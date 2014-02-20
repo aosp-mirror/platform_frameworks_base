@@ -966,7 +966,7 @@
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"ይዘት አቅራቢዎችን በውጭ በኩል ድረስባቸው"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"ያዢውን ከቀፎው ወደሚመጡ የይዘት አቅራቢዎች እንዲደርስ ይፈቅድለታል። ለመደበኛ መተግበሪያዎች በፍጹም ማስፈለግ የለባቸውም።"</string>
     <string name="permlab_updateLock" msgid="3527558366616680889">"ራስ-ሰር የመሳሪያ መሻሻሎች አታበረታታ"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"ያዢው መሳሪያው ለማሻሻል መቼ መስተጋብራዊ ያልሆነ ዳግም ማስጀመር ቢደረግ ጥሩ ጊዜ እንደሆነ መረጃ ለስርዓቱ መረጃ እንዲያቀርብለት ያስችለዋል።"</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"ያዢው መሳሪያው ለማላቅ መቼ መስተጋብራዊ ያልሆነ ዳግም ማስጀመር ቢደረግ ጥሩ ጊዜ እንደሆነ መረጃ ለስርዓቱ መረጃ እንዲያቀርብለት ያስችለዋል።"</string>
     <string name="save_password_message" msgid="767344687139195790">"አሳሹ ይህን ይለፍ ቃል እንዲያስታወስ ይፈልጋሉ?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"አሁን አይደለም"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"አስታውስ"</string>

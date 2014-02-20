@@ -700,7 +700,7 @@
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"تنظیم رمزگذاری حافظه"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"باید اطلاعات ذخیره شده برنامه رمزگذاری شود."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"غیر فعال کردن دوربین ها"</string>
-    <string name="policydesc_disableCamera" msgid="2306349042834754597">"‏از استفاده از تمام دوربین‎های دستگاه جلوگیری کنید."</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"جلوگیری از استفاده از همه دوربین‌های دستگاه."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"غیرفعال کردن ویژگی‌‌ها در محافظ کلید"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"از استفاده از برخی ویژگی‌ها در محافظ کلید جلوگیری شود."</string>
   <string-array name="phoneTypes">

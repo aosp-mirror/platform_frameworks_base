@@ -279,9 +279,9 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Приложение сможет получать и обрабатывать WAP-сообщения. Это значит, что оно сможет отслеживать и удалять отправленные на ваше устройство сообщения, не показывая их."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"Получение данных о запущенных приложениях"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Приложение сможет получать информацию о недавно запущенных и выполняемых задачах, а следовательно, и о приложениях, используемых на устройстве."</string>
-    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"разрешить взаимодействие со всеми аккаунтами"</string>
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"Взаимодействие с аккаунтами всех пользователей"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Приложение сможет выполнять действия во всех аккаунтах на этом устройстве. При этом защита от вредоносных приложений может быть недостаточной."</string>
-    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"Полное взаимодействие со всеми аккаунтами"</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"Полное взаимодействие с аккаунтами всех пользователей"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Приложение сможет выполнять любые действия во всех аккаунтах на этом устройстве."</string>
     <string name="permlab_manageUsers" msgid="1676150911672282428">"Управлять аккаунтами"</string>
     <string name="permdesc_manageUsers" msgid="8409306667645355638">"Приложения смогут управлять аккаунтами на этом устройстве (выполнять поиск, создавать и удалять их)"</string>

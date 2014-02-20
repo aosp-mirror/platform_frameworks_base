@@ -157,7 +157,7 @@
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Starta om i felsäkert läge"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Vill du starta om datorn i felsäkert läge? Då inaktiveras alla appar från tredje part som du har installerat. Apparna återställs när du startar om datorn igen."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Senaste"</string>
-    <string name="no_recent_tasks" msgid="8794906658732193473">"Inga nya appar."</string>
+    <string name="no_recent_tasks" msgid="8794906658732193473">"Inga aktiva appar."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Alternativ för surfplattan"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefonalternativ"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Skärmlås"</string>
