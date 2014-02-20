@@ -28,6 +28,7 @@
 
 #include <Caches.h>
 #include <Extensions.h>
+#include <LayerRenderer.h>
 
 #ifdef USE_OPENGL_RENDERER
     EGLAPI void EGLAPIENTRY eglBeginFrame(EGLDisplay dpy, EGLSurface surface);
@@ -131,6 +132,13 @@ static jlong android_view_GLRenderer_getSystemTime(JNIEnv* env, jobject clazz) {
     return systemTime(SYSTEM_TIME_MONOTONIC);
 }
 
+static void android_view_GLRenderer_destroyLayer(JNIEnv* env, jobject clazz,
+        jlong layerPtr) {
+    using namespace android::uirenderer;
+    Layer* layer = reinterpret_cast<Layer*>(layerPtr);
+    LayerRenderer::destroyLayer(layer);
+}
+
 #endif // USE_OPENGL_RENDERER
 
 // ----------------------------------------------------------------------------
@@ -160,6 +168,7 @@ static JNINativeMethod gMethods[] = {
     { "beginFrame",            "([I)V", (void*) android_view_GLRenderer_beginFrame },
 
     { "getSystemTime",         "()J",   (void*) android_view_GLRenderer_getSystemTime },
+    { "nDestroyLayer",         "(J)V",  (void*) android_view_GLRenderer_destroyLayer },
 #endif
 
     { "setupShadersDiskCache", "(Ljava/lang/String;)V",
