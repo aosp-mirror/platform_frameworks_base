@@ -86,7 +86,7 @@
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Löschen"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Fertig"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modusänderung"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Umschalttaste"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Eingabetaste"</string>
     <string name="description_target_unlock" msgid="2228524900439801453">"Entsperren"</string>
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
