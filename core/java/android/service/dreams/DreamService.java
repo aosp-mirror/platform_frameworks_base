@@ -20,12 +20,14 @@ import java.io.PrintWriter;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.AlarmManager;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
 import android.view.ActionMode;
@@ -42,6 +44,8 @@ import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.policy.PolicyManager;
+import com.android.internal.util.DumpUtils;
+import com.android.internal.util.DumpUtils.Dump;
 
 /**
  * Extend this class to implement a custom dream (available to the user as a "Daydream").
@@ -145,18 +149,25 @@ public class DreamService extends Service implements Window.Callback {
      */
     public static final String DREAM_META_DATA = "android.service.dream";
 
+    private final IDreamManager mSandman;
     private final Handler mHandler = new Handler();
     private IBinder mWindowToken;
     private Window mWindow;
     private WindowManager mWindowManager;
-    private IDreamManager mSandman;
     private boolean mInteractive = false;
     private boolean mLowProfile = true;
     private boolean mFullscreen = false;
     private boolean mScreenBright = true;
     private boolean mFinished;
+    private boolean mCanDoze;
+    private boolean mDozing;
+    private DozeHardware mDozeHardware;
 
     private boolean mDebug = false;
+
+    public DreamService() {
+        mSandman = IDreamManager.Stub.asInterface(ServiceManager.getService(DREAM_SERVICE));
+    }
 
     /**
      * @hide
@@ -444,9 +455,11 @@ public class DreamService extends Service implements Window.Callback {
      * correct interactions with it (seeing when it is cleared etc).
      */
     public void setLowProfile(boolean lowProfile) {
-        mLowProfile = lowProfile;
-        int flag = View.SYSTEM_UI_FLAG_LOW_PROFILE;
-        applySystemUiVisibilityFlags(mLowProfile ? flag : 0, flag);
+        if (mLowProfile != lowProfile) {
+            mLowProfile = lowProfile;
+            int flag = View.SYSTEM_UI_FLAG_LOW_PROFILE;
+            applySystemUiVisibilityFlags(mLowProfile ? flag : 0, flag);
+        }
     }
 
     /**
@@ -467,9 +480,11 @@ public class DreamService extends Service implements Window.Callback {
      * will be cleared.
      */
     public void setFullscreen(boolean fullscreen) {
-        mFullscreen = fullscreen;
-        int flag = WindowManager.LayoutParams.FLAG_FULLSCREEN;
-        applyWindowFlags(mFullscreen ? flag : 0, flag);
+        if (mFullscreen != fullscreen) {
+            mFullscreen = fullscreen;
+            int flag = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+            applyWindowFlags(mFullscreen ? flag : 0, flag);
+        }
     }
 
     /**
@@ -487,19 +502,134 @@ public class DreamService extends Service implements Window.Callback {
      * @param screenBright True to keep the screen bright while dreaming.
      */
     public void setScreenBright(boolean screenBright) {
-        mScreenBright = screenBright;
-        int flag = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-        applyWindowFlags(mScreenBright ? flag : 0, flag);
+        if (mScreenBright != screenBright) {
+            mScreenBright = screenBright;
+            int flag = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+            applyWindowFlags(mScreenBright ? flag : 0, flag);
+        }
     }
 
     /**
-     * Returns whether or not this dream keeps the screen bright while dreaming. Defaults to false,
-     * allowing the screen to dim if necessary.
+     * Returns whether or not this dream keeps the screen bright while dreaming.
+     * Defaults to false, allowing the screen to dim if necessary.
      *
      * @see #setScreenBright(boolean)
      */
     public boolean isScreenBright() {
         return getWindowFlagValue(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, mScreenBright);
+    }
+
+    /**
+     * Returns true if this dream is allowed to doze.
+     * <p>
+     * The value returned by this method is only meaningful when the dream has started.
+     * </p>
+     *
+     * @return True if this dream can doze.
+     * @see #startDozing
+     * @hide experimental
+     */
+    public boolean canDoze() {
+        return mCanDoze;
+    }
+
+    /**
+     * Starts dozing, entering a deep dreamy sleep.
+     * <p>
+     * Dozing enables the system to conserve power while the user is not actively interacting
+     * with the device.  While dozing, the display will remain on in a low-power state
+     * and will continue to show its previous contents but the application processor and
+     * other system components will be allowed to suspend when possible.
+     * </p><p>
+     * While the application processor is suspended, the dream may stop executing code
+     * for long periods of time.  Prior to being suspended, the dream may schedule periodic
+     * wake-ups to render new content by scheduling an alarm with the {@link AlarmManager}.
+     * The dream may also keep the CPU awake by acquiring a
+     * {@link android.os.PowerManager#PARTIAL_WAKE_LOCK partial wake lock} when necessary.
+     * Note that since the purpose of doze mode is to conserve power (especially when
+     * running on battery), the dream should not wake the CPU very often or keep it
+     * awake for very long.
+     * </p><p>
+     * It is a good idea to call this method some time after the dream's entry animation
+     * has completed and the dream is ready to doze.  It is important to completely
+     * finish all of the work needed before dozing since the application processor may
+     * be suspended at any moment once this method is called unless other wake locks
+     * are being held.
+     * </p><p>
+     * Call {@link #stopDozing} or {@link #finish} to stop dozing.
+     * </p>
+     *
+     * @see #stopDozing
+     * @hide experimental
+     */
+    public void startDozing() {
+        if (mCanDoze && !mDozing) {
+            mDozing = true;
+            try {
+                mSandman.startDozing(mWindowToken);
+            } catch (RemoteException ex) {
+                // system server died
+            }
+        }
+    }
+
+    /**
+     * Stops dozing, returns to active dreaming.
+     * <p>
+     * This method reverses the effect of {@link #startDozing}.  From this moment onward,
+     * the application processor will be kept awake as long as the dream is running
+     * or until the dream starts dozing again.
+     * </p>
+     *
+     * @see #startDozing
+     * @hide experimental
+     */
+    public void stopDozing() {
+        if (mDozing) {
+            mDozing = false;
+            try {
+                mSandman.stopDozing(mWindowToken);
+            } catch (RemoteException ex) {
+                // system server died
+            }
+        }
+    }
+
+    /**
+     * Returns true if the dream will allow the system to enter a low-power state while
+     * it is running without actually turning off the screen.  Defaults to false,
+     * keeping the application processor awake while the dream is running.
+     *
+     * @return True if the dream is dozing.
+     *
+     * @see #setDozing(boolean)
+     * @hide experimental
+     */
+    public boolean isDozing() {
+        return mDozing;
+    }
+
+    /**
+     * Gets an object that may be used to access low-level hardware features that a
+     * dream may use to provide a richer user experience while dozing.
+     *
+     * @return An instance of {@link DozeHardware} or null if this device does not offer
+     * hardware support for dozing.
+     *
+     * @hide experimental
+     */
+    public DozeHardware getDozeHardware() {
+        if (mCanDoze && mDozeHardware == null) {
+            try {
+                IDozeHardware hardware = mSandman.getDozeHardware(mWindowToken);
+                if (hardware != null) {
+                    mDozeHardware = new DozeHardware(hardware);
+                }
+            } catch (RemoteException ex) {
+                // system server died
+            }
+        }
+        return mDozeHardware;
     }
 
     /**
@@ -536,7 +666,11 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
-     * Stops the dream, detaches from the window, and wakes up.
+     * Stops the dream and detaches from the window.
+     * <p>
+     * When the dream ends, the system will be allowed to go to sleep fully unless there
+     * is a reason for it to be awake such as recent user activity or wake locks being held.
+     * </p>
      */
     public final void finish() {
         if (mDebug) Slog.v(TAG, "finish()");
@@ -557,10 +691,6 @@ public class DreamService extends Service implements Window.Callback {
 
     // end public api
 
-    private void loadSandman() {
-        mSandman = IDreamManager.Stub.asInterface(ServiceManager.getService(DREAM_SERVICE));
-    }
-
     /**
      * Called by DreamController.stopDream() when the Dream is about to be unbound and destroyed.
      *
@@ -572,23 +702,16 @@ public class DreamService extends Service implements Window.Callback {
             return;
         }
 
-        try {
-            onDreamingStopped();
-        } catch (Throwable t) {
-            Slog.w(TAG, "Crashed in onDreamingStopped()", t);
-            // we were going to stop anyway
-        }
+        if (mDebug) Slog.v(TAG, "detach(): Calling onDreamingStopped()");
+        onDreamingStopped();
 
         if (mDebug) Slog.v(TAG, "detach(): Removing window from window manager");
-        try {
-            // force our window to be removed synchronously
-            mWindowManager.removeViewImmediate(mWindow.getDecorView());
-            // the following will print a log message if it finds any other leaked windows
-            WindowManagerGlobal.getInstance().closeAll(mWindowToken,
-                    this.getClass().getName(), "Dream");
-        } catch (Throwable t) {
-            Slog.w(TAG, "Crashed removing window view", t);
-        }
+
+        // force our window to be removed synchronously
+        mWindowManager.removeViewImmediate(mWindow.getDecorView());
+        // the following will print a log message if it finds any other leaked windows
+        WindowManagerGlobal.getInstance().closeAll(mWindowToken,
+                this.getClass().getName(), "Dream");
 
         mWindow = null;
         mWindowToken = null;
@@ -601,23 +724,30 @@ public class DreamService extends Service implements Window.Callback {
      *
      * @param windowToken A window token that will allow a window to be created in the correct layer.
      */
-    private final void attach(IBinder windowToken) {
+    private final void attach(IBinder windowToken, boolean canDoze) {
         if (mWindowToken != null) {
             Slog.e(TAG, "attach() called when already attached with token=" + mWindowToken);
+            return;
+        }
+        if (mFinished) {
+            Slog.w(TAG, "attach() called after dream already finished");
+            try {
+                mSandman.finishSelf(windowToken);
+            } catch (RemoteException ex) {
+                // system server died
+            }
             return;
         }
 
         if (mDebug) Slog.v(TAG, "Attached on thread " + Thread.currentThread().getId());
 
-        if (mSandman == null) {
-            loadSandman();
-        }
         mWindowToken = windowToken;
         mWindow = PolicyManager.makeNewWindow(this);
         mWindow.setCallback(this);
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
         mWindow.setBackgroundDrawable(new ColorDrawable(0xFF000000));
         mWindow.setFormat(PixelFormat.OPAQUE);
+        mCanDoze = canDoze;
 
         if (mDebug) Slog.v(TAG, String.format("Attaching window token: %s to window of type %s",
                 windowToken, WindowManager.LayoutParams.TYPE_DREAM));
@@ -642,40 +772,25 @@ public class DreamService extends Service implements Window.Callback {
         mWindowManager = mWindow.getWindowManager();
 
         if (mDebug) Slog.v(TAG, "Window added on thread " + Thread.currentThread().getId());
-        try {
-            applySystemUiVisibilityFlags(
-                    (mLowProfile ? View.SYSTEM_UI_FLAG_LOW_PROFILE : 0),
-                    View.SYSTEM_UI_FLAG_LOW_PROFILE);
-            getWindowManager().addView(mWindow.getDecorView(), mWindow.getAttributes());
-        } catch (Throwable t) {
-            Slog.w(TAG, "Crashed adding window view", t);
-            safelyFinish();
-            return;
-        }
+        applySystemUiVisibilityFlags(
+                (mLowProfile ? View.SYSTEM_UI_FLAG_LOW_PROFILE : 0),
+                View.SYSTEM_UI_FLAG_LOW_PROFILE);
+        getWindowManager().addView(mWindow.getDecorView(), mWindow.getAttributes());
 
         // start it up
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                try {
-                    onDreamingStarted();
-                } catch (Throwable t) {
-                    Slog.w(TAG, "Crashed in onDreamingStarted()", t);
-                    safelyFinish();
-                }
+                if (mDebug) Slog.v(TAG, "Calling onDreamingStarted()");
+                onDreamingStarted();
             }
         });
     }
 
     private void safelyFinish() {
         if (mDebug) Slog.v(TAG, "safelyFinish()");
-        try {
-            finish();
-        } catch (Throwable t) {
-            Slog.w(TAG, "Crashed in safelyFinish()", t);
-            finishInternal();
-            return;
-        }
+
+        finish();
 
         if (!mFinished) {
             Slog.w(TAG, "Bad dream, did not call super.finish()");
@@ -685,19 +800,21 @@ public class DreamService extends Service implements Window.Callback {
 
     private void finishInternal() {
         if (mDebug) Slog.v(TAG, "finishInternal() mFinished = " + mFinished);
-        if (mFinished) return;
-        try {
+
+        if (!mFinished) {
             mFinished = true;
 
-            if (mSandman != null) {
-                mSandman.finishSelf(mWindowToken);
+            if (mWindowToken == null) {
+                Slog.w(TAG, "Finish was called before the dream was attached.");
             } else {
-                Slog.w(TAG, "No dream manager found");
+                try {
+                    mSandman.finishSelf(mWindowToken);
+                } catch (RemoteException ex) {
+                    // system server died
+                }
             }
-            stopSelf(); // if launched via any other means
 
-        } catch (Throwable t) {
-            Slog.w(TAG, "Crashed in finishInternal()", t);
+            stopSelf(); // if launched via any other means
         }
     }
 
@@ -732,32 +849,39 @@ public class DreamService extends Service implements Window.Callback {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        super.dump(fd, pw, args);
-
-        pw.print(TAG + ": ");
-        if (mWindowToken == null) {
-            pw.println("stopped");
-        } else {
-            pw.println("running (token=" + mWindowToken + ")");
-        }
-        pw.println("  window: " + mWindow);
-        pw.print("  flags:");
-        if (isInteractive()) pw.print(" interactive");
-        if (isLowProfile()) pw.print(" lowprofile");
-        if (isFullscreen()) pw.print(" fullscreen");
-        if (isScreenBright()) pw.print(" bright");
-        pw.println();
+        DumpUtils.dumpAsync(mHandler, new Dump() {
+            @Override
+            public void dump(PrintWriter pw) {
+                pw.print(TAG + ": ");
+                if (mWindowToken == null) {
+                    pw.println("stopped");
+                } else {
+                    pw.println("running (token=" + mWindowToken + ")");
+                }
+                pw.println("  window: " + mWindow);
+                pw.print("  flags:");
+                if (isInteractive()) pw.print(" interactive");
+                if (isLowProfile()) pw.print(" lowprofile");
+                if (isFullscreen()) pw.print(" fullscreen");
+                if (isScreenBright()) pw.print(" bright");
+                if (isDozing()) pw.print(" dozing");
+                pw.println();
+            }
+        }, pw, 1000);
     }
 
-    private class DreamServiceWrapper extends IDreamService.Stub {
-        public void attach(final IBinder windowToken) {
+    private final class DreamServiceWrapper extends IDreamService.Stub {
+        @Override
+        public void attach(final IBinder windowToken, final boolean canDoze) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    DreamService.this.attach(windowToken);
+                    DreamService.this.attach(windowToken, canDoze);
                 }
             });
         }
+
+        @Override
         public void detach() {
             mHandler.post(new Runnable() {
                 @Override

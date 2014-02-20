@@ -364,8 +364,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
      * motion event processing when the screen is off since these events are normally
      * dropped. */
     @Override
-    public int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags) {
-        return mService.mPolicy.interceptMotionBeforeQueueingWhenScreenOff(policyFlags);
+    public int interceptMotionBeforeQueueingWhenScreenOff(long whenNanos, int policyFlags) {
+        return mService.mPolicy.interceptMotionBeforeQueueingWhenScreenOff(whenNanos, policyFlags);
     }
 
     /* Provides an opportunity for the window manager policy to process a key before

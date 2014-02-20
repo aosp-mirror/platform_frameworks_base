@@ -83,7 +83,7 @@ public final class PowerManagerService extends com.android.server.SystemService
 
     // Message: Sent when a user activity timeout occurs to update the power state.
     private static final int MSG_USER_ACTIVITY_TIMEOUT = 1;
-    // Message: Sent when the device enters or exits a napping or dreaming state.
+    // Message: Sent when the device enters or exits a dreaming or dozing state.
     private static final int MSG_SANDMAN = 2;
     // Message: Sent when the screen on blocker is released.
     private static final int MSG_SCREEN_ON_BLOCKER_RELEASED = 3;
@@ -117,19 +117,21 @@ public final class PowerManagerService extends com.android.server.SystemService
 
     // Wakefulness: The device is asleep and can only be awoken by a call to wakeUp().
     // The screen should be off or in the process of being turned off by the display controller.
+    // The device typically passes through the dozing state first.
     private static final int WAKEFULNESS_ASLEEP = 0;
     // Wakefulness: The device is fully awake.  It can be put to sleep by a call to goToSleep().
-    // When the user activity timeout expires, the device may start napping or go to sleep.
+    // When the user activity timeout expires, the device may start dreaming or go to sleep.
     private static final int WAKEFULNESS_AWAKE = 1;
-    // Wakefulness: The device is napping.  It is deciding whether to dream or go to sleep
-    // but hasn't gotten around to it yet.  It can be awoken by a call to wakeUp(), which
-    // ends the nap. User activity may brighten the screen but does not end the nap.
-    private static final int WAKEFULNESS_NAPPING = 2;
     // Wakefulness: The device is dreaming.  It can be awoken by a call to wakeUp(),
     // which ends the dream.  The device goes to sleep when goToSleep() is called, when
     // the dream ends or when unplugged.
     // User activity may brighten the screen but does not end the dream.
-    private static final int WAKEFULNESS_DREAMING = 3;
+    private static final int WAKEFULNESS_DREAMING = 2;
+    // Wakefulness: The device is dozing.  It is almost asleep but is allowing a special
+    // low-power "doze" dream to run which keeps the display on but lets the application
+    // processor be suspended.  It can be awoken by a call to wakeUp() which ends the dream.
+    // The device fully goes to sleep if the dream cannot be started or ends on its own.
+    private static final int WAKEFULNESS_DOZING = 3;
 
     // Summarizes the state of all active wakelocks.
     private static final int WAKE_LOCK_CPU = 1 << 0;
@@ -138,6 +140,7 @@ public final class PowerManagerService extends com.android.server.SystemService
     private static final int WAKE_LOCK_BUTTON_BRIGHT = 1 << 3;
     private static final int WAKE_LOCK_PROXIMITY_SCREEN_OFF = 1 << 4;
     private static final int WAKE_LOCK_STAY_AWAKE = 1 << 5; // only set if already awake
+    private static final int WAKE_LOCK_DOZE = 1 << 6;
 
     // Summarizes the user activity state.
     private static final int USER_ACTIVITY_SCREEN_BRIGHT = 1 << 0;
@@ -164,11 +167,6 @@ public final class PowerManagerService extends com.android.server.SystemService
     // Poll interval in milliseconds for watching boot animation finished.
     private static final int BOOT_ANIMATION_POLL_INTERVAL = 200;
 
-    // If the battery level drops by this percentage and the user activity timeout
-    // has expired, then assume the device is receiving insufficient current to charge
-    // effectively and terminate the dream.
-    private static final int DREAM_BATTERY_LEVEL_DRAIN_CUTOFF = 5;
-
     private final Context mContext;
     private LightsManager mLightsManager;
     private BatteryService mBatteryService;
@@ -194,6 +192,10 @@ public final class PowerManagerService extends com.android.server.SystemService
     // Indicates whether the device is awake or asleep or somewhere in between.
     // This is distinct from the screen power state, which is managed separately.
     private int mWakefulness;
+
+    // True if the sandman has just been summoned for the first time since entering the
+    // dreaming or dozing state.  Indicates whether a new dream should begin.
+    private boolean mSandmanSummoned;
 
     // True if MSG_SANDMAN has been scheduled.
     private boolean mSandmanScheduled;
@@ -265,6 +267,14 @@ public final class PowerManagerService extends com.android.server.SystemService
     // True if boot completed occurred.  We keep the screen on until this happens.
     private boolean mBootCompleted;
 
+    // True if auto-suspend mode is enabled.
+    // Refer to autosuspend.h.
+    private boolean mAutoSuspendModeEnabled;
+
+    // True if interactive mode is enabled.
+    // Refer to power.h.
+    private boolean mInteractiveModeEnabled;
+
     // True if the device is plugged into a power source.
     private boolean mIsPowered;
 
@@ -281,6 +291,12 @@ public final class PowerManagerService extends com.android.server.SystemService
 
     // The current dock state.
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
+
+    // True to decouple auto-suspend mode from the display state.
+    private boolean mDecoupleAutoSuspendModeFromDisplayConfig;
+
+    // True to decouple interactive mode from the display state.
+    private boolean mDecoupleInteractiveModeFromDisplayConfig;
 
     // True if the device should wake up when plugged or unplugged.
     private boolean mWakeUpWhenPluggedOrUnpluggedConfig;
@@ -299,6 +315,22 @@ public final class PowerManagerService extends com.android.server.SystemService
 
     // Default value for dreams activate-on-dock
     private boolean mDreamsActivatedOnDockByDefaultConfig;
+
+    // True if dreams can run while not plugged in.
+    private boolean mDreamsEnabledOnBatteryConfig;
+
+    // Minimum battery level to allow dreaming when powered.
+    // Use -1 to disable this safety feature.
+    private int mDreamsBatteryLevelMinimumWhenPoweredConfig;
+
+    // Minimum battery level to allow dreaming when not powered.
+    // Use -1 to disable this safety feature.
+    private int mDreamsBatteryLevelMinimumWhenNotPoweredConfig;
+
+    // If the battery level drops by this percentage and the user activity timeout
+    // has expired, then assume the device is receiving insufficient current to charge
+    // effectively and terminate the dream.  Use -1 to disable this safety feature.
+    private int mDreamsBatteryLevelDrainCutoffConfig;
 
     // True if dreams are enabled by the user.
     private boolean mDreamsEnabledSetting;
@@ -523,6 +555,10 @@ public final class PowerManagerService extends com.android.server.SystemService
     private void readConfigurationLocked() {
         final Resources resources = mContext.getResources();
 
+        mDecoupleAutoSuspendModeFromDisplayConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_powerDecoupleAutoSuspendModeFromDisplay);
+        mDecoupleInteractiveModeFromDisplayConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_powerDecoupleInteractiveModeFromDisplay);
         mWakeUpWhenPluggedOrUnpluggedConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_unplugTurnsOnScreen);
         mSuspendWhenScreenOffDueToProximityConfig = resources.getBoolean(
@@ -535,6 +571,14 @@ public final class PowerManagerService extends com.android.server.SystemService
                 com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
         mDreamsActivatedOnDockByDefaultConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
+        mDreamsEnabledOnBatteryConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_dreamsEnabledOnBattery);
+        mDreamsBatteryLevelMinimumWhenPoweredConfig = resources.getInteger(
+                com.android.internal.R.integer.config_dreamsBatteryLevelMinimumWhenPowered);
+        mDreamsBatteryLevelMinimumWhenNotPoweredConfig = resources.getInteger(
+                com.android.internal.R.integer.config_dreamsBatteryLevelMinimumWhenNotPowered);
+        mDreamsBatteryLevelDrainCutoffConfig = resources.getInteger(
+                com.android.internal.R.integer.config_dreamsBatteryLevelDrainCutoff);
     }
 
     private void updateSettingsLocked() {
@@ -762,6 +806,7 @@ public final class PowerManagerService extends com.android.server.SystemService
                 case PowerManager.SCREEN_DIM_WAKE_LOCK:
                 case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
                 case PowerManager.FULL_WAKE_LOCK:
+                case PowerManager.DOZE_WAKE_LOCK:
                     return true;
 
                 case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
@@ -794,7 +839,8 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
 
         if (eventTime < mLastSleepTime || eventTime < mLastWakeTime
-                || mWakefulness == WAKEFULNESS_ASLEEP || !mBootCompleted || !mSystemReady) {
+                || mWakefulness == WAKEFULNESS_ASLEEP || mWakefulness == WAKEFULNESS_DOZING
+                || !mBootCompleted || !mSystemReady) {
             return false;
         }
 
@@ -843,16 +889,19 @@ public final class PowerManagerService extends com.android.server.SystemService
         switch (mWakefulness) {
             case WAKEFULNESS_ASLEEP:
                 Slog.i(TAG, "Waking up from sleep...");
-                sendPendingNotificationsLocked();
-                mNotifier.onWakeUpStarted();
-                mSendWakeUpFinishedNotificationWhenReady = true;
                 break;
             case WAKEFULNESS_DREAMING:
                 Slog.i(TAG, "Waking up from dream...");
                 break;
-            case WAKEFULNESS_NAPPING:
-                Slog.i(TAG, "Waking up from nap...");
+            case WAKEFULNESS_DOZING:
+                Slog.i(TAG, "Waking up from dozing...");
                 break;
+        }
+
+        if (mWakefulness != WAKEFULNESS_DREAMING) {
+            sendPendingNotificationsLocked();
+            mNotifier.onWakeUpStarted();
+            mSendWakeUpFinishedNotificationWhenReady = true;
         }
 
         mLastWakeTime = eventTime;
@@ -877,13 +926,17 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
     }
 
+    // This method is called goToSleep for historical reasons but we actually start
+    // dozing before really going to sleep.
     @SuppressWarnings("deprecation")
     private boolean goToSleepNoUpdateLocked(long eventTime, int reason) {
         if (DEBUG_SPEW) {
             Slog.d(TAG, "goToSleepNoUpdateLocked: eventTime=" + eventTime + ", reason=" + reason);
         }
 
-        if (eventTime < mLastWakeTime || mWakefulness == WAKEFULNESS_ASLEEP
+        if (eventTime < mLastWakeTime
+                || mWakefulness == WAKEFULNESS_ASLEEP
+                || mWakefulness == WAKEFULNESS_DOZING
                 || !mBootCompleted || !mSystemReady) {
             return false;
         }
@@ -907,7 +960,8 @@ public final class PowerManagerService extends com.android.server.SystemService
 
         mLastSleepTime = eventTime;
         mDirty |= DIRTY_WAKEFULNESS;
-        mWakefulness = WAKEFULNESS_ASLEEP;
+        mWakefulness = WAKEFULNESS_DOZING;
+        mSandmanSummoned = true;
 
         // Report the number of wake locks that will be cleared by going to sleep.
         int numWakeLocksCleared = 0;
@@ -947,7 +1001,26 @@ public final class PowerManagerService extends com.android.server.SystemService
         Slog.i(TAG, "Nap time...");
 
         mDirty |= DIRTY_WAKEFULNESS;
-        mWakefulness = WAKEFULNESS_NAPPING;
+        mWakefulness = WAKEFULNESS_DREAMING;
+        mSandmanSummoned = true;
+        return true;
+    }
+
+    // Done dozing, drop everything and go to sleep.
+    private boolean reallyGoToSleepNoUpdateLocked(long eventTime) {
+        if (DEBUG_SPEW) {
+            Slog.d(TAG, "reallyGoToSleepNoUpdateLocked: eventTime=" + eventTime);
+        }
+
+        if (eventTime < mLastWakeTime || mWakefulness == WAKEFULNESS_ASLEEP
+                || !mBootCompleted || !mSystemReady) {
+            return false;
+        }
+
+        Slog.i(TAG, "Sleeping...");
+
+        mDirty |= DIRTY_WAKEFULNESS;
+        mWakefulness = WAKEFULNESS_ASLEEP;
         return true;
     }
 
@@ -1023,7 +1096,7 @@ public final class PowerManagerService extends com.android.server.SystemService
             mPlugType = mBatteryService.getPlugType();
             mBatteryLevel = mBatteryService.getBatteryLevel();
 
-            if (DEBUG) {
+            if (DEBUG_SPEW) {
                 Slog.d(TAG, "updateIsPoweredLocked: wasPowered=" + wasPowered
                         + ", mIsPowered=" + mIsPowered
                         + ", oldPlugType=" + oldPlugType
@@ -1083,8 +1156,7 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
 
         // If already dreaming and becoming powered, then don't wake.
-        if (mIsPowered && (mWakefulness == WAKEFULNESS_NAPPING
-                || mWakefulness == WAKEFULNESS_DREAMING)) {
+        if (mIsPowered && mWakefulness == WAKEFULNESS_DREAMING) {
             return false;
         }
 
@@ -1131,33 +1203,43 @@ public final class PowerManagerService extends com.android.server.SystemService
                         mWakeLockSummary |= WAKE_LOCK_CPU;
                         break;
                     case PowerManager.FULL_WAKE_LOCK:
-                        if (mWakefulness != WAKEFULNESS_ASLEEP) {
+                        if (mWakefulness == WAKEFULNESS_AWAKE
+                                || mWakefulness == WAKEFULNESS_DREAMING) {
                             mWakeLockSummary |= WAKE_LOCK_CPU
                                     | WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_BUTTON_BRIGHT;
-                            if (mWakefulness == WAKEFULNESS_AWAKE) {
-                                mWakeLockSummary |= WAKE_LOCK_STAY_AWAKE;
-                            }
+                        }
+                        if (mWakefulness == WAKEFULNESS_AWAKE) {
+                            mWakeLockSummary |= WAKE_LOCK_STAY_AWAKE;
                         }
                         break;
                     case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
-                        if (mWakefulness != WAKEFULNESS_ASLEEP) {
+                        if (mWakefulness == WAKEFULNESS_AWAKE
+                                || mWakefulness == WAKEFULNESS_DREAMING) {
                             mWakeLockSummary |= WAKE_LOCK_CPU | WAKE_LOCK_SCREEN_BRIGHT;
-                            if (mWakefulness == WAKEFULNESS_AWAKE) {
-                                mWakeLockSummary |= WAKE_LOCK_STAY_AWAKE;
-                            }
+                        }
+                        if (mWakefulness == WAKEFULNESS_AWAKE) {
+                            mWakeLockSummary |= WAKE_LOCK_STAY_AWAKE;
                         }
                         break;
                     case PowerManager.SCREEN_DIM_WAKE_LOCK:
-                        if (mWakefulness != WAKEFULNESS_ASLEEP) {
+                        if (mWakefulness == WAKEFULNESS_AWAKE
+                                || mWakefulness == WAKEFULNESS_DREAMING) {
                             mWakeLockSummary |= WAKE_LOCK_CPU | WAKE_LOCK_SCREEN_DIM;
-                            if (mWakefulness == WAKEFULNESS_AWAKE) {
-                                mWakeLockSummary |= WAKE_LOCK_STAY_AWAKE;
-                            }
+                        }
+                        if (mWakefulness == WAKEFULNESS_AWAKE) {
+                            mWakeLockSummary |= WAKE_LOCK_STAY_AWAKE;
                         }
                         break;
                     case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
-                        if (mWakefulness != WAKEFULNESS_ASLEEP) {
+                        if (mWakefulness == WAKEFULNESS_AWAKE
+                                || mWakefulness == WAKEFULNESS_DREAMING
+                                || mWakefulness == WAKEFULNESS_DOZING) {
                             mWakeLockSummary |= WAKE_LOCK_PROXIMITY_SCREEN_OFF;
+                        }
+                        break;
+                    case PowerManager.DOZE_WAKE_LOCK:
+                        if (mWakefulness == WAKEFULNESS_DOZING) {
+                            mWakeLockSummary |= WAKE_LOCK_DOZE;
                         }
                         break;
                 }
@@ -1184,7 +1266,8 @@ public final class PowerManagerService extends com.android.server.SystemService
             mHandler.removeMessages(MSG_USER_ACTIVITY_TIMEOUT);
 
             long nextTimeout = 0;
-            if (mWakefulness != WAKEFULNESS_ASLEEP) {
+            if (mWakefulness == WAKEFULNESS_AWAKE
+                    || mWakefulness == WAKEFULNESS_DREAMING) {
                 final int screenOffTimeout = getScreenOffTimeoutLocked();
                 final int screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
 
@@ -1205,8 +1288,7 @@ public final class PowerManagerService extends com.android.server.SystemService
                         && mLastUserActivityTimeNoChangeLights >= mLastWakeTime) {
                     nextTimeout = mLastUserActivityTimeNoChangeLights + screenOffTimeout;
                     if (now < nextTimeout
-                            && mDisplayPowerRequest.screenState
-                                    != DisplayPowerRequest.SCREEN_STATE_OFF) {
+                            && mDisplayPowerRequest.wantScreenOnNormal()) {
                         mUserActivitySummary = mDisplayPowerRequest.screenState
                                 == DisplayPowerRequest.SCREEN_STATE_BRIGHT ?
                                 USER_ACTIVITY_SCREEN_BRIGHT : USER_ACTIVITY_SCREEN_DIM;
@@ -1268,7 +1350,7 @@ public final class PowerManagerService extends com.android.server.SystemService
     /**
      * Updates the wakefulness of the device.
      *
-     * This is the function that decides whether the device should start napping
+     * This is the function that decides whether the device should start dreaming
      * based on the current wake locks and user activity state.  It may modify mDirty
      * if the wakefulness changes.
      *
@@ -1357,7 +1439,7 @@ public final class PowerManagerService extends com.android.server.SystemService
     }
 
     /**
-     * Called when the device enters or exits a napping or dreaming state.
+     * Called when the device enters or exits a dreaming or dozing state.
      *
      * We do this asynchronously because we must call out of the power manager to start
      * the dream and we don't want to hold our lock while doing so.  There is a risk that
@@ -1365,46 +1447,60 @@ public final class PowerManagerService extends com.android.server.SystemService
      */
     private void handleSandman() { // runs on handler thread
         // Handle preconditions.
-        boolean startDreaming = false;
+        final boolean startDreaming;
+        final int wakefulness;
         synchronized (mLock) {
             mSandmanScheduled = false;
-            boolean canDream = canDreamLocked();
-            if (DEBUG_SPEW) {
-                Slog.d(TAG, "handleSandman: canDream=" + canDream
-                        + ", mWakefulness=" + wakefulnessToString(mWakefulness));
-            }
-
-            if (canDream && mWakefulness == WAKEFULNESS_NAPPING) {
-                startDreaming = true;
+            wakefulness = mWakefulness;
+            if (mSandmanSummoned) {
+                startDreaming = ((wakefulness == WAKEFULNESS_DREAMING && canDreamLocked())
+                        || wakefulness == WAKEFULNESS_DOZING);
+                mSandmanSummoned = false;
+            } else {
+                startDreaming = false;
             }
         }
 
         // Start dreaming if needed.
         // We only control the dream on the handler thread, so we don't need to worry about
         // concurrent attempts to start or stop the dream.
-        boolean isDreaming = false;
+        final boolean isDreaming;
         if (mDreamManager != null) {
+            // Restart the dream whenever the sandman is summoned.
             if (startDreaming) {
-                mDreamManager.startDream();
+                mDreamManager.stopDream();
+                mDreamManager.startDream(wakefulness == WAKEFULNESS_DOZING);
             }
             isDreaming = mDreamManager.isDreaming();
+        } else {
+            isDreaming = false;
         }
 
         // Update dream state.
-        // We might need to stop the dream again if the preconditions changed.
-        boolean continueDreaming = false;
         synchronized (mLock) {
-            if (isDreaming && canDreamLocked()) {
-                if (mWakefulness == WAKEFULNESS_NAPPING) {
-                    mWakefulness = WAKEFULNESS_DREAMING;
-                    mDirty |= DIRTY_WAKEFULNESS;
-                    mBatteryLevelWhenDreamStarted = mBatteryLevel;
-                    updatePowerStateLocked();
-                    continueDreaming = true;
-                } else if (mWakefulness == WAKEFULNESS_DREAMING) {
-                    if (!isBeingKeptAwakeLocked()
+            // Remember the initial battery level when the dream started.
+            if (startDreaming && isDreaming) {
+                mBatteryLevelWhenDreamStarted = mBatteryLevel;
+                if (wakefulness == WAKEFULNESS_DOZING) {
+                    Slog.i(TAG, "Dozing...");
+                } else {
+                    Slog.i(TAG, "Dreaming...");
+                }
+            }
+
+            // If preconditions changed, wait for the next iteration to determine
+            // whether the dream should continue (or be restarted).
+            if (mSandmanSummoned || mWakefulness != wakefulness) {
+                return; // wait for next cycle
+            }
+
+            // Determine whether the dream should continue.
+            if (wakefulness == WAKEFULNESS_DREAMING) {
+                if (isDreaming && canDreamLocked()) {
+                    if (mDreamsBatteryLevelDrainCutoffConfig >= 0
                             && mBatteryLevel < mBatteryLevelWhenDreamStarted
-                                    - DREAM_BATTERY_LEVEL_DRAIN_CUTOFF) {
+                                    - mDreamsBatteryLevelDrainCutoffConfig
+                            && !isBeingKeptAwakeLocked()) {
                         // If the user activity timeout expired and the battery appears
                         // to be draining faster than it is charging then stop dreaming
                         // and go to sleep.
@@ -1414,53 +1510,64 @@ public final class PowerManagerService extends com.android.server.SystemService
                                 + mBatteryLevelWhenDreamStarted + "%.  "
                                 + "Battery level now: " + mBatteryLevel + "%.");
                     } else {
-                        continueDreaming = true;
+                        return; // continue dreaming
                     }
                 }
-            }
-            if (!continueDreaming) {
-                handleDreamFinishedLocked();
+
+                // Dream has ended or will be stopped.  Update the power state.
+                if (isItBedTimeYetLocked()) {
+                    goToSleepNoUpdateLocked(SystemClock.uptimeMillis(),
+                            PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+                    updatePowerStateLocked();
+                } else {
+                    wakeUpNoUpdateLocked(SystemClock.uptimeMillis());
+                    updatePowerStateLocked();
+                }
+            } else if (wakefulness == WAKEFULNESS_DOZING) {
+                if (isDreaming) {
+                    return; // continue dozing
+                }
+
+                // Doze has ended or will be stopped.  Update the power state.
+                reallyGoToSleepNoUpdateLocked(SystemClock.uptimeMillis());
+                updatePowerStateLocked();
             }
         }
 
-        // Stop dreaming if needed.
-        // It's possible that something else changed to make us need to start the dream again.
-        // If so, then the power manager will have posted another message to the handler
-        // to take care of it later.
-        if (mDreamManager != null) {
-            if (!continueDreaming) {
-                mDreamManager.stopDream();
-            }
+        // Stop dream.
+        if (isDreaming) {
+            mDreamManager.stopDream();
         }
     }
 
     /**
-     * Returns true if the device is allowed to dream in its current state
-     * assuming that it is currently napping or dreaming.
+     * Returns true if the device is allowed to dream in its current state.
+     * This function is not called when dozing.
      */
     private boolean canDreamLocked() {
-        return mDreamsSupportedConfig
-                && mDreamsEnabledSetting
-                && mDisplayPowerRequest.screenState != DisplayPowerRequest.SCREEN_STATE_OFF
-                && mBootCompleted
-                && (mIsPowered || isBeingKeptAwakeLocked());
-    }
-
-    /**
-     * Called when a dream is ending to figure out what to do next.
-     */
-    private void handleDreamFinishedLocked() {
-        if (mWakefulness == WAKEFULNESS_NAPPING
-                || mWakefulness == WAKEFULNESS_DREAMING) {
-            if (isItBedTimeYetLocked()) {
-                goToSleepNoUpdateLocked(SystemClock.uptimeMillis(),
-                        PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
-                updatePowerStateLocked();
-            } else {
-                wakeUpNoUpdateLocked(SystemClock.uptimeMillis());
-                updatePowerStateLocked();
+        if (mWakefulness != WAKEFULNESS_DREAMING
+                || !mDreamsSupportedConfig
+                || !mDreamsEnabledSetting
+                || !mDisplayPowerRequest.wantScreenOnNormal()
+                || !mBootCompleted) {
+            return false;
+        }
+        if (!isBeingKeptAwakeLocked()) {
+            if (!mIsPowered && !mDreamsEnabledByDefaultConfig) {
+                return false;
+            }
+            if (!mIsPowered
+                    && mDreamsBatteryLevelMinimumWhenNotPoweredConfig >= 0
+                    && mBatteryLevel < mDreamsBatteryLevelMinimumWhenNotPoweredConfig) {
+                return false;
+            }
+            if (mIsPowered
+                    && mDreamsBatteryLevelMinimumWhenPoweredConfig >= 0
+                    && mBatteryLevel < mDreamsBatteryLevelMinimumWhenPoweredConfig) {
+                return false;
             }
         }
+        return true;
     }
 
     private void handleScreenOnBlockerReleased() {
@@ -1482,11 +1589,11 @@ public final class PowerManagerService extends com.android.server.SystemService
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY | DIRTY_WAKEFULNESS
                 | DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED | DIRTY_BOOT_COMPLETED
                 | DIRTY_SETTINGS | DIRTY_SCREEN_ON_BLOCKER_RELEASED)) != 0) {
-            int newScreenState = getDesiredScreenPowerStateLocked();
+            final int newScreenState = getDesiredScreenPowerStateLocked();
             if (newScreenState != mDisplayPowerRequest.screenState) {
                 mDisplayPowerRequest.screenState = newScreenState;
                 nativeSetPowerState(
-                        newScreenState != DisplayPowerRequest.SCREEN_STATE_OFF,
+                        mDisplayPowerRequest.wantScreenOnNormal(),
                         newScreenState == DisplayPowerRequest.SCREEN_STATE_BRIGHT);
             }
 
@@ -1555,6 +1662,10 @@ public final class PowerManagerService extends com.android.server.SystemService
             return DisplayPowerRequest.SCREEN_STATE_OFF;
         }
 
+        if ((mWakeLockSummary & WAKE_LOCK_DOZE) != 0) {
+            return DisplayPowerRequest.SCREEN_STATE_DOZE;
+        }
+
         if ((mWakeLockSummary & WAKE_LOCK_SCREEN_BRIGHT) != 0
                 || (mUserActivitySummary & USER_ACTIVITY_SCREEN_BRIGHT) != 0
                 || !mBootCompleted) {
@@ -1606,7 +1717,18 @@ public final class PowerManagerService extends com.android.server.SystemService
      */
     private void updateSuspendBlockerLocked() {
         final boolean needWakeLockSuspendBlocker = ((mWakeLockSummary & WAKE_LOCK_CPU) != 0);
-        final boolean needDisplaySuspendBlocker = needDisplaySuspendBlocker();
+        final boolean needDisplaySuspendBlocker = needDisplaySuspendBlockerLocked();
+        final boolean autoSuspend = !needDisplaySuspendBlocker;
+
+        // Disable auto-suspend if needed.
+        if (!autoSuspend) {
+            if (mDecoupleAutoSuspendModeFromDisplayConfig) {
+                setAutoSuspendModeLocked(false);
+            }
+            if (mDecoupleInteractiveModeFromDisplayConfig) {
+                setInteractiveModeLocked(true);
+            }
+        }
 
         // First acquire suspend blockers if needed.
         if (needWakeLockSuspendBlocker && !mHoldingWakeLockSuspendBlocker) {
@@ -1627,17 +1749,27 @@ public final class PowerManagerService extends com.android.server.SystemService
             mDisplaySuspendBlocker.release();
             mHoldingDisplaySuspendBlocker = false;
         }
+
+        // Enable auto-suspend if needed.
+        if (autoSuspend) {
+            if (mDecoupleInteractiveModeFromDisplayConfig) {
+                setInteractiveModeLocked(false);
+            }
+            if (mDecoupleAutoSuspendModeFromDisplayConfig) {
+                setAutoSuspendModeLocked(true);
+            }
+        }
     }
 
     /**
      * Return true if we must keep a suspend blocker active on behalf of the display.
      * We do so if the screen is on or is in transition between states.
      */
-    private boolean needDisplaySuspendBlocker() {
+    private boolean needDisplaySuspendBlockerLocked() {
         if (!mDisplayReady) {
             return true;
         }
-        if (mDisplayPowerRequest.screenState != DisplayPowerRequest.SCREEN_STATE_OFF) {
+        if (mDisplayPowerRequest.wantScreenOnNormal()) {
             // If we asked for the screen to be on but it is off due to the proximity
             // sensor then we may suspend but only if the configuration allows it.
             // On some hardware it may not be safe to suspend because the proximity
@@ -1647,13 +1779,34 @@ public final class PowerManagerService extends com.android.server.SystemService
                 return true;
             }
         }
+        // Let the system suspend if the screen is off or dozing.
         return false;
+    }
+
+    private void setAutoSuspendModeLocked(boolean enable) {
+        if (enable != mAutoSuspendModeEnabled) {
+            if (DEBUG) {
+                Slog.d(TAG, "Setting auto-suspend mode to " + enable);
+            }
+            mAutoSuspendModeEnabled = enable;
+            nativeSetAutoSuspend(enable);
+        }
+    }
+
+    private void setInteractiveModeLocked(boolean enable) {
+        if (enable != mInteractiveModeEnabled) {
+            if (DEBUG) {
+                Slog.d(TAG, "Setting interactive mode to " + enable);
+            }
+            mInteractiveModeEnabled = enable;
+            nativeSetInteractive(enable);
+        }
     }
 
     private boolean isScreenOnInternal() {
         synchronized (mLock) {
             return !mSystemReady
-                    || mDisplayPowerRequest.screenState != DisplayPowerRequest.SCREEN_STATE_OFF;
+                    || mDisplayPowerRequest.wantScreenOnNormal();
         }
     }
 
@@ -1871,10 +2024,13 @@ public final class PowerManagerService extends com.android.server.SystemService
             pw.println("  mProximityPositive=" + mProximityPositive);
             pw.println("  mBootCompleted=" + mBootCompleted);
             pw.println("  mSystemReady=" + mSystemReady);
+            pw.println("  mAutoSuspendModeEnabled=" + mAutoSuspendModeEnabled);
+            pw.println("  mInteactiveModeEnabled=" + mInteractiveModeEnabled);
             pw.println("  mWakeLockSummary=0x" + Integer.toHexString(mWakeLockSummary));
             pw.println("  mUserActivitySummary=0x" + Integer.toHexString(mUserActivitySummary));
             pw.println("  mRequestWaitForNegativeProximity=" + mRequestWaitForNegativeProximity);
             pw.println("  mSandmanScheduled=" + mSandmanScheduled);
+            pw.println("  mSandmanSummoned=" + mSandmanSummoned);
             pw.println("  mLastWakeTime=" + TimeUtils.formatUptime(mLastWakeTime));
             pw.println("  mLastSleepTime=" + TimeUtils.formatUptime(mLastSleepTime));
             pw.println("  mSendWakeUpFinishedNotificationWhenReady="
@@ -1890,6 +2046,10 @@ public final class PowerManagerService extends com.android.server.SystemService
 
             pw.println();
             pw.println("Settings and Configuration:");
+            pw.println("  mDecoupleAutoSuspendModeFromDisplayConfig="
+                    + mDecoupleAutoSuspendModeFromDisplayConfig);
+            pw.println("  mDecoupleInteractiveModeFromDisplayConfig="
+                    + mDecoupleInteractiveModeFromDisplayConfig);
             pw.println("  mWakeUpWhenPluggedOrUnpluggedConfig="
                     + mWakeUpWhenPluggedOrUnpluggedConfig);
             pw.println("  mSuspendWhenScreenOffDueToProximityConfig="
@@ -1900,6 +2060,14 @@ public final class PowerManagerService extends com.android.server.SystemService
                     + mDreamsActivatedOnSleepByDefaultConfig);
             pw.println("  mDreamsActivatedOnDockByDefaultConfig="
                     + mDreamsActivatedOnDockByDefaultConfig);
+            pw.println("  mDreamsEnabledOnBatteryConfig="
+                    + mDreamsEnabledOnBatteryConfig);
+            pw.println("  mDreamsBatteryLevelMinimumWhenPoweredConfig="
+                    + mDreamsBatteryLevelMinimumWhenPoweredConfig);
+            pw.println("  mDreamsBatteryLevelMinimumWhenNotPoweredConfig="
+                    + mDreamsBatteryLevelMinimumWhenNotPoweredConfig);
+            pw.println("  mDreamsBatteryLevelDrainCutoffConfig="
+                    + mDreamsBatteryLevelDrainCutoffConfig);
             pw.println("  mDreamsEnabledSetting=" + mDreamsEnabledSetting);
             pw.println("  mDreamsActivateOnSleepSetting=" + mDreamsActivateOnSleepSetting);
             pw.println("  mDreamsActivateOnDockSetting=" + mDreamsActivateOnDockSetting);
@@ -1975,8 +2143,8 @@ public final class PowerManagerService extends com.android.server.SystemService
                 return "Awake";
             case WAKEFULNESS_DREAMING:
                 return "Dreaming";
-            case WAKEFULNESS_NAPPING:
-                return "Napping";
+            case WAKEFULNESS_DOZING:
+                return "Dozing";
             default:
                 return Integer.toString(wakefulness);
         }
@@ -2153,6 +2321,7 @@ public final class PowerManagerService extends com.android.server.SystemService
                     + " (uid=" + mOwnerUid + ", pid=" + mOwnerPid + ", ws=" + mWorkSource + ")";
         }
 
+        @SuppressWarnings("deprecation")
         private String getLockLevelString() {
             switch (mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK) {
                 case PowerManager.FULL_WAKE_LOCK:
@@ -2165,6 +2334,8 @@ public final class PowerManagerService extends com.android.server.SystemService
                     return "PARTIAL_WAKE_LOCK             ";
                 case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
                     return "PROXIMITY_SCREEN_OFF_WAKE_LOCK";
+                case PowerManager.DOZE_WAKE_LOCK:
+                    return "DOZE_WAKE_LOCK                ";
                 default:
                     return "???                           ";
             }
@@ -2295,16 +2466,24 @@ public final class PowerManagerService extends com.android.server.SystemService
             synchronized (this) {
                 mBlanked = true;
                 mDisplayManagerInternal.blankAllDisplaysFromPowerManager();
-                nativeSetInteractive(false);
-                nativeSetAutoSuspend(true);
+                if (!mDecoupleInteractiveModeFromDisplayConfig) {
+                    setInteractiveModeLocked(false);
+                }
+                if (!mDecoupleAutoSuspendModeFromDisplayConfig) {
+                    setAutoSuspendModeLocked(true);
+                }
             }
         }
 
         @Override
         public void unblankAllDisplays() {
             synchronized (this) {
-                nativeSetAutoSuspend(false);
-                nativeSetInteractive(true);
+                if (!mDecoupleAutoSuspendModeFromDisplayConfig) {
+                    setAutoSuspendModeLocked(false);
+                }
+                if (!mDecoupleInteractiveModeFromDisplayConfig) {
+                    setInteractiveModeLocked(true);
+                }
                 mDisplayManagerInternal.unblankAllDisplaysFromPowerManager();
                 mBlanked = false;
             }
