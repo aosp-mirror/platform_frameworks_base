@@ -45,10 +45,10 @@ interface IAssetAtlas {
      * if the atlas is not available yet.
      *
      * Each bitmap is represented by several entries in the array:
-     * int0: SkBitmap*, the native bitmap object
-     * int1: x position
-     * int2: y position
-     * int3: rotated, 1 if the bitmap must be rotated, 0 otherwise
+     * long0: SkBitmap*, the native bitmap object
+     * long1: x position
+     * long2: y position
+     * long3: rotated, 1 if the bitmap must be rotated, 0 otherwise
      */
-    int[] getMap();
+    long[] getMap();
 }
