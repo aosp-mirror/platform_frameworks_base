@@ -69,7 +69,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 98;
+    private static final int DATABASE_VERSION = 99;
 
     private Context mContext;
     private int mUserHandle;
@@ -1554,6 +1554,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
             }
             upgradeVersion = 98;
+        }
+
+        if (upgradeVersion == 98) {
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                SQLiteStatement stmt = null;
+                try {
+                    stmt = db.compileStatement("INSERT OR REPLACE INTO global(name,value)"
+                            + " VALUES(?,?);");
+                    loadIntegerSetting(stmt, Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS,
+                            R.integer.def_lock_screen_show_notifications);
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                    if (stmt != null) stmt.close();
+                }
+            }
+            upgradeVersion = 99;
         }
 
         // *** Remember to update DATABASE_VERSION above!
