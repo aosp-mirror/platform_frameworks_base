@@ -880,13 +880,17 @@ the location information in the intent data with one of the schemes defined belo
     (closest) zoom level is 23.
       <p>Example: <code>"geo:47.6,-122.3?z=11"</code>
     </dd>
-  <dt><code>geo:0,0?q=lat,lng(label)</code></dt>
-    <dd>Show the map at the given longitude and latitude with a string label.
-      <p>Example: <code>"geo:0,0?q=34.99,-106.61(Treasure)"</code>
-    </dd>
+    <dt><code>geo:0,0?q=lat,lng(label)</code></dt>
+      <dd>Show the map at the given longitude and latitude with a string label.
+        <p>Example: <code>"geo:0,0?q=34.99,-106.61(Treasure)"</code>
+      </dd>
   <dt><code>geo:0,0?q=my+street+address</code></dt>
     <dd>Show the location for "my street address" (may be a specific address or location query).
-      <p>Example: <code>"geo:0,0?q=1600+amphitheatre+parkway+ca"</code>
+      <p>Example: <code>"geo:0,0?q=1600+Amphitheatre+Parkway%2C+CA"</code></p>
+      <p class="note"><strong>Note:</strong> All strings passed in the {@code geo} URI must
+      be encoded. For example, the string {@code 1st & Pike, Seattle} should become
+      {@code 1st%20%26%20Pike%2C%20Seattle}. Spaces in the string can be encoded with
+      {@code %20} or replaced with the plus sign ({@code +}).</p>
     </dd>
 </dl>
 </dd>
