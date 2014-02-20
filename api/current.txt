@@ -24188,9 +24188,9 @@ package android.telecomm {
     method public abstract void call(android.telecomm.CallInfo);
     method public abstract void confirmIncomingCall(java.lang.String, java.lang.String);
     method public abstract void disconnect(java.lang.String);
-    method public android.os.IBinder getBinder();
+    method public final android.os.IBinder getBinder();
     method public abstract void isCompatibleWith(android.telecomm.CallInfo);
-    method public android.os.IBinder onBind(android.content.Intent);
+    method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void setCallServiceAdapter(android.telecomm.ICallServiceAdapter);
   }
 
@@ -24220,9 +24220,14 @@ package android.telecomm {
 
   public abstract class CallServiceSelector extends android.app.Service {
     ctor protected CallServiceSelector();
-    method protected abstract boolean isSwitchable(android.telecomm.CallInfo);
+    method protected abstract void isSwitchable(android.telecomm.CallInfo, android.telecomm.CallServiceSelector.Response);
     method public final android.os.IBinder onBind(android.content.Intent);
-    method protected abstract java.util.List<android.telecomm.CallServiceInfo> select(android.telecomm.CallInfo, java.util.List<android.telecomm.CallServiceInfo>);
+    method protected abstract void select(android.telecomm.CallInfo, java.util.List<android.telecomm.CallServiceDescriptor>, android.telecomm.CallServiceSelector.Response);
+  }
+
+  public static abstract interface CallServiceSelector.Response {
+    method public abstract void setSelectedCallServices(java.util.List<android.telecomm.CallServiceDescriptor>);
+    method public abstract void setSwitchable(boolean);
   }
 
   public final class CallState extends java.lang.Enum {

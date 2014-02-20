@@ -21,8 +21,6 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.telecomm.ICallService;
-import android.telecomm.ICallServiceAdapter;
 
 import com.android.internal.os.SomeArgs;
 
@@ -135,14 +133,14 @@ public abstract class CallService extends Service {
 
     /** {@inheritDoc} */
     @Override
-    public IBinder onBind(Intent intent) {
+    public final IBinder onBind(Intent intent) {
         return getBinder();
     }
 
     /**
      * Returns binder object which can be used across IPC methods.
      */
-    public IBinder getBinder() {
+    public final IBinder getBinder() {
         return mBinder;
     }
 
