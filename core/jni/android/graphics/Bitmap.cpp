@@ -627,7 +627,7 @@ static jobject Bitmap_extractAlpha(JNIEnv* env, jobject clazz,
     }
 
     return GraphicsJNI::createBitmap(env, dst, allocator.getStorageObj(),
-            GraphicsJNI::kBitmapCreateFlag_Mutable, NULL, NULL);
+            getPremulBitmapCreateFlags(true), NULL, NULL);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
