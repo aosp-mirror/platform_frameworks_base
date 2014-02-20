@@ -100,7 +100,7 @@
     <string name="roamingText4" msgid="8808456682550796530">"Nje ya Jengo"</string>
     <string name="roamingText5" msgid="7604063252850354350">"Urandaji - Mfumo unaopendelewa"</string>
     <string name="roamingText6" msgid="2059440825782871513">"Uzururaji - Mfumo Unaopatikana"</string>
-    <string name="roamingText7" msgid="7112078724097233605">"Uzururaji - Mwenza wa Ushirikiamo"</string>
+    <string name="roamingText7" msgid="7112078724097233605">"Roaming - Alliance Partner"</string>
     <string name="roamingText8" msgid="5989569778604089291">"Uzururaji - Mwenzi wa Thamani"</string>
     <string name="roamingText9" msgid="7969296811355152491">"Uzururaji - Utendajikazi Kamili wa Huduma"</string>
     <string name="roamingText10" msgid="3992906999815316417">"Uzururaji - Utendajikazi Nusi wa Huduma"</string>
@@ -348,7 +348,7 @@
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"rekebisha takwimu za oparesheni ya programu"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Inaruhusu programu kurekebisha takwimu za matumizi ya programu zilizokusanywa. Si ya kutumiwa na programu za kawaida."</string>
     <string name="permlab_backup" msgid="470013022865453920">"Dhibiti kuhifadhi nakala na kurejesha kwa mfumo"</string>
-    <string name="permdesc_backup" msgid="6912230525140589891">"Inaruhusu programu kudhibiti utaratibu wa kucheleza na kurejesha wa mfumo. Si kwa matumizi na programu za kawaida."</string>
+    <string name="permdesc_backup" msgid="6912230525140589891">"Huruhusu programu kudhibiti utaratibu wa kuhifadhi nakala rudufu na kurejesha mfumo. Haifai kutumiwa na programu za kawaida."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"thibitisha chelezo kamilifu au rejesha upya uendeshaji"</string>
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Huruhusu programu kuzindua kiolesura cha kuthibitisha kuhifadhiwa kwa nakala rudufu kamili. Haitumiwi na programu yoyote."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"onyesha madirisha yasiyoidhinishwa"</string>
@@ -359,8 +359,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Huruhusu programu kubadilisha kasi ya uhuishaji kijumla (uhuisho wa haraka zaidi au wa polepole zaidi) wakati wowote."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"Dhibiti shuhuda za programu"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Inaruhusu programu kuunda na kudhibiti shuhuda zake, kukwepa mipangilio yao ya kawaida. Haitahitajika kamwe na programu za kawaida."</string>
-    <string name="permlab_freezeScreen" msgid="4708181184441880175">"lemaza skrini"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Inaruhusu programu kulemaza kwa muda skrini kwa ajili ya mpito kamili wa skrinimaombi kwa muda kufungia screen kwa ajili ya mpito full-screen."</string>
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"fanya skrini isisonge"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Huruhusu programu kufanya skrini isisonge kwa muda ili kuruhusu kubadilisha hadi skrini nzima."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"bonyeza vitufe na vitufe vya kudhibiti"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Huruhusu programu kuwasilisha matukio yake ya ingizo (mibonyezo ya vitufe, nk.) kwa programu zingine. programu hasidi zinaweza kutumia hii ili kutawala kompyuta kibao."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Inaruhusu programu kuwasilisha matukio yake ya ingizo (mibonyezo ya kitufe, nk.)kwa programu zingine.Programu hasidi zinaweza kutumia hii kutawala simu."</string>
@@ -686,23 +686,23 @@
     <string name="policylab_watchLogin" msgid="914130646942199503">"Kuhesabu idadi ya mara ambazo skrini inajaribu kufunguliwa"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Fuatilia idadi ya manenosiri yasiyo sahihi yatakayoingizwa wakati wa kufungua skrini, na ufunge kompyuta kibao au ufute data yote iliyomo kama manenosiri mengi yenye makosa yataingizwa."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Fuatilia idadi ya manenosiri yasiyo sahihi yatakayoingizwa wakati wa kufungua skrini, na ufunge simu au ufute data yote iliyomo kama manenosiri mengi sana yasiyo sahihi yataingizwa."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Badilisha nenosiri la kufungua skrini"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Badilisha nenosiri la kufungua skrini."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Funga skrini"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Dhibiti jinsi na wakati skrini inapofunga."</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Kubadilisha nenosiri la kufungua skrini"</string>
+    <string name="policydesc_resetPassword" msgid="605963962301904458">"Kubadilisha nenosiri la kufungua skrini."</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Kufunga skrini"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kudhibiti jinsi na wakati skrini inapofunga."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Kufuta data yote"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Futa data ya kompyuta kibao bila ilani kwa kurejesha mipangilio ya mwanzo."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Kufuta data ya simu bila ilani kwa kurejesha data ambayo kifaa kilitoka nayo kiwandani"</string>
-    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Weka mbadala wa kifaa cha ulimwengu"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Weka kifaa mbadala cha ulimwengu kitakachotumiwa wakati wa kuwezesha sera. Msimamizi wa kwanza wa kifaa pekee anaweka matekelezo mbadala ya ulimwengu."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Weka muda wa kuisha wa nenosiri"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Dhibiti ni mara ngapi nenosiri la kufunga skrini linafaa libadilishwe."</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Weka msimbo fiche wa hifadhi"</string>
-    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Inahitaji kwamba data ya programu iliyohifadhiwa iwe na msimbo fiche."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Zima kamera"</string>
-    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zuia matumizi yote ya kamera za kifaa."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Lemaza vipengele kwenye kilinzi cha kitufe."</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Inazuia matumizi ya baadhi ya vipengele kwenye kilinzi cha kitufe."</string>
+    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Weka seva mbadala ya ulimwengu kote ya kifaa"</string>
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Weka seva mbadala ya ulimwengu kote ya kifaa itakayotumiwa wakati sera iwezeshwa. Msimamizi wa kwanza wa kifaa pekee ndiye anaweza kuweka seva mbadala ya ulimwengu inayofanya kazi."</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Kuweka kipindi cha kutumia nenosiri la kufunga skrini"</string>
+    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Kudhibiti ni mara ngapi nenosiri la kufunga skrini linafaa libadilishwe."</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Kuweka msimbo fiche wa hifadhi"</string>
+    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Inahitaji kwamba data iliyohifadhiwa ya programu iwe na msimbo fiche."</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Kuzima kamera"</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Kuzuia matumizi yote ya kamera za kifaa."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Kuzima vipengele kwenye kilinda vitufe"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Inazuia matumizi ya baadhi ya vipengele kwenye kilinda vitufe."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Nyumbani"</item>
     <item msgid="869923650527136615">"Simu ya mkononi"</item>
@@ -838,7 +838,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Jaribu tena"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Majaribio ya Juu ya Kufungua Uso yamezidishwa"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Inachaji <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"Imechajiwa"</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Betri imejaa"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Unganisha chaja yako"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Hakuna SIM kadi"</string>
@@ -886,8 +886,8 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Ruwaza imefutwa"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Kiini kimeongezwa"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Ruwaza imekamilika"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Wiji %2$d ya %3$d."</string>
-    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Ongeza wiji"</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Wijeti %2$d ya %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Ongeza wijeti."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Tupu"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Eneo la kufungua limepanuliwa."</string>
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Eneo la kufungua limekunjwa."</string>
@@ -896,7 +896,7 @@
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Hali"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Vidhibiti vya media"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Upangaji upya wa wiji umeanza."</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Upangaji upya wa wijeti umeanza."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Upangaji upya wa wiji umekamilika."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Wiji <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> imefutwa."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Panua eneo la kufungua."</string>

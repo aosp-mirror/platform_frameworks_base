@@ -1119,8 +1119,8 @@
     <string name="no" msgid="5141531044935541497">"Annuler"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Attention"</string>
     <string name="loading" msgid="7933681260296021180">"Chargement en cours..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"ACTIVÉE"</string>
-    <string name="capital_off" msgid="6815870386972805832">"DÉSACTIVÉE"</string>
+    <string name="capital_on" msgid="1544682755514494298">"OUI"</string>
+    <string name="capital_off" msgid="6815870386972805832">"NON"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Continuer avec"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Sélectionnez une application de l\'écran d\'accueil"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utiliser cette application par défaut pour cette action"</string>

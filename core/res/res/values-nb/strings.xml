@@ -1493,7 +1493,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Trådløs skjerm"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Medieutgang"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Koble til enheten"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Send skjermen til enheten"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Cast skjermen til enheten"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Søker etter enheter …"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Innstillinger"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Koble fra"</string>

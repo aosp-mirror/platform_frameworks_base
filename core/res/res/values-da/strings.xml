@@ -330,11 +330,11 @@
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"overvåge og kontrollere åbning af alle apps"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Tillader, at appen kan overvåge og kontrollere, hvordan systemet starter aktiviteter. Ondsindede apps kan fuldstændig kompromittere systemet. Denne tilladelse er kun nødvendig til udvikling, aldrig til normal brug."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"send udsendelse om fjernet pakke"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Tillader, at appen kan udsende en meddelelse om, at en apppakke er fjernet. Ondsindede apps kan bruge dette til at dræbe andre kørende apps."</string>
+    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Tillader, at appen kan udsende en underretning om, at en app-pakke er fjernet. Ondsindede apps kan bruge dette til at lukke andre kørende apps."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"send sms-modtaget udsendelse"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Tillader, at appen kan udsende en meddelelse om, at der er modtaget en sms-besked. Ondsindede apps kan bruge dette til at forfalske indgående sms-beskeder."</string>
+    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Tillader, at appen kan udsende en underretning om, at der er modtaget en sms-besked. Ondsindede apps kan bruge dette til at simulere indgående sms-beskeder."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"send WAP-PUSH-modtaget udsendelse"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Tillader, at appen kan udsende en meddelelse om, at der er modtaget en WAP PUSH-besked. Ondsindede apps kan bruge dette til at forfalske modtagelse af mms-beskeder eller i det skjulte erstatte indholdet på en webside med ondsindede varianter."</string>
+    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Tillader, at appen kan udsende en underretning om, at der er modtaget en WAP PUSH-besked. Ondsindede apps kan bruge dette til at simulere modtagelse af mms-beskeder eller i det skjulte erstatte indholdet på en webside med ondsindede varianter."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"begræns antallet af kørende processer"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Tillader, at appen kan kontrollere det maksimale antal kørende processer. Dette er aldrig nødvendigt til normale apps."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"tvinge baggrundsapps til at lukke"</string>
