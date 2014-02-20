@@ -12755,6 +12755,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mDisplayList != null) {
             mDisplayList.clearDirty();
         }
+
+        if (mBackgroundDisplayList != null) {
+            mBackgroundDisplayList.clearDirty();
+        }
     }
 
     /**
@@ -13073,13 +13077,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private void cleanupDraw() {
         if (mAttachInfo != null) {
+            // Ensure the display lists are reset when the view root dies.
             if (mDisplayList != null) {
                 mDisplayList.markDirty();
                 mAttachInfo.mViewRootImpl.enqueueDisplayList(mDisplayList);
             }
+            if (mBackgroundDisplayList != null) {
+                mBackgroundDisplayList.markDirty();
+                mAttachInfo.mViewRootImpl.enqueueDisplayList(mBackgroundDisplayList);
+            }
             mAttachInfo.mViewRootImpl.cancelInvalidate(this);
         } else {
-            // Should never happen
+            // Should never happen.
             resetDisplayList();
         }
     }
@@ -15216,12 +15225,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (mBackgroundSizeChanged) {
-            // We should see the background invalidate itself, but just to be
-            // careful we're going to clear the display list and force redraw.
-            if (mBackgroundDisplayList != null) {
-                mBackgroundDisplayList.clear();
-            }
-
             background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
             mBackgroundSizeChanged = false;
         }
@@ -15269,10 +15272,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return A valid display list for the specified drawable
      */
     private static DisplayList getDrawableDisplayList(Drawable drawable, DisplayList displayList) {
-        if (displayList != null && displayList.isValid()) {
-            return displayList;
-        }
-
         if (displayList == null) {
             displayList = DisplayList.create(drawable.getClass().getName());
         }
