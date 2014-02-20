@@ -1567,10 +1567,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void clearDnsInterfaceForUidRange(int uid_start, int uid_end) {
+    public void clearDnsInterfaceForUidRange(String iface, int uid_start, int uid_end) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            mConnector.execute("resolver", "clearifaceforuidrange", uid_start, uid_end);
+            mConnector.execute("resolver", "clearifaceforuidrange", iface, uid_start, uid_end);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
