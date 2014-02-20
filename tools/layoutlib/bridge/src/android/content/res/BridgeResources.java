@@ -155,6 +155,11 @@ public final class BridgeResources extends Resources {
 
     @Override
     public Drawable getDrawable(int id) throws NotFoundException {
+        return getDrawable(id, null);
+    }
+
+    @Override
+    public Drawable getDrawable(int id, Theme theme) {
         Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
