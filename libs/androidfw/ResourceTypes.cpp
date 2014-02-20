@@ -101,21 +101,20 @@ static status_t validate_chunk(const ResChunk_header* chunk,
                 if ((ssize_t)size <= (dataEnd-((const uint8_t*)chunk))) {
                     return NO_ERROR;
                 }
-                ALOGW("%s data size %p extends beyond resource end %p.",
-                     name, (void*)size,
-                     (void*)(dataEnd-((const uint8_t*)chunk)));
+                ALOGW("%s data size 0x%x extends beyond resource end %p.",
+                     name, size, (void*)(dataEnd-((const uint8_t*)chunk)));
                 return BAD_TYPE;
             }
             ALOGW("%s size 0x%x or headerSize 0x%x is not on an integer boundary.",
                  name, (int)size, (int)headerSize);
             return BAD_TYPE;
         }
-        ALOGW("%s size %p is smaller than header size %p.",
-             name, (void*)size, (void*)(int)headerSize);
+        ALOGW("%s size 0x%x is smaller than header size 0x%x.",
+             name, size, headerSize);
         return BAD_TYPE;
     }
-    ALOGW("%s header size %p is too small.",
-         name, (void*)(int)headerSize);
+    ALOGW("%s header size 0x%x is too small.",
+         name, headerSize);
     return BAD_TYPE;
 }
 
@@ -3252,8 +3251,8 @@ status_t ResTable::addInternal(const void* data, size_t size, const int32_t cook
             }
             curPackage++;
         } else {
-            ALOGW("Unknown chunk type %p in table at %p.\n",
-                 (void*)(int)(ctype),
+            ALOGW("Unknown chunk type 0x%x in table at %p.\n",
+                 ctype,
                  (void*)(((const uint8_t*)chunk) - ((const uint8_t*)header->header)));
         }
         chunk = (const ResChunk_header*)
@@ -3469,8 +3468,8 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
 
         if ((dtohs(entry->flags)&entry->FLAG_COMPLEX) != 0) {
             if (!mayBeBag) {
-                ALOGW("Requesting resource %p failed because it is complex\n",
-                     (void*)resID);
+                ALOGW("Requesting resource 0x%x failed because it is complex\n",
+                     resID);
             }
             continue;
         }
@@ -3745,8 +3744,8 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
         }
 
         if ((dtohs(entry->flags)&entry->FLAG_COMPLEX) == 0) {
-            ALOGW("Skipping entry %p in package table %d because it is not complex!\n",
-                 (void*)resID, (int)ip);
+            ALOGW("Skipping entry 0x%x in package table %zu because it is not complex!\n",
+                 resID, ip);
             continue;
         }
 
@@ -5342,26 +5341,26 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
         return (mError=err);
     }
 
-    const size_t pkgSize = dtohl(pkg->header.size);
+    const uint32_t pkgSize = dtohl(pkg->header.size);
 
     if (dtohl(pkg->typeStrings) >= pkgSize) {
-        ALOGW("ResTable_package type strings at %p are past chunk size %p.",
-             (void*)dtohl(pkg->typeStrings), (void*)pkgSize);
+        ALOGW("ResTable_package type strings at 0x%x are past chunk size 0x%x.",
+             dtohl(pkg->typeStrings), pkgSize);
         return (mError=BAD_TYPE);
     }
     if ((dtohl(pkg->typeStrings)&0x3) != 0) {
-        ALOGW("ResTable_package type strings at %p is not on an integer boundary.",
-             (void*)dtohl(pkg->typeStrings));
+        ALOGW("ResTable_package type strings at 0x%x is not on an integer boundary.",
+             dtohl(pkg->typeStrings));
         return (mError=BAD_TYPE);
     }
     if (dtohl(pkg->keyStrings) >= pkgSize) {
-        ALOGW("ResTable_package key strings at %p are past chunk size %p.",
-             (void*)dtohl(pkg->keyStrings), (void*)pkgSize);
+        ALOGW("ResTable_package key strings at 0x%x are past chunk size 0x%x.",
+             dtohl(pkg->keyStrings), pkgSize);
         return (mError=BAD_TYPE);
     }
     if ((dtohl(pkg->keyStrings)&0x3) != 0) {
-        ALOGW("ResTable_package key strings at %p is not on an integer boundary.",
-             (void*)dtohl(pkg->keyStrings));
+        ALOGW("ResTable_package key strings at 0x%x is not on an integer boundary.",
+             dtohl(pkg->keyStrings));
         return (mError=BAD_TYPE);
     }
     
@@ -5499,7 +5498,7 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                 return (mError=err);
             }
             
-            const size_t typeSize = dtohl(type->header.size);
+            const uint32_t typeSize = dtohl(type->header.size);
             
             LOAD_TABLE_NOISY(printf("Type off %p: type=0x%x, headerSize=0x%x, size=%p\n",
                                     (void*)(base-(const uint8_t*)chunk),
@@ -5508,16 +5507,16 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                                     (void*)typeSize));
             if (dtohs(type->header.headerSize)+(sizeof(uint32_t)*dtohl(type->entryCount))
                 > typeSize) {
-                ALOGW("ResTable_type entry index to %p extends beyond chunk end %p.",
+                ALOGW("ResTable_type entry index to %p extends beyond chunk end 0x%x.",
                      (void*)(dtohs(type->header.headerSize)
                              +(sizeof(uint32_t)*dtohl(type->entryCount))),
-                     (void*)typeSize);
+                     typeSize);
                 return (mError=BAD_TYPE);
             }
             if (dtohl(type->entryCount) != 0
                 && dtohl(type->entriesStart) > (typeSize-sizeof(ResTable_entry))) {
-                ALOGW("ResTable_type entriesStart at %p extends beyond chunk end %p.",
-                     (void*)dtohl(type->entriesStart), (void*)typeSize);
+                ALOGW("ResTable_type entriesStart at 0x%x extends beyond chunk end 0x%x.",
+                     dtohl(type->entriesStart), typeSize);
                 return (mError=BAD_TYPE);
             }
             if (type->id == 0) {
@@ -5934,12 +5933,12 @@ void ResTable::print(bool inclValues) const
                     size_t entryCount = dtohl(type->entryCount);
                     uint32_t entriesStart = dtohl(type->entriesStart);
                     if ((entriesStart&0x3) != 0) {
-                        printf("      NON-INTEGER ResTable_type entriesStart OFFSET: %p\n", (void*)entriesStart);
+                        printf("      NON-INTEGER ResTable_type entriesStart OFFSET: 0x%x\n", entriesStart);
                         continue;
                     }
                     uint32_t typeSize = dtohl(type->header.size);
                     if ((typeSize&0x3) != 0) {
-                        printf("      NON-INTEGER ResTable_type header.size: %p\n", (void*)typeSize);
+                        printf("      NON-INTEGER ResTable_type header.size: 0x%x\n", typeSize);
                         continue;
                     }
                     for (size_t entryIndex=0; entryIndex<entryCount; entryIndex++) {
@@ -5978,33 +5977,31 @@ void ResTable::print(bool inclValues) const
                             printf("        INVALID RESOURCE 0x%08x: ", resID);
                         }
                         if ((thisOffset&0x3) != 0) {
-                            printf("NON-INTEGER OFFSET: %p\n", (void*)thisOffset);
+                            printf("NON-INTEGER OFFSET: 0x%x\n", thisOffset);
                             continue;
                         }
                         if ((thisOffset+sizeof(ResTable_entry)) > typeSize) {
-                            printf("OFFSET OUT OF BOUNDS: %p+%p (size is %p)\n",
-                                   (void*)entriesStart, (void*)thisOffset,
-                                   (void*)typeSize);
+                            printf("OFFSET OUT OF BOUNDS: 0x%x+0x%x (size is 0x%x)\n",
+                                   entriesStart, thisOffset, typeSize);
                             continue;
                         }
                         
                         const ResTable_entry* ent = (const ResTable_entry*)
                             (((const uint8_t*)type) + entriesStart + thisOffset);
                         if (((entriesStart + thisOffset)&0x3) != 0) {
-                            printf("NON-INTEGER ResTable_entry OFFSET: %p\n",
-                                 (void*)(entriesStart + thisOffset));
+                            printf("NON-INTEGER ResTable_entry OFFSET: 0x%x\n",
+                                 (entriesStart + thisOffset));
                             continue;
                         }
                         
                         uintptr_t esize = dtohs(ent->size);
                         if ((esize&0x3) != 0) {
-                            printf("NON-INTEGER ResTable_entry SIZE: %p\n", (void*)esize);
+                            printf("NON-INTEGER ResTable_entry SIZE: 0x%x\n", esize);
                             continue;
                         }
                         if ((thisOffset+esize) > typeSize) {
-                            printf("ResTable_entry OUT OF BOUNDS: %p+%p+%p (size is %p)\n",
-                                   (void*)entriesStart, (void*)thisOffset,
-                                   (void*)esize, (void*)typeSize);
+                            printf("ResTable_entry OUT OF BOUNDS: 0x%x+0x%x+0x%x (size is 0x%x)\n",
+                                   entriesStart, thisOffset, esize, typeSize);
                             continue;
                         }
                             
