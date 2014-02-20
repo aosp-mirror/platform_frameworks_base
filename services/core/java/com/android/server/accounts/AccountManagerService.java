@@ -863,6 +863,7 @@ public class AccountManagerService
                         "User cannot modify accounts");
             } catch (RemoteException re) {
             }
+            return;
         }
 
         long identityToken = clearCallingIdentity();
