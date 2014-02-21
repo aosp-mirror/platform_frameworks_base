@@ -1713,6 +1713,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case START_USER_IN_BACKGROUND_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int userid = data.readInt();
+            boolean result = startUserInBackground(userid);
+            reply.writeNoException();
+            reply.writeInt(result ? 1 : 0);
+            return true;
+        }
+
         case STOP_USER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int userid = data.readInt();
@@ -4297,6 +4306,19 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(userid);
         mRemote.transact(SWITCH_USER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean result = reply.readInt() != 0;
+        reply.recycle();
+        data.recycle();
+        return result;
+    }
+
+    public boolean startUserInBackground(int userid) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(userid);
+        mRemote.transact(START_USER_IN_BACKGROUND_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean result = reply.readInt() != 0;
         reply.recycle();

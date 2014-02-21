@@ -349,6 +349,7 @@ public interface IActivityManager extends IInterface {
 
     // Multi-user APIs
     public boolean switchUser(int userid) throws RemoteException;
+    public boolean startUserInBackground(int userid) throws RemoteException;
     public int stopUser(int userid, IStopUserCallback callback) throws RemoteException;
     public UserInfo getCurrentUser() throws RemoteException;
     public boolean isUserRunning(int userid, boolean orStopping) throws RemoteException;
@@ -715,4 +716,5 @@ public interface IActivityManager extends IInterface {
 
     // Start of L transactions
     int GET_TAG_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+210;
+    int START_USER_IN_BACKGROUND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+211;
 }
