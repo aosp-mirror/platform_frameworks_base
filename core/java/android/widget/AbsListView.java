@@ -7196,7 +7196,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             // within that row by subtracting the height of each preceeding row.
             int remainingOffset = mOffset;
             int targetHeight = getHeightForRow(targetRow);
-            while (targetRow > 0 && remainingOffset > targetHeight) {
+            while (targetRow > 1 && remainingOffset > targetHeight) {
                 targetRow--;
                 remainingOffset -= targetHeight;
                 targetHeight = getHeightForRow(targetRow);
@@ -7204,7 +7204,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             // Compute the offset within the actual target row.
             final float targetOffsetRatio;
-            if (targetHeight == 0) {
+            if (remainingOffset > 0) {
+                // We can't reach that offset given the row count.
+                targetOffsetRatio = 0;
+            } else if (targetHeight == 0) {
                 targetOffsetRatio = 1;
             } else {
                 targetOffsetRatio = remainingOffset / (float) targetHeight;
