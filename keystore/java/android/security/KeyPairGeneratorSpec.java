@@ -315,7 +315,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * <pre class="prettyprint">
      * Calendar start = new Calendar();
      * Calendar end = new Calendar();
-     * end.add(1, Calendar.YEAR);
+     * end.add(Calendar.YEAR, 1);
      *
      * KeyPairGeneratorSpec spec =
      *         new KeyPairGeneratorSpec.Builder(mContext).setAlias(&quot;myKey&quot;)
