@@ -11647,6 +11647,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_EXPOSURE_TIME;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_FORWARD_MATRIX;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_FRAME_DURATION;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_GREEN_SPLIT;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_NEUTRAL_COLOR_POINT;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_PROFILE_HUE_SAT_MAP;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_PROFILE_TONE_CURVE;
