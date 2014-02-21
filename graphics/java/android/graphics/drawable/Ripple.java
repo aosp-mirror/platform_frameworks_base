@@ -32,10 +32,10 @@ class Ripple {
     private static final TimeInterpolator INTERPOLATOR = new DecelerateInterpolator(2.0f);
 
     /** Starting radius for a ripple. */
-    private static final int STARTING_RADIUS_DP = 40;
+    private static final int STARTING_RADIUS_DP = 16;
 
     /** Radius when finger is outside view bounds. */
-    private static final int OUTSIDE_RADIUS_DP = 40;
+    private static final int OUTSIDE_RADIUS_DP = 16;
 
     /** Margin when constraining outside touches (fraction of outer radius). */
     private static final float OUTSIDE_MARGIN = 0.8f;

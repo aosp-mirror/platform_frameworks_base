@@ -25,7 +25,6 @@ import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.Xfermode;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -79,7 +78,7 @@ public class TouchFeedbackDrawable extends Drawable {
     private Paint mRipplePaint;
 
     /** Target density of the display into which ripples are drawn. */
-    private int mTargetDensity;
+    private float mDensity = 1.0f;
 
     /** Whether the animation runnable has been posted. */
     private boolean mAnimating;
@@ -90,9 +89,7 @@ public class TouchFeedbackDrawable extends Drawable {
 
     TouchFeedbackDrawable(TouchFeedbackState state, Resources res) {
         if (res != null) {
-            mTargetDensity = res.getDisplayMetrics().densityDpi;
-        } else if (state != null) {
-            mTargetDensity = state.mTargetDensity;
+            mDensity = res.getDisplayMetrics().density;
         }
 
         mState = state;
@@ -143,32 +140,30 @@ public class TouchFeedbackDrawable extends Drawable {
         return mState.mColorStateList != null && mState.mColorStateList.isStateful();
     }
 
-    /**
-     * Set the density at which this drawable will be rendered.
-     *
-     * @param density The density scale for this drawable.
-     */
-    public void setTargetDensity(int density) {
-        if (mTargetDensity != density) {
-            mTargetDensity = density == 0 ? DisplayMetrics.DENSITY_DEFAULT : density;
-            // TODO: Update density in ripples?
-            invalidateSelf();
-        }
-    }
-
     @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
             throws XmlPullParserException, IOException {
         super.inflate(r, parser, attrs);
 
-        final TypedArray a = r.obtainAttributes(attrs,
-                com.android.internal.R.styleable.ColorDrawable);
+        final TypedArray a = r.obtainAttributes(
+                attrs, com.android.internal.R.styleable.ColorDrawable);
         mState.mColorStateList = a.getColorStateList(
                 com.android.internal.R.styleable.ColorDrawable_color);
         a.recycle();
 
-        mState.mXfermode = null; //new PorterDuffXfermode(Mode.SRC_ATOP);
-        mState.mProjected = false;
+        setTargetDensity(r.getDisplayMetrics());
+    }
+
+    /**
+     * Set the density at which this drawable will be rendered.
+     *
+     * @param metrics The display metrics for this drawable.
+     */
+    private void setTargetDensity(DisplayMetrics metrics) {
+        if (mDensity != metrics.density) {
+            mDensity = metrics.density;
+            invalidateSelf();
+        }
     }
 
     /**
@@ -196,12 +191,13 @@ public class TouchFeedbackDrawable extends Drawable {
 
             final Rect bounds = getBounds();
             final Ripple newRipple = new Ripple(bounds, padding, bounds.exactCenterX(),
-                    bounds.exactCenterY(), mTargetDensity);
+                    bounds.exactCenterY(), mDensity);
             newRipple.enter();
 
             mActiveRipples.add(newRipple);
             mTouchedRipples.put(id, newRipple);
         } else {
+            // TODO: How do we want to respond to movement?
             //ripple.move(x, y);
         }
 
@@ -296,7 +292,6 @@ public class TouchFeedbackDrawable extends Drawable {
             mRipplePaint.setAntiAlias(true);
         }
 
-        mRipplePaint.setXfermode(mState.mXfermode);
         mRipplePaint.setColor(color);
 
         final int restoreCount = canvas.save();
@@ -345,16 +340,10 @@ public class TouchFeedbackDrawable extends Drawable {
 
     static class TouchFeedbackState extends ConstantState {
         ColorStateList mColorStateList;
-        Xfermode mXfermode;
-        int mTargetDensity;
-        boolean mProjected;
 
         public TouchFeedbackState(TouchFeedbackState orig) {
             if (orig != null) {
                 mColorStateList = orig.mColorStateList;
-                mXfermode = orig.mXfermode;
-                mTargetDensity = orig.mTargetDensity;
-                mProjected = orig.mProjected;
             }
         }
 
