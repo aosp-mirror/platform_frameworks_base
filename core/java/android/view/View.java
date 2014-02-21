@@ -11838,7 +11838,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * <p>Compute the vertical extent of the horizontal scrollbar's thumb
+     * <p>Compute the vertical extent of the vertical scrollbar's thumb
      * within the vertical range. This value is used to compute the length
      * of the thumb within the scrollbar's track.</p>
      *
