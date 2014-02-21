@@ -382,7 +382,7 @@ intent.setData(Uri.parse("market://details?id=com.example.app"));
 startActivity(intent);</pre>
 
 <p>For more information, see 
-  <a href="{@docRoot}distribute/googleplay/promote/linking.html">Linking to Your Products</a>.</p>
+  <a href="{@docRoot}distribute/tools/promote/linking.html">Linking to Your Products</a>.</p>
 
 <h2 id="purchase-state-changes">Recurring Billing, Cancellation, and Changes In Purchase State</h2>
 

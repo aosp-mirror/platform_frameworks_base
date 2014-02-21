@@ -1,0 +1,57 @@
+page.title=Tools &amp; Reference
+section.landing=true
+nonavpage=true
+
+@jd:body
+
+<p>
+  Here you’ll find resources to help you publish your apps and games, acquire
+  users, and monetize your investment.
+</p>
+
+<div class="dynamic-grid">
+
+  <h3>Publishing and Launch</h3>
+  <div class="resource-widget resource-flow-layout landing col-16"
+    data-query="collection:distribute/tools/checklists"
+    data-cardSizes="9x6"
+    data-maxResults="2">
+  </div>
+
+<h3>Marketing Tools</h3>
+  <div class="resource-widget resource-flow-layout landing col-16"
+    data-query="collection:distribute/tools/promote"
+    data-cardSizes="6x6"
+    data-maxResults="3">
+  </div>
+
+  <h3>Developer Support</h3>
+  <div class="resource-widget resource-flow-layout landing col-16"
+    data-query="collection:distribute/tools/support"
+    data-cardSizes="6x6"
+    data-maxResults="3">
+  </div>
+
+  <h3>Developer News</h3>
+  <div class="resource-widget resource-flow-layout landing col-16"
+    data-query="collection:distribute/tools/news"
+    data-cardSizes="9x6"
+    data-maxResults="2">
+  </div>
+
+  <h3>More</h3>
+  <div class="resource-widget resource-flow-layout landing col-16"
+    data-query="collection:distribute/tools/more"
+    data-cardSizes="6x6"
+    data-maxResults="3">
+  </div>
+
+<!--  <h3>Related Resources</h3>
+  <div class="resource-widget resource-stack-layout col-16"
+    data-query="tag:developersupport"
+    data-sortOrder="-timestamp"
+    data-numStacks="3"
+    data-maxResults="6">
+  </div> -->
+
+</div>

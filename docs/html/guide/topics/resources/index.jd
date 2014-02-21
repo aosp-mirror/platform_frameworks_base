@@ -2,6 +2,8 @@ page.title=App Resources
 page.landing=true
 page.landing.intro=It takes more than just code to build a great app. Resources are the additional files and static content that your code uses, such as bitmaps, layout definitions, user interface strings, animation instructions, and more.  
 page.landing.image=images/develop/resources.png
+page.image=/images/develop/resources.png
+page.metaDescription=Developer guide about how to use resources in your Android apps.
 
 @jd:body
 

@@ -1,4 +1,5 @@
 page.title=Content License
+page.type=about
 fullpage=1
 excludeFromSuggestions=true
 @jd:body
@@ -68,7 +69,7 @@ included in that license.</li>
 style="margin:0;padding:0 2px;vertical-align:baseline" /> stylized typeface logo) are not included
 in the license.
 Please see <a
-href="{@docRoot}distribute/googleplay/promote/brand.html">Brand Guidelines</a> for
+href="{@docRoot}distribute/tools/promote/brand.html">Brand Guidelines</a> for
 information about this usage. </li>
 
 <li>In some cases, a page may include content, such as an image, that is not 
