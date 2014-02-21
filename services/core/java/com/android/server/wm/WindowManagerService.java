@@ -4208,7 +4208,22 @@ public class WindowManagerService extends IWindowManager.Stub
         AppWindowToken atoken = findAppWindowToken(token);
         if (atoken != null) {
             atoken.appFullscreen = toOpaque;
+            // When making translucent, wait until windows below have been drawn.
+            if (toOpaque) {
+                // Making opaque so do it now.
+                setWindowOpaque(token, true);
+            }
             requestTraversal();
+        }
+    }
+
+    public void setWindowOpaque(IBinder token, boolean isOpaque) {
+        AppWindowToken wtoken = findAppWindowToken(token);
+        if (wtoken != null) {
+            WindowState win = wtoken.findMainWindow();
+            if (win != null) {
+                win.mWinAnimator.setOpaque(isOpaque);
+            }
         }
     }
 

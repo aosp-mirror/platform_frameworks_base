@@ -1235,12 +1235,14 @@ final class ActivityStack {
             mUndrawnActivitiesBelowTopTranslucent.clear();
             mHandler.removeMessages(TRANSLUCENT_TIMEOUT_MSG);
 
-            if (waitingActivity != null && waitingActivity.app != null &&
-                    waitingActivity.app.thread != null) {
-                try {
-                    waitingActivity.app.thread.scheduleTranslucentConversionComplete(
-                            waitingActivity.appToken, r != null);
-                } catch (RemoteException e) {
+            if (waitingActivity != null) {
+                mWindowManager.setWindowOpaque(waitingActivity.appToken, false);
+                if (waitingActivity.app != null && waitingActivity.app.thread != null) {
+                    try {
+                        waitingActivity.app.thread.scheduleTranslucentConversionComplete(
+                                waitingActivity.appToken, r != null);
+                    } catch (RemoteException e) {
+                    }
                 }
             }
         }
