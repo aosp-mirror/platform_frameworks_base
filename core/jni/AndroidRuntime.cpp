@@ -133,7 +133,6 @@ extern int register_android_database_CursorWindow(JNIEnv* env);
 extern int register_android_database_SQLiteConnection(JNIEnv* env);
 extern int register_android_database_SQLiteGlobal(JNIEnv* env);
 extern int register_android_database_SQLiteDebug(JNIEnv* env);
-extern int register_android_debug_JNITest(JNIEnv* env);
 extern int register_android_nio_utils(JNIEnv* env);
 extern int register_android_text_format_Time(JNIEnv* env);
 extern int register_android_os_Debug(JNIEnv* env);
@@ -1095,7 +1094,6 @@ static void register_jam_procs(const RegJAMProc array[], size_t count)
 }
 
 static const RegJNIRec gRegJNI[] = {
-    REG_JNI(register_android_debug_JNITest),
     REG_JNI(register_com_android_internal_os_RuntimeInit),
     REG_JNI(register_android_os_SystemClock),
     REG_JNI(register_android_util_EventLog),
