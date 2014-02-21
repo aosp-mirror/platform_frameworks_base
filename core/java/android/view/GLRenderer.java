@@ -478,6 +478,7 @@ public class GLRenderer extends HardwareRenderer {
     @Override
     void flushLayerUpdates() {
         if (validate()) {
+            flushLayerChanges();
             mGlCanvas.flushLayerUpdates();
         }
     }
