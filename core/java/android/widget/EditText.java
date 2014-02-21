@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.Spannable;
@@ -131,5 +132,23 @@ public class EditText extends TextView {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(EditText.class.getName());
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_SET_TEXT: {
+                CharSequence text = (arguments != null) ? arguments.getCharSequence(
+                        AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE) : null;
+                setText(text);
+                if (text != null && text.length() > 0) {
+                    setSelection(text.length());
+                }
+                return true;
+            }
+            default: {
+                return super.performAccessibilityAction(action, arguments);
+            }
+        }
     }
 }
