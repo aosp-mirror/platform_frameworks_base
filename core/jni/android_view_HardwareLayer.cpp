@@ -88,13 +88,11 @@ static jboolean android_view_HardwareLayer_prepare(JNIEnv* env, jobject clazz,
 }
 
 static void android_view_HardwareLayer_setLayerPaint(JNIEnv* env, jobject clazz,
-        jlong layerUpdaterPtr, jlong paintPtr, jlong colorFilterPtr) {
+        jlong layerUpdaterPtr, jlong paintPtr) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
     if (layer) {
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
-        SkColorFilter* colorFilter = reinterpret_cast<SkColorFilter*>(colorFilterPtr);
         layer->setPaint(paint);
-        layer->setColorFilter(colorFilter);
     }
 }
 
@@ -162,7 +160,7 @@ static JNINativeMethod gMethods[] = {
     { "nDestroyLayerUpdater",    "(J)V",       (void*) android_view_HardwareLayer_destroyLayerUpdater },
 
     { "nPrepare",                "(JIIZ)Z",    (void*) android_view_HardwareLayer_prepare },
-    { "nSetLayerPaint",          "(JJJ)V",     (void*) android_view_HardwareLayer_setLayerPaint },
+    { "nSetLayerPaint",          "(JJ)V",      (void*) android_view_HardwareLayer_setLayerPaint },
     { "nSetTransform",           "(JJ)V",      (void*) android_view_HardwareLayer_setTransform },
     { "nSetSurfaceTexture",      "(JLandroid/graphics/SurfaceTexture;Z)V",
             (void*) android_view_HardwareLayer_setSurfaceTexture },
