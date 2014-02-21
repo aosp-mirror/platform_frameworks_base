@@ -1366,8 +1366,9 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags) {
-        return mWindowManagerCallbacks.interceptMotionBeforeQueueingWhenScreenOff(policyFlags);
+    private int interceptMotionBeforeQueueingWhenScreenOff(long whenNanos, int policyFlags) {
+        return mWindowManagerCallbacks.interceptMotionBeforeQueueingWhenScreenOff(
+                whenNanos, policyFlags);
     }
 
     // Native callback.
@@ -1527,7 +1528,7 @@ public class InputManagerService extends IInputManager.Stub
 
         public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn);
 
-        public int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags);
+        public int interceptMotionBeforeQueueingWhenScreenOff(long whenNanos, int policyFlags);
 
         public long interceptKeyBeforeDispatching(InputWindowHandle focus,
                 KeyEvent event, int policyFlags);

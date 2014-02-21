@@ -30,10 +30,11 @@ import android.os.PowerManager;
  */
 final class DisplayPowerRequest {
     public static final int SCREEN_STATE_OFF = 0;
-    public static final int SCREEN_STATE_DIM = 1;
-    public static final int SCREEN_STATE_BRIGHT = 2;
+    public static final int SCREEN_STATE_DOZE = 1;
+    public static final int SCREEN_STATE_DIM = 2;
+    public static final int SCREEN_STATE_BRIGHT = 3;
 
-    // The requested minimum screen power state: off, dim or bright.
+    // The requested minimum screen power state: off, doze, dim or bright.
     public int screenState;
 
     // If true, the proximity sensor overrides the screen state when an object is
@@ -73,6 +74,23 @@ final class DisplayPowerRequest {
 
     public DisplayPowerRequest(DisplayPowerRequest other) {
         copyFrom(other);
+    }
+
+    // Returns true if we want the screen on in any mode, including doze.
+    public boolean wantScreenOnAny() {
+        return screenState != SCREEN_STATE_OFF;
+    }
+
+    // Returns true if we want the screen on in a normal mode, excluding doze.
+    // This is usually what we want to tell the rest of the system.  For compatibility
+    // reasons, we pretend the screen is off when dozing.
+    public boolean wantScreenOnNormal() {
+        return screenState == SCREEN_STATE_DIM || screenState == SCREEN_STATE_BRIGHT;
+    }
+
+    public boolean wantLightSensorEnabled() {
+        // Specifically, we don't want the light sensor while dozing.
+        return useAutoBrightness && wantScreenOnNormal();
     }
 
     public void copyFrom(DisplayPowerRequest other) {
