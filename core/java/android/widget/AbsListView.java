@@ -2169,20 +2169,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * @return the direct child that contains accessibility focus, or null if no
+     * @param focusedView view that holds accessibility focus
+     * @return direct child that contains accessibility focus, or null if no
      *         child contains accessibility focus
      */
-    View getAccessibilityFocusedChild() {
-        final ViewRootImpl viewRootImpl = getViewRootImpl();
-        if (viewRootImpl == null) {
-            return null;
-        }
-
-        View focusedView = viewRootImpl.getAccessibilityFocusedHost();
-        if (focusedView == null) {
-            return null;
-        }
-
+    View getAccessibilityFocusedChild(View focusedView) {
         ViewParent viewParent = focusedView.getParent();
         while ((viewParent instanceof View) && (viewParent != this)) {
             focusedView = (View) viewParent;
@@ -2334,12 +2325,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mRecycler.addScrapView(scrapView, position);
             } else {
                 isScrap[0] = true;
-
-                // Clear any system-managed transient state so that we can
-                // recycle this view and bind it to different data.
-                if (child.isAccessibilityFocused()) {
-                    child.clearAccessibilityFocus();
-                }
 
                 child.dispatchFinishTemporaryDetach();
             }
@@ -6196,18 +6181,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         void clear() {
             if (mViewTypeCount == 1) {
                 final ArrayList<View> scrap = mCurrentScrap;
-                final int scrapCount = scrap.size();
-                for (int i = 0; i < scrapCount; i++) {
-                    removeDetachedView(scrap.remove(scrapCount - 1 - i), false);
-                }
+                clearScrap(scrap);
             } else {
                 final int typeCount = mViewTypeCount;
                 for (int i = 0; i < typeCount; i++) {
                     final ArrayList<View> scrap = mScrapViews[i];
-                    final int scrapCount = scrap.size();
-                    for (int j = 0; j < scrapCount; j++) {
-                        removeDetachedView(scrap.remove(scrapCount - 1 - j), false);
-                    }
+                    clearScrap(scrap);
                 }
             }
 
@@ -6308,7 +6287,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (mViewTypeCount == 1) {
                 return retrieveFromScrap(mCurrentScrap, position);
             } else {
-                int whichScrap = mAdapter.getItemViewType(position);
+                final int whichScrap = mAdapter.getItemViewType(position);
                 if (whichScrap >= 0 && whichScrap < mScrapViews.length) {
                     return retrieveFromScrap(mScrapViews[whichScrap], position);
                 }
@@ -6379,13 +6358,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 } else {
                     mScrapViews[viewType].add(scrap);
                 }
-
-                // Clear any system-managed transient state.
-                if (scrap.isAccessibilityFocused()) {
-                    scrap.clearAccessibilityFocus();
-                }
-
-                scrap.setAccessibilityDelegate(null);
 
                 if (mRecyclerListener != null) {
                     mRecyclerListener.onMovedToScrapHeap(scrap);
@@ -6460,7 +6432,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         lp.scrappedFromPosition = mFirstActivePosition + i;
                         scrapViews.add(victim);
 
-                        victim.setAccessibilityDelegate(null);
                         if (hasListener) {
                             mRecyclerListener.onMovedToScrapHeap(victim);
                         }
@@ -6564,23 +6535,52 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
             }
         }
-    }
 
-    static View retrieveFromScrap(ArrayList<View> scrapViews, int position) {
-        int size = scrapViews.size();
-        if (size > 0) {
-            // See if we still have a view for this position.
-            for (int i=0; i<size; i++) {
-                View view = scrapViews.get(i);
-                if (((AbsListView.LayoutParams)view.getLayoutParams())
-                        .scrappedFromPosition == position) {
-                    scrapViews.remove(i);
-                    return view;
+        private View retrieveFromScrap(ArrayList<View> scrapViews, int position) {
+            final int size = scrapViews.size();
+            if (size > 0) {
+                // See if we still have a view for this position or ID.
+                for (int i = 0; i < size; i++) {
+                    final View view = scrapViews.get(i);
+                    final AbsListView.LayoutParams params =
+                            (AbsListView.LayoutParams) view.getLayoutParams();
+
+                    if (mAdapterHasStableIds) {
+                        final long id = mAdapter.getItemId(position);
+                        if (id == params.itemId) {
+                            return scrapViews.remove(i);
+                        }
+                    } else if (params.scrappedFromPosition == position) {
+                        final View scrap = scrapViews.remove(i);
+                        clearAccessibilityFromScrap(scrap);
+                        return scrap;
+                    }
                 }
+                final View scrap = scrapViews.remove(size - 1);
+                clearAccessibilityFromScrap(scrap);
+                return scrap;
+            } else {
+                return null;
             }
-            return scrapViews.remove(size - 1);
-        } else {
-            return null;
+        }
+
+        private void clearScrap(final ArrayList<View> scrap) {
+            final int scrapCount = scrap.size();
+            for (int j = 0; j < scrapCount; j++) {
+                removeDetachedView(scrap.remove(scrapCount - 1 - j), false);
+            }
+        }
+
+        private void clearAccessibilityFromScrap(View view) {
+            if (view.isAccessibilityFocused()) {
+                view.clearAccessibilityFocus();
+            }
+            view.setAccessibilityDelegate(null);
+        }
+
+        private void removeDetachedView(View child, boolean animate) {
+            child.setAccessibilityDelegate(null);
+            AbsListView.this.removeDetachedView(child, animate);
         }
     }
 
