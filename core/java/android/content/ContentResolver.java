@@ -192,6 +192,14 @@ public abstract class ContentResolver {
      */
     public static final String CURSOR_DIR_BASE_TYPE = "vnd.android.cursor.dir";
 
+    /**
+     * This is the Android platform's generic MIME type to match any MIME
+     * type of the form "{@link #CURSOR_ITEM_BASE_TYPE}/{@code SUB_TYPE}".
+     * {@code SUB_TYPE} is the sub-type of the application-dependent
+     * content, e.g., "audio", "video", "playlist".
+     */
+    public static final String ANY_CURSOR_ITEM_TYPE = "vnd.android.cursor.item/*";
+
     /** @hide */
     public static final int SYNC_ERROR_SYNC_ALREADY_IN_PROGRESS = 1;
     /** @hide */
