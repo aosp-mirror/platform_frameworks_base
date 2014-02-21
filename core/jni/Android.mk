@@ -136,7 +136,6 @@ LOCAL_SRC_FILES:= \
 	android_hardware_UsbDevice.cpp \
 	android_hardware_UsbDeviceConnection.cpp \
 	android_hardware_UsbRequest.cpp \
-	android_debug_JNITest.cpp \
 	android_util_FileObserver.cpp \
 	android/opengl/poly_clip.cpp.arm \
 	android/opengl/util.cpp.arm \
