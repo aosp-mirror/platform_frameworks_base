@@ -16,7 +16,6 @@
 
 package android.media;
 
-import android.net.Uri;
 import android.os.IBinder;
 import android.os.StrictMode;
 import android.util.Log;
@@ -52,6 +51,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
         native_setup();
     }
 
+    @Override
     public IBinder connect(String uri, String headers) {
         if (VERBOSE) {
             Log.d(TAG, "connect: uri=" + uri + ", headers=" + headers);
@@ -85,6 +85,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
         return map;
     }
 
+    @Override
     public void disconnect() {
         teardownConnection();
         mHeaders = null;
@@ -120,7 +121,11 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
                         "Range", "bytes=" + offset + "-");
             }
 
-            if (mConnection.getResponseCode() == HttpURLConnection.HTTP_PARTIAL) {
+            int response = mConnection.getResponseCode();
+            // remember the current, possibly redirected URL
+            mURL = mConnection.getURL();
+
+            if (response == HttpURLConnection.HTTP_PARTIAL) {
                 // Partial content, we cannot just use getContentLength
                 // because what we want is not just the length of the range
                 // returned but the size of the full content if available.
@@ -145,16 +150,13 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
                         }
                     }
                 }
-            } else if (mConnection.getResponseCode()
-                    != HttpURLConnection.HTTP_OK) {
+            } else if (response != HttpURLConnection.HTTP_OK) {
                 throw new IOException();
             } else {
                 mTotalSize = mConnection.getContentLength();
             }
 
-            if (offset > 0
-                    && mConnection.getResponseCode()
-                            != HttpURLConnection.HTTP_PARTIAL) {
+            if (offset > 0 && response != HttpURLConnection.HTTP_PARTIAL) {
                 // Some servers simply ignore "Range" requests and serve
                 // data from the start of the content.
                 throw new IOException();
@@ -174,6 +176,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
         }
     }
 
+    @Override
     public int readAt(long offset, int size) {
         return native_readAt(offset, size);
     }
@@ -218,6 +221,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
         }
     }
 
+    @Override
     public long getSize() {
         if (mConnection == null) {
             try {
@@ -230,6 +234,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
         return mTotalSize;
     }
 
+    @Override
     public String getMIMEType() {
         if (mConnection == null) {
             try {
@@ -240,6 +245,11 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
         }
 
         return mConnection.getContentType();
+    }
+
+    @Override
+    public String getUri() {
+        return mURL.toString();
     }
 
     @Override
@@ -260,4 +270,5 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     }
 
     private int mNativeContext;
+
 }
