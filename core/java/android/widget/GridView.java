@@ -30,13 +30,13 @@ import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo;
 import android.view.animation.GridLayoutAnimationController;
-import android.widget.AbsListView.AbsPositionScroller;
-import android.widget.ListView.ListViewPositionScroller;
 import android.widget.RemoteViews.RemoteView;
 
 import java.lang.annotation.Retention;
@@ -1222,22 +1222,32 @@ public class GridView extends AbsListView {
 
             setSelectedPositionInt(mNextSelectedPosition);
 
-            // Remember which child, if any, had accessibility focus.
-            final int accessibilityFocusPosition;
-            final View accessFocusedChild = getAccessibilityFocusedChild();
-            if (accessFocusedChild != null) {
-                accessibilityFocusPosition = getPositionForView(accessFocusedChild);
-                accessFocusedChild.setHasTransientState(true);
-            } else {
-                accessibilityFocusPosition = INVALID_POSITION;
-            }
+            AccessibilityNodeInfo accessibilityFocusLayoutRestoreNode = null;
+            View accessibilityFocusLayoutRestoreView = null;
+            int accessibilityFocusPosition = INVALID_POSITION;
 
-            // Ensure the child containing focus, if any, has transient state.
-            // If the list data hasn't changed, or if the adapter has stable
-            // IDs, this will maintain focus.
-            final View focusedChild = getFocusedChild();
-            if (focusedChild != null) {
-                focusedChild.setHasTransientState(true);
+            // Remember which child, if any, had accessibility focus. This must
+            // occur before recycling any views, since that will clear
+            // accessibility focus.
+            final ViewRootImpl viewRootImpl = getViewRootImpl();
+            if (viewRootImpl != null) {
+                final View focusHost = viewRootImpl.getAccessibilityFocusedHost();
+                if (focusHost != null) {
+                    final View focusChild = getAccessibilityFocusedChild(focusHost);
+                    if (focusChild != null) {
+                        if (!dataChanged || focusChild.hasTransientState()
+                                || mAdapterHasStableIds) {
+                            // The views won't be changing, so try to maintain
+                            // focus on the current host and virtual view.
+                            accessibilityFocusLayoutRestoreView = focusHost;
+                            accessibilityFocusLayoutRestoreNode = viewRootImpl
+                                    .getAccessibilityFocusedVirtualView();
+                        }
+
+                        // Try to maintain focus at the same position.
+                        accessibilityFocusPosition = getPositionForView(focusChild);
+                    }
+                }
             }
 
             // Pull all children into the RecycleBin.
@@ -1324,13 +1334,22 @@ public class GridView extends AbsListView {
                 mSelectorRect.setEmpty();
             }
 
-            if (accessFocusedChild != null) {
-                accessFocusedChild.setHasTransientState(false);
-
-                // If we failed to maintain accessibility focus on the previous
-                // view, attempt to restore it to the previous position.
-                if (!accessFocusedChild.isAccessibilityFocused()
-                    && accessibilityFocusPosition != INVALID_POSITION) {
+            // Attempt to restore accessibility focus, if necessary.
+            final View newAccessibilityFocusedView = viewRootImpl.getAccessibilityFocusedHost();
+            if (newAccessibilityFocusedView == null) {
+                if (accessibilityFocusLayoutRestoreView != null
+                        && accessibilityFocusLayoutRestoreView.isAttachedToWindow()) {
+                    final AccessibilityNodeProvider provider =
+                            accessibilityFocusLayoutRestoreView.getAccessibilityNodeProvider();
+                    if (accessibilityFocusLayoutRestoreNode != null && provider != null) {
+                        final int virtualViewId = AccessibilityNodeInfo.getVirtualDescendantId(
+                                accessibilityFocusLayoutRestoreNode.getSourceNodeId());
+                        provider.performAction(virtualViewId,
+                                AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
+                    } else {
+                        accessibilityFocusLayoutRestoreView.requestAccessibilityFocus();
+                    }
+                } else if (accessibilityFocusPosition != INVALID_POSITION) {
                     // Bound the position within the visible children.
                     final int position = MathUtils.constrain(
                             accessibilityFocusPosition - mFirstPosition, 0, getChildCount() - 1);
@@ -1339,10 +1358,6 @@ public class GridView extends AbsListView {
                         restoreView.requestAccessibilityFocus();
                     }
                 }
-            }
-
-            if (focusedChild != null) {
-                focusedChild.setHasTransientState(false);
             }
 
             mLayoutMode = LAYOUT_NORMAL;
