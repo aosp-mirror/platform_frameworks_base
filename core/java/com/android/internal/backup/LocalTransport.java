@@ -35,6 +35,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import libcore.io.ErrnoException;
+import libcore.io.Libcore;
+import libcore.io.StructStat;
+import static libcore.io.OsConstants.*;
+
 /**
  * Backup transport for stashing stuff into a known location on disk, and
  * later restoring from there.  For testing only.
@@ -96,7 +101,16 @@ public class LocalTransport extends IBackupTransport.Stub {
     }
 
     public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor data) {
-        if (DEBUG) Log.v(TAG, "performBackup() pkg=" + packageInfo.packageName);
+        if (DEBUG) {
+            try {
+            StructStat ss = Libcore.os.fstat(data.getFileDescriptor());
+            Log.v(TAG, "performBackup() pkg=" + packageInfo.packageName
+                    + " size=" + ss.st_size);
+            } catch (ErrnoException e) {
+                Log.w(TAG, "Unable to stat input file in performBackup() on "
+                        + packageInfo.packageName);
+            }
+        }
 
         File packageDir = new File(mDataDir, packageInfo.packageName);
         packageDir.mkdirs();
@@ -130,7 +144,16 @@ public class LocalTransport extends IBackupTransport.Stub {
                         buf = new byte[bufSize];
                     }
                     changeSet.readEntityData(buf, 0, dataSize);
-                    if (DEBUG) Log.v(TAG, "  data size " + dataSize);
+                    if (DEBUG) {
+                        try {
+                            long cur = Libcore.os.lseek(data.getFileDescriptor(), 0, SEEK_CUR);
+                            Log.v(TAG, "  read entity data; new pos=" + cur);
+                        }
+                        catch (ErrnoException e) {
+                            Log.w(TAG, "Unable to stat input file in performBackup() on "
+                                    + packageInfo.packageName);
+                        }
+                    }
 
                     try {
                         entity.write(buf, 0, dataSize);
