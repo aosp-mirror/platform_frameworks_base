@@ -1460,10 +1460,11 @@ public final class Parcel {
     }
 
     /**
-     * Use this function for customized exception handling.
-     * customized method call this method for all unknown case
-     * @param code exception code
-     * @param msg exception message
+     * Throw an exception with the given message. Not intended for use
+     * outside the Parcel class.
+     *
+     * @param code Used to determine which exception class to throw.
+     * @param msg The exception message.
      */
     public final void readException(int code, String msg) {
         switch (code) {
