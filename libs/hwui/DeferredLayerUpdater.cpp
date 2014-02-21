@@ -34,21 +34,23 @@ DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer, OpenGLRenderer* rendere
     mWidth = mLayer->layer.getWidth();
     mHeight = mLayer->layer.getHeight();
     mBlend = mLayer->isBlend();
-    mColorFilter = mLayer->getColorFilter();
+    mColorFilter = SkSafeRef(mLayer->getColorFilter());
     mAlpha = mLayer->getAlpha();
     mMode = mLayer->getMode();
     mDirtyRect.setEmpty();
 }
 
 DeferredLayerUpdater::~DeferredLayerUpdater() {
-    setColorFilter(NULL);
+    SkSafeUnref(mColorFilter);
     if (mLayer) {
         mCaches.resourceCache.decrementRefcount(mLayer);
     }
     delete mRenderer;
 }
 
-void DeferredLayerUpdater::setColorFilter(SkColorFilter* colorFilter) {
+void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
+    OpenGLRenderer::getAlphaAndModeDirect(paint, &mAlpha, &mMode);
+    SkColorFilter* colorFilter = (paint) ? paint->getColorFilter() : NULL;
     SkRefCnt_SafeAssign(mColorFilter, colorFilter);
 }
 
