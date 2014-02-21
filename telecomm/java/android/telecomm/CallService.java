@@ -29,7 +29,7 @@ import com.android.internal.os.SomeArgs;
  * in-call UI. CallService is a one-way service from the framework's CallsManager to any app
  * that would like to provide calls managed by the default system in-call user interface.
  * When the service is bound by the framework, CallsManager will call setCallServiceAdapter
- * which will provide CallService with an instance of {@link CallServiceAdapter} to be used
+ * which will provide CallService with an instance of {@link ICallServiceAdapter} to be used
  * for communicating back to CallsManager. Subsequently, more specific methods of the service
  * will be called to perform various call actions including making an outgoing call and
  * disconnected existing calls.
@@ -168,8 +168,8 @@ public abstract class CallService extends Service {
      * SIP address, or some other kind of user ID.  Note that the set of handle types is
      * dynamically extensible since call providers should be able to implement arbitrary
      * handle-calling systems.  See {@link #isCompatibleWith}. It is expected that the
-     * call service respond via {@link ICallServiceAdapter#handleIncomingCall} if it can
-     * successfully make the call.
+     * call service respond via {@link ICallServiceAdapter#handleSuccessfulOutgoingCall(String)}
+     * if it can successfully make the call.
      *
      * @param callInfo The details of the relevant call.
      */
