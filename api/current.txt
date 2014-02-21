@@ -7661,6 +7661,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_TOUCHSCREEN_MULTITOUCH_JAZZHAND = "android.hardware.touchscreen.multitouch.jazzhand";
     field public static final java.lang.String FEATURE_USB_ACCESSORY = "android.hardware.usb.accessory";
     field public static final java.lang.String FEATURE_USB_HOST = "android.hardware.usb.host";
+    field public static final java.lang.String FEATURE_WATCH = "android.hardware.type.watch";
     field public static final java.lang.String FEATURE_WIFI = "android.hardware.wifi";
     field public static final java.lang.String FEATURE_WIFI_DIRECT = "android.hardware.wifi.direct";
     field public static final int GET_ACTIVITIES = 1; // 0x1
