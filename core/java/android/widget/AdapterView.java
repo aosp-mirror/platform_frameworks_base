@@ -667,7 +667,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
 
     /**
      * When the current adapter is empty, the AdapterView can display a special view
-     * call the empty view. The empty view is used to provide feedback to the user
+     * called the empty view. The empty view is used to provide feedback to the user
      * that no data is available in this AdapterView.
      *
      * @return The view to show if the adapter is empty.

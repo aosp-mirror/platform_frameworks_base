@@ -824,7 +824,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Return the LoaderManager for this fragment, creating it if needed.
+     * Return the LoaderManager for this activity, creating it if needed.
      */
     public LoaderManager getLoaderManager() {
         if (mLoaderManager != null) {

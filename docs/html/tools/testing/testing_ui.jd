@@ -90,7 +90,7 @@ Functional or black-box UI testing does not require testers to know the internal
          alt="User interface of uiautomatorviewer tool" height="327px" id="figure1"/>
 </a>
 <p class="img-caption">
-    <strong>Figure 1.</strong> The {@code uiautomatorviewer} showing the captured interface of a test deviice.
+    <strong>Figure 1.</strong> The {@code uiautomatorviewer} showing the captured interface of a test device.
 </p>
 
 <p>To analyze the UI components of the application that you want to test:</p>
