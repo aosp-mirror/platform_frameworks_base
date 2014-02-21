@@ -1315,9 +1315,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (admin.getUid() != Binder.getCallingUid()) {
                 // If trying to remove device owner, refuse when the caller is not the owner.
-                if (mDeviceOwner != null
-                        && adminReceiver.getPackageName().equals(
-                        mDeviceOwner.getDeviceOwnerPackageName())) {
+                if (isDeviceOwner(adminReceiver.getPackageName())) {
                     return;
                 }
                 mContext.enforceCallingOrSelfPermission(
@@ -2793,6 +2791,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         synchronized (this) {
             return mDeviceOwner != null
+                    && mDeviceOwner.hasDeviceOwner()
                     && mDeviceOwner.getDeviceOwnerPackageName().equals(packageName);
         }
     }
