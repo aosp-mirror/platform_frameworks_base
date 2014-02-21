@@ -151,8 +151,6 @@ static void loadSystemIconAsSprite(JNIEnv* env, jobject contextObj, int32_t styl
 
 enum {
     WM_ACTION_PASS_TO_USER = 1,
-    WM_ACTION_WAKE_UP = 2,
-    WM_ACTION_GO_TO_SLEEP = 4,
 };
 
 
@@ -844,7 +842,7 @@ void NativeInputManager::interceptMotionBeforeQueueing(nsecs_t when, uint32_t& p
             JNIEnv* env = jniEnv();
             jint wmActions = env->CallIntMethod(mServiceObj,
                         gServiceClassInfo.interceptMotionBeforeQueueingWhenScreenOff,
-                        policyFlags);
+                        when, policyFlags);
             if (checkAndClearExceptionFromCallback(env,
                     "interceptMotionBeforeQueueingWhenScreenOff")) {
                 wmActions = 0;
@@ -860,20 +858,6 @@ void NativeInputManager::interceptMotionBeforeQueueing(nsecs_t when, uint32_t& p
 
 void NativeInputManager::handleInterceptActions(jint wmActions, nsecs_t when,
         uint32_t& policyFlags) {
-    if (wmActions & WM_ACTION_GO_TO_SLEEP) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
-        ALOGD("handleInterceptActions: Going to sleep.");
-#endif
-        android_server_PowerManagerService_goToSleep(when);
-    }
-
-    if (wmActions & WM_ACTION_WAKE_UP) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
-        ALOGD("handleInterceptActions: Waking up.");
-#endif
-        android_server_PowerManagerService_wakeUp(when);
-    }
-
     if (wmActions & WM_ACTION_PASS_TO_USER) {
         policyFlags |= POLICY_FLAG_PASS_TO_USER;
     } else {
@@ -1412,7 +1396,7 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.interceptMotionBeforeQueueingWhenScreenOff,
             clazz,
-            "interceptMotionBeforeQueueingWhenScreenOff", "(I)I");
+            "interceptMotionBeforeQueueingWhenScreenOff", "(JI)I");
 
     GET_METHOD_ID(gServiceClassInfo.interceptKeyBeforeDispatching, clazz,
             "interceptKeyBeforeDispatching",
