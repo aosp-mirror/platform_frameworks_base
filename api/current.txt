@@ -27382,6 +27382,7 @@ package android.util {
     method public final V put(K, V);
     method public final synchronized int putCount();
     method public final V remove(K);
+    method public void resize(int);
     method public final synchronized int size();
     method protected int sizeOf(K, V);
     method public final synchronized java.util.Map<K, V> snapshot();
