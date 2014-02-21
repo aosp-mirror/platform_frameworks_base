@@ -24230,13 +24230,16 @@ package android.telecomm {
 
   public abstract class CallServiceSelector extends android.app.Service {
     ctor protected CallServiceSelector();
-    method protected abstract void isSwitchable(android.telecomm.CallInfo, android.telecomm.CallServiceSelector.Response);
+    method protected abstract void isSwitchable(android.telecomm.CallInfo, android.telecomm.CallServiceSelector.CallSwitchabilityResponse);
     method public final android.os.IBinder onBind(android.content.Intent);
-    method protected abstract void select(android.telecomm.CallInfo, java.util.List<android.telecomm.CallServiceDescriptor>, android.telecomm.CallServiceSelector.Response);
+    method protected abstract void select(android.telecomm.CallInfo, java.util.List<android.telecomm.CallServiceDescriptor>, android.telecomm.CallServiceSelector.CallServiceSelectionResponse);
   }
 
-  public static abstract interface CallServiceSelector.Response {
+  public static abstract interface CallServiceSelector.CallServiceSelectionResponse {
     method public abstract void setSelectedCallServices(java.util.List<android.telecomm.CallServiceDescriptor>);
+  }
+
+  public static abstract interface CallServiceSelector.CallSwitchabilityResponse {
     method public abstract void setSwitchable(boolean);
   }
 
