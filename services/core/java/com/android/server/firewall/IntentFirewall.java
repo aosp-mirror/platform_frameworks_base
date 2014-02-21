@@ -95,6 +95,7 @@ public class IntentFirewall {
 
                 CategoryFilter.FACTORY,
                 SenderFilter.FACTORY,
+                SenderPackageFilter.FACTORY,
                 SenderPermissionFilter.FACTORY,
                 PortFilter.FACTORY
         };
