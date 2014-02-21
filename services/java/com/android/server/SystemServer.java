@@ -42,6 +42,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.service.dreams.DreamService;
+import android.tv.TvInputManager;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -78,6 +79,7 @@ import com.android.server.search.SearchManagerService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
 import com.android.server.trust.TrustManagerService;
+import com.android.server.tv.TvInputManagerService;
 import com.android.server.twilight.TwilightService;
 import com.android.server.usb.UsbService;
 import com.android.server.wallpaper.WallpaperManagerService;
@@ -904,6 +906,13 @@ public final class SystemServer {
                 mSystemServiceManager.startService(HDMI_CEC_SERVICE_CLASS);
             } catch (Throwable e) {
                 reportWtf("starting HdmiCec Service", e);
+            }
+
+            try {
+                Slog.i(TAG, "TvInputManagerService");
+                mSystemServiceManager.startService(TvInputManagerService.class);
+            } catch (Throwable e) {
+                reportWtf("starting TvInputManagerService", e);
             }
 
             if (!disableNonCoreServices) {

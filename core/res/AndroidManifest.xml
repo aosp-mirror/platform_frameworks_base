@@ -2036,6 +2036,13 @@
         android:description="@string/permdesc_bindRemoteDisplay"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by a {@link android.tv.TvInputService}
+         to ensure that only the system can bind to it. -->
+    <permission android:name="android.permission.BIND_TV_INPUT"
+        android:label="@string/permlab_bindTvInput"
+        android:description="@string/permdesc_bindTvInput"
+        android:protectionLevel="signature|system" />
+
     <!-- Must be required by device administration receiver, to ensure that only the
          system can interact with it. -->
     <permission android:name="android.permission.BIND_DEVICE_ADMIN"

@@ -103,6 +103,8 @@ import android.os.storage.StorageManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
 import android.telephony.TelephonyManager;
+import android.tv.ITvInputManager;
+import android.tv.TvInputManager;
 import android.content.ClipboardManager;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
@@ -629,6 +631,13 @@ class ContextImpl extends Context {
                 return new TrustManager(b);
             }
         });
+
+        registerService(TV_INPUT_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                IBinder iBinder = ServiceManager.getService(TV_INPUT_SERVICE);
+                ITvInputManager service = ITvInputManager.Stub.asInterface(iBinder);
+                return new TvInputManager(service, UserHandle.myUserId());
+            }});
     }
 
     static ContextImpl getImpl(Context context) {
