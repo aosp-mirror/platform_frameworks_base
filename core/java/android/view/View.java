@@ -11447,76 +11447,54 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 (!(mParent instanceof ViewGroup) ||
                         !((ViewGroup) mParent).isViewTransitioning(this));
     }
+
     /**
      * Mark the area defined by dirty as needing to be drawn. If the view is
-     * visible, {@link #onDraw(android.graphics.Canvas)} will be called at some point
-     * in the future. This must be called from a UI thread. To call from a non-UI
-     * thread, call {@link #postInvalidate()}.
+     * visible, {@link #onDraw(android.graphics.Canvas)} will be called at some
+     * point in the future.
+     * <p>
+     * This must be called from a UI thread. To call from a non-UI thread, call
+     * {@link #postInvalidate()}.
+     * <p>
+     * <b>WARNING:</b> In API 19 and below, this method may be destructive to
+     * {@code dirty}.
      *
-     * WARNING: This method is destructive to dirty.
      * @param dirty the rectangle representing the bounds of the dirty region
      */
     public void invalidate(Rect dirty) {
-        if (skipInvalidate()) {
-            return;
-        }
-        if ((mPrivateFlags & (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)) == (PFLAG_DRAWN | PFLAG_HAS_BOUNDS) ||
-                (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID ||
-                (mPrivateFlags & PFLAG_INVALIDATED) != PFLAG_INVALIDATED) {
-            mPrivateFlags &= ~PFLAG_DRAWING_CACHE_VALID;
-            mPrivateFlags |= PFLAG_INVALIDATED;
-            mPrivateFlags |= PFLAG_DIRTY;
-            final ViewParent p = mParent;
-            final AttachInfo ai = mAttachInfo;
-            if (p != null && ai != null) {
-                final int scrollX = mScrollX;
-                final int scrollY = mScrollY;
-                final Rect r = ai.mTmpInvalRect;
-                r.set(dirty.left - scrollX, dirty.top - scrollY,
-                        dirty.right - scrollX, dirty.bottom - scrollY);
-                mParent.invalidateChild(this, r);
-            }
-        }
+        final int scrollX = mScrollX;
+        final int scrollY = mScrollY;
+        invalidateInternal(dirty.left - scrollX, dirty.top - scrollY,
+                dirty.right - scrollX, dirty.bottom - scrollY, true);
     }
 
     /**
-     * Mark the area defined by the rect (l,t,r,b) as needing to be drawn.
-     * The coordinates of the dirty rect are relative to the view.
-     * If the view is visible, {@link #onDraw(android.graphics.Canvas)}
-     * will be called at some point in the future. This must be called from
-     * a UI thread. To call from a non-UI thread, call {@link #postInvalidate()}.
+     * Mark the area defined by the rect (l,t,r,b) as needing to be drawn. The
+     * coordinates of the dirty rect are relative to the view. If the view is
+     * visible, {@link #onDraw(android.graphics.Canvas)} will be called at some
+     * point in the future.
+     * <p>
+     * This must be called from a UI thread. To call from a non-UI thread, call
+     * {@link #postInvalidate()}.
+     *
      * @param l the left position of the dirty region
      * @param t the top position of the dirty region
      * @param r the right position of the dirty region
      * @param b the bottom position of the dirty region
      */
     public void invalidate(int l, int t, int r, int b) {
-        if (skipInvalidate()) {
-            return;
-        }
-        if ((mPrivateFlags & (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)) == (PFLAG_DRAWN | PFLAG_HAS_BOUNDS) ||
-                (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID ||
-                (mPrivateFlags & PFLAG_INVALIDATED) != PFLAG_INVALIDATED) {
-            mPrivateFlags &= ~PFLAG_DRAWING_CACHE_VALID;
-            mPrivateFlags |= PFLAG_INVALIDATED;
-            mPrivateFlags |= PFLAG_DIRTY;
-            final ViewParent p = mParent;
-            final AttachInfo ai = mAttachInfo;
-            if (p != null && ai != null && l < r && t < b) {
-                final int scrollX = mScrollX;
-                final int scrollY = mScrollY;
-                final Rect tmpr = ai.mTmpInvalRect;
-                tmpr.set(l - scrollX, t - scrollY, r - scrollX, b - scrollY);
-                p.invalidateChild(this, tmpr);
-            }
-        }
+        final int scrollX = mScrollX;
+        final int scrollY = mScrollY;
+        invalidateInternal(l - scrollX, t - scrollY, r - scrollY, b - scrollY, true);
     }
 
     /**
      * Invalidate the whole view. If the view is visible,
      * {@link #onDraw(android.graphics.Canvas)} will be called at some point in
-     * the future. This must be called from a UI thread. To call from a non-UI thread,
-     * call {@link #postInvalidate()}.
+     * the future.
+     * <p>
+     * This must be called from a UI thread. To call from a non-UI thread, call
+     * {@link #postInvalidate()}.
      */
     public void invalidate() {
         invalidate(true);
@@ -11524,40 +11502,80 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * This is where the invalidate() work actually happens. A full invalidate()
-     * causes the drawing cache to be invalidated, but this function can be called with
-     * invalidateCache set to false to skip that invalidation step for cases that do not
-     * need it (for example, a component that remains at the same dimensions with the same
-     * content).
+     * causes the drawing cache to be invalidated, but this function can be
+     * called with invalidateCache set to false to skip that invalidation step
+     * for cases that do not need it (for example, a component that remains at
+     * the same dimensions with the same content).
      *
-     * @param invalidateCache Whether the drawing cache for this view should be invalidated as
-     * well. This is usually true for a full invalidate, but may be set to false if the
-     * View's contents or dimensions have not changed.
+     * @param invalidateCache Whether the drawing cache for this view should be
+     *            invalidated as well. This is usually true for a full
+     *            invalidate, but may be set to false if the View's contents or
+     *            dimensions have not changed.
      */
     void invalidate(boolean invalidateCache) {
+        invalidateInternal(0, 0, mRight - mLeft, mBottom - mTop, invalidateCache);
+    }
+
+    void invalidateInternal(int l, int t, int r, int b, boolean invalidateCache) {
         if (skipInvalidate()) {
             return;
         }
-        if ((mPrivateFlags & (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)) == (PFLAG_DRAWN | PFLAG_HAS_BOUNDS) ||
-                (invalidateCache && (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID) ||
-                (mPrivateFlags & PFLAG_INVALIDATED) != PFLAG_INVALIDATED || isOpaque() != mLastIsOpaque) {
+
+        final boolean wasDrawn = (mPrivateFlags & (PFLAG_DRAWN | PFLAG_HAS_BOUNDS))
+                == (PFLAG_DRAWN | PFLAG_HAS_BOUNDS);
+        final boolean hasValidCache = (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) != 0;
+        final boolean invalidated = (mPrivateFlags & PFLAG_INVALIDATED) != 0;
+        final boolean opacityChanged = isOpaque() != mLastIsOpaque;
+        if (wasDrawn || (invalidateCache && hasValidCache) || !invalidated || opacityChanged) {
             mLastIsOpaque = isOpaque();
             mPrivateFlags &= ~PFLAG_DRAWN;
             mPrivateFlags |= PFLAG_DIRTY;
+
             if (invalidateCache) {
                 mPrivateFlags |= PFLAG_INVALIDATED;
                 mPrivateFlags &= ~PFLAG_DRAWING_CACHE_VALID;
             }
+
+            // Propagate the damage rectangle to the parent view.
             final AttachInfo ai = mAttachInfo;
             final ViewParent p = mParent;
+            if (p != null && ai != null && l < r && t < b) {
+                final Rect damage = ai.mTmpInvalRect;
+                damage.set(l, t, r, b);
+                p.invalidateChild(this, damage);
+            }
 
-            if (p != null && ai != null) {
-                final Rect r = ai.mTmpInvalRect;
-                r.set(0, 0, mRight - mLeft, mBottom - mTop);
-                // Don't call invalidate -- we don't want to internally scroll
-                // our own bounds
-                p.invalidateChild(this, r);
+            // Damage the entire projection receiver, if necessary.
+            if (mBackground != null && mBackground.isProjected()) {
+                final View receiver = getProjectionReceiver();
+                if (receiver != null) {
+                    receiver.damageInParent();
+                }
             }
         }
+    }
+
+    /**
+     * @return this view's projection receiver, or {@code null} if none exists
+     */
+    private View getProjectionReceiver() {
+        ViewParent p = getParent();
+        while (p != null && p instanceof View) {
+            final View v = (View) p;
+            if (v.isProjectionReceiver()) {
+                return v;
+            }
+            p = p.getParent();
+        }
+
+        return null;
+    }
+
+    /**
+     * @return whether the view is a projection receiver
+     */
+    private boolean isProjectionReceiver() {
+        return mBackground != null;
     }
 
     /**
@@ -11586,16 +11604,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             invalidate(false);
         } else {
-            final AttachInfo ai = mAttachInfo;
-            final ViewParent p = mParent;
-            if (p != null && ai != null) {
-                final Rect r = ai.mTmpInvalRect;
-                r.set(0, 0, mRight - mLeft, mBottom - mTop);
-                if (mParent instanceof ViewGroup) {
-                    ((ViewGroup) mParent).invalidateChildFast(this, r);
-                } else {
-                    mParent.invalidateChild(this, r);
-                }
+            damageInParent();
+        }
+    }
+
+    /**
+     * Tells the parent view to damage this view's bounds.
+     */
+    private void damageInParent() {
+        final AttachInfo ai = mAttachInfo;
+        final ViewParent p = mParent;
+        if (p != null && ai != null) {
+            final Rect r = ai.mTmpInvalRect;
+            r.set(0, 0, mRight - mLeft, mBottom - mTop);
+            if (mParent instanceof ViewGroup) {
+                ((ViewGroup) mParent).invalidateChildFast(this, r);
+            } else {
+                mParent.invalidateChild(this, r);
             }
         }
     }
@@ -15635,11 +15660,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Override
     public void invalidateDrawable(Drawable drawable) {
         if (verifyDrawable(drawable)) {
-            if (drawable == mBackground && mBackgroundDisplayList != null) {
-                // We'll need to redraw the display list.
-                mBackgroundDisplayList.clear();
-            }
-
             final Rect dirty = drawable.getDirtyBounds();
             final int scrollX = mScrollX;
             final int scrollY = mScrollY;
