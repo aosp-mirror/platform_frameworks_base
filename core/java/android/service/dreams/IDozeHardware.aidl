@@ -17,23 +17,8 @@
 package android.service.dreams;
 
 /**
- * Dream manager local system service interface.
- *
- * @hide Only for use within the system server.
+ * @hide
  */
-public abstract class DreamManagerInternal {
-    /**
-     * Called by the power manager to start a dream.
-     */
-    public abstract void startDream(boolean doze);
-
-    /**
-     * Called by the power manager to stop a dream.
-     */
-    public abstract void stopDream();
-
-    /**
-     * Called by the power manager to determine whether a dream is running.
-     */
-    public abstract boolean isDreaming();
+interface IDozeHardware {
+    byte[] sendMessage(String msg, in byte[] arg);
 }

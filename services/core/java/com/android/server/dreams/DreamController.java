@@ -85,6 +85,7 @@ final class DreamController {
             pw.println("    mToken=" + mCurrentDream.mToken);
             pw.println("    mName=" + mCurrentDream.mName);
             pw.println("    mIsTest=" + mCurrentDream.mIsTest);
+            pw.println("    mCanDoze=" + mCurrentDream.mCanDoze);
             pw.println("    mUserId=" + mCurrentDream.mUserId);
             pw.println("    mBound=" + mCurrentDream.mBound);
             pw.println("    mService=" + mCurrentDream.mService);
@@ -94,15 +95,18 @@ final class DreamController {
         }
     }
 
-    public void startDream(Binder token, ComponentName name, boolean isTest, int userId) {
+    public void startDream(Binder token, ComponentName name,
+            boolean isTest, boolean canDoze, int userId) {
         stopDream();
 
         // Close the notification shade. Don't need to send to all, but better to be explicit.
         mContext.sendBroadcastAsUser(mCloseNotificationShadeIntent, UserHandle.ALL);
 
-        Slog.i(TAG, "Starting dream: name=" + name + ", isTest=" + isTest + ", userId=" + userId);
+        Slog.i(TAG, "Starting dream: name=" + name
+                + ", isTest=" + isTest + ", canDoze=" + canDoze
+                + ", userId=" + userId);
 
-        mCurrentDream = new DreamRecord(token, name, isTest, userId);
+        mCurrentDream = new DreamRecord(token, name, isTest, canDoze, userId);
 
         try {
             mIWindowManager.addWindowToken(token, WindowManager.LayoutParams.TYPE_DREAM);
@@ -140,7 +144,8 @@ final class DreamController {
         final DreamRecord oldDream = mCurrentDream;
         mCurrentDream = null;
         Slog.i(TAG, "Stopping dream: name=" + oldDream.mName
-                + ", isTest=" + oldDream.mIsTest + ", userId=" + oldDream.mUserId);
+                + ", isTest=" + oldDream.mIsTest + ", canDoze=" + oldDream.mCanDoze
+                + ", userId=" + oldDream.mUserId);
 
         mHandler.removeCallbacks(mStopUnconnectedDreamRunnable);
 
@@ -187,7 +192,7 @@ final class DreamController {
     private void attach(IDreamService service) {
         try {
             service.asBinder().linkToDeath(mCurrentDream, 0);
-            service.attach(mCurrentDream.mToken);
+            service.attach(mCurrentDream.mToken, mCurrentDream.mCanDoze);
         } catch (RemoteException ex) {
             Slog.e(TAG, "The dream service died unexpectedly.", ex);
             stopDream();
@@ -213,6 +218,7 @@ final class DreamController {
         public final Binder mToken;
         public final ComponentName mName;
         public final boolean mIsTest;
+        public final boolean mCanDoze;
         public final int mUserId;
 
         public boolean mBound;
@@ -221,10 +227,11 @@ final class DreamController {
         public boolean mSentStartBroadcast;
 
         public DreamRecord(Binder token, ComponentName name,
-                boolean isTest, int userId) {
+                boolean isTest, boolean canDoze, int userId) {
             mToken = token;
             mName = name;
             mIsTest = isTest;
+            mCanDoze = canDoze;
             mUserId  = userId;
         }
 

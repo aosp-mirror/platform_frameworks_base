@@ -3799,14 +3799,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (keyCode == KeyEvent.KEYCODE_POWER) {
             policyFlags |= WindowManagerPolicy.FLAG_WAKE;
         }
-        final boolean isWakeKey = (policyFlags & (WindowManagerPolicy.FLAG_WAKE
-                | WindowManagerPolicy.FLAG_WAKE_DROPPED)) != 0;
 
         if (DEBUG_INPUT) {
             Log.d(TAG, "interceptKeyTq keycode=" + keyCode
                     + " screenIsOn=" + isScreenOn + " keyguardActive=" + keyguardActive
-                    + " policyFlags=" + Integer.toHexString(policyFlags)
-                    + " isWakeKey=" + isWakeKey);
+                    + " policyFlags=" + Integer.toHexString(policyFlags));
         }
 
         if (down && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0
@@ -3823,6 +3820,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         //        the device some other way (which is why we have an exemption here for injected
         //        events).
         int result;
+        boolean isWakeKey = (policyFlags & (WindowManagerPolicy.FLAG_WAKE
+                | WindowManagerPolicy.FLAG_WAKE_DROPPED)) != 0;
         if (isScreenOn || (isInjected && !isWakeKey)) {
             // When the screen is on or if the key is injected pass the key to the application.
             result = ACTION_PASS_TO_USER;
@@ -3830,8 +3829,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // When the screen is off and the key is not injected, determine whether
             // to wake the device but don't pass the key to the application.
             result = 0;
-            if (down && isWakeKey && isWakeKeyWhenScreenOff(keyCode)) {
-                result |= ACTION_WAKE_UP;
+            if (isWakeKey && (!down || !isWakeKeyWhenScreenOff(keyCode))) {
+                isWakeKey = false;
             }
         }
 
@@ -3941,7 +3940,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                         if ((mEndcallBehavior
                                 & Settings.System.END_BUTTON_BEHAVIOR_SLEEP) != 0) {
-                            result = (result & ~ACTION_WAKE_UP) | ACTION_GO_TO_SLEEP;
+                            mPowerManager.goToSleep(event.getEventTime());
+                            isWakeKey = false;
                         }
                     }
                 }
@@ -3988,7 +3988,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mPowerKeyTriggered = false;
                     cancelPendingScreenshotChordAction();
                     if (interceptPowerKeyUp(canceled || mPendingPowerKeyUpCanceled)) {
-                        result = (result & ~ACTION_WAKE_UP) | ACTION_GO_TO_SLEEP;
+                        mPowerManager.goToSleep(event.getEventTime());
+                        isWakeKey = false;
                     }
                     mPendingPowerKeyUpCanceled = false;
                 }
@@ -4058,6 +4059,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             }
         }
+
+        if (isWakeKey) {
+            mPowerManager.wakeUp(event.getEventTime());
+        }
         return result;
     }
 
@@ -4098,13 +4103,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags) {
+    public int interceptMotionBeforeQueueingWhenScreenOff(long whenNanos, int policyFlags) {
         int result = 0;
 
         final boolean isWakeMotion = (policyFlags
                 & (WindowManagerPolicy.FLAG_WAKE | WindowManagerPolicy.FLAG_WAKE_DROPPED)) != 0;
         if (isWakeMotion) {
-            result |= ACTION_WAKE_UP;
+            mPowerManager.wakeUp(whenNanos / 1000000);
         }
         return result;
     }
