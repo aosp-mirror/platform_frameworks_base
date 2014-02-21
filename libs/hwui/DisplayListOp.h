@@ -1410,7 +1410,7 @@ public:
                 DeferredDisplayList::kOpBatch_Text :
                 DeferredDisplayList::kOpBatch_ColorText;
 
-        deferInfo.mergeId = (mergeid_t)mPaint->getColor();
+        deferInfo.mergeId = reinterpret_cast<mergeid_t>(mPaint->getColor());
 
         // don't merge decorated text - the decorations won't draw in order
         bool noDecorations = !(mPaint->getFlags() & (SkPaint::kUnderlineText_Flag |
