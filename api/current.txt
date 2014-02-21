@@ -11497,6 +11497,25 @@ package android.hardware.camera2 {
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_ZSL = 4; // 0x4
     field public static final int SCALER_AVAILABLE_STREAM_CONFIGURATIONS_INPUT = 1; // 0x1
     field public static final int SCALER_AVAILABLE_STREAM_CONFIGURATIONS_OUTPUT = 0; // 0x0
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_CLOUDY_WEATHER = 10; // 0xa
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_COOL_WHITE_FLUORESCENT = 14; // 0xe
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_D50 = 23; // 0x17
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_D55 = 20; // 0x14
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_D65 = 21; // 0x15
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_D75 = 22; // 0x16
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_DAYLIGHT = 1; // 0x1
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_DAYLIGHT_FLUORESCENT = 12; // 0xc
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_DAY_WHITE_FLUORESCENT = 13; // 0xd
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_FINE_WEATHER = 9; // 0x9
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_FLASH = 4; // 0x4
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_FLUORESCENT = 2; // 0x2
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_ISO_STUDIO_TUNGSTEN = 24; // 0x18
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_SHADE = 11; // 0xb
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_STANDARD_A = 17; // 0x11
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_STANDARD_B = 18; // 0x12
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_STANDARD_C = 19; // 0x13
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_TUNGSTEN = 3; // 0x3
+    field public static final int SENSOR_REFERENCE_ILLUMINANT_WHITE_FLUORESCENT = 15; // 0xf
     field public static final int SENSOR_TEST_PATTERN_MODE_COLOR_BARS = 2; // 0x2
     field public static final int SENSOR_TEST_PATTERN_MODE_COLOR_BARS_FADE_TO_GRAY = 3; // 0x3
     field public static final int SENSOR_TEST_PATTERN_MODE_CUSTOM1 = 256; // 0x100
@@ -11651,6 +11670,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_NEUTRAL_COLOR_POINT;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_PROFILE_HUE_SAT_MAP;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_PROFILE_TONE_CURVE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_REFERENCE_ILLUMINANT;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_SENSITIVITY;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TEMPERATURE;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TEST_PATTERN_MODE;

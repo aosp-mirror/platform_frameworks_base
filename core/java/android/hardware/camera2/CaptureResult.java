@@ -1459,6 +1459,36 @@ public final class CaptureResult extends CameraMetadata {
             new Key<Float>("android.sensor.temperature", float.class);
 
     /**
+     * <p>A reference illumination source roughly matching the current scene
+     * illumination, which is used to describe the sensor color space
+     * transformations.</p>
+     * <p>The values in this tag correspond to the values defined for the
+     * EXIF LightSource tag. These illuminants are standard light sources
+     * that are often used for calibrating camera devices.</p>
+     * @see #SENSOR_REFERENCE_ILLUMINANT_DAYLIGHT
+     * @see #SENSOR_REFERENCE_ILLUMINANT_FLUORESCENT
+     * @see #SENSOR_REFERENCE_ILLUMINANT_TUNGSTEN
+     * @see #SENSOR_REFERENCE_ILLUMINANT_FLASH
+     * @see #SENSOR_REFERENCE_ILLUMINANT_FINE_WEATHER
+     * @see #SENSOR_REFERENCE_ILLUMINANT_CLOUDY_WEATHER
+     * @see #SENSOR_REFERENCE_ILLUMINANT_SHADE
+     * @see #SENSOR_REFERENCE_ILLUMINANT_DAYLIGHT_FLUORESCENT
+     * @see #SENSOR_REFERENCE_ILLUMINANT_DAY_WHITE_FLUORESCENT
+     * @see #SENSOR_REFERENCE_ILLUMINANT_COOL_WHITE_FLUORESCENT
+     * @see #SENSOR_REFERENCE_ILLUMINANT_WHITE_FLUORESCENT
+     * @see #SENSOR_REFERENCE_ILLUMINANT_STANDARD_A
+     * @see #SENSOR_REFERENCE_ILLUMINANT_STANDARD_B
+     * @see #SENSOR_REFERENCE_ILLUMINANT_STANDARD_C
+     * @see #SENSOR_REFERENCE_ILLUMINANT_D55
+     * @see #SENSOR_REFERENCE_ILLUMINANT_D65
+     * @see #SENSOR_REFERENCE_ILLUMINANT_D75
+     * @see #SENSOR_REFERENCE_ILLUMINANT_D50
+     * @see #SENSOR_REFERENCE_ILLUMINANT_ISO_STUDIO_TUNGSTEN
+     */
+    public static final Key<Integer> SENSOR_REFERENCE_ILLUMINANT =
+            new Key<Integer>("android.sensor.referenceIlluminant", int.class);
+
+    /**
      * <p>A per-device calibration transform matrix to be applied after the
      * color space transform when rendering the raw image buffer.</p>
      * <p>This matrix is expressed as a 3x3 matrix in row-major-order, and

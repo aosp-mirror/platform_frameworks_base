@@ -1670,6 +1670,110 @@ public abstract class CameraMetadata {
     public static final int LENS_STATE_MOVING = 1;
 
     //
+    // Enumeration values for CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+    //
+
+    /**
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_DAYLIGHT = 1;
+
+    /**
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_FLUORESCENT = 2;
+
+    /**
+     * <p>Incandescent light</p>
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_TUNGSTEN = 3;
+
+    /**
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_FLASH = 4;
+
+    /**
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_FINE_WEATHER = 9;
+
+    /**
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_CLOUDY_WEATHER = 10;
+
+    /**
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_SHADE = 11;
+
+    /**
+     * <p>D 5700 - 7100K</p>
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_DAYLIGHT_FLUORESCENT = 12;
+
+    /**
+     * <p>N 4600 - 5400K</p>
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_DAY_WHITE_FLUORESCENT = 13;
+
+    /**
+     * <p>W 3900 - 4500K</p>
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_COOL_WHITE_FLUORESCENT = 14;
+
+    /**
+     * <p>WW 3200 - 3700K</p>
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_WHITE_FLUORESCENT = 15;
+
+    /**
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_STANDARD_A = 17;
+
+    /**
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_STANDARD_B = 18;
+
+    /**
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_STANDARD_C = 19;
+
+    /**
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_D55 = 20;
+
+    /**
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_D65 = 21;
+
+    /**
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_D75 = 22;
+
+    /**
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_D50 = 23;
+
+    /**
+     * @see CaptureResult#SENSOR_REFERENCE_ILLUMINANT
+     */
+    public static final int SENSOR_REFERENCE_ILLUMINANT_ISO_STUDIO_TUNGSTEN = 24;
+
+    //
     // Enumeration values for CaptureResult#STATISTICS_SCENE_FLICKER
     //
 
