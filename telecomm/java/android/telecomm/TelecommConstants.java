@@ -27,7 +27,7 @@ public final class TelecommConstants {
      * and bind to the appropriate {@link android.telecomm.CallService} which Telecomm will
      * ultimately use to control and get information about the call.</p>
      *
-     * <p>Input: get*Extra field {@link #EXTRA_CALL_SERVICE} contains the component name
+     * <p>Input: get*Extra field {@link #EXTRA_CALL_SERVICE_DESCRIPTOR} contains the component name
      * of the {@link android.telecomm.CallService} that Telecomm should bind to. Telecomm will then
      * ask the call service for more information about the call prior to showing any UI.
      *

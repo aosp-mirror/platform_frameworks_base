@@ -59,8 +59,8 @@ oneway interface ICallService {
      * SIP address, or some other kind of user ID.  Note that the set of handle types is
      * dynamically extensible since call providers should be able to implement arbitrary
      * handle-calling systems.  See {@link #isCompatibleWith}. It is expected that the
-     * call service respond via {@link ICallServiceAdapter#newOutgoingCall} if it can successfully
-     * make the call.
+     * call service respond via {@link ICallServiceAdapter#handleSuccessfulOutgoingCall} if it can
+     * successfully make the call.
      * TODO(santoscordon): Figure out how a calls service can short-circuit a failure to
      * the adapter.
      *
