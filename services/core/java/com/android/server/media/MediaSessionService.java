@@ -17,9 +17,9 @@
 package com.android.server.media;
 
 import android.content.Context;
-import android.media.IMediaSession;
-import android.media.IMediaSessionCallback;
-import android.media.IMediaSessionManager;
+import android.media.session.IMediaSession;
+import android.media.session.IMediaSessionCallback;
+import android.media.session.IMediaSessionManager;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.text.TextUtils;

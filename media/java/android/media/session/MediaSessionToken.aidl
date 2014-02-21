@@ -13,6 +13,6 @@
 ** limitations under the License.
 */
 
-package android.media;
+package android.media.session;
 
 parcelable MediaSessionToken;

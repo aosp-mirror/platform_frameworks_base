@@ -186,6 +186,7 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/media/audio/effects/)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/framework-res_intermediates)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework-base_intermediates/src/core/java/android/print/IPrintClient.*)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/services_intermediates)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework-base_intermediates/src/media/java/android/media/IMedia*)
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
 # ************************************************

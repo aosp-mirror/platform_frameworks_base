@@ -17,10 +17,10 @@
 package com.android.server.media;
 
 import android.content.Intent;
-import android.media.IMediaController;
-import android.media.IMediaControllerCallback;
-import android.media.IMediaSession;
-import android.media.IMediaSessionCallback;
+import android.media.session.IMediaController;
+import android.media.session.IMediaControllerCallback;
+import android.media.session.IMediaSession;
+import android.media.session.IMediaSessionCallback;
 import android.media.RemoteControlClient;
 import android.os.Bundle;
 import android.os.IBinder;

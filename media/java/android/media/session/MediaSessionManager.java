@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package android.media;
+package android.media.session;
 
 import android.content.Context;
+import android.media.session.IMediaSessionManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;

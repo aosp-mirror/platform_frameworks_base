@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package android.media;
+package android.media.session;
 
 import android.content.Intent;
-import android.media.IMediaSession;
+import android.media.session.IMediaController;
+import android.media.session.IMediaSession;
+import android.media.session.IMediaSessionCallback;
+import android.media.RemoteControlClient;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
