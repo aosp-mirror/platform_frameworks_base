@@ -271,7 +271,7 @@ public class GLRenderer extends HardwareRenderer {
             if (atlas.isCompatible(android.os.Process.myPpid())) {
                 GraphicBuffer buffer = atlas.getBuffer();
                 if (buffer != null) {
-                    int[] map = atlas.getMap();
+                    long[] map = atlas.getMap();
                     if (map != null) {
                         GLES20Canvas.initAtlas(buffer, map);
                     }
