@@ -73,7 +73,7 @@ static inline void swapCanvasPtr(JNIEnv* env, jobject canvasObj, SkCanvas* newCa
     SkSafeUnref(previousCanvas);
 }
 
-static SkBitmap* com_android_server_AssetAtlasService_acquireCanvas(JNIEnv* env, jobject,
+static jlong com_android_server_AssetAtlasService_acquireCanvas(JNIEnv* env, jobject,
         jobject canvas, jint width, jint height) {
 
     SkBitmap* bitmap = new SkBitmap;
@@ -84,12 +84,13 @@ static SkBitmap* com_android_server_AssetAtlasService_acquireCanvas(JNIEnv* env,
     SkCanvas* nativeCanvas = SkNEW_ARGS(SkCanvas, (*bitmap));
     swapCanvasPtr(env, canvas, nativeCanvas);
 
-    return bitmap;
+    return reinterpret_cast<jlong>(bitmap);
 }
 
 static void com_android_server_AssetAtlasService_releaseCanvas(JNIEnv* env, jobject,
-        jobject canvas, SkBitmap* bitmap) {
+        jobject canvas, jlong bitmapHandle) {
 
+    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
     SkCanvas* nativeCanvas = SkNEW(SkCanvas);
     swapCanvasPtr(env, canvas, nativeCanvas);
 
@@ -108,21 +109,22 @@ static void com_android_server_AssetAtlasService_releaseCanvas(JNIEnv* env, jobj
     return result;
 
 static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject,
-        jobject graphicBuffer, SkBitmap* bitmap) {
+        jobject graphicBuffer, jlong bitmapHandle) {
 
+    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
     // The goal of this method is to copy the bitmap into the GraphicBuffer
     // using the GPU to swizzle the texture content
     sp<GraphicBuffer> buffer(graphicBufferForJavaObject(env, graphicBuffer));
 
     if (buffer != NULL) {
         EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-        if (display == EGL_NO_DISPLAY) return false;
+        if (display == EGL_NO_DISPLAY) return JNI_FALSE;
 
         EGLint major;
         EGLint minor;
         if (!eglInitialize(display, &major, &minor)) {
             ALOGW("Could not initialize EGL");
-            return false;
+            return JNI_FALSE;
         }
 
         // We're going to use a 1x1 pbuffer surface later on
@@ -143,13 +145,13 @@ static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject
             ALOGW("Could not select EGL configuration");
             eglReleaseThread();
             eglTerminate(display);
-            return false;
+            return JNI_FALSE;
         }
         if (configCount <= 0) {
             ALOGW("Could not find EGL configuration");
             eglReleaseThread();
             eglTerminate(display);
-            return false;
+            return JNI_FALSE;
         }
 
         // These objects are initialized below but the default "null"
@@ -164,7 +166,7 @@ static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject
         EGLContext context = eglCreateContext(display, configs[0], EGL_NO_CONTEXT, attrs);
         if (context == EGL_NO_CONTEXT) {
             ALOGW("Could not create EGL context");
-            CLEANUP_GL_AND_RETURN(false);
+            CLEANUP_GL_AND_RETURN(JNI_FALSE);
         }
 
         // Create the 1x1 pbuffer
@@ -172,12 +174,12 @@ static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject
         surface = eglCreatePbufferSurface(display, configs[0], surfaceAttrs);
         if (surface == EGL_NO_SURFACE) {
             ALOGW("Could not create EGL surface");
-            CLEANUP_GL_AND_RETURN(false);
+            CLEANUP_GL_AND_RETURN(JNI_FALSE);
         }
 
         if (!eglMakeCurrent(display, surface, surface, context)) {
             ALOGW("Could not change current EGL context");
-            CLEANUP_GL_AND_RETURN(false);
+            CLEANUP_GL_AND_RETURN(JNI_FALSE);
         }
 
         // We use an EGLImage to access the content of the GraphicBuffer
@@ -188,7 +190,7 @@ static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject
                 EGL_NATIVE_BUFFER_ANDROID, clientBuffer, imageAttrs);
         if (image == EGL_NO_IMAGE_KHR) {
             ALOGW("Could not create EGL image");
-            CLEANUP_GL_AND_RETURN(false);
+            CLEANUP_GL_AND_RETURN(JNI_FALSE);
         }
 
         glGenTextures(1, &texture);
@@ -196,7 +198,7 @@ static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject
         glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, image);
         if (glGetError() != GL_NO_ERROR) {
             ALOGW("Could not create/bind texture");
-            CLEANUP_GL_AND_RETURN(false);
+            CLEANUP_GL_AND_RETURN(JNI_FALSE);
         }
 
         // Upload the content of the bitmap in the GraphicBuffer
@@ -205,7 +207,7 @@ static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject
                 GL_RGBA, GL_UNSIGNED_BYTE, bitmap->getPixels());
         if (glGetError() != GL_NO_ERROR) {
             ALOGW("Could not upload to texture");
-            CLEANUP_GL_AND_RETURN(false);
+            CLEANUP_GL_AND_RETURN(JNI_FALSE);
         }
 
         // The fence is used to wait for the texture upload to finish
@@ -214,7 +216,7 @@ static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject
         fence = eglCreateSyncKHR(display, EGL_SYNC_FENCE_KHR, NULL);
         if (fence == EGL_NO_SYNC_KHR) {
             ALOGW("Could not create sync fence %#x", eglGetError());
-            CLEANUP_GL_AND_RETURN(false);
+            CLEANUP_GL_AND_RETURN(JNI_FALSE);
         }
 
         // The flag EGL_SYNC_FLUSH_COMMANDS_BIT_KHR will trigger a
@@ -223,13 +225,13 @@ static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject
                 EGL_SYNC_FLUSH_COMMANDS_BIT_KHR, FENCE_TIMEOUT);
         if (waitStatus != EGL_CONDITION_SATISFIED_KHR) {
             ALOGW("Failed to wait for the fence %#x", eglGetError());
-            CLEANUP_GL_AND_RETURN(false);
+            CLEANUP_GL_AND_RETURN(JNI_FALSE);
         }
 
-        CLEANUP_GL_AND_RETURN(true);
+        CLEANUP_GL_AND_RETURN(JNI_TRUE);
     }
 
-    return false;
+    return JNI_FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -247,11 +249,11 @@ static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject
 const char* const kClassPathName = "com/android/server/AssetAtlasService";
 
 static JNINativeMethod gMethods[] = {
-    { "nAcquireAtlasCanvas", "(Landroid/graphics/Canvas;II)I",
+    { "nAcquireAtlasCanvas", "(Landroid/graphics/Canvas;II)J",
             (void*) com_android_server_AssetAtlasService_acquireCanvas },
-    { "nReleaseAtlasCanvas", "(Landroid/graphics/Canvas;I)V",
+    { "nReleaseAtlasCanvas", "(Landroid/graphics/Canvas;J)V",
             (void*) com_android_server_AssetAtlasService_releaseCanvas },
-    { "nUploadAtlas", "(Landroid/view/GraphicBuffer;I)Z",
+    { "nUploadAtlas", "(Landroid/view/GraphicBuffer;J)Z",
             (void*) com_android_server_AssetAtlasService_upload },
 };
 
