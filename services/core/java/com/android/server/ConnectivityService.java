@@ -2669,6 +2669,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             setBufferSize(bufferSizes);
         }
+
+        final String defaultRwndKey = "net.tcp.default_init_rwnd";
+        int defaultRwndValue = SystemProperties.getInt(defaultRwndKey, 0);
+        Integer rwndValue = Settings.Global.getInt(mContext.getContentResolver(),
+            Settings.Global.TCP_DEFAULT_INIT_RWND, defaultRwndValue);
+        final String sysctlKey = "sys.sysctl.tcp_def_init_rwnd";
+        if (rwndValue != 0) {
+            SystemProperties.set(sysctlKey, rwndValue.toString());
+        }
     }
 
     /**
