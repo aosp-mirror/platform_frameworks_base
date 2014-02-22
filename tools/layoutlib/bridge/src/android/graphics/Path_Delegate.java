@@ -142,7 +142,7 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long native_getFillType(long nPath) {
+    /*package*/ static int native_getFillType(long nPath) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
             return 0;

@@ -48,14 +48,14 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nGetMultipleIntMethod(Class<?> targetClass, String methodName,
+    /*package*/ static long nGetMultipleIntMethod(Class<?> targetClass, String methodName,
             int numParams) {
         // TODO: return the right thing.
         return 0;
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nGetMultipleFloatMethod(Class<?> targetClass, String methodName,
+    /*package*/ static long nGetMultipleFloatMethod(Class<?> targetClass, String methodName,
             int numParams) {
         // TODO: return the right thing.
         return 0;
