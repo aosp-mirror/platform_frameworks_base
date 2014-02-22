@@ -688,7 +688,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long native_getStyle(long native_object) {
+    /*package*/ static int native_getStyle(long native_object) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
@@ -710,7 +710,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long native_getStrokeCap(long native_object) {
+    /*package*/ static int native_getStrokeCap(long native_object) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
@@ -732,7 +732,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long native_getStrokeJoin(long native_object) {
+    /*package*/ static int native_getStrokeJoin(long native_object) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
@@ -889,7 +889,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long native_getTextAlign(long native_object) {
+    /*package*/ static int native_getTextAlign(long native_object) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
@@ -922,7 +922,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long native_getTextWidths(long native_object, char[] text, int index,
+    /*package*/ static int native_getTextWidths(long native_object, char[] text, int index,
             int count, int bidiFlags, float[] widths) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
@@ -964,14 +964,14 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long native_getTextWidths(long native_object, String text, int start,
+    /*package*/ static int native_getTextWidths(long native_object, String text, int start,
             int end, int bidiFlags, float[] widths) {
         return native_getTextWidths(native_object, text.toCharArray(), start, end - start,
                 bidiFlags, widths);
     }
 
     @LayoutlibDelegate
-    /* package */static long native_getTextGlyphs(long native_object, String text, int start,
+    /* package */static int native_getTextGlyphs(long native_object, String text, int start,
             int end, int contextStart, int contextEnd, int flags, char[] glyphs) {
         // FIXME
         return 0;
@@ -1012,7 +1012,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long native_getTextRunCursor(Paint thisPaint, long native_object, char[] text,
+    /*package*/ static int native_getTextRunCursor(Paint thisPaint, long native_object, char[] text,
             int contextStart, int contextLength, int flags, int offset, int cursorOpt) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
@@ -1021,7 +1021,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long native_getTextRunCursor(Paint thisPaint, long native_object, String text,
+    /*package*/ static int native_getTextRunCursor(Paint thisPaint, long native_object, String text,
             int contextStart, int contextEnd, int flags, int offset, int cursorOpt) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
