@@ -18,8 +18,12 @@
 // #define LOG_NDEBUG 0
 // #define LOG_NNDEBUG 0
 #define LOG_TAG "CameraMetadata-JNI"
+#include <utils/Errors.h>
 #include <utils/Log.h>
 #include <utils/RefBase.h>
+#include <utils/Vector.h>
+#include <utils/SortedVector.h>
+#include <utils/KeyedVector.h>
 #include <string.h>
 
 #include "jni.h"
@@ -483,12 +487,20 @@ static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyN
 
     ALOGV("%s (key = '%s')", __FUNCTION__, key);
 
+    sp<VendorTagDescriptor> vTags = VendorTagDescriptor::getGlobalVendorTagDescriptor();
+
+    SortedVector<String8> vendorSections = vTags->getAllSectionNames();
+    size_t vendorSectionCount = vendorSections.size();
+
     // First, find the section by the longest string match
     const char *section = NULL;
     size_t sectionIndex = 0;
     size_t sectionLength = 0;
-    for (size_t i = 0; i < ANDROID_SECTION_COUNT; ++i) {
-        const char *str = camera_metadata_section_names[i];
+    size_t totalSectionCount = ANDROID_SECTION_COUNT + vendorSectionCount;
+    for (size_t i = 0; i < totalSectionCount; ++i) {
+
+        const char *str = (i < ANDROID_SECTION_COUNT) ? camera_metadata_section_names[i] :
+                vendorSections[i - ANDROID_SECTION_COUNT].string();
         ALOGVV("%s: Trying to match against section '%s'",
                __FUNCTION__, str);
         if (strstr(key, str) == key) { // key begins with the section name
@@ -502,12 +514,11 @@ static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyN
                 sectionIndex = i;
                 sectionLength = strLength;
 
-                ALOGVV("%s: Found new best section (idx %d)", __FUNCTION__, sectionIndex);
+                ALOGVV("%s: Found new best section (%s)", __FUNCTION__, section);
             }
         }
     }
 
-    // TODO: vendor ext
     // TODO: Make above get_camera_metadata_section_from_name ?
 
     if (section == NULL) {
@@ -524,32 +535,46 @@ static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyN
     if (sectionLength + 1 >= keyLength) {
         jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
                              "Key length too short for key '%s')", key);
+        return 0;
     }
 
     // Match rest of name against the tag names in that section only
-    uint32_t tagBegin, tagEnd; // [tagBegin, tagEnd)
-    tagBegin = camera_metadata_section_bounds[sectionIndex][0];
-    tagEnd = camera_metadata_section_bounds[sectionIndex][1];
+    uint32_t tag = 0;
+    if (sectionIndex < ANDROID_SECTION_COUNT) {
+        // Match built-in tags (typically android.*)
+        uint32_t tagBegin, tagEnd; // [tagBegin, tagEnd)
+        tagBegin = camera_metadata_section_bounds[sectionIndex][0];
+        tagEnd = camera_metadata_section_bounds[sectionIndex][1];
 
-    uint32_t tag;
-    for (tag = tagBegin; tag < tagEnd; ++tag) {
-        const char *tagName = get_camera_metadata_tag_name(tag);
+        for (tag = tagBegin; tag < tagEnd; ++tag) {
+            const char *tagName = get_camera_metadata_tag_name(tag);
 
-        if (strcmp(keyTagName, tagName) == 0) {
-            ALOGV("%s: Found matched tag '%s' (%d)",
-                  __FUNCTION__, tagName, tag);
-            break;
+            if (strcmp(keyTagName, tagName) == 0) {
+                ALOGV("%s: Found matched tag '%s' (%d)",
+                      __FUNCTION__, tagName, tag);
+                break;
+            }
+        }
+
+        if (tag == tagEnd) {
+            jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                                 "Could not find tag name for key '%s')", key);
+            return 0;
+        }
+    } else {
+        // Match vendor tags (typically com.*)
+        const String8 sectionName(section);
+        const String8 tagName(keyTagName);
+
+        status_t res = OK;
+        if ((res = vTags->lookupTag(tagName, sectionName, &tag)) != OK) {
+            jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                    "%s: No vendor tag matches key '%s'", __FUNCTION__, key);
+            return 0;
         }
     }
 
-    // TODO: vendor ext
     // TODO: Make above get_camera_metadata_tag_from_name ?
-
-    if (tag == tagEnd) {
-        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-                             "Could not find tag name for key '%s')", key);
-        return 0;
-    }
 
     return tag;
 }
