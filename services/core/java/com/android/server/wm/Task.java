@@ -16,10 +16,12 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowManagerService.TAG;
+
 import android.util.EventLog;
+import android.util.Slog;
 
 class Task {
-//    private final String TAG = "TaskGroup";
     TaskStack mStack;
     final AppTokenList mAppTokens = new AppTokenList();
     final int taskId;
@@ -38,17 +40,24 @@ class Task {
     }
 
     void addAppToken(int addPos, AppWindowToken wtoken) {
+        final int lastPos = mAppTokens.size();
+        if (addPos > lastPos) {
+            // We lost an app token. Don't crash though.
+            Slog.e(TAG, "Task.addAppToken: Out of bounds attempt token=" + wtoken + " addPos="
+                    + addPos + " lastPos=" + lastPos);
+            addPos = lastPos;
+        }
         mAppTokens.add(addPos, wtoken);
+        mDeferRemoval = false;
     }
 
     boolean removeAppToken(AppWindowToken wtoken) {
-        mAppTokens.remove(wtoken);
+        boolean removed = mAppTokens.remove(wtoken);
         if (mAppTokens.size() == 0) {
             EventLog.writeEvent(com.android.server.EventLogTags.WM_TASK_REMOVED, taskId,
                     "removeAppToken: last token");
-            return true;
         }
-        return false;
+        return removed;
     }
 
     @Override

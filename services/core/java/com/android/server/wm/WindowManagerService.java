@@ -3486,7 +3486,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {
-                task = createTask(taskId, stackId, userId, atoken);
+                createTask(taskId, stackId, userId, atoken);
             } else {
                 task.addAppToken(addPos, atoken);
             }
@@ -3839,27 +3839,23 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
-            boolean changed = false;
+            final AppWindowToken newFocus;
             if (token == null) {
                 if (DEBUG_FOCUS_LIGHT) Slog.v(TAG, "Clearing focused app, was " + mFocusedApp);
-                changed = mFocusedApp != null;
-                mFocusedApp = null;
-                if (changed) {
-                    mInputMonitor.setFocusedAppLw(null);
-                }
+                newFocus = null;
             } else {
-                AppWindowToken newFocus = findAppWindowToken(token);
+                newFocus = findAppWindowToken(token);
                 if (newFocus == null) {
                     Slog.w(TAG, "Attempted to set focus to non-existing app token: " + token);
-                    return;
                 }
-                changed = mFocusedApp != newFocus;
                 if (DEBUG_FOCUS_LIGHT) Slog.v(TAG, "Set focused app to: " + newFocus
                         + " old focus=" + mFocusedApp + " moveFocusNow=" + moveFocusNow);
+            }
+
+            final boolean changed = mFocusedApp != newFocus;
+            if (changed) {
                 mFocusedApp = newFocus;
-                if (changed) {
-                    mInputMonitor.setFocusedAppLw(newFocus);
-                }
+                mInputMonitor.setFocusedAppLw(null);
             }
 
             if (moveFocusNow && changed) {
@@ -4551,11 +4547,9 @@ public class WindowManagerService extends IWindowManager.Stub
     void removeAppFromTaskLocked(AppWindowToken wtoken) {
         final Task task = mTaskIdToTask.get(wtoken.groupId);
         if (task != null) {
-            task.removeAppToken(wtoken);
-            // Remove after bug resolved.
-            Slog.d(TAG, "removeAppFromTaskLocked: wtoken=" + wtoken
-                    + " numTokens left=" + task.mAppTokens.size()
-                    + " Callers=" + Debug.getCallers(5));
+            if (!task.removeAppToken(wtoken)) {
+                Slog.e(TAG, "removeAppFromTaskLocked: token=" + wtoken + " not found.");
+            }
         }
     }
 
@@ -4591,6 +4585,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         TAG, "Removing app " + wtoken + " delayed=" + delayed
                         + " animation=" + wtoken.mAppAnimator.animation
                         + " animating=" + wtoken.mAppAnimator.animating);
+                if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG, "removeAppToken: "
+                        + wtoken + " delayed=" + delayed + " Callers=" + Debug.getCallers(4));
                 final TaskStack stack = mTaskIdToTask.get(wtoken.groupId).mStack;
                 if (delayed) {
                     // set the token aside because it has an active animation to be finished
@@ -4606,9 +4602,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     wtoken.mAppAnimator.animating = false;
                     removeAppFromTaskLocked(wtoken);
                 }
-                if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
-                        "removeAppToken: " + wtoken);
-
 
                 wtoken.removed = true;
                 if (wtoken.startingData != null) {
