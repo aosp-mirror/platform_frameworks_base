@@ -11517,7 +11517,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     void invalidateInternal(int l, int t, int r, int b, boolean invalidateCache,
-            boolean checkOpaque) {
+            boolean fullInvalidate) {
         if (skipInvalidate()) {
             return;
         }
@@ -11525,9 +11525,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mPrivateFlags & (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)) == (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)
                 || (invalidateCache && (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID)
                 || (mPrivateFlags & PFLAG_INVALIDATED) != PFLAG_INVALIDATED
-                || (checkOpaque && isOpaque() != mLastIsOpaque)) {
-            mLastIsOpaque = isOpaque();
-            mPrivateFlags &= ~PFLAG_DRAWN;
+                || (fullInvalidate && isOpaque() != mLastIsOpaque)) {
+            if (fullInvalidate) {
+                mLastIsOpaque = isOpaque();
+                mPrivateFlags &= ~PFLAG_DRAWN;
+            }
+
             mPrivateFlags |= PFLAG_DIRTY;
 
             if (invalidateCache) {
