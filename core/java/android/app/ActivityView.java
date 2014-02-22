@@ -39,6 +39,7 @@ import android.view.WindowManager;
 
 public class ActivityView extends ViewGroup {
     private final String TAG = "ActivityView";
+    private final boolean DEBUG = false;
 
     private final TextureView mTextureView;
     private IActivityContainer mActivityContainer;
@@ -76,6 +77,7 @@ public class ActivityView extends ViewGroup {
         mTextureView = new TextureView(context);
         mTextureView.setSurfaceTextureListener(new ActivityViewSurfaceTextureListener());
         addView(mTextureView);
+        if (DEBUG) Log.v(TAG, "ctor()");
     }
 
     @Override
@@ -85,6 +87,8 @@ public class ActivityView extends ViewGroup {
 
     @Override
     protected void onAttachedToWindow() {
+        if (DEBUG) Log.v(TAG, "onAttachedToWindow()");
+        super.onAttachedToWindow();
         try {
             final IBinder token = mActivity.getActivityToken();
             mActivityContainer =
@@ -99,6 +103,8 @@ public class ActivityView extends ViewGroup {
 
     @Override
     protected void onDetachedFromWindow() {
+        if (DEBUG) Log.v(TAG, "onDetachedFromWindow(): mActivityContainer=" + mActivityContainer);
+        super.onDetachedFromWindow();
         if (mActivityContainer != null) {
             detach();
             mActivityContainer = null;
@@ -107,11 +113,17 @@ public class ActivityView extends ViewGroup {
 
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
+        if (DEBUG) Log.v(TAG, "onWindowVisibilityChanged(): visibility=" + visibility);
         super.onWindowVisibilityChanged(visibility);
-        if (visibility == View.VISIBLE) {
-            attachToSurfaceWhenReady();
-        } else {
-            detach();
+        switch (visibility) {
+            case  View.VISIBLE:
+                attachToSurfaceWhenReady();
+                break;
+            case  View.INVISIBLE:
+                break;
+            case View.GONE:
+                detach();
+                break;
         }
     }
 
@@ -143,6 +155,8 @@ public class ActivityView extends ViewGroup {
     }
 
     public void startActivity(Intent intent) {
+        if (DEBUG) Log.v(TAG, "startActivity(): intent=" + intent + " " +
+                (isAttachedToDisplay() ? "" : "not") + " attached");
         if (mSurface != null) {
             try {
                 mActivityContainer.startActivity(intent);
@@ -165,6 +179,8 @@ public class ActivityView extends ViewGroup {
     }
 
     public void startActivity(IntentSender intentSender) {
+        if (DEBUG) Log.v(TAG, "startActivityIntentSender(): intentSender=" + intentSender + " " +
+                (isAttachedToDisplay() ? "" : "not") + " attached");
         final IIntentSender iIntentSender = intentSender.getTarget();
         if (mSurface != null) {
             startActivityIntentSender(iIntentSender);
@@ -175,6 +191,8 @@ public class ActivityView extends ViewGroup {
     }
 
     public void startActivity(PendingIntent pendingIntent) {
+        if (DEBUG) Log.v(TAG, "startActivityPendingIntent(): PendingIntent=" + pendingIntent + " "
+                + (isAttachedToDisplay() ? "" : "not") + " attached");
         final IIntentSender iIntentSender = pendingIntent.getTarget();
         if (mSurface != null) {
             startActivityIntentSender(iIntentSender);
@@ -205,6 +223,8 @@ public class ActivityView extends ViewGroup {
                     "ActivityView: Unable to create ActivityContainer. " + e);
         }
 
+        if (DEBUG) Log.v(TAG, "attachToSurfaceWhenReady: " + (mQueuedIntent != null ||
+                mQueuedPendingIntent != null ? "" : "no") + " queued intent");
         if (mQueuedIntent != null) {
             startActivity(mQueuedIntent);
             mQueuedIntent = null;
@@ -215,6 +235,7 @@ public class ActivityView extends ViewGroup {
     }
 
     private void detach() {
+        if (DEBUG) Log.d(TAG, "detach: attached=" + isAttachedToDisplay());
         if (mSurface != null) {
             try {
                 mActivityContainer.detachFromDisplay();
@@ -229,6 +250,8 @@ public class ActivityView extends ViewGroup {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width,
                 int height) {
+            if (DEBUG) Log.d(TAG, "onSurfaceTextureAvailable: width=" + width + " height="
+                    + height);
             mWidth = width;
             mHeight = height;
             if (mActivityContainer != null) {
@@ -239,12 +262,12 @@ public class ActivityView extends ViewGroup {
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int width,
                 int height) {
-            Log.d(TAG, "onSurfaceTextureSizeChanged: w=" + width + " h=" + height);
+            if (DEBUG) Log.d(TAG, "onSurfaceTextureSizeChanged: w=" + width + " h=" + height);
         }
 
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
-            Log.d(TAG, "onSurfaceTextureDestroyed");
+            if (DEBUG) Log.d(TAG, "onSurfaceTextureDestroyed");
             detach();
             return true;
         }
