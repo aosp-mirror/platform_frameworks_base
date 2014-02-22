@@ -1661,7 +1661,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return view.getParent() != null ? view : null;
         } catch (WindowManager.BadTokenException e) {
             // ignore
-            Log.w(TAG, appToken + " already running, starting window not displayed");
+            Log.w(TAG, appToken + " already running, starting window not displayed. " +
+                    e.getMessage());
         } catch (RuntimeException e) {
             // don't crash if something else bad happens, for example a
             // failure loading resources because we are loading from an app
