@@ -1375,8 +1375,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     void setFocusedStack(ActivityRecord r) {
         if (r != null) {
-            final boolean isHomeActivity =
-                    !r.isApplicationActivity() || (r.task != null && !r.task.isApplicationTask());
+            final TaskRecord task = r.task;
+            boolean isHomeActivity = !r.isApplicationActivity();
+            if (!isHomeActivity && task != null) {
+                isHomeActivity = !task.isApplicationTask();
+            }
+            if (!isHomeActivity && task != null) {
+                final ActivityRecord parent = task.stack.mActivityContainer.mParentActivity;
+                isHomeActivity = parent != null && parent.isHomeActivity();
+            }
             moveHomeStack(isHomeActivity);
         }
     }
@@ -2058,17 +2065,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (targetStack == null) {
             targetStack = getFocusedStack();
         }
+        // Do targetStack first.
         boolean result = false;
+        if (isFrontStack(targetStack)) {
+            result = targetStack.resumeTopActivityLocked(target, targetOptions);
+        }
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
+                if (stack == targetStack) {
+                    // Already started above.
+                    continue;
+                }
                 if (isFrontStack(stack)) {
-                    if (stack == targetStack) {
-                        result = stack.resumeTopActivityLocked(target, targetOptions);
-                    } else {
-                        stack.resumeTopActivityLocked(null);
-                    }
+                    stack.resumeTopActivityLocked(null);
                 }
             }
         }
