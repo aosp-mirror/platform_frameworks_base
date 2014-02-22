@@ -28,7 +28,7 @@ interface IAlarmManager {
 	/** windowLength == 0 means exact; windowLength < 0 means the let the OS decide */
     void set(int type, long triggerAtTime, long windowLength,
             long interval, in PendingIntent operation, in WorkSource workSource);
-    void setTime(long millis);
+    boolean setTime(long millis);
     void setTimeZone(String zone);
     void remove(in PendingIntent operation);
 }

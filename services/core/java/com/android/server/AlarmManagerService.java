@@ -673,12 +673,19 @@ class AlarmManagerService extends SystemService {
         }
 
         @Override
-        public void setTime(long millis) {
+        public boolean setTime(long millis) {
             getContext().enforceCallingOrSelfPermission(
                     "android.permission.SET_TIME",
                     "setTime");
 
-            SystemClock.setCurrentTimeMillis(millis);
+            if (mNativeData == 0) {
+                Slog.w(TAG, "Not setting time since no alarm driver is available.");
+                return false;
+            }
+
+            synchronized (mLock) {
+                return setKernelTime(mNativeData, millis) == 0;
+            }
         }
 
         @Override
@@ -1063,6 +1070,7 @@ class AlarmManagerService extends SystemService {
     private native void close(long nativeData);
     private native void set(long nativeData, int type, long seconds, long nanoseconds);
     private native int waitForAlarm(long nativeData);
+    private native int setKernelTime(long nativeData, long millis);
     private native int setKernelTimezone(long nativeData, int minuteswest);
 
     void triggerAlarmsLocked(ArrayList<Alarm> triggerList, final long nowELAPSED,
