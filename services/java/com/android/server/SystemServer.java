@@ -1001,138 +1001,131 @@ public final class SystemServer {
         // where third party code can really run (but before it has actually
         // started launching the initial applications), for us to complete our
         // initialization.
-        final Handler handler = new Handler();
         mActivityManagerService.systemReady(new Runnable() {
             @Override
             public void run() {
-                // We initiate all boot phases on the SystemServer thread.
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Slog.i(TAG, "Making services ready");
-                        mSystemServiceManager.startBootPhase(
-                                SystemService.PHASE_ACTIVITY_MANAGER_READY);
+                Slog.i(TAG, "Making services ready");
+                mSystemServiceManager.startBootPhase(
+                        SystemService.PHASE_ACTIVITY_MANAGER_READY);
 
-                        try {
-                            mActivityManagerService.startObservingNativeCrashes();
-                        } catch (Throwable e) {
-                            reportWtf("observing native crashes", e);
-                        }
-                        try {
-                            startSystemUi(context);
-                        } catch (Throwable e) {
-                            reportWtf("starting System UI", e);
-                        }
-                        try {
-                            if (mountServiceF != null) mountServiceF.systemReady();
-                        } catch (Throwable e) {
-                            reportWtf("making Mount Service ready", e);
-                        }
-                        try {
-                            if (batteryF != null) batteryF.systemReady();
-                        } catch (Throwable e) {
-                            reportWtf("making Battery Service ready", e);
-                        }
-                        try {
-                            if (networkManagementF != null) networkManagementF.systemReady();
-                        } catch (Throwable e) {
-                            reportWtf("making Network Managment Service ready", e);
-                        }
-                        try {
-                            if (networkStatsF != null) networkStatsF.systemReady();
-                        } catch (Throwable e) {
-                            reportWtf("making Network Stats Service ready", e);
-                        }
-                        try {
-                            if (networkPolicyF != null) networkPolicyF.systemReady();
-                        } catch (Throwable e) {
-                            reportWtf("making Network Policy Service ready", e);
-                        }
-                        try {
-                            if (connectivityF != null) connectivityF.systemReady();
-                        } catch (Throwable e) {
-                            reportWtf("making Connectivity Service ready", e);
-                        }
-                        try {
-                            if (dockF != null) dockF.systemReady();
-                        } catch (Throwable e) {
-                            reportWtf("making Dock Service ready", e);
-                        }
-                        try {
-                            if (recognitionF != null) recognitionF.systemReady();
-                        } catch (Throwable e) {
-                            reportWtf("making Recognition Service ready", e);
-                        }
-                        Watchdog.getInstance().start();
+                try {
+                    mActivityManagerService.startObservingNativeCrashes();
+                } catch (Throwable e) {
+                    reportWtf("observing native crashes", e);
+                }
+                try {
+                    startSystemUi(context);
+                } catch (Throwable e) {
+                    reportWtf("starting System UI", e);
+                }
+                try {
+                    if (mountServiceF != null) mountServiceF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Mount Service ready", e);
+                }
+                try {
+                    if (batteryF != null) batteryF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Battery Service ready", e);
+                }
+                try {
+                    if (networkManagementF != null) networkManagementF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Network Managment Service ready", e);
+                }
+                try {
+                    if (networkStatsF != null) networkStatsF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Network Stats Service ready", e);
+                }
+                try {
+                    if (networkPolicyF != null) networkPolicyF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Network Policy Service ready", e);
+                }
+                try {
+                    if (connectivityF != null) connectivityF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Connectivity Service ready", e);
+                }
+                try {
+                    if (dockF != null) dockF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Dock Service ready", e);
+                }
+                try {
+                    if (recognitionF != null) recognitionF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Recognition Service ready", e);
+                }
+                Watchdog.getInstance().start();
 
-                        // It is now okay to let the various system services start their
-                        // third party code...
-                        mSystemServiceManager.startBootPhase(
-                                SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
+                // It is now okay to let the various system services start their
+                // third party code...
+                mSystemServiceManager.startBootPhase(
+                        SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
 
-                        try {
-                            if (wallpaperF != null) wallpaperF.systemRunning();
-                        } catch (Throwable e) {
-                            reportWtf("Notifying WallpaperService running", e);
-                        }
-                        try {
-                            if (immF != null) immF.systemRunning(statusBarF);
-                        } catch (Throwable e) {
-                            reportWtf("Notifying InputMethodService running", e);
-                        }
-                        try {
-                            if (locationF != null) locationF.systemRunning();
-                        } catch (Throwable e) {
-                            reportWtf("Notifying Location Service running", e);
-                        }
-                        try {
-                            if (countryDetectorF != null) countryDetectorF.systemRunning();
-                        } catch (Throwable e) {
-                            reportWtf("Notifying CountryDetectorService running", e);
-                        }
-                        try {
-                            if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemRunning();
-                        } catch (Throwable e) {
-                            reportWtf("Notifying NetworkTimeService running", e);
-                        }
-                        try {
-                            if (commonTimeMgmtServiceF != null) {
-                                commonTimeMgmtServiceF.systemRunning();
-                            }
-                        } catch (Throwable e) {
-                            reportWtf("Notifying CommonTimeManagementService running", e);
-                        }
-                        try {
-                            if (textServiceManagerServiceF != null)
-                                textServiceManagerServiceF.systemRunning();
-                        } catch (Throwable e) {
-                            reportWtf("Notifying TextServicesManagerService running", e);
-                        }
-                        try {
-                            if (atlasF != null) atlasF.systemRunning();
-                        } catch (Throwable e) {
-                            reportWtf("Notifying AssetAtlasService running", e);
-                        }
-                        try {
-                            // TODO(BT) Pass parameter to input manager
-                            if (inputManagerF != null) inputManagerF.systemRunning();
-                        } catch (Throwable e) {
-                            reportWtf("Notifying InputManagerService running", e);
-                        }
-                        try {
-                            if (telephonyRegistryF != null) telephonyRegistryF.systemRunning();
-                        } catch (Throwable e) {
-                            reportWtf("Notifying TelephonyRegistry running", e);
-                        }
-                        try {
-                            if (mediaRouterF != null) mediaRouterF.systemRunning();
-                        } catch (Throwable e) {
-                            reportWtf("Notifying MediaRouterService running", e);
-                        }
-
-                        mSystemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETE);
+                try {
+                    if (wallpaperF != null) wallpaperF.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying WallpaperService running", e);
+                }
+                try {
+                    if (immF != null) immF.systemRunning(statusBarF);
+                } catch (Throwable e) {
+                    reportWtf("Notifying InputMethodService running", e);
+                }
+                try {
+                    if (locationF != null) locationF.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying Location Service running", e);
+                }
+                try {
+                    if (countryDetectorF != null) countryDetectorF.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying CountryDetectorService running", e);
+                }
+                try {
+                    if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying NetworkTimeService running", e);
+                }
+                try {
+                    if (commonTimeMgmtServiceF != null) {
+                        commonTimeMgmtServiceF.systemRunning();
                     }
-                });
+                } catch (Throwable e) {
+                    reportWtf("Notifying CommonTimeManagementService running", e);
+                }
+                try {
+                    if (textServiceManagerServiceF != null)
+                        textServiceManagerServiceF.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying TextServicesManagerService running", e);
+                }
+                try {
+                    if (atlasF != null) atlasF.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying AssetAtlasService running", e);
+                }
+                try {
+                    // TODO(BT) Pass parameter to input manager
+                    if (inputManagerF != null) inputManagerF.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying InputManagerService running", e);
+                }
+                try {
+                    if (telephonyRegistryF != null) telephonyRegistryF.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying TelephonyRegistry running", e);
+                }
+                try {
+                    if (mediaRouterF != null) mediaRouterF.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying MediaRouterService running", e);
+                }
+
+                mSystemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETE);
             }
         });
     }
