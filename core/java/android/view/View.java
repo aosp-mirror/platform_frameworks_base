@@ -11465,7 +11465,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final int scrollX = mScrollX;
         final int scrollY = mScrollY;
         invalidateInternal(dirty.left - scrollX, dirty.top - scrollY,
-                dirty.right - scrollX, dirty.bottom - scrollY, true);
+                dirty.right - scrollX, dirty.bottom - scrollY, true, false);
     }
 
     /**
@@ -11485,7 +11485,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void invalidate(int l, int t, int r, int b) {
         final int scrollX = mScrollX;
         final int scrollY = mScrollY;
-        invalidateInternal(l - scrollX, t - scrollY, r - scrollY, b - scrollY, true);
+        invalidateInternal(l - scrollX, t - scrollY, r - scrollY, b - scrollY, true, false);
     }
 
     /**
@@ -11513,20 +11513,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *            dimensions have not changed.
      */
     void invalidate(boolean invalidateCache) {
-        invalidateInternal(0, 0, mRight - mLeft, mBottom - mTop, invalidateCache);
+        invalidateInternal(0, 0, mRight - mLeft, mBottom - mTop, invalidateCache, true);
     }
 
-    void invalidateInternal(int l, int t, int r, int b, boolean invalidateCache) {
+    void invalidateInternal(int l, int t, int r, int b, boolean invalidateCache,
+            boolean checkOpaque) {
         if (skipInvalidate()) {
             return;
         }
 
-        final boolean wasDrawn = (mPrivateFlags & (PFLAG_DRAWN | PFLAG_HAS_BOUNDS))
-                == (PFLAG_DRAWN | PFLAG_HAS_BOUNDS);
-        final boolean hasValidCache = (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) != 0;
-        final boolean invalidated = (mPrivateFlags & PFLAG_INVALIDATED) != 0;
-        final boolean opacityChanged = isOpaque() != mLastIsOpaque;
-        if (wasDrawn || (invalidateCache && hasValidCache) || !invalidated || opacityChanged) {
+        if ((mPrivateFlags & (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)) == (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)
+                || (invalidateCache && (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID)
+                || (mPrivateFlags & PFLAG_INVALIDATED) != PFLAG_INVALIDATED
+                || checkOpaque && isOpaque() != mLastIsOpaque) {
             mLastIsOpaque = isOpaque();
             mPrivateFlags &= ~PFLAG_DRAWN;
             mPrivateFlags |= PFLAG_DIRTY;
