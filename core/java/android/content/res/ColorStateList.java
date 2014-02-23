@@ -17,12 +17,14 @@
 package android.content.res;
 
 import android.graphics.Color;
+
 import com.android.internal.util.ArrayUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.util.AttributeSet;
+import android.util.MathUtils;
 import android.util.SparseArray;
 import android.util.StateSet;
 import android.util.Xml;
@@ -172,7 +174,7 @@ public class ColorStateList implements Parcelable {
      * Fill in this object based on the contents of an XML "selector" element.
      */
     private void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
-        throws XmlPullParserException, IOException {
+            throws XmlPullParserException, IOException {
 
         int type;
 
@@ -195,6 +197,8 @@ public class ColorStateList implements Parcelable {
                 continue;
             }
 
+            int alphaRes = 0;
+            float alpha = 1.0f;
             int colorRes = 0;
             int color = 0xffff0000;
             boolean haveColor = false;
@@ -206,17 +210,20 @@ public class ColorStateList implements Parcelable {
             for (i = 0; i < numAttrs; i++) {
                 final int stateResId = attrs.getAttributeNameResource(i);
                 if (stateResId == 0) break;
-                if (stateResId == com.android.internal.R.attr.color) {
+                if (stateResId == com.android.internal.R.attr.alpha) {
+                    alphaRes = attrs.getAttributeResourceValue(i, 0);
+                    if (alphaRes == 0) {
+                        alpha = attrs.getAttributeFloatValue(i, 1.0f);
+                    }
+                } else if (stateResId == com.android.internal.R.attr.color) {
                     colorRes = attrs.getAttributeResourceValue(i, 0);
-
                     if (colorRes == 0) {
                         color = attrs.getAttributeIntValue(i, color);
                         haveColor = true;
                     }
                 } else {
                     stateSpec[j++] = attrs.getAttributeBooleanValue(i, false)
-                                  ? stateResId
-                                  : -stateResId;
+                            ? stateResId : -stateResId;
                 }
             }
             stateSpec = StateSet.trimStateSet(stateSpec, j);
@@ -229,10 +236,18 @@ public class ColorStateList implements Parcelable {
                         + ": <item> tag requires a 'android:color' attribute.");
             }
 
+            if (alphaRes != 0) {
+                alpha = r.getFraction(alphaRes, 1, 1);
+            }
+
+            // Apply alpha modulation.
+            final int alphaMod = MathUtils.constrain((int) (Color.alpha(color) * alpha), 0, 255);
+            color = (color & 0xFFFFFF) | (alphaMod << 24);
+
             if (listSize == 0 || stateSpec.length == 0) {
                 mDefaultColor = color;
             }
-            
+
             if (listSize + 1 >= listAllocated) {
                 listAllocated = ArrayUtils.idealIntArraySize(listSize + 1);
 
@@ -300,6 +315,7 @@ public class ColorStateList implements Parcelable {
         return mDefaultColor;
     }
 
+    @Override
     public String toString() {
         return "ColorStateList{" +
                "mStateSpecs=" + Arrays.deepToString(mStateSpecs) +
@@ -307,14 +323,16 @@ public class ColorStateList implements Parcelable {
                "mDefaultColor=" + mDefaultColor + '}';
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         final int N = mStateSpecs.length;
         dest.writeInt(N);
-        for (int i=0; i<N; i++) {
+        for (int i = 0; i < N; i++) {
             dest.writeIntArray(mStateSpecs[i]);
         }
         dest.writeIntArray(mColors);
@@ -322,17 +340,19 @@ public class ColorStateList implements Parcelable {
 
     public static final Parcelable.Creator<ColorStateList> CREATOR =
             new Parcelable.Creator<ColorStateList>() {
+        @Override
         public ColorStateList[] newArray(int size) {
             return new ColorStateList[size];
         }
 
+        @Override
         public ColorStateList createFromParcel(Parcel source) {
             final int N = source.readInt();
-            int[][] stateSpecs = new int[N][];
-            for (int i=0; i<N; i++) {
+            final int[][] stateSpecs = new int[N][];
+            for (int i = 0; i < N; i++) {
                 stateSpecs[i] = source.createIntArray();
             }
-            int[] colors = source.createIntArray();
+            final int[] colors = source.createIntArray();
             return new ColorStateList(stateSpecs, colors);
         }
     };
