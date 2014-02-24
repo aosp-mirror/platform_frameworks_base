@@ -287,6 +287,7 @@ package android {
     field public static final int alwaysDrawnWithCache = 16842991; // 0x10100ef
     field public static final int alwaysRetainTaskState = 16843267; // 0x1010203
     field public static final int angle = 16843168; // 0x10101a0
+    field public static final int animate = 16843794; // 0x1010412
     field public static final int animateFirstView = 16843477; // 0x10102d5
     field public static final int animateLayoutChanges = 16843506; // 0x10102f2
     field public static final int animateOnClick = 16843356; // 0x101025c
@@ -373,6 +374,7 @@ package android {
     field public static final int clipChildren = 16842986; // 0x10100ea
     field public static final int clipOrientation = 16843274; // 0x101020a
     field public static final int clipToPadding = 16842987; // 0x10100eb
+    field public static final int clipToPath = 16843793; // 0x1010411
     field public static final int codes = 16843330; // 0x1010242
     field public static final int collapseColumns = 16843083; // 0x101014b
     field public static final int color = 16843173; // 0x10101a5
@@ -465,6 +467,7 @@ package android {
     field public static final int dropDownWidth = 16843362; // 0x1010262
     field public static final int duplicateParentState = 16842985; // 0x10100e9
     field public static final int duration = 16843160; // 0x1010198
+    field public static final int durations = 16843786; // 0x101040a
     field public static final int editTextBackground = 16843602; // 0x1010352
     field public static final int editTextColor = 16843601; // 0x1010351
     field public static final int editTextPreferenceStyle = 16842898; // 0x1010092
@@ -509,9 +512,11 @@ package android {
     field public static final int fastScrollTextColor = 16843609; // 0x1010359
     field public static final int fastScrollThumbDrawable = 16843574; // 0x1010336
     field public static final int fastScrollTrackDrawable = 16843577; // 0x1010339
+    field public static final int fill = 16843781; // 0x1010405
     field public static final int fillAfter = 16843197; // 0x10101bd
     field public static final int fillBefore = 16843196; // 0x10101bc
     field public static final int fillEnabled = 16843343; // 0x101024f
+    field public static final int fillOpacity = 16843780; // 0x1010404
     field public static final int fillViewport = 16843130; // 0x101017a
     field public static final int filter = 16843035; // 0x101011b
     field public static final int filterTouchesWhenObscured = 16843460; // 0x10102c4
@@ -715,6 +720,7 @@ package android {
     field public static final int layout_x = 16843135; // 0x101017f
     field public static final int layout_y = 16843136; // 0x1010180
     field public static final int left = 16843181; // 0x10101ad
+    field public static final int limitTo = 16843795; // 0x1010413
     field public static final int lineSpacingExtra = 16843287; // 0x1010217
     field public static final int lineSpacingMultiplier = 16843288; // 0x1010218
     field public static final int lines = 16843092; // 0x1010154
@@ -817,6 +823,7 @@ package android {
     field public static final int parentActivityName = 16843687; // 0x10103a7
     field public static final deprecated int password = 16843100; // 0x101015c
     field public static final int path = 16842794; // 0x101002a
+    field public static final int pathData = 16843782; // 0x1010406
     field public static final int pathPattern = 16842796; // 0x101002c
     field public static final int pathPrefix = 16842795; // 0x101002b
     field public static final int permission = 16842758; // 0x1010006
@@ -826,7 +833,7 @@ package android {
     field public static final int persistent = 16842765; // 0x101000d
     field public static final int persistentDrawingCache = 16842990; // 0x10100ee
     field public static final deprecated int phoneNumber = 16843111; // 0x1010167
-    field public static final int pinned = 16843778; // 0x1010402
+    field public static final int pinned = 16843797; // 0x1010415
     field public static final int pivotX = 16843189; // 0x10101b5
     field public static final int pivotY = 16843190; // 0x10101b6
     field public static final int popupAnimationStyle = 16843465; // 0x10102c9
@@ -881,6 +888,7 @@ package android {
     field public static final int readPermission = 16842759; // 0x1010007
     field public static final int repeatCount = 16843199; // 0x10101bf
     field public static final int repeatMode = 16843200; // 0x10101c0
+    field public static final int repeatStyle = 16843788; // 0x101040c
     field public static final int reqFiveWayNav = 16843314; // 0x1010232
     field public static final int reqHardKeyboard = 16843305; // 0x1010229
     field public static final int reqKeyboardType = 16843304; // 0x1010228
@@ -890,7 +898,7 @@ package android {
     field public static final int required = 16843406; // 0x101028e
     field public static final int requiredAccountType = 16843734; // 0x10103d6
     field public static final int requiredForAllUsers = 16843728; // 0x10103d0
-    field public static final int requiredForProfile = 16843777; // 0x1010401
+    field public static final int requiredForProfile = 16843796; // 0x1010414
     field public static final int requiresFadingEdge = 16843685; // 0x10103a5
     field public static final int requiresSmallestWidthDp = 16843620; // 0x1010364
     field public static final int resizeMode = 16843619; // 0x1010363
@@ -954,6 +962,7 @@ package android {
     field public static final int selectableItemBackground = 16843534; // 0x101030e
     field public static final int selectedDateVerticalBar = 16843591; // 0x1010347
     field public static final int selectedWeekBackgroundColor = 16843586; // 0x1010342
+    field public static final int sequence = 16843787; // 0x101040b
     field public static final int settingsActivity = 16843301; // 0x1010225
     field public static final int shadowColor = 16843105; // 0x1010161
     field public static final int shadowDx = 16843106; // 0x1010162
@@ -1025,6 +1034,10 @@ package android {
     field public static final int streamType = 16843273; // 0x1010209
     field public static final int stretchColumns = 16843081; // 0x1010149
     field public static final int stretchMode = 16843030; // 0x1010116
+    field public static final int stroke = 16843783; // 0x1010407
+    field public static final int strokeLineCap = 16843792; // 0x1010410
+    field public static final int strokeOpacity = 16843784; // 0x1010408
+    field public static final int strokeWidth = 16843785; // 0x1010409
     field public static final int subtitle = 16843473; // 0x10102d1
     field public static final int subtitleTextStyle = 16843513; // 0x10102f9
     field public static final int subtypeExtraValue = 16843674; // 0x101039a
@@ -1165,6 +1178,10 @@ package android {
     field public static final int translationX = 16843554; // 0x1010322
     field public static final int translationY = 16843555; // 0x1010323
     field public static final int translationZ = 16843769; // 0x10103f9
+    field public static final int trigger = 16843777; // 0x1010401
+    field public static final int trimPathEnd = 16843790; // 0x101040e
+    field public static final int trimPathOffset = 16843791; // 0x101040f
+    field public static final int trimPathStart = 16843789; // 0x101040d
     field public static final int type = 16843169; // 0x10101a1
     field public static final int typeface = 16842902; // 0x1010096
     field public static final int uiOptions = 16843672; // 0x1010398
@@ -1189,6 +1206,8 @@ package android {
     field public static final int verticalGap = 16843328; // 0x1010240
     field public static final int verticalScrollbarPosition = 16843572; // 0x1010334
     field public static final int verticalSpacing = 16843029; // 0x1010115
+    field public static final int viewportHeight = 16843779; // 0x1010403
+    field public static final int viewportWidth = 16843778; // 0x1010402
     field public static final int visibility = 16842972; // 0x10100dc
     field public static final int visible = 16843156; // 0x1010194
     field public static final int vmSafeMode = 16843448; // 0x10102b8
@@ -10843,6 +10862,27 @@ package android.graphics.drawable {
     method public void reverseTransition(int);
     method public void setCrossFadeEnabled(boolean);
     method public void startTransition(int);
+  }
+
+  public class VectorDrawable extends android.graphics.drawable.Drawable {
+    ctor public VectorDrawable();
+    method public void draw(android.graphics.Canvas);
+    method public float geAnimationFraction();
+    method public int getOpacity();
+    method public int getRepeatCount();
+    method public void setAlpha(int);
+    method public void setAnimationFraction(float);
+    method public void setColorFilter(android.graphics.ColorFilter);
+    method public void setDuration(long);
+    method public void setIntrinsicHeight(int);
+    method public void setIntrinsicWidth(int);
+    method public void setPadding(android.graphics.Rect);
+    method public void setPadding(int, int, int, int);
+    method public void setRepeatCount(int);
+    method public void setRepeatMode(int);
+    method public void start();
+    method public void stop();
+    field public static final int INFINITE = -1; // 0xffffffff
   }
 
 }

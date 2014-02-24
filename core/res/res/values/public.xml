@@ -2113,6 +2113,25 @@
   <public type="attr" name="controlY2" />
   <public type="attr" name="sharedElementName" />
   <public type="attr" name="transitionGroup" />
+  <public type="attr" name="trigger" />
+  <public type="attr" name="viewportWidth" />
+  <public type="attr" name="viewportHeight" />
+  <public type="attr" name="fillOpacity" />
+  <public type="attr" name="fill" />
+  <public type="attr" name="pathData" />
+  <public type="attr" name="stroke" />
+  <public type="attr" name="strokeOpacity" />
+  <public type="attr" name="strokeWidth" />
+  <public type="attr" name="durations" />
+  <public type="attr" name="sequence" />
+  <public type="attr" name="repeatStyle" />
+  <public type="attr" name="trimPathStart" />
+  <public type="attr" name="trimPathEnd" />
+  <public type="attr" name="trimPathOffset" />
+  <public type="attr" name="strokeLineCap" />
+  <public type="attr" name="clipToPath" />
+  <public type="attr" name="animate" />
+  <public type="attr" name="limitTo" />
   <public type="attr" name="requiredForProfile"/>
   <public type="attr" name="pinned" />
 

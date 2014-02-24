@@ -1,0 +1,45 @@
+<!-- Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <size
+            android:width="64dp"
+            android:height="64dp"/>
+
+    <viewport android:viewportWidth="1000"
+          android:viewportHeight="800"/>
+
+    <group>
+        <path
+                android:name="arrow"
+                android:pathData="M10,300 Q400,50 600,300 T1000,300"
+                android:stroke="#FF00FFFF"
+                android:strokeWidth="40"/>
+    </group>
+
+    <group>
+        <path
+                android:name="house"
+                android:pathData="M10,300 Q400,550 600,300 T1000,300"
+                android:stroke="#FFFF0000"
+                android:strokeWidth="60"
+                android:pivotX="90"
+                android:pivotY="100"/>
+    </group>
+
+    <animation android:sequence="arrow,house"/>
+
+
+</vector>
