@@ -116,8 +116,9 @@ public interface RILConstants {
     int DEACTIVATE_REASON_PDP_RESET = 2;
 
     /* NV config radio reset types. */
-    int NV_CONFIG_RESET_FACTORY = 1;
-    int NV_CONFIG_RESET_NV_ONLY = 2;
+    int NV_CONFIG_RELOAD_RESET = 1;
+    int NV_CONFIG_ERASE_RESET = 2;
+    int NV_CONFIG_FACTORY_RESET = 3;
 
 /*
 cat include/telephony/ril.h | \
