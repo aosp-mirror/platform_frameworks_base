@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -28,6 +29,8 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.GradientDrawable.GradientState;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.Xfermode;
@@ -49,8 +52,8 @@ import java.io.IOException;
  * information, see the guide to <a
  * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.</p>
  * <p>
- * Also see the {@link android.graphics.Bitmap} class, which handles the management and 
- * transformation of raw bitmap graphics, and should be used when drawing to a 
+ * Also see the {@link android.graphics.Bitmap} class, which handles the management and
+ * transformation of raw bitmap graphics, and should be used when drawing to a
  * {@link android.graphics.Canvas}.
  * </p>
  *
@@ -68,13 +71,14 @@ public class BitmapDrawable extends Drawable {
             Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG;
     private BitmapState mBitmapState;
     private Bitmap mBitmap;
+    private PorterDuffColorFilter mTintFilter;
     private int mTargetDensity;
 
     private final Rect mDstRect = new Rect();   // Gravity.apply() sets this
 
     private boolean mApplyGravity;
     private boolean mMutated;
-    
+
      // These are scaled to match the target density.
     private int mBitmapWidth;
     private int mBitmapHeight;
@@ -192,7 +196,7 @@ public class BitmapDrawable extends Drawable {
         mBitmapWidth = mBitmap.getScaledWidth(mTargetDensity);
         mBitmapHeight = mBitmap.getScaledHeight(mTargetDensity);
     }
-    
+
     private void setBitmap(Bitmap bitmap) {
         if (bitmap != mBitmap) {
             mBitmap = bitmap;
@@ -277,7 +281,7 @@ public class BitmapDrawable extends Drawable {
      *
      * @param mipMap True if the bitmap should use mipmaps, false otherwise.
      *
-     * @see #hasMipMap() 
+     * @see #hasMipMap()
      */
     public void setMipMap(boolean mipMap) {
         if (mBitmapState.mBitmap != null) {
@@ -292,7 +296,7 @@ public class BitmapDrawable extends Drawable {
      * @return True if the mipmap hint is set, false otherwise. If the bitmap
      *         is null, this method always returns false.
      *
-     * @see #setMipMap(boolean) 
+     * @see #setMipMap(boolean)
      * @attr ref android.R.styleable#BitmapDrawable_mipMap
      */
     public boolean hasMipMap() {
@@ -302,10 +306,10 @@ public class BitmapDrawable extends Drawable {
     /**
      * Enables or disables anti-aliasing for this drawable. Anti-aliasing affects
      * the edges of the bitmap only so it applies only when the drawable is rotated.
-     * 
+     *
      * @param aa True if the bitmap should be anti-aliased, false otherwise.
      *
-     * @see #hasAntiAlias() 
+     * @see #hasAntiAlias()
      */
     public void setAntiAlias(boolean aa) {
         mBitmapState.mPaint.setAntiAlias(aa);
@@ -337,7 +341,7 @@ public class BitmapDrawable extends Drawable {
 
     /**
      * Indicates the repeat behavior of this drawable on the X axis.
-     * 
+     *
      * @return {@link Shader.TileMode#CLAMP} if the bitmap does not repeat,
      *         {@link Shader.TileMode#REPEAT} or {@link Shader.TileMode#MIRROR} otherwise.
      */
@@ -347,10 +351,10 @@ public class BitmapDrawable extends Drawable {
 
     /**
      * Indicates the repeat behavior of this drawable on the Y axis.
-     * 
+     *
      * @return {@link Shader.TileMode#CLAMP} if the bitmap does not repeat,
      *         {@link Shader.TileMode#REPEAT} or {@link Shader.TileMode#MIRROR} otherwise.
-     */    
+     */
     public Shader.TileMode getTileModeY() {
         return mBitmapState.mTileModeY;
     }
@@ -360,11 +364,11 @@ public class BitmapDrawable extends Drawable {
      * does not repeat its bitmap. Using {@link Shader.TileMode#REPEAT} or
      * {@link Shader.TileMode#MIRROR} the bitmap can be repeated (or tiled) if the bitmap
      * is smaller than this drawable.
-     * 
+     *
      * @param mode The repeat mode for this drawable.
-     * 
-     * @see #setTileModeY(android.graphics.Shader.TileMode) 
-     * @see #setTileModeXY(android.graphics.Shader.TileMode, android.graphics.Shader.TileMode) 
+     *
+     * @see #setTileModeY(android.graphics.Shader.TileMode)
+     * @see #setTileModeXY(android.graphics.Shader.TileMode, android.graphics.Shader.TileMode)
      */
     public void setTileModeX(Shader.TileMode mode) {
         setTileModeXY(mode, mBitmapState.mTileModeY);
@@ -375,12 +379,12 @@ public class BitmapDrawable extends Drawable {
      * does not repeat its bitmap. Using {@link Shader.TileMode#REPEAT} or
      * {@link Shader.TileMode#MIRROR} the bitmap can be repeated (or tiled) if the bitmap
      * is smaller than this drawable.
-     * 
+     *
      * @param mode The repeat mode for this drawable.
-     * 
-     * @see #setTileModeX(android.graphics.Shader.TileMode) 
-     * @see #setTileModeXY(android.graphics.Shader.TileMode, android.graphics.Shader.TileMode) 
-     */    
+     *
+     * @see #setTileModeX(android.graphics.Shader.TileMode)
+     * @see #setTileModeXY(android.graphics.Shader.TileMode, android.graphics.Shader.TileMode)
+     */
     public final void setTileModeY(Shader.TileMode mode) {
         setTileModeXY(mBitmapState.mTileModeX, mode);
     }
@@ -390,12 +394,12 @@ public class BitmapDrawable extends Drawable {
      * does not repeat its bitmap. Using {@link Shader.TileMode#REPEAT} or
      * {@link Shader.TileMode#MIRROR} the bitmap can be repeated (or tiled) if the bitmap
      * is smaller than this drawable.
-     * 
+     *
      * @param xmode The X repeat mode for this drawable.
      * @param ymode The Y repeat mode for this drawable.
-     * 
+     *
      * @see #setTileModeX(android.graphics.Shader.TileMode)
-     * @see #setTileModeY(android.graphics.Shader.TileMode) 
+     * @see #setTileModeY(android.graphics.Shader.TileMode)
      */
     public void setTileModeXY(Shader.TileMode xmode, Shader.TileMode ymode) {
         final BitmapState state = mBitmapState;
@@ -457,66 +461,86 @@ public class BitmapDrawable extends Drawable {
 
     @Override
     public void draw(Canvas canvas) {
-        Bitmap bitmap = mBitmap;
-        if (bitmap != null) {
-            final BitmapState state = mBitmapState;
-            if (state.mRebuildShader) {
-                Shader.TileMode tmx = state.mTileModeX;
-                Shader.TileMode tmy = state.mTileModeY;
+        final Bitmap bitmap = mBitmap;
+        if (bitmap == null) {
+            return;
+        }
 
-                if (tmx == null && tmy == null) {
-                    state.mPaint.setShader(null);
-                } else {
-                    state.mPaint.setShader(new BitmapShader(bitmap,
-                            tmx == null ? Shader.TileMode.CLAMP : tmx,
-                            tmy == null ? Shader.TileMode.CLAMP : tmy));
-                }
-                state.mRebuildShader = false;
-                copyBounds(mDstRect);
-            }
-
-            Shader shader = state.mPaint.getShader();
-            final boolean needMirroring = needMirroring();
-            if (shader == null) {
-                if (mApplyGravity) {
-                    final int layoutDirection = getLayoutDirection();
-                    Gravity.apply(state.mGravity, mBitmapWidth, mBitmapHeight,
-                            getBounds(), mDstRect, layoutDirection);
-                    mApplyGravity = false;
-                }
-                if (needMirroring) {
-                    canvas.save();
-                    // Mirror the bitmap
-                    canvas.translate(mDstRect.right - mDstRect.left, 0);
-                    canvas.scale(-1.0f, 1.0f);
-                }
-                canvas.drawBitmap(bitmap, null, mDstRect, state.mPaint);
-                if (needMirroring) {
-                    canvas.restore();
-                }
+        final BitmapState state = mBitmapState;
+        final Paint paint = state.mPaint;
+        if (state.mRebuildShader) {
+            final Shader.TileMode tmx = state.mTileModeX;
+            final Shader.TileMode tmy = state.mTileModeY;
+            if (tmx == null && tmy == null) {
+                paint.setShader(null);
             } else {
-                if (mApplyGravity) {
-                    copyBounds(mDstRect);
-                    mApplyGravity = false;
-                }
-                if (needMirroring) {
-                    // Mirror the bitmap
-                    updateMirrorMatrix(mDstRect.right - mDstRect.left);
-                    shader.setLocalMatrix(mMirrorMatrix);
-                } else {
-                    if (mMirrorMatrix != null) {
-                        mMirrorMatrix = null;
-                        shader.setLocalMatrix(Matrix.IDENTITY_MATRIX);
-                    }
-                }
-                canvas.drawRect(mDstRect, state.mPaint);
+                paint.setShader(new BitmapShader(bitmap,
+                        tmx == null ? Shader.TileMode.CLAMP : tmx,
+                        tmy == null ? Shader.TileMode.CLAMP : tmy));
             }
+
+            state.mRebuildShader = false;
+            copyBounds(mDstRect);
+        }
+
+        final boolean clearColorFilter;
+        if (mTintFilter != null && paint.getColorFilter() == null) {
+            paint.setColorFilter(mTintFilter);
+            clearColorFilter = true;
+        } else {
+            clearColorFilter = false;
+        }
+
+        final Shader shader = paint.getShader();
+        final boolean needMirroring = needMirroring();
+        if (shader == null) {
+            if (mApplyGravity) {
+                final int layoutDirection = getLayoutDirection();
+                Gravity.apply(state.mGravity, mBitmapWidth, mBitmapHeight,
+                        getBounds(), mDstRect, layoutDirection);
+                mApplyGravity = false;
+            }
+
+            if (needMirroring) {
+                canvas.save();
+                // Mirror the bitmap
+                canvas.translate(mDstRect.right - mDstRect.left, 0);
+                canvas.scale(-1.0f, 1.0f);
+            }
+
+            canvas.drawBitmap(bitmap, null, mDstRect, paint);
+
+            if (needMirroring) {
+                canvas.restore();
+            }
+        } else {
+            if (mApplyGravity) {
+                copyBounds(mDstRect);
+                mApplyGravity = false;
+            }
+
+            if (needMirroring) {
+                // Mirror the bitmap
+                updateMirrorMatrix(mDstRect.right - mDstRect.left);
+                shader.setLocalMatrix(mMirrorMatrix);
+            } else {
+                if (mMirrorMatrix != null) {
+                    mMirrorMatrix = null;
+                    shader.setLocalMatrix(Matrix.IDENTITY_MATRIX);
+                }
+            }
+
+            canvas.drawRect(mDstRect, paint);
+        }
+
+        if (clearColorFilter) {
+            paint.setColorFilter(null);
         }
     }
 
     @Override
     public void setAlpha(int alpha) {
-        int oldAlpha = mBitmapState.mPaint.getAlpha();
+        final int oldAlpha = mBitmapState.mPaint.getAlpha();
         if (alpha != oldAlpha) {
             mBitmapState.mPaint.setAlpha(alpha);
             invalidateSelf();
@@ -531,6 +555,43 @@ public class BitmapDrawable extends Drawable {
     @Override
     public void setColorFilter(ColorFilter cf) {
         mBitmapState.mPaint.setColorFilter(cf);
+        invalidateSelf();
+    }
+
+    /**
+     * Specifies a tint for this drawable.
+     * <p>
+     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
+     * tint.
+     *
+     * @param tint Color state list to use for tinting this drawable, or null to
+     *            clear the tint
+     */
+    public void setTint(ColorStateList tint) {
+        mBitmapState.mTint = tint;
+        if (mTintFilter == null) {
+            if (tint != null) {
+                final int color = tint.getColorForState(getState(), 0);
+                mTintFilter = new PorterDuffColorFilter(color, mBitmapState.mTintMode);
+            }
+        } else {
+            if (tint == null) {
+                mTintFilter = null;
+            }
+        }
+        invalidateSelf();
+    }
+
+    /**
+     * Specifies the blending mode used to apply tint.
+     *
+     * @param tintMode A Porter-Duff blending mode
+     */
+    public void setTintMode(Mode tintMode) {
+        mBitmapState.mTintMode = tintMode;
+        if (mTintFilter != null) {
+            mTintFilter.setMode(tintMode);
+        }
         invalidateSelf();
     }
 
@@ -558,11 +619,34 @@ public class BitmapDrawable extends Drawable {
     }
 
     @Override
+    protected boolean onStateChange(int[] stateSet) {
+        final ColorStateList tint = mBitmapState.mTint;
+        if (tint != null) {
+            final int newColor = tint.getColorForState(stateSet, 0);
+            final int oldColor = mTintFilter.getColor();
+            if (oldColor != newColor) {
+                mTintFilter.setColor(newColor);
+                invalidateSelf();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean isStateful() {
+        final BitmapState s = mBitmapState;
+        return super.isStateful() || (s.mTint != null && s.mTint.isStateful());
+    }
+
+    @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
             throws XmlPullParserException, IOException {
         super.inflate(r, parser, attrs);
 
-        TypedArray a = r.obtainAttributes(attrs, com.android.internal.R.styleable.BitmapDrawable);
+        final BitmapState state = mBitmapState;
+        final TypedArray a = r.obtainAttributes(attrs, com.android.internal.R.styleable.BitmapDrawable);
 
         final int id = a.getResourceId(com.android.internal.R.styleable.BitmapDrawable_src, 0);
         if (id == 0) {
@@ -574,7 +658,7 @@ public class BitmapDrawable extends Drawable {
             throw new XmlPullParserException(parser.getPositionDescription() +
                     ": <bitmap> requires a valid src attribute");
         }
-        mBitmapState.mBitmap = bitmap;
+        state.mBitmap = bitmap;
         setBitmap(bitmap);
         setTargetDensity(r.getDisplayMetrics());
         setMipMap(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_mipMap,
@@ -582,19 +666,16 @@ public class BitmapDrawable extends Drawable {
         setAutoMirrored(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_autoMirrored,
                 false));
 
-        if (a.hasValue(com.android.internal.R.styleable.BitmapDrawable_colorFilterColor)) {
-            final int colorFilterColor = a.getColor(
-                    com.android.internal.R.styleable.BitmapDrawable_colorFilterColor, 0);
-            final int modeValue = a.getInt(
-                    com.android.internal.R.styleable.BitmapDrawable_colorFilterMode,
-                    Mode.MULTIPLY.ordinal());
-            final Mode mode = Drawable.parseColorFilterMode(modeValue);
-            if (mode != null) {
-                setColorFilter(colorFilterColor, mode);
-            }
+        final int tintModeValue = a.getInt(
+                com.android.internal.R.styleable.BitmapDrawable_tintMode, -1);
+        state.mTintMode = Drawable.parseTintMode(tintModeValue, Mode.SRC_IN);
+        state.mTint = a.getColorStateList(com.android.internal.R.styleable.BitmapDrawable_tint);
+        if (state.mTint != null) {
+            final int color = state.mTint.getColorForState(getState(), 0);
+            mTintFilter = new PorterDuffColorFilter(color, mBitmapState.mTintMode);
         }
 
-        final Paint paint = mBitmapState.mPaint;
+        final Paint paint = state.mPaint;
         paint.setAntiAlias(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_antialias,
                 paint.isAntiAlias()));
         paint.setFilterBitmap(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_filter,
@@ -648,6 +729,8 @@ public class BitmapDrawable extends Drawable {
 
     final static class BitmapState extends ConstantState {
         Bitmap mBitmap;
+        ColorStateList mTint;
+        Mode mTintMode;
         int mChangingConfigurations;
         int mGravity = Gravity.FILL;
         Paint mPaint = new Paint(DEFAULT_PAINT_FLAGS);
@@ -663,6 +746,8 @@ public class BitmapDrawable extends Drawable {
 
         BitmapState(BitmapState bitmapState) {
             mBitmap = bitmapState.mBitmap;
+            mTint = bitmapState.mTint;
+            mTintMode = bitmapState.mTintMode;
             mChangingConfigurations = bitmapState.mChangingConfigurations;
             mGravity = bitmapState.mGravity;
             mTileModeX = bitmapState.mTileModeX;
@@ -696,11 +781,18 @@ public class BitmapDrawable extends Drawable {
 
     private BitmapDrawable(BitmapState state, Resources res) {
         mBitmapState = state;
+
         if (res != null) {
             mTargetDensity = res.getDisplayMetrics().densityDpi;
         } else {
             mTargetDensity = state.mTargetDensity;
         }
+
+        if (state.mTint != null) {
+            final int color = state.mTint.getColorForState(getState(), 0);
+            mTintFilter = new PorterDuffColorFilter(color, state.mTintMode);
+        }
+
         setBitmap(state != null ? state.mBitmap : null);
     }
 }

@@ -19,6 +19,7 @@ package android.graphics.drawable;
 import android.graphics.Insets;
 import android.graphics.Xfermode;
 import android.os.Trace;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -34,6 +35,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.PorterDuff.Mode;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.StateSet;
@@ -1137,15 +1139,21 @@ public abstract class Drawable {
     }
 
     /**
-     * Parses a {@link android.graphics.PorterDuff.Mode} from a colorFilterMode
+     * Parses a {@link android.graphics.PorterDuff.Mode} from a tintMode
      * attribute's enum value.
      */
-    static PorterDuff.Mode parseColorFilterMode(int value) {
-        final PorterDuff.Mode[] modes = PorterDuff.Mode.values();
-        if (value >= 0 && value < modes.length) {
-            return modes[value];
+    static PorterDuff.Mode parseTintMode(int value, Mode defaultMode) {
+        switch (value) {
+            case 0:
+                return Mode.SRC_IN;
+            case 1:
+                return Mode.SRC_ATOP;
+            case 2:
+                return Mode.MULTIPLY;
+            case 3:
+                return Mode.SCREEN;
         }
-        return null;
+        return defaultMode;
     }
 }
 
