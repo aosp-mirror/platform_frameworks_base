@@ -58,6 +58,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
     private MediaRecorder mRecorder;
 
     private int MIN_VIDEO_FPS = 5;
+    private int HIGH_SPEED_FPS = 120;
 
     private static final int CAMERA_ID = 0;
 
@@ -221,10 +222,12 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
         return success;
     }
 
-    private boolean recordVideoFromSurface(int frameRate, int width, int height,
+    private boolean recordVideoFromSurface(
+            int frameRate, int captureRate, int width, int height,
             int videoFormat, int outFormat, String outFile, boolean videoOnly) {
         Log.v(TAG,"recordVideoFromSurface");
         MediaRecorder recorder = new MediaRecorder();
+        int sleepTime = 33; // normal capture at 33ms / frame
         try {
             if (!videoOnly) {
                 recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -233,6 +236,10 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
             recorder.setOutputFormat(outFormat);
             recorder.setOutputFile(outFile);
             recorder.setVideoFrameRate(frameRate);
+            if (captureRate > 0) {
+                recorder.setCaptureRate(captureRate);
+                sleepTime = 1000 / captureRate;
+            }
             recorder.setVideoSize(width, height);
             recorder.setVideoEncoder(videoFormat);
             if (!videoOnly) {
@@ -256,7 +263,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
                 String text = "Frame #" + i;
                 canvas.drawText(text, 100, 100, paint);
                 surface.unlockCanvasAndPost(canvas);
-                Thread.sleep(33);
+                Thread.sleep(sleepTime);
             }
 
             Log.v(TAG, "start");
@@ -270,7 +277,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
                 String text = "Frame #" + i;
                 canvas.drawText(text, 100, 100, paint);
                 surface.unlockCanvasAndPost(canvas);
-                Thread.sleep(33);
+                Thread.sleep(sleepTime);
             }
 
             Log.v(TAG, "stop");
@@ -517,7 +524,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
                 String filename = "/sdcard/surface_" +
                             (k==0?"video_only":"with_audio") + ".3gp";
 
-                success = recordVideoFromSurface(frameRate, 352, 288, codec,
+                success = recordVideoFromSurface(frameRate, 0, 352, 288, codec,
                         MediaRecorder.OutputFormat.THREE_GPP, filename,
                         k == 0 ? true : false /* videoOnly */);
                 if (success) {
@@ -532,4 +539,38 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
         }
         assertTrue("testSurfaceRecording", noOfFailure == 0);
     }
+
+    // Test recording from surface source with/without audio
+    public void testSurfaceRecordingTimeLapse() {
+        boolean success = false;
+        int noOfFailure = 0;
+        try {
+            int codec = MediaRecorder.VideoEncoder.H264;
+            int frameRate = MediaProfileReader.getMaxFrameRateForCodec(codec);
+            for (int k = 0; k < 2; k++) {
+                // k==0: time lapse test, set capture rate to MIN_VIDEO_FPS
+                // k==1: slow motion test, set capture rate to HIGH_SPEED_FPS
+                String filename = "/sdcard/surface_" +
+                            (k==0 ? "time_lapse" : "slow_motion") + ".3gp";
+
+                // always set videoOnly=false, MediaRecorder should disable
+                // audio automatically with time lapse/slow motion
+                success = recordVideoFromSurface(frameRate,
+                        k==0 ? MIN_VIDEO_FPS : HIGH_SPEED_FPS,
+                        352, 288, codec,
+                        MediaRecorder.OutputFormat.THREE_GPP,
+                        filename, false /* videoOnly */);
+                if (success) {
+                    success = validateVideo(filename, 352, 288);
+                }
+                if (!success) {
+                    noOfFailure++;
+                }
+            }
+        } catch (Exception e) {
+            Log.v(TAG, e.toString());
+        }
+        assertTrue("testSurfaceRecordingTimeLapse", noOfFailure == 0);
+    }
+
 }

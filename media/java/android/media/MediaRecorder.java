@@ -417,8 +417,8 @@ public class MediaRecorder
         setParameter("time-lapse-enable=1");
 
         double timeBetweenFrameCapture = 1 / fps;
-        int timeBetweenFrameCaptureMs = (int) (1000 * timeBetweenFrameCapture);
-        setParameter("time-between-time-lapse-frame-capture=" + timeBetweenFrameCaptureMs);
+        long timeBetweenFrameCaptureUs = (long) (1000000 * timeBetweenFrameCapture);
+        setParameter("time-between-time-lapse-frame-capture=" + timeBetweenFrameCaptureUs);
     }
 
     /**
