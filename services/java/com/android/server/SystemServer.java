@@ -851,9 +851,8 @@ public final class SystemServer {
                 }
             }
 
-            if (!disableNonCoreServices
-                    && context.getResources().getBoolean(R.bool.config_dreamsSupported)) {
-                // Dreams (interactive idle-time views, a/k/a screen savers)
+            if (!disableNonCoreServices) {
+                // Dreams (interactive idle-time views, a/k/a screen savers, and doze mode)
                 mSystemServiceManager.startService(DreamManagerService.class);
             }
 
