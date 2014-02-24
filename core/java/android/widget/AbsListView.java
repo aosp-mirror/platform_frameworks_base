@@ -704,6 +704,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private SavedState mPendingSync;
 
     /**
+     * Whether the view is in the process of detaching from its window.
+     */
+    private boolean mIsDetaching;
+
+    /**
      * Interface definition for a callback to be invoked when the list or grid
      * has been scrolled.
      */
@@ -2788,6 +2793,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 
+        mIsDetaching = true;
+
         // Dismiss the popup in case onSaveInstanceState() was not invoked
         dismissPopup();
 
@@ -2836,6 +2843,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             removeCallbacks(mTouchModeReset);
             mTouchModeReset.run();
         }
+
+        mIsDetaching = false;
     }
 
     @Override
@@ -3462,7 +3471,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mPositionScroller.stop();
         }
 
-        if (!isAttachedToWindow()) {
+        if (mIsDetaching || !isAttachedToWindow()) {
             // Something isn't right.
             // Since we rely on being attached to get data set change notifications,
             // don't risk doing anything where we might try to resync and find things
@@ -3701,7 +3710,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     mTouchMode = TOUCH_MODE_REST;
                                     child.setPressed(false);
                                     setPressed(false);
-                                    if (!mDataChanged && isAttachedToWindow()) {
+                                    if (!mDataChanged && !mIsDetaching && isAttachedToWindow()) {
                                         performClick.run();
                                     }
                                 }
@@ -3976,7 +3985,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mPositionScroller.stop();
         }
 
-        if (!isAttachedToWindow()) {
+        if (mIsDetaching || !isAttachedToWindow()) {
             // Something isn't right.
             // Since we rely on being attached to get data set change notifications,
             // don't risk doing anything where we might try to resync and find things
