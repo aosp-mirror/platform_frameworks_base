@@ -141,6 +141,11 @@ final class Settings {
     final SparseArray<PreferredIntentResolver> mPreferredActivities =
             new SparseArray<PreferredIntentResolver>();
 
+    // The persistent preferred activities of the user's profile/device owner
+    // associated with particular intent filters.
+    final SparseArray<PersistentPreferredIntentResolver> mPersistentPreferredActivities =
+            new SparseArray<PersistentPreferredIntentResolver>();
+
     final HashMap<String, SharedUserSetting> mSharedUsers =
             new HashMap<String, SharedUserSetting>();
     private final ArrayList<Object> mUserIds = new ArrayList<Object>();
@@ -776,6 +781,15 @@ final class Settings {
         return pir;
     }
 
+    PersistentPreferredIntentResolver editPersistentPreferredActivitiesLPw(int userId) {
+        PersistentPreferredIntentResolver ppir = mPersistentPreferredActivities.get(userId);
+        if (ppir == null) {
+            ppir = new PersistentPreferredIntentResolver();
+            mPersistentPreferredActivities.put(userId, ppir);
+        }
+        return ppir;
+    }
+
     private File getUserPackagesStateFile(int userId) {
         return new File(Environment.getUserSystemDirectory(userId), "package-restrictions.xml");
     }
@@ -830,6 +844,27 @@ final class Settings {
             } else {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Unknown element under <preferred-activities>: " + parser.getName());
+                XmlUtils.skipCurrentTag(parser);
+            }
+        }
+    }
+
+    private void readPersistentPreferredActivitiesLPw(XmlPullParser parser, int userId)
+            throws XmlPullParserException, IOException {
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+            String tagName = parser.getName();
+            if (tagName.equals(TAG_ITEM)) {
+                PersistentPreferredActivity ppa = new PersistentPreferredActivity(parser);
+                editPersistentPreferredActivitiesLPw(userId).addFilter(ppa);
+            } else {
+                PackageManagerService.reportSettingsProblem(Log.WARN,
+                        "Unknown element under <hard-preferred-activities>: " + parser.getName());
                 XmlUtils.skipCurrentTag(parser);
             }
         }
@@ -961,6 +996,8 @@ final class Settings {
                             enabledCaller, enabledComponents, disabledComponents);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
+                } else if (tagName.equals("hard-preferred-activities")) {
+                    readPersistentPreferredActivitiesLPw(parser, userId);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <stopped-packages>: "
                           + parser.getName());
@@ -1022,6 +1059,20 @@ final class Settings {
             }
         }
         serializer.endTag(null, "preferred-activities");
+    }
+
+    void writePersistentPreferredActivitiesLPr(XmlSerializer serializer, int userId)
+            throws IllegalArgumentException, IllegalStateException, IOException {
+        serializer.startTag(null, "hard-preferred-activities");
+        PersistentPreferredIntentResolver ppir = mPersistentPreferredActivities.get(userId);
+        if (ppir != null) {
+            for (final PersistentPreferredActivity ppa : ppir.filterSet()) {
+                serializer.startTag(null, TAG_ITEM);
+                ppa.writeToXml(serializer);
+                serializer.endTag(null, TAG_ITEM);
+            }
+        }
+        serializer.endTag(null, "hard-preferred-activities");
     }
 
     void writePackageRestrictionsLPr(int userId) {
@@ -1119,6 +1170,8 @@ final class Settings {
             }
 
             writePreferredActivitiesLPr(serializer, userId, true);
+
+            writePersistentPreferredActivitiesLPr(serializer, userId);
 
             serializer.endTag(null, TAG_PACKAGE_RESTRICTIONS);
 
@@ -1721,6 +1774,10 @@ final class Settings {
                     // Upgrading from old single-user implementation;
                     // these are the preferred activities for user 0.
                     readPreferredActivitiesLPw(parser, 0);
+                } else if (tagName.equals("hard-preferred-activities")) {
+                    // TODO: check whether this is okay! as it is very
+                    // similar to how preferred-activities are treated
+                    readPersistentPreferredActivitiesLPw(parser, 0);
                 } else if (tagName.equals("updated-package")) {
                     readDisabledSysPackageLPw(parser);
                 } else if (tagName.equals("cleaning-package")) {
