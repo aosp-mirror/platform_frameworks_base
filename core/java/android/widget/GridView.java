@@ -1335,27 +1335,30 @@ public class GridView extends AbsListView {
             }
 
             // Attempt to restore accessibility focus, if necessary.
-            final View newAccessibilityFocusedView = viewRootImpl.getAccessibilityFocusedHost();
-            if (newAccessibilityFocusedView == null) {
-                if (accessibilityFocusLayoutRestoreView != null
-                        && accessibilityFocusLayoutRestoreView.isAttachedToWindow()) {
-                    final AccessibilityNodeProvider provider =
-                            accessibilityFocusLayoutRestoreView.getAccessibilityNodeProvider();
-                    if (accessibilityFocusLayoutRestoreNode != null && provider != null) {
-                        final int virtualViewId = AccessibilityNodeInfo.getVirtualDescendantId(
-                                accessibilityFocusLayoutRestoreNode.getSourceNodeId());
-                        provider.performAction(virtualViewId,
-                                AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
-                    } else {
-                        accessibilityFocusLayoutRestoreView.requestAccessibilityFocus();
-                    }
-                } else if (accessibilityFocusPosition != INVALID_POSITION) {
-                    // Bound the position within the visible children.
-                    final int position = MathUtils.constrain(
-                            accessibilityFocusPosition - mFirstPosition, 0, getChildCount() - 1);
-                    final View restoreView = getChildAt(position);
-                    if (restoreView != null) {
-                        restoreView.requestAccessibilityFocus();
+            if (viewRootImpl != null) {
+                final View newAccessibilityFocusedView = viewRootImpl.getAccessibilityFocusedHost();
+                if (newAccessibilityFocusedView == null) {
+                    if (accessibilityFocusLayoutRestoreView != null
+                            && accessibilityFocusLayoutRestoreView.isAttachedToWindow()) {
+                        final AccessibilityNodeProvider provider =
+                                accessibilityFocusLayoutRestoreView.getAccessibilityNodeProvider();
+                        if (accessibilityFocusLayoutRestoreNode != null && provider != null) {
+                            final int virtualViewId = AccessibilityNodeInfo.getVirtualDescendantId(
+                                    accessibilityFocusLayoutRestoreNode.getSourceNodeId());
+                            provider.performAction(virtualViewId,
+                                    AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
+                        } else {
+                            accessibilityFocusLayoutRestoreView.requestAccessibilityFocus();
+                        }
+                    } else if (accessibilityFocusPosition != INVALID_POSITION) {
+                        // Bound the position within the visible children.
+                        final int position = MathUtils.constrain(
+                                accessibilityFocusPosition - mFirstPosition, 0,
+                                getChildCount() - 1);
+                        final View restoreView = getChildAt(position);
+                        if (restoreView != null) {
+                            restoreView.requestAccessibilityFocus();
+                        }
                     }
                 }
             }
