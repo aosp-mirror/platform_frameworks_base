@@ -1468,14 +1468,16 @@ public abstract class CameraMetadata {
 
     /**
      * <p>AE is off or recently reset. When a camera device is opened, it starts in
-     * this state.</p>
+     * this state. This is a transient state, the camera device may skip reporting
+     * this state in capture result.</p>
      * @see CaptureResult#CONTROL_AE_STATE
      */
     public static final int CONTROL_AE_STATE_INACTIVE = 0;
 
     /**
      * <p>AE doesn't yet have a good set of control values
-     * for the current scene.</p>
+     * for the current scene. This is a transient state, the camera device may skip
+     * reporting this state in capture result.</p>
      * @see CaptureResult#CONTROL_AE_STATE
      */
     public static final int CONTROL_AE_STATE_SEARCHING = 1;
@@ -1506,7 +1508,8 @@ public abstract class CameraMetadata {
      * (through the {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger} START),
      * and is currently executing it. Once PRECAPTURE
      * completes, AE will transition to CONVERGED or
-     * FLASH_REQUIRED as appropriate.</p>
+     * FLASH_REQUIRED as appropriate. This is a transient state, the
+     * camera device may skip reporting this state in capture result.</p>
      *
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
      * @see CaptureResult#CONTROL_AE_STATE
@@ -1520,7 +1523,8 @@ public abstract class CameraMetadata {
     /**
      * <p>AF off or has not yet tried to scan/been asked
      * to scan.  When a camera device is opened, it starts in
-     * this state.</p>
+     * this state. This is a transient state, the camera device may
+     * skip reporting this state in capture result.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_INACTIVE = 0;
@@ -1528,7 +1532,8 @@ public abstract class CameraMetadata {
     /**
      * <p>if CONTINUOUS_* modes are supported. AF is
      * currently doing an AF scan initiated by a continuous
-     * autofocus mode</p>
+     * autofocus mode. This is a transient state, the camera device may
+     * skip reporting this state in capture result.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_PASSIVE_SCAN = 1;
@@ -1536,15 +1541,17 @@ public abstract class CameraMetadata {
     /**
      * <p>if CONTINUOUS_* modes are supported. AF currently
      * believes it is in focus, but may restart scanning at
-     * any time.</p>
+     * any time. This is a transient state, the camera device may skip
+     * reporting this state in capture result.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_PASSIVE_FOCUSED = 2;
 
     /**
      * <p>if AUTO or MACRO modes are supported. AF is doing
-     * an AF scan because it was triggered by AF
-     * trigger</p>
+     * an AF scan because it was triggered by AF trigger. This is a
+     * transient state, the camera device may skip reporting
+     * this state in capture result.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_ACTIVE_SCAN = 3;
@@ -1552,7 +1559,7 @@ public abstract class CameraMetadata {
     /**
      * <p>if any AF mode besides OFF is supported. AF
      * believes it is focused correctly and is
-     * locked</p>
+     * locked.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_FOCUSED_LOCKED = 4;
@@ -1560,7 +1567,7 @@ public abstract class CameraMetadata {
     /**
      * <p>if any AF mode besides OFF is supported. AF has
      * failed to focus successfully and is
-     * locked</p>
+     * locked.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_NOT_FOCUSED_LOCKED = 5;
@@ -1568,7 +1575,8 @@ public abstract class CameraMetadata {
     /**
      * <p>if CONTINUOUS_* modes are supported. AF finished a
      * passive scan without finding focus, and may restart
-     * scanning at any time.</p>
+     * scanning at any time. This is a transient state, the camera
+     * device may skip reporting this state in capture result.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_PASSIVE_UNFOCUSED = 6;
@@ -1579,14 +1587,16 @@ public abstract class CameraMetadata {
 
     /**
      * <p>AWB is not in auto mode.  When a camera device is opened, it
-     * starts in this state.</p>
+     * starts in this state. This is a transient state, the camera device may
+     * skip reporting this state in capture result.</p>
      * @see CaptureResult#CONTROL_AWB_STATE
      */
     public static final int CONTROL_AWB_STATE_INACTIVE = 0;
 
     /**
      * <p>AWB doesn't yet have a good set of control
-     * values for the current scene.</p>
+     * values for the current scene. This is a transient state, the camera device
+     * may skip reporting this state in capture result.</p>
      * @see CaptureResult#CONTROL_AWB_STATE
      */
     public static final int CONTROL_AWB_STATE_SEARCHING = 1;
