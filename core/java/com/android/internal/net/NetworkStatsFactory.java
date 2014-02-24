@@ -17,6 +17,7 @@
 package com.android.internal.net;
 
 import static android.net.NetworkStats.SET_ALL;
+import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
@@ -26,6 +27,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ProcFileReader;
 
 import java.io.File;
@@ -165,22 +167,32 @@ public class NetworkStatsFactory {
     }
 
     public NetworkStats readNetworkStatsDetail() throws IOException {
-        return readNetworkStatsDetail(UID_ALL);
+        return readNetworkStatsDetail(UID_ALL, null, TAG_ALL, null);
     }
 
-    public NetworkStats readNetworkStatsDetail(int limitUid) throws IOException {
+    public NetworkStats readNetworkStatsDetail(int limitUid, String[] limitIfaces, int limitTag,
+            NetworkStats lastStats)
+            throws IOException {
         if (USE_NATIVE_PARSING) {
-            final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
-            if (nativeReadNetworkStatsDetail(stats, mStatsXtUid.getAbsolutePath(), limitUid) != 0) {
+            final NetworkStats stats;
+            if (lastStats != null) {
+                stats = lastStats;
+                stats.setElapsedRealtime(SystemClock.elapsedRealtime());
+            } else {
+                stats = new NetworkStats(SystemClock.elapsedRealtime(), -1);
+            }
+            if (nativeReadNetworkStatsDetail(stats, mStatsXtUid.getAbsolutePath(), limitUid,
+                    limitIfaces, limitTag) != 0) {
                 throw new IOException("Failed to parse network stats");
             }
             if (SANITY_CHECK_NATIVE) {
-                final NetworkStats javaStats = javaReadNetworkStatsDetail(mStatsXtUid, limitUid);
+                final NetworkStats javaStats = javaReadNetworkStatsDetail(mStatsXtUid, limitUid,
+                        limitIfaces, limitTag);
                 assertEquals(javaStats, stats);
             }
             return stats;
         } else {
-            return javaReadNetworkStatsDetail(mStatsXtUid, limitUid);
+            return javaReadNetworkStatsDetail(mStatsXtUid, limitUid, limitIfaces, limitTag);
         }
     }
 
@@ -189,7 +201,8 @@ public class NetworkStatsFactory {
      * expected to monotonically increase since device boot.
      */
     @VisibleForTesting
-    public static NetworkStats javaReadNetworkStatsDetail(File detailPath, int limitUid)
+    public static NetworkStats javaReadNetworkStatsDetail(File detailPath, int limitUid,
+            String[] limitIfaces, int limitTag)
             throws IOException {
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
 
@@ -222,7 +235,9 @@ public class NetworkStatsFactory {
                 entry.txBytes = reader.nextLong();
                 entry.txPackets = reader.nextLong();
 
-                if (limitUid == UID_ALL || limitUid == entry.uid) {
+                if ((limitIfaces == null || ArrayUtils.contains(limitIfaces, entry.iface))
+                        && (limitUid == UID_ALL || limitUid == entry.uid)
+                        && (limitTag == TAG_ALL || limitTag == entry.tag)) {
                     stats.addValues(entry);
                 }
 
@@ -264,5 +279,5 @@ public class NetworkStatsFactory {
      */
     @VisibleForTesting
     public static native int nativeReadNetworkStatsDetail(
-            NetworkStats stats, String path, int limitUid);
+            NetworkStats stats, String path, int limitUid, String[] limitIfaces, int limitTag);
 }

@@ -16,6 +16,7 @@
 
 package com.android.internal.os;
 
+import static android.net.NetworkStats.UID_ALL;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
 
 import android.bluetooth.BluetoothDevice;
@@ -52,6 +53,7 @@ import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.NetworkStatsFactory;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.JournaledFile;
 import com.google.android.collect.Sets;
@@ -370,12 +372,15 @@ public final class BatteryStatsImpl extends BatteryStats {
             new HashMap<String, KernelWakelockStats>();
 
     private final NetworkStatsFactory mNetworkStatsFactory = new NetworkStatsFactory();
-    private NetworkStats mLastSnapshot;
+    private NetworkStats mLastMobileSnapshot;
+    private NetworkStats mLastWifiSnapshot;
+    private NetworkStats mTmpNetworkStats;
+    private final NetworkStats.Entry mTmpNetworkStatsEntry = new NetworkStats.Entry();
 
     @GuardedBy("this")
-    private HashSet<String> mMobileIfaces = Sets.newHashSet();
+    private String[] mMobileIfaces = new String[0];
     @GuardedBy("this")
-    private HashSet<String> mWifiIfaces = Sets.newHashSet();
+    private String[] mWifiIfaces = new String[0];
 
     // For debugging
     public BatteryStatsImpl() {
@@ -2954,16 +2959,45 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    private static String[] includeInStringArray(String[] array, String str) {
+        if (ArrayUtils.indexOf(array, str) >= 0) {
+            return array;
+        }
+        String[] newArray = new String[array.length+1];
+        System.arraycopy(array, 0, newArray, 0, array.length);
+        newArray[array.length] = str;
+        return newArray;
+    }
+
+    private static String[] excludeFromStringArray(String[] array, String str) {
+        int index = ArrayUtils.indexOf(array, str);
+        if (index >= 0) {
+            String[] newArray = new String[array.length-1];
+            if (index > 0) {
+                System.arraycopy(array, 0, newArray, 0, index);
+            }
+            if (index < array.length-1) {
+                System.arraycopy(array, index+1, newArray, index, array.length-index-1);
+            }
+            return newArray;
+        }
+        return array;
+    }
+
     public void noteNetworkInterfaceTypeLocked(String iface, int networkType) {
         if (ConnectivityManager.isNetworkTypeMobile(networkType)) {
-            mMobileIfaces.add(iface);
+            mMobileIfaces = includeInStringArray(mMobileIfaces, iface);
+            if (DEBUG) Slog.d(TAG, "Note mobile iface " + iface + ": " + mMobileIfaces);
         } else {
-            mMobileIfaces.remove(iface);
+            mMobileIfaces = excludeFromStringArray(mMobileIfaces, iface);
+            if (DEBUG) Slog.d(TAG, "Note non-mobile iface " + iface + ": " + mMobileIfaces);
         }
         if (ConnectivityManager.isNetworkTypeWifi(networkType)) {
-            mWifiIfaces.add(iface);
+            mWifiIfaces = includeInStringArray(mWifiIfaces, iface);
+            if (DEBUG) Slog.d(TAG, "Note wifi iface " + iface + ": " + mWifiIfaces);
         } else {
-            mWifiIfaces.remove(iface);
+            mWifiIfaces = excludeFromStringArray(mWifiIfaces, iface);
+            if (DEBUG) Slog.d(TAG, "Note non-wifi iface " + iface + ": " + mWifiIfaces);
         }
     }
 
@@ -5572,33 +5606,33 @@ public final class BatteryStatsImpl extends BatteryStats {
     private void updateNetworkActivityLocked() {
         if (!SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) return;
 
-        final NetworkStats snapshot;
-        try {
-            snapshot = mNetworkStatsFactory.readNetworkStatsDetail();
-        } catch (IOException e) {
-            Log.wtf(TAG, "Failed to read network stats", e);
-            return;
-        }
+        if (mMobileIfaces.length > 0) {
+            final NetworkStats snapshot;
+            try {
+                snapshot = mNetworkStatsFactory.readNetworkStatsDetail(UID_ALL,
+                        mMobileIfaces, NetworkStats.TAG_NONE, mLastMobileSnapshot);
+            } catch (IOException e) {
+                Log.wtf(TAG, "Failed to read mobile network stats", e);
+                return;
+            }
 
-        if (mLastSnapshot == null) {
-            mLastSnapshot = snapshot;
-            return;
-        }
+            if (mLastMobileSnapshot == null) {
+                mLastMobileSnapshot = snapshot;
+                return;
+            }
 
-        final NetworkStats delta = snapshot.subtract(mLastSnapshot);
-        mLastSnapshot = snapshot;
+            final NetworkStats delta = NetworkStats.subtract(snapshot, mLastMobileSnapshot,
+                    null, null, mTmpNetworkStats);
+            mTmpNetworkStats = delta;
+            mLastMobileSnapshot = snapshot;
 
-        NetworkStats.Entry entry = null;
-        final int size = delta.size();
-        for (int i = 0; i < size; i++) {
-            entry = delta.getValues(i, entry);
+            final int size = delta.size();
+            for (int i = 0; i < size; i++) {
+                final NetworkStats.Entry entry = delta.getValues(i, mTmpNetworkStatsEntry);
 
-            if (entry.rxBytes == 0 || entry.txBytes == 0) continue;
-            if (entry.tag != NetworkStats.TAG_NONE) continue;
+                if (entry.rxBytes == 0 || entry.txBytes == 0) continue;
 
-            final Uid u = getUidStatsLocked(entry.uid);
-
-            if (mMobileIfaces.contains(entry.iface)) {
+                final Uid u = getUidStatsLocked(entry.uid);
                 u.noteNetworkActivityLocked(NETWORK_MOBILE_RX_DATA, entry.rxBytes,
                         entry.rxPackets);
                 u.noteNetworkActivityLocked(NETWORK_MOBILE_TX_DATA, entry.txBytes,
@@ -5610,8 +5644,36 @@ public final class BatteryStatsImpl extends BatteryStats {
                         entry.rxPackets);
                 mNetworkPacketActivityCounters[NETWORK_MOBILE_TX_DATA].addCountLocked(
                         entry.txPackets);
+            }
+        }
 
-            } else if (mWifiIfaces.contains(entry.iface)) {
+        if (mWifiIfaces.length > 0) {
+            final NetworkStats snapshot;
+            try {
+                snapshot = mNetworkStatsFactory.readNetworkStatsDetail(UID_ALL,
+                        mWifiIfaces, NetworkStats.TAG_NONE, mLastWifiSnapshot);
+            } catch (IOException e) {
+                Log.wtf(TAG, "Failed to read wifi network stats", e);
+                return;
+            }
+
+            if (mLastWifiSnapshot == null) {
+                mLastWifiSnapshot = snapshot;
+                return;
+            }
+
+            final NetworkStats delta = NetworkStats.subtract(snapshot, mLastWifiSnapshot,
+                    null, null, mTmpNetworkStats);
+            mTmpNetworkStats = delta;
+            mLastWifiSnapshot = snapshot;
+
+            final int size = delta.size();
+            for (int i = 0; i < size; i++) {
+                final NetworkStats.Entry entry = delta.getValues(i, mTmpNetworkStatsEntry);
+
+                if (entry.rxBytes == 0 || entry.txBytes == 0) continue;
+
+                final Uid u = getUidStatsLocked(entry.uid);
                 u.noteNetworkActivityLocked(NETWORK_WIFI_RX_DATA, entry.rxBytes, entry.rxPackets);
                 u.noteNetworkActivityLocked(NETWORK_WIFI_TX_DATA, entry.txBytes, entry.txPackets);
 
