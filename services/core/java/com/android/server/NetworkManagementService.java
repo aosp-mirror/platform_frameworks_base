@@ -20,6 +20,7 @@ import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.SHUTDOWN;
 import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_TETHERING;
@@ -1271,7 +1272,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public NetworkStats getNetworkStatsDetail() {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            return mStatsFactory.readNetworkStatsDetail(UID_ALL);
+            return mStatsFactory.readNetworkStatsDetail(UID_ALL, null, TAG_ALL, null);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -1432,7 +1433,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public NetworkStats getNetworkStatsUidDetail(int uid) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            return mStatsFactory.readNetworkStatsDetail(uid);
+            return mStatsFactory.readNetworkStatsDetail(uid, null, TAG_ALL, null);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
