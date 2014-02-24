@@ -661,7 +661,8 @@ void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& ren
         if (mode == kNegativeZChildren && zValue > 0.0f) break;
 
         DisplayList* child = childOp->mDisplayList;
-        if (mode == kPositiveZChildren && zValue > 0.0f && child->mCastsShadow) {
+        if (mode == kPositiveZChildren && zValue > 0.0f
+                && child->mCastsShadow && child->mAlpha > 0.0f) {
             /* draw shadow with parent matrix applied, passing in the child's total matrix
              * TODO: consider depth in more complex scenarios (neg z, added shadow depth)
              */

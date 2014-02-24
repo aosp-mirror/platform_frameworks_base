@@ -3233,7 +3233,7 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlp
 
     // draw caster's shadows
     if (mCaches.propertyAmbientShadowStrength > 0) {
-        paint.setARGB(mCaches.propertyAmbientShadowStrength, 0, 0, 0);
+        paint.setARGB(casterAlpha * mCaches.propertyAmbientShadowStrength, 0, 0, 0);
         VertexBuffer ambientShadowVertexBuffer;
         ShadowTessellator::tessellateAmbientShadow(casterPolygon, casterVertexCount,
                 ambientShadowVertexBuffer);
@@ -3241,7 +3241,7 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlp
     }
 
     if (mCaches.propertySpotShadowStrength > 0) {
-        paint.setARGB(mCaches.propertySpotShadowStrength, 0, 0, 0);
+        paint.setARGB(casterAlpha * mCaches.propertySpotShadowStrength, 0, 0, 0);
         VertexBuffer spotShadowVertexBuffer;
         Vector3 lightPosScale(mCaches.propertyLightPosXScale,
                 mCaches.propertyLightPosYScale, mCaches.propertyLightPosZScale);
