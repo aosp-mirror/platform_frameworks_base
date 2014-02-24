@@ -2097,8 +2097,7 @@
   <public type="attr" name="windowContentTransitions" />
   <public type="attr" name="windowContentTransitionManager" />
   <public type="attr" name="translationZ" />
-  <public type="attr" name="colorFilterColor" />
-  <public type="attr" name="colorFilterMode" />
+  <public type="attr" name="tintMode" />
   <public type="attr" name="isolatedZVolume" />
   <public type="attr" name="controlX1" />
   <public type="attr" name="controlY1" />

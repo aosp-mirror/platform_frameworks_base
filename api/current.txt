@@ -345,7 +345,7 @@ package android {
     field public static final int canRetrieveWindowContent = 16843653; // 0x1010385
     field public static final int candidatesTextStyleSpans = 16843312; // 0x1010230
     field public static final deprecated int capitalize = 16843113; // 0x1010169
-    field public static final int castsShadow = 16843778; // 0x1010402
+    field public static final int castsShadow = 16843777; // 0x1010401
     field public static final int category = 16843752; // 0x10103e8
     field public static final int centerBright = 16842956; // 0x10100cc
     field public static final int centerColor = 16843275; // 0x101020b
@@ -379,8 +379,6 @@ package android {
     field public static final int colorActivatedHighlight = 16843664; // 0x1010390
     field public static final int colorBackground = 16842801; // 0x1010031
     field public static final int colorBackgroundCacheHint = 16843435; // 0x10102ab
-    field public static final int colorFilterColor = 16843767; // 0x10103f7
-    field public static final int colorFilterMode = 16843768; // 0x10103f8
     field public static final int colorFocusedHighlight = 16843663; // 0x101038f
     field public static final int colorForeground = 16842800; // 0x1010030
     field public static final int colorForegroundInverse = 16843270; // 0x1010206
@@ -401,10 +399,10 @@ package android {
     field public static final int content = 16843355; // 0x101025b
     field public static final int contentAuthority = 16843408; // 0x1010290
     field public static final int contentDescription = 16843379; // 0x1010273
-    field public static final int controlX1 = 16843770; // 0x10103fa
-    field public static final int controlX2 = 16843772; // 0x10103fc
-    field public static final int controlY1 = 16843771; // 0x10103fb
-    field public static final int controlY2 = 16843773; // 0x10103fd
+    field public static final int controlX1 = 16843769; // 0x10103f9
+    field public static final int controlX2 = 16843771; // 0x10103fb
+    field public static final int controlY1 = 16843770; // 0x10103fa
+    field public static final int controlY2 = 16843772; // 0x10103fc
     field public static final int cropToPadding = 16843043; // 0x1010123
     field public static final int cursorVisible = 16843090; // 0x1010152
     field public static final int customNavigationLayout = 16843474; // 0x10102d2
@@ -544,7 +542,7 @@ package android {
     field public static final int fromAlpha = 16843210; // 0x10101ca
     field public static final int fromDegrees = 16843187; // 0x10101b3
     field public static final int fromScene = 16843741; // 0x10103dd
-    field public static final int fromSceneName = 16843774; // 0x10103fe
+    field public static final int fromSceneName = 16843773; // 0x10103fd
     field public static final int fromXDelta = 16843206; // 0x10101c6
     field public static final int fromXScale = 16843202; // 0x10101c2
     field public static final int fromYDelta = 16843208; // 0x10101c8
@@ -639,7 +637,7 @@ package android {
     field public static final int isScrollContainer = 16843342; // 0x101024e
     field public static final int isSticky = 16843335; // 0x1010247
     field public static final int isolatedProcess = 16843689; // 0x10103a9
-    field public static final int isolatedZVolume = 16843769; // 0x10103f9
+    field public static final int isolatedZVolume = 16843768; // 0x10103f8
     field public static final int itemBackground = 16843056; // 0x1010130
     field public static final int itemIconDisabledAlpha = 16843057; // 0x1010131
     field public static final int itemPadding = 16843565; // 0x101032d
@@ -962,7 +960,7 @@ package android {
     field public static final int shadowRadius = 16843108; // 0x1010164
     field public static final int shape = 16843162; // 0x101019a
     field public static final int shareInterpolator = 16843195; // 0x10101bb
-    field public static final int sharedElementName = 16843776; // 0x1010400
+    field public static final int sharedElementName = 16843775; // 0x10103ff
     field public static final int sharedUserId = 16842763; // 0x101000b
     field public static final int sharedUserLabel = 16843361; // 0x1010261
     field public static final int shouldDisableView = 16843246; // 0x10101ee
@@ -1139,13 +1137,14 @@ package android {
     field public static final int tileMode = 16843265; // 0x1010201
     field public static final int timeZone = 16843724; // 0x10103cc
     field public static final int tint = 16843041; // 0x1010121
+    field public static final int tintMode = 16843767; // 0x10103f7
     field public static final int title = 16843233; // 0x10101e1
     field public static final int titleCondensed = 16843234; // 0x10101e2
     field public static final int titleTextStyle = 16843512; // 0x10102f8
     field public static final int toAlpha = 16843211; // 0x10101cb
     field public static final int toDegrees = 16843188; // 0x10101b4
     field public static final int toScene = 16843742; // 0x10103de
-    field public static final int toSceneName = 16843775; // 0x10103ff
+    field public static final int toSceneName = 16843774; // 0x10103fe
     field public static final int toXDelta = 16843207; // 0x10101c7
     field public static final int toXScale = 16843203; // 0x10101c3
     field public static final int toYDelta = 16843209; // 0x10101c9
@@ -1161,7 +1160,7 @@ package android {
     field public static final int transformPivotX = 16843552; // 0x1010320
     field public static final int transformPivotY = 16843553; // 0x1010321
     field public static final int transition = 16843743; // 0x10103df
-    field public static final int transitionGroup = 16843777; // 0x1010401
+    field public static final int transitionGroup = 16843776; // 0x1010400
     field public static final int transitionOrdering = 16843744; // 0x10103e0
     field public static final int translationX = 16843554; // 0x1010322
     field public static final int translationY = 16843555; // 0x1010323
@@ -10410,6 +10409,8 @@ package android.graphics.drawable {
     method public void setTileModeX(android.graphics.Shader.TileMode);
     method public void setTileModeXY(android.graphics.Shader.TileMode, android.graphics.Shader.TileMode);
     method public final void setTileModeY(android.graphics.Shader.TileMode);
+    method public void setTint(android.content.res.ColorStateList);
+    method public void setTintMode(android.graphics.PorterDuff.Mode);
   }
 
   public class ClipDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
@@ -10551,7 +10552,6 @@ package android.graphics.drawable {
     method public float getGradientRadius();
     method public int getOpacity();
     method public android.graphics.drawable.GradientDrawable.Orientation getOrientation();
-    method public boolean onStateChange(int[]);
     method public void setAlpha(int);
     method public void setColor(int);
     method public void setColor(android.content.res.ColorStateList);
@@ -10646,6 +10646,8 @@ package android.graphics.drawable {
     method public void setTargetDensity(android.graphics.Canvas);
     method public void setTargetDensity(android.util.DisplayMetrics);
     method public void setTargetDensity(int);
+    method public void setTint(android.content.res.ColorStateList);
+    method public void setTintMode(android.graphics.PorterDuff.Mode);
   }
 
   public class PaintDrawable extends android.graphics.drawable.ShapeDrawable {

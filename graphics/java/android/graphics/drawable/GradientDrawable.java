@@ -731,7 +731,7 @@ public class GradientDrawable extends Drawable {
     }
 
     @Override
-    public boolean onStateChange(int[] stateSet) {
+    protected boolean onStateChange(int[] stateSet) {
         boolean invalidateSelf = false;
 
         final GradientState s = mGradientState;

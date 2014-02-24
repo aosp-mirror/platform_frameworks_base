@@ -112,7 +112,7 @@ public class TouchFeedbackDrawable extends Drawable {
     }
 
     @Override
-    public boolean onStateChange(int[] stateSet) {
+    protected boolean onStateChange(int[] stateSet) {
         final ColorStateList stateList = mState.mColorStateList;
         if (stateList != null && mRipplePaint != null) {
             final int newColor = stateList.getColorForState(stateSet, 0);

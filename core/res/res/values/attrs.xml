@@ -4094,19 +4094,6 @@
              RTL (right-to-left).  See
              {@link android.graphics.drawable.Drawable#setAutoMirrored}. -->
         <attr name="autoMirrored" format="boolean" />
-        <!-- If set, specifies the color to apply to the drawable as a color filter. By
-             default, no color filter is applied. -->
-        <attr name="colorFilterColor" format="color" />
-        <!-- When a color filter color is set, specifies its Porter-Duff blending mode.
-             The default value is multiply. -->
-        <attr name="colorFilterMode">
-            <!-- [Sa * Da, Sc * Dc] -->
-            <enum name="multiply" value="14" />
-            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
-            <enum name="screen" value="15" />
-            <!-- [Da, Sc * Da + (1 - Sa) * Dc] -->
-            <enum name="src_atop" value="9" />
-        </attr>
     </declare-styleable>
 
     <!-- Drawable used to render several states. Each state is represented by
@@ -4391,8 +4378,21 @@
         <!-- Indicates if the drawable needs to be mirrored when its layout direction is
              RTL (right-to-left). -->
         <attr name="autoMirrored" />
-        <attr name="colorFilterColor" />
-        <attr name="colorFilterMode" />
+        <!-- If set, specifies the color to apply to the drawable as a tint. By default,
+             no tint is applied. May be a color state list. -->
+        <attr name="tint" />
+        <!-- When a tint color is set, specifies its Porter-Duff blending mode. The
+             default value is src_in, which treats the drawable as an alpha mask. -->
+        <attr name="tintMode">
+            <!-- [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="0" />
+            <!-- [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="1" />
+            <!-- [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="2" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="3" />
+        </attr>
     </declare-styleable>
 
     <!-- Drawable used to draw 9-patches. -->
@@ -4406,8 +4406,12 @@
         <!-- Indicates if the drawable needs to be mirrored when its layout direction is
              RTL (right-to-left). -->
         <attr name="autoMirrored" />
-        <attr name="colorFilterColor" />
-        <attr name="colorFilterMode" />
+        <!-- If set, specifies the color to apply to the drawable as a tint. By default,
+             no tint is applied. May be a color state list. -->
+        <attr name="tint" />
+        <!-- When a tint color is set, specifies its Porter-Duff blending mode. The
+             default value is src_in, which treats the drawable as an alpha mask. -->
+        <attr name="tintMode" />
     </declare-styleable>
 
     <!-- Drawable used to draw a single color. -->
