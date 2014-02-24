@@ -18,6 +18,7 @@
 package android.app.admin;
 
 import android.content.ComponentName;
+import android.content.IntentFilter;
 import android.os.RemoteCallback;
 
 /**
@@ -109,4 +110,7 @@ interface IDevicePolicyManager {
 
     boolean installCaCert(in byte[] certBuffer);
     void uninstallCaCert(in byte[] certBuffer);
+
+    void addPersistentPreferredActivity(in ComponentName admin, in IntentFilter filter, in ComponentName activity);
+    void clearPackagePersistentPreferredActivities(in ComponentName admin, String packageName);
 }

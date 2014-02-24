@@ -22,6 +22,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -1765,5 +1766,54 @@ public class DevicePolicyManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Called by a profile owner or device owner to add a default intent handler activity for
+     * intents that match a certain intent filter. This activity will remain the default intent
+     * handler even if the set of potential event handlers for the intent filter changes and if
+     * the intent preferences are reset.
+     *
+     * <p>The default disambiguation mechanism takes over if the activity is not installed
+     * (anymore). When the activity is (re)installed, it is automatically reset as default
+     * intent handler for the filter.
+     *
+     * <p>The calling device admin must be a profile owner or device owner. If it is not, a
+     * security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param filter The IntentFilter for which a default handler is added.
+     * @param activity The Activity that is added as default intent handler.
+     */
+    public void addPersistentPreferredActivity(ComponentName admin, IntentFilter filter,
+            ComponentName activity) {
+        if (mService != null) {
+            try {
+                mService.addPersistentPreferredActivity(admin, filter, activity);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Called by a profile owner or device owner to remove all persistent intent handler preferences
+     * associated with the given package that were set by {@link addPersistentPreferredActivity}.
+     *
+     * <p>The calling device admin must be a profile owner. If it is not, a security
+     * exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName The name of the package for which preferences are removed.
+     */
+    public void clearPackagePersistentPreferredActivities(ComponentName admin,
+            String packageName) {
+        if (mService != null) {
+            try {
+                mService.clearPackagePersistentPreferredActivities(admin, packageName);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
     }
 }
