@@ -36,9 +36,11 @@ import android.view.Surface;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -269,10 +271,10 @@ public final class UiAutomation {
      * @param action The action to perform.
      * @return Whether the action was successfully performed.
      *
-     * @see AccessibilityService#GLOBAL_ACTION_BACK
-     * @see AccessibilityService#GLOBAL_ACTION_HOME
-     * @see AccessibilityService#GLOBAL_ACTION_NOTIFICATIONS
-     * @see AccessibilityService#GLOBAL_ACTION_RECENTS
+     * @see android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_BACK
+     * @see android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_HOME
+     * @see android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_NOTIFICATIONS
+     * @see android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_RECENTS
      */
     public final boolean performGlobalAction(int action) {
         final IAccessibilityServiceConnection connection;
@@ -343,6 +345,33 @@ public final class UiAutomation {
                 Log.w(LOG_TAG, "Error while setting AccessibilityServiceInfo", re);
             }
         }
+    }
+
+    /**
+     * Gets the windows on the screen. This method returns only the windows
+     * that a sighted user can interact with, as opposed to all windows.
+     * For example, if there is a modal dialog shown and the user cannot touch
+     * anything behind it, then only the modal window will be reported
+     * (assuming it is the top one). For convenience the returned windows
+     * are ordered in a descending layer order, which is the windows that
+     * are higher in the Z-order are reported first.
+     * <p>
+     * <strong>Note:</strong> In order to access the windows you have to opt-in
+     * to retrieve the interactive windows by setting the
+     * {@link AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS} flag.
+     * </p>
+     *
+     * @return The windows if there are windows such, otherwise an empty list.
+     */
+    public List<AccessibilityWindowInfo> getWindows() {
+        final int connectionId;
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+            connectionId = mConnectionId;
+        }
+        // Calling out without a lock held.
+        return AccessibilityInteractionClient.getInstance()
+                .getWindows(connectionId);
     }
 
     /**
@@ -632,7 +661,7 @@ public final class UiAutomation {
      * potentially undesirable actions such as calling 911 or posting on public forums etc.
      *
      * @param enable whether to run in a "monkey" mode or not. Default is not.
-     * @see {@link ActivityManager#isUserAMonkey()}
+     * @see {@link android.app.ActivityManager#isUserAMonkey()}
      */
     public void setRunAsMonkey(boolean enable) {
         synchronized (mLock) {

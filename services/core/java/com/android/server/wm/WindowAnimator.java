@@ -529,8 +529,9 @@ public class WindowAnimator {
                 mAnimating |= mService.getDisplayContentLocked(displayId).animateDimLayers();
 
                 //TODO (multidisplay): Magnification is supported only for the default display.
-                if (mService.mDisplayMagnifier != null && displayId == Display.DEFAULT_DISPLAY) {
-                    mService.mDisplayMagnifier.drawMagnifiedRegionBorderIfNeededLocked();
+                if (mService.mAccessibilityController != null
+                        && displayId == Display.DEFAULT_DISPLAY) {
+                    mService.mAccessibilityController.drawMagnifiedRegionBorderIfNeededLocked();
                 }
             }
 

@@ -29,8 +29,6 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -38,8 +36,6 @@ import android.util.Property;
 import android.util.Slog;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.IMagnificationCallbacks;
-import android.view.IWindowManager;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
@@ -48,10 +44,12 @@ import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.WindowManagerInternal;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.DecelerateInterpolator;
 
 import com.android.internal.os.SomeArgs;
+import com.android.server.LocalServices;
 
 import java.util.Locale;
 
@@ -94,8 +92,8 @@ import java.util.Locale;
  *
  * 6. The magnification scale will be persisted in settings and in the cloud.
  */
-public final class ScreenMagnifier extends IMagnificationCallbacks.Stub
-        implements EventStreamTransformation {
+public final class ScreenMagnifier implements WindowManagerInternal.MagnificationCallbacks,
+        EventStreamTransformation {
 
     private static final String LOG_TAG = ScreenMagnifier.class.getSimpleName();
 
@@ -127,7 +125,7 @@ public final class ScreenMagnifier extends IMagnificationCallbacks.Stub
     private final Rect mTempRect1 = new Rect();
 
     private final Context mContext;
-    private final IWindowManager mWindowManager;
+    private final WindowManagerInternal mWindowManager;
     private final MagnificationController mMagnificationController;
     private final ScreenStateObserver mScreenStateObserver;
 
@@ -191,8 +189,7 @@ public final class ScreenMagnifier extends IMagnificationCallbacks.Stub
 
     public ScreenMagnifier(Context context, int displayId, AccessibilityManagerService service) {
         mContext = context;
-        mWindowManager = IWindowManager.Stub.asInterface(
-                ServiceManager.getService("window"));
+        mWindowManager = LocalServices.getService(WindowManagerInternal.class);
         mAms = service;
 
         mLongAnimationDuration = context.getResources().getInteger(
@@ -208,11 +205,7 @@ public final class ScreenMagnifier extends IMagnificationCallbacks.Stub
         mMagnificationController = new MagnificationController(mLongAnimationDuration);
         mScreenStateObserver = new ScreenStateObserver(context, mMagnificationController);
 
-        try {
-            mWindowManager.setMagnificationCallbacks(this);
-        } catch (RemoteException re) {
-            /* ignore */
-        }
+        mWindowManager.setMagnificationCallbacks(this);
 
         transitionToState(STATE_DETECTING);
     }
@@ -378,11 +371,7 @@ public final class ScreenMagnifier extends IMagnificationCallbacks.Stub
     @Override
     public void onDestroy() {
         mScreenStateObserver.destroy();
-        try {
-            mWindowManager.setMagnificationCallbacks(null);
-        } catch (RemoteException re) {
-            /* ignore */
-        }
+        mWindowManager.setMagnificationCallbacks(null);
     }
 
     private void handleMotionEventStateDelegating(MotionEvent event,
@@ -462,7 +451,7 @@ public final class ScreenMagnifier extends IMagnificationCallbacks.Stub
         }
         return mTempPointerProperties;
     }
-    
+
     private void transitionToState(int state) {
         if (DEBUG_STATE_TRANSITIONS) {
             switch (state) {
@@ -1120,15 +1109,10 @@ public final class ScreenMagnifier extends IMagnificationCallbacks.Stub
             if (DEBUG_SET_MAGNIFICATION_SPEC) {
                 Slog.i(LOG_TAG, "Sending: " + spec);
             }
-            try {
-                mSentMagnificationSpec.scale = spec.scale;
-                mSentMagnificationSpec.offsetX = spec.offsetX;
-                mSentMagnificationSpec.offsetY = spec.offsetY;
-                mWindowManager.setMagnificationSpec(
-                        MagnificationSpec.obtain(spec));
-            } catch (RemoteException re) {
-                /* ignore */
-            }
+            mSentMagnificationSpec.scale = spec.scale;
+            mSentMagnificationSpec.offsetX = spec.offsetX;
+            mSentMagnificationSpec.offsetY = spec.offsetY;
+            mWindowManager.setMagnificationSpec(MagnificationSpec.obtain(spec));
         }
     }
 

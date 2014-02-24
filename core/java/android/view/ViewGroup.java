@@ -3711,7 +3711,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             childHasTransientStateChanged(child, true);
         }
 
-        if (child.isImportantForAccessibility() && child.getVisibility() != View.GONE) {
+        if (child.getVisibility() != View.GONE) {
             notifySubtreeAccessibilityStateChangedIfNeeded();
         }
     }
@@ -3954,7 +3954,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         onViewRemoved(view);
 
-        if (view.isImportantForAccessibility() && view.getVisibility() != View.GONE) {
+        if (view.getVisibility() != View.GONE) {
             notifySubtreeAccessibilityStateChangedIfNeeded();
         }
     }

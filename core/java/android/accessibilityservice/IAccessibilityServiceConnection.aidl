@@ -21,6 +21,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.view.MagnificationSpec;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 /**
  * Interface given to an AccessibilitySerivce to talk to the AccessibilityManagerService.
@@ -52,6 +53,10 @@ interface IAccessibilityServiceConnection {
     boolean performAccessibilityAction(int accessibilityWindowId, long accessibilityNodeId,
         int action, in Bundle arguments, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, long threadId);
+
+    AccessibilityWindowInfo getWindow(int windowId);
+
+    List<AccessibilityWindowInfo> getWindows();
 
     AccessibilityServiceInfo getServiceInfo();
 

@@ -1913,22 +1913,10 @@
         android:description="@string/permdesc_filter_events"
         android:protectionLevel="signature" />
 
-    <!-- @hide Allows an application to retrieve info for a window from the window manager. -->
-    <permission android:name="android.permission.RETRIEVE_WINDOW_INFO"
-        android:label="@string/permlab_retrieve_window_info"
-        android:description="@string/permdesc_retrieve_window_info"
-        android:protectionLevel="signature" />
-
     <!-- @hide Allows an application to temporary enable accessibility on the device. -->
     <permission android:name="android.permission.TEMPORARY_ENABLE_ACCESSIBILITY"
         android:label="@string/permlab_temporary_enable_accessibility"
         android:description="@string/permdesc_temporary_enable_accessibility"
-        android:protectionLevel="signature" />
-
-    <!-- @hide Allows an application to magnify the content of a display. -->
-    <permission android:name="android.permission.MAGNIFY_DISPLAY"
-        android:label="@string/permlab_magnify_display"
-        android:description="@string/permdesc_magnify_display"
         android:protectionLevel="signature" />
 
     <!-- Allows an application to watch and control how activities are

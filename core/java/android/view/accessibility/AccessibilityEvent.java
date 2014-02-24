@@ -343,6 +343,23 @@ import java.util.List;
  * view.</br>
  * </p>
  * <p>
+ * <b>Windows changed</b> - represents the event of changes in the windows shown on
+ * the screen such as a window appeared, a window disappeared, a window size changed,
+ * a window layer changed, etc.</br>
+ * <em>Type:</em> {@link #TYPE_WINDOWS_CHANGED}</br>
+ * <em>Properties:</em></br>
+ * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
+ *   <li>{@link #getEventTime()} - The event time.</li>
+ * </ul>
+ * <em>Note:</em> You can retrieve the {@link AccessibilityWindowInfo} for the window
+ * source of the event via {@link AccessibilityEvent#getSource()} to get the source
+ * node on which then call {@link AccessibilityNodeInfo#getWindow()
+ * AccessibilityNodeInfo.getWindow()} to get the window. Also all windows on the screen can
+ * be retrieved by a call to {@link android.accessibilityservice.AccessibilityService#getWindows()
+ * android.accessibilityservice.AccessibilityService.getWindows()}.
+ * </p>
+ * <p>
  * <b>NOTIFICATION TYPES</b></br>
  * </p>
  * <p>
@@ -662,6 +679,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_TOUCH_INTERACTION_END = 0x00200000;
 
     /**
+     * Represents the event change in the windows shown on the screen.
+     */
+    public static final int TYPE_WINDOWS_CHANGED = 0x00400000;
+
+    /**
      * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
      * The type of change is not defined.
      */
@@ -708,6 +730,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @see #TYPE_GESTURE_DETECTION_END
      * @see #TYPE_TOUCH_INTERACTION_START
      * @see #TYPE_TOUCH_INTERACTION_END
+     * @see #TYPE_WINDOWS_CHANGED
      */
     public static final int TYPES_ALL_MASK = 0xFFFFFFFF;
 
@@ -1364,6 +1387,13 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                         builder.append(", ");
                     }
                     builder.append("TYPE_TOUCH_INTERACTION_END");
+                    eventTypeCount++;
+                } break;
+                case TYPE_WINDOWS_CHANGED: {
+                    if (eventTypeCount > 0) {
+                        builder.append(", ");
+                    }
+                    builder.append("TYPE_WINDOWS_CHANGED");
                     eventTypeCount++;
                 } break;
             }

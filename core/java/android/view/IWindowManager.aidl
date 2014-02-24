@@ -27,7 +27,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.view.IApplicationToken;
-import android.view.IMagnificationCallbacks;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
 import android.view.IWindowSession;
@@ -197,7 +196,7 @@ interface IWindowManager
     void thawRotation();
 
     /**
-     * Gets whether the rotation is frozen. 
+     * Gets whether the rotation is frozen.
      *
      * @return Whether the rotation is frozen.
      */
@@ -231,55 +230,7 @@ interface IWindowManager
     void lockNow(in Bundle options);
 
     /**
-     * Gets the token for the focused window.
-     */
-    IBinder getFocusedWindowToken();
-
-    /**
-     * Sets an input filter for manipulating the input event stream.
-     */
-    void setInputFilter(in IInputFilter filter);
-
-    /**
-     * Gets the frame of a window given its token.
-     */
-    void getWindowFrame(IBinder token, out Rect outFrame);
-
-    /**
      * Device is in safe mode.
      */
     boolean isSafeModeEnabled();
-
-    /**
-     * Sets the display magnification callbacks. These callbacks notify
-     * the client for contextual changes related to display magnification.
-     *
-     * @param callbacks The magnification callbacks.
-     */
-    void setMagnificationCallbacks(IMagnificationCallbacks callbacks);
-
-    /**
-     * Sets the magnification spec to be applied to all windows that can be
-     * magnified.
-     *
-     * @param spec The current magnification spec.
-     */
-    void setMagnificationSpec(in MagnificationSpec spec);
-
-    /**
-     * Gets the magnification spec for a window given its token. If the
-     * window has a compatibility scale it is also folded in the returned
-     * magnification spec.
-     *
-     * @param windowToken The unique window token.
-     * @return The magnification spec if such or null.
-     */
-    MagnificationSpec getCompatibleMagnificationSpecForWindow(in IBinder windowToken);
-
-    /**
-     * Sets the current touch exploration state.
-     *
-     * @param enabled Whether touch exploration is enabled.
-     */
-    void setTouchExplorationEnabled(boolean enabled);
 }

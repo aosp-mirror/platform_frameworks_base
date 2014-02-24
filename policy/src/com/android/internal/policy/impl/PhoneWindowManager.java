@@ -91,6 +91,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
@@ -212,6 +213,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     final Object mServiceAquireLock = new Object();
     Vibrator mVibrator; // Vibrator for giving feedback of orientation changes
     SearchManager mSearchManager;
+    AccessibilityManager mAccessibilityManager;
 
     // Vibrator pattern for haptic feedback of a long press.
     long[] mLongPressVibePattern;
@@ -299,7 +301,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mOrientationSensorEnabled = false;
     int mCurrentAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mHasSoftInput = false;
-    boolean mTouchExplorationEnabled = false;
     boolean mTranslucentDecorEnabled = true;
 
     int mPointerLocationMode = 0; // guarded by mLock
@@ -905,6 +906,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.bool.config_enableTranslucentDecor);
         readConfigurationDependentBehaviors();
 
+        mAccessibilityManager = (AccessibilityManager) context.getSystemService(
+                Context.ACCESSIBILITY_SERVICE);
+
         // register for dock events
         IntentFilter filter = new IntentFilter();
         filter.addAction(UiModeManager.ACTION_ENTER_CAR_MODE);
@@ -1105,7 +1109,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      *         navigation bar and touch exploration is not enabled
      */
     private boolean canHideNavigationBar() {
-        return mHasNavigationBar && !mTouchExplorationEnabled;
+        return mHasNavigationBar
+                && !mAccessibilityManager.isTouchExplorationEnabled();
     }
 
     @Override
@@ -5246,7 +5251,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * R.boolean.config_enableTranslucentDecor is false.
      */
     private boolean areTranslucentBarsAllowed() {
-        return mTranslucentDecorEnabled && !mTouchExplorationEnabled;
+        return mTranslucentDecorEnabled
+                && !mAccessibilityManager.isTouchExplorationEnabled();
     }
 
     // Use this instead of checking config_showNavigationBar so that it can be consistently
@@ -5294,11 +5300,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         return true;
-    }
-
-    @Override
-    public void setTouchExplorationEnabled(boolean enabled) {
-        mTouchExplorationEnabled = enabled;
     }
 
     @Override

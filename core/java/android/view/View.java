@@ -5101,10 +5101,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see AccessibilityDelegate
      */
     public void sendAccessibilityEvent(int eventType) {
-        // Excluded views do not send accessibility events.
-        if (!includeForAccessibility()) {
-            return;
-        }
         if (mAccessibilityDelegate != null) {
             mAccessibilityDelegate.sendAccessibilityEvent(this, eventType);
         } else {
@@ -9386,6 +9382,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mParent.invalidateChild(this, null);
             }
             dispatchVisibilityChanged(this, newVisibility);
+
+            notifySubtreeAccessibilityStateChangedIfNeeded();
         }
 
         if ((changed & WILL_NOT_CACHE_DRAWING) != 0) {

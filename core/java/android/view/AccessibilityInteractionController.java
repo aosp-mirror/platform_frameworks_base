@@ -18,12 +18,14 @@ package android.view;
 
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.util.LongSparseArray;
 import android.view.View.AttachInfo;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -35,8 +37,11 @@ import com.android.internal.util.Predicate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * Class for managing accessibility interactions initiated from the system
@@ -46,6 +51,8 @@ import java.util.Map;
  * UI thread.
  */
 final class AccessibilityInteractionController {
+
+    private static final boolean ENFORCE_NODE_TREE_CONSISTENT = Build.IS_DEBUGGABLE;
 
     private final ArrayList<AccessibilityNodeInfo> mTempAccessibilityNodeInfoList =
         new ArrayList<AccessibilityNodeInfo>();
@@ -137,7 +144,7 @@ final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             View root = null;
-            if (accessibilityViewId == AccessibilityNodeInfo.UNDEFINED) {
+            if (accessibilityViewId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
                 root = mViewRootImpl.mView;
             } else {
                 root = findViewByAccessibilityId(accessibilityViewId);
@@ -209,7 +216,7 @@ final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             View root = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED) {
+            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
                 root = findViewByAccessibilityId(accessibilityViewId);
             } else {
                 root = mViewRootImpl.mView;
@@ -289,7 +296,7 @@ final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             View root = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED) {
+            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
                 root = findViewByAccessibilityId(accessibilityViewId);
             } else {
                 root = mViewRootImpl.mView;
@@ -297,9 +304,14 @@ final class AccessibilityInteractionController {
             if (root != null && isShown(root)) {
                 AccessibilityNodeProvider provider = root.getAccessibilityNodeProvider();
                 if (provider != null) {
-                    infos = provider.findAccessibilityNodeInfosByText(text,
-                            virtualDescendantId);
-                } else if (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED) {
+                    if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+                        infos = provider.findAccessibilityNodeInfosByText(text,
+                                virtualDescendantId);
+                    } else {
+                        infos = provider.findAccessibilityNodeInfosByText(text,
+                                AccessibilityNodeProvider.HOST_VIEW_ID);
+                    }
+                } else if (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
                     ArrayList<View> foundViews = mTempArrayList;
                     foundViews.clear();
                     root.findViewsWithText(foundViews, text, View.FIND_VIEWS_WITH_TEXT
@@ -316,7 +328,7 @@ final class AccessibilityInteractionController {
                                 if (provider != null) {
                                     List<AccessibilityNodeInfo> infosFromProvider =
                                         provider.findAccessibilityNodeInfosByText(text,
-                                                AccessibilityNodeInfo.UNDEFINED);
+                                                AccessibilityNodeProvider.HOST_VIEW_ID);
                                     if (infosFromProvider != null) {
                                         infos.addAll(infosFromProvider);
                                     }
@@ -391,7 +403,7 @@ final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             View root = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED) {
+            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
                 root = findViewByAccessibilityId(accessibilityViewId);
             } else {
                 root = mViewRootImpl.mView;
@@ -417,7 +429,7 @@ final class AccessibilityInteractionController {
                                 focused = AccessibilityNodeInfo.obtain(
                                         mViewRootImpl.mAccessibilityFocusedVirtualView);
                             }
-                        } else if (virtualDescendantId == View.NO_ID) {
+                        } else if (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
                             focused = host.createAccessibilityNodeInfo();
                         }
                     } break;
@@ -500,7 +512,7 @@ final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             View root = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED) {
+            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
                 root = findViewByAccessibilityId(accessibilityViewId);
             } else {
                 root = mViewRootImpl.mView;
@@ -576,7 +588,7 @@ final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             View target = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED) {
+            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
                 target = findViewByAccessibilityId(accessibilityViewId);
             } else {
                 target = mViewRootImpl.mView;
@@ -584,9 +596,14 @@ final class AccessibilityInteractionController {
             if (target != null && isShown(target)) {
                 AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
                 if (provider != null) {
-                    succeeded = provider.performAction(virtualDescendantId, action,
-                            arguments);
-                } else if (virtualDescendantId == View.NO_ID) {
+                    if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+                        succeeded = provider.performAction(virtualDescendantId, action,
+                                arguments);
+                    } else {
+                        succeeded = provider.performAction(AccessibilityNodeProvider.HOST_VIEW_ID,
+                                action, arguments);
+                    }
+                } else if (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
                     succeeded = target.performAccessibilityAction(action, arguments);
                 }
             }
@@ -734,6 +751,85 @@ final class AccessibilityInteractionController {
                     }
                 }
             }
+            if (ENFORCE_NODE_TREE_CONSISTENT) {
+                enforceNodeTreeConsistent(outInfos);
+            }
+        }
+
+        private void enforceNodeTreeConsistent(List<AccessibilityNodeInfo> nodes) {
+            LongSparseArray<AccessibilityNodeInfo> nodeMap =
+                    new LongSparseArray<AccessibilityNodeInfo>();
+            final int nodeCount = nodes.size();
+            for (int i = 0; i < nodeCount; i++) {
+                AccessibilityNodeInfo node = nodes.get(i);
+                nodeMap.put(node.getSourceNodeId(), node);
+            }
+
+            // If the nodes are a tree it does not matter from
+            // which node we start to search for the root.
+            AccessibilityNodeInfo root = nodeMap.valueAt(0);
+            AccessibilityNodeInfo parent = root;
+            while (parent != null) {
+                root = parent;
+                parent = nodeMap.get(parent.getParentNodeId());
+            }
+
+            // Traverse the tree and do some checks.
+            AccessibilityNodeInfo accessFocus = null;
+            AccessibilityNodeInfo inputFocus = null;
+            HashSet<AccessibilityNodeInfo> seen = new HashSet<AccessibilityNodeInfo>();
+            Queue<AccessibilityNodeInfo> fringe = new LinkedList<AccessibilityNodeInfo>();
+            fringe.add(root);
+
+            while (!fringe.isEmpty()) {
+                AccessibilityNodeInfo current = fringe.poll();
+
+                // Check for duplicates
+                if (!seen.add(current)) {
+                    throw new IllegalStateException("Duplicate node: "
+                            + current + " in window:"
+                            + mViewRootImpl.mAttachInfo.mAccessibilityWindowId);
+                }
+
+                // Check for one accessibility focus.
+                if (current.isAccessibilityFocused()) {
+                    if (accessFocus != null) {
+                        throw new IllegalStateException("Duplicate accessibility focus:"
+                                + current
+                                + " in window:" + mViewRootImpl.mAttachInfo.mAccessibilityWindowId);
+                    } else {
+                        accessFocus = current;
+                    }
+                }
+
+                // Check for one input focus.
+                if (current.isFocused()) {
+                    if (inputFocus != null) {
+                        throw new IllegalStateException("Duplicate input focus: "
+                            + current + " in window:"
+                            + mViewRootImpl.mAttachInfo.mAccessibilityWindowId);
+                    } else {
+                        inputFocus = current;
+                    }
+                }
+
+                final int childCount = current.getChildCount();
+                for (int j = 0; j < childCount; j++) {
+                    final long childId = current.getChildId(j);
+                    final AccessibilityNodeInfo child = nodeMap.get(childId);
+                    if (child != null) {
+                        fringe.add(child);
+                    }
+                }
+            }
+
+            // Check for disconnected nodes.
+            for (int j = nodeMap.size() - 1; j >= 0; j--) {
+                AccessibilityNodeInfo info = nodeMap.valueAt(j);
+                if (!seen.contains(info)) {
+                    throw new IllegalStateException("Disconnected node: " + info);
+                }
+            }
         }
 
         private void prefetchPredecessorsOfRealNode(View view,
@@ -774,7 +870,7 @@ final class AccessibilityInteractionController {
                                 info = child.createAccessibilityNodeInfo();
                             } else {
                                 info = provider.createAccessibilityNodeInfo(
-                                        AccessibilityNodeInfo.UNDEFINED);
+                                        AccessibilityNodeProvider.HOST_VIEW_ID);
                             }
                             if (info != null) {
                                 outInfos.add(info);
@@ -814,7 +910,7 @@ final class AccessibilityInteractionController {
                             }
                         } else {
                             AccessibilityNodeInfo info = provider.createAccessibilityNodeInfo(
-                                   AccessibilityNodeInfo.UNDEFINED);
+                                   AccessibilityNodeProvider.HOST_VIEW_ID);
                             if (info != null) {
                                 outInfos.add(info);
                                 addedChildren.put(child, info);
@@ -845,16 +941,22 @@ final class AccessibilityInteractionController {
                 List<AccessibilityNodeInfo> outInfos) {
             long parentNodeId = root.getParentNodeId();
             int accessibilityViewId = AccessibilityNodeInfo.getAccessibilityViewId(parentNodeId);
-            while (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED) {
+            while (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
                 if (outInfos.size() >= MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
                     return;
                 }
                 final int virtualDescendantId =
                     AccessibilityNodeInfo.getVirtualDescendantId(parentNodeId);
-                if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED
+                if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID
                         || accessibilityViewId == providerHost.getAccessibilityViewId()) {
-                    AccessibilityNodeInfo parent = provider.createAccessibilityNodeInfo(
-                            virtualDescendantId);
+                    final AccessibilityNodeInfo parent;
+                    if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+                        parent = provider.createAccessibilityNodeInfo(
+                                virtualDescendantId);
+                    } else {
+                        parent= provider.createAccessibilityNodeInfo(
+                                AccessibilityNodeProvider.HOST_VIEW_ID);
+                    }
                     if (parent != null) {
                         outInfos.add(parent);
                     }
@@ -875,10 +977,15 @@ final class AccessibilityInteractionController {
                 AccessibilityNodeInfo.getAccessibilityViewId(parentNodeId);
             final int parentVirtualDescendantId =
                 AccessibilityNodeInfo.getVirtualDescendantId(parentNodeId);
-            if (parentVirtualDescendantId != AccessibilityNodeInfo.UNDEFINED
+            if (parentVirtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID
                     || parentAccessibilityViewId == providerHost.getAccessibilityViewId()) {
-                AccessibilityNodeInfo parent =
-                    provider.createAccessibilityNodeInfo(parentVirtualDescendantId);
+                final AccessibilityNodeInfo parent;
+                if (parentAccessibilityViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+                    parent = provider.createAccessibilityNodeInfo(parentVirtualDescendantId);
+                } else {
+                    parent = provider.createAccessibilityNodeInfo(
+                            AccessibilityNodeProvider.HOST_VIEW_ID);
+                }
                 if (parent != null) {
                     final int childCount = parent.getChildCount();
                     for (int i = 0; i < childCount; i++) {

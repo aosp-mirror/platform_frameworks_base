@@ -23,13 +23,17 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import com.android.internal.os.HandlerCaller;
+
+import java.util.List;
 
 /**
  * An accessibility service runs in the background and receives callbacks by the system
@@ -180,28 +184,37 @@ import com.android.internal.os.HandlerCaller;
  * event generation has settled down.</p>
  * <h3>Event types</h3>
  * <ul>
- * <li>{@link AccessibilityEvent#TYPE_VIEW_CLICKED}
- * <li>{@link AccessibilityEvent#TYPE_VIEW_LONG_CLICKED}
- * <li>{@link AccessibilityEvent#TYPE_VIEW_FOCUSED}
- * <li>{@link AccessibilityEvent#TYPE_VIEW_SELECTED}
- * <li>{@link AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED}
- * <li>{@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED}
- * <li>{@link AccessibilityEvent#TYPE_NOTIFICATION_STATE_CHANGED}
- * <li>{@link AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_START}
- * <li>{@link AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_END}
- * <li>{@link AccessibilityEvent#TYPE_VIEW_HOVER_ENTER}
- * <li>{@link AccessibilityEvent#TYPE_VIEW_HOVER_EXIT}
- * <li>{@link AccessibilityEvent#TYPE_VIEW_SCROLLED}
- * <li>{@link AccessibilityEvent#TYPE_VIEW_TEXT_SELECTION_CHANGED}
- * <li>{@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED}
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_CLICKED}</li>
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_LONG_CLICKED}</li>
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_FOCUSED}</li>
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_SELECTED}</li>
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED}</li>
+ * <li>{@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED}</li>
+ * <li>{@link AccessibilityEvent#TYPE_NOTIFICATION_STATE_CHANGED}</li>
+ * <li>{@link AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_START}</li>
+ * <li>{@link AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_END}</li>
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_HOVER_ENTER}</li>
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_HOVER_EXIT}</li>
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_SCROLLED}</li>
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_TEXT_SELECTION_CHANGED}</li>
+ * <li>{@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED}</li>
+ * <li>{@link AccessibilityEvent#TYPE_ANNOUNCEMENT}</li>
+ * <li>{@link AccessibilityEvent#TYPE_GESTURE_DETECTION_START}</li>
+ * <li>{@link AccessibilityEvent#TYPE_GESTURE_DETECTION_END}</li>
+ * <li>{@link AccessibilityEvent#TYPE_TOUCH_INTERACTION_START}</li>
+ * <li>{@link AccessibilityEvent#TYPE_TOUCH_INTERACTION_END}</li>
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_ACCESSIBILITY_FOCUSED}</li>
+ * <li>{@link AccessibilityEvent#TYPE_WINDOWS_CHANGED}</li>
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED}</li>
  * </ul>
  * <h3>Feedback types</h3>
  * <ul>
- * <li>{@link AccessibilityServiceInfo#FEEDBACK_AUDIBLE}
- * <li>{@link AccessibilityServiceInfo#FEEDBACK_HAPTIC}
- * <li>{@link AccessibilityServiceInfo#FEEDBACK_AUDIBLE}
- * <li>{@link AccessibilityServiceInfo#FEEDBACK_VISUAL}
- * <li>{@link AccessibilityServiceInfo#FEEDBACK_GENERIC}
+ * <li>{@link AccessibilityServiceInfo#FEEDBACK_AUDIBLE}</li>
+ * <li>{@link AccessibilityServiceInfo#FEEDBACK_HAPTIC}</li>
+ * <li>{@link AccessibilityServiceInfo#FEEDBACK_AUDIBLE}</li>
+ * <li>{@link AccessibilityServiceInfo#FEEDBACK_VISUAL}</li>
+ * <li>{@link AccessibilityServiceInfo#FEEDBACK_GENERIC}</li>
+ * <li>{@link AccessibilityServiceInfo#FEEDBACK_BRAILLE}</li>
  * </ul>
  * @see AccessibilityEvent
  * @see AccessibilityServiceInfo
@@ -443,8 +456,41 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
+     * Gets the windows on the screen. This method returns only the windows
+     * that a sighted user can interact with, as opposed to all windows.
+     * For example, if there is a modal dialog shown and the user cannot touch
+     * anything behind it, then only the modal window will be reported
+     * (assuming it is the top one). For convenience the returned windows
+     * are ordered in a descending layer order, which is the windows that
+     * are higher in the Z-order are reported first.
+     * <p>
+     * <strong>Note:</strong> In order to access the windows your service has
+     * to declare the capability to retrieve window content by setting the
+     * {@link android.R.styleable#AccessibilityService_canRetrieveWindowContent}
+     * property in its meta-data. For details refer to {@link #SERVICE_META_DATA}.
+     * Also the service has to opt-in to retrieve the interactive windows by
+     * setting the {@link AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS}
+     * flag.
+     * </p>
+     *
+     * @return The windows if there are windows and the service is can retrieve
+     *         them, otherwise an empty list.
+     */
+    public List<AccessibilityWindowInfo> getWindows() {
+        return AccessibilityInteractionClient.getInstance().getWindows(mConnectionId);
+    }
+
+    /**
      * Gets the root node in the currently active window if this service
-     * can retrieve window content.
+     * can retrieve window content. The active window is the one that the user
+     * is currently touching or the window with input focus, if the user is not
+     * touching any window.
+     * <p>
+     * <strong>Note:</strong> In order to access the root node your service has
+     * to declare the capability to retrieve window content by setting the
+     * {@link android.R.styleable#AccessibilityService_canRetrieveWindowContent}
+     * property in its meta-data. For details refer to {@link #SERVICE_META_DATA}.
+     * </p>
      *
      * @return The root node if this service can retrieve window content.
      */
@@ -584,12 +630,13 @@ public abstract class AccessibilityService extends Service {
 
         static final int NO_ID = -1;
 
-        private static final int DO_SET_SET_CONNECTION = 10;
-        private static final int DO_ON_INTERRUPT = 20;
-        private static final int DO_ON_ACCESSIBILITY_EVENT = 30;
-        private static final int DO_ON_GESTURE = 40;
-        private static final int DO_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE = 50;
-        private static final int DO_ON_KEY_EVENT = 60;
+        private static final int DO_SET_SET_CONNECTION = 1;
+        private static final int DO_ON_INTERRUPT = 2;
+        private static final int DO_ON_ACCESSIBILITY_EVENT = 3;
+        private static final int DO_ON_GESTURE = 4;
+        private static final int DO_CLEAR_ACCESSIBILITY_CACHE = 5;
+        private static final int DO_ON_KEY_EVENT = 6;
+        private static final int DO_ON_WINDOWS_CHANGED = 7;
 
         private final HandlerCaller mCaller;
 
@@ -624,8 +671,8 @@ public abstract class AccessibilityService extends Service {
             mCaller.sendMessage(message);
         }
 
-        public void clearAccessibilityNodeInfoCache() {
-            Message message = mCaller.obtainMessage(DO_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE);
+        public void clearAccessibilityCache() {
+            Message message = mCaller.obtainMessage(DO_CLEAR_ACCESSIBILITY_CACHE);
             mCaller.sendMessage(message);
         }
 
@@ -635,6 +682,13 @@ public abstract class AccessibilityService extends Service {
             mCaller.sendMessage(message);
         }
 
+        @Override
+        public void onWindowsChanged(int[] windowIds) {
+            Message message = mCaller.obtainMessageO(DO_ON_WINDOWS_CHANGED, windowIds);
+            mCaller.sendMessage(message);
+        }
+
+        @Override
         public void executeMessage(Message message) {
             switch (message.what) {
                 case DO_ON_ACCESSIBILITY_EVENT: {
@@ -642,12 +696,19 @@ public abstract class AccessibilityService extends Service {
                     if (event != null) {
                         AccessibilityInteractionClient.getInstance().onAccessibilityEvent(event);
                         mCallback.onAccessibilityEvent(event);
-                        event.recycle();
+                        // Make sure the event is recycled.
+                        try {
+                            event.recycle();
+                        } catch (IllegalStateException ise) {
+                            /* ignore - best effort */
+                        }
                     }
                 } return;
+
                 case DO_ON_INTERRUPT: {
                     mCallback.onInterrupt();
                 } return;
+
                 case DO_SET_SET_CONNECTION: {
                     mConnectionId = message.arg1;
                     IAccessibilityServiceConnection connection =
@@ -658,18 +719,22 @@ public abstract class AccessibilityService extends Service {
                         mCallback.onSetConnectionId(mConnectionId);
                         mCallback.onServiceConnected();
                     } else {
-                        AccessibilityInteractionClient.getInstance().removeConnection(mConnectionId);
+                        AccessibilityInteractionClient.getInstance().removeConnection(
+                                mConnectionId);
                         AccessibilityInteractionClient.getInstance().clearCache();
                         mCallback.onSetConnectionId(AccessibilityInteractionClient.NO_ID);
                     }
                 } return;
+
                 case DO_ON_GESTURE: {
                     final int gestureId = message.arg1;
                     mCallback.onGesture(gestureId);
                 } return;
-                case DO_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE: {
+
+                case DO_CLEAR_ACCESSIBILITY_CACHE: {
                     AccessibilityInteractionClient.getInstance().clearCache();
                 } return;
+
                 case DO_ON_KEY_EVENT: {
                     KeyEvent event = (KeyEvent) message.obj;
                     try {
@@ -685,9 +750,40 @@ public abstract class AccessibilityService extends Service {
                             }
                         }
                     } finally {
-                        event.recycle();
+                        // Make sure the event is recycled.
+                        try {
+                            event.recycle();
+                        } catch (IllegalStateException ise) {
+                            /* ignore - best effort */
+                        }
                     }
                 } return;
+
+                case DO_ON_WINDOWS_CHANGED: {
+                    final int[] windowIds = (int[]) message.obj;
+
+                    // Update the cached windows first.
+                    // NOTE: The cache will hold on to the windows so do not recycle.
+                    if (windowIds != null) {
+                        AccessibilityInteractionClient.getInstance().removeWindows(windowIds);
+                    }
+
+                    // Let the client know the windows changed.
+                    AccessibilityEvent event = AccessibilityEvent.obtain(
+                            AccessibilityEvent.TYPE_WINDOWS_CHANGED);
+                    event.setEventTime(SystemClock.uptimeMillis());
+                    event.setSealed(true);
+
+                    mCallback.onAccessibilityEvent(event);
+
+                    // Make sure the event is recycled.
+                    try {
+                        event.recycle();
+                    } catch (IllegalStateException ise) {
+                        /* ignore - best effort */
+                    }
+                } break;
+
                 default :
                     Log.w(LOG_TAG, "Unknown message type " + message.what);
             }

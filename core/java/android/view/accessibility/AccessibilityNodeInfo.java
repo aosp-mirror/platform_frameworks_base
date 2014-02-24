@@ -62,13 +62,19 @@ public class AccessibilityNodeInfo implements Parcelable {
     private static final boolean DEBUG = false;
 
     /** @hide */
-    public static final int UNDEFINED = -1;
+    public static final int UNDEFINED_CONNECTION_ID = -1;
 
     /** @hide */
-    public static final long ROOT_NODE_ID = makeNodeId(UNDEFINED, UNDEFINED);
+    public static final int UNDEFINED_SELECTION_INDEX = -1;
 
     /** @hide */
-    public static final int ACTIVE_WINDOW_ID = UNDEFINED;
+    public static final int UNDEFINED_ITEM_ID = Integer.MAX_VALUE;
+
+    /** @hide */
+    public static final long ROOT_NODE_ID = makeNodeId(UNDEFINED_ITEM_ID, UNDEFINED_ITEM_ID);
+
+    /** @hide */
+    public static final int ACTIVE_WINDOW_ID = UNDEFINED_ITEM_ID;
 
     /** @hide */
     public static final int FLAG_PREFETCH_PREDECESSORS = 0x00000001;
@@ -504,6 +510,13 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     public static long makeNodeId(int accessibilityViewId, int virtualDescendantId) {
+        // We changed the value for undefined node to positive due to wrong
+        // global id composition (two 32-bin ints into one 64-bit long) but
+        // the value used for the host node provider view has id -1 so we
+        // remap it here.
+        if (virtualDescendantId == AccessibilityNodeProvider.HOST_VIEW_ID) {
+            virtualDescendantId = UNDEFINED_ITEM_ID;
+        }
         return (((long) virtualDescendantId) << VIRTUAL_DESCENDANT_ID_SHIFT) | accessibilityViewId;
     }
 
@@ -515,7 +528,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private boolean mSealed;
 
     // Data.
-    private int mWindowId = UNDEFINED;
+    private int mWindowId = UNDEFINED_ITEM_ID;
     private long mSourceNodeId = ROOT_NODE_ID;
     private long mParentNodeId = ROOT_NODE_ID;
     private long mLabelForId = ROOT_NODE_ID;
@@ -536,14 +549,14 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private int mMovementGranularities;
 
-    private int mTextSelectionStart = UNDEFINED;
-    private int mTextSelectionEnd = UNDEFINED;
+    private int mTextSelectionStart = UNDEFINED_SELECTION_INDEX;
+    private int mTextSelectionEnd = UNDEFINED_SELECTION_INDEX;
     private int mInputType = InputType.TYPE_NULL;
     private int mLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE;
 
     private Bundle mExtras;
 
-    private int mConnectionId = UNDEFINED;
+    private int mConnectionId = UNDEFINED_CONNECTION_ID;
 
     private RangeInfo mRangeInfo;
     private CollectionInfo mCollectionInfo;
@@ -567,7 +580,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param source The info source.
      */
     public void setSource(View source) {
-        setSource(source, UNDEFINED);
+        setSource(source, UNDEFINED_ITEM_ID);
     }
 
     /**
@@ -591,9 +604,9 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setSource(View root, int virtualDescendantId) {
         enforceNotSealed();
-        mWindowId = (root != null) ? root.getAccessibilityWindowId() : UNDEFINED;
+        mWindowId = (root != null) ? root.getAccessibilityWindowId() : UNDEFINED_ITEM_ID;
         final int rootAccessibilityViewId =
-            (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
+            (root != null) ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
         mSourceNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
     }
 
@@ -766,7 +779,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void addChild(View child) {
-        addChildInternal(child, UNDEFINED, true);
+        addChildInternal(child, UNDEFINED_ITEM_ID, true);
     }
 
     /**
@@ -776,7 +789,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     public void addChildUnchecked(View child) {
-        addChildInternal(child, UNDEFINED, false);
+        addChildInternal(child, UNDEFINED_ITEM_ID, false);
     }
 
     /**
@@ -794,7 +807,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public boolean removeChild(View child) {
-        return removeChild(child, UNDEFINED);
+        return removeChild(child, UNDEFINED_ITEM_ID);
     }
 
     /**
@@ -821,7 +834,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             mChildNodeIds = new LongArray();
         }
         final int rootAccessibilityViewId =
-            (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
+            (root != null) ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
         final long childNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
         // If we're checking uniqueness and the ID already exists, abort.
         if (checked && mChildNodeIds.indexOf(childNodeId) >= 0) {
@@ -847,7 +860,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             return false;
         }
         final int rootAccessibilityViewId =
-                (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
+                (root != null) ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
         final long childNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
         final int index = childIds.indexOf(childNodeId);
         if (index < 0) {
@@ -1043,6 +1056,22 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Gets the window to which this node belongs.
+     *
+     * @return The window.
+     *
+     * @see android.accessibilityservice.AccessibilityService#getWindows()
+     */
+    public AccessibilityWindowInfo getWindow() {
+        enforceSealed();
+        if (!canPerformRequestOverConnection(mSourceNodeId)) {
+            return null;
+        }
+        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        return client.getWindow(mConnectionId, mWindowId);
+    }
+
+    /**
      * Gets the parent.
      * <p>
      *   <strong>Note:</strong> It is a client responsibility to recycle the
@@ -1059,7 +1088,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                mWindowId, mParentNodeId, false, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
+                mWindowId, mParentNodeId, false, FLAG_PREFETCH_PREDECESSORS
+                        | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
     }
 
     /**
@@ -1084,7 +1114,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setParent(View parent) {
-        setParent(parent, UNDEFINED);
+        setParent(parent, UNDEFINED_ITEM_ID);
     }
 
     /**
@@ -1109,7 +1139,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void setParent(View root, int virtualDescendantId) {
         enforceNotSealed();
         final int rootAccessibilityViewId =
-            (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
+            (root != null) ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
         mParentNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
     }
 
@@ -1811,7 +1841,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param labeled The view for which this info serves as a label.
      */
     public void setLabelFor(View labeled) {
-        setLabelFor(labeled, UNDEFINED);
+        setLabelFor(labeled, UNDEFINED_ITEM_ID);
     }
 
     /**
@@ -1836,7 +1866,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void setLabelFor(View root, int virtualDescendantId) {
         enforceNotSealed();
         final int rootAccessibilityViewId = (root != null)
-                ? root.getAccessibilityViewId() : UNDEFINED;
+                ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
         mLabelForId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
     }
 
@@ -1858,7 +1888,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                mWindowId, mLabelForId, false, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
+                mWindowId, mLabelForId, false, FLAG_PREFETCH_PREDECESSORS
+                        | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
     }
 
     /**
@@ -1868,7 +1899,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param label The view that labels this node's source.
      */
     public void setLabeledBy(View label) {
-        setLabeledBy(label, UNDEFINED);
+        setLabeledBy(label, UNDEFINED_ITEM_ID);
     }
 
     /**
@@ -1893,7 +1924,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void setLabeledBy(View root, int virtualDescendantId) {
         enforceNotSealed();
         final int rootAccessibilityViewId = (root != null)
-                ? root.getAccessibilityViewId() : UNDEFINED;
+                ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
         mLabeledById = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
     }
 
@@ -1915,7 +1946,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                mWindowId, mLabeledById, false, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
+                mWindowId, mLabeledById, false, FLAG_PREFETCH_PREDECESSORS
+                        | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
     }
 
     /**
@@ -2362,6 +2394,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             if (mChildNodeIds == null) {
                 mChildNodeIds = otherChildNodeIds.clone();
             } else {
+                mChildNodeIds.clear();
                 mChildNodeIds.addAll(otherChildNodeIds);
             }
         }
@@ -2474,8 +2507,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         mParentNodeId = ROOT_NODE_ID;
         mLabelForId = ROOT_NODE_ID;
         mLabeledById = ROOT_NODE_ID;
-        mWindowId = UNDEFINED;
-        mConnectionId = UNDEFINED;
+        mWindowId = UNDEFINED_ITEM_ID;
+        mConnectionId = UNDEFINED_CONNECTION_ID;
         mMovementGranularities = 0;
         if (mChildNodeIds != null) {
             mChildNodeIds.clear();
@@ -2489,8 +2522,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         mContentDescription = null;
         mViewIdResourceName = null;
         mActions = 0;
-        mTextSelectionStart = UNDEFINED;
-        mTextSelectionEnd = UNDEFINED;
+        mTextSelectionStart = UNDEFINED_SELECTION_INDEX;
+        mTextSelectionEnd = UNDEFINED_SELECTION_INDEX;
         mInputType = InputType.TYPE_NULL;
         mLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE;
         if (mExtras != null) {
@@ -2583,9 +2616,9 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     private boolean canPerformRequestOverConnection(long accessibilityNodeId) {
-        return (mWindowId != UNDEFINED
-                && getAccessibilityViewId(accessibilityNodeId) != UNDEFINED
-                && mConnectionId != UNDEFINED);
+        return (mWindowId != UNDEFINED_ITEM_ID
+                && getAccessibilityViewId(accessibilityNodeId) != UNDEFINED_ITEM_ID
+                && mConnectionId != UNDEFINED_CONNECTION_ID);
     }
 
     @Override
@@ -2625,6 +2658,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append(super.toString());
 
         if (DEBUG) {
+            builder.append("; sourceNodeId: " + mSourceNodeId);
             builder.append("; accessibilityViewId: " + getAccessibilityViewId(mSourceNodeId));
             builder.append("; virtualDescendantId: " + getVirtualDescendantId(mSourceNodeId));
             builder.append("; mParentNodeId: " + mParentNodeId);
