@@ -71,9 +71,9 @@ public class NotificationData {
             final StatusBarNotification na = a.notification;
             final StatusBarNotification nb = b.notification;
             int d = na.getScore() - nb.getScore();
-	    if (a.interruption != b.interruption) {
-	      return a.interruption ? 1 : -1;
-	    } else if (d != 0) {
+            if (a.interruption != b.interruption) {
+                return a.interruption ? 1 : -1;
+            } else if (d != 0) {
                 return d;
             } else {
                 return (int) (na.getNotification().when - nb.getNotification().when);
