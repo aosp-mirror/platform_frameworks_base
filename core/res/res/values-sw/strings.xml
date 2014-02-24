@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Huruhusu programu kutumia vyombo vyovyote vya habari vilivyosakinishwa ili kusimbua kwa ajili ya kucheza tena."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"dhibiti vitambulisho vinavyoaminika"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Huruhusu programu kusakinisha na kusanidua vyeti vya CA kama vitambulisho vinavyoaminika."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"endesha programu wakati haifanyi kitu"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Ruhusa hii huwezesha mfumo wa Android kuendesha programu chini chini wakati kifaa hakitumiki."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"endesha programu wakati kifaa hakifanyi kitu"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Ruhusa hii huwezesha mfumo wa Android kuendesha programu chini kwa chini wakati kifaa hakitumiki."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"soma/andika kwa vyanzo vinavyomilikiwa na diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Inaruhusu programu kusoma na kuandika kwa chanzo chochote kinachomilikiwa na kikundi cha diag; kwa mfano, faili katika /dev. Hii inaweza kuathiri udhabiti na usalama wa mfumo. Hii inapaswa kutumiwa TU kwa utambuzi mahsusi wa maunzi na mtengenezaji au opareta."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"wezesha au lemeza vijenzi vya programu"</string>
@@ -564,7 +564,7 @@
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"kusoma hali na kitambulisho cha simu"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Inaruhusu programu kufikia vipengele vya simu vya kifaa. Idhini hii inaruhusu programu kutambua nambari ya simu na kifaa, kama simu ni amilifu, na nambari ya mbali iliyounganishwa kwa simu."</string>
     <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"Soma hali sahihi ya simu"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Huruhusu programu kufikia hali sahihi ya simu. Ruhusa hii huwezesha programu kufahamu hali sahihi ya simu, iwapo simu inatumika au katika hali ya chini chini, simu inaposhindikana, hali sahihi ya muunganisho wa data na muunganisho wa data unaposhindikana."</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Huruhusu programu kufikia hali sahihi ya simu. Ruhusa hii huwezesha programu kufahamu hali sahihi ya simu, iwapo simu inatumika au iko katika hali ya chini kwa chini, simu inaposhindikana, hali sahihi ya muunganisho wa data na muunganisho wa data unaposhindikana."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"zuia kompyuta ndogo dhidi ya kulala"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"kuzuia simu isilale"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Inaruhusu programu kuzuia kompyuta kibao  kwenda kulala."</string>

@@ -564,7 +564,7 @@
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lese telefonstatus og -identitet"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lar appen bruke enhetens telefonfunksjoner. Med denne tillatelsen kan appen finne telefonnummer og enhets-ID-er, registrere om en samtale pågår, og se det eksterne nummeret det opprettes en forbindelse med via oppringing."</string>
     <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"lese nøyaktige telefontilstander"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Gir appen tillatelse til å bruke nøyaktige telefontilstander. Denne tillatelsen gjør at appen kan fastslå den faktiske anropstatusen, om et anrop er aktivt eller i bakgrunnen, anropsfeil, nøyaktig status for datatilkobling og datatilkoblingsfeil."</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Gir appen tilgang til nøyaktige telefontilstander. Denne tillatelsen gjør at appen kan fastslå den faktiske anropstatusen, om et anrop er aktivt eller i bakgrunnen, anropsfeil, nøyaktig status for datatilkobling og datatilkoblingsfeil."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"hindre nettbrettet fra å gå over til sovemodus"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"forhindre telefonen fra å sove"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Lar appen hindre nettbrettet fra å gå over i sovemodus."</string>

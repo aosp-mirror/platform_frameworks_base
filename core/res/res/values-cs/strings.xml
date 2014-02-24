@@ -563,8 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Umožňuje aplikaci ovládat telefonní funkce zařízení. Aplikace s tímto oprávněním smí bez upozornění přepínat sítě, zapínat a vypínat bezdrátový modul telefonu a podobně."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"čtení stavu a identity telefonu"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Umožňuje aplikaci získat přístup k telefonním funkcím zařízení. Toto oprávnění umožňuje aplikaci zjistit telefonní číslo telefonu, identifikační čísla zařízení, zda zrovna probíhá hovor, a vzdálené číslo, ke kterému je hovor připojen."</string>
-    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"čtení přesných stavů telefonů"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Umožňuje aplikaci používat přesné stavy telefonů. Toto oprávnění aplikaci umožňuje zjistit skutečný stav volání, zda je volání aktivní nebo na pozadí, zda volání selhalo, přesný stav datového připojení a zda datové připojení selhalo."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"čtení přesného stavu telefonování"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Umožňuje aplikaci zjišťovat přesný stav telefonování a mobilních dat. Toto oprávnění aplikaci umožňuje zjistit skutečný stav volání, zda je volání aktivní nebo na pozadí, zda volání selhalo, přesný stav datového připojení a zda datové připojení selhalo."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"bránění přechodu tabletu do režimu spánku"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"bránění přechodu telefonu do režimu spánku"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Umožňuje aplikaci zabránit přechodu tabletu do režimu spánku."</string>

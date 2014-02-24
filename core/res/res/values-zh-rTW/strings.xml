@@ -563,8 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"允許應用程式控制裝置的電話功能。擁有這項權限的應用程式可在未通知您的情況下，任意切換網路、開啟或關閉手機無線電等。"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"讀取手機狀態和識別碼"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"允許應用程式使用裝置的電話功能。這項權限可讓應用程式判讀手機號碼和裝置 ID、是否正在通話中，以及所撥打的對方號碼。"</string>
-    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"讀取精確手機狀態"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"允許應用程式存取精確的手機狀態。這項權限可讓應用程式判別實際通話狀態、通話程序正在進行中或是在背景運作、通話失敗次數、精確數據連線狀態和數據連線失敗次數。"</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"讀取手機精確狀態"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"允許應用程式存取手機的精確狀態。這項權限可讓應用程式判別實際通話狀態，包括通話正在進行中或是在背景運作、通話失敗次數、精確數據連線狀態和數據連線失敗次數。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"防止平板電腦進入休眠狀態"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"防止手機進入待命狀態"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"允許應用程式防止平板電腦進入休眠狀態。"</string>
