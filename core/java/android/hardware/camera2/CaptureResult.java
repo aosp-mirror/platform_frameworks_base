@@ -143,7 +143,7 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>Gains applying to Bayer raw color channels for
-     * white-balance</p>
+     * white-balance.</p>
      * <p>The 4-channel white-balance gains are defined in
      * the order of <code>[R G_even G_odd B]</code>, where <code>G_even</code> is the gain
      * for green pixels on even rows of the output, and <code>G_odd</code>
@@ -151,11 +151,11 @@ public final class CaptureResult extends CameraMetadata {
      * does not support a separate gain for even/odd green channels,
      * it should use the <code>G_even</code> value, and write <code>G_odd</code> equal to
      * <code>G_even</code> in the output result metadata.</p>
-     * <p>This array is either set by HAL when the request
+     * <p>This array is either set by the camera device when the request
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is not TRANSFORM_MATRIX, or
      * directly by the application in the request when the
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is TRANSFORM_MATRIX.</p>
-     * <p>The output should be the gains actually applied by the HAL to
+     * <p>The output should be the gains actually applied by the camera device to
      * the current frame.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_MODE
@@ -225,9 +225,9 @@ public final class CaptureResult extends CameraMetadata {
      * bottom-right pixel in the active pixel array. The weight
      * should be nonnegative.</p>
      * <p>If all regions have 0 weight, then no specific metering area
-     * needs to be used by the HAL. If the metering region is
-     * outside the current {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, the HAL
-     * should ignore the sections outside the region and output the
+     * needs to be used by the camera device. If the metering region is
+     * outside the current {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, the camera device
+     * will ignore the sections outside the region and output the
      * used sections in the frame metadata.</p>
      *
      * @see CaptureRequest#SCALER_CROP_REGION
@@ -437,13 +437,15 @@ public final class CaptureResult extends CameraMetadata {
     /**
      * <p>Whether AF is currently enabled, and what
      * mode it is set to</p>
-     * <p>Only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} = AUTO.</p>
+     * <p>Only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} = AUTO and the lens is not fixed focus
+     * (i.e. <code>{@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} &gt; 0</code>).</p>
      * <p>If the lens is controlled by the camera device auto-focus algorithm,
      * the camera device will report the current AF status in {@link CaptureResult#CONTROL_AF_STATE android.control.afState}
      * in result metadata.</p>
      *
      * @see CaptureResult#CONTROL_AF_STATE
      * @see CaptureRequest#CONTROL_MODE
+     * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
      * @see #CONTROL_AF_MODE_OFF
      * @see #CONTROL_AF_MODE_AUTO
      * @see #CONTROL_AF_MODE_MACRO
@@ -467,9 +469,9 @@ public final class CaptureResult extends CameraMetadata {
      * bottom-right pixel in the active pixel array. The weight
      * should be nonnegative.</p>
      * <p>If all regions have 0 weight, then no specific focus area
-     * needs to be used by the HAL. If the focusing region is
-     * outside the current {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, the HAL
-     * should ignore the sections outside the region and output the
+     * needs to be used by the camera device. If the focusing region is
+     * outside the current {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, the camera device
+     * will ignore the sections outside the region and output the
      * used sections in the frame metadata.</p>
      *
      * @see CaptureRequest#SCALER_CROP_REGION
@@ -889,14 +891,14 @@ public final class CaptureResult extends CameraMetadata {
     /**
      * <p>Whether AWB is currently setting the color
      * transform fields, and what its illumination target
-     * is</p>
+     * is.</p>
      * <p>This control is only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} is AUTO.</p>
      * <p>When set to the ON mode, the camera device's auto white balance
      * routine is enabled, overriding the application's selected
      * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} and
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}.</p>
      * <p>When set to the OFF mode, the camera device's auto white balance
-     * routine is disabled. The applicantion manually controls the white
+     * routine is disabled. The application manually controls the white
      * balance by {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}
      * and {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}.</p>
      * <p>When set to any other modes, the camera device's auto white balance
@@ -933,10 +935,10 @@ public final class CaptureResult extends CameraMetadata {
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.height - 1) being the
      * bottom-right pixel in the active pixel array. The weight
      * should be nonnegative.</p>
-     * <p>If all regions have 0 weight, then no specific metering area
-     * needs to be used by the HAL. If the metering region is
-     * outside the current {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, the HAL
-     * should ignore the sections outside the region and output the
+     * <p>If all regions have 0 weight, then no specific auto-white balance (AWB) area
+     * needs to be used by the camera device. If the AWB region is
+     * outside the current {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, the camera device
+     * will ignore the sections outside the region and output the
      * used sections in the frame metadata.</p>
      *
      * @see CaptureRequest#SCALER_CROP_REGION
@@ -1077,7 +1079,7 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>Overall mode of 3A control
-     * routines</p>
+     * routines.</p>
      * <p>High-level 3A control. When set to OFF, all 3A control
      * by the camera device is disabled. The application must set the fields for
      * capture parameters itself.</p>
@@ -1105,9 +1107,9 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>Operation mode for edge
-     * enhancement</p>
+     * enhancement.</p>
      * <p>Edge/sharpness/detail enhancement. OFF means no
-     * enhancement will be applied by the HAL.</p>
+     * enhancement will be applied by the camera device.</p>
      * <p>FAST/HIGH_QUALITY both mean camera device determined enhancement
      * will be applied. HIGH_QUALITY mode indicates that the
      * camera device will use the highest-quality enhancement algorithms,
@@ -1385,7 +1387,7 @@ public final class CaptureResult extends CameraMetadata {
      * <p>Mode of operation for the noise reduction
      * algorithm</p>
      * <p>Noise filtering control. OFF means no noise reduction
-     * will be applied by the HAL.</p>
+     * will be applied by the camera device.</p>
      * <p>FAST/HIGH_QUALITY both mean camera device determined noise filtering
      * will be applied. HIGH_QUALITY mode indicates that the camera device
      * will use the highest-quality noise filtering algorithms,
@@ -1411,7 +1413,7 @@ public final class CaptureResult extends CameraMetadata {
      * before the FINAL buffer for frame 4. PARTIAL buffers may be returned
      * in any order relative to other frames, but all PARTIAL buffers for a given
      * capture must arrive before the FINAL buffer for that capture. This entry may
-     * only be used by the HAL if quirks.usePartialResult is set to 1.</p>
+     * only be used by the camera device if quirks.usePartialResult is set to 1.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @hide
      */
@@ -1904,7 +1906,7 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>The best-fit color channel gains calculated
-     * by the HAL's statistics units for the current output frame</p>
+     * by the camera device's statistics units for the current output frame.</p>
      * <p>This may be different than the gains used for this frame,
      * since statistics processing on data from a new frame
      * typically completes after the transform has already been
@@ -1923,11 +1925,11 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>The best-fit color transform matrix estimate
-     * calculated by the HAL's statistics units for the current
-     * output frame</p>
-     * <p>The HAL must provide the estimate from its
+     * calculated by the camera device's statistics units for the current
+     * output frame.</p>
+     * <p>The camera device will provide the estimate from its
      * statistics unit on the white balance transforms to use
-     * for the next frame. These are the values the HAL believes
+     * for the next frame. These are the values the camera device believes
      * are the best fit for the current output frame. This may
      * be different than the transform used for this frame, since
      * statistics processing on data from a new frame typically

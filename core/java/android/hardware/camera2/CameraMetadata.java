@@ -999,7 +999,7 @@ public abstract class CameraMetadata {
     /**
      * <p>Use specific scene mode. Enabling this disables
      * control.aeMode, control.awbMode and control.afMode
-     * controls; the HAL must ignore those settings while
+     * controls; the camera device will ignore those settings while
      * USE_SCENE_MODE is active (except for FACE_PRIORITY
      * scene mode). Other control entries are still active.
      * This setting can only be used if availableSceneModes !=
