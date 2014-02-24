@@ -29,5 +29,6 @@ interface IMediaHTTPConnection
     int readAt(long offset, int size);
     long getSize();
     String getMIMEType();
+    String getUri();
 }
 
