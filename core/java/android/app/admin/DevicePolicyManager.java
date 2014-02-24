@@ -1798,7 +1798,7 @@ public class DevicePolicyManager {
 
     /**
      * Called by a profile owner or device owner to remove all persistent intent handler preferences
-     * associated with the given package that were set by {@link addPersistentPreferredActivity}.
+     * associated with the given package that were set by {@link #addPersistentPreferredActivity}.
      *
      * <p>The calling device admin must be a profile owner. If it is not, a security
      * exception will be thrown.
