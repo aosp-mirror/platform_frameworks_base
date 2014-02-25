@@ -117,6 +117,11 @@ enum ModelViewMode {
     kModelViewMode_TranslateAndScale = 1,
 };
 
+enum VertexBufferMode {
+    kVertexBufferMode_Standard = 0,
+    kVertexBufferMode_Shadow = 1
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
@@ -629,8 +634,8 @@ private:
      * @param paint The paint to render with
      * @param useOffset Offset the vertexBuffer (used in drawing non-AA lines)
      */
-    status_t drawVertexBuffer(const VertexBuffer& vertexBuffer, const SkPaint* paint,
-            bool useOffset = false);
+    status_t drawVertexBuffer(VertexBufferMode mode, const VertexBuffer& vertexBuffer,
+            const SkPaint* paint, bool useOffset = false);
 
     /**
      * Renders the convex hull defined by the specified path as a strip of polygons.
