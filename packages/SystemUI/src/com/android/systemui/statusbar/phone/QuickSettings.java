@@ -312,7 +312,7 @@ class QuickSettings {
             public void onClick(View v) {
                 collapsePanels();
                 final UserManager um = UserManager.get(mContext);
-                if (um.getUsers(true).size() > 1) {
+                if (um.isUserSwitcherEnabled()) {
                     // Since keyguard and systemui were merged into the same process to save
                     // memory, they share the same Looper and graphics context.  As a result,
                     // there's no way to allow concurrent animation while keyguard inflates.

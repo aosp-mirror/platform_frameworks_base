@@ -1051,9 +1051,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private void enableUserSelectorIfNecessary() {
-        if (!UserManager.supportsMultipleUsers()) {
-            return; // device doesn't support multi-user mode
-        }
         final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         if (um == null) {
             Throwable t = new Throwable();
@@ -1063,61 +1060,53 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
         // if there are multiple users, we need to enable to multi-user switcher
-        final List<UserInfo> users = um.getUsers(true);
-        if (users == null) {
-            Throwable t = new Throwable();
-            t.fillInStackTrace();
-            Log.e(TAG, "list of users is null.", t);
+        if (!um.isUserSwitcherEnabled()) {
             return;
         }
 
         final View multiUserView = findViewById(R.id.keyguard_user_selector);
         if (multiUserView == null) {
-            Throwable t = new Throwable();
-            t.fillInStackTrace();
-            Log.e(TAG, "can't find user_selector in layout.", t);
+            if (DEBUG) Log.d(TAG, "can't find user_selector in layout.");
             return;
         }
 
-        if (users.size() > 1) {
-            if (multiUserView instanceof KeyguardMultiUserSelectorView) {
-                mKeyguardMultiUserSelectorView = (KeyguardMultiUserSelectorView) multiUserView;
-                mKeyguardMultiUserSelectorView.setVisibility(View.VISIBLE);
-                mKeyguardMultiUserSelectorView.addUsers(users);
-                UserSwitcherCallback callback = new UserSwitcherCallback() {
-                    @Override
-                    public void hideSecurityView(int duration) {
-                        getSecurityContainer().animate().alpha(0).setDuration(duration);
-                    }
-
-                    @Override
-                    public void showSecurityView() {
-                        getSecurityContainer().setAlpha(1.0f);
-                    }
-
-                    @Override
-                    public void showUnlockHint() {
-                        if (getSecurityContainer() != null) {
-                            getSecurityContainer().showUsabilityHint();
-                        }
-                    }
-
-                    @Override
-                    public void userActivity() {
-                        if (mViewMediatorCallback != null) {
-                            mViewMediatorCallback.userActivity();
-                        }
-                    }
-                };
-                mKeyguardMultiUserSelectorView.setCallback(callback);
-            } else {
-                Throwable t = new Throwable();
-                t.fillInStackTrace();
-                if (multiUserView == null) {
-                    Log.e(TAG, "could not find the user_selector.", t);
-                } else {
-                    Log.e(TAG, "user_selector is the wrong type.", t);
+        if (multiUserView instanceof KeyguardMultiUserSelectorView) {
+            mKeyguardMultiUserSelectorView = (KeyguardMultiUserSelectorView) multiUserView;
+            mKeyguardMultiUserSelectorView.setVisibility(View.VISIBLE);
+            mKeyguardMultiUserSelectorView.addUsers(um.getUsers(true));
+            UserSwitcherCallback callback = new UserSwitcherCallback() {
+                @Override
+                public void hideSecurityView(int duration) {
+                    getSecurityContainer().animate().alpha(0).setDuration(duration);
                 }
+
+                @Override
+                public void showSecurityView() {
+                    getSecurityContainer().setAlpha(1.0f);
+                }
+
+                @Override
+                public void showUnlockHint() {
+                    if (getSecurityContainer() != null) {
+                        getSecurityContainer().showUsabilityHint();
+                    }
+                }
+
+                @Override
+                public void userActivity() {
+                    if (mViewMediatorCallback != null) {
+                        mViewMediatorCallback.userActivity();
+                    }
+                }
+            };
+            mKeyguardMultiUserSelectorView.setCallback(callback);
+        } else {
+            Throwable t = new Throwable();
+            t.fillInStackTrace();
+            if (multiUserView == null) {
+                Log.e(TAG, "could not find the user_selector.", t);
+            } else {
+                Log.e(TAG, "user_selector is the wrong type.", t);
             }
         }
     }

@@ -363,36 +363,38 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private void addUsersToMenu(ArrayList<Action> items) {
-        List<UserInfo> users = ((UserManager) mContext.getSystemService(Context.USER_SERVICE))
-                .getUsers();
-        if (users.size() > 1) {
+        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        if (um.isUserSwitcherEnabled()) {
+            List<UserInfo> users = um.getUsers();
             UserInfo currentUser = getCurrentUser();
             for (final UserInfo user : users) {
-                boolean isCurrentUser = currentUser == null
-                        ? user.id == 0 : (currentUser.id == user.id);
-                Drawable icon = user.iconPath != null ? Drawable.createFromPath(user.iconPath)
-                        : null;
-                SinglePressAction switchToUser = new SinglePressAction(
-                        com.android.internal.R.drawable.ic_menu_cc, icon,
-                        (user.name != null ? user.name : "Primary")
-                        + (isCurrentUser ? " \u2714" : "")) {
-                    public void onPress() {
-                        try {
-                            ActivityManagerNative.getDefault().switchUser(user.id);
-                        } catch (RemoteException re) {
-                            Log.e(TAG, "Couldn't switch user " + re);
+                if (user.supportsSwitchTo()) {
+                    boolean isCurrentUser = currentUser == null
+                            ? user.id == 0 : (currentUser.id == user.id);
+                    Drawable icon = user.iconPath != null ? Drawable.createFromPath(user.iconPath)
+                            : null;
+                    SinglePressAction switchToUser = new SinglePressAction(
+                            com.android.internal.R.drawable.ic_menu_cc, icon,
+                            (user.name != null ? user.name : "Primary")
+                            + (isCurrentUser ? " \u2714" : "")) {
+                        public void onPress() {
+                            try {
+                                ActivityManagerNative.getDefault().switchUser(user.id);
+                            } catch (RemoteException re) {
+                                Log.e(TAG, "Couldn't switch user " + re);
+                            }
                         }
-                    }
 
-                    public boolean showDuringKeyguard() {
-                        return true;
-                    }
+                        public boolean showDuringKeyguard() {
+                            return true;
+                        }
 
-                    public boolean showBeforeProvisioning() {
-                        return false;
-                    }
-                };
-                items.add(switchToUser);
+                        public boolean showBeforeProvisioning() {
+                            return false;
+                        }
+                    };
+                    items.add(switchToUser);
+                }
             }
         }
     }

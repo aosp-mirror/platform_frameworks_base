@@ -164,11 +164,13 @@ public class UserManager {
 
     /**
      * Returns whether the system supports multiple users.
-     * @return true if multiple users can be created, false if it is a single user device.
+     * @return true if multiple users can be created by user, false if it is a single user device.
      * @hide
      */
     public static boolean supportsMultipleUsers() {
-        return getMaxSupportedUsers() > 1;
+        return getMaxSupportedUsers() > 1
+                && SystemProperties.getBoolean("fw.show_multiuserui",
+                Resources.getSystem().getBoolean(R.bool.config_enableMultiUserUI));
     }
 
     /**
@@ -598,6 +600,26 @@ public class UserManager {
         if (android.os.Build.ID.startsWith("JVP")) return 1;
         return SystemProperties.getInt("fw.max_users",
                 Resources.getSystem().getInteger(R.integer.config_multiuserMaximumUsers));
+    }
+
+    /**
+     * Returns true if the user switcher should be shown, this will be if there
+     * are multiple users that aren't managed profiles.
+     * @hide
+     * @return true if user switcher should be shown.
+     */
+    public boolean isUserSwitcherEnabled() {
+        List<UserInfo> users = getUsers(true);
+        if (users == null) {
+           return false;
+        }
+        int switchableUserCount = 0;
+        for (UserInfo user : users) {
+            if (user.supportsSwitchTo()) {
+                ++switchableUserCount;
+            }
+        }
+        return switchableUserCount > 1;
     }
 
     /**
