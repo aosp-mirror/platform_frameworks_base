@@ -70,22 +70,22 @@ nativeClassInit(JNIEnv *_env, jclass glImplClass)
     jclass eglconfigClassLocal = _env->FindClass("android/opengl/EGLConfig");
     eglconfigClass = (jclass) _env->NewGlobalRef(eglconfigClassLocal);
 
-    egldisplayGetHandleID = _env->GetMethodID(egldisplayClass, "getHandle", "()I");
-    eglcontextGetHandleID = _env->GetMethodID(eglcontextClass, "getHandle", "()I");
-    eglsurfaceGetHandleID = _env->GetMethodID(eglsurfaceClass, "getHandle", "()I");
-    eglconfigGetHandleID = _env->GetMethodID(eglconfigClass, "getHandle", "()I");
+    egldisplayGetHandleID = _env->GetMethodID(egldisplayClass, "getNativeHandle", "()J");
+    eglcontextGetHandleID = _env->GetMethodID(eglcontextClass, "getNativeHandle", "()J");
+    eglsurfaceGetHandleID = _env->GetMethodID(eglsurfaceClass, "getNativeHandle", "()J");
+    eglconfigGetHandleID = _env->GetMethodID(eglconfigClass, "getNativeHandle", "()J");
 
 
-    egldisplayConstructor = _env->GetMethodID(egldisplayClass, "<init>", "(I)V");
-    eglcontextConstructor = _env->GetMethodID(eglcontextClass, "<init>", "(I)V");
-    eglsurfaceConstructor = _env->GetMethodID(eglsurfaceClass, "<init>", "(I)V");
-    eglconfigConstructor = _env->GetMethodID(eglconfigClass, "<init>", "(I)V");
+    egldisplayConstructor = _env->GetMethodID(egldisplayClass, "<init>", "(J)V");
+    eglcontextConstructor = _env->GetMethodID(eglcontextClass, "<init>", "(J)V");
+    eglsurfaceConstructor = _env->GetMethodID(eglsurfaceClass, "<init>", "(J)V");
+    eglconfigConstructor = _env->GetMethodID(eglconfigClass, "<init>", "(J)V");
 
-    jobject localeglNoContextObject = _env->NewObject(eglcontextClass, eglcontextConstructor, (jint)EGL_NO_CONTEXT);
+    jobject localeglNoContextObject = _env->NewObject(eglcontextClass, eglcontextConstructor, reinterpret_cast<jlong>(EGL_NO_CONTEXT));
     eglNoContextObject = _env->NewGlobalRef(localeglNoContextObject);
-    jobject localeglNoDisplayObject = _env->NewObject(egldisplayClass, egldisplayConstructor, (jint)EGL_NO_DISPLAY);
+    jobject localeglNoDisplayObject = _env->NewObject(egldisplayClass, egldisplayConstructor, reinterpret_cast<jlong>(EGL_NO_DISPLAY));
     eglNoDisplayObject = _env->NewGlobalRef(localeglNoDisplayObject);
-    jobject localeglNoSurfaceObject = _env->NewObject(eglsurfaceClass, eglsurfaceConstructor, (jint)EGL_NO_SURFACE);
+    jobject localeglNoSurfaceObject = _env->NewObject(eglsurfaceClass, eglsurfaceConstructor, reinterpret_cast<jlong>(EGL_NO_SURFACE));
     eglNoSurfaceObject = _env->NewGlobalRef(localeglNoSurfaceObject);
 
 
@@ -107,7 +107,7 @@ fromEGLHandle(JNIEnv *_env, jmethodID mid, jobject obj) {
                           "Object is set to null.");
     }
 
-    return (void*) (_env->CallIntMethod(obj, mid));
+    return reinterpret_cast<void*>(_env->CallLongMethod(obj, mid));
 }
 
 static jobject
@@ -127,7 +127,7 @@ toEGLHandle(JNIEnv *_env, jclass cls, jmethodID con, void * handle) {
            return eglNoSurfaceObject;
     }
 
-    return _env->NewObject(cls, con, (jint)handle);
+    return _env->NewObject(cls, con, reinterpret_cast<jlong>(handle));
 }
 
 // --------------------------------------------------------------------------
