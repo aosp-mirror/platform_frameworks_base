@@ -37,6 +37,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+/** @hide */
 public class ActivityView extends ViewGroup {
     private final String TAG = "ActivityView";
     private final boolean DEBUG = false;
@@ -107,6 +108,10 @@ public class ActivityView extends ViewGroup {
         super.onDetachedFromWindow();
         if (mActivityContainer != null) {
             detach();
+            try {
+                ActivityManagerNative.getDefault().deleteActivityContainer(mActivityContainer);
+            } catch (RemoteException e) {
+            }
             mActivityContainer = null;
         }
     }
@@ -122,7 +127,6 @@ public class ActivityView extends ViewGroup {
             case  View.INVISIBLE:
                 break;
             case View.GONE:
-                detach();
                 break;
         }
     }

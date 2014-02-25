@@ -188,6 +188,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_WINDOW_TRACE = false;
     static final boolean DEBUG_TASK_MOVEMENT = false;
     static final boolean DEBUG_STACK = false;
+    static final boolean DEBUG_DISPLAY = false;
     static final boolean SHOW_SURFACE_ALLOC = false;
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
@@ -4931,6 +4932,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    void detachStackLocked(DisplayContent displayContent, TaskStack stack) {
+        displayContent.detachStack(stack);
+        stack.detachDisplay();
+    }
+
     public void detachStack(int stackId) {
         synchronized (mWindowMap) {
             TaskStack stack = mStackIdToStack.get(stackId);
@@ -4938,14 +4944,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayContent displayContent = stack.getDisplayContent();
                 if (displayContent != null) {
                     if (stack.isAnimating()) {
-                        displayContent.mDeferredActions |= DisplayContent.DEFER_DETACH;
+                        stack.mDeferDetach = true;
                         return;
                     }
-                    displayContent.detachStack(stack);
-                    stack.detachDisplay();
+                    detachStackLocked(displayContent, stack);
                 }
             }
         }
+    }
+
+    public void removeStack(int stackId) {
+        mStackIdToStack.remove(stackId);
     }
 
     void removeTaskLocked(Task task) {
@@ -9499,9 +9508,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        // Remove all deferred Stacks, tasks, and activities.
-        for (int stackNdx = mPendingStacksRemove.size() - 1; stackNdx >= 0; --stackNdx) {
-            mPendingStacksRemove.removeAt(stackNdx).checkForDeferredActions();
+        // Remove all deferred displays stacks, tasks, and activities.
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            mDisplayContents.valueAt(displayNdx).checkForDeferredActions();
         }
 
         setFocusedStackFrame();
@@ -10780,6 +10789,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private DisplayContent newDisplayContentLocked(final Display display) {
         DisplayContent displayContent = new DisplayContent(display, this);
         final int displayId = display.getDisplayId();
+        if (DEBUG_DISPLAY) Slog.v(TAG, "Adding display=" + display);
         mDisplayContents.put(displayId, displayContent);
 
         DisplayInfo displayInfo = displayContent.getDisplayInfo();
@@ -10881,10 +10891,11 @@ public class WindowManagerService extends IWindowManager.Stub
     private void handleDisplayRemovedLocked(int displayId) {
         final DisplayContent displayContent = getDisplayContentLocked(displayId);
         if (displayContent != null) {
-            if ((displayContent.mDeferredActions & DisplayContent.DEFER_DETACH) != 0) {
-                displayContent.mDeferredActions |= DisplayContent.DEFER_REMOVAL;
+            if (displayContent.isAnimating()) {
+                displayContent.mDeferredRemoval = true;
                 return;
             }
+            if (DEBUG_DISPLAY) Slog.v(TAG, "Removing display=" + displayContent);
             mDisplayContents.delete(displayId);
             displayContent.close();
             if (displayId == Display.DEFAULT_DISPLAY) {
