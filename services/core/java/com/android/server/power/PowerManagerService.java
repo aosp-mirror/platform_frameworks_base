@@ -1553,7 +1553,7 @@ public final class PowerManagerService extends com.android.server.SystemService
             return false;
         }
         if (!isBeingKeptAwakeLocked()) {
-            if (!mIsPowered && !mDreamsEnabledByDefaultConfig) {
+            if (!mIsPowered && !mDreamsEnabledOnBatteryConfig) {
                 return false;
             }
             if (!mIsPowered
