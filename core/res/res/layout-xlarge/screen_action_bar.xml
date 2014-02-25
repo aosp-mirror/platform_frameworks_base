@@ -34,6 +34,7 @@ the Action Bar enabled overlaying application content.
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         style="?android:attr/actionBarStyle"
+        android:sharedElementName="android:action_bar"
         android:gravity="top">
         <com.android.internal.widget.ActionBarView
             android:id="@+id/action_bar"

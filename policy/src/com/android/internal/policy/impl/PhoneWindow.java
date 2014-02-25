@@ -29,6 +29,8 @@ import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
 import android.transition.TransitionManager;
+import android.transition.TransitionSet;
+import android.util.ArrayMap;
 import android.view.ViewConfiguration;
 
 import com.android.internal.R;
@@ -105,6 +107,9 @@ import android.widget.TextView;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Android-specific Window.
@@ -119,6 +124,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private final static boolean SWEEP_OPEN_MENU = false;
     private static final long MAX_TRANSITION_START_WAIT = 500;
     private static final long MAX_TRANSITION_FINISH_WAIT = 1000;
+
+    private static final String KEY_SCREEN_X = "shared_element:screenX";
+    private static final String KEY_SCREEN_Y = "shared_element:screenY";
+    private static final String KEY_TRANSLATION_Z = "shared_element:translationZ";
+    private static final String KEY_WIDTH = "shared_element:width";
+    private static final String KEY_HEIGHT = "shared_element:height";
+    private static final String KEY_NAME = "shared_element:name";
 
     /**
      * Simple callback used by the context menu and its submenus. The options
@@ -239,7 +251,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private ActivityOptions mActivityOptions;
     private SceneTransitionListener mSceneTransitionListener;
-    private boolean mFadeEarly = true;
+    private boolean mTriggerEarly = true;
+    private Map<String, String> mSharedElementsMap;
 
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
@@ -2562,6 +2575,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return super.fitSystemWindows(insets);
         }
 
+        @Override
+        public boolean isTransitionGroup() {
+            return false;
+        }
+
         private void updateStatusGuard(Rect insets) {
             boolean showStatusGuard = false;
             // Show the status guard when the non-overlay contextual action bar is showing
@@ -3988,78 +4006,196 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
-    public void setEarlyBackgroundTransition(boolean fadeEarly) {
-        mFadeEarly = fadeEarly;
+    public void setTriggerEarlyEnterTransition(boolean triggerEarly) {
+        mTriggerEarly = triggerEarly;
     }
 
     @Override
-    public void startExitTransition(ActivityOptions activityOptions) {
-        Transition transition = mTransitionManager.getNamedTransition(getContentScene(), "null");
-        if (transition == null) {
-            transition = TransitionManager.getDefaultTransition().clone();
+    public void mapTransitionTargets(Map<String, String> sharedElementNames) {
+        mSharedElementsMap = sharedElementNames;
+    }
+
+    @Override
+    public Bundle startExitTransition(Map<String, View> sharedElements) {
+        if (mContentScene == null) {
+            return null;
         }
-        activityOptions.setExitTransition(transition, new ActivityOptions.SharedElementSource() {
+        Transition transition = mTransitionManager.getExitTransition(mContentScene);
+        if (transition == null) {
+            return null;
+        }
+
+        // Find exiting Views and shared elements
+        final ArrayList<View> transitioningViews = new ArrayList<View>();
+        mDecor.captureTransitioningViews(transitioningViews);
+        transitioningViews.removeAll(sharedElements.values());
+
+        Transition exitTransition = cloneAndSetTransitionTargets(transition,
+                transitioningViews, true);
+        Transition sharedElementTransition = cloneAndSetTransitionTargets(transition,
+                transitioningViews, false);
+
+        // transitionSet is the total exit transition, including hero animation.
+        TransitionSet transitionSet = new TransitionSet();
+        transitionSet.addTransition(exitTransition);
+        transitionSet.addTransition(sharedElementTransition);
+
+        ActivityOptions activityOptions = createExitActivityOptions(sharedElements,
+                sharedElementTransition, exitTransition);
+
+        // Start exiting the Views that need to exit
+        TransitionManager.beginDelayedTransition(mDecor, transitionSet);
+        setViewVisibility(transitioningViews, View.INVISIBLE);
+
+        return activityOptions.toBundle();
+    }
+
+    private ActivityOptions createExitActivityOptions(final Map<String, View> sharedElements,
+            Transition sharedElementTransition, Transition exitTransition) {
+
+        // Schedule capturing of the shared element state
+        final Bundle sharedElementArgs = new Bundle();
+        captureTerminalSharedElementState(sharedElements, sharedElementArgs);
+
+        ActivityOptions.SharedElementSource sharedElementSource
+                = new ActivityOptions.SharedElementSource() {
             @Override
-            public int getTextureId() {
-                // TODO: move shared elements to a layer and return the texture id
-                recurseHideExitingSharedElements(mContentParent);
-                return 0;
+            public Bundle getSharedElementExitState() {
+                return sharedElementArgs;
+            }
+
+            @Override
+            public void acceptedSharedElements(ArrayList<String> sharedElementNames) {
+                if (sharedElementNames.size() == sharedElements.size()) {
+                    return; // They were all accepted
+                }
+                Transition transition = mTransitionManager.getExitTransition(mContentScene).clone();
+                TransitionManager.beginDelayedTransition(mDecor, transition);
+                for (String name: sharedElements.keySet()) {
+                    if (!sharedElementNames.contains(name)) {
+                        sharedElements.get(name).setVisibility(View.INVISIBLE);
+                    }
+                }
+                sharedElements.keySet().retainAll(sharedElementNames);
+            }
+
+            @Override
+            public void hideSharedElements() {
+                if (sharedElements != null) {
+                    setViewVisibility(sharedElements.values(), View.INVISIBLE);
+                }
+            }
+        };
+
+        ArrayList<String> names = new ArrayList<String>(sharedElements.keySet());
+        return ActivityOptions.makeSceneTransitionAnimation(
+                exitTransition, names, sharedElementTransition, sharedElementSource);
+    }
+
+    private void captureTerminalSharedElementState(final Map<String, View> sharedElements,
+            final Bundle sharedElementArgs) {
+        mDecor.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                mDecor.getViewTreeObserver().removeOnPreDrawListener(this);
+                int[] tempLoc = new int[2];
+                for (String name: sharedElements.keySet()) {
+                    View sharedElement = sharedElements.get(name);
+                    captureSharedElementState(sharedElement, name, sharedElementArgs, tempLoc);
+                }
+                return true;
             }
         });
-        ViewGroup sceneRoot = getContentScene().getSceneRoot();
-        TransitionManager.beginDelayedTransition(sceneRoot, transition);
-        recurseExitNonSharedElements(mContentParent);
     }
 
-    private static void recurseExitNonSharedElements(ViewGroup viewGroup) {
-        int numChildren = viewGroup.getChildCount();
-        for (int i = 0; i < numChildren; i++) {
-            View child = viewGroup.getChildAt(i);
-            if (child.getSharedElementName() != null || (child.getVisibility() != View.VISIBLE)) {
-                continue;
-            }
-            if (child instanceof ViewGroup && !((ViewGroup)child).isTransitionGroup()) {
-                recurseExitNonSharedElements((ViewGroup) child);
+    private static Transition cloneAndSetTransitionTargets(Transition transition,
+            List<View> views, boolean add) {
+        transition = transition.clone();
+        if (!transition.getTargetIds().isEmpty() || !transition.getTargets().isEmpty()) {
+            TransitionSet set = new TransitionSet();
+            set.addTransition(transition);
+            transition = set;
+        }
+        for (View view: views) {
+            if (add) {
+                transition.addTarget(view);
             } else {
-                child.setVisibility(View.INVISIBLE);
+                transition.excludeTarget(view, true);
             }
+        }
+        return transition;
+    }
+
+    private static void setViewVisibility(Collection<View> views, int visibility) {
+        for (View view : views) {
+            view.setVisibility(visibility);
         }
     }
 
-    private static void recurseHideViews(ViewGroup viewGroup, ArrayList<View> nonSharedElements,
-            ArrayList<View> sharedElements) {
-        int numChildren = viewGroup.getChildCount();
-        for (int i = 0; i < numChildren; i++) {
-            View child = viewGroup.getChildAt(i);
-            if (child.getVisibility() != View.VISIBLE) {
-                continue;
-            }
-            if (child.getSharedElementName() != null) {
-                sharedElements.add(child);
-                child.setVisibility(View.INVISIBLE);
-            } else if (child instanceof ViewGroup && !((ViewGroup)child).isTransitionGroup()) {
-                recurseHideViews((ViewGroup) child, nonSharedElements, sharedElements);
-            } else {
-                nonSharedElements.add(child);
-                child.setVisibility(View.INVISIBLE);
-            }
+    /**
+     * Sets the captured values from a previous
+     * {@link #captureSharedElementState(android.view.View, String, android.os.Bundle, int[])}
+     * @param view The View to apply placement changes to.
+     * @param name The shared element name given from the source Activity.
+     * @param transitionArgs A <code>Bundle</code> containing all placementinformation for named
+     *                       shared elements in the scene.
+     * @param tempLoc A temporary int[2] for capturing the current location of views.
+     */
+    private static void setSharedElementState(View view, String name, Bundle transitionArgs,
+            int[] tempLoc) {
+        Bundle sharedElementBundle = transitionArgs.getBundle(name);
+        if (sharedElementBundle == null) {
+            return;
         }
+
+        int x = sharedElementBundle.getInt(KEY_SCREEN_X);
+        view.getLocationOnScreen(tempLoc);
+        int offsetX = x - tempLoc[0];
+        view.offsetLeftAndRight(offsetX);
+
+        int width = sharedElementBundle.getInt(KEY_WIDTH);
+        view.setRight(view.getLeft() + width);
+
+        int y = sharedElementBundle.getInt(KEY_SCREEN_Y);
+        int offsetY = y - tempLoc[1];
+        view.offsetTopAndBottom(offsetY);
+
+        int height = sharedElementBundle.getInt(KEY_HEIGHT);
+        view.setBottom(view.getTop() + height);
+
+        float z = sharedElementBundle.getFloat(KEY_TRANSLATION_Z);
+        view.setTranslationZ(z);
     }
 
-    private static void recurseHideExitingSharedElements(ViewGroup viewGroup) {
-        int numChildren = viewGroup.getChildCount();
-        for (int i = 0; i < numChildren; i++) {
-            View child = viewGroup.getChildAt(i);
-            if (child.getVisibility() != View.VISIBLE) {
-                continue;
-            }
-            if (child.getSharedElementName() != null) {
-                child.setVisibility(View.INVISIBLE);
-            } else if (child instanceof ViewGroup) {
-                ViewGroup childViewGroup = (ViewGroup) child;
-                recurseHideExitingSharedElements(childViewGroup);
-            }
-        }
+    /**
+     * Captures placement information for Views with a shared element name for
+     * Activity Transitions.
+     * @param view The View to capture the placement information for.
+     * @param name The shared element name in the target Activity to apply the placement
+     *             information for.
+     * @param transitionArgs Bundle to store shared element placement information.
+     * @param tempLoc A temporary int[2] for capturing the current location of views.
+     * @see #setSharedElementState(android.view.View, String, android.os.Bundle, int[])
+     */
+    private static void captureSharedElementState(View view, String name, Bundle transitionArgs,
+            int[] tempLoc) {
+        Bundle sharedElementBundle = new Bundle();
+        view.getLocationOnScreen(tempLoc);
+        float scaleX = view.getScaleX();
+        sharedElementBundle.putInt(KEY_SCREEN_X, tempLoc[0]);
+        int width = Math.round(view.getWidth() * scaleX);
+        sharedElementBundle.putInt(KEY_WIDTH, width);
+
+        float scaleY = view.getScaleY();
+        sharedElementBundle.putInt(KEY_SCREEN_Y, tempLoc[1]);
+        int height= Math.round(view.getHeight() * scaleY);
+        sharedElementBundle.putInt(KEY_HEIGHT, height);
+
+        sharedElementBundle.putFloat(KEY_TRANSLATION_Z, view.getTranslationZ());
+
+        sharedElementBundle.putString(KEY_NAME, view.getSharedElementName());
+
+        transitionArgs.putBundle(name, sharedElementBundle);
     }
 
     /**
@@ -4080,46 +4216,57 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private boolean mAllDone;
         private Handler mHandler = new Handler();
         private boolean mEnterTransitionStarted;
-        private ArrayList<View> mSharedElements = new ArrayList<View>();
+        private ArrayMap<String, View> mSharedElementTargets = new ArrayMap<String, View>();
+        private ArrayList<View> mEnteringViews = new ArrayList<View>();
 
         public EnterScene() {
             mSceneTransitionListener.nullPendingTransition();
             Drawable background = getDecorView().getBackground();
             if (background != null) {
-                setBackgroundDrawable(null);
                 background.setAlpha(0);
-                setBackgroundDrawable(background);
+                mDecor.drawableChanged();
             }
             mSceneTransitionListener.convertToTranslucent();
         }
 
         @Override
         public boolean onPreDraw() {
-            ViewTreeObserver observer = mContentParent.getViewTreeObserver();
+            ViewTreeObserver observer = mDecor.getViewTreeObserver();
             observer.removeOnPreDrawListener(this);
             if (!mEnterTransitionStarted && mSceneTransitionListener != null) {
                 mEnterTransitionStarted = true;
-                ArrayList<View> enteringViews = new ArrayList<View>();
-                recurseHideViews(mContentParent, enteringViews, mSharedElements);
-                Transition transition = getTransitionManager().getNamedTransition("null",
-                        mContentScene);
-                if (transition == null) {
-                    transition = TransitionManager.getDefaultTransition().clone();
+                mDecor.captureTransitioningViews(mEnteringViews);
+                ArrayList<String> sharedElementNames = mActivityOptions.getSharedElementNames();
+                if (sharedElementNames != null) {
+                    mDecor.findSharedElements(mSharedElementTargets);
+                    if (mSharedElementsMap != null) {
+                        for (Map.Entry<String, String> entry : mSharedElementsMap.entrySet()) {
+                            View sharedElement = mSharedElementTargets.remove(entry.getValue());
+                            if (sharedElement != null) {
+                                mSharedElementTargets.put(entry.getKey(), sharedElement);
+                            }
+                        }
+                    }
+                    mSharedElementTargets.keySet().retainAll(sharedElementNames);
+                    mEnteringViews.removeAll(mSharedElementTargets.values());
                 }
-                TransitionManager.beginDelayedTransition(mContentParent, transition);
-                for (View hidden : enteringViews) {
-                    hidden.setVisibility(View.VISIBLE);
+
+                setViewVisibility(mEnteringViews, View.INVISIBLE);
+                setViewVisibility(mSharedElementTargets.values(), View.INVISIBLE);
+                if (mTriggerEarly) {
+                    beginEnterScene();
                 }
                 observer.addOnPreDrawListener(this);
             } else {
                 mHandler.postDelayed(this, MAX_TRANSITION_START_WAIT);
-                mActivityOptions.dispatchSceneTransitionStarted(this);
+                mActivityOptions.dispatchSceneTransitionStarted(this,
+                        new ArrayList<String>(mSharedElementTargets.keySet()));
             }
             return true;
         }
 
         public void start() {
-            ViewTreeObserver observer = mContentParent.getViewTreeObserver();
+            ViewTreeObserver observer = mDecor.getViewTreeObserver();
             observer.addOnPreDrawListener(this);
         }
 
@@ -4129,25 +4276,43 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         @Override
-        public void sharedElementTransitionComplete() {
+        public void sharedElementTransitionComplete(Bundle transitionArgs) {
             if (!mSharedElementReadyReceived) {
                 mSharedElementReadyReceived = true;
                 mHandler.removeCallbacks(this);
                 mHandler.postDelayed(this, MAX_TRANSITION_FINISH_WAIT);
-                for (View sharedElement: mSharedElements) {
-                    sharedElement.setVisibility(View.VISIBLE);
-                }
-                mSharedElements.clear();
-                mContentParent.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        mContentParent.getViewTreeObserver().removeOnPreDrawListener(this);
-                        mSceneTransitionListener.enterSharedElement(
-                                mActivityOptions.getSceneTransitionArgs());
-                        return false;
+                if (!mSharedElementTargets.isEmpty()) {
+                    Transition transition = getTransitionManager().getEnterTransition(
+                            mContentScene);
+                    if (transition == null) {
+                        transition = TransitionManager.getDefaultTransition();
                     }
-                });
-                if (mFadeEarly) {
+                    transition = transition.clone();
+                    if (transitionArgs == null) {
+                        TransitionManager.beginDelayedTransition(mDecor, transition);
+                        setViewVisibility(mSharedElementTargets.values(), View.VISIBLE);
+                    } else {
+                        int[] tempLoc = new int[2];
+                        for (Map.Entry<String, View> entry: mSharedElementTargets.entrySet()) {
+                            setSharedElementState(entry.getValue(), entry.getKey(), transitionArgs,
+                                    tempLoc);
+                        }
+                        setViewVisibility(mSharedElementTargets.values(), View.VISIBLE);
+                        mSceneTransitionListener.sharedElementStart(transition);
+                        mDecor.getViewTreeObserver().addOnPreDrawListener(
+                                new ViewTreeObserver.OnPreDrawListener() {
+                                    @Override
+                                    public boolean onPreDraw() {
+                                        mDecor.getViewTreeObserver().removeOnPreDrawListener(this);
+                                        mSceneTransitionListener.sharedElementEnd();
+                                        mActivityOptions.dispatchSharedElementsReady();
+                                        return true;
+                                    }
+                                });
+                        TransitionManager.beginDelayedTransition(mDecor, transition);
+                    }
+                }
+                if (mTriggerEarly) {
                     fadeInBackground();
                 }
             }
@@ -4170,9 +4335,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 return;
             }
             mAllDone = true;
-            sharedElementTransitionComplete();
+            sharedElementTransitionComplete(null);
             mHandler.removeCallbacks(this);
-            if (!mFadeEarly) {
+            if (!mTriggerEarly) {
+                beginEnterScene();
                 fadeInBackground();
             }
         }
@@ -4192,6 +4358,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         @Override
         public void onAnimationRepeat(Animator animation) {
+        }
+
+        private void beginEnterScene() {
+            Transition transition = getTransitionManager().getEnterTransition(mContentScene);
+            if (transition == null) {
+                transition = TransitionManager.getDefaultTransition().clone();
+            }
+            TransitionManager.beginDelayedTransition(mDecor, transition);
+            setViewVisibility(mEnteringViews, View.VISIBLE);
         }
     }
 }

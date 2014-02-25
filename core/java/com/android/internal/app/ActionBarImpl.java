@@ -57,6 +57,7 @@ import android.widget.SpinnerAdapter;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * ActionBarImpl is the ActionBar implementation used
@@ -353,6 +354,10 @@ public class ActionBarImpl extends ActionBar {
     @Override
     public void setSubtitle(int resId) {
         setSubtitle(mContext.getString(resId));
+    }
+
+    public void captureSharedElements(Map<String, View> sharedElements) {
+        mContainerView.findSharedElements(sharedElements);
     }
 
     public void setSelectedNavigationItem(int position) {
