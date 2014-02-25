@@ -3080,17 +3080,6 @@ package android.app {
     method public void update(android.app.ActivityOptions);
   }
 
-  public class ActivityView extends android.view.ViewGroup {
-    ctor public ActivityView(android.content.Context);
-    ctor public ActivityView(android.content.Context, android.util.AttributeSet);
-    ctor public ActivityView(android.content.Context, android.util.AttributeSet, int);
-    method public boolean isAttachedToDisplay();
-    method protected void onLayout(boolean, int, int, int, int);
-    method public void startActivity(android.content.Intent);
-    method public void startActivity(android.content.IntentSender);
-    method public void startActivity(android.app.PendingIntent);
-  }
-
   public class AlarmManager {
     method public void cancel(android.app.PendingIntent);
     method public void set(int, long, android.app.PendingIntent);
@@ -42739,11 +42728,11 @@ package java.util.concurrent {
   }
 
   public class ConcurrentHashMap extends java.util.AbstractMap implements java.util.concurrent.ConcurrentMap java.io.Serializable {
-    ctor public ConcurrentHashMap(int, float, int);
-    ctor public ConcurrentHashMap(int, float);
-    ctor public ConcurrentHashMap(int);
     ctor public ConcurrentHashMap();
+    ctor public ConcurrentHashMap(int);
     ctor public ConcurrentHashMap(java.util.Map<? extends K, ? extends V>);
+    ctor public ConcurrentHashMap(int, float);
+    ctor public ConcurrentHashMap(int, float, int);
     method public boolean contains(java.lang.Object);
     method public java.util.Enumeration<V> elements();
     method public java.util.Set<java.util.Map.Entry<K, V>> entrySet();
@@ -44183,12 +44172,12 @@ package java.util.regex {
   public final class Matcher implements java.util.regex.MatchResult {
     method public java.util.regex.Matcher appendReplacement(java.lang.StringBuffer, java.lang.String);
     method public java.lang.StringBuffer appendTail(java.lang.StringBuffer);
-    method public int end(int);
     method public int end();
+    method public int end(int);
     method public boolean find(int);
     method public boolean find();
-    method public java.lang.String group(int);
     method public java.lang.String group();
+    method public java.lang.String group(int);
     method public int groupCount();
     method public boolean hasAnchoringBounds();
     method public boolean hasTransparentBounds();
@@ -44205,8 +44194,8 @@ package java.util.regex {
     method public boolean requireEnd();
     method public java.util.regex.Matcher reset();
     method public java.util.regex.Matcher reset(java.lang.CharSequence);
-    method public int start(int) throws java.lang.IllegalStateException;
     method public int start();
+    method public int start(int) throws java.lang.IllegalStateException;
     method public java.util.regex.MatchResult toMatchResult();
     method public java.util.regex.Matcher useAnchoringBounds(boolean);
     method public java.util.regex.Matcher usePattern(java.util.regex.Pattern);
@@ -50947,7 +50936,7 @@ package org.json {
     method public java.lang.String getString(java.lang.String) throws org.json.JSONException;
     method public boolean has(java.lang.String);
     method public boolean isNull(java.lang.String);
-    method public java.util.Iterator keys();
+    method public java.util.Iterator<java.lang.String> keys();
     method public int length();
     method public org.json.JSONArray names();
     method public static java.lang.String numberToString(java.lang.Number) throws org.json.JSONException;
