@@ -189,7 +189,8 @@ public final class CallServiceDescriptor implements Parcelable {
         dest.writeInt(mNetworkType);
     }
 
-    static final Creator<CallServiceDescriptor> CREATOR = new Creator<CallServiceDescriptor>() {
+    public static final Creator<CallServiceDescriptor> CREATOR =
+            new Creator<CallServiceDescriptor>() {
         @Override
         public CallServiceDescriptor createFromParcel(Parcel source) {
             String id = source.readString();

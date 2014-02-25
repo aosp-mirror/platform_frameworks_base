@@ -61,8 +61,7 @@ oneway interface ICallService {
      * handle-calling systems.  See {@link #isCompatibleWith}. It is expected that the
      * call service respond via {@link ICallServiceAdapter#handleSuccessfulOutgoingCall} if it can
      * successfully make the call.
-     * TODO(santoscordon): Figure out how a calls service can short-circuit a failure to
-     * the adapter.
+     * TODO(santoscordon): Figure out how a call service can short-circuit a failure to the adapter.
      *
      * @param callInfo The details of the relevant call.
      */
@@ -76,14 +75,29 @@ oneway interface ICallService {
     void disconnect(String callId);
 
     /**
-     * Confirms that the specified incoming call is connecting through this call service. Telecomm
-     * receives all incoming calls initially as intents that include information about a call
-     * and a token identifying the call. Before displaying any UI to the user, Telecomm confirms
-     * the existence of the incoming call by binding to the specified call service and calling
-     * this method. Confirmation responses are received through {@link ICallServiceAdapter}.
+     * Receives a new call ID to use with an incoming call. Invoked by Telecomm after it is notified
+     * that this call service has a pending incoming call, see
+     * {@link TelecommConstants#ACTION_INCOMING_CALL}. The call service must first give Telecomm
+     * additional information of the call through {@link ICallServiceAdapter#handleIncomingCall}.
+     * Following that, the call service can update the call at will using the specified call ID.
      *
      * @param callId The ID of the call.
-     * @param callToken The call token received through the incoming call intent.
      */
-     void confirmIncomingCall(String callId, String callToken);
+    void setIncomingCallId(String callId);
+
+    /**
+     * Answers a ringing call identified by callId. Telecomm invokes this method as a result of the
+     * user hitting the "answer" button in the incoming call screen.
+     *
+     * @param callId The ID of the call.
+     */
+    void answer(String callId);
+
+    /**
+     * Rejects a ringing call identified by callId. Telecomm invokes this method as a result of the
+     * user hitting the "reject" button in the incoming call screen.
+     *
+     * @param callId The ID of the call.
+     */
+    void reject(String callId);
 }
