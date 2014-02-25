@@ -24,7 +24,7 @@ import android.text.TextPaint;
  * ones may just implement {@link UpdateAppearance}.
  */
 public abstract class CharacterStyle {
-	public abstract void updateDrawState(TextPaint tp);
+    public abstract void updateDrawState(TextPaint tp);
 
     /**
      * A given CharacterStyle can only applied to a single region of a given

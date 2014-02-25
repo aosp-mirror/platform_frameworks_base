@@ -41,8 +41,8 @@ public class DatabaseStatementTest extends AndroidTestCase implements Performanc
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-	File dbDir = getContext().getDir("tests", Context.MODE_PRIVATE);
-	mDatabaseFile = new File(dbDir, "database_test.db");
+        File dbDir = getContext().getDir("tests", Context.MODE_PRIVATE);
+        mDatabaseFile = new File(dbDir, "database_test.db");
 
         if (mDatabaseFile.exists()) {
             mDatabaseFile.delete();

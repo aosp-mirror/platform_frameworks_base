@@ -864,13 +864,13 @@ public class GLES30 extends GLES20 {
         int buffer
     );
 
-	// C function void glTransformFeedbackVaryings ( GLuint program, GLsizei count, const GLchar *varyings, GLenum bufferMode )
+    // C function void glTransformFeedbackVaryings ( GLuint program, GLsizei count, const GLchar *varyings, GLenum bufferMode )
 
-	public static native void glTransformFeedbackVaryings(
+    public static native void glTransformFeedbackVaryings(
         int program,
         String[] varyings,
         int bufferMode
-	);
+    );
 
     // C function void glGetTransformFeedbackVarying ( GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint *size, GLenum *type, GLchar *name )
 
@@ -1245,14 +1245,14 @@ public class GLES30 extends GLES20 {
         int size
     );
 
-	// C function void glGetUniformIndices ( GLuint program, GLsizei uniformCount, const GLchar *const *uniformNames, GLuint *uniformIndices )
+    // C function void glGetUniformIndices ( GLuint program, GLsizei uniformCount, const GLchar *const *uniformNames, GLuint *uniformIndices )
 
-	public static native void glGetUniformIndices(
+    public static native void glGetUniformIndices(
         int program,
         String[] uniformNames,
         int[] uniformIndices,
         int uniformIndicesOffset
-	);
+    );
 
     // C function void glGetUniformIndices ( GLuint program, GLsizei uniformCount, const GLchar *const *uniformNames, GLuint *uniformIndices )
 
