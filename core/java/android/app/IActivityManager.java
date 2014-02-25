@@ -407,8 +407,12 @@ public interface IActivityManager extends IInterface {
 
     public void performIdleMaintenance() throws RemoteException;
 
+    /** @hide */
     public IActivityContainer createActivityContainer(IBinder parentActivityToken,
             IActivityContainerCallback callback) throws RemoteException;
+
+    /** @hide */
+    public void deleteActivityContainer(IActivityContainer container) throws RemoteException;
 
     public IActivityContainer getEnclosingActivityContainer(IBinder activityToken)
             throws RemoteException;
@@ -703,4 +707,5 @@ public interface IActivityManager extends IInterface {
     int APP_NOT_RESPONDING_VIA_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+182;
     int GET_HOME_ACTIVITY_TOKEN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+183;
     int GET_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+184;
+    int DELETE_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+185;
 }
