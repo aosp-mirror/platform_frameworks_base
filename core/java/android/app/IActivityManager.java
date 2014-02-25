@@ -367,6 +367,8 @@ public interface IActivityManager extends IInterface {
 
     public Intent getIntentForIntentSender(IIntentSender sender) throws RemoteException;
 
+    public String getTagForIntentSender(IIntentSender sender, String prefix) throws RemoteException;
+
     public void updatePersistentConfiguration(Configuration values) throws RemoteException;
 
     public long[] getProcessPss(int[] pids) throws RemoteException;
@@ -709,4 +711,8 @@ public interface IActivityManager extends IInterface {
     int GET_HOME_ACTIVITY_TOKEN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+183;
     int GET_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+184;
     int DELETE_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+185;
+
+
+    // Start of L transactions
+    int GET_TAG_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+210;
 }

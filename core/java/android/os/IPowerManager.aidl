@@ -25,8 +25,10 @@ interface IPowerManager
 {
     // WARNING: The first four methods must remain the first three methods because their
     // transaction numbers must not change unless IPowerManager.cpp is also updated.
-    void acquireWakeLock(IBinder lock, int flags, String tag, String packageName, in WorkSource ws);
-    void acquireWakeLockWithUid(IBinder lock, int flags, String tag, String packageName, int uidtoblame);
+    void acquireWakeLock(IBinder lock, int flags, String tag, String packageName, in WorkSource ws,
+            String historyTag);
+    void acquireWakeLockWithUid(IBinder lock, int flags, String tag, String packageName,
+            int uidtoblame);
     void releaseWakeLock(IBinder lock, int flags);
     void updateWakeLockUids(IBinder lock, in int[] uids);
 

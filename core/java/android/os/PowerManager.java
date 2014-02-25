@@ -662,6 +662,7 @@ public final class PowerManager {
         private boolean mRefCounted = true;
         private boolean mHeld;
         private WorkSource mWorkSource;
+        private String mHistoryTag;
 
         private final Runnable mReleaser = new Runnable() {
             public void run() {
@@ -748,7 +749,8 @@ public final class PowerManager {
                 // been explicitly released by the keyguard.
                 mHandler.removeCallbacks(mReleaser);
                 try {
-                    mService.acquireWakeLock(mToken, mFlags, mTag, mPackageName, mWorkSource);
+                    mService.acquireWakeLock(mToken, mFlags, mTag, mPackageName, mWorkSource,
+                            mHistoryTag);
                 } catch (RemoteException e) {
                 }
                 mHeld = true;
@@ -852,6 +854,11 @@ public final class PowerManager {
         /** @hide */
         public void setTag(String tag) {
             mTag = tag;
+        }
+
+        /** @hide */
+        public void setHistoryTag(String tag) {
+            mHistoryTag = tag;
         }
 
         /** @hide */

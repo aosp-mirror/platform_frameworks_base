@@ -492,7 +492,7 @@ class AlarmManagerService extends SystemService {
 
         PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*alarm*");
-        
+
         mTimeTickSender = PendingIntent.getBroadcastAsUser(getContext(), 0,
                 new Intent(Intent.ACTION_TIME_TICK).addFlags(
                         Intent.FLAG_RECEIVER_REGISTERED_ONLY
@@ -1283,13 +1283,7 @@ class AlarmManagerService extends SystemService {
                                 setWakelockWorkSource(alarm.operation, alarm.workSource);
                                 mWakeLock.setUnimportantForLogging(
                                         alarm.operation == mTimeTickSender);
-                                // XXX debugging
-                                /*
-                                Intent intent = alarm.operation.getIntent();
-                                mWakeLock.setTag(intent.getAction() != null ? intent.getAction()
-                                        : (intent.getComponent() != null
-                                                ? intent.getComponent().toShortString() : TAG));
-                                */
+                                mWakeLock.setHistoryTag(alarm.operation.getTag("*alarm*:"));
                                 mWakeLock.acquire();
                             }
                             final InFlight inflight = new InFlight(AlarmManagerService.this,

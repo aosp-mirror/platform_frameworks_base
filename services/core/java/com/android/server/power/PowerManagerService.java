@@ -632,7 +632,7 @@ public final class PowerManagerService extends com.android.server.SystemService
     }
 
     private void acquireWakeLockInternal(IBinder lock, int flags, String tag, String packageName,
-            WorkSource ws, int uid, int pid) {
+            WorkSource ws, String historyTag, int uid, int pid) {
         synchronized (mLock) {
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "acquireWakeLockInternal: lock=" + Objects.hashCode(lock)
@@ -647,11 +647,11 @@ public final class PowerManagerService extends com.android.server.SystemService
                 if (!wakeLock.hasSameProperties(flags, tag, ws, uid, pid)) {
                     // Update existing wake lock.  This shouldn't happen but is harmless.
                     notifyWakeLockReleasedLocked(wakeLock);
-                    wakeLock.updateProperties(flags, tag, packageName, ws, uid, pid);
+                    wakeLock.updateProperties(flags, tag, packageName, ws, historyTag, uid, pid);
                     notifyWakeLockAcquiredLocked(wakeLock);
                 }
             } else {
-                wakeLock = new WakeLock(lock, flags, tag, packageName, ws, uid, pid);
+                wakeLock = new WakeLock(lock, flags, tag, packageName, ws, historyTag, uid, pid);
                 try {
                     lock.linkToDeath(wakeLock, 0);
                 } catch (RemoteException ex) {
@@ -786,7 +786,8 @@ public final class PowerManagerService extends com.android.server.SystemService
         if (mSystemReady) {
             wakeLock.mNotifiedAcquired = true;
             mNotifier.onWakeLockAcquired(wakeLock.mFlags, wakeLock.mTag, wakeLock.mPackageName,
-                    wakeLock.mOwnerUid, wakeLock.mOwnerPid, wakeLock.mWorkSource);
+                    wakeLock.mOwnerUid, wakeLock.mOwnerPid, wakeLock.mWorkSource,
+                    wakeLock.mHistoryTag);
         }
     }
 
@@ -2274,17 +2275,19 @@ public final class PowerManagerService extends com.android.server.SystemService
         public String mTag;
         public final String mPackageName;
         public WorkSource mWorkSource;
+        public String mHistoryTag;
         public final int mOwnerUid;
         public final int mOwnerPid;
         public boolean mNotifiedAcquired;
 
         public WakeLock(IBinder lock, int flags, String tag, String packageName,
-                WorkSource workSource, int ownerUid, int ownerPid) {
+                WorkSource workSource, String historyTag, int ownerUid, int ownerPid) {
             mLock = lock;
             mFlags = flags;
             mTag = tag;
             mPackageName = packageName;
             mWorkSource = copyWorkSource(workSource);
+            mHistoryTag = historyTag;
             mOwnerUid = ownerUid;
             mOwnerPid = ownerPid;
         }
@@ -2304,7 +2307,7 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
 
         public void updateProperties(int flags, String tag, String packageName,
-                WorkSource workSource, int ownerUid, int ownerPid) {
+                WorkSource workSource, String historyTag, int ownerUid, int ownerPid) {
             if (!mPackageName.equals(packageName)) {
                 throw new IllegalStateException("Existing wake lock package name changed: "
                         + mPackageName + " to " + packageName);
@@ -2320,6 +2323,7 @@ public final class PowerManagerService extends com.android.server.SystemService
             mFlags = flags;
             mTag = tag;
             updateWorkSource(workSource);
+            mHistoryTag = historyTag;
         }
 
         public boolean hasSameWorkSource(WorkSource workSource) {
@@ -2517,12 +2521,12 @@ public final class PowerManagerService extends com.android.server.SystemService
         @Override // Binder call
         public void acquireWakeLockWithUid(IBinder lock, int flags, String tag,
                 String packageName, int uid) {
-            acquireWakeLock(lock, flags, tag, packageName, new WorkSource(uid));
+            acquireWakeLock(lock, flags, tag, packageName, new WorkSource(uid), null);
         }
 
         @Override // Binder call
         public void acquireWakeLock(IBinder lock, int flags, String tag, String packageName,
-                WorkSource ws) {
+                WorkSource ws, String historyTag) {
             if (lock == null) {
                 throw new IllegalArgumentException("lock must not be null");
             }
@@ -2543,7 +2547,7 @@ public final class PowerManagerService extends com.android.server.SystemService
             final int pid = Binder.getCallingPid();
             final long ident = Binder.clearCallingIdentity();
             try {
-                acquireWakeLockInternal(lock, flags, tag, packageName, ws, uid, pid);
+                acquireWakeLockInternal(lock, flags, tag, packageName, ws, historyTag, uid, pid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

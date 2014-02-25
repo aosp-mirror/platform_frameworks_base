@@ -5547,6 +5547,38 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public String getTagForIntentSender(IIntentSender pendingResult, String prefix) {
+        if (!(pendingResult instanceof PendingIntentRecord)) {
+            return null;
+        }
+        try {
+            PendingIntentRecord res = (PendingIntentRecord)pendingResult;
+            Intent intent = res.key.requestIntent;
+            if (intent != null) {
+                if (res.lastTag != null && res.lastTagPrefix == prefix && (res.lastTagPrefix == null
+                        || res.lastTagPrefix.equals(prefix))) {
+                    return res.lastTag;
+                }
+                res.lastTagPrefix = prefix;
+                StringBuilder sb = new StringBuilder(128);
+                if (prefix != null) {
+                    sb.append(prefix);
+                }
+                if (intent.getAction() != null) {
+                    sb.append(intent.getAction());
+                } else if (intent.getComponent() != null) {
+                    intent.getComponent().appendShortString(sb);
+                } else {
+                    sb.append("?");
+                }
+                return res.lastTag = sb.toString();
+            }
+        } catch (ClassCastException e) {
+        }
+        return null;
+    }
+
+    @Override
     public void setProcessLimit(int max) {
         enforceCallingPermission(android.Manifest.permission.SET_PROCESS_LIMIT,
                 "setProcessLimit()");

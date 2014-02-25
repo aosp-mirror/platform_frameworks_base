@@ -53,6 +53,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.BatteryStats;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -60,6 +61,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -75,6 +77,7 @@ import android.util.Pair;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.accounts.AccountManagerService;
@@ -172,6 +175,7 @@ public class SyncManager {
 
     private final NotificationManager mNotificationMgr;
     private AlarmManager mAlarmService = null;
+    private final IBatteryStats mBatteryStats;
 
     private SyncStorageEngine mSyncStorageEngine;
 
@@ -435,6 +439,8 @@ public class SyncManager {
         }
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService(
+                BatteryStats.SERVICE_NAME));
 
         // This WakeLock is used to ensure that we stay awake between the time that we receive
         // a sync alarm notification and when we finish processing it. We need to do this
@@ -1123,6 +1129,7 @@ public class SyncManager {
         final int mSyncAdapterUid;
         SyncInfo mSyncInfo;
         boolean mIsLinkedToDeath = false;
+        String mEventName;
 
         /**
          * Create an ActiveSyncContext for an impending sync and grab the wakelock for that
@@ -1201,6 +1208,13 @@ public class SyncManager {
                     new UserHandle(mSyncOperation.target.userId));
             if (!bindResult) {
                 mBound = false;
+            } else {
+                try {
+                    mEventName = serviceComponent.flattenToShortString();
+                    mBatteryStats.noteEvent(BatteryStats.HistoryItem.EVENT_SYNC_START,
+                            serviceComponent.flattenToShortString(), mSyncAdapterUid);
+                } catch (RemoteException e) {
+                }
             }
             return bindResult;
         }
@@ -1216,6 +1230,11 @@ public class SyncManager {
             if (mBound) {
                 mBound = false;
                 mContext.unbindService(this);
+                try {
+                    mBatteryStats.noteEvent(BatteryStats.HistoryItem.EVENT_SYNC_FINISH,
+                            mEventName, mSyncAdapterUid);
+                } catch (RemoteException e) {
+                }
             }
             mSyncWakeLock.release();
             mSyncWakeLock.setWorkSource(null);
