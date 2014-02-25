@@ -21,18 +21,18 @@ import android.text.TextPaint;
 
 public class RasterizerSpan extends CharacterStyle implements UpdateAppearance {
 
-	private Rasterizer mRasterizer;
+    private Rasterizer mRasterizer;
 
-	public RasterizerSpan(Rasterizer r) {
-		mRasterizer = r;
-	}
+    public RasterizerSpan(Rasterizer r) {
+        mRasterizer = r;
+    }
 
-	public Rasterizer getRasterizer() {
-		return mRasterizer;
-	}
+    public Rasterizer getRasterizer() {
+        return mRasterizer;
+    }
 
-	@Override
-	public void updateDrawState(TextPaint ds) {
-		ds.setRasterizer(mRasterizer);
-	}
+    @Override
+    public void updateDrawState(TextPaint ds) {
+        ds.setRasterizer(mRasterizer);
+    }
 }

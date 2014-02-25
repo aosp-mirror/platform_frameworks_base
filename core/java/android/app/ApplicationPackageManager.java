@@ -1059,7 +1059,7 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-	  public void installPackageWithVerificationAndEncryption(Uri packageURI,
+    public void installPackageWithVerificationAndEncryption(Uri packageURI,
             IPackageInstallObserver observer, int flags, String installerPackageName,
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
         try {

@@ -33,17 +33,17 @@ import android.text.TextUtils;
  */
 public class StyleSpan extends MetricAffectingSpan implements ParcelableSpan {
 
-	private final int mStyle;
+    private final int mStyle;
 
-	/**
-	 * 
-	 * @param style An integer constant describing the style for this span. Examples
-	 * include bold, italic, and normal. Values are constants defined 
-	 * in {@link android.graphics.Typeface}.
-	 */
-	public StyleSpan(int style) {
-		mStyle = style;
-	}
+    /**
+     * 
+     * @param style An integer constant describing the style for this span. Examples
+     * include bold, italic, and normal. Values are constants defined 
+     * in {@link android.graphics.Typeface}.
+     */
+    public StyleSpan(int style) {
+        mStyle = style;
+    }
 
     public StyleSpan(Parcel src) {
         mStyle = src.readInt();
@@ -61,19 +61,19 @@ public class StyleSpan extends MetricAffectingSpan implements ParcelableSpan {
         dest.writeInt(mStyle);
     }
 
-	/**
-	 * Returns the style constant defined in {@link android.graphics.Typeface}. 
-	 */
-	public int getStyle() {
-		return mStyle;
-	}
+    /**
+     * Returns the style constant defined in {@link android.graphics.Typeface}. 
+     */
+    public int getStyle() {
+        return mStyle;
+    }
 
-	@Override
+    @Override
     public void updateDrawState(TextPaint ds) {
         apply(ds, mStyle);
     }
 
-	@Override
+    @Override
     public void updateMeasureState(TextPaint paint) {
         apply(paint, mStyle);
     }

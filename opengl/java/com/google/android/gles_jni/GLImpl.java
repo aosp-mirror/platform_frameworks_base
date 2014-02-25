@@ -39,7 +39,7 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
 
     native private static void _nativeClassInit();
     static {
-	_nativeClassInit();
+        _nativeClassInit();
     }
 
     Buffer _colorPointer = null;

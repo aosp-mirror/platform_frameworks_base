@@ -24,14 +24,14 @@ import com.android.imftest.R;
 
 public class BottomEditTextActivityPanScanTests extends ImfBaseTestCase<BottomEditTextActivityPanScan> {
 
-	public final String TAG = "BottomEditTextActivityPanScanTests";
-	
+    public final String TAG = "BottomEditTextActivityPanScanTests";
+    
     public BottomEditTextActivityPanScanTests() {
         super(BottomEditTextActivityPanScan.class);
     }
-	
-	@LargeTest
-	public void testAppAdjustmentPanScan() {
+    
+    @LargeTest
+    public void testAppAdjustmentPanScan() {
         // Give the IME 2 seconds to appear.
         pause(2000);
         
@@ -44,6 +44,6 @@ public class BottomEditTextActivityPanScanTests extends ImfBaseTestCase<BottomEd
         destructiveCheckImeInitialState(rootView, servedView);
         
         verifyEditTextAdjustment(servedView, rootView.getMeasuredHeight());
-	}
-	
+    }
+    
 }

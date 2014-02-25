@@ -171,10 +171,10 @@ public class Broadcaster
     public void broadcast(Message msg)
     {
         synchronized (this) {
-        	if (mReg == null) {
-        		return;
-        	}
-        	
+            if (mReg == null) {
+                return;
+            }
+            
             int senderWhat = msg.what;
             Registration start = mReg;
             Registration r = start;

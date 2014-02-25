@@ -38,7 +38,7 @@ public class LinearGradient extends Shader {
 
     private TileMode mTileMode;
 
-	/**	Create a shader that draws a linear gradient along a line.
+    /** Create a shader that draws a linear gradient along a line.
         @param x0           The x-coordinate for the start of the gradient line
         @param y0           The y-coordinate for the start of the gradient line
         @param x1           The x-coordinate for the end of the gradient line
@@ -48,8 +48,8 @@ public class LinearGradient extends Shader {
                             each corresponding color in the colors array. If this is null,
                             the the colors are distributed evenly along the gradient line.
         @param  tile        The Shader tiling mode
-	*/
-	public LinearGradient(float x0, float y0, float x1, float y1, int colors[], float positions[],
+    */
+    public LinearGradient(float x0, float y0, float x1, float y1, int colors[], float positions[],
             TileMode tile) {
         if (colors.length < 2) {
             throw new IllegalArgumentException("needs >= 2 number of colors");
@@ -70,7 +70,7 @@ public class LinearGradient extends Shader {
                 tile.nativeInt);
     }
 
-	/**	Create a shader that draws a linear gradient along a line.
+    /** Create a shader that draws a linear gradient along a line.
         @param x0       The x-coordinate for the start of the gradient line
         @param y0       The y-coordinate for the start of the gradient line
         @param x1       The x-coordinate for the end of the gradient line
@@ -78,8 +78,8 @@ public class LinearGradient extends Shader {
         @param  color0  The color at the start of the gradient line.
         @param  color1  The color at the end of the gradient line.
         @param  tile    The Shader tiling mode
-	*/
-	public LinearGradient(float x0, float y0, float x1, float y1, int color0, int color1,
+    */
+    public LinearGradient(float x0, float y0, float x1, float y1, int color0, int color1,
             TileMode tile) {
         mType = TYPE_COLOR_START_AND_COLOR_END;
         mX0 = x0;
@@ -118,7 +118,7 @@ public class LinearGradient extends Shader {
 
     private native long nativeCreate1(float x0, float y0, float x1, float y1,
             int colors[], float positions[], int tileMode);
-	private native long nativeCreate2(float x0, float y0, float x1, float y1,
+    private native long nativeCreate2(float x0, float y0, float x1, float y1,
             int color0, int color1, int tileMode);
     private native long nativePostCreate1(long native_shader, float x0, float y0, float x1, float y1,
             int colors[], float positions[], int tileMode);

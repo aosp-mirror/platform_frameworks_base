@@ -252,26 +252,26 @@ public class AccessPointParserHelper {
                 if (!validateEapValue(eapValue)) {
                     throw new SAXException();
                 }
-		if (eapValue.equals("TLS")) {
-		    config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
-		} else if (eapValue.equals("TTLS")) {
-		    config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TTLS);
-		} else if (eapValue.equals("PEAP")) {
-		    config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.PEAP);
-		}
+                if (eapValue.equals("TLS")) {
+                    config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
+                } else if (eapValue.equals("TTLS")) {
+                    config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TTLS);
+                } else if (eapValue.equals("PEAP")) {
+                    config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.PEAP);
+                }
                 eap = false;
             }
             if (phase2) {
                 String phase2Value = new String(ch, start, length);
-		if (phase2Value.equals("PAP")) {
+                if (phase2Value.equals("PAP")) {
                     config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.PAP);
-		} else if (phase2Value.equals("MSCHAP")) {
+                } else if (phase2Value.equals("MSCHAP")) {
                     config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.MSCHAP);
-		} else if (phase2Value.equals("MSCHAPV2")) {
+                } else if (phase2Value.equals("MSCHAPV2")) {
                     config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.MSCHAPV2);
-		} else if (phase2Value.equals("GTC")) {
+                } else if (phase2Value.equals("GTC")) {
                     config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.GTC);
-		}
+                }
                 phase2 = false;
             }
             if (identity) {

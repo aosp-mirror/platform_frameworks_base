@@ -117,7 +117,7 @@ public class GraphReader {
         }
 
         @Override
-	public void execute(CommandStack stack) {
+        public void execute(CommandStack stack) {
             Filter filter = null;
             try {
                 filter = stack.getFactory().createFilterByClassName(mClassName,

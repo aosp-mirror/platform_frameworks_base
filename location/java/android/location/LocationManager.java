@@ -1610,7 +1610,7 @@ public class LocationManager {
      * @hide
      */
     public boolean sendNiResponse(int notifId, int userResponse) {
-    	try {
+        try {
             return mService.sendNiResponse(notifId, userResponse);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in sendNiResponse: ", e);

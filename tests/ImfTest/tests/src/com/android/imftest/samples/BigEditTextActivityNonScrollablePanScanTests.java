@@ -24,26 +24,26 @@ import com.android.imftest.R;
 
 public class BigEditTextActivityNonScrollablePanScanTests extends ImfBaseTestCase<BigEditTextActivityNonScrollablePanScan> {
 
-	public final String TAG = "BigEditTextActivityNonScrollablePanScanTests";
-	
+    public final String TAG = "BigEditTextActivityNonScrollablePanScanTests";
+    
     public BigEditTextActivityNonScrollablePanScanTests() {
         super(BigEditTextActivityNonScrollablePanScan.class);
     }
-	
-	@LargeTest
-	public void testAppAdjustmentPanScan() {
-	    // Give the IME 2 seconds to appear.
-	    pause(2000);
+    
+    @LargeTest
+    public void testAppAdjustmentPanScan() {
+        // Give the IME 2 seconds to appear.
+        pause(2000);
         
-	    View rootView = ((BigEditTextActivityNonScrollablePanScan) mTargetActivity).getRootView();
-	    View servedView = ((BigEditTextActivityNonScrollablePanScan) mTargetActivity).getDefaultFocusedView();
-	        
-	    assertNotNull(rootView);
-	    assertNotNull(servedView);
-	    
-	    destructiveCheckImeInitialState(rootView, servedView);
-	    
+        View rootView = ((BigEditTextActivityNonScrollablePanScan) mTargetActivity).getRootView();
+        View servedView = ((BigEditTextActivityNonScrollablePanScan) mTargetActivity).getDefaultFocusedView();
+            
+        assertNotNull(rootView);
+        assertNotNull(servedView);
+        
+        destructiveCheckImeInitialState(rootView, servedView);
+        
         verifyEditTextAdjustment(servedView, rootView.getMeasuredHeight());
-	}
-	
+    }
+    
 }
