@@ -75,6 +75,9 @@ public class TaskStack {
     /** Application tokens that are exiting, but still on screen for animations. */
     final AppTokenList mExitingAppTokens = new AppTokenList();
 
+    /** Detach this stack from its display when animation completes. */
+    boolean mDeferDetach;
+
     TaskStack(WindowManagerService service, int stackId) {
         mService = service;
         mStackId = stackId;
@@ -362,36 +365,9 @@ public class TaskStack {
         mAnimationBackgroundSurface.mDimSurface.destroy();
     }
 
-    void checkForDeferredActions() {
-        if (mDisplayContent != null &&
-                (mDisplayContent.mDeferredActions & DisplayContent.DEFER_DETACH) != 0 &&
-                !isAnimating()) {
-            mDisplayContent.mDeferredActions &= ~DisplayContent.DEFER_DETACH;
-            if ((mDisplayContent.mDeferredActions & DisplayContent.DEFER_REMOVAL) != 0) {
-                mDisplayContent.mDeferredActions &= ~DisplayContent.DEFER_REMOVAL;
-                mService.onDisplayRemoved(mDisplayContent.getDisplayId());
-            }
-            mService.detachStack(mStackId);
-        }
-        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final Task task = mTasks.get(taskNdx);
-            AppTokenList tokens = task.mAppTokens;
-            for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
-                AppWindowToken wtoken = tokens.get(tokenNdx);
-                if (wtoken.mDeferRemoval) {
-                    wtoken.mDeferRemoval = false;
-                    mService.removeAppFromTaskLocked(wtoken);
-                }
-            }
-            if (task.mDeferRemoval) {
-                task.mDeferRemoval = false;
-                mService.removeTaskLocked(task);
-            }
-        }
-    }
-
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("mStackId="); pw.println(mStackId);
+        pw.print(prefix); pw.print("mDeferDetach="); pw.println(mDeferDetach);
         for (int taskNdx = 0; taskNdx < mTasks.size(); ++taskNdx) {
             pw.print(prefix); pw.println(mTasks.get(taskNdx));
         }
