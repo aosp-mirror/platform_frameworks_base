@@ -430,7 +430,6 @@ class WindowStateAnimator {
             mService.mPendingRemove.add(mWin);
             mWin.mRemoveOnExit = false;
         }
-        mService.mPendingStacksRemove.add(mWin.getStack());
         mAnimator.hideWallpapersLocked(mWin);
     }
 
