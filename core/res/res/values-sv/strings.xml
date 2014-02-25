@@ -1461,7 +1461,7 @@
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Gränsen för data via Wi-Fi har överskridits"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> över angiven gräns."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Bakgrundsdata är begränsade"</string>
-    <string name="data_usage_restricted_body" msgid="6741521330997452990">"Tryck för att radera begränsning"</string>
+    <string name="data_usage_restricted_body" msgid="6741521330997452990">"Tryck för att ta bort begränsning"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Säkerhetscertifikat"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Certifikatet är giltigt."</string>
     <string name="issued_to" msgid="454239480274921032">"Utfärdad till:"</string>
