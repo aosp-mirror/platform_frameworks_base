@@ -17,25 +17,11 @@
 ** limitations under the License.
 */
 -->
-
-<!--    android:background="@drawable/status_bar_closed_default_background" -->
 <com.android.systemui.statusbar.policy.HeadsUpNotificationView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
-    android:orientation="vertical"
-    >
-    <FrameLayout
-            android:layout_height="wrap_content"
-            android:layout_width="@dimen/notification_panel_width"
-            android:id="@+id/content_slider"
-            android:layout_marginStart="@dimen/notification_panel_margin_left"
-            >
-        <FrameLayout
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:id="@+id/content_holder"
-                android:background="@drawable/heads_up_window_bg"
-                />
-    </FrameLayout>
-</com.android.systemui.statusbar.policy.HeadsUpNotificationView>
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_height="wrap_content"
+        android:layout_width="@dimen/notification_panel_width"
+        android:id="@+id/content_holder"
+        android:layout_marginStart="@dimen/notification_panel_margin_left"
+        android:background="@drawable/notification_panel_bg"
+        />
