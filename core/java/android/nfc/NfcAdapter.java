@@ -1266,8 +1266,8 @@ public final class NfcAdapter {
      *
      * <p>Note that to use this method, the passed in Activity must have already
      * set data to share over Beam by using method calls such as
-     * {@link #setNdefPushMessageCallback(CreateNdefMessageCallback, Activity, Activity...)} or
-     * {@link #setBeamPushUrisCallback(CreateBeamUrisCallback, Activity)}.
+     * {@link #setNdefPushMessageCallback} or
+     * {@link #setBeamPushUrisCallback}.
      *
      * @param activity the current foreground Activity that has registered data to share
      * @return whether the Beam animation was successfully invoked
