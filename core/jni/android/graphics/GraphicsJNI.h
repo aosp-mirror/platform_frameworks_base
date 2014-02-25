@@ -92,15 +92,16 @@ public:
 
 class AndroidPixelRef : public SkMallocPixelRef {
 public:
-    AndroidPixelRef(JNIEnv* env, void* storage, size_t size, jbyteArray storageObj,
-                    SkColorTable* ctable);
+    AndroidPixelRef(JNIEnv* env, const SkImageInfo& info, void* storage, size_t rowBytes,
+            jbyteArray storageObj, SkColorTable* ctable);
 
     /**
      * Creates an AndroidPixelRef that wraps (and refs) another to reuse/share
      * the same storage and java byte array refcounting, yet have a different
      * color table.
      */
-    AndroidPixelRef(AndroidPixelRef& wrappedPixelRef, SkColorTable* ctable);
+    AndroidPixelRef(AndroidPixelRef& wrappedPixelRef, const SkImageInfo& info,
+            size_t rowBytes, SkColorTable* ctable);
 
     virtual ~AndroidPixelRef();
 
