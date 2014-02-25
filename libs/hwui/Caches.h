@@ -190,8 +190,8 @@ public:
      * Binds a global indices buffer that can draw up to
      * gMaxNumberOfQuads quads.
      */
-    bool bindIndicesBuffer();
-    bool bindIndicesBuffer(const GLuint buffer);
+    bool bindQuadIndicesBuffer();
+    bool bindShadowIndicesBuffer();
     bool unbindIndicesBuffer();
 
     /**
@@ -381,6 +381,8 @@ private:
     void initConstraints();
     void initStaticProperties();
 
+    bool bindIndicesBufferInternal(const GLuint buffer);
+
     static void eventMarkNull(GLsizei length, const GLchar* marker) { }
     static void startMarkNull(GLsizei length, const GLchar* marker) { }
     static void endMarkNull() { }
@@ -417,6 +419,7 @@ private:
 
     // Global index buffer
     GLuint mMeshIndices;
+    GLuint mShadowStripsIndices;
 
     mutable Mutex mGarbageLock;
     Vector<Layer*> mLayerGarbage;

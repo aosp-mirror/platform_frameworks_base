@@ -498,7 +498,7 @@ void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
                 }
 
                 checkTextureUpdate();
-                caches.bindIndicesBuffer();
+                caches.bindQuadIndicesBuffer();
 
                 if (!mDrawn) {
                     // If returns true, a VBO was bound and we must

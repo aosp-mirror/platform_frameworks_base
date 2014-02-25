@@ -23,6 +23,7 @@
 #include "DisplayListRenderer.h"
 #include "Properties.h"
 #include "LayerRenderer.h"
+#include "ShadowTessellator.h"
 
 namespace android {
 
@@ -86,7 +87,7 @@ bool Caches::init() {
 
     mRegionMesh = NULL;
     mMeshIndices = 0;
-
+    mShadowStripsIndices = 0;
     blend = false;
     lastSrcMode = GL_ZERO;
     lastDstMode = GL_ZERO;
@@ -222,6 +223,9 @@ void Caches::terminate() {
     delete[] mRegionMesh;
     mMeshIndices = 0;
     mRegionMesh = NULL;
+
+    glDeleteBuffers(1, &mShadowStripsIndices);
+    mShadowStripsIndices = 0;
 
     fboCache.clear();
 
@@ -404,7 +408,7 @@ bool Caches::unbindMeshBuffer() {
     return false;
 }
 
-bool Caches::bindIndicesBuffer(const GLuint buffer) {
+bool Caches::bindIndicesBufferInternal(const GLuint buffer) {
     if (mCurrentIndicesBuffer != buffer) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
         mCurrentIndicesBuffer = buffer;
@@ -413,7 +417,7 @@ bool Caches::bindIndicesBuffer(const GLuint buffer) {
     return false;
 }
 
-bool Caches::bindIndicesBuffer() {
+bool Caches::bindQuadIndicesBuffer() {
     if (!mMeshIndices) {
         uint16_t* regionIndices = new uint16_t[gMaxNumberOfQuads * 6];
         for (uint32_t i = 0; i < gMaxNumberOfQuads; i++) {
@@ -428,7 +432,7 @@ bool Caches::bindIndicesBuffer() {
         }
 
         glGenBuffers(1, &mMeshIndices);
-        bool force = bindIndicesBuffer(mMeshIndices);
+        bool force = bindIndicesBufferInternal(mMeshIndices);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, gMaxNumberOfQuads * 6 * sizeof(uint16_t),
                 regionIndices, GL_STATIC_DRAW);
 
@@ -436,7 +440,23 @@ bool Caches::bindIndicesBuffer() {
         return force;
     }
 
-    return bindIndicesBuffer(mMeshIndices);
+    return bindIndicesBufferInternal(mMeshIndices);
+}
+
+bool Caches::bindShadowIndicesBuffer() {
+    if (!mShadowStripsIndices) {
+        uint16_t* shadowIndices = new uint16_t[SHADOW_INDEX_COUNT];
+        ShadowTessellator::generateShadowIndices(shadowIndices);
+        glGenBuffers(1, &mShadowStripsIndices);
+        bool force = bindIndicesBufferInternal(mShadowStripsIndices);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, SHADOW_INDEX_COUNT * sizeof(uint16_t),
+            shadowIndices, GL_STATIC_DRAW);
+
+        delete[] shadowIndices;
+        return force;
+    }
+
+    return bindIndicesBufferInternal(mShadowStripsIndices);
 }
 
 bool Caches::unbindIndicesBuffer() {

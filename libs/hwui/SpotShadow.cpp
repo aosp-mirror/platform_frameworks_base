@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <utils/Log.h>
 
+#include "ShadowTessellator.h"
 #include "SpotShadow.h"
 #include "Vertex.h"
 
@@ -67,35 +68,6 @@ float SpotShadow::rayIntersectPoly(const Vector2* poly, int polyLength,
         p1 = p2;
     }
     return FP_NAN;
-}
-
-/**
- * Calculate the centroid of a 2d polygon.
- *
- * @param poly The polygon, which is represented in a Vector2 array.
- * @param polyLength The length of the polygon in terms of number of vertices.
- * @return the centroid of the polygon.
- */
-Vector2 SpotShadow::centroid2d(const Vector2* poly, int polyLength) {
-    double sumx = 0;
-    double sumy = 0;
-    int p1 = polyLength - 1;
-    double area = 0;
-    for (int p2 = 0; p2 < polyLength; p2++) {
-        double x1 = poly[p1].x;
-        double y1 = poly[p1].y;
-        double x2 = poly[p2].x;
-        double y2 = poly[p2].y;
-        double a = (x1 * y2 - x2 * y1);
-        sumx += (x1 + x2) * a;
-        sumy += (y1 + y2) * a;
-        area += a;
-        p1 = p2;
-    }
-
-    double centroidx = sumx / (3 * area);
-    double centroidy = sumy / (3 * area);
-    return Vector2((float)centroidx, (float)centroidy);
 }
 
 /**
@@ -550,20 +522,17 @@ void SpotShadow::computeLightPolygon(int points, const Vector3& lightCenter,
 * @param lightCenter the center of the light
 * @param lightSize the radius of the light source
 * @param lightVertexCount the vertex counter for the light polygon
-* @param rays the number of vertexes to create along the edges of the shadow
-* @param layers the number of layers of triangles strips to create
-* @param strength the "darkness" of the shadow
 * @param shadowTriangleStrip return an (x,y,alpha) triangle strip representing the shadow. Return
 *                            empty strip if error.
 *
 */
 void SpotShadow::createSpotShadow(const Vector3* poly, int polyLength,
         const Vector3& lightCenter, float lightSize, int lightVertexCount,
-        int rays, int layers, float strength, VertexBuffer& retStrips) {
+        VertexBuffer& retStrips) {
     Vector3 light[lightVertexCount * 3];
     computeLightPolygon(lightVertexCount, lightCenter, lightSize, light);
-    computeSpotShadow(light, lightVertexCount, lightCenter,
-            poly, polyLength, rays, layers, strength, retStrips);
+    computeSpotShadow(light, lightVertexCount, lightCenter, poly, polyLength,
+            retStrips);
 }
 
 /**
@@ -573,15 +542,12 @@ void SpotShadow::createSpotShadow(const Vector3* poly, int polyLength,
  * @param lightPolyLength number of vertexes of the light source polygon
  * @param poly x,y,z vertexes of a convex polygon that occludes the light source
  * @param polyLength number of vertexes of the occluding polygon
- * @param rays the number of vertexes to create along the edges of the shadow
- * @param layers the number of layers of triangles strips to create
- * @param strength the "darkness" of the shadow
  * @param shadowTriangleStrip return an (x,y,alpha) triangle strip representing the shadow. Return
  *                            empty strip if error.
  */
 void SpotShadow::computeSpotShadow(const Vector3* lightPoly, int lightPolyLength,
         const Vector3& lightCenter, const Vector3* poly, int polyLength,
-        int rays, int layers, float strength, VertexBuffer& shadowTriangleStrip) {
+        VertexBuffer& shadowTriangleStrip) {
     // Point clouds for all the shadowed vertices
     Vector2 shadowRegion[lightPolyLength * polyLength];
     // Shadow polygon from one point light.
@@ -671,7 +637,8 @@ void SpotShadow::computeSpotShadow(const Vector3* lightPoly, int lightPolyLength
 
         // Shrink the centroid's shadow by 10%.
         // TODO: Study the magic number of 10%.
-        Vector2 shadowCentroid = centroid2d(fakeUmbra, polyLength);
+        Vector2 shadowCentroid =
+                ShadowTessellator::centroid2d(fakeUmbra, polyLength);
         for (int i = 0; i < polyLength; i++) {
             fakeUmbra[i] = shadowCentroid * (1.0f - SHADOW_SHRINK_SCALE) +
                     fakeUmbra[i] * SHADOW_SHRINK_SCALE;
@@ -686,7 +653,7 @@ void SpotShadow::computeSpotShadow(const Vector3* lightPoly, int lightPolyLength
     }
 
     generateTriangleStrip(penumbra, penumbraLength, umbra, umbraLength,
-            rays, layers, strength, shadowTriangleStrip);
+            shadowTriangleStrip);
 }
 
 /**
@@ -696,22 +663,18 @@ void SpotShadow::computeSpotShadow(const Vector3* lightPoly, int lightPolyLength
  * @param penumbraLength The number of vertexes in the outer polygon
  * @param umbra The inner outer polygon x,y vertexes
  * @param umbraLength The number of vertexes in the inner polygon
- * @param rays The number of points along the polygons to create
- * @param layers The number of layers of triangle strips between the umbra and penumbra
- * @param strength The max alpha of the umbra
  * @param shadowTriangleStrip return an (x,y,alpha) triangle strip representing the shadow. Return
  *                            empty strip if error.
 **/
 void SpotShadow::generateTriangleStrip(const Vector2* penumbra, int penumbraLength,
-        const Vector2* umbra, int umbraLength, int rays, int layers,
-        float strength, VertexBuffer& shadowTriangleStrip) {
+        const Vector2* umbra, int umbraLength, VertexBuffer& shadowTriangleStrip) {
+    const int rays = SHADOW_RAY_COUNT;
+    const int layers = SHADOW_LAYER_COUNT;
 
-    int rings = layers + 1;
-    int size = rays * rings;
-
+    int size = rays * (layers + 1);
     float step = M_PI * 2 / rays;
     // Centroid of the umbra.
-    Vector2 centroid = centroid2d(umbra, umbraLength);
+    Vector2 centroid = ShadowTessellator::centroid2d(umbra, umbraLength);
 #if DEBUG_SHADOW
     ALOGD("centroid2d =  %f , %f", centroid.x, centroid.y);
 #endif
@@ -741,57 +704,29 @@ void SpotShadow::generateTriangleStrip(const Vector2* penumbra, int penumbraLeng
     int stripSize = getStripSize(rays, layers);
     AlphaVertex* shadowVertices = shadowTriangleStrip.alloc<AlphaVertex>(stripSize);
     int currentIndex = 0;
-    int firstInLayer = 0;
-    // Calculate the vertex values in the penumbra area.
-    for (int r = 0; r < layers; r++) {
-        firstInLayer = currentIndex;
-        for (int i = 0; i < rays; i++) {
-            float dx = sinf(step * i);
-            float dy = cosf(step * i);
 
-            for (int j = r; j < (r + 2); j++) {
-                float layerRatio = j / (float)(rings - 1);
-                float deltaDist = layerRatio * (umbraDistPerRay[i] - penumbraDistPerRay[i]);
-                float currentDist = penumbraDistPerRay[i] + deltaDist;
-                float op = calculateOpacity(layerRatio, deltaDist);
+    // Calculate the vertices (x, y, alpha) in the shadow area.
+    for (int layerIndex = 0; layerIndex <= layers; layerIndex++) {
+        for (int rayIndex = 0; rayIndex < rays; rayIndex++) {
+            float dx = sinf(step * rayIndex);
+            float dy = cosf(step * rayIndex);
+                float layerRatio = layerIndex / (float) layers;
+                float deltaDist = layerRatio *
+                        (umbraDistPerRay[rayIndex] - penumbraDistPerRay[rayIndex]);
+                float currentDist = penumbraDistPerRay[rayIndex] + deltaDist;
+                float op = calculateOpacity(layerRatio);
                 AlphaVertex::set(&shadowVertices[currentIndex++],
-                        dx * currentDist + centroid.x,
-                        dy * currentDist + centroid.y,
-                        layerRatio * op * strength);
-            }
+                        dx * currentDist + centroid.x, dy * currentDist + centroid.y, op);
         }
-
-        // Duplicate the vertices from one layer to another one to make triangle
-        // strip.
-        shadowVertices[currentIndex++] = shadowVertices[firstInLayer + 0];
-        shadowVertices[currentIndex++] = shadowVertices[firstInLayer + 1];
     }
-
-    int lastInPenumbra = currentIndex - 1;
-    shadowVertices[currentIndex++] = shadowVertices[lastInPenumbra];
-
-    // Preallocate the vertices (index as [firstInUmbra - 1]) for jumping from
-    // the penumbra to umbra.
-    currentIndex++;
-    int firstInUmbra = currentIndex;
-
-    // traverse the umbra area in a zig zag pattern for strips.
-    const int innerRingStartIndex = firstInLayer + 1;
-    for (int k = 0; k < rays; k++) {
-        int i = k / 2;
-        if ((k & 1) == 1) {
-            i = rays - i - 1;
-        }
-        // copy already computed values for umbra vertices
-        shadowVertices[currentIndex++] = shadowVertices[innerRingStartIndex + i * 2];
-    }
-
-    // Back fill the one vertex for jumping from penumbra to umbra.
-    shadowVertices[firstInUmbra - 1] = shadowVertices[firstInUmbra];
-
+    // The centroid is in the umbra area, so the opacity is considered as 1.0.
+    AlphaVertex::set(&shadowVertices[currentIndex++], centroid.x, centroid.y, 1.0);
 #if DEBUG_SHADOW
+    if (currentIndex != SHADOW_VERTEX_COUNT) {
+        ALOGE("number of vertex generated for spot shadow is wrong!");
+    }
     for (int i = 0; i < currentIndex; i++) {
-        ALOGD("shadow value: i %d, (x:%f, y:%f, a:%f)", i, shadowVertices[i].x,
+        ALOGD("spot shadow value: i %d, (x:%f, y:%f, a:%f)", i, shadowVertices[i].x,
                 shadowVertices[i].y, shadowVertices[i].alpha);
     }
 #endif
@@ -819,17 +754,15 @@ void SpotShadow::smoothPolygon(int level, int rays, float* rayDist) {
 }
 
 /**
- * Calculate the opacity according to the distance and falloff ratio.
+ * Calculate the opacity according to the distance. Ideally, the opacity is 1.0
+ * in the umbra area, and fall off to 0.0 till the edge of penumbra area.
  *
- * @param distRatio The distance ratio of current sample between umbra and
- *                  penumbra area.
- * @param deltaDist The distance between current sample to the penumbra area.
+ * @param layerRatio The distance ratio of current sample between umbra and penumbra area.
+ *                   Penumbra edge is 0 and umbra edge is 1.
  * @return The opacity according to the distance between umbra and penumbra.
  */
-float SpotShadow::calculateOpacity(float distRatio, float deltaDist) {
-    // TODO: Experiment on the opacity calculation.
-    float falloffRatio = 1 + deltaDist * deltaDist;
-    return (distRatio + 1 - 1 / falloffRatio) / 2;
+float SpotShadow::calculateOpacity(float layerRatio) {
+    return (layerRatio * layerRatio + layerRatio) / 2.0;
 }
 
 /**

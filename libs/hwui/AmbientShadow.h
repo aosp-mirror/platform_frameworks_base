@@ -34,17 +34,15 @@ namespace uirenderer {
  */
 class AmbientShadow {
 public:
-    static void createAmbientShadow(const Vector3* poly, int polyLength, int rays,
-            int layers, float strength, float heightFactor, float geomFactor,
+    static void createAmbientShadow(const Vector3* poly, int polyLength,
+            const Vector3& centroid3d, float heightFactor, float geomFactor,
             VertexBuffer& shadowVertexBuffer);
 
 private:
-    static void calculatePolygonCentroid(const Vector3* poly, int len, Vector2& centroid);
-
     static void calculateRayDirections(int rays, Vector2* dir);
 
     static void calculateIntersection(const Vector3* poly, int nbVertices,
-            const Vector2& start, const Vector2& dir, int& outEdgeIndex,
+            const Vector3& start, const Vector2& dir, int& outEdgeIndex,
             float& outEdgeFraction, float& outRayDist);
 
     static void calculateNormal(int rays, int currentRayIndex, const Vector2* dir,
