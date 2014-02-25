@@ -22,7 +22,7 @@ package android.opengl;
  *
  */
 public class EGLConfig extends EGLObjectHandle {
-    private EGLConfig(int handle) {
+    private EGLConfig(long handle) {
         super(handle);
     }
 
@@ -32,6 +32,6 @@ public class EGLConfig extends EGLObjectHandle {
         if (!(o instanceof EGLConfig)) return false;
 
         EGLConfig that = (EGLConfig) o;
-        return getHandle() == that.getHandle();
+        return getNativeHandle() == that.getNativeHandle();
     }
 }
