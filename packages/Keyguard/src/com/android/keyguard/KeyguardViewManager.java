@@ -71,6 +71,7 @@ public class KeyguardViewManager {
 
     // Timeout used for keypresses
     static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
+    private static final boolean ENABLE_SIMPLE_KEYGUARD = false;
 
     private final Context mContext;
     private final ViewManager mViewManager;
@@ -312,7 +313,7 @@ public class KeyguardViewManager {
         if (force || mKeyguardView == null) {
             mKeyguardHost.setCustomBackground(null);
             mKeyguardHost.removeAllViews();
-            int layout = allowNotificationsOnSecureKeyguard()
+            int layout = (allowNotificationsOnSecureKeyguard() && ENABLE_SIMPLE_KEYGUARD)
                     ? R.layout.keyguard_simple_host_view
                     : R.layout.keyguard_host_view;
             if (mCurrentLayout != layout) {
