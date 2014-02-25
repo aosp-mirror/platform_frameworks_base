@@ -56,7 +56,6 @@ import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.JournaledFile;
-import com.google.android.collect.Sets;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -65,7 +64,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -372,8 +370,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             new HashMap<String, KernelWakelockStats>();
 
     private final NetworkStatsFactory mNetworkStatsFactory = new NetworkStatsFactory();
-    private NetworkStats mLastMobileSnapshot;
-    private NetworkStats mLastWifiSnapshot;
+    private NetworkStats mCurMobileSnapshot = new NetworkStats(SystemClock.elapsedRealtime(), 50);
+    private NetworkStats mLastMobileSnapshot = new NetworkStats(SystemClock.elapsedRealtime(), 50);
+    private NetworkStats mCurWifiSnapshot = new NetworkStats(SystemClock.elapsedRealtime(), 50);
+    private NetworkStats mLastWifiSnapshot = new NetworkStats(SystemClock.elapsedRealtime(), 50);
     private NetworkStats mTmpNetworkStats;
     private final NetworkStats.Entry mTmpNetworkStatsEntry = new NetworkStats.Entry();
 
@@ -5608,6 +5608,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         if (mMobileIfaces.length > 0) {
             final NetworkStats snapshot;
+            final NetworkStats last = mCurMobileSnapshot;
             try {
                 snapshot = mNetworkStatsFactory.readNetworkStatsDetail(UID_ALL,
                         mMobileIfaces, NetworkStats.TAG_NONE, mLastMobileSnapshot);
@@ -5616,15 +5617,12 @@ public final class BatteryStatsImpl extends BatteryStats {
                 return;
             }
 
-            if (mLastMobileSnapshot == null) {
-                mLastMobileSnapshot = snapshot;
-                return;
-            }
+            mCurMobileSnapshot = snapshot;
+            mLastMobileSnapshot = last;
 
-            final NetworkStats delta = NetworkStats.subtract(snapshot, mLastMobileSnapshot,
+            final NetworkStats delta = NetworkStats.subtract(snapshot, last,
                     null, null, mTmpNetworkStats);
             mTmpNetworkStats = delta;
-            mLastMobileSnapshot = snapshot;
 
             final int size = delta.size();
             for (int i = 0; i < size; i++) {
@@ -5649,6 +5647,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         if (mWifiIfaces.length > 0) {
             final NetworkStats snapshot;
+            final NetworkStats last = mCurWifiSnapshot;
             try {
                 snapshot = mNetworkStatsFactory.readNetworkStatsDetail(UID_ALL,
                         mWifiIfaces, NetworkStats.TAG_NONE, mLastWifiSnapshot);
@@ -5657,12 +5656,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                 return;
             }
 
-            if (mLastWifiSnapshot == null) {
-                mLastWifiSnapshot = snapshot;
-                return;
-            }
+            mCurWifiSnapshot = snapshot;
+            mLastWifiSnapshot = last;
 
-            final NetworkStats delta = NetworkStats.subtract(snapshot, mLastWifiSnapshot,
+            final NetworkStats delta = NetworkStats.subtract(snapshot, last,
                     null, null, mTmpNetworkStats);
             mTmpNetworkStats = delta;
             mLastWifiSnapshot = snapshot;
@@ -5670,6 +5667,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             final int size = delta.size();
             for (int i = 0; i < size; i++) {
                 final NetworkStats.Entry entry = delta.getValues(i, mTmpNetworkStatsEntry);
+
+                if (DEBUG) {
+                    final NetworkStats.Entry cur = snapshot.getValues(i, null);
+                    Slog.d(TAG, "Wifi uid " + entry.uid + ": delta rx=" + entry.rxBytes
+                            + " tx=" + entry.txBytes + ", cur rx=" + cur.rxBytes
+                            + " tx=" + cur.txBytes);
+                }
 
                 if (entry.rxBytes == 0 || entry.txBytes == 0) continue;
 
