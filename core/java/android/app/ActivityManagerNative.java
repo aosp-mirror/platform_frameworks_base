@@ -1843,6 +1843,17 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_TAG_FOR_INTENT_SENDER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IIntentSender r = IIntentSender.Stub.asInterface(
+                data.readStrongBinder());
+            String prefix = data.readString();
+            String tag = getTagForIntentSender(r, prefix);
+            reply.writeNoException();
+            reply.writeString(tag);
+            return true;
+        }
+
         case UPDATE_PERSISTENT_CONFIGURATION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             Configuration config = Configuration.CREATOR.createFromParcel(data);
@@ -4430,6 +4441,21 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         Intent res = reply.readInt() != 0
                 ? Intent.CREATOR.createFromParcel(reply) : null;
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
+
+    public String getTagForIntentSender(IIntentSender sender, String prefix)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(sender.asBinder());
+        data.writeString(prefix);
+        mRemote.transact(GET_TAG_FOR_INTENT_SENDER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        String res = reply.readString();
         data.recycle();
         reply.recycle();
         return res;

@@ -588,8 +588,10 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_FOREGROUND = 0x0002;
         // Event is about an application package that is at the top of the screen.
         public static final int EVENT_TOP = 0x0003;
+        // Event is about an application package that is at the top of the screen.
+        public static final int EVENT_SYNC = 0x0004;
         // Number of event types.
-        public static final int EVENT_COUNT = 0x0004;
+        public static final int EVENT_COUNT = 0x0005;
 
         public static final int EVENT_PROC_START = EVENT_PROC | EVENT_FLAG_START;
         public static final int EVENT_PROC_FINISH = EVENT_PROC | EVENT_FLAG_FINISH;
@@ -597,6 +599,8 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_FOREGROUND_FINISH = EVENT_FOREGROUND | EVENT_FLAG_FINISH;
         public static final int EVENT_TOP_START = EVENT_TOP | EVENT_FLAG_START;
         public static final int EVENT_TOP_FINISH = EVENT_TOP | EVENT_FLAG_FINISH;
+        public static final int EVENT_SYNC_START = EVENT_SYNC | EVENT_FLAG_START;
+        public static final int EVENT_SYNC_FINISH = EVENT_SYNC | EVENT_FLAG_FINISH;
 
         // For CMD_EVENT.
         public int eventCode;
@@ -975,11 +979,11 @@ public abstract class BatteryStats implements Parcelable {
     };
 
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
-            "null", "proc", "fg", "top"
+            "null", "proc", "fg", "top", "sync"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
-            "Nl", "Pr", "Fg", "Tp"
+            "Enl", "Epr", "Efg", "Etp", "Esy"
     };
 
     /**

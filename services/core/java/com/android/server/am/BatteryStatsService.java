@@ -126,11 +126,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
-    public void noteStartWakelock(int uid, int pid, String name, int type,
+    public void noteStartWakelock(int uid, int pid, String name, String historyName, int type,
             boolean unimportantForLogging) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteStartWakeLocked(uid, pid, name, type, unimportantForLogging);
+            mStats.noteStartWakeLocked(uid, pid, name, historyName, type, unimportantForLogging);
         }
     }
 
@@ -141,11 +141,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
-    public void noteStartWakelockFromSource(WorkSource ws, int pid, String name, int type,
-            boolean unimportantForLogging) {
+    public void noteStartWakelockFromSource(WorkSource ws, int pid, String name,
+            String historyName, int type, boolean unimportantForLogging) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteStartWakeFromSourceLocked(ws, pid, name, type, unimportantForLogging);
+            mStats.noteStartWakeFromSourceLocked(ws, pid, name, historyName,
+                    type, unimportantForLogging);
         }
     }
 

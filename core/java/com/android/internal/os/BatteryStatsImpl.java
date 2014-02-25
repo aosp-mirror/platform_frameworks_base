@@ -2011,7 +2011,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         addHistoryEventLocked(SystemClock.elapsedRealtime(), code, name, uid);
     }
 
-    public void noteStartWakeLocked(int uid, int pid, String name, int type,
+    public void noteStartWakeLocked(int uid, int pid, String name, String historyName, int type,
             boolean unimportantForLogging) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
@@ -2023,7 +2023,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 if (DEBUG_HISTORY) Slog.v(TAG, "Start wake lock to: "
                         + Integer.toHexString(mHistoryCur.states));
                 mHistoryCur.wakelockTag = mHistoryCur.localWakelockTag;
-                mHistoryCur.wakelockTag.string = name;
+                mHistoryCur.wakelockTag.string = historyName != null ? historyName : name;
                 mHistoryCur.wakelockTag.uid = uid;
                 mWakeLockImportant = !unimportantForLogging;
                 addHistoryRecordLocked(elapsedRealtime);
@@ -2032,7 +2032,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     // We'll try to update the last tag.
                     mHistoryLastWritten.wakelockTag = null;
                     mHistoryCur.wakelockTag = mHistoryCur.localWakelockTag;
-                    mHistoryCur.wakelockTag.string = name;
+                    mHistoryCur.wakelockTag.string = historyName != null ? historyName : name;
                     mHistoryCur.wakelockTag.uid = uid;
                     addHistoryRecordLocked(elapsedRealtime);
                 }
@@ -2070,11 +2070,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void noteStartWakeFromSourceLocked(WorkSource ws, int pid, String name, int type,
-            boolean unimportantForLogging) {
+    public void noteStartWakeFromSourceLocked(WorkSource ws, int pid, String name,
+            String historyName, int type, boolean unimportantForLogging) {
         int N = ws.size();
         for (int i=0; i<N; i++) {
-            noteStartWakeLocked(ws.get(i), pid, name, type, unimportantForLogging);
+            noteStartWakeLocked(ws.get(i), pid, name, historyName, type, unimportantForLogging);
         }
     }
 
@@ -2291,7 +2291,8 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             // Fake a wake lock, so we consider the device waked as long
             // as the screen is on.
-            noteStartWakeLocked(-1, -1, "screen", WAKE_TYPE_PARTIAL, false);
+            noteStartWakeLocked(Process.myUid(), Process.myPid(), "screen", null,
+                    WAKE_TYPE_PARTIAL, false);
             
             // Update discharge amounts.
             if (mOnBatteryInternal) {
@@ -5662,7 +5663,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             final NetworkStats delta = NetworkStats.subtract(snapshot, last,
                     null, null, mTmpNetworkStats);
             mTmpNetworkStats = delta;
-            mLastWifiSnapshot = snapshot;
 
             final int size = delta.size();
             for (int i = 0; i < size; i++) {

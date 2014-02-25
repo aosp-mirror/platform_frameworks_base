@@ -130,7 +130,7 @@ final class Notifier {
      * Called when a wake lock is acquired.
      */
     public void onWakeLockAcquired(int flags, String tag, String packageName,
-            int ownerUid, int ownerPid, WorkSource workSource) {
+            int ownerUid, int ownerPid, WorkSource workSource, String historyTag) {
         if (DEBUG) {
             Slog.d(TAG, "onWakeLockAcquired: flags=" + flags + ", tag=\"" + tag
                     + "\", packageName=" + packageName
@@ -143,11 +143,11 @@ final class Notifier {
             boolean unimportantForLogging = (flags&PowerManager.UNIMPORTANT_FOR_LOGGING) != 0
                     && ownerUid == Process.SYSTEM_UID;
             if (workSource != null) {
-                mBatteryStats.noteStartWakelockFromSource(workSource, ownerPid, tag, monitorType,
-                        unimportantForLogging);
+                mBatteryStats.noteStartWakelockFromSource(workSource, ownerPid, tag, historyTag,
+                        monitorType, unimportantForLogging);
             } else {
-                mBatteryStats.noteStartWakelock(ownerUid, ownerPid, tag, monitorType,
-                        unimportantForLogging);
+                mBatteryStats.noteStartWakelock(ownerUid, ownerPid, tag, historyTag,
+                        monitorType, unimportantForLogging);
                 // XXX need to deal with disabled operations.
                 mAppOps.startOperation(AppOpsManager.getToken(mAppOps),
                         AppOpsManager.OP_WAKE_LOCK, ownerUid, packageName);

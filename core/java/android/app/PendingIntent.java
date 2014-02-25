@@ -889,6 +889,20 @@ public final class PendingIntent implements Parcelable {
     }
 
     /**
+     * @hide
+     * Return descriptive tag for this PendingIntent.
+     */
+    public String getTag(String prefix) {
+        try {
+            return ActivityManagerNative.getDefault()
+                .getTagForIntentSender(mTarget, prefix);
+        } catch (RemoteException e) {
+            // Should never happen.
+            return null;
+        }
+    }
+
+    /**
      * Comparison operator on two PendingIntent objects, such that true
      * is returned then they both represent the same operation from the
      * same package.  This allows you to use {@link #getActivity},

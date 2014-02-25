@@ -41,6 +41,8 @@ final class PendingIntentRecord extends IIntentSender.Stub {
     boolean canceled = false;
 
     String stringName;
+    String lastTagPrefix;
+    String lastTag;
     
     final static class Key {
         final int type;

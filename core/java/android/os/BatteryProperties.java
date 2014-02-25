@@ -15,9 +15,6 @@
 
 package android.os;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
  * {@hide}
  */
@@ -32,6 +29,22 @@ public class BatteryProperties implements Parcelable {
     public int batteryVoltage;
     public int batteryTemperature;
     public String batteryTechnology;
+
+    public BatteryProperties() {
+    }
+
+    public void set(BatteryProperties other) {
+        chargerAcOnline = other.chargerAcOnline;
+        chargerUsbOnline = other.chargerUsbOnline;
+        chargerWirelessOnline = other.chargerWirelessOnline;
+        batteryStatus = other.batteryStatus;
+        batteryHealth = other.batteryHealth;
+        batteryPresent = other.batteryPresent;
+        batteryLevel = other.batteryLevel;
+        batteryVoltage = other.batteryVoltage;
+        batteryTemperature = other.batteryTemperature;
+        batteryTechnology = other.batteryTechnology;
+    }
 
     /*
      * Parcel read/write code must be kept in sync with

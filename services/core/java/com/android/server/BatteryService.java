@@ -108,6 +108,7 @@ public final class BatteryService extends Binder {
     private final Object mLock = new Object();
 
     private BatteryProperties mBatteryProps;
+    private final BatteryProperties mLastBatteryProps = new BatteryProperties();
     private boolean mBatteryLevelCritical;
     private int mLastBatteryStatus;
     private int mLastBatteryHealth;
@@ -281,6 +282,8 @@ public final class BatteryService extends Binder {
                 mBatteryProps = props;
                 // Process the new values.
                 processValuesLocked();
+            } else {
+                mLastBatteryProps.set(props);
             }
         }
     }
@@ -617,6 +620,9 @@ public final class BatteryService extends Binder {
                 String key = args[1];
                 String value = args[2];
                 try {
+                    if (!mUpdatesStopped) {
+                        mLastBatteryProps.set(mBatteryProps);
+                    }
                     boolean update = true;
                     if ("ac".equals(key)) {
                         mBatteryProps.chargerAcOnline = Integer.parseInt(value) != 0;
@@ -649,13 +655,16 @@ public final class BatteryService extends Binder {
             } else if (args.length == 1 && "reset".equals(args[0])) {
                 long ident = Binder.clearCallingIdentity();
                 try {
-                    mUpdatesStopped = false;
+                    if (mUpdatesStopped) {
+                        mBatteryProps.set(mLastBatteryProps);
+                        processValuesLocked();
+                    }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
             } else {
                 pw.println("Dump current battery state, or:");
-                pw.println("  set ac|usb|wireless|status|level|invalid <value>");
+                pw.println("  set [ac|usb|wireless|status|level|invalid] <value>");
                 pw.println("  reset");
             }
         }
