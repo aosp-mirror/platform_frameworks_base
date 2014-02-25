@@ -22,12 +22,20 @@ package android.opengl;
  *
  */
 public abstract class EGLObjectHandle {
-    private final int mHandle;
+    private final long mHandle;
 
+    // TODO Deprecate EGLObjectHandle(int) method
     protected EGLObjectHandle(int handle) {
         mHandle = handle;
     }
-
+    // TODO Unhide the EGLObjectHandle(long) method
+    /**
+     * {@hide}
+     */
+    protected EGLObjectHandle(long handle) {
+        mHandle = handle;
+    }
+    // TODO Deprecate getHandle() method in favor of getNativeHandle()
     /**
      * Returns the native handle of the wrapped EGL object. This handle can be
      * cast to the corresponding native type on the native side.
@@ -37,11 +45,27 @@ public abstract class EGLObjectHandle {
      * @return the native handle of the wrapped EGL object.
      */
     public int getHandle() {
-        return mHandle;
+        if ((mHandle & 0xffffffffL) != mHandle) {
+            throw new UnsupportedOperationException();
+        }
+        return (int)mHandle;
     }
 
+    // TODO Unhide getNativeHandle() method
+    /**
+     * {@hide}
+     */
+    public long getNativeHandle() {
+        return mHandle;
+    }
     @Override
     public int hashCode() {
-        return getHandle();
+        /*
+         * Based on the algorithm suggested in
+         * http://developer.android.com/reference/java/lang/Object.html
+         */
+        int result = 17;
+        result = 31 * result + (int) (mHandle ^ (mHandle >>> 32));
+        return result;
     }
 }
