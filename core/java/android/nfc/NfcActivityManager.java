@@ -18,6 +18,7 @@ package android.nfc;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Intent;
 import android.net.Uri;
 import android.nfc.NfcAdapter.ReaderCallback;
 import android.os.Binder;
@@ -327,6 +328,7 @@ public final class NfcActivityManager extends IAppCallback.Stub
         NfcAdapter.CreateNdefMessageCallback ndefCallback;
         NfcAdapter.CreateBeamUrisCallback urisCallback;
         NdefMessage message;
+        Activity activity;
         Uri[] uris;
         int flags;
         synchronized (NfcActivityManager.this) {
@@ -338,6 +340,7 @@ public final class NfcActivityManager extends IAppCallback.Stub
             message = state.ndefMessage;
             uris = state.uris;
             flags = state.flags;
+            activity = state.activity;
         }
 
         // Make callbacks without lock
@@ -362,7 +365,13 @@ public final class NfcActivityManager extends IAppCallback.Stub
                 }
             }
         }
-
+        if (uris != null && uris.length > 0) {
+            for (Uri uri : uris) {
+                // Grant the NFC process permission to read these URIs
+                activity.grantUriPermission("com.android.nfc", uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+        }
         return new BeamShareData(message, uris, flags);
     }
 
