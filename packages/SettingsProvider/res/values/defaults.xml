@@ -183,4 +183,7 @@
     <!-- Default for Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE -->
     <integer name="def_wifi_scan_always_available">0</integer>
 
+    <!-- Default for Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1==on -->
+    <integer name="def_lock_screen_show_notifications">1</integer>
+
 </resources>
