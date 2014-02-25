@@ -11,7 +11,6 @@ LOCAL_SRC_FILES := accessorychat.c
 
 LOCAL_MODULE := accessorychat
 
-LOCAL_C_INCLUDES += bionic/libc/kernel/common
 LOCAL_STATIC_LIBRARIES := libusbhost libcutils
 LOCAL_LDLIBS += -lpthread
 LOCAL_CFLAGS := -g -O0
