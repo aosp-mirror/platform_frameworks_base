@@ -209,6 +209,19 @@ public class PackageInfo implements Parcelable {
      */
     public static final int INSTALL_LOCATION_PREFER_EXTERNAL = 2;
     /**
+     * Flag for {@link #requiredForProfile}
+     * The application will always be installed for a restricted profile.
+     * @hide
+     */
+    public static final int RESTRICTED_PROFILE = 1;
+    /**
+     * Flag for {@link #requiredForProfile}
+     * The application will always be installed for a managed profile.
+     * @hide
+     */
+    public static final int MANAGED_PROFILE = 2;
+
+    /**
      * The install location requested by the activity.  From the
      * {@link android.R.attr#installLocation} attribute, one of
      * {@link #INSTALL_LOCATION_AUTO},
@@ -217,6 +230,12 @@ public class PackageInfo implements Parcelable {
      * @hide
      */
     public int installLocation = INSTALL_LOCATION_INTERNAL_ONLY;
+
+    /**
+     * Defines which profiles this app is required for.
+     * @hide
+     */
+    public int requiredForProfile;
 
     /** @hide */
     public boolean requiredForAllUsers;
@@ -276,6 +295,7 @@ public class PackageInfo implements Parcelable {
         dest.writeTypedArray(reqFeatures, parcelableFlags);
         dest.writeInt(installLocation);
         dest.writeInt(requiredForAllUsers ? 1 : 0);
+        dest.writeInt(requiredForProfile);
         dest.writeString(restrictedAccountType);
         dest.writeString(requiredAccountType);
         dest.writeString(overlayTarget);
@@ -318,6 +338,7 @@ public class PackageInfo implements Parcelable {
         reqFeatures = source.createTypedArray(FeatureInfo.CREATOR);
         installLocation = source.readInt();
         requiredForAllUsers = source.readInt() != 0;
+        requiredForProfile = source.readInt();
         restrictedAccountType = source.readString();
         requiredAccountType = source.readString();
         overlayTarget = source.readString();
