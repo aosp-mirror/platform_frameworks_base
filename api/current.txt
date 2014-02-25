@@ -13815,6 +13815,7 @@ package android.media {
     field public static final int RATING_4_STARS = 4; // 0x4
     field public static final int RATING_5_STARS = 5; // 0x5
     field public static final int RATING_HEART = 1; // 0x1
+    field public static final int RATING_NONE = 0; // 0x0
     field public static final int RATING_PERCENTAGE = 6; // 0x6
     field public static final int RATING_THUMB_UP_DOWN = 2; // 0x2
   }
@@ -14455,34 +14456,76 @@ package android.media.effect {
 package android.media.session {
 
   public final class MediaController {
-    ctor public MediaController(android.media.session.MediaSessionToken);
     method public void addCallback(android.media.session.MediaController.Callback);
     method public void addCallback(android.media.session.MediaController.Callback, android.os.Handler);
+    method public static android.media.session.MediaController fromToken(android.media.session.MediaSessionToken);
+    method public android.media.session.TransportController getTransportController();
     method public void removeCallback(android.media.session.MediaController.Callback);
-    method public void sendCommand(java.lang.String, android.os.Bundle);
+    method public void sendCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
     method public void sendMediaButton(int);
   }
 
   public static abstract class MediaController.Callback {
     ctor public MediaController.Callback();
     method public void onEvent(java.lang.String, android.os.Bundle);
-    method public void onMetadataUpdate(android.os.Bundle);
-    method public void onPlaybackStateChange(int);
     method public void onRouteChanged(android.os.Bundle);
+  }
+
+  public final class MediaMetadata implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.graphics.Bitmap getBitmap(java.lang.String);
+    method public long getLong(java.lang.String);
+    method public android.media.Rating getRating(java.lang.String);
+    method public java.lang.String getString(java.lang.String);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final java.lang.String METADATA_KEY_ALBUM = "android.media.metadata.ALBUM";
+    field public static final java.lang.String METADATA_KEY_ALBUM_ART = "android.media.metadata.ALBUM_ART";
+    field public static final java.lang.String METADATA_KEY_ALBUM_ARTIST = "android.media.metadata.ALBUM_ARTIST";
+    field public static final java.lang.String METADATA_KEY_ALBUM_ART_URI = "android.media.metadata.ALBUM_ART_URI";
+    field public static final java.lang.String METADATA_KEY_ART = "android.media.metadata.ART";
+    field public static final java.lang.String METADATA_KEY_ARTIST = "android.media.metadata.ARTIST";
+    field public static final java.lang.String METADATA_KEY_ART_URI = "android.media.metadata.ART_URI";
+    field public static final java.lang.String METADATA_KEY_AUTHOR = "android.media.metadata.AUTHOR";
+    field public static final java.lang.String METADATA_KEY_COMPOSER = "android.media.metadata.COMPOSER";
+    field public static final java.lang.String METADATA_KEY_DATE = "android.media.metadata.DATE";
+    field public static final java.lang.String METADATA_KEY_DISC_NUMBER = "android.media.metadata.DISC_NUMBER";
+    field public static final java.lang.String METADATA_KEY_DURATION = "android.media.metadata.DURATION";
+    field public static final java.lang.String METADATA_KEY_GENRE = "android.media.metadata.GENRE";
+    field public static final java.lang.String METADATA_KEY_NUM_TRACKS = "android.media.metadata.NUM_TRACKS";
+    field public static final java.lang.String METADATA_KEY_RATING = "android.media.metadata.RATING";
+    field public static final java.lang.String METADATA_KEY_TITLE = "android.media.metadata.TITLE";
+    field public static final java.lang.String METADATA_KEY_TRACK_NUMBER = "android.media.metadata.TRACK_NUMBER";
+    field public static final java.lang.String METADATA_KEY_USER_RATING = "android.media.metadata.USER_RATING";
+    field public static final java.lang.String METADATA_KEY_WRITER = "android.media.metadata.WRITER";
+    field public static final java.lang.String METADATA_KEY_YEAR = "android.media.metadata.YEAR";
+  }
+
+  public static final class MediaMetadata.Builder {
+    ctor public MediaMetadata.Builder();
+    ctor public MediaMetadata.Builder(android.media.session.MediaMetadata);
+    method public android.media.session.MediaMetadata build();
+    method public android.media.session.MediaMetadata.Builder putBitmap(java.lang.String, android.graphics.Bitmap);
+    method public android.media.session.MediaMetadata.Builder putLong(java.lang.String, long);
+    method public android.media.session.MediaMetadata.Builder putRating(java.lang.String, android.media.Rating);
+    method public android.media.session.MediaMetadata.Builder putString(java.lang.String, java.lang.String);
   }
 
   public final class MediaSession {
     method public void addCallback(android.media.session.MediaSession.Callback);
     method public void addCallback(android.media.session.MediaSession.Callback, android.os.Handler);
     method public android.media.session.MediaSessionToken getSessionToken();
+    method public android.media.session.TransportPerformer getTransportPerformer();
+    method public void publish();
     method public void release();
     method public void removeCallback(android.media.session.MediaSession.Callback);
-    method public void setPlaybackState(int);
+    method public void sendEvent(java.lang.String, android.os.Bundle);
+    method public android.media.session.TransportPerformer setTransportPerformerEnabled();
   }
 
   public static abstract class MediaSession.Callback {
     ctor public MediaSession.Callback();
-    method public void onCommand(java.lang.String, android.os.Bundle);
+    method public void onCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
     method public void onMediaButton(android.content.Intent);
     method public void onRequestRouteChange(android.os.Bundle);
   }
@@ -14496,6 +14539,137 @@ package android.media.session {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class PlaybackState implements android.os.Parcelable {
+    ctor public PlaybackState();
+    ctor public PlaybackState(android.media.session.PlaybackState);
+    method public int describeContents();
+    method public long getActions();
+    method public long getBufferPosition();
+    method public java.lang.String getErrorMessage();
+    method public long getPosition();
+    method public float getSpeed();
+    method public int getState();
+    method public void setActions(long);
+    method public void setBufferPosition(long);
+    method public void setErrorMessage(java.lang.String);
+    method public void setPosition(long);
+    method public void setSpeed(float);
+    method public void setState(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final long ACTION_FASTFORWARD = 64L; // 0x40L
+    field public static final long ACTION_NEXT_ITEM = 32L; // 0x20L
+    field public static final long ACTION_PAUSE = 2L; // 0x2L
+    field public static final long ACTION_PLAY = 4L; // 0x4L
+    field public static final long ACTION_PREVIOUS_ITEM = 16L; // 0x10L
+    field public static final long ACTION_RATING = 128L; // 0x80L
+    field public static final long ACTION_REWIND = 8L; // 0x8L
+    field public static final long ACTION_SEEK_TO = 256L; // 0x100L
+    field public static final long ACTION_STOP = 1L; // 0x1L
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int PLAYSTATE_BUFFERING = 6; // 0x6
+    field public static final int PLAYSTATE_ERROR = 7; // 0x7
+    field public static final int PLAYSTATE_FAST_FORWARDING = 4; // 0x4
+    field public static final int PLAYSTATE_NONE = 0; // 0x0
+    field public static final int PLAYSTATE_PAUSED = 2; // 0x2
+    field public static final int PLAYSTATE_PLAYING = 3; // 0x3
+    field public static final int PLAYSTATE_REWINDING = 5; // 0x5
+    field public static final int PLAYSTATE_STOPPED = 1; // 0x1
+  }
+
+  public final class RouteInterface {
+    method public void addListener(android.media.session.RouteInterface.EventListener);
+    method public void addListener(android.media.session.RouteInterface.EventListener, android.os.Handler);
+    method public void removeListener(android.media.session.RouteInterface.EventListener);
+    method public void sendCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
+  }
+
+  public static abstract class RouteInterface.EventListener {
+    ctor public RouteInterface.EventListener();
+    method public abstract void onEvent(java.lang.String, android.os.Bundle);
+  }
+
+  public static abstract class RouteInterface.Stub {
+    ctor public RouteInterface.Stub();
+    method public abstract java.lang.String getName();
+    method public abstract void onCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
+    method public final void sendEvent(android.media.session.MediaSession, java.lang.String, android.os.Bundle);
+  }
+
+  public final class RouteTransportControls {
+    method public void addListener(android.media.session.RouteTransportControls.Listener);
+    method public void addListener(android.media.session.RouteTransportControls.Listener, android.os.Handler);
+    method public void fastForward(float);
+    method public static android.media.session.RouteTransportControls from(android.media.session.MediaController);
+    method public void getCapabilities(android.os.ResultReceiver);
+    method public void getCurrentPosition(android.os.ResultReceiver);
+    method public void pause();
+    method public void play();
+    method public void removeListener(android.media.session.RouteTransportControls.Listener);
+    field public static final java.lang.String NAME = "android.media.session.RouteTransportControls";
+  }
+
+  public static abstract class RouteTransportControls.Listener {
+    ctor public RouteTransportControls.Listener();
+    method public void onMetadataUpdate(android.os.Bundle);
+    method public void onPlaybackStateChange(int);
+  }
+
+  public static abstract class RouteTransportControls.Stub extends android.media.session.RouteInterface.Stub {
+    ctor public RouteTransportControls.Stub(android.media.session.MediaSession);
+    method public void fastForward(float);
+    method public long getCapabilities();
+    method public long getCurrentPosition();
+    method public java.lang.String getName();
+    method public void onCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
+    method public final void updatePlaybackState(int);
+  }
+
+  public final class TransportController {
+    method public void addStateListener(android.media.session.TransportController.TransportStateListener);
+    method public void addStateListener(android.media.session.TransportController.TransportStateListener, android.os.Handler);
+    method public void fastForward();
+    method public android.media.session.MediaMetadata getMetadata();
+    method public android.media.session.PlaybackState getPlaybackState();
+    method public int getRatingType();
+    method public void next();
+    method public void pause();
+    method public void play();
+    method public void previous();
+    method public void rate(android.media.Rating);
+    method public void removeStateListener(android.media.session.TransportController.TransportStateListener);
+    method public void rewind();
+    method public void seekTo(long);
+    method public void stop();
+  }
+
+  public static abstract class TransportController.TransportStateListener {
+    ctor public TransportController.TransportStateListener();
+    method public void onMetadataChanged(android.media.session.MediaMetadata);
+    method public void onPlaybackStateChanged(android.media.session.PlaybackState);
+  }
+
+  public final class TransportPerformer {
+    method public void addListener(android.media.session.TransportPerformer.Listener);
+    method public void addListener(android.media.session.TransportPerformer.Listener, android.os.Handler);
+    method public void removeListener(android.media.session.TransportPerformer.Listener);
+    method public final void setMetadata(android.media.session.MediaMetadata);
+    method public final void setPlaybackState(android.media.session.PlaybackState);
+  }
+
+  public static abstract class TransportPerformer.Listener {
+    ctor public TransportPerformer.Listener();
+    method public void onFastForward();
+    method public void onNext();
+    method public void onPause();
+    method public void onPlay();
+    method public void onPrevious();
+    method public void onRate(android.media.Rating);
+    method public void onRewind();
+    method public void onRouteFocusChange(int);
+    method public void onSeekTo(long);
+    method public void onStop();
   }
 
 }

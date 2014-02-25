@@ -499,11 +499,12 @@ public class LocalRenderer extends Renderer implements OnPreparedListener,
     @Override
     public boolean onPause() {
         MediaPlayer player = mPlayer;
+        // If the user paused us make sure we won't start playing again until
+        // asked to
+        mPlayOnReady = false;
         if (player != null && (mState & CAN_PAUSE) != 0) {
             player.pause();
             setState(STATE_PAUSED);
-        } else if ((mState & CAN_READY_PLAY) != 0) {
-            mPlayOnReady = false;
         } else if (!isPaused()) {
             return false;
         }

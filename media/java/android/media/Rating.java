@@ -29,8 +29,13 @@ import android.util.Log;
  * through one of the factory methods.
  */
 public final class Rating implements Parcelable {
-
     private final static String TAG = "Rating";
+    /**
+     * Indicates a rating style is not supported. A Rating will never have this
+     * type, but can be used by other classes to indicate they do not support
+     * Rating.
+     */
+    public final static int RATING_NONE = 0;
 
     /**
      * A rating style with a single degree of rating, "heart" vs "no heart". Can be used to

@@ -1,8 +1,27 @@
 
+/*
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.onemedia;
 
 import android.media.session.MediaController;
+import android.media.session.MediaMetadata;
 import android.media.session.MediaSessionManager;
+import android.media.session.PlaybackState;
+import android.media.session.TransportController;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -11,22 +30,23 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.util.Log;
-import android.view.KeyEvent;
 
 import com.android.onemedia.playback.RequestUtils;
 
 public class PlayerController {
-    private static final String TAG = "PlayerSession";
+    private static final String TAG = "PlayerController";
 
     public static final int STATE_DISCONNECTED = 0;
     public static final int STATE_CONNECTED = 1;
 
     protected MediaController mController;
     protected IPlayerService mBinder;
+    protected TransportController mTransportControls;
 
     private final Intent mServiceIntent;
     private Context mContext;
     private Listener mListener;
+    private TransportListener mTransportListener = new TransportListener();
     private SessionCallback mControllerCb;
     private MediaSessionManager mManager;
     private Handler mHandler = new Handler();
@@ -52,7 +72,7 @@ public class PlayerController {
         Log.d(TAG, "Listener set to " + listener + " session is " + mController);
         if (mListener != null) {
             mHandler = new Handler();
-            mListener.onPlayerStateChange(
+            mListener.onConnectionStateChange(
                     mController == null ? STATE_DISCONNECTED : STATE_CONNECTED);
         }
     }
@@ -70,11 +90,15 @@ public class PlayerController {
     }
 
     public void play() {
-        mController.sendMediaButton(KeyEvent.KEYCODE_MEDIA_PLAY);
+        if (mTransportControls != null) {
+            mTransportControls.play();
+        }
     }
 
     public void pause() {
-        mController.sendMediaButton(KeyEvent.KEYCODE_MEDIA_PAUSE);
+        if (mTransportControls != null) {
+            mTransportControls.pause();
+        }
     }
 
     public void setContent(String source) {
@@ -113,10 +137,11 @@ public class PlayerController {
             }
             mBinder = null;
             mController = null;
+            mTransportControls = null;
             Log.d(TAG, "Disconnected from PlayerService");
 
             if (mListener != null) {
-                mListener.onPlayerStateChange(STATE_DISCONNECTED);
+                mListener.onConnectionStateChange(STATE_DISCONNECTED);
             }
         }
 
@@ -125,33 +150,60 @@ public class PlayerController {
             mBinder = IPlayerService.Stub.asInterface(service);
             Log.d(TAG, "service is " + service + " binder is " + mBinder);
             try {
-                mController = new MediaController(mBinder.getSessionToken());
+                mController = MediaController.fromToken(mBinder.getSessionToken());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error getting session", e);
                 return;
             }
             mController.addCallback(mControllerCb, mHandler);
+            mTransportControls = mController.getTransportController();
+            if (mTransportControls != null) {
+                mTransportControls.addStateListener(mTransportListener);
+            }
             Log.d(TAG, "Ready to use PlayerService");
 
             if (mListener != null) {
-                mListener.onPlayerStateChange(STATE_CONNECTED);
+                mListener.onConnectionStateChange(STATE_CONNECTED);
+                if (mTransportControls != null) {
+                    mListener.onPlaybackStateChange(mTransportControls.getPlaybackState());
+                }
             }
         }
     };
 
     private class SessionCallback extends MediaController.Callback {
         @Override
-        public void onPlaybackStateChange(int state) {
-            if (mListener != null) {
-                mListener.onSessionStateChange(state);
+        public void onRouteChanged(Bundle route) {
+            // TODO
+        }
+    }
+
+    private class TransportListener extends TransportController.TransportStateListener {
+        @Override
+        public void onPlaybackStateChanged(PlaybackState state) {
+            if (state == null) {
+                return;
             }
+            Log.d(TAG, "Received playback state change to state " + state.getState());
+            if (mListener != null) {
+                mListener.onPlaybackStateChange(state);
+            }
+        }
+
+        @Override
+        public void onMetadataChanged(MediaMetadata metadata) {
+            if (metadata == null) {
+                return;
+            }
+            Log.d(TAG, "Received metadata change, title is "
+                    + metadata.getString(MediaMetadata.METADATA_KEY_TITLE));
         }
     }
 
     public interface Listener {
-        public void onSessionStateChange(int state);
-
-        public void onPlayerStateChange(int state);
+        public void onPlaybackStateChange(PlaybackState state);
+        public void onMetadataChange(MediaMetadata metadata);
+        public void onConnectionStateChange(int state);
     }
 
 }

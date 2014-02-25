@@ -21,6 +21,7 @@ import android.media.session.IMediaSession;
 import android.media.session.IMediaSessionCallback;
 import android.media.session.IMediaSessionManager;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
@@ -41,6 +42,8 @@ public class MediaSessionService extends SystemService {
     private final ArrayList<MediaSessionRecord> mSessions
             = new ArrayList<MediaSessionRecord>();
     private final Object mLock = new Object();
+    // TODO do we want a separate thread for handling mediasession messages?
+    private final Handler mHandler = new Handler();
 
     public MediaSessionService(Context context) {
         super(context);
@@ -91,7 +94,8 @@ public class MediaSessionService extends SystemService {
 
     private MediaSessionRecord createSessionLocked(int pid, String packageName,
             IMediaSessionCallback cb, String tag) {
-        final MediaSessionRecord session = new MediaSessionRecord(pid, packageName, cb, tag, this);
+        final MediaSessionRecord session = new MediaSessionRecord(pid, packageName, cb, tag, this,
+                mHandler);
         try {
             cb.asBinder().linkToDeath(session, 0);
         } catch (RemoteException e) {

@@ -15,15 +15,27 @@
 
 package android.media.session;
 
+import android.media.Rating;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.os.ResultReceiver;
 
 /**
  * @hide
  */
 oneway interface IMediaSessionCallback {
-    void onCommand(String command, in Bundle extras);
+    void onCommand(String command, in Bundle extras, in ResultReceiver cb);
     void onMediaButton(in Intent mediaRequestIntent);
     void onRequestRouteChange(in Bundle route);
+
+    // These callbacks are for the TransportPerformer
+    void onPlay();
+    void onPause();
+    void onStop();
+    void onNext();
+    void onPrevious();
+    void onFastForward();
+    void onRewind();
+    void onSeekTo(long pos);
+    void onRate(in Rating rating);
 }

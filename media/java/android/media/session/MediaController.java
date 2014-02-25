@@ -16,20 +16,17 @@
 
 package android.media.session;
 
-import android.content.Intent;
-import android.media.session.IMediaController;
-import android.media.session.IMediaControllerCallback;
-import android.media.MediaMetadataRetriever;
-import android.media.RemoteControlClient;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -46,58 +43,62 @@ import java.util.ArrayList;
 public final class MediaController {
     private static final String TAG = "MediaController";
 
-    private static final int MESSAGE_EVENT = 1;
+    private static final int MSG_EVENT = 1;
     private static final int MESSAGE_PLAYBACK_STATE = 2;
     private static final int MESSAGE_METADATA = 3;
-    private static final int MESSAGE_ROUTE = 4;
-
-    private static final String KEY_EVENT = "event";
-    private static final String KEY_EXTRAS = "extras";
+    private static final int MSG_ROUTE = 4;
 
     private final IMediaController mSessionBinder;
 
-    private final CallbackStub mCbStub = new CallbackStub();
-    private final ArrayList<Callback> mCbs = new ArrayList<Callback>();
+    private final CallbackStub mCbStub = new CallbackStub(this);
+    private final ArrayList<MessageHandler> mCallbacks = new ArrayList<MessageHandler>();
     private final Object mLock = new Object();
 
     private boolean mCbRegistered = false;
 
-    /**
-     * If you have a {@link MediaSessionToken} from the owner of the session a
-     * controller can be created directly. It is up to the session creator to
-     * handle token distribution if desired.
-     *
-     * @see MediaSession#getSessionToken()
-     * @param token A token from the creator of the session
-     */
-    public MediaController(MediaSessionToken token) {
-        mSessionBinder = token.getBinder();
+    private TransportController mTransportController;
+
+    private MediaController(IMediaController sessionBinder) {
+        mSessionBinder = sessionBinder;
     }
 
     /**
      * @hide
      */
-    public MediaController(IMediaController sessionBinder) {
-        mSessionBinder = sessionBinder;
+    public static MediaController fromBinder(IMediaController sessionBinder) {
+        MediaController controller = new MediaController(sessionBinder);
+        try {
+            controller.mSessionBinder.registerCallbackListener(controller.mCbStub);
+            if (controller.mSessionBinder.isTransportControlEnabled()) {
+                controller.mTransportController = new TransportController(sessionBinder);
+            }
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "MediaController created with expired token", e);
+            controller = null;
+        }
+        return controller;
     }
 
     /**
-     * Sends a generic command to the session. It is up to the session creator
-     * to decide what commands and parameters they will support. As such,
-     * commands should only be sent to sessions that the controller owns.
+     * Get a new MediaController for a MediaSessionToken. If successful the
+     * controller returned will be connected to the session that generated the
+     * token.
      *
-     * @param command The command to send
-     * @param params Any parameters to include with the command
+     * @param token The session token to use
+     * @return A controller for the session or null
      */
-    public void sendCommand(String command, Bundle params) {
-        if (TextUtils.isEmpty(command)) {
-            throw new IllegalArgumentException("command cannot be null or empty");
-        }
-        try {
-            mSessionBinder.sendCommand(command, params);
-        } catch (RemoteException e) {
-            Log.d(TAG, "Dead object in sendCommand.", e);
-        }
+    public static MediaController fromToken(MediaSessionToken token) {
+        return fromBinder(token.getBinder());
+    }
+
+    /**
+     * Get a TransportController if the session supports it. If it is not
+     * supported null will be returned.
+     *
+     * @return A TransportController or null
+     */
+    public TransportController getTransportController() {
+        return mTransportController;
     }
 
     /**
@@ -133,10 +134,10 @@ public final class MediaController {
 
     /**
      * Adds a callback to receive updates from the session. Updates will be
-     * posted on the specified handler.
+     * posted on the specified handler's thread.
      *
      * @param cb Cannot be null.
-     * @param handler The handler to post updates on, if null the callers thread
+     * @param handler The handler to post updates on. If null the callers thread
      *            will be used
      */
     public void addCallback(Callback cb, Handler handler) {
@@ -160,6 +161,26 @@ public final class MediaController {
         }
     }
 
+    /**
+     * Sends a generic command to the session. It is up to the session creator
+     * to decide what commands and parameters they will support. As such,
+     * commands should only be sent to sessions that the controller owns.
+     *
+     * @param command The command to send
+     * @param params Any parameters to include with the command
+     * @param cb The callback to receive the result on
+     */
+    public void sendCommand(String command, Bundle params, ResultReceiver cb) {
+        if (TextUtils.isEmpty(command)) {
+            throw new IllegalArgumentException("command cannot be null or empty");
+        }
+        try {
+            mSessionBinder.sendCommand(command, params, cb);
+        } catch (RemoteException e) {
+            Log.d(TAG, "Dead object in sendCommand.", e);
+        }
+    }
+
     /*
      * @hide
      */
@@ -174,14 +195,13 @@ public final class MediaController {
         if (handler == null) {
             throw new IllegalArgumentException("Handler cannot be null");
         }
-        if (mCbs.contains(cb)) {
+        if (getHandlerForCallbackLocked(cb) != null) {
             Log.w(TAG, "Callback is already added, ignoring");
             return;
         }
-        cb.setHandler(handler);
-        mCbs.add(cb);
+        MessageHandler holder = new MessageHandler(handler.getLooper(), cb);
+        mCallbacks.add(holder);
 
-        // Only register one cb binder, track callbacks internally and notify
         if (!mCbRegistered) {
             try {
                 mSessionBinder.registerCallbackListener(mCbStub);
@@ -192,79 +212,62 @@ public final class MediaController {
         }
     }
 
-    private void removeCallbackLocked(Callback cb) {
+    private boolean removeCallbackLocked(Callback cb) {
         if (cb == null) {
             throw new IllegalArgumentException("Callback cannot be null");
         }
-        mCbs.remove(cb);
-
-        if (mCbs.size() == 0 && mCbRegistered) {
-            try {
-                mSessionBinder.unregisterCallbackListener(mCbStub);
-            } catch (RemoteException e) {
-                Log.d(TAG, "Dead object in unregisterCallback", e);
+        for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+            MessageHandler handler = mCallbacks.get(i);
+            if (cb == handler.mCallback) {
+                mCallbacks.remove(i);
+                return true;
             }
-            mCbRegistered = false;
+        }
+        return false;
+    }
+
+    private MessageHandler getHandlerForCallbackLocked(Callback cb) {
+        if (cb == null) {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+        for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+            MessageHandler handler = mCallbacks.get(i);
+            if (cb == handler.mCallback) {
+                return handler;
+            }
+        }
+        return null;
+    }
+
+    private void postEvent(String event, Bundle extras) {
+        synchronized (mLock) {
+            for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+                mCallbacks.get(i).post(MSG_EVENT, event, extras);
+            }
         }
     }
 
-    private void pushOnEventLocked(String event, Bundle extras) {
-        for (int i = mCbs.size() - 1; i >= 0; i--) {
-            mCbs.get(i).postEvent(event, extras);
-        }
-    }
-
-    private void pushOnMetadataUpdateLocked(Bundle metadata) {
-        for (int i = mCbs.size() - 1; i >= 0; i--) {
-            mCbs.get(i).postMetadataUpdate(metadata);
-        }
-    }
-
-    private void pushOnPlaybackUpdateLocked(int newState) {
-        for (int i = mCbs.size() - 1; i >= 0; i--) {
-            mCbs.get(i).postPlaybackStateChange(newState);
-        }
-    }
-
-    private void pushOnRouteChangedLocked(Bundle routeDescriptor) {
-        for (int i = mCbs.size() - 1; i >= 0; i--) {
-            mCbs.get(i).postRouteChanged(routeDescriptor);
+    private void postRouteChanged(Bundle routeDescriptor) {
+        synchronized (mLock) {
+            for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+                mCallbacks.get(i).post(MSG_ROUTE, null, routeDescriptor);
+            }
         }
     }
 
     /**
-     * MediaSession callbacks will be posted on the thread that created the
-     * Callback object.
+     * Callback for receiving updates on from the session. A Callback can be
+     * registered using {@link #addCallback}
      */
     public static abstract class Callback {
-        private Handler mHandler;
-
         /**
-         * Override to handle custom events sent by the session owner.
-         * Controllers should only handle these for sessions they own.
+         * Override to handle custom events sent by the session owner without a
+         * specified interface. Controllers should only handle these for
+         * sessions they own.
          *
          * @param event
          */
         public void onEvent(String event, Bundle extras) {
-        }
-
-        /**
-         * Override to handle updates to the playback state. Valid values are in
-         * {@link RemoteControlClient}. TODO put playstate values somewhere more
-         * generic.
-         *
-         * @param state
-         */
-        public void onPlaybackStateChange(int state) {
-        }
-
-        /**
-         * Override to handle metadata changes for this session's media. The
-         * default supported fields are those in {@link MediaMetadataRetriever}.
-         *
-         * @param metadata
-         */
-        public void onMetadataUpdate(Bundle metadata) {
         }
 
         /**
@@ -274,93 +277,76 @@ public final class MediaController {
          */
         public void onRouteChanged(Bundle route) {
         }
-
-        private void setHandler(Handler handler) {
-            mHandler = new MessageHandler(handler.getLooper(), this);
-        }
-
-        private void postEvent(String event, Bundle extras) {
-            Bundle eventBundle = new Bundle();
-            eventBundle.putString(KEY_EVENT, event);
-            eventBundle.putBundle(KEY_EXTRAS, extras);
-            Message msg = mHandler.obtainMessage(MESSAGE_EVENT, eventBundle);
-            mHandler.sendMessage(msg);
-        }
-
-        private void postPlaybackStateChange(final int state) {
-            Message msg = mHandler.obtainMessage(MESSAGE_PLAYBACK_STATE, state, 0);
-            mHandler.sendMessage(msg);
-        }
-
-        private void postMetadataUpdate(final Bundle metadata) {
-            Message msg = mHandler.obtainMessage(MESSAGE_METADATA, metadata);
-            mHandler.sendMessage(msg);
-        }
-
-        private void postRouteChanged(final Bundle descriptor) {
-            Message msg = mHandler.obtainMessage(MESSAGE_ROUTE, descriptor);
-            mHandler.sendMessage(msg);
-        }
     }
 
-    private final class CallbackStub extends IMediaControllerCallback.Stub {
+    private final static class CallbackStub extends IMediaControllerCallback.Stub {
+        private final WeakReference<MediaController> mController;
+
+        public CallbackStub(MediaController controller) {
+            mController = new WeakReference<MediaController>(controller);
+        }
 
         @Override
-        public void onEvent(String event, Bundle extras) throws RemoteException {
-            synchronized (mLock) {
-                pushOnEventLocked(event, extras);
+        public void onEvent(String event, Bundle extras) {
+            MediaController controller = mController.get();
+            if (controller != null) {
+                controller.postEvent(event, extras);
             }
         }
 
         @Override
-        public void onMetadataUpdate(Bundle metadata) throws RemoteException {
-            synchronized (mLock) {
-                pushOnMetadataUpdateLocked(metadata);
+        public void onRouteChanged(Bundle mediaRouteDescriptor) {
+            MediaController controller = mController.get();
+            if (controller != null) {
+                controller.postRouteChanged(mediaRouteDescriptor);
             }
         }
 
         @Override
-        public void onPlaybackUpdate(final int newState) throws RemoteException {
-            synchronized (mLock) {
-                pushOnPlaybackUpdateLocked(newState);
+        public void onPlaybackStateChanged(PlaybackState state) {
+            MediaController controller = mController.get();
+            if (controller != null) {
+                TransportController tc = controller.getTransportController();
+                if (tc != null) {
+                    tc.postPlaybackStateChanged(state);
+                }
             }
         }
 
         @Override
-        public void onRouteChanged(Bundle mediaRouteDescriptor) throws RemoteException {
-            synchronized (mLock) {
-                pushOnRouteChangedLocked(mediaRouteDescriptor);
+        public void onMetadataChanged(MediaMetadata metadata) {
+            MediaController controller = mController.get();
+            if (controller != null) {
+                TransportController tc = controller.getTransportController();
+                if (tc != null) {
+                    tc.postMetadataChanged(metadata);
+                }
             }
         }
 
     }
 
     private final static class MessageHandler extends Handler {
-        private final MediaController.Callback mCb;
+        private final MediaController.Callback mCallback;
 
         public MessageHandler(Looper looper, MediaController.Callback cb) {
-            super(looper);
-            mCb = cb;
+            super(looper, null, true);
+            mCallback = cb;
         }
 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MESSAGE_EVENT:
-                    Bundle eventBundle = (Bundle) msg.obj;
-                    String event = eventBundle.getString(KEY_EVENT);
-                    Bundle extras = eventBundle.getBundle(KEY_EXTRAS);
-                    mCb.onEvent(event, extras);
+                case MSG_EVENT:
+                    mCallback.onEvent((String) msg.obj, msg.getData());
                     break;
-                case MESSAGE_PLAYBACK_STATE:
-                    mCb.onPlaybackStateChange(msg.arg1);
-                    break;
-                case MESSAGE_METADATA:
-                    mCb.onMetadataUpdate((Bundle) msg.obj);
-                    break;
-                case MESSAGE_ROUTE:
-                    mCb.onRouteChanged((Bundle) msg.obj);
+                case MSG_ROUTE:
+                    mCallback.onRouteChanged(msg.getData());
             }
+        }
+
+        public void post(int what, Object obj, Bundle data) {
+            obtainMessage(what, obj).sendToTarget();
         }
     }
 

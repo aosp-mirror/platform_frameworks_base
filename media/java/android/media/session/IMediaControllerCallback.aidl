@@ -15,6 +15,8 @@
 
 package android.media.session;
 
+import android.media.session.MediaMetadata;
+import android.media.session.PlaybackState;
 import android.os.Bundle;
 
 /**
@@ -22,7 +24,9 @@ import android.os.Bundle;
  */
 oneway interface IMediaControllerCallback {
     void onEvent(String event, in Bundle extras);
-    void onMetadataUpdate(in Bundle metadata);
-    void onPlaybackUpdate(int newState);
     void onRouteChanged(in Bundle route);
+
+    // These callbacks are for the TransportController
+    void onPlaybackStateChanged(in PlaybackState state);
+    void onMetadataChanged(in MediaMetadata metadata);
 }
