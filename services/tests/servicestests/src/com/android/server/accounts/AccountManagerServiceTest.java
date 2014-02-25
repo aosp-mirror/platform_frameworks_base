@@ -226,9 +226,9 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 final Handler handler) {
         }
 
-		@Override
-		public void invalidateCache(int userId) {
-		}
+        @Override
+        public void invalidateCache(int userId) {
+        }
     }
 
     static public class MyMockContext extends MockContext {

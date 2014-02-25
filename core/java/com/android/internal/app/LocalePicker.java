@@ -117,7 +117,7 @@ public class LocalePicker extends ListFragment {
         /** - TODO: Enable when zz_ZY Pseudolocale is complete
          *  if (!localeList.contains("zz_ZY")) {
          *      localeList.add("zz_ZY");
-         *	}
+         *  }
          */
         }
         String[] locales = new String[localeList.size()];

@@ -12,7 +12,7 @@ import junit.framework.*;
 public interface FailureDetailView {
     // The following definition was removed for compatibility with Android
     // libraries.
-    // 	/**
+    //  /**
     //   * Returns the component used to present the TraceView
     //   */
     //  public Component getComponent();

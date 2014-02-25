@@ -1005,7 +1005,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         mState = BluetoothAdapter.STATE_OFF;
                         // enable
                         handleEnable(mQuietEnable);
-		    } else if (mBinding || mBluetooth != null) {
+                    } else if (mBinding || mBluetooth != null) {
                         Message userMsg = mHandler.obtainMessage(MESSAGE_USER_SWITCHED);
                         userMsg.arg2 = 1 + msg.arg2;
                         // if user is switched when service is being binding
@@ -1014,7 +1014,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         if (DBG) {
                             Log.d(TAG, "delay MESSAGE_USER_SWITCHED " + userMsg.arg2);
                         }
-		    }
+                    }
                     break;
                 }
             }

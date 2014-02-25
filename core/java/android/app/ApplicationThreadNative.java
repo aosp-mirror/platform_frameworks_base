@@ -714,7 +714,7 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     public final void scheduleSendResult(IBinder token, List<ResultInfo> results)
-    		throws RemoteException {
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
@@ -884,7 +884,7 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     public final void scheduleServiceArgs(IBinder token, boolean taskRemoved, int startId,
-	    int flags, Intent args) throws RemoteException {
+            int flags, Intent args) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);

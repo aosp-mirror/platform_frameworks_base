@@ -41,7 +41,7 @@ public class WindowManagerPermissionTests extends TestCase {
     }
 
     @SmallTest
-	public void testMANAGE_APP_TOKENS() {
+    public void testMANAGE_APP_TOKENS() {
         try {
             mWm.pauseKeyDispatching(null);
             fail("IWindowManager.pauseKeyDispatching did not throw SecurityException as"

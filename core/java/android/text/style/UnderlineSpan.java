@@ -40,8 +40,8 @@ public class UnderlineSpan extends CharacterStyle
     public void writeToParcel(Parcel dest, int flags) {
     }
 
-	@Override
-	public void updateDrawState(TextPaint ds) {
-		ds.setUnderlineText(true);
-	}
+    @Override
+    public void updateDrawState(TextPaint ds) {
+        ds.setUnderlineText(true);
+    }
 }

@@ -172,7 +172,7 @@ public class AppWidgetProviderInfo implements Parcelable {
      * <p>This field corresponds to the <code>android:previewImage</code> attribute in
      * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
      */
-	public int previewImage;
+    public int previewImage;
 
     /**
      * The rules by which a widget can be resized. See {@link #RESIZE_NONE},

@@ -22,21 +22,21 @@ import android.view.View;
 
 public class OneEditTextActivityNotSelectedTests extends ImfBaseTestCase<OneEditTextActivityNotSelected> {
 
-	public final String TAG = "OneEditTextActivityNotSelectedTests";
-	
+    public final String TAG = "OneEditTextActivityNotSelectedTests";
+    
     public OneEditTextActivityNotSelectedTests() {
         super(OneEditTextActivityNotSelected.class);
     }
     
-	@LargeTest
-	public void testSoftKeyboardNoAutoPop() {
-	    
-	    // Give the IME 2 seconds to appear.
-	    pause(2000);
-	    
-	    assertFalse(mImm.isAcceptingText());
-	    
-	    View rootView = ((OneEditTextActivityNotSelected) mTargetActivity).getRootView();
+    @LargeTest
+    public void testSoftKeyboardNoAutoPop() {
+        
+        // Give the IME 2 seconds to appear.
+        pause(2000);
+        
+        assertFalse(mImm.isAcceptingText());
+        
+        View rootView = ((OneEditTextActivityNotSelected) mTargetActivity).getRootView();
         View servedView = ((OneEditTextActivityNotSelected) mTargetActivity).getDefaultFocusedView();
         
         assertNotNull(rootView);
@@ -45,6 +45,6 @@ public class OneEditTextActivityNotSelectedTests extends ImfBaseTestCase<OneEdit
         destructiveCheckImeInitialState(rootView, servedView);
         
         verifyEditTextAdjustment(servedView, rootView.getMeasuredHeight());
-	}
-	
+    }
+    
 }
