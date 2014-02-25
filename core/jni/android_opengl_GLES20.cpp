@@ -111,7 +111,7 @@ getPointer(JNIEnv *_env, jobject buffer, jarray *array, jint *remaining, jint *o
             getBasePointerID, buffer);
     if (pointer != 0L) {
         *array = NULL;
-        return (void *) (jint) pointer;
+        return reinterpret_cast<void*>(pointer);
     }
 
     *array = (jarray) _env->CallStaticObjectMethod(nioAccessClass,
@@ -1180,7 +1180,7 @@ android_glDrawElements__IIII
         (GLenum)mode,
         (GLsizei)count,
         (GLenum)type,
-        (GLvoid *)offset
+        reinterpret_cast<GLvoid *>(offset)
     );
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -1804,7 +1804,7 @@ android_glGetActiveAttrib__IIILjava_nio_IntBuffer_2Ljava_nio_IntBuffer_2Ljava_ni
         (GLsizei *)length,
         (GLint *)size,
         (GLenum *)type,
-        (char *)name
+        reinterpret_cast<char *>(name)
     );
     if (_typeArray) {
         releasePointer(_env, _typeArray, type, JNI_TRUE);
@@ -2132,7 +2132,7 @@ android_glGetActiveUniform__IIILjava_nio_IntBuffer_2Ljava_nio_IntBuffer_2Ljava_n
         (GLsizei *)length,
         (GLint *)size,
         (GLenum *)type,
-        (char *)name
+        reinterpret_cast<char *>(name)
     );
     if (_typeArray) {
         releasePointer(_env, _typeArray, type, JNI_TRUE);
@@ -3212,7 +3212,7 @@ android_glGetShaderSource__IILjava_nio_IntBuffer_2B
         (GLuint)shader,
         (GLsizei)bufsize,
         (GLsizei *)length,
-        (char *)source
+        reinterpret_cast<char *>(source)
     );
     if (_array) {
         releasePointer(_env, _array, length, JNI_TRUE);
@@ -5985,7 +5985,7 @@ android_glVertexAttribPointer__IIIZII
         (GLenum)type,
         (GLboolean)normalized,
         (GLsizei)stride,
-        (GLvoid *)offset
+        reinterpret_cast<GLvoid *>(offset)
     );
 }
 
