@@ -102,9 +102,8 @@ class DisplayContent {
 
     final WindowManagerService mService;
 
-    static final int DEFER_DETACH = 1;
-    static final int DEFER_REMOVAL = 2;
-    int mDeferredActions;
+    /** Remove this display when animation on it has completed. */
+    boolean mDeferredRemoval;
 
     /**
      * @param display May not be null.
@@ -302,6 +301,49 @@ class DisplayContent {
         }
     }
 
+    boolean isAnimating() {
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final TaskStack stack = mStacks.get(stackNdx);
+            if (stack.isAnimating()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void checkForDeferredActions() {
+        boolean animating = false;
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final TaskStack stack = mStacks.get(stackNdx);
+            if (stack.isAnimating()) {
+                animating = true;
+            } else {
+                if (stack.mDeferDetach) {
+                    mService.detachStackLocked(this, stack);
+                }
+                final ArrayList<Task> tasks = stack.getTasks();
+                for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                    final Task task = tasks.get(taskNdx);
+                    AppTokenList tokens = task.mAppTokens;
+                    for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
+                        AppWindowToken wtoken = tokens.get(tokenNdx);
+                        if (wtoken.mDeferRemoval) {
+                            wtoken.mDeferRemoval = false;
+                            mService.removeAppFromTaskLocked(wtoken);
+                        }
+                    }
+                    if (task.mDeferRemoval) {
+                        task.mDeferRemoval = false;
+                        mService.removeTaskLocked(task);
+                    }
+                }
+            }
+        }
+        if (!animating && mDeferredRemoval) {
+            mService.onDisplayRemoved(mDisplayId);
+        }
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("Display: mDisplayId="); pw.println(mDisplayId);
         final String subPrefix = "  " + prefix;
@@ -325,7 +367,8 @@ class DisplayContent {
             pw.print("x"); pw.print(mDisplayInfo.smallestNominalAppHeight);
             pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
             pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
-            pw.print(subPrefix); pw.print("layoutNeeded="); pw.println(layoutNeeded);
+            pw.print(subPrefix); pw.print("deferred="); pw.print(mDeferredRemoval);
+                pw.print(" layoutNeeded="); pw.println(layoutNeeded);
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mStacks.get(stackNdx);
             pw.print(prefix); pw.print("mStacks[" + stackNdx + "]"); pw.println(stack.mStackId);

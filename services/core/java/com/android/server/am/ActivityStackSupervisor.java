@@ -2180,10 +2180,25 @@ public final class ActivityStackSupervisor implements DisplayListener {
             ActivityRecord top = stack.topRunningNonDelayedActivityLocked(null);
             if (top != null) {
                 // TODO: Make sure the next activity doesn't start up when top is destroyed.
-                stack.destroyActivityLocked(top, true, true, "stack removal");
+                stack.destroyActivityLocked(top, true, true, "stack parent destroyed");
             }
             mActivityContainers.removeAt(ndx);
             container.detachLocked();
+        }
+    }
+
+    void deleteActivityContainer(IActivityContainer container) {
+        ActivityContainer activityContainer = (ActivityContainer)container;
+        if (activityContainer != null) {
+            activityContainer.mStack.destroyActivitiesLocked(null, true,
+                    "deleteActivityContainer");
+            final ActivityRecord parent = activityContainer.mParentActivity;
+            if (parent != null) {
+                parent.mChildContainers.remove(activityContainer);
+            }
+            final int stackId = activityContainer.mStackId;
+            mActivityContainers.remove(stackId);
+            mWindowManager.removeStack(stackId);
         }
     }
 
@@ -2557,6 +2572,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         pw.print(prefix); pw.println("mSleepTimeout=" + mSleepTimeout);
         pw.print(prefix); pw.println("mCurTaskId=" + mCurTaskId);
         pw.print(prefix); pw.println("mUserStackInFront=" + mUserStackInFront);
+        pw.print(prefix); pw.println("mActivityContainers=" + mActivityContainers);
     }
 
     ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {

@@ -7107,6 +7107,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public void deleteActivityContainer(IActivityContainer container) throws RemoteException {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "deleteActivityContainer()");
+        synchronized (this) {
+            mStackSupervisor.deleteActivityContainer(container);
+        }
+    }
+
+    @Override
     public IActivityContainer getEnclosingActivityContainer(IBinder activityToken)
             throws RemoteException {
         synchronized (this) {
