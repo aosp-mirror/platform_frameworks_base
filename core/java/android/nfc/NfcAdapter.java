@@ -1249,6 +1249,45 @@ public final class NfcAdapter {
     }
 
     /**
+     * Manually invoke Android Beam to share data.
+     *
+     * <p>The Android Beam animation is normally only shown when two NFC-capable
+     * devices come into range.
+     * By calling this method, an Activity can invoke the Beam animation directly
+     * even if no other NFC device is in range yet. The Beam animation will then
+     * prompt the user to tap another NFC-capable device to complete the data
+     * transfer.
+     *
+     * <p>The main advantage of using this method is that it avoids the need for the
+     * user to tap the screen to complete the transfer, as this method already
+     * establishes the direction of the transfer and the consent of the user to
+     * share data. Callers are responsible for making sure that the user has
+     * consented to sharing data on NFC tap.
+     *
+     * <p>Note that to use this method, the passed in Activity must have already
+     * set data to share over Beam by using method calls such as
+     * {@link #setNdefPushMessageCallback(CreateNdefMessageCallback, Activity, Activity...)} or
+     * {@link #setBeamPushUrisCallback(CreateBeamUrisCallback, Activity)}.
+     *
+     * @param activity the current foreground Activity that has registered data to share
+     * @return whether the Beam animation was successfully invoked
+     */
+    public boolean invokeBeam(Activity activity) {
+        if (activity == null) {
+            throw new NullPointerException("activity may not be null.");
+        }
+        enforceResumed(activity);
+        try {
+            sService.invokeBeam();
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG, "invokeBeam: NFC process has died.");
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+    }
+
+    /**
      * Enable NDEF message push over NFC while this Activity is in the foreground.
      *
      * <p>You must explicitly call this method every time the activity is

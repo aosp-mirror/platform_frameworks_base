@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -471,6 +472,45 @@ public final class NdefRecord implements Parcelable {
         System.arraycopy(byteType, 0, b, byteDomain.length + 1, byteType.length);
 
         return new NdefRecord(TNF_EXTERNAL_TYPE, b, null, data);
+    }
+
+    /**
+     * Create a new NDEF record containing UTF-8 text data.<p>
+     *
+     * The caller can either specify the language code for the provided text,
+     * or otherwise the language code corresponding to the current default
+     * locale will be used.
+     *
+     * Reference specification: NFCForum-TS-RTD_Text_1.0
+     * @param languageCode The languageCode for the record. If locale is empty or null,
+     *                     the language code of the current default locale will be used.
+     * @param text   The text to be encoded in the record. Will be represented in UTF-8 format.
+     * @throws IllegalArgumentException if text is null
+     */
+    public static NdefRecord createTextRecord(String languageCode, String text) {
+        if (text == null) throw new NullPointerException("text is null");
+
+        byte[] textBytes = text.getBytes(StandardCharsets.UTF_8);
+
+        byte[] languageCodeBytes = null;
+        if (languageCode != null && !languageCode.isEmpty()) {
+            languageCodeBytes = languageCode.getBytes(StandardCharsets.US_ASCII);
+        } else {
+            languageCodeBytes = Locale.getDefault().getLanguage().
+                    getBytes(StandardCharsets.US_ASCII);
+        }
+        // We only have 6 bits to indicate ISO/IANA language code.
+        if (languageCodeBytes.length >= 64) {
+            throw new IllegalArgumentException("language code is too long, must be <64 bytes.");
+        }
+        ByteBuffer buffer = ByteBuffer.allocate(1 + languageCodeBytes.length + textBytes.length);
+
+        byte status = (byte) (languageCodeBytes.length & 0xFF);
+        buffer.put(status);
+        buffer.put(languageCodeBytes);
+        buffer.put(textBytes);
+
+        return new NdefRecord(TNF_WELL_KNOWN, RTD_TEXT, null, buffer.array());
     }
 
     /**

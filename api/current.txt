@@ -15844,6 +15844,7 @@ package android.nfc {
     method public static android.nfc.NdefRecord createApplicationRecord(java.lang.String);
     method public static android.nfc.NdefRecord createExternal(java.lang.String, java.lang.String, byte[]);
     method public static android.nfc.NdefRecord createMime(java.lang.String, byte[]);
+    method public static android.nfc.NdefRecord createTextRecord(java.lang.String, java.lang.String);
     method public static android.nfc.NdefRecord createUri(android.net.Uri);
     method public static android.nfc.NdefRecord createUri(java.lang.String);
     method public int describeContents();
@@ -15880,6 +15881,7 @@ package android.nfc {
     method public deprecated void enableForegroundNdefPush(android.app.Activity, android.nfc.NdefMessage);
     method public void enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle);
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
+    method public boolean invokeBeam(android.app.Activity);
     method public boolean isEnabled();
     method public boolean isNdefPushEnabled();
     method public void setBeamPushUris(android.net.Uri[], android.app.Activity);
