@@ -612,6 +612,13 @@ public class Notification implements Parcelable
     public static final String EXTRA_AS_HEADS_UP = "headsup";
 
     /**
+     * Extra added from {@link Notification.Builder} to indicate that the remote views were inflated
+     * from the builder, as opposed to being created directly from the application.
+     * @hide
+     */
+    public static final String EXTRA_BUILDER_REMOTE_VIEWS = "android.builderRemoteViews";
+
+    /**
      * Value for {@link #EXTRA_AS_HEADS_UP}.
      * @hide
      */
@@ -1273,6 +1280,7 @@ public class Notification implements Parcelable
         private boolean mShowWhen = true;
         private int mVisibility = VISIBILITY_PRIVATE;
         private Notification mPublicVersion = null;
+        private boolean mQuantumTheme;
 
         /**
          * Constructs a new Builder with the defaults:
@@ -1300,6 +1308,9 @@ public class Notification implements Parcelable
             mWhen = System.currentTimeMillis();
             mAudioStreamType = STREAM_DEFAULT;
             mPriority = PRIORITY_DEFAULT;
+
+            // TODO: Decide on targetSdk from calling app whether to use quantum theme.
+            mQuantumTheme = true;
         }
 
         /**
@@ -1807,7 +1818,7 @@ public class Notification implements Parcelable
                 contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
                 smallIconImageViewId = R.id.right_icon;
             }
-            if (mPriority < PRIORITY_LOW) {
+            if (!mQuantumTheme && mPriority < PRIORITY_LOW) {
                 contentView.setInt(R.id.icon,
                         "setBackgroundResource", R.drawable.notification_template_icon_low_bg);
                 contentView.setInt(R.id.status_bar_latest_event_content,
@@ -1921,7 +1932,7 @@ public class Notification implements Parcelable
             if (mContentView != null) {
                 return mContentView;
             } else {
-                return applyStandardTemplate(R.layout.notification_template_base, true); // no more special large_icon flavor
+                return applyStandardTemplate(getBaseLayoutResource(), true); // no more special large_icon flavor
             }
         }
 
@@ -1942,21 +1953,21 @@ public class Notification implements Parcelable
         private RemoteViews makeBigContentView() {
             if (mActions.size() == 0) return null;
 
-            return applyStandardTemplateWithActions(R.layout.notification_template_big_base);
+            return applyStandardTemplateWithActions(getBigBaseLayoutResource());
         }
 
-        private RemoteViews makeHEadsUpContentView() {
+        private RemoteViews makeHeadsUpContentView() {
             if (mActions.size() == 0) return null;
 
-            return applyStandardTemplateWithActions(R.layout.notification_template_big_base);
+            return applyStandardTemplateWithActions(getBigBaseLayoutResource());
         }
 
 
         private RemoteViews generateActionButton(Action action) {
             final boolean tombstone = (action.actionIntent == null);
             RemoteViews button = new RemoteViews(mContext.getPackageName(),
-                    tombstone ? R.layout.notification_action_tombstone
-                              : R.layout.notification_action);
+                    tombstone ? getActionTombstoneLayoutResource()
+                              : getActionLayoutResource());
             button.setTextViewCompoundDrawablesRelative(R.id.action0, action.icon, 0, 0, 0);
             button.setTextViewText(R.id.action0, action.title);
             if (!tombstone) {
@@ -1992,7 +2003,7 @@ public class Notification implements Parcelable
             n.defaults = mDefaults;
             n.flags = mFlags;
             n.bigContentView = makeBigContentView();
-            n.headsUpContentView = makeHEadsUpContentView();
+            n.headsUpContentView = makeHeadsUpContentView();
             if (mLedOnMs != 0 || mLedOffMs != 0) {
                 n.flags |= FLAG_SHOW_LIGHTS;
             }
@@ -2037,6 +2048,7 @@ public class Notification implements Parcelable
             extras.putBoolean(EXTRA_PROGRESS_INDETERMINATE, mProgressIndeterminate);
             extras.putBoolean(EXTRA_SHOW_CHRONOMETER, mUseChronometer);
             extras.putBoolean(EXTRA_SHOW_WHEN, mShowWhen);
+            extras.putBoolean(EXTRA_BUILDER_REMOTE_VIEWS, mContentView == null);
             if (mLargeIcon != null) {
                 extras.putParcelable(EXTRA_LARGE_ICON, mLargeIcon);
             }
@@ -2079,6 +2091,49 @@ public class Notification implements Parcelable
         public Notification buildInto(Notification n) {
             build().cloneInto(n, true);
             return n;
+        }
+
+
+        private int getBaseLayoutResource() {
+            return mQuantumTheme
+                    ? R.layout.notification_template_quantum_base
+                    : R.layout.notification_template_base;
+        }
+
+        private int getBigBaseLayoutResource() {
+            return mQuantumTheme
+                    ? R.layout.notification_template_quantum_big_base
+                    : R.layout.notification_template_big_base;
+        }
+
+        private int getBigPictureLayoutResource() {
+            return mQuantumTheme
+                    ? R.layout.notification_template_quantum_big_picture
+                    : R.layout.notification_template_big_picture;
+        }
+
+        private int getBigTextLayoutResource() {
+            return mQuantumTheme
+                    ? R.layout.notification_template_quantum_big_text
+                    : R.layout.notification_template_big_text;
+        }
+
+        private int getInboxLayoutResource() {
+            return mQuantumTheme
+                    ? R.layout.notification_template_quantum_inbox
+                    : R.layout.notification_template_inbox;
+        }
+
+        private int getActionLayoutResource() {
+            return mQuantumTheme
+                    ? R.layout.notification_quantum_action
+                    : R.layout.notification_action;
+        }
+
+        private int getActionTombstoneLayoutResource() {
+            return mQuantumTheme
+                    ? R.layout.notification_quantum_action_tombstone
+                    : R.layout.notification_action_tombstone;
         }
     }
 
@@ -2249,7 +2304,7 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews makeBigContentView() {
-            RemoteViews contentView = getStandardView(R.layout.notification_template_big_picture);
+            RemoteViews contentView = getStandardView(mBuilder.getBigPictureLayoutResource());
 
             contentView.setImageViewBitmap(R.id.big_picture, mPicture);
 
@@ -2348,7 +2403,7 @@ public class Notification implements Parcelable
             final boolean hadThreeLines = (mBuilder.mContentText != null && mBuilder.mSubText != null);
             mBuilder.mContentText = null;
 
-            RemoteViews contentView = getStandardView(R.layout.notification_template_big_text);
+            RemoteViews contentView = getStandardView(mBuilder.getBigTextLayoutResource());
 
             if (hadThreeLines) {
                 // vertical centering
@@ -2442,7 +2497,7 @@ public class Notification implements Parcelable
         private RemoteViews makeBigContentView() {
             // Remove the content text so line3 disappears unless you have a summary
             mBuilder.mContentText = null;
-            RemoteViews contentView = getStandardView(R.layout.notification_template_inbox);
+            RemoteViews contentView = getStandardView(mBuilder.getInboxLayoutResource());
 
             contentView.setViewVisibility(R.id.text2, View.GONE);
 
