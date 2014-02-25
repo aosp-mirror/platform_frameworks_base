@@ -676,13 +676,15 @@ static bool applyFileOverlay(Bundle *bundle,
 }
 
 /*
- * Inserts an attribute in a given node, only if the attribute does not
- * exist.
+ * Inserts an attribute in a given node.
  * If errorOnFailedInsert is true, and the attribute already exists, returns false.
- * Returns true otherwise, even if the attribute already exists.
+ * If replaceExisting is true, the attribute will be updated if it already exists.
+ * Returns true otherwise, even if the attribute already exists, and does not modify
+ * the existing attribute's value.
  */
 bool addTagAttribute(const sp<XMLNode>& node, const char* ns8,
-        const char* attr8, const char* value, bool errorOnFailedInsert)
+        const char* attr8, const char* value, bool errorOnFailedInsert,
+        bool replaceExisting)
 {
     if (value == NULL) {
         return true;
@@ -691,7 +693,16 @@ bool addTagAttribute(const sp<XMLNode>& node, const char* ns8,
     const String16 ns(ns8);
     const String16 attr(attr8);
 
-    if (node->getAttribute(ns, attr) != NULL) {
+    XMLNode::attribute_entry* existingEntry = node->editAttribute(ns, attr);
+    if (existingEntry != NULL) {
+        if (replaceExisting) {
+            NOISY(printf("Info: AndroidManifest.xml already defines %s (in %s);"
+                         " overwriting existing value from manifest.\n",
+                         String8(attr).string(), String8(ns).string()));
+            existingEntry->string = String16(value);
+            return true;
+        }
+
         if (errorOnFailedInsert) {
             fprintf(stderr, "Error: AndroidManifest.xml already defines %s (in %s);"
                             " cannot insert new value %s.\n",
@@ -709,6 +720,18 @@ bool addTagAttribute(const sp<XMLNode>& node, const char* ns8,
     
     node->addAttribute(ns, attr, String16(value));
     return true;
+}
+
+/*
+ * Inserts an attribute in a given node, only if the attribute does not
+ * exist.
+ * If errorOnFailedInsert is true, and the attribute already exists, returns false.
+ * Returns true otherwise, even if the attribute already exists.
+ */
+bool addTagAttribute(const sp<XMLNode>& node, const char* ns8,
+        const char* attr8, const char* value, bool errorOnFailedInsert)
+{
+    return addTagAttribute(node, ns8, attr8, value, errorOnFailedInsert, false);
 }
 
 static void fullyQualifyClassName(const String8& package, sp<XMLNode> node,
@@ -748,13 +771,14 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
     }
 
     bool errorOnFailedInsert = bundle->getErrorOnFailedInsert();
+    bool replaceVersion = bundle->getReplaceVersion();
 
     if (!addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "versionCode",
-            bundle->getVersionCode(), errorOnFailedInsert)) {
+            bundle->getVersionCode(), errorOnFailedInsert, replaceVersion)) {
         return UNKNOWN_ERROR;
     }
     if (!addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "versionName",
-            bundle->getVersionName(), errorOnFailedInsert)) {
+            bundle->getVersionName(), errorOnFailedInsert, replaceVersion)) {
         return UNKNOWN_ERROR;
     }
     

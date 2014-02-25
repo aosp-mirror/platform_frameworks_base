@@ -59,10 +59,10 @@ public:
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
           mRClassDir(NULL), mResourceIntermediatesDir(NULL), mManifestMinSdkVersion(NULL),
           mMinSdkVersion(NULL), mTargetSdkVersion(NULL), mMaxSdkVersion(NULL),
-          mVersionCode(NULL), mVersionName(NULL), mCustomPackage(NULL), mExtraPackages(NULL),
-          mMaxResVersion(NULL), mDebugMode(false), mNonConstantId(false), mProduct(NULL),
-          mUseCrunchCache(false), mErrorOnFailedInsert(false), mErrorOnMissingConfigEntry(false),
-          mOutputTextSymbols(NULL),
+          mVersionCode(NULL), mVersionName(NULL), mReplaceVersion(false), mCustomPackage(NULL),
+          mExtraPackages(NULL), mMaxResVersion(NULL), mDebugMode(false), mNonConstantId(false),
+          mProduct(NULL), mUseCrunchCache(false), mErrorOnFailedInsert(false),
+          mErrorOnMissingConfigEntry(false), mOutputTextSymbols(NULL),
           mSingleCrunchInputFile(NULL), mSingleCrunchOutputFile(NULL),
           mArgc(0), mArgv(NULL)
         {}
@@ -166,6 +166,8 @@ public:
     void setVersionCode(const char*  val) { mVersionCode = val; }
     const char* getVersionName() const { return mVersionName; }
     void setVersionName(const char* val) { mVersionName = val; }
+    bool getReplaceVersion() { return mReplaceVersion; }
+    void setReplaceVersion(bool val) { mReplaceVersion = val; }
     const char* getCustomPackage() const { return mCustomPackage; }
     void setCustomPackage(const char* val) { mCustomPackage = val; }
     const char* getExtraPackages() const { return mExtraPackages; }
@@ -285,6 +287,7 @@ private:
     const char* mMaxSdkVersion;
     const char* mVersionCode;
     const char* mVersionName;
+    bool        mReplaceVersion;
     const char* mCustomPackage;
     const char* mExtraPackages;
     const char* mMaxResVersion;
