@@ -10387,6 +10387,7 @@ package android.graphics.drawable {
     method public final android.graphics.Paint getPaint();
     method public android.graphics.Shader.TileMode getTileModeX();
     method public android.graphics.Shader.TileMode getTileModeY();
+    method public android.content.res.ColorStateList getTint();
     method public boolean hasAntiAlias();
     method public boolean hasMipMap();
     method public final boolean isAutoMirrored();
@@ -10402,7 +10403,6 @@ package android.graphics.drawable {
     method public void setTileModeXY(android.graphics.Shader.TileMode, android.graphics.Shader.TileMode);
     method public final void setTileModeY(android.graphics.Shader.TileMode);
     method public void setTint(android.content.res.ColorStateList);
-    method public void setTintMode(android.graphics.PorterDuff.Mode);
   }
 
   public class ClipDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
@@ -10445,6 +10445,7 @@ package android.graphics.drawable {
     method public final android.graphics.Rect getBounds();
     method public android.graphics.drawable.Drawable.Callback getCallback();
     method public int getChangingConfigurations();
+    method public android.graphics.ColorFilter getColorFilter();
     method public android.graphics.drawable.Drawable.ConstantState getConstantState();
     method public android.graphics.drawable.Drawable getCurrent();
     method public int getIntrinsicHeight();
@@ -10633,13 +10634,13 @@ package android.graphics.drawable {
     method public void draw(android.graphics.Canvas);
     method public int getOpacity();
     method public android.graphics.Paint getPaint();
+    method public android.content.res.ColorStateList getTint();
     method public void setAlpha(int);
     method public void setColorFilter(android.graphics.ColorFilter);
     method public void setTargetDensity(android.graphics.Canvas);
     method public void setTargetDensity(android.util.DisplayMetrics);
     method public void setTargetDensity(int);
     method public void setTint(android.content.res.ColorStateList);
-    method public void setTintMode(android.graphics.PorterDuff.Mode);
   }
 
   public class PaintDrawable extends android.graphics.drawable.ShapeDrawable {
@@ -10708,6 +10709,7 @@ package android.graphics.drawable {
     method public android.graphics.Paint getPaint();
     method public android.graphics.drawable.ShapeDrawable.ShaderFactory getShaderFactory();
     method public android.graphics.drawable.shapes.Shape getShape();
+    method public android.content.res.ColorStateList getTint();
     method protected boolean inflateTag(java.lang.String, android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet);
     method protected void onDraw(android.graphics.drawable.shapes.Shape, android.graphics.Canvas, android.graphics.Paint);
     method public void setAlpha(int);
@@ -10718,6 +10720,7 @@ package android.graphics.drawable {
     method public void setPadding(android.graphics.Rect);
     method public void setShaderFactory(android.graphics.drawable.ShapeDrawable.ShaderFactory);
     method public void setShape(android.graphics.drawable.shapes.Shape);
+    method public void setTint(android.content.res.ColorStateList);
   }
 
   public static abstract class ShapeDrawable.ShaderFactory {

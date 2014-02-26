@@ -454,12 +454,6 @@ public abstract class Drawable {
     }
 
     /**
-     * Specify an optional color filter for the drawable. Pass null to remove
-     * any existing color filter.
-     */
-    public abstract void setColorFilter(ColorFilter cf);
-
-    /**
      * @hide Consider for future API inclusion
      */
     public void setXfermode(Xfermode mode) {
@@ -469,11 +463,29 @@ public abstract class Drawable {
     }
 
     /**
+     * Specify an optional color filter for the drawable. Pass {@code null} to
+     * remove any existing color filter.
+     *
+     * @param cf the color filter to apply, or {@code null} to remove the
+     *            existing color filter
+     */
+    public abstract void setColorFilter(ColorFilter cf);
+
+    /**
      * Specify a color and Porter-Duff mode to be the color filter for this
      * drawable.
      */
     public void setColorFilter(int color, PorterDuff.Mode mode) {
         setColorFilter(new PorterDuffColorFilter(color, mode));
+    }
+
+    /**
+     * Returns the current color filter, or {@code null} if none set.
+     *
+     * @return the current color filter, or {@code null} if none set
+     */
+    public ColorFilter getColorFilter() {
+        return null;
     }
 
     /**

@@ -558,6 +558,11 @@ public class BitmapDrawable extends Drawable {
         invalidateSelf();
     }
 
+    @Override
+    public ColorFilter getColorFilter() {
+        return mBitmapState.mPaint.getColorFilter();
+    }
+
     /**
      * Specifies a tint for this drawable.
      * <p>
@@ -583,9 +588,20 @@ public class BitmapDrawable extends Drawable {
     }
 
     /**
+     * Returns the tint color for this drawable.
+     *
+     * @return Color state list to use for tinting this drawable, or null if
+     *         none set
+     */
+    public ColorStateList getTint() {
+        return mBitmapState.mTint;
+    }
+
+    /**
      * Specifies the blending mode used to apply tint.
      *
      * @param tintMode A Porter-Duff blending mode
+     * @hide Pending finalization of supported Modes
      */
     public void setTintMode(Mode tintMode) {
         mBitmapState.mTintMode = tintMode;
@@ -593,6 +609,16 @@ public class BitmapDrawable extends Drawable {
             mTintFilter.setMode(tintMode);
         }
         invalidateSelf();
+    }
+
+    /**
+     * Returns the blending mode used to apply tint.
+     *
+     * @return The Porter-Duff blending mode used to apply tint.
+     * @hide Pending finalization of supported Modes
+     */
+    public Mode getTintMode() {
+        return mBitmapState.mTintMode;
     }
 
     /**

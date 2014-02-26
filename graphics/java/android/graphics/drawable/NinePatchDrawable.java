@@ -31,7 +31,6 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.PorterDuff.Mode;
-import android.graphics.drawable.BitmapDrawable.BitmapState;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.LayoutDirection;
@@ -342,9 +341,20 @@ public class NinePatchDrawable extends Drawable {
     }
 
     /**
+     * Returns the tint color for this drawable.
+     *
+     * @return Color state list to use for tinting this drawable, or null if
+     *         none set
+     */
+    public ColorStateList getTint() {
+        return mNinePatchState.mTint;
+    }
+
+    /**
      * Specifies the blending mode used to apply tint.
      *
      * @param tintMode A Porter-Duff blending mode
+     * @hide Pending finalization of supported Modes
      */
     public void setTintMode(Mode tintMode) {
         mNinePatchState.mTintMode = tintMode;
@@ -352,6 +362,16 @@ public class NinePatchDrawable extends Drawable {
             mTintFilter.setMode(tintMode);
         }
         invalidateSelf();
+    }
+
+    /**
+     * Returns the blending mode used to apply tint.
+     *
+     * @return The Porter-Duff blending mode used to apply tint.
+     * @hide Pending finalization of supported Modes
+     */
+    public Mode getTintMode() {
+        return mNinePatchState.mTintMode;
     }
 
     @Override
