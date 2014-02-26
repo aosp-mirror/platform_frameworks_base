@@ -16,7 +16,6 @@
 
 package android.app;
 
-import android.animation.Animator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -24,8 +23,8 @@ import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.transition.Transition;
-import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -100,12 +99,6 @@ public class ActivityOptions {
     public static final String KEY_ANIM_START_LISTENER = "android:animStartListener";
 
     /**
-     * Arguments for the scene transition about to begin.
-     * @hide
-     */
-    public static final String KEY_SCENE_TRANSITION_ARGS = "android:sceneTransitionArgs";
-
-    /**
      * For Activity transitions, the calling Activity's TransitionListener used to
      * notify the called Activity when the shared element and the exit transitions
      * complete.
@@ -120,9 +113,15 @@ public class ActivityOptions {
     private static final String KEY_TRANSITION_TARGET_LISTENER = "android:transitionTargetListener";
 
     /**
-     * The shared element's texture ID (TODO: not used yet).
+     * The names of shared elements that are transitioned to the started Activity.
+     * This is also the name of shared elements that the started Activity accepted.
      */
-    private static final String KEY_SHARED_ELEMENT_TEXTURE_ID = "android:sharedElementTextureId";
+    private static final String KEY_SHARED_ELEMENT_NAMES = "android:shared_element_names";
+
+    /**
+     * The shared elements names of the views in the calling Activity.
+     */
+    private static final String KEY_LOCAL_ELEMENT_NAMES = "android:local_element_names";
 
     /** @hide */
     public static final int ANIM_NONE = 0;
@@ -146,9 +145,10 @@ public class ActivityOptions {
     private int mStartY;
     private int mStartWidth;
     private int mStartHeight;
-    private Bundle mTransitionArgs;
     private IRemoteCallback mAnimationStartedListener;
     private IRemoteCallback mTransitionCompleteListener;
+    private ArrayList<String> mSharedElementNames;
+    private ArrayList<String> mLocalElementNames;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -226,7 +226,7 @@ public class ActivityOptions {
 
     /** @hide */
     public interface ActivityTransitionTarget {
-        void sharedElementTransitionComplete();
+        void sharedElementTransitionComplete(Bundle transitionArgs);
         void exitTransitionComplete();
     }
 
@@ -348,35 +348,51 @@ public class ActivityOptions {
     }
 
     /**
-     * Create an ActivityOptions to transition between Activities using cross-Activity animation.
-     * When visual elements are to carry between Activities, args should be used to tell the called
-     * Activity about the location and size.
-     *
-     * TODO: Provide facility to capture layout and bitmap of shared elements.
-     *
-     * <p>When
-     * {@link android.app.Activity#startActivities(android.content.Intent[], android.os.Bundle)}
-     * is used with the {@link #toBundle()} result, the Activity's content scene will automatically
-     * transition out by setting their visibility to {@link View#INVISIBLE}. Shared elements
-     * ({@link android.view.View#setSharedElementName(String)}) are unmodified during the
-     * transition to allow the started Activity to seamlessly take it over. ViewGroups typically
-     * don't transition out, and instead transition out their children unless they have a
-     * background. To modify this behavior, use
-     * {@link android.view.ViewGroup#setTransitionGroup(boolean)}.</p>
+     * Create an ActivityOptions to transition between Activities using cross-Activity scene
+     * animations. This method carries the position of one shared element to the started Activity.
      *
      * <p>This requires {@link android.view.Window#FEATURE_CONTENT_TRANSITIONS} to be
      * enabled on the calling Activity to cause an exit transition. The same must be in
      * the called Activity to get an entering transition.</p>
-     *
-     * @param args Contains information for transferring a view between this Activity and the
-     *             target Activity. Will be used by the called Activity to transition the
-     *             view to its eventual destination
-     * @see android.app.Activity#startSharedElementTransition(android.os.Bundle)
+     * @param sharedElement The View to transition to the started Activity. sharedElement must
+     *                      have a non-null sharedElementName.
+     * @param sharedElementName The shared element name as used in the target Activity. This may
+     *                          be null if it has the same name as sharedElement.
+     * @return Returns a new ActivityOptions object that you can use to
+     *         supply these options as the options Bundle when starting an activity.
      */
-    public static ActivityOptions makeSceneTransitionAnimation(Bundle args) {
+    public static ActivityOptions makeSceneTransitionAnimation(View sharedElement,
+            String sharedElementName) {
+        return makeSceneTransitionAnimation(
+                new Pair<View, String>(sharedElement, sharedElementName));
+    }
+
+    /**
+     * Create an ActivityOptions to transition between Activities using cross-Activity scene
+     * animations. This method carries the position of multiple shared elements to the started
+     * Activity.
+     *
+     * <p>This requires {@link android.view.Window#FEATURE_CONTENT_TRANSITIONS} to be
+     * enabled on the calling Activity to cause an exit transition. The same must be in
+     * the called Activity to get an entering transition.</p>
+     * @param sharedElements The View to transition to the started Activity along with the
+     *                       shared element name as used in the started Activity. The view
+     *                       must have a non-null sharedElementName.
+     * @return Returns a new ActivityOptions object that you can use to
+     *         supply these options as the options Bundle when starting an activity.
+     */
+    public static ActivityOptions makeSceneTransitionAnimation(
+            Pair<View, String>... sharedElements) {
         ActivityOptions opts = new ActivityOptions();
         opts.mAnimationType = ANIM_SCENE_TRANSITION;
-        opts.mTransitionArgs = args;
+        opts.mSharedElementNames = new ArrayList<String>();
+        opts.mLocalElementNames = new ArrayList<String>();
+
+        if (sharedElements != null) {
+            for (Pair<View, String> sharedElement : sharedElements) {
+                opts.addSharedElement(sharedElement.first, sharedElement.second);
+            }
+        }
         return opts;
     }
 
@@ -412,9 +428,10 @@ public class ActivityOptions {
                 break;
 
             case ANIM_SCENE_TRANSITION:
-                mTransitionArgs = opts.getBundle(KEY_SCENE_TRANSITION_ARGS);
                 mTransitionCompleteListener = IRemoteCallback.Stub.asInterface(
                         opts.getBinder(KEY_TRANSITION_COMPLETE_LISTENER));
+                mSharedElementNames = opts.getStringArrayList(KEY_SHARED_ELEMENT_NAMES);
+                mLocalElementNames = opts.getStringArrayList(KEY_LOCAL_ELEMENT_NAMES);
                 break;
         }
     }
@@ -465,17 +482,19 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public Bundle getSceneTransitionArgs() {
-        return mTransitionArgs;
-    }
-
-    /** @hide */
     public IRemoteCallback getOnAnimationStartListener() {
         return mAnimationStartedListener;
     }
 
     /** @hide */
-    public void dispatchSceneTransitionStarted(final ActivityTransitionTarget target) {
+    public ArrayList<String> getSharedElementNames() { return mSharedElementNames; }
+
+    /** @hide */
+    public ArrayList<String> getLocalElementNames() { return mLocalElementNames; }
+
+    /** @hide */
+    public void dispatchSceneTransitionStarted(final ActivityTransitionTarget target,
+            ArrayList<String> sharedElementNames) {
         boolean listenerSent = false;
         if (mTransitionCompleteListener != null) {
             IRemoteCallback callback = new IRemoteCallback.Stub() {
@@ -484,13 +503,13 @@ public class ActivityOptions {
                     if (data == null) {
                         target.exitTransitionComplete();
                     } else {
-                        // TODO: Use texture id
-                        target.sharedElementTransitionComplete();
+                        target.sharedElementTransitionComplete(data);
                     }
                 }
             };
             Bundle bundle = new Bundle();
             bundle.putBinder(KEY_TRANSITION_TARGET_LISTENER, callback.asBinder());
+            bundle.putStringArrayList(KEY_SHARED_ELEMENT_NAMES, sharedElementNames);
             try {
                 mTransitionCompleteListener.sendResult(bundle);
                 listenerSent = true;
@@ -499,8 +518,19 @@ public class ActivityOptions {
             }
         }
         if (!listenerSent) {
-            target.sharedElementTransitionComplete();
+            target.sharedElementTransitionComplete(null);
             target.exitTransitionComplete();
+        }
+    }
+
+    /** @hide */
+    public void dispatchSharedElementsReady() {
+        if (mTransitionCompleteListener != null) {
+            try {
+                mTransitionCompleteListener.sendResult(null);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Couldn't synchronize shared elements", e);
+            }
         }
     }
 
@@ -530,6 +560,8 @@ public class ActivityOptions {
         if (otherOptions.mPackageName != null) {
             mPackageName = otherOptions.mPackageName;
         }
+        mSharedElementNames = null;
+        mLocalElementNames = null;
         switch (otherOptions.mAnimationType) {
             case ANIM_CUSTOM:
                 mAnimationType = otherOptions.mAnimationType;
@@ -544,7 +576,6 @@ public class ActivityOptions {
                 }
                 mAnimationStartedListener = otherOptions.mAnimationStartedListener;
                 mTransitionCompleteListener = null;
-                mTransitionArgs = null;
                 break;
             case ANIM_SCALE_UP:
                 mAnimationType = otherOptions.mAnimationType;
@@ -560,7 +591,6 @@ public class ActivityOptions {
                 }
                 mAnimationStartedListener = null;
                 mTransitionCompleteListener = null;
-                mTransitionArgs = null;
                 break;
             case ANIM_THUMBNAIL_SCALE_UP:
             case ANIM_THUMBNAIL_SCALE_DOWN:
@@ -576,14 +606,14 @@ public class ActivityOptions {
                 }
                 mAnimationStartedListener = otherOptions.mAnimationStartedListener;
                 mTransitionCompleteListener = null;
-                mTransitionArgs = null;
                 break;
             case ANIM_SCENE_TRANSITION:
                 mAnimationType = otherOptions.mAnimationType;
                 mTransitionCompleteListener = otherOptions.mTransitionCompleteListener;
-                mTransitionArgs = otherOptions.mTransitionArgs;
                 mThumbnail = null;
                 mAnimationStartedListener = null;
+                mSharedElementNames = otherOptions.mSharedElementNames;
+                mLocalElementNames = otherOptions.mLocalElementNames;
                 break;
         }
     }
@@ -627,11 +657,12 @@ public class ActivityOptions {
                 break;
             case ANIM_SCENE_TRANSITION:
                 b.putInt(KEY_ANIM_TYPE, mAnimationType);
-                b.putBundle(KEY_SCENE_TRANSITION_ARGS, mTransitionArgs);
                 if (mTransitionCompleteListener != null) {
                     b.putBinder(KEY_TRANSITION_COMPLETE_LISTENER,
                             mTransitionCompleteListener.asBinder());
                 }
+                b.putStringArrayList(KEY_SHARED_ELEMENT_NAMES, mSharedElementNames);
+                b.putStringArrayList(KEY_LOCAL_ELEMENT_NAMES, mLocalElementNames);
                 break;
         }
         return b;
@@ -652,32 +683,52 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public interface SharedElementSource {
-        int getTextureId();
+    public void addSharedElements(Map<String, View> sharedElements) {
+        for (Map.Entry<String, View> entry : sharedElements.entrySet()) {
+            addSharedElement(entry.getValue(), entry.getKey());
+        }
     }
 
-    /**
-     * In the calling Activity when transitioning out, sets the Transition to listen for
-     * changes.
-     * @hide
-     */
-    public void setExitTransition(Transition transition, SharedElementSource sharedElementSource) {
-        mTransitionCompleteListener = new ExitTransitionListener(transition, sharedElementSource);
+    /** @hide */
+    public void updateSceneTransitionAnimation(Transition exitTransition,
+            Transition sharedElementTransition, SharedElementSource sharedElementSource) {
+        mTransitionCompleteListener = new ExitTransitionListener(exitTransition,
+                sharedElementTransition, sharedElementSource);
+    }
+
+    private void addSharedElement(View view, String name) {
+        String sharedElementName = view.getSharedElementName();
+        if (name == null) {
+            name = sharedElementName;
+        }
+        mSharedElementNames.add(name);
+        mLocalElementNames.add(sharedElementName);
+    }
+
+    /** @hide */
+    public interface SharedElementSource {
+        Bundle getSharedElementExitState();
+        void acceptedSharedElements(ArrayList<String> sharedElementNames);
+        void hideSharedElements();
     }
 
     private static class ExitTransitionListener extends IRemoteCallback.Stub
-            implements Transition.TransitionListener, Animator.AnimatorListener {
-        private ArrayList<Animator> mSharedElementAnimators = new ArrayList<Animator>();
+            implements Transition.TransitionListener {
         private boolean mSharedElementNotified;
         private Transition mExitTransition;
+        private Transition mSharedElementTransition;
         private IRemoteCallback mTransitionCompleteCallback;
         private boolean mExitComplete;
+        private boolean mSharedElementComplete;
         private SharedElementSource mSharedElementSource;
 
-        public ExitTransitionListener(Transition transition, SharedElementSource sharedElementSource) {
+        public ExitTransitionListener(Transition exitTransition, Transition sharedElementTransition,
+                SharedElementSource sharedElementSource) {
             mSharedElementSource = sharedElementSource;
-            mExitTransition = transition;
+            mExitTransition = exitTransition;
             mExitTransition.addListener(this);
+            mSharedElementTransition = sharedElementTransition;
+            mSharedElementTransition.addListener(this);
         }
 
         @Override
@@ -685,36 +736,36 @@ public class ActivityOptions {
             if (data != null) {
                 mTransitionCompleteCallback = IRemoteCallback.Stub.asInterface(
                         data.getBinder(KEY_TRANSITION_TARGET_LISTENER));
+                ArrayList<String> sharedElementNames
+                        = data.getStringArrayList(KEY_SHARED_ELEMENT_NAMES);
+                mSharedElementSource.acceptedSharedElements(sharedElementNames);
                 notifySharedElement();
                 notifyExit();
+            } else {
+                mSharedElementSource.hideSharedElements();
             }
         }
 
         @Override
         public void onTransitionStart(Transition transition) {
-            ArrayMap<Animator, Transition.AnimationInfo> runningAnimators
-                    = Transition.getRunningAnimators();
-            for (Map.Entry<Animator, Transition.AnimationInfo> entry : runningAnimators.entrySet()) {
-                if (entry.getValue().view.getSharedElementName() != null) {
-                    mSharedElementAnimators.add(entry.getKey());
-                    entry.getKey().addListener(this);
-                }
-            }
-            notifySharedElement();
         }
 
         @Override
         public void onTransitionEnd(Transition transition) {
-            mExitComplete = true;
-            notifyExit();
-            mExitTransition.removeListener(this);
+            if (transition == mExitTransition) {
+                mExitComplete = true;
+                notifyExit();
+                mExitTransition.removeListener(this);
+            } else {
+                mSharedElementComplete = true;
+                notifySharedElement();
+                mSharedElementTransition.removeListener(this);
+            }
         }
 
         @Override
         public void onTransitionCancel(Transition transition) {
-            mExitComplete = true;
-            notifyExit();
-            mExitTransition.removeListener(this);
+            onTransitionEnd(transition);
         }
 
         @Override
@@ -725,34 +776,13 @@ public class ActivityOptions {
         public void onTransitionResume(Transition transition) {
         }
 
-        @Override
-        public void onAnimationStart(Animator animation) {
-        }
-
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            mSharedElementAnimators.remove(animation);
-            notifySharedElement();
-        }
-
-        @Override
-        public void onAnimationCancel(Animator animation) {
-            mSharedElementAnimators.remove(animation);
-            notifySharedElement();
-        }
-
-        @Override
-        public void onAnimationRepeat(Animator animation) {
-        }
-
         private void notifySharedElement() {
-            if (!mSharedElementNotified && mSharedElementAnimators.isEmpty()
+            if (!mSharedElementNotified && mSharedElementComplete
                     && mTransitionCompleteCallback != null) {
                 mSharedElementNotified = true;
                 try {
-                    Bundle bundle = new Bundle();
-                    bundle.putInt(KEY_SHARED_ELEMENT_TEXTURE_ID, mSharedElementSource.getTextureId());
-                    mTransitionCompleteCallback.sendResult(bundle);
+                    Bundle sharedElementState = mSharedElementSource.getSharedElementExitState();
+                    mTransitionCompleteCallback.sendResult(sharedElementState);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Couldn't notify that the transition ended", e);
                 }

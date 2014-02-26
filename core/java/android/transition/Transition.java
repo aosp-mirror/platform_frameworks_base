@@ -552,8 +552,7 @@ public abstract class Transition implements Cloneable {
         return false;
     }
 
-    /** @hide */
-    public static ArrayMap<Animator, AnimationInfo> getRunningAnimators() {
+    private static ArrayMap<Animator, AnimationInfo> getRunningAnimators() {
         ArrayMap<Animator, AnimationInfo> runningAnimators = sRunningAnimators.get();
         if (runningAnimators == null) {
             runningAnimators = new ArrayMap<Animator, AnimationInfo>();
@@ -1113,30 +1112,32 @@ public abstract class Transition implements Cloneable {
                 }
             }
         }
-        TransitionValues values = new TransitionValues();
-        values.view = view;
-        if (start) {
-            captureStartValues(values);
-        } else {
-            captureEndValues(values);
-        }
-        if (start) {
-            if (!isListViewItem) {
-                mStartValues.viewValues.put(view, values);
-                if (id >= 0) {
-                    mStartValues.idValues.put((int) id, values);
-                }
+        if (view.getParent() instanceof ViewGroup) {
+            TransitionValues values = new TransitionValues();
+            values.view = view;
+            if (start) {
+                captureStartValues(values);
             } else {
-                mStartValues.itemIdValues.put(itemId, values);
+                captureEndValues(values);
             }
-        } else {
-            if (!isListViewItem) {
-                mEndValues.viewValues.put(view, values);
-                if (id >= 0) {
-                    mEndValues.idValues.put((int) id, values);
+            if (start) {
+                if (!isListViewItem) {
+                    mStartValues.viewValues.put(view, values);
+                    if (id >= 0) {
+                        mStartValues.idValues.put((int) id, values);
+                    }
+                } else {
+                    mStartValues.itemIdValues.put(itemId, values);
                 }
             } else {
-                mEndValues.itemIdValues.put(itemId, values);
+                if (!isListViewItem) {
+                    mEndValues.viewValues.put(view, values);
+                    if (id >= 0) {
+                        mEndValues.idValues.put((int) id, values);
+                    }
+                } else {
+                    mEndValues.itemIdValues.put(itemId, values);
+                }
             }
         }
         if (view instanceof ViewGroup) {

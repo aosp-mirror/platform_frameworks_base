@@ -4760,14 +4760,6 @@
         <attr name="fromScene" format="reference" />
         <!-- The destination scene in this scene change. -->
         <attr name="toScene" format="reference" />
-        <!-- The name of the originating scene in this scene change.
-             Apps should treat this name as an API in the same sense
-             that an Intent action or extra key is. -->
-        <attr name="fromSceneName" format="string" />
-        <!-- The name of the destination scene in this scene change.
-             Apps should treat this name as an API in the same sense
-             that an Intent action or extra key is. -->
-        <attr name="toSceneName" format="string" />
     </declare-styleable>
 
     <!-- ========================== -->
