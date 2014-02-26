@@ -17,7 +17,10 @@
 package android.graphics.drawable;
 
 import android.graphics.*;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.drawable.BitmapDrawable.BitmapState;
 import android.graphics.drawable.shapes.Shape;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -55,6 +58,7 @@ import java.io.IOException;
  */
 public class ShapeDrawable extends Drawable {
     private ShapeState mShapeState;
+    private PorterDuffColorFilter mTintFilter;
     private boolean mMutated;
 
     /**
@@ -77,6 +81,11 @@ public class ShapeDrawable extends Drawable {
     
     private ShapeDrawable(ShapeState state) {
         mShapeState = new ShapeState(state);
+
+        if (state.mTint != null) {
+            final int color = state.mTint.getColorForState(getState(), 0);
+            mTintFilter = new PorterDuffColorFilter(color, state.mTintMode);
+        }
     }
 
     /**
@@ -211,22 +220,35 @@ public class ShapeDrawable extends Drawable {
 
     @Override
     public void draw(Canvas canvas) {
-        Rect r = getBounds();
-        Paint paint = mShapeState.mPaint;
+        final Rect r = getBounds();
+        final ShapeState state = mShapeState;
+        final Paint paint = state.mPaint;
 
-        int prevAlpha = paint.getAlpha();
-        paint.setAlpha(modulateAlpha(prevAlpha, mShapeState.mAlpha));
+        final int prevAlpha = paint.getAlpha();
+        paint.setAlpha(modulateAlpha(prevAlpha, state.mAlpha));
 
         // only draw shape if it may affect output
         if (paint.getAlpha() != 0 || paint.getXfermode() != null || paint.hasShadow) {
-            if (mShapeState.mShape != null) {
+            final boolean clearColorFilter;
+            if (mTintFilter != null && paint.getColorFilter() == null) {
+                paint.setColorFilter(mTintFilter);
+                clearColorFilter = true;
+            } else {
+                clearColorFilter = false;
+            }
+
+            if (state.mShape != null) {
                 // need the save both for the translate, and for the (unknown) Shape
-                int count = canvas.save();
+                final int count = canvas.save();
                 canvas.translate(r.left, r.top);
-                onDraw(mShapeState.mShape, canvas, paint);
+                onDraw(state.mShape, canvas, paint);
                 canvas.restoreToCount(count);
             } else {
                 canvas.drawRect(r, paint);
+            }
+
+            if (clearColorFilter) {
+                paint.setColorFilter(null);
             }
         }
 
@@ -256,6 +278,64 @@ public class ShapeDrawable extends Drawable {
     @Override
     public int getAlpha() {
         return mShapeState.mAlpha;
+    }
+
+    /**
+     * Specifies a tint for this drawable.
+     * <p>
+     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
+     * tint.
+     *
+     * @param tint Color state list to use for tinting this drawable, or null to
+     *            clear the tint
+     */
+    public void setTint(ColorStateList tint) {
+        mShapeState.mTint = tint;
+        if (mTintFilter == null) {
+            if (tint != null) {
+                final int color = tint.getColorForState(getState(), 0);
+                mTintFilter = new PorterDuffColorFilter(color, mShapeState.mTintMode);
+            }
+        } else {
+            if (tint == null) {
+                mTintFilter = null;
+            }
+        }
+        invalidateSelf();
+    }
+
+    /**
+     * Returns the tint color for this drawable.
+     *
+     * @return Color state list to use for tinting this drawable, or null if
+     *         none set
+     */
+    public ColorStateList getTint() {
+        return mShapeState.mTint;
+    }
+
+    /**
+     * Specifies the blending mode used to apply tint.
+     *
+     * @param tintMode A Porter-Duff blending mode
+     * @hide Pending finalization of supported Modes
+     */
+    public void setTintMode(Mode tintMode) {
+        mShapeState.mTintMode = tintMode;
+        if (mTintFilter != null) {
+            mTintFilter.setMode(tintMode);
+        }
+        invalidateSelf();
+    }
+
+    /**
+     * Returns the blending mode used to apply tint.
+     *
+     * @return The Porter-Duff blending mode used to apply tint.
+     * @hide Pending finalization of supported Modes
+     */
+    public Mode getTintMode() {
+        return mShapeState.mTintMode;
     }
 
     @Override
@@ -292,6 +372,28 @@ public class ShapeDrawable extends Drawable {
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
         updateShape();
+    }
+
+    @Override
+    protected boolean onStateChange(int[] stateSet) {
+        final ColorStateList tint = mShapeState.mTint;
+        if (tint != null) {
+            final int newColor = tint.getColorForState(stateSet, 0);
+            final int oldColor = mTintFilter.getColor();
+            if (oldColor != newColor) {
+                mTintFilter.setColor(newColor);
+                invalidateSelf();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean isStateful() {
+        final ShapeState s = mShapeState;
+        return super.isStateful() || (s.mTint != null && s.mTint.isStateful());
     }
 
     /**
@@ -408,6 +510,8 @@ public class ShapeDrawable extends Drawable {
         int mChangingConfigurations;
         Paint mPaint;
         Shape mShape;
+        ColorStateList mTint;
+        Mode mTintMode;
         Rect mPadding;
         int mIntrinsicWidth;
         int mIntrinsicHeight;
@@ -418,6 +522,8 @@ public class ShapeDrawable extends Drawable {
             if (orig != null) {
                 mPaint = orig.mPaint;
                 mShape = orig.mShape;
+                mTint = orig.mTint;
+                mTintMode = orig.mTintMode;
                 mPadding = orig.mPadding;
                 mIntrinsicWidth = orig.mIntrinsicWidth;
                 mIntrinsicHeight = orig.mIntrinsicHeight;

@@ -346,19 +346,24 @@ public class ProgressBar extends View {
             return out;
             
         } else if (drawable instanceof BitmapDrawable) {
-            final Bitmap tileBitmap = ((BitmapDrawable) drawable).getBitmap();
+            final BitmapDrawable bitmap = (BitmapDrawable) drawable;
+            final Bitmap tileBitmap = bitmap.getBitmap();
             if (mSampleTile == null) {
                 mSampleTile = tileBitmap;
             }
-            
-            final ShapeDrawable shapeDrawable = new ShapeDrawable(getDrawableShape());
 
+            final ShapeDrawable shapeDrawable = new ShapeDrawable(getDrawableShape());
             final BitmapShader bitmapShader = new BitmapShader(tileBitmap,
                     Shader.TileMode.REPEAT, Shader.TileMode.CLAMP);
             shapeDrawable.getPaint().setShader(bitmapShader);
 
-            return (clip) ? new ClipDrawable(shapeDrawable, Gravity.LEFT,
-                    ClipDrawable.HORIZONTAL) : shapeDrawable;
+            // Ensure the color filter and tint are propagated.
+            shapeDrawable.setTint(bitmap.getTint());
+            shapeDrawable.setTintMode(bitmap.getTintMode());
+            shapeDrawable.setColorFilter(bitmap.getColorFilter());
+
+            return clip ? new ClipDrawable(
+                    shapeDrawable, Gravity.LEFT, ClipDrawable.HORIZONTAL) : shapeDrawable;
         }
         
         return drawable;
