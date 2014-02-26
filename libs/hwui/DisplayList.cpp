@@ -48,179 +48,10 @@ void DisplayList::outputLogBuffer(int fd) {
     fflush(file);
 }
 
-DisplayList::DisplayList(const DisplayListRenderer& recorder) :
-    mDestroyed(false), mTransformMatrix(NULL), mTransformCamera(NULL), mTransformMatrix3D(NULL),
-    mStaticMatrix(NULL), mAnimationMatrix(NULL) {
+DisplayList::DisplayList() :
+        mDisplayListData(0), mDestroyed(false), mTransformMatrix(NULL), mTransformCamera(NULL),
+        mTransformMatrix3D(NULL), mStaticMatrix(NULL), mAnimationMatrix(NULL) {
 
-    initFromDisplayListRenderer(recorder);
-}
-
-DisplayList::~DisplayList() {
-    mDestroyed = true;
-    clearResources();
-}
-
-void DisplayList::destroyDisplayListDeferred(DisplayList* displayList) {
-    if (displayList) {
-        DISPLAY_LIST_LOGD("Deferring display list destruction");
-        Caches::getInstance().deleteDisplayListDeferred(displayList);
-    }
-}
-
-void DisplayList::clearResources() {
-    mDisplayListData = NULL;
-
-    delete mTransformMatrix;
-    delete mTransformCamera;
-    delete mTransformMatrix3D;
-    delete mStaticMatrix;
-    delete mAnimationMatrix;
-
-    mTransformMatrix = NULL;
-    mTransformCamera = NULL;
-    mTransformMatrix3D = NULL;
-    mStaticMatrix = NULL;
-    mAnimationMatrix = NULL;
-
-    Caches& caches = Caches::getInstance();
-    caches.unregisterFunctors(mFunctorCount);
-    caches.resourceCache.lock();
-
-    for (size_t i = 0; i < mBitmapResources.size(); i++) {
-        caches.resourceCache.decrementRefcountLocked(mBitmapResources.itemAt(i));
-    }
-
-    for (size_t i = 0; i < mOwnedBitmapResources.size(); i++) {
-        const SkBitmap* bitmap = mOwnedBitmapResources.itemAt(i);
-        caches.resourceCache.decrementRefcountLocked(bitmap);
-        caches.resourceCache.destructorLocked(bitmap);
-    }
-
-    for (size_t i = 0; i < mPatchResources.size(); i++) {
-        caches.resourceCache.decrementRefcountLocked(mPatchResources.itemAt(i));
-    }
-
-    for (size_t i = 0; i < mShaders.size(); i++) {
-        caches.resourceCache.decrementRefcountLocked(mShaders.itemAt(i));
-        caches.resourceCache.destructorLocked(mShaders.itemAt(i));
-    }
-
-    for (size_t i = 0; i < mSourcePaths.size(); i++) {
-        caches.resourceCache.decrementRefcountLocked(mSourcePaths.itemAt(i));
-    }
-
-    for (size_t i = 0; i < mLayers.size(); i++) {
-        caches.resourceCache.decrementRefcountLocked(mLayers.itemAt(i));
-    }
-
-    caches.resourceCache.unlock();
-
-    for (size_t i = 0; i < mPaints.size(); i++) {
-        delete mPaints.itemAt(i);
-    }
-
-    for (size_t i = 0; i < mRegions.size(); i++) {
-        delete mRegions.itemAt(i);
-    }
-
-    for (size_t i = 0; i < mPaths.size(); i++) {
-        delete mPaths.itemAt(i);
-    }
-
-    for (size_t i = 0; i < mMatrices.size(); i++) {
-        delete mMatrices.itemAt(i);
-    }
-
-    mBitmapResources.clear();
-    mOwnedBitmapResources.clear();
-    mPatchResources.clear();
-    mShaders.clear();
-    mSourcePaths.clear();
-    mPaints.clear();
-    mRegions.clear();
-    mPaths.clear();
-    mMatrices.clear();
-    mLayers.clear();
-}
-
-void DisplayList::reset() {
-    clearResources();
-    init();
-}
-
-void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing) {
-    if (reusing) {
-        // re-using display list - clear out previous allocations
-        clearResources();
-    }
-
-    init();
-
-    mDisplayListData = recorder.getDisplayListData();
-    mSize = mDisplayListData->allocator.usedSize();
-
-    if (mSize == 0) {
-        return;
-    }
-
-    mFunctorCount = recorder.getFunctorCount();
-
-    Caches& caches = Caches::getInstance();
-    caches.registerFunctors(mFunctorCount);
-    caches.resourceCache.lock();
-
-    const Vector<const SkBitmap*>& bitmapResources = recorder.getBitmapResources();
-    for (size_t i = 0; i < bitmapResources.size(); i++) {
-        const SkBitmap* resource = bitmapResources.itemAt(i);
-        mBitmapResources.add(resource);
-        caches.resourceCache.incrementRefcountLocked(resource);
-    }
-
-    const Vector<const SkBitmap*>& ownedBitmapResources = recorder.getOwnedBitmapResources();
-    for (size_t i = 0; i < ownedBitmapResources.size(); i++) {
-        const SkBitmap* resource = ownedBitmapResources.itemAt(i);
-        mOwnedBitmapResources.add(resource);
-        caches.resourceCache.incrementRefcountLocked(resource);
-    }
-
-    const Vector<const Res_png_9patch*>& patchResources = recorder.getPatchResources();
-    for (size_t i = 0; i < patchResources.size(); i++) {
-        const Res_png_9patch* resource = patchResources.itemAt(i);
-        mPatchResources.add(resource);
-        caches.resourceCache.incrementRefcountLocked(resource);
-    }
-
-    const Vector<SkiaShader*>& shaders = recorder.getShaders();
-    for (size_t i = 0; i < shaders.size(); i++) {
-        SkiaShader* resource = shaders.itemAt(i);
-        mShaders.add(resource);
-        caches.resourceCache.incrementRefcountLocked(resource);
-    }
-
-    const SortedVector<const SkPath*>& sourcePaths = recorder.getSourcePaths();
-    for (size_t i = 0; i < sourcePaths.size(); i++) {
-        mSourcePaths.add(sourcePaths.itemAt(i));
-        caches.resourceCache.incrementRefcountLocked(sourcePaths.itemAt(i));
-    }
-
-    const Vector<Layer*>& layers = recorder.getLayers();
-    for (size_t i = 0; i < layers.size(); i++) {
-        mLayers.add(layers.itemAt(i));
-        caches.resourceCache.incrementRefcountLocked(layers.itemAt(i));
-    }
-
-    caches.resourceCache.unlock();
-
-    mPaints.appendVector(recorder.getPaints());
-    mRegions.appendVector(recorder.getRegions());
-    mPaths.appendVector(recorder.getPaths());
-    mMatrices.appendVector(recorder.getMatrices());
-}
-
-void DisplayList::init() {
-    mSize = 0;
-    mIsRenderable = true;
-    mFunctorCount = 0;
     mLeft = 0;
     mTop = 0;
     mRight = 0;
@@ -256,8 +87,28 @@ void DisplayList::init() {
     mCaching = false;
 }
 
-size_t DisplayList::getSize() {
-    return mSize;
+DisplayList::~DisplayList() {
+    LOG_ALWAYS_FATAL_IF(mDestroyed, "Double destroyed DisplayList %p", this);
+
+    mDestroyed = true;
+    delete mDisplayListData;
+    delete mTransformMatrix;
+    delete mTransformCamera;
+    delete mTransformMatrix3D;
+    delete mStaticMatrix;
+    delete mAnimationMatrix;
+}
+
+void DisplayList::destroyDisplayListDeferred(DisplayList* displayList) {
+    if (displayList) {
+        DISPLAY_LIST_LOGD("Deferring display list destruction");
+        Caches::getInstance().deleteDisplayListDeferred(displayList);
+    }
+}
+
+void DisplayList::setData(DisplayListData* data) {
+    delete mDisplayListData;
+    mDisplayListData = data;
 }
 
 /**
@@ -518,7 +369,7 @@ void DisplayList::computeOrderingImpl(
         const mat4* transformFromProjectionSurface) {
     m3dNodes.clear();
     mProjectedNodes.clear();
-    if (mDisplayListData == NULL || mSize == 0) return;
+    if (mDisplayListData == NULL || mDisplayListData->isEmpty()) return;
 
     // TODO: should avoid this calculation in most cases
     // TODO: just calculate single matrix, down to all leaf composited elements
@@ -716,10 +567,10 @@ void DisplayList::iterateProjectedChildren(OpenGLRenderer& renderer, T& handler,
 template <class T>
 void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level) {
     if (CC_UNLIKELY(mDestroyed)) { // temporary debug logging
-        ALOGW("Error: %s is drawing after destruction, size %d", getName(), mSize);
+        ALOGW("Error: %s is drawing after destruction, size %d", getName());
         CRASH();
     }
-    if (mSize == 0 || mAlpha <= 0) {
+    if (mDisplayListData->isEmpty() || mAlpha <= 0) {
         DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, mName.string());
         return;
     }
@@ -775,6 +626,68 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
     handler(new (alloc) RestoreToCountOp(restoreTo),
             PROPERTY_SAVECOUNT, mClipToBounds);
     renderer.setOverrideLayerAlpha(1.0f);
+}
+
+void DisplayListData::cleanupResources() {
+    Caches& caches = Caches::getInstance();
+    caches.unregisterFunctors(functorCount);
+    caches.resourceCache.lock();
+
+    for (size_t i = 0; i < bitmapResources.size(); i++) {
+        caches.resourceCache.decrementRefcountLocked(bitmapResources.itemAt(i));
+    }
+
+    for (size_t i = 0; i < ownedBitmapResources.size(); i++) {
+        const SkBitmap* bitmap = ownedBitmapResources.itemAt(i);
+        caches.resourceCache.decrementRefcountLocked(bitmap);
+        caches.resourceCache.destructorLocked(bitmap);
+    }
+
+    for (size_t i = 0; i < patchResources.size(); i++) {
+        caches.resourceCache.decrementRefcountLocked(patchResources.itemAt(i));
+    }
+
+    for (size_t i = 0; i < shaders.size(); i++) {
+        caches.resourceCache.decrementRefcountLocked(shaders.itemAt(i));
+        caches.resourceCache.destructorLocked(shaders.itemAt(i));
+    }
+
+    for (size_t i = 0; i < sourcePaths.size(); i++) {
+        caches.resourceCache.decrementRefcountLocked(sourcePaths.itemAt(i));
+    }
+
+    for (size_t i = 0; i < layers.size(); i++) {
+        caches.resourceCache.decrementRefcountLocked(layers.itemAt(i));
+    }
+
+    caches.resourceCache.unlock();
+
+    for (size_t i = 0; i < paints.size(); i++) {
+        delete paints.itemAt(i);
+    }
+
+    for (size_t i = 0; i < regions.size(); i++) {
+        delete regions.itemAt(i);
+    }
+
+    for (size_t i = 0; i < paths.size(); i++) {
+        delete paths.itemAt(i);
+    }
+
+    for (size_t i = 0; i < matrices.size(); i++) {
+        delete matrices.itemAt(i);
+    }
+
+    bitmapResources.clear();
+    ownedBitmapResources.clear();
+    patchResources.clear();
+    shaders.clear();
+    sourcePaths.clear();
+    paints.clear();
+    regions.clear();
+    paths.clear();
+    matrices.clear();
+    layers.clear();
 }
 
 }; // namespace uirenderer

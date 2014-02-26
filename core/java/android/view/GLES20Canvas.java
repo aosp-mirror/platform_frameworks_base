@@ -18,7 +18,6 @@ package android.view;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
 import android.graphics.DrawFilter;
 import android.graphics.Matrix;
 import android.graphics.NinePatch;
@@ -47,7 +46,7 @@ class GLES20Canvas extends HardwareCanvas {
     private static final int MODIFIER_SHADER = 2;
 
     private final boolean mOpaque;
-    private long mRenderer;
+    protected long mRenderer;
 
     // The native renderer will be destroyed when this object dies.
     // DO NOT overwrite this reference once it is set.
@@ -105,10 +104,6 @@ class GLES20Canvas extends HardwareCanvas {
         } else {
             mFinalizer = new CanvasFinalizer(mRenderer);
         }
-    }
-
-    protected void resetDisplayListRenderer() {
-        nResetDisplayListRenderer(mRenderer);
     }
 
     private static native long nCreateRenderer();
@@ -361,11 +356,7 @@ class GLES20Canvas extends HardwareCanvas {
     // Display list
     ///////////////////////////////////////////////////////////////////////////
 
-    long getDisplayList(long displayList) {
-        return nGetDisplayList(mRenderer, displayList);
-    }
-
-    private static native long nGetDisplayList(long renderer, long displayList);
+    protected static native long nFinishRecording(long renderer);
 
     @Override
     public int drawDisplayList(DisplayList displayList, Rect dirty, int flags) {

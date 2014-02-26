@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.graphics.Rect;
 import android.util.Pools.SynchronizedPool;
 
 /**
@@ -33,39 +32,23 @@ class GLES20RecordingCanvas extends GLES20Canvas {
     private static final SynchronizedPool<GLES20RecordingCanvas> sPool =
             new SynchronizedPool<GLES20RecordingCanvas>(POOL_LIMIT);
 
-    private DisplayList mDisplayList;
-
     private GLES20RecordingCanvas() {
         super(true, true);
     }
 
-    static GLES20RecordingCanvas obtain(DisplayList displayList) {
+    static GLES20RecordingCanvas obtain() {
         GLES20RecordingCanvas canvas = sPool.acquire();
         if (canvas == null) {
             canvas = new GLES20RecordingCanvas();
         }
-        canvas.mDisplayList = displayList;
         return canvas;
     }
 
     void recycle() {
-        mDisplayList = null;
-        resetDisplayListRenderer();
         sPool.release(this);
     }
 
-    void start() {
-        mDisplayList.clearReferences();
-    }
-
-    long end(long nativeDisplayList) {
-        return getDisplayList(nativeDisplayList);
-    }
-
-    @Override
-    public int drawDisplayList(DisplayList displayList, Rect dirty, int flags) {
-        int status = super.drawDisplayList(displayList, dirty, flags);
-        mDisplayList.getChildDisplayLists().add(displayList);
-        return status;
+    long finishRecording() {
+        return nFinishRecording(mRenderer);
     }
 }

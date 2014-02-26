@@ -373,6 +373,10 @@ void CanvasContext::setup(int width, int height) {
     mCanvas->setViewport(width, height);
 }
 
+void CanvasContext::swapDisplayListData(DisplayList* displayList, DisplayListData* newData) {
+    displayList->setData(newData);
+}
+
 void CanvasContext::processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters) {
     mGlobalContext->makeCurrent(mEglSurface);
     for (size_t i = 0; i < layerUpdaters->size(); i++) {

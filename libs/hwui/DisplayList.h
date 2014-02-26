@@ -107,11 +107,13 @@ public:
 };
 
 /**
- * Refcounted structure that holds the list of commands used in display list stream.
+ * Data structure that holds the list of commands used in display list stream
  */
-class DisplayListData : public LightRefBase<DisplayListData> {
+class DisplayListData {
 public:
-    DisplayListData() : projectionReceiveIndex(-1) {}
+    DisplayListData() : projectionReceiveIndex(-1), functorCount(0), hasDrawOps(false) {}
+    virtual ~DisplayListData() { cleanupResources(); }
+
     // allocator into which all ops were allocated
     LinearAllocator allocator;
 
@@ -123,6 +125,27 @@ public:
 
     // index of DisplayListOp restore, after which projected descendents should be drawn
     int projectionReceiveIndex;
+
+    Vector<const SkBitmap*> bitmapResources;
+    Vector<const SkBitmap*> ownedBitmapResources;
+    Vector<const Res_png_9patch*> patchResources;
+
+    Vector<const SkPaint*> paints;
+    Vector<const SkPath*> paths;
+    SortedVector<const SkPath*> sourcePaths;
+    Vector<const SkRegion*> regions;
+    Vector<const SkMatrix*> matrices;
+    Vector<SkiaShader*> shaders;
+    Vector<Layer*> layers;
+    uint32_t functorCount;
+    bool hasDrawOps;
+
+    bool isEmpty() {
+        return !displayListOps.size();
+    }
+
+private:
+    void cleanupResources();
 };
 
 /**
@@ -139,7 +162,7 @@ public:
  */
 class DisplayList {
 public:
-    DisplayList(const DisplayListRenderer& recorder);
+    ANDROID_API DisplayList();
     ANDROID_API ~DisplayList();
 
     // See flags defined in DisplayList.java
@@ -147,11 +170,10 @@ public:
         kReplayFlag_ClipChildren = 0x1
     };
 
-    ANDROID_API size_t getSize();
     ANDROID_API static void destroyDisplayListDeferred(DisplayList* displayList);
     ANDROID_API static void outputLogBuffer(int fd);
 
-    void initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing = false);
+    ANDROID_API void setData(DisplayListData* newData);
 
     void computeOrdering();
     void defer(DeferStateStruct& deferStruct, const int level);
@@ -159,14 +181,8 @@ public:
 
     ANDROID_API void output(uint32_t level = 1);
 
-    ANDROID_API void reset();
-
-    void setRenderable(bool renderable) {
-        mIsRenderable = renderable;
-    }
-
     bool isRenderable() const {
-        return mIsRenderable;
+        return mDisplayListData && mDisplayListData->hasDrawOps;
     }
 
     void setName(const char* name) {
@@ -571,10 +587,6 @@ private:
     template <class T>
     inline void iterate(OpenGLRenderer& renderer, T& handler, const int level);
 
-    void init();
-
-    void clearResources();
-
     void updateMatrix();
 
     class TextContainer {
@@ -591,24 +603,7 @@ private:
         const char* mText;
     };
 
-    Vector<const SkBitmap*> mBitmapResources;
-    Vector<const SkBitmap*> mOwnedBitmapResources;
-    Vector<const Res_png_9patch*> mPatchResources;
-
-    Vector<const SkPaint*> mPaints;
-    Vector<const SkPath*> mPaths;
-    SortedVector<const SkPath*> mSourcePaths;
-    Vector<const SkRegion*> mRegions;
-    Vector<const SkMatrix*> mMatrices;
-    Vector<SkiaShader*> mShaders;
-    Vector<Layer*> mLayers;
-
-    sp<DisplayListData> mDisplayListData;
-
-    size_t mSize;
-
-    bool mIsRenderable;
-    uint32_t mFunctorCount;
+    DisplayListData* mDisplayListData;
 
     String8 mName;
     bool mDestroyed; // used for debugging crash, TODO: remove once invalid state crash fixed

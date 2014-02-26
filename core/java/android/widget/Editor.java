@@ -23,6 +23,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputFilter;
 import android.text.SpannableString;
+
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.EditableInputConnection;
 
@@ -77,6 +78,7 @@ import android.view.DisplayList;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.HardwareCanvas;
+import android.view.HardwareRenderer;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -1314,6 +1316,7 @@ public class Editor {
 
         layout.drawBackground(canvas, highlight, highlightPaint, cursorOffsetVertical,
                 firstLine, lastLine);
+        final HardwareRenderer renderer = mTextView.getHardwareRenderer();
 
         if (layout instanceof DynamicLayout) {
             if (mTextDisplayLists == null) {
@@ -1345,8 +1348,6 @@ public class Editor {
                 if (blockDisplayList == null) {
                     blockDisplayList = mTextDisplayLists[blockIndex] =
                             DisplayList.create("Text " + blockIndex);
-                } else {
-                    if (blockIsInvalid) blockDisplayList.clear();
                 }
 
                 final boolean blockDisplayListIsInvalid = !blockDisplayList.isValid();
@@ -1379,7 +1380,7 @@ public class Editor {
                             // No need to untranslate, previous context is popped after
                             // drawDisplayList
                         } finally {
-                            blockDisplayList.end();
+                            blockDisplayList.end(renderer, hardwareCanvas);
                             // Same as drawDisplayList below, handled by our TextView's parent
                             blockDisplayList.setClipToBounds(false);
                         }
@@ -1459,7 +1460,7 @@ public class Editor {
             while (i < numberOfBlocks) {
                 final int blockIndex = blockIndices[i];
                 if (blockIndex != DynamicLayout.INVALID_BLOCK_INDEX) {
-                    mTextDisplayLists[blockIndex].clear();
+                    mTextDisplayLists[blockIndex].markInvalid();
                 }
                 if (blockEndLines[i] >= lastLine) break;
                 i++;
@@ -1470,7 +1471,7 @@ public class Editor {
     void invalidateTextDisplayList() {
         if (mTextDisplayLists != null) {
             for (int i = 0; i < mTextDisplayLists.length; i++) {
-                if (mTextDisplayLists[i] != null) mTextDisplayLists[i].clear();
+                if (mTextDisplayLists[i] != null) mTextDisplayLists[i].markInvalid();
             }
         }
     }
