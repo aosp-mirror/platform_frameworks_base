@@ -7188,7 +7188,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 startOffsetRatio = -firstChild.getTop() / (float) firstChildHeight;
             }
 
-            final float startSubRow = firstRow + startOffsetRatio;
+            final float startSubRow = MathUtils.constrain(
+                    firstRow + startOffsetRatio, 0, getCount());
             if (startSubRow == endSubRow && mOffset == 0) {
                 // Don't scroll, target is already in position.
                 return;
