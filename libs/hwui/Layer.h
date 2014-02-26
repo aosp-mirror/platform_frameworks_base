@@ -127,6 +127,14 @@ public:
         return texture.blend;
     }
 
+    inline void setForceFilter(bool forceFilter) {
+        this->forceFilter = forceFilter;
+    }
+
+    inline bool getForceFilter() const {
+        return forceFilter;
+    }
+
     inline void setAlpha(int alpha) {
         this->alpha = alpha;
     }
@@ -343,9 +351,15 @@ private:
     SkColorFilter* colorFilter;
 
     /**
+     * Indicates raster data backing the layer is scaled, requiring filtration.
+     */
+    bool forceFilter;
+
+    /**
      * Opacity of the layer.
      */
     int alpha;
+
     /**
      * Blending mode of the layer.
      */

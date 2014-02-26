@@ -290,14 +290,15 @@ Layer* LayerRenderer::createTextureLayer() {
 }
 
 void LayerRenderer::updateTextureLayer(Layer* layer, uint32_t width, uint32_t height,
-        bool isOpaque, GLenum renderTarget, float* transform) {
+        bool isOpaque, bool forceFilter, GLenum renderTarget, float* textureTransform) {
     if (layer) {
         layer->setBlend(!isOpaque);
+        layer->setForceFilter(forceFilter);
         layer->setSize(width, height);
         layer->layer.set(0.0f, 0.0f, width, height);
         layer->region.set(width, height);
         layer->regionRect.set(0.0f, 0.0f, width, height);
-        layer->getTexTransform().load(transform);
+        layer->getTexTransform().load(textureTransform);
 
         if (renderTarget != layer->getRenderTarget()) {
             layer->setRenderTarget(renderTarget);

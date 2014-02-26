@@ -112,6 +112,15 @@ void DeferredLayerUpdater::doUpdateTexImage() {
             frameNumber = newFrameNumber;
             dropCounter++;
         }
+
+        bool forceFilter = false;
+        sp<GraphicBuffer> buffer = mSurfaceTexture->getCurrentBuffer();
+        if (buffer != NULL) {
+            // force filtration if buffer size != layer size
+            forceFilter = mWidth != buffer->getWidth()
+                    || mHeight != buffer->getHeight();
+        }
+
         #if DEBUG_RENDERER
         if (dropCounter > 0) {
             RENDERER_LOGD("Dropped %d frames on texture layer update", dropCounter);
@@ -120,8 +129,8 @@ void DeferredLayerUpdater::doUpdateTexImage() {
         mSurfaceTexture->getTransformMatrix(transform);
         GLenum renderTarget = mSurfaceTexture->getCurrentTextureTarget();
 
-        LayerRenderer::updateTextureLayer(mLayer, mWidth, mHeight, !mBlend,
-                renderTarget, transform);
+        LayerRenderer::updateTextureLayer(mLayer, mWidth, mHeight,
+                !mBlend, forceFilter, renderTarget, transform);
     }
 }
 
