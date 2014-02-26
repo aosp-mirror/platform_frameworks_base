@@ -15516,6 +15516,7 @@ package android.net.wifi {
     method public int describeContents();
     method public java.lang.String getBSSID();
     method public static android.net.NetworkInfo.DetailedState getDetailedStateOf(android.net.wifi.SupplicantState);
+    method public int getFrequency();
     method public boolean getHiddenSSID();
     method public int getIpAddress();
     method public int getLinkSpeed();
@@ -15525,6 +15526,7 @@ package android.net.wifi {
     method public java.lang.String getSSID();
     method public android.net.wifi.SupplicantState getSupplicantState();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final java.lang.String FREQUENCY_UNITS = "MHz";
     field public static final java.lang.String LINK_SPEED_UNITS = "Mbps";
   }
 
