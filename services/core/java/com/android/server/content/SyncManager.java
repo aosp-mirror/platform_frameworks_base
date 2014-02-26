@@ -154,7 +154,7 @@ public class SyncManager {
 
     private static final int INITIALIZATION_UNBIND_DELAY_MS = 5000;
 
-    private static final String SYNC_WAKE_LOCK_PREFIX = "*sync*";
+    private static final String SYNC_WAKE_LOCK_PREFIX = "*sync*/";
     private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarm";
     private static final String SYNC_LOOP_WAKE_LOCK = "SyncLoopWakeLock";
 
@@ -1210,9 +1210,9 @@ public class SyncManager {
                 mBound = false;
             } else {
                 try {
-                    mEventName = serviceComponent.flattenToShortString();
+                    mEventName = mSyncOperation.wakeLockName();
                     mBatteryStats.noteEvent(BatteryStats.HistoryItem.EVENT_SYNC_START,
-                            serviceComponent.flattenToShortString(), mSyncAdapterUid);
+                            mEventName, mSyncAdapterUid);
                 } catch (RemoteException e) {
                 }
             }
@@ -1927,10 +1927,10 @@ public class SyncManager {
         }
 
         private PowerManager.WakeLock getSyncWakeLock(SyncOperation operation) {
-            final String wakeLockKey = operation.wakeLockKey();
+            final String wakeLockKey = operation.wakeLockName();
             PowerManager.WakeLock wakeLock = mWakeLocks.get(wakeLockKey);
             if (wakeLock == null) {
-                final String name = SYNC_WAKE_LOCK_PREFIX + operation.wakeLockName();
+                final String name = SYNC_WAKE_LOCK_PREFIX + wakeLockKey;
                 wakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, name);
                 wakeLock.setReferenceCounted(false);
                 mWakeLocks.put(wakeLockKey, wakeLock);
