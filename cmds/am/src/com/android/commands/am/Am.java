@@ -232,6 +232,8 @@ public class Am extends BaseCommand {
                 "    [--eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
                 "    [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
                 "    [--efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
+                "    [--esa <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]\n" +
+                "        (to embed a comma into a string escape it using \"\\,\")\n" +
                 "    [-n <COMPONENT>] [-f <FLAGS>]\n" +
                 "    [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
                 "    [--debug-log-resolution] [--exclude-stopped-packages]\n" +
@@ -418,6 +420,15 @@ public class Am extends BaseCommand {
                     list[i] = Float.valueOf(strings[i]);
                 }
                 intent.putExtra(key, list);
+                hasIntentInfo = true;
+            } else if (opt.equals("--esa")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                // Split on commas unless they are preceeded by an escape.
+                // The escape character must be escaped for the string and
+                // again for the regex, thus four escape characters become one.
+                String[] strings = value.split("(?<!\\\\),");
+                intent.putExtra(key, strings);
                 hasIntentInfo = true;
             } else if (opt.equals("--ez")) {
                 String key = nextArgRequired();
