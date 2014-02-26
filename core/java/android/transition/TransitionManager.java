@@ -70,9 +70,12 @@ public class TransitionManager {
     private static final String[] EMPTY_STRINGS = new String[0];
 
     ArrayMap<Scene, Transition> mSceneTransitions = new ArrayMap<Scene, Transition>();
-    ArrayMap<Scene, Transition> mExitSceneTransitions = new ArrayMap<Scene, Transition>();
     ArrayMap<Scene, ArrayMap<Scene, Transition>> mScenePairTransitions =
             new ArrayMap<Scene, ArrayMap<Scene, Transition>>();
+    ArrayMap<Scene, ArrayMap<String, Transition>> mSceneNameTransitions =
+            new ArrayMap<Scene, ArrayMap<String, Transition>>();
+    ArrayMap<String, ArrayMap<Scene, Transition>> mNameSceneTransitions =
+            new ArrayMap<String, ArrayMap<Scene, Transition>>();
     private static ThreadLocal<WeakReference<ArrayMap<ViewGroup, ArrayList<Transition>>>>
             sRunningTransitions =
             new ThreadLocal<WeakReference<ArrayMap<ViewGroup, ArrayList<Transition>>>>();
@@ -116,21 +119,6 @@ public class TransitionManager {
      */
     public void setTransition(Scene scene, Transition transition) {
         mSceneTransitions.put(scene, transition);
-    }
-
-    /**
-     * Sets a specific transition to occur when the given scene is exited. This
-     * has the lowest priority -- if a Scene-to-Scene transition or
-     * Scene enter transition can be applied, it will.
-     *
-     * @param scene The scene which, when exited, will cause the given
-     * transition to run.
-     * @param transition The transition that will play when the given scene is
-     * exited. A value of null will result in the default behavior of
-     * using the default transition instead.
-     */
-    public void setExitTransition(Scene scene, Transition transition) {
-        mExitSceneTransitions.put(scene, transition);
     }
 
     /**
@@ -181,9 +169,6 @@ public class TransitionManager {
             }
         }
         transition = mSceneTransitions.get(scene);
-        if (transition == null && sceneRoot != null) {
-            transition = mExitSceneTransitions.get(Scene.getCurrentScene(sceneRoot));
-        }
         return (transition != null) ? transition : sDefaultTransition;
     }
 
@@ -239,31 +224,138 @@ public class TransitionManager {
     }
 
     /**
-     * Retrieve the transition to a target defined scene if one has been
+     * Retrieve the transition from a named scene to a target defined scene if one has been
      * associated with this TransitionManager.
      *
+     * <p>A named scene is an indirect link for a transition. Fundamentally a named
+     * scene represents a potentially arbitrary intersection point of two otherwise independent
+     * transitions. Activity A may define a transition from scene X to "com.example.scene.FOO"
+     * while activity B may define a transition from scene "com.example.scene.FOO" to scene Y.
+     * In this way applications may define an API for more sophisticated transitions between
+     * caller and called activities very similar to the way that <code>Intent</code> extras
+     * define APIs for arguments and data propagation between activities.</p>
+     *
+     * @param fromName Named scene that this transition corresponds to
      * @param toScene Target scene that this transition will move to
-     * @return Transition corresponding to the given toScene or null
+     * @return Transition corresponding to the given fromName and toScene or null
      *         if no association exists in this TransitionManager
      *
-     * @see #setTransition(Scene, Transition)
-     * @hide
+     * @see #setTransition(String, Scene, Transition)
      */
-    public Transition getEnterTransition(Scene toScene) {
-        return mSceneTransitions.get(toScene);
+    public Transition getNamedTransition(String fromName, Scene toScene) {
+        ArrayMap<Scene, Transition> m = mNameSceneTransitions.get(fromName);
+        if (m != null) {
+            return m.get(toScene);
+        }
+        return null;
     }
 
     /**
      * Retrieve the transition from a defined scene to a target named scene if one has been
      * associated with this TransitionManager.
      *
+     * <p>A named scene is an indirect link for a transition. Fundamentally a named
+     * scene represents a potentially arbitrary intersection point of two otherwise independent
+     * transitions. Activity A may define a transition from scene X to "com.example.scene.FOO"
+     * while activity B may define a transition from scene "com.example.scene.FOO" to scene Y.
+     * In this way applications may define an API for more sophisticated transitions between
+     * caller and called activities very similar to the way that <code>Intent</code> extras
+     * define APIs for arguments and data propagation between activities.</p>
+     *
      * @param fromScene Scene that this transition starts from
-     * @return Transition corresponding to the given fromScene or null
+     * @param toName Name of the target scene
+     * @return Transition corresponding to the given fromScene and toName or null
      *         if no association exists in this TransitionManager
-     * @hide
      */
-    public Transition getExitTransition(Scene fromScene) {
-        return mExitSceneTransitions.get(fromScene);
+    public Transition getNamedTransition(Scene fromScene, String toName) {
+        ArrayMap<String, Transition> m = mSceneNameTransitions.get(fromScene);
+        if (m != null) {
+            return m.get(toName);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve the supported target named scenes when transitioning away from the given scene.
+     *
+     * <p>A named scene is an indirect link for a transition. Fundamentally a named
+     * scene represents a potentially arbitrary intersection point of two otherwise independent
+     * transitions. Activity A may define a transition from scene X to "com.example.scene.FOO"
+     * while activity B may define a transition from scene "com.example.scene.FOO" to scene Y.
+     * In this way applications may define an API for more sophisticated transitions between
+     * caller and called activities very similar to the way that <code>Intent</code> extras
+     * define APIs for arguments and data propagation between activities.</p>
+     *
+     * @param fromScene Scene to transition from
+     * @return An array of Strings naming each supported transition starting from
+     *         <code>fromScene</code>. If no transitions to a named scene from the given
+     *         scene are supported this function will return a String[] of length 0.
+     *
+     * @see #setTransition(Scene, String, Transition)
+     */
+    public String[] getTargetSceneNames(Scene fromScene) {
+        final ArrayMap<String, Transition> m = mSceneNameTransitions.get(fromScene);
+        if (m == null) {
+            return EMPTY_STRINGS;
+        }
+        final int count = m.size();
+        final String[] result = new String[count];
+        for (int i = 0; i < count; i++) {
+            result[i] = m.keyAt(i);
+        }
+        return result;
+    }
+
+    /**
+     * Set a transition from a specific scene to a named scene.
+     *
+     * <p>A named scene is an indirect link for a transition. Fundamentally a named
+     * scene represents a potentially arbitrary intersection point of two otherwise independent
+     * transitions. Activity A may define a transition from scene X to "com.example.scene.FOO"
+     * while activity B may define a transition from scene "com.example.scene.FOO" to scene Y.
+     * In this way applications may define an API for more sophisticated transitions between
+     * caller and called activities very similar to the way that <code>Intent</code> extras
+     * define APIs for arguments and data propagation between activities.</p>
+     *
+     * @param fromScene Scene to transition from
+     * @param toName Named scene to transition to
+     * @param transition Transition to use
+     *
+     * @see #getTargetSceneNames(Scene)
+     */
+    public void setTransition(Scene fromScene, String toName, Transition transition) {
+        ArrayMap<String, Transition> m = mSceneNameTransitions.get(fromScene);
+        if (m == null) {
+            m = new ArrayMap<String, Transition>();
+            mSceneNameTransitions.put(fromScene, m);
+        }
+        m.put(toName, transition);
+    }
+
+    /**
+     * Set a transition from a named scene to a concrete scene.
+     *
+     * <p>A named scene is an indirect link for a transition. Fundamentally a named
+     * scene represents a potentially arbitrary intersection point of two otherwise independent
+     * transitions. Activity A may define a transition from scene X to "com.example.scene.FOO"
+     * while activity B may define a transition from scene "com.example.scene.FOO" to scene Y.
+     * In this way applications may define an API for more sophisticated transitions between
+     * caller and called activities very similar to the way that <code>Intent</code> extras
+     * define APIs for arguments and data propagation between activities.</p>
+     *
+     * @param fromName Named scene to transition from
+     * @param toScene Scene to transition to
+     * @param transition Transition to use
+     *
+     * @see #getNamedTransition(String, Scene)
+     */
+    public void setTransition(String fromName, Scene toScene, Transition transition) {
+        ArrayMap<Scene, Transition> m = mNameSceneTransitions.get(fromName);
+        if (m == null) {
+            m = new ArrayMap<Scene, Transition>();
+            mNameSceneTransitions.put(fromName, m);
+        }
+        m.put(toScene, transition);
     }
 
     /**

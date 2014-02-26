@@ -33,7 +33,6 @@ This is an optimized layout for a screen with the Action Bar enabled.
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         style="?android:attr/actionBarStyle"
-        android:sharedElementName="android:action_bar"
         android:gravity="top">
         <com.android.internal.widget.ActionBarView
             android:id="@+id/action_bar"

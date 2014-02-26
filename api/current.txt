@@ -345,7 +345,7 @@ package android {
     field public static final int canRetrieveWindowContent = 16843653; // 0x1010385
     field public static final int candidatesTextStyleSpans = 16843312; // 0x1010230
     field public static final deprecated int capitalize = 16843113; // 0x1010169
-    field public static final int castsShadow = 16843775; // 0x10103ff
+    field public static final int castsShadow = 16843777; // 0x1010401
     field public static final int category = 16843752; // 0x10103e8
     field public static final int centerBright = 16842956; // 0x10100cc
     field public static final int centerColor = 16843275; // 0x101020b
@@ -542,6 +542,7 @@ package android {
     field public static final int fromAlpha = 16843210; // 0x10101ca
     field public static final int fromDegrees = 16843187; // 0x10101b3
     field public static final int fromScene = 16843741; // 0x10103dd
+    field public static final int fromSceneName = 16843773; // 0x10103fd
     field public static final int fromXDelta = 16843206; // 0x10101c6
     field public static final int fromXScale = 16843202; // 0x10101c2
     field public static final int fromYDelta = 16843208; // 0x10101c8
@@ -889,7 +890,7 @@ package android {
     field public static final int required = 16843406; // 0x101028e
     field public static final int requiredAccountType = 16843734; // 0x10103d6
     field public static final int requiredForAllUsers = 16843728; // 0x10103d0
-    field public static final int requiredForProfile = 16843776; // 0x1010400
+    field public static final int requiredForProfile = 16843778; // 0x1010402
     field public static final int requiresFadingEdge = 16843685; // 0x10103a5
     field public static final int requiresSmallestWidthDp = 16843620; // 0x1010364
     field public static final int resizeMode = 16843619; // 0x1010363
@@ -960,7 +961,7 @@ package android {
     field public static final int shadowRadius = 16843108; // 0x1010164
     field public static final int shape = 16843162; // 0x101019a
     field public static final int shareInterpolator = 16843195; // 0x10101bb
-    field public static final int sharedElementName = 16843773; // 0x10103fd
+    field public static final int sharedElementName = 16843775; // 0x10103ff
     field public static final int sharedUserId = 16842763; // 0x101000b
     field public static final int sharedUserLabel = 16843361; // 0x1010261
     field public static final int shouldDisableView = 16843246; // 0x10101ee
@@ -1144,6 +1145,7 @@ package android {
     field public static final int toAlpha = 16843211; // 0x10101cb
     field public static final int toDegrees = 16843188; // 0x10101b4
     field public static final int toScene = 16843742; // 0x10103de
+    field public static final int toSceneName = 16843774; // 0x10103fe
     field public static final int toXDelta = 16843207; // 0x10101c7
     field public static final int toXScale = 16843203; // 0x10101c3
     field public static final int toYDelta = 16843209; // 0x10101c9
@@ -1159,7 +1161,7 @@ package android {
     field public static final int transformPivotX = 16843552; // 0x1010320
     field public static final int transformPivotY = 16843553; // 0x1010321
     field public static final int transition = 16843743; // 0x10103df
-    field public static final int transitionGroup = 16843774; // 0x10103fe
+    field public static final int transitionGroup = 16843776; // 0x1010400
     field public static final int transitionOrdering = 16843744; // 0x10103e0
     field public static final int translationX = 16843554; // 0x1010322
     field public static final int translationY = 16843555; // 0x1010323
@@ -3039,6 +3041,7 @@ package android.app {
     method public int getTaskId();
     method public final java.lang.CharSequence getTitle();
     method public final int getTitleColor();
+    method public android.os.Bundle getTransitionArgs();
     method public final int getVolumeControlStream();
     method public android.view.Window getWindow();
     method public android.view.WindowManager getWindowManager();
@@ -3060,8 +3063,6 @@ package android.app {
     method public void onAttachFragment(android.app.Fragment);
     method public void onAttachedToWindow();
     method public void onBackPressed();
-    method public void onCaptureSharedElementEnd();
-    method public void onCaptureSharedElementStart(android.transition.Transition);
     method protected void onChildTitleChanged(android.app.Activity, java.lang.CharSequence);
     method public void onConfigurationChanged(android.content.res.Configuration);
     method public void onContentChanged();
@@ -3136,6 +3137,7 @@ package android.app {
     method public void setContentView(android.view.View);
     method public void setContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public final void setDefaultKeyMode(int);
+    method public void setEarlyBackgroundTransition(boolean);
     method public final void setFeatureDrawable(int, android.graphics.drawable.Drawable);
     method public final void setFeatureDrawableAlpha(int, int);
     method public final void setFeatureDrawableResource(int, int);
@@ -3160,9 +3162,7 @@ package android.app {
     method public final deprecated void showDialog(int);
     method public final deprecated boolean showDialog(int, android.os.Bundle);
     method public android.view.ActionMode startActionMode(android.view.ActionMode.Callback);
-    method public void startActivity(android.content.Intent, android.util.Pair<android.view.View, java.lang.String>...);
     method public void startActivityForResult(android.content.Intent, int);
-    method public void startActivityForResult(android.content.Intent, int, android.util.Pair<android.view.View, java.lang.String>...);
     method public void startActivityForResult(android.content.Intent, int, android.os.Bundle);
     method public void startActivityFromChild(android.app.Activity, android.content.Intent, int);
     method public void startActivityFromChild(android.app.Activity, android.content.Intent, int, android.os.Bundle);
@@ -3178,6 +3178,7 @@ package android.app {
     method public boolean startNextMatchingActivity(android.content.Intent);
     method public boolean startNextMatchingActivity(android.content.Intent, android.os.Bundle);
     method public void startSearch(java.lang.String, boolean, android.os.Bundle, boolean);
+    method protected void startSharedElementTransition(android.os.Bundle);
     method public deprecated void stopManagingCursor(android.database.Cursor);
     method public void takeKeyEvents(boolean);
     method public void triggerSearch(java.lang.String, android.os.Bundle);
@@ -3348,6 +3349,7 @@ package android.app {
   public class ActivityOptions {
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
     method public static android.app.ActivityOptions makeScaleUpAnimation(android.view.View, int, int, int, int);
+    method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.os.Bundle);
     method public static android.app.ActivityOptions makeThumbnailScaleUpAnimation(android.view.View, android.graphics.Bitmap, int, int);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
@@ -26818,11 +26820,15 @@ package android.transition {
     ctor public TransitionManager();
     method public static void beginDelayedTransition(android.view.ViewGroup);
     method public static void beginDelayedTransition(android.view.ViewGroup, android.transition.Transition);
+    method public android.transition.Transition getNamedTransition(java.lang.String, android.transition.Scene);
+    method public android.transition.Transition getNamedTransition(android.transition.Scene, java.lang.String);
+    method public java.lang.String[] getTargetSceneNames(android.transition.Scene);
     method public static void go(android.transition.Scene);
     method public static void go(android.transition.Scene, android.transition.Transition);
-    method public void setExitTransition(android.transition.Scene, android.transition.Transition);
     method public void setTransition(android.transition.Scene, android.transition.Transition);
     method public void setTransition(android.transition.Scene, android.transition.Scene, android.transition.Transition);
+    method public void setTransition(android.transition.Scene, java.lang.String, android.transition.Transition);
+    method public void setTransition(java.lang.String, android.transition.Scene, android.transition.Transition);
     method public void transitionTo(android.transition.Scene);
   }
 
@@ -29793,7 +29799,6 @@ package android.view {
     method public abstract boolean isFloating();
     method public abstract boolean isShortcutKey(int, android.view.KeyEvent);
     method public final void makeActive();
-    method public void mapTransitionTargets(java.util.Map<java.lang.String, java.lang.String>);
     method protected abstract void onActive();
     method public abstract void onConfigurationChanged(android.content.res.Configuration);
     method public abstract void openPanel(int, android.view.KeyEvent);
@@ -29832,7 +29837,6 @@ package android.view {
     method public abstract void setTitle(java.lang.CharSequence);
     method public abstract deprecated void setTitleColor(int);
     method public void setTransitionManager(android.transition.TransitionManager);
-    method public void setTriggerEarlyEnterTransition(boolean);
     method public void setType(int);
     method public void setUiOptions(int);
     method public void setUiOptions(int, int);

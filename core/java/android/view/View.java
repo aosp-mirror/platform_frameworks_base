@@ -101,9 +101,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -18840,33 +18838,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (newValue > 0x00FFFFFF) newValue = 1; // Roll over to 1, not 0.
             if (sNextGeneratedId.compareAndSet(result, newValue)) {
                 return result;
-            }
-        }
-    }
-
-    /**
-     * Gets the Views in the hierarchy affected by entering and exiting Activity Scene transitions.
-     * @param transitioningViews This View will be added to transitioningViews if it is VISIBLE and
-     *                           a normal View or a ViewGroup with
-     *                           {@link android.view.ViewGroup#isTransitionGroup()} true.
-     * @hide
-     */
-    public void captureTransitioningViews(List<View> transitioningViews) {
-        if (getVisibility() == View.VISIBLE) {
-            transitioningViews.add(this);
-        }
-    }
-
-    /**
-     * Adds all Views that have {@link #getSharedElementName()} non-null to sharedElements.
-     * @param sharedElements Will contain all Views in the hierarchy having a shared element name.
-     * @hide
-     */
-    public void findSharedElements(Map<String, View> sharedElements) {
-        if (getVisibility() == VISIBLE) {
-            String sharedElementName = getSharedElementName();
-            if (sharedElementName != null) {
-                sharedElements.put(sharedElementName, this);
             }
         }
     }

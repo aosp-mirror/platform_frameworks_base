@@ -31,7 +31,6 @@ This is a custom layout for a screen.
     <FrameLayout android:id="@android:id/title_container" 
         android:layout_width="match_parent" 
         android:layout_height="?android:attr/windowTitleSize"
-        android:sharedElementName="android:title"
         style="?android:attr/windowTitleBackgroundStyle">
     </FrameLayout>
     <FrameLayout android:id="@android:id/content"
