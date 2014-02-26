@@ -184,7 +184,9 @@ void TextureCache::clearGarbage() {
     Mutex::Autolock _l(mLock);
     size_t count = mGarbage.size();
     for (size_t i = 0; i < count; i++) {
-        mCache.remove(mGarbage.itemAt(i));
+        const SkBitmap* bitmap = mGarbage.itemAt(i);
+        mCache.remove(bitmap);
+        delete bitmap;
     }
     mGarbage.clear();
 }
