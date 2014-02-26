@@ -2,9 +2,9 @@ package com.android.onemedia;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaSession;
-import android.media.MediaSessionManager;
-import android.media.MediaSessionToken;
+import android.media.session.MediaSession;
+import android.media.session.MediaSessionManager;
+import android.media.session.MediaSessionToken;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;

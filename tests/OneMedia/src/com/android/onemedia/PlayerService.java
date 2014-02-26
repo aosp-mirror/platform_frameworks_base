@@ -2,7 +2,7 @@ package com.android.onemedia;
 
 import android.app.Service;
 import android.content.Intent;
-import android.media.MediaSessionToken;
+import android.media.session.MediaSessionToken;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;

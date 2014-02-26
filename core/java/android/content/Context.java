@@ -2352,10 +2352,10 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@link android.media.MediaSessionManager} for managing media Sessions.
+     * {@link android.media.session.MediaSessionManager} for managing media Sessions.
      *
      * @see #getSystemService
-     * @see android.media.MediaSessionManager
+     * @see android.media.session.MediaSessionManager
      */
     public static final String MEDIA_SESSION_SERVICE = "media_session";
 
