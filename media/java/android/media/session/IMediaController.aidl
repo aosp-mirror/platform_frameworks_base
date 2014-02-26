@@ -13,21 +13,22 @@
  * limitations under the License.
  */
 
-package android.media;
+package android.media.session;
 
-import android.media.IMediaController;
+import android.content.Intent;
+import android.media.session.IMediaControllerCallback;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.view.KeyEvent;
 
 /**
  * Interface to a MediaSession in the system.
  * @hide
  */
-interface IMediaSession {
-    void sendEvent(in Bundle data);
-    IMediaController getMediaSessionToken();
-    void setPlaybackState(int state);
-    void setMetadata(in Bundle metadata);
-    void setRouteState(in Bundle routeState);
-    void setRoute(in Bundle mediaRouteDescriptor);
-    void destroy();
+interface IMediaController {
+    void sendCommand(String command, in Bundle extras);
+    void sendMediaButton(in KeyEvent mediaButton);
+    void registerCallbackListener(in IMediaControllerCallback cb);
+    void unregisterCallbackListener(in IMediaControllerCallback cb);
+    int getPlaybackState();
 }

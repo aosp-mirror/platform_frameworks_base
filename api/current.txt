@@ -13174,23 +13174,6 @@ package android.media {
     method public static final android.media.MediaCodecInfo getCodecInfoAt(int);
   }
 
-  public final class MediaController {
-    ctor public MediaController(android.media.MediaSessionToken);
-    method public void addCallback(android.media.MediaController.Callback);
-    method public void addCallback(android.media.MediaController.Callback, android.os.Handler);
-    method public void removeCallback(android.media.MediaController.Callback);
-    method public void sendCommand(java.lang.String, android.os.Bundle);
-    method public void sendMediaButton(int);
-  }
-
-  public static abstract class MediaController.Callback {
-    ctor public MediaController.Callback();
-    method public void onEvent(java.lang.String, android.os.Bundle);
-    method public void onMetadataUpdate(android.os.Bundle);
-    method public void onPlaybackStateChange(int);
-    method public void onRouteChanged(android.os.Bundle);
-  }
-
   public final class MediaCrypto {
     ctor public MediaCrypto(java.util.UUID, byte[]) throws android.media.MediaCryptoException;
     method public static final boolean isCryptoSchemeSupported(java.util.UUID);
@@ -13755,33 +13738,6 @@ package android.media {
 
   public static abstract interface MediaScannerConnection.OnScanCompletedListener {
     method public abstract void onScanCompleted(java.lang.String, android.net.Uri);
-  }
-
-  public final class MediaSession {
-    method public void addCallback(android.media.MediaSession.Callback);
-    method public void addCallback(android.media.MediaSession.Callback, android.os.Handler);
-    method public android.media.MediaSessionToken getSessionToken();
-    method public void release();
-    method public void removeCallback(android.media.MediaSession.Callback);
-    method public void setPlaybackState(int);
-  }
-
-  public static abstract class MediaSession.Callback {
-    ctor public MediaSession.Callback();
-    method public void onCommand(java.lang.String, android.os.Bundle);
-    method public void onMediaButton(android.content.Intent);
-    method public void onRequestRouteChange(android.os.Bundle);
-  }
-
-  public final class MediaSessionManager {
-    method public android.media.MediaSession createSession(java.lang.String);
-    method public java.util.List<android.media.MediaController> getActiveSessions();
-  }
-
-  public class MediaSessionToken implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public class MediaSyncEvent {
@@ -14449,6 +14405,54 @@ package android.media.effect {
 
   public abstract interface EffectUpdateListener {
     method public abstract void onEffectUpdated(android.media.effect.Effect, java.lang.Object);
+  }
+
+}
+
+package android.media.session {
+
+  public final class MediaController {
+    ctor public MediaController(android.media.session.MediaSessionToken);
+    method public void addCallback(android.media.session.MediaController.Callback);
+    method public void addCallback(android.media.session.MediaController.Callback, android.os.Handler);
+    method public void removeCallback(android.media.session.MediaController.Callback);
+    method public void sendCommand(java.lang.String, android.os.Bundle);
+    method public void sendMediaButton(int);
+  }
+
+  public static abstract class MediaController.Callback {
+    ctor public MediaController.Callback();
+    method public void onEvent(java.lang.String, android.os.Bundle);
+    method public void onMetadataUpdate(android.os.Bundle);
+    method public void onPlaybackStateChange(int);
+    method public void onRouteChanged(android.os.Bundle);
+  }
+
+  public final class MediaSession {
+    method public void addCallback(android.media.session.MediaSession.Callback);
+    method public void addCallback(android.media.session.MediaSession.Callback, android.os.Handler);
+    method public android.media.session.MediaSessionToken getSessionToken();
+    method public void release();
+    method public void removeCallback(android.media.session.MediaSession.Callback);
+    method public void setPlaybackState(int);
+  }
+
+  public static abstract class MediaSession.Callback {
+    ctor public MediaSession.Callback();
+    method public void onCommand(java.lang.String, android.os.Bundle);
+    method public void onMediaButton(android.content.Intent);
+    method public void onRequestRouteChange(android.os.Bundle);
+  }
+
+  public final class MediaSessionManager {
+    method public android.media.session.MediaSession createSession(java.lang.String);
+    method public java.util.List<android.media.session.MediaController> getActiveSessions();
+  }
+
+  public class MediaSessionToken implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
 }

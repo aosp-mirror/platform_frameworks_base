@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package android.media;
+package android.media.session;
 
+import android.media.session.IMediaController;
 import android.os.Parcel;
 import android.os.Parcelable;
 

@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-package android.media;
+package android.media.session;
 
-import android.content.Intent;
+import android.media.session.IMediaSession;
+import android.media.session.IMediaSessionCallback;
 import android.os.Bundle;
-import android.os.IBinder;
 
 /**
+ * Interface to the MediaSessionManagerService
  * @hide
  */
-oneway interface IMediaSessionCallback {
-    void onCommand(String command, in Bundle extras);
-    void onMediaButton(in Intent mediaRequestIntent);
-    void onRequestRouteChange(in Bundle route);
+interface IMediaSessionManager {
+    IMediaSession createSession(String packageName, in IMediaSessionCallback cb, String tag);
 }

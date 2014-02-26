@@ -12,17 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package com.android.onemedia;
 
-import android.media.MediaSessionToken;
+import android.media.session.MediaSessionToken;
 import android.os.Bundle;
 
 import com.android.onemedia.IPlayerCallback;
 import com.android.onemedia.playback.IRequestCallback;
 
 interface IPlayerService {
-    MediaSessionToken getSessionToken(); 
+    MediaSessionToken getSessionToken();
     void registerCallback(in IPlayerCallback cb);
     void unregisterCallback(in IPlayerCallback cb);
     void sendRequest(String action, in Bundle params, in IRequestCallback cb);
