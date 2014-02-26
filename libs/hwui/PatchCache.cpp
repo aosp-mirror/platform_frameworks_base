@@ -129,7 +129,11 @@ void PatchCache::clearGarbage() {
         Mutex::Autolock _l(mLock);
         size_t count = mGarbage.size();
         for (size_t i = 0; i < count; i++) {
-            remove(patchesToRemove, mGarbage[i]);
+            Res_png_9patch* patch = mGarbage[i];
+            remove(patchesToRemove, patch);
+            // A Res_png_9patch is actually an array of byte that's larger
+            // than sizeof(Res_png_9patch). It must be freed as an array.
+            delete[] (int8_t*) patch;
         }
         mGarbage.clear();
     }
