@@ -233,7 +233,9 @@ public class LocalTransport extends IBackupTransport.Stub {
         if (mRestorePackages == null) throw new IllegalStateException("startRestore not called");
         while (++mRestorePackage < mRestorePackages.length) {
             String name = mRestorePackages[mRestorePackage].packageName;
-            if (new File(mDataDir, name).isDirectory()) {
+            // skip packages where we have a data dir but no actual contents
+            String[] contents = (new File(mDataDir, name)).list();
+            if (contents != null && contents.length > 0) {
                 if (DEBUG) Log.v(TAG, "  nextRestorePackage() = " + name);
                 return name;
             }
