@@ -46,7 +46,7 @@
     <string name="badPin" msgid="9015277645546710014">"የተየበከው የድሮ ፒን ትክክል አይደለም።"</string>
     <string name="badPuk" msgid="5487257647081132201">"የተየብከው PUK ትክክል  አይደለም።"</string>
     <string name="mismatchPin" msgid="609379054496863419">"ያስገባሃቸው ፒኖች አይዛመዱም"</string>
-    <string name="invalidPin" msgid="3850018445187475377">"ከ4 እስከ 8 ቁጥሮች የያዘ PIN ተይብ"</string>
+    <string name="invalidPin" msgid="3850018445187475377">"ከ4 እስከ 8 ቁጥሮች የያዘ ፒን  ተይብ"</string>
     <string name="invalidPuk" msgid="8761456210898036513">"8 ወይም ከዛ በላይ የሆኑ ቁጥሮችንPUK ተይብ።"</string>
     <string name="needPuk" msgid="919668385956251611">"SIM ካርድዎ PUK-የተቆለፈ ነው።የPUK ኮዱን በመተየብ ይክፈቱት።"</string>
     <string name="needPuk2" msgid="4526033371987193070">" SIM ለመክፈት PUK2 ተይብ።"</string>
@@ -832,7 +832,7 @@
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"የይለፍ ቃል ለመተየብ ንካ"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"ለመክፈት የይለፍ ቃል ተይብ"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"ለመክፈት ፒን ተይብ"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"ትክክል ያልሆነ PIN ኮድ።"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"ትክክል ያልሆነ ፒን  ኮድ።"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"ለመክፈት፣ምናሌ ተጫን ከዛ 0"</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"የአደጋ ጊዜቁጥር"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"ከአገልግሎት መስጫ ክልል ውጪ"</string>
@@ -994,8 +994,8 @@
     <string name="searchview_description_submit" msgid="2688450133297983542">"ጥያቄ አስረክብ"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"የድምፅ ፍለጋ"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"በመንካት አስስ ይንቃ?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>  ማሰስን በንኪ ማንቃት ይፈልጋል። አስስ በንኪ በሚበራበት ጊዜ፣ ከጡባዊ ተኮው ጋር ለመግባባት ምን በጣትህ ስር ወይም ምልክቶችን ማከናወን እንዳለብህ ማብራሪያ ልታይ ወይም ልትሰማ ትችላለህ።"</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>  ማሰስን በንኪ ማንቃት ይፈልጋል። አስስ በንኪ በሚበራበት ጊዜ፣ ከስልኩ ጋር ለመግባባት ምን በጣትህ ስር ወይም ምልክቶችን ማከናወን እንዳለብህ ማብራሪያ ልታይ ወይም ልትሰማ ትችላለህ።"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>  ማሰስን በንኪ ማንቃት ይፈልጋል። አስስ በንኪ በሚበራበት ጊዜ፣ ከጡባዊ ተኮው ጋር ለመግባባት ምን በጣትዎ ስር ወይም ምልክቶችን ማከናወን እንዳለብዎ ማብራሪያ ሊመለከቱ ወይም ሊሰሙ ይችላሉ።"</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>  ማሰስን በንኪ ማንቃት ይፈልጋል። አስስ በንኪ በሚበራበት ጊዜ፣ ከስልኩ ጋር ለመግባባት ምን በጣትዎ ስር ወይም ምልክቶችን ማከናወን እንዳለብዎ ማብራሪያ ሊመለከቱ ወይም ሊሰሙ ይችላሉ።"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"ከ1 ወር በፊት"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"ከ1 ወር በፊት"</string>
   <plurals name="num_seconds_ago">

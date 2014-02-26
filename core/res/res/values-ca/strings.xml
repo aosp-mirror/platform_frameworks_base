@@ -683,8 +683,8 @@
     <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Permet que l\'aplicació modifiqui les marques de sòcols per a l\'encaminament"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"accedeix a les notificacions"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permet que l\'aplicació recuperi, examini i esborri les notificacions, incloses les que han publicat altres aplicacions."</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vincula a un servei de processament de notificacions"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permet que el titular vinculi la interfície de nivell superior d\'un servei de processament de notificacions. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vincula a un servei oient de notificacions"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permet que el titular vinculi la interfície de nivell superior d\'un servei oient de notificacions. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invoca l\'aplicació de configuració proporcionada per l\'operador"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permet que el titular invoqui l\'aplicació de configuració proporcionada per l\'operador. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"conèixer les observacions sobre les condicions de la xarxa"</string>
@@ -1346,7 +1346,7 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibilitat"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fons de pantalla"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Canvia el fons de pantalla"</string>
-    <string name="notification_listener_binding_label" msgid="2014162835481906429">"Processador de notificacions"</string>
+    <string name="notification_listener_binding_label" msgid="2014162835481906429">"Oient de notificacions"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN activada"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> ha activat VPN"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Toca per gestionar la xarxa."</string>
