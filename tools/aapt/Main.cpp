@@ -153,6 +153,11 @@ void usage(void)
         "       inserts android:versionCode in to manifest.\n"
         "   --version-name\n"
         "       inserts android:versionName in to manifest.\n"
+        "   --replace-version\n"
+        "       If --version-code and/or --version-name are specified, these\n"
+        "       values will replace any value already in the manifest. By\n"
+        "       default, nothing is changed if the manifest already defines\n"
+        "       these attributes.\n"
         "   --custom-package\n"
         "       generates R.java into a different package.\n"
         "   --extra-packages\n"
@@ -532,6 +537,8 @@ int main(int argc, char* const argv[])
                         goto bail;
                     }
                     bundle.setVersionName(argv[0]);
+                } else if (strcmp(cp, "-replace-version") == 0) {
+                    bundle.setReplaceVersion(true);
                 } else if (strcmp(cp, "-values") == 0) {
                     bundle.setValues(true);
                 } else if (strcmp(cp, "-include-meta-data") == 0) {
