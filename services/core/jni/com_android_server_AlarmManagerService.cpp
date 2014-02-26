@@ -21,7 +21,9 @@
 #include "jni.h"
 #include <utils/Log.h>
 #include <utils/misc.h>
+#include <utils/String8.h>
 
+#include <dirent.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
@@ -80,8 +82,8 @@ public:
 class AlarmImplTimerFd : public AlarmImpl
 {
 public:
-    AlarmImplTimerFd(int fds[N_ANDROID_TIMERFDS], int epollfd) :
-        AlarmImpl(fds, N_ANDROID_TIMERFDS), epollfd(epollfd) { }
+    AlarmImplTimerFd(int fds[N_ANDROID_TIMERFDS], int epollfd, int rtc_id) :
+        AlarmImpl(fds, N_ANDROID_TIMERFDS), epollfd(epollfd), rtc_id(rtc_id) { }
     ~AlarmImplTimerFd();
 
     int set(int type, struct timespec *ts);
@@ -90,6 +92,7 @@ public:
 
 private:
     int epollfd;
+    int rtc_id;
 };
 
 AlarmImpl::AlarmImpl(int *fds_, size_t n_fds) : fds(new int[n_fds]),
@@ -170,9 +173,16 @@ int AlarmImplTimerFd::setTime(struct timeval *tv)
         return -1;
     }
 
-    fd = open("/dev/rtc0", O_RDWR);
+    if (rtc_id < 0) {
+        ALOGV("Not setting RTC because wall clock RTC was not found");
+        errno = ENODEV;
+        return -1;
+    }
+
+    android::String8 rtc_dev = String8::format("/dev/rtc%d", rtc_id);
+    fd = open(rtc_dev.string(), O_RDWR);
     if (fd < 0) {
-        ALOGV("Unable to open RTC driver: %s\n", strerror(errno));
+        ALOGV("Unable to open %s: %s\n", rtc_dev.string(), strerror(errno));
         return res;
     }
 
@@ -283,6 +293,66 @@ static jlong init_alarm_driver()
     return reinterpret_cast<jlong>(ret);
 }
 
+static const char rtc_sysfs[] = "/sys/class/rtc";
+
+static bool rtc_is_hctosys(unsigned int rtc_id)
+{
+    android::String8 hctosys_path = String8::format("%s/rtc%u/hctosys",
+            rtc_sysfs, rtc_id);
+
+    FILE *file = fopen(hctosys_path.string(), "re");
+    if (!file) {
+        ALOGE("failed to open %s: %s", hctosys_path.string(), strerror(errno));
+        return false;
+    }
+
+    unsigned int hctosys;
+    bool ret = false;
+    int err = fscanf(file, "%u", &hctosys);
+    if (err == EOF)
+        ALOGE("failed to read from %s: %s", hctosys_path.string(),
+                strerror(errno));
+    else if (err == 0)
+        ALOGE("%s did not have expected contents", hctosys_path.string());
+    else
+        ret = hctosys;
+
+    fclose(file);
+    return ret;
+}
+
+static int wall_clock_rtc()
+{
+    DIR *dir = opendir(rtc_sysfs);
+    if (!dir) {
+        ALOGE("failed to open %s: %s", rtc_sysfs, strerror(errno));
+        return -1;
+    }
+
+    struct dirent *dirent;
+    while (errno = 0, dirent = readdir(dir)) {
+        unsigned int rtc_id;
+        int matched = sscanf(dirent->d_name, "rtc%u", &rtc_id);
+
+        if (matched < 0)
+            break;
+        else if (matched != 1)
+            continue;
+
+        if (rtc_is_hctosys(rtc_id)) {
+            ALOGV("found wall clock RTC %u", rtc_id);
+            return rtc_id;
+        }
+    }
+
+    if (errno == 0)
+        ALOGW("no wall clock RTC found");
+    else
+        ALOGE("failed to enumerate RTCs: %s", strerror(errno));
+
+    return -1;
+}
+
 static jlong init_timerfd()
 {
     int epollfd;
@@ -308,7 +378,7 @@ static jlong init_timerfd()
         }
     }
 
-    AlarmImpl *ret = new AlarmImplTimerFd(fds, epollfd);
+    AlarmImpl *ret = new AlarmImplTimerFd(fds, epollfd, wall_clock_rtc());
 
     for (size_t i = 0; i < N_ANDROID_TIMERFDS; i++) {
         epoll_event event;
