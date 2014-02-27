@@ -28,6 +28,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.systemui.ExpandHelper;
+import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -42,13 +43,13 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
     private final int mTouchSensitivityDelay;
     private SwipeHelper mSwipeHelper;
+    private EdgeSwipeHelper mEdgeSwipeHelper;
 
     private BaseStatusBar mBar;
     private ExpandHelper mExpandHelper;
-    private long mStartTouchTime;
 
+    private long mStartTouchTime;
     private ViewGroup mContentHolder;
-    private ViewGroup mContentSlider;
 
     private NotificationData.Entry mHeadsUp;
 
@@ -72,7 +73,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
     public boolean setNotification(NotificationData.Entry headsUp) {
         mHeadsUp = headsUp;
-        mHeadsUp.row.setExpanded(false);
+        mHeadsUp.row.setExpanded(true);
         mHeadsUp.row.setShowingPublic(false);
         if (mContentHolder == null) {
             // too soon!
@@ -83,7 +84,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         mContentHolder.setAlpha(1f);
         mContentHolder.removeAllViews();
         mContentHolder.addView(mHeadsUp.row);
-        mSwipeHelper.snapChild(mContentSlider, 1f);
+        mSwipeHelper.snapChild(mContentHolder, 1f);
         mStartTouchTime = System.currentTimeMillis() + mTouchSensitivityDelay;
         return true;
     }
@@ -94,10 +95,11 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
     public void setMargin(int notificationPanelMarginPx) {
         if (SPEW) Log.v(TAG, "setMargin() " + notificationPanelMarginPx);
-        if (mContentSlider != null) {
-            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mContentSlider.getLayoutParams();
+        if (mContentHolder != null &&
+                mContentHolder.getLayoutParams() instanceof FrameLayout.LayoutParams) {
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mContentHolder.getLayoutParams();
             lp.setMarginStart(notificationPanelMarginPx);
-            mContentSlider.setLayoutParams(lp);
+            mContentHolder.setLayoutParams(lp);
         }
     }
 
@@ -122,15 +124,17 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     @Override
     public void onAttachedToWindow() {
         float densityScale = getResources().getDisplayMetrics().density;
-        float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
+        final ViewConfiguration viewConfiguration = ViewConfiguration.get(getContext());
+        float pagingTouchSlop = viewConfiguration.getScaledPagingTouchSlop();
+        float touchSlop = viewConfiguration.getScaledTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
+        mEdgeSwipeHelper = new EdgeSwipeHelper(touchSlop);
 
         int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
         int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
         mExpandHelper = new ExpandHelper(getContext(), this, minHeight, maxHeight);
 
         mContentHolder = (ViewGroup) findViewById(R.id.content_holder);
-        mContentSlider = (ViewGroup) findViewById(R.id.content_slider);
 
         if (mHeadsUp != null) {
             // whoops, we're on already!
@@ -144,7 +148,8 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         if (System.currentTimeMillis() < mStartTouchTime) {
             return true;
         }
-        return mSwipeHelper.onInterceptTouchEvent(ev)
+        return mEdgeSwipeHelper.onInterceptTouchEvent(ev)
+                || mSwipeHelper.onInterceptTouchEvent(ev)
                 || mExpandHelper.onInterceptTouchEvent(ev)
                 || super.onInterceptTouchEvent(ev);
     }
@@ -157,7 +162,8 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
             return false;
         }
         mBar.resetHeadsUpDecayTimer();
-        return mSwipeHelper.onTouchEvent(ev)
+        return mEdgeSwipeHelper.onTouchEvent(ev)
+                || mSwipeHelper.onTouchEvent(ev)
                 || mExpandHelper.onTouchEvent(ev)
                 || super.onTouchEvent(ev);
     }
@@ -226,11 +232,65 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
     @Override
     public View getChildAtPosition(MotionEvent ev) {
-        return mContentSlider;
+        return mContentHolder;
     }
 
     @Override
     public View getChildContentView(View v) {
-        return mContentSlider;
+        return mContentHolder;
+    }
+
+    private class EdgeSwipeHelper implements Gefingerpoken {
+        private static final boolean DEBUG_EDGE_SWIPE = false;
+        private final float mTouchSlop;
+        private boolean mConsuming;
+        private float mFirstY;
+        private float mFirstX;
+
+        public EdgeSwipeHelper(float touchSlop) {
+            mTouchSlop = touchSlop;
+        }
+
+        @Override
+        public boolean onInterceptTouchEvent(MotionEvent ev) {
+            switch (ev.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    if (DEBUG_EDGE_SWIPE) Log.d(TAG, "action down " + ev.getY());
+                    mFirstX = ev.getX();
+                    mFirstY = ev.getY();
+                    mConsuming = false;
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    if (DEBUG_EDGE_SWIPE) Log.d(TAG, "action move " + ev.getY());
+                    final float dY = ev.getY() - mFirstY;
+                    final float daX = Math.abs(ev.getX() - mFirstX);
+                    final float daY = Math.abs(dY);
+                    if (!mConsuming && (4f * daX) < daY && daY > mTouchSlop) {
+                        if (dY > 0) {
+                            if (DEBUG_EDGE_SWIPE) Log.d(TAG, "found an open");
+                            mBar.animateExpandNotificationsPanel();
+                        }
+                        if (dY < 0) {
+                            if (DEBUG_EDGE_SWIPE) Log.d(TAG, "found a close");
+                            mBar.onHeadsUpDismissed();
+                        }
+                        mConsuming = true;
+                    }
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    if (DEBUG_EDGE_SWIPE) Log.d(TAG, "action done" );
+                    mConsuming = false;
+                    break;
+            }
+            return mConsuming;
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent ev) {
+            return mConsuming;
+        }
     }
 }

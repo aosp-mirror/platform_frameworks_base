@@ -855,7 +855,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 PixelFormat.TRANSLUCENT);
         lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         lp.gravity = Gravity.TOP;
-        lp.y = getStatusBarHeight();
         lp.setTitle("Heads Up");
         lp.packageName = mContext.getPackageName();
         lp.windowAnimations = R.style.Animation_StatusBar_HeadsUp;
