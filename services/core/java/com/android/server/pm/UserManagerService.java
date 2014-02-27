@@ -984,27 +984,26 @@ public class UserManagerService extends IUserManager.Stub {
             Slog.w(LOG_TAG, "Only user owner can have related users");
             return null;
         }
-        synchronized (mPackagesLock) {
-            UserInfo relatedUser = getUserInfoLocked(relatedUserId);
-            if (relatedUser == null) {
-                return null;
-            }
-            return createUserInternal(name, flags, relatedUser);
-        }
+        return createUserInternal(name, flags, relatedUserId);
     }
 
     @Override
     public UserInfo createUser(String name, int flags) {
         checkManageUsersPermission("Only the system can create users");
-        return createUserInternal(name, flags, null);
+        return createUserInternal(name, flags, UserHandle.USER_NULL);
     }
 
-    private UserInfo createUserInternal(String name, int flags, UserInfo relatedUser) {
+    private UserInfo createUserInternal(String name, int flags, int relatedUserId) {
         final long ident = Binder.clearCallingIdentity();
-        final UserInfo userInfo;
+        UserInfo userInfo = null;
         try {
             synchronized (mInstallLock) {
                 synchronized (mPackagesLock) {
+                    UserInfo relatedUser = null;
+                    if (relatedUserId != UserHandle.USER_NULL) {
+                        relatedUser = getUserInfoLocked(relatedUserId);
+                        if (relatedUser == null) return null;
+                    }
                     if (isUserLimitReachedLocked()) return null;
                     int userId = getNextAvailableIdLocked();
                     userInfo = new UserInfo(userId, name, null, flags);
