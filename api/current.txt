@@ -14614,11 +14614,14 @@ package android.net {
     method public android.net.NetworkInfo getNetworkInfo(int);
     method public int getNetworkPreference();
     method public boolean isActiveNetworkMetered();
+    method public boolean isNetworkActive();
     method public static boolean isNetworkTypeValid(int);
+    method public void registerNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     method public boolean requestRouteToHost(int, int);
     method public void setNetworkPreference(int);
     method public int startUsingNetworkFeature(int, java.lang.String);
     method public int stopUsingNetworkFeature(int, java.lang.String);
+    method public void unregisterNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     field public static final deprecated java.lang.String ACTION_BACKGROUND_DATA_SETTING_CHANGED = "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
     field public static final java.lang.String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
     field public static final deprecated int DEFAULT_NETWORK_PREFERENCE = 1; // 0x1
@@ -14639,6 +14642,10 @@ package android.net {
     field public static final int TYPE_MOBILE_SUPL = 3; // 0x3
     field public static final int TYPE_WIFI = 1; // 0x1
     field public static final int TYPE_WIMAX = 6; // 0x6
+  }
+
+  public static abstract interface ConnectivityManager.OnNetworkActiveListener {
+    method public abstract void onNetworkActive();
   }
 
   public class Credentials {

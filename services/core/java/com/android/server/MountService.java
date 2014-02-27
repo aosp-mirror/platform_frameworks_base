@@ -817,6 +817,13 @@ class MountService extends IMountService.Stub
     /**
      * Callback from NativeDaemonConnector
      */
+    public boolean onCheckHoldWakeLock(int code) {
+        return false;
+    }
+
+    /**
+     * Callback from NativeDaemonConnector
+     */
     public boolean onEvent(int code, String raw, String[] cooked) {
         if (DEBUG_EVENTS) {
             StringBuilder builder = new StringBuilder();
@@ -1407,7 +1414,8 @@ class MountService extends IMountService.Stub
          * amount of containers we'd ever expect to have. This keeps an
          * "asec list" from blocking a thread repeatedly.
          */
-        mConnector = new NativeDaemonConnector(this, "vold", MAX_CONTAINERS * 2, VOLD_TAG, 25);
+        mConnector = new NativeDaemonConnector(this, "vold", MAX_CONTAINERS * 2, VOLD_TAG, 25,
+                null);
 
         Thread thread = new Thread(mConnector, VOLD_TAG);
         thread.start();

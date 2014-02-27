@@ -458,6 +458,7 @@ public class BatteryStatsHelper {
                 app.mobileRxPackets = mobileRx;
                 app.mobileTxPackets = mobileTx;
                 app.mobileActive = mobileActive / 1000;
+                app.mobileActiveCount = u.getMobileRadioActiveCount(mStatsType);
                 app.wifiRxPackets = wifiRx;
                 app.wifiTxPackets = wifiTx;
                 app.mobileRxBytes = mobileRxB;
@@ -595,6 +596,7 @@ public class BatteryStatsHelper {
                 bs.noCoveragePercent = noCoverageTimeMs * 100.0 / signalTimeMs;
             }
             bs.mobileActive = remainingActiveTime;
+            bs.mobileActiveCount = mStats.getMobileRadioActiveUnknownCount(mStatsType);
         }
     }
 
@@ -610,6 +612,7 @@ public class BatteryStatsHelper {
             bs.mobileRxPackets += wbs.mobileRxPackets;
             bs.mobileTxPackets += wbs.mobileTxPackets;
             bs.mobileActive += wbs.mobileActive;
+            bs.mobileActiveCount += wbs.mobileActiveCount;
             bs.wifiRxPackets += wbs.wifiRxPackets;
             bs.wifiTxPackets += wbs.wifiTxPackets;
             bs.mobileRxBytes += wbs.mobileRxBytes;

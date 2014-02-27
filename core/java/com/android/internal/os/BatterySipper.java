@@ -35,6 +35,7 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public long mobileRxPackets;
     public long mobileTxPackets;
     public long mobileActive;
+    public int mobileActiveCount;
     public double mobilemspp;         // milliseconds per packet
     public long wifiRxPackets;
     public long wifiTxPackets;

@@ -23,6 +23,7 @@ import android.net.LinkAddress;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
 import android.net.wifi.WifiConfiguration;
+import android.os.INetworkActivityListener;
 
 /**
  * @hide
@@ -306,14 +307,12 @@ interface INetworkManagementService
      * reference-counting if an idletimer already exists for given
      * {@code iface}.
      *
-     * {@code label} usually represents the network type of {@code iface}.
-     * Caller should ensure that {@code label} for an {@code iface} remains the
-     * same for all calls to addIdleTimer.
+     * {@code type} is the type of the interface, such as TYPE_MOBILE.
      *
      * Every {@code addIdleTimer} should be paired with a
      * {@link removeIdleTimer} to cleanup when the network disconnects.
      */
-    void addIdleTimer(String iface, int timeout, String label);
+    void addIdleTimer(String iface, int timeout, int type);
 
     /**
      * Removes idletimer for an interface.
@@ -441,4 +440,19 @@ interface INetworkManagementService
      * Determine whether the clatd (464xlat) service has been started
      */
     boolean isClatdStarted();
+
+    /**
+     * Start listening for mobile activity state changes.
+     */
+    void registerNetworkActivityListener(INetworkActivityListener listener);
+
+    /**
+     * Stop listening for mobile activity state changes.
+     */
+    void unregisterNetworkActivityListener(INetworkActivityListener listener);
+
+    /**
+     * Check whether the mobile radio is currently active.
+     */
+    boolean isNetworkActive();
 }
