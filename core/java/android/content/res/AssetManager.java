@@ -539,7 +539,7 @@ public final class AssetManager {
          * @hide
          */
         public final int getAssetInt() {
-            return (int) mAsset;
+            throw new UnsupportedOperationException();
         }
         /**
          * @hide
