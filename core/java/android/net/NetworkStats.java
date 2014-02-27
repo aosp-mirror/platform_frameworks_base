@@ -507,6 +507,17 @@ public class NetworkStats implements Parcelable {
     }
 
     /**
+     * Fast path for battery stats.
+     */
+    public long getTotalPackets() {
+        long total = 0;
+        for (int i = size-1; i >= 0; i--) {
+            total += rxPackets[i] + txPackets[i];
+        }
+        return total;
+    }
+
+    /**
      * Subtract the given {@link NetworkStats}, effectively leaving the delta
      * between two snapshots in time. Assumes that statistics rows collect over
      * time, and that none of them have disappeared.

@@ -656,6 +656,7 @@ public final class BatteryService extends Binder {
                 long ident = Binder.clearCallingIdentity();
                 try {
                     if (mUpdatesStopped) {
+                        mUpdatesStopped = false;
                         mBatteryProps.set(mLastBatteryProps);
                         processValuesLocked();
                     }

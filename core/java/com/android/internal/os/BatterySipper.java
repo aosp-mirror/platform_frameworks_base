@@ -34,6 +34,8 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public long wakeLockTime;
     public long mobileRxPackets;
     public long mobileTxPackets;
+    public long mobileActive;
+    public double mobilemspp;         // milliseconds per packet
     public long wifiRxPackets;
     public long wifiTxPackets;
     public long mobileRxBytes;
@@ -67,6 +69,11 @@ public class BatterySipper implements Comparable<BatterySipper> {
 
     public double[] getValues() {
         return values;
+    }
+
+    public void computeMobilemspp() {
+        long packets = mobileRxPackets+mobileTxPackets;
+        mobilemspp = packets > 0 ? (mobileActive / (double)packets) : 0;
     }
 
     @Override

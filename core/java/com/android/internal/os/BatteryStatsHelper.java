@@ -43,6 +43,7 @@ import com.android.internal.os.BatterySipper.DrainType;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -73,6 +74,8 @@ public class BatteryStatsHelper {
             = new SparseArray<List<BatterySipper>>();
     private final SparseArray<Double> mUserPower = new SparseArray<Double>();
 
+    private final List<BatterySipper> mMobilemsppList = new ArrayList<BatterySipper>();
+
     private int mStatsType = BatteryStats.STATS_SINCE_CHARGED;
     private int mAsUser = 0;
 
@@ -89,6 +92,9 @@ public class BatteryStatsHelper {
     private double mBluetoothPower;
     private double mMinDrainedPower;
     private double mMaxDrainedPower;
+
+    // How much the apps together have kept the mobile radio active.
+    private long mAppMobileActive;
 
     // How much the apps together have left WIFI running.
     private long mAppWifiRunning;
@@ -132,7 +138,7 @@ public class BatteryStatsHelper {
     }
 
     public static String makemAh(double power) {
-        if (power < .0001) return String.format("%.8f", power);
+        if (power < .00001) return String.format("%.8f", power);
         else if (power < .0001) return String.format("%.7f", power);
         else if (power < .001) return String.format("%.6f", power);
         else if (power < .01) return String.format("%.5f", power);
@@ -160,6 +166,7 @@ public class BatteryStatsHelper {
         mTotalPower = 0;
         mWifiPower = 0;
         mBluetoothPower = 0;
+        mAppMobileActive = 0;
         mAppWifiRunning = 0;
 
         mUsageList.clear();
@@ -167,6 +174,7 @@ public class BatteryStatsHelper {
         mBluetoothSippers.clear();
         mUserSippers.clear();
         mUserPower.clear();
+        mMobilemsppList.clear();
 
         if (mStats == null) {
             return;
@@ -193,6 +201,37 @@ public class BatteryStatsHelper {
                 * mPowerProfile.getBatteryCapacity()) / 100;
 
         processAppUsage();
+
+        // Before aggregating apps in to users, collect all apps to sort by their ms per packet.
+        for (int i=0; i<mUsageList.size(); i++) {
+            BatterySipper bs = mUsageList.get(i);
+            bs.computeMobilemspp();
+            if (bs.mobilemspp != 0) {
+                mMobilemsppList.add(bs);
+            }
+        }
+        for (int i=0; i<mUserSippers.size(); i++) {
+            List<BatterySipper> user = mUserSippers.valueAt(i);
+            for (int j=0; j<user.size(); j++) {
+                BatterySipper bs = user.get(j);
+                bs.computeMobilemspp();
+                if (bs.mobilemspp != 0) {
+                    mMobilemsppList.add(bs);
+                }
+            }
+        }
+        Collections.sort(mMobilemsppList, new Comparator<BatterySipper>() {
+            @Override
+            public int compare(BatterySipper lhs, BatterySipper rhs) {
+                if (lhs.mobilemspp < rhs.mobilemspp) {
+                    return 1;
+                } else if (lhs.mobilemspp > rhs.mobilemspp) {
+                    return -1;
+                }
+                return 0;
+            }
+        });
+
         processMiscUsage();
 
         if (DEBUG) {
@@ -225,6 +264,7 @@ public class BatteryStatsHelper {
             powerCpuNormal[p] = mPowerProfile.getAveragePower(PowerProfile.POWER_CPU_ACTIVE, p);
         }
         final double mobilePowerPerPacket = getMobilePowerPerPacket();
+        final double mobilePowerPerMs = getMobilePowerPerMs();
         final double wifiPowerPerPacket = getWifiPowerPerPacket();
         long appWakelockTime = 0;
         BatterySipper osApp = null;
@@ -320,9 +360,20 @@ public class BatteryStatsHelper {
             final long mobileTx = u.getNetworkActivityPackets(NETWORK_MOBILE_TX_DATA, mStatsType);
             final long mobileRxB = u.getNetworkActivityBytes(NETWORK_MOBILE_RX_DATA, mStatsType);
             final long mobileTxB = u.getNetworkActivityBytes(NETWORK_MOBILE_TX_DATA, mStatsType);
-            p = (mobileRx + mobileTx) * mobilePowerPerPacket;
+            final long mobileActive = u.getMobileRadioActiveTime(mStatsType);
+            if (mobileActive > 0) {
+                // We are tracking when the radio is up, so can use the active time to
+                // determine power use.
+                mAppMobileActive += mobileActive;
+                p = (mobilePowerPerMs * mobileActive) / 1000;
+            } else {
+                // We are not tracking when the radio is up, so must approximate power use
+                // based on the number of packets.
+                p = (mobileRx + mobileTx) * mobilePowerPerPacket;
+            }
             if (DEBUG && p != 0) Log.d(TAG, "UID " + u.getUid() + ": mobile packets "
-                    + (mobileRx+mobileTx) + " power=" + makemAh(p));
+                    + (mobileRx+mobileTx) + " active time " + mobileActive
+                    + " power=" + makemAh(p));
             power += p;
 
             // Add cost of wifi traffic
@@ -406,6 +457,7 @@ public class BatteryStatsHelper {
                 app.wakeLockTime = wakelockTime;
                 app.mobileRxPackets = mobileRx;
                 app.mobileTxPackets = mobileTx;
+                app.mobileActive = mobileActive / 1000;
                 app.wifiRxPackets = wifiRx;
                 app.wifiTxPackets = wifiTx;
                 app.mobileRxBytes = mobileRxB;
@@ -474,7 +526,7 @@ public class BatteryStatsHelper {
         double phoneOnPower = mPowerProfile.getAveragePower(PowerProfile.POWER_RADIO_ACTIVE)
                 * phoneOnTimeMs / (60*60*1000);
         if (phoneOnPower != 0) {
-            addEntry(BatterySipper.DrainType.PHONE, phoneOnTimeMs, phoneOnPower);
+            BatterySipper bs = addEntry(BatterySipper.DrainType.PHONE, phoneOnTimeMs, phoneOnPower);
         }
     }
 
@@ -531,12 +583,18 @@ public class BatteryStatsHelper {
             Log.d(TAG, "Cell radio scanning: time=" + scanningTimeMs + " power=" + makemAh(p));
         }
         power += p;
+        long radioActiveTimeUs = mStats.getMobileRadioActiveTime(mBatteryRealtime, mStatsType);
+        long remainingActiveTime = (radioActiveTimeUs - mAppMobileActive) / 1000;
+        if (remainingActiveTime > 0) {
+            power += getMobilePowerPerMs() * remainingActiveTime;
+        }
         if (power != 0) {
             BatterySipper bs =
                     addEntry(BatterySipper.DrainType.CELL, signalTimeMs, power);
             if (signalTimeMs != 0) {
                 bs.noCoveragePercent = noCoverageTimeMs * 100.0 / signalTimeMs;
             }
+            bs.mobileActive = remainingActiveTime;
         }
     }
 
@@ -551,6 +609,7 @@ public class BatteryStatsHelper {
             bs.wakeLockTime += wbs.wakeLockTime;
             bs.mobileRxPackets += wbs.mobileRxPackets;
             bs.mobileTxPackets += wbs.mobileTxPackets;
+            bs.mobileActive += wbs.mobileActive;
             bs.wifiRxPackets += wbs.wifiRxPackets;
             bs.wifiTxPackets += wbs.wifiTxPackets;
             bs.mobileRxBytes += wbs.mobileRxBytes;
@@ -558,6 +617,7 @@ public class BatteryStatsHelper {
             bs.wifiRxBytes += wbs.wifiRxBytes;
             bs.wifiTxBytes += wbs.wifiTxBytes;
         }
+        bs.computeMobilemspp();
     }
 
     private void addWiFiUsage() {
@@ -650,6 +710,13 @@ public class BatteryStatsHelper {
     }
 
     /**
+     * Return estimated power (in mAs) of keeping the radio up
+     */
+    private double getMobilePowerPerMs() {
+        return mPowerProfile.getAveragePower(PowerProfile.POWER_RADIO_ACTIVE) / (60*60*1000);
+    }
+
+    /**
      * Return estimated power (in mAs) of sending a byte with the Wi-Fi radio.
      */
     private double getWifiPowerPerPacket() {
@@ -689,6 +756,10 @@ public class BatteryStatsHelper {
 
     public List<BatterySipper> getUsageList() {
         return mUsageList;
+    }
+
+    public List<BatterySipper> getMobilemsppList() {
+        return mMobilemsppList;
     }
 
     public long getStatsPeriod() { return mStatsPeriod; }
