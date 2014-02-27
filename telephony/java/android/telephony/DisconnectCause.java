@@ -101,8 +101,93 @@ public class DisconnectCause {
     /** Unknown error or not specified */
     public static final int ERROR_UNSPECIFIED              = 36;
 
+    /** Smallest valid value for call disconnect codes. */
+    public static final int MINIMUM_VALID_VALUE = NOT_DISCONNECTED;
+    /** Largest valid value for call disconnect codes. */
+    public static final int MAXIMUM_VALID_VALUE = ERROR_UNSPECIFIED;
+
     /** Private constructor to avoid class instantiation. */
     private DisconnectCause() {
         // Do nothing.
+    }
+
+    /** Returns descriptive string for the specified disconnect cause. */
+    public static String toString(int cause) {
+        switch (cause) {
+        case NOT_DISCONNECTED:
+            return "NOT_DISCONNECTED";
+        case INCOMING_MISSED:
+            return "INCOMING_MISSED";
+        case NORMAL:
+            return "NORMAL";
+        case LOCAL:
+            return "LOCAL";
+        case BUSY:
+            return "BUSY";
+        case CONGESTION:
+            return "CONGESTION";
+        case INVALID_NUMBER:
+            return "INVALID_NUMBER";
+        case NUMBER_UNREACHABLE:
+            return "NUMBER_UNREACHABLE";
+        case SERVER_UNREACHABLE:
+            return "SERVER_UNREACHABLE";
+        case INVALID_CREDENTIALS:
+            return "INVALID_CREDENTIALS";
+        case OUT_OF_NETWORK:
+            return "OUT_OF_NETWORK";
+        case SERVER_ERROR:
+            return "SERVER_ERROR";
+        case TIMED_OUT:
+            return "TIMED_OUT";
+        case LOST_SIGNAL:
+            return "LOST_SIGNAL";
+        case LIMIT_EXCEEDED:
+            return "LIMIT_EXCEEDED";
+        case INCOMING_REJECTED:
+            return "INCOMING_REJECTED";
+        case POWER_OFF:
+            return "POWER_OFF";
+        case OUT_OF_SERVICE:
+            return "OUT_OF_SERVICE";
+        case ICC_ERROR:
+            return "ICC_ERROR";
+        case CALL_BARRED:
+            return "CALL_BARRED";
+        case FDN_BLOCKED:
+            return "FDN_BLOCKED";
+        case CS_RESTRICTED:
+            return "CS_RESTRICTED";
+        case CS_RESTRICTED_NORMAL:
+            return "CS_RESTRICTED_NORMAL";
+        case CS_RESTRICTED_EMERGENCY:
+            return "CS_RESTRICTED_EMERGENCY";
+        case UNOBTAINABLE_NUMBER:
+            return "UNOBTAINABLE_NUMBER";
+        case CDMA_LOCKED_UNTIL_POWER_CYCLE:
+            return "CDMA_LOCKED_UNTIL_POWER_CYCLE";
+        case CDMA_DROP:
+            return "CDMA_DROP";
+        case CDMA_INTERCEPT:
+            return "CDMA_INTERCEPT";
+        case CDMA_REORDER:
+            return "CDMA_REORDER";
+        case CDMA_SO_REJECT:
+            return "CDMA_SO_REJECT";
+        case CDMA_RETRY_ORDER:
+            return "CDMA_RETRY_ORDER";
+        case CDMA_ACCESS_FAILURE:
+            return "CDMA_ACCESS_FAILURE";
+        case CDMA_PREEMPTED:
+            return "CDMA_PREEMPTED";
+        case CDMA_NOT_EMERGENCY:
+            return "CDMA_NOT_EMERGENCY";
+        case CDMA_ACCESS_BLOCKED:
+            return "CDMA_ACCESS_BLOCKED";
+        case ERROR_UNSPECIFIED:
+            return "ERROR_UNSPECIFIED";
+        default:
+            return "INVALID";
+        }
     }
 }
