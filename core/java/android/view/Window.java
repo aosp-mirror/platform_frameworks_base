@@ -29,8 +29,11 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemProperties;
 import android.transition.Scene;
+import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.view.accessibility.AccessibilityEvent;
+
+import java.util.Map;
 
 /**
  * Abstract base class for a top-level window look and behavior policy.  An
@@ -1386,30 +1389,43 @@ public abstract class Window {
      * @hide
      */
     public interface SceneTransitionListener {
-        void enterSharedElement(Bundle transitionArgs);
         void nullPendingTransition();
         void convertFromTranslucent();
         void convertToTranslucent();
+        void sharedElementStart(Transition transition);
+        void sharedElementEnd();
     }
 
     /**
-     * Controls how the background fade is triggered. If fadeEarly is true, the Window background
-     * will fade in as soon as the shared elements are ready to switch. If fadeEarly is false,
-     * the background will fade only after the calling Activity's exit transition completes.
-     * By default, the Window will fade in when the calling Activity's exit transition completes.
+     * Controls when the Activity enter scene is triggered and the background is faded in. If
+     * triggerEarly is true, the enter scene will begin as soon as possible and the background
+     * will fade in when all shared elements are ready to begin transitioning. If triggerEarly is
+     * false, the Activity enter scene and background fade will be triggered when the calling
+     * Activity's exit transition completes.
      *
-     * @param fadeEarly Set to true to fade out the exiting Activity as soon as the shared elements
-     *                  are transferred. Set to false to fade out the exiting Activity as soon as
-     *                  the shared element is transferred.
-     * @hide
+     * @param triggerEarly Set to true to have the Activity enter scene transition in as early as
+     *                     possible or set to false to wait for the calling Activity to exit first.
      */
-    public void setEarlyBackgroundTransition(boolean fadeEarly) {
+    public void setTriggerEarlyEnterTransition(boolean triggerEarly) {
     }
 
     /**
      * Start the exit transition.
      * @hide
      */
-    public void startExitTransition(ActivityOptions activityOptions) {
+    public Bundle startExitTransition(ActivityOptions options) {
+        return null;
+    }
+
+    /**
+     * On entering Activity Scene transitions, shared element names may be mapped from a
+     * source Activity's specified name to a unique shared element name in the View hierarchy.
+     * Under most circumstances, mapping is not necessary - a single View will have the
+     * shared element name given by the calling Activity. However, if there are several similar
+     * Views (e.g. in a ListView), the correct shared element must be mapped.
+     * @param sharedElementNames A mapping from the calling Activity's assigned shared element
+     *                           name to a unique shared element name in the View hierarchy.
+     */
+    public void mapTransitionTargets(Map<String, String> sharedElementNames) {
     }
 }
