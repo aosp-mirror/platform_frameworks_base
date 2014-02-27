@@ -35,32 +35,58 @@ import android.os.Parcelable;
 public class UsbInterface implements Parcelable {
 
     private final int mId;
+    private final int mAlternateSetting;
+    private final String mName;
     private final int mClass;
     private final int mSubclass;
     private final int mProtocol;
-    private final Parcelable[] mEndpoints;
+    private Parcelable[] mEndpoints;
 
     /**
      * UsbInterface should only be instantiated by UsbService implementation
      * @hide
      */
-    public UsbInterface(int id, int Class, int subClass, int protocol,
-            Parcelable[] endpoints) {
+    public UsbInterface(int id, int alternateSetting, String name,
+            int Class, int subClass, int protocol) {
         mId = id;
+        mAlternateSetting = alternateSetting;
+        mName = name;
         mClass = Class;
         mSubclass = subClass;
         mProtocol = protocol;
-        mEndpoints = endpoints;
     }
 
     /**
-     * Returns the interface's ID field.
-     * This is an integer that uniquely identifies the interface on the device.
+     * Returns the interface's bInterfaceNumber field.
+     * This is an integer that along with the alternate setting uniquely identifies
+     * the interface on the device.
      *
      * @return the interface's ID
      */
     public int getId() {
         return mId;
+    }
+
+    /**
+     * Returns the interface's bAlternateSetting field.
+     * This is an integer that along with the ID uniquely identifies
+     * the interface on the device.
+     * {@link UsbDeviceConnection#setInterface} can be used to switch between
+     * two interfaces with the same ID but different alternate setting.
+     *
+     * @return the interface's alternate setting
+     */
+    public int getAlternateSetting() {
+        return mAlternateSetting;
+    }
+
+    /**
+     * Returns the interface's name.
+     *
+     * @return the interface's name
+     */
+    public String getName() {
+        return mName;
     }
 
     /**
@@ -109,22 +135,42 @@ public class UsbInterface implements Parcelable {
         return (UsbEndpoint)mEndpoints[index];
     }
 
+    /**
+     * Only used by UsbService implementation
+     * @hide
+     */
+    public void setEndpoints(Parcelable[] endpoints) {
+        mEndpoints = endpoints;
+    }
+
     @Override
     public String toString() {
-        return "UsbInterface[mId=" + mId + ",mClass=" + mClass +
+        StringBuilder builder = new StringBuilder("UsbInterface[mId=" + mId +
+                ",mAlternateSetting=" + mAlternateSetting +
+                ",mName=" + mName + ",mClass=" + mClass +
                 ",mSubclass=" + mSubclass + ",mProtocol=" + mProtocol +
-                ",mEndpoints=" + mEndpoints + "]";
+                ",mEndpoints=[");
+        for (int i = 0; i < mEndpoints.length; i++) {
+            builder.append("\n");
+            builder.append(mEndpoints[i].toString());
+        }
+        builder.append("]");
+        return builder.toString();
     }
 
     public static final Parcelable.Creator<UsbInterface> CREATOR =
         new Parcelable.Creator<UsbInterface>() {
         public UsbInterface createFromParcel(Parcel in) {
             int id = in.readInt();
+            int alternateSetting = in.readInt();
+            String name = in.readString();
             int Class = in.readInt();
             int subClass = in.readInt();
             int protocol = in.readInt();
             Parcelable[] endpoints = in.readParcelableArray(UsbEndpoint.class.getClassLoader());
-            return new UsbInterface(id, Class, subClass, protocol, endpoints);
+            UsbInterface intf = new UsbInterface(id, alternateSetting, name, Class, subClass, protocol);
+            intf.setEndpoints(endpoints);
+            return intf;
         }
 
         public UsbInterface[] newArray(int size) {
@@ -138,6 +184,8 @@ public class UsbInterface implements Parcelable {
 
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mId);
+        parcel.writeInt(mAlternateSetting);
+        parcel.writeString(mName);
         parcel.writeInt(mClass);
         parcel.writeInt(mSubclass);
         parcel.writeInt(mProtocol);

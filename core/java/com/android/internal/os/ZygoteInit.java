@@ -244,9 +244,11 @@ public class ZygoteInit {
     }
 
     static void preload() {
+        Log.d(TAG, "begin preload");
         preloadClasses();
         preloadResources();
         preloadOpenGL();
+        Log.d(TAG, "end preload");
     }
 
     private static void preloadOpenGL() {

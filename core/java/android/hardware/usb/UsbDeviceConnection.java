@@ -101,6 +101,25 @@ public class UsbDeviceConnection {
     }
 
     /**
+     * Sets the current {@link android.hardware.usb.UsbInterface}.
+     * Used to select between two interfaces with the same ID but different alternate setting.
+     *
+     * @return true if the interface was successfully released
+     */
+    public boolean setInterface(UsbInterface intf) {
+        return native_set_interface(intf.getId(), intf.getAlternateSetting());
+    }
+
+    /**
+     * Sets the device's current {@link android.hardware.usb.UsbConfiguration}.
+     *
+     * @return true if the configuration was successfully set
+     */
+    public boolean setConfiguration(UsbConfiguration configuration) {
+        return native_set_configuration(configuration.getId());
+    }
+
+    /**
      * Performs a control transaction on endpoint zero for this device.
      * The direction of the transfer is determined by the request type.
      * If requestType & {@link UsbConstants#USB_ENDPOINT_DIR_MASK} is
@@ -236,6 +255,8 @@ public class UsbDeviceConnection {
     private native byte[] native_get_desc();
     private native boolean native_claim_interface(int interfaceID, boolean force);
     private native boolean native_release_interface(int interfaceID);
+    private native boolean native_set_interface(int interfaceID, int alternateSetting);
+    private native boolean native_set_configuration(int configurationID);
     private native int native_control_request(int requestType, int request, int value,
             int index, byte[] buffer, int offset, int length, int timeout);
     private native int native_bulk_request(int endpoint, byte[] buffer,
