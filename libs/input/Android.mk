@@ -31,7 +31,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libinputflinger
 
 LOCAL_C_INCLUDES := \
-    external/skia/include/core \
     frameworks/native/services
 
 
