@@ -2831,6 +2831,13 @@ void TouchInputMapper::configureParameters() {
                 mParameters.deviceType == Parameters::DEVICE_TYPE_TOUCH_SCREEN
                         && getDevice()->isExternal();
     }
+
+    // Initial downs on external touch devices should wake the device.
+    // Normally we don't do this for internal touch screens to prevent them from waking
+    // up in your pocket but you can enable it using the input device configuration.
+    mParameters.wake = getDevice()->isExternal();
+    getDevice()->getConfiguration().tryGetProperty(String8("touch.wake"),
+            mParameters.wake);
 }
 
 void TouchInputMapper::dumpParameters(String8& dump) {
@@ -3733,11 +3740,7 @@ void TouchInputMapper::sync(nsecs_t when) {
                 getContext()->fadePointer();
             }
 
-            // Initial downs on external touch devices should wake the device.
-            // We don't do this for internal touch screens to prevent them from waking
-            // up in your pocket.
-            // TODO: Use the input device configuration to control this behavior more finely.
-            if (getDevice()->isExternal()) {
+            if (mParameters.wake) {
                 policyFlags |= POLICY_FLAG_WAKE_DROPPED;
             }
         }
