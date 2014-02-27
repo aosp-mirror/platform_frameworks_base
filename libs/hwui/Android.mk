@@ -61,12 +61,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_C_INCLUDES += \
 		$(JNI_H_INCLUDE) \
 		$(LOCAL_PATH)/../../include/utils \
-		external/skia/include/core \
-		external/skia/include/effects \
-		external/skia/include/images \
-		external/skia/src/core \
-		external/skia/src/ports \
-		external/skia/include/utils
+		external/skia/src/core
 
 	LOCAL_CFLAGS += -DUSE_OPENGL_RENDERER -DEGL_EGLEXT_PROTOTYPES -DGL_GLEXT_PROTOTYPES
 	LOCAL_CFLAGS += -Wno-unused-parameter

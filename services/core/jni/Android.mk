@@ -30,7 +30,6 @@ LOCAL_C_INCLUDES += \
     frameworks/base/libs \
     frameworks/base/core/jni \
     frameworks/native/services \
-    external/skia/include/core \
     libcore/include \
     libcore/include/libsuspend \
 	$(call include-path-for, libhardware)/hardware \
