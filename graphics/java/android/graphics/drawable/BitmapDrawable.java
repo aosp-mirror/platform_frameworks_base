@@ -603,6 +603,16 @@ public class BitmapDrawable extends Drawable {
     }
 
     /**
+     * Returns the tint mode for this drawable, or {@code null} if none set.
+     *
+     * @return the tint mode for this drawable, or {@code null} if none set
+     * @hide
+     */
+    public Mode getTintMode() {
+        return mBitmapState.mTintMode;
+    }
+
+    /**
      * Ensures the tint filter is consistent with the current tint color and
      * mode.
      */
