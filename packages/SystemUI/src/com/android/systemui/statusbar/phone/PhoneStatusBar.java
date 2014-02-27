@@ -346,6 +346,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     public void setZenMode(int mode) {
         super.setZenMode(mode);
         if (mModeIcon == null) return;
+        if (!isDeviceProvisioned()) return;
         final boolean limited = mode == Settings.Global.ZEN_MODE_LIMITED;
         final boolean full = mode == Settings.Global.ZEN_MODE_FULL;
         mModeIcon.setVisibility(full || limited ? View.VISIBLE : View.GONE);

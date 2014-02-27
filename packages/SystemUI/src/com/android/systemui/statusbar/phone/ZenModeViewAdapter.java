@@ -33,27 +33,30 @@ public class ZenModeViewAdapter implements ZenModeView.Adapter {
     private final Context mContext;
     private final ContentResolver mResolver;
     private final Handler mHandler = new Handler();
+    private final SettingsObserver mObserver;
     private final List<ExitCondition> mExits = Arrays.asList(
             newExit("Until you delete this", "Until", "You delete this"));
 
     private Callbacks mCallbacks;
     private int mExitIndex;
+    private boolean mDeviceProvisioned;
+    private int mMode;
 
     public ZenModeViewAdapter(Context context) {
         mContext = context;
         mResolver = mContext.getContentResolver();
-        mResolver.registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.ZEN_MODE),
-                false, new SettingsObserver(mHandler));
+        mObserver = new SettingsObserver(mHandler);
+        mObserver.init();
+    }
+
+    @Override
+    public boolean isApplicable() {
+        return mDeviceProvisioned;
     }
 
     @Override
     public int getMode() {
-        final int v = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
-        if (v == Settings.Global.ZEN_MODE_LIMITED) return MODE_LIMITED;
-        if (v == Settings.Global.ZEN_MODE_FULL) return MODE_FULL;
-        return MODE_OFF;
+        return mMode;
     }
 
     @Override
@@ -137,9 +140,34 @@ public class ZenModeViewAdapter implements ZenModeView.Adapter {
             super(handler);
         }
 
+        public void init() {
+            loadSettings();
+            mResolver.registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.ZEN_MODE),
+                    false, this);
+            mResolver.registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED),
+                    false, this);
+        }
+
         @Override
         public void onChange(boolean selfChange) {
+            loadSettings();
             mChange.run();  // already on handler
+        }
+
+        private void loadSettings() {
+            mDeviceProvisioned = Settings.Global.getInt(mResolver,
+                    Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+            mMode = getMode();
+        }
+
+        private int getMode() {
+            final int v = Settings.Global.getInt(mResolver,
+                    Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
+            if (v == Settings.Global.ZEN_MODE_LIMITED) return MODE_LIMITED;
+            if (v == Settings.Global.ZEN_MODE_FULL) return MODE_FULL;
+            return MODE_OFF;
         }
     }
 }
