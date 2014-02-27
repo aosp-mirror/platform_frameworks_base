@@ -669,9 +669,14 @@ class WindowStateAnimator {
 
             int flags = SurfaceControl.HIDDEN;
             final WindowManager.LayoutParams attrs = mWin.mAttrs;
+            final boolean isVideoPlane =
+                    (attrs.privateFlags & WindowManager.LayoutParams.PRIVATE_FLAG_VIDEO_PLANE) != 0;
 
             if ((attrs.flags&WindowManager.LayoutParams.FLAG_SECURE) != 0) {
                 flags |= SurfaceControl.SECURE;
+            }
+            if (isVideoPlane) {
+                flags |= SurfaceControl.FX_SURFACE_VIDEO_PLANE;
             }
             if (DEBUG_VISIBILITY) Slog.v(
                 TAG, "Creating surface in session "
