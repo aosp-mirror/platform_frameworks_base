@@ -1068,6 +1068,7 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
         setupDrawExternalTexture(layer->getTexture());
     }
     if (currentTransform()->isPureTranslate() &&
+            !layer->getForceFilter() &&
             layer->getWidth() == (uint32_t) rect.getWidth() &&
             layer->getHeight() == (uint32_t) rect.getHeight()) {
         const float x = (int) floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
