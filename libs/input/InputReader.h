@@ -1214,6 +1214,8 @@ protected:
             GESTURE_MODE_SPOTS,
         };
         GestureMode gestureMode;
+
+        bool wake;
     } mParameters;
 
     // Immutable calibration parameters in parsed form.
