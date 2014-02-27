@@ -34,6 +34,7 @@ public class InputMethodTest extends InstrumentationTestCase {
     private static final boolean IS_AUX = true;
     private static final boolean IS_DEFAULT = true;
     private static final boolean IS_AUTO = true;
+    private static final ArrayList<InputMethodSubtype> NO_SUBTYPE = null;
 
     @SmallTest
     public void testDefaultEnabledImesWithDefaultVoiceIme() throws Exception {
@@ -45,6 +46,7 @@ public class InputMethodTest extends InstrumentationTestCase {
         imis.add(createNonDefaultDummyVoiceIme2());
         imis.add(createDefaultDummyEnUSKeyboardIme());
         imis.add(createNonDefaultDummyJaJPKeyboardIme());
+        imis.add(createNonDefaultDummyJaJPKeyboardImeWithoutSubtypes());
         final ArrayList<InputMethodInfo> enabledImis = InputMethodUtils.getDefaultEnabledImes(
                 context, true, imis);
         assertEquals(2, enabledImis.size());
@@ -69,6 +71,7 @@ public class InputMethodTest extends InstrumentationTestCase {
         imis.add(createNonDefaultDummyVoiceIme2());
         imis.add(createDefaultDummyEnUSKeyboardIme());
         imis.add(createNonDefaultDummyJaJPKeyboardIme());
+        imis.add(createNonDefaultDummyJaJPKeyboardImeWithoutSubtypes());
         final ArrayList<InputMethodInfo> enabledImis = InputMethodUtils.getDefaultEnabledImes(
                 context, true, imis);
         assertEquals(3, enabledImis.size());
@@ -82,6 +85,49 @@ public class InputMethodTest extends InstrumentationTestCase {
                 continue;
             } else {
                 fail("Invalid enabled subtype.");
+            }
+        }
+    }
+
+    @SmallTest
+    public void testParcelable() throws Exception {
+        final ArrayList<InputMethodInfo> originalList = new ArrayList<InputMethodInfo>();
+        originalList.add(createNonDefaultAutoDummyVoiceIme0());
+        originalList.add(createNonDefaultAutoDummyVoiceIme1());
+        originalList.add(createNonDefaultDummyVoiceIme2());
+        originalList.add(createDefaultDummyEnUSKeyboardIme());
+        originalList.add(createNonDefaultDummyJaJPKeyboardIme());
+        originalList.add(createNonDefaultDummyJaJPKeyboardImeWithoutSubtypes());
+
+        final List<InputMethodInfo> clonedList = cloneViaParcel(originalList);
+        assertNotNull(clonedList);
+        assertEquals(originalList.size(), clonedList.size());
+        assertEquals(originalList, clonedList);
+
+        for (int imeIndex = 0; imeIndex < originalList.size(); ++imeIndex) {
+            final InputMethodInfo original = originalList.get(imeIndex);
+            final InputMethodInfo cloned = clonedList.get(imeIndex);
+            assertEquals(original, cloned);
+            assertEquals(original.getSubtypeCount(), cloned.getSubtypeCount());
+            for (int subtypeIndex = 0; subtypeIndex < original.getSubtypeCount(); ++subtypeIndex) {
+                final InputMethodSubtype originalSubtype = original.getSubtypeAt(subtypeIndex);
+                final InputMethodSubtype clonedSubtype = cloned.getSubtypeAt(subtypeIndex);
+                assertEquals(originalSubtype, clonedSubtype);
+                assertEquals(originalSubtype.hashCode(), clonedSubtype.hashCode());
+            }
+        }
+    }
+
+    private static List<InputMethodInfo> cloneViaParcel(final List<InputMethodInfo> list) {
+        Parcel p = null;
+        try {
+            p = Parcel.obtain();
+            p.writeTypedList(list);
+            p.setDataPosition(0);
+            return p.createTypedArrayList(InputMethodInfo.CREATOR);
+        } finally {
+            if (p != null) {
+                p.recycle();
             }
         }
     }
@@ -154,5 +200,13 @@ public class InputMethodTest extends InstrumentationTestCase {
         subtypes.add(createDummyInputMethodSubtype("ja_JP", "keyboard", !IS_AUX, !IS_AUTO));
         return createDummyInputMethodInfo("DummyNonDefaultJaJPKeyboardIme", "dummy.keyboard1",
                 "DummyKeyboard1", !IS_AUX, !IS_DEFAULT, subtypes);
+    }
+
+    // Although IMEs that have no subtype are considered to be deprecated, the Android framework
+    // must still be able to handle such IMEs as well as IMEs that have at least one subtype.
+    private static InputMethodInfo createNonDefaultDummyJaJPKeyboardImeWithoutSubtypes() {
+        final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+        return createDummyInputMethodInfo("DummyNonDefaultJaJPKeyboardImeWithoutSubtypes",
+                "dummy.keyboard2", "DummyKeyboard2", !IS_AUX, !IS_DEFAULT, NO_SUBTYPE);
     }
 }
