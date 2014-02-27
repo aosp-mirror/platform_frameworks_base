@@ -156,7 +156,7 @@ static jobject
 android_eglGetDisplayInt
   (JNIEnv *_env, jobject _this, jint display_id) {
 
-    if (sizeof(void*) != sizeof(uint32_t)) {
+    if ((EGLNativeDisplayType)display_id != EGL_DEFAULT_DISPLAY) {
         jniThrowException(_env, "java/lang/UnsupportedOperationException", "eglGetDisplay");
         return 0;
     }
