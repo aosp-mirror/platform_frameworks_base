@@ -20,6 +20,8 @@ import android.net.wifi.BatchedScanResult;
 import android.net.wifi.BatchedScanSettings;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
+import android.net.wifi.ScanSettings;
+import android.net.wifi.WifiChannel;
 import android.net.wifi.ScanResult;
 import android.net.DhcpInfo;
 
@@ -45,7 +47,9 @@ interface IWifiManager
 
     boolean pingSupplicant();
 
-    void startScan(in WorkSource ws);
+    List<WifiChannel> getChannelList();
+
+    void startScan(in ScanSettings requested, in WorkSource ws);
 
     List<ScanResult> getScanResults(String callingPackage);
 
