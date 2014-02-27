@@ -35,6 +35,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.RegisteredServicesCacheListener;
+import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -1799,9 +1800,31 @@ public class AccountManagerService
             }
         }
 
+        @Override
         public void onResult(Bundle result) {
             mNumResults++;
-            if (result != null && !TextUtils.isEmpty(result.getString(AccountManager.KEY_AUTHTOKEN))) {
+            Intent intent = null;
+            if (result != null
+                    && (intent = result.getParcelable(AccountManager.KEY_INTENT)) != null) {
+                /*
+                 * The Authenticator API allows third party authenticators to
+                 * supply arbitrary intents to other apps that they can run,
+                 * this can be very bad when those apps are in the system like
+                 * the System Settings.
+                 */
+                PackageManager pm = mContext.getPackageManager();
+                ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
+                int targetUid = resolveInfo.activityInfo.applicationInfo.uid;
+                int authenticatorUid = Binder.getCallingUid();
+                if (PackageManager.SIGNATURE_MATCH !=
+                        pm.checkSignatures(authenticatorUid, targetUid)) {
+                    throw new SecurityException(
+                            "Activity to be started with KEY_INTENT must " +
+                            "share Authenticator's signatures");
+                }
+            }
+            if (result != null
+                    && !TextUtils.isEmpty(result.getString(AccountManager.KEY_AUTHTOKEN))) {
                 String accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
                 String accountType = result.getString(AccountManager.KEY_ACCOUNT_TYPE);
                 if (!TextUtils.isEmpty(accountName) && !TextUtils.isEmpty(accountType)) {
