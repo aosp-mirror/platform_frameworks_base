@@ -23,9 +23,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.util.Slog;
@@ -207,6 +205,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub
 
     @Override
     public void disable(int what, IBinder token, String pkg) {
+        if (!mNotificationDelegate.allowDisable(what, token, pkg)) {
+            if (SPEW) Slog.d(TAG, "Blocking disable request from " + pkg);
+            return;
+        }
         disableInternal(mCurrentUserId, what, token, pkg);
     }
 
@@ -676,26 +678,4 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             }
         }
     }
-
-    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
-                    || Intent.ACTION_SCREEN_OFF.equals(action)) {
-                collapsePanels();
-            }
-            /*
-            else if (Telephony.Intents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
-                updateNetworkName(intent.getBooleanExtra(Telephony.Intents.EXTRA_SHOW_SPN, false),
-                        intent.getStringExtra(Telephony.Intents.EXTRA_SPN),
-                        intent.getBooleanExtra(Telephony.Intents.EXTRA_SHOW_PLMN, false),
-                        intent.getStringExtra(Telephony.Intents.EXTRA_PLMN));
-            }
-            else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-                updateResources();
-            }
-            */
-        }
-    };
-
 }
