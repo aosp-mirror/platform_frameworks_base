@@ -86,6 +86,9 @@ public class SyncOperation implements Comparable {
     /** Amount of time before {@link #effectiveRunTime} from which this sync can run. */
     public long flexTime;
 
+    /** Descriptive string key for this operation */
+    public String wakeLockName;
+
     public SyncOperation(Account account, int userId, int reason, int source, String provider,
             Bundle extras, long runTimeFromNow, long flexTime, long backoff,
             long delayUntil, boolean allowParallelSyncs) {
@@ -308,25 +311,17 @@ public class SyncOperation implements Comparable {
         sb.append("]");
     }
 
-    public String wakeLockKey() {
-        if (target.target_provider) {
-            return target.account.name + "/" + target.account.type + ":" + target.provider;
-        } else if (target.target_service) {
-            return target.service.getPackageName() + "/" + target.service.getClassName();
-        } else {
-            Log.wtf(TAG, "Invalid target getting wakelock for operation - " + key);
-            return null;
-        }
-    }
-
     public String wakeLockName() {
+        if (wakeLockName != null) {
+            return wakeLockName;
+        }
         if (target.target_provider) {
-            return "/" + target.provider
+            return (wakeLockName = target.provider
                     + "/" + target.account.type
-                    + "/" + target.account.name;
+                    + "/" + target.account.name);
         } else if (target.target_service) {
-            return "/" + target.service.getPackageName()
-                    + "/" + target.service.getClassName();
+            return (wakeLockName = target.service.getPackageName()
+                    + "/" + target.service.getClassName());
         } else {
             Log.wtf(TAG, "Invalid target getting wakelock name for operation - " + key);
             return null;
