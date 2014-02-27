@@ -155,12 +155,11 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
     );
 
     // C function EGLDisplay eglGetDisplay ( EGLNativeDisplayType display_id )
-    // TODO Deprecate the eglGetDisplay(int) API method
 
     public static native EGLDisplay eglGetDisplay(
         int display_id
     );
-    // TODO Unhide the eglGetDisplay(long) API method
+
     /**
      * {@hide}
      */
