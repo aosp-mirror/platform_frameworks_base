@@ -190,7 +190,7 @@
     <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Prístup k zariadeniam a sieťam prostredníctvom rozhrania Bluetooth."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Nastavenia zvuku"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Zmena nastavení zvuku."</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Má vplyv na batériu"</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Vplyv na batériu"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Používanie funkcií, ktoré môžu rýchlo vyčerpať batériu."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendár"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Priamy prístup ku kalendáru a udalostiam."</string>
@@ -232,7 +232,7 @@
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Funkcie len pre vývojárov aplikácií."</string>
     <string name="permgrouplab_display" msgid="4279909676036402636">"Používateľské rozhranie iných aplikácií"</string>
     <string name="permgroupdesc_display" msgid="6051002031933013714">"Vplyv na používateľské rozhranie ďalších aplikácií."</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Ukladací priestor"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Úložisko"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Prístup do ukl. priestoru USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Prístup na kartu SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funkcie zjednodušenia ovládania"</string>
@@ -566,7 +566,7 @@
     <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"čítanie presných stavov telefónu"</string>
     <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Umožňuje aplikácii pristupovať k presným stavom telefónu. Toto povolenie umožňuje aplikácii zistiť skutočný stav hovoru, či je hovor aktívny alebo na pozadí, zlyhania hovorov, presný stav dátového pripojenia a zlyhania dátového pripojenia."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"zabránenie prechodu tabletu do režimu spánku"</string>
-    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"zabránenie prechodu telefónu do režimu spánku"</string>
+    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"deaktivácia režimu spánku"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Umožňuje aplikácii zabrániť prechodu tabletu do režimu spánku."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Umožňuje aplikácii zabrániť prechodu telefónu do režimu spánku."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"infračervený prenos"</string>
@@ -637,7 +637,7 @@
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Umožňuje aplikácii zobraziť informácie o konfigurácii Bluetooth na telefóne. Taktiež jej umožňuje nadväzovať a akceptovať spojenia so spárovanými zariadeniami."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"ovládať technológiu Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Umožňuje aplikácii komunikovať so značkami, kartami a čítačkami s podporou technológie Near Field Communication (NFC)."</string>
-    <string name="permlab_disableKeyguard" msgid="3598496301486439258">"zakázať uzamknutie obrazovky"</string>
+    <string name="permlab_disableKeyguard" msgid="3598496301486439258">"deaktivácia zámky obrazovky"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Umožňuje aplikácii zakázať uzamknutie klávesnice a akékoľvek súvisiace zabezpečenie heslom. Príkladom je zakázanie uzamknutia klávesnice pri prichádzajúcom telefonickom hovore a jeho opätovné povolenie po skončení hovoru."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čítanie nastavení synchronizácie"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Umožňuje aplikácii čítať nastavenia synchronizácie v účte. Môže napríklad určiť, či je s účtom synchronizovaná aplikácia Ľudia."</string>
