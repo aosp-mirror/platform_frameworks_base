@@ -17,6 +17,7 @@
 package com.android.server.usb;
 
 import android.content.Context;
+import android.hardware.usb.UsbConfiguration;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbEndpoint;
@@ -30,6 +31,7 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -47,6 +49,13 @@ public class UsbHostManager {
 
     private final Context mContext;
     private final Object mLock = new Object();
+
+    private UsbDevice mNewDevice;
+    private UsbConfiguration mNewConfiguration;
+    private UsbInterface mNewInterface;
+    private ArrayList<UsbConfiguration> mNewConfigurations;
+    private ArrayList<UsbInterface> mNewInterfaces;
+    private ArrayList<UsbEndpoint> mNewEndpoints;
 
     @GuardedBy("mLock")
     private UsbSettingsManager mCurrentSettings;
@@ -93,69 +102,103 @@ public class UsbHostManager {
         return false;
     }
 
-    /* Called from JNI in monitorUsbHostBus() to report new USB devices */
-    private void usbDeviceAdded(String deviceName, int vendorID, int productID,
+    /* Called from JNI in monitorUsbHostBus() to report new USB devices
+       Returns true if successful, in which case the JNI code will continue adding configurations,
+       interfaces and endpoints, and finally call endUsbDeviceAdded after all descriptors
+       have been processed
+     */
+    private boolean beginUsbDeviceAdded(String deviceName, int vendorID, int productID,
             int deviceClass, int deviceSubclass, int deviceProtocol,
-            String manufacturerName, String productName, String serialNumber,
-            /* array of quintuples containing id, class, subclass, protocol
-               and number of endpoints for each interface */
-            int[] interfaceValues,
-           /* array of quadruples containing address, attributes, max packet size
-              and interval for each endpoint */
-            int[] endpointValues) {
+            String manufacturerName, String productName, String serialNumber) {
 
         if (isBlackListed(deviceName) ||
                 isBlackListed(deviceClass, deviceSubclass, deviceProtocol)) {
-            return;
+            return false;
         }
 
         synchronized (mLock) {
             if (mDevices.get(deviceName) != null) {
                 Slog.w(TAG, "device already on mDevices list: " + deviceName);
-                return;
+                return false;
             }
 
-            int numInterfaces = interfaceValues.length / 5;
-            Parcelable[] interfaces = new UsbInterface[numInterfaces];
-            try {
-                // repackage interfaceValues as an array of UsbInterface
-                int intf, endp, ival = 0, eval = 0;
-                for (intf = 0; intf < numInterfaces; intf++) {
-                    int interfaceId = interfaceValues[ival++];
-                    int interfaceClass = interfaceValues[ival++];
-                    int interfaceSubclass = interfaceValues[ival++];
-                    int interfaceProtocol = interfaceValues[ival++];
-                    int numEndpoints = interfaceValues[ival++];
-
-                    Parcelable[] endpoints = new UsbEndpoint[numEndpoints];
-                    for (endp = 0; endp < numEndpoints; endp++) {
-                        int address = endpointValues[eval++];
-                        int attributes = endpointValues[eval++];
-                        int maxPacketSize = endpointValues[eval++];
-                        int interval = endpointValues[eval++];
-                        endpoints[endp] = new UsbEndpoint(address, attributes,
-                                maxPacketSize, interval);
-                    }
-
-                    // don't allow if any interfaces are blacklisted
-                    if (isBlackListed(interfaceClass, interfaceSubclass, interfaceProtocol)) {
-                        return;
-                    }
-                    interfaces[intf] = new UsbInterface(interfaceId, interfaceClass,
-                            interfaceSubclass, interfaceProtocol, endpoints);
-                }
-            } catch (Exception e) {
-                // beware of index out of bound exceptions, which might happen if
-                // a device does not set bNumEndpoints correctly
-                Slog.e(TAG, "error parsing USB descriptors", e);
-                return;
+            if (mNewDevice != null) {
+                Slog.e(TAG, "mNewDevice is not null in endUsbDeviceAdded");
+                return false;
             }
 
-            UsbDevice device = new UsbDevice(deviceName, vendorID, productID,
+            mNewDevice = new UsbDevice(deviceName, vendorID, productID,
                     deviceClass, deviceSubclass, deviceProtocol,
-                    manufacturerName, productName, serialNumber, interfaces);
-            mDevices.put(deviceName, device);
-            getCurrentSettings().deviceAttached(device);
+                    manufacturerName, productName, serialNumber);
+
+            mNewConfigurations = new ArrayList<UsbConfiguration>();
+            mNewInterfaces = new ArrayList<UsbInterface>();
+            mNewEndpoints = new ArrayList<UsbEndpoint>();
+        }
+        return true;
+    }
+
+    /* Called from JNI in monitorUsbHostBus() to report new USB configuration for the device
+       currently being added.  Returns true if successful, false in case of error.
+     */
+    private void addUsbConfiguration(int id, String name, int attributes, int maxPower) {
+        if (mNewConfiguration != null) {
+            mNewConfiguration.setInterfaces(
+                    mNewInterfaces.toArray(new UsbInterface[mNewInterfaces.size()]));
+            mNewInterfaces.clear();
+        }
+
+        mNewConfiguration = new UsbConfiguration(id, name, attributes, maxPower);
+        mNewConfigurations.add(mNewConfiguration);
+    }
+
+    /* Called from JNI in monitorUsbHostBus() to report new USB interface for the device
+       currently being added.  Returns true if successful, false in case of error.
+     */
+    private void addUsbInterface(int id, String name, int altSetting,
+            int Class, int subClass, int protocol) {
+        if (mNewInterface != null) {
+            mNewInterface.setEndpoints(
+                    mNewEndpoints.toArray(new UsbEndpoint[mNewEndpoints.size()]));
+            mNewEndpoints.clear();
+        }
+
+        mNewInterface = new UsbInterface(id, altSetting, name, Class, subClass, protocol);
+        mNewInterfaces.add(mNewInterface);
+    }
+
+    /* Called from JNI in monitorUsbHostBus() to report new USB endpoint for the device
+       currently being added.  Returns true if successful, false in case of error.
+     */
+    private void addUsbEndpoint(int address, int attributes, int maxPacketSize, int interval) {
+        mNewEndpoints.add(new UsbEndpoint(address, attributes, maxPacketSize, interval));
+    }
+
+    /* Called from JNI in monitorUsbHostBus() to finish adding a new device */
+    private void endUsbDeviceAdded() {
+        if (mNewInterface != null) {
+            mNewInterface.setEndpoints(
+                    mNewEndpoints.toArray(new UsbEndpoint[mNewEndpoints.size()]));
+        }
+        if (mNewConfiguration != null) {
+            mNewConfiguration.setInterfaces(
+                    mNewInterfaces.toArray(new UsbInterface[mNewInterfaces.size()]));
+        }
+
+        synchronized (mLock) {
+            if (mNewDevice != null) {
+                mNewDevice.setConfigurations(
+                        mNewConfigurations.toArray(new UsbConfiguration[mNewConfigurations.size()]));
+                mDevices.put(mNewDevice.getDeviceName(), mNewDevice);
+                Slog.d(TAG, "Added device " + mNewDevice);
+                getCurrentSettings().deviceAttached(mNewDevice);
+            } else {
+                Slog.e(TAG, "mNewDevice is null in endUsbDeviceAdded");
+            }
+            mNewDevice = null;
+            mNewConfigurations = null;
+            mNewInterfaces = null;
+            mNewEndpoints = null;
         }
     }
 

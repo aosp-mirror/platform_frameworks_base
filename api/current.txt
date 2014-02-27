@@ -11826,6 +11826,20 @@ package android.hardware.usb {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
+  public class UsbConfiguration implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAttributes();
+    method public int getId();
+    method public android.hardware.usb.UsbInterface getInterface(int);
+    method public int getInterfaceCount();
+    method public int getMaxPower();
+    method public java.lang.String getName();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int ATTR_REMOTE_WAKEUP_MASK = 32; // 0x20
+    field public static final int ATTR_SELF_POWERED_MASK = 64; // 0x40
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
   public final class UsbConstants {
     ctor public UsbConstants();
     field public static final int USB_CLASS_APP_SPEC = 254; // 0xfe
@@ -11865,6 +11879,8 @@ package android.hardware.usb {
 
   public class UsbDevice implements android.os.Parcelable {
     method public int describeContents();
+    method public android.hardware.usb.UsbConfiguration getConfiguration(int);
+    method public int getConfigurationCount();
     method public int getDeviceClass();
     method public int getDeviceId();
     method public static int getDeviceId(java.lang.String);
@@ -11895,6 +11911,8 @@ package android.hardware.usb {
     method public java.lang.String getSerial();
     method public boolean releaseInterface(android.hardware.usb.UsbInterface);
     method public android.hardware.usb.UsbRequest requestWait();
+    method public boolean setConfiguration(android.hardware.usb.UsbConfiguration);
+    method public boolean setInterface(android.hardware.usb.UsbInterface);
   }
 
   public class UsbEndpoint implements android.os.Parcelable {
@@ -11912,12 +11930,14 @@ package android.hardware.usb {
 
   public class UsbInterface implements android.os.Parcelable {
     method public int describeContents();
+    method public int getAlternateSetting();
     method public android.hardware.usb.UsbEndpoint getEndpoint(int);
     method public int getEndpointCount();
     method public int getId();
     method public int getInterfaceClass();
     method public int getInterfaceProtocol();
     method public int getInterfaceSubclass();
+    method public java.lang.String getName();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
