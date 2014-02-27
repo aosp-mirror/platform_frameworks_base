@@ -56,7 +56,7 @@ public:
     ANDROID_API static Layer* createRenderLayer(uint32_t width, uint32_t height);
     ANDROID_API static bool resizeLayer(Layer* layer, uint32_t width, uint32_t height);
     ANDROID_API static void updateTextureLayer(Layer* layer, uint32_t width, uint32_t height,
-            bool isOpaque, GLenum renderTarget, float* transform);
+            bool isOpaque, bool forceFilter, GLenum renderTarget, float* textureTransform);
     ANDROID_API static void destroyLayer(Layer* layer);
     ANDROID_API static void destroyLayerDeferred(Layer* layer);
     ANDROID_API static bool copyLayer(Layer* layer, SkBitmap* bitmap);
