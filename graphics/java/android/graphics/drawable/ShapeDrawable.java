@@ -16,13 +16,18 @@
 
 package android.graphics.drawable;
 
-import android.graphics.*;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.drawable.BitmapDrawable.BitmapState;
-import android.graphics.drawable.shapes.Shape;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.Paint;
+import android.graphics.PixelFormat;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.Rect;
+import android.graphics.Shader;
+import android.graphics.drawable.shapes.Shape;
 import android.util.AttributeSet;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -31,22 +36,24 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 
 /**
- * A Drawable object that draws primitive shapes. 
- * A ShapeDrawable takes a {@link android.graphics.drawable.shapes.Shape}
- * object and manages its presence on the screen. If no Shape is given, then
- * the ShapeDrawable will default to a 
- * {@link android.graphics.drawable.shapes.RectShape}.
- *
- * <p>This object can be defined in an XML file with the <code>&lt;shape></code> element.</p>
- *
- * <div class="special reference">
- * <h3>Developer Guides</h3>
- * <p>For more information about how to use ShapeDrawable, read the
- * <a href="{@docRoot}guide/topics/graphics/2d-graphics.html#shape-drawable">
- * Canvas and Drawables</a> document. For more information about defining a ShapeDrawable in
- * XML, read the
- * <a href="{@docRoot}guide/topics/resources/drawable-resource.html#Shape">Drawable Resources</a>
- * document.</p></div>
+ * A Drawable object that draws primitive shapes. A ShapeDrawable takes a
+ * {@link android.graphics.drawable.shapes.Shape} object and manages its
+ * presence on the screen. If no Shape is given, then the ShapeDrawable will
+ * default to a {@link android.graphics.drawable.shapes.RectShape}.
+ * <p>
+ * This object can be defined in an XML file with the <code>&lt;shape></code>
+ * element.
+ * </p>
+ * <div class="special reference"> <h3>Developer Guides</h3>
+ * <p>
+ * For more information about how to use ShapeDrawable, read the <a
+ * href="{@docRoot}guide/topics/graphics/2d-graphics.html#shape-drawable">
+ * Canvas and Drawables</a> document. For more information about defining a
+ * ShapeDrawable in XML, read the <a href="{@docRoot}
+ * guide/topics/resources/drawable-resource.html#Shape">Drawable Resources</a>
+ * document.
+ * </p>
+ * </div>
  *
  * @attr ref android.R.styleable#ShapeDrawablePadding_left
  * @attr ref android.R.styleable#ShapeDrawablePadding_top
@@ -67,18 +74,18 @@ public class ShapeDrawable extends Drawable {
     public ShapeDrawable() {
         this((ShapeState) null);
     }
-    
+
     /**
      * Creates a ShapeDrawable with a specified Shape.
-     * 
+     *
      * @param s the Shape that this ShapeDrawable should be
      */
     public ShapeDrawable(Shape s) {
         this((ShapeState) null);
-        
+
         mShapeState.mShape = s;
     }
-    
+
     private ShapeDrawable(ShapeState state) {
         mShapeState = new ShapeState(state);
 
@@ -94,7 +101,7 @@ public class ShapeDrawable extends Drawable {
     public Shape getShape() {
         return mShapeState.mShape;
     }
-    
+
     /**
      * Sets the Shape of this ShapeDrawable.
      */
@@ -102,19 +109,19 @@ public class ShapeDrawable extends Drawable {
         mShapeState.mShape = s;
         updateShape();
     }
-    
+
     /**
-     * Sets a ShaderFactory to which requests for a 
+     * Sets a ShaderFactory to which requests for a
      * {@link android.graphics.Shader} object will be made.
-     * 
+     *
      * @param fact an instance of your ShaderFactory implementation
      */
     public void setShaderFactory(ShaderFactory fact) {
         mShapeState.mShaderFactory = fact;
     }
-    
+
     /**
-     * Returns the ShaderFactory used by this ShapeDrawable for requesting a 
+     * Returns the ShaderFactory used by this ShapeDrawable for requesting a
      * {@link android.graphics.Shader}.
      */
     public ShaderFactory getShaderFactory() {
@@ -127,14 +134,14 @@ public class ShapeDrawable extends Drawable {
     public Paint getPaint() {
         return mShapeState.mPaint;
     }
-    
+
     /**
      * Sets padding for the shape.
-     * 
-     * @param left    padding for the left side (in pixels)
-     * @param top     padding for the top (in pixels)
-     * @param right   padding for the right side (in pixels)
-     * @param bottom  padding for the bottom (in pixels)
+     *
+     * @param left padding for the left side (in pixels)
+     * @param top padding for the top (in pixels)
+     * @param right padding for the right side (in pixels)
+     * @param bottom padding for the bottom (in pixels)
      */
     public void setPadding(int left, int top, int right, int bottom) {
         if ((left | top | right | bottom) == 0) {
@@ -147,10 +154,10 @@ public class ShapeDrawable extends Drawable {
         }
         invalidateSelf();
     }
-    
+
     /**
-     * Sets padding for this shape, defined by a Rect object.
-     * Define the padding in the Rect object as: left, top, right, bottom.
+     * Sets padding for this shape, defined by a Rect object. Define the padding
+     * in the Rect object as: left, top, right, bottom.
      */
     public void setPadding(Rect padding) {
         if (padding == null) {
@@ -163,37 +170,37 @@ public class ShapeDrawable extends Drawable {
         }
         invalidateSelf();
     }
-    
+
     /**
      * Sets the intrinsic (default) width for this shape.
-     * 
+     *
      * @param width the intrinsic width (in pixels)
      */
     public void setIntrinsicWidth(int width) {
         mShapeState.mIntrinsicWidth = width;
         invalidateSelf();
     }
-    
+
     /**
      * Sets the intrinsic (default) height for this shape.
-     * 
+     *
      * @param height the intrinsic height (in pixels)
      */
     public void setIntrinsicHeight(int height) {
         mShapeState.mIntrinsicHeight = height;
         invalidateSelf();
     }
-    
+
     @Override
     public int getIntrinsicWidth() {
         return mShapeState.mIntrinsicWidth;
     }
-    
+
     @Override
     public int getIntrinsicHeight() {
         return mShapeState.mIntrinsicHeight;
     }
-    
+
     @Override
     public boolean getPadding(Rect padding) {
         if (mShapeState.mPadding != null) {
@@ -205,14 +212,14 @@ public class ShapeDrawable extends Drawable {
     }
 
     private static int modulateAlpha(int paintAlpha, int alpha) {
-        int scale = alpha + (alpha >>> 7);  // convert to 0..256
+        int scale = alpha + (alpha >>> 7); // convert to 0..256
         return paintAlpha * scale >>> 8;
     }
 
     /**
-     * Called from the drawable's draw() method after the canvas has been set
-     * to draw the shape at (0,0). Subclasses can override for special effects
-     * such as multiple layers, stroking, etc.
+     * Called from the drawable's draw() method after the canvas has been set to
+     * draw the shape at (0,0). Subclasses can override for special effects such
+     * as multiple layers, stroking, etc.
      */
     protected void onDraw(Shape shape, Canvas canvas, Paint paint) {
         shape.draw(canvas, paint);
@@ -238,7 +245,8 @@ public class ShapeDrawable extends Drawable {
             }
 
             if (state.mShape != null) {
-                // need the save both for the translate, and for the (unknown) Shape
+                // need the save both for the translate, and for the (unknown)
+                // Shape
                 final int count = canvas.save();
                 canvas.translate(r.left, r.top);
                 onDraw(state.mShape, canvas, paint);
@@ -261,16 +269,17 @@ public class ShapeDrawable extends Drawable {
         return super.getChangingConfigurations()
                 | mShapeState.mChangingConfigurations;
     }
-    
+
     /**
      * Set the alpha level for this drawable [0..255]. Note that this drawable
      * also has a color in its paint, which has an alpha as well. These two
      * values are automatically combined during drawing. Thus if the color's
      * alpha is 75% (i.e. 192) and the drawable's alpha is 50% (i.e. 128), then
-     * the combined alpha that will be used during drawing will be 37.5%
-     * (i.e. 96).
+     * the combined alpha that will be used during drawing will be 37.5% (i.e.
+     * 96).
      */
-    @Override public void setAlpha(int alpha) {
+    @Override
+    public void setAlpha(int alpha) {
         mShapeState.mAlpha = alpha;
         invalidateSelf();
     }
@@ -290,18 +299,11 @@ public class ShapeDrawable extends Drawable {
      *            clear the tint
      */
     public void setTint(ColorStateList tint) {
-        mShapeState.mTint = tint;
-        if (mTintFilter == null) {
-            if (tint != null) {
-                final int color = tint.getColorForState(getState(), 0);
-                mTintFilter = new PorterDuffColorFilter(color, mShapeState.mTintMode);
-            }
-        } else {
-            if (tint == null) {
-                mTintFilter = null;
-            }
+        if (mShapeState.mTint != tint) {
+            mShapeState.mTint = tint;
+            updateTintFilter();
+            invalidateSelf();
         }
-        invalidateSelf();
     }
 
     /**
@@ -321,11 +323,29 @@ public class ShapeDrawable extends Drawable {
      * @hide Pending finalization of supported Modes
      */
     public void setTintMode(Mode tintMode) {
-        mShapeState.mTintMode = tintMode;
-        if (mTintFilter != null) {
-            mTintFilter.setMode(tintMode);
+        if (mShapeState.mTintMode != tintMode) {
+            mShapeState.mTintMode = tintMode;
+            updateTintFilter();
+            invalidateSelf();
         }
-        invalidateSelf();
+    }
+
+    /**
+     * Ensures the tint filter is consistent with the current tint color and
+     * mode.
+     */
+    private void updateTintFilter() {
+        final ColorStateList tint = mShapeState.mTint;
+        final Mode tintMode = mShapeState.mTintMode;
+        if (tint != null && tintMode != null) {
+            if (mTintFilter == null) {
+                mTintFilter = new PorterDuffColorFilter(0, tintMode);
+            } else {
+                mTintFilter.setMode(tintMode);
+            }
+        } else {
+            mTintFilter = null;
+        }
     }
 
     /**
@@ -343,7 +363,7 @@ public class ShapeDrawable extends Drawable {
         mShapeState.mPaint.setColorFilter(cf);
         invalidateSelf();
     }
-    
+
     @Override
     public int getOpacity() {
         if (mShapeState.mShape == null) {
@@ -397,8 +417,8 @@ public class ShapeDrawable extends Drawable {
     }
 
     /**
-     * Subclasses override this to parse custom subelements.
-     * If you handle it, return true, else return <em>super.inflateTag(...)</em>.
+     * Subclasses override this to parse custom subelements. If you handle it,
+     * return true, else return <em>super.inflateTag(...)</em>.
      */
     protected boolean inflateTag(String name, Resources r, XmlPullParser parser,
             AttributeSet attrs) {
@@ -424,7 +444,7 @@ public class ShapeDrawable extends Drawable {
 
     @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
-                        throws XmlPullParserException, IOException {
+            throws XmlPullParserException, IOException {
         super.inflate(r, parser, attrs);
 
         TypedArray a = r.obtainAttributes(attrs, com.android.internal.R.styleable.ShapeDrawable);
@@ -445,12 +465,12 @@ public class ShapeDrawable extends Drawable {
 
         int type;
         final int outerDepth = parser.getDepth();
-        while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-               && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
-            
+
             final String name = parser.getName();
             // call our subclass
             if (!inflateTag(name, r, parser, attrs)) {
@@ -473,7 +493,7 @@ public class ShapeDrawable extends Drawable {
         }
         invalidateSelf();
     }
-    
+
     @Override
     public ConstantState getConstantState() {
         mShapeState.mChangingConfigurations = getChangingConfigurations();
@@ -511,13 +531,13 @@ public class ShapeDrawable extends Drawable {
         Paint mPaint;
         Shape mShape;
         ColorStateList mTint;
-        Mode mTintMode;
+        Mode mTintMode = Mode.SRC_IN;
         Rect mPadding;
         int mIntrinsicWidth;
         int mIntrinsicHeight;
         int mAlpha = 255;
         ShaderFactory mShaderFactory;
-        
+
         ShapeState(ShapeState orig) {
             if (orig != null) {
                 mPaint = orig.mPaint;
@@ -533,48 +553,45 @@ public class ShapeDrawable extends Drawable {
                 mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             }
         }
-        
+
         @Override
         public Drawable newDrawable() {
             return new ShapeDrawable(this);
         }
-        
+
         @Override
         public Drawable newDrawable(Resources res) {
             return new ShapeDrawable(this);
         }
-        
+
         @Override
         public int getChangingConfigurations() {
             return mChangingConfigurations;
         }
     }
-    
+
     /**
      * Base class defines a factory object that is called each time the drawable
      * is resized (has a new width or height). Its resize() method returns a
-     * corresponding shader, or null.
-     * Implement this class if you'd like your ShapeDrawable to use a special
-     * {@link android.graphics.Shader}, such as a 
-     * {@link android.graphics.LinearGradient}. 
-     * 
+     * corresponding shader, or null. Implement this class if you'd like your
+     * ShapeDrawable to use a special {@link android.graphics.Shader}, such as a
+     * {@link android.graphics.LinearGradient}.
      */
     public static abstract class ShaderFactory {
         /**
-         * Returns the Shader to be drawn when a Drawable is drawn.
-         * The dimensions of the Drawable are passed because they may be needed
-         * to adjust how the Shader is configured for drawing.
-         * This is called by ShapeDrawable.setShape().
-         * 
-         * @param width  the width of the Drawable being drawn
+         * Returns the Shader to be drawn when a Drawable is drawn. The
+         * dimensions of the Drawable are passed because they may be needed to
+         * adjust how the Shader is configured for drawing. This is called by
+         * ShapeDrawable.setShape().
+         *
+         * @param width the width of the Drawable being drawn
          * @param height the heigh of the Drawable being drawn
-         * @return       the Shader to be drawn
+         * @return the Shader to be drawn
          */
         public abstract Shader resize(int width, int height);
     }
-    
+
     // other subclass could wack the Shader's localmatrix based on the
     // resize params (e.g. scaletofit, etc.). This could be used to scale
     // a bitmap to fill the bounds without needing any other special casing.
 }
-
