@@ -82,7 +82,7 @@ public class ShapeDrawable extends Drawable {
     private ShapeDrawable(ShapeState state) {
         mShapeState = new ShapeState(state);
 
-        if (state.mTint != null) {
+        if (state != null && state.mTint != null) {
             final int color = state.mTint.getColorForState(getState(), 0);
             mTintFilter = new PorterDuffColorFilter(color, state.mTintMode);
         }
