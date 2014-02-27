@@ -27,10 +27,10 @@ import android.graphics.Insets;
 import android.graphics.NinePatch;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.graphics.PorterDuff.Mode;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.LayoutDirection;
@@ -326,18 +326,11 @@ public class NinePatchDrawable extends Drawable {
      *            clear the tint
      */
     public void setTint(ColorStateList tint) {
-        mNinePatchState.mTint = tint;
-        if (mTintFilter == null) {
-            if (tint != null) {
-                final int color = tint.getColorForState(getState(), 0);
-                mTintFilter = new PorterDuffColorFilter(color, mNinePatchState.mTintMode);
-            }
-        } else {
-            if (tint == null) {
-                mTintFilter = null;
-            }
+        if (mNinePatchState.mTint != tint) {
+            mNinePatchState.mTint = tint;
+            updateTintFilter();
+            invalidateSelf();
         }
-        invalidateSelf();
     }
 
     /**
@@ -357,21 +350,29 @@ public class NinePatchDrawable extends Drawable {
      * @hide Pending finalization of supported Modes
      */
     public void setTintMode(Mode tintMode) {
-        mNinePatchState.mTintMode = tintMode;
-        if (mTintFilter != null) {
-            mTintFilter.setMode(tintMode);
+        if (mNinePatchState.mTintMode != tintMode) {
+            mNinePatchState.mTintMode = tintMode;
+            updateTintFilter();
+            invalidateSelf();
         }
-        invalidateSelf();
     }
 
     /**
-     * Returns the blending mode used to apply tint.
-     *
-     * @return The Porter-Duff blending mode used to apply tint.
-     * @hide Pending finalization of supported Modes
+     * Ensures the tint filter is consistent with the current tint color and
+     * mode.
      */
-    public Mode getTintMode() {
-        return mNinePatchState.mTintMode;
+    private void updateTintFilter() {
+        final ColorStateList tint = mNinePatchState.mTint;
+        final Mode tintMode = mNinePatchState.mTintMode;
+        if (tint != null && tintMode != null) {
+            if (mTintFilter == null) {
+                mTintFilter = new PorterDuffColorFilter(0, tintMode);
+            } else {
+                mTintFilter.setMode(tintMode);
+            }
+        } else {
+            mTintFilter = null;
+        }
     }
 
     @Override
@@ -563,7 +564,7 @@ public class NinePatchDrawable extends Drawable {
     final static class NinePatchState extends ConstantState {
         NinePatch mNinePatch;
         ColorStateList mTint;
-        Mode mTintMode;
+        Mode mTintMode = Mode.SRC_IN;
         Rect mPadding;
         Insets mOpticalInsets;
         boolean mDither;

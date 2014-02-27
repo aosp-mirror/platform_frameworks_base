@@ -27,10 +27,8 @@ import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.GradientDrawable.GradientState;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.Xfermode;
@@ -573,18 +571,11 @@ public class BitmapDrawable extends Drawable {
      *            clear the tint
      */
     public void setTint(ColorStateList tint) {
-        mBitmapState.mTint = tint;
-        if (mTintFilter == null) {
-            if (tint != null) {
-                final int color = tint.getColorForState(getState(), 0);
-                mTintFilter = new PorterDuffColorFilter(color, mBitmapState.mTintMode);
-            }
-        } else {
-            if (tint == null) {
-                mTintFilter = null;
-            }
+        if (mBitmapState.mTint != tint) {
+            mBitmapState.mTint = tint;
+            updateTintFilter();
+            invalidateSelf();
         }
-        invalidateSelf();
     }
 
     /**
@@ -604,21 +595,29 @@ public class BitmapDrawable extends Drawable {
      * @hide Pending finalization of supported Modes
      */
     public void setTintMode(Mode tintMode) {
-        mBitmapState.mTintMode = tintMode;
-        if (mTintFilter != null) {
-            mTintFilter.setMode(tintMode);
+        if (mBitmapState.mTintMode != tintMode) {
+            mBitmapState.mTintMode = tintMode;
+            updateTintFilter();
+            invalidateSelf();
         }
-        invalidateSelf();
     }
 
     /**
-     * Returns the blending mode used to apply tint.
-     *
-     * @return The Porter-Duff blending mode used to apply tint.
-     * @hide Pending finalization of supported Modes
+     * Ensures the tint filter is consistent with the current tint color and
+     * mode.
      */
-    public Mode getTintMode() {
-        return mBitmapState.mTintMode;
+    private void updateTintFilter() {
+        final ColorStateList tint = mBitmapState.mTint;
+        final Mode tintMode = mBitmapState.mTintMode;
+        if (tint != null && tintMode != null) {
+            if (mTintFilter == null) {
+                mTintFilter = new PorterDuffColorFilter(0, tintMode);
+            } else {
+                mTintFilter.setMode(tintMode);
+            }
+        } else {
+            mTintFilter = null;
+        }
     }
 
     /**
@@ -756,7 +755,7 @@ public class BitmapDrawable extends Drawable {
     final static class BitmapState extends ConstantState {
         Bitmap mBitmap;
         ColorStateList mTint;
-        Mode mTintMode;
+        Mode mTintMode = Mode.SRC_IN;
         int mChangingConfigurations;
         int mGravity = Gravity.FILL;
         Paint mPaint = new Paint(DEFAULT_PAINT_FLAGS);
