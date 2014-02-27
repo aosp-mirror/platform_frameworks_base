@@ -34,11 +34,6 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_C_INCLUDES := \
     $(TOP)/external/jpeg \
-    $(TOP)/external/skia/include/config \
-    $(TOP)/external/skia/include/core \
-    $(TOP)/external/skia/include/images \
-    $(TOP)/external/skia/include/utils \
-    $(TOP)/external/skia/include/effects \
     $(TOP)/frameworks/base/media/libstagefright \
     $(TOP)/frameworks/base/include/ \
     $(TOP)/frameworks/base/ \

@@ -164,9 +164,7 @@ LOCAL_C_INCLUDES += \
 	$(TOP)/frameworks/av/include \
 	$(TOP)/system/media/camera/include \
 	external/skia/src/core \
-	external/skia/src/pdf \
 	external/skia/src/images \
-	external/skia/include/utils \
 	external/sqlite/dist \
 	external/sqlite/android \
 	external/expat/lib \
