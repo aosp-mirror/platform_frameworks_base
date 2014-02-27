@@ -2313,6 +2313,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                 // If we failed to re-bind the data, scrap the obtained view.
                 if (updatedView != transientView) {
+                    setItemViewLayoutParams(updatedView, position);
                     mRecycler.addScrapView(updatedView, position);
                 }
             }
@@ -2343,19 +2344,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             child.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
 
-        if (mAdapterHasStableIds) {
-            final ViewGroup.LayoutParams vlp = child.getLayoutParams();
-            LayoutParams lp;
-            if (vlp == null) {
-                lp = (LayoutParams) generateDefaultLayoutParams();
-            } else if (!checkLayoutParams(vlp)) {
-                lp = (LayoutParams) generateLayoutParams(vlp);
-            } else {
-                lp = (LayoutParams) vlp;
-            }
-            lp.itemId = mAdapter.getItemId(position);
-            child.setLayoutParams(lp);
-        }
+        setItemViewLayoutParams(child, position);
 
         if (AccessibilityManager.getInstance(mContext).isEnabled()) {
             if (mAccessibilityDelegate == null) {
@@ -2369,6 +2358,24 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
 
         return child;
+    }
+
+    private void setItemViewLayoutParams(View child, int position) {
+        final ViewGroup.LayoutParams vlp = child.getLayoutParams();
+        LayoutParams lp;
+        if (vlp == null) {
+            lp = (LayoutParams) generateDefaultLayoutParams();
+        } else if (!checkLayoutParams(vlp)) {
+            lp = (LayoutParams) generateLayoutParams(vlp);
+        } else {
+            lp = (LayoutParams) vlp;
+        }
+
+        if (mAdapterHasStableIds) {
+            lp.itemId = mAdapter.getItemId(position);
+        }
+        lp.viewType = mAdapter.getItemViewType(position);
+        child.setLayoutParams(lp);
     }
 
     class ListItemAccessibilityDelegate extends AccessibilityDelegate {
