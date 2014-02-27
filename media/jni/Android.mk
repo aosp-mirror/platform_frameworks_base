@@ -61,8 +61,7 @@ LOCAL_C_INCLUDES += \
     $(call include-path-for, libhardware)/hardware \
     system/media/camera/include \
     $(PV_INCLUDES) \
-    $(JNI_H_INCLUDE) \
-    $(call include-path-for, corecg graphics)
+    $(JNI_H_INCLUDE)
 
 LOCAL_CFLAGS +=
 

@@ -42,9 +42,9 @@
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
 
-#include <core/SkBitmap.h>
-#include <core/SkStream.h>
-#include <core/SkImageDecoder.h>
+#include <SkBitmap.h>
+#include <SkStream.h>
+#include <SkImageDecoder.h>
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>

@@ -19,9 +19,6 @@ LOCAL_SHARED_LIBRARIES := \
     libGLESv1_CM \
     libgui
 
-LOCAL_C_INCLUDES := \
-	$(call include-path-for, corecg graphics)
-
 LOCAL_MODULE:= bootanimation
 
 

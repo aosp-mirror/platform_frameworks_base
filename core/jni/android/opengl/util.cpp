@@ -27,7 +27,7 @@
 #include <GLES/gl.h>
 #include <ETC1/etc1.h>
 
-#include <core/SkBitmap.h>
+#include <SkBitmap.h>
 
 #include "android_runtime/AndroidRuntime.h"
 
