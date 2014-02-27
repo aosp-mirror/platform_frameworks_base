@@ -104,6 +104,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     public static final int EXPANDED_LEAVE_ALONE = -10000;
     public static final int EXPANDED_FULL_OPEN = -10001;
 
+    private static final String EXTRA_INTERCEPT = "android.intercept";
+    private static final float INTERCEPTED_ALPHA = .2f;
+
     protected CommandQueue mCommandQueue;
     protected IStatusBarService mBarService;
     protected H mHandler = createHandler();
@@ -155,6 +158,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private RecentsComponent mRecents;
 
+    protected int mZenMode;
+
     public IStatusBarService getStatusBarService() {
         return mBarService;
     }
@@ -163,7 +168,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         return mDeviceProvisioned;
     }
 
-    private final ContentObserver mProvisioningObserver = new ContentObserver(mHandler) {
+    protected final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange) {
             final boolean provisioned = 0 != Settings.Global.getInt(
@@ -172,6 +177,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mDeviceProvisioned = provisioned;
                 updateNotificationIcons();
             }
+            final int mode = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
+            setZenMode(mode);
         }
     };
 
@@ -239,10 +247,13 @@ public abstract class BaseStatusBar extends SystemUI implements
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 
-        mProvisioningObserver.onChange(false); // set up
+        mSettingsObserver.onChange(false); // set up
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED), true,
-                mProvisioningObserver);
+                mSettingsObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.ZEN_MODE), false,
+                mSettingsObserver);
 
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS),
@@ -980,6 +991,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (DEBUG) {
             Log.d(TAG, "addNotificationViews: added at " + pos);
         }
+        updateInterceptedState(entry);
         updateExpansionStates();
         updateNotificationIcons();
     }
@@ -1008,6 +1020,34 @@ public abstract class BaseStatusBar extends SystemUI implements
                 if (DEBUG) Log.d(TAG, "ignoring notification being held by user at " + i);
             }
         }
+    }
+
+    protected void setZenMode(int mode) {
+        final boolean change = mZenMode != mode;
+        mZenMode = mode;
+        final int N = mNotificationData.size();
+        for (int i = 0; i < N; i++) {
+            final NotificationData.Entry entry = mNotificationData.get(i);
+            if (change && !shouldIntercept()) {
+                entry.notification.getNotification().extras.putBoolean(EXTRA_INTERCEPT, false);
+            }
+            updateInterceptedState(entry);
+        }
+        updateNotificationIcons();
+    }
+
+    private boolean shouldIntercept() {
+        return mZenMode == Settings.Global.ZEN_MODE_LIMITED
+                || mZenMode == Settings.Global.ZEN_MODE_FULL;
+    }
+
+    protected boolean shouldIntercept(Notification n) {
+        return shouldIntercept() && n.extras.getBoolean(EXTRA_INTERCEPT);
+    }
+
+    private void updateInterceptedState(NotificationData.Entry entry) {
+        final boolean intercepted = shouldIntercept(entry.notification.getNotification());
+        entry.row.findViewById(R.id.container).setAlpha(intercepted ? INTERCEPTED_ALPHA : 1);
     }
 
     protected abstract void haltTicker();
@@ -1202,6 +1242,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         } else {
             entry.content.setOnClickListener(null);
         }
+        updateInterceptedState(entry);
     }
 
     protected void notifyHeadsUpScreenOn(boolean screenOn) {
