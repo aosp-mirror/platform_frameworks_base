@@ -537,7 +537,7 @@ public final class AssetManager {
     
     public final class AssetInputStream extends InputStream {
         public final int getAssetInt() {
-            return (int) mAsset;
+            throw new UnsupportedOperationException();
         }
         /**
          * @hide
