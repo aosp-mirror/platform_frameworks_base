@@ -2357,8 +2357,8 @@
         <!-- Sets whether or not this ViewGroup should be treated as a single entity
              when doing an Activity transition. Typically, the elements inside a
              ViewGroup are each transitioned from the scene individually. The default
-             for a ViewGroup is false unless it has a background.
-             See {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.os.Bundle)}
+             for a ViewGroup is false unless it has a background. See
+             {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.view.View, String)}
              for more information. -->
         <attr name="transitionGroup" format="boolean" />
     </declare-styleable>
