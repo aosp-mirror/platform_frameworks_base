@@ -1023,6 +1023,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected void setZenMode(int mode) {
+        if (!isDeviceProvisioned()) return;
         final boolean change = mZenMode != mode;
         mZenMode = mode;
         final int N = mNotificationData.size();

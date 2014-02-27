@@ -175,6 +175,10 @@ public class ZenModeView extends RelativeLayout {
         addView(mHintText, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
     }
 
+    private boolean isApplicable() {
+        return mAdapter != null && mAdapter.isApplicable();
+    }
+
     private void close() {
         mClosing = true;
         final int startBottom = mBottom;
@@ -217,6 +221,11 @@ public class ZenModeView extends RelativeLayout {
     }
 
     private void updateState(boolean animate) {
+        final boolean applicable = isApplicable();
+        setVisibility(applicable ? VISIBLE : GONE);
+        if (!applicable) {
+            return;
+        }
         if (mAdapter != null && mAdapter.getMode() == Adapter.MODE_OFF && !mPeekable) {
             close();
         } else {
@@ -303,7 +312,8 @@ public class ZenModeView extends RelativeLayout {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         final boolean rt = super.onInterceptTouchEvent(ev);
         if (DEBUG) logTouchEvent("onInterceptTouchEvent", rt, ev);
-        if (ev.getAction() == MotionEvent.ACTION_DOWN
+        if (isApplicable()
+                && ev.getAction() == MotionEvent.ACTION_DOWN
                 && ev.getY() > mCloseButton.getBottom()
                 && mPeekable) {
             return true;
@@ -326,7 +336,7 @@ public class ZenModeView extends RelativeLayout {
     public boolean onTouchEvent(MotionEvent event) {
         boolean rt = super.onTouchEvent(event);
         if (DEBUG) logTouchEvent("onTouchEvent", rt, event);
-        if (!mPeekable) {
+        if (!isApplicable() || !mPeekable) {
             return rt;
         }
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -398,7 +408,9 @@ public class ZenModeView extends RelativeLayout {
     }
 
     public void dispatchExternalTouchEvent(MotionEvent ev) {
-        onTouchEvent(ev);
+        if (isApplicable()) {
+            onTouchEvent(ev);
+        }
     }
 
     private static void bounce(final View v, final Runnable midBounce) {
@@ -584,6 +596,7 @@ public class ZenModeView extends RelativeLayout {
         public static final int MODE_LIMITED = 1;
         public static final int MODE_FULL = 2;
 
+        boolean isApplicable();
         int getMode();
         void setMode(int mode);
         void select(ExitCondition ec);
