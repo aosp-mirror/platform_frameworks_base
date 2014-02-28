@@ -696,6 +696,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         StatusBarNotification sbn = entry.notification;
         RemoteViews contentView = sbn.getNotification().contentView;
         RemoteViews bigContentView = sbn.getNotification().bigContentView;
+
+        if (isHeadsUp) {
+            maxHeight =
+                    mContext.getResources().getDimensionPixelSize(R.dimen.notification_mid_height);
+            bigContentView = sbn.getNotification().headsUpContentView;
+        }
+
         if (contentView == null) {
             return false;
         }
@@ -1081,6 +1088,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         final RemoteViews contentView = notification.getNotification().contentView;
         final RemoteViews oldBigContentView = oldNotification.getNotification().bigContentView;
         final RemoteViews bigContentView = notification.getNotification().bigContentView;
+        final RemoteViews oldHeadsUpContentView = oldNotification.getNotification().headsUpContentView;
+        final RemoteViews headsUpContentView = notification.getNotification().headsUpContentView;
         final Notification oldPublicNotification = oldNotification.getNotification().publicVersion;
         final RemoteViews oldPublicContentView = oldPublicNotification != null
                 ? oldPublicNotification.contentView : null;
@@ -1120,6 +1129,13 @@ public abstract class BaseStatusBar extends SystemUI implements
                     && oldBigContentView.getPackage() != null
                     && oldBigContentView.getPackage().equals(bigContentView.getPackage())
                     && oldBigContentView.getLayoutId() == bigContentView.getLayoutId());
+        boolean headsUpContentsUnchanged =
+                (oldHeadsUpContentView == null && headsUpContentView == null)
+                || ((oldHeadsUpContentView != null && headsUpContentView != null)
+                    && headsUpContentView.getPackage() != null
+                    && oldHeadsUpContentView.getPackage() != null
+                    && oldHeadsUpContentView.getPackage().equals(headsUpContentView.getPackage())
+                    && oldHeadsUpContentView.getLayoutId() == headsUpContentView.getLayoutId());
         boolean publicUnchanged  =
                 (oldPublicContentView == null && publicContentView == null)
                 || ((oldPublicContentView != null && publicContentView != null)
@@ -1138,7 +1154,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 && !TextUtils.equals(notification.getNotification().tickerText,
                         oldEntry.notification.getNotification().tickerText);
         boolean isTopAnyway = isTopNotification(rowParent, oldEntry);
-        if (contentsUnchanged && bigContentsUnchanged && publicUnchanged
+        if (contentsUnchanged && bigContentsUnchanged && headsUpContentsUnchanged && publicUnchanged
                 && (orderUnchanged || isTopAnyway)) {
             if (DEBUG) Log.d(TAG, "reusing notification for key: " + key);
             oldEntry.notification = notification;
@@ -1222,7 +1238,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     private void updateNotificationViews(NotificationData.Entry entry,
             StatusBarNotification notification, boolean isHeadsUp) {
         final RemoteViews contentView = notification.getNotification().contentView;
-        final RemoteViews bigContentView = notification.getNotification().bigContentView;
+        final RemoteViews bigContentView = isHeadsUp
+                ? notification.getNotification().headsUpContentView
+                : notification.getNotification().bigContentView;
         final Notification publicVersion = notification.getNotification().publicVersion;
         final RemoteViews publicContentView = publicVersion != null ? publicVersion.contentView
                 : null;

@@ -204,6 +204,15 @@ public class Notification implements Parcelable
      */
     public RemoteViews bigContentView;
 
+
+    /**
+     * @hide
+     * A medium-format version of {@link #contentView}, giving the Notification an
+     * opportunity to add action buttons to contentView. The system UI may
+     * choose to show this as a popup notification at its discretion.
+     */
+    public RemoteViews headsUpContentView;
+
     /**
      * The bitmap that may escape the bounds of the panel and bar.
      */
@@ -809,6 +818,10 @@ public class Notification implements Parcelable
             bigContentView = RemoteViews.CREATOR.createFromParcel(parcel);
         }
 
+        if (parcel.readInt() != 0) {
+            headsUpContentView = RemoteViews.CREATOR.createFromParcel(parcel);
+        }
+
         visibility = parcel.readInt();
 
         if (parcel.readInt() != 0) {
@@ -899,6 +912,10 @@ public class Notification implements Parcelable
             that.bigContentView = this.bigContentView.clone();
         }
 
+        if (heavy && this.headsUpContentView != null) {
+            that.headsUpContentView = this.headsUpContentView.clone();
+        }
+
         that.visibility = this.visibility;
 
         if (this.publicVersion != null) {
@@ -920,6 +937,7 @@ public class Notification implements Parcelable
         tickerView = null;
         contentView = null;
         bigContentView = null;
+        headsUpContentView = null;
         largeIcon = null;
         if (extras != null) {
             extras.remove(Notification.EXTRA_LARGE_ICON);
@@ -1028,6 +1046,13 @@ public class Notification implements Parcelable
         if (bigContentView != null) {
             parcel.writeInt(1);
             bigContentView.writeToParcel(parcel, 0);
+        } else {
+            parcel.writeInt(0);
+        }
+
+        if (headsUpContentView != null) {
+            parcel.writeInt(1);
+            headsUpContentView.writeToParcel(parcel, 0);
         } else {
             parcel.writeInt(0);
         }
@@ -1181,6 +1206,9 @@ public class Notification implements Parcelable
         }
         if (bigContentView != null) {
             bigContentView.setUser(user);
+        }
+        if (headsUpContentView != null) {
+            headsUpContentView.setUser(user);
         }
     }
 
@@ -1881,6 +1909,13 @@ public class Notification implements Parcelable
             return applyStandardTemplateWithActions(R.layout.notification_template_big_base);
         }
 
+        private RemoteViews makeHEadsUpContentView() {
+            if (mActions.size() == 0) return null;
+
+            return applyStandardTemplateWithActions(R.layout.notification_template_big_base);
+        }
+
+
         private RemoteViews generateActionButton(Action action) {
             final boolean tombstone = (action.actionIntent == null);
             RemoteViews button = new RemoteViews(mContext.getPackageName(),
@@ -1921,6 +1956,7 @@ public class Notification implements Parcelable
             n.defaults = mDefaults;
             n.flags = mFlags;
             n.bigContentView = makeBigContentView();
+            n.headsUpContentView = makeHEadsUpContentView();
             if (mLedOnMs != 0 || mLedOffMs != 0) {
                 n.flags |= FLAG_SHOW_LIGHTS;
             }
