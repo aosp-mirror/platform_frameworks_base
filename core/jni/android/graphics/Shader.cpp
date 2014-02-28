@@ -520,7 +520,7 @@ static jlong ComposeShader_postCreate1(JNIEnv* env, jobject o, jlong shaderHandl
     SkiaShader* shaderB = reinterpret_cast<SkiaShader *>(shaderBHandle);
     SkXfermode* mode = reinterpret_cast<SkXfermode *>(modeHandle);
     SkXfermode::Mode skiaMode;
-    if (!SkXfermode::IsMode(mode, &skiaMode)) {
+    if (!SkXfermode::AsMode(mode, &skiaMode)) {
         // TODO: Support other modes
         skiaMode = SkXfermode::kSrcOver_Mode;
     }
