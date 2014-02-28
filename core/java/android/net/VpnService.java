@@ -151,9 +151,10 @@ public class VpnService extends Service {
     }
 
     /**
-     * Protect a socket from VPN connections. The socket will be bound to the
-     * current default network interface, so its traffic will not be forwarded
-     * through VPN. This method is useful if some connections need to be kept
+     * Protect a socket from VPN connections. After protecting, data sent
+     * through this socket will go directly to the underlying network,
+     * so its traffic will not be forwarded through the VPN.
+     * This method is useful if some connections need to be kept
      * outside of VPN. For example, a VPN tunnel should protect itself if its
      * destination is covered by VPN routes. Otherwise its outgoing packets
      * will be sent back to the VPN interface and cause an infinite loop. This
