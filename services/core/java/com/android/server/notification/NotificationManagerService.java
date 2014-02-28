@@ -258,10 +258,11 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void binderDied() {
-            if (connection == null) {
-                // This is not a service; it won't be recreated. We can give up this connection.
-                unregisterListenerImpl(this.listener, this.userid);
-            }
+            // Remove the listener, but don't unbind from the service. The system will bring the
+            // service back up, and the onServiceConnected handler will readd the listener with the
+            // new binding. If this isn't a bound service, and is just a registered
+            // INotificationListener, just removing it from the list is all we need to do anyway.
+            removeListenerImpl(this.listener, this.userid);
         }
 
         /** convenience method for looking in mEnabledListenersForCurrentUser */
@@ -1999,20 +2000,35 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    /**
+     * Removes a listener from the list and unbinds from its service.
+     */
     void unregisterListenerImpl(final INotificationListener listener, final int userid) {
+        NotificationListenerInfo info = removeListenerImpl(listener, userid);
+        if (info != null && info.connection != null) {
+            getContext().unbindService(info.connection);
+        }
+    }
+
+    /**
+     * Removes a listener from the list but does not unbind from the listener's service.
+     *
+     * @return the removed listener.
+     */
+    NotificationListenerInfo removeListenerImpl(
+            final INotificationListener listener, final int userid) {
+        NotificationListenerInfo listenerInfo = null;
         synchronized (mNotificationList) {
             final int N = mListeners.size();
             for (int i=N-1; i>=0; i--) {
                 final NotificationListenerInfo info = mListeners.get(i);
                 if (info.listener.asBinder() == listener.asBinder()
                         && info.userid == userid) {
-                    mListeners.remove(i);
-                    if (info.connection != null) {
-                        getContext().unbindService(info.connection);
-                    }
+                    listenerInfo = mListeners.remove(i);
                 }
             }
         }
+        return listenerInfo;
     }
 
     void showNextToastLocked() {
