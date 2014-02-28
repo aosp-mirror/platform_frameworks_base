@@ -196,20 +196,18 @@ public class Type extends BaseObj {
 
     @Override
     void updateFromNative() {
-        // FIXME: rsaTypeGetNativeData needs 32-bit and 64-bit paths
-
-        // We have 6 integer to obtain mDimX; mDimY; mDimZ;
+        // We have 6 integer/long to obtain mDimX; mDimY; mDimZ;
         // mDimLOD; mDimFaces; mElement;
-        int[] dataBuffer = new int[6];
-        mRS.nTypeGetNativeData((int)getID(mRS), dataBuffer);
+        long[] dataBuffer = new long[6];
+        mRS.nTypeGetNativeData(getID(mRS), dataBuffer);
 
-        mDimX = dataBuffer[0];
-        mDimY = dataBuffer[1];
-        mDimZ = dataBuffer[2];
+        mDimX = (int)dataBuffer[0];
+        mDimY = (int)dataBuffer[1];
+        mDimZ = (int)dataBuffer[2];
         mDimMipmaps = dataBuffer[3] == 1 ? true : false;
         mDimFaces = dataBuffer[4] == 1 ? true : false;
 
-        int elementID = dataBuffer[5];
+        long elementID = dataBuffer[5];
         if(elementID != 0) {
             mElement = new Element(elementID, mRS);
             mElement.updateFromNative();

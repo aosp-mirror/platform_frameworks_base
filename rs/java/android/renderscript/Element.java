@@ -803,8 +803,6 @@ public class Element extends BaseObj {
     void updateFromNative() {
         super.updateFromNative();
 
-        // FIXME: updateFromNative is broken in JNI for 64-bit
-
         // we will pack mType; mKind; mNormalized; mVectorSize; NumSubElements
         int[] dataBuffer = new int[5];
         mRS.nElementGetNativeData(getID(mRS), dataBuffer);
@@ -831,7 +829,7 @@ public class Element extends BaseObj {
             mArraySizes = new int[numSubElements];
             mOffsetInBytes = new int[numSubElements];
 
-            int[] subElementIds = new int[numSubElements];
+            long[] subElementIds = new long[numSubElements];
             mRS.nElementGetSubElements(getID(mRS), subElementIds, mElementNames, mArraySizes);
             for(int i = 0; i < numSubElements; i ++) {
                 mElements[i] = new Element(subElementIds[i], mRS);
@@ -1090,10 +1088,9 @@ public class Element extends BaseObj {
             java.lang.System.arraycopy(mElementNames, 0, sin, 0, mCount);
             java.lang.System.arraycopy(mArraySizes, 0, asin, 0, mCount);
 
-            // FIXME: broken for 64-bit
-            int[] ids = new int[ein.length];
+            long[] ids = new long[ein.length];
             for (int ct = 0; ct < ein.length; ct++ ) {
-                ids[ct] = (int)ein[ct].getID(mRS);
+                ids[ct] = ein[ct].getID(mRS);
             }
             long id = mRS.nElementCreate2(ids, sin, asin);
             return new Element(id, mRS, ein, sin, asin);
