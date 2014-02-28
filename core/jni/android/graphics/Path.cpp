@@ -25,7 +25,7 @@
 #include <android_runtime/AndroidRuntime.h>
 
 #include "SkPath.h"
-#include "pathops/SkPathOps.h"
+#include "SkPathOps.h"
 
 #include <Caches.h>
 #include <vector>
