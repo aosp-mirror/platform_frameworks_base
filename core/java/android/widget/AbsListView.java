@@ -56,7 +56,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -4479,6 +4478,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * scroll such that the indicated position is displayed, but it will
      * stop early if scrolling further would scroll boundPosition out of
      * view.
+     *
      * @param position Scroll to this adapter position.
      * @param boundPosition Do not scroll if it would move this adapter
      *          position out of view.
@@ -7128,7 +7128,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * understanding of layout.
      */
     abstract class AbsSubPositionScroller extends AbsPositionScroller {
-        private static final int DEFAULT_SCROLL_DURATION = 200;
+        private static final int DURATION_AUTO = -1;
+
+        private static final int DURATION_AUTO_MIN = 100;
+        private static final int DURATION_AUTO_MAX = 500;
 
         private final SubScroller mSubScroller = new SubScroller();
 
@@ -7157,9 +7160,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 return;
             }
 
+            final int itemCount = getCount();
+            final int clampedPosition = MathUtils.constrain(targetPosition, 0, itemCount - 1);
             final int firstPosition = getFirstVisiblePosition();
             final int lastPosition = firstPosition + getChildCount();
-            final int targetRow = getRowForPosition(targetPosition);
+            final int targetRow = getRowForPosition(clampedPosition);
             final int firstRow = getRowForPosition(firstPosition);
             final int lastRow = getRowForPosition(lastPosition);
             if (useOffset || targetRow <= firstRow) {
@@ -7168,7 +7173,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             } else if (targetRow >= lastRow - 1) {
                 // Offset so the target row is bottom-aligned.
                 final int listHeight = getHeight() - getPaddingTop() - getPaddingBottom();
-                mOffset = listHeight - getHeightForPosition(targetPosition);
+                mOffset = getHeightForPosition(clampedPosition) - listHeight;
             } else {
                 // Don't scroll, target is entirely on-screen.
                 return;
@@ -7190,7 +7195,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int firstChildHeight = firstChild.getHeight();
             final float startOffsetRatio;
             if (firstChildHeight == 0) {
-                startOffsetRatio = 1;
+                startOffsetRatio = 0;
             } else {
                 startOffsetRatio = -firstChild.getTop() / (float) firstChildHeight;
             }
@@ -7202,40 +7207,63 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 return;
             }
 
-            mSubScroller.startScroll(startSubRow, endSubRow, duration);
+            final int durationMillis;
+            if (duration == DURATION_AUTO) {
+                final float subRowDelta = Math.abs(startSubRow - endSubRow);
+                durationMillis = (int) MathUtils.lerp(
+                        DURATION_AUTO_MIN, DURATION_AUTO_MAX, subRowDelta / getCount());
+            } else {
+                durationMillis = duration;
+            }
+
+            mSubScroller.startScroll(startSubRow, endSubRow, durationMillis);
 
             postOnAnimation(mAnimationFrame);
         }
 
-        private float computeBoundSubRow(int targetRow, int boundRow) {
-            // If the final offset is greater than 0, we're aiming above the
-            // suggested target row. Compute the actual target row and offset
-            // within that row by subtracting the height of each preceeding row.
-            int remainingOffset = mOffset;
+        /**
+         * Given a target row and offset, computes the sub-row position that
+         * aligns with the top of the list. If the offset is negative, the
+         * resulting sub-row will be smaller than the target row.
+         */
+        private float resolveOffset(int targetRow, int offset) {
+            // Compute the target sub-row position by finding the actual row
+            // indicated by the target and offset.
+            int remainingOffset = offset;
             int targetHeight = getHeightForRow(targetRow);
-            while (targetRow > 1 && remainingOffset > targetHeight) {
-                targetRow--;
-                remainingOffset -= targetHeight;
-                targetHeight = getHeightForRow(targetRow);
+            if (offset < 0) {
+                // Subtract row heights until we find the right row.
+                while (targetRow > 0 && remainingOffset < 0) {
+                    remainingOffset += targetHeight;
+                    targetRow--;
+                    targetHeight = getHeightForRow(targetRow);
+                }
+            } else if (offset > 0) {
+                // Add row heights until we find the right row.
+                while (targetRow < getCount() - 1 && remainingOffset > targetHeight) {
+                    remainingOffset -= targetHeight;
+                    targetRow++;
+                    targetHeight = getHeightForRow(targetRow);
+                }
             }
 
-            // Compute the offset within the actual target row.
             final float targetOffsetRatio;
-            if (remainingOffset > 0) {
-                // We can't reach that offset given the row count.
+            if (remainingOffset < 0 || targetHeight == 0) {
                 targetOffsetRatio = 0;
-            } else if (targetHeight == 0) {
-                targetOffsetRatio = 1;
             } else {
                 targetOffsetRatio = remainingOffset / (float) targetHeight;
             }
 
-            // The final offset has been accounted for, reset it.
-            final float targetSubRow = targetRow - targetOffsetRatio;
+            return targetRow + targetOffsetRatio;
+        }
+
+        private float computeBoundSubRow(int targetRow, int boundRow) {
+            final float targetSubRow = resolveOffset(targetRow, mOffset);
             mOffset = 0;
 
+            // The target row is below the bound row, so the end position would
+            // push the bound position above the list. Abort!
             if (targetSubRow >= boundRow) {
-                // End position would push the bound position above the list.
                 return boundRow;
             }
 
@@ -7243,39 +7271,24 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             // bound position's view further below the list.
             final int listHeight = getHeight() - getPaddingTop() - getPaddingBottom();
             final int boundHeight = getHeightForRow(boundRow);
-            int endRow = boundRow;
-            int totalHeight = boundHeight;
-            int endHeight;
-            do {
-                endRow--;
-                endHeight = getHeightForRow(endRow);
-                totalHeight += endHeight;
-            } while (totalHeight < listHeight && endRow > 0);
+            final float boundSubRow = resolveOffset(boundRow, -listHeight + boundHeight);
 
-            final float endOffsetRatio;
-            if (endHeight == 0) {
-                endOffsetRatio = 1;
-            } else {
-                endOffsetRatio = (totalHeight - listHeight) / (float) endHeight;
-            }
-
-            final float boundSubRow = endRow + endOffsetRatio;
             return Math.max(boundSubRow, targetSubRow);
         }
 
         @Override
         public void start(int position) {
-            scrollToPosition(position, false, 0, INVALID_POSITION, DEFAULT_SCROLL_DURATION);
+            scrollToPosition(position, false, 0, INVALID_POSITION, DURATION_AUTO);
         }
 
         @Override
         public void start(int position, int boundPosition) {
-            scrollToPosition(position, false, 0, boundPosition, DEFAULT_SCROLL_DURATION);
+            scrollToPosition(position, false, 0, boundPosition, DURATION_AUTO);
         }
 
         @Override
         public void startWithOffset(int position, int offset) {
-            scrollToPosition(position, true, offset, INVALID_POSITION, DEFAULT_SCROLL_DURATION);
+            scrollToPosition(position, true, offset, INVALID_POSITION, DURATION_AUTO);
         }
 
         @Override
@@ -7327,7 +7340,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int rowHeight = getHeightForRow(row);
             final int offset = (int) (rowHeight * (subRow - row));
             final int addOffset = (int) (mOffset * mSubScroller.getInterpolatedValue());
-            setSelectionFromTop(position, -offset + addOffset);
+            setSelectionFromTop(position, -offset - addOffset);
 
             if (shouldPost) {
                 postOnAnimation(mAnimationFrame);
@@ -7346,7 +7359,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Scroller capable of returning floating point positions.
      */
     static class SubScroller {
-        private final Interpolator mInterpolator;
+        private static final Interpolator INTERPOLATOR = new AccelerateDecelerateInterpolator();
 
         private float mStartPosition;
         private float mEndPosition;
@@ -7355,18 +7368,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         private float mPosition;
         private float mInterpolatedValue;
-
-        public SubScroller() {
-            this(null);
-        }
-
-        public SubScroller(Interpolator interpolator) {
-            if (interpolator == null) {
-                mInterpolator = new AccelerateDecelerateInterpolator();
-            } else {
-                mInterpolator = interpolator;
-            }
-        }
 
         public void startScroll(float startPosition, float endPosition, int duration) {
             mStartPosition = startPosition;
@@ -7387,7 +7388,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 value = MathUtils.constrain(elapsed / (float) mDuration, 0, 1);
             }
 
-            mInterpolatedValue = mInterpolator.getInterpolation(value);
+            mInterpolatedValue = INTERPOLATOR.getInterpolation(value);
             mPosition = (mEndPosition - mStartPosition) * mInterpolatedValue + mStartPosition;
 
             return elapsed < mDuration;
