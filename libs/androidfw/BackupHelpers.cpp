@@ -1083,7 +1083,7 @@ backup_helper_test_four()
     }
 
     if (readSnapshot.size() != 4) {
-        fprintf(stderr, "readSnapshot should be length 4 is %d\n", readSnapshot.size());
+        fprintf(stderr, "readSnapshot should be length 4 is %zu\n", readSnapshot.size());
         return 1;
     }
 
@@ -1095,8 +1095,8 @@ backup_helper_test_four()
         if (name != filenames[i] || states[i].modTime_sec != state.modTime_sec
                 || states[i].modTime_nsec != state.modTime_nsec || states[i].mode != state.mode
                 || states[i].size != state.size || states[i].crc32 != states[i].crc32) {
-            fprintf(stderr, "state %d expected={%d/%d, 0x%08x, %04o, 0x%08x, %3d} '%s'\n"
-                            "          actual={%d/%d, 0x%08x, %04o, 0x%08x, %3d} '%s'\n", i,
+            fprintf(stderr, "state %zu expected={%d/%d, 0x%08x, %04o, 0x%08x, %3d} '%s'\n"
+                            "          actual={%d/%d, 0x%08x, %04o, 0x%08x, %3zu} '%s'\n", i,
                     states[i].modTime_sec, states[i].modTime_nsec, states[i].mode, states[i].size,
                     states[i].crc32, name.length(), filenames[i].string(),
                     state.modTime_sec, state.modTime_nsec, state.mode, state.size, state.crc32,
@@ -1230,7 +1230,7 @@ test_read_header_and_entity(BackupDataReader& reader, const char* str)
         goto finished;
     }
     if ((int)actualSize != bufSize) {
-        fprintf(stderr, "ReadEntityHeader expected dataSize 0x%08x got 0x%08x\n", bufSize,
+        fprintf(stderr, "ReadEntityHeader expected dataSize 0x%08x got 0x%08zx\n", bufSize,
                 actualSize);
         err = EINVAL;
         goto finished;
