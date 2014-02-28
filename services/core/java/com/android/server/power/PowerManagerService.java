@@ -1591,12 +1591,9 @@ public final class PowerManagerService extends com.android.server.SystemService
                 | DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED | DIRTY_BOOT_COMPLETED
                 | DIRTY_SETTINGS | DIRTY_SCREEN_ON_BLOCKER_RELEASED)) != 0) {
             final int newScreenState = getDesiredScreenPowerStateLocked();
-            if (newScreenState != mDisplayPowerRequest.screenState) {
-                mDisplayPowerRequest.screenState = newScreenState;
-                nativeSetPowerState(
-                        mDisplayPowerRequest.wantScreenOnNormal(),
-                        newScreenState == DisplayPowerRequest.SCREEN_STATE_BRIGHT);
-            }
+            mDisplayPowerRequest.screenState = newScreenState;
+            nativeSetPowerState(isScreenOnLocked(),
+                    newScreenState == DisplayPowerRequest.SCREEN_STATE_BRIGHT);
 
             int screenBrightness = mScreenBrightnessSettingDefault;
             float screenAutoBrightnessAdjustment = 0.0f;
@@ -1806,9 +1803,13 @@ public final class PowerManagerService extends com.android.server.SystemService
 
     private boolean isScreenOnInternal() {
         synchronized (mLock) {
-            return !mSystemReady
-                    || mDisplayPowerRequest.wantScreenOnNormal();
+            return isScreenOnLocked();
         }
+    }
+
+    private boolean isScreenOnLocked() {
+        return mWakefulness == WAKEFULNESS_AWAKE
+                || mWakefulness == WAKEFULNESS_DREAMING;
     }
 
     private void handleBatteryStateChangedLocked() {
