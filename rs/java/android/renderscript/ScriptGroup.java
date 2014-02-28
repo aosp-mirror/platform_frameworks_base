@@ -380,7 +380,6 @@ public final class ScriptGroup extends BaseObj {
          * @return ScriptGroup The new ScriptGroup
          */
         public ScriptGroup create() {
-            // FIXME: this is broken for 64-bit
 
             if (mNodes.size() == 0) {
                 throw new RSInvalidStateException("Empty script groups are not allowed");
@@ -395,13 +394,13 @@ public final class ScriptGroup extends BaseObj {
             ArrayList<IO> inputs = new ArrayList<IO>();
             ArrayList<IO> outputs = new ArrayList<IO>();
 
-            int[] kernels = new int[mKernelCount];
+            long[] kernels = new long[mKernelCount];
             int idx = 0;
             for (int ct=0; ct < mNodes.size(); ct++) {
                 Node n = mNodes.get(ct);
                 for (int ct2=0; ct2 < n.mKernels.size(); ct2++) {
                     final Script.KernelID kid = n.mKernels.get(ct2);
-                    kernels[idx++] = (int)kid.getID(mRS);
+                    kernels[idx++] = kid.getID(mRS);
 
                     boolean hasInput = false;
                     boolean hasOutput = false;
@@ -428,21 +427,21 @@ public final class ScriptGroup extends BaseObj {
                 throw new RSRuntimeException("Count mismatch, should not happen.");
             }
 
-            int[] src = new int[mLines.size()];
-            int[] dstk = new int[mLines.size()];
-            int[] dstf = new int[mLines.size()];
-            int[] types = new int[mLines.size()];
+            long[] src = new long[mLines.size()];
+            long[] dstk = new long[mLines.size()];
+            long[] dstf = new long[mLines.size()];
+            long[] types = new long[mLines.size()];
 
             for (int ct=0; ct < mLines.size(); ct++) {
                 ConnectLine cl = mLines.get(ct);
-                src[ct] = (int)cl.mFrom.getID(mRS);
+                src[ct] = cl.mFrom.getID(mRS);
                 if (cl.mToK != null) {
-                    dstk[ct] = (int)cl.mToK.getID(mRS);
+                    dstk[ct] = cl.mToK.getID(mRS);
                 }
                 if (cl.mToF != null) {
-                    dstf[ct] = (int)cl.mToF.getID(mRS);
+                    dstf[ct] = cl.mToF.getID(mRS);
                 }
-                types[ct] = (int)cl.mAllocationType.getID(mRS);
+                types[ct] = cl.mAllocationType.getID(mRS);
             }
 
             long id = mRS.nScriptGroupCreate(kernels, src, dstk, dstf, types);
