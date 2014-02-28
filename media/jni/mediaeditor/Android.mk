@@ -35,7 +35,6 @@ LOCAL_C_INCLUDES += \
     $(TOP)/frameworks/base/media/libstagefright/include \
     $(TOP)/frameworks/base/media/libstagefright/rtsp \
     $(JNI_H_INCLUDE) \
-    $(call include-path-for, corecg graphics) \
     $(TOP)/frameworks/native/include/media/editor \
     $(TOP)/frameworks/base/core/jni/mediaeditor \
     $(TOP)/frameworks/av/libvideoeditor/vss/inc \

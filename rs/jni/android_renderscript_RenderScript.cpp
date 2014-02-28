@@ -23,10 +23,7 @@
 #include <math.h>
 #include <utils/misc.h>
 
-#include <core/SkBitmap.h>
-#include <core/SkPixelRef.h>
-#include <core/SkStream.h>
-#include <core/SkTemplates.h>
+#include <SkBitmap.h>
 
 #include <androidfw/Asset.h>
 #include <androidfw/AssetManager.h>
