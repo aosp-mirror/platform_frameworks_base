@@ -25,7 +25,7 @@ public abstract class EGLObjectHandle {
     private final long mHandle;
 
     /**
-     * @deprecated Use {@link EGLObjectHandle(long)} instead. Handles
+     * @deprecated Use {@link #EGLObjectHandle(long)} instead. Handles
      *     on 64 bit platforms will be wider than java ints.
      */
     @Deprecated
