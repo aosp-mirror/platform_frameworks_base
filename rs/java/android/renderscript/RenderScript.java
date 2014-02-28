@@ -303,8 +303,8 @@ public class RenderScript {
         validate();
         return rsnElementCreate(mContext, type, kind, norm, vecSize);
     }
-    native long rsnElementCreate2(long con, int[]elements, String[] names, int[] arraySizes);
-    synchronized long nElementCreate2(int[] elements, String[] names, int[] arraySizes) {
+    native long rsnElementCreate2(long con, long[] elements, String[] names, int[] arraySizes);
+    synchronized long nElementCreate2(long[] elements, String[] names, int[] arraySizes) {
         validate();
         return rsnElementCreate2(mContext, elements, names, arraySizes);
     }
@@ -314,8 +314,8 @@ public class RenderScript {
         rsnElementGetNativeData(mContext, id, elementData);
     }
     native void rsnElementGetSubElements(long con, long id,
-                                         int[] IDs, String[] names, int[] arraySizes);
-    synchronized void nElementGetSubElements(long id, int[] IDs, String[] names, int[] arraySizes) {
+                                         long[] IDs, String[] names, int[] arraySizes);
+    synchronized void nElementGetSubElements(long id, long[] IDs, String[] names, int[] arraySizes) {
         validate();
         rsnElementGetSubElements(mContext, id, IDs, names, arraySizes);
     }
@@ -325,14 +325,14 @@ public class RenderScript {
         validate();
         return rsnTypeCreate(mContext, eid, x, y, z, mips, faces, yuv);
     }
-    native void rsnTypeGetNativeData(long con, long id, int[] typeData);
-    synchronized void nTypeGetNativeData(long id, int[] typeData) {
+    native void rsnTypeGetNativeData(long con, long id, long[] typeData);
+    synchronized void nTypeGetNativeData(long id, long[] typeData) {
         validate();
         rsnTypeGetNativeData(mContext, id, typeData);
     }
 
-    native long rsnAllocationCreateTyped(long con, long type, int mip, int usage, int pointer);
-    synchronized long nAllocationCreateTyped(long type, int mip, int usage, int pointer) {
+    native long rsnAllocationCreateTyped(long con, long type, int mip, int usage, long pointer);
+    synchronized long nAllocationCreateTyped(long type, int mip, int usage, long pointer) {
         validate();
         return rsnAllocationCreateTyped(mContext, type, mip, usage, pointer);
     }
@@ -700,8 +700,8 @@ public class RenderScript {
         return rsnScriptFieldIDCreate(mContext, sid, slot);
     }
 
-    native long rsnScriptGroupCreate(long con, int[] kernels, int[] src, int[] dstk, int[] dstf, int[] types);
-    synchronized long nScriptGroupCreate(int[] kernels, int[] src, int[] dstk, int[] dstf, int[] types) {
+    native long rsnScriptGroupCreate(long con, long[] kernels, long[] src, long[] dstk, long[] dstf, long[] types);
+    synchronized long nScriptGroupCreate(long[] kernels, long[] src, long[] dstk, long[] dstf, long[] types) {
         validate();
         return rsnScriptGroupCreate(mContext, kernels, src, dstk, dstf, types);
     }
@@ -764,19 +764,19 @@ public class RenderScript {
         validate();
         rsnProgramBindSampler(mContext, vpf, slot, s);
     }
-    native long rsnProgramFragmentCreate(long con, String shader, String[] texNames, int[] params);
-    synchronized long nProgramFragmentCreate(String shader, String[] texNames, int[] params) {
+    native long rsnProgramFragmentCreate(long con, String shader, String[] texNames, long[] params);
+    synchronized long nProgramFragmentCreate(String shader, String[] texNames, long[] params) {
         validate();
         return rsnProgramFragmentCreate(mContext, shader, texNames, params);
     }
-    native long rsnProgramVertexCreate(long con, String shader, String[] texNames, int[] params);
-    synchronized long nProgramVertexCreate(String shader, String[] texNames, int[] params) {
+    native long rsnProgramVertexCreate(long con, String shader, String[] texNames, long[] params);
+    synchronized long nProgramVertexCreate(String shader, String[] texNames, long[] params) {
         validate();
         return rsnProgramVertexCreate(mContext, shader, texNames, params);
     }
 
-    native long rsnMeshCreate(long con, int[] vtx, int[] idx, int[] prim);
-    synchronized long nMeshCreate(int[] vtx, int[] idx, int[] prim) {
+    native long rsnMeshCreate(long con, long[] vtx, long[] idx, int[] prim);
+    synchronized long nMeshCreate(long[] vtx, long[] idx, int[] prim) {
         validate();
         return rsnMeshCreate(mContext, vtx, idx, prim);
     }
@@ -790,13 +790,13 @@ public class RenderScript {
         validate();
         return rsnMeshGetIndexCount(mContext, id);
     }
-    native void rsnMeshGetVertices(long con, long id, int[] vtxIds, int vtxIdCount);
-    synchronized void nMeshGetVertices(long id, int[] vtxIds, int vtxIdCount) {
+    native void rsnMeshGetVertices(long con, long id, long[] vtxIds, int vtxIdCount);
+    synchronized void nMeshGetVertices(long id, long[] vtxIds, int vtxIdCount) {
         validate();
         rsnMeshGetVertices(mContext, id, vtxIds, vtxIdCount);
     }
-    native void rsnMeshGetIndices(long con, long id, int[] idxIds, int[] primitives, int vtxIdCount);
-    synchronized void nMeshGetIndices(long id, int[] idxIds, int[] primitives, int vtxIdCount) {
+    native void rsnMeshGetIndices(long con, long id, long[] idxIds, int[] primitives, int vtxIdCount);
+    synchronized void nMeshGetIndices(long id, long[] idxIds, int[] primitives, int vtxIdCount) {
         validate();
         rsnMeshGetIndices(mContext, id, idxIds, primitives, vtxIdCount);
     }

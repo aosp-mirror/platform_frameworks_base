@@ -75,25 +75,25 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
          */
         public ProgramVertexFixedFunction create() {
             mRS.validate();
-            int[] tmp = new int[(mInputCount + mOutputCount + mConstantCount + mTextureCount) * 2];
+            long[] tmp = new long[(mInputCount + mOutputCount + mConstantCount + mTextureCount) * 2];
             String[] texNames = new String[mTextureCount];
             int idx = 0;
 
             for (int i=0; i < mInputCount; i++) {
                 tmp[idx++] = ProgramParam.INPUT.mID;
-                tmp[idx++] = (int)mInputs[i].getID(mRS);
+                tmp[idx++] = mInputs[i].getID(mRS);
             }
             for (int i=0; i < mOutputCount; i++) {
                 tmp[idx++] = ProgramParam.OUTPUT.mID;
-                tmp[idx++] = (int)mOutputs[i].getID(mRS);
+                tmp[idx++] = mOutputs[i].getID(mRS);
             }
             for (int i=0; i < mConstantCount; i++) {
                 tmp[idx++] = ProgramParam.CONSTANT.mID;
-                tmp[idx++] = (int)mConstants[i].getID(mRS);
+                tmp[idx++] = mConstants[i].getID(mRS);
             }
             for (int i=0; i < mTextureCount; i++) {
                 tmp[idx++] = ProgramParam.TEXTURE_TYPE.mID;
-                tmp[idx++] = (int)mTextureTypes[i].mID;
+                tmp[idx++] = mTextureTypes[i].mID;
                 texNames[i] = mTextureNames[i];
             }
 
