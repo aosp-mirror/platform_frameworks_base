@@ -267,6 +267,10 @@ public final class ViewRootImpl implements ViewParent,
     HardwareLayer mResizeBuffer;
     long mResizeBufferStartTime;
     int mResizeBufferDuration;
+    // Used to block the creation of the ResizeBuffer due to invalidations in
+    // the previous DisplayList tree that must prevent re-execution.
+    // Currently this means a functor was detached.
+    boolean mBlockResizeBuffer;
     static final Interpolator mResizeInterpolator = new AccelerateDecelerateInterpolator();
     private ArrayList<LayoutTransition> mPendingTransitions;
 
@@ -667,6 +671,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void detachFunctor(int functor) {
+        mBlockResizeBuffer = true;
         if (mAttachInfo.mHardwareRenderer != null) {
             mAttachInfo.mHardwareRenderer.detachFunctor(functor);
         }
@@ -1454,7 +1459,8 @@ public final class ViewRootImpl implements ViewParent,
                             !mAttachInfo.mTurnOffWindowResizeAnim &&
                             mAttachInfo.mHardwareRenderer != null &&
                             mAttachInfo.mHardwareRenderer.isEnabled() &&
-                            lp != null && !PixelFormat.formatHasAlpha(lp.format)) {
+                            lp != null && !PixelFormat.formatHasAlpha(lp.format)
+                            && !mBlockResizeBuffer) {
 
                         disposeResizeBuffer();
 
@@ -2377,6 +2383,7 @@ public final class ViewRootImpl implements ViewParent,
                 mCurrentDirty.set(dirty);
                 dirty.setEmpty();
 
+                mBlockResizeBuffer = false;
                 attachInfo.mHardwareRenderer.draw(mView, attachInfo, this,
                         animating ? null : mCurrentDirty);
             } else {
