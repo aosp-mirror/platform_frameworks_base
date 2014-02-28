@@ -7160,8 +7160,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 return;
             }
 
+            if (mAdapter == null) {
+                // Can't scroll anywhere without an adapter.
+                return;
+            }
+
             final int itemCount = getCount();
             final int clampedPosition = MathUtils.constrain(targetPosition, 0, itemCount - 1);
+            final int clampedBoundPosition = MathUtils.constrain(boundPosition, 0, itemCount - 1);
             final int firstPosition = getFirstVisiblePosition();
             final int lastPosition = firstPosition + getChildCount();
             final int targetRow = getRowForPosition(clampedPosition);
@@ -7180,8 +7186,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             float endSubRow = targetRow;
-            if (boundPosition != INVALID_POSITION) {
-                final int boundRow = getRowForPosition(boundPosition);
+            if (clampedBoundPosition != INVALID_POSITION) {
+                final int boundRow = getRowForPosition(clampedBoundPosition);
                 if (boundRow >= firstRow && boundRow < lastRow && boundRow != targetRow) {
                     endSubRow = computeBoundSubRow(targetRow, boundRow);
                 }
