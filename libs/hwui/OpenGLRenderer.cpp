@@ -52,7 +52,12 @@ namespace uirenderer {
 
 #define ALPHA_THRESHOLD 0
 
-#define FILTER(paint) (!paint || paint->isFilterBitmap() ? GL_LINEAR : GL_NEAREST)
+static GLenum getFilter(const SkPaint* paint) {
+    if (!paint || paint->getFilterLevel() != SkPaint::kNone_FilterLevel) {
+        return GL_LINEAR;
+    }
+    return GL_NEAREST;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Globals
@@ -1973,7 +1978,7 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, co
 
         texture->setFilter(GL_NEAREST, true);
     } else {
-        texture->setFilter(FILTER(paint), true);
+        texture->setFilter(getFilter(paint), true);
     }
 
     // No need to check for a UV mapper on the texture object, only ARGB_8888
@@ -1998,7 +2003,7 @@ status_t OpenGLRenderer::drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* 
     const AutoTexture autoCleanup(texture);
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
-    texture->setFilter(pureTranslate ? GL_NEAREST : FILTER(paint), true);
+    texture->setFilter(pureTranslate ? GL_NEAREST : getFilter(paint), true);
 
     const float x = (int) floorf(bounds.left + 0.5f);
     const float y = (int) floorf(bounds.top + 0.5f);
@@ -2174,7 +2179,7 @@ status_t OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, i
     const AutoTexture autoCleanup(texture);
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
-    texture->setFilter(FILTER(paint), true);
+    texture->setFilter(getFilter(paint), true);
 
     int alpha;
     SkXfermode::Mode mode;
@@ -2259,10 +2264,10 @@ status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap,
         dstLeft = x;
         dstTop = y;
 
-        texture->setFilter(scaled ? FILTER(paint) : GL_NEAREST, true);
+        texture->setFilter(scaled ? getFilter(paint) : GL_NEAREST, true);
         ignoreTransform = true;
     } else {
-        texture->setFilter(FILTER(paint), true);
+        texture->setFilter(getFilter(paint), true);
     }
 
     if (CC_UNLIKELY(useScaleTransform)) {
@@ -3382,7 +3387,7 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
                 paint, texture->blend, vertices, texCoords,
                 GL_TRIANGLE_STRIP, gMeshCount, false, true);
     } else {
-        texture->setFilter(FILTER(paint), true);
+        texture->setFilter(getFilter(paint), true);
         drawTextureMesh(left, top, right, bottom, texture->id, paint,
                 texture->blend, vertices, texCoords, GL_TRIANGLE_STRIP, gMeshCount);
     }

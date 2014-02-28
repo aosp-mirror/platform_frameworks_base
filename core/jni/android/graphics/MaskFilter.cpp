@@ -1,5 +1,6 @@
 #include "GraphicsJNI.h"
 #include "SkMaskFilter.h"
+#include "SkBlurMask.h"
 #include "SkBlurMaskFilter.h"
 #include "SkTableMaskFilter.h"
 
@@ -19,8 +20,9 @@ public:
     }
 
     static jlong createBlur(JNIEnv* env, jobject, jfloat radius, jint blurStyle) {
-        SkMaskFilter* filter = SkBlurMaskFilter::Create(SkFloatToScalar(radius),
-                                        (SkBlurMaskFilter::BlurStyle)blurStyle);
+        SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(SkFloatToScalar(radius));
+        SkMaskFilter* filter = SkBlurMaskFilter::Create(sigma,
+                (SkBlurMaskFilter::BlurStyle)blurStyle);
         ThrowIAE_IfNull(env, filter);
         return reinterpret_cast<jlong>(filter);
     }
@@ -34,10 +36,9 @@ public:
             direction[i] = SkFloatToScalar(values[i]);
         }
 
-        SkMaskFilter* filter =  SkBlurMaskFilter::CreateEmboss(direction,
-                                                      SkFloatToScalar(ambient),
-                                                      SkFloatToScalar(specular),
-                                                      SkFloatToScalar(radius));
+        SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(SkFloatToScalar(radius));
+        SkMaskFilter* filter =  SkBlurMaskFilter::CreateEmboss(sigma,
+                direction, SkFloatToScalar(ambient), SkFloatToScalar(specular));
         ThrowIAE_IfNull(env, filter);
         return reinterpret_cast<jlong>(filter);
     }
