@@ -27,7 +27,7 @@ import android.util.Log;
 import java.util.Arrays;
 import java.util.List;
 
-public class ZenModeViewAdapter implements ZenModeView.Adapter {
+public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
     private static final String TAG = "ZenModeViewAdapter";
 
     private final Context mContext;
