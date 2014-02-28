@@ -21,8 +21,8 @@ public:
 
     static jlong createBlur(JNIEnv* env, jobject, jfloat radius, jint blurStyle) {
         SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(SkFloatToScalar(radius));
-        SkMaskFilter* filter = SkBlurMaskFilter::Create(sigma,
-                (SkBlurMaskFilter::BlurStyle)blurStyle);
+        SkMaskFilter* filter = SkBlurMaskFilter::Create(
+                (SkBlurMaskFilter::BlurStyle)blurStyle, sigma);
         ThrowIAE_IfNull(env, filter);
         return reinterpret_cast<jlong>(filter);
     }
