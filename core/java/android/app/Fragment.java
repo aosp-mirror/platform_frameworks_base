@@ -1402,6 +1402,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         mRestored = false;
         mBackStackNesting = 0;
         mFragmentManager = null;
+        mChildFragmentManager = null;
         mActivity = null;
         mFragmentId = 0;
         mContainerId = 0;
