@@ -97,6 +97,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     // scores above this threshold should be displayed in heads up mode.
     protected static final int INTERRUPTION_THRESHOLD = 11;
     protected static final String SETTING_HEADS_UP = "heads_up_enabled";
+    protected static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
 
     // Should match the value in PhoneWindowManager
     public static final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
@@ -131,6 +132,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected int mLayoutDirection = -1; // invalid
     private Locale mLocale;
     protected boolean mUseHeadsUp = false;
+    protected boolean mHeadsUpTicker = false;
 
     protected IDreamManager mDreamManager;
     PowerManager mPowerManager;
@@ -1261,11 +1263,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                 || notification.vibrate != null;
         boolean isHighPriority = sbn.getScore() >= INTERRUPTION_THRESHOLD;
         boolean isFullscreen = notification.fullScreenIntent != null;
+        boolean hasTicker = mHeadsUpTicker && !TextUtils.isEmpty(notification.tickerText);
         boolean isAllowed = notification.extras.getInt(Notification.EXTRA_AS_HEADS_UP,
                 Notification.HEADS_UP_ALLOWED) != Notification.HEADS_UP_NEVER;
 
         final KeyguardTouchDelegate keyguard = KeyguardTouchDelegate.getInstance(mContext);
-        boolean interrupt = (isFullscreen || (isHighPriority && isNoisy))
+        boolean interrupt = (isFullscreen || (isHighPriority && (isNoisy || hasTicker)))
                 && isAllowed
                 && mPowerManager.isScreenOn()
                 && !keyguard.isShowingAndNotHidden()
