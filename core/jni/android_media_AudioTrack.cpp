@@ -263,7 +263,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
 
     // compute the frame count
     const size_t bytesPerSample = audio_bytes_per_sample(format);
-    int frameCount = buffSizeInBytes / (nbChannels * bytesPerSample);
+    size_t frameCount = buffSizeInBytes / (nbChannels * bytesPerSample);
 
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
