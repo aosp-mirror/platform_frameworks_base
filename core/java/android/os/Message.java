@@ -71,7 +71,14 @@ public final class Message implements Parcelable {
      */
     public Messenger replyTo;
 
-    /** If set message is in use */
+    /** If set message is in use.
+     * This flag is set when the message is enqueued and remains set while it
+     * is delivered and afterwards when it is recycled.  The flag is only cleared
+     * when a new message is created or obtained since that is the only time that
+     * applications are allowed to modify the contents of the message.
+     *
+     * It is an error to attempt to enqueue or recycle a message that is already in use.
+     */
     /*package*/ static final int FLAG_IN_USE = 1 << 0;
 
     /** If set message is asynchronous */
@@ -86,9 +93,9 @@ public final class Message implements Parcelable {
     
     /*package*/ Bundle data;
     
-    /*package*/ Handler target;     
+    /*package*/ Handler target;
     
-    /*package*/ Runnable callback;   
+    /*package*/ Runnable callback;
     
     // sometimes we store linked lists of these things
     /*package*/ Message next;
@@ -109,6 +116,7 @@ public final class Message implements Parcelable {
                 Message m = sPool;
                 sPool = m.next;
                 m.next = null;
+                m.flags = 0; // clear in-use flag
                 sPoolSize--;
                 return m;
             }
@@ -241,12 +249,38 @@ public final class Message implements Parcelable {
     }
 
     /**
-     * Return a Message instance to the global pool.  You MUST NOT touch
-     * the Message after calling this function -- it has effectively been
-     * freed.
+     * Return a Message instance to the global pool.
+     * <p>
+     * You MUST NOT touch the Message after calling this function because it has
+     * effectively been freed.  It is an error to recycle a message that is currently
+     * enqueued or that is in the process of being delivered to a Handler.
+     * </p>
      */
     public void recycle() {
-        clearForRecycle();
+        if (isInUse()) {
+            throw new IllegalStateException("This message cannot be recycled because it "
+                    + "is still in use.");
+        }
+        recycleUnchecked();
+    }
+
+    /**
+     * Recycles a Message that may be in-use.
+     * Used internally by the MessageQueue and Looper when disposing of queued Messages.
+     */
+    void recycleUnchecked() {
+        // Mark the message as in use while it remains in the recycled object pool.
+        // Clear out all other details.
+        flags = FLAG_IN_USE;
+        what = 0;
+        arg1 = 0;
+        arg2 = 0;
+        obj = null;
+        replyTo = null;
+        when = 0;
+        target = null;
+        callback = null;
+        data = null;
 
         synchronized (sPoolSync) {
             if (sPoolSize < MAX_POOL_SIZE) {
@@ -400,19 +434,6 @@ public final class Message implements Parcelable {
         } else {
             flags &= ~FLAG_ASYNCHRONOUS;
         }
-    }
-
-    /*package*/ void clearForRecycle() {
-        flags = 0;
-        what = 0;
-        arg1 = 0;
-        arg2 = 0;
-        obj = null;
-        replyTo = null;
-        when = 0;
-        target = null;
-        callback = null;
-        data = null;
     }
 
     /*package*/ boolean isInUse() {

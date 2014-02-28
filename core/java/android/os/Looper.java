@@ -149,7 +149,7 @@ public final class Looper {
                         + msg.callback + " what=" + msg.what);
             }
 
-            msg.recycle();
+            msg.recycleUnchecked();
         }
     }
 
