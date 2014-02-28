@@ -152,8 +152,8 @@ public class Mesh extends BaseObj {
         int vtxCount = mRS.nMeshGetVertexBufferCount(getID(mRS));
         int idxCount = mRS.nMeshGetIndexCount(getID(mRS));
 
-        int[] vtxIDs = new int[vtxCount];
-        int[] idxIDs = new int[idxCount];
+        long[] vtxIDs = new long[vtxCount];
+        long[] idxIDs = new long[idxCount];
         int[] primitives = new int[idxCount];
 
         mRS.nMeshGetVertices(getID(mRS), vtxIDs, vtxCount);
@@ -348,8 +348,8 @@ public class Mesh extends BaseObj {
         **/
         public Mesh create() {
             mRS.validate();
-            int[] vtx = new int[mVertexTypeCount];
-            int[] idx = new int[mIndexTypes.size()];
+            long[] vtx = new long[mVertexTypeCount];
+            long[] idx = new long[mIndexTypes.size()];
             int[] prim = new int[mIndexTypes.size()];
 
             Allocation[] vertexBuffers = new Allocation[mVertexTypeCount];
@@ -365,7 +365,7 @@ public class Mesh extends BaseObj {
                     alloc = Allocation.createSized(mRS, entry.e, entry.size, mUsage);
                 }
                 vertexBuffers[ct] = alloc;
-                vtx[ct] = (int)alloc.getID(mRS);
+                vtx[ct] = alloc.getID(mRS);
             }
 
             for(int ct = 0; ct < mIndexTypes.size(); ct ++) {
@@ -380,7 +380,7 @@ public class Mesh extends BaseObj {
                 indexBuffers[ct] = alloc;
                 primitives[ct] = entry.prim;
 
-                idx[ct] = (int)allocID;
+                idx[ct] = allocID;
                 prim[ct] = entry.prim.mID;
             }
 
@@ -504,8 +504,8 @@ public class Mesh extends BaseObj {
         public Mesh create() {
             mRS.validate();
 
-            int[] vtx = new int[mVertexTypeCount];
-            int[] idx = new int[mIndexTypes.size()];
+            long[] vtx = new long[mVertexTypeCount];
+            long[] idx = new long[mIndexTypes.size()];
             int[] prim = new int[mIndexTypes.size()];
 
             Allocation[] indexBuffers = new Allocation[mIndexTypes.size()];
@@ -515,7 +515,7 @@ public class Mesh extends BaseObj {
             for(int ct = 0; ct < mVertexTypeCount; ct ++) {
                 Entry entry = mVertexTypes[ct];
                 vertexBuffers[ct] = entry.a;
-                vtx[ct] = (int)entry.a.getID(mRS);
+                vtx[ct] = entry.a.getID(mRS);
             }
 
             for(int ct = 0; ct < mIndexTypes.size(); ct ++) {
@@ -524,7 +524,7 @@ public class Mesh extends BaseObj {
                 indexBuffers[ct] = entry.a;
                 primitives[ct] = entry.prim;
 
-                idx[ct] = (int)allocID;
+                idx[ct] = allocID;
                 prim[ct] = entry.prim.mID;
             }
 
