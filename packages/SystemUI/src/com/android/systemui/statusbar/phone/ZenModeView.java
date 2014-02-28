@@ -66,10 +66,7 @@ public class ZenModeView extends RelativeLayout {
     private static final long BOUNCE_DURATION = DURATION / 3;
     private static final float BOUNCE_SCALE = 0.8f;
     private static final float SETTINGS_ALPHA = 0.6f;
-    private static final int INFO_WINDOW_DELAY = 2000;
 
-    private static final String LIMITED_TEXT =
-            "New notifications suppressed except calls, alarms & timers.";
     private static final String FULL_TEXT =
             "You won't hear any calls, alarms or timers.";
 
@@ -79,7 +76,6 @@ public class ZenModeView extends RelativeLayout {
     private final ModeSpinner mModeSpinner;
     private final ImageView mCloseButton;
     private final ImageView mSettingsButton;
-    private final InfoWindow mInfoWindow;
     private final Rect mLayoutRect = new Rect();
     private final UntilPager mUntilPager;
     private final AlarmWarning mAlarmWarning;
@@ -133,16 +129,12 @@ public class ZenModeView extends RelativeLayout {
         mSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mAdapter == null || mAdapter.getMode() != Adapter.MODE_LIMITED) {
-                    return;
-                }
-                if (!mInfoWindow.isShowing()) {
-                    mInfoWindow.show(mUntilPager);
+                if (mAdapter != null && mAdapter.getMode() == Adapter.MODE_LIMITED) {
+                    mAdapter.configure();
                 }
                 bounce(mSettingsButton, null);
             }
         });
-        mInfoWindow = new InfoWindow(mContext, LIMITED_TEXT);
 
         mModeSpinner = new ModeSpinner(mContext);
         mModeSpinner.setAlpha(0);
@@ -201,7 +193,6 @@ public class ZenModeView extends RelativeLayout {
         }).start();
         mUntilPager.animate().alpha(0).start();
         mAlarmWarning.animate().alpha(0).start();
-        mInfoWindow.dismiss();
     }
 
     public void setAdapter(Adapter adapter) {
@@ -247,7 +238,6 @@ public class ZenModeView extends RelativeLayout {
                 mBottom = getExpandedBottom();
                 setExpanded(1);
             }
-            mInfoWindow.dismiss();
         }
     }
 
@@ -597,6 +587,7 @@ public class ZenModeView extends RelativeLayout {
         public static final int MODE_FULL = 2;
 
         boolean isApplicable();
+        void configure();
         int getMode();
         void setMode(int mode);
         void select(ExitCondition ec);
@@ -743,35 +734,6 @@ public class ZenModeView extends RelativeLayout {
                 setAlpha(alpha);
                 requestLayout();
             }
-        }
-    }
-
-    private static class InfoWindow extends PopupWindow implements Runnable {
-        private final TextView mText;
-
-        public InfoWindow(Context context, String text) {
-            mText = new TextView(context);
-            mText.setTypeface(CONDENSED);
-            mText.setBackgroundColor(0xbb000000);
-            mText.setTextColor(0xffffffff);
-            mText.setText(text);
-            mText.setGravity(Gravity.CENTER);
-            setAnimationStyle(android.R.style.Animation_Toast);
-            setContentView(mText);
-        }
-
-        @Override
-        public void run() {
-            dismiss();
-        }
-
-        public void show(View over) {
-            setWidth(over.getMeasuredWidth());
-            setHeight(over.getMeasuredHeight());
-            final int[] loc = new int[2];
-            over.getLocationInWindow(loc);
-            showAtLocation(over, Gravity.NO_GRAVITY, loc[0], loc[1]);
-            over.postDelayed(this, INFO_WINDOW_DELAY);
         }
     }
 }

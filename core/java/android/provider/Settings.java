@@ -749,6 +749,14 @@ public final class Settings {
     public static final String ACTION_PRINT_SETTINGS =
             "android.settings.ACTION_PRINT_SETTINGS";
 
+    /**
+     * Activity Action: Show Zen Mode configuration settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ZEN_MODE_SETTINGS = "android.settings.ZEN_MODE_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
