@@ -2742,6 +2742,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 || (mDisabled & StatusBarManager.DISABLE_SEARCH) != 0;
     }
 
+    public void startSettingsActivity(String action) {
+        if (mQS != null) {
+            mQS.startSettingsActivity(action);
+        }
+    }
+
     private static class FastColorDrawable extends Drawable {
         private final int mColor;
 

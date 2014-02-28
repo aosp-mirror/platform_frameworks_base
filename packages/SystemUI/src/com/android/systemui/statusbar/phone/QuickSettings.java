@@ -278,7 +278,7 @@ class QuickSettings {
         mTilesSetUp = true;
     }
 
-    private void startSettingsActivity(String action) {
+    public void startSettingsActivity(String action) {
         Intent intent = new Intent(action);
         startSettingsActivity(intent);
     }
