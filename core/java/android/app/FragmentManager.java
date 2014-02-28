@@ -1026,6 +1026,7 @@ final class FragmentManagerImpl extends FragmentManager {
                                     f.mActivity = null;
                                     f.mParentFragment = null;
                                     f.mFragmentManager = null;
+                                    f.mChildFragmentManager = null;
                                 }
                             }
                         }
