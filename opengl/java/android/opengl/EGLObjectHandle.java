@@ -24,18 +24,28 @@ package android.opengl;
 public abstract class EGLObjectHandle {
     private final long mHandle;
 
-    // TODO Deprecate EGLObjectHandle(int) method
+    /**
+     * @deprecated Use {@link EGLObjectHandle(long)} instead. Handles
+     *     on 64 bit platforms will be wider than java ints.
+     */
+    @Deprecated
     protected EGLObjectHandle(int handle) {
         mHandle = handle;
     }
-    // TODO Unhide the EGLObjectHandle(long) method
-    /**
-     * {@hide}
-     */
     protected EGLObjectHandle(long handle) {
         mHandle = handle;
     }
-    // TODO Deprecate getHandle() method in favor of getNativeHandle()
+    /**
+     * @deprecated Use {@link #getNativeHandle()} instead. Handles on
+     *     64 bit platforms will be wider than java ints.
+     */
+    @Deprecated
+    public int getHandle() {
+        if ((mHandle & 0xffffffffL) != mHandle) {
+            throw new UnsupportedOperationException();
+        }
+        return (int)mHandle;
+    }
     /**
      * Returns the native handle of the wrapped EGL object. This handle can be
      * cast to the corresponding native type on the native side.
@@ -43,17 +53,6 @@ public abstract class EGLObjectHandle {
      * For example, EGLDisplay dpy = (EGLDisplay)handle;
      *
      * @return the native handle of the wrapped EGL object.
-     */
-    public int getHandle() {
-        if ((mHandle & 0xffffffffL) != mHandle) {
-            throw new UnsupportedOperationException();
-        }
-        return (int)mHandle;
-    }
-
-    // TODO Unhide getNativeHandle() method
-    /**
-     * {@hide}
      */
     public long getNativeHandle() {
         return mHandle;

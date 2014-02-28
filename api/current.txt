@@ -16328,8 +16328,10 @@ package android.opengl {
   }
 
   public abstract class EGLObjectHandle {
-    ctor protected EGLObjectHandle(int);
-    method public int getHandle();
+    ctor protected deprecated EGLObjectHandle(int);
+    ctor protected EGLObjectHandle(long);
+    method public deprecated int getHandle();
+    method public long getNativeHandle();
   }
 
   public class EGLSurface extends android.opengl.EGLObjectHandle {
