@@ -73,19 +73,24 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
     public boolean setNotification(NotificationData.Entry headsUp) {
         mHeadsUp = headsUp;
-        mHeadsUp.row.setExpanded(true);
-        mHeadsUp.row.setShowingPublic(false);
-        if (mContentHolder == null) {
-            // too soon!
-            return false;
+        if (mContentHolder != null) {
+            mContentHolder.removeAllViews();
         }
-        mContentHolder.setX(0);
-        mContentHolder.setVisibility(View.VISIBLE);
-        mContentHolder.setAlpha(1f);
-        mContentHolder.removeAllViews();
-        mContentHolder.addView(mHeadsUp.row);
-        mSwipeHelper.snapChild(mContentHolder, 1f);
-        mStartTouchTime = System.currentTimeMillis() + mTouchSensitivityDelay;
+
+        if (mHeadsUp != null) {
+            mHeadsUp.row.setExpanded(true);
+            mHeadsUp.row.setShowingPublic(false);
+            if (mContentHolder == null) {
+                // too soon!
+                return false;
+            }
+            mContentHolder.setX(0);
+            mContentHolder.setVisibility(View.VISIBLE);
+            mContentHolder.setAlpha(1f);
+            mContentHolder.addView(mHeadsUp.row);
+            mSwipeHelper.snapChild(mContentHolder, 1f);
+            mStartTouchTime = System.currentTimeMillis() + mTouchSensitivityDelay;
+        }
         return true;
     }
 

@@ -6108,6 +6108,16 @@ public final class Settings {
         }
 
         /**
+         * Defines global heads up toggle.  One of HEADS_UP_OFF, HEADS_UP_ON.
+         *
+         * @hide
+         */
+        public static final String HEADS_UP = "heads_up_enabled";
+
+        /** @hide */ public static final int HEADS_UP_OFF = 0;
+        /** @hide */ public static final int HEADS_UP_ON = 1;
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
