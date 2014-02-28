@@ -114,6 +114,8 @@ public final class SystemServer {
             "com.android.server.print.PrintManagerService";
     private static final String USB_SERVICE_CLASS =
             "com.android.server.usb.UsbService$Lifecycle";
+    private static final String HDMI_CEC_SERVICE_CLASS =
+            "com.android.server.hdmi.HdmiCecService";
 
     private final int mFactoryTestMode;
     private Timer mProfilerSnapshotTimer;
@@ -885,6 +887,12 @@ public final class SystemServer {
                 }
             } catch (Throwable e) {
                 reportWtf("starting Print Service", e);
+            }
+
+            try {
+                mSystemServiceManager.startService(HDMI_CEC_SERVICE_CLASS);
+            } catch (Throwable e) {
+                reportWtf("starting HdmiCec Service", e);
             }
 
             if (!disableNonCoreServices) {
