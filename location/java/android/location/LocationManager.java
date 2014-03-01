@@ -28,6 +28,7 @@ import android.os.Message;
 import android.util.Log;
 
 
+import java.lang.SecurityException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1104,13 +1105,18 @@ public class LocationManager {
      * unless they depend on provider-specific APIs such as
      * {@link #requestLocationUpdates(String, long, float, LocationListener)}.
      *
+     * <p>
+     * Before API version 20, this method would throw {@link SecurityException}
+     * if the location permissions were not sufficient to use the specified
+     * provider.
+     *
      * @param provider the name of the provider
      * @return true if the provider exists and is enabled
      *
      * @throws IllegalArgumentException if provider is null
-     * @throws SecurityException if no suitable permission is present
      */
     public boolean isProviderEnabled(String provider) {
+        // STOPSHIP: finalize API version number in javadoc
         checkProvider(provider);
 
         try {
