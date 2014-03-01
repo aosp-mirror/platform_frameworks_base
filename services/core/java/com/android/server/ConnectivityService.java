@@ -1986,7 +1986,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mNetTrackers[prevNetType].setTeardownRequested(false);
 
         // Remove idletimer previously setup in {@code handleConnect}
-        removeDataActivityTracking(prevNetType);
+        if (mNetConfigs[prevNetType].isDefault()) {
+            removeDataActivityTracking(prevNetType);
+        }
 
         /*
          * If the disconnected network is not the active one, then don't report
@@ -2318,8 +2320,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void handleConnect(NetworkInfo info) {
         final int newNetType = info.getType();
 
-        setupDataActivityTracking(newNetType);
-
         // snapshot isFailover, because sendConnectedBroadcast() resets it
         boolean isFailover = info.isFailover();
         final NetworkStateTracker thisNet = mNetTrackers[newNetType];
@@ -2357,6 +2357,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         return;
                 }
             }
+            setupDataActivityTracking(newNetType);
             synchronized (ConnectivityService.this) {
                 // have a new default network, release the transition wakelock in a second
                 // if it's held.  The second pause is to allow apps to reconnect over the
@@ -2406,7 +2407,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * Setup data activity tracking for the given network interface.
      *
      * Every {@code setupDataActivityTracking} should be paired with a
-     * {@link removeDataActivityTracking} for cleanup.
+     * {@link #removeDataActivityTracking} for cleanup.
      */
     private void setupDataActivityTracking(int type) {
         final NetworkStateTracker thisNet = mNetTrackers[type];
@@ -2431,7 +2432,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         if (timeout > 0 && iface != null) {
             try {
-                mNetd.addIdleTimer(iface, timeout, Integer.toString(type));
+                mNetd.addIdleTimer(iface, timeout, type);
             } catch (RemoteException e) {
             }
         }
@@ -2943,6 +2944,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 pw.decreaseIndent();
             }
         }
+
+        pw.print("Active default network: "); pw.println(getNetworkTypeName(mActiveDefaultNetwork));
+        pw.println();
 
         pw.println("Network Requester Pids:");
         pw.increaseIndent();

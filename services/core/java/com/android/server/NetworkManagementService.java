@@ -37,6 +37,7 @@ import static com.android.server.NetworkManagementService.NetdResponseCode.TtyLi
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
@@ -48,7 +49,9 @@ import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.INetworkActivityListener;
 import android.os.INetworkManagementService;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -81,7 +84,6 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -175,12 +177,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /** Set of interfaces with active idle timers. */
     private static class IdleTimerParams {
         public final int timeout;
-        public final String label;
+        public final int type;
         public int networkCount;
 
-        IdleTimerParams(int timeout, String label) {
+        IdleTimerParams(int timeout, int type) {
             this.timeout = timeout;
-            this.label = label;
+            this.type = type;
             this.networkCount = 1;
         }
     }
@@ -188,6 +190,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private volatile boolean mBandwidthControlEnabled;
     private volatile boolean mFirewallEnabled;
+
+    private final RemoteCallbackList<INetworkActivityListener> mNetworkActivityListeners =
+            new RemoteCallbackList<INetworkActivityListener>();
+    private boolean mNetworkActive;
 
     /**
      * Constructs a new NetworkManagementService instance
@@ -201,8 +207,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             return;
         }
 
+        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, NETD_TAG);
+
         mConnector = new NativeDaemonConnector(
-                new NetdCallbackReceiver(), socket, 10, NETD_TAG, 160);
+                new NetdCallbackReceiver(), socket, 10, NETD_TAG, 160, wl);
         mThread = new Thread(mConnector, NETD_TAG);
 
         // Add ourself to the Watchdog monitors.
@@ -337,20 +346,38 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /**
      * Notify our observers of a change in the data activity state of the interface
      */
-    private void notifyInterfaceClassActivity(String label, boolean active) {
+    private void notifyInterfaceClassActivity(int type, boolean active) {
         try {
-            getBatteryStats().noteDataConnectionActive(label, active);
+            getBatteryStats().noteDataConnectionActive(type, active);
         } catch (RemoteException e) {
         }
+
         final int length = mObservers.beginBroadcast();
         for (int i = 0; i < length; i++) {
             try {
-                mObservers.getBroadcastItem(i).interfaceClassDataActivityChanged(label, active);
+                mObservers.getBroadcastItem(i).interfaceClassDataActivityChanged(
+                        Integer.toString(type), active);
             } catch (RemoteException e) {
             } catch (RuntimeException e) {
             }
         }
         mObservers.finishBroadcast();
+
+        boolean report = false;
+        synchronized (mIdleTimerLock) {
+            if (mActiveIdleTimers.isEmpty()) {
+                // If there are no idle times, we are not monitoring activity, so we
+                // are always considered active.
+                active = true;
+            }
+            if (mNetworkActive != active) {
+                mNetworkActive = active;
+                report = active;
+            }
+        }
+        if (report) {
+            reportNetworkActive();
+        }
     }
 
     /**
@@ -488,6 +515,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
 
         @Override
+        public boolean onCheckHoldWakeLock(int code) {
+            return code == NetdResponseCode.InterfaceClassActivity;
+        }
+
+        @Override
         public boolean onEvent(int code, String raw, String[] cooked) {
             String errorMessage = String.format("Invalid event from daemon (%s)", raw);
             switch (code) {
@@ -540,7 +572,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                         throw new IllegalStateException(errorMessage);
                     }
                     boolean isActive = cooked[2].equals("active");
-                    notifyInterfaceClassActivity(cooked[3], isActive);
+                    notifyInterfaceClassActivity(Integer.parseInt(cooked[3]), isActive);
                     return true;
                     // break;
             case NetdResponseCode.InterfaceAddressChange:
@@ -1202,7 +1234,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void addIdleTimer(String iface, int timeout, String label) {
+    public void addIdleTimer(String iface, int timeout, final int type) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         if (DBG) Slog.d(TAG, "Adding idletimer");
@@ -1216,13 +1248,22 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             }
 
             try {
-                mConnector.execute("idletimer", "add", iface, Integer.toString(timeout), label);
+                mConnector.execute("idletimer", "add", iface, Integer.toString(timeout),
+                        Integer.toString(type));
             } catch (NativeDaemonConnectorException e) {
                 throw e.rethrowAsParcelableException();
             }
-            mActiveIdleTimers.put(iface, new IdleTimerParams(timeout, label));
+            mActiveIdleTimers.put(iface, new IdleTimerParams(timeout, type));
+
             // Networks start up.
-            notifyInterfaceClassActivity(label, true);
+            if (ConnectivityManager.isNetworkTypeMobile(type)) {
+                mNetworkActive = false;
+            }
+            mMainHandler.post(new Runnable() {
+                @Override public void run() {
+                    notifyInterfaceClassActivity(type, true);
+                }
+            });
         }
     }
 
@@ -1233,18 +1274,23 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         if (DBG) Slog.d(TAG, "Removing idletimer");
 
         synchronized (mIdleTimerLock) {
-            IdleTimerParams params = mActiveIdleTimers.get(iface);
+            final IdleTimerParams params = mActiveIdleTimers.get(iface);
             if (params == null || --(params.networkCount) > 0) {
                 return;
             }
 
             try {
                 mConnector.execute("idletimer", "remove", iface,
-                        Integer.toString(params.timeout), params.label);
+                        Integer.toString(params.timeout), Integer.toString(params.type));
             } catch (NativeDaemonConnectorException e) {
                 throw e.rethrowAsParcelableException();
             }
             mActiveIdleTimers.remove(iface);
+            mMainHandler.post(new Runnable() {
+                @Override public void run() {
+                    notifyInterfaceClassActivity(params.type, false);
+                }
+            });
         }
     }
 
@@ -1803,6 +1849,35 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         return event.getMessage().endsWith("started");
     }
 
+    @Override
+    public void registerNetworkActivityListener(INetworkActivityListener listener) {
+        mNetworkActivityListeners.register(listener);
+    }
+
+    @Override
+    public void unregisterNetworkActivityListener(INetworkActivityListener listener) {
+        mNetworkActivityListeners.unregister(listener);
+    }
+
+    @Override
+    public boolean isNetworkActive() {
+        synchronized (mNetworkActivityListeners) {
+            return mNetworkActive || mActiveIdleTimers.isEmpty();
+        }
+    }
+
+    private void reportNetworkActive() {
+        final int length = mNetworkActivityListeners.beginBroadcast();
+        for (int i = 0; i < length; i++) {
+            try {
+                mNetworkActivityListeners.getBroadcastItem(i).onNetworkActive();
+            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
+            }
+        }
+        mNetworkActivityListeners.finishBroadcast();
+    }
+
     /** {@inheritDoc} */
     @Override
     public void monitor() {
@@ -1834,6 +1909,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 if (i < size - 1) pw.print(",");
             }
             pw.println("]");
+        }
+
+        synchronized (mIdleTimerLock) {
+            pw.println("Idle timers:");
+            for (HashMap.Entry<String, IdleTimerParams> ent : mActiveIdleTimers.entrySet()) {
+                pw.print("  "); pw.print(ent.getKey()); pw.println(":");
+                IdleTimerParams params = ent.getValue();
+                pw.print("    timeout="); pw.print(params.timeout);
+                pw.print(" type="); pw.print(params.type);
+                pw.print(" networkCount="); pw.println(params.networkCount);
+            }
         }
 
         pw.print("Firewall enabled: "); pw.println(mFirewallEnabled);

@@ -52,7 +52,7 @@ interface IBatteryStats {
     void noteScreenOff();
     void noteInputEvent();
     void noteUserActivity(int uid, int event);
-    void noteDataConnectionActive(String label, boolean active);
+    void noteDataConnectionActive(int type, boolean active);
     void notePhoneOn();
     void notePhoneOff();
     void notePhoneSignalStrength(in SignalStrength signalStrength);

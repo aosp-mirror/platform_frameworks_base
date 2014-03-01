@@ -87,7 +87,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 90 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 94 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -283,6 +283,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     boolean mMobileRadioActive;
     StopwatchTimer mMobileRadioActiveTimer;
+    StopwatchTimer mMobileRadioActivePerAppTimer;
     LongSamplingCounter mMobileRadioActiveUnknownTime;
     LongSamplingCounter mMobileRadioActiveUnknownCount;
 
@@ -2373,33 +2374,31 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteUserActivityLocked(int uid, int event) {
-        uid = mapUid(uid);
-        getUidStatsLocked(uid).noteUserActivityLocked(event);
+        if (mOnBatteryInternal) {
+            uid = mapUid(uid);
+            getUidStatsLocked(uid).noteUserActivityLocked(event);
+        }
     }
 
-    public void noteDataConnectionActive(String label, boolean active) {
-        try {
-            int type = Integer.parseInt(label);
-            if (ConnectivityManager.isNetworkTypeMobile(type)) {
-                final long elapsedRealtime = SystemClock.elapsedRealtime();
-                if (mMobileRadioActive != active) {
-                    if (active) mHistoryCur.states |= HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG;
-                    else mHistoryCur.states &= ~HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG;
-                    if (DEBUG_HISTORY) Slog.v(TAG, "Mobile network active " + active + " to: "
-                            + Integer.toHexString(mHistoryCur.states));
-                    addHistoryRecordLocked(elapsedRealtime);
-                    mMobileRadioActive = active;
-                    if (active) {
-                        mMobileRadioActiveTimer.startRunningLocked(this, elapsedRealtime);
-                    } else {
-                        updateNetworkActivityLocked(NET_UPDATE_MOBILE, elapsedRealtime);
-                        mMobileRadioActiveTimer.stopRunningLocked(this, elapsedRealtime);
-                    }
+    public void noteDataConnectionActive(int type, boolean active) {
+        if (ConnectivityManager.isNetworkTypeMobile(type)) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            if (mMobileRadioActive != active) {
+                if (active) mHistoryCur.states |= HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG;
+                else mHistoryCur.states &= ~HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG;
+                if (DEBUG_HISTORY) Slog.v(TAG, "Mobile network active " + active + " to: "
+                        + Integer.toHexString(mHistoryCur.states));
+                addHistoryRecordLocked(elapsedRealtime);
+                mMobileRadioActive = active;
+                if (active) {
+                    mMobileRadioActiveTimer.startRunningLocked(this, elapsedRealtime);
+                    mMobileRadioActivePerAppTimer.startRunningLocked(this, elapsedRealtime);
+                } else {
+                    updateNetworkActivityLocked(NET_UPDATE_MOBILE, elapsedRealtime);
+                    mMobileRadioActiveTimer.stopRunningLocked(this, elapsedRealtime);
+                    mMobileRadioActivePerAppTimer.stopRunningLocked(this, elapsedRealtime);
                 }
             }
-        } catch (NumberFormatException e) {
-            Slog.w(TAG, "Bad data connection label: " + label, e);
-            return;
         }
     }
 
@@ -3038,6 +3037,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         return mScreenOnTimer.getTotalTimeLocked(batteryRealtime, which);
     }
 
+    @Override public int getScreenOnCount(int which) {
+        return mScreenOnTimer.getCountLocked(which);
+    }
+
     @Override public long getScreenBrightnessTime(int brightnessBin,
             long batteryRealtime, int which) {
         return mScreenBrightnessTimer[brightnessBin].getTotalTimeLocked(
@@ -3050,6 +3053,10 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     @Override public long getPhoneOnTime(long batteryRealtime, int which) {
         return mPhoneOnTimer.getTotalTimeLocked(batteryRealtime, which);
+    }
+
+    @Override public int getPhoneOnCount(int which) {
+        return mPhoneOnTimer.getCountLocked(which);
     }
 
     @Override public long getPhoneSignalStrengthTime(int strengthBin,
@@ -5143,6 +5150,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mUnpluggables);
         }
         mMobileRadioActiveTimer = new StopwatchTimer(null, -400, null, mUnpluggables);
+        mMobileRadioActivePerAppTimer = new StopwatchTimer(null, -401, null, mUnpluggables);
         mMobileRadioActiveUnknownTime = new LongSamplingCounter(mUnpluggables);
         mMobileRadioActiveUnknownCount = new LongSamplingCounter(mUnpluggables);
         mWifiOnTimer = new StopwatchTimer(null, -3, null, mUnpluggables);
@@ -5411,6 +5419,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mNetworkPacketActivityCounters[i].reset(false);
         }
         mMobileRadioActiveTimer.reset(this, false);
+        mMobileRadioActivePerAppTimer.reset(this, false);
         mMobileRadioActiveUnknownTime.reset(false);
         mMobileRadioActiveUnknownCount.reset(false);
         mWifiOnTimer.reset(this, false);
@@ -5491,6 +5500,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void pullPendingStateUpdatesLocked() {
         updateKernelWakelocksLocked();
         updateNetworkActivityLocked(NET_UPDATE_ALL, SystemClock.elapsedRealtime());
+        if (mOnBatteryInternal) {
+            updateDischargeScreenLevelsLocked(mScreenOn, mScreenOn);
+        }
     }
 
     void setOnBatteryLocked(boolean onBattery, int oldStatus, int level) {
@@ -5696,49 +5708,53 @@ public final class BatteryStatsImpl extends BatteryStats {
             mCurMobileSnapshot = snapshot;
             mLastMobileSnapshot = last;
 
-            final NetworkStats delta = NetworkStats.subtract(snapshot, last,
-                    null, null, mTmpNetworkStats);
-            mTmpNetworkStats = delta;
+            if (mOnBatteryInternal) {
+                final NetworkStats delta = NetworkStats.subtract(snapshot, last,
+                        null, null, mTmpNetworkStats);
+                mTmpNetworkStats = delta;
 
-            long radioTime = mMobileRadioActiveTimer.checkpointRunningLocked(this,
-                    elapsedRealtime);
-            long totalPackets = delta.getTotalPackets();
+                long radioTime = mMobileRadioActivePerAppTimer.checkpointRunningLocked(this,
+                        elapsedRealtime);
+                long totalPackets = delta.getTotalPackets();
 
-            final int size = delta.size();
-            for (int i = 0; i < size; i++) {
-                final NetworkStats.Entry entry = delta.getValues(i, mTmpNetworkStatsEntry);
+                final int size = delta.size();
+                for (int i = 0; i < size; i++) {
+                    final NetworkStats.Entry entry = delta.getValues(i, mTmpNetworkStatsEntry);
 
-                if (entry.rxBytes == 0 || entry.txBytes == 0) continue;
+                    if (entry.rxBytes == 0 || entry.txBytes == 0) continue;
 
-                final Uid u = getUidStatsLocked(entry.uid);
-                u.noteNetworkActivityLocked(NETWORK_MOBILE_RX_DATA, entry.rxBytes,
-                        entry.rxPackets);
-                u.noteNetworkActivityLocked(NETWORK_MOBILE_TX_DATA, entry.txBytes,
-                        entry.txPackets);
+                    final Uid u = getUidStatsLocked(entry.uid);
+                    u.noteNetworkActivityLocked(NETWORK_MOBILE_RX_DATA, entry.rxBytes,
+                            entry.rxPackets);
+                    u.noteNetworkActivityLocked(NETWORK_MOBILE_TX_DATA, entry.txBytes,
+                            entry.txPackets);
 
-                if (radioTime > 0) {
-                    // Distribute total radio active time in to this app.
-                    long appPackets = entry.rxPackets + entry.txPackets;
-                    long appRadioTime = (radioTime*appPackets)/totalPackets;
-                    u.noteMobileRadioActiveTimeLocked(appRadioTime);
-                    // Remove this app from the totals, so that we don't lose any time
-                    // due to rounding.
-                    radioTime -= appRadioTime;
-                    totalPackets -= appPackets;
+                    if (radioTime > 0) {
+                        // Distribute total radio active time in to this app.
+                        long appPackets = entry.rxPackets + entry.txPackets;
+                        long appRadioTime = (radioTime*appPackets)/totalPackets;
+                        u.noteMobileRadioActiveTimeLocked(appRadioTime);
+                        // Remove this app from the totals, so that we don't lose any time
+                        // due to rounding.
+                        radioTime -= appRadioTime;
+                        totalPackets -= appPackets;
+                    }
+
+                    mNetworkByteActivityCounters[NETWORK_MOBILE_RX_DATA].addCountLocked(
+                            entry.rxBytes);
+                    mNetworkByteActivityCounters[NETWORK_MOBILE_TX_DATA].addCountLocked(
+                            entry.txBytes);
+                    mNetworkPacketActivityCounters[NETWORK_MOBILE_RX_DATA].addCountLocked(
+                            entry.rxPackets);
+                    mNetworkPacketActivityCounters[NETWORK_MOBILE_TX_DATA].addCountLocked(
+                            entry.txPackets);
                 }
 
-                mNetworkByteActivityCounters[NETWORK_MOBILE_RX_DATA].addCountLocked(entry.rxBytes);
-                mNetworkByteActivityCounters[NETWORK_MOBILE_TX_DATA].addCountLocked(entry.txBytes);
-                mNetworkPacketActivityCounters[NETWORK_MOBILE_RX_DATA].addCountLocked(
-                        entry.rxPackets);
-                mNetworkPacketActivityCounters[NETWORK_MOBILE_TX_DATA].addCountLocked(
-                        entry.txPackets);
-            }
-
-            if (radioTime > 0) {
-                // Whoops, there is some radio time we can't blame on an app!
-                mMobileRadioActiveUnknownTime.addCountLocked(radioTime);
-                mMobileRadioActiveUnknownCount.addCountLocked(1);
+                if (radioTime > 0) {
+                    // Whoops, there is some radio time we can't blame on an app!
+                    mMobileRadioActiveUnknownTime.addCountLocked(radioTime);
+                    mMobileRadioActiveUnknownCount.addCountLocked(1);
+                }
             }
         }
 
@@ -5756,33 +5772,39 @@ public final class BatteryStatsImpl extends BatteryStats {
             mCurWifiSnapshot = snapshot;
             mLastWifiSnapshot = last;
 
-            final NetworkStats delta = NetworkStats.subtract(snapshot, last,
-                    null, null, mTmpNetworkStats);
-            mTmpNetworkStats = delta;
+            if (mOnBatteryInternal) {
+                final NetworkStats delta = NetworkStats.subtract(snapshot, last,
+                        null, null, mTmpNetworkStats);
+                mTmpNetworkStats = delta;
 
-            final int size = delta.size();
-            for (int i = 0; i < size; i++) {
-                final NetworkStats.Entry entry = delta.getValues(i, mTmpNetworkStatsEntry);
+                final int size = delta.size();
+                for (int i = 0; i < size; i++) {
+                    final NetworkStats.Entry entry = delta.getValues(i, mTmpNetworkStatsEntry);
 
-                if (DEBUG) {
-                    final NetworkStats.Entry cur = snapshot.getValues(i, null);
-                    Slog.d(TAG, "Wifi uid " + entry.uid + ": delta rx=" + entry.rxBytes
-                            + " tx=" + entry.txBytes + ", cur rx=" + cur.rxBytes
-                            + " tx=" + cur.txBytes);
+                    if (DEBUG) {
+                        final NetworkStats.Entry cur = snapshot.getValues(i, null);
+                        Slog.d(TAG, "Wifi uid " + entry.uid + ": delta rx=" + entry.rxBytes
+                                + " tx=" + entry.txBytes + ", cur rx=" + cur.rxBytes
+                                + " tx=" + cur.txBytes);
+                    }
+
+                    if (entry.rxBytes == 0 || entry.txBytes == 0) continue;
+
+                    final Uid u = getUidStatsLocked(entry.uid);
+                    u.noteNetworkActivityLocked(NETWORK_WIFI_RX_DATA, entry.rxBytes,
+                            entry.rxPackets);
+                    u.noteNetworkActivityLocked(NETWORK_WIFI_TX_DATA, entry.txBytes,
+                            entry.txPackets);
+
+                    mNetworkByteActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
+                            entry.rxBytes);
+                    mNetworkByteActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
+                            entry.txBytes);
+                    mNetworkPacketActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
+                            entry.rxPackets);
+                    mNetworkPacketActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
+                            entry.txPackets);
                 }
-
-                if (entry.rxBytes == 0 || entry.txBytes == 0) continue;
-
-                final Uid u = getUidStatsLocked(entry.uid);
-                u.noteNetworkActivityLocked(NETWORK_WIFI_RX_DATA, entry.rxBytes, entry.rxPackets);
-                u.noteNetworkActivityLocked(NETWORK_WIFI_TX_DATA, entry.txBytes, entry.txPackets);
-
-                mNetworkByteActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(entry.rxBytes);
-                mNetworkByteActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(entry.txBytes);
-                mNetworkPacketActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
-                        entry.rxPackets);
-                mNetworkPacketActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
-                        entry.txPackets);
             }
         }
     }
@@ -6371,6 +6393,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         mMobileRadioActive = false;
         mMobileRadioActiveTimer.readSummaryFromParcelLocked(in);
+        mMobileRadioActivePerAppTimer.readSummaryFromParcelLocked(in);
         mMobileRadioActiveUnknownTime.readSummaryFromParcelLocked(in);
         mMobileRadioActiveUnknownCount.readSummaryFromParcelLocked(in);
         mWifiOn = false;
@@ -6606,6 +6629,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mNetworkPacketActivityCounters[i].writeSummaryFromParcelLocked(out);
         }
         mMobileRadioActiveTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+        mMobileRadioActivePerAppTimer.writeSummaryFromParcelLocked(out, NOWREAL);
         mMobileRadioActiveUnknownTime.writeSummaryFromParcelLocked(out);
         mMobileRadioActiveUnknownCount.writeSummaryFromParcelLocked(out);
         mWifiOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
@@ -6852,6 +6876,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         mMobileRadioActive = false;
         mMobileRadioActiveTimer = new StopwatchTimer(null, -400, null, mUnpluggables, in);
+        mMobileRadioActivePerAppTimer = new StopwatchTimer(null, -401, null, mUnpluggables, in);
         mMobileRadioActiveUnknownTime = new LongSamplingCounter(mUnpluggables, in);
         mMobileRadioActiveUnknownCount = new LongSamplingCounter(mUnpluggables, in);
         mWifiOn = false;
@@ -6971,6 +6996,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mNetworkPacketActivityCounters[i].writeToParcel(out);
         }
         mMobileRadioActiveTimer.writeToParcel(out, batteryRealtime);
+        mMobileRadioActivePerAppTimer.writeToParcel(out, batteryRealtime);
         mMobileRadioActiveUnknownTime.writeToParcel(out);
         mMobileRadioActiveUnknownCount.writeToParcel(out);
         mWifiOnTimer.writeToParcel(out, batteryRealtime);

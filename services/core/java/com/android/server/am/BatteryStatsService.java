@@ -232,10 +232,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
-    public void noteDataConnectionActive(String label, boolean active) {
+    public void noteDataConnectionActive(int type, boolean active) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteDataConnectionActive(label, active);
+            mStats.noteDataConnectionActive(type, active);
         }
     }
 

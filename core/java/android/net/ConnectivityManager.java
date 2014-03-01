@@ -23,9 +23,14 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
+import android.os.IBinder;
+import android.os.INetworkActivityListener;
+import android.os.INetworkManagementService;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.Settings;
+import android.util.ArrayMap;
 
 import java.net.InetAddress;
 
@@ -76,7 +81,7 @@ public class ConnectivityManager {
 
     /**
      * Identical to {@link #CONNECTIVITY_ACTION} broadcast, but sent without any
-     * applicable {@link Settings.Secure#CONNECTIVITY_CHANGE_DELAY}.
+     * applicable {@link Settings.Global#CONNECTIVITY_CHANGE_DELAY}.
      *
      * @hide
      */
@@ -401,6 +406,8 @@ public class ConnectivityManager {
     private final IConnectivityManager mService;
 
     private final String mPackageName;
+
+    private INetworkManagementService mNMService;
 
     /**
      * Tests if a given integer represents a valid network type.
@@ -907,6 +914,92 @@ public class ConnectivityManager {
     }
 
     /**
+     * Callback for use with {@link ConnectivityManager#registerNetworkActiveListener} to
+     * find out when the current network has gone in to a high power state.
+     */
+    public interface OnNetworkActiveListener {
+        /**
+         * Called on the main thread of the process to report that the current data network
+         * has become active, and it is now a good time to perform any pending network
+         * operations.  Note that this listener only tells you when the network becomes
+         * active; if at any other time you want to know whether it is active (and thus okay
+         * to initiate network traffic), you can retrieve its instantaneous state with
+         * {@link ConnectivityManager#isNetworkActive}.
+         */
+        public void onNetworkActive();
+    }
+
+    private INetworkManagementService getNetworkManagementService() {
+        synchronized (this) {
+            if (mNMService != null) {
+                return mNMService;
+            }
+            IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
+            mNMService = INetworkManagementService.Stub.asInterface(b);
+            return mNMService;
+        }
+    }
+
+    private final ArrayMap<OnNetworkActiveListener, INetworkActivityListener>
+            mNetworkActivityListeners
+                    = new ArrayMap<OnNetworkActiveListener, INetworkActivityListener>();
+
+    /**
+     * Start listening to reports when the data network is active, meaning it is
+     * a good time to perform network traffic.  Use {@link #isNetworkActive()}
+     * to determine the current state of the network after registering the listener.
+     *
+     * @param l The listener to be told when the network is active.
+     */
+    public void registerNetworkActiveListener(final OnNetworkActiveListener l) {
+        INetworkActivityListener rl = new INetworkActivityListener.Stub() {
+            @Override
+            public void onNetworkActive() throws RemoteException {
+                l.onNetworkActive();
+            }
+        };
+
+        try {
+            getNetworkManagementService().registerNetworkActivityListener(rl);
+            mNetworkActivityListeners.put(l, rl);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Remove network active listener previously registered with
+     * {@link #registerNetworkActiveListener}.
+     *
+     * @param l Previously registered listener.
+     */
+    public void unregisterNetworkActiveListener(OnNetworkActiveListener l) {
+        INetworkActivityListener rl = mNetworkActivityListeners.get(l);
+        if (rl == null) {
+            throw new IllegalArgumentException("Listener not registered: " + l);
+        }
+        try {
+            getNetworkManagementService().unregisterNetworkActivityListener(rl);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Return whether the data network is currently active.  An active network means that
+     * it is currently in a high power state for performing data transmission.  On some
+     * types of networks, it may be expensive to move and stay in such a state, so it is
+     * more power efficient to batch network traffic together when the radio is already in
+     * this state.  This method tells you whether right now is currently a good time to
+     * initiate network traffic, as the network is already active.
+     */
+    public boolean isNetworkActive() {
+        try {
+            return getNetworkManagementService().isNetworkActive();
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    /**
      * {@hide}
      */
     public ConnectivityManager(IConnectivityManager service, String packageName) {
@@ -1021,7 +1114,7 @@ public class ConnectivityManager {
 
     /**
      * Check if the device allows for tethering.  It may be disabled via
-     * {@code ro.tether.denied} system property, {@link Settings#TETHER_SUPPORTED} or
+     * {@code ro.tether.denied} system property, Settings.TETHER_SUPPORTED or
      * due to device configuration.
      *
      * @return a boolean - {@code true} indicating Tethering is supported.
@@ -1209,7 +1302,7 @@ public class ConnectivityManager {
      * doing something unusual like general internal filtering this may be useful.  On
      * a private network where the proxy is not accessible, you may break HTTP using this.
      *
-     * @param proxyProperties The a {@link ProxyProperites} object defining the new global
+     * @param p The a {@link ProxyProperties} object defining the new global
      *        HTTP proxy.  A {@code null} value will clear the global HTTP proxy.
      *
      * <p>This method requires the call to hold the permission
@@ -1362,7 +1455,7 @@ public class ConnectivityManager {
     /**
      * Supply the backend messenger for a network tracker
      *
-     * @param type NetworkType to set
+     * @param networkType NetworkType to set
      * @param messenger {@link Messenger}
      * {@hide}
      */

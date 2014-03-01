@@ -534,7 +534,7 @@ public class NsdService extends INsdManager.Stub {
         mContentResolver = context.getContentResolver();
 
         mNativeConnector = new NativeDaemonConnector(new NativeCallbackReceiver(), "mdns", 10,
-                MDNS_TAG, 25);
+                MDNS_TAG, 25, null);
 
         mNsdStateMachine = new NsdStateMachine(TAG);
         mNsdStateMachine.start();
@@ -620,6 +620,10 @@ public class NsdService extends INsdManager.Stub {
     class NativeCallbackReceiver implements INativeDaemonConnectorCallbacks {
         public void onDaemonConnected() {
             mNativeDaemonConnected.countDown();
+        }
+
+        public boolean onCheckHoldWakeLock(int code) {
+            return false;
         }
 
         public boolean onEvent(int code, String raw, String[] cooked) {
