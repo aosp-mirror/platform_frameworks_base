@@ -20,4 +20,4 @@ LOCAL_MODULE:= preload
 
 include $(BUILD_HOST_JAVA_LIBRARY)
 
-include $(call all-subdir-makefiles)
+include $(call all-makefiles-under,$(LOCAL_PATH))
