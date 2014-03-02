@@ -112,10 +112,33 @@ void JMediaCodec::registerSelf() {
     mLooper->registerHandler(this);
 }
 
-JMediaCodec::~JMediaCodec() {
+void JMediaCodec::release() {
     if (mCodec != NULL) {
         mCodec->release();
         mCodec.clear();
+    }
+
+    if (mLooper != NULL) {
+        mLooper->unregisterHandler(id());
+        mLooper->stop();
+        mLooper.clear();
+    }
+}
+
+JMediaCodec::~JMediaCodec() {
+    if (mCodec != NULL || mLooper != NULL) {
+        /* MediaCodec and looper should have been released explicitly already
+         * in setMediaCodec() (see comments in setMediaCodec()).
+         *
+         * Otherwise JMediaCodec::~JMediaCodec() might be called from within the
+         * message handler, doing release() there risks deadlock as MediaCodec::
+         * release() post synchronous message to the same looper.
+         *
+         * Print a warning and try to proceed with releasing.
+         */
+        ALOGW("try to release MediaCodec from JMediaCodec::~JMediaCodec()...");
+        release();
+        ALOGW("done releasing MediaCodec from JMediaCodec::~JMediaCodec().");
     }
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
@@ -432,6 +455,12 @@ static sp<JMediaCodec> setMediaCodec(
         codec->incStrong(thiz);
     }
     if (old != NULL) {
+        /* release MediaCodec and stop the looper now before decStrong.
+         * otherwise JMediaCodec::~JMediaCodec() could be called from within
+         * its message handler, doing release() from there will deadlock
+         * (as MediaCodec::release() post synchronous message to the same looper)
+         */
+        old->release();
         old->decStrong(thiz);
     }
     env->SetLongField(thiz, gFields.context, (jlong)codec.get());

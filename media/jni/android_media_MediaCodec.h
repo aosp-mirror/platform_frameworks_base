@@ -42,6 +42,7 @@ struct JMediaCodec : public AHandler {
     status_t initCheck() const;
 
     void registerSelf();
+    void release();
 
     status_t configure(
             const sp<AMessage> &format,
