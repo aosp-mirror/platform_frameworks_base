@@ -45,8 +45,6 @@ public class KeyguardAnalytics implements SensorEventListener {
     private static final String TAG = "KeyguardAnalytics";
     private static final long TIMEOUT_MILLIS = 11000; // 11 seconds.
 
-    private static final String ANALYTICS_FILE = "/sdcard/keyguard_analytics.bin";
-
     private static final int[] SENSORS = new int[] {
             Sensor.TYPE_ACCELEROMETER,
             Sensor.TYPE_GYROSCOPE,
