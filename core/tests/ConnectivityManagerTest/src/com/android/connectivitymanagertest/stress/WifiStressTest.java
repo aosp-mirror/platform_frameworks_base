@@ -27,6 +27,7 @@ import android.net.wifi.WifiConfiguration.ProxySettings;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.view.KeyEvent;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -52,6 +53,7 @@ public class WifiStressTest
         extends ConnectivityManagerTestBase {
     private final static String TAG = "WifiStressTest";
 
+    private final static long SCREEN_OFF_TIMER = 500; //500ms
     /**
      * Wi-Fi idle time for default sleep policy
      */
@@ -157,11 +159,11 @@ public class WifiStressTest
             writeOutput(String.format("average scanning time is %d", averageScanTime));
             writeOutput(String.format("ssid appear %d out of %d scan iterations",
                     ssidAppearInScanResultsCount, i));
-            long startTime = System.currentTimeMillis();
+            long startTime = SystemClock.uptimeMillis();
             scanResultAvailable = false;
             assertTrue("start scan failed", mWifiManager.startScan());
             while (true) {
-                if ((System.currentTimeMillis() - startTime) >
+                if ((SystemClock.uptimeMillis() - startTime) >
                 WIFI_SCAN_TIMEOUT) {
                     fail("Wifi scanning takes more than " + WIFI_SCAN_TIMEOUT + " ms");
                 }
@@ -172,7 +174,7 @@ public class WifiStressTest
                         e.printStackTrace();
                     }
                     if (scanResultAvailable) {
-                        long scanTime = (System.currentTimeMillis() - startTime);
+                        long scanTime = (SystemClock.uptimeMillis() - startTime);
                         scanTimeSum += scanTime;
                         break;
                     }
@@ -255,8 +257,13 @@ public class WifiStressTest
                     i, mReconnectIterations));
             log("iteration: " + i);
             turnScreenOff();
+            // Use clock time since boot for intervals.
+            long start = SystemClock.uptimeMillis();
             PowerManager pm =
                 (PowerManager)mRunner.getContext().getSystemService(Context.POWER_SERVICE);
+            while (pm.isScreenOn() && ((SystemClock.uptimeMillis() - start) < SCREEN_OFF_TIMER)) {
+                sleep(100, "wait for screen off");
+            }
             assertFalse(pm.isScreenOn());
             sleep(WIFI_IDLE_MS + WIFI_SHUTDOWN_DELAY, "Interruped while wait for wifi to be idle");
             assertTrue("Wait for Wi-Fi to idle timeout",
@@ -287,14 +294,14 @@ public class WifiStressTest
             mRunner.sendKeyDownUpSync(KeyEvent.KEYCODE_MENU);
 
             // Measure the time for Wi-Fi to get connected
-            long startTime = System.currentTimeMillis();
+            long startTime = SystemClock.uptimeMillis();
             assertTrue("Wait for Wi-Fi enable timeout after wake up",
                     waitForWifiState(WifiManager.WIFI_STATE_ENABLED,
                     SHORT_TIMEOUT));
             assertTrue("Wait for Wi-Fi connection timeout after wake up",
                     waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
                     WIFI_CONNECTION_TIMEOUT));
-            long connectionTime = System.currentTimeMillis() - startTime;
+            long connectionTime = SystemClock.uptimeMillis() - startTime;
             sum += connectionTime;
             log("average reconnection time is: " + sum/(i+1));
 
