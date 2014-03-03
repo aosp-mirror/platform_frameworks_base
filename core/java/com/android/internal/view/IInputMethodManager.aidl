@@ -32,7 +32,9 @@ import com.android.internal.view.IInputMethodClient;
  * this file.
  */
 interface IInputMethodManager {
+    // TODO: Use ParceledListSlice instead
     List<InputMethodInfo> getInputMethodList();
+    // TODO: Use ParceledListSlice instead
     List<InputMethodInfo> getEnabledInputMethodList();
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,
             boolean allowsImplicitlySelectedSubtypes);
