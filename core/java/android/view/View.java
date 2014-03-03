@@ -13620,11 +13620,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (layerType == mLayerType) {
-            if (layerType != LAYER_TYPE_NONE && paint != mLayerPaint) {
-                mLayerPaint = paint == null ? new Paint() : paint;
-                invalidateParentCaches();
-                invalidate(true);
-            }
+            setLayerPaint(paint);
             return;
         }
 
