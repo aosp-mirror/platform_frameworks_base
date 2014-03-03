@@ -29,6 +29,7 @@ public class BatteryProperty implements Parcelable {
     public static final int BATTERY_PROP_CHARGE_COUNTER = 1;
     public static final int BATTERY_PROP_CURRENT_NOW = 2;
     public static final int BATTERY_PROP_CURRENT_AVG = 3;
+    public static final int BATTERY_PROP_CAPACITY = 4;
 
     public int valueInt;
 
