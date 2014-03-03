@@ -75,7 +75,6 @@
             <name>baskerville</name>
             <name>goudy</name>
             <name>fantasy</name>
-            <name>cursive</name>
             <name>ITC Stone Serif</name>
         </nameset>
         <fileset>
@@ -105,6 +104,34 @@
         </nameset>
         <fileset>
             <file>DroidSansMono.ttf</file>
+        </fileset>
+    </family>
+
+    <family>
+        <nameset>
+            <name>casual</name>
+        </nameset>
+        <fileset>
+            <file>ComingSoon.ttf</file>
+        </fileset>
+    </family>
+
+    <family>
+        <nameset>
+            <name>cursive</name>
+        </nameset>
+        <fileset>
+            <file>DancingScript-Regular.ttf</file>
+            <file>DancingScript-Bold.ttf</file>
+        </fileset>
+    </family>
+
+    <family>
+        <nameset>
+            <name>sans-serif-smallcaps</name>
+        </nameset>
+        <fileset>
+            <file>CarroisGothicSC-Regular.ttf</file>
         </fileset>
     </family>
 
