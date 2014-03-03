@@ -12493,7 +12493,7 @@ package android.location {
     ctor public SettingInjectorService(java.lang.String);
     method public final android.os.IBinder onBind(android.content.Intent);
     method protected abstract boolean onGetEnabled();
-    method protected abstract java.lang.String onGetSummary();
+    method protected deprecated java.lang.String onGetSummary();
     method public final void onStart(android.content.Intent, int);
     method public final int onStartCommand(android.content.Intent, int, int);
     field public static final java.lang.String ACTION_INJECTED_SETTING_CHANGED = "android.location.InjectedSettingChanged";
