@@ -186,4 +186,7 @@
     <!-- Default for Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1==on -->
     <integer name="def_lock_screen_show_notifications">1</integer>
 
+    <!-- Default for Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED, 1==on -->
+    <integer name="def_heads_up_enabled">1</integer>
+
 </resources>
