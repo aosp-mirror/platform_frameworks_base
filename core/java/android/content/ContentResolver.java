@@ -1540,7 +1540,7 @@ public abstract class ContentResolver {
      * for a whole class of content.
      * @param notifyForDescendents If <code>true</code> changes to URIs beginning with <code>uri</code>
      * will also cause notifications to be sent. If <code>false</code> only changes to the exact URI
-     * specified by <em>uri</em> will cause notifications to be sent. If true, than any URI values
+     * specified by <em>uri</em> will cause notifications to be sent. If <code>true</code>, any URI values
      * at or below the specified URI will also trigger a match.
      * @param observer The object that receives callbacks when changes occur.
      * @see #unregisterContentObserver
