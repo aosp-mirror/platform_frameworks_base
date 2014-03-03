@@ -932,13 +932,13 @@
     <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_getAppOpsStats">Allows the app to retrieve
         collected application operation statistics. Not for use by normal apps.</string>
-    
+
     <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_updateAppOpsStats">modify app ops statistics</string>
     <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_updateAppOpsStats">Allows the app to modify
         collected application operation statistics. Not for use by normal apps.</string>
-    
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_backup">control system backup and restore</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -2254,6 +2254,10 @@
     <string name="sipAddressTypeWork">Work</string>
     <!-- Other SIP address type. Same context as Other phone type. -->
     <string name="sipAddressTypeOther">Other</string>
+
+    <!-- Error message that is displayed when the user clicks on a quick contacts badge, but
+         there is no contacts application installed that can display the quick contact -->
+    <string name="quick_contacts_not_available">No activity found to view contact.</string>
 
     <!-- Instructions telling the user to enter their SIM PIN to unlock the keyguard.
          Displayed in one line in a large font.  -->
