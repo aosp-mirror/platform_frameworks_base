@@ -48,6 +48,8 @@ import java.util.List;
  * battery life.
  */
 public final class BatteryStatsService extends IBatteryStats.Stub {
+    static final String TAG = "BatteryStatsService";
+
     static IBatteryStats sService;
     
     final BatteryStatsImpl mStats;
@@ -66,7 +68,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         mStats.setRadioScanningTimeout(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout)
                 * 1000L);
-    }
+        (new WakeupReasonThread()).start();
+     }
     
     public void shutdown() {
         Slog.w("BatteryStats", "Writing battery stats before shutdown...");
@@ -538,14 +541,45 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         mContext.enforcePermission(android.Manifest.permission.UPDATE_DEVICE_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
     }
-    
+
+    final class WakeupReasonThread extends Thread {
+        final int[] mIrqs = new int[32];
+        final String[] mReasons = new String[32];
+
+        WakeupReasonThread() {
+            super("BatteryStats_wakeupReason");
+        }
+
+        public void run() {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
+
+            try {
+                int num;
+                while ((num=nativeWaitWakeup(mIrqs, mReasons)) >= 0) {
+                    synchronized (mStats) {
+                        for (int i=0; i<num; i++) {
+                            //Slog.i(TAG, "Wakeup: irq #" + mIrqs[i] + " reason=" + mReasons[i]);
+                            mStats.noteWakeupReasonLocked(mIrqs[i], mReasons[i]);
+                        }
+                    }
+                }
+            } catch (RuntimeException e) {
+                Slog.e(TAG, "Failure reading wakeup reasons", e);
+            }
+        }
+    }
+
+    private static native int nativeWaitWakeup(int[] outIrqs, String[] outReasons);
+
     private void dumpHelp(PrintWriter pw) {
         pw.println("Battery stats (batterystats) dump options:");
-        pw.println("  [--checkin] [--history] [-c] [--unplugged] [--reset] [--write]");
-        pw.println("  [-h] [<package.name>]");
+        pw.println("  [--checkin] [--history] [--history-start] [--unplugged] [--charged] [-c]");
+        pw.println("  [--reset] [--write] [-h] [<package.name>]");
         pw.println("  --checkin: format output for a checkin report.");
         pw.println("  --history: show only history data.");
+        pw.println("  --history-start <num>: show only history data starting at given time offset.");
         pw.println("  --unplugged: only output data since last unplugged.");
+        pw.println("  --charged: only output data since last charged.");
         pw.println("  --reset: reset the stats, clearing all current data.");
         pw.println("  --write: force write current collected stats to disk.");
         pw.println("  -h: print this help text.");
@@ -562,23 +596,34 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
             return;
         }
 
+        int flags = 0;
         boolean isCheckin = false;
-        boolean includeHistory = false;
-        boolean historyOnly = false;
-        boolean isUnpluggedOnly = false;
         boolean noOutput = false;
+        long historyStart = -1;
         int reqUid = -1;
         if (args != null) {
-            for (String arg : args) {
+            for (int i=0; i<args.length; i++) {
+                String arg = args[i];
                 if ("--checkin".equals(arg)) {
                     isCheckin = true;
                 } else if ("--history".equals(arg)) {
-                    historyOnly = true;
+                    flags |= BatteryStats.DUMP_HISTORY_ONLY;
+                } else if ("--history-start".equals(arg)) {
+                    flags |= BatteryStats.DUMP_HISTORY_ONLY;
+                    i++;
+                    if (i >= args.length) {
+                        pw.println("Missing time argument for --history-since");
+                        dumpHelp(pw);
+                        return;
+                    }
+                    historyStart = Long.parseLong(args[i]);
                 } else if ("-c".equals(arg)) {
                     isCheckin = true;
-                    includeHistory = true;
+                    flags |= BatteryStats.DUMP_INCLUDE_HISTORY;
                 } else if ("--unplugged".equals(arg)) {
-                    isUnpluggedOnly = true;
+                    flags |= BatteryStats.DUMP_UNPLUGGED_ONLY;
+                } else if ("--charged".equals(arg)) {
+                    flags |= BatteryStats.DUMP_CHARGED_ONLY;
                 } else if ("--reset".equals(arg)) {
                     synchronized (mStats) {
                         mStats.resetAllStatsCmdLocked();
@@ -619,12 +664,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         if (isCheckin) {
             List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(0);
             synchronized (mStats) {
-                mStats.dumpCheckinLocked(mContext, pw, apps, isUnpluggedOnly, includeHistory,
-                        historyOnly);
+                mStats.dumpCheckinLocked(mContext, pw, apps, flags, historyStart);
             }
         } else {
             synchronized (mStats) {
-                mStats.dumpLocked(mContext, pw, isUnpluggedOnly, reqUid, historyOnly);
+                mStats.dumpLocked(mContext, pw, flags, reqUid, historyStart);
             }
         }
     }

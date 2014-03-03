@@ -1283,7 +1283,10 @@ class AlarmManagerService extends SystemService {
                                 setWakelockWorkSource(alarm.operation, alarm.workSource);
                                 mWakeLock.setUnimportantForLogging(
                                         alarm.operation == mTimeTickSender);
-                                mWakeLock.setHistoryTag(alarm.operation.getTag("*alarm*:"));
+                                mWakeLock.setHistoryTag(alarm.operation.getTag(
+                                        alarm.type == ELAPSED_REALTIME_WAKEUP
+                                                || alarm.type == RTC_WAKEUP
+                                                ? "*walarm*:" : "*alarm*:"));
                                 mWakeLock.acquire();
                             }
                             final InFlight inflight = new InFlight(AlarmManagerService.this,
