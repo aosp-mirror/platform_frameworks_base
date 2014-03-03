@@ -5,13 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#f55">
+    <!-- Left and right layouts are not isolated volumes, so the text views
+         will interleave since they share an isolated z volume-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="150dp"
+            android:layout_height="200dp"
             android:layout_weight="1"
             android:isolatedZVolume="false"
             android:orientation="vertical">
@@ -20,21 +22,24 @@
         </LinearLayout>
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="150dp"
+            android:layout_height="200dp"
             android:layout_weight="1"
+            android:translationY="50dp"
             android:isolatedZVolume="false"
             android:orientation="vertical">
             <TextView style="@style/TopRightReorderTextView"/>
             <TextView style="@style/BottomRightReorderTextView"/>
         </LinearLayout>
     </LinearLayout>
+
+    <!-- Left and right volumes are isolated by default, so no interleaving will be seen. -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="150dp"
+            android:layout_height="200dp"
             android:layout_weight="1"
             android:orientation="vertical">
             <TextView style="@style/TopLeftReorderTextView"/>
@@ -42,8 +47,9 @@
         </LinearLayout>
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="150dp"
+            android:layout_height="200dp"
             android:layout_weight="1"
+            android:translationY="50dp"
             android:orientation="vertical">
             <TextView style="@style/TopRightReorderTextView"/>
             <TextView style="@style/BottomRightReorderTextView"/>
