@@ -175,7 +175,11 @@ public class StatusBarNotification implements Parcelable {
                 && ((notification.flags & Notification.FLAG_NO_CLEAR) == 0);
     }
 
-    /** Returns a userHandle for the instance of the app that posted this notification. */
+    /**
+     * Returns a userHandle for the instance of the app that posted this notification.
+     *
+     * @deprecated Use {@link #getUser()} instead.
+     */
     public int getUserId() {
         return this.user.getIdentifier();
     }
@@ -219,7 +223,6 @@ public class StatusBarNotification implements Parcelable {
 
     /**
      * The {@link android.os.UserHandle} for whom this notification is intended.
-     * @hide
      */
     public UserHandle getUser() {
         return user;
