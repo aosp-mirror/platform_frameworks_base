@@ -16081,8 +16081,20 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     // Multi-user methods
 
+    /**
+     * Start user, if its not already running, but don't bring it to foreground.
+     */
+    @Override
+    public boolean startUserInBackground(final int userId) {
+        return startUser(userId, /* foreground */ false);
+    }
+
     @Override
     public boolean switchUser(final int userId) {
+        return startUser(userId, /* foregound */ true);
+    }
+
+    private boolean startUser(final int userId, boolean foreground) {
         if (checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: switchUser() from pid="
@@ -16120,12 +16132,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                     needStart = true;
                 }
 
-                mCurrentUserId = userId;
                 final Integer userIdInt = Integer.valueOf(userId);
                 mUserLru.remove(userIdInt);
                 mUserLru.add(userIdInt);
 
-                mWindowManager.setCurrentUser(userId);
+                if (foreground) {
+                    mCurrentUserId = userId;
+                    mWindowManager.setCurrentUser(userId);
+                } else {
+                    final Integer currentUserIdInt = Integer.valueOf(mCurrentUserId);
+                    mUserLru.remove(currentUserIdInt);
+                    mUserLru.add(currentUserIdInt);
+                }
 
                 // Once the internal notion of the active user has switched, we lock the device
                 // with the option to show the user switcher on the keyguard.
@@ -16150,12 +16168,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     needStart = true;
                 }
 
-                mHandler.removeMessages(REPORT_USER_SWITCH_MSG);
-                mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
-                mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_MSG,
-                        oldUserId, userId, uss));
-                mHandler.sendMessageDelayed(mHandler.obtainMessage(USER_SWITCH_TIMEOUT_MSG,
-                        oldUserId, userId, uss), USER_SWITCH_TIMEOUT);
+                if (foreground) {
+                    mHandler.removeMessages(REPORT_USER_SWITCH_MSG);
+                    mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
+                    mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_MSG,
+                            oldUserId, userId, uss));
+                    mHandler.sendMessageDelayed(mHandler.obtainMessage(USER_SWITCH_TIMEOUT_MSG,
+                            oldUserId, userId, uss), USER_SWITCH_TIMEOUT);
+                }
+
                 if (needStart) {
                     Intent intent = new Intent(Intent.ACTION_USER_STARTED);
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
@@ -16186,16 +16207,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
-                boolean homeInFront = mStackSupervisor.switchUserLocked(userId, uss);
-                if (homeInFront) {
-                    startHomeActivityLocked(userId);
-                } else {
-                    mStackSupervisor.resumeTopActivitiesLocked();
+                if (foreground) {
+                    boolean homeInFront = mStackSupervisor.switchUserLocked(userId, uss);
+                    if (homeInFront) {
+                        startHomeActivityLocked(userId);
+                    } else {
+                        mStackSupervisor.resumeTopActivitiesLocked();
+                    }
+                    EventLogTags.writeAmSwitchUser(userId);
+                    getUserManagerLocked().userForeground(userId);
+                    sendUserSwitchBroadcastsLocked(oldUserId, userId);
                 }
 
-                EventLogTags.writeAmSwitchUser(userId);
-                getUserManagerLocked().userForeground(userId);
-                sendUserSwitchBroadcastsLocked(oldUserId, userId);
                 if (needStart) {
                     Intent intent = new Intent(Intent.ACTION_USER_STARTING);
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
