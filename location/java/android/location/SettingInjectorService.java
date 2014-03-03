@@ -26,7 +26,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 /**
- * Dynamically specifies the summary (subtitle) and enabled status of a preference injected into
+ * Dynamically specifies the enabled status of a preference injected into
  * the list of app settings displayed by the system settings app
  * <p/>
  * For use only by apps that are included in the system image, for preferences that affect multiple
@@ -71,13 +71,12 @@ import android.util.Log;
  * </ul>
  *
  * To ensure a good user experience, your {@link android.app.Application#onCreate()},
- * {@link #onGetSummary()}, and {@link #onGetEnabled()} methods must all be fast. If any are slow,
- * it can delay the display of settings values for other apps as well. Note further that all are
- * called on your app's UI thread.
+ * and {@link #onGetEnabled()} methods must all be fast. If either is slow,
+ * it can delay the display of settings values for other apps as well. Note further that these
+ * methods are called on your app's UI thread.
  * <p/>
  * For compactness, only one copy of a given setting should be injected. If each account has a
- * distinct value for the setting, then the {@link #onGetSummary()} value should represent a summary
- * of the state across all of the accounts and {@code settingsActivity} should display the value for
+ * distinct value for the setting, then only {@code settingsActivity} should display the value for
  * each account.
  */
 public abstract class SettingInjectorService extends Service {
@@ -107,14 +106,6 @@ public abstract class SettingInjectorService extends Service {
      */
     public static final String ACTION_INJECTED_SETTING_CHANGED =
             "android.location.InjectedSettingChanged";
-
-    /**
-     * Name of the bundle key for the string specifying the summary for the setting (e.g., "ON" or
-     * "OFF").
-     *
-     * @hide
-     */
-    public static final String SUMMARY_KEY = "summary";
 
     /**
      * Name of the bundle key for the string specifying whether the setting is currently enabled.
@@ -160,42 +151,31 @@ public abstract class SettingInjectorService extends Service {
 
     private void onHandleIntent(Intent intent) {
 
-        String summary;
-        try {
-            summary = onGetSummary();
-        } catch (RuntimeException e) {
-            // Exception. Send status anyway, so that settings injector can immediately start
-            // loading the status of the next setting.
-            sendStatus(intent, null, true);
-            throw e;
-        }
-
         boolean enabled;
         try {
             enabled = onGetEnabled();
         } catch (RuntimeException e) {
             // Exception. Send status anyway, so that settings injector can immediately start
             // loading the status of the next setting.
-            sendStatus(intent, summary, true);
+            sendStatus(intent, true);
             throw e;
         }
 
-        sendStatus(intent, summary, enabled);
+        sendStatus(intent, enabled);
     }
 
     /**
-     * Send the summary and enabled values back to the caller via the messenger encoded in the
+     * Send the enabled values back to the caller via the messenger encoded in the
      * intent.
      */
-    private void sendStatus(Intent intent, String summary, boolean enabled) {
+    private void sendStatus(Intent intent, boolean enabled) {
         Message message = Message.obtain();
         Bundle bundle = new Bundle();
-        bundle.putString(SUMMARY_KEY, summary);
         bundle.putBoolean(ENABLED_KEY, enabled);
         message.setData(bundle);
 
         if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, mName + ": received " + intent + ", summary=" + summary
+            Log.d(TAG, mName + ": received " + intent
                     + ", enabled=" + enabled + ", sending message: " + message);
         }
 
@@ -208,13 +188,18 @@ public abstract class SettingInjectorService extends Service {
     }
 
     /**
-     * Returns the {@link android.preference.Preference#getSummary()} value (allowed to be null or
-     * empty). Should not perform unpredictably-long operations such as network access--see the
-     * running-time comments in the class-level javadoc.
+     * This method is no longer called, because status values are no longer shown for any injected
+     * setting.
      *
-     * @return the {@link android.preference.Preference#getSummary()} value
+     * @return ignored
+     *
+     * @deprecated not called any more
      */
-    protected abstract String onGetSummary();
+    @Deprecated
+    protected String onGetSummary() {
+        // Do not delete until no callers have @Override annotations for this method
+        return null;
+    }
 
     /**
      * Returns the {@link android.preference.Preference#isEnabled()} value. Should not perform
