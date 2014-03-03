@@ -88,47 +88,48 @@ please see styles_device_defaults.xml.
 
     <!-- Begin Quantum theme styles -->
 
-    <!-- Text Styles -->
+    <!-- Text styles -->
+
     <style name="TextAppearance.Quantum" parent="TextAppearance"/>
 
     <style name="TextAppearance.Quantum.Inverse" parent="TextAppearance.Inverse">
-        <item name="textColor">?textColorPrimaryInverse</item>
-        <item name="textColorHint">?textColorHintInverse</item>
-        <item name="textColorHighlight">?textColorHighlightInverse</item>
-        <item name="textColorLink">?textColorLinkInverse</item>
+        <item name="textColor">?attr/textColorPrimaryInverse</item>
+        <item name="textColorHint">?attr/textColorHintInverse</item>
+        <item name="textColorHighlight">?attr/textColorHighlightInverse</item>
+        <item name="textColorLink">?attr/textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Quantum.Large" parent="TextAppearance.Large"/>
 
+    <style name="TextAppearance.Quantum.Large.Inverse">
+        <item name="textColor">?attr/textColorPrimaryInverse</item>
+        <item name="textColorHint">?attr/textColorHintInverse</item>
+        <item name="textColorHighlight">?attr/textColorHighlightInverse</item>
+        <item name="textColorLink">?attr/textColorLinkInverse</item>
+    </style>
+
     <style name="TextAppearance.Quantum.Medium" parent="TextAppearance.Medium"/>
+
+    <style name="TextAppearance.Quantum.Medium.Inverse">
+        <item name="textColor">?attr/textColorSecondaryInverse</item>
+        <item name="textColorHint">?attr/textColorHintInverse</item>
+        <item name="textColorHighlight">?attr/textColorHighlightInverse</item>
+        <item name="textColorLink">?attr/textColorLinkInverse</item>
+    </style>
 
     <style name="TextAppearance.Quantum.Small" parent="TextAppearance.Small"/>
 
-    <style name="TextAppearance.Quantum.Large.Inverse">
-        <item name="textColor">?textColorPrimaryInverse</item>
-        <item name="textColorHint">?textColorHintInverse</item>
-        <item name="textColorHighlight">?textColorHighlightInverse</item>
-        <item name="textColorLink">?textColorLinkInverse</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Medium.Inverse">
-        <item name="textColor">?textColorPrimaryInverse</item>
-        <item name="textColorHint">?textColorHintInverse</item>
-        <item name="textColorHighlight">?textColorHighlightInverse</item>
-        <item name="textColorLink">?textColorLinkInverse</item>
-    </style>
-
     <style name="TextAppearance.Quantum.Small.Inverse">
-        <item name="textColor">?textColorSecondaryInverse</item>
-        <item name="textColorHint">?textColorHintInverse</item>
-        <item name="textColorHighlight">?textColorHighlightInverse</item>
-        <item name="textColorLink">?textColorLinkInverse</item>
+        <item name="textColor">?attr/textColorSecondaryInverse</item>
+        <item name="textColorHint">?attr/textColorHintInverse</item>
+        <item name="textColorHighlight">?attr/textColorHighlightInverse</item>
+        <item name="textColorLink">?attr/textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Quantum.SearchResult">
         <item name="textStyle">normal</item>
-        <item name="textColor">?textColorPrimary</item>
-        <item name="textColorHint">?textColorHint</item>
+        <item name="textColor">?attr/textColorPrimary</item>
+        <item name="textColorHint">?attr/textColorHint</item>
     </style>
 
     <style name="TextAppearance.Quantum.SearchResult.Title">
@@ -137,54 +138,26 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Quantum.SearchResult.Subtitle">
         <item name="textSize">14sp</item>
-        <item name="textColor">?textColorSecondary</item>
+        <item name="textColor">?attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.Quantum.Widget" parent="TextAppearance.Widget"/>
 
-    <style name="TextAppearance.Quantum.Widget.Button" parent="TextAppearance.Quantum.Small.Inverse">
-        <item name="textColor">@color/primary_text_light_nodisable</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.IconMenu.Item" parent="TextAppearance.Quantum.Small">
-        <item name="textColor">?textColorPrimary</item>
-    </style>
-
-    <!-- This style is for smaller screens; values-xlarge defines a version
-         for larger screens. -->
-    <style name="TextAppearance.Quantum.Widget.TabWidget">
-        <item name="textSize">14sp</item>
+    <style name="TextAppearance.Quantum.Widget.Button">
+        <item name="fontFamily">@string/font_family_button_quantum</item>
+        <item name="textSize">@dimen/text_size_button_quantum</item>
+        <item name="textAllCaps">true</item>
+        <item name="textColor">?attr/textColorPrimary</item>
         <item name="textStyle">normal</item>
-        <item name="textColor">@color/tab_indicator_text</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.TextView">
-        <item name="textColor">?textColorPrimaryDisableOnly</item>
-        <item name="textColorHint">?textColorHint</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.TextView.PopupMenu">
-        <item name="textSize">18sp</item>
-        <item name="textColor">?textColorPrimaryDisableOnly</item>
-        <item name="textColorHint">?textColorHint</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.DropDownHint">
-        <item name="textColor">?textColorPrimary</item>
-        <item name="textSize">14sp</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.DropDownItem">
-        <item name="textColor">?textColorPrimaryDisableOnly</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.TextView.SpinnerItem">
-        <item name="textColor">?textColorPrimaryDisableOnly</item>
     </style>
 
     <style name="TextAppearance.Quantum.Widget.EditText">
-        <item name="textColor">@color/bright_foreground_light</item>
-        <item name="textColorHint">@color/hint_foreground_quantum_light</item>
+        <item name="textColor">?textColorPrimaryInverse</item>
+        <item name="textColorHint">?textColorHintInverse</item>
+    </style>
+
+    <style name="TextAppearance.Quantum.Widget.Switch" parent="TextAppearance.Quantum.Small">
+        <item name="textColor">@color/secondary_text_quantum_dark</item>
     </style>
 
     <style name="TextAppearance.Quantum.Widget.PopupMenu" parent="TextAppearance.Widget.PopupMenu">
@@ -199,75 +172,89 @@ please see styles_device_defaults.xml.
         <item name="textSize">14sp</item>
     </style>
 
-    <style name="TextAppearance.Quantum.Widget.ActionBar.Title"
-           parent="TextAppearance.Quantum.Medium">
-        <item name="textSize">@dimen/action_bar_title_text_size</item>
+    <style name="TextAppearance.Quantum.Widget.DropDownHint">
+        <item name="textColor">?attr/textColorPrimary</item>
+        <item name="textSize">14sp</item>
+    </style>
+    <style name="TextAppearance.Quantum.Widget.IconMenu.Item" parent="TextAppearance.Quantum.Small">
+        <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
-    <style name="TextAppearance.Quantum.Widget.ActionBar.Subtitle"
-           parent="TextAppearance.Quantum.Small">
-        <item name="textSize">@dimen/action_bar_subtitle_text_size</item>
+    <!-- This style is for smaller screens; values-xlarge defines a version
+         for larger screens. -->
+    <style name="TextAppearance.Quantum.Widget.TabWidget">
+        <item name="textSize">14sp</item>
+        <item name="textStyle">normal</item>
+        <item name="textColor">@color/tab_indicator_text</item>
     </style>
 
-    <style name="TextAppearance.Quantum.Widget.ActionBar.Title.Inverse"
-           parent="TextAppearance.Quantum.Medium.Inverse">
-        <item name="textSize">@dimen/action_bar_title_text_size</item>
+    <style name="TextAppearance.Quantum.Widget.TextView">
+        <item name="textColor">?attr/textColorPrimaryDisableOnly</item>
+        <item name="textColorHint">?attr/textColorHint</item>
     </style>
 
-    <style name="TextAppearance.Quantum.Widget.ActionBar.Subtitle.Inverse"
-           parent="TextAppearance.Quantum.Small.Inverse">
-        <item name="textSize">@dimen/action_bar_subtitle_text_size</item>
+    <style name="TextAppearance.Quantum.Widget.TextView.PopupMenu">
+        <item name="textSize">18sp</item>
     </style>
 
-    <style name="TextAppearance.Quantum.Widget.ActionBar.Menu"
-           parent="TextAppearance.Quantum.Small">
+    <style name="TextAppearance.Quantum.Widget.TextView.SpinnerItem" />
+
+    <style name="TextAppearance.Quantum.Widget.DropDownItem">
+        <item name="textColor">?attr/textColorPrimaryDisableOnly</item>
+    </style>
+
+    <style name="TextAppearance.Quantum.Widget.ActionMode"/>
+
+    <style name="TextAppearance.Quantum.Widget.ActionMode.Title" parent="TextAppearance.Quantum.Medium">
+        <item name="textSize">@dimen/action_bar_title_text_size_quantum</item>
+    </style>
+
+    <style name="TextAppearance.Quantum.Widget.ActionMode.Subtitle" parent="TextAppearance.Quantum.Small">
+        <item name="textSize">@dimen/action_bar_subtitle_text_size_quantum</item>
+    </style>
+
+    <!-- Text styles with no light versions -->
+
+    <style name="TextAppearance.Quantum.Widget.ActionBar.Title" parent="TextAppearance.Quantum.Medium">
+        <item name="textSize">@dimen/action_bar_title_text_size_quantum</item>
+    </style>
+
+    <style name="TextAppearance.Quantum.Widget.ActionBar.Subtitle" parent="TextAppearance.Quantum.Small">
+        <item name="textSize">@dimen/action_bar_subtitle_text_size_quantum</item>
+    </style>
+
+    <style name="TextAppearance.Quantum.Widget.ActionBar.Title.Inverse" parent="TextAppearance.Quantum.Medium.Inverse">
+        <item name="textSize">@dimen/action_bar_title_text_size_quantum</item>
+    </style>
+
+    <style name="TextAppearance.Quantum.Widget.ActionBar.Subtitle.Inverse" parent="TextAppearance.Quantum.Small.Inverse">
+        <item name="textSize">@dimen/action_bar_subtitle_text_size_quantum</item>
+    </style>
+
+    <style name="TextAppearance.Quantum.Widget.ActionBar.Menu" parent="TextAppearance.Quantum.Small">
         <item name="textSize">12sp</item>
         <item name="textStyle">bold</item>
         <item name="textColor">?attr/actionMenuTextColor</item>
         <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
     </style>
 
-    <style name="TextAppearance.Quantum.Widget.ActionMode"/>
-
-    <style name="TextAppearance.Quantum.Widget.ActionMode.Title"
-           parent="TextAppearance.Quantum.Medium">
-        <item name="textSize">@dimen/action_bar_title_text_size</item>
+    <style name="TextAppearance.Quantum.Widget.ActionMode.Title.Inverse" parent="TextAppearance.Quantum.Medium.Inverse">
+        <item name="textSize">@dimen/action_bar_title_text_size_quantum</item>
     </style>
 
-    <style name="TextAppearance.Quantum.Widget.ActionMode.Subtitle"
-           parent="TextAppearance.Quantum.Small">
-        <item name="textSize">@dimen/action_bar_subtitle_text_size</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.ActionMode.Title.Inverse"
-           parent="TextAppearance.Quantum.Medium.Inverse">
-        <item name="textSize">@dimen/action_bar_title_text_size</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.ActionMode.Subtitle.Inverse"
-           parent="TextAppearance.Quantum.Small.Inverse">
-        <item name="textSize">@dimen/action_bar_subtitle_text_size</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.Switch" parent="TextAppearance.Quantum.Small">
-        <!-- Switch thumb asset presents a dark background. -->
-        <item name="textColor">@color/secondary_text_quantum_dark</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Light.Widget.Switch" parent="TextAppearance.Quantum.Small">
-        <!-- Switch thumb asset presents a dark background. -->
-        <item name="textColor">@color/primary_text_quantum_dark</item>
+    <style name="TextAppearance.Quantum.Widget.ActionMode.Subtitle.Inverse" parent="TextAppearance.Quantum.Small.Inverse">
+        <item name="textSize">@dimen/action_bar_subtitle_text_size_quantum</item>
     </style>
 
     <style name="TextAppearance.Quantum.WindowTitle">
-        <item name="textColor">#fff</item>
+        <item name="textColor">?attr/textColorPrimary</item>
         <item name="textSize">14sp</item>
         <item name="textStyle">bold</item>
     </style>
 
     <style name="TextAppearance.Quantum.DialogWindowTitle">
         <item name="textSize">22sp</item>
-        <item name="textColor">@color/holo_blue_light</item>
+        <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Quantum.CalendarViewWeekDayView" parent="TextAppearance.Small.CalendarViewWeekDayView">
@@ -277,12 +264,7 @@ please see styles_device_defaults.xml.
     <!-- Light text styles -->
     <style name="TextAppearance.Quantum.Light" parent="TextAppearance.Quantum"/>
 
-    <style name="TextAppearance.Quantum.Light.Inverse">
-        <item name="textColor">?textColorPrimaryInverse</item>
-        <item name="textColorHint">?textColorHintInverse</item>
-        <item name="textColorHighlight">?textColorHighlightInverse</item>
-        <item name="textColorLink">?textColorLinkInverse</item>
-    </style>
+    <style name="TextAppearance.Quantum.Light.Inverse" parent="TextAppearance.Quantum.Inverse" />
 
     <style name="TextAppearance.Quantum.Light.Large" parent="TextAppearance.Quantum.Large"/>
 
@@ -290,48 +272,26 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Quantum.Light.Small" parent="TextAppearance.Quantum.Small"/>
 
-    <style name="TextAppearance.Quantum.Light.Large.Inverse">
-        <item name="textColor">?textColorPrimaryInverse</item>
-        <item name="textColorHint">?textColorHintInverse</item>
-        <item name="textColorHighlight">?textColorHighlightInverse</item>
-        <item name="textColorLink">?textColorLinkInverse</item>
-    </style>
+    <style name="TextAppearance.Quantum.Light.Large.Inverse" parent="TextAppearance.Quantum.Large.Inverse" />
 
-    <style name="TextAppearance.Quantum.Light.Medium.Inverse">
-        <item name="textColor">?textColorPrimaryInverse</item>
-        <item name="textColorHint">?textColorHintInverse</item>
-        <item name="textColorHighlight">?textColorHighlightInverse</item>
-        <item name="textColorLink">?textColorLinkInverse</item>
-    </style>
+    <style name="TextAppearance.Quantum.Light.Medium.Inverse" parent="TextAppearance.Quantum.Medium.Inverse" />
 
-    <style name="TextAppearance.Quantum.Light.Small.Inverse">
-        <item name="textColor">?textColorPrimaryInverse</item>
-        <item name="textColorHint">?textColorHintInverse</item>
-        <item name="textColorHighlight">?textColorHighlightInverse</item>
-        <item name="textColorLink">?textColorLinkInverse</item>
-    </style>
+    <style name="TextAppearance.Quantum.Light.Small.Inverse" parent="TextAppearance.Quantum.Small.Inverse" />
 
-    <style name="TextAppearance.Quantum.Light.SearchResult" parent="TextAppearance.Quantum.SearchResult">
-        <item name="textColor">?textColorPrimary</item>
-        <item name="textColorHint">?textColorHint</item>
-    </style>
+    <style name="TextAppearance.Quantum.Light.SearchResult" parent="TextAppearance.Quantum.SearchResult" />
 
-    <style name="TextAppearance.Quantum.Light.SearchResult.Title">
-        <item name="textSize">18sp</item>
-    </style>
+    <style name="TextAppearance.Quantum.Light.SearchResult.Title" parent="TextAppearance.Quantum.SearchResult.Title" />
 
-    <style name="TextAppearance.Quantum.Light.SearchResult.Subtitle">
-        <item name="textSize">14sp</item>
-        <item name="textColor">?textColorSecondary</item>
-    </style>
+    <style name="TextAppearance.Quantum.Light.SearchResult.Subtitle" parent="TextAppearance.Quantum.SearchResult.Subtitle" />
 
     <style name="TextAppearance.Quantum.Light.Widget" parent="TextAppearance.Widget"/>
 
-    <style name="TextAppearance.Quantum.Light.Widget.Button"/>
+    <style name="TextAppearance.Quantum.Light.Widget.Button" parent="TextAppearance.Quantum.Widget.Button" />
 
-    <style name="TextAppearance.Quantum.Light.Widget.EditText">
-        <item name="textColor">@color/bright_foreground_dark</item>
-        <item name="textColorHint">@color/hint_foreground_quantum_dark</item>
+    <style name="TextAppearance.Quantum.Light.Widget.EditText" parent="TextAppearance.Quantum.Widget.EditText" />
+
+    <style name="TextAppearance.Quantum.Light.Widget.Switch" parent="TextAppearance.Quantum.Small">
+        <item name="textColor">@color/secondary_text_quantum_dark</item>
     </style>
 
     <style name="TextAppearance.Quantum.Light.Widget.PopupMenu" parent="TextAppearance.Quantum.Widget.PopupMenu"/>
@@ -346,57 +306,59 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Quantum.Light.Widget.ActionMode.Subtitle" parent="TextAppearance.Widget.ActionMode.Subtitle"/>
 
-    <style name="TextAppearance.Quantum.Light.WindowTitle">
-        <item name="textColor">#fff</item>
-        <item name="textSize">14sp</item>
-        <item name="textStyle">bold</item>
-    </style>
+    <style name="TextAppearance.Quantum.Light.WindowTitle" parent="TextAppearance.Quantum.WindowTitle" />
 
-    <style name="TextAppearance.Quantum.Light.DialogWindowTitle">
-        <item name="textSize">22sp</item>
-        <item name="textColor">@color/holo_blue_light</item>
-    </style>
+    <style name="TextAppearance.Quantum.Light.DialogWindowTitle" parent="TextAppearance.Quantum.DialogWindowTitle" />
 
     <style name="TextAppearance.Quantum.Light.CalendarViewWeekDayView" parent="TextAppearance.Small.CalendarViewWeekDayView"/>
 
     <!-- Widget Styles -->
 
-    <style name="Widget.Quantum" parent="Widget"/>
 
     <style name="Quantum" />
     <style name="Quantum.Light" />
 
+    <style name="Widget.Quantum" parent="Widget" />
+
+    <!-- Bordered ink button -->
     <style name="Widget.Quantum.Button" parent="Widget.Button">
         <item name="background">@drawable/btn_default_quantum_dark</item>
-        <item name="textAppearance">?attr/textAppearanceMedium</item>
-        <item name="textColor">@color/primary_text_quantum_dark</item>
+        <item name="textAppearance">?attr/textAppearanceButton</item>
         <item name="minHeight">48dip</item>
-        <item name="minWidth">64dip</item>
+        <item name="minWidth">96dip</item>
     </style>
 
-    <style name="Widget.Quantum.StackView">
-        <item name="resOutColor">@color/holo_blue_light</item>
-        <item name="clickColor">@color/holo_blue_light</item>
-    </style>
-
-    <style name="Widget.Quantum.Button.Borderless">
-        <item name="background">?attr/selectableItemBackground</item>
-        <item name="paddingStart">4dip</item>
-        <item name="paddingEnd">4dip</item>
-    </style>
-
-    <style name="Widget.Quantum.Button.Borderless.Small">
-        <item name="textSize">14sp</item>
-    </style>
-
+    <!-- Small bordered ink button -->
     <style name="Widget.Quantum.Button.Small">
-        <item name="background">@drawable/btn_default_quantum_dark</item>
-        <item name="textAppearance">?attr/textAppearanceSmall</item>
-        <item name="textColor">@color/primary_text_quantum_dark</item>
         <item name="minHeight">48dip</item>
         <item name="minWidth">48dip</item>
     </style>
 
+    <!-- Bordered paper button -->
+    <style name="Widget.Quantum.Button.Paper">
+        <!-- TODO: Specify pressed state animation. -->
+    </style>
+
+    <!-- Bordered paper button with color -->
+    <style name="Widget.Quantum.Button.Paper.Color">
+        <item name="background">@drawable/btn_color_quantum_dark</item>
+    </style>
+
+    <!-- Borderless ink button -->
+    <style name="Widget.Quantum.Button.Borderless">
+        <item name="background">@drawable/btn_borderless_quantum_dark</item>
+    </style>
+
+    <!-- Small borderless ink button -->
+    <style name="Widget.Quantum.Button.Borderless.Small">
+        <item name="minHeight">48dip</item>
+        <item name="minWidth">48dip</item>
+    </style>
+
+    <!-- Borderless paper button -->
+    <style name="Widget.Quantum.Button.Borderless.Paper">
+        <!-- TODO: Specify pressed state animation. -->
+    </style>
     <style name="Widget.Quantum.Button.Inset">
         <item name="background">@drawable/button_inset</item>
     </style>
@@ -405,7 +367,6 @@ please see styles_device_defaults.xml.
         <item name="background">@drawable/btn_toggle_holo_dark</item>
         <item name="textOn">@string/capital_on</item>
         <item name="textOff">@string/capital_off</item>
-        <item name="disabledAlpha">?attr/disabledAlpha</item>
         <item name="textAppearance">?attr/textAppearanceSmall</item>
         <item name="minHeight">48dip</item>
     </style>
@@ -430,12 +391,17 @@ please see styles_device_defaults.xml.
         <item name="dividerPadding">0dp</item>
     </style>
 
+    <style name="Widget.Quantum.StackView">
+        <item name="resOutColor">@color/holo_blue_light</item>
+        <item name="clickColor">@color/holo_blue_light</item>
+    </style>
+
     <style name="Widget.Quantum.TextView" parent="Widget.TextView"/>
 
     <style name="Widget.Quantum.CheckedTextView" parent="Widget.CheckedTextView"/>
 
     <style name="Widget.Quantum.TextView.ListSeparator" parent="Widget.TextView.ListSeparator">
-        <item name="background">@drawable/list_section_divider_holo_dark</item>
+        <item name="background">@drawable/list_section_divider_quantum_dark</item>
         <item name="textAllCaps">true</item>
     </style>
 
@@ -447,7 +413,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
         <item name="dropDownSelector">@drawable/list_selector_quantum_dark</item>
-        <item name="popupBackground">@drawable/menu_dropdown_panel_holo_dark</item>
+        <item name="popupBackground">?attr/colorBackground</item>
     </style>
 
     <style name="Widget.Quantum.CompoundButton" parent="Widget.CompoundButton"/>
@@ -609,7 +575,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Spinner" parent="Widget.Spinner.DropDown">
         <item name="background">@drawable/spinner_background_holo_dark</item>
         <item name="dropDownSelector">@drawable/list_selector_quantum_dark</item>
-        <item name="popupBackground">@drawable/menu_dropdown_panel_holo_dark</item>
+        <item name="popupBackground">?attr/colorBackground</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
         <item name="dropDownWidth">wrap_content</item>
@@ -684,7 +650,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.ListPopupWindow" parent="Widget.ListPopupWindow">
         <item name="dropDownSelector">@drawable/list_selector_quantum_dark</item>
-        <item name="popupBackground">@drawable/menu_panel_holo_dark</item>
+        <item name="popupBackground">?attr/colorBackground</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
         <item name="dropDownWidth">wrap_content</item>
@@ -708,7 +674,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.ActionButton.Overflow">
-        <item name="src">@drawable/ic_menu_moreoverflow_holo_dark</item>
+        <item name="src">@drawable/ic_menu_moreoverflow_quantum_dark</item>
         <item name="background">?attr/actionBarItemBackground</item>
         <item name="contentDescription">@string/action_menu_overflow_description</item>
     </style>
@@ -749,7 +715,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.ActionBar" parent="Widget.ActionBar">
         <item name="titleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Title</item>
         <item name="subtitleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Subtitle</item>
-        <item name="background">@drawable/ab_transparent_dark_holo</item>
+        <item name="background">@drawable/ab_transparent_quantum_dark</item>
         <item name="backgroundStacked">@drawable/ab_stacked_transparent_dark_holo</item>
         <item name="backgroundSplit">@drawable/ab_bottom_transparent_dark_holo</item>
         <item name="divider">?attr/dividerVertical</item>
@@ -785,41 +751,53 @@ please see styles_device_defaults.xml.
 
     <!-- Light widget styles -->
 
-    <style name="Widget.Quantum.Light"/>
+    <style name="Widget.Quantum.Light" parent="Widget" />
 
-    <style name="Widget.Quantum.Light.Button" parent="Widget.Button">
+    <!-- Bordered ink button -->
+    <style name="Widget.Quantum.Light.Button" parent="Widget.Quantum.Button">
         <item name="background">@drawable/btn_default_quantum_light</item>
-        <item name="textAppearance">?attr/textAppearanceMediumInverse</item>
-        <item name="textColor">@color/primary_text_quantum_light</item>
+        <item name="textAppearance">?attr/textAppearanceButton</item>
         <item name="minHeight">48dip</item>
-        <item name="minWidth">64dip</item>
+        <item name="minWidth">96dip</item>
     </style>
 
-    <style name="Widget.Quantum.Light.Button.Borderless">
-        <item name="background">?attr/selectableItemBackground</item>
-        <item name="paddingStart">4dip</item>
-        <item name="paddingEnd">4dip</item>
-    </style>
-
-    <style name="Widget.Quantum.Light.Button.Borderless.Small">
-        <item name="textSize">14sp</item>
-    </style>
-
+    <!-- Small bordered ink button -->
     <style name="Widget.Quantum.Light.Button.Small">
-        <item name="background">@drawable/btn_default_quantum_light</item>
-        <item name="textAppearance">?attr/textAppearanceSmall</item>
-        <item name="textColor">@color/primary_text_quantum_light</item>
         <item name="minHeight">48dip</item>
         <item name="minWidth">48dip</item>
     </style>
 
+    <!-- Bordered paper button -->
+    <style name="Widget.Quantum.Light.Button.Paper">
+        <!-- TODO: Specify pressed state animation. -->
+    </style>
+
+    <!-- Bordered paper button with color -->
+    <style name="Widget.Quantum.Light.Button.Paper.Color">
+        <item name="background">@drawable/btn_color_quantum_light</item>
+    </style>
+
+    <!-- Borderless ink button -->
+    <style name="Widget.Quantum.Light.Button.Borderless">
+        <item name="background">@drawable/btn_borderless_quantum_light</item>
+    </style>
+
+    <!-- Small borderless ink button -->
+    <style name="Widget.Quantum.Light.Button.Borderless.Small">
+        <item name="minHeight">48dip</item>
+        <item name="minWidth">48dip</item>
+    </style>
+
+    <!-- Borderless paper button -->
+    <style name="Widget.Quantum.Light.Button.Borderless.Paper">
+        <!-- TODO: Specify pressed state animation. -->
+    </style>
     <style name="Widget.Quantum.Light.Button.Inset"/>
 
     <style name="Widget.Quantum.Light.Button.Toggle">
         <item name="background">@drawable/btn_toggle_holo_light</item>
         <item name="textOn">@string/capital_on</item>
         <item name="textOff">@string/capital_off</item>
-        <item name="disabledAlpha">?attr/disabledAlpha</item>
         <item name="textAppearance">?attr/textAppearanceSmall</item>
         <item name="minHeight">48dip</item>
     </style>
@@ -840,7 +818,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.CheckedTextView" parent="Widget.CheckedTextView"/>
 
     <style name="Widget.Quantum.Light.TextView.ListSeparator" parent="Widget.TextView.ListSeparator">
-        <item name="background">@drawable/list_section_divider_holo_light</item>
+        <item name="background">@drawable/list_section_divider_quantum_light</item>
         <item name="textAllCaps">true</item>
     </style>
 
@@ -852,7 +830,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.Light.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
         <item name="dropDownSelector">@drawable/list_selector_quantum_light</item>
-        <item name="popupBackground">@drawable/menu_dropdown_panel_holo_light</item>
+        <item name="popupBackground">?attr/colorBackground</item>
     </style>
 
     <style name="Widget.Quantum.Light.CompoundButton.CheckBox" parent="Widget.CompoundButton.CheckBox"/>
@@ -978,7 +956,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.Spinner" parent="Widget.Quantum.Spinner">
         <item name="background">@drawable/spinner_background_holo_light</item>
         <item name="dropDownSelector">@drawable/list_selector_quantum_light</item>
-        <item name="popupBackground">@drawable/menu_dropdown_panel_holo_light</item>
+        <item name="popupBackground">?attr/colorBackground</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
         <item name="dropDownWidth">wrap_content</item>
@@ -1023,7 +1001,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.Light.ListPopupWindow" parent="Widget.ListPopupWindow">
         <item name="dropDownSelector">@drawable/list_selector_quantum_light</item>
-        <item name="popupBackground">@drawable/menu_panel_holo_light</item>
+        <item name="popupBackground">?attr/colorBackground</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
         <item name="dropDownWidth">wrap_content</item>
@@ -1034,14 +1012,13 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.ActionButton" parent="Widget.Quantum.ActionButton"/>
 
     <style name="Widget.Quantum.Light.ActionButton.Overflow">
-        <item name="src">@drawable/ic_menu_moreoverflow_holo_light</item>
+        <item name="src">@drawable/ic_menu_moreoverflow_quantum_light</item>
         <item name="contentDescription">@string/action_menu_overflow_description</item>
     </style>
 
     <style name="Widget.Quantum.Light.ActionBar.TabView" parent="Widget.Quantum.ActionBar.TabView"/>
 
     <style name="Widget.Quantum.Light.Tab" parent="Widget.Quantum.Light.ActionBar.TabView">
-        <item name="background">@drawable/tab_indicator_holo</item>
         <item name="layout_width">0dip</item>
         <item name="layout_weight">1</item>
         <item name="minWidth">80dip</item>
@@ -1076,10 +1053,10 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.ActionBar" parent="Widget.Quantum.ActionBar">
         <item name="titleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Title</item>
         <item name="subtitleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Subtitle</item>
-        <item name="background">@drawable/ab_transparent_light_holo</item>
+        <item name="background">@drawable/ab_transparent_quantum_light</item>
         <item name="backgroundStacked">@drawable/ab_stacked_transparent_light_holo</item>
         <item name="backgroundSplit">@drawable/ab_bottom_transparent_light_holo</item>
-        <item name="homeAsUpIndicator">@drawable/ic_ab_back_holo_light</item>
+        <item name="homeAsUpIndicator">@drawable/ic_ab_back_quantum_light</item>
         <item name="progressBarStyle">@style/Widget.Quantum.Light.ProgressBar.Horizontal</item>
         <item name="indeterminateProgressStyle">@style/Widget.Quantum.Light.ProgressBar</item>
     </style>
@@ -1103,7 +1080,7 @@ please see styles_device_defaults.xml.
         <item name="background">@drawable/ab_solid_dark_holo</item>
         <item name="backgroundStacked">@drawable/ab_stacked_solid_dark_holo</item>
         <item name="backgroundSplit">@drawable/ab_bottom_solid_inverse_holo</item>
-        <item name="divider">@drawable/list_divider_holo_dark</item>
+        <item name="divider">@drawable/list_divider_quantum_dark</item>
         <item name="progressBarStyle">@style/Widget.Quantum.ProgressBar.Horizontal</item>
         <item name="indeterminateProgressStyle">@style/Widget.Quantum.ProgressBar</item>
         <item name="progressBarPadding">32dip</item>
@@ -1132,16 +1109,16 @@ please see styles_device_defaults.xml.
     <!-- Dialog styles -->
 
     <style name="AlertDialog.Quantum" parent="AlertDialog">
-        <item name="fullDark">@drawable/dialog_full_holo_dark</item>
-        <item name="topDark">@drawable/dialog_top_holo_dark</item>
-        <item name="centerDark">@drawable/dialog_middle_holo_dark</item>
-        <item name="bottomDark">@drawable/dialog_bottom_holo_dark</item>
-        <item name="fullBright">@drawable/dialog_full_holo_dark</item>
-        <item name="topBright">@drawable/dialog_top_holo_dark</item>
-        <item name="centerBright">@drawable/dialog_middle_holo_dark</item>
-        <item name="bottomBright">@drawable/dialog_bottom_holo_dark</item>
-        <item name="bottomMedium">@drawable/dialog_bottom_holo_dark</item>
-        <item name="centerMedium">@drawable/dialog_middle_holo_dark</item>
+        <item name="fullDark">?attr/colorBackground</item>
+        <item name="topDark">?attr/colorBackground</item>
+        <item name="centerDark">?attr/colorBackground</item>
+        <item name="bottomDark">?attr/colorBackground</item>
+        <item name="fullBright">?attr/colorBackground</item>
+        <item name="topBright">?attr/colorBackground</item>
+        <item name="centerBright">?attr/colorBackground</item>
+        <item name="bottomBright">?attr/colorBackground</item>
+        <item name="bottomMedium">?attr/colorBackground</item>
+        <item name="centerMedium">?attr/colorBackground</item>
         <item name="layout">@layout/alert_dialog_holo</item>
         <item name="listLayout">@layout/select_dialog_holo</item>
         <item name="progressLayout">@layout/progress_dialog_holo</item>
@@ -1151,18 +1128,7 @@ please see styles_device_defaults.xml.
         <item name="singleChoiceItemLayout">@layout/select_dialog_singlechoice_holo</item>
     </style>
 
-    <style name="AlertDialog.Quantum.Light">
-        <item name="fullDark">@drawable/dialog_full_holo_light</item>
-        <item name="topDark">@drawable/dialog_top_holo_light</item>
-        <item name="centerDark">@drawable/dialog_middle_holo_light</item>
-        <item name="bottomDark">@drawable/dialog_bottom_holo_light</item>
-        <item name="fullBright">@drawable/dialog_full_holo_light</item>
-        <item name="topBright">@drawable/dialog_top_holo_light</item>
-        <item name="centerBright">@drawable/dialog_middle_holo_light</item>
-        <item name="bottomBright">@drawable/dialog_bottom_holo_light</item>
-        <item name="bottomMedium">@drawable/dialog_bottom_holo_light</item>
-        <item name="centerMedium">@drawable/dialog_middle_holo_light</item>
-    </style>
+    <style name="AlertDialog.Quantum.Light" />
 
     <!-- Window title -->
     <style name="WindowTitleBackground.Quantum">

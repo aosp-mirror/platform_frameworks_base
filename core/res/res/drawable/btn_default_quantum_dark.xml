@@ -16,20 +16,11 @@
 
 <reveal xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
-        <selector>
-            <item android:state_window_focused="false" android:state_enabled="true"
-                android:drawable="@drawable/btn_default_normal_holo_dark" />
-            <item android:state_window_focused="false" android:state_enabled="false"
-                android:drawable="@drawable/btn_default_disabled_holo_dark" />
-            <item android:state_focused="true" android:state_enabled="true"
-                android:drawable="@drawable/btn_default_focused_holo_dark" />
-            <item android:state_enabled="true"
-                android:drawable="@drawable/btn_default_normal_holo_dark" />
-            <item android:state_focused="true"
-                android:drawable="@drawable/btn_default_disabled_focused_holo_dark" />
-            <item
-                android:drawable="@drawable/btn_default_disabled_holo_dark" />
-        </selector>
+        <nine-patch android:src="@drawable/btn_qntm_alpha"
+            android:tint="@color/btn_default_normal_quantum_dark" />
     </item>
-    <item android:drawable="@drawable/btn_default_pressed_holo_dark" />
+    <item>
+        <nine-patch android:src="@drawable/btn_qntm_alpha"
+            android:tint="@color/btn_default_pressed_quantum_dark" />
+    </item>
 </reveal>
