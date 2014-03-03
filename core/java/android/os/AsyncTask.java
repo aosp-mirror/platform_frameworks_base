@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * and does not constitute a generic threading framework. AsyncTasks should ideally be
  * used for short operations (a few seconds at the most.) If you need to keep threads
  * running for long periods of time, it is highly recommended you use the various APIs
- * provided by the <code>java.util.concurrent</code> pacakge such as {@link Executor},
+ * provided by the <code>java.util.concurrent</code> package such as {@link Executor},
  * {@link ThreadPoolExecutor} and {@link FutureTask}.</p>
  *
  * <p>An asynchronous task is defined by a computation that runs on a background thread and
