@@ -261,10 +261,9 @@ public class ZenModeView extends RelativeLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (DEBUG) log("onMeasure %s %s",
                 MeasureSpec.toString(widthMeasureSpec), MeasureSpec.toString(heightMeasureSpec));
-        if (MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.EXACTLY) {
-            throw new UnsupportedOperationException("Width must be exact");
-        }
-        if (widthMeasureSpec != mWidthSpec) {
+        final boolean widthExact = MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY;
+
+        if (!widthExact || (widthMeasureSpec != mWidthSpec)) {
             if (DEBUG) log("  super.onMeasure");
             final int hms = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
             super.onMeasure(widthMeasureSpec, hms);
