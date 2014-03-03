@@ -1056,7 +1056,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         for (int i=0; i<N; i++) {
             Entry ent = mNotificationData.get(N-i-1);
             if (!(provisioned || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
-            if (!notificationIsForCurrentUser(ent.notification)) continue;
+
+            // TODO How do we want to badge notifcations from related users.
+            if (!notificationIsForCurrentOrRelatedUser(ent.notification)) continue;
+
             final int vis = ent.notification.getNotification().visibility;
             if (vis != Notification.VISIBILITY_SECRET) {
                 // when isLockscreenPublicMode() we show the public form of VISIBILITY_PRIVATE notifications
@@ -1114,7 +1117,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             Entry ent = mNotificationData.get(N-i-1);
             if (!((provisioned && ent.notification.getScore() >= HIDE_ICONS_BELOW_SCORE)
                     || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
-            if (!notificationIsForCurrentUser(ent.notification)) continue;
+            if (!notificationIsForCurrentOrRelatedUser(ent.notification)) continue;
             if (isLockscreenPublicMode()
                     && ent.notification.getNotification().visibility
                             == Notification.VISIBILITY_SECRET
@@ -2121,7 +2124,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (!isDeviceProvisioned()) return;
 
         // not for you
-        if (!notificationIsForCurrentUser(n)) return;
+        if (!notificationIsForCurrentOrRelatedUser(n)) return;
 
         // Show the ticker if one is requested. Also don't do this
         // until status bar window is attached to the window manager,
@@ -2429,7 +2432,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                                 }
                                 try {
                                     mPile.setViewRemoval(true);
-                                    mBarService.onClearAllNotifications();
+                                    mBarService.onClearAllNotifications(mCurrentUserId);
                                 } catch (Exception ex) { }
                             }
                         };
@@ -2607,7 +2610,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 mBarService.onNotificationClear(
                         mInterruptingNotificationEntry.notification.getPackageName(),
                         mInterruptingNotificationEntry.notification.getTag(),
-                        mInterruptingNotificationEntry.notification.getId());
+                        mInterruptingNotificationEntry.notification.getId(),
+                        mInterruptingNotificationEntry.notification.getUserId());
             } catch (android.os.RemoteException ex) {
                 // oh well
             }
