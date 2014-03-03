@@ -6120,7 +6120,8 @@ public final class Settings {
          *
          * @hide
          */
-        public static final String HEADS_UP = "heads_up_enabled";
+        public static final String HEADS_UP_NOTIFICATIONS_ENABLED =
+                "heads_up_notifications_enabled";
 
         /** @hide */ public static final int HEADS_UP_OFF = 0;
         /** @hide */ public static final int HEADS_UP_ON = 1;
