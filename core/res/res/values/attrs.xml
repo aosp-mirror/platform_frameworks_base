@@ -673,6 +673,8 @@
         <!-- Action bar styles   -->
         <!-- =================== -->
         <eat-comment />
+        <!-- Theme override for the Action Bar -->
+        <attr name="actionBarTheme" format="reference" />
         <!-- Default style for tabs within an action bar -->
         <attr name="actionBarTabStyle" format="reference" />
         <attr name="actionBarTabBarStyle" format="reference" />

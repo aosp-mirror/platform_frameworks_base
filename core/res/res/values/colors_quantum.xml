@@ -15,34 +15,150 @@
 -->
 
 <resources>
-    <color name="background_quantum_dark">#ff000000</color>
-    <color name="background_quantum_light">#fff3f3f3</color>
+    <color name="background_quantum_dark">@color/black</color>
+    <color name="background_quantum_light">@color/quantum_grey_50</color>
+    <color name="secondary_background_quantum_dark">@color/quantum_grey_700</color>
+    <color name="secondary_background_quantum_light">@color/quantum_grey_100</color>
 
     <color name="bright_foreground_quantum_dark">@color/background_quantum_light</color>
     <color name="bright_foreground_quantum_light">@color/background_quantum_dark</color>
-    <color name="bright_foreground_disabled_quantum_dark">#ff4c4c4c</color>
-    <color name="bright_foreground_disabled_quantum_light">#ffb2b2b2</color>
+    <!-- TODO: This is 50% alpha black -->
+    <color name="bright_foreground_disabled_quantum_dark">#80000000</color>
+    <!-- TODO: This is 50% alpha grey_50 -->
+    <color name="bright_foreground_disabled_quantum_light">#80fafafa</color>
     <color name="bright_foreground_inverse_quantum_dark">@color/bright_foreground_quantum_light</color>
     <color name="bright_foreground_inverse_quantum_light">@color/bright_foreground_quantum_dark</color>
 
-    <color name="dim_foreground_quantum_dark">#bebebe</color>
-    <color name="dim_foreground_quantum_light">#323232</color>
+    <color name="dim_foreground_quantum_dark">#ffbebebe</color>
+    <color name="dim_foreground_quantum_light">#ff323232</color>
     <color name="dim_foreground_disabled_quantum_dark">#80bebebe</color>
     <color name="dim_foreground_disabled_quantum_light">#80323232</color>
 
-    <color name="hint_foreground_quantum_dark">#808080</color>
-    <color name="hint_foreground_quantum_light">#808080</color>
-    <color name="highlighted_text_quantum_dark">#6633b5e5</color>
-    <color name="highlighted_text_quantum_light">#6633b5e5</color>
+    <!-- TODO: These should be theme attributes. -->
+    <color name="control_normal_foreground_quantum_light">@color/secondary_text_quantum_light</color>
+    <color name="control_activated_foreground_quantum_light">@color/quantum_teal_700</color>
 
-    <color name="timepicker_default_background_quantum_dark">#ff303030</color>
-    <color name="timepicker_default_background_quantum_light">@color/white</color>
-    <color name="timepicker_default_text_color_quantum_dark">@color/white</color>
-    <color name="timepicker_default_text_color_quantum_light">#8c8c8c</color>
-    <color name="timepicker_default_disabled_color_quantum_dark">#7f08c8c8</color>
-    <color name="timepicker_default_disabled_color_quantum_light">#7f000000</color>
-    <color name="timepicker_default_ampm_selected_background_color_quantum_dark">@color/holo_blue_light</color>
-    <color name="timepicker_default_ampm_selected_background_color_quantum_light">@color/holo_blue_light</color>
+    <!-- TODO: These should be theme attributes. -->
+    <color name="control_normal_foreground_quantum_dark">@color/secondary_text_quantum_dark</color>
+    <color name="control_activated_foreground_quantum_dark">@color/quantum_lime_A200</color>
+
+    <!-- TODO: These should be theme attributes. -->
+    <color name="btn_default_normal_quantum_light">@color/quantum_grey_300</color>
+    <color name="btn_default_pressed_quantum_light">@color/quantum_grey_500</color>
+
+    <!-- TODO: These should be theme attributes. -->
+    <color name="btn_default_normal_quantum_dark">@color/quantum_grey_700</color>
+    <color name="btn_default_pressed_quantum_dark">@color/quantum_grey_500</color>
+
+    <color name="hint_foreground_quantum_dark">@color/bright_foreground_disabled_quantum_dark</color>
+    <color name="hint_foreground_quantum_light">@color/bright_foreground_disabled_quantum_light</color>
+    <!-- TODO: This is 40% alpha lime_A200 -->
+    <color name="highlighted_text_quantum_dark">#66eeff41</color>
+    <!-- TODO: This is 40% alpha teal_700 -->
+    <color name="highlighted_text_quantum_light">#660097a7</color>
+
+    <!-- TODO: These should all be pushed into a TimePicker widget style. -->
+    <color name="timepicker_default_background_quantum_dark">@color/background_quantum_dark</color>
+    <color name="timepicker_default_background_quantum_light">@color/background_quantum_light</color>
+    <color name="timepicker_default_text_color_quantum_dark">@color/bright_foreground_quantum_dark</color>
+    <color name="timepicker_default_text_color_quantum_light">@color/bright_foreground_quantum_light</color>
+    <color name="timepicker_default_disabled_color_quantum_dark">@color/bright_foreground_disabled_quantum_dark</color>
+    <color name="timepicker_default_disabled_color_quantum_light">@color/bright_foreground_disabled_quantum_light</color>
+    <color name="timepicker_default_ampm_selected_background_color_quantum_dark">@color/control_activated_foreground_quantum_dark</color>
+    <color name="timepicker_default_ampm_selected_background_color_quantum_light">@color/control_activated_foreground_quantum_light</color>
     <color name="timepicker_default_ampm_unselected_background_color_quantum_dark">@color/transparent</color>
     <color name="timepicker_default_ampm_unselected_background_color_quantum_light">@color/white</color>
+
+    <!-- Primary & accent colors -->
+
+    <color name="quantum_red_100">#fff4c7c3</color>
+    <color name="quantum_red_300">#ffe67c73</color>
+    <color name="quantum_red_500">#ffdb4437</color>
+    <color name="quantum_red_700">#ffc53929</color>
+    <color name="quantum_red_A200">#ffff5252</color>
+    <color name="quantum_red_A400">#ffff1744</color>
+
+    <color name="quantum_blue_100">#ffc6dafc</color>
+    <color name="quantum_blue_300">#ff7baaf7</color>
+    <color name="quantum_blue_500">#ff4285f4</color>
+    <color name="quantum_blue_700">#ff3367d6</color>
+    <color name="quantum_blue_A200">#ff448aff</color>
+    <color name="quantum_blue_A400">#ff2979ff</color>
+
+    <color name="quantum_teal_100">#ffb2ebf2</color>
+    <color name="quantum_teal_300">#ff4dd0e1</color>
+    <color name="quantum_teal_500">#ff00bcd4</color>
+    <color name="quantum_teal_700">#ff0097a7</color>
+    <color name="quantum_teal_A200">#ff18ffff</color>
+    <color name="quantum_teal_A400">#ff00e5ff</color>
+
+    <color name="quantum_green_100">#ffb7e1cd</color>
+    <color name="quantum_green_300">#ff57bb8a</color>
+    <color name="quantum_green_500">#ff0f9d58</color>
+    <color name="quantum_green_700">#ff0b8043</color>
+    <color name="quantum_green_A200">#ff69f0ae</color>
+    <color name="quantum_green_A400">#ff00e676</color>
+
+    <color name="quantum_lime_100">#fff0f4c3</color>
+    <color name="quantum_lime_300">#ffdce775</color>
+    <color name="quantum_lime_500">#ffcddc39</color>
+    <color name="quantum_lime_700">#ffafb42b</color>
+    <color name="quantum_lime_A200">#ffeeff41</color>
+    <color name="quantum_lime_A400">#ffc6ff00</color>
+
+    <color name="quantum_yellow_100">#fffce8b2</color>
+    <color name="quantum_yellow_300">#fff7cb4d</color>
+    <color name="quantum_yellow_500">#fff4b400</color>
+    <color name="quantum_yellow_700">#fff09300</color>
+    <color name="quantum_yellow_A200">#ffffcd40</color>
+    <color name="quantum_yellow_A400">#ffffbc00</color>
+
+    <color name="quantum_orange_100">#ffffe0b2</color>
+    <color name="quantum_orange_300">#ffffb74d</color>
+    <color name="quantum_orange_500">#ffff9800</color>
+    <color name="quantum_orange_700">#fff57c00</color>
+    <color name="quantum_orange_A200">#ffffab40</color>
+    <color name="quantum_orange_A400">#ffff9100</color>
+
+    <color name="quantum_deep_orange_100">#fff4c7c3</color>
+    <color name="quantum_deep_orange_300">#ffe67c73</color>
+    <color name="quantum_deep_orange_500">#ffff5722</color>
+    <color name="quantum_deep_orange_700">#ffc53929</color>
+    <color name="quantum_deep_orange_A200">#ffff5252</color>
+    <color name="quantum_deep_orange_A400">#ffff1744</color>
+
+    <!-- Neutral colors -->
+
+    <color name="quantum_grey_50">#fffafafa</color>
+    <color name="quantum_grey_100">#fff5f5f5</color>
+    <color name="quantum_grey_300">#ffeeeeee</color>
+    <color name="quantum_grey_500">#ffa3a3a3</color>
+    <color name="quantum_grey_700">#ff717171</color>
+
+    <color name="quantum_blue_grey_50">#ffeceff1</color>
+    <color name="quantum_blue_grey_100">#ffcfd8dc</color>
+    <color name="quantum_blue_grey_300">#ff90a4ae</color>
+    <color name="quantum_blue_grey_500">#ff607d8b</color>
+    <color name="quantum_blue_grey_700">#ff455a64</color>
+
+    <color name="quantum_brown_100">#ffd7ccc8</color>
+    <color name="quantum_brown_300">#ffa1887f</color>
+    <color name="quantum_brown_500">#ff795548</color>
+    <color name="quantum_brown_700">#ff5d4037</color>
+
+    <!-- Text & foreground colors -->
+
+    <color name="primary_text_quantum_light">#ff000000</color>
+    <color name="secondary_text_quantum_light">#de000000</color>
+    <color name="tertiary_text_quantum_light">#8a000000</color>
+
+    <color name="primary_text_quantum_dark">#ffffffff</color>
+    <color name="secondary_text_quantum_dark">#deffffff</color>
+    <color name="tertiary_text_quantum_dark">#8affffff</color>
+
+    <!-- "Theme" colors to be replaced by attrs when available -->
+    <color name="theme_color_100">@color/quantum_teal_100</color>
+    <color name="theme_color_300">@color/quantum_teal_300</color>
+    <color name="theme_color_500">@color/quantum_teal_500</color>
+    <color name="theme_color_700">@color/quantum_teal_700</color>
 </resources>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2010 The Android Open Source Project
+<!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,10 +15,12 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false" android:color="@android:color/bright_foreground_disabled_holo_dark"/>
-    <item android:state_window_focused="false" android:color="@android:color/bright_foreground_holo_dark"/>
-    <item android:state_pressed="true" android:color="@android:color/bright_foreground_holo_dark"/>
-    <item android:state_selected="true" android:color="@android:color/bright_foreground_holo_dark"/>
-    <item android:state_activated="true" android:color="@android:color/bright_foreground_holo_dark"/>
-    <item android:color="@android:color/bright_foreground_holo_dark"/>
+    <item android:state_pressed="true">
+        <bitmap android:src="@drawable/fastscroll_thumb_qntm_alpha"
+            android:tint="@color/control_activated_foreground_quantum_dark" />
+    </item>
+    <item>
+        <bitmap android:src="@drawable/fastscroll_thumb_qntm_alpha"
+            android:tint="@color/control_normal_foreground_quantum_dark" />
+    </item>
 </selector>
