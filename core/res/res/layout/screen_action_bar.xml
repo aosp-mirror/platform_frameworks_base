@@ -23,7 +23,8 @@ This is an optimized layout for a screen with the Action Bar enabled.
     android:id="@+id/action_bar_overlay_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:splitMotionEvents="false">
+    android:splitMotionEvents="false"
+    android:theme="?attr/actionBarTheme">
     <FrameLayout android:id="@android:id/content"
                  android:layout_width="match_parent"
                  android:layout_height="match_parent" />
