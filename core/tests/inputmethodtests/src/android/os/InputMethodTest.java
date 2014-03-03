@@ -101,20 +101,15 @@ public class InputMethodTest extends InstrumentationTestCase {
 
         final List<InputMethodInfo> clonedList = cloneViaParcel(originalList);
         assertNotNull(clonedList);
-        assertEquals(originalList.size(), clonedList.size());
+        final List<InputMethodInfo> clonedClonedList = cloneViaParcel(clonedList);
+        assertNotNull(clonedClonedList);
         assertEquals(originalList, clonedList);
-
+        assertEquals(clonedList, clonedClonedList);
+        assertEquals(originalList.size(), clonedList.size());
+        assertEquals(clonedList.size(), clonedClonedList.size());
         for (int imeIndex = 0; imeIndex < originalList.size(); ++imeIndex) {
-            final InputMethodInfo original = originalList.get(imeIndex);
-            final InputMethodInfo cloned = clonedList.get(imeIndex);
-            assertEquals(original, cloned);
-            assertEquals(original.getSubtypeCount(), cloned.getSubtypeCount());
-            for (int subtypeIndex = 0; subtypeIndex < original.getSubtypeCount(); ++subtypeIndex) {
-                final InputMethodSubtype originalSubtype = original.getSubtypeAt(subtypeIndex);
-                final InputMethodSubtype clonedSubtype = cloned.getSubtypeAt(subtypeIndex);
-                assertEquals(originalSubtype, clonedSubtype);
-                assertEquals(originalSubtype.hashCode(), clonedSubtype.hashCode());
-            }
+            verifyEquality(originalList.get(imeIndex), clonedList.get(imeIndex));
+            verifyEquality(clonedList.get(imeIndex), clonedClonedList.get(imeIndex));
         }
     }
 
@@ -129,6 +124,17 @@ public class InputMethodTest extends InstrumentationTestCase {
             if (p != null) {
                 p.recycle();
             }
+        }
+    }
+
+    private static void verifyEquality(InputMethodInfo expected, InputMethodInfo actual) {
+        assertEquals(expected, actual);
+        assertEquals(expected.getSubtypeCount(), actual.getSubtypeCount());
+        for (int subtypeIndex = 0; subtypeIndex < expected.getSubtypeCount(); ++subtypeIndex) {
+            final InputMethodSubtype expectedSubtype = expected.getSubtypeAt(subtypeIndex);
+            final InputMethodSubtype actualSubtype = actual.getSubtypeAt(subtypeIndex);
+            assertEquals(expectedSubtype, actualSubtype);
+            assertEquals(expectedSubtype.hashCode(), actualSubtype.hashCode());
         }
     }
 
