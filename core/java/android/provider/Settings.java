@@ -3368,21 +3368,29 @@ public final class Settings {
         public static final String INSTALL_NON_MARKET_APPS = Global.INSTALL_NON_MARKET_APPS;
 
         /**
-         * Comma-separated list of location providers that activities may access.
+         * Comma-separated list of location providers that activities may access. Do not rely on
+         * this value being present in settings.db or on ContentObserver notifications on the
+         * corresponding Uri.
          *
-         * @deprecated use {@link #LOCATION_MODE}
+         * @deprecated use {@link #LOCATION_MODE} and
+         * {@link LocationManager#MODE_CHANGED_ACTION} (or
+         * {@link LocationManager#PROVIDERS_CHANGED_ACTION})
          */
         @Deprecated
         public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
 
         /**
          * The degree of location access enabled by the user.
-         * <p/>
+         * <p>
          * When used with {@link #putInt(ContentResolver, String, int)}, must be one of {@link
          * #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY}, {@link
          * #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}. When used with {@link
          * #getInt(ContentResolver, String)}, the caller must gracefully handle additional location
          * modes that might be added in the future.
+         * <p>
+         * Note: do not rely on this value being present in settings.db or on ContentObserver
+         * notifications for the corresponding Uri. Use {@link LocationManager#MODE_CHANGED_ACTION}
+         * to receive changes in this value.
          */
         public static final String LOCATION_MODE = "location_mode";
 
