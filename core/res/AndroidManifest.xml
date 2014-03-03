@@ -1071,7 +1071,7 @@
         android:permissionGroupFlags="personalInfo"
         android:priority="370" />
 
-    <!-- Allows an application to monitor, modify, or abort outgoing
+    <!-- Allows an application to modify or abort outgoing
          calls. -->
     <permission android:name="android.permission.PROCESS_OUTGOING_CALLS"
         android:permissionGroup="android.permission-group.PHONE_CALLS"
