@@ -430,12 +430,12 @@ public class NumberPicker extends LinearLayout {
      * Flag whether to ignore move events - we ignore such when we show in IME
      * to prevent the content from scrolling.
      */
-    private boolean mIngonreMoveEvents;
+    private boolean mIgnoreMoveEvents;
 
     /**
-     * Flag whether to show soft input on tap.
+     * Flag whether to perform a click on tap.
      */
-    private boolean mShowSoftInputOnTap;
+    private boolean mPerformClickOnTap;
 
     /**
      * The top of the top selection divider.
@@ -834,8 +834,8 @@ public class NumberPicker extends LinearLayout {
                 mInputText.setVisibility(View.INVISIBLE);
                 mLastDownOrMoveEventY = mLastDownEventY = event.getY();
                 mLastDownEventTime = event.getEventTime();
-                mIngonreMoveEvents = false;
-                mShowSoftInputOnTap = false;
+                mIgnoreMoveEvents = false;
+                mPerformClickOnTap = false;
                 // Handle pressed state before any state change.
                 if (mLastDownEventY < mTopSelectionDividerTop) {
                     if (mScrollState == OnScrollListener.SCROLL_STATE_IDLE) {
@@ -866,7 +866,7 @@ public class NumberPicker extends LinearLayout {
                     postChangeCurrentByOneFromLongPress(
                             true, ViewConfiguration.getLongPressTimeout());
                 } else {
-                    mShowSoftInputOnTap = true;
+                    mPerformClickOnTap = true;
                     postBeginSoftInputOnLongPressCommand();
                 }
                 return true;
@@ -887,7 +887,7 @@ public class NumberPicker extends LinearLayout {
         int action = event.getActionMasked();
         switch (action) {
             case MotionEvent.ACTION_MOVE: {
-                if (mIngonreMoveEvents) {
+                if (mIgnoreMoveEvents) {
                     break;
                 }
                 float currentMoveY = event.getY();
@@ -919,9 +919,9 @@ public class NumberPicker extends LinearLayout {
                     int deltaMoveY = (int) Math.abs(eventY - mLastDownEventY);
                     long deltaTime = event.getEventTime() - mLastDownEventTime;
                     if (deltaMoveY <= mTouchSlop && deltaTime < ViewConfiguration.getTapTimeout()) {
-                        if (mShowSoftInputOnTap) {
-                            mShowSoftInputOnTap = false;
-                            showSoftInput();
+                        if (mPerformClickOnTap) {
+                            mPerformClickOnTap = false;
+                            performClick();
                         } else {
                             int selectorIndexOffset = (eventY / mSelectorElementHeight)
                                     - SELECTOR_MIDDLE_ITEM_INDEX;
@@ -1212,6 +1212,27 @@ public class NumberPicker extends LinearLayout {
      */
     public void setValue(int value) {
         setValueInternal(value, false);
+    }
+
+    @Override
+    public boolean performClick() {
+        if (!mHasSelectorWheel) {
+            return super.performClick();
+        } else if (!super.performClick()) {
+            showSoftInput();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean performLongClick() {
+        if (!mHasSelectorWheel) {
+            return super.performLongClick();
+        } else if (!super.performLongClick()) {
+            showSoftInput();
+            mIgnoreMoveEvents = true;
+        }
+        return true;
     }
 
     /**
@@ -2192,8 +2213,7 @@ public class NumberPicker extends LinearLayout {
 
         @Override
         public void run() {
-            showSoftInput();
-            mIngonreMoveEvents = true;
+            performLongClick();
         }
     }
 
@@ -2321,7 +2341,14 @@ public class NumberPicker extends LinearLayout {
                         }
                         case AccessibilityNodeInfo.ACTION_CLICK: {
                             if (NumberPicker.this.isEnabled()) {
-                                showSoftInput();
+                                performClick();
+                                return true;
+                            }
+                            return false;
+                        }
+                        case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
+                            if (NumberPicker.this.isEnabled()) {
+                                performLongClick();
                                 return true;
                             }
                             return false;
