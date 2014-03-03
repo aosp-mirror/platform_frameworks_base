@@ -752,7 +752,7 @@ public class MediaRouter {
      *
      * @see #addUserRoute(UserRouteInfo)
      * @see #removeUserRoute(UserRouteInfo)
-     * @see #createRouteCategory(CharSequence)
+     * @see #createRouteCategory(CharSequence, boolean)
      */
     public UserRouteInfo createUserRoute(RouteCategory category) {
         return new UserRouteInfo(category);
