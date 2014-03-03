@@ -1534,7 +1534,7 @@
         @hide -->
     <permission android:name="android.permission.FORCE_STOP_PACKAGES"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="signature"
+        android:protectionLevel="signature|system"
         android:label="@string/permlab_forceStopPackages"
         android:description="@string/permdesc_forceStopPackages" />
 
