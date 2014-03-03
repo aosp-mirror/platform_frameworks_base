@@ -1,14 +1,14 @@
 <resources>
     <style name="ReorderTextView" parent="@android:style/TextAppearance.Medium">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">75dp</item>
+        <item name="android:layout_height">100dp</item>
         <item name="android:gravity">center</item>
     </style>
     <style name="LeftReorderTextView" parent="@style/ReorderTextView">
-        <item name="android:translationX">50dp</item>
+        <item name="android:translationX">20dp</item>
     </style>
     <style name="RightReorderTextView" parent="@style/ReorderTextView">
-        <item name="android:translationX">-50dp</item>
+        <item name="android:translationX">-20dp</item>
     </style>
 
     <style name="TopLeftReorderTextView" parent="@style/LeftReorderTextView">
