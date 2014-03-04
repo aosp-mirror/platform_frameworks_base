@@ -2227,6 +2227,13 @@ public class LocationManagerService extends ILocationManager.Stub {
     public void removeTestProvider(String provider) {
         checkMockPermissionsSafe();
         synchronized (mLock) {
+
+            // These methods can't be called after removing the test provider, so first make sure
+            // we don't leave anything dangling (cf b/11446702).
+            clearTestProviderEnabled(provider);
+            clearTestProviderLocation(provider);
+            clearTestProviderStatus(provider);
+
             MockProvider mockProvider = mMockProviders.remove(provider);
             if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
