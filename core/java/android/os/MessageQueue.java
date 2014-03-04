@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.util.Printer;
 
@@ -169,7 +168,6 @@ public final class MessageQueue {
                         }
                         msg.next = null;
                         if (false) Log.v("MessageQueue", "Returning message: " + msg);
-                        msg.markInUse();
                         return msg;
                     }
                 } else {
@@ -233,7 +231,7 @@ public final class MessageQueue {
 
     void quit(boolean safe) {
         if (!mQuitAllowed) {
-            throw new RuntimeException("Main thread not allowed to quit.");
+            throw new IllegalStateException("Main thread not allowed to quit.");
         }
 
         synchronized (this) {
@@ -259,6 +257,7 @@ public final class MessageQueue {
         synchronized (this) {
             final int token = mNextBarrierToken++;
             final Message msg = Message.obtain();
+            msg.markInUse();
             msg.when = when;
             msg.arg1 = token;
 
@@ -303,7 +302,7 @@ public final class MessageQueue {
                 mMessages = p.next;
                 needWake = mMessages == null || mMessages.target != null;
             }
-            p.recycle();
+            p.recycleUnchecked();
 
             // If the loop is quitting then it is already awake.
             // We can assume mPtr != 0 when mQuitting is false.
@@ -314,21 +313,23 @@ public final class MessageQueue {
     }
 
     boolean enqueueMessage(Message msg, long when) {
-        if (msg.isInUse()) {
-            throw new AndroidRuntimeException(msg + " This message is already in use.");
-        }
         if (msg.target == null) {
-            throw new AndroidRuntimeException("Message must have a target.");
+            throw new IllegalArgumentException("Message must have a target.");
+        }
+        if (msg.isInUse()) {
+            throw new IllegalStateException(msg + " This message is already in use.");
         }
 
         synchronized (this) {
             if (mQuitting) {
-                RuntimeException e = new RuntimeException(
+                IllegalStateException e = new IllegalStateException(
                         msg.target + " sending message to a Handler on a dead thread");
                 Log.w("MessageQueue", e.getMessage(), e);
+                msg.recycle();
                 return false;
             }
 
+            msg.markInUse();
             msg.when = when;
             Message p = mMessages;
             boolean needWake;
@@ -424,7 +425,7 @@ public final class MessageQueue {
                    && (object == null || p.obj == object)) {
                 Message n = p.next;
                 mMessages = n;
-                p.recycle();
+                p.recycleUnchecked();
                 p = n;
             }
 
@@ -435,7 +436,7 @@ public final class MessageQueue {
                     if (n.target == h && n.what == what
                         && (object == null || n.obj == object)) {
                         Message nn = n.next;
-                        n.recycle();
+                        n.recycleUnchecked();
                         p.next = nn;
                         continue;
                     }
@@ -458,7 +459,7 @@ public final class MessageQueue {
                    && (object == null || p.obj == object)) {
                 Message n = p.next;
                 mMessages = n;
-                p.recycle();
+                p.recycleUnchecked();
                 p = n;
             }
 
@@ -469,7 +470,7 @@ public final class MessageQueue {
                     if (n.target == h && n.callback == r
                         && (object == null || n.obj == object)) {
                         Message nn = n.next;
-                        n.recycle();
+                        n.recycleUnchecked();
                         p.next = nn;
                         continue;
                     }
@@ -492,7 +493,7 @@ public final class MessageQueue {
                     && (object == null || p.obj == object)) {
                 Message n = p.next;
                 mMessages = n;
-                p.recycle();
+                p.recycleUnchecked();
                 p = n;
             }
 
@@ -502,7 +503,7 @@ public final class MessageQueue {
                 if (n != null) {
                     if (n.target == h && (object == null || n.obj == object)) {
                         Message nn = n.next;
-                        n.recycle();
+                        n.recycleUnchecked();
                         p.next = nn;
                         continue;
                     }
@@ -516,7 +517,7 @@ public final class MessageQueue {
         Message p = mMessages;
         while (p != null) {
             Message n = p.next;
-            p.recycle();
+            p.recycleUnchecked();
             p = n;
         }
         mMessages = null;
@@ -544,7 +545,7 @@ public final class MessageQueue {
                 do {
                     p = n;
                     n = p.next;
-                    p.recycle();
+                    p.recycleUnchecked();
                 } while (n != null);
             }
         }
