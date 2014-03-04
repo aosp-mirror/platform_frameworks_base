@@ -1155,7 +1155,9 @@ public class DevicePolicyManager {
                         }
                         exclSpec = listBuilder.toString();
                     }
-                    android.net.Proxy.validate(hostName, Integer.toString(port), exclSpec);
+                    if (android.net.Proxy.validate(hostName, Integer.toString(port), exclSpec)
+                            != android.net.Proxy.PROXY_VALID)
+                        throw new IllegalArgumentException();
                 }
                 return mService.setGlobalProxy(admin, hostSpec, exclSpec, UserHandle.myUserId());
             } catch (RemoteException e) {
