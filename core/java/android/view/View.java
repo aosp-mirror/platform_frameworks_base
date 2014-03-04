@@ -13676,7 +13676,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (layerType == LAYER_TYPE_HARDWARE) {
                 HardwareLayer layer = getHardwareLayer();
                 if (layer != null) {
-                    layer.setLayerPaint(paint);
+                    layer.setLayerPaint(mLayerPaint);
                 }
                 invalidateViewProperty(false, false);
             } else {
