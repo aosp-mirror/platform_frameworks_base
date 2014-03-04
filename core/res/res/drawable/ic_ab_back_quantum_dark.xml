@@ -15,6 +15,6 @@
 -->
 
 <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/ic_ab_back_quantum_am_alpha"
+    android:src="@drawable/ic_ab_back_qntm_am_alpha"
     android:autoMirrored="true"
     android:tint="@color/control_normal_foreground_quantum_dark" />
