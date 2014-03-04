@@ -90,8 +90,10 @@ public final class Proxy {
 
     private static final Pattern HOSTNAME_PATTERN;
 
-    private static final String EXCLLIST_REGEXP = "$|^(.?" + NAME_IP_REGEX
-        + ")+(,(.?" + NAME_IP_REGEX + "))*$";
+    private static final String EXCL_REGEX =
+        "[a-zA-Z0-9*]+(\\-[a-zA-Z0-9*]+)*(\\.[a-zA-Z0-9*]+(\\-[a-zA-Z0-9*]+)*)*";
+
+    private static final String EXCLLIST_REGEXP = "^$|^" + EXCL_REGEX + "(," + EXCL_REGEX + ")*$";
 
     private static final Pattern EXCLLIST_PATTERN;
 
