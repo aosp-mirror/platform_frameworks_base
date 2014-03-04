@@ -1110,11 +1110,14 @@ public final class CaptureResult extends CameraMetadata {
      * enhancement.</p>
      * <p>Edge/sharpness/detail enhancement. OFF means no
      * enhancement will be applied by the camera device.</p>
+     * <p>This must be set to one of the modes listed in {@link CameraCharacteristics#EDGE_AVAILABLE_EDGE_MODES android.edge.availableEdgeModes}.</p>
      * <p>FAST/HIGH_QUALITY both mean camera device determined enhancement
      * will be applied. HIGH_QUALITY mode indicates that the
      * camera device will use the highest-quality enhancement algorithms,
      * even if it slows down capture rate. FAST means the camera device will
      * not slow down capture rate when applying edge enhancement.</p>
+     *
+     * @see CameraCharacteristics#EDGE_AVAILABLE_EDGE_MODES
      * @see #EDGE_MODE_OFF
      * @see #EDGE_MODE_FAST
      * @see #EDGE_MODE_HIGH_QUALITY
@@ -1378,11 +1381,15 @@ public final class CaptureResult extends CameraMetadata {
      * algorithm</p>
      * <p>Noise filtering control. OFF means no noise reduction
      * will be applied by the camera device.</p>
+     * <p>This must be set to a valid mode in
+     * {@link CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES android.noiseReduction.availableNoiseReductionModes}.</p>
      * <p>FAST/HIGH_QUALITY both mean camera device determined noise filtering
      * will be applied. HIGH_QUALITY mode indicates that the camera device
      * will use the highest-quality noise filtering algorithms,
      * even if it slows down capture rate. FAST means the camera device should not
      * slow down capture rate when applying noise filtering.</p>
+     *
+     * @see CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES
      * @see #NOISE_REDUCTION_MODE_OFF
      * @see #NOISE_REDUCTION_MODE_FAST
      * @see #NOISE_REDUCTION_MODE_HIGH_QUALITY
@@ -2076,6 +2083,8 @@ public final class CaptureResult extends CameraMetadata {
      * tables, selective chroma enhancement, or other non-linear color
      * transforms will be disabled when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is
      * CONTRAST_CURVE.</p>
+     * <p>This must be set to a valid mode in
+     * {@link CameraCharacteristics#TONEMAP_AVAILABLE_TONE_MAP_MODES android.tonemap.availableToneMapModes}.</p>
      * <p>When using either FAST or HIGH_QUALITY, the camera device will
      * emit its own tonemap curve in {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed},
      * {@link CaptureRequest#TONEMAP_CURVE_GREEN android.tonemap.curveGreen}, and {@link CaptureRequest#TONEMAP_CURVE_BLUE android.tonemap.curveBlue}.
@@ -2085,6 +2094,7 @@ public final class CaptureResult extends CameraMetadata {
      * provided curve in FAST or HIGH_QUALITY, the image's tonemap will be
      * roughly the same.</p>
      *
+     * @see CameraCharacteristics#TONEMAP_AVAILABLE_TONE_MAP_MODES
      * @see CaptureRequest#TONEMAP_CURVE_BLUE
      * @see CaptureRequest#TONEMAP_CURVE_GREEN
      * @see CaptureRequest#TONEMAP_CURVE_RED
