@@ -225,6 +225,14 @@ please see styles_device_defaults.xml.
         <item name="windowExitAnimation">@anim/fast_fade_out</item>
     </style>
 
+    <!-- Window animations for swipe-dismissable windows. {@hide} -->
+    <style name="Animation.SwipeDismiss">
+        <item name="taskOpenEnterAnimation">@anim/swipe_window_enter</item>
+        <item name="taskOpenExitAnimation">@anim/swipe_window_exit</item>
+        <item name="taskCloseEnterAnimation">@anim/swipe_window_enter</item>
+        <item name="taskCloseExitAnimation">@anim/swipe_window_exit</item>
+    </style>
+
     <!-- Status Bar Styles -->
     <style name="TextAppearance.StatusBar">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>

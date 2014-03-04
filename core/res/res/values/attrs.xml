@@ -447,6 +447,10 @@
              to {@link android.view.WindowManager.LayoutParams#FLAG_TRANSLUCENT_NAVIGATION}. -->
         <attr name="windowTranslucentNavigation" format="boolean" />
 
+        <!-- Flag to indicate that a window can be swiped away to be dismissed.
+             Corresponds to {@link android.view.Window.FEATURE_SWIPE_TO_DISMISS} -->
+        <attr name="windowSwipeToDismiss" format="boolean" />
+
         <!-- ============ -->
         <!-- Alert Dialog styles -->
         <!-- ============ -->
@@ -1604,6 +1608,7 @@
         <attr name="windowCloseOnTouchOutside" />
         <attr name="windowTranslucentStatus" />
         <attr name="windowTranslucentNavigation" />
+        <attr name="windowSwipeToDismiss" />
         <!-- The minimum width the window is allowed to be, along the major
              axis of the screen.  That is, when in landscape.  Can be either
              an absolute dimension or a fraction of the screen size in that
