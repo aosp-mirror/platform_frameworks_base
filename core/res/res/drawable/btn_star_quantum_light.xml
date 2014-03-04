@@ -14,7 +14,17 @@
      limitations under the License.
 -->
 
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/ic_ab_back_qntm_am_alpha"
-    android:autoMirrored="true"
-    android:tint="@color/control_normal_foreground_quantum_light" />
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true">
+        <bitmap android:src="@drawable/btn_star_qntm_alpha"
+            android:tint="@color/control_activated_foreground_quantum_light" />
+    </item>
+    <item android:state_pressed="true">
+        <bitmap android:src="@drawable/btn_star_qntm_alpha"
+            android:tint="@color/control_activated_foreground_quantum_light" />
+    </item>
+    <item>
+        <bitmap android:src="@drawable/btn_star_qntm_alpha"
+            android:tint="@color/control_normal_foreground_quantum_light" />
+    </item>
+</selector>

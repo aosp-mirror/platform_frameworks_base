@@ -511,15 +511,18 @@ public class Switch extends CompoundButton {
         if (mOnLayout == null) {
             mOnLayout = makeLayout(mTextOn);
         }
+
         if (mOffLayout == null) {
             mOffLayout = makeLayout(mTextOff);
         }
 
         mTrackDrawable.getPadding(mTempRect);
+
         final int maxTextWidth = Math.max(mOnLayout.getWidth(), mOffLayout.getWidth());
         final int switchWidth = Math.max(mSwitchMinWidth,
                 maxTextWidth * 2 + mThumbTextPadding * 4 + mTempRect.left + mTempRect.right);
-        final int switchHeight = mTrackDrawable.getIntrinsicHeight();
+        final int switchHeight = Math.max(mTrackDrawable.getIntrinsicHeight(),
+                mThumbDrawable.getIntrinsicHeight());
 
         mThumbWidth = maxTextWidth + mThumbTextPadding * 2;
 
@@ -772,48 +775,51 @@ public class Switch extends CompoundButton {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        final Rect tempRect = mTempRect;
+        final Drawable trackDrawable = mTrackDrawable;
+        final Drawable thumbDrawable = mThumbDrawable;
+
         // Draw the switch
-        int switchLeft = mSwitchLeft;
-        int switchTop = mSwitchTop;
-        int switchRight = mSwitchRight;
-        int switchBottom = mSwitchBottom;
+        final int switchLeft = mSwitchLeft;
+        final int switchTop = mSwitchTop;
+        final int switchRight = mSwitchRight;
+        final int switchBottom = mSwitchBottom;
+        trackDrawable.setBounds(switchLeft, switchTop, switchRight, switchBottom);
+        trackDrawable.draw(canvas);
 
-        mTrackDrawable.setBounds(switchLeft, switchTop, switchRight, switchBottom);
-        mTrackDrawable.draw(canvas);
+        final int saveCount = canvas.save();
 
-        canvas.save();
-
-        mTrackDrawable.getPadding(mTempRect);
-        int switchInnerLeft = switchLeft + mTempRect.left;
-        int switchInnerTop = switchTop + mTempRect.top;
-        int switchInnerRight = switchRight - mTempRect.right;
-        int switchInnerBottom = switchBottom - mTempRect.bottom;
+        trackDrawable.getPadding(tempRect);
+        final int switchInnerLeft = switchLeft + tempRect.left;
+        final int switchInnerTop = switchTop + tempRect.top;
+        final int switchInnerRight = switchRight - tempRect.right;
+        final int switchInnerBottom = switchBottom - tempRect.bottom;
         canvas.clipRect(switchInnerLeft, switchTop, switchInnerRight, switchBottom);
 
         // Relies on mTempRect, MUST be called first!
         final int thumbPos = getThumbOffset();
 
-        mThumbDrawable.getPadding(mTempRect);
-        int thumbLeft = switchInnerLeft - mTempRect.left + thumbPos;
-        int thumbRight = switchInnerLeft + thumbPos + mThumbWidth + mTempRect.right;
-        mThumbDrawable.setBounds(thumbLeft, switchTop, thumbRight, switchBottom);
-        mThumbDrawable.draw(canvas);
+        thumbDrawable.getPadding(tempRect);
+        int thumbLeft = switchInnerLeft - tempRect.left + thumbPos;
+        int thumbRight = switchInnerLeft + thumbPos + mThumbWidth + tempRect.right;
+        thumbDrawable.setBounds(thumbLeft, switchTop, thumbRight, switchBottom);
+        thumbDrawable.draw(canvas);
 
-        // mTextColors should not be null, but just in case
+        final int drawableState[] = getDrawableState();
         if (mTextColors != null) {
-            mTextPaint.setColor(mTextColors.getColorForState(getDrawableState(),
-                    mTextColors.getDefaultColor()));
+            mTextPaint.setColor(mTextColors.getColorForState(drawableState, 0));
         }
-        mTextPaint.drawableState = getDrawableState();
+        mTextPaint.drawableState = drawableState;
 
-        Layout switchText = getTargetCheckedState() ? mOnLayout : mOffLayout;
+        final Layout switchText = getTargetCheckedState() ? mOnLayout : mOffLayout;
         if (switchText != null) {
-            canvas.translate((thumbLeft + thumbRight) / 2 - switchText.getWidth() / 2,
-                    (switchInnerTop + switchInnerBottom) / 2 - switchText.getHeight() / 2);
+            final int left = (thumbLeft + thumbRight) / 2 - switchText.getWidth() / 2;
+            final int top = (switchInnerTop + switchInnerBottom) / 2 - switchText.getHeight() / 2;
+            canvas.translate(left, top);
             switchText.draw(canvas);
         }
 
-        canvas.restore();
+        canvas.restoreToCount(saveCount);
     }
 
     @Override

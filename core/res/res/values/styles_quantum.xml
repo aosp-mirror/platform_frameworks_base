@@ -412,7 +412,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.AbsListView" parent="Widget.AbsListView"/>
 
     <style name="Widget.Quantum.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
-        <item name="dropDownSelector">@drawable/list_selector_quantum_dark</item>
+        <item name="dropDownSelector">@drawable/list_selector_holo_dark</item>
         <item name="popupBackground">?attr/colorBackground</item>
     </style>
 
@@ -425,7 +425,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.EditText" parent="Widget.EditText"/>
 
     <style name="Widget.Quantum.ExpandableListView" parent="Widget.Quantum.ListView">
-        <item name="groupIndicator">@drawable/expander_group_holo_dark</item>
+        <item name="groupIndicator">@drawable/expander_group_quantum_dark</item>
         <item name="indicatorLeft">?attr/expandableListPreferredItemIndicatorLeft</item>
         <item name="indicatorRight">?attr/expandableListPreferredItemIndicatorRight</item>
         <item name="childDivider">?attr/listDivider</item>
@@ -511,7 +511,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.ProgressBar.Horizontal" parent="Widget.ProgressBar.Horizontal">
-        <item name="progressDrawable">@drawable/progress_horizontal_holo_dark</item>
+        <item name="progressDrawable">@drawable/progress_horizontal_quantum_dark</item>
         <item name="indeterminateDrawable">@drawable/progress_indeterminate_horizontal_holo</item>
         <item name="minHeight">16dip</item>
         <item name="maxHeight">16dip</item>
@@ -535,11 +535,11 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.SeekBar">
         <item name="indeterminateOnly">false</item>
-        <item name="progressDrawable">@drawable/scrubber_progress_horizontal_holo_dark</item>
-        <item name="indeterminateDrawable">@drawable/scrubber_progress_horizontal_holo_dark</item>
+        <item name="progressDrawable">@drawable/scrubber_progress_horizontal_quantum_dark</item>
+        <item name="indeterminateDrawable">@drawable/scrubber_progress_horizontal_quantum_dark</item>
         <item name="minHeight">13dip</item>
         <item name="maxHeight">13dip</item>
-        <item name="thumb">@drawable/scrubber_control_selector_holo</item>
+        <item name="thumb">@drawable/scrubber_control_selector_quantum_dark</item>
         <item name="thumbOffset">16dip</item>
         <item name="focusable">true</item>
         <item name="paddingStart">16dip</item>
@@ -573,8 +573,8 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.HorizontalScrollView" parent="Widget.HorizontalScrollView"/>
 
     <style name="Widget.Quantum.Spinner" parent="Widget.Spinner.DropDown">
-        <item name="background">@drawable/spinner_background_holo_dark</item>
-        <item name="dropDownSelector">@drawable/list_selector_quantum_dark</item>
+        <item name="background">@drawable/spinner_background_quantum_dark</item>
+        <item name="dropDownSelector">@drawable/list_selector_holo_dark</item>
         <item name="popupBackground">?attr/colorBackground</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
@@ -587,11 +587,11 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Spinner.DropDown"/>
 
     <style name="Widget.Quantum.Spinner.DropDown.ActionBar">
-        <item name="background">@drawable/spinner_ab_holo_dark</item>
+        <item name="background">@drawable/spinner_background_quantum_dark</item>
     </style>
 
     <style name="Widget.Quantum.CompoundButton.Star" parent="Widget.CompoundButton.Star">
-        <item name="button">@drawable/btn_star_holo_dark</item>
+        <item name="button">@drawable/btn_star_quantum_dark</item>
     </style>
 
     <style name="Widget.Quantum.TabWidget" parent="Widget.TabWidget">
@@ -606,7 +606,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.Tab" parent="Widget.Quantum.ActionBar.TabView">
-        <item name="background">@drawable/tab_indicator_holo</item>
+        <item name="background">@drawable/tab_indicator_quantum_dark</item>
         <item name="layout_width">0dip</item>
         <item name="layout_weight">1</item>
         <item name="minWidth">80dip</item>
@@ -649,7 +649,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.QuickContactBadgeSmall.WindowLarge" parent="Widget.QuickContactBadgeSmall.WindowLarge"/>
 
     <style name="Widget.Quantum.ListPopupWindow" parent="Widget.ListPopupWindow">
-        <item name="dropDownSelector">@drawable/list_selector_quantum_dark</item>
+        <item name="dropDownSelector">@drawable/list_selector_holo_dark</item>
         <item name="popupBackground">?attr/colorBackground</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
@@ -682,7 +682,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.ActionButton.TextButton" parent="Widget.Quantum.ButtonBar.Button"/>
 
     <style name="Widget.Quantum.ActionBar.TabView" parent="Widget.ActionBar.TabView">
-        <item name="background">@drawable/tab_indicator_ab_holo</item>
+        <item name="background">@drawable/tab_indicator_quantum_dark</item>
         <item name="paddingStart">16dip</item>
         <item name="paddingEnd">16dip</item>
     </style>
@@ -739,13 +739,13 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.CompoundButton.Switch">
-        <item name="track">@drawable/switch_track_holo_dark</item>
-        <item name="thumb">@drawable/switch_inner_holo_dark</item>
+        <item name="track">@drawable/switch_track_quantum_dark</item>
+        <item name="thumb">@drawable/switch_inner_quantum_dark</item>
         <item name="switchTextAppearance">@style/TextAppearance.Quantum.Widget.Switch</item>
-        <item name="textOn">@string/capital_on</item>
-        <item name="textOff">@string/capital_off</item>
+        <item name="textOn"></item>
+        <item name="textOff"></item>
         <item name="thumbTextPadding">12dip</item>
-        <item name="switchMinWidth">96dip</item>
+        <item name="switchMinWidth">72dip</item>
         <item name="switchPadding">16dip</item>
     </style>
 
@@ -829,7 +829,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.AbsListView" parent="Widget.AbsListView"/>
 
     <style name="Widget.Quantum.Light.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
-        <item name="dropDownSelector">@drawable/list_selector_quantum_light</item>
+        <item name="dropDownSelector">@drawable/list_selector_holo_light</item>
         <item name="popupBackground">?attr/colorBackground</item>
     </style>
 
@@ -840,7 +840,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.EditText" parent="Widget.Quantum.EditText"/>
 
     <style name="Widget.Quantum.Light.ExpandableListView" parent="Widget.Quantum.Light.ListView">
-        <item name="groupIndicator">@drawable/expander_group_holo_light</item>
+        <item name="groupIndicator">@drawable/expander_group_quantum_light</item>
         <item name="indicatorLeft">?attr/expandableListPreferredItemIndicatorLeft</item>
         <item name="indicatorRight">?attr/expandableListPreferredItemIndicatorRight</item>
         <item name="childDivider">?attr/listDivider</item>
@@ -908,7 +908,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.ProgressBar" parent="Widget.Quantum.ProgressBar"/>
 
     <style name="Widget.Quantum.Light.ProgressBar.Horizontal" parent="Widget.Quantum.ProgressBar.Horizontal">
-        <item name="progressDrawable">@drawable/progress_horizontal_holo_light</item>
+        <item name="progressDrawable">@drawable/progress_horizontal_quantum_light</item>
     </style>
 
     <style name="Widget.Quantum.Light.ProgressBar.Small" parent="Widget.Quantum.ProgressBar.Small"/>
@@ -924,8 +924,9 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.ProgressBar.Large.Inverse" parent="Widget.Quantum.ProgressBar.Large.Inverse"/>
 
     <style name="Widget.Quantum.Light.SeekBar" parent="Widget.Quantum.SeekBar">
-        <item name="progressDrawable">@drawable/scrubber_progress_horizontal_holo_light</item>
-        <item name="indeterminateDrawable">@drawable/scrubber_progress_horizontal_holo_light</item>
+        <item name="progressDrawable">@drawable/scrubber_progress_horizontal_quantum_light</item>
+        <item name="indeterminateDrawable">@drawable/scrubber_progress_horizontal_quantum_light</item>
+        <item name="thumb">@drawable/scrubber_control_selector_quantum_light</item>
     </style>
 
     <style name="Widget.Quantum.Light.RatingBar" parent="Widget.RatingBar">
@@ -954,8 +955,8 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.HorizontalScrollView" parent="Widget.HorizontalScrollView"/>
 
     <style name="Widget.Quantum.Light.Spinner" parent="Widget.Quantum.Spinner">
-        <item name="background">@drawable/spinner_background_holo_light</item>
-        <item name="dropDownSelector">@drawable/list_selector_quantum_light</item>
+        <item name="background">@drawable/spinner_background_quantum_light</item>
+        <item name="dropDownSelector">@drawable/list_selector_holo_light</item>
         <item name="popupBackground">?attr/colorBackground</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
@@ -966,11 +967,11 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.Spinner.DropDown"/>
 
     <style name="Widget.Quantum.Light.Spinner.DropDown.ActionBar">
-        <item name="background">@drawable/spinner_ab_holo_light</item>
+        <item name="background">@drawable/spinner_background_quantum_light</item>
     </style>
 
     <style name="Widget.Quantum.Light.CompoundButton.Star" parent="Widget.CompoundButton.Star">
-        <item name="button">@drawable/btn_star_holo_light</item>
+        <item name="button">@drawable/btn_star_quantum_light</item>
     </style>
 
     <style name="Widget.Quantum.Light.TabWidget" parent="Widget.Quantum.TabWidget"/>
@@ -1000,7 +1001,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.QuickContactBadgeSmall.WindowLarge" parent="Widget.QuickContactBadgeSmall.WindowLarge"/>
 
     <style name="Widget.Quantum.Light.ListPopupWindow" parent="Widget.ListPopupWindow">
-        <item name="dropDownSelector">@drawable/list_selector_quantum_light</item>
+        <item name="dropDownSelector">@drawable/list_selector_holo_light</item>
         <item name="popupBackground">?attr/colorBackground</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
@@ -1016,7 +1017,9 @@ please see styles_device_defaults.xml.
         <item name="contentDescription">@string/action_menu_overflow_description</item>
     </style>
 
-    <style name="Widget.Quantum.Light.ActionBar.TabView" parent="Widget.Quantum.ActionBar.TabView"/>
+    <style name="Widget.Quantum.Light.ActionBar.TabView" parent="Widget.Quantum.ActionBar.TabView">
+        <item name="background">@drawable/tab_indicator_quantum_light</item>
+    </style>
 
     <style name="Widget.Quantum.Light.Tab" parent="Widget.Quantum.Light.ActionBar.TabView">
         <item name="layout_width">0dip</item>
@@ -1088,11 +1091,11 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.Light.CompoundButton.Switch" parent="Widget.CompoundButton.Switch">
-        <item name="track">@drawable/switch_track_holo_light</item>
-        <item name="thumb">@drawable/switch_inner_holo_light</item>
+        <item name="track">@drawable/switch_track_quantum_light</item>
+        <item name="thumb">@drawable/switch_inner_quantum_light</item>
         <item name="switchTextAppearance">@style/TextAppearance.Quantum.Light.Widget.Switch</item>
-        <item name="textOn">@string/capital_on</item>
-        <item name="textOff">@string/capital_off</item>
+        <item name="textOn"></item>
+        <item name="textOff"></item>
         <item name="thumbTextPadding">12dip</item>
         <item name="switchMinWidth">96dip</item>
         <item name="switchPadding">16dip</item>
