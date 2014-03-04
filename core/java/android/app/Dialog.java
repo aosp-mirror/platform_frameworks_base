@@ -695,6 +695,10 @@ public class Dialog implements DialogInterface, Window.Callback,
     
     public void onDetachedFromWindow() {
     }
+
+    public void onWindowDismissed() {
+        dismiss();
+    }
     
     /**
      * Called to process key events.  You can override this to intercept all 
