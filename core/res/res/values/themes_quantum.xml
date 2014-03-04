@@ -123,7 +123,7 @@ please see themes_device_defaults.xml.
         <item name="listChoiceIndicatorSingle">@drawable/btn_radio_quantum_dark</item>
         <item name="listChoiceIndicatorMultiple">@drawable/btn_check_quantum_dark</item>
 
-        <item name="listChoiceBackgroundIndicator">@drawable/list_selector_quantum_dark</item>
+        <item name="listChoiceBackgroundIndicator">@drawable/list_selector_holo_dark</item>
 
         <item name="activatedBackgroundIndicator">@drawable/activated_background_quantum_dark</item>
 
@@ -441,7 +441,7 @@ please see themes_device_defaults.xml.
         <item name="listChoiceIndicatorSingle">@drawable/btn_radio_quantum_light</item>
         <item name="listChoiceIndicatorMultiple">@drawable/btn_check_quantum_light</item>
 
-        <item name="listChoiceBackgroundIndicator">@drawable/list_selector_quantum_light</item>
+        <item name="listChoiceBackgroundIndicator">@drawable/list_selector_holo_light</item>
 
         <item name="activatedBackgroundIndicator">@drawable/activated_background_quantum_light</item>
 
