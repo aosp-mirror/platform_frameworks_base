@@ -2462,6 +2462,13 @@ public class Activity extends ContextThemeWrapper
         }
         return false;
     }
+
+    /**
+     * Called when the main window associated with the activity has been dismissed.
+     */
+    public void onWindowDismissed() {
+        finish();
+    }
     
     /**
      * Called to process key events.  You can override this to intercept all 

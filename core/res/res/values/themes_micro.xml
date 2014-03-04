@@ -16,22 +16,42 @@
 <resources>
     <style name="Theme.Micro" parent="Theme.Holo">
         <item name="numberPickerStyle">@android:style/Widget.Micro.NumberPicker</item>
+        <item name="windowAnimationStyle">@android:style/Animation.SwipeDismiss</item>
+        <item name="windowIsFloating">false</item>
+        <item name="windowIsTranslucent">true</item>
+        <item name="windowSwipeToDismiss">true</item>
 	</style>
 
     <style name="Theme.Micro.NoActionBar" parent="Theme.Holo.NoActionBar">
         <item name="textViewStyle">@android:style/Widget.Micro.TextView</item>
         <item name="numberPickerStyle">@android:style/Widget.Micro.NumberPicker</item>
+        <item name="windowAnimationStyle">@android:style/Animation.SwipeDismiss</item>
+        <item name="windowIsFloating">false</item>
+        <item name="windowIsTranslucent">true</item>
+        <item name="windowSwipeToDismiss">true</item>
     </style>
     <style name="Theme.Micro.Light" parent="Theme.Holo.Light">
 		<item name="numberPickerStyle">@android:style/Widget.Micro.NumberPicker</item>
+        <item name="windowAnimationStyle">@android:style/Animation.SwipeDismiss</item>
+        <item name="windowIsFloating">false</item>
+        <item name="windowIsTranslucent">true</item>
+        <item name="windowSwipeToDismiss">true</item>
 	</style>
     <style name="Theme.Micro.Light.NoActionBar" parent="Theme.Holo.Light.NoActionBar">
         <item name="textViewStyle">@android:style/Widget.Micro.TextView</item>
         <item name="numberPickerStyle">@android:style/Widget.Micro.NumberPicker</item>
+        <item name="windowAnimationStyle">@android:style/Animation.SwipeDismiss</item>
+        <item name="windowIsFloating">false</item>
+        <item name="windowIsTranslucent">true</item>
+        <item name="windowSwipeToDismiss">true</item>
     </style>
     <style name="Theme.Micro.Light.DarkActionBar" parent="Theme.Holo.Light.DarkActionBar">
         <item name="textViewStyle">@android:style/Widget.Micro.TextView</item>
 		<item name="numberPickerStyle">@android:style/Widget.Micro.NumberPicker</item>
+        <item name="windowAnimationStyle">@android:style/Animation.SwipeDismiss</item>
+        <item name="windowIsFloating">false</item>
+        <item name="windowIsTranslucent">true</item>
+        <item name="windowSwipeToDismiss">true</item>
     </style>
 
 </resources>

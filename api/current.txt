@@ -3120,6 +3120,7 @@ package android.app {
     method public void onUserInteraction();
     method protected void onUserLeaveHint();
     method public void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
+    method public void onWindowDismissed();
     method public void onWindowFocusChanged(boolean);
     method public android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
     method public void openContextMenu(android.view.View);
@@ -3641,6 +3642,7 @@ package android.app {
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
     method public void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
+    method public void onWindowDismissed();
     method public void onWindowFocusChanged(boolean);
     method public android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
     method public void openContextMenu(android.view.View);
@@ -23741,6 +23743,7 @@ package android.service.dreams {
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
     method public boolean onSearchRequested();
     method public void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
+    method public void onWindowDismissed();
     method public void onWindowFocusChanged(boolean);
     method public android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
     method public void setContentView(int);
@@ -29905,6 +29908,7 @@ package android.view {
     field public static final int FEATURE_OPTIONS_PANEL = 0; // 0x0
     field public static final int FEATURE_PROGRESS = 2; // 0x2
     field public static final int FEATURE_RIGHT_ICON = 4; // 0x4
+    field public static final int FEATURE_SWIPE_TO_DISMISS = 11; // 0xb
     field public static final int ID_ANDROID_CONTENT = 16908290; // 0x1020002
     field public static final int PROGRESS_END = 10000; // 0x2710
     field public static final int PROGRESS_INDETERMINATE_OFF = -4; // 0xfffffffc
@@ -29936,6 +29940,7 @@ package android.view {
     method public abstract boolean onPreparePanel(int, android.view.View, android.view.Menu);
     method public abstract boolean onSearchRequested();
     method public abstract void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
+    method public abstract void onWindowDismissed();
     method public abstract void onWindowFocusChanged(boolean);
     method public abstract android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
   }
