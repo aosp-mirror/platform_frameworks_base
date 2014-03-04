@@ -11517,6 +11517,9 @@ package android.hardware.camera2 {
     field public static final int SENSOR_TEST_PATTERN_MODE_OFF = 0; // 0x0
     field public static final int SENSOR_TEST_PATTERN_MODE_PN9 = 4; // 0x4
     field public static final int SENSOR_TEST_PATTERN_MODE_SOLID_COLOR = 1; // 0x1
+    field public static final int SHADING_MODE_FAST = 1; // 0x1
+    field public static final int SHADING_MODE_HIGH_QUALITY = 2; // 0x2
+    field public static final int SHADING_MODE_OFF = 0; // 0x0
     field public static final int STATISTICS_FACE_DETECT_MODE_FULL = 2; // 0x2
     field public static final int STATISTICS_FACE_DETECT_MODE_OFF = 0; // 0x0
     field public static final int STATISTICS_FACE_DETECT_MODE_SIMPLE = 1; // 0x1
@@ -11598,6 +11601,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_SENSITIVITY;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TEST_PATTERN_DATA;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TEST_PATTERN_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SHADING_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_DETECT_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_LENS_SHADING_MAP_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_BLUE;
@@ -11670,6 +11674,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TEMPERATURE;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TEST_PATTERN_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TIMESTAMP;
+    field public static final android.hardware.camera2.CameraMetadata.Key SHADING_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACES;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_DETECT_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_LENS_SHADING_MAP;
