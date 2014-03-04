@@ -27,21 +27,21 @@ sdk.win64_bundle_checksum=ddddbb1b9028015779d68dde01f96b14
 
 
 
-sdk.linux_download=android-sdk_r22.3-linux.tgz
-sdk.linux_bytes=100968558
-sdk.linux_checksum=6ae581a906d6420ad67176dff25a31cc
+sdk.linux_download=android-sdk_r22.6-linux.tgz
+sdk.linux_bytes=100992666
+sdk.linux_checksum=dde27b72715e52693c1ebc908742fc40
 
-sdk.mac_download=android-sdk_r22.3-macosx.zip
-sdk.mac_bytes=74893875
-sdk.mac_checksum=ecde88ca1f05955826697848fcb4a9e7
+sdk.mac_download=android-sdk_r22.6-macosx.zip
+sdk.mac_bytes=74547402
+sdk.mac_checksum=10c0e2ab65444c4911d69356ca2343f5
 
-sdk.win_download=android-sdk_r22.3-windows.zip
-sdk.win_bytes=108847452
-sdk.win_checksum=9f0fe8c8884d6aee2b298fee203c62dc
+sdk.win_download=android-sdk_r22.6-windows.zip
+sdk.win_bytes=108862292
+sdk.win_checksum=6faa487d328be352a456c53d9cbf0e3d
 
-sdk.win_installer=installer_r22.3-windows.exe
-sdk.win_installer_bytes=88845794
-sdk.win_installer_checksum=ad50c4dd9e23cee65a1ed740ff3345fa
+sdk.win_installer=installer_r22.6-windows.exe
+sdk.win_installer_bytes=88856450
+sdk.win_installer_checksum=6e5351b414bd554f3ac4c79f9dd4d213
 
 
 
@@ -363,8 +363,8 @@ the ADT plugin to it.</p>
 <div class="col-6 reqs" style="margin:0 0 15px 20px;display:none;">
 <h5>Eclipse IDE</h5>
     <ul>
-      <li><a href="http://eclipse.org/mobile/">Eclipse</a> 3.6.2 (Helios) or greater
-<p class="note"><strong>Note:</strong> Eclipse 3.5 (Galileo) is no longer
+      <li><a href="http://eclipse.org/mobile/">Eclipse</a> 3.7.2 (Indigo) or greater
+<p class="note"><strong>Note:</strong> Eclipse 3.6 (Helios) is no longer
 supported with the latest version of ADT.</p></li>
       <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin (included
 in most Eclipse IDE packages) </li>
