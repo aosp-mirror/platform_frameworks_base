@@ -26,10 +26,92 @@ Tools you are using, refer to the "Installed Packages" listing in the Android SD
 href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
 
 
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 22.6</a> <em>(March 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 18 or later.</li>
+        <li>If you are developing in Eclipse with ADT, note that this version of SDK Tools is
+          designed for use with ADT 22.6.0 and later. If you haven't already, update your
+        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 22.6.0.</li>
+        <li>If you are developing outside Eclipse, you must have
+          <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li><p>The command line <code>lint</code> script (<code>tools\lint.bat</code> on
+            Windows platforms, <code>tools/lint</code> on other platforms) and the
+            <code>lint</code> target on <code>ant</code> builds fail with the following
+            error:</p>
+            <p><code>Exception in thread "main" java.lang.NoClassDefFoundError:
+            lombok/ast/AstVisitor</code></p>
+            <p>As a temporary workaround, rename the file
+              <code>tools\lib\lombok-ast-0.2.2.jar</code> to
+            <code>tools\lib\lombok-ast.jar</code>.
+            We will release an updated version of the tools with a fix for
+            this issue as soon as possible.</p>
+          </li>
+        <li>Added support for Java 7 language features like multi-catch, try-with-resources,
+            and the diamond operator. These features require version 19 or higher
+            of the Build Tools. Try-with-resources requires <code>minSdkVersion</code>
+            19; the rest of the new language features require
+            <code>minSdkVersion</code> 8 or higher.</li>
+        <li>Added new lint checks:
+          <ul>
+            <li>Security:
+              <ul>
+                <li>Look for code potentially affected by a <code>SecureRandom</code>
+                    vulnerability.</li>
+                <li>Check that calls to <code>checkPermission</code> use the return value.</li>
+              </ul>
+            </li>
+            <li>Check that production builds do not use mock location providers.</li>
+            <li>Look for manifest values that are overwritten by values from Gradle build 
+                scripts.</li>
+          </ul>
+        </li>
+        <li>Fixed a number of minor issues in the SDK and build system.</li>
+        <li>Emulator:
+          <ul>
+            <li>Fixed a problem with the emulator shutting down immediately for Android 1.5
+                on the Nexus One and Nexus S devices.
+                (<a href="http://b.android.com/64945">Issue 64945</a>)</li>
+            <li>Fixed a problem with port numbers longer than four digits.
+                (<a href="http://b.android.com/60024">Issue 60024</a>)</li>
+            <li>Fixed battery errors for the Nexus One and Nexus S devices.
+                (<a href="http://b.android.com/39959">Issue 39959</a>)</li>
+            <li>Fixed a problem with paths or arguments that contain
+                spaces on Windows platforms.
+                (<a href="http://b.android.com/18317">Issue 18317</a>)</li>
+            <li>Fixed a problem with long path values on Windows platforms.
+                (<a href="http://b.android.com/33336">Issue 33336</a>)</li>
+            <li>Fixed a problem with the {@code -snapshot-list} command line
+                option on 64-bit systems.
+                (<a href="http://b.android.com/34233">Issue 34233</a>)</li>
+          </ul>
+        </li>
+        <li>Fixed an issue with RenderScript support. Using RenderScript support mode 
+          now requires version 19.0.3 of the Build Tools.</li>
+      </ul>
+    </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.3</a> <em>(October 2013)</em>
   </p>
 
