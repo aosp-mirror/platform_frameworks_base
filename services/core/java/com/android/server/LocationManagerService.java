@@ -2229,7 +2229,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         synchronized (mLock) {
 
             // These methods can't be called after removing the test provider, so first make sure
-            // we don't leave anything dangling (cf b/11446702).
+            // we don't leave anything dangling.
             clearTestProviderEnabled(provider);
             clearTestProviderLocation(provider);
             clearTestProviderStatus(provider);
