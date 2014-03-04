@@ -174,13 +174,11 @@ public class AccessibilityNodeInfoCache {
                     // subtrees in the cache.
                     // TODO: Runs in O(n^2), could optimize to O(n + n log n)
                     final LongArray newChildrenIds = info.getChildNodeIds();
-                    if (newChildrenIds != null) {
-                        final int oldChildCount = oldInfo.getChildCount();
-                        for (int i = 0; i < oldChildCount; i++) {
-                            final long oldChildId = oldInfo.getChildId(i);
-                            if (newChildrenIds.indexOf(oldChildId) < 0) {
-                                clearSubTreeLocked(oldChildId);
-                            }
+                    final int oldChildCount = oldInfo.getChildCount();
+                    for (int i = 0; i < oldChildCount; i++) {
+                        final long oldChildId = oldInfo.getChildId(i);
+                        if (newChildrenIds.indexOf(oldChildId) < 0) {
+                            clearSubTreeLocked(oldChildId);
                         }
                     }
 
