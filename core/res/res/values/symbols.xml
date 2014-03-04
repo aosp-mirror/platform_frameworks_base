@@ -1374,6 +1374,7 @@
   <java-symbol type="layout" name="screen_progress" />
   <java-symbol type="layout" name="screen_simple" />
   <java-symbol type="layout" name="screen_simple_overlay_action_mode" />
+  <java-symbol type="layout" name="screen_swipe_dismiss" />
   <java-symbol type="layout" name="screen_title" />
   <java-symbol type="layout" name="screen_title_icons" />
   <java-symbol type="string" name="system_ui_date_pattern" />
