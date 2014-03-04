@@ -72,11 +72,16 @@ public:
         *dst = *src;
     }
 
+    static jboolean isConvex(JNIEnv* env, jobject clazz, jlong objHandle) {
+        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
+        return obj->isConvex();
+    }
+
     static jint getFillType(JNIEnv* env, jobject clazz, jlong objHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         return obj->getFillType();
     }
- 
+
     static void setFillType(JNIEnv* env, jobject clazz, jlong pathHandle, jint ftHandle) {
         SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
         SkPath::FillType ft = static_cast<SkPath::FillType>(ftHandle);
@@ -524,6 +529,7 @@ static JNINativeMethod methods[] = {
     {"native_reset","(J)V", (void*) SkPathGlue::reset},
     {"native_rewind","(J)V", (void*) SkPathGlue::rewind},
     {"native_set","(JJ)V", (void*) SkPathGlue::assign},
+    {"native_isConvex","(J)Z", (void*) SkPathGlue::isConvex},
     {"native_getFillType","(J)I", (void*) SkPathGlue::getFillType},
     {"native_setFillType","(JI)V", (void*) SkPathGlue::setFillType},
     {"native_isEmpty","(J)Z", (void*) SkPathGlue::isEmpty},
