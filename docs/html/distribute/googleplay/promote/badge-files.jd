@@ -18,110 +18,118 @@ two Google Play badges.</p>
 
 <div class="col-4" style="margin-left:0">
 
-       <a href="{@docRoot}downloads/brand/en_generic_rgb_wo.ai">English (English)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/english_get.ai">English (English)</a><br/>
+
+       <a href="{@docRoot}downloads/brand/v2/amharic_get.ai">ኣማርኛ (Amharic)</a><br/>
 
        <a href="{@docRoot}downloads/brand/af_generic_rgb_wo.ai">Afrikaans (Afrikaans)</a><br/>
 <!--
        <a href="{@docRoot}downloads/brand/ar_generic_rgb_wo.ai">العربية (Arabic)</a><br/>
 -->
-       <a href="{@docRoot}downloads/brand/be_generic_rgb_wo.ai">Беларуская (Belarusian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/belarusian_get.ai">Беларуская (Belarusian)</a><br/>
        
-       <a href="{@docRoot}downloads/brand/bg_generic_rgb_wo.ai">български (Bulgarian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/bulgarian_get.ai">български (Bulgarian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/ca_generic_rgb_wo.ai">Català (Catalan)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/catalan_get.ai">Català (Catalan)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/zh-cn_generic_rgb_wo.ai">中文 (中国) (Chinese)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/traditional_chinese_get.ai">中文 (中国) (Chinese)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/zh-hk_generic_rgb_wo.ai">中文（香港) (Chinese Hong Kong)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/hongkong_chinese_get.ai">中文（香港) (Chinese Hong Kong)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/zh-tw_generic_rgb_wo.ai">中文 (台灣) (Chinese Taiwan)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/taiwan_chinese_get.ai">中文 (台灣) (Chinese Taiwan)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/hr_generic_rgb_wo.ai">Hrvatski (Croatian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/croatian_get.ai">Hrvatski (Croatian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/cs_generic_rgb_wo.ai">Česky (Czech)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/czech_get.ai">Česky (Czech)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/da_generic_rgb_wo.ai">Dansk (Danish)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/danish_get.ai">Dansk (Danish)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/nl_generic_rgb_wo.ai">Nederlands (Dutch)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/dutch_get.ai">Nederlands (Dutch)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/et_generic_rgb_wo.ai">Eesti keel (Estonian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/estonian_get.ai">Eesti keel (Estonian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/fa_generic_rgb_wo.ai">فارسی (Farsi Persian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/farsi_get.ai">فارسی (Farsi Persian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/fil_generic_rgb_wo.ai">Tagalog (Filipino)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/filipino_get.ai">Tagalog (Filipino)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/fi_generic_rgb_wo.ai">Suomi (Finnish)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/finnish_get.ai">Suomi (Finnish)</a><br/>
 
 </div>
 
 <div class="col-4">
 
-       <a href="{@docRoot}downloads/brand/fr_generic_rgb_wo.ai">Français (French)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/french_get.ai">Français (French)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/de_generic_rgb_wo.ai">Deutsch (German)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/german_get.ai">Deutsch (German)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/el_generic_rgb_wo.ai">Ελληνικά (Greek)</a><br/>
-<!--
-       <a href="{@docRoot}downloads/brand/iw-he_generic_rgb_wo.ai">עברית (Hebrew)</a><br/>
--->
-       <a href="{@docRoot}downloads/brand/hu_generic_rgb_wo.ai">Magyar (Hungarian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/greek_get.ai">Ελληνικά (Greek)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/id-in_generic_rgb_wo.ai">Bahasa Indonesia (Indonesian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/hebrew_get.ai">עברית (Hebrew)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/it_generic_rgb_wo.ai">Italiano (Italian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/hindi_get.ai">हिन्दी (Hindi)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/ja_generic_rgb_wo.ai">日本語 (Japanese)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/hungarian_get.ai">Magyar (Hungarian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/ko_generic_rgb_wo.ai">한국어 (Korean)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/indonesian_get.ai">Bahasa Indonesia (Indonesian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/lv_generic_rgb_wo.ai">Latviski (Latvian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/italian_get.ai">Italiano (Italian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/lt_generic_rgb_wo.ai">Lietuviškai (Lithuanian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/japanese_get.ai">日本語 (Japanese)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/ms_generic_rgb_wo.ai">Bahasa Melayu (Malay)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/kazakh_get.ai">Қазақ тілі (Kazakh)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/no_generic_rgb_wo.ai">Norsk (Norwegian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/korean_get.ai">한국어 (Korean)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/pl_generic_rgb_wo.ai">Polski (Polish)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/latvian_get.ai">Latviski (Latvian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/pt-pt_generic_rgb_wo.ai">Português (Portuguese)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/lithuanian_get.ai">Lietuviškai (Lithuanian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/pt-br_generic_rgb_wo.ai">Português Brasil (Portuguese Brazil)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/malay_get.ai">Bahasa Melayu (Malay)</a><br/>
+
+       <a href="{@docRoot}downloads/brand/v2/norwegian_get.ai">Norsk (Norwegian)</a><br/>
+
+       <a href="{@docRoot}downloads/brand/v2/polish_get.ai">Polski (Polish)</a><br/>
 
 </div>
 
 <div class="col-4" style="margin-right:0">
 
-       <a href="{@docRoot}downloads/brand/ro_generic_rgb_wo.ai">Românã (Romanian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/portugal_portuguese_get.ai">Português (Portuguese)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/ru_generic_rgb_wo.ai">Pусский (Russian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/brazilian_portuguese_get.ai">Português Brasil (Portuguese Brazil)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/sr_generic_rgb_wo.ai">Српски / srpski (Serbian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/romanian_get.ai">Românã (Romanian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/sk_generic_rgb_wo.ai">Slovenčina (Slovak)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/russian_get.ai">Pусский (Russian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/sl_generic_rgb_wo.ai">Slovenščina (Slovenian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/serbian_get.ai">Српски / srpski (Serbian)</a><br/>
+
+       <a href="{@docRoot}downloads/brand/v2/slovak_get.ai">Slovenčina (Slovak)</a><br/>
+
+       <a href="{@docRoot}downloads/brand/v2/slovenian_get.ai">Slovenščina (Slovenian)</a><br/>
        
-       <a href="{@docRoot}downloads/brand/es_generic_rgb_wo.ai">Español (Spanish)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/spanish_get.ai">Español (Spanish)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/es-419_generic_rgb_wo.ai">Español Latinoamérica (Spanish Latin America)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/spanish_latam_get.ai">Español Latinoamérica (Spanish Latin America)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/sv_generic_rgb_wo.ai">Svenska (Swedish)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/swahili_get.ai">Kiswahili (Swahili)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/sw_generic_rgb_wo.ai">Kiswahili (Swahili)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/swedish_get.ai">Svenska (Swedish)</a><br/>
        
-       <a href="{@docRoot}downloads/brand/th_generic_rgb_wo.ai">ภาษาไทย (Thai)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/thai_get.ai">ภาษาไทย (Thai)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/tr_generic_rgb_wo.ai">Türkçe (Turkish)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/turkish_get.ai">Türkçe (Turkish)</a><br/>
 
        <a href="{@docRoot}downloads/brand/uk_generic_rgb_wo.ai">Українська (Ukrainian)</a><br/>
-
        <a href="{@docRoot}downloads/brand/vi_generic_rgb_wo.ai">Tiếng Việt (Vietnamese)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/zu_generic_rgb_wo.ai">isiZulu (Zulu)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/zulu_get.ai">isiZulu (Zulu)</a><br/>
 
 </div>
 <div style="clear:left">&nbsp;</div>
+
+
+
 
 
 
@@ -133,121 +141,114 @@ two Google Play badges.</p>
 
 <div style="clear:left">&nbsp;</div>
 
-<div class="col-8" style="margin-left:0">
+<div class="col-4" style="margin-left:0">
 
-       <a href="{@docRoot}downloads/brand/en_app_rgb_wo.ai">English (English)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/english_app.ai">English (English)</a><br/>
+      
+       <a href="{@docRoot}downloads/brand/v2/afrikaans_app.ai">Afrikaans (Afrikaans)</a><br/>
+
+       <a href="{@docRoot}downloads/brand/v2/amharic_app.ai">ኣማርኛ (Amharic)</a><br/>
+
+       <a href="{@docRoot}downloads/brand/v2/arabic_app.ai">العربية (Arabic)</a><br/>
+
+       <a href="{@docRoot}downloads/brand/v2/belarusian_app.ai">Беларуская (Belarusian)</a><br/>
        
-<!--
-       <a href="{@docRoot}downloads/brand/af_app_rgb_wo.ai">Afrikaans (Afrikaans)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/bulgarian_app.ai">български (Bulgarian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/ar_app_rgb_wo.ai">العربية (Arabic)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/catalan_app.ai">Català (Catalan)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/be_app_rgb_wo.ai">Беларуская (Belarusian)</a><br/>
-       
-       <a href="{@docRoot}downloads/brand/bg_app_rgb_wo.ai">български (Bulgarian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/traditional_chinese_app.ai">中文 (中国) (Chinese)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/ca_app_rgb_wo.ai">Català (Catalan)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/hongkong_chinese_app.ai">中文（香港) (Chinese Hong Kong)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/zh-cn_app_rgb_wo.ai">中文 (中国) (Chinese)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/taiwan_chinese_app.ai">中文 (台灣) (Chinese Taiwan)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/zh-hk_app_rgb_wo.ai">中文（香港) (Chinese Hong Kong)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/croatian_app.ai">Hrvatski (Croatian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/zh-tw_app_rgb_wo.ai">中文 (台灣) (Chinese Taiwan)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/czech_app.ai">Česky (Czech)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/hr_app_rgb_wo.ai">Hrvatski (Croatian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/danish_app.ai">Dansk (Danish)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/cs_app_rgb_wo.ai">Česky (Czech)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/dutch_app.ai">Nederlands (Dutch)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/da_app_rgb_wo.ai">Dansk (Danish)</a><br/>
--->
+       <a href="{@docRoot}downloads/brand/v2/estonian_app.ai">Eesti keel (Estonian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/nl_app_rgb_wo.ai">Nederlands (Dutch)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/farsi_app.ai">فارسی (Farsi Persian)</a><br/>
 
-<!--
-       <a href="{@docRoot}downloads/brand/et_app_rgb_wo.ai">Eesti keel (Estonian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/filipino_app.ai">Tagalog (Filipino)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/fa_app_rgb_wo.ai">فارسی (Farsi Persian)</a><br/>
-
-       <a href="{@docRoot}downloads/brand/fil_app_rgb_wo.ai">Tagalog (Filipino)</a><br/>
-
-       <a href="{@docRoot}downloads/brand/fi_app_rgb_wo.ai">Suomi (Finnish)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/finnish_app.ai">Suomi (Finnish)</a><br/>
 
 </div>
 
 <div class="col-4">
--->
 
-       <a href="{@docRoot}downloads/brand/fr_app_rgb_wo.ai">Français (French)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/french_app.ai">Français (French)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/de_app_rgb_wo.ai">Deutsch (German)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/german_app.ai">Deutsch (German)</a><br/>
 
-<!--
-       <a href="{@docRoot}downloads/brand/el_app_rgb_wo.ai">Ελληνικά (Greek)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/greek_app.ai">Ελληνικά (Greek)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/iw-he_app_rgb_wo.ai">עברית (Hebrew)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/hebrew_app.ai">עברית (Hebrew)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/hu_app_rgb_wo.ai">Magyar (Hungarian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/hindi_app.ai">हिन्दी (Hindi)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/id-in_app_rgb_wo.ai">Bahasa Indonesia (Indonesian)</a><br/>
--->
+       <a href="{@docRoot}downloads/brand/v2/hungarian_app.ai">Magyar (Hungarian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/it_app_rgb_wo.ai">Italiano (Italian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/indonesian_app.ai">Bahasa Indonesia (Indonesian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/ja_app_rgb_wo.ai">日本語 (Japanese)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/italian_app.ai">Italiano (Italian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/ko_app_rgb_wo.ai">한국어 (Korean)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/japanese_app.ai">日本語 (Japanese)</a><br/>
 
-<!--
-       <a href="{@docRoot}downloads/brand/lv_app_rgb_wo.ai">Latviski (Latvian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/korean_app.ai">한국어 (Korean)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/lt_app_rgb_wo.ai">Lietuviškai (Lithuanian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/latvian_app.ai">Latviski (Latvian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/ms_app_rgb_wo.ai">Bahasa Melayu (Malay)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/lithuanian_app.ai">Lietuviškai (Lithuanian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/no_app_rgb_wo.ai">Norsk (Norwegian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/malay_app.ai">Bahasa Melayu (Malay)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/pl_app_rgb_wo.ai">Polski (Polish)</a><br/>
--->
+       <a href="{@docRoot}downloads/brand/v2/norwegian_app.ai">Norsk (Norwegian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/pt-pt_app_rgb_wo.ai">Português (Portuguese)</a><br/>
-
-       <a href="{@docRoot}downloads/brand/pt-br_app_rgb_wo.ai">Português Brasil (Portuguese Brazil)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/polish_app.ai">Polski (Polish)</a><br/>
 
 
-<!--
 </div>
 
 <div class="col-4" style="margin-right:0">
-       <a href="{@docRoot}downloads/brand/ro_app_rgb_wo.ai">Românã (Romanian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/ru_app_rgb_wo.ai">Pусский (Russian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/portugal_portuguese_app.ai">Português (Portuguese)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/sr_app_rgb_wo.ai">Српски / srpski (Serbian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/brazilian_portuguese_app.ai">Português Brasil (Portuguese Brazil)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/sk_app_rgb_wo.ai">Slovenčina (Slovak)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/romanian_app.ai">Românã (Romanian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/sl_app_rgb_wo.ai">Slovenščina (Slovenian)</a><br/>
--->
+       <a href="{@docRoot}downloads/brand/v2/russian_app.ai">Pусский (Russian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/es_app_rgb_wo.ai">Español (Spanish)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/serbian_app.ai">Српски / srpski (Serbian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/es-419_app_rgb_wo.ai">Español Latinoamérica (Spanish Latin America)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/slovak_app.ai">Slovenčina (Slovak)</a><br/>
 
-<!--
-       <a href="{@docRoot}downloads/brand/sv_app_rgb_wo.ai">Svenska (Swedish)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/slovenian_app.ai">Slovenščina (Slovenian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/sw_app_rgb_wo.ai">Kiswahili (Swahili)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/spanish_app.ai">Español (Spanish)</a><br/>
+
+       <a href="{@docRoot}downloads/brand/v2/spanish_latam_app.ai">Español Latinoamérica (Spanish Latin America)</a><br/>
+
+       <a href="{@docRoot}downloads/brand/v2/swahili_app.ai">Kiswahili (Swahili)</a><br/>
+
+       <a href="{@docRoot}downloads/brand/v2/swedish_app.ai">Svenska (Swedish)</a><br/>
        
-       <a href="{@docRoot}downloads/brand/th_app_rgb_wo.ai">ภาษาไทย (Thai)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/thai_app.ai">ภาษาไทย (Thai)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/tr_app_rgb_wo.ai">Türkçe (Turkish)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/turkish_app.ai">Türkçe (Turkish)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/uk_app_rgb_wo.ai">Українська (Ukrainian)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/ukranian_app.ai">Українська (Ukrainian)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/vi_app_rgb_wo.ai">Tiếng Việt (Vietnamese)</a><br/>
+       <a href="{@docRoot}downloads/brand/v2/vietnamese_app.ai">Tiếng Việt (Vietnamese)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/zu_app_rgb_wo.ai">isiZulu (Zulu)</a><br/>
--->
+       <a href="{@docRoot}downloads/brand/v2/zulu_app.ai">isiZulu (Zulu)</a><br/>
 
 </div>
 <div style="clear:left">&nbsp;</div>
