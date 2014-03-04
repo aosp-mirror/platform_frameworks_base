@@ -447,6 +447,10 @@
              to {@link android.view.WindowManager.LayoutParams#FLAG_TRANSLUCENT_NAVIGATION}. -->
         <attr name="windowTranslucentNavigation" format="boolean" />
 
+        <!-- Flag to indicate that a window can be swiped away to be dismissed.
+             Corresponds to {@link android.view.Window.FEATURE_SWIPE_TO_DISMISS} -->
+        <attr name="windowSwipeToDismiss" format="boolean" />
+
         <!-- Flag indicating whether this window requests that content changes be performed
              as scene changes with transitions. Corresponds to
              {@link android.view.Window#FEATURE_CONTENT_TRANSITIONS}. -->
@@ -1629,6 +1633,7 @@
         <attr name="windowCloseOnTouchOutside" />
         <attr name="windowTranslucentStatus" />
         <attr name="windowTranslucentNavigation" />
+        <attr name="windowSwipeToDismiss" />
         <attr name="windowContentTransitions" />
         <attr name="windowContentTransitionManager" />
 

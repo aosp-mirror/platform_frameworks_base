@@ -98,6 +98,10 @@ public abstract class Window {
      */
     public static final int FEATURE_ACTION_MODE_OVERLAY = 10;
     /**
+     * Flag for requesting a decoration-free window that is dismissed by swiping from the left.
+     */
+    public static final int FEATURE_SWIPE_TO_DISMISS = 11;
+    /**
      * Flag for requesting that window content changes should be represented
      * with scenes and transitions.
      *
@@ -105,7 +109,7 @@ public abstract class Window {
      *
      * @see #setContentView
      */
-    public static final int FEATURE_CONTENT_TRANSITIONS = 11;
+    public static final int FEATURE_CONTENT_TRANSITIONS = 12;
 
     /**
      * Max value used as a feature ID
@@ -404,6 +408,12 @@ public abstract class Window {
          * @param mode The mode that was just finished.
          */
         public void onActionModeFinished(ActionMode mode);
+
+        /**
+         * Called when a window is dismissed. This informs the callback that the
+         * window is gone, and it should finish itself.
+         */
+        public void onWindowDismissed();
     }
 
     public Window(Context context) {
