@@ -66,6 +66,19 @@ public final class Proxy {
     /** {@hide} **/
     public static final String EXTRA_PROXY_INFO = "proxy";
 
+    /** @hide */
+    public static final int PROXY_VALID             = 0;
+    /** @hide */
+    public static final int PROXY_HOSTNAME_EMPTY    = 1;
+    /** @hide */
+    public static final int PROXY_HOSTNAME_INVALID  = 2;
+    /** @hide */
+    public static final int PROXY_PORT_EMPTY        = 3;
+    /** @hide */
+    public static final int PROXY_PORT_INVALID      = 4;
+    /** @hide */
+    public static final int PROXY_EXCLLIST_INVALID  = 5;
+
     private static ConnectivityManager sConnectivityManager = null;
 
     // Hostname / IP REGEX validation
@@ -236,36 +249,27 @@ public final class Proxy {
      * Validate syntax of hostname, port and exclusion list entries
      * {@hide}
      */
-    public static void validate(String hostname, String port, String exclList) {
+    public static int validate(String hostname, String port, String exclList) {
         Matcher match = HOSTNAME_PATTERN.matcher(hostname);
         Matcher listMatch = EXCLLIST_PATTERN.matcher(exclList);
 
-        if (!match.matches()) {
-            throw new IllegalArgumentException();
-        }
+        if (!match.matches()) return PROXY_HOSTNAME_INVALID;
 
-        if (!listMatch.matches()) {
-            throw new IllegalArgumentException();
-        }
+        if (!listMatch.matches()) return PROXY_EXCLLIST_INVALID;
 
-        if (hostname.length() > 0 && port.length() == 0) {
-            throw new IllegalArgumentException();
-        }
+        if (hostname.length() > 0 && port.length() == 0) return PROXY_PORT_EMPTY;
 
         if (port.length() > 0) {
-            if (hostname.length() == 0) {
-                throw new IllegalArgumentException();
-            }
+            if (hostname.length() == 0) return PROXY_HOSTNAME_EMPTY;
             int portVal = -1;
             try {
                 portVal = Integer.parseInt(port);
             } catch (NumberFormatException ex) {
-                throw new IllegalArgumentException();
+                return PROXY_PORT_INVALID;
             }
-            if (portVal <= 0 || portVal > 0xFFFF) {
-                throw new IllegalArgumentException();
-            }
+            if (portVal <= 0 || portVal > 0xFFFF) return PROXY_PORT_INVALID;
         }
+        return PROXY_VALID;
     }
 
     static class AndroidProxySelectorRoutePlanner
