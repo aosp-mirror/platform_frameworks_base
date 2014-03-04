@@ -5138,8 +5138,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param text The announcement text.
      */
     public void announceForAccessibility(CharSequence text) {
-        if (AccessibilityManager.getInstance(mContext).isEnabled() && mParent != null
-                && isImportantForAccessibility()) {
+        if (AccessibilityManager.getInstance(mContext).isEnabled() && mParent != null) {
             AccessibilityEvent event = AccessibilityEvent.obtain(
                     AccessibilityEvent.TYPE_ANNOUNCEMENT);
             onInitializeAccessibilityEvent(event);
@@ -5189,7 +5188,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Note: Called from the default {@link AccessibilityDelegate}.
      */
     void sendAccessibilityEventUncheckedInternal(AccessibilityEvent event) {
-        if (!isShown() || !isImportantForAccessibility()) {
+        if (!isShown()) {
             return;
         }
         onInitializeAccessibilityEvent(event);
