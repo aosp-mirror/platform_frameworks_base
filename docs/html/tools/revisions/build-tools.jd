@@ -77,6 +77,18 @@ listing in the Android SDK Manager.</p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 19.0.3</a> <em>(March 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+
+    <p>Fixed an issue with RenderScript support.</p>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 19.0.2</a> <em>(February 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
