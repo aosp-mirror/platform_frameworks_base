@@ -2378,9 +2378,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mInetConditionChangeInFlight = false;
             // Don't do this - if we never sign in stay, grey
             //reportNetworkCondition(mActiveDefaultNetwork, 100);
+            updateNetworkSettings(thisNet);
         }
         thisNet.setTeardownRequested(false);
-        updateNetworkSettings(thisNet);
         updateMtuSizeSettings(thisNet);
         handleConnectivityChange(newNetType, false);
         sendConnectedBroadcastDelayed(info, getConnectivityChangeDelay());
@@ -3086,7 +3086,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 case NetworkStateTracker.EVENT_NETWORK_SUBTYPE_CHANGED: {
                     info = (NetworkInfo) msg.obj;
                     int type = info.getType();
-                    updateNetworkSettings(mNetTrackers[type]);
+                    if (mNetConfigs[type].isDefault()) updateNetworkSettings(mNetTrackers[type]);
                     break;
                 }
             }
