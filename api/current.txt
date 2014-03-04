@@ -11286,6 +11286,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AWB_AVAILABLE_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_MAX_REGIONS;
     field public static final android.hardware.camera2.CameraMetadata.Key FLASH_INFO_AVAILABLE;
+    field public static final android.hardware.camera2.CameraMetadata.Key HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key INFO_SUPPORTED_HARDWARE_LEVEL;
     field public static final android.hardware.camera2.CameraMetadata.Key JPEG_AVAILABLE_THUMBNAIL_SIZES;
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_FACING;
@@ -11326,6 +11327,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_ORIENTATION;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_INFO_MAX_FACE_COUNT;
     field public static final android.hardware.camera2.CameraMetadata.Key SYNC_MAX_LATENCY;
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_MAX_CURVE_POINTS;
@@ -11620,6 +11622,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TEST_PATTERN_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key SHADING_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_DETECT_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_HOT_PIXEL_MAP_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_LENS_SHADING_MAP_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_BLUE;
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_GREEN;
@@ -11657,7 +11660,6 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key EDGE_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key FLASH_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key FLASH_STATE;
-    field public static final android.hardware.camera2.CameraMetadata.Key HOT_PIXEL_MAP;
     field public static final android.hardware.camera2.CameraMetadata.Key HOT_PIXEL_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key JPEG_GPS_COORDINATES;
     field public static final android.hardware.camera2.CameraMetadata.Key JPEG_GPS_PROCESSING_METHOD;
@@ -11694,6 +11696,8 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SHADING_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACES;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_DETECT_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_HOT_PIXEL_MAP;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_HOT_PIXEL_MAP_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_LENS_SHADING_MAP;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_SCENE_FLICKER;
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_BLUE;

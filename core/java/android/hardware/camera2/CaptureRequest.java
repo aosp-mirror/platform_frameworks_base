@@ -876,9 +876,13 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
 
     /**
      * <p>Set operational mode for hot pixel correction.</p>
+     * <p>Valid modes for this camera device are listed in
+     * {@link CameraCharacteristics#HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES android.hotPixel.availableHotPixelModes}.</p>
      * <p>Hotpixel correction interpolates out, or otherwise removes, pixels
      * that do not accurately encode the incoming light (i.e. pixels that
      * are stuck at an arbitrary value).</p>
+     *
+     * @see CameraCharacteristics#HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES
      * @see #HOT_PIXEL_MODE_OFF
      * @see #HOT_PIXEL_MODE_FAST
      * @see #HOT_PIXEL_MODE_HIGH_QUALITY
@@ -1284,6 +1288,18 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      */
     public static final Key<Integer> STATISTICS_FACE_DETECT_MODE =
             new Key<Integer>("android.statistics.faceDetectMode", int.class);
+
+    /**
+     * <p>Operating mode for hotpixel map generation.</p>
+     * <p>If set to ON, a hotpixel map is returned in {@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}.
+     * If set to OFF, no hotpixel map should be returned.</p>
+     * <p>This must be set to a valid mode from {@link CameraCharacteristics#STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES android.statistics.info.availableHotPixelMapModes}.</p>
+     *
+     * @see CaptureResult#STATISTICS_HOT_PIXEL_MAP
+     * @see CameraCharacteristics#STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES
+     */
+    public static final Key<Boolean> STATISTICS_HOT_PIXEL_MAP_MODE =
+            new Key<Boolean>("android.statistics.hotPixelMapMode", boolean.class);
 
     /**
      * <p>Whether the camera device will output the lens
