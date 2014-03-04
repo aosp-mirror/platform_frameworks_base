@@ -1265,7 +1265,6 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * @see #SHADING_MODE_OFF
      * @see #SHADING_MODE_FAST
      * @see #SHADING_MODE_HIGH_QUALITY
-     * @hide
      */
     public static final Key<Integer> SHADING_MODE =
             new Key<Integer>("android.shading.mode", int.class);
