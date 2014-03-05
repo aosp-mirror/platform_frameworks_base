@@ -605,7 +605,7 @@
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"הצג חיבורי רשת"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"מאפשר לאפליקציה להציג מידע לגבי חיבורי רשת, למשל, אילו רשתות קיימות ומחוברות."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"גישת רשת מלאה"</string>
-    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"‏מאפשר לאפליקציה ליצור Sockets ולהשתמש בפרוטוקולי רשת מותאמים אישית. הדפדפן ואפליקציות  אחרות מספקות אמצעים לשליחת נתונים לאינטרנט, כך שאישור זה אינו נחוץ לשליחת נתונים לאינטרנט."</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"‏מאפשר לאפליקציה ליצור Sockets ולהשתמש בפרוטוקולי רשת מותאמים אישית. הדפדפן, כמו אפליקציות  אחרות, מספק אמצעים לשליחת נתונים לאינטרנט, כך שאישור זה אינו נחוץ לשליחת נתונים לאינטרנט."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"שנה/עכב הגדרות רשת ותנועה"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"‏מאפשר לאפליקציה לשנות את הגדרות הרשת ולעכב ולבדוק את כל תנועת הרשת, לדוגמה, לשנות את ה-proxy והיציאה של כל רשת APN. אפליקציות זדוניות עלולות לעקוב אחר חבילות רשת, לבצע הפניה מחדש שלהן או לשנות אותן, ללא ידיעתך."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"שנה את קישוריות הרשת"</string>
