@@ -16119,8 +16119,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return false;
                 }
 
-                mWindowManager.startFreezingScreen(R.anim.screen_user_exit,
-                        R.anim.screen_user_enter);
+                if (foreground) {
+                    mWindowManager.startFreezingScreen(R.anim.screen_user_exit,
+                            R.anim.screen_user_enter);
+                }
 
                 boolean needStart = false;
 
@@ -16139,15 +16141,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (foreground) {
                     mCurrentUserId = userId;
                     mWindowManager.setCurrentUser(userId);
+                    // Once the internal notion of the active user has switched, we lock the device
+                    // with the option to show the user switcher on the keyguard.
+                    mWindowManager.lockNow(null);
                 } else {
                     final Integer currentUserIdInt = Integer.valueOf(mCurrentUserId);
                     mUserLru.remove(currentUserIdInt);
                     mUserLru.add(currentUserIdInt);
                 }
-
-                // Once the internal notion of the active user has switched, we lock the device
-                // with the option to show the user switcher on the keyguard.
-                mWindowManager.lockNow(null);
 
                 final UserStartedState uss = mStartedUsers.get(userId);
 
