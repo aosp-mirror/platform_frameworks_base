@@ -239,16 +239,6 @@ public class DisplayList {
     }
 
     /**
-    * After calling this method {@link #isValid()} will return false.
-    * TODO: Have Editor stop using this
-    *
-    * @see #isValid()
-    */
-    public void markInvalid() {
-        mValid = false;
-    }
-
-    /**
      * Reset native resources. This is called when cleaning up the state of display lists
      * during destruction of hardware resources, to ensure that we do not hold onto
      * obsolete resources after related resources are gone.

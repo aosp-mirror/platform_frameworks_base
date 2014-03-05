@@ -137,7 +137,16 @@ public class Editor {
     InputContentType mInputContentType;
     InputMethodState mInputMethodState;
 
-    DisplayList[] mTextDisplayLists;
+    private static class TextDisplayList {
+        DisplayList displayList;
+        boolean isDirty;
+        public TextDisplayList(String name) {
+            isDirty = true;
+            displayList = DisplayList.create(name);
+        }
+        boolean needsRecord() { return isDirty || !displayList.isValid(); }
+    }
+    TextDisplayList[] mTextDisplayLists;
 
     boolean mFrozenWithFocus;
     boolean mSelectionMoved;
@@ -262,7 +271,7 @@ public class Editor {
             mTextView.removeCallbacks(mShowSuggestionRunnable);
         }
 
-        invalidateTextDisplayList();
+        destroyDisplayListsData();
 
         if (mSpellChecker != null) {
             mSpellChecker.closeSession();
@@ -275,6 +284,19 @@ public class Editor {
         hideControllers();
         mPreserveDetachedSelection = false;
         mTemporaryDetach = false;
+    }
+
+    private void destroyDisplayListsData() {
+        HardwareRenderer renderer = mTextView.getHardwareRenderer();
+        if (mTextDisplayLists != null) {
+            for (int i = 0; i < mTextDisplayLists.length; i++) {
+                DisplayList displayList = mTextDisplayLists[i] != null
+                        ? mTextDisplayLists[i].displayList : null;
+                if (displayList != null && displayList.isValid()) {
+                    displayList.destroyDisplayListData(renderer);
+                }
+            }
+        }
     }
 
     private void showError() {
@@ -1320,7 +1342,7 @@ public class Editor {
 
         if (layout instanceof DynamicLayout) {
             if (mTextDisplayLists == null) {
-                mTextDisplayLists = new DisplayList[ArrayUtils.idealObjectArraySize(0)];
+                mTextDisplayLists = new TextDisplayList[ArrayUtils.idealObjectArraySize(0)];
             }
 
             DynamicLayout dynamicLayout = (DynamicLayout) layout;
@@ -1344,13 +1366,13 @@ public class Editor {
                     searchStartIndex = blockIndex + 1;
                 }
 
-                DisplayList blockDisplayList = mTextDisplayLists[blockIndex];
-                if (blockDisplayList == null) {
-                    blockDisplayList = mTextDisplayLists[blockIndex] =
-                            DisplayList.create("Text " + blockIndex);
+                if (mTextDisplayLists[blockIndex] == null) {
+                    mTextDisplayLists[blockIndex] =
+                            new TextDisplayList("Text " + blockIndex);
                 }
 
-                final boolean blockDisplayListIsInvalid = !blockDisplayList.isValid();
+                final boolean blockDisplayListIsInvalid = mTextDisplayLists[blockIndex].needsRecord();
+                DisplayList blockDisplayList = mTextDisplayLists[blockIndex].displayList;
                 if (i >= indexFirstChangedBlock || blockDisplayListIsInvalid) {
                     final int blockBeginLine = endOfPreviousBlock + 1;
                     final int top = layout.getLineTop(blockBeginLine);
@@ -1421,7 +1443,7 @@ public class Editor {
 
         // No available index found, the pool has to grow
         int newSize = ArrayUtils.idealIntArraySize(length + 1);
-        DisplayList[] displayLists = new DisplayList[newSize];
+        TextDisplayList[] displayLists = new TextDisplayList[newSize];
         System.arraycopy(mTextDisplayLists, 0, displayLists, 0, length);
         mTextDisplayLists = displayLists;
         return length;
@@ -1460,7 +1482,7 @@ public class Editor {
             while (i < numberOfBlocks) {
                 final int blockIndex = blockIndices[i];
                 if (blockIndex != DynamicLayout.INVALID_BLOCK_INDEX) {
-                    mTextDisplayLists[blockIndex].markInvalid();
+                    mTextDisplayLists[blockIndex].isDirty = true;
                 }
                 if (blockEndLines[i] >= lastLine) break;
                 i++;
@@ -1471,7 +1493,7 @@ public class Editor {
     void invalidateTextDisplayList() {
         if (mTextDisplayLists != null) {
             for (int i = 0; i < mTextDisplayLists.length; i++) {
-                if (mTextDisplayLists[i] != null) mTextDisplayLists[i].markInvalid();
+                if (mTextDisplayLists[i] != null) mTextDisplayLists[i].isDirty = true;
             }
         }
     }
