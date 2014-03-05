@@ -67,6 +67,7 @@ public enum CallState {
     /**
      * Indicates that the call was attempted (mostly in the context of outgoing, at least at the
      * time of writing) but cancelled before it was successfully connected.
+     * @hide
      */
     ABORTED;
 }

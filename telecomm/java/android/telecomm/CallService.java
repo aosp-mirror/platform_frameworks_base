@@ -59,8 +59,8 @@ public abstract class CallService extends Service {
                 case MSG_CALL:
                     call((CallInfo) msg.obj);
                     break;
-                case MSG_DISCONNECT:
-                    disconnect((String) msg.obj);
+                case MSG_ABORT:
+                    abort((String) msg.obj);
                     break;
                 case MSG_SET_INCOMING_CALL_ID:
                     setIncomingCallId((String) msg.obj);
@@ -70,6 +70,9 @@ public abstract class CallService extends Service {
                     break;
                 case MSG_REJECT:
                     reject((String) msg.obj);
+                    break;
+                case MSG_DISCONNECT:
+                    disconnect((String) msg.obj);
                     break;
                 default:
                     break;
@@ -98,8 +101,8 @@ public abstract class CallService extends Service {
         }
 
         @Override
-        public void disconnect(String callId) {
-            mMessageHandler.obtainMessage(MSG_DISCONNECT, callId).sendToTarget();
+        public void abort(String callId) {
+            mMessageHandler.obtainMessage(MSG_ABORT, callId).sendToTarget();
         }
 
         @Override
@@ -116,6 +119,11 @@ public abstract class CallService extends Service {
         public void reject(String callId) {
             mMessageHandler.obtainMessage(MSG_REJECT, callId).sendToTarget();
         }
+
+        @Override
+        public void disconnect(String callId) {
+            mMessageHandler.obtainMessage(MSG_DISCONNECT, callId).sendToTarget();
+        }
     }
 
     // Only used internally by this class.
@@ -127,10 +135,11 @@ public abstract class CallService extends Service {
             MSG_SET_CALL_SERVICE_ADAPTER = 1,
             MSG_IS_COMPATIBLE_WITH = 2,
             MSG_CALL = 3,
-            MSG_DISCONNECT = 4,
+            MSG_ABORT = 4,
             MSG_SET_INCOMING_CALL_ID = 5,
             MSG_ANSWER = 6,
-            MSG_REJECT = 7;
+            MSG_REJECT = 7,
+            MSG_DISCONNECT = 8;
 
     /**
      * Message handler for consolidating binder callbacks onto a single thread.
@@ -169,7 +178,7 @@ public abstract class CallService extends Service {
     /**
      * Determines if the CallService can place the specified call. Response is sent via
      * {@link ICallServiceAdapter#setCompatibleWith}. When responding, the correct call ID must be
-     * specified.
+     * specified.  Only used in the context of outgoing calls and call switching (handoff).
      *
      * @param callInfo The details of the relevant call.
      */
@@ -181,18 +190,22 @@ public abstract class CallService extends Service {
      * dynamically extensible since call providers should be able to implement arbitrary
      * handle-calling systems.  See {@link #isCompatibleWith}. It is expected that the
      * call service respond via {@link ICallServiceAdapter#handleSuccessfulOutgoingCall(String)}
-     * if it can successfully make the call.
+     * if it can successfully make the call.  Only used in the context of outgoing calls.
      *
      * @param callInfo The details of the relevant call.
      */
     public abstract void call(CallInfo callInfo);
 
     /**
-     * Disconnects the specified call.
+     * Aborts the outgoing call attempt. Invoked in the unlikely event that Telecomm decides to
+     * abort an attempt to place a call.  Only ever be invoked after {@link #call} invocations.
+     * After this is invoked, Telecomm does not expect any more updates about the call and will
+     * actively ignore any such update. This is different from {@link #disconnect} where Telecomm
+     * expects confirmation via {@link #markCallAsDisconnected}.
      *
-     * @param callId The ID of the call to disconnect.
+     * @param callId The identifier of the call to abort.
      */
-    public abstract void disconnect(String callId);
+    public abstract void abort(String callId);
 
     /**
      * Receives a new call ID to use with an incoming call. Invoked by Telecomm after it is notified
@@ -220,4 +233,11 @@ public abstract class CallService extends Service {
      * @param callId The ID of the call.
      */
     public abstract void reject(String callId);
+
+    /**
+     * Disconnects the specified call.
+     *
+     * @param callId The ID of the call to disconnect.
+     */
+    public abstract void disconnect(String callId);
 }
