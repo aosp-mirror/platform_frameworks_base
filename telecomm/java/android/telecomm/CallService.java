@@ -18,6 +18,7 @@ package android.telecomm;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -63,7 +64,14 @@ public abstract class CallService extends Service {
                     disconnect((String) msg.obj);
                     break;
                 case MSG_SET_INCOMING_CALL_ID:
-                    setIncomingCallId((String) msg.obj);
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        String callId = (String) args.arg1;
+                        Bundle extras = (Bundle) args.arg2;
+                        setIncomingCallId(callId, extras);
+                    } finally {
+                        args.recycle();
+                    }
                     break;
                 case MSG_ANSWER:
                     answer((String) msg.obj);
@@ -103,8 +111,11 @@ public abstract class CallService extends Service {
         }
 
         @Override
-        public void setIncomingCallId(String callId) {
-            mMessageHandler.obtainMessage(MSG_SET_INCOMING_CALL_ID, callId).sendToTarget();
+        public void setIncomingCallId(String callId, Bundle extras) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            args.arg2 = extras;
+            mMessageHandler.obtainMessage(MSG_SET_INCOMING_CALL_ID, args).sendToTarget();
         }
 
         @Override
@@ -201,9 +212,14 @@ public abstract class CallService extends Service {
      * additional information about the call through {@link ICallServiceAdapter#handleIncomingCall}.
      * Following that, the call service can update the call at will using the specified call ID.
      *
+     * If a {@link Bundle} was passed (via {@link TelecommConstants#EXTRA_INCOMING_CALL_EXTRAS}) in
+     * with the {@link TelecommConstants#ACTION_INCOMING_CALL} intent, <code>extras</code> will be
+     * populated with this {@link Bundle}. Otherwise, an empty Bundle will be returned.
+     *
      * @param callId The ID of the call.
+     * @param extras The optional extras which were passed in with the intent, or an empty Bundle.
      */
-    public abstract void setIncomingCallId(String callId);
+    public abstract void setIncomingCallId(String callId, Bundle extras);
 
     /**
      * Answers a ringing call identified by callId. Telecomm invokes this method as a result of the

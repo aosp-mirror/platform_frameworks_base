@@ -16,6 +16,8 @@
 
 package android.telecomm;
 
+import android.os.Bundle;
+
 /**
  * Defines constants for use with the Telecomm system.
  */
@@ -42,4 +44,12 @@ public final class TelecommConstants {
      */
     public static final String EXTRA_CALL_SERVICE_DESCRIPTOR =
             "android.intent.extra.CALL_SERVICE_DESCRIPTOR";
+
+    /**
+     * Optional extra for {@link #ACTION_INCOMING_CALL} containing a {@link Bundle} which contains
+     * metadata about the call. This {@link Bundle} will be returned to the {@link CallService} as
+     * part of {@link CallService#setIncomingCallId(String,Bundle)}.
+     */
+    public static final String EXTRA_INCOMING_CALL_EXTRAS =
+            "android.intent.extra.INCOMING_CALL_EXTRAS";
 }

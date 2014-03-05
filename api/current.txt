@@ -24264,7 +24264,7 @@ package android.telecomm {
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void reject(java.lang.String);
     method public abstract void setCallServiceAdapter(android.telecomm.ICallServiceAdapter);
-    method public abstract void setIncomingCallId(java.lang.String);
+    method public abstract void setIncomingCallId(java.lang.String, android.os.Bundle);
   }
 
   public final class CallServiceDescriptor implements android.os.Parcelable {
@@ -24324,7 +24324,7 @@ package android.telecomm {
     method public abstract void isCompatibleWith(android.telecomm.CallInfo) throws android.os.RemoteException;
     method public abstract void reject(java.lang.String) throws android.os.RemoteException;
     method public abstract void setCallServiceAdapter(android.telecomm.ICallServiceAdapter) throws android.os.RemoteException;
-    method public abstract void setIncomingCallId(java.lang.String) throws android.os.RemoteException;
+    method public abstract void setIncomingCallId(java.lang.String, android.os.Bundle) throws android.os.RemoteException;
   }
 
   public static abstract class ICallService.Stub extends android.os.Binder implements android.telecomm.ICallService {
@@ -24439,6 +24439,7 @@ package android.telecomm {
     ctor public TelecommConstants();
     field public static final java.lang.String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
     field public static final java.lang.String EXTRA_CALL_SERVICE_DESCRIPTOR = "android.intent.extra.CALL_SERVICE_DESCRIPTOR";
+    field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.intent.extra.INCOMING_CALL_EXTRAS";
   }
 
 }
