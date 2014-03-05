@@ -395,16 +395,16 @@ static void readLocale(char* language, char* region)
  *
  * This will cut up "extraOptsBuf" as we chop it into individual options.
  *
+ * If "quotingArg" is non-null, it is passed before each extra option in mOptions.
+ *
  * Adds the strings, if any, to mOptions.
  */
-void AndroidRuntime::parseExtraOpts(char* extraOptsBuf)
+void AndroidRuntime::parseExtraOpts(char* extraOptsBuf, const char* quotingArg)
 {
     JavaVMOption opt;
-    char* start;
-    char* end;
-
     memset(&opt, 0, sizeof(opt));
-    start = extraOptsBuf;
+    char* start = extraOptsBuf;
+    char* end = NULL;
     while (*start != '\0') {
         while (*start == ' ')                   /* skip leading whitespace */
             start++;
@@ -418,6 +418,11 @@ void AndroidRuntime::parseExtraOpts(char* extraOptsBuf)
             *end++ = '\0';          /* mark end, advance to indicate more */
 
         opt.optionString = start;
+        if (quotingArg != NULL) {
+            JavaVMOption quotingOpt;
+            quotingOpt.optionString = quotingArg;
+            mOptions.add(quotingOpt);
+        }
         mOptions.add(opt);
         start = end;
     }
@@ -449,6 +454,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char gctypeOptsBuf[sizeof("-Xgc:")-1 + PROPERTY_VALUE_MAX];
     char heaptargetutilizationOptsBuf[sizeof("-XX:HeapTargetUtilization=")-1 + PROPERTY_VALUE_MAX];
     char jitcodecachesizeOptsBuf[sizeof("-Xjitcodecachesize:")-1 + PROPERTY_VALUE_MAX];
+    char dalvikVmLibBuf[PROPERTY_VALUE_MAX];
+    char dex2oatFlagsBuf[PROPERTY_VALUE_MAX];
+    char dex2oatImageFlagsBuf[PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
     char* stackTraceFile = NULL;
     bool checkJni = false;
@@ -741,9 +749,22 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         mOptions.add(opt);
     }
 
+    // libart tolerates libdvm flags, but not vice versa, so only pass these if libart.
+    property_get("persist.sys.dalvik.vm.lib.1", dalvikVmLibBuf, "libdvm.so");
+    if (strncmp(dalvikVmLibBuf, "libart", 6) == 0) {
+
+        // Extra options for DexClassLoader.
+        property_get("dalvik.vm.dex2oat-flags", dex2oatFlagsBuf, "");
+        parseExtraOpts(dex2oatFlagsBuf, "-Xcompiler-option");
+
+        // Extra options for boot.art/boot.oat image generation.
+        property_get("dalvik.vm.image-dex2oat-flags", dex2oatImageFlagsBuf, "");
+        parseExtraOpts(dex2oatImageFlagsBuf, "-Ximage-compiler-option");
+    }
+
     /* extra options; parse this late so it overrides others */
     property_get("dalvik.vm.extra-opts", extraOptsBuf, "");
-    parseExtraOpts(extraOptsBuf);
+    parseExtraOpts(extraOptsBuf, NULL);
 
     /* Set the properties for locale */
     {
