@@ -400,7 +400,6 @@ android.ddm.DdmHandleProfiling
 android.ddm.DdmHandleThread
 android.ddm.DdmHandleViewDebug
 android.ddm.DdmRegister
-android.debug.JNITest
 android.drm.DrmManagerClient
 android.emoji.EmojiFactory
 android.graphics.AvoidXfermode
@@ -661,7 +660,6 @@ android.net.wifi.IWifiManager$Stub
 android.net.wifi.IWifiManager$Stub$Proxy
 android.net.wifi.WifiManager
 android.net.wifi.WifiManager$ServiceHandler
-android.net.wifi.WifiNative
 android.nfc.IAppCallback
 android.nfc.IAppCallback$Stub
 android.nfc.INfcAdapter
@@ -984,10 +982,7 @@ android.view.FocusFinder$1
 android.view.FocusFinder$SequentialFocusComparator
 android.view.GLES20Canvas
 android.view.GLES20Canvas$CanvasFinalizer
-android.view.GLES20Layer
-android.view.GLES20Layer$Finalizer
 android.view.GLES20RecordingCanvas
-android.view.GLES20RenderLayer
 android.view.GestureDetector
 android.view.GestureDetector$GestureHandler
 android.view.GestureDetector$OnDoubleTapListener
@@ -997,12 +992,6 @@ android.view.Gravity
 android.view.HardwareCanvas
 android.view.HardwareLayer
 android.view.HardwareRenderer
-android.view.HardwareRenderer$Gl20Renderer
-android.view.HardwareRenderer$Gl20Renderer$1
-android.view.HardwareRenderer$Gl20Renderer$2
-android.view.HardwareRenderer$Gl20Renderer$Gl20RendererEglContext
-android.view.HardwareRenderer$GlRenderer
-android.view.HardwareRenderer$GlRenderer$FunctorsRunnable
 android.view.HardwareRenderer$HardwareDrawCallbacks
 android.view.IRotationWatcher
 android.view.IRotationWatcher$Stub
@@ -1113,7 +1102,6 @@ android.view.ViewManager
 android.view.ViewParent
 android.view.ViewRootImpl
 android.view.ViewRootImpl$3
-android.view.ViewRootImpl$4
 android.view.ViewRootImpl$AccessibilityInteractionConnectionManager
 android.view.ViewRootImpl$AsyncInputStage
 android.view.ViewRootImpl$ConsumeBatchedInputRunnable
@@ -1452,14 +1440,6 @@ com.android.internal.view.InputBindResult$1
 com.android.internal.view.RootViewSurfaceTaker
 com.android.internal.view.menu.ActionMenuItem
 com.android.internal.view.menu.ActionMenuItemView
-com.android.internal.view.menu.ActionMenuPresenter
-com.android.internal.view.menu.ActionMenuPresenter$OverflowMenuButton
-com.android.internal.view.menu.ActionMenuPresenter$PopupPresenterCallback
-com.android.internal.view.menu.ActionMenuPresenter$SavedState
-com.android.internal.view.menu.ActionMenuPresenter$SavedState$1
-com.android.internal.view.menu.ActionMenuView
-com.android.internal.view.menu.ActionMenuView$ActionMenuChildView
-com.android.internal.view.menu.ActionMenuView$LayoutParams
 com.android.internal.view.menu.BaseMenuPresenter
 com.android.internal.view.menu.ListMenuItemView
 com.android.internal.view.menu.MenuBuilder
@@ -1700,7 +1680,6 @@ com.android.org.conscrypt.OpenSSLX509CertificateFactory$2
 com.android.org.conscrypt.OpenSSLX509CertificateFactory$Parser
 com.android.org.conscrypt.ProtocolVersion
 com.android.org.conscrypt.SSLClientSessionCache
-com.android.org.conscrypt.SSLContextImpl
 com.android.org.conscrypt.SSLParametersImpl
 com.android.org.conscrypt.ServerSessionContext
 com.android.org.conscrypt.TrustManagerFactoryImpl
@@ -1887,7 +1866,6 @@ java.lang.ThreadLocal
 java.lang.ThreadLocal$Values
 java.lang.Throwable
 java.lang.TypeNotPresentException
-java.lang.UnsafeByteSequence
 java.lang.UnsatisfiedLinkError
 java.lang.UnsupportedOperationException
 java.lang.VMClassLoader
@@ -2196,8 +2174,6 @@ java.util.concurrent.BlockingQueue
 java.util.concurrent.Callable
 java.util.concurrent.CancellationException
 java.util.concurrent.ConcurrentHashMap
-java.util.concurrent.ConcurrentHashMap$HashEntry
-java.util.concurrent.ConcurrentHashMap$HashIterator
 java.util.concurrent.ConcurrentHashMap$Segment
 java.util.concurrent.ConcurrentLinkedQueue
 java.util.concurrent.ConcurrentLinkedQueue$Node
@@ -2257,7 +2233,6 @@ java.util.jar.Attributes
 java.util.jar.Attributes$Name
 java.util.jar.JarEntry
 java.util.jar.JarFile
-java.util.jar.JarFile$1JarFileEnumerator
 java.util.jar.JarVerifier
 java.util.jar.Manifest
 java.util.logging.ConsoleHandler
@@ -2382,7 +2357,6 @@ libcore.io.StructUcred
 libcore.io.StructUtsname
 libcore.math.MathUtils
 libcore.net.MimeUtils
-libcore.net.RawSocket
 libcore.net.UriCodec
 libcore.net.http.HttpDate
 libcore.net.http.HttpDate$1
