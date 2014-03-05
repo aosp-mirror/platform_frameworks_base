@@ -985,8 +985,8 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean allowDisable(int what, IBinder token, String pkg) {
-            if (mZenMode == Settings.Global.ZEN_MODE_FULL && isCall(pkg, null)) {
-                return false;
+            if (isCall(pkg, null)) {
+                return mZenMode == Settings.Global.ZEN_MODE_OFF;
             }
             return true;
         }
@@ -2505,28 +2505,32 @@ public class NotificationManagerService extends SystemService {
                 Settings.Global.MODE_RINGER, -1);
         final boolean nonSilentRingerMode = ringerMode == AudioManager.RINGER_MODE_NORMAL
                 || ringerMode == AudioManager.RINGER_MODE_VIBRATE;
-        if (mZenMode == Settings.Global.ZEN_MODE_FULL && nonSilentRingerMode) {
+        if (mZenMode != Settings.Global.ZEN_MODE_OFF && nonSilentRingerMode) {
             Settings.Global.putInt(getContext().getContentResolver(),
                     Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
         }
     }
 
     private void updateZenMode() {
-        mZenMode = Settings.Global.getInt(getContext().getContentResolver(),
+        final int mode = Settings.Global.getInt(getContext().getContentResolver(),
                 Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
-        if (DBG) Slog.d(TAG, "updateZenMode " + Settings.Global.zenModeToString(mZenMode));
+        if (mode != mZenMode) {
+            Slog.d(TAG, "updateZenMode: " + Settings.Global.zenModeToString(mZenMode));
+        }
+        mZenMode = mode;
         if (mAudioManager != null) {
-            if (mZenMode == Settings.Global.ZEN_MODE_FULL) {
-                // calls vibrate if ringer mode = vibrate, so set the ringer mode as well
-                mPreZenRingerMode = mAudioManager.getRingerMode();
-                if (DBG) Slog.d(TAG, "Muting calls mPreZenRingerMode=" + mPreZenRingerMode);
+            // call audio
+            final boolean muteCalls = mZenMode != Settings.Global.ZEN_MODE_OFF;
+            if (muteCalls) {
+                if (DBG) Slog.d(TAG, "Muting calls");
                 mAudioManager.setStreamMute(AudioManager.STREAM_RING, true);
-                mAudioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-                // alarms don't simply respect mute, so set the volume as well
-                mPreZenAlarmVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_ALARM);
-                if (DBG) Slog.d(TAG, "Muting alarms mPreZenAlarmVolume=" + mPreZenAlarmVolume);
-                mAudioManager.setStreamMute(AudioManager.STREAM_ALARM, true);
-                mAudioManager.setStreamVolume(AudioManager.STREAM_ALARM, 0, 0);
+                // calls vibrate if ringer mode = vibrate, so set the ringer mode as well
+                final int ringerMode = mAudioManager.getRingerMode();
+                if (ringerMode != AudioManager.RINGER_MODE_SILENT) {
+                    if (DBG) Slog.d(TAG, "Saving ringer mode of " + ringerMode);
+                    mPreZenRingerMode = ringerMode;
+                    mAudioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+                }
             } else {
                 if (DBG) Slog.d(TAG, "Unmuting calls");
                 mAudioManager.setStreamMute(AudioManager.STREAM_RING, false);
@@ -2535,10 +2539,24 @@ public class NotificationManagerService extends SystemService {
                     mAudioManager.setRingerMode(mPreZenRingerMode);
                     mPreZenRingerMode = -1;
                 }
+            }
+            // alarm audio
+            final boolean muteAlarms = mZenMode == Settings.Global.ZEN_MODE_FULL;
+            if (muteAlarms) {
+                if (DBG) Slog.d(TAG, "Muting alarms");
+                mAudioManager.setStreamMute(AudioManager.STREAM_ALARM, true);
+                // alarms don't simply respect mute, so set the volume as well
+                final int volume = mAudioManager.getStreamVolume(AudioManager.STREAM_ALARM);
+                if (volume != 0) {
+                    if (DBG) Slog.d(TAG, "Saving STREAM_ALARM volume of " + volume);
+                    mPreZenAlarmVolume = volume;
+                    mAudioManager.setStreamVolume(AudioManager.STREAM_ALARM, 0, 0);
+                }
+            } else {
                 if (DBG) Slog.d(TAG, "Unmuting alarms");
                 mAudioManager.setStreamMute(AudioManager.STREAM_ALARM, false);
                 if (mPreZenAlarmVolume != -1) {
-                    if (DBG) Slog.d(TAG, "Restoring STREAM_ALARM to " + mPreZenAlarmVolume);
+                    if (DBG) Slog.d(TAG, "Restoring STREAM_ALARM volume to " + mPreZenAlarmVolume);
                     mAudioManager.setStreamVolume(AudioManager.STREAM_ALARM, mPreZenAlarmVolume, 0);
                     mPreZenAlarmVolume = -1;
                 }
@@ -2556,7 +2574,7 @@ public class NotificationManagerService extends SystemService {
 
     private boolean shouldIntercept(String pkg, Notification n) {
         if (mZenMode == Settings.Global.ZEN_MODE_LIMITED) {
-            return !isCall(pkg, n) && !isAlarm(pkg, n);
+            return !isAlarm(pkg, n);
         } else if (mZenMode == Settings.Global.ZEN_MODE_FULL) {
             return true;
         }
