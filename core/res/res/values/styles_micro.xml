@@ -29,5 +29,6 @@
         <item name="android:internalMinWidth">64dip</item>
         <item name="android:internalMaxHeight">180dip</item>
         <item name="virtualButtonPressedDrawable">?android:attr/selectableItemBackground</item>
+        <item name="android:descendantFocusability">blocksDescendants</item>
     </style>
 </resources>
