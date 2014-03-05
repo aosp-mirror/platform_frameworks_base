@@ -29899,7 +29899,7 @@ package android.view {
     field public static final int FEATURE_ACTION_BAR = 8; // 0x8
     field public static final int FEATURE_ACTION_BAR_OVERLAY = 9; // 0x9
     field public static final int FEATURE_ACTION_MODE_OVERLAY = 10; // 0xa
-    field public static final int FEATURE_CONTENT_TRANSITIONS = 12; // 0xc
+    field public static final int FEATURE_CONTENT_TRANSITIONS = 11; // 0xb
     field public static final int FEATURE_CONTEXT_MENU = 6; // 0x6
     field public static final int FEATURE_CUSTOM_TITLE = 7; // 0x7
     field public static final int FEATURE_INDETERMINATE_PROGRESS = 5; // 0x5
