@@ -1625,7 +1625,7 @@ public class Resources {
 
             String locale = null;
             if (mConfiguration.locale != null) {
-                locale = localeToLanguageTag(mConfiguration.locale);
+                locale = adjustLanguageTag(localeToLanguageTag(mConfiguration.locale));
             }
             int width, height;
             if (mMetrics.widthPixels >= mMetrics.heightPixels) {
@@ -1710,6 +1710,41 @@ public class Resources {
     // this method to enable users to use Java6.
     private String localeToLanguageTag(Locale locale) {
         return locale.toLanguageTag();
+    }
+
+    /**
+     * {@code Locale.toLanguageTag} will transform the obsolete (and deprecated)
+     * language codes "in", "ji" and "iw" to "id", "yi" and "he" respectively.
+     *
+     * All released versions of android prior to "L" used the deprecated language
+     * tags, so we will need to support them for backwards compatibility.
+     *
+     * Note that this conversion needs to take place *after* the call to
+     * {@code toLanguageTag} because that will convert all the deprecated codes to
+     * the new ones, even if they're set manually.
+     */
+    private static String adjustLanguageTag(String languageTag) {
+        final int separator = languageTag.indexOf('-');
+        final String language;
+        final String remainder;
+
+        if (separator == -1) {
+            language = languageTag;
+            remainder = "";
+        } else {
+            language = languageTag.substring(0, separator);
+            remainder = languageTag.substring(separator);
+        }
+
+        if ("id".equals(language)) {
+            return "in" + remainder;
+        } else if ("yi".equals(language)) {
+            return "ji" + remainder;
+        } else if ("he".equals(language)) {
+            return "iw" + remainder;
+        } else {
+            return languageTag;
+        }
     }
 
     /**
