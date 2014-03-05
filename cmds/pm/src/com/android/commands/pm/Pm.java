@@ -18,6 +18,7 @@ package com.android.commands.pm;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ContainerEncryptionParams;
@@ -1089,13 +1090,16 @@ public final class Pm {
 
     public void runListUsers() {
         try {
+            IActivityManager am = ActivityManagerNative.getDefault();
+
             List<UserInfo> users = mUm.getUsers(false);
             if (users == null) {
                 System.err.println("Error: couldn't get users");
             } else {
                 System.out.println("Users:");
                 for (int i = 0; i < users.size(); i++) {
-                    System.out.println("\t" + users.get(i).toString());
+                    String running = am.isUserRunning(users.get(i).id, false) ? " running" : "";
+                    System.out.println("\t" + users.get(i).toString() + running);
                 }
             }
         } catch (RemoteException e) {
