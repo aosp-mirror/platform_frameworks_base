@@ -27,6 +27,7 @@
 #include <utils/Timers.h>
 
 #include <Caches.h>
+#include <DisplayList.h>
 #include <Extensions.h>
 #include <LayerRenderer.h>
 
@@ -139,6 +140,14 @@ static void android_view_GLRenderer_destroyLayer(JNIEnv* env, jobject clazz,
     LayerRenderer::destroyLayer(layer);
 }
 
+static void android_view_GLRenderer_swapDisplayListData(JNIEnv* env, jobject clazz,
+        jlong displayListPtr, jlong newDataPtr) {
+    using namespace android::uirenderer;
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
+    DisplayListData* newData = reinterpret_cast<DisplayListData*>(newDataPtr);
+    displayList->setData(newData);
+}
+
 #endif // USE_OPENGL_RENDERER
 
 // ----------------------------------------------------------------------------
@@ -169,6 +178,7 @@ static JNINativeMethod gMethods[] = {
 
     { "getSystemTime",         "()J",   (void*) android_view_GLRenderer_getSystemTime },
     { "nDestroyLayer",         "(J)V",  (void*) android_view_GLRenderer_destroyLayer },
+    { "nSwapDisplayListData",  "(JJ)V", (void*) android_view_GLRenderer_swapDisplayListData },
 #endif
 
     { "setupShadersDiskCache", "(Ljava/lang/String;)V",

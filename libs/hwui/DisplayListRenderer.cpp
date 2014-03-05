@@ -32,83 +32,28 @@ namespace android {
 namespace uirenderer {
 
 DisplayListRenderer::DisplayListRenderer():
-        mCaches(Caches::getInstance()), mDisplayListData(new DisplayListData),
+        mCaches(Caches::getInstance()),
         mTranslateX(0.0f), mTranslateY(0.0f), mHasTranslate(false),
-        mHasDrawOps(false), mFunctorCount(0) {
+        mRestoreSaveCount(-1), mDisplayListData(0) {
 }
 
 DisplayListRenderer::~DisplayListRenderer() {
-    reset();
-}
-
-void DisplayListRenderer::reset() {
-    mDisplayListData = new DisplayListData();
-    mCaches.resourceCache.lock();
-
-    for (size_t i = 0; i < mBitmapResources.size(); i++) {
-        mCaches.resourceCache.decrementRefcountLocked(mBitmapResources.itemAt(i));
-    }
-
-    for (size_t i = 0; i < mOwnedBitmapResources.size(); i++) {
-        mCaches.resourceCache.decrementRefcountLocked(mOwnedBitmapResources.itemAt(i));
-    }
-
-    for (size_t i = 0; i < mPatchResources.size(); i++) {
-        mCaches.resourceCache.decrementRefcountLocked(mPatchResources.itemAt(i));
-    }
-
-    for (size_t i = 0; i < mShaders.size(); i++) {
-        mCaches.resourceCache.decrementRefcountLocked(mShaders.itemAt(i));
-    }
-
-    for (size_t i = 0; i < mSourcePaths.size(); i++) {
-        mCaches.resourceCache.decrementRefcountLocked(mSourcePaths.itemAt(i));
-    }
-
-    for (size_t i = 0; i < mLayers.size(); i++) {
-        mCaches.resourceCache.decrementRefcountLocked(mLayers.itemAt(i));
-    }
-
-    mCaches.resourceCache.unlock();
-
-    mBitmapResources.clear();
-    mOwnedBitmapResources.clear();
-    mPatchResources.clear();
-    mSourcePaths.clear();
-
-    mShaders.clear();
-    mShaderMap.clear();
-
-    mPaints.clear();
-    mPaintMap.clear();
-
-    mRegions.clear();
-    mRegionMap.clear();
-
-    mPaths.clear();
-    mPathMap.clear();
-
-    mMatrices.clear();
-
-    mLayers.clear();
-
-    mHasDrawOps = false;
-    mFunctorCount = 0;
+    LOG_ALWAYS_FATAL_IF(mDisplayListData,
+            "Destroyed a DisplayListRenderer during a record!");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Operations
 ///////////////////////////////////////////////////////////////////////////////
 
-DisplayList* DisplayListRenderer::getDisplayList(DisplayList* displayList) {
-    if (!displayList) {
-        displayList = new DisplayList(*this);
-    } else {
-        displayList->initFromDisplayListRenderer(*this, true);
-    }
-    // TODO: should just avoid setting the DisplayList's DisplayListData
-    displayList->setRenderable(mHasDrawOps);
-    return displayList;
+DisplayListData* DisplayListRenderer::finishRecording() {
+    mShaderMap.clear();
+    mPaintMap.clear();
+    mRegionMap.clear();
+    mPathMap.clear();
+    DisplayListData* data = mDisplayListData;
+    mDisplayListData = 0;
+    return data;
 }
 
 void DisplayListRenderer::setViewport(int width, int height) {
@@ -120,6 +65,11 @@ void DisplayListRenderer::setViewport(int width, int height) {
 
 status_t DisplayListRenderer::prepareDirty(float left, float top,
         float right, float bottom, bool opaque) {
+
+    LOG_ALWAYS_FATAL_IF(mDisplayListData,
+            "prepareDirty called a second time during a recording!");
+    mDisplayListData = new DisplayListData();
+
     initializeSaveStack(0, 0, getWidth(), getHeight());
 
     mDirtyClip = opaque;
@@ -142,7 +92,7 @@ void DisplayListRenderer::resume() {
 status_t DisplayListRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
     // Ignore dirty during recording, it matters only when we replay
     addDrawOp(new (alloc()) DrawFunctorOp(functor));
-    mFunctorCount++;
+    mDisplayListData->functorCount++;
     return DrawGlInfo::kStatusDone; // No invalidate needed at record-time
 }
 
@@ -501,7 +451,7 @@ void DisplayListRenderer::addDrawOp(DrawOp* op) {
         op->setQuickRejected(rejected);
     }
 
-    mHasDrawOps = true;
+    mDisplayListData->hasDrawOps = true;
     addOpInternal(op);
 }
 

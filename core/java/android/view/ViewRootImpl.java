@@ -56,6 +56,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TypedValue;
+import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
@@ -69,7 +70,6 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.view.Surface.OutOfResourcesException;
 import android.widget.Scroller;
 
 import com.android.internal.R;
@@ -293,8 +293,6 @@ public final class ViewRootImpl implements ViewParent,
     private long mFpsStartTime = -1;
     private long mFpsPrevTime = -1;
     private int mFpsNumFrames;
-
-    private final ArrayList<DisplayList> mDisplayLists = new ArrayList<DisplayList>();
 
     /**
      * see {@link #playSoundEffect(int)}
@@ -620,7 +618,6 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void destroyHardwareResources() {
-        invalidateDisplayLists();
         if (mAttachInfo.mHardwareRenderer != null) {
             mAttachInfo.mHardwareRenderer.destroyHardwareResources(mView);
             mAttachInfo.mHardwareRenderer.destroy(false);
@@ -634,7 +631,6 @@ public final class ViewRootImpl implements ViewParent,
                 HardwareRenderer.trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
             }
         } else {
-            invalidateDisplayLists();
             destroyHardwareLayer(mView);
         }
     }
@@ -1503,7 +1499,7 @@ public final class ViewRootImpl implements ViewParent,
                                 com.android.internal.R.integer.config_mediumAnimTime);
 
                         layerCanvas.restoreToCount(restoreCount);
-                        layerDisplayList.end();
+                        layerDisplayList.end(mAttachInfo.mHardwareRenderer, layerCanvas);
                         layerDisplayList.setCaching(true);
                         layerDisplayList.setLeftTopRightBottom(0, 0, mWidth, mHeight);
                         mTempRect.set(0, 0, mWidth, mHeight);
@@ -2369,8 +2365,6 @@ public final class ViewRootImpl implements ViewParent,
                     appScale + ", width=" + mWidth + ", height=" + mHeight);
         }
 
-        invalidateDisplayLists();
-
         attachInfo.mTreeObserver.dispatchOnDraw();
 
         if (!dirty.isEmpty() || mIsAnimating) {
@@ -2586,20 +2580,6 @@ public final class ViewRootImpl implements ViewParent,
             return mAttachInfo.mAccessibilityFocusDrawable;
         }
         return null;
-    }
-
-    void invalidateDisplayLists() {
-        final ArrayList<DisplayList> displayLists = mDisplayLists;
-        final int count = displayLists.size();
-
-        for (int i = 0; i < count; i++) {
-            final DisplayList displayList = displayLists.get(i);
-            if (displayList.isDirty()) {
-                displayList.reset();
-            }
-        }
-
-        displayLists.clear();
     }
 
     /**
@@ -5229,7 +5209,7 @@ public final class ViewRootImpl implements ViewParent,
         DisplayList displayList = view.mDisplayList;
         info[0]++;
         if (displayList != null) {
-            info[1] += displayList.getSize();
+            info[1] += 0; /* TODO: Memory used by display lists */
         }
 
         if (view instanceof ViewGroup) {
@@ -5277,7 +5257,6 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             if (mAdded && !mFirst) {
-                invalidateDisplayLists();
                 destroyHardwareRenderer();
 
                 if (mView != null) {
@@ -5741,10 +5720,6 @@ public final class ViewRootImpl implements ViewParent,
 
     public void dispatchInvalidateRectOnAnimation(AttachInfo.InvalidateInfo info) {
         mInvalidateOnAnimationRunnable.addViewRect(info);
-    }
-
-    public void enqueueDisplayList(DisplayList displayList) {
-        mDisplayLists.add(displayList);
     }
 
     public void cancelInvalidate(View view) {

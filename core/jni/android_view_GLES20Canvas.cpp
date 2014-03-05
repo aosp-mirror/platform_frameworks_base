@@ -864,22 +864,15 @@ static void android_view_GLES20Canvas_drawPosText(JNIEnv* env, jobject clazz,
 // Display lists
 // ----------------------------------------------------------------------------
 
-static jint android_view_GLES20Canvas_getDisplayList(JNIEnv* env,
-        jobject clazz, jlong rendererPtr, jlong displayListPtr) {
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
-    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
-    return reinterpret_cast<jint>(renderer->getDisplayList(displayList));
-}
-
-static jint android_view_GLES20Canvas_createDisplayListRenderer(JNIEnv* env,
-        jobject clazz) {
-    return reinterpret_cast<jint>(new DisplayListRenderer);
-}
-
-static void android_view_GLES20Canvas_resetDisplayListRenderer(JNIEnv* env,
+static jlong android_view_GLES20Canvas_finishRecording(JNIEnv* env,
         jobject clazz, jlong rendererPtr) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
-    renderer->reset();
+    return reinterpret_cast<jlong>(renderer->finishRecording());
+}
+
+static jlong android_view_GLES20Canvas_createDisplayListRenderer(JNIEnv* env,
+        jobject clazz) {
+    return reinterpret_cast<jlong>(new DisplayListRenderer);
 }
 
 static jint android_view_GLES20Canvas_drawDisplayList(JNIEnv* env,
@@ -1094,12 +1087,11 @@ static JNINativeMethod gMethods[] = {
     { "nGetClipBounds",     "(JLandroid/graphics/Rect;)Z",
             (void*) android_view_GLES20Canvas_getClipBounds },
 
-    { "nGetDisplayList",         "(JJ)J",      (void*) android_view_GLES20Canvas_getDisplayList },
+    { "nFinishRecording",        "(J)J",      (void*) android_view_GLES20Canvas_finishRecording },
     { "nDrawDisplayList",        "(JJLandroid/graphics/Rect;I)I",
             (void*) android_view_GLES20Canvas_drawDisplayList },
 
     { "nCreateDisplayListRenderer", "()J",     (void*) android_view_GLES20Canvas_createDisplayListRenderer },
-    { "nResetDisplayListRenderer",  "(J)V",    (void*) android_view_GLES20Canvas_resetDisplayListRenderer },
 
     { "nInterrupt",              "(J)V",       (void*) android_view_GLES20Canvas_interrupt },
     { "nResume",                 "(J)V",       (void*) android_view_GLES20Canvas_resume },

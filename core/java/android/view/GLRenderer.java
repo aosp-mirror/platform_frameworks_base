@@ -1196,6 +1196,11 @@ public class GLRenderer extends HardwareRenderer {
         }
     }
 
+    void swapDisplayListData(long displayList, long newData) {
+        nSwapDisplayListData(displayList, newData);
+    }
+    private static native void nSwapDisplayListData(long displayList, long newData);
+
     private DisplayList buildDisplayList(View view, HardwareCanvas canvas) {
         if (mDrawDelta <= 0) {
             return view.mDisplayList;

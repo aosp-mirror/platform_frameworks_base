@@ -41,18 +41,6 @@ using namespace uirenderer;
 // DisplayList view properties
 // ----------------------------------------------------------------------------
 
-static void android_view_DisplayList_reset(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
-    displayList->reset();
-}
-
-static jint android_view_DisplayList_getDisplayListSize(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
-    return displayList->getSize();
-}
-
 static void android_view_DisplayList_setDisplayListName(JNIEnv* env,
         jobject clazz, jlong displayListPtr, jstring name) {
     DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
@@ -67,6 +55,11 @@ static void android_view_DisplayList_output(JNIEnv* env,
         jobject clazz, jlong displayListPtr) {
     DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->output();
+}
+
+static jlong android_view_DisplayList_create(JNIEnv* env, jobject clazz) {
+    DisplayList* displayList = new DisplayList();
+    return reinterpret_cast<jlong>(displayList);
 }
 
 static void android_view_DisplayList_destroyDisplayList(JNIEnv* env,
@@ -285,18 +278,6 @@ static void android_view_DisplayList_offsetTopAndBottom(JNIEnv* env,
     displayList->offsetTopBottom(offset);
 }
 
-static void android_view_DisplayList_getMatrix(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jlong matrixPtr) {
-    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
-    SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
-    SkMatrix* source = displayList->getStaticMatrix();
-    if (source) {
-        matrix->setConcat(SkMatrix::I(), *source);
-    } else {
-        matrix->setIdentity();
-    }
-}
-
 static jboolean android_view_DisplayList_hasOverlappingRendering(JNIEnv* env,
         jobject clazz, jlong displayListPtr) {
     DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
@@ -403,13 +384,12 @@ const char* const kClassPathName = "android/view/DisplayList";
 
 static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
+    { "nCreate",               "()J",    (void*) android_view_DisplayList_create },
     { "nDestroyDisplayList",   "(J)V",   (void*) android_view_DisplayList_destroyDisplayList },
-    { "nGetDisplayListSize",   "(J)I",   (void*) android_view_DisplayList_getDisplayListSize },
     { "nSetDisplayListName",   "(JLjava/lang/String;)V",
             (void*) android_view_DisplayList_setDisplayListName },
     { "nOutput",               "(J)V",  (void*) android_view_DisplayList_output },
 
-    { "nReset",                "(J)V",   (void*) android_view_DisplayList_reset },
     { "nSetCaching",           "(JZ)V",  (void*) android_view_DisplayList_setCaching },
     { "nSetStaticMatrix",      "(JJ)V",  (void*) android_view_DisplayList_setStaticMatrix },
     { "nSetAnimationMatrix",   "(JJ)V",  (void*) android_view_DisplayList_setAnimationMatrix },
@@ -445,7 +425,6 @@ static JNINativeMethod gMethods[] = {
     { "nOffsetLeftAndRight",   "(JF)V",  (void*) android_view_DisplayList_offsetLeftAndRight },
     { "nOffsetTopAndBottom",   "(JF)V",  (void*) android_view_DisplayList_offsetTopAndBottom },
 
-    { "nGetMatrix",               "(JJ)V", (void*) android_view_DisplayList_getMatrix },
     { "nHasOverlappingRendering", "(J)Z",  (void*) android_view_DisplayList_hasOverlappingRendering },
     { "nGetAlpha",                "(J)F",  (void*) android_view_DisplayList_getAlpha },
     { "nGetLeft",                 "(J)F",  (void*) android_view_DisplayList_getLeft },
