@@ -230,7 +230,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         public void onServiceConnected(ComponentName name, IBinder service) {
             synchronized (mLock) {
                 if (mWallpaper.connection == this) {
-                    mWallpaper.lastDiedTime = SystemClock.uptimeMillis();
                     mService = IWallpaperService.Stub.asInterface(service);
                     attachServiceLocked(this, mWallpaper);
                     // XXX should probably do saveSettingsLocked() later
@@ -250,11 +249,21 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 if (mWallpaper.connection == this) {
                     Slog.w(TAG, "Wallpaper service gone: " + mWallpaper.wallpaperComponent);
                     if (!mWallpaper.wallpaperUpdating
-                            && (mWallpaper.lastDiedTime + MIN_WALLPAPER_CRASH_TIME)
-                                > SystemClock.uptimeMillis()
                             && mWallpaper.userId == mCurrentUserId) {
-                        Slog.w(TAG, "Reverting to built-in wallpaper!");
-                        clearWallpaperLocked(true, mWallpaper.userId, null);
+                        // There is a race condition which causes
+                        // {@link #mWallpaper.wallpaperUpdating} to be false even if it is
+                        // currently updating since the broadcast notifying us is async.
+                        // This race is overcome by the general rule that we only reset the
+                        // wallpaper if its service was shut down twice
+                        // during {@link #MIN_WALLPAPER_CRASH_TIME} millis.
+                        if (mWallpaper.lastDiedTime != 0
+                                && mWallpaper.lastDiedTime + MIN_WALLPAPER_CRASH_TIME
+                                    > SystemClock.uptimeMillis()) {
+                            Slog.w(TAG, "Reverting to built-in wallpaper!");
+                            clearWallpaperLocked(true, mWallpaper.userId, null);
+                        } else {
+                            mWallpaper.lastDiedTime = SystemClock.uptimeMillis();
+                        }
                     }
                 }
             }
@@ -938,7 +947,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             }
             wallpaper.wallpaperComponent = componentName;
             wallpaper.connection = newConn;
-            wallpaper.lastDiedTime = SystemClock.uptimeMillis();
             newConn.mReply = reply;
             try {
                 if (wallpaper.userId == mCurrentUserId) {
