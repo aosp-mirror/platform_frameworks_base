@@ -1071,8 +1071,9 @@
         android:permissionGroupFlags="personalInfo"
         android:priority="370" />
 
-    <!-- Allows an application to modify or abort outgoing
-         calls. -->
+    <!-- Allows an application to see the number being dialed during an outgoing
+         call with the option to redirect the call to a different number or
+         abort the call altogether. -->
     <permission android:name="android.permission.PROCESS_OUTGOING_CALLS"
         android:permissionGroup="android.permission-group.PHONE_CALLS"
         android:protectionLevel="dangerous"
