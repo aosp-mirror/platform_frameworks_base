@@ -1308,6 +1308,26 @@ public class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
+        // Snap up to current on the pw file version
+        mPasswordVersion = BACKUP_PW_FILE_VERSION;
+        FileOutputStream pwFout = null;
+        DataOutputStream pwOut = null;
+        try {
+            pwFout = new FileOutputStream(mPasswordVersionFile);
+            pwOut = new DataOutputStream(pwFout);
+            pwOut.writeInt(mPasswordVersion);
+        } catch (IOException e) {
+            Slog.e(TAG, "Unable to write backup pw version; password not changed");
+            return false;
+        } finally {
+            try {
+                if (pwOut != null) pwOut.close();
+                if (pwFout != null) pwFout.close();
+            } catch (IOException e) {
+                Slog.w(TAG, "Unable to close pw version record");
+            }
+        }
+
         // Clearing the password is okay
         if (newPw == null || newPw.isEmpty()) {
             if (mPasswordHashFile.exists()) {
