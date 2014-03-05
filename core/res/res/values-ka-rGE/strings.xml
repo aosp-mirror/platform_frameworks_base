@@ -816,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"სახლი"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"სამსახური"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"სხვა"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"ამ კონტაქტის მნახველი აპლიკაცია ვერ მოიძებნა."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"აკრიფეთ PIN კოდი"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"დაბეჭდეთ PUK კოდი და ახალი PIN კოდი."</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK კოდი"</string>

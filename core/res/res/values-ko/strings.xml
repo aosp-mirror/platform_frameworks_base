@@ -816,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"집"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"직장"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"기타"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"이 주소록을 표시할 수 있는 애플리케이션이 없습니다."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN 코드 입력"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK 및 새 PIN 코드 입력"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK 코드"</string>

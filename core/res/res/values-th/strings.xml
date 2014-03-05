@@ -816,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"หน้าแรก"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"ที่ทำงาน"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"อื่นๆ"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"ไม่พบแอปพลิเคชันที่ใช้ดูที่อยู่ติดต่อนี้"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"พิมพ์รหัส PIN"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"พิมพ์ PUK และรหัส PIN ใหม่"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"รหัส PUK"</string>
@@ -1352,7 +1353,7 @@
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"แตะเพื่อออกจากโหมดรถยนต์"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"การปล่อยสัญญาณหรือฮอตสปอตทำงานอยู่"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"แตะเพื่อตั้งค่า"</string>
-    <string name="back_button_label" msgid="2300470004503343439">"ย้อนกลับ"</string>
+    <string name="back_button_label" msgid="2300470004503343439">"กลับ"</string>
     <string name="next_button_label" msgid="1080555104677992408">"ถัดไป"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"ข้าม"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"การใช้งานข้อมูลมือถือในระดับสูง"</string>

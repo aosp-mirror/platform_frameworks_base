@@ -816,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"المنزل"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"العمل"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"غير ذلك"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"لم يتم العثور على تطبيق لعرض جهة الاتصال هذه."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"‏اكتب رمز رمز PIN"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"‏اكتب رمز PUK ورمز رمز PIN الجديد"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"‏رمز PUK"</string>
