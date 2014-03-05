@@ -1,5 +1,7 @@
 #include "Type.h"
 
+#include <sys/types.h>
+
 Namespace NAMES;
 
 Type* VOID_TYPE;
