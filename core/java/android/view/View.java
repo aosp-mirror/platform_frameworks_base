@@ -7983,8 +7983,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void dispatchStartTemporaryDetach() {
-        clearDisplayList();
-
         onStartTemporaryDetach();
     }
 
@@ -9385,7 +9383,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if ((changed & VISIBILITY_MASK) != 0) {
             // If the view is invisible, cleanup its display list to free up resources
-            if (newVisibility != VISIBLE) {
+            if (newVisibility != VISIBLE && mAttachInfo != null) {
                 cleanupDraw();
             }
 
@@ -12812,14 +12810,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             InputMethodManager imm = InputMethodManager.peekInstance();
             imm.focusIn(this);
         }
-
-        if (mDisplayList != null) {
-            mDisplayList.clearDirty();
-        }
-
-        if (mBackgroundDisplayList != null) {
-            mBackgroundDisplayList.clearDirty();
-        }
     }
 
     /**
@@ -13137,21 +13127,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private void cleanupDraw() {
-        if (mAttachInfo != null) {
-            // Ensure the display lists are reset when the view root dies.
-            if (mDisplayList != null) {
-                mDisplayList.markDirty();
-                mAttachInfo.mViewRootImpl.enqueueDisplayList(mDisplayList);
-            }
-            if (mBackgroundDisplayList != null) {
-                mBackgroundDisplayList.markDirty();
-                mAttachInfo.mViewRootImpl.enqueueDisplayList(mBackgroundDisplayList);
-            }
-            mAttachInfo.mViewRootImpl.cancelInvalidate(this);
-        } else {
-            // Should never happen.
-            resetDisplayList();
-        }
+        resetDisplayList();
+        mAttachInfo.mViewRootImpl.cancelInvalidate(this);
     }
 
     /**
@@ -14027,7 +14004,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                 }
             } finally {
-                displayList.end();
+                displayList.end(getHardwareRenderer(), canvas);
                 displayList.setCaching(caching);
                 if (isLayer) {
                     displayList.setLeftTopRightBottom(0, 0, width, height);
@@ -14056,23 +14033,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return mDisplayList;
     }
 
-    private void clearDisplayList() {
-        if (mDisplayList != null) {
-            mDisplayList.clear();
-        }
-
-        if (mBackgroundDisplayList != null) {
-            mBackgroundDisplayList.clear();
-        }
-    }
-
     private void resetDisplayList() {
-        if (mDisplayList != null) {
-            mDisplayList.reset();
+        HardwareRenderer renderer = getHardwareRenderer();
+        if (mDisplayList != null && mDisplayList.isValid()) {
+            mDisplayList.destroyDisplayListData(renderer);
         }
 
-        if (mBackgroundDisplayList != null) {
-            mBackgroundDisplayList.reset();
+        if (mBackgroundDisplayList != null && mBackgroundDisplayList.isValid()) {
+            mBackgroundDisplayList.destroyDisplayListData(renderer);
         }
     }
 
@@ -14695,7 +14663,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             alpha = t.getAlpha();
                         }
                         if ((transformType & Transformation.TYPE_MATRIX) != 0) {
-                            displayList.setMatrix(t.getMatrix());
+                            displayList.setStaticMatrix(t.getMatrix());
                         }
                     }
                 }
@@ -15328,7 +15296,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param displayList Existing display list, or {@code null}
      * @return A valid display list for the specified drawable
      */
-    private static DisplayList getDrawableDisplayList(Drawable drawable, DisplayList displayList) {
+    private DisplayList getDrawableDisplayList(Drawable drawable, DisplayList displayList) {
         if (displayList == null) {
             displayList = DisplayList.create(drawable.getClass().getName());
         }
@@ -15338,7 +15306,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final int height = bounds.height();
         final HardwareCanvas canvas = displayList.start(width, height);
         drawable.draw(canvas);
-        displayList.end();
+        displayList.end(getHardwareRenderer(), canvas);
 
         // Set up drawable properties that are view-independent.
         displayList.setLeftTopRightBottom(bounds.left, bounds.top, bounds.right, bounds.bottom);

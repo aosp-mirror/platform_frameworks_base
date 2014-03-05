@@ -19,8 +19,6 @@ package android.view;
 import android.graphics.Matrix;
 import android.graphics.Path;
 
-import java.util.ArrayList;
-
 /**
  * <p>A display list records a series of graphics related operations and can replay
  * them later. Display lists are usually built by recording operations on a
@@ -124,18 +122,8 @@ import java.util.ArrayList;
  * @hide
  */
 public class DisplayList {
-    private boolean mDirty;
-    private ArrayList<DisplayList> mChildDisplayLists;
-
-    private GLES20RecordingCanvas mCanvas;
     private boolean mValid;
-
-    // Used for debugging
-    private final String mName;
-
-    // The native display list will be destroyed when this object dies.
-    // DO NOT overwrite this reference once it is set.
-    private DisplayListFinalizer mFinalizer;
+    private final long mNativeDisplayList;
 
     /**
      * Flag used when calling
@@ -188,7 +176,8 @@ public class DisplayList {
     public static final int STATUS_DREW = 0x4;
 
     private DisplayList(String name) {
-        mName = name;
+        mNativeDisplayList = nCreate();
+        nSetDisplayListName(mNativeDisplayList, name);
     }
 
     /**
@@ -221,19 +210,11 @@ public class DisplayList {
      * @see #isValid()
      */
     public HardwareCanvas start(int width, int height) {
-        if (mCanvas != null) {
-            throw new IllegalStateException("Recording has already started");
-        }
-
-        mValid = false;
-        mCanvas = GLES20RecordingCanvas.obtain(this);
-        mCanvas.start();
-
-        mCanvas.setViewport(width, height);
+        HardwareCanvas canvas = GLES20RecordingCanvas.obtain();
+        canvas.setViewport(width, height);
         // The dirty rect should always be null for a display list
-        mCanvas.onPreDraw(null);
-
-        return mCanvas;
+        canvas.onPreDraw(null);
+        return canvas;
     }
 
     /**
@@ -244,47 +225,27 @@ public class DisplayList {
      * @see #start(int, int)
      * @see #isValid()
      */
-    public void end() {
-        if (mCanvas != null) {
-            mCanvas.onPostDraw();
-            if (mFinalizer != null) {
-                mCanvas.end(mFinalizer.mNativeDisplayList);
-            } else {
-                mFinalizer = new DisplayListFinalizer(mCanvas.end(0));
-                nSetDisplayListName(mFinalizer.mNativeDisplayList, mName);
-            }
-            mCanvas.recycle();
-            mCanvas = null;
-            mValid = true;
+    public void end(HardwareRenderer renderer, HardwareCanvas endCanvas) {
+        if (!(endCanvas instanceof GLES20RecordingCanvas)) {
+            throw new IllegalArgumentException("Passed an invalid canvas to end!");
         }
+
+        GLES20RecordingCanvas canvas = (GLES20RecordingCanvas) endCanvas;
+        canvas.onPostDraw();
+        long displayListData = canvas.finishRecording();
+        renderer.swapDisplayListData(mNativeDisplayList, displayListData);
+        canvas.recycle();
+        mValid = true;
     }
 
     /**
-     * Clears resources held onto by this display list. After calling this method
-     * {@link #isValid()} will return false.
-     *
-     * @see #isValid()
-     * @see #reset()
-     */
-    public void clear() {
-        clearDirty();
-
-        if (mCanvas != null) {
-            mCanvas.recycle();
-            mCanvas = null;
-        }
+    * After calling this method {@link #isValid()} will return false.
+    * TODO: Have Editor stop using this
+    *
+    * @see #isValid()
+    */
+    public void markInvalid() {
         mValid = false;
-
-        clearReferences();
-    }
-
-    void clearReferences() {
-        if (mChildDisplayLists != null) mChildDisplayLists.clear();
-    }
-
-    ArrayList<DisplayList> getChildDisplayLists() {
-        if (mChildDisplayLists == null) mChildDisplayLists = new ArrayList<DisplayList>();
-        return mChildDisplayLists;
     }
 
     /**
@@ -292,53 +253,14 @@ public class DisplayList {
      * during destruction of hardware resources, to ensure that we do not hold onto
      * obsolete resources after related resources are gone.
      *
-     * @see #clear()
-     *
      * @hide
      */
-    public void reset() {
-        if (hasNativeDisplayList()) {
-            nReset(mFinalizer.mNativeDisplayList);
+    public void destroyDisplayListData(HardwareRenderer renderer) {
+        if (renderer == null) {
+            throw new IllegalArgumentException("Cannot destroyDisplayListData with a null renderer");
         }
-        clear();
-    }
-
-    /**
-     * Sets the dirty flag. When a display list is dirty, {@link #clear()} should
-     * be invoked whenever possible.
-     *
-     * @see #isDirty()
-     * @see #clear()
-     *
-     * @hide
-     */
-    public void markDirty() {
-        mDirty = true;
-    }
-
-    /**
-     * Removes the dirty flag. This method can be used to cancel a cleanup
-     * previously scheduled by setting the dirty flag.
-     *
-     * @see #isDirty()
-     * @see #clear()
-     *
-     * @hide
-     */
-    protected void clearDirty() {
-        mDirty = false;
-    }
-
-    /**
-     * Indicates whether the display list is dirty.
-     *
-     * @see #markDirty()
-     * @see #clear()
-     *
-     * @hide
-     */
-    public boolean isDirty() {
-        return mDirty;
+        renderer.swapDisplayListData(mNativeDisplayList, 0);
+        mValid = false;
     }
 
     /**
@@ -349,27 +271,11 @@ public class DisplayList {
      */
     public boolean isValid() { return mValid; }
 
-    /**
-     * Return the amount of memory used by this display list.
-     *
-     * @return The size of this display list in bytes
-     *
-     * @hide
-     */
-    public int getSize() {
-        if (mFinalizer == null) return 0;
-        return nGetDisplayListSize(mFinalizer.mNativeDisplayList);
-    }
-
-    boolean hasNativeDisplayList() {
-        return mValid && mFinalizer != null;
-    }
-
     long getNativeDisplayList() {
-        if (!mValid || mFinalizer == null) {
+        if (!mValid) {
             throw new IllegalStateException("The display list is not valid.");
         }
-        return mFinalizer.mNativeDisplayList;
+        return mNativeDisplayList;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -386,9 +292,7 @@ public class DisplayList {
      * @hide
      */
     public void setCaching(boolean caching) {
-        if (hasNativeDisplayList()) {
-            nSetCaching(mFinalizer.mNativeDisplayList, caching);
-        }
+        nSetCaching(mNativeDisplayList, caching);
     }
 
     /**
@@ -398,9 +302,7 @@ public class DisplayList {
      * @param clipToBounds true if the display list should clip to its bounds
      */
     public void setClipToBounds(boolean clipToBounds) {
-        if (hasNativeDisplayList()) {
-            nSetClipToBounds(mFinalizer.mNativeDisplayList, clipToBounds);
-        }
+        nSetClipToBounds(mNativeDisplayList, clipToBounds);
     }
 
     /**
@@ -410,9 +312,7 @@ public class DisplayList {
      * @param isolatedZVolume true if the display list should collect and Z order descendents.
      */
     public void setIsolatedZVolume(boolean isolatedZVolume) {
-        if (hasNativeDisplayList()) {
-            nSetIsolatedZVolume(mFinalizer.mNativeDisplayList, isolatedZVolume);
-        }
+        nSetIsolatedZVolume(mNativeDisplayList, isolatedZVolume);
     }
 
     /**
@@ -425,9 +325,7 @@ public class DisplayList {
      *            containing volume.
      */
     public void setProjectBackwards(boolean shouldProject) {
-        if (hasNativeDisplayList()) {
-            nSetProjectBackwards(mFinalizer.mNativeDisplayList, shouldProject);
-        }
+        nSetProjectBackwards(mNativeDisplayList, shouldProject);
     }
 
     /**
@@ -436,9 +334,7 @@ public class DisplayList {
      * ProjectBackwards=true directly on top of it. Default value is false.
      */
     public void setProjectionReceiver(boolean shouldRecieve) {
-        if (hasNativeDisplayList()) {
-            nSetProjectionReceiver(mFinalizer.mNativeDisplayList, shouldRecieve);
-        }
+        nSetProjectionReceiver(mNativeDisplayList, shouldRecieve);
     }
 
     /**
@@ -450,10 +346,8 @@ public class DisplayList {
      * @param outline Convex, CW Path to store in the DisplayList. May be null.
      */
     public void setOutline(Path outline) {
-        if (hasNativeDisplayList()) {
-            long nativePath = (outline == null) ? 0 : outline.mNativePath;
-            nSetOutline(mFinalizer.mNativeDisplayList, nativePath);
-        }
+        long nativePath = (outline == null) ? 0 : outline.mNativePath;
+        nSetOutline(mNativeDisplayList, nativePath);
     }
 
     /**
@@ -462,9 +356,7 @@ public class DisplayList {
      * @param clipToOutline true if clipping to the outline.
      */
     public void setClipToOutline(boolean clipToOutline) {
-        if (hasNativeDisplayList()) {
-            nSetClipToOutline(mFinalizer.mNativeDisplayList, clipToOutline);
-        }
+        nSetClipToOutline(mNativeDisplayList, clipToOutline);
     }
 
     /**
@@ -474,9 +366,7 @@ public class DisplayList {
      * and non-empty, otherwise it will be the bounds rect.
      */
     public void setCastsShadow(boolean castsShadow) {
-        if (hasNativeDisplayList()) {
-            nSetCastsShadow(mFinalizer.mNativeDisplayList, castsShadow);
-        }
+        nSetCastsShadow(mNativeDisplayList, castsShadow);
     }
 
     /**
@@ -485,9 +375,7 @@ public class DisplayList {
      * If set to true, camera distance will be ignored. Defaults to false.
      */
     public void setUsesGlobalCamera(boolean usesGlobalCamera) {
-        if (hasNativeDisplayList()) {
-            nSetUsesGlobalCamera(mFinalizer.mNativeDisplayList, usesGlobalCamera);
-        }
+        nSetUsesGlobalCamera(mNativeDisplayList, usesGlobalCamera);
     }
 
     /**
@@ -499,41 +387,8 @@ public class DisplayList {
      * @see #getMatrix(android.graphics.Matrix)
      * @see #getMatrix()
      */
-    public void setMatrix(Matrix matrix) {
-        if (hasNativeDisplayList()) {
-            nSetStaticMatrix(mFinalizer.mNativeDisplayList, matrix.native_instance);
-        }
-    }
-
-    /**
-     * Returns the static matrix set on this display list.
-     *
-     * @return A new {@link Matrix} instance populated with this display list's static
-     *         matrix
-     *
-     * @see #getMatrix(android.graphics.Matrix)
-     * @see #setMatrix(android.graphics.Matrix)
-     */
-    public Matrix getMatrix() {
-        return getMatrix(new Matrix());
-    }
-
-    /**
-     * Copies this display list's static matrix into the specified matrix.
-     *
-     * @param matrix The {@link Matrix} instance in which to copy this display
-     *               list's static matrix. Cannot be null
-     *
-     * @return The <code>matrix</code> parameter, for convenience
-     *
-     * @see #getMatrix()
-     * @see #setMatrix(android.graphics.Matrix)
-     */
-    public Matrix getMatrix(Matrix matrix) {
-        if (hasNativeDisplayList()) {
-            nGetMatrix(mFinalizer.mNativeDisplayList, matrix.native_instance);
-        }
-        return matrix;
+    public void setStaticMatrix(Matrix matrix) {
+        nSetStaticMatrix(mNativeDisplayList, matrix.native_instance);
     }
 
     /**
@@ -547,10 +402,8 @@ public class DisplayList {
      * @hide
      */
     public void setAnimationMatrix(Matrix matrix) {
-        if (hasNativeDisplayList()) {
-            nSetAnimationMatrix(mFinalizer.mNativeDisplayList,
-                    (matrix != null) ? matrix.native_instance : 0);
-        }
+        nSetAnimationMatrix(mNativeDisplayList,
+                (matrix != null) ? matrix.native_instance : 0);
     }
 
     /**
@@ -562,9 +415,7 @@ public class DisplayList {
      * @see #getAlpha()
      */
     public void setAlpha(float alpha) {
-        if (hasNativeDisplayList()) {
-            nSetAlpha(mFinalizer.mNativeDisplayList, alpha);
-        }
+        nSetAlpha(mNativeDisplayList, alpha);
     }
 
     /**
@@ -575,10 +426,7 @@ public class DisplayList {
      * @see #setAlpha(float)
      */
     public float getAlpha() {
-        if (hasNativeDisplayList()) {
-            return nGetAlpha(mFinalizer.mNativeDisplayList);
-        }
-        return 1.0f;
+        return nGetAlpha(mNativeDisplayList);
     }
 
     /**
@@ -593,9 +441,7 @@ public class DisplayList {
      * @see #hasOverlappingRendering()
      */
     public void setHasOverlappingRendering(boolean hasOverlappingRendering) {
-        if (hasNativeDisplayList()) {
-            nSetHasOverlappingRendering(mFinalizer.mNativeDisplayList, hasOverlappingRendering);
-        }
+        nSetHasOverlappingRendering(mNativeDisplayList, hasOverlappingRendering);
     }
 
     /**
@@ -607,10 +453,7 @@ public class DisplayList {
      */
     public boolean hasOverlappingRendering() {
         //noinspection SimplifiableIfStatement
-        if (hasNativeDisplayList()) {
-            return nHasOverlappingRendering(mFinalizer.mNativeDisplayList);
-        }
-        return true;
+        return nHasOverlappingRendering(mNativeDisplayList);
     }
 
     /**
@@ -622,9 +465,7 @@ public class DisplayList {
      * @see #getTranslationX()
      */
     public void setTranslationX(float translationX) {
-        if (hasNativeDisplayList()) {
-            nSetTranslationX(mFinalizer.mNativeDisplayList, translationX);
-        }
+        nSetTranslationX(mNativeDisplayList, translationX);
     }
 
     /**
@@ -633,10 +474,7 @@ public class DisplayList {
      * @see #setTranslationX(float)
      */
     public float getTranslationX() {
-        if (hasNativeDisplayList()) {
-            return nGetTranslationX(mFinalizer.mNativeDisplayList);
-        }
-        return 0.0f;
+        return nGetTranslationX(mNativeDisplayList);
     }
 
     /**
@@ -648,9 +486,7 @@ public class DisplayList {
      * @see #getTranslationY()
      */
     public void setTranslationY(float translationY) {
-        if (hasNativeDisplayList()) {
-            nSetTranslationY(mFinalizer.mNativeDisplayList, translationY);
-        }
+        nSetTranslationY(mNativeDisplayList, translationY);
     }
 
     /**
@@ -659,10 +495,7 @@ public class DisplayList {
      * @see #setTranslationY(float)
      */
     public float getTranslationY() {
-        if (hasNativeDisplayList()) {
-            return nGetTranslationY(mFinalizer.mNativeDisplayList);
-        }
-        return 0.0f;
+        return nGetTranslationY(mNativeDisplayList);
     }
 
     /**
@@ -672,9 +505,7 @@ public class DisplayList {
      * @see #getTranslationZ()
      */
     public void setTranslationZ(float translationZ) {
-        if (hasNativeDisplayList()) {
-            nSetTranslationZ(mFinalizer.mNativeDisplayList, translationZ);
-        }
+        nSetTranslationZ(mNativeDisplayList, translationZ);
     }
 
     /**
@@ -683,10 +514,7 @@ public class DisplayList {
      * @see #setTranslationZ(float)
      */
     public float getTranslationZ() {
-        if (hasNativeDisplayList()) {
-            return nGetTranslationZ(mFinalizer.mNativeDisplayList);
-        }
-        return 0.0f;
+        return nGetTranslationZ(mNativeDisplayList);
     }
 
     /**
@@ -698,9 +526,7 @@ public class DisplayList {
      * @see #getRotation()
      */
     public void setRotation(float rotation) {
-        if (hasNativeDisplayList()) {
-            nSetRotation(mFinalizer.mNativeDisplayList, rotation);
-        }
+        nSetRotation(mNativeDisplayList, rotation);
     }
 
     /**
@@ -709,10 +535,7 @@ public class DisplayList {
      * @see #setRotation(float)
      */
     public float getRotation() {
-        if (hasNativeDisplayList()) {
-            return nGetRotation(mFinalizer.mNativeDisplayList);
-        }
-        return 0.0f;
+        return nGetRotation(mNativeDisplayList);
     }
 
     /**
@@ -724,9 +547,7 @@ public class DisplayList {
      * @see #getRotationX()
      */
     public void setRotationX(float rotationX) {
-        if (hasNativeDisplayList()) {
-            nSetRotationX(mFinalizer.mNativeDisplayList, rotationX);
-        }
+        nSetRotationX(mNativeDisplayList, rotationX);
     }
 
     /**
@@ -735,10 +556,7 @@ public class DisplayList {
      * @see #setRotationX(float)
      */
     public float getRotationX() {
-        if (hasNativeDisplayList()) {
-            return nGetRotationX(mFinalizer.mNativeDisplayList);
-        }
-        return 0.0f;
+        return nGetRotationX(mNativeDisplayList);
     }
 
     /**
@@ -750,9 +568,7 @@ public class DisplayList {
      * @see #getRotationY()
      */
     public void setRotationY(float rotationY) {
-        if (hasNativeDisplayList()) {
-            nSetRotationY(mFinalizer.mNativeDisplayList, rotationY);
-        }
+        nSetRotationY(mNativeDisplayList, rotationY);
     }
 
     /**
@@ -761,10 +577,7 @@ public class DisplayList {
      * @see #setRotationY(float)
      */
     public float getRotationY() {
-        if (hasNativeDisplayList()) {
-            return nGetRotationY(mFinalizer.mNativeDisplayList);
-        }
-        return 0.0f;
+        return nGetRotationY(mNativeDisplayList);
     }
 
     /**
@@ -776,9 +589,7 @@ public class DisplayList {
      * @see #getScaleX()
      */
     public void setScaleX(float scaleX) {
-        if (hasNativeDisplayList()) {
-            nSetScaleX(mFinalizer.mNativeDisplayList, scaleX);
-        }
+        nSetScaleX(mNativeDisplayList, scaleX);
     }
 
     /**
@@ -787,10 +598,7 @@ public class DisplayList {
      * @see #setScaleX(float)
      */
     public float getScaleX() {
-        if (hasNativeDisplayList()) {
-            return nGetScaleX(mFinalizer.mNativeDisplayList);
-        }
-        return 1.0f;
+        return nGetScaleX(mNativeDisplayList);
     }
 
     /**
@@ -802,9 +610,7 @@ public class DisplayList {
      * @see #getScaleY()
      */
     public void setScaleY(float scaleY) {
-        if (hasNativeDisplayList()) {
-            nSetScaleY(mFinalizer.mNativeDisplayList, scaleY);
-        }
+        nSetScaleY(mNativeDisplayList, scaleY);
     }
 
     /**
@@ -813,10 +619,7 @@ public class DisplayList {
      * @see #setScaleY(float)
      */
     public float getScaleY() {
-        if (hasNativeDisplayList()) {
-            return nGetScaleY(mFinalizer.mNativeDisplayList);
-        }
-        return 1.0f;
+        return nGetScaleY(mNativeDisplayList);
     }
 
     /**
@@ -836,11 +639,9 @@ public class DisplayList {
     public void setTransformationInfo(float alpha,
             float translationX, float translationY, float translationZ,
             float rotation, float rotationX, float rotationY, float scaleX, float scaleY) {
-        if (hasNativeDisplayList()) {
-            nSetTransformationInfo(mFinalizer.mNativeDisplayList, alpha,
-                    translationX, translationY, translationZ,
-                    rotation, rotationX, rotationY, scaleX, scaleY);
-        }
+        nSetTransformationInfo(mNativeDisplayList, alpha,
+                translationX, translationY, translationZ,
+                rotation, rotationX, rotationY, scaleX, scaleY);
     }
 
     /**
@@ -852,9 +653,7 @@ public class DisplayList {
      * @see #getPivotX()
      */
     public void setPivotX(float pivotX) {
-        if (hasNativeDisplayList()) {
-            nSetPivotX(mFinalizer.mNativeDisplayList, pivotX);
-        }
+        nSetPivotX(mNativeDisplayList, pivotX);
     }
 
     /**
@@ -863,10 +662,7 @@ public class DisplayList {
      * @see #setPivotX(float)
      */
     public float getPivotX() {
-        if (hasNativeDisplayList()) {
-            return nGetPivotX(mFinalizer.mNativeDisplayList);
-        }
-        return 0.0f;
+        return nGetPivotX(mNativeDisplayList);
     }
 
     /**
@@ -878,9 +674,7 @@ public class DisplayList {
      * @see #getPivotY()
      */
     public void setPivotY(float pivotY) {
-        if (hasNativeDisplayList()) {
-            nSetPivotY(mFinalizer.mNativeDisplayList, pivotY);
-        }
+        nSetPivotY(mNativeDisplayList, pivotY);
     }
 
     /**
@@ -889,10 +683,7 @@ public class DisplayList {
      * @see #setPivotY(float)
      */
     public float getPivotY() {
-        if (hasNativeDisplayList()) {
-            return nGetPivotY(mFinalizer.mNativeDisplayList);
-        }
-        return 0.0f;
+        return nGetPivotY(mNativeDisplayList);
     }
 
     /**
@@ -906,9 +697,7 @@ public class DisplayList {
      * @see #getCameraDistance()
      */
     public void setCameraDistance(float distance) {
-        if (hasNativeDisplayList()) {
-            nSetCameraDistance(mFinalizer.mNativeDisplayList, distance);
-        }
+        nSetCameraDistance(mNativeDisplayList, distance);
     }
 
     /**
@@ -917,10 +706,7 @@ public class DisplayList {
      * @see #setCameraDistance(float)
      */
     public float getCameraDistance() {
-        if (hasNativeDisplayList()) {
-            return nGetCameraDistance(mFinalizer.mNativeDisplayList);
-        }
-        return 0.0f;
+        return nGetCameraDistance(mNativeDisplayList);
     }
 
     /**
@@ -932,9 +718,7 @@ public class DisplayList {
      * @see #getLeft()
      */
     public void setLeft(int left) {
-        if (hasNativeDisplayList()) {
-            nSetLeft(mFinalizer.mNativeDisplayList, left);
-        }
+        nSetLeft(mNativeDisplayList, left);
     }
 
     /**
@@ -943,10 +727,7 @@ public class DisplayList {
      * @see #setLeft(int)
      */
     public float getLeft() {
-        if (hasNativeDisplayList()) {
-            return nGetLeft(mFinalizer.mNativeDisplayList);
-        }
-        return 0.0f;
+        return nGetLeft(mNativeDisplayList);
     }
 
     /**
@@ -958,9 +739,7 @@ public class DisplayList {
      * @see #getTop()
      */
     public void setTop(int top) {
-        if (hasNativeDisplayList()) {
-            nSetTop(mFinalizer.mNativeDisplayList, top);
-        }
+        nSetTop(mNativeDisplayList, top);
     }
 
     /**
@@ -969,10 +748,7 @@ public class DisplayList {
      * @see #setTop(int)
      */
     public float getTop() {
-        if (hasNativeDisplayList()) {
-            return nGetTop(mFinalizer.mNativeDisplayList);
-        }
-        return 0.0f;
+        return nGetTop(mNativeDisplayList);
     }
 
     /**
@@ -984,9 +760,7 @@ public class DisplayList {
      * @see #getRight()
      */
     public void setRight(int right) {
-        if (hasNativeDisplayList()) {
-            nSetRight(mFinalizer.mNativeDisplayList, right);
-        }
+        nSetRight(mNativeDisplayList, right);
     }
 
     /**
@@ -995,10 +769,7 @@ public class DisplayList {
      * @see #setRight(int)
      */
     public float getRight() {
-        if (hasNativeDisplayList()) {
-            return nGetRight(mFinalizer.mNativeDisplayList);
-        }
-        return 0.0f;
+        return nGetRight(mNativeDisplayList);
     }
 
     /**
@@ -1010,9 +781,7 @@ public class DisplayList {
      * @see #getBottom()
      */
     public void setBottom(int bottom) {
-        if (hasNativeDisplayList()) {
-            nSetBottom(mFinalizer.mNativeDisplayList, bottom);
-        }
+        nSetBottom(mNativeDisplayList, bottom);
     }
 
     /**
@@ -1021,10 +790,7 @@ public class DisplayList {
      * @see #setBottom(int)
      */
     public float getBottom() {
-        if (hasNativeDisplayList()) {
-            return nGetBottom(mFinalizer.mNativeDisplayList);
-        }
-        return 0.0f;
+        return nGetBottom(mNativeDisplayList);
     }
 
     /**
@@ -1041,9 +807,7 @@ public class DisplayList {
      * @see View#setBottom(int)
      */
     public void setLeftTopRightBottom(int left, int top, int right, int bottom) {
-        if (hasNativeDisplayList()) {
-            nSetLeftTopRightBottom(mFinalizer.mNativeDisplayList, left, top, right, bottom);
-        }
+        nSetLeftTopRightBottom(mNativeDisplayList, left, top, right, bottom);
     }
 
     /**
@@ -1055,9 +819,7 @@ public class DisplayList {
      * @see View#offsetLeftAndRight(int)
      */
     public void offsetLeftAndRight(float offset) {
-        if (hasNativeDisplayList()) {
-            nOffsetLeftAndRight(mFinalizer.mNativeDisplayList, offset);
-        }
+        nOffsetLeftAndRight(mNativeDisplayList, offset);
     }
 
     /**
@@ -1069,9 +831,7 @@ public class DisplayList {
      * @see View#offsetTopAndBottom(int)
      */
     public void offsetTopAndBottom(float offset) {
-        if (hasNativeDisplayList()) {
-            nOffsetTopAndBottom(mFinalizer.mNativeDisplayList, offset);
-        }
+        nOffsetTopAndBottom(mNativeDisplayList, offset);
     }
 
     /**
@@ -1081,22 +841,19 @@ public class DisplayList {
      * @hide
      */
     public void output() {
-        if (hasNativeDisplayList()) {
-            nOutput(mFinalizer.mNativeDisplayList);
-        }
+        nOutput(mNativeDisplayList);
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // Native methods
     ///////////////////////////////////////////////////////////////////////////
 
+    private static native long nCreate();
     private static native void nDestroyDisplayList(long displayList);
-    private static native int nGetDisplayListSize(long displayList);
     private static native void nSetDisplayListName(long displayList, String name);
 
     // Properties
 
-    private static native void nReset(long displayList);
     private static native void nOffsetTopAndBottom(long displayList, float offset);
     private static native void nOffsetLeftAndRight(long displayList, float offset);
     private static native void nSetLeftTopRightBottom(long displayList, int left, int top,
@@ -1135,7 +892,6 @@ public class DisplayList {
     private static native void nSetAnimationMatrix(long displayList, long animationMatrix);
 
     private static native boolean nHasOverlappingRendering(long displayList);
-    private static native void nGetMatrix(long displayList, long matrix);
     private static native float nGetAlpha(long displayList);
     private static native float nGetLeft(long displayList);
     private static native float nGetTop(long displayList);
@@ -1158,20 +914,12 @@ public class DisplayList {
     // Finalization
     ///////////////////////////////////////////////////////////////////////////
 
-    private static class DisplayListFinalizer {
-        final long mNativeDisplayList;
-
-        public DisplayListFinalizer(long nativeDisplayList) {
-            mNativeDisplayList = nativeDisplayList;
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            try {
-                nDestroyDisplayList(mNativeDisplayList);
-            } finally {
-                super.finalize();
-            }
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            nDestroyDisplayList(mNativeDisplayList);
+        } finally {
+            super.finalize();
         }
     }
 }

@@ -148,6 +148,11 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
+    void swapDisplayListData(long displayList, long newData) {
+        nSwapDisplayListData(mNativeProxy, displayList, newData);
+    }
+
+    @Override
     void draw(View view, AttachInfo attachInfo, HardwareDrawCallbacks callbacks, Rect dirty) {
         attachInfo.mIgnoreDirtyState = true;
         attachInfo.mDrawingTime = SystemClock.uptimeMillis();
@@ -252,6 +257,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native boolean nInitialize(long nativeProxy, Surface window);
     private static native void nUpdateSurface(long nativeProxy, Surface window);
     private static native void nSetup(long nativeProxy, int width, int height);
+    private static native void nSwapDisplayListData(long nativeProxy, long displayList,
+            long newData);
     private static native void nDrawDisplayList(long nativeProxy, long displayList,
             int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
     private static native void nRunWithGlContext(long nativeProxy, Runnable runnable);

@@ -61,7 +61,7 @@ public:
     ANDROID_API DisplayListRenderer();
     virtual ~DisplayListRenderer();
 
-    ANDROID_API DisplayList* getDisplayList(DisplayList* displayList);
+    ANDROID_API DisplayListData* finishRecording();
 
     virtual bool isRecording() const { return true; }
 
@@ -162,59 +162,6 @@ public:
     // TODO: rename for consistency
     virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);
 
-// ----------------------------------------------------------------------------
-// DisplayList / resource management
-// ----------------------------------------------------------------------------
-    ANDROID_API void reset();
-
-    sp<DisplayListData> getDisplayListData() const {
-        return mDisplayListData;
-    }
-
-    const Vector<const SkBitmap*>& getBitmapResources() const {
-        return mBitmapResources;
-    }
-
-    const Vector<const SkBitmap*>& getOwnedBitmapResources() const {
-        return mOwnedBitmapResources;
-    }
-
-    const Vector<const Res_png_9patch*>& getPatchResources() const {
-        return mPatchResources;
-    }
-
-    const Vector<SkiaShader*>& getShaders() const {
-        return mShaders;
-    }
-
-    const Vector<const SkPaint*>& getPaints() const {
-        return mPaints;
-    }
-
-    const Vector<const SkPath*>& getPaths() const {
-        return mPaths;
-    }
-
-    const SortedVector<const SkPath*>& getSourcePaths() const {
-        return mSourcePaths;
-    }
-
-    const Vector<const SkRegion*>& getRegions() const {
-        return mRegions;
-    }
-
-    const Vector<Layer*>& getLayers() const {
-        return mLayers;
-    }
-
-    const Vector<const SkMatrix*>& getMatrices() const {
-        return mMatrices;
-    }
-
-    uint32_t getFunctorCount() const {
-        return mFunctorCount;
-    }
-
 private:
     void insertRestoreToCount();
     void insertTranslate();
@@ -252,11 +199,11 @@ private:
             pathCopy = newPathCopy;
             // replaceValueFor() performs an add if the entry doesn't exist
             mPathMap.replaceValueFor(path, pathCopy);
-            mPaths.add(pathCopy);
+            mDisplayListData->paths.add(pathCopy);
         }
-        if (mSourcePaths.indexOf(path) < 0) {
+        if (mDisplayListData->sourcePaths.indexOf(path) < 0) {
             mCaches.resourceCache.incrementRefcount(path);
-            mSourcePaths.add(path);
+            mDisplayListData->sourcePaths.add(path);
         }
         return pathCopy;
     }
@@ -271,7 +218,7 @@ private:
             paintCopy = new SkPaint(*paint);
             // replaceValueFor() performs an add if the entry doesn't exist
             mPaintMap.replaceValueFor(paint, paintCopy);
-            mPaints.add(paintCopy);
+            mDisplayListData->paints.add(paintCopy);
         }
 
         return paintCopy;
@@ -288,7 +235,7 @@ private:
             regionCopy = new SkRegion(*region);
             // replaceValueFor() performs an add if the entry doesn't exist
             mRegionMap.replaceValueFor(region, regionCopy);
-            mRegions.add(regionCopy);
+            mDisplayListData->regions.add(regionCopy);
         }
 
         return regionCopy;
@@ -299,14 +246,14 @@ private:
             // Copying the matrix is cheap and prevents against the user changing
             // the original matrix before the operation that uses it
             const SkMatrix* copy = new SkMatrix(*matrix);
-            mMatrices.add(copy);
+            mDisplayListData->matrices.add(copy);
             return copy;
         }
         return matrix;
     }
 
     inline Layer* refLayer(Layer* layer) {
-        mLayers.add(layer);
+        mDisplayListData->layers.add(layer);
         mCaches.resourceCache.incrementRefcount(layer);
         return layer;
     }
@@ -316,13 +263,13 @@ private:
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its
         // contents, and drawing again. The only fix would be to always copy it the first time,
         // which doesn't seem worth the extra cycles for this unlikely case.
-        mBitmapResources.add(bitmap);
+        mDisplayListData->bitmapResources.add(bitmap);
         mCaches.resourceCache.incrementRefcount(bitmap);
         return bitmap;
     }
 
     inline const SkBitmap* refBitmapData(const SkBitmap* bitmap) {
-        mOwnedBitmapResources.add(bitmap);
+        mDisplayListData->ownedBitmapResources.add(bitmap);
         mCaches.resourceCache.incrementRefcount(bitmap);
         return bitmap;
     }
@@ -336,52 +283,31 @@ private:
             shaderCopy = shader->copy();
             // replaceValueFor() performs an add if the entry doesn't exist
             mShaderMap.replaceValueFor(shader, shaderCopy);
-            mShaders.add(shaderCopy);
+            mDisplayListData->shaders.add(shaderCopy);
             mCaches.resourceCache.incrementRefcount(shaderCopy);
         }
         return shaderCopy;
     }
 
     inline const Res_png_9patch* refPatch(const Res_png_9patch* patch) {
-        mPatchResources.add(patch);
+        mDisplayListData->patchResources.add(patch);
         mCaches.resourceCache.incrementRefcount(patch);
         return patch;
     }
 
-    // TODO: move these to DisplayListData
-    Vector<const SkBitmap*> mBitmapResources;
-    Vector<const SkBitmap*> mOwnedBitmapResources;
-    Vector<const Res_png_9patch*> mPatchResources;
-
-    Vector<const SkPaint*> mPaints;
     DefaultKeyedVector<const SkPaint*, const SkPaint*> mPaintMap;
-
-    Vector<const SkPath*> mPaths;
     DefaultKeyedVector<const SkPath*, const SkPath*> mPathMap;
-
-    SortedVector<const SkPath*> mSourcePaths;
-
-    Vector<const SkRegion*> mRegions;
     DefaultKeyedVector<const SkRegion*, const SkRegion*> mRegionMap;
-
-    Vector<SkiaShader*> mShaders;
     DefaultKeyedVector<SkiaShader*, SkiaShader*> mShaderMap;
-
-    Vector<const SkMatrix*> mMatrices;
-
-    Vector<Layer*> mLayers;
 
     int mRestoreSaveCount;
 
     Caches& mCaches;
-    sp<DisplayListData> mDisplayListData;
+    DisplayListData* mDisplayListData;
 
     float mTranslateX;
     float mTranslateY;
     bool mHasTranslate;
-    bool mHasDrawOps;
-
-    uint32_t mFunctorCount;
 
     friend class DisplayList;
 
