@@ -867,7 +867,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     int[] uidArray = new int[] { res.pkg.applicationInfo.uid };
                                     ArrayList<String> pkgList = new ArrayList<String>(1);
                                     pkgList.add(res.pkg.applicationInfo.packageName);
-                                    sendResourcesChangedBroadcast(true, false,
+                                    sendResourcesChangedBroadcast(true, true,
                                             pkgList,uidArray, null);
                                 }
                             }
@@ -11064,7 +11064,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (uidArr != null) {
                 extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidArr);
             }
-            if (replacing && !mediaStatus) {
+            if (replacing) {
                 extras.putBoolean(Intent.EXTRA_REPLACING, replacing);
             }
             String action = mediaStatus ? Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE
