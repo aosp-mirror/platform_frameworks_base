@@ -36,7 +36,6 @@
 #include <ui/Rect.h>
 #include <ui/Region.h>
 #include <ui/DisplayInfo.h>
-#include <ui/FramebufferNativeWindow.h>
 
 #include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
