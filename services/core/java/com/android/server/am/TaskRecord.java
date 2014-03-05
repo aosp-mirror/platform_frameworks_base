@@ -153,7 +153,7 @@ final class TaskRecord extends ThumbnailHolder {
     ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
         for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
             ActivityRecord r = mActivities.get(activityNdx);
-            if (!r.finishing && r != notTop && stack.okToShow(r)) {
+            if (!r.finishing && r != notTop && stack.okToShowLocked(r)) {
                 return r;
             }
         }

@@ -1249,7 +1249,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
 
         return win.mShowToOwnerOnly
-                && UserHandle.getUserId(win.mOwnerUid) != mService.mCurrentUserId;
+                && !mService.isRelatedToOrCurrentUserLocked(UserHandle.getUserId(win.mOwnerUid));
     }
 
     private static void applyInsets(Region outRegion, Rect frame, Rect inset) {

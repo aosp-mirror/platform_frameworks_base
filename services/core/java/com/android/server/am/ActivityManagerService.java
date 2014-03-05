@@ -1015,6 +1015,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     final ActivityThread mSystemThread;
 
     int mCurrentUserId = 0;
+    int[] mRelatedUserIds = new int[0]; // Accessed by ActivityStack
     private UserManagerService mUserManager;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
@@ -16097,6 +16098,20 @@ public final class ActivityManagerService extends ActivityManagerNative
         return startUser(userId, /* foreground */ false);
     }
 
+    /**
+     * Refreshes the list of users related to the current user when either a
+     * user switch happens or when a new related user is started in the
+     * background.
+     */
+    private void updateRelatedUserIdsLocked() {
+        final List<UserInfo> relatedUsers = getUserManagerLocked().getRelatedUsers(mCurrentUserId);
+        int[] relatedUserIds = new int[relatedUsers.size()]; // relatedUsers will not be null
+        for (int i = 0; i < relatedUserIds.length; i++) {
+            relatedUserIds[i] = relatedUsers.get(i).id;
+        }
+        mRelatedUserIds = relatedUserIds;
+    }
+
     @Override
     public boolean switchUser(final int userId) {
         return startUser(userId, /* foregound */ true);
@@ -16150,12 +16165,15 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 if (foreground) {
                     mCurrentUserId = userId;
-                    mWindowManager.setCurrentUser(userId);
+                    updateRelatedUserIdsLocked();
+                    mWindowManager.setCurrentUser(userId, mRelatedUserIds);
                     // Once the internal notion of the active user has switched, we lock the device
                     // with the option to show the user switcher on the keyguard.
                     mWindowManager.lockNow(null);
                 } else {
                     final Integer currentUserIdInt = Integer.valueOf(mCurrentUserId);
+                    updateRelatedUserIdsLocked();
+                    mWindowManager.updateRelatedUserIds(mRelatedUserIds);
                     mUserLru.remove(currentUserIdInt);
                     mUserLru.add(currentUserIdInt);
                 }

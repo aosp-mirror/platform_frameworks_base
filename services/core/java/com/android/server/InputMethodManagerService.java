@@ -59,6 +59,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -78,6 +79,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
@@ -441,6 +443,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 hideInputMethodMenu();
                 // No need to updateActive
                 return;
+            } else if (Intent.ACTION_USER_ADDED.equals(action)
+                    || Intent.ACTION_USER_REMOVED.equals(action)) {
+                updateRelatedUserIds();
+                return;
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
             }
@@ -642,6 +648,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         broadcastFilter.addAction(Intent.ACTION_SCREEN_ON);
         broadcastFilter.addAction(Intent.ACTION_SCREEN_OFF);
         broadcastFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        broadcastFilter.addAction(Intent.ACTION_USER_ADDED);
+        broadcastFilter.addAction(Intent.ACTION_USER_REMOVED);
         mContext.registerReceiver(new ImmsBroadcastReceiver(), broadcastFilter);
 
         mNotificationShown = false;
@@ -675,6 +683,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // mSettings should be created before buildInputMethodListLocked
         mSettings = new InputMethodSettings(
                 mRes, context.getContentResolver(), mMethodMap, mMethodList, userId);
+        updateRelatedUserIds();
         mFileManager = new InputMethodFileManager(mMethodMap, userId);
         mSwitchingController = new InputMethodSubtypeSwitchingController(mSettings);
         mSwitchingController.resetCircularListLocked(context);
@@ -790,6 +799,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private void switchUserLocked(int newUserId) {
         mSettings.setCurrentUserId(newUserId);
+        updateRelatedUserIds();
         // InputMethodFileManager should be reset when the user is changed
         mFileManager = new InputMethodFileManager(mMethodMap, newUserId);
         final String defaultImiId = mSettings.getSelectedInputMethod();
@@ -808,6 +818,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mContext.getPackageManager(),
                     mSettings.getEnabledInputMethodListLocked());
         }
+    }
+
+    void updateRelatedUserIds() {
+        List<UserInfo> relatedUsers =
+                UserManager.get(mContext).getRelatedUsers(mSettings.getCurrentUserId());
+        int[] relatedUserIds = new int[relatedUsers.size()]; // relatedUsers will not be null
+        for (int i = 0; i < relatedUserIds.length; i++) {
+            relatedUserIds[i] = relatedUsers.get(i).id;
+        }
+        mSettings.setRelatedUserIds(relatedUserIds);
     }
 
     @Override
@@ -905,7 +925,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + mSettings.getCurrentUserId() + ", calling pid = " + Binder.getCallingPid()
                     + InputMethodUtils.getApiCallStack());
         }
-        if (uid == Process.SYSTEM_UID || userId == mSettings.getCurrentUserId()) {
+        if (uid == Process.SYSTEM_UID || mSettings.isRelatedToOrCurrentUser(userId)) {
             return true;
         }
 
