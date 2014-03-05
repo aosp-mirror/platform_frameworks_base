@@ -62,5 +62,11 @@ public enum CallState {
      * the disconnection or communication was lost to the call service currently responsible for
      * this call (e.g., call service crashes).
      */
-    DISCONNECTED;
+    DISCONNECTED,
+
+    /**
+     * Indicates that the call was attempted (mostly in the context of outgoing, at least at the
+     * time of writing) but cancelled before it was successfully connected.
+     */
+    ABORTED;
 }
