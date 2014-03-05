@@ -901,6 +901,14 @@ public final class ContactsContract {
         public static final String PHOTO_THUMBNAIL_URI = "photo_thumb_uri";
 
         /**
+         * Flag that reflects whether the contact exists inside the default directory.
+         * Ie, whether the contact is designed to only be visible outside search.
+         *
+         * @hide
+         */
+        public static final String IN_DEFAULT_DIRECTORY = "in_default_directory";
+
+        /**
          * Flag that reflects the {@link Groups#GROUP_VISIBLE} state of any
          * {@link CommonDataKinds.GroupMembership} for this contact.
          */
