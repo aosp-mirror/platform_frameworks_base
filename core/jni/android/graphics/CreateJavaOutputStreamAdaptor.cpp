@@ -63,9 +63,14 @@ private:
         size_t bytesRead = 0;
         // read the bytes
         do {
-            size_t requested = size;
-            if (requested > fCapacity)
+            jint requested = 0;
+            if (size > static_cast<size_t>(fCapacity)) {
                 requested = fCapacity;
+            } else {
+                // This is safe because requested is clamped to (jint)
+                // fCapacity.
+                requested = static_cast<jint>(size);
+            }
 
             jint n = env->CallIntMethod(fJavaInputStream,
                                         gInputStream_readMethodID, fJavaByteArray, 0, requested);
@@ -120,7 +125,7 @@ private:
     JNIEnv*     fEnv;
     jobject     fJavaInputStream;   // the caller owns this object
     jbyteArray  fJavaByteArray;     // the caller owns this object
-    size_t      fCapacity;
+    jint        fCapacity;
     size_t      fBytesRead;
     bool        fIsAtEnd;
 };
@@ -174,14 +179,18 @@ public:
         fCapacity = env->GetArrayLength(storage);
     }
 
-	virtual bool write(const void* buffer, size_t size) {
+    virtual bool write(const void* buffer, size_t size) {
         JNIEnv* env = fEnv;
         jbyteArray storage = fJavaByteArray;
 
         while (size > 0) {
-            size_t requested = size;
-            if (requested > fCapacity) {
+            jint requested = 0;
+            if (size > static_cast<size_t>(fCapacity)) {
                 requested = fCapacity;
+            } else {
+                // This is safe because requested is clamped to (jint)
+                // fCapacity.
+                requested = static_cast<jint>(size);
             }
 
             env->SetByteArrayRegion(storage, 0, requested,
@@ -216,7 +225,7 @@ private:
     JNIEnv*     fEnv;
     jobject     fJavaOutputStream;  // the caller owns this object
     jbyteArray  fJavaByteArray;     // the caller owns this object
-    size_t      fCapacity;
+    jint        fCapacity;
 };
 
 SkWStream* CreateJavaOutputStreamAdaptor(JNIEnv* env, jobject stream,
