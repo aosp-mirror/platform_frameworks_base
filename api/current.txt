@@ -24310,6 +24310,7 @@ package android.telecomm {
   public final class CallState extends java.lang.Enum {
     method public static android.telecomm.CallState valueOf(java.lang.String);
     method public static final android.telecomm.CallState[] values();
+    enum_constant public static final android.telecomm.CallState ABORTED;
     enum_constant public static final android.telecomm.CallState ACTIVE;
     enum_constant public static final android.telecomm.CallState DIALING;
     enum_constant public static final android.telecomm.CallState DISCONNECTED;
