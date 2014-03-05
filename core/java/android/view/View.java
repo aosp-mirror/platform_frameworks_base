@@ -13128,7 +13128,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private void cleanupDraw() {
         resetDisplayList();
-        mAttachInfo.mViewRootImpl.cancelInvalidate(this);
+        if (mAttachInfo != null) {
+            mAttachInfo.mViewRootImpl.cancelInvalidate(this);
+        }
     }
 
     /**
@@ -15254,9 +15256,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mBackgroundSizeChanged = false;
         }
 
-
         // Attempt to use a display list if requested.
-        if (canvas != null && canvas.isHardwareAccelerated()) {
+        if (canvas.isHardwareAccelerated() && mAttachInfo != null
+                && mAttachInfo.mHardwareRenderer != null) {
             mBackgroundDisplayList = getDrawableDisplayList(background, mBackgroundDisplayList);
 
             final DisplayList displayList = mBackgroundDisplayList;
