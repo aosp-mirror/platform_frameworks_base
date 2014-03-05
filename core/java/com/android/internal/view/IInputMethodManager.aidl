@@ -73,7 +73,7 @@ interface IInputMethodManager {
     boolean switchToNextInputMethod(in IBinder token, boolean onlyCurrentIme);
     boolean shouldOfferSwitchingToNextInputMethod(in IBinder token);
     boolean setInputMethodEnabled(String id, boolean enabled);
-    oneway void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
+    void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     int getInputMethodWindowVisibleHeight();
     oneway void notifyTextCommitted();
 }
