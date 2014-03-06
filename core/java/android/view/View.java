@@ -13110,19 +13110,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #onAttachedToWindow()
      */
     protected void onDetachedFromWindow() {
-    }
-
-    /**
-     * This is a framework-internal mirror of onDetachedFromWindow() that's called
-     * after onDetachedFromWindow().
-     *
-     * If you override this you *MUST* call super.onDetachedFromWindowInternal()!
-     * The super method should be called at the end of the overriden method to ensure
-     * subclasses are destroyed first
-     *
-     * @hide
-     */
-    protected void onDetachedFromWindowInternal() {
         mPrivateFlags &= ~PFLAG_CANCEL_NEXT_UP_EVENT;
         mPrivateFlags3 &= ~PFLAG3_IS_LAID_OUT;
 
@@ -13310,7 +13297,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         onDetachedFromWindow();
-        onDetachedFromWindowInternal();
 
         ListenerInfo li = mListenerInfo;
         final CopyOnWriteArrayList<OnAttachStateChangeListener> listeners =
