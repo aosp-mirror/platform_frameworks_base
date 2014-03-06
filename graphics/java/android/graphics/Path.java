@@ -168,6 +168,21 @@ public class Path {
     }
 
     /**
+     * Returns the path's convexity, as defined by the content of the path.
+     * <p>
+     * A path is convex if it has a single contour, and only ever curves in a
+     * single direction.
+     * <p>
+     * This function will calculate the convexity of the path from its control
+     * points, and cache the result.
+     *
+     * @return True if the path is convex.
+     */
+    public boolean isConvex() {
+        return native_isConvex(mNativePath);
+    }
+
+    /**
      * Enum for the ways a path may be filled.
      */
     public enum FillType {
@@ -224,7 +239,7 @@ public class Path {
     public void setFillType(FillType ft) {
         native_setFillType(mNativePath, ft.nativeInt);
     }
-    
+
     /**
      * Returns true if the filltype is one of the INVERSE variants
      *
@@ -232,18 +247,18 @@ public class Path {
      */
     public boolean isInverseFillType() {
         final int ft = native_getFillType(mNativePath);
-        return (ft & 2) != 0;
+        return (ft & FillType.INVERSE_WINDING.nativeInt) != 0;
     }
-    
+
     /**
      * Toggles the INVERSE state of the filltype
      */
     public void toggleInverseFillType() {
         int ft = native_getFillType(mNativePath);
-        ft ^= 2;
+        ft ^= FillType.INVERSE_WINDING.nativeInt;
         native_setFillType(mNativePath, ft);
     }
-    
+
     /**
      * Returns true if the path is empty (contains no lines or curves)
      *
@@ -719,6 +734,7 @@ public class Path {
     private static native void native_reset(long nPath);
     private static native void native_rewind(long nPath);
     private static native void native_set(long native_dst, long native_src);
+    private static native boolean native_isConvex(long nPath);
     private static native int native_getFillType(long nPath);
     private static native void native_setFillType(long nPath, int ft);
     private static native boolean native_isEmpty(long nPath);

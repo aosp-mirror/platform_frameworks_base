@@ -10838,11 +10838,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Sets the outline of the view, which defines the shape of the shadow it
      * casts, and can used for clipping.
      * <p>
+     * The outline path of a View must be {@link android.graphics.Path#isConvex() convex}.
+     * <p>
      * If the outline is not set, or {@link Path#isEmpty()}, shadows will be
      * cast from the bounds of the View, and clipToOutline will be ignored.
      *
-     * @param outline The new outline of the view. Must be non-null.
+     * @param outline The new outline of the view. Must be non-null, and convex.
      *
+     * @see #setCastsShadow(boolean)
      * @see #getOutline(Path)
      * @see #getClipToOutline()
      * @see #setClipToOutline(boolean)
@@ -10850,6 +10853,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void setOutline(@NonNull Path outline) {
         if (outline == null) {
             throw new IllegalArgumentException("Path must be non-null");
+        }
+        if (!outline.isConvex()) {
+            throw new IllegalArgumentException("Path must be convex");
         }
         // always copy the path since caller may reuse
         if (mOutline == null) {
