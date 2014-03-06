@@ -79,6 +79,8 @@ public class BatteryStatsHelper {
     private int mStatsType = BatteryStats.STATS_SINCE_CHARGED;
     private int mAsUser = 0;
 
+    long mRawRealtime;
+    long mRawUptime;
     long mBatteryRealtime;
     long mBatteryUptime;
     long mTypeBatteryRealtime;
@@ -157,7 +159,7 @@ public class BatteryStatsHelper {
                 SystemClock.uptimeMillis() * 1000);
     }
 
-    public void refreshStats(int statsType, int asUser, long rawRealtimeNano, long rawUptimeNano) {
+    public void refreshStats(int statsType, int asUser, long rawRealtimeUs, long rawUptimeUs) {
         // Initialize mStats if necessary.
         getStats();
 
@@ -182,14 +184,16 @@ public class BatteryStatsHelper {
 
         mStatsType = statsType;
         mAsUser = asUser;
-        mBatteryUptime = mStats.getBatteryUptime(rawUptimeNano);
-        mBatteryRealtime = mStats.getBatteryRealtime(rawRealtimeNano);
-        mTypeBatteryUptime = mStats.computeBatteryUptime(rawUptimeNano, mStatsType);
-        mTypeBatteryRealtime = mStats.computeBatteryRealtime(rawRealtimeNano, mStatsType);
+        mRawUptime = rawUptimeUs;
+        mRawRealtime = rawRealtimeUs;
+        mBatteryUptime = mStats.getBatteryUptime(rawUptimeUs);
+        mBatteryRealtime = mStats.getBatteryRealtime(rawRealtimeUs);
+        mTypeBatteryUptime = mStats.computeBatteryUptime(rawUptimeUs, mStatsType);
+        mTypeBatteryRealtime = mStats.computeBatteryRealtime(rawRealtimeUs, mStatsType);
 
         if (DEBUG) {
-            Log.d(TAG, "Raw time: realtime=" + (rawRealtimeNano/1000) + " uptime="
-                    + (rawUptimeNano/1000));
+            Log.d(TAG, "Raw time: realtime=" + (rawRealtimeUs/1000) + " uptime="
+                    + (rawUptimeUs/1000));
             Log.d(TAG, "Battery time: realtime=" + (mBatteryRealtime/1000) + " uptime="
                     + (mBatteryUptime/1000));
             Log.d(TAG, "Battery type time: realtime=" + (mTypeBatteryRealtime/1000) + " uptime="
@@ -266,7 +270,7 @@ public class BatteryStatsHelper {
         final double mobilePowerPerPacket = getMobilePowerPerPacket();
         final double mobilePowerPerMs = getMobilePowerPerMs();
         final double wifiPowerPerPacket = getWifiPowerPerPacket();
-        long appWakelockTime = 0;
+        long appWakelockTimeUs = 0;
         BatterySipper osApp = null;
         mStatsPeriod = mTypeBatteryRealtime;
         SparseArray<? extends Uid> uidStats = mStats.getUidStats();
@@ -342,11 +346,11 @@ public class BatteryStatsHelper {
                 // are canceled when the user turns the screen off.
                 BatteryStats.Timer timer = wakelock.getWakeTime(BatteryStats.WAKE_TYPE_PARTIAL);
                 if (timer != null) {
-                    wakelockTime += timer.getTotalTimeLocked(mBatteryRealtime, which);
+                    wakelockTime += timer.getTotalTimeLocked(mRawRealtime, which);
                 }
             }
+            appWakelockTimeUs += wakelockTime;
             wakelockTime /= 1000; // convert to millis
-            appWakelockTime += wakelockTime;
 
             // Add cost of holding a wake lock
             p = (wakelockTime
@@ -387,7 +391,7 @@ public class BatteryStatsHelper {
             power += p;
 
             // Add cost of keeping WIFI running.
-            long wifiRunningTimeMs = u.getWifiRunningTime(mBatteryRealtime, which) / 1000;
+            long wifiRunningTimeMs = u.getWifiRunningTime(mRawRealtime, which) / 1000;
             mAppWifiRunning += wifiRunningTimeMs;
             p = (wifiRunningTimeMs
                     * mPowerProfile.getAveragePower(PowerProfile.POWER_WIFI_ON)) / (60*60*1000);
@@ -396,14 +400,14 @@ public class BatteryStatsHelper {
             power += p;
 
             // Add cost of WIFI scans
-            long wifiScanTimeMs = u.getWifiScanTime(mBatteryRealtime, which) / 1000;
+            long wifiScanTimeMs = u.getWifiScanTime(mRawRealtime, which) / 1000;
             p = (wifiScanTimeMs
                     * mPowerProfile.getAveragePower(PowerProfile.POWER_WIFI_SCAN)) / (60*60*1000);
             if (DEBUG) Log.d(TAG, "UID " + u.getUid() + ": wifi scan " + wifiScanTimeMs
                     + " power=" + makemAh(p));
             power += p;
             for (int bin = 0; bin < BatteryStats.Uid.NUM_WIFI_BATCHED_SCAN_BINS; bin++) {
-                long batchScanTimeMs = u.getWifiBatchedScanTime(bin, mBatteryRealtime, which) / 1000;
+                long batchScanTimeMs = u.getWifiBatchedScanTime(bin, mRawRealtime, which) / 1000;
                 p = ((batchScanTimeMs
                         * mPowerProfile.getAveragePower(PowerProfile.POWER_WIFI_BATCHED_SCAN, bin))
                     ) / (60*60*1000);
@@ -419,7 +423,7 @@ public class BatteryStatsHelper {
                 Uid.Sensor sensor = sensorEntry.getValue();
                 int sensorHandle = sensor.getHandle();
                 BatteryStats.Timer timer = sensor.getSensorTime();
-                long sensorTime = timer.getTotalTimeLocked(mBatteryRealtime, which) / 1000;
+                long sensorTime = timer.getTotalTimeLocked(mRawRealtime, which) / 1000;
                 double multiplier = 0;
                 switch (sensorHandle) {
                     case Uid.Sensor.GPS:
@@ -505,8 +509,8 @@ public class BatteryStatsHelper {
         // this remainder to the OS, if possible.
         if (osApp != null) {
             long wakeTimeMillis = mBatteryUptime / 1000;
-            wakeTimeMillis -= appWakelockTime
-                    + (mStats.getScreenOnTime(mBatteryRealtime, which) / 1000);
+            wakeTimeMillis -= (appWakelockTimeUs / 1000)
+                    + (mStats.getScreenOnTime(mRawRealtime, which) / 1000);
             if (wakeTimeMillis > 0) {
                 double power = (wakeTimeMillis
                         * mPowerProfile.getAveragePower(PowerProfile.POWER_CPU_AWAKE))
@@ -523,7 +527,7 @@ public class BatteryStatsHelper {
     }
 
     private void addPhoneUsage() {
-        long phoneOnTimeMs = mStats.getPhoneOnTime(mBatteryRealtime, mStatsType) / 1000;
+        long phoneOnTimeMs = mStats.getPhoneOnTime(mRawRealtime, mStatsType) / 1000;
         double phoneOnPower = mPowerProfile.getAveragePower(PowerProfile.POWER_RADIO_ACTIVE)
                 * phoneOnTimeMs / (60*60*1000);
         if (phoneOnPower != 0) {
@@ -533,14 +537,14 @@ public class BatteryStatsHelper {
 
     private void addScreenUsage() {
         double power = 0;
-        long screenOnTimeMs = mStats.getScreenOnTime(mBatteryRealtime, mStatsType) / 1000;
+        long screenOnTimeMs = mStats.getScreenOnTime(mRawRealtime, mStatsType) / 1000;
         power += screenOnTimeMs * mPowerProfile.getAveragePower(PowerProfile.POWER_SCREEN_ON);
         final double screenFullPower =
                 mPowerProfile.getAveragePower(PowerProfile.POWER_SCREEN_FULL);
         for (int i = 0; i < BatteryStats.NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             double screenBinPower = screenFullPower * (i + 0.5f)
                     / BatteryStats.NUM_SCREEN_BRIGHTNESS_BINS;
-            long brightnessTime = mStats.getScreenBrightnessTime(i, mBatteryRealtime, mStatsType)
+            long brightnessTime = mStats.getScreenBrightnessTime(i, mRawRealtime, mStatsType)
                     / 1000;
             double p = screenBinPower*brightnessTime;
             if (DEBUG && p != 0) {
@@ -561,7 +565,7 @@ public class BatteryStatsHelper {
         long signalTimeMs = 0;
         long noCoverageTimeMs = 0;
         for (int i = 0; i < BINS; i++) {
-            long strengthTimeMs = mStats.getPhoneSignalStrengthTime(i, mBatteryRealtime, mStatsType)
+            long strengthTimeMs = mStats.getPhoneSignalStrengthTime(i, mRawRealtime, mStatsType)
                     / 1000;
             double p = (strengthTimeMs * mPowerProfile.getAveragePower(PowerProfile.POWER_RADIO_ON, i))
                         / (60*60*1000);
@@ -575,7 +579,7 @@ public class BatteryStatsHelper {
                 noCoverageTimeMs = strengthTimeMs;
             }
         }
-        long scanningTimeMs = mStats.getPhoneSignalScanningTime(mBatteryRealtime, mStatsType)
+        long scanningTimeMs = mStats.getPhoneSignalScanningTime(mRawRealtime, mStatsType)
                 / 1000;
         double p = (scanningTimeMs * mPowerProfile.getAveragePower(
                         PowerProfile.POWER_RADIO_SCANNING))
@@ -584,7 +588,7 @@ public class BatteryStatsHelper {
             Log.d(TAG, "Cell radio scanning: time=" + scanningTimeMs + " power=" + makemAh(p));
         }
         power += p;
-        long radioActiveTimeUs = mStats.getMobileRadioActiveTime(mBatteryRealtime, mStatsType);
+        long radioActiveTimeUs = mStats.getMobileRadioActiveTime(mRawRealtime, mStatsType);
         long remainingActiveTime = (radioActiveTimeUs - mAppMobileActive) / 1000;
         if (remainingActiveTime > 0) {
             power += getMobilePowerPerMs() * remainingActiveTime;
@@ -624,8 +628,8 @@ public class BatteryStatsHelper {
     }
 
     private void addWiFiUsage() {
-        long onTimeMs = mStats.getWifiOnTime(mBatteryRealtime, mStatsType) / 1000;
-        long runningTimeMs = mStats.getGlobalWifiRunningTime(mBatteryRealtime, mStatsType) / 1000;
+        long onTimeMs = mStats.getWifiOnTime(mRawRealtime, mStatsType) / 1000;
+        long runningTimeMs = mStats.getGlobalWifiRunningTime(mRawRealtime, mStatsType) / 1000;
         if (DEBUG) Log.d(TAG, "WIFI runningTime=" + runningTimeMs
                 + " app runningTime=" + mAppWifiRunning);
         runningTimeMs -= mAppWifiRunning;
@@ -646,7 +650,7 @@ public class BatteryStatsHelper {
 
     private void addIdleUsage() {
         long idleTimeMs = (mTypeBatteryRealtime
-                - mStats.getScreenOnTime(mBatteryRealtime, mStatsType)) / 1000;
+                - mStats.getScreenOnTime(mRawRealtime, mStatsType)) / 1000;
         double idlePower = (idleTimeMs * mPowerProfile.getAveragePower(PowerProfile.POWER_CPU_IDLE))
                 / (60*60*1000);
         if (DEBUG && idlePower != 0) {
@@ -658,7 +662,7 @@ public class BatteryStatsHelper {
     }
 
     private void addBluetoothUsage() {
-        long btOnTimeMs = mStats.getBluetoothOnTime(mBatteryRealtime, mStatsType) / 1000;
+        long btOnTimeMs = mStats.getBluetoothOnTime(mRawRealtime, mStatsType) / 1000;
         double btPower = btOnTimeMs * mPowerProfile.getAveragePower(PowerProfile.POWER_BLUETOOTH_ON)
                 / (60*60*1000);
         if (DEBUG && btPower != 0) {
@@ -704,7 +708,7 @@ public class BatteryStatsHelper {
         final long mobileData = mobileRx + mobileTx;
 
         final long radioDataUptimeMs
-                = mStats.getMobileRadioActiveTime(mBatteryRealtime, mStatsType) / 1000;
+                = mStats.getMobileRadioActiveTime(mRawRealtime, mStatsType) / 1000;
         final double mobilePps = (mobileData != 0 && radioDataUptimeMs != 0)
                 ? (mobileData / (double)radioDataUptimeMs)
                 : (((double)MOBILE_BPS) / 8 / 2048);

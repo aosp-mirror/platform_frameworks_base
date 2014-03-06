@@ -87,7 +87,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 94 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 97 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -174,7 +174,15 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     // These are the objects that will want to do something when the device
     // is unplugged from power.
-    final ArrayList<Unpluggable> mUnpluggables = new ArrayList<Unpluggable>();
+    final TimeBase mOnBatteryTimeBase = new TimeBase();
+
+    // These are the objects that will want to do something when the device
+    // is unplugged from power *and* the screen is off.
+    final TimeBase mOnBatteryScreenOffTimeBase = new TimeBase();
+
+    // Set to true when we want to distribute CPU across wakelocks for the next
+    // CPU update, even if we aren't currently running wake locks.
+    boolean mDistributeWakelockCpu;
 
     boolean mShuttingDown;
 
@@ -216,11 +224,6 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mStartCount;
 
     long mStartClockTime;
-
-    long mBatteryUptime;
-    long mBatteryLastUptime;
-    long mBatteryRealtime;
-    long mBatteryLastRealtime;
 
     long mUptime;
     long mUptimeStart;
@@ -296,13 +299,6 @@ public final class BatteryStatsImpl extends BatteryStats {
      */
     boolean mOnBattery;
     boolean mOnBatteryInternal;
-    long mTrackBatteryPastUptime;
-    long mTrackBatteryUptimeStart;
-    long mTrackBatteryPastRealtime;
-    long mTrackBatteryRealtimeStart;
-
-    long mUnpluggedBatteryUptime;
-    long mUnpluggedBatteryRealtime;
 
     /*
      * These keep track of battery levels (1-100) at the last plug event and the last unplug event.
@@ -391,35 +387,235 @@ public final class BatteryStatsImpl extends BatteryStats {
         mHandler = null;
     }
 
-    public static interface Unpluggable {
-        void unplug(long elapsedRealtime, long batteryUptime, long batteryRealtime);
-        void plug(long elapsedRealtime, long batteryUptime, long batteryRealtime);
+    public static interface TimeBaseObs {
+        void onTimeStarted(long elapsedRealtime, long baseUptime, long baseRealtime);
+        void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime);
+    }
+
+    static class TimeBase {
+        private final ArrayList<TimeBaseObs> mObservers = new ArrayList<TimeBaseObs>();
+
+        private long mUptime;
+        private long mLastUptime;
+        private long mRealtime;
+        private long mLastRealtime;
+
+        private boolean mRunning;
+
+        private long mPastUptime;
+        private long mUptimeStart;
+        private long mPastRealtime;
+        private long mRealtimeStart;
+        private long mUnpluggedUptime;
+        private long mUnpluggedRealtime;
+
+        public void dump(PrintWriter pw, String prefix) {
+            StringBuilder sb = new StringBuilder(128);
+            pw.print(prefix); pw.print("mRunning="); pw.println(mRunning);
+            sb.setLength(0);
+            sb.append(prefix);
+                    sb.append("mUptime=");
+                    formatTimeMs(sb, mUptime / 1000); sb.append("mLastUptime=");
+                    formatTimeMs(sb, mLastUptime / 1000);
+            pw.println(sb.toString());
+            sb.setLength(0);
+            sb.append(prefix);
+                    sb.append("mRealtime=");
+                    formatTimeMs(sb, mRealtime / 1000); sb.append("mLastRealtime=");
+                    formatTimeMs(sb, mLastRealtime / 1000);
+            pw.println(sb.toString());
+            sb.setLength(0);
+            sb.append(prefix);
+                    sb.append("mPastUptime=");
+                    formatTimeMs(sb, mPastUptime / 1000); sb.append("mUptimeStart=");
+                    formatTimeMs(sb, mUptimeStart / 1000);
+                    sb.append("mUnpluggedUptime="); formatTimeMs(sb, mUnpluggedUptime / 1000);
+            pw.println(sb.toString());
+            sb.setLength(0);
+            sb.append(prefix);
+                    sb.append("mPastRealtime=");
+                    formatTimeMs(sb, mPastRealtime / 1000); sb.append("mRealtimeStart=");
+                    formatTimeMs(sb, mRealtimeStart / 1000);
+                    sb.append("mUnpluggedRealtime="); formatTimeMs(sb, mUnpluggedRealtime / 1000);
+            pw.println(sb.toString());
+        }
+
+        public void add(TimeBaseObs observer) {
+            mObservers.add(observer);
+        }
+
+        public void remove(TimeBaseObs observer) {
+            if (!mObservers.remove(observer)) {
+                Slog.wtf(TAG, "Removed unknown observer: " + observer);
+            }
+        }
+
+        public void init(long uptime, long realtime) {
+            mRealtime = 0;
+            mUptime = 0;
+            mPastUptime = 0;
+            mPastRealtime = 0;
+            mUptimeStart = uptime;
+            mRealtimeStart = realtime;
+            mUnpluggedUptime = getUptime(mUptimeStart);
+            mUnpluggedRealtime = getRealtime(mRealtimeStart);
+        }
+
+        public void reset(long uptime, long realtime) {
+            if (!mRunning) {
+                mPastUptime = 0;
+                mPastRealtime = 0;
+            } else {
+                mUptimeStart = uptime;
+                mRealtimeStart = realtime;
+                mUnpluggedUptime = getUptime(uptime);
+                mUnpluggedRealtime = getRealtime(realtime);
+            }
+        }
+
+        public long computeUptime(long curTime, int which) {
+            switch (which) {
+                case STATS_SINCE_CHARGED:
+                    return mUptime + getUptime(curTime);
+                case STATS_LAST:
+                    return mLastUptime;
+                case STATS_CURRENT:
+                    return getUptime(curTime);
+                case STATS_SINCE_UNPLUGGED:
+                    return getUptime(curTime) - mUnpluggedUptime;
+            }
+            return 0;
+        }
+
+        public long computeRealtime(long curTime, int which) {
+            switch (which) {
+                case STATS_SINCE_CHARGED:
+                    return mRealtime + getRealtime(curTime);
+                case STATS_LAST:
+                    return mLastRealtime;
+                case STATS_CURRENT:
+                    return getRealtime(curTime);
+                case STATS_SINCE_UNPLUGGED:
+                    return getRealtime(curTime) - mUnpluggedRealtime;
+            }
+            return 0;
+        }
+
+        public long getUptime(long curTime) {
+            long time = mPastUptime;
+            if (mRunning) {
+                time += curTime - mUptimeStart;
+            }
+            return time;
+        }
+
+        public long getRealtime(long curTime) {
+            long time = mPastRealtime;
+            if (mRunning) {
+                time += curTime - mRealtimeStart;
+            }
+            return time;
+        }
+
+        public long getUptimeStart() {
+            return mUptimeStart;
+        }
+
+        public long getRealtimeStart() {
+            return mRealtimeStart;
+        }
+
+        public boolean isRunning() {
+            return mRunning;
+        }
+
+        public boolean setRunning(boolean running, long uptime, long realtime) {
+            if (mRunning != running) {
+                mRunning = running;
+                if (running) {
+                    mUptimeStart = uptime;
+                    mRealtimeStart = realtime;
+                    long batteryUptime = mUnpluggedUptime = getUptime(uptime);
+                    long batteryRealtime = mUnpluggedRealtime = getRealtime(realtime);
+
+                    for (int i = mObservers.size() - 1; i >= 0; i--) {
+                        mObservers.get(i).onTimeStarted(realtime, batteryUptime, batteryRealtime);
+                    }
+                } else {
+                    mPastUptime += uptime - mUptimeStart;
+                    mPastRealtime += realtime - mRealtimeStart;
+
+                    long batteryUptime = getUptime(uptime);
+                    long batteryRealtime = getRealtime(realtime);
+
+                    for (int i = mObservers.size() - 1; i >= 0; i--) {
+                        mObservers.get(i).onTimeStopped(realtime, batteryUptime, batteryRealtime);
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public void readSummaryFromParcel(Parcel in) {
+            mUptime = in.readLong();
+            mRealtime = in.readLong();
+        }
+
+        public void writeSummaryToParcel(Parcel out, long uptime, long realtime) {
+            out.writeLong(computeUptime(uptime, STATS_SINCE_CHARGED));
+            out.writeLong(computeRealtime(realtime, STATS_SINCE_CHARGED));
+        }
+
+        public void readFromParcel(Parcel in) {
+            mRunning = false;
+            mUptime = in.readLong();
+            mLastUptime = 0;
+            mPastUptime = in.readLong();
+            mUptimeStart = in.readLong();
+            mPastRealtime = in.readLong();
+            mRealtimeStart = in.readLong();
+            mUnpluggedUptime = in.readLong();
+            mUnpluggedRealtime = in.readLong();
+        }
+
+        public void writeToParcel(Parcel out, long uptime, long realtime) {
+            final long runningUptime = getUptime(uptime);
+            final long runningRealtime = getRealtime(realtime);
+            out.writeLong(mUptime);
+            out.writeLong(runningUptime);
+            out.writeLong(mUptimeStart);
+            out.writeLong(runningRealtime);
+            out.writeLong(mRealtimeStart);
+            out.writeLong(mUnpluggedUptime);
+            out.writeLong(mUnpluggedRealtime);
+        }
     }
 
     /**
      * State for keeping track of counting information.
      */
-    public static class Counter extends BatteryStats.Counter implements Unpluggable {
+    public static class Counter extends BatteryStats.Counter implements TimeBaseObs {
         final AtomicInteger mCount = new AtomicInteger();
-        final ArrayList<Unpluggable> mUnpluggables;
+        final TimeBase mTimeBase;
         int mLoadedCount;
         int mLastCount;
         int mUnpluggedCount;
         int mPluggedCount;
 
-        Counter(ArrayList<Unpluggable> unpluggables, Parcel in) {
-            mUnpluggables = unpluggables;
+        Counter(TimeBase timeBase, Parcel in) {
+            mTimeBase = timeBase;
             mPluggedCount = in.readInt();
             mCount.set(mPluggedCount);
             mLoadedCount = in.readInt();
             mLastCount = 0;
             mUnpluggedCount = in.readInt();
-            unpluggables.add(this);
+            timeBase.add(this);
         }
 
-        Counter(ArrayList<Unpluggable> unpluggables) {
-            mUnpluggables = unpluggables;
-            unpluggables.add(this);
+        Counter(TimeBase timeBase) {
+            mTimeBase = timeBase;
+            timeBase.add(this);
         }
 
         public void writeToParcel(Parcel out) {
@@ -428,12 +624,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             out.writeInt(mUnpluggedCount);
         }
 
-        public void unplug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
+        public void onTimeStarted(long elapsedRealtime, long baseUptime, long baseRealtime) {
             mUnpluggedCount = mPluggedCount;
             mCount.set(mPluggedCount);
         }
 
-        public void plug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
+        public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
             mPluggedCount = mCount.get();
         }
 
@@ -493,7 +689,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         void detach() {
-            mUnpluggables.remove(this);
+            mTimeBase.remove(this);
         }
 
         void writeSummaryFromParcelLocked(Parcel out) {
@@ -510,12 +706,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public static class SamplingCounter extends Counter {
-        SamplingCounter(ArrayList<Unpluggable> unpluggables, Parcel in) {
-            super(unpluggables, in);
+        SamplingCounter(TimeBase timeBase, Parcel in) {
+            super(timeBase, in);
         }
 
-        SamplingCounter(ArrayList<Unpluggable> unpluggables) {
-            super(unpluggables);
+        SamplingCounter(TimeBase timeBase) {
+            super(timeBase);
         }
 
         public void addCountAtomic(long count) {
@@ -523,27 +719,27 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public static class LongSamplingCounter implements Unpluggable {
-        final ArrayList<Unpluggable> mUnpluggables;
+    public static class LongSamplingCounter implements TimeBaseObs {
+        final TimeBase mTimeBase;
         long mCount;
         long mLoadedCount;
         long mLastCount;
         long mUnpluggedCount;
         long mPluggedCount;
 
-        LongSamplingCounter(ArrayList<Unpluggable> unpluggables, Parcel in) {
-            mUnpluggables = unpluggables;
+        LongSamplingCounter(TimeBase timeBase, Parcel in) {
+            mTimeBase = timeBase;
             mPluggedCount = in.readLong();
             mCount = mPluggedCount;
             mLoadedCount = in.readLong();
             mLastCount = 0;
             mUnpluggedCount = in.readLong();
-            unpluggables.add(this);
+            timeBase.add(this);
         }
 
-        LongSamplingCounter(ArrayList<Unpluggable> unpluggables) {
-            mUnpluggables = unpluggables;
-            unpluggables.add(this);
+        LongSamplingCounter(TimeBase timeBase) {
+            mTimeBase = timeBase;
+            timeBase.add(this);
         }
 
         public void writeToParcel(Parcel out) {
@@ -553,13 +749,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
-        public void unplug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
+        public void onTimeStarted(long elapsedRealtime, long baseUptime, long baseRealtime) {
             mUnpluggedCount = mPluggedCount;
             mCount = mPluggedCount;
         }
 
         @Override
-        public void plug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
+        public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
             mPluggedCount = mCount;
         }
 
@@ -595,7 +791,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         void detach() {
-            mUnpluggables.remove(this);
+            mTimeBase.remove(this);
         }
 
         void writeSummaryFromParcelLocked(Parcel out) {
@@ -613,9 +809,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     /**
      * State for keeping track of timing information.
      */
-    public static abstract class Timer extends BatteryStats.Timer implements Unpluggable {
+    public static abstract class Timer extends BatteryStats.Timer implements TimeBaseObs {
         final int mType;
-        final ArrayList<Unpluggable> mUnpluggables;
+        final TimeBase mTimeBase;
 
         int mCount;
         int mLoadedCount;
@@ -654,12 +850,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         /**
          * Constructs from a parcel.
          * @param type
-         * @param unpluggables
+         * @param timeBase
          * @param in
          */
-        Timer(int type, ArrayList<Unpluggable> unpluggables, Parcel in) {
+        Timer(int type, TimeBase timeBase, Parcel in) {
             mType = type;
-            mUnpluggables = unpluggables;
+            mTimeBase = timeBase;
 
             mCount = in.readInt();
             mLoadedCount = in.readInt();
@@ -669,13 +865,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             mLoadedTime = in.readLong();
             mLastTime = 0;
             mUnpluggedTime = in.readLong();
-            unpluggables.add(this);
+            timeBase.add(this);
         }
 
-        Timer(int type, ArrayList<Unpluggable> unpluggables) {
+        Timer(int type, TimeBase timeBase) {
             mType = type;
-            mUnpluggables = unpluggables;
-            unpluggables.add(this);
+            mTimeBase = timeBase;
+            timeBase.add(this);
         }
 
         protected abstract long computeRunTimeLocked(long curBatteryRealtime);
@@ -686,7 +882,7 @@ public final class BatteryStatsImpl extends BatteryStats {
          * Clear state of this timer.  Returns true if the timer is inactive
          * so can be completely dropped.
          */
-        boolean reset(BatteryStatsImpl stats, boolean detachIfReset) {
+        boolean reset(boolean detachIfReset) {
             mTotalTime = mLoadedTime = mLastTime = 0;
             mCount = mLoadedCount = mLastCount = 0;
             if (detachIfReset) {
@@ -696,25 +892,25 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         void detach() {
-            mUnpluggables.remove(this);
+            mTimeBase.remove(this);
         }
 
-        public void writeToParcel(Parcel out, long batteryRealtime) {
+        public void writeToParcel(Parcel out, long elapsedRealtimeUs) {
             out.writeInt(mCount);
             out.writeInt(mLoadedCount);
             out.writeInt(mUnpluggedCount);
-            out.writeLong(computeRunTimeLocked(batteryRealtime));
+            out.writeLong(computeRunTimeLocked(mTimeBase.getRealtime(elapsedRealtimeUs)));
             out.writeLong(mLoadedTime);
             out.writeLong(mUnpluggedTime);
         }
 
-        public void unplug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
+        public void onTimeStarted(long elapsedRealtime, long timeBaseUptime, long baseRealtime) {
             if (DEBUG && mType < 0) {
-                Log.v(TAG, "unplug #" + mType + ": realtime=" + batteryRealtime
+                Log.v(TAG, "unplug #" + mType + ": realtime=" + baseRealtime
                         + " old mUnpluggedTime=" + mUnpluggedTime
                         + " old mUnpluggedCount=" + mUnpluggedCount);
             }
-            mUnpluggedTime = computeRunTimeLocked(batteryRealtime);
+            mUnpluggedTime = computeRunTimeLocked(baseRealtime);
             mUnpluggedCount = mCount;
             if (DEBUG && mType < 0) {
                 Log.v(TAG, "unplug #" + mType
@@ -723,12 +919,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        public void plug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
+        public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
             if (DEBUG && mType < 0) {
-                Log.v(TAG, "plug #" + mType + ": realtime=" + batteryRealtime
+                Log.v(TAG, "plug #" + mType + ": realtime=" + baseRealtime
                         + " old mTotalTime=" + mTotalTime);
             }
-            mTotalTime = computeRunTimeLocked(batteryRealtime);
+            mTotalTime = computeRunTimeLocked(baseRealtime);
             mCount = computeCurrentCountLocked();
             if (DEBUG && mType < 0) {
                 Log.v(TAG, "plug #" + mType
@@ -742,24 +938,23 @@ public final class BatteryStatsImpl extends BatteryStats {
          * @param out the Parcel to be written to.
          * @param timer a Timer, or null.
          */
-        public static void writeTimerToParcel(Parcel out, Timer timer,
-                long batteryRealtime) {
+        public static void writeTimerToParcel(Parcel out, Timer timer, long elapsedRealtimeUs) {
             if (timer == null) {
                 out.writeInt(0); // indicates null
                 return;
             }
             out.writeInt(1); // indicates non-null
 
-            timer.writeToParcel(out, batteryRealtime);
+            timer.writeToParcel(out, elapsedRealtimeUs);
         }
 
         @Override
-        public long getTotalTimeLocked(long batteryRealtime, int which) {
+        public long getTotalTimeLocked(long elapsedRealtimeUs, int which) {
             long val;
             if (which == STATS_LAST) {
                 val = mLastTime;
             } else {
-                val = computeRunTimeLocked(batteryRealtime);
+                val = computeRunTimeLocked(mTimeBase.getRealtime(elapsedRealtimeUs));
                 if (which == STATS_SINCE_UNPLUGGED) {
                     val -= mUnpluggedTime;
                 } else if (which != STATS_SINCE_CHARGED) {
@@ -798,16 +993,15 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
 
-        void writeSummaryFromParcelLocked(Parcel out, long batteryRealtime) {
-            long runTime = computeRunTimeLocked(batteryRealtime);
-            // Divide by 1000 for backwards compatibility
-            out.writeLong((runTime + 500) / 1000);
+        void writeSummaryFromParcelLocked(Parcel out, long elapsedRealtimeUs) {
+            long runTime = computeRunTimeLocked(mTimeBase.getRealtime(elapsedRealtimeUs));
+            out.writeLong(runTime);
             out.writeInt(mCount);
         }
 
         void readSummaryFromParcelLocked(Parcel in) {
             // Multiply by 1000 for backwards compatibility
-            mTotalTime = mLoadedTime = in.readLong() * 1000;
+            mTotalTime = mLoadedTime = in.readLong();
             mLastTime = 0;
             mUnpluggedTime = mTotalTime;
             mCount = mLoadedCount = in.readInt();
@@ -844,7 +1038,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         /**
          * Whether we are currently in a discharge cycle.
          */
-        boolean mInDischarge;
+        boolean mTimeBaseRunning;
 
         /**
          * Whether we are currently recording reported values.
@@ -856,21 +1050,20 @@ public final class BatteryStatsImpl extends BatteryStats {
          */
         int mUpdateVersion;
 
-        SamplingTimer(ArrayList<Unpluggable> unpluggables, boolean inDischarge, Parcel in) {
-            super(0, unpluggables, in);
+        SamplingTimer(TimeBase timeBase, Parcel in) {
+            super(0, timeBase, in);
             mCurrentReportedCount = in.readInt();
             mUnpluggedReportedCount = in.readInt();
             mCurrentReportedTotalTime = in.readLong();
             mUnpluggedReportedTotalTime = in.readLong();
             mTrackingReportedValues = in.readInt() == 1;
-            mInDischarge = inDischarge;
+            mTimeBaseRunning = timeBase.isRunning();
         }
 
-        SamplingTimer(ArrayList<Unpluggable> unpluggables, boolean inDischarge,
-                boolean trackReportedValues) {
-            super(0, unpluggables);
+        SamplingTimer(TimeBase timeBase, boolean trackReportedValues) {
+            super(0, timeBase);
             mTrackingReportedValues = trackReportedValues;
-            mInDischarge = inDischarge;
+            mTimeBaseRunning = timeBase.isRunning();
         }
 
         public void setStale() {
@@ -888,7 +1081,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         public void updateCurrentReportedCount(int count) {
-            if (mInDischarge && mUnpluggedReportedCount == 0) {
+            if (mTimeBaseRunning && mUnpluggedReportedCount == 0) {
                 // Updating the reported value for the first time.
                 mUnpluggedReportedCount = count;
                 // If we are receiving an update update mTrackingReportedValues;
@@ -898,7 +1091,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         public void updateCurrentReportedTotalTime(long totalTime) {
-            if (mInDischarge && mUnpluggedReportedTotalTime == 0) {
+            if (mTimeBaseRunning && mUnpluggedReportedTotalTime == 0) {
                 // Updating the reported value for the first time.
                 mUnpluggedReportedTotalTime = totalTime;
                 // If we are receiving an update update mTrackingReportedValues;
@@ -907,18 +1100,18 @@ public final class BatteryStatsImpl extends BatteryStats {
             mCurrentReportedTotalTime = totalTime;
         }
 
-        public void unplug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
-            super.unplug(elapsedRealtime, batteryUptime, batteryRealtime);
+        public void onTimeStarted(long elapsedRealtime, long baseUptime, long baseRealtime) {
+            super.onTimeStarted(elapsedRealtime, baseUptime, baseRealtime);
             if (mTrackingReportedValues) {
                 mUnpluggedReportedTotalTime = mCurrentReportedTotalTime;
                 mUnpluggedReportedCount = mCurrentReportedCount;
             }
-            mInDischarge = true;
+            mTimeBaseRunning = true;
         }
 
-        public void plug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
-            super.plug(elapsedRealtime, batteryUptime, batteryRealtime);
-            mInDischarge = false;
+        public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
+            super.onTimeStopped(elapsedRealtime, baseUptime, baseRealtime);
+            mTimeBaseRunning = false;
         }
 
         public void logState(Printer pw, String prefix) {
@@ -930,17 +1123,17 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         protected long computeRunTimeLocked(long curBatteryRealtime) {
-            return mTotalTime + (mInDischarge && mTrackingReportedValues
+            return mTotalTime + (mTimeBaseRunning && mTrackingReportedValues
                     ? mCurrentReportedTotalTime - mUnpluggedReportedTotalTime : 0);
         }
 
         protected int computeCurrentCountLocked() {
-            return mCount + (mInDischarge && mTrackingReportedValues
+            return mCount + (mTimeBaseRunning && mTrackingReportedValues
                     ? mCurrentReportedCount - mUnpluggedReportedCount : 0);
         }
 
-        public void writeToParcel(Parcel out, long batteryRealtime) {
-            super.writeToParcel(out, batteryRealtime);
+        public void writeToParcel(Parcel out, long elapsedRealtimeUs) {
+            super.writeToParcel(out, elapsedRealtimeUs);
             out.writeInt(mCurrentReportedCount);
             out.writeInt(mUnpluggedReportedCount);
             out.writeLong(mCurrentReportedTotalTime);
@@ -948,8 +1141,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             out.writeInt(mTrackingReportedValues ? 1 : 0);
         }
 
-        boolean reset(BatteryStatsImpl stats, boolean detachIfReset) {
-            super.reset(stats, detachIfReset);
+        boolean reset(boolean detachIfReset) {
+            super.reset(detachIfReset);
             setStale();
             return true;
         }
@@ -991,45 +1184,43 @@ public final class BatteryStatsImpl extends BatteryStats {
          */
         boolean mInDischarge;
 
-        BatchTimer(Uid uid, int type, ArrayList<Unpluggable> unpluggables,
-                boolean inDischarge, Parcel in) {
-            super(type, unpluggables, in);
+        BatchTimer(Uid uid, int type, TimeBase timeBase, Parcel in) {
+            super(type, timeBase, in);
             mUid = uid;
             mLastAddedTime = in.readLong();
             mLastAddedDuration = in.readLong();
-            mInDischarge = inDischarge;
+            mInDischarge = timeBase.isRunning();
         }
 
-        BatchTimer(Uid uid, int type, ArrayList<Unpluggable> unpluggables,
-                boolean inDischarge) {
-            super(type, unpluggables);
+        BatchTimer(Uid uid, int type, TimeBase timeBase) {
+            super(type, timeBase);
             mUid = uid;
-            mInDischarge = inDischarge;
+            mInDischarge = timeBase.isRunning();
         }
 
         @Override
-        public void writeToParcel(Parcel out, long batteryRealtime) {
-            super.writeToParcel(out, batteryRealtime);
+        public void writeToParcel(Parcel out, long elapsedRealtimeUs) {
+            super.writeToParcel(out, elapsedRealtimeUs);
             out.writeLong(mLastAddedTime);
             out.writeLong(mLastAddedDuration);
         }
 
         @Override
-        public void plug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
+        public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
             recomputeLastDuration(SystemClock.elapsedRealtime() * 1000, false);
             mInDischarge = false;
-            super.plug(elapsedRealtime, batteryUptime, batteryRealtime);
+            super.onTimeStopped(elapsedRealtime, baseUptime, baseRealtime);
         }
 
         @Override
-        public void unplug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
+        public void onTimeStarted(long elapsedRealtime, long baseUptime, long baseRealtime) {
             recomputeLastDuration(elapsedRealtime, false);
             mInDischarge = true;
             // If we are still within the last added duration, then re-added whatever remains.
             if (mLastAddedTime == elapsedRealtime) {
                 mTotalTime += mLastAddedDuration;
             }
-            super.unplug(elapsedRealtime, batteryUptime, batteryRealtime);
+            super.onTimeStarted(elapsedRealtime, baseUptime, baseRealtime);
         }
 
         @Override
@@ -1095,11 +1286,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
-        boolean reset(BatteryStatsImpl stats, boolean detachIfReset) {
+        boolean reset(boolean detachIfReset) {
             final long now = SystemClock.elapsedRealtime() * 1000;
             recomputeLastDuration(now, true);
             boolean stillActive = mLastAddedTime == now;
-            super.reset(stats, !stillActive && detachIfReset);
+            super.reset(!stillActive && detachIfReset);
             return !stillActive;
         }
     }
@@ -1135,16 +1326,16 @@ public final class BatteryStatsImpl extends BatteryStats {
         boolean mInList;
 
         StopwatchTimer(Uid uid, int type, ArrayList<StopwatchTimer> timerPool,
-                ArrayList<Unpluggable> unpluggables, Parcel in) {
-            super(type, unpluggables, in);
+                TimeBase timeBase, Parcel in) {
+            super(type, timeBase, in);
             mUid = uid;
             mTimerPool = timerPool;
             mUpdateTime = in.readLong();
         }
 
         StopwatchTimer(Uid uid, int type, ArrayList<StopwatchTimer> timerPool,
-                ArrayList<Unpluggable> unpluggables) {
-            super(type, unpluggables);
+                TimeBase timeBase) {
+            super(type, timeBase);
             mUid = uid;
             mTimerPool = timerPool;
         }
@@ -1153,18 +1344,18 @@ public final class BatteryStatsImpl extends BatteryStats {
             mTimeout = timeout;
         }
 
-        public void writeToParcel(Parcel out, long batteryRealtime) {
-            super.writeToParcel(out, batteryRealtime);
+        public void writeToParcel(Parcel out, long elapsedRealtimeUs) {
+            super.writeToParcel(out, elapsedRealtimeUs);
             out.writeLong(mUpdateTime);
         }
 
-        public void plug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
+        public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
             if (mNesting > 0) {
                 if (DEBUG && mType < 0) {
                     Log.v(TAG, "old mUpdateTime=" + mUpdateTime);
                 }
-                super.plug(elapsedRealtime, batteryUptime, batteryRealtime);
-                mUpdateTime = batteryRealtime;
+                super.onTimeStopped(elapsedRealtime, baseUptime, baseRealtime);
+                mUpdateTime = baseRealtime;
                 if (DEBUG && mType < 0) {
                     Log.v(TAG, "new mUpdateTime=" + mUpdateTime);
                 }
@@ -1177,14 +1368,14 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + " mAcquireTime=" + mAcquireTime);
         }
 
-        void startRunningLocked(BatteryStatsImpl stats, long elapsedRealtime) {
+        void startRunningLocked(long elapsedRealtimeMs) {
             if (mNesting++ == 0) {
-                final long batteryRealtime = stats.getBatteryRealtimeLocked(elapsedRealtime * 1000);
+                final long batteryRealtime = mTimeBase.getRealtime(elapsedRealtimeMs * 1000);
                 mUpdateTime = batteryRealtime;
                 if (mTimerPool != null) {
                     // Accumulate time to all currently active timers before adding
                     // this new one to the pool.
-                    refreshTimersLocked(stats, batteryRealtime, mTimerPool, null);
+                    refreshTimersLocked(batteryRealtime, mTimerPool, null);
                     // Add this timer to the active pool
                     mTimerPool.add(this);
                 }
@@ -1203,12 +1394,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             return mNesting > 0;
         }
 
-        long checkpointRunningLocked(BatteryStatsImpl stats, long elapsedRealtime) {
+        long checkpointRunningLocked(long elapsedRealtimeMs) {
             if (mNesting > 0) {
                 // We are running...
-                final long batteryRealtime = stats.getBatteryRealtimeLocked(elapsedRealtime * 1000);
+                final long batteryRealtime = mTimeBase.getRealtime(elapsedRealtimeMs * 1000);
                 if (mTimerPool != null) {
-                    return refreshTimersLocked(stats, batteryRealtime, mTimerPool, this);
+                    return refreshTimersLocked(batteryRealtime, mTimerPool, this);
                 }
                 final long heldTime = batteryRealtime - mUpdateTime;
                 mUpdateTime = batteryRealtime;
@@ -1218,17 +1409,17 @@ public final class BatteryStatsImpl extends BatteryStats {
             return 0;
         }
 
-        void stopRunningLocked(BatteryStatsImpl stats, long elapsedRealtime) {
+        void stopRunningLocked(long elapsedRealtimeMs) {
             // Ignore attempt to stop a timer that isn't running
             if (mNesting == 0) {
                 return;
             }
             if (--mNesting == 0) {
-                final long batteryRealtime = stats.getBatteryRealtimeLocked(elapsedRealtime * 1000);
+                final long batteryRealtime = mTimeBase.getRealtime(elapsedRealtimeMs * 1000);
                 if (mTimerPool != null) {
                     // Accumulate time to all active counters, scaled by the total
                     // active in the pool, before taking this one out of the pool.
-                    refreshTimersLocked(stats, batteryRealtime, mTimerPool, null);
+                    refreshTimersLocked(batteryRealtime, mTimerPool, null);
                     // Remove this timer from the active pool
                     mTimerPool.remove(this);
                 } else {
@@ -1253,8 +1444,8 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         // Update the total time for all other running Timers with the same type as this Timer
         // due to a change in timer count
-        private static long refreshTimersLocked(final BatteryStatsImpl stats,
-                long batteryRealtime, final ArrayList<StopwatchTimer> pool, StopwatchTimer self) {
+        private static long refreshTimersLocked(long batteryRealtime,
+                final ArrayList<StopwatchTimer> pool, StopwatchTimer self) {
             long selfTime = 0;
             final int N = pool.size();
             for (int i=N-1; i>= 0; i--) {
@@ -1288,12 +1479,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             return mCount;
         }
 
-        boolean reset(BatteryStatsImpl stats, boolean detachIfReset) {
+        boolean reset(boolean detachIfReset) {
             boolean canDetach = mNesting <= 0;
-            super.reset(stats, canDetach && detachIfReset);
+            super.reset(canDetach && detachIfReset);
             if (mNesting > 0) {
-                mUpdateTime = stats.getBatteryRealtimeLocked(
-                        SystemClock.elapsedRealtime() * 1000);
+                mUpdateTime = mTimeBase.getRealtime(SystemClock.elapsedRealtime() * 1000);
             }
             mAcquireTime = mTotalTime;
             return canDetach;
@@ -1456,8 +1646,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     public SamplingTimer getKernelWakelockTimerLocked(String name) {
         SamplingTimer kwlt = mKernelWakelockStats.get(name);
         if (kwlt == null) {
-            kwlt = new SamplingTimer(mUnpluggables, mOnBatteryInternal,
-                    true /* track reported values */);
+            kwlt = new SamplingTimer(mOnBatteryScreenOffTimeBase, true /* track reported values */);
             mKernelWakelockStats.put(name, kwlt);
         }
         return kwlt;
@@ -1953,24 +2142,31 @@ public final class BatteryStatsImpl extends BatteryStats {
         mHistoryOverflow = false;
     }
 
-    public void doUnplugLocked(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
-        for (int i = mUnpluggables.size() - 1; i >= 0; i--) {
-            mUnpluggables.get(i).unplug(elapsedRealtime, batteryUptime, batteryRealtime);
+    public void updateTimeBasesLocked(boolean unplugged, boolean screenOff, long uptime,
+            long realtime) {
+        if (mOnBatteryTimeBase.setRunning(unplugged, uptime, realtime)) {
+            if (unplugged) {
+                // Track bt headset ping count
+                mBluetoothPingStart = getCurrentBluetoothPingCount();
+                mBluetoothPingCount = 0;
+            } else {
+                // Track bt headset ping count
+                mBluetoothPingCount = getBluetoothPingCount();
+                mBluetoothPingStart = -1;
+            }
         }
 
-        // Track bt headset ping count
-        mBluetoothPingStart = getCurrentBluetoothPingCount();
-        mBluetoothPingCount = 0;
-    }
-
-    public void doPlugLocked(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
-        for (int i = mUnpluggables.size() - 1; i >= 0; i--) {
-            mUnpluggables.get(i).plug(elapsedRealtime, batteryUptime, batteryRealtime);
+        boolean unpluggedScreenOff = unplugged && screenOff;
+        if (unpluggedScreenOff != mOnBatteryScreenOffTimeBase.isRunning()) {
+            updateKernelWakelocksLocked();
+            requestWakelockCpuUpdate();
+            if (!unpluggedScreenOff) {
+                // We are switching to no longer tracking wake locks, but we want
+                // the next CPU update we receive to take them in to account.
+                mDistributeWakelockCpu = true;
+            }
+            mOnBatteryScreenOffTimeBase.setRunning(unpluggedScreenOff, uptime, realtime);
         }
-
-        // Track bt headset ping count
-        mBluetoothPingCount = getBluetoothPingCount();
-        mBluetoothPingStart = -1;
     }
 
     public void addIsolatedUidLocked(int isolatedUid, int appUid) {
@@ -2033,6 +2229,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         addHistoryEventLocked(SystemClock.elapsedRealtime(), code, name, uid);
     }
 
+    private void requestWakelockCpuUpdate() {
+        if (!mHandler.hasMessages(MSG_UPDATE_WAKELOCKS)) {
+            Message m = mHandler.obtainMessage(MSG_UPDATE_WAKELOCKS);
+            mHandler.sendMessageDelayed(m, DELAY_UPDATE_WAKELOCKS);
+        }
+    }
+
     public void noteStartWakeLocked(int uid, int pid, String name, String historyName, int type,
             boolean unimportantForLogging) {
         uid = mapUid(uid);
@@ -2063,10 +2266,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWakeLockNesting++;
         }
         if (uid >= 0) {
-            if (!mHandler.hasMessages(MSG_UPDATE_WAKELOCKS)) {
-                Message m = mHandler.obtainMessage(MSG_UPDATE_WAKELOCKS);
-                mHandler.sendMessageDelayed(m, DELAY_UPDATE_WAKELOCKS);
-            }
+            requestWakelockCpuUpdate();
             getUidStatsLocked(uid).noteStartWakeLocked(pid, name, type, elapsedRealtime);
         }
     }
@@ -2084,10 +2284,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
         if (uid >= 0) {
-            if (!mHandler.hasMessages(MSG_UPDATE_WAKELOCKS)) {
-                Message m = mHandler.obtainMessage(MSG_UPDATE_WAKELOCKS);
-                mHandler.sendMessageDelayed(m, DELAY_UPDATE_WAKELOCKS);
-            }
+            requestWakelockCpuUpdate();
             getUidStatsLocked(uid).noteStopWakeLocked(pid, name, type, elapsedRealtime);
         }
     }
@@ -2110,15 +2307,18 @@ public final class BatteryStatsImpl extends BatteryStats {
     public int startAddingCpuLocked() {
         mHandler.removeMessages(MSG_UPDATE_WAKELOCKS);
 
-        if (mScreenOn) {
-            return 0;
-        }
-
         final int N = mPartialTimers.size();
         if (N == 0) {
             mLastPartialTimers.clear();
+            mDistributeWakelockCpu = false;
             return 0;
         }
+
+        if (!mOnBatteryScreenOffTimeBase.isRunning() && !mDistributeWakelockCpu) {
+            return 0;
+        }
+
+        mDistributeWakelockCpu = false;
 
         // How many timers should consume CPU?  Only want to include ones
         // that have already been in the list.
@@ -2305,16 +2505,17 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime);
             mScreenOn = true;
-            mScreenOnTimer.startRunningLocked(this, elapsedRealtime);
+            mScreenOnTimer.startRunningLocked(elapsedRealtime);
             if (mScreenBrightnessBin >= 0) {
-                mScreenBrightnessTimer[mScreenBrightnessBin].startRunningLocked(this,
-                        elapsedRealtime);
+                mScreenBrightnessTimer[mScreenBrightnessBin].startRunningLocked(elapsedRealtime);
             }
+
+            updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), false,
+                    SystemClock.uptimeMillis() * 1000, elapsedRealtime * 1000);
 
             // Fake a wake lock, so we consider the device waked as long
             // as the screen is on.
-            noteStartWakeLocked(Process.myUid(), Process.myPid(), "screen", null,
-                    WAKE_TYPE_PARTIAL, false);
+            noteStartWakeLocked(-1, -1, "screen", null, WAKE_TYPE_PARTIAL, false);
             
             // Update discharge amounts.
             if (mOnBatteryInternal) {
@@ -2331,14 +2532,16 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime);
             mScreenOn = false;
-            mScreenOnTimer.stopRunningLocked(this, elapsedRealtime);
+            mScreenOnTimer.stopRunningLocked(elapsedRealtime);
             if (mScreenBrightnessBin >= 0) {
-                mScreenBrightnessTimer[mScreenBrightnessBin].stopRunningLocked(this,
-                        elapsedRealtime);
+                mScreenBrightnessTimer[mScreenBrightnessBin].stopRunningLocked(elapsedRealtime);
             }
 
-            noteStopWakeLocked(-1, -1, "dummy", WAKE_TYPE_PARTIAL);
-            
+            noteStopWakeLocked(-1, -1, "screen", WAKE_TYPE_PARTIAL);
+
+            updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), true,
+                    SystemClock.uptimeMillis() * 1000, elapsedRealtime * 1000);
+
             // Update discharge amounts.
             if (mOnBatteryInternal) {
                 updateDischargeScreenLevelsLocked(true, false);
@@ -2360,10 +2563,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime);
             if (mScreenOn) {
                 if (mScreenBrightnessBin >= 0) {
-                    mScreenBrightnessTimer[mScreenBrightnessBin].stopRunningLocked(this,
-                            elapsedRealtime);
+                    mScreenBrightnessTimer[mScreenBrightnessBin].stopRunningLocked(elapsedRealtime);
                 }
-                mScreenBrightnessTimer[bin].startRunningLocked(this, elapsedRealtime);
+                mScreenBrightnessTimer[bin].startRunningLocked(elapsedRealtime);
             }
             mScreenBrightnessBin = bin;
         }
@@ -2391,12 +2593,12 @@ public final class BatteryStatsImpl extends BatteryStats {
                 addHistoryRecordLocked(elapsedRealtime);
                 mMobileRadioActive = active;
                 if (active) {
-                    mMobileRadioActiveTimer.startRunningLocked(this, elapsedRealtime);
-                    mMobileRadioActivePerAppTimer.startRunningLocked(this, elapsedRealtime);
+                    mMobileRadioActiveTimer.startRunningLocked(elapsedRealtime);
+                    mMobileRadioActivePerAppTimer.startRunningLocked(elapsedRealtime);
                 } else {
                     updateNetworkActivityLocked(NET_UPDATE_MOBILE, elapsedRealtime);
-                    mMobileRadioActiveTimer.stopRunningLocked(this, elapsedRealtime);
-                    mMobileRadioActivePerAppTimer.stopRunningLocked(this, elapsedRealtime);
+                    mMobileRadioActiveTimer.stopRunningLocked(elapsedRealtime);
+                    mMobileRadioActivePerAppTimer.stopRunningLocked(elapsedRealtime);
                 }
             }
         }
@@ -2410,7 +2612,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime);
             mPhoneOn = true;
-            mPhoneOnTimer.startRunningLocked(this, elapsedRealtime);
+            mPhoneOnTimer.startRunningLocked(elapsedRealtime);
         }
     }
 
@@ -2422,7 +2624,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime);
             mPhoneOn = false;
-            mPhoneOnTimer.stopRunningLocked(this, elapsedRealtime);
+            mPhoneOnTimer.stopRunningLocked(elapsedRealtime);
         }
     }
 
@@ -2433,7 +2635,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 continue;
             }
             while (mPhoneSignalStrengthsTimer[i].isRunningLocked()) {
-                mPhoneSignalStrengthsTimer[i].stopRunningLocked(this, elapsedRealtime);
+                mPhoneSignalStrengthsTimer[i].stopRunningLocked(elapsedRealtime);
             }
         }
     }
@@ -2488,7 +2690,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 newHistory = true;
                 if (DEBUG_HISTORY) Slog.v(TAG, "Phone started scanning to: "
                         + Integer.toHexString(mHistoryCur.states));
-                mPhoneSignalScanningTimer.startRunningLocked(this, elapsedRealtime);
+                mPhoneSignalScanningTimer.startRunningLocked(elapsedRealtime);
             }
         }
 
@@ -2499,7 +2701,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 if (DEBUG_HISTORY) Slog.v(TAG, "Phone stopped scanning to: "
                         + Integer.toHexString(mHistoryCur.states));
                 newHistory = true;
-                mPhoneSignalScanningTimer.stopRunningLocked(this, elapsedRealtime);
+                mPhoneSignalScanningTimer.stopRunningLocked(elapsedRealtime);
             }
         }
 
@@ -2514,13 +2716,12 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         if (mPhoneSignalStrengthBin != strengthBin) {
             if (mPhoneSignalStrengthBin >= 0) {
-                mPhoneSignalStrengthsTimer[mPhoneSignalStrengthBin].stopRunningLocked(this,
+                mPhoneSignalStrengthsTimer[mPhoneSignalStrengthBin].stopRunningLocked(
                         elapsedRealtime);
             }
             if (strengthBin >= 0) {
                 if (!mPhoneSignalStrengthsTimer[strengthBin].isRunningLocked()) {
-                    mPhoneSignalStrengthsTimer[strengthBin].startRunningLocked(this,
-                            elapsedRealtime);
+                    mPhoneSignalStrengthsTimer[strengthBin].startRunningLocked(elapsedRealtime);
                 }
                 mHistoryCur.states = (mHistoryCur.states&~HistoryItem.STATE_SIGNAL_STRENGTH_MASK)
                         | (strengthBin << HistoryItem.STATE_SIGNAL_STRENGTH_SHIFT);
@@ -2615,11 +2816,11 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime);
             if (mPhoneDataConnectionType >= 0) {
-                mPhoneDataConnectionsTimer[mPhoneDataConnectionType].stopRunningLocked(this,
+                mPhoneDataConnectionsTimer[mPhoneDataConnectionType].stopRunningLocked(
                         elapsedRealtime);
             }
             mPhoneDataConnectionType = bin;
-            mPhoneDataConnectionsTimer[bin].startRunningLocked(this, elapsedRealtime);
+            mPhoneDataConnectionsTimer[bin].startRunningLocked(elapsedRealtime);
         }
     }
 
@@ -2631,7 +2832,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime);
             mWifiOn = true;
-            mWifiOnTimer.startRunningLocked(this, elapsedRealtime);
+            mWifiOnTimer.startRunningLocked(elapsedRealtime);
         }
     }
 
@@ -2643,7 +2844,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime);
             mWifiOn = false;
-            mWifiOnTimer.stopRunningLocked(this, elapsedRealtime);
+            mWifiOnTimer.stopRunningLocked(elapsedRealtime);
         }
         if (mWifiOnUid >= 0) {
             getUidStatsLocked(mWifiOnUid).noteWifiStoppedLocked(elapsedRealtime);
@@ -2660,7 +2861,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(SystemClock.elapsedRealtime());
             mAudioOn = true;
-            mAudioOnTimer.startRunningLocked(this, elapsedRealtime);
+            mAudioOnTimer.startRunningLocked(elapsedRealtime);
         }
         getUidStatsLocked(uid).noteAudioTurnedOnLocked(elapsedRealtime);
     }
@@ -2674,7 +2875,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(SystemClock.elapsedRealtime());
             mAudioOn = false;
-            mAudioOnTimer.stopRunningLocked(this, elapsedRealtime);
+            mAudioOnTimer.stopRunningLocked(elapsedRealtime);
         }
         getUidStatsLocked(uid).noteAudioTurnedOffLocked(elapsedRealtime);
     }
@@ -2688,7 +2889,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(SystemClock.elapsedRealtime());
             mVideoOn = true;
-            mVideoOnTimer.startRunningLocked(this, elapsedRealtime);
+            mVideoOnTimer.startRunningLocked(elapsedRealtime);
         }
         getUidStatsLocked(uid).noteVideoTurnedOnLocked(elapsedRealtime);
     }
@@ -2702,7 +2903,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(SystemClock.elapsedRealtime());
             mVideoOn = false;
-            mVideoOnTimer.stopRunningLocked(this, elapsedRealtime);
+            mVideoOnTimer.stopRunningLocked(elapsedRealtime);
         }
         getUidStatsLocked(uid).noteVideoTurnedOffLocked(elapsedRealtime);
     }
@@ -2735,7 +2936,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(SystemClock.elapsedRealtime());
             mGlobalWifiRunning = true;
-            mGlobalWifiRunningTimer.startRunningLocked(this, elapsedRealtime);
+            mGlobalWifiRunningTimer.startRunningLocked(elapsedRealtime);
             int N = ws.size();
             for (int i=0; i<N; i++) {
                 int uid = mapUid(ws.get(i));
@@ -2772,7 +2973,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime);
             mGlobalWifiRunning = false;
-            mGlobalWifiRunningTimer.stopRunningLocked(this, elapsedRealtime);
+            mGlobalWifiRunningTimer.stopRunningLocked(elapsedRealtime);
             int N = ws.size();
             for (int i=0; i<N; i++) {
                 int uid = mapUid(ws.get(i));
@@ -2788,10 +2989,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (mWifiState != wifiState) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             if (mWifiState >= 0) {
-                mWifiStateTimer[mWifiState].stopRunningLocked(this, elapsedRealtime);
+                mWifiStateTimer[mWifiState].stopRunningLocked(elapsedRealtime);
             }
             mWifiState = wifiState;
-            mWifiStateTimer[wifiState].startRunningLocked(this, elapsedRealtime);
+            mWifiStateTimer[wifiState].startRunningLocked(elapsedRealtime);
         }
     }
 
@@ -2803,7 +3004,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime);
             mBluetoothOn = true;
-            mBluetoothOnTimer.startRunningLocked(this, elapsedRealtime);
+            mBluetoothOnTimer.startRunningLocked(elapsedRealtime);
         }
     }
 
@@ -2815,7 +3016,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime);
             mBluetoothOn = false;
-            mBluetoothOnTimer.stopRunningLocked(this, elapsedRealtime);
+            mBluetoothOnTimer.stopRunningLocked(elapsedRealtime);
         }
     }
 
@@ -2824,11 +3025,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (mBluetoothState != bluetoothState) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             if (mBluetoothState >= 0) {
-                mBluetoothStateTimer[mBluetoothState].stopRunningLocked(this,
-                        elapsedRealtime);
+                mBluetoothStateTimer[mBluetoothState].stopRunningLocked(elapsedRealtime);
             }
             mBluetoothState = bluetoothState;
-            mBluetoothStateTimer[bluetoothState].startRunningLocked(this, elapsedRealtime);
+            mBluetoothStateTimer[bluetoothState].startRunningLocked(elapsedRealtime);
         }
     }
 
@@ -3033,8 +3233,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         updateNetworkActivityLocked(NET_UPDATE_ALL, SystemClock.elapsedRealtime());
     }
 
-    @Override public long getScreenOnTime(long batteryRealtime, int which) {
-        return mScreenOnTimer.getTotalTimeLocked(batteryRealtime, which);
+    @Override public long getScreenOnTime(long elapsedRealtimeUs, int which) {
+        return mScreenOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
 
     @Override public int getScreenOnCount(int which) {
@@ -3042,17 +3242,17 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override public long getScreenBrightnessTime(int brightnessBin,
-            long batteryRealtime, int which) {
+            long elapsedRealtimeUs, int which) {
         return mScreenBrightnessTimer[brightnessBin].getTotalTimeLocked(
-                batteryRealtime, which);
+                elapsedRealtimeUs, which);
     }
 
     @Override public int getInputEventCount(int which) {
         return mInputEventCounter.getCountLocked(which);
     }
 
-    @Override public long getPhoneOnTime(long batteryRealtime, int which) {
-        return mPhoneOnTimer.getTotalTimeLocked(batteryRealtime, which);
+    @Override public long getPhoneOnTime(long elapsedRealtimeUs, int which) {
+        return mPhoneOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
 
     @Override public int getPhoneOnCount(int which) {
@@ -3060,15 +3260,15 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override public long getPhoneSignalStrengthTime(int strengthBin,
-            long batteryRealtime, int which) {
+            long elapsedRealtimeUs, int which) {
         return mPhoneSignalStrengthsTimer[strengthBin].getTotalTimeLocked(
-                batteryRealtime, which);
+                elapsedRealtimeUs, which);
     }
 
     @Override public long getPhoneSignalScanningTime(
-            long batteryRealtime, int which) {
+            long elapsedRealtimeUs, int which) {
         return mPhoneSignalScanningTimer.getTotalTimeLocked(
-                batteryRealtime, which);
+                elapsedRealtimeUs, which);
     }
 
     @Override public int getPhoneSignalStrengthCount(int strengthBin, int which) {
@@ -3076,17 +3276,17 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override public long getPhoneDataConnectionTime(int dataType,
-            long batteryRealtime, int which) {
+            long elapsedRealtimeUs, int which) {
         return mPhoneDataConnectionsTimer[dataType].getTotalTimeLocked(
-                batteryRealtime, which);
+                elapsedRealtimeUs, which);
     }
 
     @Override public int getPhoneDataConnectionCount(int dataType, int which) {
         return mPhoneDataConnectionsTimer[dataType].getCountLocked(which);
     }
 
-    @Override public long getMobileRadioActiveTime(long batteryRealtime, int which) {
-        return mMobileRadioActiveTimer.getTotalTimeLocked(batteryRealtime, which);
+    @Override public long getMobileRadioActiveTime(long elapsedRealtimeUs, int which) {
+        return mMobileRadioActiveTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
 
     @Override public int getMobileRadioActiveCount(int which) {
@@ -3101,32 +3301,32 @@ public final class BatteryStatsImpl extends BatteryStats {
         return (int)mMobileRadioActiveUnknownCount.getCountLocked(which);
     }
 
-    @Override public long getWifiOnTime(long batteryRealtime, int which) {
-        return mWifiOnTimer.getTotalTimeLocked(batteryRealtime, which);
+    @Override public long getWifiOnTime(long elapsedRealtimeUs, int which) {
+        return mWifiOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
 
-    @Override public long getGlobalWifiRunningTime(long batteryRealtime, int which) {
-        return mGlobalWifiRunningTimer.getTotalTimeLocked(batteryRealtime, which);
+    @Override public long getGlobalWifiRunningTime(long elapsedRealtimeUs, int which) {
+        return mGlobalWifiRunningTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
 
     @Override public long getWifiStateTime(int wifiState,
-            long batteryRealtime, int which) {
+            long elapsedRealtimeUs, int which) {
         return mWifiStateTimer[wifiState].getTotalTimeLocked(
-                batteryRealtime, which);
+                elapsedRealtimeUs, which);
     }
 
     @Override public int getWifiStateCount(int wifiState, int which) {
         return mWifiStateTimer[wifiState].getCountLocked(which);
     }
 
-    @Override public long getBluetoothOnTime(long batteryRealtime, int which) {
-        return mBluetoothOnTimer.getTotalTimeLocked(batteryRealtime, which);
+    @Override public long getBluetoothOnTime(long elapsedRealtimeUs, int which) {
+        return mBluetoothOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
 
     @Override public long getBluetoothStateTime(int bluetoothState,
-            long batteryRealtime, int which) {
+            long elapsedRealtimeUs, int which) {
         return mBluetoothStateTimer[bluetoothState].getTotalTimeLocked(
-                batteryRealtime, which);
+                elapsedRealtimeUs, which);
     }
 
     @Override public int getBluetoothStateCount(int bluetoothState, int which) {
@@ -3231,14 +3431,14 @@ public final class BatteryStatsImpl extends BatteryStats {
         public Uid(int uid) {
             mUid = uid;
             mWifiRunningTimer = new StopwatchTimer(Uid.this, WIFI_RUNNING,
-                    mWifiRunningTimers, mUnpluggables);
+                    mWifiRunningTimers, mOnBatteryTimeBase);
             mFullWifiLockTimer = new StopwatchTimer(Uid.this, FULL_WIFI_LOCK,
-                    mFullWifiLockTimers, mUnpluggables);
+                    mFullWifiLockTimers, mOnBatteryTimeBase);
             mWifiScanTimer = new StopwatchTimer(Uid.this, WIFI_SCAN,
-                    mWifiScanTimers, mUnpluggables);
+                    mWifiScanTimers, mOnBatteryTimeBase);
             mWifiBatchedScanTimer = new StopwatchTimer[NUM_WIFI_BATCHED_SCAN_BINS];
             mWifiMulticastTimer = new StopwatchTimer(Uid.this, WIFI_MULTICAST_ENABLED,
-                    mWifiMulticastTimers, mUnpluggables);
+                    mWifiMulticastTimers, mOnBatteryTimeBase);
         }
 
         @Override
@@ -3267,67 +3467,67 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
-        public void noteWifiRunningLocked(long elapsedRealtime) {
+        public void noteWifiRunningLocked(long elapsedRealtimeMs) {
             if (!mWifiRunning) {
                 mWifiRunning = true;
                 if (mWifiRunningTimer == null) {
                     mWifiRunningTimer = new StopwatchTimer(Uid.this, WIFI_RUNNING,
-                            mWifiRunningTimers, mUnpluggables);
+                            mWifiRunningTimers, mOnBatteryTimeBase);
                 }
-                mWifiRunningTimer.startRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                mWifiRunningTimer.startRunningLocked(elapsedRealtimeMs);
             }
         }
 
         @Override
-        public void noteWifiStoppedLocked(long elapsedRealtime) {
+        public void noteWifiStoppedLocked(long elapsedRealtimeMs) {
             if (mWifiRunning) {
                 mWifiRunning = false;
-                mWifiRunningTimer.stopRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                mWifiRunningTimer.stopRunningLocked(elapsedRealtimeMs);
             }
         }
 
         @Override
-        public void noteFullWifiLockAcquiredLocked(long elapsedRealtime) {
+        public void noteFullWifiLockAcquiredLocked(long elapsedRealtimeMs) {
             if (!mFullWifiLockOut) {
                 mFullWifiLockOut = true;
                 if (mFullWifiLockTimer == null) {
                     mFullWifiLockTimer = new StopwatchTimer(Uid.this, FULL_WIFI_LOCK,
-                            mFullWifiLockTimers, mUnpluggables);
+                            mFullWifiLockTimers, mOnBatteryTimeBase);
                 }
-                mFullWifiLockTimer.startRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                mFullWifiLockTimer.startRunningLocked(elapsedRealtimeMs);
             }
         }
 
         @Override
-        public void noteFullWifiLockReleasedLocked(long elapsedRealtime) {
+        public void noteFullWifiLockReleasedLocked(long elapsedRealtimeMs) {
             if (mFullWifiLockOut) {
                 mFullWifiLockOut = false;
-                mFullWifiLockTimer.stopRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                mFullWifiLockTimer.stopRunningLocked(elapsedRealtimeMs);
             }
         }
 
         @Override
-        public void noteWifiScanStartedLocked(long elapsedRealtime) {
+        public void noteWifiScanStartedLocked(long elapsedRealtimeMs) {
             if (!mWifiScanStarted) {
                 mWifiScanStarted = true;
                 if (mWifiScanTimer == null) {
                     mWifiScanTimer = new StopwatchTimer(Uid.this, WIFI_SCAN,
-                            mWifiScanTimers, mUnpluggables);
+                            mWifiScanTimers, mOnBatteryTimeBase);
                 }
-                mWifiScanTimer.startRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                mWifiScanTimer.startRunningLocked(elapsedRealtimeMs);
             }
         }
 
         @Override
-        public void noteWifiScanStoppedLocked(long elapsedRealtime) {
+        public void noteWifiScanStoppedLocked(long elapsedRealtimeMs) {
             if (mWifiScanStarted) {
                 mWifiScanStarted = false;
-                mWifiScanTimer.stopRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                mWifiScanTimer.stopRunningLocked(elapsedRealtimeMs);
             }
         }
 
         @Override
-        public void noteWifiBatchedScanStartedLocked(int csph, long elapsedRealtime) {
+        public void noteWifiBatchedScanStartedLocked(int csph, long elapsedRealtimeMs) {
             int bin = 0;
             while (csph > 8 && bin < NUM_WIFI_BATCHED_SCAN_BINS) {
                 csph = csph >> 3;
@@ -3338,67 +3538,66 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             if (mWifiBatchedScanBinStarted != NO_BATCHED_SCAN_STARTED) {
                 mWifiBatchedScanTimer[mWifiBatchedScanBinStarted].
-                        stopRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                        stopRunningLocked(elapsedRealtimeMs);
             }
             mWifiBatchedScanBinStarted = bin;
             if (mWifiBatchedScanTimer[bin] == null) {
                 makeWifiBatchedScanBin(bin, null);
             }
-            mWifiBatchedScanTimer[bin].startRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+            mWifiBatchedScanTimer[bin].startRunningLocked(elapsedRealtimeMs);
         }
 
         @Override
-        public void noteWifiBatchedScanStoppedLocked(long elapsedRealtime) {
+        public void noteWifiBatchedScanStoppedLocked(long elapsedRealtimeMs) {
             if (mWifiBatchedScanBinStarted != NO_BATCHED_SCAN_STARTED) {
                 mWifiBatchedScanTimer[mWifiBatchedScanBinStarted].
-                        stopRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                        stopRunningLocked(elapsedRealtimeMs);
                 mWifiBatchedScanBinStarted = NO_BATCHED_SCAN_STARTED;
             }
         }
 
         @Override
-        public void noteWifiMulticastEnabledLocked(long elapsedRealtime) {
+        public void noteWifiMulticastEnabledLocked(long elapsedRealtimeMs) {
             if (!mWifiMulticastEnabled) {
                 mWifiMulticastEnabled = true;
                 if (mWifiMulticastTimer == null) {
                     mWifiMulticastTimer = new StopwatchTimer(Uid.this, WIFI_MULTICAST_ENABLED,
-                            mWifiMulticastTimers, mUnpluggables);
+                            mWifiMulticastTimers, mOnBatteryTimeBase);
                 }
-                mWifiMulticastTimer.startRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                mWifiMulticastTimer.startRunningLocked(elapsedRealtimeMs);
             }
         }
 
         @Override
-        public void noteWifiMulticastDisabledLocked(long elapsedRealtime) {
+        public void noteWifiMulticastDisabledLocked(long elapsedRealtimeMs) {
             if (mWifiMulticastEnabled) {
                 mWifiMulticastEnabled = false;
-                mWifiMulticastTimer.stopRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                mWifiMulticastTimer.stopRunningLocked(elapsedRealtimeMs);
             }
         }
 
         public StopwatchTimer createAudioTurnedOnTimerLocked() {
             if (mAudioTurnedOnTimer == null) {
                 mAudioTurnedOnTimer = new StopwatchTimer(Uid.this, AUDIO_TURNED_ON,
-                        null, mUnpluggables);
+                        null, mOnBatteryTimeBase);
             }
             return mAudioTurnedOnTimer;
         }
 
         @Override
-        public void noteAudioTurnedOnLocked(long elapsedRealtime) {
+        public void noteAudioTurnedOnLocked(long elapsedRealtimeMs) {
             if (!mAudioTurnedOn) {
                 mAudioTurnedOn = true;
-                createAudioTurnedOnTimerLocked().startRunningLocked(BatteryStatsImpl.this,
-                        elapsedRealtime);
+                createAudioTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
             }
         }
 
         @Override
-        public void noteAudioTurnedOffLocked(long elapsedRealtime) {
+        public void noteAudioTurnedOffLocked(long elapsedRealtimeMs) {
             if (mAudioTurnedOn) {
                 mAudioTurnedOn = false;
                 if (mAudioTurnedOnTimer != null) {
-                    mAudioTurnedOnTimer.stopRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                    mAudioTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
                 }
             }
         }
@@ -3406,26 +3605,25 @@ public final class BatteryStatsImpl extends BatteryStats {
         public StopwatchTimer createVideoTurnedOnTimerLocked() {
             if (mVideoTurnedOnTimer == null) {
                 mVideoTurnedOnTimer = new StopwatchTimer(Uid.this, VIDEO_TURNED_ON,
-                        null, mUnpluggables);
+                        null, mOnBatteryTimeBase);
             }
             return mVideoTurnedOnTimer;
         }
 
         @Override
-        public void noteVideoTurnedOnLocked(long elapsedRealtime) {
+        public void noteVideoTurnedOnLocked(long elapsedRealtimeMs) {
             if (!mVideoTurnedOn) {
                 mVideoTurnedOn = true;
-                createVideoTurnedOnTimerLocked().startRunningLocked(BatteryStatsImpl.this,
-                        elapsedRealtime);
+                createVideoTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
             }
         }
 
         @Override
-        public void noteVideoTurnedOffLocked(long elapsedRealtime) {
+        public void noteVideoTurnedOffLocked(long elapsedRealtimeMs) {
             if (mVideoTurnedOn) {
                 mVideoTurnedOn = false;
                 if (mVideoTurnedOnTimer != null) {
-                    mVideoTurnedOnTimer.stopRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                    mVideoTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
                 }
             }
         }
@@ -3433,29 +3631,27 @@ public final class BatteryStatsImpl extends BatteryStats {
         public StopwatchTimer createForegroundActivityTimerLocked() {
             if (mForegroundActivityTimer == null) {
                 mForegroundActivityTimer = new StopwatchTimer(
-                        Uid.this, FOREGROUND_ACTIVITY, null, mUnpluggables);
+                        Uid.this, FOREGROUND_ACTIVITY, null, mOnBatteryTimeBase);
             }
             return mForegroundActivityTimer;
         }
 
         @Override
-        public void noteActivityResumedLocked(long elapsedRealtime) {
+        public void noteActivityResumedLocked(long elapsedRealtimeMs) {
             // We always start, since we want multiple foreground PIDs to nest
-            createForegroundActivityTimerLocked().startRunningLocked(BatteryStatsImpl.this,
-                    elapsedRealtime);
+            createForegroundActivityTimerLocked().startRunningLocked(elapsedRealtimeMs);
         }
 
         @Override
-        public void noteActivityPausedLocked(long elapsedRealtime) {
+        public void noteActivityPausedLocked(long elapsedRealtimeMs) {
             if (mForegroundActivityTimer != null) {
-                mForegroundActivityTimer.stopRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                mForegroundActivityTimer.stopRunningLocked(elapsedRealtimeMs);
             }
         }
 
         public BatchTimer createVibratorOnTimerLocked() {
             if (mVibratorOnTimer == null) {
-                mVibratorOnTimer = new BatchTimer(Uid.this, VIBRATOR_ON,
-                        mUnpluggables, BatteryStatsImpl.this.mOnBatteryInternal);
+                mVibratorOnTimer = new BatchTimer(Uid.this, VIBRATOR_ON, mOnBatteryTimeBase);
             }
             return mVibratorOnTimer;
         }
@@ -3471,61 +3667,60 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
-        public long getWifiRunningTime(long batteryRealtime, int which) {
+        public long getWifiRunningTime(long elapsedRealtimeUs, int which) {
             if (mWifiRunningTimer == null) {
                 return 0;
             }
-            return mWifiRunningTimer.getTotalTimeLocked(batteryRealtime, which);
+            return mWifiRunningTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
         }
 
         @Override
-        public long getFullWifiLockTime(long batteryRealtime, int which) {
+        public long getFullWifiLockTime(long elapsedRealtimeUs, int which) {
             if (mFullWifiLockTimer == null) {
                 return 0;
             }
-            return mFullWifiLockTimer.getTotalTimeLocked(batteryRealtime, which);
+            return mFullWifiLockTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
         }
 
         @Override
-        public long getWifiScanTime(long batteryRealtime, int which) {
+        public long getWifiScanTime(long elapsedRealtimeUs, int which) {
             if (mWifiScanTimer == null) {
                 return 0;
             }
-            return mWifiScanTimer.getTotalTimeLocked(batteryRealtime, which);
+            return mWifiScanTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
         }
 
         @Override
-        public long getWifiBatchedScanTime(int csphBin, long batteryRealtime, int which) {
+        public long getWifiBatchedScanTime(int csphBin, long elapsedRealtimeUs, int which) {
             if (csphBin < 0 || csphBin >= NUM_WIFI_BATCHED_SCAN_BINS) return 0;
             if (mWifiBatchedScanTimer[csphBin] == null) {
                 return 0;
             }
-            return mWifiBatchedScanTimer[csphBin].getTotalTimeLocked(batteryRealtime, which);
+            return mWifiBatchedScanTimer[csphBin].getTotalTimeLocked(elapsedRealtimeUs, which);
         }
 
         @Override
-        public long getWifiMulticastTime(long batteryRealtime, int which) {
+        public long getWifiMulticastTime(long elapsedRealtimeUs, int which) {
             if (mWifiMulticastTimer == null) {
                 return 0;
             }
-            return mWifiMulticastTimer.getTotalTimeLocked(batteryRealtime,
-                                                          which);
+            return mWifiMulticastTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
         }
 
         @Override
-        public long getAudioTurnedOnTime(long batteryRealtime, int which) {
+        public long getAudioTurnedOnTime(long elapsedRealtimeUs, int which) {
             if (mAudioTurnedOnTimer == null) {
                 return 0;
             }
-            return mAudioTurnedOnTimer.getTotalTimeLocked(batteryRealtime, which);
+            return mAudioTurnedOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
         }
 
         @Override
-        public long getVideoTurnedOnTime(long batteryRealtime, int which) {
+        public long getVideoTurnedOnTime(long elapsedRealtimeUs, int which) {
             if (mVideoTurnedOnTimer == null) {
                 return 0;
             }
-            return mVideoTurnedOnTimer.getTotalTimeLocked(batteryRealtime, which);
+            return mVideoTurnedOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
         }
 
         @Override
@@ -3574,10 +3769,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             if (in == null) {
                 mWifiBatchedScanTimer[i] = new StopwatchTimer(this, WIFI_BATCHED_SCAN, collected,
-                        mUnpluggables);
+                        mOnBatteryTimeBase);
             } else {
                 mWifiBatchedScanTimer[i] = new StopwatchTimer(this, WIFI_BATCHED_SCAN, collected,
-                        mUnpluggables, in);
+                        mOnBatteryTimeBase, in);
             }
         }
 
@@ -3585,7 +3780,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         void initUserActivityLocked() {
             mUserActivityCounters = new Counter[NUM_USER_ACTIVITY_TYPES];
             for (int i=0; i<NUM_USER_ACTIVITY_TYPES; i++) {
-                mUserActivityCounters[i] = new Counter(mUnpluggables);
+                mUserActivityCounters[i] = new Counter(mOnBatteryTimeBase);
             }
         }
 
@@ -3651,11 +3846,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             mNetworkByteActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
             mNetworkPacketActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
             for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-                mNetworkByteActivityCounters[i] = new LongSamplingCounter(mUnpluggables);
-                mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mUnpluggables);
+                mNetworkByteActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase);
+                mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase);
             }
-            mMobileRadioActiveTime = new LongSamplingCounter(mUnpluggables);
-            mMobileRadioActiveCount = new LongSamplingCounter(mUnpluggables);
+            mMobileRadioActiveTime = new LongSamplingCounter(mOnBatteryTimeBase);
+            mMobileRadioActiveCount = new LongSamplingCounter(mOnBatteryTimeBase);
         }
 
         /**
@@ -3666,42 +3861,42 @@ public final class BatteryStatsImpl extends BatteryStats {
             boolean active = false;
 
             if (mWifiRunningTimer != null) {
-                active |= !mWifiRunningTimer.reset(BatteryStatsImpl.this, false);
+                active |= !mWifiRunningTimer.reset(false);
                 active |= mWifiRunning;
             }
             if (mFullWifiLockTimer != null) {
-                active |= !mFullWifiLockTimer.reset(BatteryStatsImpl.this, false);
+                active |= !mFullWifiLockTimer.reset(false);
                 active |= mFullWifiLockOut;
             }
             if (mWifiScanTimer != null) {
-                active |= !mWifiScanTimer.reset(BatteryStatsImpl.this, false);
+                active |= !mWifiScanTimer.reset(false);
                 active |= mWifiScanStarted;
             }
             if (mWifiBatchedScanTimer != null) {
                 for (int i = 0; i < NUM_WIFI_BATCHED_SCAN_BINS; i++) {
                     if (mWifiBatchedScanTimer[i] != null) {
-                        active |= !mWifiBatchedScanTimer[i].reset(BatteryStatsImpl.this, false);
+                        active |= !mWifiBatchedScanTimer[i].reset(false);
                     }
                 }
                 active |= (mWifiBatchedScanBinStarted != NO_BATCHED_SCAN_STARTED);
             }
             if (mWifiMulticastTimer != null) {
-                active |= !mWifiMulticastTimer.reset(BatteryStatsImpl.this, false);
+                active |= !mWifiMulticastTimer.reset(false);
                 active |= mWifiMulticastEnabled;
             }
             if (mAudioTurnedOnTimer != null) {
-                active |= !mAudioTurnedOnTimer.reset(BatteryStatsImpl.this, false);
+                active |= !mAudioTurnedOnTimer.reset(false);
                 active |= mAudioTurnedOn;
             }
             if (mVideoTurnedOnTimer != null) {
-                active |= !mVideoTurnedOnTimer.reset(BatteryStatsImpl.this, false);
+                active |= !mVideoTurnedOnTimer.reset(false);
                 active |= mVideoTurnedOn;
             }
             if (mForegroundActivityTimer != null) {
-                active |= !mForegroundActivityTimer.reset(BatteryStatsImpl.this, false);
+                active |= !mForegroundActivityTimer.reset(false);
             }
             if (mVibratorOnTimer != null) {
-                if (mVibratorOnTimer.reset(BatteryStatsImpl.this, false)) {
+                if (mVibratorOnTimer.reset(false)) {
                     mVibratorOnTimer.detach();
                     mVibratorOnTimer = null;
                 } else {
@@ -3830,19 +4025,19 @@ public final class BatteryStatsImpl extends BatteryStats {
             return !active;
         }
 
-        void writeToParcelLocked(Parcel out, long batteryRealtime) {
+        void writeToParcelLocked(Parcel out, long elapsedRealtimeUs) {
             out.writeInt(mWakelockStats.size());
             for (Map.Entry<String, Uid.Wakelock> wakelockEntry : mWakelockStats.entrySet()) {
                 out.writeString(wakelockEntry.getKey());
                 Uid.Wakelock wakelock = wakelockEntry.getValue();
-                wakelock.writeToParcelLocked(out, batteryRealtime);
+                wakelock.writeToParcelLocked(out, elapsedRealtimeUs);
             }
 
             out.writeInt(mSensorStats.size());
             for (Map.Entry<Integer, Uid.Sensor> sensorEntry : mSensorStats.entrySet()) {
                 out.writeInt(sensorEntry.getKey());
                 Uid.Sensor sensor = sensorEntry.getValue();
-                sensor.writeToParcelLocked(out, batteryRealtime);
+                sensor.writeToParcelLocked(out, elapsedRealtimeUs);
             }
 
             out.writeInt(mProcessStats.size());
@@ -3861,57 +4056,57 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             if (mWifiRunningTimer != null) {
                 out.writeInt(1);
-                mWifiRunningTimer.writeToParcel(out, batteryRealtime);
+                mWifiRunningTimer.writeToParcel(out, elapsedRealtimeUs);
             } else {
                 out.writeInt(0);
             }
             if (mFullWifiLockTimer != null) {
                 out.writeInt(1);
-                mFullWifiLockTimer.writeToParcel(out, batteryRealtime);
+                mFullWifiLockTimer.writeToParcel(out, elapsedRealtimeUs);
             } else {
                 out.writeInt(0);
             }
             if (mWifiScanTimer != null) {
                 out.writeInt(1);
-                mWifiScanTimer.writeToParcel(out, batteryRealtime);
+                mWifiScanTimer.writeToParcel(out, elapsedRealtimeUs);
             } else {
                 out.writeInt(0);
             }
             for (int i = 0; i < NUM_WIFI_BATCHED_SCAN_BINS; i++) {
                 if (mWifiBatchedScanTimer[i] != null) {
                     out.writeInt(1);
-                    mWifiBatchedScanTimer[i].writeToParcel(out, batteryRealtime);
+                    mWifiBatchedScanTimer[i].writeToParcel(out, elapsedRealtimeUs);
                 } else {
                     out.writeInt(0);
                 }
             }
             if (mWifiMulticastTimer != null) {
                 out.writeInt(1);
-                mWifiMulticastTimer.writeToParcel(out, batteryRealtime);
+                mWifiMulticastTimer.writeToParcel(out, elapsedRealtimeUs);
             } else {
                 out.writeInt(0);
             }
             if (mAudioTurnedOnTimer != null) {
                 out.writeInt(1);
-                mAudioTurnedOnTimer.writeToParcel(out, batteryRealtime);
+                mAudioTurnedOnTimer.writeToParcel(out, elapsedRealtimeUs);
             } else {
                 out.writeInt(0);
             }
             if (mVideoTurnedOnTimer != null) {
                 out.writeInt(1);
-                mVideoTurnedOnTimer.writeToParcel(out, batteryRealtime);
+                mVideoTurnedOnTimer.writeToParcel(out, elapsedRealtimeUs);
             } else {
                 out.writeInt(0);
             }
             if (mForegroundActivityTimer != null) {
                 out.writeInt(1);
-                mForegroundActivityTimer.writeToParcel(out, batteryRealtime);
+                mForegroundActivityTimer.writeToParcel(out, elapsedRealtimeUs);
             } else {
                 out.writeInt(0);
             }
             if (mVibratorOnTimer != null) {
                 out.writeInt(1);
-                mVibratorOnTimer.writeToParcel(out, batteryRealtime);
+                mVibratorOnTimer.writeToParcel(out, elapsedRealtimeUs);
             } else {
                 out.writeInt(0);
             }
@@ -3936,13 +4131,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        void readFromParcelLocked(ArrayList<Unpluggable> unpluggables, Parcel in) {
+        void readFromParcelLocked(TimeBase timeBase, TimeBase screenOffTimeBase, Parcel in) {
             int numWakelocks = in.readInt();
             mWakelockStats.clear();
             for (int j = 0; j < numWakelocks; j++) {
                 String wakelockName = in.readString();
                 Uid.Wakelock wakelock = new Wakelock();
-                wakelock.readFromParcelLocked(unpluggables, in);
+                wakelock.readFromParcelLocked(timeBase, screenOffTimeBase, in);
                 // We will just drop some random set of wakelocks if
                 // the previous run of the system was an older version
                 // that didn't impose a limit.
@@ -3954,7 +4149,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             for (int k = 0; k < numSensors; k++) {
                 int sensorNumber = in.readInt();
                 Uid.Sensor sensor = new Sensor(sensorNumber);
-                sensor.readFromParcelLocked(mUnpluggables, in);
+                sensor.readFromParcelLocked(mOnBatteryTimeBase, in);
                 mSensorStats.put(sensorNumber, sensor);
             }
 
@@ -3979,21 +4174,21 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWifiRunning = false;
             if (in.readInt() != 0) {
                 mWifiRunningTimer = new StopwatchTimer(Uid.this, WIFI_RUNNING,
-                        mWifiRunningTimers, mUnpluggables, in);
+                        mWifiRunningTimers, mOnBatteryTimeBase, in);
             } else {
                 mWifiRunningTimer = null;
             }
             mFullWifiLockOut = false;
             if (in.readInt() != 0) {
                 mFullWifiLockTimer = new StopwatchTimer(Uid.this, FULL_WIFI_LOCK,
-                        mFullWifiLockTimers, mUnpluggables, in);
+                        mFullWifiLockTimers, mOnBatteryTimeBase, in);
             } else {
                 mFullWifiLockTimer = null;
             }
             mWifiScanStarted = false;
             if (in.readInt() != 0) {
                 mWifiScanTimer = new StopwatchTimer(Uid.this, WIFI_SCAN,
-                        mWifiScanTimers, mUnpluggables, in);
+                        mWifiScanTimers, mOnBatteryTimeBase, in);
             } else {
                 mWifiScanTimer = null;
             }
@@ -4008,40 +4203,39 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWifiMulticastEnabled = false;
             if (in.readInt() != 0) {
                 mWifiMulticastTimer = new StopwatchTimer(Uid.this, WIFI_MULTICAST_ENABLED,
-                        mWifiMulticastTimers, mUnpluggables, in);
+                        mWifiMulticastTimers, mOnBatteryTimeBase, in);
             } else {
                 mWifiMulticastTimer = null;
             }
             mAudioTurnedOn = false;
             if (in.readInt() != 0) {
                 mAudioTurnedOnTimer = new StopwatchTimer(Uid.this, AUDIO_TURNED_ON,
-                        null, mUnpluggables, in);
+                        null, mOnBatteryTimeBase, in);
             } else {
                 mAudioTurnedOnTimer = null;
             }
             mVideoTurnedOn = false;
             if (in.readInt() != 0) {
                 mVideoTurnedOnTimer = new StopwatchTimer(Uid.this, VIDEO_TURNED_ON,
-                        null, mUnpluggables, in);
+                        null, mOnBatteryTimeBase, in);
             } else {
                 mVideoTurnedOnTimer = null;
             }
             if (in.readInt() != 0) {
                 mForegroundActivityTimer = new StopwatchTimer(
-                        Uid.this, FOREGROUND_ACTIVITY, null, mUnpluggables, in);
+                        Uid.this, FOREGROUND_ACTIVITY, null, mOnBatteryTimeBase, in);
             } else {
                 mForegroundActivityTimer = null;
             }
             if (in.readInt() != 0) {
-                mVibratorOnTimer = new BatchTimer(Uid.this, VIBRATOR_ON,
-                        mUnpluggables, BatteryStatsImpl.this.mOnBatteryInternal, in);
+                mVibratorOnTimer = new BatchTimer(Uid.this, VIBRATOR_ON, mOnBatteryTimeBase, in);
             } else {
                 mVibratorOnTimer = null;
             }
             if (in.readInt() != 0) {
                 mUserActivityCounters = new Counter[NUM_USER_ACTIVITY_TYPES];
                 for (int i=0; i<NUM_USER_ACTIVITY_TYPES; i++) {
-                    mUserActivityCounters[i] = new Counter(mUnpluggables, in);
+                    mUserActivityCounters[i] = new Counter(mOnBatteryTimeBase, in);
                 }
             } else {
                 mUserActivityCounters = null;
@@ -4051,11 +4245,13 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mNetworkPacketActivityCounters
                         = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
                 for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-                    mNetworkByteActivityCounters[i] = new LongSamplingCounter(mUnpluggables, in);
-                    mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mUnpluggables, in);
+                    mNetworkByteActivityCounters[i]
+                            = new LongSamplingCounter(mOnBatteryTimeBase, in);
+                    mNetworkPacketActivityCounters[i]
+                            = new LongSamplingCounter(mOnBatteryTimeBase, in);
                 }
-                mMobileRadioActiveTime = new LongSamplingCounter(mUnpluggables, in);
-                mMobileRadioActiveCount = new LongSamplingCounter(mUnpluggables, in);
+                mMobileRadioActiveTime = new LongSamplingCounter(mOnBatteryTimeBase, in);
+                mMobileRadioActiveCount = new LongSamplingCounter(mOnBatteryTimeBase, in);
             } else {
                 mNetworkByteActivityCounters = null;
                 mNetworkPacketActivityCounters = null;
@@ -4089,24 +4285,24 @@ public final class BatteryStatsImpl extends BatteryStats {
              * return a new Timer, or null.
              */
             private StopwatchTimer readTimerFromParcel(int type, ArrayList<StopwatchTimer> pool,
-                    ArrayList<Unpluggable> unpluggables, Parcel in) {
+                    TimeBase timeBase, Parcel in) {
                 if (in.readInt() == 0) {
                     return null;
                 }
 
-                return new StopwatchTimer(Uid.this, type, pool, unpluggables, in);
+                return new StopwatchTimer(Uid.this, type, pool, timeBase, in);
             }
 
             boolean reset() {
                 boolean wlactive = false;
                 if (mTimerFull != null) {
-                    wlactive |= !mTimerFull.reset(BatteryStatsImpl.this, false);
+                    wlactive |= !mTimerFull.reset(false);
                 }
                 if (mTimerPartial != null) {
-                    wlactive |= !mTimerPartial.reset(BatteryStatsImpl.this, false);
+                    wlactive |= !mTimerPartial.reset(false);
                 }
                 if (mTimerWindow != null) {
-                    wlactive |= !mTimerWindow.reset(BatteryStatsImpl.this, false);
+                    wlactive |= !mTimerWindow.reset(false);
                 }
                 if (!wlactive) {
                     if (mTimerFull != null) {
@@ -4125,19 +4321,19 @@ public final class BatteryStatsImpl extends BatteryStats {
                 return !wlactive;
             }
 
-            void readFromParcelLocked(ArrayList<Unpluggable> unpluggables, Parcel in) {
+            void readFromParcelLocked(TimeBase timeBase, TimeBase screenOffTimeBase, Parcel in) {
                 mTimerPartial = readTimerFromParcel(WAKE_TYPE_PARTIAL,
-                        mPartialTimers, unpluggables, in);
+                        mPartialTimers, screenOffTimeBase, in);
                 mTimerFull = readTimerFromParcel(WAKE_TYPE_FULL,
-                        mFullTimers, unpluggables, in);
+                        mFullTimers, timeBase, in);
                 mTimerWindow = readTimerFromParcel(WAKE_TYPE_WINDOW,
-                        mWindowTimers, unpluggables, in);
+                        mWindowTimers, timeBase, in);
             }
 
-            void writeToParcelLocked(Parcel out, long batteryRealtime) {
-                Timer.writeTimerToParcel(out, mTimerPartial, batteryRealtime);
-                Timer.writeTimerToParcel(out, mTimerFull, batteryRealtime);
-                Timer.writeTimerToParcel(out, mTimerWindow, batteryRealtime);
+            void writeToParcelLocked(Parcel out, long elapsedRealtimeUs) {
+                Timer.writeTimerToParcel(out, mTimerPartial, elapsedRealtimeUs);
+                Timer.writeTimerToParcel(out, mTimerFull, elapsedRealtimeUs);
+                Timer.writeTimerToParcel(out, mTimerWindow, elapsedRealtimeUs);
             }
 
             @Override
@@ -4159,8 +4355,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mHandle = handle;
             }
 
-            private StopwatchTimer readTimerFromParcel(ArrayList<Unpluggable> unpluggables,
-                    Parcel in) {
+            private StopwatchTimer readTimerFromParcel(TimeBase timeBase, Parcel in) {
                 if (in.readInt() == 0) {
                     return null;
                 }
@@ -4170,23 +4365,23 @@ public final class BatteryStatsImpl extends BatteryStats {
                     pool = new ArrayList<StopwatchTimer>();
                     mSensorTimers.put(mHandle, pool);
                 }
-                return new StopwatchTimer(Uid.this, 0, pool, unpluggables, in);
+                return new StopwatchTimer(Uid.this, 0, pool, timeBase, in);
             }
 
             boolean reset() {
-                if (mTimer.reset(BatteryStatsImpl.this, true)) {
+                if (mTimer.reset(true)) {
                     mTimer = null;
                     return true;
                 }
                 return false;
             }
 
-            void readFromParcelLocked(ArrayList<Unpluggable> unpluggables, Parcel in) {
-                mTimer = readTimerFromParcel(unpluggables, in);
+            void readFromParcelLocked(TimeBase timeBase, Parcel in) {
+                mTimer = readTimerFromParcel(timeBase, in);
             }
 
-            void writeToParcelLocked(Parcel out, long batteryRealtime) {
-                Timer.writeTimerToParcel(out, mTimer, batteryRealtime);
+            void writeToParcelLocked(Parcel out, long elapsedRealtimeUs) {
+                Timer.writeTimerToParcel(out, mTimer, elapsedRealtimeUs);
             }
 
             @Override
@@ -4203,7 +4398,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         /**
          * The statistics associated with a particular process.
          */
-        public final class Proc extends BatteryStats.Uid.Proc implements Unpluggable {
+        public final class Proc extends BatteryStats.Uid.Proc implements TimeBaseObs {
             /**
              * Remains true until removed from the stats.
              */
@@ -4294,27 +4489,27 @@ public final class BatteryStatsImpl extends BatteryStats {
             ArrayList<ExcessivePower> mExcessivePower;
 
             Proc() {
-                mUnpluggables.add(this);
+                mOnBatteryTimeBase.add(this);
                 mSpeedBins = new SamplingCounter[getCpuSpeedSteps()];
             }
 
-            public void unplug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
+            public void onTimeStarted(long elapsedRealtime, long baseUptime, long baseRealtime) {
                 mUnpluggedUserTime = mUserTime;
                 mUnpluggedSystemTime = mSystemTime;
                 mUnpluggedForegroundTime = mForegroundTime;
                 mUnpluggedStarts = mStarts;
             }
 
-            public void plug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
+            public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
             }
 
             void detach() {
                 mActive = false;
-                mUnpluggables.remove(this);
+                mOnBatteryTimeBase.remove(this);
                 for (int i = 0; i < mSpeedBins.length; i++) {
                     SamplingCounter c = mSpeedBins[i];
                     if (c != null) {
-                        mUnpluggables.remove(c);
+                        mOnBatteryTimeBase.remove(c);
                         mSpeedBins[i] = null;
                     }
                 }
@@ -4443,7 +4638,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mSpeedBins = new SamplingCounter[bins >= steps ? bins : steps];
                 for (int i = 0; i < bins; i++) {
                     if (in.readInt() != 0) {
-                        mSpeedBins[i] = new SamplingCounter(mUnpluggables, in);
+                        mSpeedBins[i] = new SamplingCounter(mOnBatteryTimeBase, in);
                     }
                 }
 
@@ -4543,7 +4738,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     if (amt != 0) {
                         SamplingCounter c = mSpeedBins[i];
                         if (c == null) {
-                            mSpeedBins[i] = c = new SamplingCounter(mUnpluggables);
+                            mSpeedBins[i] = c = new SamplingCounter(mOnBatteryTimeBase);
                         }
                         c.addCountAtomic(values[i]);
                     }
@@ -4564,7 +4759,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         /**
          * The statistics associated with a particular package.
          */
-        public final class Pkg extends BatteryStats.Uid.Pkg implements Unpluggable {
+        public final class Pkg extends BatteryStats.Uid.Pkg implements TimeBaseObs {
             /**
              * Number of times this package has done something that could wake up the
              * device from sleep.
@@ -4595,18 +4790,18 @@ public final class BatteryStatsImpl extends BatteryStats {
             final HashMap<String, Serv> mServiceStats = new HashMap<String, Serv>();
 
             Pkg() {
-                mUnpluggables.add(this);
+                mOnBatteryScreenOffTimeBase.add(this);
             }
 
-            public void unplug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
+            public void onTimeStarted(long elapsedRealtime, long baseUptime, long baseRealtime) {
                 mUnpluggedWakeups = mWakeups;
             }
 
-            public void plug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
+            public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
             }
 
             void detach() {
-                mUnpluggables.remove(this);
+                mOnBatteryScreenOffTimeBase.remove(this);
             }
 
             void readFromParcelLocked(Parcel in) {
@@ -4665,7 +4860,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             /**
              * The statistics associated with a particular service.
              */
-            public final class Serv extends BatteryStats.Uid.Pkg.Serv implements Unpluggable {
+            public final class Serv extends BatteryStats.Uid.Pkg.Serv implements TimeBaseObs {
                 /**
                  * Total time (ms in battery uptime) the service has been left started.
                  */
@@ -4757,20 +4952,22 @@ public final class BatteryStatsImpl extends BatteryStats {
                 int mUnpluggedLaunches;
 
                 Serv() {
-                    mUnpluggables.add(this);
+                    mOnBatteryTimeBase.add(this);
                 }
 
-                public void unplug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
-                    mUnpluggedStartTime = getStartTimeToNowLocked(batteryUptime);
+                public void onTimeStarted(long elapsedRealtime, long baseUptime,
+                        long baseRealtime) {
+                    mUnpluggedStartTime = getStartTimeToNowLocked(baseUptime);
                     mUnpluggedStarts = mStarts;
                     mUnpluggedLaunches = mLaunches;
                 }
 
-                public void plug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
+                public void onTimeStopped(long elapsedRealtime, long baseUptime,
+                        long baseRealtime) {
                 }
 
                 void detach() {
-                    mUnpluggables.remove(this);
+                    mOnBatteryTimeBase.remove(this);
                 }
 
                 void readFromParcelLocked(Parcel in) {
@@ -5005,7 +5202,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     t = wl.mTimerPartial;
                     if (t == null) {
                         t = new StopwatchTimer(Uid.this, WAKE_TYPE_PARTIAL,
-                                mPartialTimers, mUnpluggables);
+                                mPartialTimers, mOnBatteryScreenOffTimeBase);
                         wl.mTimerPartial = t;
                     }
                     return t;
@@ -5013,7 +5210,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     t = wl.mTimerFull;
                     if (t == null) {
                         t = new StopwatchTimer(Uid.this, WAKE_TYPE_FULL,
-                                mFullTimers, mUnpluggables);
+                                mFullTimers, mOnBatteryTimeBase);
                         wl.mTimerFull = t;
                     }
                     return t;
@@ -5021,7 +5218,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     t = wl.mTimerWindow;
                     if (t == null) {
                         t = new StopwatchTimer(Uid.this, WAKE_TYPE_WINDOW,
-                                mWindowTimers, mUnpluggables);
+                                mWindowTimers, mOnBatteryTimeBase);
                         wl.mTimerWindow = t;
                     }
                     return t;
@@ -5048,33 +5245,33 @@ public final class BatteryStatsImpl extends BatteryStats {
                 timers = new ArrayList<StopwatchTimer>();
                 mSensorTimers.put(sensor, timers);
             }
-            t = new StopwatchTimer(Uid.this, BatteryStats.SENSOR, timers, mUnpluggables);
+            t = new StopwatchTimer(Uid.this, BatteryStats.SENSOR, timers, mOnBatteryTimeBase);
             se.mTimer = t;
             return t;
         }
 
-        public void noteStartWakeLocked(int pid, String name, int type, long elapsedRealtime) {
+        public void noteStartWakeLocked(int pid, String name, int type, long elapsedRealtimeMs) {
             StopwatchTimer t = getWakeTimerLocked(name, type);
             if (t != null) {
-                t.startRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                t.startRunningLocked(elapsedRealtimeMs);
             }
             if (pid >= 0 && type == WAKE_TYPE_PARTIAL) {
                 Pid p = getPidStatsLocked(pid);
                 if (p.mWakeStart == 0) {
-                    p.mWakeStart = elapsedRealtime;
+                    p.mWakeStart = elapsedRealtimeMs;
                 }
             }
         }
 
-        public void noteStopWakeLocked(int pid, String name, int type, long elapsedRealtime) {
+        public void noteStopWakeLocked(int pid, String name, int type, long elapsedRealtimeMs) {
             StopwatchTimer t = getWakeTimerLocked(name, type);
             if (t != null) {
-                t.stopRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                t.stopRunningLocked(elapsedRealtimeMs);
             }
             if (pid >= 0 && type == WAKE_TYPE_PARTIAL) {
                 Pid p = mPids.get(pid);
                 if (p != null && p.mWakeStart != 0) {
-                    p.mWakeSum += elapsedRealtime - p.mWakeStart;
+                    p.mWakeSum += elapsedRealtimeMs - p.mWakeStart;
                     p.mWakeStart = 0;
                 }
             }
@@ -5094,32 +5291,32 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        public void noteStartSensor(int sensor, long elapsedRealtime) {
+        public void noteStartSensor(int sensor, long elapsedRealtimeMs) {
             StopwatchTimer t = getSensorTimerLocked(sensor, true);
             if (t != null) {
-                t.startRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                t.startRunningLocked(elapsedRealtimeMs);
             }
         }
 
-        public void noteStopSensor(int sensor, long elapsedRealtime) {
+        public void noteStopSensor(int sensor, long elapsedRealtimeMs) {
             // Don't create a timer if one doesn't already exist
             StopwatchTimer t = getSensorTimerLocked(sensor, false);
             if (t != null) {
-                t.stopRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                t.stopRunningLocked(elapsedRealtimeMs);
             }
         }
 
-        public void noteStartGps(long elapsedRealtime) {
+        public void noteStartGps(long elapsedRealtimeMs) {
             StopwatchTimer t = getSensorTimerLocked(Sensor.GPS, true);
             if (t != null) {
-                t.startRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                t.startRunningLocked(elapsedRealtimeMs);
             }
         }
 
-        public void noteStopGps(long elapsedRealtime) {
+        public void noteStopGps(long elapsedRealtimeMs) {
             StopwatchTimer t = getSensorTimerLocked(Sensor.GPS, false);
             if (t != null) {
-                t.stopRunningLocked(BatteryStatsImpl.this, elapsedRealtime);
+                t.stopRunningLocked(elapsedRealtimeMs);
             }
         }
 
@@ -5132,46 +5329,46 @@ public final class BatteryStatsImpl extends BatteryStats {
         mFile = new JournaledFile(new File(filename), new File(filename + ".tmp"));
         mHandler = new MyHandler(handler.getLooper());
         mStartCount++;
-        mScreenOnTimer = new StopwatchTimer(null, -1, null, mUnpluggables);
+        mScreenOnTimer = new StopwatchTimer(null, -1, null, mOnBatteryTimeBase);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
-            mScreenBrightnessTimer[i] = new StopwatchTimer(null, -100-i, null, mUnpluggables);
+            mScreenBrightnessTimer[i] = new StopwatchTimer(null, -100-i, null, mOnBatteryTimeBase);
         }
-        mInputEventCounter = new Counter(mUnpluggables);
-        mPhoneOnTimer = new StopwatchTimer(null, -2, null, mUnpluggables);
+        mInputEventCounter = new Counter(mOnBatteryTimeBase);
+        mPhoneOnTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
-            mPhoneSignalStrengthsTimer[i] = new StopwatchTimer(null, -200-i, null, mUnpluggables);
+            mPhoneSignalStrengthsTimer[i] = new StopwatchTimer(null, -200-i, null,
+                    mOnBatteryTimeBase);
         }
-        mPhoneSignalScanningTimer = new StopwatchTimer(null, -200+1, null, mUnpluggables);
+        mPhoneSignalScanningTimer = new StopwatchTimer(null, -200+1, null, mOnBatteryTimeBase);
         for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
-            mPhoneDataConnectionsTimer[i] = new StopwatchTimer(null, -300-i, null, mUnpluggables);
+            mPhoneDataConnectionsTimer[i] = new StopwatchTimer(null, -300-i, null,
+                    mOnBatteryTimeBase);
         }
         for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-            mNetworkByteActivityCounters[i] = new LongSamplingCounter(mUnpluggables);
-            mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mUnpluggables);
+            mNetworkByteActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase);
+            mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase);
         }
-        mMobileRadioActiveTimer = new StopwatchTimer(null, -400, null, mUnpluggables);
-        mMobileRadioActivePerAppTimer = new StopwatchTimer(null, -401, null, mUnpluggables);
-        mMobileRadioActiveUnknownTime = new LongSamplingCounter(mUnpluggables);
-        mMobileRadioActiveUnknownCount = new LongSamplingCounter(mUnpluggables);
-        mWifiOnTimer = new StopwatchTimer(null, -3, null, mUnpluggables);
-        mGlobalWifiRunningTimer = new StopwatchTimer(null, -4, null, mUnpluggables);
+        mMobileRadioActiveTimer = new StopwatchTimer(null, -400, null, mOnBatteryTimeBase);
+        mMobileRadioActivePerAppTimer = new StopwatchTimer(null, -401, null, mOnBatteryTimeBase);
+        mMobileRadioActiveUnknownTime = new LongSamplingCounter(mOnBatteryTimeBase);
+        mMobileRadioActiveUnknownCount = new LongSamplingCounter(mOnBatteryTimeBase);
+        mWifiOnTimer = new StopwatchTimer(null, -3, null, mOnBatteryTimeBase);
+        mGlobalWifiRunningTimer = new StopwatchTimer(null, -4, null, mOnBatteryTimeBase);
         for (int i=0; i<NUM_WIFI_STATES; i++) {
-            mWifiStateTimer[i] = new StopwatchTimer(null, -600-i, null, mUnpluggables);
+            mWifiStateTimer[i] = new StopwatchTimer(null, -600-i, null, mOnBatteryTimeBase);
         }
-        mBluetoothOnTimer = new StopwatchTimer(null, -5, null, mUnpluggables);
+        mBluetoothOnTimer = new StopwatchTimer(null, -5, null, mOnBatteryTimeBase);
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
-            mBluetoothStateTimer[i] = new StopwatchTimer(null, -500-i, null, mUnpluggables);
+            mBluetoothStateTimer[i] = new StopwatchTimer(null, -500-i, null, mOnBatteryTimeBase);
         }
-        mAudioOnTimer = new StopwatchTimer(null, -6, null, mUnpluggables);
-        mVideoOnTimer = new StopwatchTimer(null, -7, null, mUnpluggables);
+        mAudioOnTimer = new StopwatchTimer(null, -6, null, mOnBatteryTimeBase);
+        mVideoOnTimer = new StopwatchTimer(null, -7, null, mOnBatteryTimeBase);
         mOnBattery = mOnBatteryInternal = false;
-        initTimes();
-        mTrackBatteryPastUptime = 0;
-        mTrackBatteryPastRealtime = 0;
-        mUptimeStart = mTrackBatteryUptimeStart = SystemClock.uptimeMillis() * 1000;
-        mRealtimeStart = mTrackBatteryRealtimeStart = SystemClock.elapsedRealtime() * 1000;
-        mUnpluggedBatteryUptime = getBatteryUptimeLocked(mUptimeStart);
-        mUnpluggedBatteryRealtime = getBatteryRealtimeLocked(mRealtimeStart);
+        long uptime = SystemClock.uptimeMillis() * 1000;
+        long realtime = SystemClock.elapsedRealtime() * 1000;
+        initTimes(uptime, realtime);
+        mUptimeStart = uptime;
+        mRealtimeStart = realtime;
         mDischargeStartLevel = 0;
         mDischargeUnplugLevel = 0;
         mDischargeCurrentLevel = 0;
@@ -5347,14 +5544,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         return mScreenOn;
     }
 
-    void initTimes() {
+    void initTimes(long uptime, long realtime) {
         mStartClockTime = System.currentTimeMillis();
-        mBatteryRealtime = mTrackBatteryPastUptime = 0;
-        mBatteryUptime = mTrackBatteryPastRealtime = 0;
-        mUptimeStart = mTrackBatteryUptimeStart = SystemClock.uptimeMillis() * 1000;
-        mRealtimeStart = mTrackBatteryRealtimeStart = SystemClock.elapsedRealtime() * 1000;
-        mUnpluggedBatteryUptime = getBatteryUptimeLocked(mUptimeStart);
-        mUnpluggedBatteryRealtime = getBatteryRealtimeLocked(mRealtimeStart);
+        mOnBatteryTimeBase.init(uptime, realtime);
+        mOnBatteryScreenOffTimeBase.init(uptime, realtime);
+        mUptimeStart = uptime;
+        mRealtimeStart = realtime;
     }
 
     void initDischarge() {
@@ -5375,14 +5570,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         pullPendingStateUpdatesLocked();
         addHistoryRecordLocked(mSecRealtime);
         mDischargeCurrentLevel = mDischargeUnplugLevel = mHistoryCur.batteryLevel;
-        if ((mHistoryCur.states&HistoryItem.STATE_BATTERY_PLUGGED_FLAG) != 0) {
-            mTrackBatteryPastUptime = 0;
-            mTrackBatteryPastRealtime = 0;
-        } else {
-            mTrackBatteryUptimeStart = uptime;
-            mTrackBatteryRealtimeStart = realtime;
-            mUnpluggedBatteryUptime = getBatteryUptimeLocked(uptime);
-            mUnpluggedBatteryRealtime = getBatteryRealtimeLocked(realtime);
+        mOnBatteryTimeBase.reset(uptime, realtime);
+        mOnBatteryScreenOffTimeBase.reset(uptime, realtime);
+        if ((mHistoryCur.states&HistoryItem.STATE_BATTERY_PLUGGED_FLAG) == 0) {
             if (mScreenOn) {
                 mDischargeScreenOnUnplugLevel = mHistoryCur.batteryLevel;
                 mDischargeScreenOffUnplugLevel = 0;
@@ -5398,38 +5588,38 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     private void resetAllStatsLocked() {
         mStartCount = 0;
-        initTimes();
-        mScreenOnTimer.reset(this, false);
+        initTimes(SystemClock.uptimeMillis() * 1000, SystemClock.elapsedRealtime() * 1000);
+        mScreenOnTimer.reset(false);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
-            mScreenBrightnessTimer[i].reset(this, false);
+            mScreenBrightnessTimer[i].reset(false);
         }
         mInputEventCounter.reset(false);
-        mPhoneOnTimer.reset(this, false);
-        mAudioOnTimer.reset(this, false);
-        mVideoOnTimer.reset(this, false);
+        mPhoneOnTimer.reset(false);
+        mAudioOnTimer.reset(false);
+        mVideoOnTimer.reset(false);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
-            mPhoneSignalStrengthsTimer[i].reset(this, false);
+            mPhoneSignalStrengthsTimer[i].reset(false);
         }
-        mPhoneSignalScanningTimer.reset(this, false);
+        mPhoneSignalScanningTimer.reset(false);
         for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
-            mPhoneDataConnectionsTimer[i].reset(this, false);
+            mPhoneDataConnectionsTimer[i].reset(false);
         }
         for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
             mNetworkByteActivityCounters[i].reset(false);
             mNetworkPacketActivityCounters[i].reset(false);
         }
-        mMobileRadioActiveTimer.reset(this, false);
-        mMobileRadioActivePerAppTimer.reset(this, false);
+        mMobileRadioActiveTimer.reset(false);
+        mMobileRadioActivePerAppTimer.reset(false);
         mMobileRadioActiveUnknownTime.reset(false);
         mMobileRadioActiveUnknownCount.reset(false);
-        mWifiOnTimer.reset(this, false);
-        mGlobalWifiRunningTimer.reset(this, false);
+        mWifiOnTimer.reset(false);
+        mGlobalWifiRunningTimer.reset(false);
         for (int i=0; i<NUM_WIFI_STATES; i++) {
-            mWifiStateTimer[i].reset(this, false);
+            mWifiStateTimer[i].reset(false);
         }
-        mBluetoothOnTimer.reset(this, false);
+        mBluetoothOnTimer.reset(false);
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
-            mBluetoothStateTimer[i].reset(this, false);
+            mBluetoothStateTimer[i].reset(false);
         }
 
         for (int i=0; i<mUidStats.size(); i++) {
@@ -5441,7 +5631,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         if (mKernelWakelockStats.size() > 0) {
             for (SamplingTimer timer : mKernelWakelockStats.values()) {
-                mUnpluggables.remove(timer);
+                mOnBatteryScreenOffTimeBase.remove(timer);
             }
             mKernelWakelockStats.clear();
         }
@@ -5491,12 +5681,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
     
-    void setOnBattery(boolean onBattery, int oldStatus, int level) {
-        synchronized(this) {
-            setOnBatteryLocked(onBattery, oldStatus, level);
-        }
-    }
-
     public void pullPendingStateUpdatesLocked() {
         updateKernelWakelocksLocked();
         updateNetworkActivityLocked(NET_UPDATE_ALL, SystemClock.elapsedRealtime());
@@ -5535,10 +5719,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "Battery unplugged to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(mSecRealtime);
-            mTrackBatteryUptimeStart = uptime;
-            mTrackBatteryRealtimeStart = realtime;
-            mUnpluggedBatteryUptime = getBatteryUptimeLocked(uptime);
-            mUnpluggedBatteryRealtime = getBatteryRealtimeLocked(realtime);
             mDischargeCurrentLevel = mDischargeUnplugLevel = level;
             if (mScreenOn) {
                 mDischargeScreenOnUnplugLevel = level;
@@ -5549,7 +5729,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             mDischargeAmountScreenOn = 0;
             mDischargeAmountScreenOff = 0;
-            doUnplugLocked(realtime, mUnpluggedBatteryUptime, mUnpluggedBatteryRealtime);
+            updateTimeBasesLocked(true, !mScreenOn, uptime, realtime);
             if (reset) {
                 initActiveHistoryEventsLocked(mSecRealtime);
             }
@@ -5560,15 +5740,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "Battery plugged to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(mSecRealtime);
-            mTrackBatteryPastUptime += uptime - mTrackBatteryUptimeStart;
-            mTrackBatteryPastRealtime += realtime - mTrackBatteryRealtimeStart;
             mDischargeCurrentLevel = level;
             if (level < mDischargeUnplugLevel) {
                 mLowDischargeAmountSinceCharge += mDischargeUnplugLevel-level-1;
                 mHighDischargeAmountSinceCharge += mDischargeUnplugLevel-level;
             }
             updateDischargeScreenLevelsLocked(mScreenOn, mScreenOn);
-            doPlugLocked(realtime, getBatteryUptimeLocked(uptime), getBatteryRealtimeLocked(realtime));
+            updateTimeBasesLocked(false, !mScreenOn, uptime, realtime);
         }
         if (doWrite || (mLastWriteTime + (60 * 1000)) < mSecRealtime) {
             if (mFile != null) {
@@ -5667,8 +5845,8 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             SamplingTimer kwlt = mKernelWakelockStats.get(name);
             if (kwlt == null) {
-                kwlt = new SamplingTimer(mUnpluggables, mOnBatteryInternal,
-                        true /* track reported values */);
+                kwlt = new SamplingTimer(mOnBatteryScreenOffTimeBase,
+                        true /* track reported val */);
                 mKernelWakelockStats.put(name, kwlt);
             }
             kwlt.updateCurrentReportedCount(kws.mCount);
@@ -5691,7 +5869,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     static final int NET_UPDATE_WIFI = 1<<1;
     static final int NET_UPDATE_ALL = 0xffff;
 
-    private void updateNetworkActivityLocked(int which, long elapsedRealtime) {
+    private void updateNetworkActivityLocked(int which, long elapsedRealtimeMs) {
         if (!SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) return;
 
         if ((which&NET_UPDATE_MOBILE) != 0 && mMobileIfaces.length > 0) {
@@ -5713,8 +5891,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                         null, null, mTmpNetworkStats);
                 mTmpNetworkStats = delta;
 
-                long radioTime = mMobileRadioActivePerAppTimer.checkpointRunningLocked(this,
-                        elapsedRealtime);
+                long radioTime = mMobileRadioActivePerAppTimer.checkpointRunningLocked(
+                        elapsedRealtimeMs);
                 long totalPackets = delta.getTotalPackets();
 
                 final int size = delta.size();
@@ -5823,7 +6001,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             case STATS_SINCE_CHARGED: return mUptime + (curTime-mUptimeStart);
             case STATS_LAST: return mLastUptime;
             case STATS_CURRENT: return (curTime-mUptimeStart);
-            case STATS_SINCE_UNPLUGGED: return (curTime-mTrackBatteryUptimeStart);
+            case STATS_SINCE_UNPLUGGED: return (curTime- mOnBatteryTimeBase.getUptimeStart());
         }
         return 0;
     }
@@ -5834,69 +6012,43 @@ public final class BatteryStatsImpl extends BatteryStats {
             case STATS_SINCE_CHARGED: return mRealtime + (curTime-mRealtimeStart);
             case STATS_LAST: return mLastRealtime;
             case STATS_CURRENT: return (curTime-mRealtimeStart);
-            case STATS_SINCE_UNPLUGGED: return (curTime-mTrackBatteryRealtimeStart);
+            case STATS_SINCE_UNPLUGGED: return (curTime- mOnBatteryTimeBase.getRealtimeStart());
         }
         return 0;
     }
 
     @Override
     public long computeBatteryUptime(long curTime, int which) {
-        switch (which) {
-            case STATS_SINCE_CHARGED:
-                return mBatteryUptime + getBatteryUptime(curTime);
-            case STATS_LAST:
-                return mBatteryLastUptime;
-            case STATS_CURRENT:
-                return getBatteryUptime(curTime);
-            case STATS_SINCE_UNPLUGGED:
-                return getBatteryUptimeLocked(curTime) - mUnpluggedBatteryUptime;
-        }
-        return 0;
+        return mOnBatteryTimeBase.computeUptime(curTime, which);
     }
 
     @Override
     public long computeBatteryRealtime(long curTime, int which) {
-        switch (which) {
-            case STATS_SINCE_CHARGED:
-                return mBatteryRealtime + getBatteryRealtimeLocked(curTime);
-            case STATS_LAST:
-                return mBatteryLastRealtime;
-            case STATS_CURRENT:
-                return getBatteryRealtimeLocked(curTime);
-            case STATS_SINCE_UNPLUGGED:
-                return getBatteryRealtimeLocked(curTime) - mUnpluggedBatteryRealtime;
-        }
-        return 0;
+        return mOnBatteryTimeBase.computeRealtime(curTime, which);
     }
 
-    long getBatteryUptimeLocked(long curTime) {
-        long time = mTrackBatteryPastUptime;
-        if (mOnBatteryInternal) {
-            time += curTime - mTrackBatteryUptimeStart;
-        }
-        return time;
+    @Override
+    public long computeBatteryScreenOffUptime(long curTime, int which) {
+        return mOnBatteryScreenOffTimeBase.computeUptime(curTime, which);
+    }
+
+    @Override
+    public long computeBatteryScreenOffRealtime(long curTime, int which) {
+        return mOnBatteryScreenOffTimeBase.computeRealtime(curTime, which);
     }
 
     long getBatteryUptimeLocked() {
-        return getBatteryUptime(SystemClock.uptimeMillis() * 1000);
+        return mOnBatteryTimeBase.getUptime(SystemClock.uptimeMillis() * 1000);
     }
 
     @Override
     public long getBatteryUptime(long curTime) {
-        return getBatteryUptimeLocked(curTime);
-    }
-
-    long getBatteryRealtimeLocked(long curTime) {
-        long time = mTrackBatteryPastRealtime;
-        if (mOnBatteryInternal) {
-            time += curTime - mTrackBatteryRealtimeStart;
-        }
-        return time;
+        return mOnBatteryTimeBase.getUptime(curTime);
     }
 
     @Override
     public long getBatteryRealtime(long curTime) {
-        return getBatteryRealtimeLocked(curTime);
+        return mOnBatteryTimeBase.getRealtime(curTime);
     }
 
     @Override
@@ -6074,7 +6226,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                                     time = (time*uidRunningTime)/totalRunningTime;
                                     SamplingCounter uidSc = uidProc.mSpeedBins[sb];
                                     if (uidSc == null) {
-                                        uidSc = new SamplingCounter(mUnpluggables);
+                                        uidSc = new SamplingCounter(mOnBatteryTimeBase);
                                         uidProc.mSpeedBins[sb] = uidSc;
                                     }
                                     uidSc.mCount.addAndGet((int)time);
@@ -6358,11 +6510,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         readHistory(in, true);
 
         mStartCount = in.readInt();
-        mBatteryUptime = in.readLong();
-        mBatteryRealtime = in.readLong();
         mUptime = in.readLong();
         mRealtime = in.readLong();
         mStartClockTime = in.readLong();
+        mOnBatteryTimeBase.readSummaryFromParcel(in);
+        mOnBatteryScreenOffTimeBase.readSummaryFromParcel(in);
         mDischargeUnplugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
         mLowDischargeAmountSinceCharge = in.readInt();
@@ -6546,7 +6698,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 p.mSpeedBins = new SamplingCounter[NSB];
                 for (int i=0; i<NSB; i++) {
                     if (in.readInt() != 0) {
-                        p.mSpeedBins[i] = new SamplingCounter(mUnpluggables);
+                        p.mSpeedBins[i] = new SamplingCounter(mOnBatteryTimeBase);
                         p.mSpeedBins[i].readSummaryFromParcelLocked(in);
                     }
                 }
@@ -6591,55 +6743,53 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         final long NOW_SYS = SystemClock.uptimeMillis() * 1000;
         final long NOWREAL_SYS = SystemClock.elapsedRealtime() * 1000;
-        final long NOW = getBatteryUptimeLocked(NOW_SYS);
-        final long NOWREAL = getBatteryRealtimeLocked(NOWREAL_SYS);
 
         out.writeInt(VERSION);
 
         writeHistory(out, true);
 
         out.writeInt(mStartCount);
-        out.writeLong(computeBatteryUptime(NOW_SYS, STATS_SINCE_CHARGED));
-        out.writeLong(computeBatteryRealtime(NOWREAL_SYS, STATS_SINCE_CHARGED));
         out.writeLong(computeUptime(NOW_SYS, STATS_SINCE_CHARGED));
         out.writeLong(computeRealtime(NOWREAL_SYS, STATS_SINCE_CHARGED));
         out.writeLong(mStartClockTime);
+        mOnBatteryTimeBase.writeSummaryToParcel(out, NOW_SYS, NOWREAL_SYS);
+        mOnBatteryScreenOffTimeBase.writeSummaryToParcel(out, NOW_SYS, NOWREAL_SYS);
         out.writeInt(mDischargeUnplugLevel);
         out.writeInt(mDischargeCurrentLevel);
         out.writeInt(getLowDischargeAmountSinceCharge());
         out.writeInt(getHighDischargeAmountSinceCharge());
         out.writeInt(getDischargeAmountScreenOnSinceCharge());
         out.writeInt(getDischargeAmountScreenOffSinceCharge());
-        
-        mScreenOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+
+        mScreenOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
-            mScreenBrightnessTimer[i].writeSummaryFromParcelLocked(out, NOWREAL);
+            mScreenBrightnessTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
         mInputEventCounter.writeSummaryFromParcelLocked(out);
-        mPhoneOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+        mPhoneOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
-            mPhoneSignalStrengthsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL);
+            mPhoneSignalStrengthsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
-        mPhoneSignalScanningTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+        mPhoneSignalScanningTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
-            mPhoneDataConnectionsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL);
+            mPhoneDataConnectionsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
         for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
             mNetworkByteActivityCounters[i].writeSummaryFromParcelLocked(out);
             mNetworkPacketActivityCounters[i].writeSummaryFromParcelLocked(out);
         }
-        mMobileRadioActiveTimer.writeSummaryFromParcelLocked(out, NOWREAL);
-        mMobileRadioActivePerAppTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+        mMobileRadioActiveTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        mMobileRadioActivePerAppTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mMobileRadioActiveUnknownTime.writeSummaryFromParcelLocked(out);
         mMobileRadioActiveUnknownCount.writeSummaryFromParcelLocked(out);
-        mWifiOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
-        mGlobalWifiRunningTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+        mWifiOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        mGlobalWifiRunningTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i<NUM_WIFI_STATES; i++) {
-            mWifiStateTimer[i].writeSummaryFromParcelLocked(out, NOWREAL);
+            mWifiStateTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
-        mBluetoothOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+        mBluetoothOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
-            mBluetoothStateTimer[i].writeSummaryFromParcelLocked(out, NOWREAL);
+            mBluetoothStateTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
 
         out.writeInt(mKernelWakelockStats.size());
@@ -6648,7 +6798,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (kwlt != null) {
                 out.writeInt(1);
                 out.writeString(ent.getKey());
-                ent.getValue().writeSummaryFromParcelLocked(out, NOWREAL);
+                ent.getValue().writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             } else {
                 out.writeInt(0);
             }
@@ -6663,57 +6813,57 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             if (u.mWifiRunningTimer != null) {
                 out.writeInt(1);
-                u.mWifiRunningTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+                u.mWifiRunningTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             } else {
                 out.writeInt(0);
             }
             if (u.mFullWifiLockTimer != null) {
                 out.writeInt(1);
-                u.mFullWifiLockTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+                u.mFullWifiLockTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             } else {
                 out.writeInt(0);
             }
             if (u.mWifiScanTimer != null) {
                 out.writeInt(1);
-                u.mWifiScanTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+                u.mWifiScanTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             } else {
                 out.writeInt(0);
             }
             for (int i = 0; i < Uid.NUM_WIFI_BATCHED_SCAN_BINS; i++) {
                 if (u.mWifiBatchedScanTimer[i] != null) {
                     out.writeInt(1);
-                    u.mWifiBatchedScanTimer[i].writeSummaryFromParcelLocked(out, NOWREAL);
+                    u.mWifiBatchedScanTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
                 } else {
                     out.writeInt(0);
                 }
             }
             if (u.mWifiMulticastTimer != null) {
                 out.writeInt(1);
-                u.mWifiMulticastTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+                u.mWifiMulticastTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             } else {
                 out.writeInt(0);
             }
             if (u.mAudioTurnedOnTimer != null) {
                 out.writeInt(1);
-                u.mAudioTurnedOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+                u.mAudioTurnedOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             } else {
                 out.writeInt(0);
             }
             if (u.mVideoTurnedOnTimer != null) {
                 out.writeInt(1);
-                u.mVideoTurnedOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+                u.mVideoTurnedOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             } else {
                 out.writeInt(0);
             }
             if (u.mForegroundActivityTimer != null) {
                 out.writeInt(1);
-                u.mForegroundActivityTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+                u.mForegroundActivityTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             } else {
                 out.writeInt(0);
             }
             if (u.mVibratorOnTimer != null) {
                 out.writeInt(1);
-                u.mVibratorOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+                u.mVibratorOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             } else {
                 out.writeInt(0);
             }
@@ -6748,19 +6898,19 @@ public final class BatteryStatsImpl extends BatteryStats {
                     Uid.Wakelock wl = ent.getValue();
                     if (wl.mTimerFull != null) {
                         out.writeInt(1);
-                        wl.mTimerFull.writeSummaryFromParcelLocked(out, NOWREAL);
+                        wl.mTimerFull.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
                     } else {
                         out.writeInt(0);
                     }
                     if (wl.mTimerPartial != null) {
                         out.writeInt(1);
-                        wl.mTimerPartial.writeSummaryFromParcelLocked(out, NOWREAL);
+                        wl.mTimerPartial.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
                     } else {
                         out.writeInt(0);
                     }
                     if (wl.mTimerWindow != null) {
                         out.writeInt(1);
-                        wl.mTimerWindow.writeSummaryFromParcelLocked(out, NOWREAL);
+                        wl.mTimerWindow.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
                     } else {
                         out.writeInt(0);
                     }
@@ -6776,7 +6926,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     Uid.Sensor se = ent.getValue();
                     if (se.mTimer != null) {
                         out.writeInt(1);
-                        se.mTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+                        se.mTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
                     } else {
                         out.writeInt(0);
                     }
@@ -6823,7 +6973,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                                 : ps.mServiceStats.entrySet()) {
                             out.writeString(sent.getKey());
                             BatteryStatsImpl.Uid.Pkg.Serv ss = sent.getValue();
-                            long time = ss.getStartTimeToNowLocked(NOW);
+                            long time = ss.getStartTimeToNowLocked(
+                                    mOnBatteryTimeBase.getUptime(NOW_SYS));
                             out.writeLong(time);
                             out.writeInt(ss.mStarts);
                             out.writeInt(ss.mLaunches);
@@ -6847,52 +6998,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         readHistory(in, false);
 
         mStartCount = in.readInt();
-        mBatteryUptime = in.readLong();
-        mBatteryLastUptime = 0;
-        mBatteryRealtime = in.readLong();
-        mBatteryLastRealtime = 0;
         mStartClockTime = in.readLong();
-        mScreenOn = false;
-        mScreenOnTimer = new StopwatchTimer(null, -1, null, mUnpluggables, in);
-        for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
-            mScreenBrightnessTimer[i] = new StopwatchTimer(null, -100-i,
-                    null, mUnpluggables, in);
-        }
-        mInputEventCounter = new Counter(mUnpluggables, in);
-        mPhoneOn = false;
-        mPhoneOnTimer = new StopwatchTimer(null, -2, null, mUnpluggables, in);
-        for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
-            mPhoneSignalStrengthsTimer[i] = new StopwatchTimer(null, -200-i,
-                    null, mUnpluggables, in);
-        }
-        mPhoneSignalScanningTimer = new StopwatchTimer(null, -200+1, null, mUnpluggables, in);
-        for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
-            mPhoneDataConnectionsTimer[i] = new StopwatchTimer(null, -300-i,
-                    null, mUnpluggables, in);
-        }
-        for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-            mNetworkByteActivityCounters[i] = new LongSamplingCounter(mUnpluggables, in);
-            mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mUnpluggables, in);
-        }
-        mMobileRadioActive = false;
-        mMobileRadioActiveTimer = new StopwatchTimer(null, -400, null, mUnpluggables, in);
-        mMobileRadioActivePerAppTimer = new StopwatchTimer(null, -401, null, mUnpluggables, in);
-        mMobileRadioActiveUnknownTime = new LongSamplingCounter(mUnpluggables, in);
-        mMobileRadioActiveUnknownCount = new LongSamplingCounter(mUnpluggables, in);
-        mWifiOn = false;
-        mWifiOnTimer = new StopwatchTimer(null, -2, null, mUnpluggables, in);
-        mGlobalWifiRunning = false;
-        mGlobalWifiRunningTimer = new StopwatchTimer(null, -2, null, mUnpluggables, in);
-        for (int i=0; i<NUM_WIFI_STATES; i++) {
-            mWifiStateTimer[i] = new StopwatchTimer(null, -600-i,
-                    null, mUnpluggables, in);
-        }
-        mBluetoothOn = false;
-        mBluetoothOnTimer = new StopwatchTimer(null, -2, null, mUnpluggables, in);
-        for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
-            mBluetoothStateTimer[i] = new StopwatchTimer(null, -500-i,
-                    null, mUnpluggables, in);
-        }
         mUptime = in.readLong();
         mUptimeStart = in.readLong();
         mLastUptime = 0;
@@ -6901,12 +7007,51 @@ public final class BatteryStatsImpl extends BatteryStats {
         mLastRealtime = 0;
         mOnBattery = in.readInt() != 0;
         mOnBatteryInternal = false; // we are no longer really running.
-        mTrackBatteryPastUptime = in.readLong();
-        mTrackBatteryUptimeStart = in.readLong();
-        mTrackBatteryPastRealtime = in.readLong();
-        mTrackBatteryRealtimeStart = in.readLong();
-        mUnpluggedBatteryUptime = in.readLong();
-        mUnpluggedBatteryRealtime = in.readLong();
+        mOnBatteryTimeBase.readFromParcel(in);
+        mOnBatteryScreenOffTimeBase.readFromParcel(in);
+
+        mScreenOn = false;
+        mScreenOnTimer = new StopwatchTimer(null, -1, null, mOnBatteryTimeBase, in);
+        for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
+            mScreenBrightnessTimer[i] = new StopwatchTimer(null, -100-i, null, mOnBatteryTimeBase,
+                    in);
+        }
+        mInputEventCounter = new Counter(mOnBatteryTimeBase, in);
+        mPhoneOn = false;
+        mPhoneOnTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase, in);
+        for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
+            mPhoneSignalStrengthsTimer[i] = new StopwatchTimer(null, -200-i,
+                    null, mOnBatteryTimeBase, in);
+        }
+        mPhoneSignalScanningTimer = new StopwatchTimer(null, -200+1, null, mOnBatteryTimeBase, in);
+        for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
+            mPhoneDataConnectionsTimer[i] = new StopwatchTimer(null, -300-i,
+                    null, mOnBatteryTimeBase, in);
+        }
+        for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
+            mNetworkByteActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase, in);
+            mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase, in);
+        }
+        mMobileRadioActive = false;
+        mMobileRadioActiveTimer = new StopwatchTimer(null, -400, null, mOnBatteryTimeBase, in);
+        mMobileRadioActivePerAppTimer = new StopwatchTimer(null, -401, null, mOnBatteryTimeBase,
+                in);
+        mMobileRadioActiveUnknownTime = new LongSamplingCounter(mOnBatteryTimeBase, in);
+        mMobileRadioActiveUnknownCount = new LongSamplingCounter(mOnBatteryTimeBase, in);
+        mWifiOn = false;
+        mWifiOnTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase, in);
+        mGlobalWifiRunning = false;
+        mGlobalWifiRunningTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase, in);
+        for (int i=0; i<NUM_WIFI_STATES; i++) {
+            mWifiStateTimer[i] = new StopwatchTimer(null, -600-i,
+                    null, mOnBatteryTimeBase, in);
+        }
+        mBluetoothOn = false;
+        mBluetoothOnTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase, in);
+        for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
+            mBluetoothStateTimer[i] = new StopwatchTimer(null, -500-i,
+                    null, mOnBatteryTimeBase, in);
+        }
         mDischargeUnplugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
         mLowDischargeAmountSinceCharge = in.readInt();
@@ -6926,7 +7071,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (in.readInt() != 0) {
                 String wakelockName = in.readString();
                 in.readInt(); // Extra 0/1 written by Timer.writeTimerToParcel
-                SamplingTimer kwlt = new SamplingTimer(mUnpluggables, mOnBattery, in);
+                SamplingTimer kwlt = new SamplingTimer(mOnBatteryTimeBase, in);
                 mKernelWakelockStats.put(wakelockName, kwlt);
             }
         }
@@ -6947,7 +7092,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i = 0; i < numUids; i++) {
             int uid = in.readInt();
             Uid u = new Uid(uid);
-            u.readFromParcelLocked(mUnpluggables, in);
+            u.readFromParcelLocked(mOnBatteryTimeBase, mOnBatteryScreenOffTimeBase, in);
             mUidStats.append(uid, u);
         }
     }
@@ -6967,58 +7112,53 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         final long uSecUptime = SystemClock.uptimeMillis() * 1000;
         final long uSecRealtime = SystemClock.elapsedRealtime() * 1000;
-        final long batteryUptime = getBatteryUptimeLocked(uSecUptime);
-        final long batteryRealtime = getBatteryRealtimeLocked(uSecRealtime);
+        final long batteryRealtime = mOnBatteryTimeBase.getRealtime(uSecRealtime);
+        final long batteryScreenOffRealtime = mOnBatteryScreenOffTimeBase.getRealtime(uSecRealtime);
 
         out.writeInt(MAGIC);
 
         writeHistory(out, false);
 
         out.writeInt(mStartCount);
-        out.writeLong(mBatteryUptime);
-        out.writeLong(mBatteryRealtime);
         out.writeLong(mStartClockTime);
-        mScreenOnTimer.writeToParcel(out, batteryRealtime);
-        for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
-            mScreenBrightnessTimer[i].writeToParcel(out, batteryRealtime);
-        }
-        mInputEventCounter.writeToParcel(out);
-        mPhoneOnTimer.writeToParcel(out, batteryRealtime);
-        for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
-            mPhoneSignalStrengthsTimer[i].writeToParcel(out, batteryRealtime);
-        }
-        mPhoneSignalScanningTimer.writeToParcel(out, batteryRealtime);
-        for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
-            mPhoneDataConnectionsTimer[i].writeToParcel(out, batteryRealtime);
-        }
-        for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-            mNetworkByteActivityCounters[i].writeToParcel(out);
-            mNetworkPacketActivityCounters[i].writeToParcel(out);
-        }
-        mMobileRadioActiveTimer.writeToParcel(out, batteryRealtime);
-        mMobileRadioActivePerAppTimer.writeToParcel(out, batteryRealtime);
-        mMobileRadioActiveUnknownTime.writeToParcel(out);
-        mMobileRadioActiveUnknownCount.writeToParcel(out);
-        mWifiOnTimer.writeToParcel(out, batteryRealtime);
-        mGlobalWifiRunningTimer.writeToParcel(out, batteryRealtime);
-        for (int i=0; i<NUM_WIFI_STATES; i++) {
-            mWifiStateTimer[i].writeToParcel(out, batteryRealtime);
-        }
-        mBluetoothOnTimer.writeToParcel(out, batteryRealtime);
-        for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
-            mBluetoothStateTimer[i].writeToParcel(out, batteryRealtime);
-        }
         out.writeLong(mUptime);
         out.writeLong(mUptimeStart);
         out.writeLong(mRealtime);
         out.writeLong(mRealtimeStart);
         out.writeInt(mOnBattery ? 1 : 0);
-        out.writeLong(batteryUptime);
-        out.writeLong(mTrackBatteryUptimeStart);
-        out.writeLong(batteryRealtime);
-        out.writeLong(mTrackBatteryRealtimeStart);
-        out.writeLong(mUnpluggedBatteryUptime);
-        out.writeLong(mUnpluggedBatteryRealtime);
+        mOnBatteryTimeBase.writeToParcel(out, uSecUptime, uSecRealtime);
+        mOnBatteryScreenOffTimeBase.writeToParcel(out, uSecUptime, uSecRealtime);
+
+        mScreenOnTimer.writeToParcel(out, uSecRealtime);
+        for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
+            mScreenBrightnessTimer[i].writeToParcel(out, uSecRealtime);
+        }
+        mInputEventCounter.writeToParcel(out);
+        mPhoneOnTimer.writeToParcel(out, uSecRealtime);
+        for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
+            mPhoneSignalStrengthsTimer[i].writeToParcel(out, uSecRealtime);
+        }
+        mPhoneSignalScanningTimer.writeToParcel(out, uSecRealtime);
+        for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
+            mPhoneDataConnectionsTimer[i].writeToParcel(out, uSecRealtime);
+        }
+        for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
+            mNetworkByteActivityCounters[i].writeToParcel(out);
+            mNetworkPacketActivityCounters[i].writeToParcel(out);
+        }
+        mMobileRadioActiveTimer.writeToParcel(out, uSecRealtime);
+        mMobileRadioActivePerAppTimer.writeToParcel(out, uSecRealtime);
+        mMobileRadioActiveUnknownTime.writeToParcel(out);
+        mMobileRadioActiveUnknownCount.writeToParcel(out);
+        mWifiOnTimer.writeToParcel(out, uSecRealtime);
+        mGlobalWifiRunningTimer.writeToParcel(out, uSecRealtime);
+        for (int i=0; i<NUM_WIFI_STATES; i++) {
+            mWifiStateTimer[i].writeToParcel(out, uSecRealtime);
+        }
+        mBluetoothOnTimer.writeToParcel(out, uSecRealtime);
+        for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
+            mBluetoothStateTimer[i].writeToParcel(out, uSecRealtime);
+        }
         out.writeInt(mDischargeUnplugLevel);
         out.writeInt(mDischargeCurrentLevel);
         out.writeInt(mLowDischargeAmountSinceCharge);
@@ -7038,7 +7178,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 if (kwlt != null) {
                     out.writeInt(1);
                     out.writeString(ent.getKey());
-                    Timer.writeTimerToParcel(out, kwlt, batteryRealtime);
+                    Timer.writeTimerToParcel(out, kwlt, uSecRealtime);
                 } else {
                     out.writeInt(0);
                 }
@@ -7056,7 +7196,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 out.writeInt(mUidStats.keyAt(i));
                 Uid uid = mUidStats.valueAt(i);
 
-                uid.writeToParcelLocked(out, batteryRealtime);
+                uid.writeToParcelLocked(out, uSecRealtime);
             }
         } else {
             out.writeInt(0);
@@ -7082,6 +7222,10 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void dumpLocked(Context context, PrintWriter pw, boolean isUnpluggedOnly, int reqUid,
             boolean historyOnly) {
         if (DEBUG) {
+            pw.println("mOnBatteryTimeBase:");
+            mOnBatteryTimeBase.dump(pw, "  ");
+            pw.println("mOnBatteryScreenOffTimeBase:");
+            mOnBatteryScreenOffTimeBase.dump(pw, "  ");
             Printer pr = new PrintWriterPrinter(pw);
             pr.println("*** Screen timer:");
             mScreenOnTimer.logState(pr, "  ");
