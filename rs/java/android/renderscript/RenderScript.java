@@ -1000,6 +1000,14 @@ public class RenderScript {
         }
     }
 
+    void validateObject(BaseObj o) {
+        if (o != null) {
+            if (o.mRS != this) {
+                throw new RSIllegalArgumentException("Attempting to use an object across contexts.");
+            }
+        }
+    }
+
     void validate() {
         if (mContext == 0) {
             throw new RSInvalidStateException("Calling RS with no Context active.");
