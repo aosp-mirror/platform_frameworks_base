@@ -2637,6 +2637,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         for (int i = 0; i < count; i++) {
             children[i].dispatchDetachedFromWindow();
         }
+        clearDisappearingChildren();
         super.dispatchDetachedFromWindow();
     }
 
@@ -5304,8 +5305,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * this if you don't want animations for exiting views to stack up.
      */
     public void clearDisappearingChildren() {
-        if (mDisappearingChildren != null) {
-            mDisappearingChildren.clear();
+        final ArrayList<View> disappearingChildren = mDisappearingChildren;
+        if (disappearingChildren != null) {
+            final int count = disappearingChildren.size();
+            for (int i = 0; i < count; i++) {
+                final View view = disappearingChildren.get(i);
+                if (view.mAttachInfo != null) {
+                    view.dispatchDetachedFromWindow();
+                }
+                view.clearAnimation();
+            }
+            disappearingChildren.clear();
             invalidate();
         }
     }
