@@ -2139,10 +2139,11 @@ public class WebView extends AbsoluteLayout
         mProvider.getViewDelegate().onAttachedToWindow();
     }
 
+    /** @hide */
     @Override
-    protected void onDetachedFromWindow() {
+    protected void onDetachedFromWindowInternal() {
         mProvider.getViewDelegate().onDetachedFromWindow();
-        super.onDetachedFromWindow();
+        super.onDetachedFromWindowInternal();
     }
 
     @Override
