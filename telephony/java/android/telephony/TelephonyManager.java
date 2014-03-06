@@ -1931,4 +1931,41 @@ public class TelephonyManager {
         } catch (RemoteException ex) {
         }
     }
+
+    /**
+     * Get the preferred network type.
+     * Used for device configuration by some CDMA operators.
+     *
+     * @return the preferred network type, defined in RILConstants.java.
+     * @hide
+     */
+    public int getPreferredNetworkType() {
+        try {
+            return getITelephony().getPreferredNetworkType();
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getPreferredNetworkType RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "getPreferredNetworkType NPE", ex);
+        }
+        return -1;
+    }
+
+    /**
+     * Set the preferred network type.
+     * Used for device configuration by some CDMA operators.
+     *
+     * @param networkType the preferred network type, defined in RILConstants.java.
+     * @return true on success; false on any failure.
+     * @hide
+     */
+    public boolean setPreferredNetworkType(int networkType) {
+        try {
+            return getITelephony().setPreferredNetworkType(networkType);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setPreferredNetworkType RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "setPreferredNetworkType NPE", ex);
+        }
+        return false;
+    }
 }

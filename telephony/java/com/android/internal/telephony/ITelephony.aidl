@@ -441,4 +441,21 @@ interface ITelephony {
      * @see android.telephony.TelephonyManager.WifiCallingChoices
      */
     void setWhenToMakeWifiCalls(int state);
+
+    /*
+     * Get the preferred network type.
+     * Used for device configuration by some CDMA operators.
+     *
+     * @return the preferred network type, defined in RILConstants.java.
+     */
+    int getPreferredNetworkType();
+
+    /**
+     * Set the preferred network type.
+     * Used for device configuration by some CDMA operators.
+     *
+     * @param networkType the preferred network type, defined in RILConstants.java.
+     * @return true on success; false on any failure.
+     */
+    boolean setPreferredNetworkType(int networkType);
 }
