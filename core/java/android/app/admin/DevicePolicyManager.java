@@ -77,6 +77,43 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Activity action: Starts the provisioning flow which sets up a managed profile.
+     * This intent will typically be sent by a mobile device management application(mdm).
+     * Managed profile provisioning creates a profile, moves the mdm to the profile,
+     * sets the mdm as the profile owner and removes all non required applications from the profile.
+     * As a profile owner the mdm than has full control over the managed profile.
+     *
+     * <p>The intent must contain the extras {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} and
+     * {@link #EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME}.
+     *
+     * <p> When managed provisioning has completed, an intent of the type
+     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcasted to the
+     * mdm app on the managed profile.
+     *
+     * <p>Input: Nothing.</p>
+     * <p>Output: Nothing</p>
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PROVISION_MANAGED_PROFILE
+        = "android.managedprovisioning.ACTION_PROVISION_MANAGED_PROFILE";
+
+    /**
+     * A String extra holding the name of the package of the mobile device management application
+     * that starts the managed provisioning flow. This package will be set as the profile owner.
+     * <p>Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}.
+     */
+    public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME
+        = "deviceAdminPackageName";
+
+    /**
+     * A String extra holding the default name of the profile that is created during managed profile
+     * provisioning.
+     * <p>Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}
+     */
+    public static final String EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME
+        = "defaultManagedProfileName";
+
+    /**
      * Activity action: ask the user to add a new device administrator to the system.
      * The desired policy is the ComponentName of the policy in the
      * {@link #EXTRA_DEVICE_ADMIN} extra field.  This will invoke a UI to
