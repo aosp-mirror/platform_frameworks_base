@@ -567,7 +567,7 @@ void DisplayList::iterateProjectedChildren(OpenGLRenderer& renderer, T& handler,
 template <class T>
 void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level) {
     if (CC_UNLIKELY(mDestroyed)) { // temporary debug logging
-        ALOGW("Error: %s is drawing after destruction, size %d", getName());
+        ALOGW("Error: %s is drawing after destruction", getName());
         CRASH();
     }
     if (mDisplayListData->isEmpty() || mAlpha <= 0) {
