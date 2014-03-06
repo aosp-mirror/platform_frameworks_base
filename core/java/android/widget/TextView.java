@@ -4730,7 +4730,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    protected void onDetachedFromWindowInternal() {
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
         if (mPreDrawRegistered) {
             getViewTreeObserver().removeOnPreDrawListener(this);
             mPreDrawRegistered = false;
@@ -4739,8 +4741,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         resetResolvedDrawables();
 
         if (mEditor != null) mEditor.onDetachedFromWindow();
-
-        super.onDetachedFromWindowInternal();
     }
 
     @Override
