@@ -69,7 +69,7 @@
     <string name="screenshot_failed_title" msgid="705781116746922771">"Nepavyko užfiksuoti ekrano kopijos."</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"Nepavyko išsaugoti ekrano kopijos. Gali būti naudojama atmintis."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB failo perdavimo parinktys"</string>
-    <string name="use_mtp_button_title" msgid="4333504413563023626">"Įmontuoti kaip medijos grotuvą (MTP)"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"Įmontuoti kaip medijos leistuvą (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Įmontuoti kaip fotoaparatą (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"Įdiegti „Mac“ skirtą „Android“ perkėl. priem. pr."</string>
     <string name="accessibility_back" msgid="567011538994429120">"Atgal"</string>
