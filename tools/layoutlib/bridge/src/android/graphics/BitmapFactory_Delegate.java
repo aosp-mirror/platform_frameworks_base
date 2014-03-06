@@ -102,7 +102,7 @@ import java.util.Set;
     }
 
     @LayoutlibDelegate
-    /*package*/ static Bitmap nativeDecodeAsset(int asset, Rect padding, Options opts) {
+    /*package*/ static Bitmap nativeDecodeAsset(long asset, Rect padding, Options opts) {
         opts.inBitmap = null;
         return null;
     }
