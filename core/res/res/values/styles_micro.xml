@@ -25,7 +25,7 @@
         <item name="android:solidColor">@android:color/transparent</item>
         <item name="android:selectionDivider">@android:drawable/numberpicker_selection_divider</item>
         <item name="android:selectionDividerHeight">0dip</item>
-        <item name="android:selectionDividersDistance">0dip</item>
+        <item name="android:selectionDividersDistance">104dip</item>
         <item name="android:internalMinWidth">64dip</item>
         <item name="android:internalMaxHeight">180dip</item>
         <item name="virtualButtonPressedDrawable">?android:attr/selectableItemBackground</item>
