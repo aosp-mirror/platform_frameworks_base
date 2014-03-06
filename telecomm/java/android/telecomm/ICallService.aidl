@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.os.Bundle;
 import android.telecomm.CallInfo;
 import android.telecomm.ICallServiceAdapter;
 
@@ -81,9 +82,15 @@ oneway interface ICallService {
      * additional information of the call through {@link ICallServiceAdapter#handleIncomingCall}.
      * Following that, the call service can update the call at will using the specified call ID.
      *
+     * As part of the {@link TelecommConstants#ACTION_INCOMING_CALL} Intent, a  Bundle of extra
+     * data could be sent via {@link TelecommConstants#EXTRA_INCOMING_CALL_EXTRAS}, which is
+     * returned through this method. If no data was given, an empty Bundle will be returned.
+     *
      * @param callId The ID of the call.
+     * @param extras The Bundle of extra information passed via
+     *     {@link TelecommConstants#EXTRA_INCOMING_CALL_EXTRAS}.
      */
-    void setIncomingCallId(String callId);
+    void setIncomingCallId(String callId, in Bundle extras);
 
     /**
      * Answers a ringing call identified by callId. Telecomm invokes this method as a result of the
