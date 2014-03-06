@@ -300,14 +300,14 @@ private:
     DefaultKeyedVector<const SkRegion*, const SkRegion*> mRegionMap;
     DefaultKeyedVector<SkiaShader*, SkiaShader*> mShaderMap;
 
-    int mRestoreSaveCount;
-
     Caches& mCaches;
     DisplayListData* mDisplayListData;
 
     float mTranslateX;
     float mTranslateY;
     bool mHasTranslate;
+
+    int mRestoreSaveCount;
 
     friend class DisplayList;
 
