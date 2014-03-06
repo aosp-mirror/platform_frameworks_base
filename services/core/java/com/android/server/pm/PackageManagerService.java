@@ -302,11 +302,14 @@ public class PackageManagerService extends IPackageManager.Stub {
     // This is the object monitoring the privileged system app dir.
     final FileObserver mPrivilegedInstallObserver;
 
-    // This is the object monitoring the system app dir.
+    // This is the object monitoring the vendor app dir.
     final FileObserver mVendorInstallObserver;
 
     // This is the object monitoring the vendor overlay package dir.
     final FileObserver mVendorOverlayInstallObserver;
+
+    // This is the object monitoring the OEM app dir.
+    final FileObserver mOemInstallObserver;
 
     // This is the object monitoring mAppInstallDir.
     final FileObserver mAppInstallObserver;
@@ -1157,7 +1160,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             sUserManager = new UserManagerService(context, this,
                     mInstallLock, mPackages);
 
-            readPermissions();
+            // Read permissions and features from system
+            readPermissions(Environment.buildPath(
+                    Environment.getRootDirectory(), "etc", "permissions"), false);
+            // Only read features from OEM
+            readPermissions(Environment.buildPath(
+                    Environment.getOemDirectory(), "etc", "permissions"), true);
 
             mFoundPolicyFile = SELinuxMMAC.readInstallPolicy();
 
@@ -1341,6 +1349,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 vendorAppDir.getPath(), OBSERVER_EVENTS, true, false);
             mVendorInstallObserver.startWatching();
             scanDirLI(vendorAppDir, PackageParser.PARSE_IS_SYSTEM
+                    | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode, 0);
+
+            // Collect all OEM packages.
+            File oemAppDir = new File(Environment.getOemDirectory(), "app");
+            mOemInstallObserver = new AppDirObserver(
+                    oemAppDir.getPath(), OBSERVER_EVENTS, true, false);
+            mOemInstallObserver.startWatching();
+            scanDirLI(oemAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode, 0);
 
             if (DEBUG_UPGRADE) Log.v(TAG, "Running installd update commands");
@@ -1581,9 +1597,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         mSettings.removePackageLPw(ps.name);
     }
 
-    void readPermissions() {
+    void readPermissions(File libraryDir, boolean onlyFeatures) {
         // Read permissions from .../etc/permission directory.
-        File libraryDir = new File(Environment.getRootDirectory(), "etc/permissions");
         if (!libraryDir.exists() || !libraryDir.isDirectory()) {
             Slog.w(TAG, "No directory " + libraryDir + ", skipping");
             return;
@@ -1609,16 +1624,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                 continue;
             }
 
-            readPermissionsFromXml(f);
+            readPermissionsFromXml(f, onlyFeatures);
         }
 
         // Read permissions from .../etc/permissions/platform.xml last so it will take precedence
         final File permFile = new File(Environment.getRootDirectory(),
                 "etc/permissions/platform.xml");
-        readPermissionsFromXml(permFile);
+        readPermissionsFromXml(permFile, onlyFeatures);
     }
 
-    private void readPermissionsFromXml(File permFile) {
+    private void readPermissionsFromXml(File permFile, boolean onlyFeatures) {
         FileReader permReader = null;
         try {
             permReader = new FileReader(permFile);
@@ -1640,7 +1655,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
 
                 String name = parser.getName();
-                if ("group".equals(name)) {
+                if ("group".equals(name) && !onlyFeatures) {
                     String gidStr = parser.getAttributeValue(null, "gid");
                     if (gidStr != null) {
                         int gid = Process.getGidForName(gidStr);
@@ -1652,7 +1667,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     XmlUtils.skipCurrentTag(parser);
                     continue;
-                } else if ("permission".equals(name)) {
+                } else if ("permission".equals(name) && !onlyFeatures) {
                     String perm = parser.getAttributeValue(null, "name");
                     if (perm == null) {
                         Slog.w(TAG, "<permission> without name at "
@@ -1663,7 +1678,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     perm = perm.intern();
                     readPermission(parser, perm);
 
-                } else if ("assign-permission".equals(name)) {
+                } else if ("assign-permission".equals(name) && !onlyFeatures) {
                     String perm = parser.getAttributeValue(null, "name");
                     if (perm == null) {
                         Slog.w(TAG, "<assign-permission> without name at "
@@ -1695,7 +1710,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     perms.add(perm);
                     XmlUtils.skipCurrentTag(parser);
 
-                } else if ("library".equals(name)) {
+                } else if ("library".equals(name) && !onlyFeatures) {
                     String lname = parser.getAttributeValue(null, "name");
                     String lfile = parser.getAttributeValue(null, "file");
                     if (lname == null) {
