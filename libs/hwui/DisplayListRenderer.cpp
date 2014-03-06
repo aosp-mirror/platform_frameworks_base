@@ -32,9 +32,9 @@ namespace android {
 namespace uirenderer {
 
 DisplayListRenderer::DisplayListRenderer():
-        mCaches(Caches::getInstance()),
+        mCaches(Caches::getInstance()), mDisplayListData(0),
         mTranslateX(0.0f), mTranslateY(0.0f), mHasTranslate(false),
-        mRestoreSaveCount(-1), mDisplayListData(0) {
+        mRestoreSaveCount(-1) {
 }
 
 DisplayListRenderer::~DisplayListRenderer() {
