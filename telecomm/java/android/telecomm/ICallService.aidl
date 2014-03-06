@@ -73,7 +73,7 @@ oneway interface ICallService {
      * abort an attempt to place a call.  Only ever be invoked after {@link #call} invocations.
      * After this is invoked, Telecomm does not expect any more updates about the call and will
      * actively ignore any such update. This is different from {@link #disconnect} where Telecomm
-     * expects confirmation via {@link #markCallAsDisconnected}.
+     * expects confirmation via ICallServiceAdapter.markCallAsDisconnected.
      *
      * @param callId The identifier of the call to abort.
      */
