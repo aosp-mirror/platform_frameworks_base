@@ -27,6 +27,7 @@
 
 #include <SkBitmap.h>
 #include <SkCanvas.h>
+#include <SkImage.h>
 
 namespace android {
 
@@ -156,7 +157,7 @@ static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
     bitmap.setConfig(convertPixelFormat(buffer.format), buffer.width, buffer.height, bytesCount);
 
     if (buffer.format == WINDOW_FORMAT_RGBX_8888) {
-        bitmap.setIsOpaque(true);
+        bitmap.setAlphaType(kOpaque_SkAlphaType);
     }
 
     if (buffer.width > 0 && buffer.height > 0) {
