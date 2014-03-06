@@ -1073,6 +1073,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int IMMERSIVE_MODE_LOCK_MSG = 37;
     static final int PERSIST_URI_GRANTS_MSG = 38;
     static final int REQUEST_ALL_PSS_MSG = 39;
+    static final int START_RELATED_USERS_MSG = 40;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1684,6 +1685,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             case REQUEST_ALL_PSS_MSG: {
                 requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
+                break;
+            }
+            case START_RELATED_USERS_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    startRelatedUsersLocked();
+                }
                 break;
             }
             }
@@ -5164,10 +5171,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 userId);
                     }
                 }
+                scheduleStartRelatedUsersLocked();
             }
         }
     }
-    
+
     final void ensureBootCompleted() {
         boolean booting;
         boolean enableScreen;
@@ -5177,7 +5185,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             enableScreen = !mBooted;
             mBooted = true;
         }
-        
+
         if (booting) {
             finishBooting();
         }
@@ -16105,6 +16113,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(msg);
         }
 
+        if (DEBUG_MU) Slog.i(TAG_MU, "starting userid:" + userId + " fore:" + foreground);
+
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -16365,6 +16375,32 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    void scheduleStartRelatedUsersLocked() {
+        if (!mHandler.hasMessages(START_RELATED_USERS_MSG)) {
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(START_RELATED_USERS_MSG),
+                    DateUtils.SECOND_IN_MILLIS);
+        }
+    }
+
+    void startRelatedUsersLocked() {
+        if (DEBUG_MU) Slog.i(TAG_MU, "startRelatedUsersLocked");
+        List<UserInfo> relatedUsers = getUserManagerLocked().getRelatedUsers(mCurrentUserId);
+        List<UserInfo> toStart = new ArrayList<UserInfo>(relatedUsers.size());
+        for (UserInfo relatedUser : relatedUsers) {
+            if ((relatedUser.flags & UserInfo.FLAG_INITIALIZED) == UserInfo.FLAG_INITIALIZED) {
+                toStart.add(relatedUser);
+            }
+        }
+        final int n = toStart.size();
+        int i = 0;
+        for (; i < n && i < (MAX_RUNNING_USERS - 1); ++i) {
+            startUserInBackground(toStart.get(i).id);
+        }
+        if (i < n) {
+            Slog.w(TAG_MU, "More related users than MAX_RUNNING_USERS");
+        }
+    }
+
     void finishUserSwitch(UserStartedState uss) {
         synchronized (this) {
             if (uss.mState == UserStartedState.STATE_BOOTING
@@ -16379,6 +16415,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         android.Manifest.permission.RECEIVE_BOOT_COMPLETED, AppOpsManager.OP_NONE,
                         true, false, MY_PID, Process.SYSTEM_UID, userId);
             }
+
+            startRelatedUsersLocked();
+
             int num = mUserLru.size();
             int i = 0;
             while (num > MAX_RUNNING_USERS && i < mUserLru.size()) {
@@ -16430,6 +16469,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private int stopUserLocked(final int userId, final IStopUserCallback callback) {
+        if (DEBUG_MU) Slog.i(TAG_MU, "stopUserLocked userId=" + userId);
         if (mCurrentUserId == userId) {
             return ActivityManager.USER_OP_IS_CURRENT;
         }
