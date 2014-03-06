@@ -816,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Домашен"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Служебен"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Друг"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Няма намерено приложение, с което да се отвори този контакт."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Въведете ПИН кода"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Въведете PUK и новия ПИН код"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK код"</string>

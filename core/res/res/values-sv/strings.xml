@@ -816,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Hem"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Arbete"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Övrigt"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Ingen app för att visa den här kontakten hittades."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Ange PIN-kod"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Ange PUK-koden och en ny PIN-kod"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-kod"</string>
@@ -1459,7 +1460,7 @@
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Gränsen för data via Wi-Fi har överskridits"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> över angiven gräns."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Bakgrundsdata är begränsade"</string>
-    <string name="data_usage_restricted_body" msgid="6741521330997452990">"Tryck för att radera begränsning"</string>
+    <string name="data_usage_restricted_body" msgid="6741521330997452990">"Tryck för att ta bort begränsning"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Säkerhetscertifikat"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Certifikatet är giltigt."</string>
     <string name="issued_to" msgid="454239480274921032">"Utfärdad till:"</string>

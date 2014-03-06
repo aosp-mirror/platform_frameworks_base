@@ -816,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"住家"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"公司"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"其他"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"找不到可用來查看這位聯絡人的應用程式。"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"輸入 PIN 碼"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"輸入 PUK 碼和新 PIN 碼"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK 碼"</string>
@@ -1129,7 +1130,7 @@
     <string name="chooseUsbActivity" msgid="6894748416073583509">"選取要以 USB 裝置存取的應用程式"</string>
     <string name="noApplications" msgid="2991814273936504689">"沒有應用程式可執行這項操作。"</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"很抱歉，<xliff:g id="APPLICATION">%1$s</xliff:g> 已停止。"</string>
+    <string name="aerr_application" msgid="932628488013092776">"很抱歉，<xliff:g id="APPLICATION">%1$s</xliff:g>已停止運作。"</string>
     <string name="aerr_process" msgid="4507058997035697579">"很抱歉，處理程序 <xliff:g id="PROCESS">%1$s</xliff:g> 已停止。"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> 沒有回應。\n\n您要結束嗎？"</string>

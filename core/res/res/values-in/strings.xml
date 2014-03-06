@@ -816,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Beranda"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Kerjaan"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Lainnya"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Tidak ada aplikasi yang ditemukan untuk melihat kontak ini."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Ketik kode PIN"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Ketik kode PUK dan PIN baru"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"Kode PUK"</string>

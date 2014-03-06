@@ -816,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"家用"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"工作"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"其他"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"找不到可以查看這位聯絡人的應用程式。"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"輸入 PIN 碼"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"輸入 PUK 碼和新 PIN 碼"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK 碼"</string>

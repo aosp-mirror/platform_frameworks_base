@@ -816,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Otthoni"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Munkahely"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Egyéb"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Nem található alkalmazás a névjegy megtekintéshez."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Írja be a PIN kódot"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Írja be a PUK kódot, majd az új PIN kódot"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK kód"</string>

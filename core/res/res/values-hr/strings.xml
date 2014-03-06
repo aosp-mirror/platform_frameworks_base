@@ -627,7 +627,7 @@
     <string name="permlab_bluetooth" msgid="6127769336339276828">"uparivanje s Bluetooth uređajima"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Aplikaciji omogućuje pregled konfiguracije Bluetootha na tabletnom računalu te uspostavljanje i prihvaćanje veza s uparenim uređajima."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Aplikaciji omogućuje pregled konfiguracije Bluetootha na telefonu te uspostavljanje i prihvaćanje veza s uparenim uređajima."</string>
-    <string name="permlab_nfc" msgid="4423351274757876953">"upravljaj beskontaktnom (NFC) komunikacijom"</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"upravljanje beskontaktnom komunikacijom (NFC)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Aplikaciji omogućuje komunikaciju s oznakama, karticama i čitačima komunikacije kratkog dometa (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"onemogućavanje zaključavanja zaslona"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Aplikaciji omogućuje onemogućavanje zaključavanja tipkovnice i svih pripadajućih sigurnosnih zaporki. Na primjer, telefon onemogućuje zaključavanje tipkovnice kod primanja dolaznog telefonskog poziva, nakon kojeg se zaključavanje tipkovnice ponovo omogućuje."</string>
@@ -816,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Početna"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Posao"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Drugo"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Nema aplikacije za prikazivanje tog kontakta."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Unesite PIN kôd"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Unesite PUK i novi PIN kôd"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK kôd"</string>

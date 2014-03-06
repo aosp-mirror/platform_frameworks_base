@@ -76,7 +76,7 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"默认显示本机号码，在下一次通话中也显示"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"未提供服务。"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"您无法更改来电显示设置。"</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"访问受限情况已发生变化"</string>
+    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"网络可用情况发生变化"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"数据服务已禁用。"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"紧急服务已禁用。"</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"已禁用语音服务。"</string>
@@ -816,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"住宅"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"单位"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"其他"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"找不到可用来查看此联系人的应用。"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"输入 PIN 码"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"请输入 PUK 码和新的 PIN 码"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK 码"</string>

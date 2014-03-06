@@ -816,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"គេហ​ទំព័រ"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"កន្លែង​ធ្វើការ"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"ផ្សេងៗ"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"រក​មិន​ឃើញ​កម្មវិធី ដើម្បី​មើល​ទំនាក់ទំនង​នេះ​ទេ។"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"បញ្ចូល​កូដ PIN"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"បញ្ចូល​កូដ PUK និង​ PIN ថ្មី"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"កូដ PUK"</string>
