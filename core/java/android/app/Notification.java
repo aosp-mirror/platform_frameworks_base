@@ -1586,17 +1586,53 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Add metadata to this notification.
+         * Merge additional metadata into this notification.
          *
-         * A reference to the Bundle is held for the lifetime of this Builder, and the Bundle's
+         * <p>Values within the Bundle will replace existing extras values in this Builder.
+         *
+         * @see Notification#extras
+         */
+        public Builder addExtras(Bundle bag) {
+            if (mExtras == null) {
+                mExtras = new Bundle(bag);
+            } else {
+                mExtras.putAll(bag);
+            }
+            return this;
+        }
+
+        /**
+         * Set metadata for this notification.
+         *
+         * <p>A reference to the Bundle is held for the lifetime of this Builder, and the Bundle's
          * current contents are copied into the Notification each time {@link #build()} is
          * called.
+         *
+         * <p>Replaces any existing extras values with those from the provided Bundle.
+         * Use {@link #addExtras} to merge in metadata instead.
          *
          * @see Notification#extras
          */
         public Builder setExtras(Bundle bag) {
             mExtras = bag;
             return this;
+        }
+
+        /**
+         * Get the current metadata Bundle used by this notification Builder.
+         *
+         * <p>The returned Bundle is shared with this Builder.
+         *
+         * <p>The current contents of this Bundle are copied into the Notification each time
+         * {@link #build()} is called.
+         *
+         * @see Notification#extras
+         */
+        public Bundle getExtras() {
+            if (mExtras == null) {
+                mExtras = new Bundle();
+            }
+            return mExtras;
         }
 
         /**
@@ -1857,7 +1893,7 @@ public class Notification implements Parcelable
          * this Notification object.
          * @hide
          */
-        public void addExtras(Bundle extras) {
+        public void populateExtras(Bundle extras) {
             // Store original information used in the construction of this object
             extras.putCharSequence(EXTRA_TITLE, mContentTitle);
             extras.putCharSequence(EXTRA_TEXT, mContentText);
@@ -1895,7 +1931,7 @@ public class Notification implements Parcelable
 
             n.extras = mExtras != null ? new Bundle(mExtras) : new Bundle();
 
-            addExtras(n.extras);
+            populateExtras(n.extras);
             if (mStyle != null) {
                 mStyle.addExtras(n.extras);
             }
