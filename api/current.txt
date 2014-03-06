@@ -311,6 +311,7 @@ package android {
     field public static final int backgroundSplit = 16843659; // 0x101038b
     field public static final int backgroundStacked = 16843658; // 0x101038a
     field public static final int backupAgent = 16843391; // 0x101027f
+    field public static final int banner = 16843762; // 0x10103f2
     field public static final int baseline = 16843548; // 0x101031c
     field public static final int baselineAlignBottom = 16843042; // 0x1010122
     field public static final int baselineAligned = 16843046; // 0x1010126
@@ -7079,6 +7080,7 @@ package android.content.pm {
     ctor public ComponentInfo();
     ctor public ComponentInfo(android.content.pm.ComponentInfo);
     ctor protected ComponentInfo(android.os.Parcel);
+    method public final int getBannerResource();
     method public final int getIconResource();
     method public final int getLogoResource();
     method public boolean isEnabled();
@@ -7182,11 +7184,13 @@ package android.content.pm {
     ctor protected PackageItemInfo(android.os.Parcel);
     method protected void dumpBack(android.util.Printer, java.lang.String);
     method protected void dumpFront(android.util.Printer, java.lang.String);
+    method public android.graphics.drawable.Drawable loadBanner(android.content.pm.PackageManager);
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
     method public android.graphics.drawable.Drawable loadLogo(android.content.pm.PackageManager);
     method public android.content.res.XmlResourceParser loadXmlMetaData(android.content.pm.PackageManager, java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
+    field public int banner;
     field public int icon;
     field public int labelRes;
     field public int logo;
@@ -7214,12 +7218,16 @@ package android.content.pm {
     method public abstract void clearPackagePreferredActivities(java.lang.String);
     method public abstract java.lang.String[] currentToCanonicalPackageNames(java.lang.String[]);
     method public abstract void extendVerificationTimeout(int, int, long);
+    method public abstract android.graphics.drawable.Drawable getActivityBanner(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public abstract android.graphics.drawable.Drawable getActivityBanner(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.graphics.drawable.Drawable getActivityIcon(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.graphics.drawable.Drawable getActivityIcon(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.graphics.drawable.Drawable getActivityLogo(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.graphics.drawable.Drawable getActivityLogo(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract java.util.List<android.content.pm.PermissionGroupInfo> getAllPermissionGroups(int);
+    method public abstract android.graphics.drawable.Drawable getApplicationBanner(android.content.pm.ApplicationInfo);
+    method public abstract android.graphics.drawable.Drawable getApplicationBanner(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract int getApplicationEnabledSetting(java.lang.String);
     method public abstract android.graphics.drawable.Drawable getApplicationIcon(android.content.pm.ApplicationInfo);
     method public abstract android.graphics.drawable.Drawable getApplicationIcon(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -24069,12 +24077,16 @@ package android.test.mock {
     method public void clearPackagePreferredActivities(java.lang.String);
     method public java.lang.String[] currentToCanonicalPackageNames(java.lang.String[]);
     method public void extendVerificationTimeout(int, int, long);
+    method public android.graphics.drawable.Drawable getActivityBanner(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.graphics.drawable.Drawable getActivityBanner(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.graphics.drawable.Drawable getActivityIcon(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.graphics.drawable.Drawable getActivityIcon(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.graphics.drawable.Drawable getActivityLogo(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.graphics.drawable.Drawable getActivityLogo(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method public java.util.List<android.content.pm.PermissionGroupInfo> getAllPermissionGroups(int);
+    method public android.graphics.drawable.Drawable getApplicationBanner(android.content.pm.ApplicationInfo);
+    method public android.graphics.drawable.Drawable getApplicationBanner(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public int getApplicationEnabledSetting(java.lang.String);
     method public android.graphics.drawable.Drawable getApplicationIcon(android.content.pm.ApplicationInfo);
     method public android.graphics.drawable.Drawable getApplicationIcon(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
