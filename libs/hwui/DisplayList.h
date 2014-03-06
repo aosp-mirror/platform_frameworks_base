@@ -550,6 +550,13 @@ public:
 private:
     typedef key_value_pair_t<float, DrawDisplayListOp*> ZDrawDisplayListOpPair;
 
+    static size_t findNonNegativeIndex(const Vector<ZDrawDisplayListOpPair>& nodes) {
+        for (size_t i = 0; i < nodes.size(); i++) {
+            if (nodes[i].key >= 0.0f) return i;
+        }
+        return nodes.size();
+    }
+
     enum ChildrenSelectMode {
         kNegativeZChildren,
         kPositiveZChildren
