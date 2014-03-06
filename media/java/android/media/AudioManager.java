@@ -2302,7 +2302,14 @@ public class AudioManager {
         }
         IAudioService service = getService();
         final RemoteController.OnClientUpdateListener l = rctlr.getUpdateListener();
-        final ComponentName listenerComponent = new ComponentName(mContext, l.getClass());
+        final ComponentName listenerComponent;
+        
+        //use actual class name if EnclosingClass is null
+        if (l.getClass().getEnclosingClass() == null){
+        	listenerComponent = new ComponentName(mContext, l.getClass());
+        } else {
+        	listenerComponent = new ComponentName(mContext, l.getClass().getEnclosingClass());
+        }
         try {
             int[] artworkDimensions = rctlr.getArtworkSize();
             boolean reg = service.registerRemoteController(rctlr.getRcDisplay(),
