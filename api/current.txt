@@ -9926,6 +9926,7 @@ package android.graphics {
     method public void cubicTo(float, float, float, float, float, float);
     method public android.graphics.Path.FillType getFillType();
     method public void incReserve(int);
+    method public boolean isConvex();
     method public boolean isEmpty();
     method public boolean isInverseFillType();
     method public boolean isRect(android.graphics.RectF);
