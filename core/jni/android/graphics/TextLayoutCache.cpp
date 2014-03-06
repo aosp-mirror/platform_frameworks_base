@@ -492,7 +492,7 @@ void TextLayoutShaper::computeValues(const SkPaint* paint, const UChar* chars,
     (((ucs) & 0xfc00) == 0xdc00)
 
 #ifndef HB_SurrogateToUcs4
-#define HB_SurrogateToUcs4_(high, low) \
+#define HB_SurrogateToUcs4(high, low) \
     (((hb_codepoint_t)(high))<<10) + (low) - 0x35fdc00;
 #endif
 
@@ -784,7 +784,7 @@ SkTypeface* TextLayoutShaper::typefaceForScript(const SkPaint* paint, SkTypeface
     if (typeface) {
         currentStyle = typeface->style();
     }
-    typeface = SkCreateTypefaceForScriptNG(script, currentStyle);
+    typeface = SkCreateTypefaceForScript(script, currentStyle);
 #if DEBUG_GLYPHS
     ALOGD("Using Harfbuzz Script %c%c%c%c, Style %d", HB_UNTAG(script), currentStyle);
 #endif
