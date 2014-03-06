@@ -228,10 +228,11 @@ public class TextureView extends View {
         }
     }
 
+    /** @hide */
     @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
+    protected void onDetachedFromWindowInternal() {
         destroySurface();
+        super.onDetachedFromWindowInternal();
     }
 
     private void destroySurface() {
