@@ -49,7 +49,7 @@ oneway interface ICallService {
      * specified. It is expected that the call service respond within 500 milliseconds. Any response
      * that takes longer than 500 milliseconds will be treated as being incompatible.
      * TODO(santoscordon): 500 ms was arbitrarily chosen and must be confirmed before this
-     * API is made public.
+     * API is made public.  Only used in the context of outgoing calls and call switching (handoff).
      *
      * @param callInfo The details of the relevant call.
      */
@@ -61,7 +61,7 @@ oneway interface ICallService {
      * dynamically extensible since call providers should be able to implement arbitrary
      * handle-calling systems.  See {@link #isCompatibleWith}. It is expected that the
      * call service respond via {@link ICallServiceAdapter#handleSuccessfulOutgoingCall} if it can
-     * successfully make the call.
+     * successfully make the call.  Only used in the context of outgoing calls.
      * TODO(santoscordon): Figure out how a call service can short-circuit a failure to the adapter.
      *
      * @param callInfo The details of the relevant call.
@@ -69,11 +69,15 @@ oneway interface ICallService {
     void call(in CallInfo callInfo);
 
     /**
-     * Disconnects the call identified by callId.
+     * Aborts the outgoing call attempt. Invoked in the unlikely event that Telecomm decides to
+     * abort an attempt to place a call.  Only ever be invoked after {@link #call} invocations.
+     * After this is invoked, Telecomm does not expect any more updates about the call and will
+     * actively ignore any such update. This is different from {@link #disconnect} where Telecomm
+     * expects confirmation via {@link #markCallAsDisconnected}.
      *
-     * @param callId The identifier of the call to disconnect.
+     * @param callId The identifier of the call to abort.
      */
-    void disconnect(String callId);
+    void abort(String callId);
 
     /**
      * Receives a new call ID to use with an incoming call. Invoked by Telecomm after it is notified
@@ -107,4 +111,11 @@ oneway interface ICallService {
      * @param callId The ID of the call.
      */
     void reject(String callId);
+
+    /**
+     * Disconnects the call identified by callId.  Used for outgoing and incoming calls.
+     *
+     * @param callId The identifier of the call to disconnect.
+     */
+    void disconnect(String callId);
 }

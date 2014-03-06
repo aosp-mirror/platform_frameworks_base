@@ -24259,6 +24259,7 @@ package android.telecomm {
 
   public abstract class CallService extends android.app.Service {
     ctor public CallService();
+    method public abstract void abort(java.lang.String);
     method public abstract void answer(java.lang.String);
     method public abstract void call(android.telecomm.CallInfo);
     method public abstract void disconnect(java.lang.String);
@@ -24313,7 +24314,6 @@ package android.telecomm {
   public final class CallState extends java.lang.Enum {
     method public static android.telecomm.CallState valueOf(java.lang.String);
     method public static final android.telecomm.CallState[] values();
-    enum_constant public static final android.telecomm.CallState ABORTED;
     enum_constant public static final android.telecomm.CallState ACTIVE;
     enum_constant public static final android.telecomm.CallState DIALING;
     enum_constant public static final android.telecomm.CallState DISCONNECTED;
@@ -24321,6 +24321,7 @@ package android.telecomm {
   }
 
   public abstract interface ICallService implements android.os.IInterface {
+    method public abstract void abort(java.lang.String) throws android.os.RemoteException;
     method public abstract void answer(java.lang.String) throws android.os.RemoteException;
     method public abstract void call(android.telecomm.CallInfo) throws android.os.RemoteException;
     method public abstract void disconnect(java.lang.String) throws android.os.RemoteException;
