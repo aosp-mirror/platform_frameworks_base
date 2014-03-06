@@ -278,6 +278,8 @@ public final class Ndef extends BasicTagTechnology {
                     throw new TagLostException();
                 }
                 return msg;
+            } else if (!tagService.isPresent(serviceHandle)) {
+                throw new TagLostException();
             } else {
                 return null;
             }
