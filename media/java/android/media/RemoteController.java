@@ -404,7 +404,7 @@ public final class RemoteController
      * @throws IllegalArgumentException
      */
     public boolean setSynchronizationMode(int sync) throws IllegalArgumentException {
-        if ((sync != POSITION_SYNCHRONIZATION_NONE) || (sync != POSITION_SYNCHRONIZATION_CHECK)) {
+        if ((sync != POSITION_SYNCHRONIZATION_NONE) && (sync != POSITION_SYNCHRONIZATION_CHECK)) {
             throw new IllegalArgumentException("Unknown synchronization mode " + sync);
         }
         if (!mIsRegistered) {
