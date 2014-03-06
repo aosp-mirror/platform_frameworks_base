@@ -488,6 +488,8 @@ void DisplayList::replay(ReplayStateStruct& replayStruct, const int level) {
             replayStruct.mDrawGlStatus);
 }
 
+#define SHADOW_DELTA 2.0f
+
 template <class T>
 void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& renderer,
         T& handler, const int level) {
@@ -501,34 +503,66 @@ void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& ren
     int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     LinearAllocator& alloc = handler.allocator();
     ClipRectOp* clipOp = new (alloc) ClipRectOp(0, 0, mWidth, mHeight,
-            SkRegion::kIntersect_Op); // clip to 3d root bounds for now
+            SkRegion::kIntersect_Op); // clip to 3d root bounds
     handler(clipOp, PROPERTY_SAVECOUNT, mClipToBounds);
 
-    for (size_t i = 0; i < m3dNodes.size(); i++) {
-        const float zValue = m3dNodes[i].key;
-        DrawDisplayListOp* childOp = m3dNodes[i].value;
+    /**
+     * Draw shadows and (potential) casters mostly in order, but allow the shadows of casters
+     * with very similar Z heights to draw together.
+     *
+     * This way, if Views A & B have the same Z height and are both casting shadows, the shadows are
+     * underneath both, and neither's shadow is drawn on top of the other.
+     */
+    const size_t nonNegativeIndex = findNonNegativeIndex(m3dNodes);
+    size_t drawIndex, shadowIndex, endIndex;
+    if (mode == kNegativeZChildren) {
+        drawIndex = 0;
+        endIndex = nonNegativeIndex;
+        shadowIndex = endIndex; // draw no shadows
+    } else {
+        drawIndex = nonNegativeIndex;
+        endIndex = m3dNodes.size();
+        shadowIndex = drawIndex; // potentially draw shadow for each pos Z child
+    }
+    float lastCasterZ = 0.0f;
+    while (shadowIndex < endIndex || drawIndex < endIndex) {
+        if (shadowIndex < endIndex) {
+            DrawDisplayListOp* casterOp = m3dNodes[shadowIndex].value;
+            DisplayList* caster = casterOp->mDisplayList;
+            const float casterZ = m3dNodes[shadowIndex].key;
+            // attempt to render the shadow if the caster about to be drawn is its caster,
+            // OR if its caster's Z value is similar to the previous potential caster
+            if (shadowIndex == drawIndex || casterZ - lastCasterZ < SHADOW_DELTA) {
 
-        if (mode == kPositiveZChildren && zValue < 0.0f) continue;
-        if (mode == kNegativeZChildren && zValue > 0.0f) break;
+                if (caster->mCastsShadow && caster->mAlpha > 0.0f) {
+                    mat4 shadowMatrix(casterOp->mTransformFromCompositingAncestor);
+                    caster->applyViewPropertyTransforms(shadowMatrix);
 
-        DisplayList* child = childOp->mDisplayList;
-        if (mode == kPositiveZChildren && zValue > 0.0f
-                && child->mCastsShadow && child->mAlpha > 0.0f) {
-            /* draw shadow with parent matrix applied, passing in the child's total matrix
-             * TODO: consider depth in more complex scenarios (neg z, added shadow depth)
-             */
-            mat4 shadowMatrix(childOp->mTransformFromCompositingAncestor);
-            child->applyViewPropertyTransforms(shadowMatrix);
+                    DisplayListOp* shadowOp  = new (alloc) DrawShadowOp(shadowMatrix,
+                            caster->mAlpha, &(caster->mOutline), caster->mWidth, caster->mHeight);
+                    handler(shadowOp, PROPERTY_SAVECOUNT, mClipToBounds);
+                }
 
-            DisplayListOp* shadowOp  = new (alloc) DrawShadowOp(shadowMatrix,
-                    child->mAlpha, &(child->mOutline), child->mWidth, child->mHeight);
-            handler(shadowOp, PROPERTY_SAVECOUNT, mClipToBounds);
+                lastCasterZ = casterZ; // must do this even if current caster not casting a shadow
+                shadowIndex++;
+                continue;
+            }
         }
+
+        // only the actual child DL draw needs to be in save/restore,
+        // since it modifies the renderer's matrix
+        int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
+
+        DrawDisplayListOp* childOp = m3dNodes[drawIndex].value;
+        DisplayList* child = childOp->mDisplayList;
 
         renderer.concatMatrix(childOp->mTransformFromCompositingAncestor);
         childOp->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
         handler(childOp, renderer.getSaveCount() - 1, mClipToBounds);
         childOp->mSkipInOrderDraw = true;
+
+        renderer.restoreToCount(restoreTo);
+        drawIndex++;
     }
     handler(new (alloc) RestoreToCountOp(rootRestoreTo), PROPERTY_SAVECOUNT, mClipToBounds);
 }
