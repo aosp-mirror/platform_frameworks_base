@@ -625,9 +625,9 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_processOutgoingCalls">reroute outgoing calls</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_processOutgoingCalls">Allows the app to process
-      outgoing calls and change the number to be dialed. This permission allows
-      the app to monitor, redirect, or prevent outgoing calls.</string>
+    <string name="permdesc_processOutgoingCalls">Allows the app to see the
+        number being dialed during an outgoing call with the option to redirect
+        the call to a different number or abort the call altogether.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_receiveSms">receive text messages (SMS)</string>
