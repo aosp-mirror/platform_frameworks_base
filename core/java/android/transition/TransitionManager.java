@@ -302,7 +302,7 @@ public class TransitionManager {
             ArrayList<Transition> runningTransitions = getRunningTransitions().get(mSceneRoot);
             if (runningTransitions != null && runningTransitions.size() > 0) {
                 for (Transition runningTransition : runningTransitions) {
-                    runningTransition.resume();
+                    runningTransition.resume(mSceneRoot);
                 }
             }
             mTransition.clearValues(true);
@@ -335,7 +335,7 @@ public class TransitionManager {
             mTransition.captureValues(mSceneRoot, false);
             if (previousRunningTransitions != null) {
                 for (Transition runningTransition : previousRunningTransitions) {
-                    runningTransition.resume();
+                    runningTransition.resume(mSceneRoot);
                 }
             }
             mTransition.playTransition(mSceneRoot);
@@ -351,7 +351,7 @@ public class TransitionManager {
 
         if (runningTransitions != null && runningTransitions.size() > 0) {
             for (Transition runningTransition : runningTransitions) {
-                runningTransition.pause();
+                runningTransition.pause(sceneRoot);
             }
         }
 

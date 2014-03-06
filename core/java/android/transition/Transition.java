@@ -28,6 +28,7 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOverlay;
+import android.view.WindowId;
 import android.widget.ListView;
 import android.widget.Spinner;
 
@@ -496,7 +497,8 @@ public abstract class Transition implements Cloneable {
                             view = (start != null) ? start.view : null;
                         }
                         if (animator != null) {
-                            AnimationInfo info = new AnimationInfo(view, getName(), infoValues);
+                            AnimationInfo info = new AnimationInfo(view, getName(),
+                                    sceneRoot.getWindowId(), infoValues);
                             runningAnimators.put(animator, info);
                             mAnimators.add(animator);
                         }
@@ -1199,13 +1201,17 @@ public abstract class Transition implements Cloneable {
      *
      * @hide
      */
-    public void pause() {
+    public void pause(View sceneRoot) {
         if (!mEnded) {
             ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
             int numOldAnims = runningAnimators.size();
+            WindowId windowId = sceneRoot.getWindowId();
             for (int i = numOldAnims - 1; i >= 0; i--) {
-                Animator anim = runningAnimators.keyAt(i);
-                anim.pause();
+                AnimationInfo info = runningAnimators.valueAt(i);
+                if (info.view != null && windowId.equals(info.windowId)) {
+                    Animator anim = runningAnimators.keyAt(i);
+                    anim.pause();
+                }
             }
             if (mListeners != null && mListeners.size() > 0) {
                 ArrayList<TransitionListener> tmpListeners =
@@ -1226,14 +1232,18 @@ public abstract class Transition implements Cloneable {
      *
      * @hide
      */
-    public void resume() {
+    public void resume(View sceneRoot) {
         if (mPaused) {
             if (!mEnded) {
                 ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
                 int numOldAnims = runningAnimators.size();
+                WindowId windowId = sceneRoot.getWindowId();
                 for (int i = numOldAnims - 1; i >= 0; i--) {
-                    Animator anim = runningAnimators.keyAt(i);
-                    anim.resume();
+                    AnimationInfo info = runningAnimators.valueAt(i);
+                    if (info.view != null && windowId.equals(info.windowId)) {
+                        Animator anim = runningAnimators.keyAt(i);
+                        anim.resume();
+                    }
                 }
                 if (mListeners != null && mListeners.size() > 0) {
                     ArrayList<TransitionListener> tmpListeners =
@@ -1644,11 +1654,13 @@ public abstract class Transition implements Cloneable {
         public View view;
         String name;
         TransitionValues values;
+        WindowId windowId;
 
-        AnimationInfo(View view, String name, TransitionValues values) {
+        AnimationInfo(View view, String name, WindowId windowId, TransitionValues values) {
             this.view = view;
             this.name = name;
             this.values = values;
+            this.windowId = windowId;
         }
     }
 
