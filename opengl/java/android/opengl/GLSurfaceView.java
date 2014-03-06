@@ -595,13 +595,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         mDetached = false;
     }
 
-    /**
-     * This method is used as part of the View class and is not normally
-     * called or subclassed by clients of GLSurfaceView.
-     * Must not be called before a renderer has been set.
-     */
+    /** @hide */
     @Override
-    protected void onDetachedFromWindow() {
+    protected void onDetachedFromWindowInternal() {
         if (LOG_ATTACH_DETACH) {
             Log.d(TAG, "onDetachedFromWindow");
         }
@@ -609,7 +605,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             mGLThread.requestExitAndWait();
         }
         mDetached = true;
-        super.onDetachedFromWindow();
+        super.onDetachedFromWindowInternal();
     }
 
     // ----------------------------------------------------------------------

@@ -255,8 +255,9 @@ public class SurfaceView extends View {
         updateWindow(false, false);
     }
 
+    /** @hide */
     @Override
-    protected void onDetachedFromWindow() {
+    protected void onDetachedFromWindowInternal() {
         if (mGlobalListenersAdded) {
             ViewTreeObserver observer = getViewTreeObserver();
             observer.removeOnScrollChangedListener(mScrollChangedListener);
@@ -278,7 +279,7 @@ public class SurfaceView extends View {
         mSession = null;
         mLayout.token = null;
 
-        super.onDetachedFromWindow();
+        super.onDetachedFromWindowInternal();
     }
 
     @Override
