@@ -58,7 +58,9 @@ public final class RotationPolicy {
         PackageManager pm = context.getPackageManager();
         return pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER)
                 && pm.hasSystemFeature(PackageManager.FEATURE_SCREEN_PORTRAIT)
-                && pm.hasSystemFeature(PackageManager.FEATURE_SCREEN_LANDSCAPE);
+                && pm.hasSystemFeature(PackageManager.FEATURE_SCREEN_LANDSCAPE)
+                && context.getResources().getBoolean(
+                        com.android.internal.R.bool.config_supportAutoRotation);
     }
 
     /**
@@ -184,6 +186,7 @@ public final class RotationPolicy {
      */
     public static abstract class RotationPolicyListener {
         final ContentObserver mObserver = new ContentObserver(new Handler()) {
+            @Override
             public void onChange(boolean selfChange, Uri uri) {
                 RotationPolicyListener.this.onChange();
             }
