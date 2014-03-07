@@ -1627,7 +1627,16 @@
   <java-symbol type="integer" name="config_maxResolverActivityColumns" />
   <java-symbol type="array" name="config_notificationScorers" />
 
-  <!-- From SystemUI -->
+  <java-symbol type="layout" name="notification_quantum_action" />
+  <java-symbol type="layout" name="notification_quantum_action_list" />
+  <java-symbol type="layout" name="notification_quantum_action_tombstone" />
+  <java-symbol type="layout" name="notification_template_quantum_base" />
+  <java-symbol type="layout" name="notification_template_quantum_big_base" />
+  <java-symbol type="layout" name="notification_template_quantum_big_picture" />
+  <java-symbol type="layout" name="notification_template_quantum_big_text" />
+  <java-symbol type="layout" name="notification_template_quantum_inbox" />
+
+    <!-- From SystemUI -->
   <java-symbol type="anim" name="push_down_in" />
   <java-symbol type="anim" name="push_down_out" />
   <java-symbol type="anim" name="push_up_in" />

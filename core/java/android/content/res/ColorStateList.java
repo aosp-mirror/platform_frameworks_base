@@ -315,6 +315,24 @@ public class ColorStateList implements Parcelable {
         return mDefaultColor;
     }
 
+    /**
+     * Return the states in this {@link ColorStateList}.
+     * @return the states in this {@link ColorStateList}
+     * @hide
+     */
+    public int[][] getStates() {
+        return mStateSpecs;
+    }
+
+    /**
+     * Return the colors in this {@link ColorStateList}.
+     * @return the colors in this {@link ColorStateList}
+     * @hide
+     */
+    public int[] getColors() {
+        return mColors;
+    }
+
     @Override
     public String toString() {
         return "ColorStateList{" +
