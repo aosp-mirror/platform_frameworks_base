@@ -283,6 +283,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mUserRotation = Surface.ROTATION_0;
     boolean mAccelerometerDefault;
 
+    boolean mSupportAutoRotation;
     int mAllowAllRotations = -1;
     boolean mCarDockEnablesAccelerometer;
     boolean mDeskDockEnablesAccelerometer;
@@ -591,13 +592,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * screen is switched off.
      */
     boolean needSensorRunningLp() {
-        if (mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR
-                || mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
-                || mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-                || mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE) {
-            // If the application has explicitly requested to follow the
-            // orientation, then we need to turn the sensor or.
-            return true;
+        if (mSupportAutoRotation) {
+            if (mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR
+                    || mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+                    || mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                    || mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE) {
+                // If the application has explicitly requested to follow the
+                // orientation, then we need to turn the sensor on.
+                return true;
+            }
         }
         if ((mCarDockEnablesAccelerometer && mDockMode == Intent.EXTRA_DOCK_STATE_CAR) ||
                 (mDeskDockEnablesAccelerometer && (mDockMode == Intent.EXTRA_DOCK_STATE_DESK
@@ -618,7 +621,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // still be turned off when the screen is off.)
             return false;
         }
-        return true;
+        return mSupportAutoRotation;
     }
 
     /*
@@ -883,6 +886,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mBroadcastWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "PhoneWindowManager.mBroadcastWakeLock");
         mEnableShiftMenuBugReports = "1".equals(SystemProperties.get("ro.debuggable"));
+        mSupportAutoRotation = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_supportAutoRotation);
         mLidOpenRotation = readRotation(
                 com.android.internal.R.integer.config_lidOpenRotation);
         mCarDockRotation = readRotation(
@@ -4485,6 +4490,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED) {
                 // Application just wants to remain locked in the last rotation.
                 preferredRotation = lastRotation;
+            } else if (!mSupportAutoRotation) {
+                // If we don't support auto-rotation then bail out here and ignore
+                // the sensor and any rotation lock settings.
+                preferredRotation = -1;
             } else if ((mUserRotationMode == WindowManagerPolicy.USER_ROTATION_FREE
                             && (orientation == ActivityInfo.SCREEN_ORIENTATION_USER
                                     || orientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
@@ -5294,6 +5303,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             pw.print(prefix); pw.print("mLastFocusNeedsMenu=");
                     pw.println(mLastFocusNeedsMenu);
         }
+        pw.print(prefix); pw.print("mSupportAutoRotation="); pw.println(mSupportAutoRotation);
         pw.print(prefix); pw.print("mUiMode="); pw.print(mUiMode);
                 pw.print(" mDockMode="); pw.print(mDockMode);
                 pw.print(" mCarDockRotation="); pw.print(mCarDockRotation);
