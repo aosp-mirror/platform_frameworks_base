@@ -28,6 +28,8 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.PathShape;
+import android.os.AsyncTask;
+import android.os.Vibrator;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
@@ -45,7 +47,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -79,6 +80,7 @@ public class ZenModeView extends RelativeLayout {
     private final Rect mLayoutRect = new Rect();
     private final UntilPager mUntilPager;
     private final AlarmWarning mAlarmWarning;
+    private final int mPopDuration;
 
     private float mDownY;
     private int mDownBottom;
@@ -87,6 +89,7 @@ public class ZenModeView extends RelativeLayout {
     private int mBottom;
     private int mWidthSpec;
     private Adapter mAdapter;
+    private boolean mPopped;
 
     public ZenModeView(Context context) {
         this(context, null);
@@ -144,7 +147,6 @@ public class ZenModeView extends RelativeLayout {
         lp.addRule(RelativeLayout.CENTER_HORIZONTAL);
         addView(mModeSpinner, lp);
 
-
         mUntilPager = new UntilPager(mContext, mPathPaint, iconSize);
         mUntilPager.setId(android.R.id.tabhost);
         mUntilPager.setAlpha(0);
@@ -165,6 +167,8 @@ public class ZenModeView extends RelativeLayout {
         mHintText.setGravity(Gravity.CENTER);
         mHintText.setTextColor(GRAY);
         addView(mHintText, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+
+        mPopDuration = mContext.getResources().getInteger(R.integer.blinds_pop_duration_ms);
     }
 
     private boolean isApplicable() {
@@ -180,9 +184,11 @@ public class ZenModeView extends RelativeLayout {
             public void onAnimationUpdate(ValueAnimator animation) {
                 final float f = animation.getAnimatedFraction();
                 final int hintBottom = mHintText.getBottom();
-                setPeeked(hintBottom + (int)((1-f) * (startBottom - hintBottom)), max);
-                if (f == 1) {
+                final boolean isDone = f == 1;
+                setPeeked(hintBottom + (int)((1-f) * (startBottom - hintBottom)), max, isDone);
+                if (isDone) {
                     mPeekable = true;
+                    mPopped = false;
                     mClosing = false;
                     mModeSpinner.updateState();
                     if (mAdapter != null) {
@@ -335,11 +341,15 @@ public class ZenModeView extends RelativeLayout {
             return true;
         } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
             final float dy = event.getY() - mDownY;
-            setPeeked(mDownBottom + (int)dy, getExpandedBottom());
+            if (!mPopped) {
+                mPopped = true;
+                AsyncTask.execute(mPopVibration);
+            }
+            setPeeked(mDownBottom + (int)dy, getExpandedBottom(), false);
         } else if (event.getAction() == MotionEvent.ACTION_UP
                 || event.getAction() == MotionEvent.ACTION_CANCEL) {
             final float dy = event.getY() - mDownY;
-            setPeeked(mDownBottom + (int)dy, getExpandedBottom());
+            setPeeked(mDownBottom + (int)dy, getExpandedBottom(), true);
             if (mPeekable) {
                 close();
             }
@@ -347,14 +357,14 @@ public class ZenModeView extends RelativeLayout {
         return rt;
     }
 
-    private void setPeeked(int peeked, int max) {
+    private void setPeeked(int peeked, int max, boolean isDone) {
         if (DEBUG) log("setPeeked=" + peeked);
         final int min = mHintText.getBottom();
         peeked = Math.max(min, Math.min(peeked, max));
-        if (mBottom == peeked) {
+        if (!isDone && mBottom == peeked) {
             return;
         }
-        if (peeked == max) {
+        if (peeked == max && isDone) {
             mPeekable = false;
             mModeSpinner.setEnabled(true);
             if (mAdapter != null) {
@@ -418,6 +428,14 @@ public class ZenModeView extends RelativeLayout {
                 }
             }).start();
     }
+
+    private final Runnable mPopVibration = new Runnable() {
+        @Override
+        public void run() {
+            Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+            v.vibrate(mPopDuration);
+        }
+    };
 
     private final class UntilPager extends RelativeLayout {
         private final ImageView mPrev;
