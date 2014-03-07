@@ -21,4 +21,4 @@ if [[ $rebuild == true ]]; then
   $COMMAND
 fi
 
-adb shell am instrument -w -e class android.os.InputMethodTest com.android.frameworks.coretests.inputmethod/android.test.InstrumentationTestRunner
+adb shell am instrument -w -e class android.os.InputMethodTest,android.os.InputMethodSubtypeArrayTest com.android.frameworks.coretests.inputmethod/android.test.InstrumentationTestRunner
