@@ -317,21 +317,21 @@ public class TransitionSet extends Transition {
 
     /** @hide */
     @Override
-    public void pause() {
-        super.pause();
+    public void pause(View sceneRoot) {
+        super.pause(sceneRoot);
         int numTransitions = mTransitions.size();
         for (int i = 0; i < numTransitions; ++i) {
-            mTransitions.get(i).pause();
+            mTransitions.get(i).pause(sceneRoot);
         }
     }
 
     /** @hide */
     @Override
-    public void resume() {
-        super.resume();
+    public void resume(View sceneRoot) {
+        super.resume(sceneRoot);
         int numTransitions = mTransitions.size();
         for (int i = 0; i < numTransitions; ++i) {
-            mTransitions.get(i).resume();
+            mTransitions.get(i).resume(sceneRoot);
         }
     }
 
