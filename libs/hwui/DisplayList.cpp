@@ -109,6 +109,9 @@ void DisplayList::destroyDisplayListDeferred(DisplayList* displayList) {
 void DisplayList::setData(DisplayListData* data) {
     delete mDisplayListData;
     mDisplayListData = data;
+    if (mDisplayListData) {
+        Caches::getInstance().registerFunctors(mDisplayListData->functorCount);
+    }
 }
 
 /**
