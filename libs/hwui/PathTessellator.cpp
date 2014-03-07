@@ -16,7 +16,7 @@
 
 #define LOG_TAG "OpenGLRenderer"
 #define LOG_NDEBUG 1
-#define ATRACE_TAG ATRACE_TAG_GRAPHICS
+#define ATRACE_TAG ATRACE_TAG_VIEW
 
 #define VERTEX_DEBUG 0
 
