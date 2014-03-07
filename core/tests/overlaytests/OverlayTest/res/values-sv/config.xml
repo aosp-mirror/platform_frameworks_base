@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="matrix_110000">200</integer>
+    <integer name="matrix_110001">200</integer>
+    <integer name="matrix_110010">200</integer>
+    <integer name="matrix_110011">200</integer>
+    <integer name="matrix_110100">200</integer>
+    <integer name="matrix_110101">200</integer>
+    <integer name="matrix_110110">200</integer>
+    <integer name="matrix_110111">200</integer>
+    <integer name="matrix_111000">200</integer>
+    <integer name="matrix_111001">200</integer>
+    <integer name="matrix_111010">200</integer>
+    <integer name="matrix_111011">200</integer>
+    <integer name="matrix_111100">200</integer>
+    <integer name="matrix_111101">200</integer>
+    <integer name="matrix_111110">200</integer>
+    <integer name="matrix_111111">200</integer>
+</resources>
