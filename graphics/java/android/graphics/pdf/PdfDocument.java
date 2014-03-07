@@ -82,7 +82,7 @@ public class PdfDocument {
 
     private final List<PageInfo> mPages = new ArrayList<PageInfo>();
 
-    private int mNativeDocument;
+    private long mNativeDocument;
 
     private Page mCurrentPage;
 
@@ -235,20 +235,20 @@ public class PdfDocument {
         }
     }
 
-    private native int nativeCreateDocument();
+    private native long nativeCreateDocument();
 
-    private native void nativeClose(int document);
+    private native void nativeClose(long nativeDocument);
 
-    private native void nativeFinishPage(int document);
+    private native void nativeFinishPage(long nativeDocument);
 
-    private native void nativeWriteTo(int document, OutputStream out, byte[] chunk);
+    private native void nativeWriteTo(long nativeDocument, OutputStream out, byte[] chunk);
 
-    private static native int nativeStartPage(int documentPtr, int pageWidth, int pageHeight,
+    private static native long nativeStartPage(long nativeDocument, int pageWidth, int pageHeight,
             int contentLeft, int contentTop, int contentRight, int contentBottom);
 
     private final class PdfCanvas extends Canvas {
 
-        public PdfCanvas(int nativeCanvas) {
+        public PdfCanvas(long nativeCanvas) {
             super(nativeCanvas);
         }
 
