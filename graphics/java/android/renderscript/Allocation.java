@@ -411,14 +411,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * Delete once code is updated.
-     * @hide
-     */
-    public void ioSendOutput() {
-        ioSend();
-    }
-
-    /**
      * Receive the latest input into the Allocation. This operation
      * is only valid if {@link #USAGE_IO_INPUT} is set on the Allocation.
      *
