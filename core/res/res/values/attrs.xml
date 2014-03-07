@@ -1571,6 +1571,8 @@
         <enum name="KEYCODE_BRIGHTNESS_DOWN" value="220" />
         <enum name="KEYCODE_BRIGHTNESS_UP" value="221" />
         <enum name="KEYCODE_MEDIA_AUDIO_TRACK" value="222" />
+        <enum name="KEYCODE_MEDIA_SLEEP" value="223" />
+        <enum name="KEYCODE_MEDIA_WAKEUP" value="224" />
     </attr>
 
     <!-- ***************************************************************** -->
