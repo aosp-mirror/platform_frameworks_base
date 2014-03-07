@@ -96,6 +96,7 @@ public class LightsService {
             synchronized (this) {
                 if (mColor == 0 && !mFlashing) {
                     setLightLocked(color, LIGHT_FLASH_HARDWARE, onMS, 1000, BRIGHTNESS_MODE_USER);
+                    mColor = 0;
                     mH.sendMessageDelayed(Message.obtain(mH, 1, this), onMS);
                 }
             }
