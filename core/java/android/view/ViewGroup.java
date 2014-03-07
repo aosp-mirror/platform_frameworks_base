@@ -3166,6 +3166,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #setIsolatedZVolume(boolean)
      *
      * @return True if the ViewGroup has an isolated Z volume.
+     *
+     * @hide
      */
     public boolean hasIsolatedZVolume() {
         return ((mGroupFlags & FLAG_ISOLATED_Z_VOLUME) != 0);
@@ -3180,6 +3182,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *         ordering space, false if its decendents should inhabit the
      *         inherited Z ordering volume.
      * @attr ref android.R.styleable#ViewGroup_isolatedZVolume
+     *
+     * @hide
      */
     public void setIsolatedZVolume(boolean isolateZVolume) {
         boolean previousValue = (mGroupFlags & FLAG_ISOLATED_Z_VOLUME) != 0;
