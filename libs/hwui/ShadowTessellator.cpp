@@ -15,9 +15,11 @@
  */
 
 #define LOG_TAG "OpenGLRenderer"
+#define ATRACE_TAG ATRACE_TAG_VIEW
 
 #include <math.h>
 #include <utils/Log.h>
+#include <utils/Trace.h>
 
 #include "AmbientShadow.h"
 #include "ShadowTessellator.h"
@@ -34,6 +36,8 @@ static inline T max(T a, T b) {
 void ShadowTessellator::tessellateAmbientShadow(const Vector3* casterPolygon,
         int casterVertexCount, const Vector3& centroid3d,
         VertexBuffer& shadowVertexBuffer) {
+    ATRACE_CALL();
+
     // A bunch of parameters to tweak the shadow.
     // TODO: Allow some of these changable by debug settings or APIs.
     const float heightFactor = 128;
@@ -47,6 +51,8 @@ void ShadowTessellator::tessellateAmbientShadow(const Vector3* casterPolygon,
 void ShadowTessellator::tessellateSpotShadow(const Vector3* casterPolygon, int casterVertexCount,
         const Vector3& lightPosScale, const mat4& receiverTransform,
         int screenWidth, int screenHeight, VertexBuffer& shadowVertexBuffer) {
+    ATRACE_CALL();
+
     // A bunch of parameters to tweak the shadow.
     // TODO: Allow some of these changable by debug settings or APIs.
     int maximal = max(screenWidth, screenHeight);
