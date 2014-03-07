@@ -36,7 +36,7 @@ final class StringBlock {
     private static final String TAG = "AssetManager";
     private static final boolean localLOGV = false;
 
-    private final int mNative;
+    private final long mNative;
     private final boolean mUseSparse;
     private final boolean mOwnsNative;
     private CharSequence[] mStrings;
@@ -474,7 +474,7 @@ final class StringBlock {
      *  are doing!  The given native object must exist for the entire lifetime
      *  of this newly creating StringBlock.
      */
-    StringBlock(int obj, boolean useSparse) {
+    StringBlock(long obj, boolean useSparse) {
         mNative = obj;
         mUseSparse = useSparse;
         mOwnsNative = false;
@@ -482,11 +482,11 @@ final class StringBlock {
                 + ": " + nativeGetSize(mNative));
     }
 
-    private static native int nativeCreate(byte[] data,
+    private static native long nativeCreate(byte[] data,
                                                  int offset,
                                                  int size);
-    private static native int nativeGetSize(int obj);
-    private static native String nativeGetString(int obj, int idx);
-    private static native int[] nativeGetStyle(int obj, int idx);
-    private static native void nativeDestroy(int obj);
+    private static native int nativeGetSize(long obj);
+    private static native String nativeGetString(long obj, int idx);
+    private static native int[] nativeGetStyle(long obj, int idx);
+    private static native void nativeDestroy(long obj);
 }
