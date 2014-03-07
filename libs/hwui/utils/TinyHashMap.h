@@ -24,8 +24,6 @@ namespace uirenderer {
 
 /**
  * A very simple hash map that doesn't allow duplicate keys, overwriting the older entry.
- *
- * Currently, expects simple keys that are handled by hash_t()
  */
 template <typename TKey, typename TValue>
 class TinyHashMap {
@@ -36,7 +34,7 @@ public:
      * Puts an entry in the hash, removing any existing entry with the same key
      */
     void put(TKey key, TValue value) {
-        hash_t hash = hash_t(key);
+        hash_t hash = android::hash_type(key);
 
         ssize_t index = mTable.find(-1, hash, key);
         if (index != -1) {
@@ -51,7 +49,7 @@ public:
      * Return true if key is in the map, in which case stores the value in the output ref
      */
     bool get(TKey key, TValue& outValue) {
-        hash_t hash = hash_t(key);
+        hash_t hash = android::hash_type(key);
         ssize_t index = mTable.find(-1, hash, key);
         if (index == -1) {
             return false;
