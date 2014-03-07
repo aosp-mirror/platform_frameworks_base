@@ -37,7 +37,10 @@
 #include "mtp.h"
 
 extern "C" {
-#include "jhead.h"
+#include "libexif/exif-content.h"
+#include "libexif/exif-data.h"
+#include "libexif/exif-tag.h"
+#include "libexif/exif-utils.h"
 }
 
 using namespace android;
@@ -750,6 +753,22 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyList(MtpObjectHandle handle,
     return result;
 }
 
+static void foreachentry(ExifEntry *entry, void *user) {
+    char buf[1024];
+    ALOGI("entry %x, format %d, size %d: %s",
+            entry->tag, entry->format, entry->size, exif_entry_get_value(entry, buf, sizeof(buf)));
+}
+
+static void foreachcontent(ExifContent *content, void *user) {
+    ALOGI("content %d", exif_content_get_ifd(content));
+    exif_content_foreach_entry(content, foreachentry, user);
+}
+
+static long getLongFromExifEntry(ExifEntry *e) {
+    ExifByteOrder o = exif_data_get_byte_order(e->parent->parent);
+    return exif_get_long(e->data, o);
+}
+
 MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
                                             MtpObjectInfo& info) {
     char            date[20];
@@ -792,23 +811,22 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
 
     // read EXIF data for thumbnail information
     if (info.mFormat == MTP_FORMAT_EXIF_JPEG || info.mFormat == MTP_FORMAT_JFIF) {
-        ResetJpgfile();
-         // Start with an empty image information structure.
-        memset(&ImageInfo, 0, sizeof(ImageInfo));
-        ImageInfo.FlashUsed = -1;
-        ImageInfo.MeteringMode = -1;
-        ImageInfo.Whitebalance = -1;
-        strncpy(ImageInfo.FileName, (const char *)path, PATH_MAX);
-        if (ReadJpegFile((const char*)path, READ_METADATA)) {
-            Section_t* section = FindSection(M_EXIF);
-            if (section) {
-                info.mThumbCompressedSize = ImageInfo.ThumbnailSize;
-                info.mThumbFormat = MTP_FORMAT_EXIF_JPEG;
-                info.mImagePixWidth = ImageInfo.Width;
-                info.mImagePixHeight = ImageInfo.Height;
-            }
+
+        ExifData *exifdata = exif_data_new_from_file(path);
+        if (exifdata) {
+            //exif_data_foreach_content(exifdata, foreachcontent, NULL);
+
+            // XXX get this from exif, or parse jpeg header instead?
+            ExifEntry *w = exif_content_get_entry(
+                    exifdata->ifd[EXIF_IFD_EXIF], EXIF_TAG_PIXEL_X_DIMENSION);
+            ExifEntry *h = exif_content_get_entry(
+                    exifdata->ifd[EXIF_IFD_EXIF], EXIF_TAG_PIXEL_Y_DIMENSION);
+            info.mThumbCompressedSize = exifdata->data ? exifdata->size : 0;
+            info.mThumbFormat = MTP_FORMAT_EXIF_JPEG;
+            info.mImagePixWidth = w ? getLongFromExifEntry(w) : 0;
+            info.mImagePixHeight = h ? getLongFromExifEntry(h) : 0;
+            exif_data_unref(exifdata);
         }
-        DiscardData();
     }
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
@@ -824,22 +842,16 @@ void* MyMtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) 
 
     if (getObjectFilePath(handle, path, length, format) == MTP_RESPONSE_OK
             && (format == MTP_FORMAT_EXIF_JPEG || format == MTP_FORMAT_JFIF)) {
-        ResetJpgfile();
-         // Start with an empty image information structure.
-        memset(&ImageInfo, 0, sizeof(ImageInfo));
-        ImageInfo.FlashUsed = -1;
-        ImageInfo.MeteringMode = -1;
-        ImageInfo.Whitebalance = -1;
-        strncpy(ImageInfo.FileName, (const char *)path, PATH_MAX);
-        if (ReadJpegFile((const char*)path, READ_METADATA)) {
-            Section_t* section = FindSection(M_EXIF);
-            if (section) {
-                outThumbSize = ImageInfo.ThumbnailSize;
-                result = malloc(outThumbSize);
-                if (result)
-                    memcpy(result, section->Data + ImageInfo.ThumbnailOffset + 8, outThumbSize);
+
+        ExifData *exifdata = exif_data_new_from_file(path);
+        if (exifdata) {
+            if (exifdata->data) {
+                result = malloc(exifdata->size);
+                if (result) {
+                    memcpy(result, exifdata->data, exifdata->size);
+                }
             }
-            DiscardData();
+            exif_data_unref(exifdata);
         }
     }
 
