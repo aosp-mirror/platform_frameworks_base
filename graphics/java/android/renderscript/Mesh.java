@@ -91,7 +91,7 @@ public class Mesh extends BaseObj {
     Allocation[] mIndexBuffers;
     Primitive[] mPrimitives;
 
-    Mesh(int id, RenderScript rs) {
+    Mesh(long id, RenderScript rs) {
         super(id, rs);
     }
 
@@ -367,7 +367,7 @@ public class Mesh extends BaseObj {
                     alloc = Allocation.createSized(mRS, entry.e, entry.size, mUsage);
                 }
                 vertexBuffers[ct] = alloc;
-                vtx[ct] = alloc.getID(mRS);
+                vtx[ct] = (int)alloc.getID(mRS);
             }
 
             for(int ct = 0; ct < mIndexTypes.size(); ct ++) {
@@ -378,15 +378,15 @@ public class Mesh extends BaseObj {
                 } else if(entry.e != null) {
                     alloc = Allocation.createSized(mRS, entry.e, entry.size, mUsage);
                 }
-                int allocID = (alloc == null) ? 0 : alloc.getID(mRS);
+                long allocID = (alloc == null) ? 0 : alloc.getID(mRS);
                 indexBuffers[ct] = alloc;
                 primitives[ct] = entry.prim;
 
-                idx[ct] = allocID;
+                idx[ct] = (int)allocID;
                 prim[ct] = entry.prim.mID;
             }
 
-            int id = mRS.nMeshCreate(vtx, idx, prim);
+            long id = mRS.nMeshCreate(vtx, idx, prim);
             Mesh newMesh = new Mesh(id, mRS);
             newMesh.mVertexBuffers = vertexBuffers;
             newMesh.mIndexBuffers = indexBuffers;
@@ -517,20 +517,20 @@ public class Mesh extends BaseObj {
             for(int ct = 0; ct < mVertexTypeCount; ct ++) {
                 Entry entry = mVertexTypes[ct];
                 vertexBuffers[ct] = entry.a;
-                vtx[ct] = entry.a.getID(mRS);
+                vtx[ct] = (int)entry.a.getID(mRS);
             }
 
             for(int ct = 0; ct < mIndexTypes.size(); ct ++) {
                 Entry entry = (Entry)mIndexTypes.elementAt(ct);
-                int allocID = (entry.a == null) ? 0 : entry.a.getID(mRS);
+                long allocID = (entry.a == null) ? 0 : entry.a.getID(mRS);
                 indexBuffers[ct] = entry.a;
                 primitives[ct] = entry.prim;
 
-                idx[ct] = allocID;
+                idx[ct] = (int)allocID;
                 prim[ct] = entry.prim.mID;
             }
 
-            int id = mRS.nMeshCreate(vtx, idx, prim);
+            long id = mRS.nMeshCreate(vtx, idx, prim);
             Mesh newMesh = new Mesh(id, mRS);
             newMesh.mVertexBuffers = vertexBuffers;
             newMesh.mIndexBuffers = indexBuffers;

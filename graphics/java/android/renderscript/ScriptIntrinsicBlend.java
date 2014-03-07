@@ -21,7 +21,7 @@ package android.renderscript;
  * Intrinsic kernels for blending two {@link android.renderscript.Allocation} objects.
  **/
 public class ScriptIntrinsicBlend extends ScriptIntrinsic {
-    ScriptIntrinsicBlend(int id, RenderScript rs) {
+    ScriptIntrinsicBlend(long id, RenderScript rs) {
         super(id, rs);
     }
 
@@ -35,7 +35,7 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      */
     public static ScriptIntrinsicBlend create(RenderScript rs, Element e) {
         // 7 comes from RS_SCRIPT_INTRINSIC_ID_BLEND in rsDefines.h
-        int id = rs.nScriptIntrinsicCreate(7, e.getID(rs));
+        long id = rs.nScriptIntrinsicCreate(7, e.getID(rs));
         return new ScriptIntrinsicBlend(id, rs);
 
     }
