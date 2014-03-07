@@ -14,7 +14,8 @@
      limitations under the License.
 -->
 <resources>
-    <style name="Theme.Micro" parent="Theme.Holo">
+    <style name="Theme.Micro" parent="Theme.Holo.NoActionBar">
+        <item name="textViewStyle">@android:style/Widget.Micro.TextView</item>
         <item name="numberPickerStyle">@android:style/Widget.Micro.NumberPicker</item>
         <item name="windowAnimationStyle">@android:style/Animation.SwipeDismiss</item>
         <item name="windowIsFloating">false</item>
