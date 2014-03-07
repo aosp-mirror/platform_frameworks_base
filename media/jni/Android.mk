@@ -37,11 +37,11 @@ LOCAL_SHARED_LIBRARIES := \
     libcamera_client \
     libmtp \
     libusbhost \
-    libexif \
+    libjhead \
     libstagefright_amrnb_common \
 
 LOCAL_REQUIRED_MODULES := \
-    libexif_jni
+    libjhead_jni
 
 LOCAL_STATIC_LIBRARIES := \
     libstagefright_amrnbenc
