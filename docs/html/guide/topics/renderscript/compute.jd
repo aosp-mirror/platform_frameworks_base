@@ -56,7 +56,9 @@ contain:</p>
 RenderScript kernel language used in this script. Currently, 1 is the only valid value.</li>
 
 <li>A pragma declaration (<code>#pragma rs java_package_name(com.example.app)</code>) that
-declares the package name of the Java classes reflected from this script.</li>
+declares the package name of the Java classes reflected from this script.
+Note that your .rs file must be part of your application package, and not in a
+library project.</li>
 
 <li>Some number of invokable functions. An invokable function is a single-threaded RenderScript
 function that you can call from your Java code with arbitrary arguments. These are often useful for
