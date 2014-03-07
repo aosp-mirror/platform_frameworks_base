@@ -370,6 +370,8 @@
     <!-- If this is true, key chords can be used to take a screenshot on the device. -->
     <bool name="config_enableScreenshotChord">true</bool>
 
+    <!-- Auto-rotation behavior -->
+
     <!-- If true, the screen can be rotated via the accelerometer in all 4
          rotations as the default behavior. -->
     <bool name="config_allowAllRotations">false</bool>
@@ -382,56 +384,11 @@
          true here reverses that logic. -->
     <bool name="config_reverseDefaultRotation">false</bool>
 
+    <!-- Lid switch behavior -->
+
     <!-- The number of degrees to rotate the display when the keyboard is open.
          A value of -1 means no change in orientation by default. -->
     <integer name="config_lidOpenRotation">-1</integer>
-
-    <!-- The number of degrees to rotate the display when the device is in a desk dock.
-         A value of -1 means no change in orientation by default. -->
-    <integer name="config_deskDockRotation">-1</integer>
-
-    <!-- The number of degrees to rotate the display when the device is in a car dock.
-         A value of -1 means no change in orientation by default. -->
-    <integer name="config_carDockRotation">-1</integer>
-
-    <!-- The number of degrees to rotate the display when the device has HDMI connected
-         but is not in a dock.  A value of -1 means no change in orientation by default.
-         Use -1 except on older devices whose Hardware Composer HAL does not
-         provide full support for multiple displays.  -->
-    <integer name="config_undockedHdmiRotation">-1</integer>
-
-    <!-- Control the default UI mode type to use when there is no other type override
-         happening.  One of the following values (See Configuration.java):
-             1  UI_MODE_TYPE_NORMAL
-             4  UI_MODE_TYPE_TELEVISION
-             5  UI_MODE_TYPE_APPLIANCE
-         Any other values will have surprising consequences. -->
-    <integer name="config_defaultUiModeType">1</integer>
-
-    <!-- Control whether being in the desk dock (and powered) always
-         keeps the screen on.  By default it stays on when plugged in to
-         AC.  0 will not keep it on; or together 1 to stay on when plugged
-         in to AC and 2 to stay on when plugged in to USB.  (So 3 for both.) -->
-    <integer name="config_deskDockKeepsScreenOn">1</integer>
-
-    <!-- Control whether being in the car dock (and powered) always
-         keeps the screen on.  By default it stays on when plugged in to
-         AC.  0 will not keep it on; or together 1 to stay on when plugged
-         in to AC and 2 to stay on when plugged in to USB.  (So 3 for both.) -->
-    <integer name="config_carDockKeepsScreenOn">1</integer>
-
-    <!-- Control whether being in the desk dock should enable accelerometer
-         based screen orientation.  This defaults to true because it is
-         common for desk docks to be sold in a variety of form factors
-         with different orientations.  Since we cannot always tell these docks
-         apart and the docks cannot report their true orientation on their own,
-         we rely on gravity to determine the effective orientation. -->
-    <bool name="config_deskDockEnablesAccelerometer">true</bool>
-
-    <!-- Control whether being in the car dock should enable accelerometer based
-         screen orientation.  This defaults to true because putting a device in
-         a car dock make the accelerometer more a physical input (like a lid). -->
-    <bool name="config_carDockEnablesAccelerometer">true</bool>
 
     <!-- Indicate whether the lid state impacts the accessibility of
          the physical keyboard.  0 means it doesn't, 1 means it is accessible
@@ -449,6 +406,60 @@
          it causes the device to wake up.
          The default is false. -->
     <bool name="config_lidControlsSleep">false</bool>
+
+    <!-- Desk dock behavior -->
+
+    <!-- The number of degrees to rotate the display when the device is in a desk dock.
+         A value of -1 means no change in orientation by default. -->
+    <integer name="config_deskDockRotation">-1</integer>
+
+    <!-- Control whether being in the desk dock (and powered) always
+         keeps the screen on.  By default it stays on when plugged in to
+         AC.  0 will not keep it on; or together 1 to stay on when plugged
+         in to AC and 2 to stay on when plugged in to USB.  (So 3 for both.) -->
+    <integer name="config_deskDockKeepsScreenOn">1</integer>
+
+    <!-- Control whether being in the desk dock should enable accelerometer
+         based screen orientation.  This defaults to true because it is
+         common for desk docks to be sold in a variety of form factors
+         with different orientations.  Since we cannot always tell these docks
+         apart and the docks cannot report their true orientation on their own,
+         we rely on gravity to determine the effective orientation. -->
+    <bool name="config_deskDockEnablesAccelerometer">true</bool>
+
+    <!-- Car dock behavior -->
+
+    <!-- The number of degrees to rotate the display when the device is in a car dock.
+         A value of -1 means no change in orientation by default. -->
+    <integer name="config_carDockRotation">-1</integer>
+
+    <!-- Control whether being in the car dock (and powered) always
+         keeps the screen on.  By default it stays on when plugged in to
+         AC.  0 will not keep it on; or together 1 to stay on when plugged
+         in to AC and 2 to stay on when plugged in to USB.  (So 3 for both.) -->
+    <integer name="config_carDockKeepsScreenOn">1</integer>
+
+    <!-- Control whether being in the car dock should enable accelerometer based
+         screen orientation.  This defaults to true because putting a device in
+         a car dock make the accelerometer more a physical input (like a lid). -->
+
+    <bool name="config_carDockEnablesAccelerometer">true</bool>
+
+    <!-- HDMI behavior -->
+
+    <!-- The number of degrees to rotate the display when the device has HDMI connected
+         but is not in a dock.  A value of -1 means no change in orientation by default.
+         Use -1 except on older devices whose Hardware Composer HAL does not
+         provide full support for multiple displays.  -->
+    <integer name="config_undockedHdmiRotation">-1</integer>
+
+    <!-- Control the default UI mode type to use when there is no other type override
+         happening.  One of the following values (See Configuration.java):
+             1  UI_MODE_TYPE_NORMAL
+             4  UI_MODE_TYPE_TELEVISION
+             5  UI_MODE_TYPE_APPLIANCE
+         Any other values will have surprising consequences. -->
+    <integer name="config_defaultUiModeType">1</integer>
 
     <!-- Indicate whether to allow the device to suspend when the screen is off
          due to the proximity sensor.  This resource should only be set to true
