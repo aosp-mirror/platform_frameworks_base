@@ -780,6 +780,49 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         mOptions.add(opt);
     }
 
+    /*
+     * Set profiler options
+     */
+    {
+      char period[sizeof("-Xprofile-period:") + PROPERTY_VALUE_MAX];
+      char duration[sizeof("-Xprofile-duration:") + PROPERTY_VALUE_MAX];
+      char interval[sizeof("-Xprofile-interval:") + PROPERTY_VALUE_MAX];
+      char backoff[sizeof("-Xprofile-backoff:") + PROPERTY_VALUE_MAX];
+
+      // Number of seconds during profile runs.
+      strcpy(period, "-Xprofile-period:");
+      property_get("dalvik.vm.profile.period_secs", period+17, "10");
+      opt.optionString = period;
+      mOptions.add(opt);
+
+      // Length of each profile run (seconds).
+      strcpy(duration, "-Xprofile-duration:");
+      property_get("dalvik.vm.profile.duration_secs", duration+19, "30");
+      opt.optionString = duration;
+      mOptions.add(opt);
+
+
+      // Polling interval during profile run (microseconds).
+      strcpy(interval, "-Xprofile-interval:");
+      property_get("dalvik.vm.profile.interval_us", interval+19, "10000");
+      opt.optionString = interval;
+      mOptions.add(opt);
+
+      // Coefficient for period backoff.  The the period is multiplied
+      // by this value after each profile run.
+      strcpy(backoff, "-Xprofile-backoff:");
+      property_get("dalvik.vm.profile.backoff_coeff", backoff+18, "2.0");
+      opt.optionString = backoff;
+      mOptions.add(opt);
+    }
+
+    /*
+     * We don't have /tmp on the device, but we often have an SD card.  Apps
+     * shouldn't use this, but some test suites might want to exercise it.
+     */
+    opt.optionString = "-Djava.io.tmpdir=/sdcard";
+    mOptions.add(opt);
+
     initArgs.version = JNI_VERSION_1_4;
     initArgs.options = mOptions.editArray();
     initArgs.nOptions = mOptions.size();
