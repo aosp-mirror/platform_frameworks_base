@@ -561,7 +561,7 @@ static jboolean android_media_MediaExtractor_getSampleCryptoInfo(
         return JNI_FALSE;
     }
 
-    size_t numSubSamples = size / sizeof(size_t);
+    size_t numSubSamples = size / sizeof(int32_t);
 
     if (numSubSamples == 0) {
         return JNI_FALSE;
@@ -571,7 +571,7 @@ static jboolean android_media_MediaExtractor_getSampleCryptoInfo(
     jboolean isCopy;
     jint *dst = env->GetIntArrayElements(numBytesOfEncryptedDataObj, &isCopy);
     for (size_t i = 0; i < numSubSamples; ++i) {
-        dst[i] = ((const size_t *)data)[i];
+        dst[i] = ((const int32_t *)data)[i];
     }
     env->ReleaseIntArrayElements(numBytesOfEncryptedDataObj, dst, 0);
     dst = NULL;
@@ -588,7 +588,7 @@ static jboolean android_media_MediaExtractor_getSampleCryptoInfo(
         jboolean isCopy;
         jint *dst = env->GetIntArrayElements(numBytesOfPlainDataObj, &isCopy);
         for (size_t i = 0; i < numSubSamples; ++i) {
-            dst[i] = ((const size_t *)data)[i];
+            dst[i] = ((const int32_t *)data)[i];
         }
         env->ReleaseIntArrayElements(numBytesOfPlainDataObj, dst, 0);
         dst = NULL;
