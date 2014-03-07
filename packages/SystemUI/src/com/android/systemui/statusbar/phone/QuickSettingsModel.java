@@ -996,8 +996,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mInversionState.toggled = enabled;
         mInversionState.type = type;
         // TODO: Add real icon assets.
-        mInversionState.iconId = enabled ? R.drawable.ic_qs_bluetooth_on
-                : R.drawable.ic_qs_bluetooth_off;
+        mInversionState.iconId = enabled ? R.drawable.ic_qs_inversion_on
+                : R.drawable.ic_qs_inversion_off;
         mInversionState.label = res.getString(R.string.quick_settings_inversion_label);
         mInversionCallback.refreshView(mInversionTile, mInversionState);
     }
@@ -1026,8 +1026,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mContrastState.contrast = contrast;
         mContrastState.brightness = brightness;
         // TODO: Add real icon assets.
-        mContrastState.iconId = enabled ? R.drawable.ic_qs_bluetooth_on
-                : R.drawable.ic_qs_bluetooth_off;
+        mContrastState.iconId = enabled ? R.drawable.ic_qs_contrast_on
+                : R.drawable.ic_qs_contrast_off;
         mContrastState.label = res.getString(R.string.quick_settings_contrast_label);
         mContrastCallback.refreshView(mContrastTile, mContrastState);
     }
@@ -1053,8 +1053,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mColorSpaceState.toggled = enabled;
         mColorSpaceState.type = type;
         // TODO: Add real icon assets.
-        mColorSpaceState.iconId = enabled ? R.drawable.ic_qs_bluetooth_on
-                : R.drawable.ic_qs_bluetooth_off;
+        mColorSpaceState.iconId = enabled ? R.drawable.ic_qs_color_space_on
+                : R.drawable.ic_qs_color_space_off;
         mColorSpaceState.label = res.getString(R.string.quick_settings_color_space_label);
         mColorSpaceCallback.refreshView(mColorSpaceTile, mColorSpaceState);
     }
