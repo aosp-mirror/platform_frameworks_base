@@ -808,6 +808,19 @@ struct ResTable_package
     uint32_t lastPublicKey;
 };
 
+// The most specific locale can consist of:
+//
+// - a 3 char language code
+// - a 3 char region code prefixed by a 'r'
+// - a 4 char script code prefixed by a 's'
+// - a 8 char variant code prefixed by a 'v'
+//
+// each separated by a single char separator, which sums up to a total of 24
+// chars, (25 include the string terminator) rounded up to 28 to be 4 byte
+// aligned.
+#define RESTABLE_MAX_LOCALE_LEN 28
+
+
 /**
  * Describes a particular resource configuration.
  */
@@ -828,10 +841,42 @@ struct ResTable_config
     
     union {
         struct {
-            // \0\0 means "any".  Otherwise, en, fr, etc.
+            // This field can take three different forms:
+            // - \0\0 means "any".
+            //
+            // - Two 7 bit ascii values interpreted as ISO-639-1 language
+            //   codes ('fr', 'en' etc. etc.). The high bit for both bytes is
+            //   zero.
+            //
+            // - A single 16 bit little endian packed value representing an
+            //   ISO-639-2 3 letter language code. This will be of the form:
+            //
+            //   {1, t, t, t, t, t, s, s, s, s, s, f, f, f, f, f}
+            //
+            //   bit[0, 4] = first letter of the language code
+            //   bit[5, 9] = second letter of the language code
+            //   bit[10, 14] = third letter of the language code.
+            //   bit[15] = 1 always
+            //
+            // For backwards compatibility, languages that have unambiguous
+            // two letter codes are represented in that format.
+            //
+            // The layout is always bigendian irrespective of the runtime
+            // architecture.
             char language[2];
             
-            // \0\0 means "any".  Otherwise, US, CA, etc.
+            // This field can take three different forms:
+            // - \0\0 means "any".
+            //
+            // - Two 7 bit ascii values interpreted as 2 letter region
+            //   codes ('US', 'GB' etc.). The high bit for both bytes is zero.
+            //
+            // - An UN M.49 3 digit region code. For simplicity, these are packed
+            //   in the same manner as the language codes, though we should need
+            //   only 10 bits to represent them, instead of the 15.
+            //
+            // The layout is always bigendian irrespective of the runtime
+            // architecture.
             char country[2];
         };
         uint32_t locale;
@@ -933,7 +978,7 @@ struct ResTable_config
         SDKVERSION_ANY = 0
     };
     
-    enum {
+  enum {
         MINORVERSION_ANY = 0
     };
     
@@ -1006,6 +1051,15 @@ struct ResTable_config
         uint32_t screenSizeDp;
     };
 
+    // The ISO-15924 short name for the script corresponding to this
+    // configuration. (eg. Hant, Latn, etc.). Interpreted in conjunction with
+    // the locale field
+    char localeScript[4];
+
+    // A single BCP-47 variant subtag. Will vary in length between 5 and 8
+    // chars. Interpreted in conjunction with the locale field.
+    char localeVariant[8];
+
     void copyFromDeviceNoSwap(const ResTable_config& o);
     
     void copyFromDtoH(const ResTable_config& o);
@@ -1063,7 +1117,33 @@ struct ResTable_config
     // settings is the requested settings
     bool match(const ResTable_config& settings) const;
 
-    void getLocale(char str[6]) const;
+    // Get the string representation of the locale component of this
+    // Config. This will contain the language along with the prefixed script,
+    // region and variant of this config, separated by underscores.
+    //
+    // 'r' is the region prefix, 's' is the script prefix and 'v' is the
+    // variant prefix.
+    //
+    // Example: en_rUS, en_sLatn_rUS, en_vPOSIX.
+    void getLocale(char str[RESTABLE_MAX_LOCALE_LEN]) const;
+    // Get the 2 or 3 letter language code of this configuration. Trailing
+    // bytes are set to '\0'.
+    size_t unpackLanguage(char language[4]) const;
+    // Get the 2 or 3 letter language code of this configuration. Trailing
+    // bytes are set to '\0'.
+    size_t unpackRegion(char region[4]) const;
+
+    // Sets the language code of this configuration from |language|. If |language|
+    // is a 2 letter code, the trailing byte is expected to be '\0'.
+    void packLanguage(const char language[3]);
+    // Sets the region code of this configuration from |region|. If |region|
+    // is a 2 letter code, the trailing byte is expected to be '\0'.
+    void packRegion(const char region[3]);
+
+    // Returns a positive integer if this config is more specific than |o|
+    // with respect to their locales, a negative integer if |o| is more specific
+    // and 0 if they're equally specific.
+    int isLocaleMoreSpecificThan(const ResTable_config &o) const;
 
     String8 toString() const;
 };
