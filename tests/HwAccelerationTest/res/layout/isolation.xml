@@ -15,7 +15,6 @@
             android:layout_width="0dp"
             android:layout_height="200dp"
             android:layout_weight="1"
-            android:isolatedZVolume="false"
             android:orientation="vertical">
             <TextView style="@style/TopLeftReorderTextView"/>
             <TextView style="@style/BottomLeftReorderTextView"/>
@@ -25,7 +24,6 @@
             android:layout_height="200dp"
             android:layout_weight="1"
             android:translationY="50dp"
-            android:isolatedZVolume="false"
             android:orientation="vertical">
             <TextView style="@style/TopRightReorderTextView"/>
             <TextView style="@style/BottomRightReorderTextView"/>
