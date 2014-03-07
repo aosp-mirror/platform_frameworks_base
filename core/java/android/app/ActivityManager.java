@@ -933,6 +933,16 @@ public class ActivityManager {
         }
     }
 
+    /** @hide */
+    public boolean isInHomeStack(int taskId) {
+        try {
+            return ActivityManagerNative.getDefault().isInHomeStack(taskId);
+        } catch (RemoteException e) {
+            // System dead, we will be dead too soon!
+            return false;
+        }
+    }
+
     /**
      * Flag for {@link #moveTaskToFront(int, int)}: also move the "home"
      * activity along with the task, so it is positioned immediately behind

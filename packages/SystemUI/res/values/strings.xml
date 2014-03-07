@@ -507,6 +507,9 @@
     <!-- QuickSettings: Label for the toggle that controls whether display color correction is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_color_space_label">Color correction mode</string>
 
+    <!-- Recents: The empty recents string. [CHAR LIMIT=NONE] -->
+    <string name="recents_empty_message">RECENTS</string>
+
 
     <!-- Glyph to be overlaid atop the battery when the level is extremely low. Do not translate. -->
     <string name="battery_meter_very_low_overlay_symbol">!</string>

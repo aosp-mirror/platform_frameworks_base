@@ -6,6 +6,11 @@
   public void setGlowAlpha(float);
   public void setGlowScale(float);
 }
+-keep class com.android.systemui.recents.views.TaskIconView {
+	public void setCircularClipRadius(float);
+	public float getCircularClipRadius();
+}
 
 -keep class com.android.systemui.statusbar.phone.PhoneStatusBar
 -keep class com.android.systemui.statusbar.tv.TvStatusBar
+-keep class com.android.systemui.recents.*

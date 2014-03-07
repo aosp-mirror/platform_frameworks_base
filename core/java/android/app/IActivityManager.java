@@ -122,6 +122,7 @@ public interface IActivityManager extends IInterface {
     public void resizeStack(int stackId, Rect bounds) throws RemoteException;
     public List<StackInfo> getAllStackInfos() throws RemoteException;
     public StackInfo getStackInfo(int stackId) throws RemoteException;
+    public boolean isInHomeStack(int taskId) throws RemoteException;
     public void setFocusedStack(int stackId) throws RemoteException;
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException;
     /* oneway */
@@ -717,4 +718,5 @@ public interface IActivityManager extends IInterface {
     // Start of L transactions
     int GET_TAG_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+210;
     int START_USER_IN_BACKGROUND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+211;
+    int IS_IN_HOME_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+212;
 }

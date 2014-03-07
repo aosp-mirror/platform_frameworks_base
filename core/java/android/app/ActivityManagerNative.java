@@ -654,6 +654,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case IS_IN_HOME_STACK_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int taskId = data.readInt();
+            boolean isInHomeStack = isInHomeStack(taskId);
+            reply.writeNoException();
+            reply.writeInt(isInHomeStack ? 1 : 0);
+            return true;
+        }
+
         case SET_FOCUSED_STACK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int stackId = data.readInt();
@@ -2831,6 +2840,19 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return info;
+    }
+    @Override
+    public boolean isInHomeStack(int taskId) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(taskId);
+        mRemote.transact(IS_IN_HOME_STACK_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean isInHomeStack = reply.readInt() > 0;
+        data.recycle();
+        reply.recycle();
+        return isInHomeStack;
     }
     @Override
     public void setFocusedStack(int stackId) throws RemoteException

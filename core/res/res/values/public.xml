@@ -2108,6 +2108,9 @@
   <public type="attr" name="requiredForProfile"/>
   <public type="attr" name="pinned" />
 
+  <public type="dimen" name="recents_thumbnail_height" />
+  <public type="dimen" name="recents_thumbnail_width" />
+
   <public type="id" name="shared_element_name" />
 
   <public type="style" name="Widget.Holo.FragmentBreadCrumbs" />
