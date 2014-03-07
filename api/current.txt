@@ -345,7 +345,7 @@ package android {
     field public static final int canRetrieveWindowContent = 16843653; // 0x1010385
     field public static final int candidatesTextStyleSpans = 16843312; // 0x1010230
     field public static final deprecated int capitalize = 16843113; // 0x1010169
-    field public static final int castsShadow = 16843775; // 0x10103ff
+    field public static final int castsShadow = 16843774; // 0x10103fe
     field public static final int category = 16843752; // 0x10103e8
     field public static final int centerBright = 16842956; // 0x10100cc
     field public static final int centerColor = 16843275; // 0x101020b
@@ -399,10 +399,10 @@ package android {
     field public static final int content = 16843355; // 0x101025b
     field public static final int contentAuthority = 16843408; // 0x1010290
     field public static final int contentDescription = 16843379; // 0x1010273
-    field public static final int controlX1 = 16843769; // 0x10103f9
-    field public static final int controlX2 = 16843771; // 0x10103fb
-    field public static final int controlY1 = 16843770; // 0x10103fa
-    field public static final int controlY2 = 16843772; // 0x10103fc
+    field public static final int controlX1 = 16843768; // 0x10103f8
+    field public static final int controlX2 = 16843770; // 0x10103fa
+    field public static final int controlY1 = 16843769; // 0x10103f9
+    field public static final int controlY2 = 16843771; // 0x10103fb
     field public static final int cropToPadding = 16843043; // 0x1010123
     field public static final int cursorVisible = 16843090; // 0x1010152
     field public static final int customNavigationLayout = 16843474; // 0x10102d2
@@ -636,7 +636,6 @@ package android {
     field public static final int isScrollContainer = 16843342; // 0x101024e
     field public static final int isSticky = 16843335; // 0x1010247
     field public static final int isolatedProcess = 16843689; // 0x10103a9
-    field public static final int isolatedZVolume = 16843768; // 0x10103f8
     field public static final int itemBackground = 16843056; // 0x1010130
     field public static final int itemIconDisabledAlpha = 16843057; // 0x1010131
     field public static final int itemPadding = 16843565; // 0x101032d
@@ -889,7 +888,7 @@ package android {
     field public static final int required = 16843406; // 0x101028e
     field public static final int requiredAccountType = 16843734; // 0x10103d6
     field public static final int requiredForAllUsers = 16843728; // 0x10103d0
-    field public static final int requiredForProfile = 16843776; // 0x1010400
+    field public static final int requiredForProfile = 16843775; // 0x10103ff
     field public static final int requiresFadingEdge = 16843685; // 0x10103a5
     field public static final int requiresSmallestWidthDp = 16843620; // 0x1010364
     field public static final int resizeMode = 16843619; // 0x1010363
@@ -960,7 +959,7 @@ package android {
     field public static final int shadowRadius = 16843108; // 0x1010164
     field public static final int shape = 16843162; // 0x101019a
     field public static final int shareInterpolator = 16843195; // 0x10101bb
-    field public static final int sharedElementName = 16843773; // 0x10103fd
+    field public static final int sharedElementName = 16843772; // 0x10103fc
     field public static final int sharedUserId = 16842763; // 0x101000b
     field public static final int sharedUserLabel = 16843361; // 0x1010261
     field public static final int shouldDisableView = 16843246; // 0x10101ee
@@ -1159,7 +1158,7 @@ package android {
     field public static final int transformPivotX = 16843552; // 0x1010320
     field public static final int transformPivotY = 16843553; // 0x1010321
     field public static final int transition = 16843743; // 0x10103df
-    field public static final int transitionGroup = 16843774; // 0x10103fe
+    field public static final int transitionGroup = 16843773; // 0x10103fd
     field public static final int transitionOrdering = 16843744; // 0x10103e0
     field public static final int translationX = 16843554; // 0x1010322
     field public static final int translationY = 16843555; // 0x1010323
@@ -29530,7 +29529,6 @@ package android.view {
     method public int getLayoutMode();
     method public android.animation.LayoutTransition getLayoutTransition();
     method public int getPersistentDrawingCache();
-    method public boolean hasIsolatedZVolume();
     method public int indexOfChild(android.view.View);
     method public final void invalidateChild(android.view.View, android.graphics.Rect);
     method public android.view.ViewParent invalidateChildInParent(int[], android.graphics.Rect);
@@ -29576,7 +29574,6 @@ package android.view {
     method public void setClipChildren(boolean);
     method public void setClipToPadding(boolean);
     method public void setDescendantFocusability(int);
-    method public void setIsolatedZVolume(boolean);
     method public void setLayoutAnimation(android.view.animation.LayoutAnimationController);
     method public void setLayoutAnimationListener(android.view.animation.Animation.AnimationListener);
     method public void setLayoutMode(int);
