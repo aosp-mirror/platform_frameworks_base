@@ -21,6 +21,7 @@
 #include <androidfw/Asset.h>
 #include <androidfw/ResourceTypes.h>
 #include <netinet/in.h>
+#include <stdio.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 
@@ -486,6 +487,12 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
             bitmapCreateFlags, ninePatchChunk, layoutBounds, -1);
 }
 
+// Need to buffer enough input to be able to rewind as much as might be read by a decoder
+// trying to determine the stream's format. Currently the most is 64, read by
+// SkImageDecoder_libwebp.
+// FIXME: Get this number from SkImageDecoder
+#define BYTES_TO_BUFFER 64
+
 static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteArray storage,
         jobject padding, jobject options) {
 
@@ -493,11 +500,8 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteA
     SkAutoTUnref<SkStream> stream(CreateJavaInputStreamAdaptor(env, is, storage));
 
     if (stream.get()) {
-        // Need to buffer enough input to be able to rewind as much as might be read by a decoder
-        // trying to determine the stream's format. Currently the most is 64, read by
-        // SkImageDecoder_libwebp.
-        // FIXME: Get this number from SkImageDecoder
-        SkAutoTUnref<SkStreamRewindable> bufferedStream(SkFrontBufferedStream::Create(stream, 64));
+        SkAutoTUnref<SkStreamRewindable> bufferedStream(
+                SkFrontBufferedStream::Create(stream, BYTES_TO_BUFFER));
         SkASSERT(bufferedStream.get() != NULL);
         // for now we don't allow purgeable with java inputstreams
         bitmap = doDecode(env, bufferedStream, padding, options, false, false);
@@ -518,27 +522,48 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
         return nullObjectReturn("fstat return -1");
     }
 
-    bool isPurgeable = optionsPurgeable(env, bitmapFactoryOptions);
-    bool isShareable = optionsShareable(env, bitmapFactoryOptions);
-    bool weOwnTheFD = false;
-    if (isPurgeable && isShareable) {
-        int newFD = ::dup(descriptor);
-        if (-1 != newFD) {
-            weOwnTheFD = true;
-            descriptor = newFD;
+    // Restore the descriptor's offset on exiting this function.
+    AutoFDSeek autoRestore(descriptor);
+
+    FILE* file = fdopen(descriptor, "r");
+    if (file == NULL) {
+        return nullObjectReturn("Could not open file");
+    }
+
+    SkAutoTUnref<SkFILEStream> fileStream(new SkFILEStream(file,
+                         SkFILEStream::kCallerRetains_Ownership));
+
+    SkAutoTUnref<SkStreamRewindable> stream;
+
+    // Retain the old behavior of allowing purgeable if both purgeable and
+    // shareable are set to true.
+    bool isPurgeable = optionsPurgeable(env, bitmapFactoryOptions)
+                       && optionsShareable(env, bitmapFactoryOptions);
+    if (isPurgeable) {
+        // Copy the stream, so the image can be decoded multiple times without
+        // continuing to modify the original file descriptor.
+        // Copy beginning from the current position.
+        const size_t fileSize = fileStream->getLength() - fileStream->getPosition();
+        void* buffer = sk_malloc_flags(fileSize, 0);
+        if (buffer == NULL) {
+            return nullObjectReturn("Could not make a copy for ashmem");
         }
+
+        SkAutoTUnref<SkData> data(SkData::NewFromMalloc(buffer, fileSize));
+
+        if (fileStream->read(buffer, fileSize) != fileSize) {
+            return nullObjectReturn("Could not read the file.");
+        }
+
+        stream.reset(new SkMemoryStream(data));
+    } else {
+        // Use a buffered stream. Although an SkFILEStream can be rewound, this
+        // ensures that SkImageDecoder::Factory never rewinds beyond the
+        // current position of the file descriptor.
+        stream.reset(SkFrontBufferedStream::Create(fileStream, BYTES_TO_BUFFER));
     }
 
-    SkAutoTUnref<SkData> data(SkData::NewFromFD(descriptor));
-    if (data.get() == NULL) {
-        return nullObjectReturn("NewFromFD failed in nativeDecodeFileDescriptor");
-    }
-    SkAutoTUnref<SkMemoryStream> stream(new SkMemoryStream(data));
-
-    /* Allow purgeable iff we own the FD, i.e., in the puregeable and
-       shareable case.
-    */
-    return doDecode(env, stream, padding, bitmapFactoryOptions, weOwnTheFD);
+    return doDecode(env, stream, padding, bitmapFactoryOptions, isPurgeable);
 }
 
 static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
