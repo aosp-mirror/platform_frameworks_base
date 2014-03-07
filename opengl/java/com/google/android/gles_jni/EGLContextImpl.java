@@ -21,13 +21,13 @@ import javax.microedition.khronos.opengles.GL;
 
 public class EGLContextImpl extends EGLContext {
     private GLImpl mGLContext;
-    int mEGLContext;
-    
-    public EGLContextImpl(int ctx) {
+    long mEGLContext;
+
+    public EGLContextImpl(long ctx) {
         mEGLContext = ctx;
         mGLContext = new GLImpl();
     }
- 
+
     @Override
     public GL getGL() {
         return mGLContext;
@@ -45,6 +45,12 @@ public class EGLContextImpl extends EGLContext {
 
     @Override
     public int hashCode() {
-        return mEGLContext;
+        /*
+         * Based on the algorithm suggested in
+         * http://developer.android.com/reference/java/lang/Object.html
+         */
+        int result = 17;
+        result = 31 * result + (int) (mEGLContext ^ (mEGLContext >>> 32));
+        return result;
     }
 }
