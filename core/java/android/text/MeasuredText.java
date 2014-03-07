@@ -98,10 +98,10 @@ class MeasuredText {
         mPos = 0;
 
         if (mWidths == null || mWidths.length < len) {
-            mWidths = new float[ArrayUtils.idealFloatArraySize(len)];
+            mWidths = ArrayUtils.newUnpaddedFloatArray(len);
         }
         if (mChars == null || mChars.length < len) {
-            mChars = new char[ArrayUtils.idealCharArraySize(len)];
+            mChars = ArrayUtils.newUnpaddedCharArray(len);
         }
         TextUtils.getChars(text, start, end, mChars, 0);
 
@@ -130,7 +130,7 @@ class MeasuredText {
             mEasy = true;
         } else {
             if (mLevels == null || mLevels.length < len) {
-                mLevels = new byte[ArrayUtils.idealByteArraySize(len)];
+                mLevels = ArrayUtils.newUnpaddedByteArray(len);
             }
             int bidiRequest;
             if (textDir == TextDirectionHeuristics.LTR) {

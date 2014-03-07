@@ -31,6 +31,7 @@ import android.text.style.ReplacementSpan;
 import android.text.style.TabStopSpan;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
 
 import java.util.Arrays;
 
@@ -403,14 +404,9 @@ public abstract class Layout {
                                 // construction
                                 if (mLineBackgroundSpans.spanStarts[j] >= end ||
                                         mLineBackgroundSpans.spanEnds[j] <= start) continue;
-                                if (spansLength == spans.length) {
-                                    // The spans array needs to be expanded
-                                    int newSize = ArrayUtils.idealObjectArraySize(2 * spansLength);
-                                    ParagraphStyle[] newSpans = new ParagraphStyle[newSize];
-                                    System.arraycopy(spans, 0, newSpans, 0, spansLength);
-                                    spans = newSpans;
-                                }
-                                spans[spansLength++] = mLineBackgroundSpans.spans[j];
+                                spans = GrowingArrayUtils.append(
+                                        spans, spansLength, mLineBackgroundSpans.spans[j]);
+                                spansLength++;
                             }
                         }
                     }

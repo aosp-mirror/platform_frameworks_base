@@ -21,6 +21,9 @@ import android.graphics.Paint;
 import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
+
+import libcore.util.EmptyArray;
 
 import java.lang.reflect.Array;
 
@@ -54,19 +57,17 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
         if (srclen < 0) throw new StringIndexOutOfBoundsException();
 
-        int len = ArrayUtils.idealCharArraySize(srclen + 1);
-        mText = new char[len];
+        mText = ArrayUtils.newUnpaddedCharArray(GrowingArrayUtils.growSize(srclen));
         mGapStart = srclen;
-        mGapLength = len - srclen;
+        mGapLength = mText.length - srclen;
 
         TextUtils.getChars(text, start, end, mText, 0);
 
         mSpanCount = 0;
-        int alloc = ArrayUtils.idealIntArraySize(0);
-        mSpans = new Object[alloc];
-        mSpanStarts = new int[alloc];
-        mSpanEnds = new int[alloc];
-        mSpanFlags = new int[alloc];
+        mSpans = EmptyArray.OBJECT;
+        mSpanStarts = EmptyArray.INT;
+        mSpanEnds = EmptyArray.INT;
+        mSpanFlags = EmptyArray.INT;
 
         if (text instanceof Spanned) {
             Spanned sp = (Spanned) text;
@@ -130,12 +131,14 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
     private void resizeFor(int size) {
         final int oldLength = mText.length;
-        final int newLength = ArrayUtils.idealCharArraySize(size + 1);
-        final int delta = newLength - oldLength;
-        if (delta == 0) return;
+        if (size + 1 <= oldLength) {
+            return;
+        }
 
-        char[] newText = new char[newLength];
+        char[] newText = ArrayUtils.newUnpaddedCharArray(GrowingArrayUtils.growSize(size));
         System.arraycopy(mText, 0, newText, 0, mGapStart);
+        final int newLength = newText.length;
+        final int delta = newLength - oldLength;
         final int after = oldLength - (mGapStart + mGapLength);
         System.arraycopy(mText, oldLength - after, newText, newLength - after, after);
         mText = newText;
@@ -679,28 +682,10 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             }
         }
 
-        if (mSpanCount + 1 >= mSpans.length) {
-            int newsize = ArrayUtils.idealIntArraySize(mSpanCount + 1);
-            Object[] newspans = new Object[newsize];
-            int[] newspanstarts = new int[newsize];
-            int[] newspanends = new int[newsize];
-            int[] newspanflags = new int[newsize];
-
-            System.arraycopy(mSpans, 0, newspans, 0, mSpanCount);
-            System.arraycopy(mSpanStarts, 0, newspanstarts, 0, mSpanCount);
-            System.arraycopy(mSpanEnds, 0, newspanends, 0, mSpanCount);
-            System.arraycopy(mSpanFlags, 0, newspanflags, 0, mSpanCount);
-
-            mSpans = newspans;
-            mSpanStarts = newspanstarts;
-            mSpanEnds = newspanends;
-            mSpanFlags = newspanflags;
-        }
-
-        mSpans[mSpanCount] = what;
-        mSpanStarts[mSpanCount] = start;
-        mSpanEnds[mSpanCount] = end;
-        mSpanFlags[mSpanCount] = flags;
+        mSpans = GrowingArrayUtils.append(mSpans, mSpanCount, what);
+        mSpanStarts = GrowingArrayUtils.append(mSpanStarts, mSpanCount, start);
+        mSpanEnds = GrowingArrayUtils.append(mSpanEnds, mSpanCount, end);
+        mSpanFlags = GrowingArrayUtils.append(mSpanFlags, mSpanCount, flags);
         mSpanCount++;
 
         if (send) sendSpanAdded(what, nstart, nend);
