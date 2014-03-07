@@ -380,6 +380,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final Rect mTmpNavigationFrame = new Rect();
 
     WindowState mTopFullscreenOpaqueWindowState;
+    boolean mHideWindowBehindKeyguard;
     boolean mTopIsFullscreen;
     boolean mForceStatusBar;
     boolean mForceStatusBarFromKeyguard;
@@ -3364,6 +3365,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void beginPostLayoutPolicyLw(int displayWidth, int displayHeight) {
         mTopFullscreenOpaqueWindowState = null;
+        mHideWindowBehindKeyguard = false;
         mForceStatusBar = false;
         mForceStatusBarFromKeyguard = false;
         mForcingShowNavBar = false;
@@ -3399,7 +3401,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (attrs.type == TYPE_KEYGUARD) {
                 mShowingLockscreen = true;
             }
-            boolean applyWindow = attrs.type >= FIRST_APPLICATION_WINDOW
+            boolean appWindow = attrs.type >= FIRST_APPLICATION_WINDOW
                     && attrs.type <= LAST_APPLICATION_WINDOW;
             if (attrs.type == TYPE_DREAM) {
                 // If the lockscreen was showing when the dream started then wait
@@ -3407,30 +3409,35 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (!mDreamingLockscreen
                         || (win.isVisibleLw() && win.hasDrawnLw())) {
                     mShowingDream = true;
-                    applyWindow = true;
+                    appWindow = true;
                 }
             }
-            if (applyWindow
-                    && attrs.x == 0 && attrs.y == 0
-                    && attrs.width == WindowManager.LayoutParams.MATCH_PARENT
-                    && attrs.height == WindowManager.LayoutParams.MATCH_PARENT) {
-                if (DEBUG_LAYOUT) Slog.v(TAG, "Fullscreen window: " + win);
-                mTopFullscreenOpaqueWindowState = win;
-                if ((attrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0) {
-                    if (DEBUG_LAYOUT) Slog.v(TAG, "Setting mHideLockScreen to true by win " + win);
-                    mHideLockScreen = true;
-                    mForceStatusBarFromKeyguard = false;
-                }
-                if ((attrs.flags & FLAG_DISMISS_KEYGUARD) != 0
-                        && mDismissKeyguard == DISMISS_KEYGUARD_NONE) {
-                    if (DEBUG_LAYOUT) Slog.v(TAG, "Setting mDismissKeyguard true by win " + win);
-                    mDismissKeyguard = mWinDismissingKeyguard == win ?
-                            DISMISS_KEYGUARD_CONTINUE : DISMISS_KEYGUARD_START;
-                    mWinDismissingKeyguard = win;
-                    mForceStatusBarFromKeyguard = mShowingLockscreen && isKeyguardSecure();
-                }
-                if ((attrs.flags & FLAG_ALLOW_LOCK_WHILE_SCREEN_ON) != 0) {
-                    mAllowLockscreenWhenOn = true;
+
+            final boolean showWhenLocked = (attrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
+            if (appWindow) {
+                if (attrs.x == 0 && attrs.y == 0
+                        && attrs.width == WindowManager.LayoutParams.MATCH_PARENT
+                        && attrs.height == WindowManager.LayoutParams.MATCH_PARENT) {
+                    if (DEBUG_LAYOUT) Slog.v(TAG, "Fullscreen window: " + win);
+                    mTopFullscreenOpaqueWindowState = win;
+                    if (showWhenLocked && !mHideWindowBehindKeyguard) {
+                        if (DEBUG_LAYOUT) Slog.v(TAG, "Setting mHideLockScreen to true by win " + win);
+                        mHideLockScreen = true;
+                        mForceStatusBarFromKeyguard = false;
+                    }
+                    if ((attrs.flags & FLAG_DISMISS_KEYGUARD) != 0
+                            && mDismissKeyguard == DISMISS_KEYGUARD_NONE) {
+                        if (DEBUG_LAYOUT) Slog.v(TAG, "Setting mDismissKeyguard true by win " + win);
+                        mDismissKeyguard = mWinDismissingKeyguard == win ?
+                                DISMISS_KEYGUARD_CONTINUE : DISMISS_KEYGUARD_START;
+                        mWinDismissingKeyguard = win;
+                        mForceStatusBarFromKeyguard = mShowingLockscreen && isKeyguardSecure();
+                    }
+                    if ((attrs.flags & FLAG_ALLOW_LOCK_WHILE_SCREEN_ON) != 0) {
+                        mAllowLockscreenWhenOn = true;
+                    }
+                } else if (!showWhenLocked) {
+                    mHideWindowBehindKeyguard = true;
                 }
             }
         }
@@ -3516,7 +3523,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguard != null) {
             if (localLOGV) Slog.v(TAG, "finishPostLayoutPolicyLw: mHideKeyguard="
                     + mHideLockScreen);
-            if (mDismissKeyguard != DISMISS_KEYGUARD_NONE && !mKeyguardDelegate.isSecure()) {
+            if (mDismissKeyguard != DISMISS_KEYGUARD_NONE && !isKeyguardSecure()) {
                 if (mKeyguard.hideLw(true)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
