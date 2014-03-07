@@ -1246,9 +1246,6 @@ public final class Parcel {
         } else if (v instanceof Parcelable[]) {
             writeInt(VAL_PARCELABLEARRAY);
             writeParcelableArray((Parcelable[]) v, 0);
-        } else if (v instanceof Object[]) {
-            writeInt(VAL_OBJECTARRAY);
-            writeArray((Object[]) v);
         } else if (v instanceof int[]) {
             writeInt(VAL_INTARRAY);
             writeIntArray((int[]) v);
@@ -1258,12 +1255,20 @@ public final class Parcel {
         } else if (v instanceof Byte) {
             writeInt(VAL_BYTE);
             writeInt((Byte) v);
-        } else if (v instanceof Serializable) {
-            // Must be last
-            writeInt(VAL_SERIALIZABLE);
-            writeSerializable((Serializable) v);
         } else {
-            throw new RuntimeException("Parcel: unable to marshal value " + v);
+            Class<?> clazz = v.getClass();
+            if (clazz.isArray() && clazz.getComponentType() == Object.class) {
+                // Only pure Object[] are written here, Other arrays of non-primitive types are
+                // handled by serialization as this does not record the component type.
+                writeInt(VAL_OBJECTARRAY);
+                writeArray((Object[]) v);
+            } else if (v instanceof Serializable) {
+                // Must be last
+                writeInt(VAL_SERIALIZABLE);
+                writeSerializable((Serializable) v);
+            } else {
+                throw new RuntimeException("Parcel: unable to marshal value " + v);
+            }
         }
     }
 
