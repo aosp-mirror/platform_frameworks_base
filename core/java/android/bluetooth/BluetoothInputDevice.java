@@ -79,6 +79,13 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_HANDSHAKE =
+        "android.bluetooth.input.profile.action.HANDSHAKE";
+
+    /**
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_REPORT =
         "android.bluetooth.input.profile.action.REPORT";
 
@@ -181,6 +188,11 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * @hide
      */
     public static final String EXTRA_REPORT = "android.bluetooth.BluetoothInputDevice.extra.REPORT";
+
+    /**
+     * @hide
+     */
+    public static final String EXTRA_STATUS = "android.bluetooth.BluetoothInputDevice.extra.STATUS";
 
     /**
      * @hide
@@ -608,7 +620,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * @hide
      */
     public boolean setReport(BluetoothDevice device, byte reportType, String report) {
-        if (DBG) log("setReport(" + device + "), reportType=" + reportType + " report=" + report);
+        if (VDBG) log("setReport(" + device + "), reportType=" + reportType + " report=" + report);
         if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.setReport(device, reportType, report);
