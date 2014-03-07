@@ -124,12 +124,18 @@ static void scaleNinePatchChunk(android::Res_png_9patch* chunk, float scale) {
 static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStreamRewindable* stream,
         int sampleSize, bool ditherImage) {
 
+    SkImageInfo bitmapInfo;
+    if (!bitmap->asImageInfo(&bitmapInfo)) {
+        ALOGW("bitmap has unknown configuration so no memory has been allocated");
+        return NULL;
+    }
+
     SkImageRef* pr;
     // only use ashmem for large images, since mmaps come at a price
     if (bitmap->getSize() >= 32 * 1024) {
-        pr = new SkImageRef_ashmem(stream, bitmap->config(), sampleSize);
+        pr = new SkImageRef_ashmem(bitmapInfo, stream, sampleSize);
     } else {
-        pr = new SkImageRef_GlobalPool(stream, bitmap->config(), sampleSize);
+        pr = new SkImageRef_GlobalPool(bitmapInfo, stream, sampleSize);
     }
     pr->setDitherImage(ditherImage);
     bitmap->setPixelRef(pr)->unref();
@@ -157,7 +163,7 @@ public:
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
         // accounts for scale in final allocation, using eventual size and config
         const int bytesPerPixel = SkBitmap::ComputeBytesPerPixel(
-                configForScaledOutput(bitmap->getConfig()));
+                configForScaledOutput(bitmap->config()));
         const int requestedSize = bytesPerPixel *
                 int(bitmap->width() * mScale + 0.5f) *
                 int(bitmap->height() * mScale + 0.5f);
@@ -191,8 +197,15 @@ public:
             return false;
         }
 
+        SkImageInfo bitmapInfo;
+        if (!bitmap->asImageInfo(&bitmapInfo)) {
+            ALOGW("unable to reuse a bitmap as the target has an unknown bitmap configuration");
+            return false;
+        }
+
         // Create a new pixelref with the new ctable that wraps the previous pixelref
-        SkPixelRef* pr = new AndroidPixelRef(*static_cast<AndroidPixelRef*>(mPixelRef), ctable);
+        SkPixelRef* pr = new AndroidPixelRef(*static_cast<AndroidPixelRef*>(mPixelRef),
+                bitmapInfo, bitmap->rowBytes(), ctable);
 
         bitmap->setPixelRef(pr)->unref();
         // since we're already allocated, we lockPixels right away
@@ -401,8 +414,11 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
         // TODO: avoid copying when scaled size equals decodingBitmap size
         SkBitmap::Config config = configForScaledOutput(decodingBitmap.config());
-        outputBitmap->setConfig(config, scaledWidth, scaledHeight);
-        outputBitmap->setIsOpaque(decodingBitmap.isOpaque());
+        // FIXME: If the alphaType is kUnpremul and the image has alpha, the
+        // colors may not be correct, since Skia does not yet support drawing
+        // to/from unpremultiplied bitmaps.
+        outputBitmap->setConfig(config, scaledWidth, scaledHeight, 0,
+                                decodingBitmap.alphaType());
         if (!outputBitmap->allocPixels(outputAllocator, NULL)) {
             return nullObjectReturn("allocation failed for scaled bitmap");
         }
@@ -414,7 +430,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         }
 
         SkPaint paint;
-        paint.setFilterBitmap(true);
+        paint.setFilterLevel(SkPaint::kLow_FilterLevel);
 
         SkCanvas canvas(*outputBitmap);
         canvas.scale(sx, sy);
@@ -541,7 +557,9 @@ static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
     } else {
         // since we know we'll be done with the asset when we return, we can
         // just use a simple wrapper
-        stream = new AssetStreamAdaptor(asset);
+        stream = new AssetStreamAdaptor(asset,
+                                        AssetStreamAdaptor::kNo_OwnAsset,
+                                        AssetStreamAdaptor::kNo_HasMemoryBase);
     }
     SkAutoUnref aur(stream);
     return doDecode(env, stream, padding, options, forcePurgeable, forcePurgeable);
