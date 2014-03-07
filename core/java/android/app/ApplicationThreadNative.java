@@ -627,6 +627,15 @@ public abstract class ApplicationThreadNative extends Binder
             reply.writeNoException();
             return true;
         }
+
+        case UPDATE_TIME_PREFS_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            byte is24Hour = data.readByte();
+            updateTimePrefs(is24Hour == (byte) 1);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -1264,6 +1273,15 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInterfaceToken(IApplicationThread.descriptor);
         provider.writeToParcel(data, 0);
         mRemote.transact(SCHEDULE_INSTALL_PROVIDER_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    @Override
+    public void updateTimePrefs(boolean is24Hour) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeByte(is24Hour ? (byte) 1 : (byte) 0);
+        mRemote.transact(UPDATE_TIME_PREFS_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 }
