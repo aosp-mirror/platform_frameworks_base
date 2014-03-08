@@ -578,6 +578,9 @@ public abstract class BatteryStats implements Parcelable {
         // The wake lock that was acquired at this point.
         public HistoryTag wakelockTag;
 
+        // Kernel wakeup reason at this point.
+        public HistoryTag wakeReasonTag;
+
         public static final int EVENT_FLAG_START = 0x8000;
         public static final int EVENT_FLAG_FINISH = 0x4000;
 
@@ -612,6 +615,7 @@ public abstract class BatteryStats implements Parcelable {
 
         // Pre-allocated objects.
         public final HistoryTag localWakelockTag = new HistoryTag();
+        public final HistoryTag localWakeReasonTag = new HistoryTag();
         public final HistoryTag localEventTag = new HistoryTag();
 
         public HistoryItem() {
@@ -645,6 +649,12 @@ public abstract class BatteryStats implements Parcelable {
             } else {
                 dest.writeInt(0);
             }
+            if (wakeReasonTag != null) {
+                dest.writeInt(1);
+                wakeReasonTag.writeToParcel(dest, flags);
+            } else {
+                dest.writeInt(0);
+            }
             dest.writeInt(eventCode);
             if (eventCode != EVENT_NONE) {
                 dest.writeInt(eventCode);
@@ -670,6 +680,12 @@ public abstract class BatteryStats implements Parcelable {
             } else {
                 wakelockTag = null;
             }
+            if (src.readInt() != 0) {
+                wakeReasonTag = localWakeReasonTag;
+                wakeReasonTag.readFromParcel(src);
+            } else {
+                wakeReasonTag = null;
+            }
             eventCode = src.readInt();
             if (eventCode != EVENT_NONE) {
                 eventTag = localEventTag;
@@ -689,6 +705,7 @@ public abstract class BatteryStats implements Parcelable {
             batteryVoltage = 0;
             states = 0;
             wakelockTag = null;
+            wakeReasonTag = null;
             eventCode = EVENT_NONE;
             eventTag = null;
         }
@@ -719,6 +736,12 @@ public abstract class BatteryStats implements Parcelable {
             } else {
                 wakelockTag = null;
             }
+            if (o.wakeReasonTag != null) {
+                wakeReasonTag = localWakeReasonTag;
+                wakeReasonTag.setTo(o.wakeReasonTag);
+            } else {
+                wakeReasonTag = null;
+            }
             eventCode = o.eventCode;
             if (o.eventTag != null) {
                 eventTag = localEventTag;
@@ -747,6 +770,14 @@ public abstract class BatteryStats implements Parcelable {
                     return false;
                 }
                 if (!wakelockTag.equals(o.wakelockTag)) {
+                    return false;
+                }
+            }
+            if (wakeReasonTag != o.wakeReasonTag) {
+                if (wakeReasonTag == null || o.wakeReasonTag == null) {
+                    return false;
+                }
+                if (!wakeReasonTag.equals(o.wakeReasonTag)) {
                     return false;
                 }
             }
@@ -1916,51 +1947,6 @@ public abstract class BatteryStats implements Parcelable {
         long fullWakeLockTimeTotalMicros = 0;
         long partialWakeLockTimeTotalMicros = 0;
 
-        final Comparator<TimerEntry> timerComparator = new Comparator<TimerEntry>() {
-            @Override
-            public int compare(TimerEntry lhs, TimerEntry rhs) {
-                long lhsTime = lhs.mTime;
-                long rhsTime = rhs.mTime;
-                if (lhsTime < rhsTime) {
-                    return 1;
-                }
-                if (lhsTime > rhsTime) {
-                    return -1;
-                }
-                return 0;
-            }
-        };
-
-        if (reqUid < 0) {
-            Map<String, ? extends BatteryStats.Timer> kernelWakelocks = getKernelWakelockStats();
-            if (kernelWakelocks.size() > 0) {
-                final ArrayList<TimerEntry> timers = new ArrayList<TimerEntry>();
-                for (Map.Entry<String, ? extends BatteryStats.Timer> ent : kernelWakelocks.entrySet()) {
-                    BatteryStats.Timer timer = ent.getValue();
-                    long totalTimeMillis = computeWakeLock(timer, rawRealtime, which);
-                    if (totalTimeMillis > 0) {
-                        timers.add(new TimerEntry(ent.getKey(), 0, timer, totalTimeMillis));
-                    }
-                }
-                Collections.sort(timers, timerComparator);
-                for (int i=0; i<timers.size(); i++) {
-                    TimerEntry timer = timers.get(i);
-                    String linePrefix = ": ";
-                    sb.setLength(0);
-                    sb.append(prefix);
-                    sb.append("  Kernel Wake lock ");
-                    sb.append(timer.mName);
-                    linePrefix = printWakeLock(sb, timer.mTimer, rawRealtime, null,
-                            which, linePrefix);
-                    if (!linePrefix.equals(": ")) {
-                        sb.append(" realtime");
-                        // Only print out wake locks that were held
-                        pw.println(sb.toString());
-                    }
-                }
-            }
-        }
-
         final ArrayList<TimerEntry> timers = new ArrayList<TimerEntry>();
 
         for (int iu = 0; iu < NU; iu++) {
@@ -2290,6 +2276,55 @@ public abstract class BatteryStats implements Parcelable {
             sb.append(")");
             pw.println(sb.toString());
             pw.println();
+        }
+
+        final Comparator<TimerEntry> timerComparator = new Comparator<TimerEntry>() {
+            @Override
+            public int compare(TimerEntry lhs, TimerEntry rhs) {
+                long lhsTime = lhs.mTime;
+                long rhsTime = rhs.mTime;
+                if (lhsTime < rhsTime) {
+                    return 1;
+                }
+                if (lhsTime > rhsTime) {
+                    return -1;
+                }
+                return 0;
+            }
+        };
+
+        if (reqUid < 0) {
+            Map<String, ? extends BatteryStats.Timer> kernelWakelocks = getKernelWakelockStats();
+            if (kernelWakelocks.size() > 0) {
+                final ArrayList<TimerEntry> ktimers = new ArrayList<TimerEntry>();
+                for (Map.Entry<String, ? extends BatteryStats.Timer> ent : kernelWakelocks.entrySet()) {
+                    BatteryStats.Timer timer = ent.getValue();
+                    long totalTimeMillis = computeWakeLock(timer, rawRealtime, which);
+                    if (totalTimeMillis > 0) {
+                        ktimers.add(new TimerEntry(ent.getKey(), 0, timer, totalTimeMillis));
+                    }
+                }
+                if (ktimers.size() > 0) {
+                    Collections.sort(ktimers, timerComparator);
+                    pw.print(prefix); pw.println("  All kernel wake locks:");
+                    for (int i=0; i<ktimers.size(); i++) {
+                        TimerEntry timer = ktimers.get(i);
+                        String linePrefix = ": ";
+                        sb.setLength(0);
+                        sb.append(prefix);
+                        sb.append("  Kernel Wake lock ");
+                        sb.append(timer.mName);
+                        linePrefix = printWakeLock(sb, timer.mTimer, rawRealtime, null,
+                                which, linePrefix);
+                        if (!linePrefix.equals(": ")) {
+                            sb.append(" realtime");
+                            // Only print out wake locks that were held
+                            pw.println(sb.toString());
+                        }
+                    }
+                    pw.println();
+                }
+            }
         }
 
         if (timers.size() > 0) {
@@ -2727,14 +2762,22 @@ public abstract class BatteryStats implements Parcelable {
         public void printNextItem(PrintWriter pw, HistoryItem rec, long now, boolean checkin) {
             if (!checkin) {
                 pw.print("  ");
-                TimeUtils.formatDuration(rec.time-now, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
+                if (now >= 0) {
+                    TimeUtils.formatDuration(rec.time-now, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
+                } else {
+                    TimeUtils.formatDuration(rec.time, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
+                }
                 pw.print(" (");
                 pw.print(rec.numReadInts);
                 pw.print(") ");
             } else {
                 if (lastTime < 0) {
-                    pw.print("@");
-                    pw.print(rec.time-now);
+                    if (now >= 0) {
+                        pw.print("@");
+                        pw.print(rec.time-now);
+                    } else {
+                        pw.print(rec.time);
+                    }
                 } else {
                     pw.print(rec.time-lastTime);
                 }
@@ -2858,6 +2901,18 @@ public abstract class BatteryStats implements Parcelable {
                 }
                 printBitDescriptions(pw, oldState, rec.states, rec.wakelockTag,
                         HISTORY_STATE_DESCRIPTIONS, !checkin);
+                if (rec.wakeReasonTag != null) {
+                    if (checkin) {
+                        pw.print(",Wr=");
+                        pw.print(rec.wakeReasonTag.poolIdx);
+                    } else {
+                        pw.print(" wake_reason=");
+                        pw.print(rec.wakeReasonTag.uid);
+                        pw.print(":\"");
+                        pw.print(rec.wakeReasonTag.string);
+                        pw.print("\"");
+                    }
+                }
                 if (rec.eventCode != HistoryItem.EVENT_NONE) {
                     pw.print(checkin ? "," : " ");
                     if ((rec.eventCode&HistoryItem.EVENT_FLAG_START) != 0) {
@@ -2918,108 +2973,130 @@ public abstract class BatteryStats implements Parcelable {
         pw.print(suffix);
     }
 
+    public static final int DUMP_UNPLUGGED_ONLY = 1<<0;
+    public static final int DUMP_CHARGED_ONLY = 1<<1;
+    public static final int DUMP_HISTORY_ONLY = 1<<2;
+    public static final int DUMP_INCLUDE_HISTORY = 1<<3;
+
     /**
      * Dumps a human-readable summary of the battery statistics to the given PrintWriter.
      *
      * @param pw a Printer to receive the dump output.
      */
     @SuppressWarnings("unused")
-    public void dumpLocked(Context context, PrintWriter pw, boolean isUnpluggedOnly, int reqUid,
-            boolean historyOnly) {
+    public void dumpLocked(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {
         prepareForDumpLocked();
 
-        long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
+        final boolean filtering =
+                (flags&(DUMP_HISTORY_ONLY|DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) != 0;
 
-        final HistoryItem rec = new HistoryItem();
-        final long historyTotalSize = getHistoryTotalSize();
-        final long historyUsedSize = getHistoryUsedSize();
-        if (startIteratingHistoryLocked()) {
-            try {
-                pw.print("Battery History (");
-                pw.print((100*historyUsedSize)/historyTotalSize);
-                pw.print("% used, ");
-                printSizeValue(pw, historyUsedSize);
-                pw.print(" used of ");
-                printSizeValue(pw, historyTotalSize);
-                pw.print(", ");
-                pw.print(getHistoryStringPoolSize());
-                pw.print(" strings using ");
-                printSizeValue(pw, getHistoryStringPoolBytes());
-                pw.println("):");
-                HistoryPrinter hprinter = new HistoryPrinter();
-                while (getNextHistoryLocked(rec)) {
-                    hprinter.printNextItem(pw, rec, now, false);
+        if ((flags&DUMP_HISTORY_ONLY) != 0 || !filtering) {
+            long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
+
+            final HistoryItem rec = new HistoryItem();
+            final long historyTotalSize = getHistoryTotalSize();
+            final long historyUsedSize = getHistoryUsedSize();
+            if (startIteratingHistoryLocked()) {
+                try {
+                    pw.print("Battery History (");
+                    pw.print((100*historyUsedSize)/historyTotalSize);
+                    pw.print("% used, ");
+                    printSizeValue(pw, historyUsedSize);
+                    pw.print(" used of ");
+                    printSizeValue(pw, historyTotalSize);
+                    pw.print(", ");
+                    pw.print(getHistoryStringPoolSize());
+                    pw.print(" strings using ");
+                    printSizeValue(pw, getHistoryStringPoolBytes());
+                    pw.println("):");
+                    HistoryPrinter hprinter = new HistoryPrinter();
+                    long lastTime = -1;
+                    while (getNextHistoryLocked(rec)) {
+                        lastTime = rec.time;
+                        if (rec.time >= histStart) {
+                            hprinter.printNextItem(pw, rec, histStart >= 0 ? -1 : now, false);
+                        }
+                    }
+                    if (histStart >= 0) {
+                        pw.print("  NEXT: "); pw.println(lastTime+1);
+                    }
+                    pw.println();
+                } finally {
+                    finishIteratingHistoryLocked();
                 }
-                pw.println();
-            } finally {
-                finishIteratingHistoryLocked();
+            }
+
+            if (startIteratingOldHistoryLocked()) {
+                try {
+                    pw.println("Old battery History:");
+                    HistoryPrinter hprinter = new HistoryPrinter();
+                    while (getNextOldHistoryLocked(rec)) {
+                        hprinter.printNextItem(pw, rec, now, false);
+                    }
+                    pw.println();
+                } finally {
+                    finishIteratingOldHistoryLocked();
+                }
             }
         }
 
-        if (startIteratingOldHistoryLocked()) {
-            try {
-                pw.println("Old battery History:");
-                HistoryPrinter hprinter = new HistoryPrinter();
-                while (getNextOldHistoryLocked(rec)) {
-                    hprinter.printNextItem(pw, rec, now, false);
-                }
-                pw.println();
-            } finally {
-                finishIteratingOldHistoryLocked();
-            }
-        }
-
-        if (historyOnly) {
+        if (filtering && (flags&(DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) == 0) {
             return;
         }
 
-        SparseArray<? extends Uid> uidStats = getUidStats();
-        final int NU = uidStats.size();
-        boolean didPid = false;
-        long nowRealtime = SystemClock.elapsedRealtime();
-        for (int i=0; i<NU; i++) {
-            Uid uid = uidStats.valueAt(i);
-            SparseArray<? extends Uid.Pid> pids = uid.getPidStats();
-            if (pids != null) {
-                for (int j=0; j<pids.size(); j++) {
-                    Uid.Pid pid = pids.valueAt(j);
-                    if (!didPid) {
-                        pw.println("Per-PID Stats:");
-                        didPid = true;
+        if (!filtering) {
+            SparseArray<? extends Uid> uidStats = getUidStats();
+            final int NU = uidStats.size();
+            boolean didPid = false;
+            long nowRealtime = SystemClock.elapsedRealtime();
+            for (int i=0; i<NU; i++) {
+                Uid uid = uidStats.valueAt(i);
+                SparseArray<? extends Uid.Pid> pids = uid.getPidStats();
+                if (pids != null) {
+                    for (int j=0; j<pids.size(); j++) {
+                        Uid.Pid pid = pids.valueAt(j);
+                        if (!didPid) {
+                            pw.println("Per-PID Stats:");
+                            didPid = true;
+                        }
+                        long time = pid.mWakeSum + (pid.mWakeStart != 0
+                                ? (nowRealtime - pid.mWakeStart) : 0);
+                        pw.print("  PID "); pw.print(pids.keyAt(j));
+                                pw.print(" wake time: ");
+                                TimeUtils.formatDuration(time, pw);
+                                pw.println("");
                     }
-                    long time = pid.mWakeSum + (pid.mWakeStart != 0
-                            ? (nowRealtime - pid.mWakeStart) : 0);
-                    pw.print("  PID "); pw.print(pids.keyAt(j));
-                            pw.print(" wake time: ");
-                            TimeUtils.formatDuration(time, pw);
-                            pw.println("");
                 }
             }
-        }
-        if (didPid) {
-            pw.println("");
+            if (didPid) {
+                pw.println("");
+            }
         }
 
-        if (!isUnpluggedOnly) {
+        if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
             pw.println("Statistics since last charge:");
             pw.println("  System starts: " + getStartCount()
                     + ", currently on battery: " + getIsOnBattery());
             dumpLocked(context, pw, "", STATS_SINCE_CHARGED, reqUid);
             pw.println("");
         }
-        pw.println("Statistics since last unplugged:");
-        dumpLocked(context, pw, "", STATS_SINCE_UNPLUGGED, reqUid);
+        if (!filtering || (flags&DUMP_UNPLUGGED_ONLY) != 0) {
+            pw.println("Statistics since last unplugged:");
+            dumpLocked(context, pw, "", STATS_SINCE_UNPLUGGED, reqUid);
+        }
     }
     
     @SuppressWarnings("unused")
-    public void dumpCheckinLocked(Context context,
-            PrintWriter pw, List<ApplicationInfo> apps, boolean isUnpluggedOnly,
-            boolean includeHistory, boolean historyOnly) {
+    public void dumpCheckinLocked(Context context, PrintWriter pw,
+            List<ApplicationInfo> apps, int flags, long histStart) {
         prepareForDumpLocked();
         
         long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
 
-        if (includeHistory || historyOnly) {
+        final boolean filtering =
+                (flags&(DUMP_HISTORY_ONLY|DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) != 0;
+
+        if ((flags&DUMP_INCLUDE_HISTORY) != 0 || (flags&DUMP_HISTORY_ONLY) != 0) {
             final HistoryItem rec = new HistoryItem();
             if (startIteratingHistoryLocked()) {
                 try {
@@ -3034,10 +3111,17 @@ public abstract class BatteryStats implements Parcelable {
                         pw.println();
                     }
                     HistoryPrinter hprinter = new HistoryPrinter();
+                    long lastTime = -1;
                     while (getNextHistoryLocked(rec)) {
-                        pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
-                        pw.print(HISTORY_DATA); pw.print(',');
-                        hprinter.printNextItem(pw, rec, now, true);
+                        lastTime = rec.time;
+                        if (rec.time >= histStart) {
+                            pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
+                            pw.print(HISTORY_DATA); pw.print(',');
+                            hprinter.printNextItem(pw, rec, histStart >= 0 ? -1 : now, true);
+                        }
+                    }
+                    if (histStart >= 0) {
+                        pw.print("NEXT: "); pw.println(lastTime+1);
                     }
                 } finally {
                     finishIteratingHistoryLocked();
@@ -3045,7 +3129,7 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
 
-        if (historyOnly) {
+        if (filtering && (flags&(DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) == 0) {
             return;
         }
 
@@ -3076,11 +3160,10 @@ public abstract class BatteryStats implements Parcelable {
                 }
             }
         }
-        if (isUnpluggedOnly) {
-            dumpCheckinLocked(context, pw, STATS_SINCE_UNPLUGGED, -1);
-        }
-        else {
+        if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
             dumpCheckinLocked(context, pw, STATS_SINCE_CHARGED, -1);
+        }
+        if (!filtering || (flags&DUMP_UNPLUGGED_ONLY) != 0) {
             dumpCheckinLocked(context, pw, STATS_SINCE_UNPLUGGED, -1);
         }
     }
