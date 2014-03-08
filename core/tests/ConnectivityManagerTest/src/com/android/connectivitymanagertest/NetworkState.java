@@ -101,9 +101,10 @@ public class NetworkState {
     }
 
     /*
-     * Transition from CONNECTED -> DISCONNECTED:
-     *    CONNECTED->DISCONNECTING->DISCONNECTED
-     * return false if any state transition is not valid and save a message in mReason
+     * Verifies state transition from CONNECTED->...-> DISCONNECTED.
+     *
+     * returns false if initial state or target state is not correct, or if there is
+     * any transition from DISCONNECTING/DISCONNECTED -> CONNECTED.
      */
     public boolean transitToDisconnection () {
         mReason = "states: " + printStates();
@@ -120,12 +121,12 @@ public class NetworkState {
         for (int i = 1; i < mStateDepository.size() - 1; i++) {
             State preState = mStateDepository.get(i-1);
             State curState = mStateDepository.get(i);
-            if ((preState == State.CONNECTED) && ((curState == State.DISCONNECTING) ||
+            if (preState == curState) {
+                continue;
+            } else if ((preState == State.CONNECTED) && ((curState == State.DISCONNECTING) ||
                     (curState == State.DISCONNECTED))) {
                 continue;
             } else if ((preState == State.DISCONNECTING) && (curState == State.DISCONNECTED)) {
-                continue;
-            } else if ((preState == State.DISCONNECTED) && (curState == State.DISCONNECTED)) {
                 continue;
             } else {
                 mReason += " Transition state from " + preState.toString() + " to " +
@@ -136,7 +137,12 @@ public class NetworkState {
         return true;
     }
 
-    // DISCONNECTED->CONNECTING->CONNECTED
+    /*
+     * Verifies state transition from DISCONNECTED->...-> CONNECTED.
+     *
+     * returns false if initial state or target state is not correct, or if there is
+     * any transition from CONNECED -> DISCONNECTED.
+     */
     public boolean transitToConnection() {
         mReason = "states: " + printStates();
         if (mStateDepository.get(0) != State.DISCONNECTED) {
@@ -152,14 +158,15 @@ public class NetworkState {
         for (int i = 1; i < mStateDepository.size(); i++) {
             State preState = mStateDepository.get(i-1);
             State curState = mStateDepository.get(i);
+            if (preState == curState) {
+                continue;
+            }
             if ((preState == State.DISCONNECTED) && ((curState == State.CONNECTING) ||
-                    (curState == State.CONNECTED) || (curState == State.DISCONNECTED))) {
+                    (curState == State.CONNECTED))) {
                 continue;
-            } else if ((preState == State.CONNECTING) && (curState == State.CONNECTED)) {
-                continue;
-            } else if ((preState == State.CONNECTED) && (curState == State.CONNECTED)) {
-                continue;
-            } else {
+             } else if ((preState == State.CONNECTING) && (curState == State.CONNECTED)) {
+                 continue;
+             } else {
                 mReason += " Transition state from " + preState.toString() + " to " +
                         curState.toString() + " is not valid.";
                 return false;
