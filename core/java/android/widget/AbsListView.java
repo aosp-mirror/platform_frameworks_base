@@ -2135,15 +2135,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mRecycler.markChildrenDirty();
         }
 
-        // TODO: Move somewhere sane. This doesn't belong in onLayout().
-        if (mFastScroll != null) {
-            mFastScroll.onItemCountChanged(childCount, mItemCount);
-        }
-
         layoutChildren();
         mInLayout = false;
 
         mOverscrollMax = (b - t) / OVERSCROLL_LIMIT_DIVISOR;
+
+        // TODO: Move somewhere sane. This doesn't belong in onLayout().
+        if (mFastScroll != null) {
+            mFastScroll.onItemCountChanged(getChildCount(), mItemCount);
+        }
     }
 
     /**
