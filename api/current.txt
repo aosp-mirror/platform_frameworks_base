@@ -26906,6 +26906,7 @@ package android.view {
     field public static final int KEYCODE_SHIFT_LEFT = 59; // 0x3b
     field public static final int KEYCODE_SHIFT_RIGHT = 60; // 0x3c
     field public static final int KEYCODE_SLASH = 76; // 0x4c
+    field public static final int KEYCODE_SLEEP = 223; // 0xdf
     field public static final int KEYCODE_SOFT_LEFT = 1; // 0x1
     field public static final int KEYCODE_SOFT_RIGHT = 2; // 0x2
     field public static final int KEYCODE_SPACE = 62; // 0x3e
@@ -26927,6 +26928,7 @@ package android.view {
     field public static final int KEYCODE_VOLUME_MUTE = 164; // 0xa4
     field public static final int KEYCODE_VOLUME_UP = 24; // 0x18
     field public static final int KEYCODE_W = 51; // 0x33
+    field public static final int KEYCODE_WAKEUP = 224; // 0xe0
     field public static final int KEYCODE_WINDOW = 171; // 0xab
     field public static final int KEYCODE_X = 52; // 0x34
     field public static final int KEYCODE_Y = 53; // 0x35
