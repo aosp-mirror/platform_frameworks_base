@@ -37,10 +37,15 @@ interface IBluetoothGatt {
     void unregisterClient(in int clientIf);
     void clientConnect(in int clientIf, in String address, in boolean isDirect);
     void clientDisconnect(in int clientIf, in String address);
-    void clientListen(in int clientIf, in boolean start);
-    void setAdvData(in int clientIf, in boolean setScanRsp, in boolean inclName,
-                            in boolean inclTxPower, in int minInterval, in int maxInterval,
-                            in int appearance, in byte[] manufacturerData);
+    void startAdvertising(in int appIf);
+    void stopAdvertising();
+    boolean setAdvServiceData(in byte[] serviceData);
+    byte[] getAdvServiceData();
+    boolean setAdvManufacturerCodeAndData(int manufactureCode, in byte[] manufacturerData);
+    byte[] getAdvManufacturerData();
+    List<ParcelUuid> getAdvServiceUuids();
+    void removeAdvManufacturerCodeAndData(int manufacturerCode);
+    boolean isAdvertising();
     void refreshDevice(in int clientIf, in String address);
     void discoverServices(in int clientIf, in String address);
     void readCharacteristic(in int clientIf, in String address, in int srvcType,
@@ -75,7 +80,7 @@ interface IBluetoothGatt {
     void serverDisconnect(in int serverIf, in String address);
     void beginServiceDeclaration(in int serverIf, in int srvcType,
                             in int srvcInstanceId, in int minHandles,
-                            in ParcelUuid srvcId);
+                            in ParcelUuid srvcId, boolean advertisePreferred);
     void addIncludedService(in int serverIf, in int srvcType,
                             in int srvcInstanceId, in ParcelUuid srvcId);
     void addCharacteristic(in int serverIf, in ParcelUuid charId,
