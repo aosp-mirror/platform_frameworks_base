@@ -87,7 +87,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 97 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 98 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -1712,7 +1712,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     static final int DELTA_STATE_FLAG           = 0x00100000;
     // Flag in delta int: a new full state2 int follows.
     static final int DELTA_STATE2_FLAG          = 0x00200000;
-    // Flag in delta int: contains a wakelock tag.
+    // Flag in delta int: contains a wakelock or wakeReason tag.
     static final int DELTA_WAKELOCK_FLAG        = 0x00400000;
     // Flag in delta int: contains an event description.
     static final int DELTA_EVENT_FLAG           = 0x00800000;
@@ -1759,7 +1759,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (stateIntChanged) {
             firstToken |= DELTA_STATE_FLAG;
         }
-        if (cur.wakelockTag != null) {
+        if (cur.wakelockTag != null || cur.wakeReasonTag != null) {
             firstToken |= DELTA_WAKELOCK_FLAG;
         }
         if (cur.eventCode != HistoryItem.EVENT_NONE) {
@@ -1795,11 +1795,24 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + " batteryPlugType=" + cur.batteryPlugType
                     + " states=0x" + Integer.toHexString(cur.states));
         }
-        if (cur.wakelockTag != null) {
-            int index = writeHistoryTag(cur.wakelockTag);
-            dest.writeInt(index);
-            if (DEBUG) Slog.i(TAG, "WRITE DELTA: wakelockTag=#" + cur.wakelockTag.poolIdx
-                + " " + cur.wakelockTag.uid + ":" + cur.wakelockTag.string);
+        if (cur.wakelockTag != null || cur.wakeReasonTag != null) {
+            int wakeLockIndex;
+            int wakeReasonIndex;
+            if (cur.wakelockTag != null) {
+                wakeLockIndex = writeHistoryTag(cur.wakelockTag);
+                if (DEBUG) Slog.i(TAG, "WRITE DELTA: wakelockTag=#" + cur.wakelockTag.poolIdx
+                    + " " + cur.wakelockTag.uid + ":" + cur.wakelockTag.string);
+            } else {
+                wakeLockIndex = 0xffff;
+            }
+            if (cur.wakeReasonTag != null) {
+                wakeReasonIndex = writeHistoryTag(cur.wakeReasonTag);
+                if (DEBUG) Slog.i(TAG, "WRITE DELTA: wakeReasonTag=#" + cur.wakeReasonTag.poolIdx
+                    + " " + cur.wakeReasonTag.uid + ":" + cur.wakeReasonTag.string);
+            } else {
+                wakeReasonIndex = 0xffff;
+            }
+            dest.writeInt((wakeReasonIndex<<16) | wakeLockIndex);
         }
         if (cur.eventCode != HistoryItem.EVENT_NONE) {
             int index = writeHistoryTag(cur.eventTag);
@@ -1905,14 +1918,29 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         if ((firstToken&DELTA_WAKELOCK_FLAG) != 0) {
-            cur.wakelockTag = cur.localWakelockTag;
-            int index = src.readInt();
-            readHistoryTag(index, cur.wakelockTag);
+            int indexes = src.readInt();
+            int wakeLockIndex = indexes&0xffff;
+            int wakeReasonIndex = (indexes>>16)&0xffff;
+            if (wakeLockIndex != 0xffff) {
+                cur.wakelockTag = cur.localWakelockTag;
+                readHistoryTag(wakeLockIndex, cur.wakelockTag);
+                if (DEBUG) Slog.i(TAG, "READ DELTA: wakelockTag=#" + cur.wakelockTag.poolIdx
+                    + " " + cur.wakelockTag.uid + ":" + cur.wakelockTag.string);
+            } else {
+                cur.wakelockTag = null;
+            }
+            if (wakeReasonIndex != 0xffff) {
+                cur.wakeReasonTag = cur.localWakeReasonTag;
+                readHistoryTag(wakeReasonIndex, cur.wakeReasonTag);
+                if (DEBUG) Slog.i(TAG, "READ DELTA: wakeReasonTag=#" + cur.wakeReasonTag.poolIdx
+                    + " " + cur.wakeReasonTag.uid + ":" + cur.wakeReasonTag.string);
+            } else {
+                cur.wakeReasonTag = null;
+            }
             cur.numReadInts += 1;
-            if (DEBUG) Slog.i(TAG, "READ DELTA: wakelockTag=#" + cur.wakelockTag.poolIdx
-                + " " + cur.wakelockTag.uid + ":" + cur.wakelockTag.string);
         } else {
             cur.wakelockTag = null;
+            cur.wakeReasonTag = null;
         }
 
         if ((firstToken&DELTA_EVENT_FLAG) != 0) {
@@ -1944,6 +1972,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (mHistoryBufferLastPos >= 0 && mHistoryLastWritten.cmd == HistoryItem.CMD_UPDATE
                 && timeDiff < 1000 && (diffStates&lastDiffStates) == 0
                 && (mHistoryLastWritten.wakelockTag == null || mHistoryCur.wakelockTag == null)
+                && (mHistoryLastWritten.wakeReasonTag == null || mHistoryCur.wakeReasonTag == null)
                 && (mHistoryLastWritten.eventCode == HistoryItem.EVENT_NONE
                         || mHistoryCur.eventCode == HistoryItem.EVENT_NONE)
                 && mHistoryLastWritten.batteryLevel == mHistoryCur.batteryLevel
@@ -1967,6 +1996,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (mHistoryLastWritten.wakelockTag != null) {
                 mHistoryCur.wakelockTag = mHistoryCur.localWakelockTag;
                 mHistoryCur.wakelockTag.setTo(mHistoryLastWritten.wakelockTag);
+            }
+            // If the last written history had a wake reason tag, we need to retain it.
+            // Note that the condition above made sure that we aren't in a case where
+            // both it and the current history item have a wakelock tag.
+            if (mHistoryLastWritten.wakeReasonTag != null) {
+                mHistoryCur.wakeReasonTag = mHistoryCur.localWakeReasonTag;
+                mHistoryCur.wakeReasonTag.setTo(mHistoryLastWritten.wakeReasonTag);
             }
             // If the last written history had an event, we need to retain it.
             // Note that the condition above made sure that we aren't in a case where
@@ -2016,6 +2052,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         writeHistoryDelta(mHistoryBuffer, mHistoryLastWritten, mHistoryLastLastWritten);
         mLastHistoryTime = curTime;
         mHistoryCur.wakelockTag = null;
+        mHistoryCur.wakeReasonTag = null;
         mHistoryCur.eventCode = HistoryItem.EVENT_NONE;
         mHistoryCur.eventTag = null;
         if (DEBUG_HISTORY) Slog.i(TAG, "Writing history buffer: was " + mHistoryBufferLastPos
@@ -2302,6 +2339,16 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<N; i++) {
             noteStopWakeLocked(ws.get(i), pid, name, type);
         }
+    }
+
+    public void noteWakeupReasonLocked(int irq, String reason) {
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        if (DEBUG_HISTORY) Slog.v(TAG, "Wakeup reason irq #" + irq + "\"" + reason +"\": "
+                + Integer.toHexString(mHistoryCur.states));
+        mHistoryCur.wakeReasonTag = mHistoryCur.localWakeReasonTag;
+        mHistoryCur.wakeReasonTag.string = reason;
+        mHistoryCur.wakeReasonTag.uid = irq;
+        addHistoryRecordLocked(elapsedRealtime);
     }
 
     public int startAddingCpuLocked() {
@@ -7219,8 +7266,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         pullPendingStateUpdatesLocked();
     }
 
-    public void dumpLocked(Context context, PrintWriter pw, boolean isUnpluggedOnly, int reqUid,
-            boolean historyOnly) {
+    public void dumpLocked(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {
         if (DEBUG) {
             pw.println("mOnBatteryTimeBase:");
             mOnBatteryTimeBase.dump(pw, "  ");
@@ -7264,6 +7310,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mBluetoothStateTimer[i].logState(pr, "  ");
             }
         }
-        super.dumpLocked(context, pw, isUnpluggedOnly, reqUid, historyOnly);
+        super.dumpLocked(context, pw, flags, reqUid, histStart);
     }
 }

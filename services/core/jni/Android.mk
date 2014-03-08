@@ -6,6 +6,7 @@ LOCAL_CFLAGS += -Wno-unused-parameter
 
 LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/com_android_server_AlarmManagerService.cpp \
+    $(LOCAL_REL_DIR)/com_android_server_am_BatteryStatsService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_AssetAtlasService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_ConsumerIrService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_dreams_McuHal.cpp \
