@@ -435,6 +435,7 @@ enum {
     LARGEST_WIDTH_LIMIT_DP_ATTR = 0x01010366,
     PUBLIC_KEY_ATTR = 0x010103a6,
     CATEGORY_ATTR = 0x010103e8,
+    BANNER_ATTR = 0x10103f2,
 };
 
 String8 getComponentName(String8 &pkgName, String8 &componentName) {
@@ -762,6 +763,7 @@ int doDump(Bundle* bundle)
             bool withinActivity = false;
             bool isMainActivity = false;
             bool isLauncherActivity = false;
+            bool isLeanbackLauncherActivity = false;
             bool isSearchable = false;
             bool withinApplication = false;
             bool withinSupportsInput = false;
@@ -872,6 +874,7 @@ int doDump(Bundle* bundle)
             String8 activityName;
             String8 activityLabel;
             String8 activityIcon;
+            String8 activityBanner;
             String8 receiverName;
             String8 serviceName;
             Vector<String8> supportedInput;
@@ -896,16 +899,29 @@ int doDump(Bundle* bundle)
                         withinApplication = false;
                         withinSupportsInput = false;
                     } else if (depth < 3) {
-                        if (withinActivity && isMainActivity && isLauncherActivity) {
+                        if (withinActivity && isMainActivity) {
                             String8 aName(getComponentName(pkg, activityName));
-                            printf("launchable-activity:");
-                            if (aName.length() > 0) {
-                                printf(" name='%s' ",
-                                        ResTable::normalizeForOutput(aName.string()).string());
+                            if (isLauncherActivity) {
+                                printf("launchable-activity:");
+                                if (aName.length() > 0) {
+                                    printf(" name='%s' ",
+                                            ResTable::normalizeForOutput(aName.string()).string());
+                                }
+                                printf(" label='%s' icon='%s'\n",
+                                        ResTable::normalizeForOutput(activityLabel.string()).string(),
+                                        ResTable::normalizeForOutput(activityIcon.string()).string());
                             }
-                            printf(" label='%s' icon='%s'\n",
-                                    ResTable::normalizeForOutput(activityLabel.string()).string(),
-                                    ResTable::normalizeForOutput(activityIcon.string()).string());
+                            if (isLeanbackLauncherActivity) {
+                                printf("leanback-launchable-activity:");
+                                if (aName.length() > 0) {
+                                    printf(" name='%s' ",
+                                            ResTable::normalizeForOutput(aName.string()).string());
+                                }
+                                printf(" label='%s' icon='%s' banner='%s'\n",
+                                        ResTable::normalizeForOutput(activityLabel.string()).string(),
+                                        ResTable::normalizeForOutput(activityIcon.string()).string(),
+                                        ResTable::normalizeForOutput(activityBanner.string()).string());
+                            }
                         }
                         if (!hasIntentFilter) {
                             hasOtherActivities |= withinActivity;
@@ -923,7 +939,7 @@ int doDump(Bundle* bundle)
                         withinService = false;
                         withinReceiver = false;
                         hasIntentFilter = false;
-                        isMainActivity = isLauncherActivity = false;
+                        isMainActivity = isLauncherActivity = isLeanbackLauncherActivity = false;
                     } else if (depth < 4) {
                         if (withinIntentFilter) {
                             if (withinActivity) {
@@ -1329,6 +1345,13 @@ int doDump(Bundle* bundle)
                                 goto bail;
                             }
 
+                            activityBanner = getResolvedAttribute(&res, tree, BANNER_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:banner' attribute: %s\n",
+                                        error.string());
+                                goto bail;
+                            }
+
                             int32_t orien = getResolvedIntegerAttribute(&res, tree,
                                     SCREEN_ORIENTATION_ATTR, &error);
                             if (error == "") {
@@ -1538,6 +1561,8 @@ int doDump(Bundle* bundle)
                         if (withinActivity) {
                             if (category == "android.intent.category.LAUNCHER") {
                                 isLauncherActivity = true;
+                            } else if (category == "android.intent.category.LEANBACK_LAUNCHER") {
+                                isLeanbackLauncherActivity = true;
                             }
                         }
                     }
