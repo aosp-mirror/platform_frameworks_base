@@ -10927,9 +10927,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Set to true to enable this View to cast shadows.
      * <p>
      * If enabled, and the View has a z translation greater than 0, or is
-     * rotated in 3D, the shadow will be cast onto the current
-     * {@link ViewGroup#setIsolatedZVolume(boolean) isolated Z volume},
-     * at the z = 0 plane.
+     * rotated in 3D, the shadow will be cast onto its parent at the z = 0
+     * plane.
      * <p>
      * The shape of the shadow being cast is defined by the
      * {@link #setOutline(Path) outline} of the view, or the rectangular bounds
