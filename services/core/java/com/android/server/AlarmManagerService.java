@@ -426,8 +426,10 @@ class AlarmManagerService extends SystemService {
         final Pair<String, ComponentName> mTarget;
         final BroadcastStats mBroadcastStats;
         final FilterStats mFilterStats;
+        final int mAlarmType;
 
-        InFlight(AlarmManagerService service, PendingIntent pendingIntent, WorkSource workSource) {
+        InFlight(AlarmManagerService service, PendingIntent pendingIntent, WorkSource workSource,
+                int alarmType) {
             mPendingIntent = pendingIntent;
             mWorkSource = workSource;
             Intent intent = pendingIntent.getIntent();
@@ -441,6 +443,7 @@ class AlarmManagerService extends SystemService {
                 mBroadcastStats.filterStats.put(mTarget, fs);
             }
             mFilterStats = fs;
+            mAlarmType = alarmType;
         }
     }
 
@@ -1280,17 +1283,12 @@ class AlarmManagerService extends SystemService {
                             
                             // we have an active broadcast so stay awake.
                             if (mBroadcastRefCount == 0) {
-                                setWakelockWorkSource(alarm.operation, alarm.workSource);
-                                mWakeLock.setUnimportantForLogging(
-                                        alarm.operation == mTimeTickSender);
-                                mWakeLock.setHistoryTag(alarm.operation.getTag(
-                                        alarm.type == ELAPSED_REALTIME_WAKEUP
-                                                || alarm.type == RTC_WAKEUP
-                                                ? "*walarm*:" : "*alarm*:"));
+                                setWakelockWorkSource(alarm.operation, alarm.workSource,
+                                        alarm.type, true);
                                 mWakeLock.acquire();
                             }
                             final InFlight inflight = new InFlight(AlarmManagerService.this,
-                                    alarm.operation, alarm.workSource);
+                                    alarm.operation, alarm.workSource, alarm.type);
                             mInFlight.add(inflight);
                             mBroadcastRefCount++;
 
@@ -1345,9 +1343,17 @@ class AlarmManagerService extends SystemService {
      * @param pi PendingIntent to attribute blame to if ws is null.
      * @param ws WorkSource to attribute blame.
      */
-    void setWakelockWorkSource(PendingIntent pi, WorkSource ws) {
+    void setWakelockWorkSource(PendingIntent pi, WorkSource ws, int type, boolean first) {
         try {
+            mWakeLock.setUnimportantForLogging(pi == mTimeTickSender);
             if (ws != null) {
+                if (first) {
+                    mWakeLock.setHistoryTag(pi.getTag(
+                            type == ELAPSED_REALTIME_WAKEUP || type == RTC_WAKEUP
+                                    ? "*walarm*:" : "*alarm*:"));
+                } else {
+                    mWakeLock.setHistoryTag(null);
+                }
                 mWakeLock.setWorkSource(ws);
                 return;
             }
@@ -1355,6 +1361,7 @@ class AlarmManagerService extends SystemService {
             final int uid = ActivityManagerNative.getDefault()
                     .getUidForIntentSender(pi.getTarget());
             if (uid >= 0) {
+                mWakeLock.setHistoryTag(null);
                 mWakeLock.setWorkSource(new WorkSource(uid));
                 return;
             }
@@ -1579,7 +1586,8 @@ class AlarmManagerService extends SystemService {
                     // the next of our alarms is now in flight.  reattribute the wakelock.
                     if (mInFlight.size() > 0) {
                         InFlight inFlight = mInFlight.get(0);
-                        setWakelockWorkSource(inFlight.mPendingIntent, inFlight.mWorkSource);
+                        setWakelockWorkSource(inFlight.mPendingIntent, inFlight.mWorkSource,
+                                inFlight.mAlarmType, false);
                     } else {
                         // should never happen
                         mLog.w("Alarm wakelock still held but sent queue empty");

@@ -343,8 +343,9 @@ public abstract class BatteryStats implements Parcelable {
         }
 
         public class Pid {
-            public long mWakeSum;
-            public long mWakeStart;
+            public int mWakeNesting;
+            public long mWakeSumMs;
+            public long mWakeStartMs;
         }
 
         /**
@@ -515,7 +516,8 @@ public abstract class BatteryStats implements Parcelable {
         public static final byte CMD_UPDATE = 0;        // These can be written as deltas
         public static final byte CMD_NULL = -1;
         public static final byte CMD_START = 4;
-        public static final byte CMD_OVERFLOW = 5;
+        public static final byte CMD_CURRENT_TIME = 5;
+        public static final byte CMD_OVERFLOW = 6;
 
         public byte cmd = CMD_NULL;
         
@@ -610,6 +612,9 @@ public abstract class BatteryStats implements Parcelable {
         public int eventCode;
         public HistoryTag eventTag;
 
+        // Only set for CMD_CURRENT_TIME.
+        public long currentTime;
+
         // Meta-data when reading.
         public int numReadInts;
 
@@ -637,28 +642,27 @@ public abstract class BatteryStats implements Parcelable {
                     | ((((int)batteryLevel)<<8)&0xff00)
                     | ((((int)batteryStatus)<<16)&0xf0000)
                     | ((((int)batteryHealth)<<20)&0xf00000)
-                    | ((((int)batteryPlugType)<<24)&0xf000000);
+                    | ((((int)batteryPlugType)<<24)&0xf000000)
+                    | (wakelockTag != null ? 0x10000000 : 0)
+                    | (wakeReasonTag != null ? 0x20000000 : 0)
+                    | (eventCode != EVENT_NONE ? 0x40000000 : 0);
             dest.writeInt(bat);
             bat = (((int)batteryTemperature)&0xffff)
                     | ((((int)batteryVoltage)<<16)&0xffff0000);
             dest.writeInt(bat);
             dest.writeInt(states);
             if (wakelockTag != null) {
-                dest.writeInt(1);
                 wakelockTag.writeToParcel(dest, flags);
-            } else {
-                dest.writeInt(0);
             }
             if (wakeReasonTag != null) {
-                dest.writeInt(1);
                 wakeReasonTag.writeToParcel(dest, flags);
-            } else {
-                dest.writeInt(0);
             }
-            dest.writeInt(eventCode);
             if (eventCode != EVENT_NONE) {
                 dest.writeInt(eventCode);
                 eventTag.writeToParcel(dest, flags);
+            }
+            if (cmd == CMD_CURRENT_TIME) {
+                dest.writeLong(currentTime);
             }
         }
 
@@ -670,26 +674,34 @@ public abstract class BatteryStats implements Parcelable {
             batteryStatus = (byte)((bat>>16)&0xf);
             batteryHealth = (byte)((bat>>20)&0xf);
             batteryPlugType = (byte)((bat>>24)&0xf);
-            bat = src.readInt();
-            batteryTemperature = (short)(bat&0xffff);
-            batteryVoltage = (char)((bat>>16)&0xffff);
+            int bat2 = src.readInt();
+            batteryTemperature = (short)(bat2&0xffff);
+            batteryVoltage = (char)((bat2>>16)&0xffff);
             states = src.readInt();
-            if (src.readInt() != 0) {
+            if ((bat&0x10000000) != 0) {
                 wakelockTag = localWakelockTag;
                 wakelockTag.readFromParcel(src);
             } else {
                 wakelockTag = null;
             }
-            if (src.readInt() != 0) {
+            if ((bat&0x20000000) != 0) {
                 wakeReasonTag = localWakeReasonTag;
                 wakeReasonTag.readFromParcel(src);
             } else {
                 wakeReasonTag = null;
             }
-            eventCode = src.readInt();
-            if (eventCode != EVENT_NONE) {
+            if ((bat&0x40000000) != 0) {
+                eventCode = src.readInt();
                 eventTag = localEventTag;
                 eventTag.readFromParcel(src);
+            } else {
+                eventCode = EVENT_NONE;
+                eventTag = null;
+            }
+            if (cmd == CMD_CURRENT_TIME) {
+                currentTime = src.readLong();
+            } else {
+                currentTime = 0;
             }
             numReadInts += (src.dataPosition()-start)/4;
         }
@@ -749,6 +761,7 @@ public abstract class BatteryStats implements Parcelable {
             } else {
                 eventTag = null;
             }
+            currentTime = o.currentTime;
         }
 
         public boolean sameNonEvent(HistoryItem o) {
@@ -758,7 +771,8 @@ public abstract class BatteryStats implements Parcelable {
                     && batteryPlugType == o.batteryPlugType
                     && batteryTemperature == o.batteryTemperature
                     && batteryVoltage == o.batteryVoltage
-                    && states == o.states;
+                    && states == o.states
+                    && currentTime == o.currentTime;
         }
 
         public boolean same(HistoryItem o) {
@@ -2788,6 +2802,18 @@ public abstract class BatteryStats implements Parcelable {
                     pw.print(":");
                 }
                 pw.println("START");
+            } else if (rec.cmd == HistoryItem.CMD_CURRENT_TIME) {
+                if (checkin) {
+                    pw.print(":");
+                }
+                pw.print("TIME:");
+                if (checkin) {
+                    pw.println(rec.currentTime);
+                } else {
+                    pw.print(" ");
+                    pw.println(DateFormat.format("yyyy-MM-dd-HH-mm-ss",
+                            rec.currentTime).toString());
+                }
             } else if (rec.cmd == HistoryItem.CMD_OVERFLOW) {
                 if (checkin) {
                     pw.print(":");
@@ -2941,8 +2967,8 @@ public abstract class BatteryStats implements Parcelable {
                     }
                 }
                 pw.println();
+                oldState = rec.states;
             }
-            oldState = rec.states;
         }
     }
 
@@ -3059,8 +3085,8 @@ public abstract class BatteryStats implements Parcelable {
                             pw.println("Per-PID Stats:");
                             didPid = true;
                         }
-                        long time = pid.mWakeSum + (pid.mWakeStart != 0
-                                ? (nowRealtime - pid.mWakeStart) : 0);
+                        long time = pid.mWakeSumMs + (pid.mWakeNesting > 0
+                                ? (nowRealtime - pid.mWakeStartMs) : 0);
                         pw.print("  PID "); pw.print(pids.keyAt(j));
                                 pw.print(" wake time: ");
                                 TimeUtils.formatDuration(time, pw);

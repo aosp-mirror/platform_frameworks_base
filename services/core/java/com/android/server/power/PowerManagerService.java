@@ -646,9 +646,9 @@ public final class PowerManagerService extends com.android.server.SystemService
                 wakeLock = mWakeLocks.get(index);
                 if (!wakeLock.hasSameProperties(flags, tag, ws, uid, pid)) {
                     // Update existing wake lock.  This shouldn't happen but is harmless.
-                    notifyWakeLockReleasedLocked(wakeLock);
+                    notifyWakeLockChangingLocked(wakeLock, flags, tag, packageName,
+                            uid, pid, ws, historyTag);
                     wakeLock.updateProperties(flags, tag, packageName, ws, historyTag, uid, pid);
-                    notifyWakeLockAcquiredLocked(wakeLock);
                 }
             } else {
                 wakeLock = new WakeLock(lock, flags, tag, packageName, ws, historyTag, uid, pid);
@@ -765,9 +765,10 @@ public final class PowerManagerService extends com.android.server.SystemService
             }
 
             if (!wakeLock.hasSameWorkSource(ws)) {
-                notifyWakeLockReleasedLocked(wakeLock);
+                notifyWakeLockChangingLocked(wakeLock, wakeLock.mFlags, wakeLock.mTag,
+                        wakeLock.mPackageName, wakeLock.mOwnerUid, wakeLock.mOwnerPid,
+                        ws, wakeLock.mHistoryTag);
                 wakeLock.updateWorkSource(ws);
-                notifyWakeLockAcquiredLocked(wakeLock);
             }
         }
     }
@@ -788,6 +789,15 @@ public final class PowerManagerService extends com.android.server.SystemService
             mNotifier.onWakeLockAcquired(wakeLock.mFlags, wakeLock.mTag, wakeLock.mPackageName,
                     wakeLock.mOwnerUid, wakeLock.mOwnerPid, wakeLock.mWorkSource,
                     wakeLock.mHistoryTag);
+        }
+    }
+
+    private void notifyWakeLockChangingLocked(WakeLock wakeLock, int flags, String tag,
+            String packageName, int uid, int pid, WorkSource ws, String historyTag) {
+        if (mSystemReady && wakeLock.mNotifiedAcquired) {
+            mNotifier.onWakeLockChanging(wakeLock.mFlags, wakeLock.mTag, wakeLock.mPackageName,
+                    wakeLock.mOwnerUid, wakeLock.mOwnerPid, wakeLock.mWorkSource,
+                    wakeLock.mHistoryTag, flags, tag, packageName, uid, pid, ws, historyTag);
         }
     }
 
