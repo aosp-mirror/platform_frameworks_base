@@ -5,7 +5,7 @@
 #
 
 # This tool is prebuilt if we're doing an app-only build.
-ifeq ($(TARGET_BUILD_APPS),)
+ifeq ($(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)),)
 
 
 aapt_src_files := \
@@ -101,4 +101,4 @@ LOCAL_STATIC_LIBRARIES := \
 include $(BUILD_EXECUTABLE)
 endif
 
-endif # TARGET_BUILD_APPS
+endif # No TARGET_BUILD_APPS or TARGET_BUILD_PDK
