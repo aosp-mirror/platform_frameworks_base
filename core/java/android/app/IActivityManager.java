@@ -424,6 +424,18 @@ public interface IActivityManager extends IInterface {
 
     public IBinder getHomeActivityToken() throws RemoteException;
 
+    /** @hide */
+    public void startLockTaskMode(int taskId) throws RemoteException;
+
+    /** @hide */
+    public void startLockTaskMode(IBinder token) throws RemoteException;
+
+    /** @hide */
+    public void stopLockTaskMode() throws RemoteException;
+
+    /** @hide */
+    public boolean isInLockTaskMode() throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -719,4 +731,8 @@ public interface IActivityManager extends IInterface {
     int GET_TAG_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+210;
     int START_USER_IN_BACKGROUND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+211;
     int IS_IN_HOME_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+212;
+    int START_LOCK_TASK_BY_TASK_ID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+213;
+    int START_LOCK_TASK_BY_TOKEN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+214;
+    int STOP_LOCK_TASK_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+215;
+    int IS_IN_LOCK_TASK_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+216;
 }

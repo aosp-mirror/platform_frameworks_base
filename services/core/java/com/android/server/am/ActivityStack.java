@@ -36,8 +36,6 @@ import static com.android.server.am.ActivityStackSupervisor.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_STATES;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
-import android.os.Trace;
-import android.util.Log;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
@@ -2478,13 +2476,14 @@ final class ActivityStack {
         }
 
         r.makeFinishing();
+        final TaskRecord task = r.task;
         EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
                 r.userId, System.identityHashCode(r),
-                r.task.taskId, r.shortComponentName, reason);
-        final ArrayList<ActivityRecord> activities = r.task.mActivities;
+                task.taskId, r.shortComponentName, reason);
+        final ArrayList<ActivityRecord> activities = task.mActivities;
         final int index = activities.indexOf(r);
         if (index < (activities.size() - 1)) {
-            r.task.setFrontOfTask();
+            task.setFrontOfTask();
             if ((r.intent.getFlags()&Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
                 // If the caller asked that this activity (and all above it)
                 // be cleared when the task is reset, don't lose that information,
@@ -2524,6 +2523,9 @@ final class ActivityStack {
                 startPausingLocked(false, false);
             }
 
+            if (endTask) {
+                mStackSupervisor.endLockTaskModeIfTaskEnding(task);
+            }
         } else if (r.state != ActivityState.PAUSING) {
             // If the activity is PAUSING, we will complete the finish once
             // it is done pausing; else we can just directly finish it here.
@@ -3088,23 +3090,6 @@ final class ActivityStack {
         }
     }
 
-    final boolean findTaskToMoveToFrontLocked(int taskId, int flags, Bundle options) {
-        final TaskRecord task = taskForIdLocked(taskId);
-        if (task != null) {
-            if ((flags & ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
-                mStackSupervisor.mUserLeaving = true;
-            }
-            if ((flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
-                // Caller wants the home activity moved with it.  To accomplish this,
-                // we'll just indicate that this task returns to the home task.
-                task.mOnTopOfHome = true;
-            }
-            moveTaskToFrontLocked(task, null, options);
-            return true;
-        }
-        return false;
-    }
-
     final void moveTaskToFrontLocked(TaskRecord tr, ActivityRecord reason, Bundle options) {
         if (DEBUG_SWITCH) Slog.v(TAG, "moveTaskToFront: " + tr);
 
@@ -3162,7 +3147,15 @@ final class ActivityStack {
      * @return Returns true if the move completed, false if not.
      */
     final boolean moveTaskToBackLocked(int taskId, ActivityRecord reason) {
-        Slog.i(TAG, "moveTaskToBack: " + taskId);
+        final TaskRecord tr = taskForIdLocked(taskId);
+        if (tr == null) {
+            Slog.i(TAG, "moveTaskToBack: bad taskId=" + taskId);
+            return false;
+        }
+
+        Slog.i(TAG, "moveTaskToBack: " + tr);
+
+        mStackSupervisor.endLockTaskModeIfTaskEnding(tr);
 
         // If we have a watcher, preflight the move before committing to it.  First check
         // for *other* available tasks, but if none are available, then try again allowing the
@@ -3189,11 +3182,6 @@ final class ActivityStack {
 
         if (DEBUG_TRANSITION) Slog.v(TAG,
                 "Prepare to back transition: task=" + taskId);
-
-        final TaskRecord tr = taskForIdLocked(taskId);
-        if (tr == null) {
-            return false;
-        }
 
         mTaskHistory.remove(tr);
         mTaskHistory.add(0, tr);
@@ -3678,6 +3666,7 @@ final class ActivityStack {
     }
 
     void removeTask(TaskRecord task) {
+        mStackSupervisor.endLockTaskModeIfTaskEnding(task);
         mWindowManager.removeTask(task.taskId);
         final ActivityRecord r = mResumedActivity;
         if (r != null && r.task == task) {

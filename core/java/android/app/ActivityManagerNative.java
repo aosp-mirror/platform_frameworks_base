@@ -2097,6 +2097,37 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeStrongBinder(homeActivityToken);
             return true;
         }
+
+        case START_LOCK_TASK_BY_TASK_ID_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final int taskId = data.readInt();
+            startLockTaskMode(taskId);
+            reply.writeNoException();
+            return true;
+        }
+
+        case START_LOCK_TASK_BY_TOKEN_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            startLockTaskMode(token);
+            reply.writeNoException();
+            return true;
+        }
+
+        case STOP_LOCK_TASK_MODE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            stopLockTaskMode();
+            reply.writeNoException();
+            return true;
+        }
+
+        case IS_IN_LOCK_TASK_MODE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final boolean isInLockTaskMode = isInLockTaskMode();
+            reply.writeNoException();
+            reply.writeInt(isInLockTaskMode ? 1 : 0);
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -4818,6 +4849,54 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return res;
+    }
+
+    @Override
+    public void startLockTaskMode(int taskId) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(taskId);
+        mRemote.transact(START_LOCK_TASK_BY_TASK_ID_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public void startLockTaskMode(IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(START_LOCK_TASK_BY_TOKEN_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public void stopLockTaskMode() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(STOP_LOCK_TASK_MODE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public boolean isInLockTaskMode() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(IS_IN_LOCK_TASK_MODE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean isInLockTaskMode = reply.readInt() == 1;
+        data.recycle();
+        reply.recycle();
+        return isInLockTaskMode;
     }
 
     private IBinder mRemote;

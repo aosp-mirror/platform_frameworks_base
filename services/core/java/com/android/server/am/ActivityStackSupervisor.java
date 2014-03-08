@@ -231,6 +231,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     InputManagerInternal mInputManagerInternal;
 
+    /** If non-null then the task specified remains in front and no other tasks may be started
+     * until the task exits or #stopLockTaskMode() is called. */
+    private TaskRecord mLockTaskModeTask;
+
     public ActivityStackSupervisor(ActivityManagerService service) {
         mService = service;
         PowerManager pm = (PowerManager)mService.mContext.getSystemService(Context.POWER_SERVICE);
@@ -1505,6 +1509,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         ? findTaskLocked(r)
                         : findActivityLocked(intent, r.info);
                 if (intentActivity != null) {
+                    if (isLockTaskModeViolation(intentActivity.task)) {
+                        Slog.e(TAG, "moveTaskToFront: Attempt to violate Lock Task Mode");
+                        return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
+                    }
                     if (r.task == null) {
                         r.task = intentActivity.task;
                     }
@@ -1715,6 +1723,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // Should this be considered a new task?
         if (r.resultTo == null && !addingToTask
                 && (launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
+            if (isLockTaskModeViolation(reuseTask)) {
+                Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
+                return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
+            }
             targetStack = adjustStackFocus(r);
             targetStack.moveToFront();
             if (reuseTask == null) {
@@ -1739,6 +1751,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         } else if (sourceRecord != null) {
             TaskRecord sourceTask = sourceRecord.task;
+            if (isLockTaskModeViolation(sourceTask)) {
+                Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
+                return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
+            }
             targetStack = sourceTask.stack;
             targetStack.moveToFront();
             if (!addingToTask &&
@@ -1782,6 +1798,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // An existing activity is starting this new activity, so we want
             // to keep the new one in the same task as the one that is starting
             // it.
+            if (isLockTaskModeViolation(sourceTask)) {
+                Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
+                return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
+            }
             r.setTask(sourceTask, sourceRecord.thumbHolder, false);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in existing task " + r.task + " from source " + sourceRecord);
@@ -2098,17 +2118,18 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void findTaskToMoveToFrontLocked(int taskId, int flags, Bundle options) {
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
-            for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                if (stacks.get(stackNdx).findTaskToMoveToFrontLocked(taskId, flags, options)) {
-                    if (DEBUG_STACK) Slog.d(TAG, "findTaskToMoveToFront: moved to front of stack="
-                            + stacks.get(stackNdx));
-                    return;
-                }
-            }
+    void findTaskToMoveToFrontLocked(TaskRecord task, int flags, Bundle options) {
+        if ((flags & ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
+            mUserLeaving = true;
         }
+        if ((flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
+            // Caller wants the home activity moved with it.  To accomplish this,
+            // we'll just indicate that this task returns to the home task.
+            task.mOnTopOfHome = true;
+        }
+        task.stack.moveTaskToFrontLocked(task, null, options);
+        if (DEBUG_STACK) Slog.d(TAG, "findTaskToMoveToFront: moved to front of stack="
+                + task.stack);
     }
 
     ActivityStack getStack(int stackId) {
@@ -2288,6 +2309,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
         checkReadyForSleepLocked();
+        setLockTaskModeLocked(null);
     }
 
     boolean shutdownLocked(int timeout) {
@@ -2870,6 +2892,35 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
         return list;
+    }
+
+    void setLockTaskModeLocked(TaskRecord task) {
+        if (task == null) {
+            // Take out of lock task mode.
+            mLockTaskModeTask = null;
+            return;
+        }
+        if (isLockTaskModeViolation(task)) {
+            Slog.e(TAG, "setLockTaskMode: Attempt to start a second Lock Task Mode task.");
+            return;
+        }
+        mLockTaskModeTask = task;
+        findTaskToMoveToFrontLocked(task, 0, null);
+        resumeTopActivitiesLocked();
+    }
+
+    boolean isLockTaskModeViolation(TaskRecord task) {
+        return mLockTaskModeTask != null && mLockTaskModeTask != task;
+    }
+
+    void endLockTaskModeIfTaskEnding(TaskRecord task) {
+        if (mLockTaskModeTask != null && mLockTaskModeTask == task) {
+            mLockTaskModeTask = null;
+        }
+    }
+
+    boolean isInLockTaskMode() {
+        return mLockTaskModeTask != null;
     }
 
     private final class ActivityStackSupervisorHandler extends Handler {
