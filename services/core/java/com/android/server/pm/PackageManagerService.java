@@ -1216,7 +1216,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         continue;
                     }
                     try {
-                        if (dalvik.system.DexFile.isDexOptNeeded(lib)) {
+                        if (dalvik.system.DexFile.isDexOptNeededInternal(lib, null, false)) {
                             alreadyDexOpted.add(lib);
                             mInstaller.dexopt(lib, Process.SYSTEM_UID, true);
                             didDexOpt = true;
@@ -1260,7 +1260,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         continue;
                     }
                     try {
-                        if (dalvik.system.DexFile.isDexOptNeeded(path)) {
+                        if (dalvik.system.DexFile.isDexOptNeededInternal(path, null, false)) {
                             mInstaller.dexopt(path, Process.SYSTEM_UID, true);
                             didDexOpt = true;
                         }
@@ -4088,7 +4088,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             String path = pkg.mScanPath;
             int ret = 0;
             try {
-                if (forceDex || dalvik.system.DexFile.isDexOptNeeded(path)) {
+                if (forceDex || dalvik.system.DexFile.isDexOptNeededInternal(path, pkg.packageName,
+                                                                             defer)) {
                     if (!forceDex && defer) {
                         if (mDeferredDexOpt == null) {
                             mDeferredDexOpt = new HashSet<PackageParser.Package>();
@@ -4098,7 +4099,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     } else {
                         Log.i(TAG, "Running dexopt on: " + pkg.applicationInfo.packageName);
                         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-                        ret = mInstaller.dexopt(path, sharedGid, !isForwardLocked(pkg));
+                        ret = mInstaller.dexopt(path, sharedGid, !isForwardLocked(pkg),
+                                                pkg.packageName);
                         pkg.mDidDexOpt = true;
                         performed = true;
                     }
