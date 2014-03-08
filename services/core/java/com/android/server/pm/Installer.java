@@ -218,6 +218,19 @@ public final class Installer extends SystemService {
         builder.append(' ');
         builder.append(uid);
         builder.append(isPublic ? " 1" : " 0");
+        builder.append(" *");         // No pkgName arg present
+        return execute(builder.toString());
+    }
+
+    public int dexopt(String apkPath, int uid, boolean isPublic, String pkgName) {
+        StringBuilder builder = new StringBuilder("dexopt");
+        builder.append(' ');
+        builder.append(apkPath);
+        builder.append(' ');
+        builder.append(uid);
+        builder.append(isPublic ? " 1" : " 0");
+        builder.append(' ');
+        builder.append(pkgName);
         return execute(builder.toString());
     }
 
