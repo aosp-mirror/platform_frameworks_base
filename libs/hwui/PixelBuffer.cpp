@@ -151,7 +151,7 @@ void GpuPixelBuffer::upload(uint32_t x, uint32_t y, uint32_t width, uint32_t hei
     mCaches.bindPixelBuffer(mBuffer);
     unmap();
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, mFormat,
-            GL_UNSIGNED_BYTE, (void*) offset);
+            GL_UNSIGNED_BYTE, reinterpret_cast<void*>(offset));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
