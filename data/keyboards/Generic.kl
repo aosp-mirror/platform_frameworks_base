@@ -161,8 +161,8 @@ key 128   MEDIA_STOP
 key 139   MENU              WAKE_DROPPED
 key 140   CALCULATOR
 # key 141 "KEY_SETUP"
-key 142   POWER             WAKE
-key 143   POWER             WAKE
+key 142   SLEEP             WAKE
+key 143   WAKEUP            WAKE
 # key 144 "KEY_FILE"
 # key 145 "KEY_SENDFILE"
 # key 146 "KEY_DELETEFILE"

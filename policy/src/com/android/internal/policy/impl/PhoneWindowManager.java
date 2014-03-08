@@ -3809,7 +3809,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                                 mKeyguardDelegate.isShowingAndNotHidden() :
                                                 mKeyguardDelegate.isShowing()));
 
-        if (keyCode == KeyEvent.KEYCODE_POWER) {
+        if (keyCode == KeyEvent.KEYCODE_POWER
+                || keyCode == KeyEvent.KEYCODE_SLEEP
+                || keyCode == KeyEvent.KEYCODE_WAKEUP) {
             policyFlags |= WindowManagerPolicy.FLAG_WAKE;
         }
 
@@ -4006,6 +4008,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                     mPendingPowerKeyUpCanceled = false;
                 }
+                break;
+            }
+
+            case KeyEvent.KEYCODE_SLEEP: {
+                result &= ~ACTION_PASS_TO_USER;
+                mPowerManager.goToSleep(event.getEventTime());
+                isWakeKey = false;
+                break;
+            }
+
+            case KeyEvent.KEYCODE_WAKEUP: {
+                result &= ~ACTION_PASS_TO_USER;
                 break;
             }
 
