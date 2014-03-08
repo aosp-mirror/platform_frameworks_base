@@ -29,45 +29,46 @@
 namespace android {
 namespace uirenderer {
 
+static const double EPSILON = 1e-7;
+
 /**
- * Calculate the intersection of a ray with a polygon.
- * It assumes the ray originates inside the polygon.
- *
- * @param poly The polygon, which is represented in a Vector2 array.
- * @param polyLength The length of caster's polygon in terms of number of
- *                   vertices.
- * @param point the start of the ray
- * @param dx the x vector of the ray
- * @param dy the y vector of the ray
- * @return the distance along the ray if it intersects with the polygon FP_NAN if otherwise
+ * Calculate the angle between and x and a y coordinate.
+ * The atan2 range from -PI to PI.
  */
-float SpotShadow::rayIntersectPoly(const Vector2* poly, int polyLength,
-        const Vector2& point, float dx, float dy) {
-    double px = point.x;
-    double py = point.y;
-    int p1 = polyLength - 1;
-    for (int p2 = 0; p2 < polyLength; p2++) {
-        double p1x = poly[p1].x;
-        double p1y = poly[p1].y;
-        double p2x = poly[p2].x;
-        double p2y = poly[p2].y;
-        // The math below is derived from solving this formula, basically the
-        // intersection point should stay on both the ray and the edge of (p1, p2).
-        // solve([p1x+t*(p2x-p1x)=dx*t2+px,p1y+t*(p2y-p1y)=dy*t2+py],[t,t2]);
-        double div = (dx * (p1y - p2y) + dy * p2x - dy * p1x);
-        if (div != 0) {
-            double t = (dx * (p1y - py) + dy * px - dy * p1x) / (div);
-            if (t >= 0 && t <= 1) {
-                double t2 = (p1x * (py - p2y) + p2x * (p1y - py) +
-                        px * (p2y - p1y)) / div;
-                if (t2 > 0) {
-                    return (float)t2;
-                }
-            }
-        }
-        p1 = p2;
-    }
-    return FP_NAN;
+float angle(const Vector2& point, const Vector2& center) {
+    return atan2(point.y - center.y, point.x - center.x);
+}
+
+/**
+ * Calculate the intersection of a ray with the line segment defined by two points.
+ *
+ * Returns a negative value in error conditions.
+
+ * @param rayOrigin The start of the ray
+ * @param dx The x vector of the ray
+ * @param dy The y vector of the ray
+ * @param p1 The first point defining the line segment
+ * @param p2 The second point defining the line segment
+ * @return The distance along the ray if it intersects with the line segment, negative if otherwise
+ */
+float rayIntersectPoints(const Vector2& rayOrigin, float dx, float dy,
+        const Vector2& p1, const Vector2& p2) {
+    // The math below is derived from solving this formula, basically the
+    // intersection point should stay on both the ray and the edge of (p1, p2).
+    // solve([p1x+t*(p2x-p1x)=dx*t2+px,p1y+t*(p2y-p1y)=dy*t2+py],[t,t2]);
+
+    double divisor = (dx * (p1.y - p2.y) + dy * p2.x - dy * p1.x);
+    if (divisor == 0) return -1.0f; // error, invalid divisor
+
+#if DEBUG_SHADOW
+    double interpVal = (dx * (p1.y - rayOrigin.y) + dy * rayOrigin.x - dy * p1.x) / divisor;
+    if (interpVal < 0 || interpVal > 1) return -1.0f; // error, doesn't intersect between points
+#endif
+
+    double distance = (p1.x * (rayOrigin.y - p2.y) + p2.x * (p1.y - rayOrigin.y) +
+            rayOrigin.x * (p2.y - p1.y)) / divisor;
+
+    return distance; // may be negative in error cases
 }
 
 /**
@@ -131,30 +132,26 @@ int SpotShadow::hull(Vector2* points, int pointsLength, Vector2* retPoly) {
             lLowerSize--;
         }
     }
-    int count = 0;
 
+    // output points in CW ordering
+    const int total = lUpperSize + lLowerSize - 2;
+    int outIndex = total - 1;
     for (int i = 0; i < lUpperSize; i++) {
-        retPoly[count] = lUpper[i];
-        count++;
+        retPoly[outIndex] = lUpper[i];
+        outIndex--;
     }
 
     for (int i = 1; i < lLowerSize - 1; i++) {
-        retPoly[count] = lLower[i];
-        count++;
+        retPoly[outIndex] = lLower[i];
+        outIndex--;
     }
     // TODO: Add test harness which verify that all the points are inside the hull.
-    return count;
+    return total;
 }
 
 /**
  * Test whether the 3 points form a counter clockwise turn.
  *
- * @param ax the x coordinate of point a
- * @param ay the y coordinate of point a
- * @param bx the x coordinate of point b
- * @param by the y coordinate of point b
- * @param cx the x coordinate of point c
- * @param cy the y coordinate of point c
  * @return true if a right hand turn
  */
 bool SpotShadow::ccw(double ax, double ay, double bx, double by,
@@ -303,15 +300,6 @@ void SpotShadow::sort(Vector2* poly, int polyLength, const Vector2& center) {
 }
 
 /**
- * Calculate the angle between and x and a y coordinate.
- * The atan2 range from -PI to PI, if we want to sort the vertices as clockwise,
- * we just negate the return angle.
- */
-float SpotShadow::angle(const Vector2& point, const Vector2& center) {
-    return -(float)atan2(point.y - center.y, point.x - center.x);
-}
-
-/**
  * Swap points pointed to by i and j
  */
 void SpotShadow::swap(Vector2* points, int i, int j) {
@@ -329,10 +317,10 @@ void SpotShadow::quicksortCirc(Vector2* points, int low, int high,
     int p = low + (high - low) / 2;
     float pivot = angle(points[p], center);
     while (i <= j) {
-        while (angle(points[i], center) < pivot) {
+        while (angle(points[i], center) > pivot) {
             i++;
         }
-        while (angle(points[j], center) > pivot) {
+        while (angle(points[j], center) < pivot) {
             j--;
         }
 
@@ -508,8 +496,8 @@ void SpotShadow::computeLightPolygon(int points, const Vector3& lightCenter,
     // TODO: Caching all the sin / cos values and store them in a look up table.
     for (int i = 0; i < points; i++) {
         double angle = 2 * i * M_PI / points;
-        ret[i].x = sinf(angle) * size + lightCenter.x;
-        ret[i].y = cosf(angle) * size + lightCenter.y;
+        ret[i].x = cosf(angle) * size + lightCenter.x;
+        ret[i].y = sinf(angle) * size + lightCenter.y;
         ret[i].z = lightCenter.z;
     }
 }
@@ -657,6 +645,63 @@ void SpotShadow::computeSpotShadow(const Vector3* lightPoly, int lightPolyLength
 }
 
 /**
+ * Converts a polygon specified with CW vertices into an array of distance-from-centroid values.
+ *
+ * Returns false in error conditions
+ *
+ * @param poly Array of vertices. Note that these *must* be CW.
+ * @param polyLength The number of vertices in the polygon.
+ * @param polyCentroid The centroid of the polygon, from which rays will be cast
+ * @param rayDist The output array for the calculated distances, must be SHADOW_RAY_COUNT in size
+ */
+bool convertPolyToRayDist(const Vector2* poly, int polyLength, const Vector2& polyCentroid,
+        float* rayDist) {
+    const int rays = SHADOW_RAY_COUNT;
+    const float step = M_PI * 2 / rays;
+
+    const Vector2* lastVertex = &(poly[polyLength - 1]);
+    float startAngle = angle(*lastVertex, polyCentroid);
+
+    // Start with the ray that's closest to and less than startAngle
+    int rayIndex = floor((startAngle - EPSILON) / step);
+    rayIndex = (rayIndex + rays) % rays; // ensure positive
+
+    for (int polyIndex = 0; polyIndex < polyLength; polyIndex++) {
+        /*
+         * For a given pair of vertices on the polygon, poly[i-1] and poly[i], the rays that
+         * intersect these will be those that are between the two angles from the centroid that the
+         * vertices define.
+         *
+         * Because the polygon vertices are stored clockwise, the closest ray with an angle
+         * *smaller* than that defined by angle(poly[i], centroid) will be the first ray that does
+         * not intersect with poly[i-1], poly[i].
+         */
+        float currentAngle = angle(poly[polyIndex], polyCentroid);
+
+        // find first ray that will not intersect the line segment poly[i-1] & poly[i]
+        int firstRayIndexOnNextSegment = floor((currentAngle - EPSILON) / step);
+        firstRayIndexOnNextSegment = (firstRayIndexOnNextSegment + rays) % rays; // ensure positive
+
+        // Iterate through all rays that intersect with poly[i-1], poly[i] line segment.
+        // This may be 0 rays.
+        while (rayIndex != firstRayIndexOnNextSegment) {
+            float distanceToIntersect = rayIntersectPoints(polyCentroid,
+                    cos(rayIndex * step),
+                    sin(rayIndex * step),
+                    *lastVertex, poly[polyIndex]);
+            if (distanceToIntersect < 0) return false; // error case, abort
+
+            rayDist[rayIndex] = distanceToIntersect;
+
+            rayIndex = (rayIndex - 1 + rays) % rays;
+        }
+        lastVertex = &poly[polyIndex];
+    }
+
+   return true;
+}
+
+/**
  * Generate a triangle strip given two convex polygons
  *
  * @param penumbra The outer polygon x,y vertexes
@@ -669,10 +714,9 @@ void SpotShadow::computeSpotShadow(const Vector3* lightPoly, int lightPolyLength
 void SpotShadow::generateTriangleStrip(const Vector2* penumbra, int penumbraLength,
         const Vector2* umbra, int umbraLength, VertexBuffer& shadowTriangleStrip) {
     const int rays = SHADOW_RAY_COUNT;
-    const int layers = SHADOW_LAYER_COUNT;
 
-    int size = rays * (layers + 1);
-    float step = M_PI * 2 / rays;
+    const int size = 2 * rays;
+    const float step = M_PI * 2 / rays;
     // Centroid of the umbra.
     Vector2 centroid = ShadowTessellator::centroid2d(umbra, umbraLength);
 #if DEBUG_SHADOW
@@ -683,48 +727,31 @@ void SpotShadow::generateTriangleStrip(const Vector2* penumbra, int penumbraLeng
     // Intersection to the umbra.
     float umbraDistPerRay[rays];
 
-    for (int i = 0; i < rays; i++) {
-        // TODO: Setup a lookup table for all the sin/cos.
-        float dx = sinf(step * i);
-        float dy = cosf(step * i);
-        umbraDistPerRay[i] = rayIntersectPoly(umbra, umbraLength, centroid,
-                dx, dy);
-        if (isnan(umbraDistPerRay[i])) {
-            ALOGE("rayIntersectPoly returns NAN");
-            return;
-        }
-        penumbraDistPerRay[i] = rayIntersectPoly(penumbra, penumbraLength,
-                centroid, dx, dy);
-        if (isnan(umbraDistPerRay[i])) {
-            ALOGE("rayIntersectPoly returns NAN");
-            return;
-        }
-    }
+    // convert CW polygons to ray distance encoding, aborting on conversion failure
+    if (!convertPolyToRayDist(umbra, umbraLength, centroid, umbraDistPerRay)) return;
+    if (!convertPolyToRayDist(penumbra, penumbraLength, centroid, penumbraDistPerRay)) return;
 
-    int stripSize = getStripSize(rays, layers);
-    AlphaVertex* shadowVertices = shadowTriangleStrip.alloc<AlphaVertex>(stripSize);
-    int currentIndex = 0;
+    AlphaVertex* shadowVertices = shadowTriangleStrip.alloc<AlphaVertex>(getStripSize(rays));
 
     // Calculate the vertices (x, y, alpha) in the shadow area.
-    for (int layerIndex = 0; layerIndex <= layers; layerIndex++) {
-        for (int rayIndex = 0; rayIndex < rays; rayIndex++) {
-            float dx = sinf(step * rayIndex);
-            float dy = cosf(step * rayIndex);
-                float layerRatio = layerIndex / (float) layers;
-                float deltaDist = layerRatio *
-                        (umbraDistPerRay[rayIndex] - penumbraDistPerRay[rayIndex]);
-                float currentDist = penumbraDistPerRay[rayIndex] + deltaDist;
-                float op = calculateOpacity(layerRatio);
-                AlphaVertex::set(&shadowVertices[currentIndex++],
-                        dx * currentDist + centroid.x, dy * currentDist + centroid.y, op);
-        }
+    for (int rayIndex = 0; rayIndex < rays; rayIndex++) {
+        float dx = cosf(step * rayIndex);
+        float dy = sinf(step * rayIndex);
+
+        // outer ring
+        float currentDist = penumbraDistPerRay[rayIndex];
+        AlphaVertex::set(&shadowVertices[rayIndex],
+                dx * currentDist + centroid.x, dy * currentDist + centroid.y, 0.0f);
+
+        // inner ring
+        float deltaDist = umbraDistPerRay[rayIndex] - penumbraDistPerRay[rayIndex];
+        currentDist += deltaDist;
+        AlphaVertex::set(&shadowVertices[rays + rayIndex],
+                dx * currentDist + centroid.x, dy * currentDist + centroid.y, 1.0f);
     }
     // The centroid is in the umbra area, so the opacity is considered as 1.0.
-    AlphaVertex::set(&shadowVertices[currentIndex++], centroid.x, centroid.y, 1.0);
+    AlphaVertex::set(&shadowVertices[SHADOW_VERTEX_COUNT - 1], centroid.x, centroid.y, 1.0f);
 #if DEBUG_SHADOW
-    if (currentIndex != SHADOW_VERTEX_COUNT) {
-        ALOGE("number of vertex generated for spot shadow is wrong!");
-    }
     for (int i = 0; i < currentIndex; i++) {
         ALOGD("spot shadow value: i %d, (x:%f, y:%f, a:%f)", i, shadowVertices[i].x,
                 shadowVertices[i].y, shadowVertices[i].alpha);
@@ -754,26 +781,14 @@ void SpotShadow::smoothPolygon(int level, int rays, float* rayDist) {
 }
 
 /**
- * Calculate the opacity according to the distance. Ideally, the opacity is 1.0
- * in the umbra area, and fall off to 0.0 till the edge of penumbra area.
- *
- * @param layerRatio The distance ratio of current sample between umbra and penumbra area.
- *                   Penumbra edge is 0 and umbra edge is 1.
- * @return The opacity according to the distance between umbra and penumbra.
- */
-float SpotShadow::calculateOpacity(float layerRatio) {
-    return (layerRatio * layerRatio + layerRatio) / 2.0;
-}
-
-/**
  * Calculate the number of vertex we will create given a number of rays and layers
  *
  * @param rays number of points around the polygons you want
  * @param layers number of layers of triangle strips you need
  * @return number of vertex (multiply by 3 for number of floats)
  */
-int SpotShadow::getStripSize(int rays, int layers) {
-    return  (2 + rays + ((layers) * 2 * (rays + 1)));
+int SpotShadow::getStripSize(int rays) {
+    return  (2 + rays + (2 * (rays + 1)));
 }
 
 #if DEBUG_SHADOW
@@ -898,7 +913,3 @@ void SpotShadow::testIntersection(const Vector2* poly1, int poly1Length,
 
 }; // namespace uirenderer
 }; // namespace android
-
-
-
-

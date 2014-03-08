@@ -705,8 +705,8 @@ void Caches::initTempProperties() {
     propertyDirtyViewport = false;
     propertyEnable3d = false;
     propertyCameraDistance = 1.0f;
-    propertyAmbientShadowStrength = 0x3f;
-    propertySpotShadowStrength = 0x3f;
+    propertyAmbientShadowStrength = 25;
+    propertySpotShadowStrength = 25;
 
     propertyLightPosXScale = 0.5f;
     propertyLightPosYScale = 0.0f;

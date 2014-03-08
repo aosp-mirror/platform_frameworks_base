@@ -38,9 +38,8 @@ private:
     static void computeLightPolygon(int points, const Vector3& lightCenter,
             float size, Vector3* ret);
 
-    static int  getStripSize(int rays, int layers);
+    static int  getStripSize(int rays);
     static void smoothPolygon(int level, int rays, float* rayDist);
-    static float calculateOpacity(float jf);
     static float rayIntersectPoly(const Vector2* poly, int polyLength,
             const Vector2& point, float dx, float dy);
 
@@ -50,7 +49,6 @@ private:
     static int intersection(Vector2* poly1, int poly1length, Vector2* poly2, int poly2length);
     static void sort(Vector2* poly, int polyLength, const Vector2& center);
 
-    static float angle(const Vector2& point, const Vector2& center);
     static void swap(Vector2* points, int i, int j);
     static void quicksortCirc(Vector2* points, int low, int high, const Vector2& center);
     static void quicksortX(Vector2* points, int low, int high);
@@ -64,8 +62,6 @@ private:
 
     static void generateTriangleStrip(const Vector2* penumbra, int penumbraLength,
             const Vector2* umbra, int umbraLength, VertexBuffer& retstrips);
-
-    static const double EPSILON = 1e-7;
 
 #if DEBUG_SHADOW
     // Verification utility function.

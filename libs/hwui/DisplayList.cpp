@@ -491,7 +491,7 @@ void DisplayList::replay(ReplayStateStruct& replayStruct, const int level) {
             replayStruct.mDrawGlStatus);
 }
 
-#define SHADOW_DELTA 2.0f
+#define SHADOW_DELTA 0.1f
 
 template <class T>
 void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& renderer,
