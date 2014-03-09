@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package android.telecomm;
+package com.android.internal.telecomm;
 
 import android.os.Bundle;
 import android.telecomm.CallInfo;
-import android.telecomm.ICallServiceAdapter;
+
+import com.android.internal.telecomm.ICallServiceAdapter;
 
 /**
  * Service interface for services which would like to provide calls to be
@@ -31,6 +32,7 @@ import android.telecomm.ICallServiceAdapter;
  * 2) Prior to an outbound call to test if this call service is compatible with the outgoing call.
  *
  * TODO(santoscordon): Need final public-facing comments in this file.
+ * {@hide}
  */
 oneway interface ICallService {
 

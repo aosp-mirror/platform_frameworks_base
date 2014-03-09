@@ -39,6 +39,21 @@ public final class TelecommConstants {
     public static final String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
 
     /**
+     * The service action used to bind to {@link CallServiceProvider} implementations.
+     */
+    public static final String ACTION_CALL_SERVICE_PROVIDER = CallServiceProvider.class.getName();
+
+    /**
+     * The service action used to bind to {@link CallService} implementations.
+     */
+    public static final String ACTION_CALL_SERVICE = CallService.class.getName();
+
+    /**
+     * The service action used to bind to {@link CallServiceSelector} implementations.
+     */
+    public static final String ACTION_CALL_SERVICE_SELECTOR = CallServiceSelector.class.getName();
+
+    /**
      * Extra for {@link #ACTION_INCOMING_CALL} containing the {@link CallServiceDescriptor} that
      * describes the call service to use for the incoming call.
      */

@@ -22,8 +22,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 
-import android.telecomm.ICallServiceProvider;
-import android.telecomm.ICallServiceLookupResponse;
+import com.android.internal.telecomm.ICallServiceLookupResponse;
+import com.android.internal.telecomm.ICallServiceProvider;
 
 /**
  * Base implementation of {@link ICallServiceProvider} which extends {@link Service}. This class
@@ -45,9 +45,9 @@ public abstract class CallServiceProvider extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_LOOKUP_CALL_SERVICES:
-                    lookupCallServices((ICallServiceLookupResponse) msg.obj);
-                    break;
-                default:
+                    CallServiceLookupResponse response =
+                            new CallServiceLookupResponse((ICallServiceLookupResponse) msg.obj);
+                    lookupCallServices(response);
                     break;
             }
         }
@@ -100,10 +100,10 @@ public abstract class CallServiceProvider extends Service {
     }
 
     /**
-     * Initiates the process to retrieve the list of {@link ICallService}s implemented by
+     * Initiates the process to retrieve the list of {@link CallServiceDescriptor}s implemented by
      * this provider.
      *
      * @param response The response object through which the list of call services is sent.
      */
-    public abstract void lookupCallServices(ICallServiceLookupResponse response);
+    public abstract void lookupCallServices(CallServiceLookupResponse response);
 }

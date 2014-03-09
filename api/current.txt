@@ -24266,8 +24266,19 @@ package android.telecomm {
     method public abstract void isCompatibleWith(android.telecomm.CallInfo);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void reject(java.lang.String);
-    method public abstract void setCallServiceAdapter(android.telecomm.ICallServiceAdapter);
+    method public abstract void setCallServiceAdapter(android.telecomm.CallServiceAdapter);
     method public abstract void setIncomingCallId(java.lang.String, android.os.Bundle);
+  }
+
+  public final class CallServiceAdapter {
+    method public void handleFailedOutgoingCall(java.lang.String, java.lang.String);
+    method public void handleSuccessfulOutgoingCall(java.lang.String);
+    method public void notifyIncomingCall(android.telecomm.CallInfo);
+    method public void setActive(java.lang.String);
+    method public void setDialing(java.lang.String);
+    method public void setDisconnected(java.lang.String);
+    method public void setIsCompatibleWith(java.lang.String, boolean);
+    method public void setRinging(java.lang.String);
   }
 
   public final class CallServiceDescriptor implements android.os.Parcelable {
@@ -24289,9 +24300,13 @@ package android.telecomm {
     method public android.telecomm.CallServiceDescriptor.Builder setNetworkType(int);
   }
 
+  public final class CallServiceLookupResponse {
+    method public void setCallServiceDescriptors(java.util.List<android.telecomm.CallServiceDescriptor>);
+  }
+
   public abstract class CallServiceProvider extends android.app.Service {
     ctor protected CallServiceProvider();
-    method public abstract void lookupCallServices(android.telecomm.ICallServiceLookupResponse);
+    method public abstract void lookupCallServices(android.telecomm.CallServiceLookupResponse);
     method public android.os.IBinder onBind(android.content.Intent);
   }
 
@@ -24438,9 +24453,27 @@ package android.telecomm {
     method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
   }
 
+  public final class InCallAdapter {
+    method public void answerCall(java.lang.String);
+    method public void disconnectCall(java.lang.String);
+    method public void rejectCall(java.lang.String);
+  }
+
+  public abstract class InCallService extends android.app.Service {
+    ctor protected InCallService();
+    method protected abstract void addCall(android.telecomm.CallInfo);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method protected abstract void setActive(java.lang.String);
+    method protected abstract void setDisconnected(java.lang.String);
+    method protected abstract void setInCallAdapter(android.telecomm.InCallAdapter);
+  }
+
   public final class TelecommConstants {
     ctor public TelecommConstants();
     field public static final java.lang.String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
+    field public static final java.lang.String CALL_SERVICE_ACTION;
+    field public static final java.lang.String CALL_SERVICE_PROVIDER_ACTION;
+    field public static final java.lang.String CALL_SERVICE_SELECTOR_ACTION;
     field public static final java.lang.String EXTRA_CALL_SERVICE_DESCRIPTOR = "android.intent.extra.CALL_SERVICE_DESCRIPTOR";
     field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.intent.extra.INCOMING_CALL_EXTRAS";
   }

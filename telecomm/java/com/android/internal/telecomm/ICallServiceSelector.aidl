@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package android.telecomm;
+package com.android.internal.telecomm;
 
 import android.telecomm.CallInfo;
 import android.telecomm.CallServiceDescriptor;
-import android.telecomm.ICallService;
-import android.telecomm.ICallServiceSelectionResponse;
-import android.telecomm.ICallSwitchabilityResponse;
+
+import com.android.internal.telecomm.ICallService;
+import com.android.internal.telecomm.ICallServiceSelectionResponse;
+import com.android.internal.telecomm.ICallSwitchabilityResponse;
 
 import java.util.List;
 
@@ -61,6 +62,7 @@ import java.util.List;
  * all supported (either for a given call or globally across a given selector) , isSwitchable
  * below can return false blindly to suppress all "select" calls beyond the initial one (that
  * is used to establish outgoing calls).
+ * {@hide}
  */
 oneway interface ICallServiceSelector {
 

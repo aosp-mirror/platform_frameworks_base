@@ -279,15 +279,15 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/session/IMediaSession.aidl \
 	media/java/android/media/session/IMediaSessionCallback.aidl \
 	media/java/android/media/session/IMediaSessionManager.aidl \
-	telecomm/java/android/telecomm/ICallService.aidl \
-	telecomm/java/android/telecomm/ICallServiceAdapter.aidl \
-	telecomm/java/android/telecomm/ICallServiceLookupResponse.aidl \
-	telecomm/java/android/telecomm/ICallServiceProvider.aidl \
-	telecomm/java/android/telecomm/ICallServiceSelectionResponse.aidl \
-	telecomm/java/android/telecomm/ICallServiceSelector.aidl \
-	telecomm/java/android/telecomm/ICallSwitchabilityResponse.aidl \
-	telecomm/java/android/telecomm/IInCallAdapter.aidl \
-	telecomm/java/android/telecomm/IInCallService.aidl \
+	telecomm/java/com/android/internal/telecomm/ICallService.aidl \
+	telecomm/java/com/android/internal/telecomm/ICallServiceAdapter.aidl \
+	telecomm/java/com/android/internal/telecomm/ICallServiceLookupResponse.aidl \
+	telecomm/java/com/android/internal/telecomm/ICallServiceProvider.aidl \
+	telecomm/java/com/android/internal/telecomm/ICallServiceSelectionResponse.aidl \
+	telecomm/java/com/android/internal/telecomm/ICallServiceSelector.aidl \
+	telecomm/java/com/android/internal/telecomm/ICallSwitchabilityResponse.aidl \
+	telecomm/java/com/android/internal/telecomm/IInCallAdapter.aidl \
+	telecomm/java/com/android/internal/telecomm/IInCallService.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
 	telephony/java/com/android/internal/telephony/ITelephony.aidl \

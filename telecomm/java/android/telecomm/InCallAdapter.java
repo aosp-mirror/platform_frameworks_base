@@ -16,26 +16,42 @@
 
 package android.telecomm;
 
+import android.os.RemoteException;
+
+import com.android.internal.telecomm.IInCallAdapter;
+
 /**
- * Receives commands from {@link IInCallService} implementations which should be executed by
- * Telecomm. When Telecomm binds to a {@link IInCallService}, an instance of this class is given to
+ * Receives commands from {@link InCallService} implementations which should be executed by
+ * Telecomm. When Telecomm binds to a {@link InCallService}, an instance of this class is given to
  * the in-call service through which it can manipulate live (active, dialing, ringing) calls. When
- * the in-call service is notified of new calls ({@link IInCallService#addCall}), it can use the
+ * the in-call service is notified of new calls ({@link InCallService#addCall}), it can use the
  * given call IDs to execute commands such as {@link #answerCall} for incoming calls or
  * {@link #disconnectCall} for active calls the user would like to end. Some commands are only
  * appropriate for calls in certain states; please consult each method for such limitations.
  * TODO(santoscordon): Needs more/better comments once the API is finalized.
  * TODO(santoscordon): Specify the adapter will stop functioning when there are no more calls.
- * TODO(santoscordon): Once we have proper "CallState" constant definitions, consider rewording
- * the javadoc to reference those states precisely.
  */
-oneway interface IInCallAdapter {
+public final class InCallAdapter {
+    private final IInCallAdapter mAdapter;
+
+    /**
+     * {@hide}
+     */
+    public InCallAdapter(IInCallAdapter adapter) {
+        mAdapter = adapter;
+    }
+
     /**
      * Instructs Telecomm to answer the specified call.
      *
      * @param callId The identifier of the call to answer.
      */
-    void answerCall(String callId);
+    public void answerCall(String callId) {
+        try {
+            mAdapter.answerCall(callId);
+        } catch (RemoteException e) {
+        }
+    }
 
     /**
      * Instructs Telecomm to reject the specified call.
@@ -44,12 +60,22 @@ oneway interface IInCallAdapter {
      *
      * @param callId The identifier of the call to reject.
      */
-    void rejectCall(String callId);
+    public void rejectCall(String callId) {
+        try {
+            mAdapter.rejectCall(callId);
+        } catch (RemoteException e) {
+        }
+    }
 
     /**
      * Instructs Telecomm to disconnect the specified call.
      *
      * @param callId The identifier of the call to disconnect.
      */
-    void disconnectCall(String callId);
+    public void disconnectCall(String callId) {
+        try {
+            mAdapter.disconnectCall(callId);
+        } catch (RemoteException e) {
+        }
+    }
 }

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package android.telecomm;
+package com.android.internal.telecomm;
 
 import android.telecomm.CallInfo;
-import android.telecomm.IInCallAdapter;
+
+import com.android.internal.telecomm.IInCallAdapter;
 
 /**
  * This service is implemented by any app that wishes to provide the user-interface for managing
@@ -25,7 +26,8 @@ import android.telecomm.IInCallAdapter;
  * call, and uses it to notify the in-call app of any live and and recently disconnected calls.
  * TODO(santoscordon): Needs more/better description of lifecycle once the interface is better
  * defined.
- * TODO(santoscordon): What happens if two or more apps on a given decide implement this interface?
+ * TODO(santoscordon): What happens if two or more apps on a given device implement this interface?
+ * {@hide}
  */
 oneway interface IInCallService {
 
@@ -48,17 +50,16 @@ oneway interface IInCallService {
     void addCall(in CallInfo callInfo);
 
     /**
-     * Indicates to the in-call app that a call has moved to the active state.
-     * TODO(santoscordon): link javadoc to "active" constant once CallState is defined.
+     * Indicates to the in-call app that a call has moved to the
+     * {@link android.telecomm.CallState#ACTIVE} state.
      *
      * @param callId The identifier of the call that became active.
      */
     void setActive(String callId);
 
     /**
-     * Indicates to the in-call app that a call has been disconnected and the user should be
-     * notified.
-     * TODO(santoscordon): link javadoc to "disconnected" constant once CallState is defined.
+     * Indicates to the in-call app that a call has been moved to the
+     * {@link android.telecomm.CallState#DISCONNECTED} and the user should be notified.
      * TODO(santoscordon): Needs disconnect-cause either as a numberical constant, string or both
      * depending on what is ultimately needed to support all scenarios.
      *
