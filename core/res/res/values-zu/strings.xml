@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"khipha izinqamuleli"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Ivumela uhlelo lokusebenza ukususa izinqamuleli zesikrini sasekhaya ngaphandle kokungenela komsebenzisi."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"thumela amakholi aphumayo kabusha"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Ivumela uhlelo lokusebenza ukucubungula amakholi aphumayo futhi ishintshe inombolo ezoshayelwa. Le mvume ivumela uhlelo lokusebenza ukwengamela, liqondise kabusha, noma livikele amakholi aphumayo."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Ivumela uhlelo lokusebenza ukubona inombolo eshayelwayo ngesikhathi sekholi ephumayo ngenketho yokuqondisa kabusha ikholi kwinombolo ehlukile noma ukuyekisa ikholi yonke."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"thola imiyalezo ebhaliwe (i-SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Ivumela uhlelo lokusebenza ukuthola nokucubungula imilayezo ye-SMS. Loku kuchaza ukuthi uhlelo lokusebenza lungangamela noma lesuse imilayezo ethunyelwe kudivayisi yakho ngaphandle kokukubonisa yona."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"thola imiyalezo ebhaliwe (i-MMS)"</string>

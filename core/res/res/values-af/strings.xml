@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"deïnstalleer kortpaaie"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Laat die program toe om Tuisskerm-kortpaaie te verwyder sonder gebruikerinmenging."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"herlei uitgaande oproepe"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Laat die program toe om uitgaande oproepe te verwerk en die nommer wat geskakel moet word te verander. Hierdie toestemming laat die program toe om uitgaande oproepe te monitor, herlei, of te voorkom."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Laat die program toe om te sien watter nommer tydens \'n uitgaande oproep geskakel word, met die opsie om die oproep na \'n ander nommer te herlei of die oproep heeltemal te beëindig."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ontvang teksboodskappe (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Laat die program toe om SMS-boodskappe te ontvang en te verwerk. Dit beteken dat die program boodskappe wat na jou toestel gestuur is, kan monitor of uitvee, sonder dat jy dit gesien het."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ontvang teksboodskappe (MMS)"</string>

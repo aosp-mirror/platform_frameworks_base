@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"eliminazione di scorciatoie"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Consente all\'applicazione di rimuovere le scorciatoie della schermata Home automaticamente."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"reindirizzamento chiamate in uscita"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Consente all\'applicazione di elaborare le chiamate in uscita e di modificare il numero da comporre. Questa autorizzazione consente all\'applicazione di monitorare, reindirizzare o impedire le chiamate in uscita."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Consente all\'app di rilevare il numero digitato durante una chiamata in uscita, con la possibilità di reindirizzare la telefonata a un numero diverso o interromperla del tutto."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ricezione messaggi di testo (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Consente all\'applicazione di ricevere ed elaborare messaggi SMS. Significa che l\'applicazione potrebbe monitorare o eliminare i messaggi inviati al tuo dispositivo senza mostrarteli."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ricezione messaggi di testo (MMS)"</string>

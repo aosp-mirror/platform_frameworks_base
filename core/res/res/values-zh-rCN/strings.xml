@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"卸载快捷方式"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"允许应用自行删除主屏幕快捷方式。"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"重新设置外拨电话的路径"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"允许该应用处理外拨电话以及更改要拨打的号码。此权限可让该应用监视、重定向或阻止外拨电话。"</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"允许应用在拨出电话时查看拨打的电话号码，并选择改为拨打其他号码或完全中止通话。"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"接收讯息（短信）"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"允许该应用接收和处理短信。这就意味着，该应用可能会监视发送到您设备的短信，或删除发送到您设备的短信而不向您显示。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"接收讯息（彩信）"</string>

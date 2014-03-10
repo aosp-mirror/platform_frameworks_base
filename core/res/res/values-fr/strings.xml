@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"désinstaller des raccourcis"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permettre à l\'application de supprimer des raccourcis de l\'écran d\'accueil sans l\'intervention de l\'utilisateur"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"transférer les appels sortants"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Permet à l\'application de traiter les appels sortants et de modifier le numéro à composer. Cette autorisation lui permet de surveiller, rediriger ou empêcher les appels sortants."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Permettre à l\'application de lire le numéro composé lors d\'un appel sortant, et lui donner la possibilité de rediriger l\'appel vers un autre numéro ou d\'abandonner l\'appel"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"recevoir des messages texte (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Permet à l\'application de recevoir et de traiter les SMS. Cette autorisation lui donne la possibilité de surveiller ou supprimer les messages envoyés à votre appareil sans vous les montrer."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"recevoir des messages texte (MMS)"</string>

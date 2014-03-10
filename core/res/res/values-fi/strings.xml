@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"poista pikakuvakkeita"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Antaa sovelluksen poistaa aloitusruudun pikakuvakkeita ilman käyttäjän toimia."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ohjaa uudelleen lähtevät puhelut"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Antaa sovelluksen käsitellä lähteviä puheluita ja muuttaa kohdenumeroita. Sovellus voi valvoa, uudelleenohjata tai estää lähteviä puheluita."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Sallii sovelluksen nähdä numeron, joka valitaan lähtevää puhelua soitettaessa, ja antaa mahdollisuuden ohjata puhelun eri numeroon tai keskeyttää puhelun kokonaan."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"vastaanota tekstiviestejä (teksti)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Antaa sovelluksen vastaanottaa ja käsitellä tekstiviestejä. Sovellus voi valvoa tai poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"vastaanota tekstiviestejä (multimedia)"</string>

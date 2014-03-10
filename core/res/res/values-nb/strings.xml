@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"avinstallere snarveier"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Lar appen fjerne snarveier på startsiden uten å involvere brukeren."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"omdirigere utgående anrop"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Lar appen behandle utgående anrop og endre nummeret som skal ringes opp. Denne tillatelsen lar appen overvåke, viderekoble eller hindre utgående anrop."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Lar appen se nummeret det ringes til under en utgående samtale, med mulighet for å omdirigere anropet til et annet nummer eller avbryte samtalen fullstendig."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"motta tekstmeldinger (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Lar appen motta og behandle tekstmeldinger. Dette betyr at appen kan overvåke eller slette meldinger som er sendt til enheten din uten at du har sett dem."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"motta tekstmeldinger (MMS)"</string>

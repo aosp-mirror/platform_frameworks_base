@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"snelkoppelingen verwijderen"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"De app toestaan snelkoppelingen van het startscherm te verwijderen zonder tussenkomst van de gebruiker."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"uitgaande oproepen doorschakelen"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Hiermee kan de app uitgaande oproepen verwerken en het nummer wijzigen dat wordt gebeld. De app kan uitgaande oproepen bijhouden, omleiden of blokkeren."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"De app toestaan het nummer te bekijken dat wordt gekozen voor een uitgaande oproep, met de mogelijkheid de oproep om te leiden naar een ander nummer of de oproep helemaal af te breken."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"tekstberichten (SMS) ontvangen"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Hiermee kan de app sms-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar uw apparaat zijn verzonden, kan bijhouden of verwijderen zonder deze aan u weer te geven."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"tekstberichten (MMS) ontvangen"</string>

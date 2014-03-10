@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"mencopot pemasangan pintasan"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Mengizinkan aplikasi menghapus pintasan Layar Utama tanpa tindakan dari pengguna."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ubah rute panggilan keluar"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Memungkinkan aplikasi memproses panggilan keluar dan mengubah nomor yang akan dipanggil. Izin ini memungkinkan aplikasi memantau, mengalihkan, atau mencegah panggilan keluar."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Memungkinkan aplikasi melihat nomor yang dihubungi saat melakukan panggilan keluar dengan opsi untuk mengalihkan panggilan ke nomor lain atau membatalkan panggilan sepenuhnya."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"terima pesan teks (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Memungkinkan aplikasi menerima dan memproses pesan SMS. Ini artinya aplikasi dapat memantau atau menghapus pesan yang dikirim ke perangkat Anda tanpa menunjukkannya kepada Anda."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"terima pesan teks (MMS)"</string>
