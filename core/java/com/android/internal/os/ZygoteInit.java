@@ -505,6 +505,7 @@ public class ZygoteInit {
     private static boolean startSystemServer()
             throws MethodAndArgsCaller, RuntimeException {
         long capabilities = posixCapabilitiesAsBits(
+            OsConstants.CAP_BLOCK_SUSPEND,
             OsConstants.CAP_KILL,
             OsConstants.CAP_NET_ADMIN,
             OsConstants.CAP_NET_BIND_SERVICE,
