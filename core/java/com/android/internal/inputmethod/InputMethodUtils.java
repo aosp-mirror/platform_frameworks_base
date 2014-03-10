@@ -504,6 +504,7 @@ public class InputMethodUtils {
 
         private String mEnabledInputMethodsStrCache;
         private int mCurrentUserId;
+        private int[] mRelatedUserIds = new int[0];
 
         private static void buildEnabledInputMethodsSettingString(
                 StringBuilder builder, Pair<String, ArrayList<String>> pair) {
@@ -534,6 +535,22 @@ public class InputMethodUtils {
             }
             // IMMS settings are kept per user, so keep track of current user
             mCurrentUserId = userId;
+        }
+
+        public void setRelatedUserIds(int[] relatedUserIds) {
+            synchronized (this) {
+                mRelatedUserIds = relatedUserIds;
+            }
+        }
+
+        public boolean isRelatedToOrCurrentUser(int userId) {
+            synchronized (this) {
+                if (userId == mCurrentUserId) return true;
+                for (int i = 0; i < mRelatedUserIds.length; i++) {
+                    if (userId == mRelatedUserIds[i]) return true;
+                }
+                return false;
+            }
         }
 
         public List<InputMethodInfo> getEnabledInputMethodListLocked() {
