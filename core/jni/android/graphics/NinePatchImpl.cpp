@@ -115,13 +115,15 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
         defaultPaint.setDither(true);
         paint = &defaultPaint;
     }
-    
+   
+    const int32_t* xDivs = chunk.getXDivs();
+    const int32_t* yDivs = chunk.getYDivs();
     // if our SkCanvas were back by GL we should enable this and draw this as
     // a mesh, which will be faster in most cases.
     if (false) {
         SkNinePatch::DrawMesh(canvas, bounds, bitmap,
-                              chunk.xDivs, chunk.numXDivs,
-                              chunk.yDivs, chunk.numYDivs,
+                              xDivs, chunk.numXDivs,
+                              yDivs, chunk.numYDivs,
                               paint);
         return;
     }
@@ -145,8 +147,8 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
     if (gTrace) {
         ALOGV("======== ninepatch bounds [%g %g]\n", SkScalarToFloat(bounds.width()), SkScalarToFloat(bounds.height()));
         ALOGV("======== ninepatch paint bm [%d,%d]\n", bitmap.width(), bitmap.height());
-        ALOGV("======== ninepatch xDivs [%d,%d]\n", chunk.xDivs[0], chunk.xDivs[1]);
-        ALOGV("======== ninepatch yDivs [%d,%d]\n", chunk.yDivs[0], chunk.yDivs[1]);
+        ALOGV("======== ninepatch xDivs [%d,%d]\n", xDivs[0], xDivs[1]);
+        ALOGV("======== ninepatch yDivs [%d,%d]\n", yDivs[0], yDivs[1]);
     }
 #endif
 
@@ -171,8 +173,8 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
     SkRect      dst;
     SkIRect     src;
 
-    const int32_t x0 = chunk.xDivs[0];
-    const int32_t y0 = chunk.yDivs[0];
+    const int32_t x0 = xDivs[0];
+    const int32_t y0 = yDivs[0];
     const SkColor initColor = ((SkPaint*)paint)->getColor();
     const uint8_t numXDivs = chunk.numXDivs;
     const uint8_t numYDivs = chunk.numYDivs;
@@ -191,12 +193,12 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
 
     int numStretchyXPixelsRemaining = 0;
     for (i = 0; i < numXDivs; i += 2) {
-        numStretchyXPixelsRemaining += chunk.xDivs[i + 1] - chunk.xDivs[i];
+        numStretchyXPixelsRemaining += xDivs[i + 1] - xDivs[i];
     }
     int numFixedXPixelsRemaining = bitmapWidth - numStretchyXPixelsRemaining;
     int numStretchyYPixelsRemaining = 0;
     for (i = 0; i < numYDivs; i += 2) {
-        numStretchyYPixelsRemaining += chunk.yDivs[i + 1] - chunk.yDivs[i];
+        numStretchyYPixelsRemaining += yDivs[i + 1] - yDivs[i];
     }
     int numFixedYPixelsRemaining = bitmapHeight - numStretchyYPixelsRemaining;
 
@@ -235,7 +237,7 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
             src.fBottom = bitmapHeight;
             dst.fBottom = bounds.fBottom;
         } else {
-            src.fBottom = chunk.yDivs[j];
+            src.fBottom = yDivs[j];
             const int srcYSize = src.fBottom - src.fTop;
             if (yIsStretchable) {
                 dst.fBottom = dst.fTop + calculateStretch(bounds.fBottom, dst.fTop,
@@ -252,15 +254,16 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
         xIsStretchable = initialXIsStretchable;
         // The initial xDiv and whether the first column is considered
         // stretchable or not depends on whether xDiv[0] was zero or not.
+        const uint32_t* colors = chunk.getColors();
         for (i = xIsStretchable ? 1 : 0;
               i <= numXDivs && src.fLeft < bitmapWidth;
               i++, xIsStretchable = !xIsStretchable) {
-            color = chunk.colors[colorIndex++];
+            color = colors[colorIndex++];
             if (i == numXDivs) {
                 src.fRight = bitmapWidth;
                 dst.fRight = bounds.fRight;
             } else {
-                src.fRight = chunk.xDivs[i];
+                src.fRight = xDivs[i];
                 if (dstRightsHaveBeenCached) {
                     dst.fRight = dstRights[i];
                 } else {
