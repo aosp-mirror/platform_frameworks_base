@@ -19,6 +19,7 @@ package android.hardware.input;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.IInputDevicesChangedListener;
+import android.hardware.input.TouchCalibration;
 import android.os.IBinder;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -38,6 +39,11 @@ interface IInputManager {
     // Injects an input event into the system.  To inject into windows owned by other
     // applications, the caller must have the INJECT_EVENTS permission.
     boolean injectInputEvent(in InputEvent ev, int mode);
+
+    // Calibrate input device position
+    TouchCalibration getTouchCalibrationForInputDevice(String inputDeviceDescriptor);
+    void setTouchCalibrationForInputDevice(String inputDeviceDescriptor,
+            in TouchCalibration calibration);
 
     // Keyboard layouts configuration.
     KeyboardLayout[] getKeyboardLayouts();

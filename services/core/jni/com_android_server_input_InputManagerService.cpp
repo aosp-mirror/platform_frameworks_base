@@ -49,6 +49,7 @@
 #include <android/graphics/GraphicsJNI.h>
 
 #include <ScopedLocalRef.h>
+#include <ScopedPrimitiveArray.h>
 #include <ScopedUtfChars.h>
 
 #include "com_android_server_power_PowerManagerService.h"
@@ -86,6 +87,7 @@ static struct {
     jmethodID getPointerIcon;
     jmethodID getKeyboardLayoutOverlay;
     jmethodID getDeviceAlias;
+    jmethodID getTouchCalibrationForInputDevice;
 } gServiceClassInfo;
 
 static struct {
@@ -104,6 +106,11 @@ static struct {
     jclass clazz;
     jmethodID constructor;
 } gInputDeviceIdentifierInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID getAffineTransform;
+} gTouchCalibrationClassInfo;
 
 
 
@@ -182,6 +189,7 @@ public:
     void setSystemUiVisibility(int32_t visibility);
     void setPointerSpeed(int32_t speed);
     void setShowTouches(bool enabled);
+    void reloadCalibration();
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -190,6 +198,8 @@ public:
     virtual void notifyInputDevicesChanged(const Vector<InputDeviceInfo>& inputDevices);
     virtual sp<KeyCharacterMap> getKeyboardLayoutOverlay(const InputDeviceIdentifier& identifier);
     virtual String8 getDeviceAlias(const InputDeviceIdentifier& identifier);
+    TouchAffineTransformation getTouchAffineTransformation(JNIEnv *env, jfloatArray matrixArr);
+    TouchAffineTransformation getTouchAffineTransformation(const String8& inputDeviceDescriptor);
 
     /* --- InputDispatcherPolicyInterface implementation --- */
 
@@ -741,12 +751,53 @@ void NativeInputManager::setShowTouches(bool enabled) {
             InputReaderConfiguration::CHANGE_SHOW_TOUCHES);
 }
 
+void NativeInputManager::reloadCalibration() {
+    mInputManager->getReader()->requestRefreshConfiguration(
+            InputReaderConfiguration::TOUCH_AFFINE_TRANSFORMATION);
+}
+
 bool NativeInputManager::isScreenOn() {
     return android_server_PowerManagerService_isScreenOn();
 }
 
 bool NativeInputManager::isScreenBright() {
     return android_server_PowerManagerService_isScreenBright();
+}
+
+TouchAffineTransformation NativeInputManager::getTouchAffineTransformation(
+        JNIEnv *env, jfloatArray matrixArr) {
+    ScopedFloatArrayRO matrix(env, matrixArr);
+    assert(matrix.size() == 6);
+
+    TouchAffineTransformation transform;
+    transform.x_scale  = matrix[0];
+    transform.x_ymix   = matrix[1];
+    transform.x_offset = matrix[2];
+    transform.y_xmix   = matrix[3];
+    transform.y_scale  = matrix[4];
+    transform.y_offset = matrix[5];
+
+    return transform;
+}
+
+TouchAffineTransformation NativeInputManager::getTouchAffineTransformation(
+        const String8& inputDeviceDescriptor) {
+    JNIEnv* env = jniEnv();
+
+    ScopedLocalRef<jstring> descriptorObj(env, env->NewStringUTF(inputDeviceDescriptor.string()));
+
+    jobject cal = env->CallObjectMethod(mServiceObj,
+            gServiceClassInfo.getTouchCalibrationForInputDevice, descriptorObj.get());
+
+    jfloatArray matrixArr = jfloatArray(env->CallObjectMethod(cal,
+            gTouchCalibrationClassInfo.getAffineTransform));
+
+    TouchAffineTransformation transform = getTouchAffineTransformation(env, matrixArr);
+
+    env->DeleteLocalRef(matrixArr);
+    env->DeleteLocalRef(cal);
+
+    return transform;
 }
 
 bool NativeInputManager::filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) {
@@ -1231,6 +1282,11 @@ static void nativeSetShowTouches(JNIEnv* env,
     im->setShowTouches(enabled);
 }
 
+static void nativeReloadCalibration(JNIEnv* env, jclass clazz, jlong ptr) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    im->reloadCalibration();
+}
+
 static void nativeVibrate(JNIEnv* env,
         jclass clazz, jlong ptr, jint deviceId, jlongArray patternObj,
         jint repeat, jint token) {
@@ -1336,6 +1392,8 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeSetPointerSpeed },
     { "nativeSetShowTouches", "(JZ)V",
             (void*) nativeSetShowTouches },
+    { "nativeReloadCalibration", "(J)V",
+            (void*) nativeReloadCalibration },
     { "nativeVibrate", "(JI[JII)V",
             (void*) nativeVibrate },
     { "nativeCancelVibrate", "(JII)V",
@@ -1446,6 +1504,10 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.getDeviceAlias, clazz,
             "getDeviceAlias", "(Ljava/lang/String;)Ljava/lang/String;");
 
+    GET_METHOD_ID(gServiceClassInfo.getTouchCalibrationForInputDevice, clazz,
+            "getTouchCalibrationForInputDevice",
+            "(Ljava/lang/String;)Landroid/hardware/input/TouchCalibration;");
+
     // InputDevice
 
     FIND_CLASS(gInputDeviceClassInfo.clazz, "android/view/InputDevice");
@@ -1467,6 +1529,14 @@ int register_android_server_InputManager(JNIEnv* env) {
     gInputDeviceIdentifierInfo.clazz = jclass(env->NewGlobalRef(gInputDeviceIdentifierInfo.clazz));
     GET_METHOD_ID(gInputDeviceIdentifierInfo.constructor, gInputDeviceIdentifierInfo.clazz,
             "<init>", "(Ljava/lang/String;II)V");
+
+    // TouchCalibration
+
+    FIND_CLASS(gTouchCalibrationClassInfo.clazz, "android/hardware/input/TouchCalibration");
+    gTouchCalibrationClassInfo.clazz = jclass(env->NewGlobalRef(gTouchCalibrationClassInfo.clazz));
+
+    GET_METHOD_ID(gTouchCalibrationClassInfo.getAffineTransform, gTouchCalibrationClassInfo.clazz,
+            "getAffineTransform", "()[F");
 
     return 0;
 }
