@@ -18,12 +18,12 @@ package com.android.connectivitymanagertest.stress;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.IpConfiguration.IpAssignment;
+import android.net.IpConfiguration.ProxySettings;
 import android.net.NetworkInfo.State;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiConfiguration.IpAssignment;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
-import android.net.wifi.WifiConfiguration.ProxySettings;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.os.PowerManager;

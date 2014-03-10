@@ -16,9 +16,13 @@
 
 package android.net.wifi;
 
+import android.net.IpConfiguration;
+import android.net.IpConfiguration.ProxySettings;
+import android.net.IpConfiguration.IpAssignment;
+import android.net.ProxyInfo;
 import android.net.LinkProperties;
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
 import java.util.HashMap;
@@ -286,20 +290,7 @@ public class WifiConfiguration implements Parcelable {
     /**
      * @hide
      */
-    public enum IpAssignment {
-        /* Use statically configured IP settings. Configuration can be accessed
-         * with linkProperties */
-        STATIC,
-        /* Use dynamically configured IP settigns */
-        DHCP,
-        /* no IP details are assigned, this is used to indicate
-         * that any existing IP settings should be retained */
-        UNASSIGNED
-    }
-    /**
-     * @hide
-     */
-    public IpAssignment ipAssignment;
+    private IpConfiguration mIpConfiguration;
 
     /**
      * @hide
@@ -457,32 +448,6 @@ public class WifiConfiguration implements Parcelable {
      */
     public HashMap<String, Integer>  linkedConfigurations;
 
-    /**
-     * @hide
-     */
-    public enum ProxySettings {
-        /* No proxy is to be used. Any existing proxy settings
-         * should be cleared. */
-        NONE,
-        /* Use statically configured proxy. Configuration can be accessed
-         * with linkProperties */
-        STATIC,
-        /* no proxy details are assigned, this is used to indicate
-         * that any existing proxy settings should be retained */
-        UNASSIGNED,
-        /* Use a Pac based proxy.
-         */
-        PAC
-    }
-    /**
-     * @hide
-     */
-    public ProxySettings proxySettings;
-    /**
-     * @hide
-     */
-    public LinkProperties linkProperties;
-
     public WifiConfiguration() {
         networkId = INVALID_NETWORK_ID;
         SSID = null;
@@ -500,12 +465,10 @@ public class WifiConfiguration implements Parcelable {
             wepKeys[i] = null;
         }
         enterpriseConfig = new WifiEnterpriseConfig();
-        ipAssignment = IpAssignment.UNASSIGNED;
-        proxySettings = ProxySettings.UNASSIGNED;
-        linkProperties = new LinkProperties();
         autoJoinStatus = AUTO_JOIN_ENABLED;
         selfAdded = false;
         ephemeral = false;
+        mIpConfiguration = new IpConfiguration();
     }
 
     /**
@@ -640,12 +603,7 @@ public class WifiConfiguration implements Parcelable {
         sbuf.append(enterpriseConfig);
         sbuf.append('\n');
 
-        sbuf.append("IP assignment: " + ipAssignment.toString());
-        sbuf.append("\n");
-        sbuf.append("Proxy settings: " + proxySettings.toString());
-        sbuf.append("\n");
-        sbuf.append(linkProperties.toString());
-        sbuf.append("\n");
+        sbuf.append(mIpConfiguration.toString());
 
         return sbuf.toString();
     }
@@ -823,6 +781,52 @@ public class WifiConfiguration implements Parcelable {
         return key;
     }
 
+    /** @hide */
+    public IpConfiguration getIpConfiguration() {
+        return mIpConfiguration;
+    }
+
+    /** @hide */
+    public void setIpConfiguration(IpConfiguration ipConfiguration) {
+        mIpConfiguration = ipConfiguration;
+    }
+
+    /** @hide */
+    public LinkProperties getLinkProperties() {
+        return mIpConfiguration.linkProperties;
+    }
+
+    /** @hide */
+    public void setLinkProperties(LinkProperties linkProperties) {
+        mIpConfiguration.linkProperties = linkProperties;
+    }
+
+    /** @hide */
+    public IpConfiguration.IpAssignment getIpAssignment() {
+        return mIpConfiguration.ipAssignment;
+    }
+
+    /** @hide */
+    public void setIpAssignment(IpConfiguration.IpAssignment ipAssignment) {
+        mIpConfiguration.ipAssignment = ipAssignment;
+    }
+
+    /** @hide */
+    public IpConfiguration.ProxySettings getProxySettings() {
+        return mIpConfiguration.proxySettings;
+    }
+
+    /** @hide */
+    public void setProxySettings(IpConfiguration.ProxySettings proxySettings) {
+        mIpConfiguration.proxySettings = proxySettings;
+    }
+
+    /** @hide */
+    public void setProxy(ProxySettings settings, ProxyInfo proxy) {
+        mIpConfiguration.proxySettings = settings;
+        mIpConfiguration.linkProperties.setHttpProxy(proxy);
+    }
+
     /** Implement the Parcelable interface {@hide} */
     public int describeContents() {
         return 0;
@@ -854,12 +858,10 @@ public class WifiConfiguration implements Parcelable {
 
             enterpriseConfig = new WifiEnterpriseConfig(source.enterpriseConfig);
 
-            ipAssignment = source.ipAssignment;
-            proxySettings = source.proxySettings;
-
             defaultGwMacAddress = source.defaultGwMacAddress;
 
-            linkProperties = new LinkProperties(source.linkProperties);
+            mIpConfiguration = new IpConfiguration(source.mIpConfiguration);
+
             if ((source.scanResultCache != null) && (source.scanResultCache.size() > 0)) {
                 scanResultCache = new HashMap<String, ScanResult>();
                 scanResultCache.putAll(source.scanResultCache);
@@ -882,10 +884,11 @@ public class WifiConfiguration implements Parcelable {
             if (source.visibility != null) {
                 visibility = new Visibility(source.visibility);
             }
-       }
+        }
     }
 
     /** Implement the Parcelable interface {@hide} */
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(networkId);
         dest.writeInt(status);
@@ -908,10 +911,7 @@ public class WifiConfiguration implements Parcelable {
 
         dest.writeParcelable(enterpriseConfig, flags);
 
-        dest.writeString(ipAssignment.name());
-        dest.writeString(proxySettings.name());
-        dest.writeParcelable(linkProperties, flags);
-
+        dest.writeParcelable(mIpConfiguration, flags);
         dest.writeString(dhcpServer);
         dest.writeString(defaultGwMacAddress);
         dest.writeInt(autoJoinStatus);
@@ -943,10 +943,7 @@ public class WifiConfiguration implements Parcelable {
 
                 config.enterpriseConfig = in.readParcelable(null);
 
-                config.ipAssignment = IpAssignment.valueOf(in.readString());
-                config.proxySettings = ProxySettings.valueOf(in.readString());
-                config.linkProperties = in.readParcelable(null);
-
+                config.mIpConfiguration = in.readParcelable(null);
                 config.dhcpServer = in.readString();
                 config.defaultGwMacAddress = in.readString();
                 config.autoJoinStatus = in.readInt();
