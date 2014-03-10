@@ -16499,7 +16499,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             } else {
                 long value = mMeasureCache.valueAt(cacheIndex);
                 // Casting a long to int drops the high 32 bits, no mask needed
-                setMeasuredDimension((int) (value >> 32), (int) value);
+                setMeasuredDimensionRaw((int) (value >> 32), (int) value);
                 mPrivateFlags3 |= PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
             }
 
@@ -16594,6 +16594,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             measuredWidth  += optical ? opticalWidth  : -opticalWidth;
             measuredHeight += optical ? opticalHeight : -opticalHeight;
         }
+        setMeasuredDimensionRaw(measuredWidth, measuredHeight);
+    }
+
+    /**
+     * Sets the measured dimension without extra processing for things like optical bounds.
+     * Useful for reapplying consistent values that have already been cooked with adjustments
+     * for optical bounds, etc. such as those from the measurement cache.
+     *
+     * @param measuredWidth The measured width of this view.  May be a complex
+     * bit mask as defined by {@link #MEASURED_SIZE_MASK} and
+     * {@link #MEASURED_STATE_TOO_SMALL}.
+     * @param measuredHeight The measured height of this view.  May be a complex
+     * bit mask as defined by {@link #MEASURED_SIZE_MASK} and
+     * {@link #MEASURED_STATE_TOO_SMALL}.
+     */
+    private void setMeasuredDimensionRaw(int measuredWidth, int measuredHeight) {
         mMeasuredWidth = measuredWidth;
         mMeasuredHeight = measuredHeight;
 
@@ -18361,7 +18377,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         static int adjust(int measureSpec, int delta) {
-            return makeMeasureSpec(getSize(measureSpec + delta), getMode(measureSpec));
+            final int mode = getMode(measureSpec);
+            if (mode == UNSPECIFIED) {
+                // No need to adjust size for UNSPECIFIED mode.
+                return makeMeasureSpec(0, UNSPECIFIED);
+            }
+            int size = getSize(measureSpec) + delta;
+            if (size < 0) {
+                Log.e(VIEW_LOG_TAG, "MeasureSpec.adjust: new size would be negative! (" + size +
+                        ") spec: " + toString(measureSpec) + " delta: " + delta);
+                size = 0;
+            }
+            return makeMeasureSpec(size, mode);
         }
 
         /**
