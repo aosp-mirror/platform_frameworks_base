@@ -418,4 +418,9 @@ public class EthernetDataTracker extends BaseNetworkStateTracker {
     public void supplyMessenger(Messenger messenger) {
         // not supported on this network
     }
+
+    @Override
+    public String getNetworkInterfaceName() {
+        return mIface;
+    }
 }
