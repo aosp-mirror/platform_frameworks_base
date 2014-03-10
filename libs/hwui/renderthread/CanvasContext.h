@@ -63,7 +63,7 @@ public:
     bool initialize(EGLNativeWindowType window);
     void updateSurface(EGLNativeWindowType window);
     void setup(int width, int height);
-    void swapDisplayListData(DisplayList* displayList, DisplayListData* newData);
+    void setDisplayListData(DisplayList* displayList, DisplayListData* newData);
     void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters);
     void drawDisplayList(DisplayList* displayList, Rect* dirty);
     void destroyCanvas();
