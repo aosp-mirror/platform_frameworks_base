@@ -21,6 +21,7 @@ import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.util.ArrayMap;
+import android.util.Pair;
 import android.util.SuperNotCalledException;
 import com.android.internal.app.ActionBarImpl;
 import com.android.internal.policy.PolicyManager;
@@ -3456,7 +3457,8 @@ public class Activity extends ContextThemeWrapper
     public void startActivityForResult(Intent intent, int requestCode) {
         Bundle options = null;
         if (mWindow.hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)) {
-            options = ActivityOptions.makeSceneTransitionAnimation(null).toBundle();
+            final Pair<View, String>[] noSharedElements = null;
+            options = ActivityOptions.makeSceneTransitionAnimation(noSharedElements).toBundle();
         }
         startActivityForResult(intent, requestCode, options);
     }
