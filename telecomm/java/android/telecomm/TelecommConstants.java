@@ -74,4 +74,16 @@ public final class TelecommConstants {
      * ID of the call.
      */
     public static final String EXTRA_CALL_ID = "android.telecomm.extra.CALL_ID";
+
+    /**
+     * The dual tone multi-frequency signaling character sent to indicate the dialing system should
+     * pause for a predefined period.
+     */
+    public static final char DTMF_CHARACTER_PAUSE = ',';
+
+    /**
+     * The dual-tone multi-frequency signaling character sent to indicate the dialing system should
+     * wait for user confirmation before proceeding.
+     */
+    public static final char DTMF_CHARACTER_WAIT = ';';
 }

@@ -19,86 +19,28 @@ package com.android.internal.telecomm;
 import android.telecomm.CallInfo;
 
 /**
- * Provides methods for ICallService implementations to interact with the system phone app.
- * TODO(santoscordon): Need final public-facing comments in this file.
+ * Internal remote callback interface for call services.
+ *
+ * @see android.telecomm.CallServiceAdapter
+ *
  * {@hide}
  */
 oneway interface ICallServiceAdapter {
-
-    /**
-     * Receives confirmation of a call service's ability to place a call. This method is used in
-     * response to {@link ICallService#isCompatibleWith}.
-     *
-     * @param callId The identifier of the call for which compatibility is being received. This ID
-     *     should correspond to the ID given as part of the call information in
-     *     {@link ICallService#isCompatibleWith}.
-     * @param isCompatible True if the call service can place the call.
-     */
     void setIsCompatibleWith(String callId, boolean isCompatible);
 
-    /**
-     * Provides Telecomm with the details of an incoming call. An invocation of this method must
-     * follow {@link CallService#setIncomingCallId} and use the call ID specified therein. Upon
-     * the invocation of this method, Telecomm will bring up the incoming-call interface where the
-     * user can elect to answer or reject a call.
-     *
-     * @param callInfo The details of the relevant call.
-     */
     void notifyIncomingCall(in CallInfo callInfo);
 
-    /**
-     * Tells Telecomm that an attempt to place the specified outgoing call succeeded.
-     * TODO(santoscordon): Consider adding a CallState parameter in case this outgoing call is
-     * somehow no longer in the DIALING state.
-     *
-     * @param callId The ID of the outgoing call.
-     */
     void handleSuccessfulOutgoingCall(String callId);
 
-    /**
-     * Tells Telecomm that an attempt to place the specified outgoing call failed.
-     *
-     * @param callId The ID of the outgoing call.
-     * @param errorMessage The error associated with the failed call attempt.
-     */
     void handleFailedOutgoingCall(String callId, String errorMessage);
 
-    /**
-     * Sets a call's state to active (e.g., an ongoing call where two parties can actively
-     * communicate).
-     *
-     * @param callId The unique ID of the call whose state is changing to active.
-     */
     void setActive(String callId);
 
-    /**
-     * Sets a call's state to ringing (e.g., an inbound ringing call).
-     *
-     * @param callId The unique ID of the call whose state is changing to ringing.
-     */
     void setRinging(String callId);
 
-    /**
-     * Sets a call's state to dialing (e.g., dialing an outbound call).
-     *
-     * @param callId The unique ID of the call whose state is changing to dialing.
-     */
     void setDialing(String callId);
 
-    /**
-     * Sets a call's state to disconnected.
-     *
-     * @param callId The unique ID of the call whose state is changing to disconnected.
-     * @param disconnectCause The reason for the disconnection, any of
-     *         {@link android.telephony.DisconnectCause}.
-     * @param disconnectMessage The call-service-provided message about the disconnect cause.
-     */
     void setDisconnected(String callId, int disconnectCause, String disconnectMessage);
 
-    /**
-     * Sets a call's state to be on hold.
-     *
-     * @param callId The unique ID of the call whose state is changing to be on hold.
-     */
     void setOnHold(String callId);
 }

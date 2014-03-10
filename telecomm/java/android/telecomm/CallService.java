@@ -57,6 +57,8 @@ public abstract class CallService extends Service {
     private static final int MSG_HOLD = 9;
     private static final int MSG_UNHOLD = 10;
     private static final int MSG_ON_AUDIO_STATE_CHANGED = 11;
+    private static final int MSG_PLAY_DTMF_TONE = 12;
+    private static final int MSG_STOP_DTMF_TONE = 13;
 
     /**
      * Default Handler used to consolidate binder method calls onto a single thread.
@@ -116,6 +118,12 @@ public abstract class CallService extends Service {
                     }
                     break;
                 }
+                case MSG_PLAY_DTMF_TONE:
+                    playDtmfTone((String) msg.obj, (char) msg.arg1);
+                    break;
+                case MSG_STOP_DTMF_TONE:
+                    stopDtmfTone((String) msg.obj);
+                    break;
                 default:
                     break;
             }
@@ -178,6 +186,16 @@ public abstract class CallService extends Service {
         @Override
         public void unhold(String callId) {
             mMessageHandler.obtainMessage(MSG_UNHOLD, callId).sendToTarget();
+        }
+
+        @Override
+        public void playDtmfTone(String callId, char digit) {
+            mMessageHandler.obtainMessage(MSG_PLAY_DTMF_TONE, digit, 0, callId).sendToTarget();
+        }
+
+        @Override
+        public void stopDtmfTone(String callId) {
+            mMessageHandler.obtainMessage(MSG_STOP_DTMF_TONE, callId).sendToTarget();
         }
 
         @Override
@@ -305,6 +323,25 @@ public abstract class CallService extends Service {
      * @param callId The ID of the call to unhold.
      */
     public abstract void unhold(String callId);
+
+    /**
+     * Plays a dual-tone multi-frequency signaling (DTMF) tone in a call.
+     *
+     * @param callId The unique ID of the call in which the tone will be played.
+     * @param digit A character representing the DTMF digit for which to play the tone. This
+     *         value must be one of {@code '0'} through {@code '9'}, {@code '*'} or {@code '#'}.
+     */
+    public abstract void playDtmfTone(String callId, char digit);
+
+    /**
+     * Stops any dual-tone multi-frequency sinaling (DTMF) tone currently playing.
+     *
+     * DTMF tones are played by calling {@link #playDtmfTone(String,char)}. If no DTMF tone is
+     * currently playing, this method will do nothing.
+     *
+     * @param callId The unique ID of the call in which any currently playing tone will be stopped.
+     */
+    public abstract void stopDtmfTone(String callId);
 
     /**
      * Called when the audio state changes.

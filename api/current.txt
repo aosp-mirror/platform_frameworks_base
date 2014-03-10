@@ -24871,9 +24871,11 @@ package android.telecomm {
     method public abstract void isCompatibleWith(android.telecomm.CallInfo);
     method public abstract void onAudioStateChanged(java.lang.String, android.telecomm.CallAudioState);
     method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract void playDtmfTone(java.lang.String, char);
     method public abstract void reject(java.lang.String);
     method public abstract void setCallServiceAdapter(android.telecomm.CallServiceAdapter);
     method public abstract void setIncomingCallId(java.lang.String, android.os.Bundle);
+    method public abstract void stopDtmfTone(java.lang.String);
     method public abstract void unhold(java.lang.String);
   }
 
@@ -24940,6 +24942,8 @@ package android.telecomm {
     enum_constant public static final android.telecomm.CallState DIALING;
     enum_constant public static final android.telecomm.CallState DISCONNECTED;
     enum_constant public static final android.telecomm.CallState ON_HOLD;
+    enum_constant public static final android.telecomm.CallState POST_DIAL;
+    enum_constant public static final android.telecomm.CallState POST_DIAL_WAIT;
     enum_constant public static final android.telecomm.CallState RINGING;
   }
 
@@ -24958,8 +24962,11 @@ package android.telecomm {
     method public void disconnectCall(java.lang.String);
     method public void holdCall(java.lang.String);
     method public void mute(boolean);
+    method public void playDtmfTone(java.lang.String, char);
+    method public void postDialContinue(java.lang.String);
     method public void rejectCall(java.lang.String);
     method public void setAudioRoute(int);
+    method public void stopDtmfTone(java.lang.String);
     method public void unholdCall(java.lang.String);
   }
 
@@ -24969,9 +24976,13 @@ package android.telecomm {
     method protected abstract void onAudioStateChanged(android.telecomm.CallAudioState);
     method public final android.os.IBinder onBind(android.content.Intent);
     method protected abstract void setActive(java.lang.String);
+    method protected abstract void setDialing(java.lang.String);
     method protected abstract void setDisconnected(java.lang.String, int);
     method protected abstract void setInCallAdapter(android.telecomm.InCallAdapter);
     method protected abstract void setOnHold(java.lang.String);
+    method protected abstract void setPostDial(java.lang.String, java.lang.String);
+    method protected abstract void setPostDialWait(java.lang.String, java.lang.String);
+    method protected abstract void setRinging(java.lang.String);
   }
 
   public final class TelecommConstants {
@@ -24980,6 +24991,8 @@ package android.telecomm {
     field public static final java.lang.String ACTION_CALL_SERVICE_PROVIDER;
     field public static final java.lang.String ACTION_CALL_SERVICE_SELECTOR;
     field public static final java.lang.String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
+    field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
+    field public static final char DTMF_CHARACTER_WAIT = 59; // 0x003b ';'
     field public static final java.lang.String EXTRA_CALL_ID = "android.telecomm.extra.CALL_ID";
     field public static final java.lang.String EXTRA_CALL_SERVICE_DESCRIPTOR = "android.intent.extra.CALL_SERVICE_DESCRIPTOR";
     field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.intent.extra.INCOMING_CALL_EXTRAS";

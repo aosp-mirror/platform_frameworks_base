@@ -126,4 +126,62 @@ public final class InCallAdapter {
         } catch (RemoteException e) {
         }
     }
+
+    /**
+     * Instructs Telecomm to play a dual-tone multi-frequency signaling (DTMF) tone in a call.
+     *
+     * Any other currently playing DTMF tone in the specified call is immediately stopped.
+     *
+     * @param callId The unique ID of the call in which the tone will be played.
+     * @param digit A character representing the DTMF digit for which to play the tone. This
+     *         value must be one of {@code '0'} through {@code '9'}, {@code '*'} or {@code '#'}.
+     */
+    public void playDtmfTone(String callId, char digit) {
+        try {
+            mAdapter.playDtmfTone(callId, digit);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Instructs Telecomm to stop any dual-tone multi-frequency signaling (DTMF) tone currently
+     * playing.
+     *
+     * DTMF tones are played by calling {@link #playDtmfTone(String,char)}. If no DTMF tone is
+     * currently playing, this method will do nothing.
+     *
+     * @param callId The unique ID of the call in which any currently playing tone will be stopped.
+     */
+    public void stopDtmfTone(String callId) {
+        try {
+            mAdapter.stopDtmfTone(callId);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Instructs Telecomm to continue playing a post-dial DTMF string.
+     *
+     * A post-dial DTMF string is a string of digits entered after a phone number, when dialed,
+     * that are immediately sent as DTMF tones to the recipient as soon as the connection is made.
+     * While these tones are playing, Telecomm will notify the {@link InCallService} that the call
+     * is in the {@link InCallService#setPostDial(String)} state.
+     *
+     * If the DTMF string contains a {@link #DTMF_CHARACTER_PAUSE} symbol, Telecomm will temporarily
+     * pause playing the tones for a pre-defined period of time.
+     *
+     * If the DTMF string contains a {@link #DTMF_CHARACTER_WAIT} symbol, Telecomm will pause
+     * playing the tones and notify the {@link InCallService} that the call is in the
+     * {@link InCallService#setPostDialWait(String)} state. When the user decides to continue the
+     * postdial sequence, the {@link InCallService} should invoke the
+     * {@link #postDialContinue(String)} method.
+     *
+     * @param callId The unique ID of the call for which postdial string playing should continue.
+     */
+    public void postDialContinue(String callId) {
+        try {
+            mAdapter.postDialContinue(callId);
+        } catch (RemoteException e) {
+        }
+    }
 }
