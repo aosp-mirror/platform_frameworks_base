@@ -23,15 +23,15 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiConfiguration.AuthAlgorithm;
-import android.net.wifi.WifiConfiguration.IpAssignment;
-import android.net.wifi.WifiConfiguration.KeyMgmt;
-import android.net.wifi.WifiConfiguration.ProxySettings;
-import android.net.wifi.WifiEnterpriseConfig;
+import android.net.IpConfiguration.IpAssignment;
+import android.net.IpConfiguration.ProxySettings;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.RouteInfo;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiConfiguration.AuthAlgorithm;
+import android.net.wifi.WifiConfiguration.KeyMgmt;
+import android.net.wifi.WifiEnterpriseConfig;
 
 import java.io.InputStream;
 import java.net.InetAddress;
