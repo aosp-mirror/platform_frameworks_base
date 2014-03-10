@@ -122,9 +122,6 @@ import android.graphics.Path;
  * @hide
  */
 public class DisplayList {
-    private boolean mValid;
-    private final long mNativeDisplayList;
-
     /**
      * Flag used when calling
      * {@link HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, int)}
@@ -174,6 +171,10 @@ public class DisplayList {
      * @hide
      */
     public static final int STATUS_DREW = 0x4;
+
+    private boolean mValid;
+    private final long mNativeDisplayList;
+    private HardwareRenderer mRenderer;
 
     private DisplayList(String name) {
         mNativeDisplayList = nCreate();
@@ -233,7 +234,13 @@ public class DisplayList {
         GLES20RecordingCanvas canvas = (GLES20RecordingCanvas) endCanvas;
         canvas.onPostDraw();
         long displayListData = canvas.finishRecording();
-        renderer.swapDisplayListData(mNativeDisplayList, displayListData);
+        if (renderer != mRenderer) {
+            // If we are changing renderers first destroy with the old
+            // renderer, then set with the new one
+            destroyDisplayListData();
+        }
+        mRenderer = renderer;
+        setDisplayListData(displayListData);
         canvas.recycle();
         mValid = true;
     }
@@ -245,12 +252,20 @@ public class DisplayList {
      *
      * @hide
      */
-    public void destroyDisplayListData(HardwareRenderer renderer) {
-        if (renderer == null) {
-            throw new IllegalArgumentException("Cannot destroyDisplayListData with a null renderer");
-        }
-        renderer.swapDisplayListData(mNativeDisplayList, 0);
+    public void destroyDisplayListData() {
+        if (!mValid) return;
+
+        setDisplayListData(0);
+        mRenderer = null;
         mValid = false;
+    }
+
+    private void setDisplayListData(long newData) {
+        if (mRenderer != null) {
+            mRenderer.setDisplayListData(mNativeDisplayList, newData);
+        } else {
+            throw new IllegalStateException("Trying to set data without a renderer! data=" + newData);
+        }
     }
 
     /**
@@ -907,6 +922,7 @@ public class DisplayList {
     @Override
     protected void finalize() throws Throwable {
         try {
+            destroyDisplayListData();
             nDestroyDisplayList(mNativeDisplayList);
         } finally {
             super.finalize();

@@ -562,7 +562,7 @@ public abstract class HardwareRenderer {
         mRequested = requested;
     }
 
-    abstract void swapDisplayListData(long displayList, long newData);
+    abstract void setDisplayListData(long displayList, long newData);
 
     /**
      * Describes a series of frames that should be drawn on screen as a graph.

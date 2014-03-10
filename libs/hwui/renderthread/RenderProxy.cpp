@@ -117,14 +117,14 @@ void RenderProxy::setup(int width, int height) {
     post(task);
 }
 
-CREATE_BRIDGE3(swapDisplayListData, CanvasContext* context, DisplayList* displayList,
+CREATE_BRIDGE3(setDisplayListData, CanvasContext* context, DisplayList* displayList,
         DisplayListData* newData) {
-    args->context->swapDisplayListData(args->displayList, args->newData);
+    args->context->setDisplayListData(args->displayList, args->newData);
     return NULL;
 }
 
-void RenderProxy::swapDisplayListData(DisplayList* displayList, DisplayListData* newData) {
-    SETUP_TASK(swapDisplayListData);
+void RenderProxy::setDisplayListData(DisplayList* displayList, DisplayListData* newData) {
+    SETUP_TASK(setDisplayListData);
     args->context = mContext;
     args->displayList = displayList;
     args->newData = newData;

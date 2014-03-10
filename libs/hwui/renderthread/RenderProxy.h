@@ -60,7 +60,7 @@ public:
     ANDROID_API bool initialize(EGLNativeWindowType window);
     ANDROID_API void updateSurface(EGLNativeWindowType window);
     ANDROID_API void setup(int width, int height);
-    ANDROID_API void swapDisplayListData(DisplayList* displayList, DisplayListData* newData);
+    ANDROID_API void setDisplayListData(DisplayList* displayList, DisplayListData* newData);
     ANDROID_API void drawDisplayList(DisplayList* displayList,
             int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
     ANDROID_API void destroyCanvas();

@@ -373,7 +373,7 @@ void CanvasContext::setup(int width, int height) {
     mCanvas->setViewport(width, height);
 }
 
-void CanvasContext::swapDisplayListData(DisplayList* displayList, DisplayListData* newData) {
+void CanvasContext::setDisplayListData(DisplayList* displayList, DisplayListData* newData) {
     displayList->setData(newData);
 }
 
