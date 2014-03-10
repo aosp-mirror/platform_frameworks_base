@@ -99,7 +99,7 @@ android.widget.CompoundButton#toggle()} method to change the state.</p>
 
 <h3 id="ClickListener">Using an OnCheckedChangeListener</h3>
 
-<p>You can also declare a click event handler pragmatically rather than in an XML layout. This
+<p>You can also declare a click event handler programmatically rather than in an XML layout. This
 might be necessary if you instantiate the {@link android.widget.ToggleButton} or {@link
 android.widget.Switch} at runtime or you need to
 declare the click behavior in a {@link android.app.Fragment} subclass.</p>
