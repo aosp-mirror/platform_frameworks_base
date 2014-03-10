@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"desinstalar accesos directos"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permite que la aplicación elimine accesos directos de la pantalla de inicio sin la intervención del usuario."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"redireccionar llamadas salientes"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Permite que la aplicación procese las llamadas salientes y cambie el número que se va a marcar. La aplicación puede utilizar este permiso para controlar, desviar o impedir que se realicen llamadas salientes."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Permite que la aplicación vea el número que se marca al realizar una llamada con la opción de redirigir la llamada a otro número o cancelar la llamada."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"recibir mensajes de texto (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Permite que la aplicación reciba y procese mensajes MMS, lo que significa que podría utilizar este permiso para controlar o eliminar mensajes enviados al dispositivo sin mostrárselos al usuario."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"recibir mensajes de texto (MMS)"</string>

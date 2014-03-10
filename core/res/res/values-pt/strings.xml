@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"desinstalar atalhos"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permite que o aplicativo remova atalhos da tela inicial sem a intervenção do usuário."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"redirecionar as chamadas efetuadas"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Permite que o aplicativo processe as chamadas de saída e altere o número a ser discado. Esta permissão autoriza o aplicativo a monitorar, redirecionar ou evitar chamadas de saída."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Permite que o aplicativo veja o número discado ao realizar uma chamada, com a opção de redirecionar a chamada para outro número ou abortá-la."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"receber mensagens de texto (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Permite que o aplicativo receba e processe mensagens SMS. Isso significa que o aplicativo pode monitorar ou excluir mensagens enviadas para o dispositivo sem mostrá-las para você."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"receber mensagens de texto (MMS)"</string>

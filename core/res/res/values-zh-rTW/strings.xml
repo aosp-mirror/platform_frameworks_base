@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"解除安裝捷徑"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"允許應用程式自動移除主螢幕捷徑。"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"重設撥號路徑"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"允許應用程式處理撥出電話及更改撥打的號碼。這項權限可讓應用程式監控、轉接或阻止撥出的電話。"</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"允許應用程式在撥打電話期間查看撥出的電話號碼，並選擇改撥其他號碼或完全中斷通話。"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"接收簡訊 (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"允許應用程式接收和處理簡訊。這項設定可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"接收簡訊 (MMS)"</string>

@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"odinstalowywanie skrótów"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Pozwala aplikacji usuwać skróty z ekranu głównego bez interwencji użytkownika."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"przekierowywanie połączeń wychodzących"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Pozwala aplikacji na przetwarzanie połączeń wychodzących i zmianę wybieranego numeru. Aplikacje z tym uprawnieniem mogą monitorować, przekierowywać lub blokować połączenia wychodzące."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Pozwala aplikacji na sprawdzenie numeru wybieranego w trakcie połączenia wychodzącego, a także umożliwia przerwanie połączenia lub przekierowanie go pod inny numer."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"odbieranie wiadomości tekstowych (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Pozwala aplikacji na odbieranie i przetwarzanie SMS-ów. To oznacza, że aplikacja będzie mogła bez Twojej wiedzy monitorować i usuwać wiadomości wysyłane do Twojego urządzenia."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"odbieranie wiadomości tekstowych (MMS)"</string>

@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"otseteede desinstallimine"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Lubab rakendusel eemaldada avaekraani otseteid ilma kasutaja sekkumiseta."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"marsruutige väljuvad kõned uuesti"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Võimaldab rakendusel töödelda väljuvaid kõnesid ja muuta valitavat numbrit. Luba võimaldab rakendusel jälgida, ümber suunata või takistada väljuvaid kõnesid."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Lubab rakendusel näha, mis number valitakse väljahelistamisel, ning laseb suunata kõne teisele numbrile või selle üldse katkestada."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"võtke vastu tekstisõnumeid (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Võimaldab rakendusel vastu võtta ja töödelda SMS-sõnumeid. See tähendab, et rakendus võib jälgida või kustutada teie seadmele saadetud sõnumeid neid teile näitamata."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"võtke vastu tekstisõnumeid (MMS)"</string>

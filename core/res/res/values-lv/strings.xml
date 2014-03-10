@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"atinstalēt saīsnes"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Ļauj lietojumprogrammai noņemt saīsnes no sākuma ekrāna, nejautājot lietotājam."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"pārmaršrutēt izejošos zvanus"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Ļauj lietotnei apstrādāt izejošos zvanus un mainīt numuru, uz kuru tiks zvanīts. Ar šo atļauju lietotne var pārraudzīt, novirzīt vai neatļaut izejošos zvanus."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Ļauj lietotnei skatīt ievadīto tālruņa numuru izejošā zvana laikā un piedāvā iespēju šo zvanu pāradresēt uz citu numuru vai vispār pārtraukt zvanu."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"saņemt īsziņas (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Ļauj lietotnei saņemt un apstrādāt īsziņas. Tas nozīmē, ka lietotne var pārraudzīt vai dzēst uz jūsu ierīci nosūtītos ziņojumus, neparādot tos jums."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"saņemt ziņojumus (MMS)"</string>

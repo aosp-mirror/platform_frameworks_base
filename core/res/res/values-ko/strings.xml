@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"바로가기 제거"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"애플리케이션이 사용자의 작업 없이 홈 화면 바로가기를 삭제할 수 있도록 허용합니다."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"발신전화 경로 전환"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"앱이 발신 전화를 처리하고 전화를 걸 번호를 변경할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 발신 전화를 모니터링, 리디렉션 또는 차단할 수도 있습니다."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"통화를 다른 번호로 리디렉션하거나 통화를 완전히 중단하는 옵션을 사용하여, 앱에서 발신 통화 중에 전화를 거는 번호를 볼 수 있게 허용합니다."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"문자 메시지 받기(SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"앱이 SMS 메시지를 수신하고 처리할 수 있도록 허용합니다. 이는 앱이 사용자에게 표시하지 않고 기기로 전송된 메시지를 모니터링 또는 삭제할 수도 있다는 것을 의미합니다."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"문자 메시지 받기(MMS)"</string>
