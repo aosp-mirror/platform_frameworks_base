@@ -750,10 +750,11 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         mOptions.add(opt);
     }
 
-    // libart tolerates libdvm flags, but not vice versa, so only pass these if libart.
+    // libart tolerates libdvm flags, but not vice versa, so only pass some options if libart.
     property_get("persist.sys.dalvik.vm.lib.1", dalvikVmLibBuf, "libdvm.so");
-    if (strncmp(dalvikVmLibBuf, "libart", 6) == 0) {
+    bool libart = (strncmp(dalvikVmLibBuf, "libart", 6) == 0);
 
+    if (libart) {
         // Extra options for DexClassLoader.
         property_get("dalvik.vm.dex2oat-flags", dex2oatFlagsBuf, "");
         parseExtraOpts(dex2oatFlagsBuf, "-Xcompiler-option");
@@ -784,7 +785,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     /*
      * Set profiler options
      */
-    {
+    if (libart) {
       char period[sizeof("-Xprofile-period:") + PROPERTY_VALUE_MAX];
       char duration[sizeof("-Xprofile-duration:") + PROPERTY_VALUE_MAX];
       char interval[sizeof("-Xprofile-interval:") + PROPERTY_VALUE_MAX];
