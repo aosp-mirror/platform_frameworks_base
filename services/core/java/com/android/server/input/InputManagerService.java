@@ -77,6 +77,7 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
+import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerPolicy;
 import android.widget.Toast;
@@ -703,18 +704,19 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @Override // Binder call & native callback
-    public TouchCalibration getTouchCalibrationForInputDevice(String inputDeviceDescriptor) {
+    public TouchCalibration getTouchCalibrationForInputDevice(String inputDeviceDescriptor,
+            int surfaceRotation) {
         if (inputDeviceDescriptor == null) {
             throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
         }
 
         synchronized (mDataStore) {
-            return mDataStore.getTouchCalibration(inputDeviceDescriptor);
+            return mDataStore.getTouchCalibration(inputDeviceDescriptor, surfaceRotation);
         }
     }
 
     @Override // Binder call
-    public void setTouchCalibrationForInputDevice(String inputDeviceDescriptor,
+    public void setTouchCalibrationForInputDevice(String inputDeviceDescriptor, int surfaceRotation,
             TouchCalibration calibration) {
         if (!checkCallingPermission(android.Manifest.permission.SET_INPUT_CALIBRATION,
                 "setTouchCalibrationForInputDevice()")) {
@@ -726,10 +728,14 @@ public class InputManagerService extends IInputManager.Stub
         if (calibration == null) {
             throw new IllegalArgumentException("calibration must not be null");
         }
+        if (surfaceRotation < Surface.ROTATION_0 || surfaceRotation > Surface.ROTATION_270) {
+            throw new IllegalArgumentException("surfaceRotation value out of bounds");
+        }
 
         synchronized (mDataStore) {
             try {
-                if (mDataStore.setTouchCalibration(inputDeviceDescriptor, calibration)) {
+                if (mDataStore.setTouchCalibration(inputDeviceDescriptor, surfaceRotation,
+                        calibration)) {
                     nativeReloadCalibration(mPtr);
                 }
             } finally {
