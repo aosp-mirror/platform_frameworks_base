@@ -13422,6 +13422,7 @@ package android.media {
 
   public static final class MediaMuxer.OutputFormat {
     field public static final int MUXER_OUTPUT_MPEG_4 = 0; // 0x0
+    field public static final int MUXER_OUTPUT_WEBM = 1; // 0x1
   }
 
   public class MediaPlayer {
