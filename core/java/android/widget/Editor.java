@@ -287,13 +287,12 @@ public class Editor {
     }
 
     private void destroyDisplayListsData() {
-        HardwareRenderer renderer = mTextView.getHardwareRenderer();
         if (mTextDisplayLists != null) {
             for (int i = 0; i < mTextDisplayLists.length; i++) {
                 DisplayList displayList = mTextDisplayLists[i] != null
                         ? mTextDisplayLists[i].displayList : null;
                 if (displayList != null && displayList.isValid()) {
-                    displayList.destroyDisplayListData(renderer);
+                    displayList.destroyDisplayListData();
                 }
             }
         }
