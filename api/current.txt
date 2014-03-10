@@ -4727,6 +4727,7 @@ package android.app.admin {
     method public void onPasswordExpiring(android.content.Context, android.content.Intent);
     method public void onPasswordFailed(android.content.Context, android.content.Intent);
     method public void onPasswordSucceeded(android.content.Context, android.content.Intent);
+    method public void onProfileProvisioningComplete(android.content.Context, android.content.Intent);
     method public void onReceive(android.content.Context, android.content.Intent);
     field public static final java.lang.String ACTION_DEVICE_ADMIN_DISABLED = "android.app.action.DEVICE_ADMIN_DISABLED";
     field public static final java.lang.String ACTION_DEVICE_ADMIN_DISABLE_REQUESTED = "android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED";
@@ -4735,6 +4736,7 @@ package android.app.admin {
     field public static final java.lang.String ACTION_PASSWORD_EXPIRING = "android.app.action.ACTION_PASSWORD_EXPIRING";
     field public static final java.lang.String ACTION_PASSWORD_FAILED = "android.app.action.ACTION_PASSWORD_FAILED";
     field public static final java.lang.String ACTION_PASSWORD_SUCCEEDED = "android.app.action.ACTION_PASSWORD_SUCCEEDED";
+    field public static final java.lang.String ACTION_PROVISIONING_COMPLETE = "android.managedprovisioning.ACTION_PROVISIONING_COMPLETE";
     field public static final java.lang.String DEVICE_ADMIN_META_DATA = "android.app.device_admin";
     field public static final java.lang.String EXTRA_DISABLE_WARNING = "android.app.extra.DISABLE_WARNING";
   }
