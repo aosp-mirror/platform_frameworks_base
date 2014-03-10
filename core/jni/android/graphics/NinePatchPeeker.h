@@ -29,6 +29,7 @@ public:
         // the host lives longer than we do, so a raw ptr is safe
         fHost = host;
         fPatch = NULL;
+        fPatchSize = 0;
         fLayoutBounds = NULL;
     }
 
@@ -38,6 +39,7 @@ public:
     }
 
     Res_png_9patch*  fPatch;
+    size_t fPatchSize;
     int    *fLayoutBounds;
 
     virtual bool peek(const char tag[], const void* data, size_t length);

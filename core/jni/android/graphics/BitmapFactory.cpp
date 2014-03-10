@@ -106,17 +106,19 @@ static void scaleNinePatchChunk(android::Res_png_9patch* chunk, float scale) {
     chunk->paddingRight = int(chunk->paddingRight * scale + 0.5f);
     chunk->paddingBottom = int(chunk->paddingBottom * scale + 0.5f);
 
+    int32_t* xDivs = chunk->getXDivs();
     for (int i = 0; i < chunk->numXDivs; i++) {
-        chunk->xDivs[i] = int(chunk->xDivs[i] * scale + 0.5f);
-        if (i > 0 && chunk->xDivs[i] == chunk->xDivs[i - 1]) {
-            chunk->xDivs[i]++;
+        xDivs[i] = int32_t(xDivs[i] * scale + 0.5f);
+        if (i > 0 && xDivs[i] == xDivs[i - 1]) {
+            xDivs[i]++;
         }
     }
 
+    int32_t* yDivs = chunk->getXDivs();
     for (int i = 0; i < chunk->numYDivs; i++) {
-        chunk->yDivs[i] = int(chunk->yDivs[i] * scale + 0.5f);
-        if (i > 0 && chunk->yDivs[i] == chunk->yDivs[i - 1]) {
-            chunk->yDivs[i]++;
+        yDivs[i] = int32_t(yDivs[i] * scale + 0.5f);
+        if (i > 0 && yDivs[i] == yDivs[i - 1]) {
+            yDivs[i]++;
         }
     }
 }
@@ -365,7 +367,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
             return nullObjectReturn("primitive array == null");
         }
 
-        peeker.fPatch->serialize(array);
+        memcpy(array, peeker.fPatch, peeker.fPatchSize);
         env->ReleasePrimitiveArrayCritical(ninePatchChunk, array, 0);
     }
 

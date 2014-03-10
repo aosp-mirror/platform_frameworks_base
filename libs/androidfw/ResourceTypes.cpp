@@ -118,6 +118,12 @@ static status_t validate_chunk(const ResChunk_header* chunk,
     return BAD_TYPE;
 }
 
+static void fill9patchOffsets(Res_png_9patch* patch) {
+    patch->xDivsOffset = sizeof(Res_png_9patch);
+    patch->yDivsOffset = patch->xDivsOffset + (patch->numXDivs * sizeof(int32_t));
+    patch->colorsOffset = patch->yDivsOffset + (patch->numYDivs * sizeof(int32_t));
+}
+
 inline void Res_value::copyFrom_dtoh(const Res_value& src)
 {
     size = dtohs(src.size);
@@ -128,9 +134,11 @@ inline void Res_value::copyFrom_dtoh(const Res_value& src)
 
 void Res_png_9patch::deviceToFile()
 {
+    int32_t* xDivs = getXDivs();
     for (int i = 0; i < numXDivs; i++) {
         xDivs[i] = htonl(xDivs[i]);
     }
+    int32_t* yDivs = getYDivs();
     for (int i = 0; i < numYDivs; i++) {
         yDivs[i] = htonl(yDivs[i]);
     }
@@ -138,6 +146,7 @@ void Res_png_9patch::deviceToFile()
     paddingRight = htonl(paddingRight);
     paddingTop = htonl(paddingTop);
     paddingBottom = htonl(paddingBottom);
+    uint32_t* colors = getColors();
     for (int i=0; i<numColors; i++) {
         colors[i] = htonl(colors[i]);
     }
@@ -145,9 +154,11 @@ void Res_png_9patch::deviceToFile()
 
 void Res_png_9patch::fileToDevice()
 {
+    int32_t* xDivs = getXDivs();
     for (int i = 0; i < numXDivs; i++) {
         xDivs[i] = ntohl(xDivs[i]);
     }
+    int32_t* yDivs = getYDivs();
     for (int i = 0; i < numYDivs; i++) {
         yDivs[i] = ntohl(yDivs[i]);
     }
@@ -155,60 +166,49 @@ void Res_png_9patch::fileToDevice()
     paddingRight = ntohl(paddingRight);
     paddingTop = ntohl(paddingTop);
     paddingBottom = ntohl(paddingBottom);
+    uint32_t* colors = getColors();
     for (int i=0; i<numColors; i++) {
         colors[i] = ntohl(colors[i]);
     }
 }
 
-size_t Res_png_9patch::serializedSize()
+size_t Res_png_9patch::serializedSize() const
 {
     // The size of this struct is 32 bytes on the 32-bit target system
     // 4 * int8_t
     // 4 * int32_t
-    // 3 * pointer
+    // 3 * uint32_t
     return 32
             + numXDivs * sizeof(int32_t)
             + numYDivs * sizeof(int32_t)
             + numColors * sizeof(uint32_t);
 }
 
-void* Res_png_9patch::serialize()
+void* Res_png_9patch::serialize(const Res_png_9patch& patch, const int32_t* xDivs,
+                                const int32_t* yDivs, const uint32_t* colors)
 {
     // Use calloc since we're going to leave a few holes in the data
     // and want this to run cleanly under valgrind
-    void* newData = calloc(1, serializedSize());
-    serialize(newData);
+    void* newData = calloc(1, patch.serializedSize());
+    serialize(patch, xDivs, yDivs, colors, newData);
     return newData;
 }
 
-void Res_png_9patch::serialize(void * outData)
+void Res_png_9patch::serialize(const Res_png_9patch& patch, const int32_t* xDivs,
+                               const int32_t* yDivs, const uint32_t* colors, void* outData)
 {
-    char* data = (char*) outData;
-    memmove(data, &wasDeserialized, 4);     // copy  wasDeserialized, numXDivs, numYDivs, numColors
-    memmove(data + 12, &paddingLeft, 16);   // copy paddingXXXX
+    uint8_t* data = (uint8_t*) outData;
+    memcpy(data, &patch.wasDeserialized, 4);     // copy  wasDeserialized, numXDivs, numYDivs, numColors
+    memcpy(data + 12, &patch.paddingLeft, 16);   // copy paddingXXXX
     data += 32;
 
-    memmove(data, this->xDivs, numXDivs * sizeof(int32_t));
-    data +=  numXDivs * sizeof(int32_t);
-    memmove(data, this->yDivs, numYDivs * sizeof(int32_t));
-    data +=  numYDivs * sizeof(int32_t);
-    memmove(data, this->colors, numColors * sizeof(uint32_t));
-}
+    memcpy(data, xDivs, patch.numXDivs * sizeof(int32_t));
+    data +=  patch.numXDivs * sizeof(int32_t);
+    memcpy(data, yDivs, patch.numYDivs * sizeof(int32_t));
+    data +=  patch.numYDivs * sizeof(int32_t);
+    memcpy(data, colors, patch.numColors * sizeof(uint32_t));
 
-static void deserializeInternal(const void* inData, Res_png_9patch* outData) {
-    char* patch = (char*) inData;
-    if (inData != outData) {
-        memmove(&outData->wasDeserialized, patch, 4);     // copy  wasDeserialized, numXDivs, numYDivs, numColors
-        memmove(&outData->paddingLeft, patch + 12, 4);     // copy  wasDeserialized, numXDivs, numYDivs, numColors
-    }
-    outData->wasDeserialized = true;
-    char* data = (char*)outData;
-    data +=  sizeof(Res_png_9patch);
-    outData->xDivs = (int32_t*) data;
-    data +=  outData->numXDivs * sizeof(int32_t);
-    outData->yDivs = (int32_t*) data;
-    data +=  outData->numYDivs * sizeof(int32_t);
-    outData->colors = (uint32_t*) data;
+    fill9patchOffsets(reinterpret_cast<Res_png_9patch*>(outData));
 }
 
 static bool assertIdmapHeader(const uint32_t* map, size_t sizeBytes)
@@ -312,14 +312,14 @@ static status_t getIdmapPackageId(const uint32_t* map, size_t mapSize, uint32_t 
     return NO_ERROR;
 }
 
-Res_png_9patch* Res_png_9patch::deserialize(const void* inData)
+Res_png_9patch* Res_png_9patch::deserialize(void* inData)
 {
-    if (sizeof(void*) != sizeof(int32_t)) {
-        ALOGE("Cannot deserialize on non 32-bit system\n");
-        return NULL;
-    }
-    deserializeInternal(inData, (Res_png_9patch*) inData);
-    return (Res_png_9patch*) inData;
+
+    Res_png_9patch* patch = reinterpret_cast<Res_png_9patch*>(inData);
+    patch->wasDeserialized = true;
+    fill9patchOffsets(patch);
+
+    return patch;
 }
 
 // --------------------------------------------------------------------
