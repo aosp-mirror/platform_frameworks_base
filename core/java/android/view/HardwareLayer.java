@@ -88,7 +88,7 @@ final class HardwareLayer {
         }
 
         if (mDisplayList != null) {
-            mDisplayList.destroyDisplayListData(mRenderer);
+            mDisplayList.destroyDisplayListData();
             mDisplayList = null;
         }
         if (mRenderer != null) {

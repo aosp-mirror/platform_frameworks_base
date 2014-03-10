@@ -14062,13 +14062,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private void resetDisplayList() {
-        HardwareRenderer renderer = getHardwareRenderer();
         if (mDisplayList != null && mDisplayList.isValid()) {
-            mDisplayList.destroyDisplayListData(renderer);
+            mDisplayList.destroyDisplayListData();
         }
 
         if (mBackgroundDisplayList != null && mBackgroundDisplayList.isValid()) {
-            mBackgroundDisplayList.destroyDisplayListData(renderer);
+            mBackgroundDisplayList.destroyDisplayListData();
         }
     }
 
