@@ -42,12 +42,10 @@
 
     <!-- BatteryMeterView parameters -->
     <array name="batterymeter_color_levels">
-        <item>4</item>
         <item>15</item>
         <item>100</item>
     </array>
     <array name="batterymeter_color_values">
-        <item>#FFFF3300</item>
         <item>#FFFF3300</item>
         <item>#FFFFFFFF</item>
     </array>

@@ -59,15 +59,15 @@
     <string name="status_bar_latest_events_title">Notifications</string>
 
     <!-- When the battery is low, this is displayed to the user in a dialog.  The title of the low battery alert.  [CHAR LIMIT=NONE]-->
-    <string name="battery_low_title">Connect charger</string>
-
-    <!-- When the battery is low, this is displayed to the user in a dialog. The subtitle of the low battery alert. [CHAR LIMIT=NONE] -->
-    <string name="battery_low_subtitle">The battery is getting low.</string>
+    <string name="battery_low_title">Battery is low</string>
 
     <!-- A message that appears when the battery level is getting low in a dialog.  This is
         appened to the subtitle of the low battery alert.  "number" is the percentage of battery
         remaining [CHAR LIMIT=none]-->
     <string name="battery_low_percent_format"><xliff:g id="number">%d%%</xliff:g> remaining</string>
+
+    <!-- Same as battery_low_percent_format, with a notice about battery saver if on. [CHAR LIMIT=none]-->
+    <string name="battery_low_percent_format_saver_started"><xliff:g id="number">%d%%</xliff:g> remaining. Battery saver is on.</string>
 
     <!-- A message that appears when a USB charger is plugged in and the device does not
     support charging on it.  That is, a charger that fits into the USB port and goes into
@@ -75,9 +75,27 @@
     current than the USB spec allows.  [CHAR LIMIT=NONE] -->
     <string name="invalid_charger">USB charging not supported.\nUse only the supplied charger.</string>
 
+    <!-- First line of invalid_charger, used in the notification form.  [CHAR LIMIT=NONE]-->
+    <string name="invalid_charger_title">USB charging not supported.</string>
+
+    <!-- Second line of invalid_charger, used in the notification form.  [CHAR LIMIT=NONE]-->
+    <string name="invalid_charger_text">Use only the supplied charger.</string>
+
     <!-- When the battery is low, this is the label of the button to go to the
          power usage activity to find out what drained the battery.  [CHAR LIMIT=30] -->
-    <string name="battery_low_why">Battery use</string>
+    <string name="battery_low_why">Settings</string>
+
+    <!-- Battery saver confirmation dialog title [CHAR LIMIT=NONE]-->
+    <string name="battery_saver_confirmation_title">Start battery saver?</string>
+
+    <!-- Battery saver confirmation dialog ok text [CHAR LIMIT=40]-->
+    <string name="battery_saver_confirmation_ok">Start</string>
+
+    <!-- Battery saver notification action [CHAR LIMIT=NONE]-->
+    <string name="battery_saver_start_action">Start battery saver</string>
+
+    <!-- Battery saver confirmation dialog text [CHAR LIMIT=NONE]-->
+    <string name="battery_saver_confirmation_text">To help improve battery life, Battery saver will reduce your device’s performance.\n\nBattery saver will be disabled when your device is plugged in.</string>
 
     <!-- Name of the button that links to the Settings app. [CHAR LIMIT=NONE] -->
     <string name="status_bar_settings_settings_button">Settings</string>
@@ -595,4 +613,13 @@
         <item quantity="one">For one hour</item>
         <item quantity="other">For %d hours</item>
     </plurals>
+
+    <!-- Battery saver notification title. [CHAR LIMIT=60]-->
+    <string name="battery_saver_notification_title">Battery saver is on</string>
+
+    <!-- Battery saver notification text. [CHAR LIMIT=60] -->
+    <string name="battery_saver_notification_text">Device performance is reduced.</string>
+
+    <!-- Battery saver notification action text. [CHAR LIMIT=60] -->
+    <string name="battery_saver_notification_action_text">Open battery saver settings</string>
 </resources>

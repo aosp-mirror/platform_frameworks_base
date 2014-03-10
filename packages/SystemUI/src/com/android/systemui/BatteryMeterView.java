@@ -25,8 +25,6 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.BatteryManager;
@@ -44,7 +42,6 @@ public class BatteryMeterView extends View implements DemoMode {
     private static final boolean SHOW_100_PERCENT = false;
 
     private static final int FULL = 96;
-    private static final int EMPTY = 4;
 
     private static final float SUBPIXEL = 0.4f;  // inset rects for softer edges
     private static final float BOLT_LEVEL_THRESHOLD = 0.3f;  // opaque bolt below this fraction
@@ -58,6 +55,7 @@ public class BatteryMeterView extends View implements DemoMode {
     private int mHeight;
     private int mWidth;
     private String mWarningString;
+    private final int mCriticalLevel;
     private final int mChargeColor;
     private final float[] mBoltPoints;
     private final Path mBoltPath = new Path();
@@ -197,6 +195,8 @@ public class BatteryMeterView extends View implements DemoMode {
         mShowPercent = ENABLE_PERCENT && 0 != Settings.System.getInt(
                 context.getContentResolver(), "status_bar_show_battery_percent", 0);
         mWarningString = context.getString(R.string.battery_meter_very_low_overlay_symbol);
+        mCriticalLevel = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_criticalBatteryWarningLevel);
 
         mFramePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mFramePaint.setColor(frameColor);
@@ -303,7 +303,7 @@ public class BatteryMeterView extends View implements DemoMode {
 
         if (level >= FULL) {
             drawFrac = 1f;
-        } else if (level <= EMPTY) {
+        } else if (level <= mCriticalLevel) {
             drawFrac = 0f;
         }
 
@@ -360,7 +360,7 @@ public class BatteryMeterView extends View implements DemoMode {
         boolean pctOpaque = false;
         float pctX = 0, pctY = 0;
         String pctText = null;
-        if (!tracker.plugged && level > EMPTY && mShowPercent
+        if (!tracker.plugged && level > mCriticalLevel && mShowPercent
                 && !(tracker.level == 100 && !SHOW_100_PERCENT)) {
             mTextPaint.setColor(getColorForLevel(level));
             mTextPaint.setTextSize(height *
@@ -390,7 +390,7 @@ public class BatteryMeterView extends View implements DemoMode {
         c.drawPath(mShapePath, mBatteryPaint);
 
         if (!tracker.plugged) {
-            if (level <= EMPTY) {
+            if (level <= mCriticalLevel) {
                 // draw the warning text
                 final float x = mWidth * 0.5f;
                 final float y = (mHeight + mWarningTextHeight) * 0.48f;
