@@ -41,8 +41,8 @@ interface IInputManager {
     boolean injectInputEvent(in InputEvent ev, int mode);
 
     // Calibrate input device position
-    TouchCalibration getTouchCalibrationForInputDevice(String inputDeviceDescriptor);
-    void setTouchCalibrationForInputDevice(String inputDeviceDescriptor,
+    TouchCalibration getTouchCalibrationForInputDevice(String inputDeviceDescriptor, int rotation);
+    void setTouchCalibrationForInputDevice(String inputDeviceDescriptor, int rotation,
             in TouchCalibration calibration);
 
     // Keyboard layouts configuration.
