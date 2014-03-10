@@ -36,4 +36,6 @@ interface IAppOpsService {
     List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, in int[] ops);
     void setMode(int code, int uid, String packageName, int mode);
     void resetAllModes();
+    int checkAudioOperation(int code, int stream, int uid, String packageName);
+    void setAudioRestriction(int code, int stream, int uid, int mode, in String[] exceptionPackages);
 }

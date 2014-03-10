@@ -853,13 +853,21 @@ public final class InputManager {
             return true;
         }
 
+        /**
+         * @hide
+         */
         @Override
-        public void vibrate(long milliseconds) {
+        public void vibrate(int owningUid, String owningPackage, long milliseconds,
+                int streamHint) {
             vibrate(new long[] { 0, milliseconds}, -1);
         }
 
+        /**
+         * @hide
+         */
         @Override
-        public void vibrate(long[] pattern, int repeat) {
+        public void vibrate(int owningUid, String owningPackage, long[] pattern, int repeat,
+                int streamHint) {
             if (repeat >= pattern.length) {
                 throw new ArrayIndexOutOfBoundsException();
             }
@@ -868,22 +876,6 @@ public final class InputManager {
             } catch (RemoteException ex) {
                 Log.w(TAG, "Failed to vibrate.", ex);
             }
-        }
-
-        /**
-         * @hide
-         */
-        @Override
-        public void vibrate(int owningUid, String owningPackage, long milliseconds) {
-            vibrate(milliseconds);
-        }
-
-        /**
-         * @hide
-         */
-        @Override
-        public void vibrate(int owningUid, String owningPackage, long[] pattern, int repeat) {
-            vibrate(pattern, repeat);
         }
 
         @Override

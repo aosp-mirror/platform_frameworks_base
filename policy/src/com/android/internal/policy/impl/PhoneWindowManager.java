@@ -5083,10 +5083,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         if (pattern.length == 1) {
             // One-shot vibration
-            mVibrator.vibrate(owningUid, owningPackage, pattern[0]);
+            mVibrator.vibrate(owningUid, owningPackage, pattern[0], AudioManager.STREAM_SYSTEM);
         } else {
             // Pattern vibration
-            mVibrator.vibrate(owningUid, owningPackage, pattern, -1);
+            mVibrator.vibrate(owningUid, owningPackage, pattern, -1, AudioManager.STREAM_SYSTEM);
         }
         return true;
     }

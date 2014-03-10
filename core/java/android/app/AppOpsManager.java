@@ -780,6 +780,25 @@ public class AppOpsManager {
         }
     }
 
+    /**
+     * Set a non-persisted restriction on an audio operation at a stream-level.
+     * Restrictions are temporary additional constraints imposed on top of the persisted rules
+     * defined by {@link #setMode}.
+     *
+     * @param code The operation to restrict.
+     * @param stream The {@link android.media.AudioManager} stream type.
+     * @param mode The restriction mode (MODE_IGNORED,MODE_ERRORED) or MODE_ALLOWED to unrestrict.
+     * @param exceptionPackages Optional list of packages to exclude from the restriction.
+     * @hide
+     */
+    public void setRestriction(int code, int stream, int mode, String[] exceptionPackages) {
+        try {
+            final int uid = Binder.getCallingUid();
+            mService.setAudioRestriction(code, stream, uid, mode, exceptionPackages);
+        } catch (RemoteException e) {
+        }
+    }
+
     /** @hide */
     public void resetAllModes() {
         try {
@@ -1006,6 +1025,35 @@ public class AppOpsManager {
         } catch (RemoteException e) {
             throw new SecurityException("Unable to verify package ownership", e);
         }
+    }
+
+    /**
+     * Like {@link #checkOp} but at a stream-level for audio operations.
+     * @hide
+     */
+    public int checkAudioOp(int op, int stream, int uid, String packageName) {
+        try {
+            final int mode = mService.checkAudioOperation(op, stream, uid, packageName);
+            if (mode == MODE_ERRORED) {
+                throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
+            }
+            return mode;
+        } catch (RemoteException e) {
+        }
+        return MODE_IGNORED;
+    }
+
+    /**
+     * Like {@link #checkAudioOp} but instead of throwing a {@link SecurityException} it
+     * returns {@link #MODE_ERRORED}.
+     * @hide
+     */
+    public int checkAudioOpNoThrow(int op, int stream, int uid, String packageName) {
+        try {
+            return mService.checkAudioOperation(op, stream, uid, packageName);
+        } catch (RemoteException e) {
+        }
+        return MODE_IGNORED;
     }
 
     /**

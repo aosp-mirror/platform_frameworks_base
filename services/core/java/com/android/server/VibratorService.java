@@ -84,24 +84,27 @@ public class VibratorService extends IVibratorService.Stub
         private final long    mStartTime;
         private final long[]  mPattern;
         private final int     mRepeat;
+        private final int     mStreamHint;
         private final int     mUid;
         private final String  mPackageName;
 
-        Vibration(IBinder token, long millis, int uid, String packageName) {
-            this(token, millis, null, 0, uid, packageName);
+        Vibration(IBinder token, long millis, int streamHint, int uid, String packageName) {
+            this(token, millis, null, 0, streamHint, uid, packageName);
         }
 
-        Vibration(IBinder token, long[] pattern, int repeat, int uid, String packageName) {
-            this(token, 0, pattern, repeat, uid, packageName);
+        Vibration(IBinder token, long[] pattern, int repeat, int streamHint, int uid,
+                String packageName) {
+            this(token, 0, pattern, repeat, streamHint, uid, packageName);
         }
 
         private Vibration(IBinder token, long millis, long[] pattern,
-                int repeat, int uid, String packageName) {
+                int repeat, int streamHint, int uid, String packageName) {
             mToken = token;
             mTimeout = millis;
             mStartTime = SystemClock.uptimeMillis();
             mPattern = pattern;
             mRepeat = repeat;
+            mStreamHint = streamHint;
             mUid = uid;
             mPackageName = packageName;
         }
@@ -191,7 +194,8 @@ public class VibratorService extends IVibratorService.Stub
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
     }
 
-    public void vibrate(int uid, String packageName, long milliseconds, IBinder token) {
+    public void vibrate(int uid, String packageName, long milliseconds, int streamHint,
+            IBinder token) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires VIBRATE permission");
@@ -207,7 +211,7 @@ public class VibratorService extends IVibratorService.Stub
             return;
         }
 
-        Vibration vib = new Vibration(token, milliseconds, uid, packageName);
+        Vibration vib = new Vibration(token, milliseconds, streamHint, uid, packageName);
 
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -233,7 +237,7 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     public void vibratePattern(int uid, String packageName, long[] pattern, int repeat,
-            IBinder token) {
+            int streamHint, IBinder token) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires VIBRATE permission");
@@ -258,7 +262,7 @@ public class VibratorService extends IVibratorService.Stub
                 return;
             }
 
-            Vibration vib = new Vibration(token, pattern, repeat, uid, packageName);
+            Vibration vib = new Vibration(token, pattern, repeat, streamHint, uid, packageName);
             try {
                 token.linkToDeath(vib, 0);
             } catch (RemoteException e) {
@@ -342,8 +346,12 @@ public class VibratorService extends IVibratorService.Stub
     // Lock held on mVibrations
     private void startVibrationLocked(final Vibration vib) {
         try {
-            int mode = mAppOpsService.startOperation(AppOpsManager.getToken(mAppOpsService),
+            int mode = mAppOpsService.checkAudioOperation(AppOpsManager.OP_VIBRATE,
+                    vib.mStreamHint, vib.mUid, vib.mPackageName);
+            if (mode == AppOpsManager.MODE_ALLOWED) {
+                mode = mAppOpsService.startOperation(AppOpsManager.getToken(mAppOpsService),
                     AppOpsManager.OP_VIBRATE, vib.mUid, vib.mPackageName);
+            }
             if (mode != AppOpsManager.MODE_ALLOWED) {
                 if (mode == AppOpsManager.MODE_ERRORED) {
                     Slog.w(TAG, "Would be an error: vibrate from uid " + vib.mUid);

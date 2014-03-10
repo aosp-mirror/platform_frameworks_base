@@ -23,10 +23,19 @@ import java.nio.ByteBuffer;
 import java.nio.NioUtils;
 
 import android.annotation.IntDef;
+import android.app.ActivityThread;
+import android.app.AppOpsManager;
+import android.content.Context;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
+
+import com.android.internal.app.IAppOpsService;
 
 
 /**
@@ -239,7 +248,10 @@ public class AudioTrack
      * Audio session ID
      */
     private int mSessionId = AudioSystem.AUDIO_SESSION_ALLOCATE;
-
+    /**
+     * Reference to the app-ops service.
+     */
+    private final IAppOpsService mAppOps;
 
     //--------------------------------
     // Used exclusively by native code
@@ -342,6 +354,9 @@ public class AudioTrack
         audioParamCheck(streamType, sampleRateInHz, channelConfig, audioFormat, mode);
 
         audioBuffSizeCheck(bufferSizeInBytes);
+
+        IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
+        mAppOps = IAppOpsService.Stub.asInterface(b);
 
         if (sessionId < 0) {
             throw new IllegalArgumentException("Invalid audio session ID: "+sessionId);
@@ -841,6 +856,9 @@ public class AudioTrack
      *    {@link #ERROR_INVALID_OPERATION}
      */
     public int setStereoVolume(float leftVolume, float rightVolume) {
+        if (isRestricted()) {
+            return SUCCESS;
+        }
         if (mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
@@ -1014,10 +1032,22 @@ public class AudioTrack
         if (mState != STATE_INITIALIZED) {
             throw new IllegalStateException("play() called on uninitialized AudioTrack.");
         }
-
+        if (isRestricted()) {
+            setVolume(0);
+        }
         synchronized(mPlayStateLock) {
             native_start();
             mPlayState = PLAYSTATE_PLAYING;
+        }
+    }
+
+    private boolean isRestricted() {
+        try {
+            final int mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO, mStreamType,
+                    Process.myUid(), ActivityThread.currentPackageName());
+            return mode != AppOpsManager.MODE_ALLOWED;
+        } catch (RemoteException e) {
+            return false;
         }
     }
 
@@ -1296,6 +1326,9 @@ public class AudioTrack
      *    {@link #ERROR_INVALID_OPERATION}
      */
     public int setAuxEffectSendLevel(float level) {
+        if (isRestricted()) {
+            return SUCCESS;
+        }
         if (mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
