@@ -58,6 +58,24 @@ import java.util.concurrent.atomic.AtomicInteger;
  * argument of {@link android.content.Context#STORAGE_SERVICE}.
  */
 public class StorageManager {
+
+    /// Consts to match the password types in cryptfs.h
+    /** Master key is encrypted with a password.
+     */
+    public static final int CRYPT_TYPE_PASSWORD = 0;
+
+    /** Master key is encrypted with the default password.
+     */
+    public static final int CRYPT_TYPE_DEFAULT = 1;
+
+    /** Master key is encrypted with a pattern.
+     */
+    public static final int CRYPT_TYPE_PATTERN = 2;
+
+    /** Master key is encrypted with a pin.
+     */
+    public static final int CRYPT_TYPE_PIN = 3;
+
     private static final String TAG = "StorageManager";
 
     private final ContentResolver mResolver;
@@ -645,14 +663,4 @@ public class StorageManager {
         return Settings.Global.getLong(mResolver, Settings.Global.SYS_STORAGE_FULL_THRESHOLD_BYTES,
                 DEFAULT_FULL_THRESHOLD_BYTES);
     }
-
-    /// Consts to match the password types in cryptfs.h
-    /** @hide */
-    public static final int CRYPT_TYPE_PASSWORD = 0;
-    /** @hide */
-    public static final int CRYPT_TYPE_DEFAULT = 1;
-    /** @hide */
-    public static final int CRYPT_TYPE_PATTERN = 2;
-    /** @hide */
-    public static final int CRYPT_TYPE_PIN = 3;
 }
