@@ -4736,7 +4736,7 @@ package android.app.admin {
     field public static final java.lang.String ACTION_PASSWORD_EXPIRING = "android.app.action.ACTION_PASSWORD_EXPIRING";
     field public static final java.lang.String ACTION_PASSWORD_FAILED = "android.app.action.ACTION_PASSWORD_FAILED";
     field public static final java.lang.String ACTION_PASSWORD_SUCCEEDED = "android.app.action.ACTION_PASSWORD_SUCCEEDED";
-    field public static final java.lang.String ACTION_PROVISIONING_COMPLETE = "android.managedprovisioning.ACTION_PROVISIONING_COMPLETE";
+    field public static final java.lang.String ACTION_PROFILE_PROVISIONING_COMPLETE = "android.managedprovisioning.ACTION_PROVISIONING_COMPLETE";
     field public static final java.lang.String DEVICE_ADMIN_META_DATA = "android.app.device_admin";
     field public static final java.lang.String EXTRA_DISABLE_WARNING = "android.app.extra.DISABLE_WARNING";
   }
