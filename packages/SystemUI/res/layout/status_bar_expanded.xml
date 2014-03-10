@@ -92,6 +92,12 @@
                     systemui:rowHeight="@dimen/notification_row_min_height"
                     />
             </ScrollView>
+
+            <com.android.systemui.statusbar.stack.NotificationStackScrollLayout
+                    android:id="@+id/notification_stack_scroller"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
         </FrameLayout>
     </LinearLayout>
 </com.android.systemui.statusbar.phone.NotificationPanelView><!-- end of sliding panel -->
