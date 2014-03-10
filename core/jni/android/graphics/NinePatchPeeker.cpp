@@ -28,11 +28,11 @@ bool NinePatchPeeker::peek(const char tag[], const void* data, size_t length) {
         // You have to copy the data because it is owned by the png reader
         Res_png_9patch* patchNew = (Res_png_9patch*) malloc(patchSize);
         memcpy(patchNew, patch, patchSize);
-        // this relies on deserialization being done in place
         Res_png_9patch::deserialize(patchNew);
         patchNew->fileToDevice();
         free(fPatch);
         fPatch = patchNew;
+        fPatchSize = patchSize;
         //printf("9patch: (%d,%d)-(%d,%d)\n",
         //       fPatch.sizeLeft, fPatch.sizeTop,
         //       fPatch.sizeRight, fPatch.sizeBottom);

@@ -57,7 +57,7 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
     if (vertices) return vertices;
 
     int8_t emptyQuads = 0;
-    mColors = patch->colors;
+    mColors = patch->getColors();
 
     const int8_t numColors = patch->numColors;
     if (uint8_t(numColors) < sizeof(uint32_t) * 4) {
@@ -79,8 +79,8 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
     TextureVertex* tempVertices = new TextureVertex[maxVertices];
     TextureVertex* vertex = tempVertices;
 
-    const int32_t* xDivs = patch->xDivs;
-    const int32_t* yDivs = patch->yDivs;
+    const int32_t* xDivs = patch->getXDivs();
+    const int32_t* yDivs = patch->getYDivs();
 
     const uint32_t xStretchCount = (xCount + 1) >> 1;
     const uint32_t yStretchCount = (yCount + 1) >> 1;
