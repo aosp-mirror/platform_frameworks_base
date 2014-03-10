@@ -35,7 +35,9 @@ png_flush_aapt_file(png_structp png_ptr)
 // This holds an image as 8bpp RGBA.
 struct image_info
 {
-    image_info() : rows(NULL), is9Patch(false), allocRows(NULL) { }
+    image_info() : rows(NULL), is9Patch(false),
+        xDivs(NULL), yDivs(NULL), colors(NULL), allocRows(NULL) { }
+
     ~image_info() {
         if (rows && rows != allocRows) {
             free(rows);
@@ -46,9 +48,15 @@ struct image_info
             }
             free(allocRows);
         }
-        free(info9Patch.xDivs);
-        free(info9Patch.yDivs);
-        free(info9Patch.colors);
+        free(xDivs);
+        free(yDivs);
+        free(colors);
+    }
+
+    void* serialize9patch() {
+        void* serialized = Res_png_9patch::serialize(info9Patch, xDivs, yDivs, colors);
+        reinterpret_cast<Res_png_9patch*>(serialized)->deviceToFile();
+        return serialized;
     }
 
     png_uint_32 width;
@@ -58,6 +66,9 @@ struct image_info
     // 9-patch info.
     bool is9Patch;
     Res_png_9patch info9Patch;
+    int32_t* xDivs;
+    int32_t* yDivs;
+    uint32_t* colors;
 
     // Layout padding, if relevant
     bool haveLayoutBounds;
@@ -440,10 +451,10 @@ static uint32_t get_color(image_info* image, int hpatch, int vpatch)
 {
     int left, right, top, bottom;
     select_patch(
-        hpatch, image->info9Patch.xDivs[0], image->info9Patch.xDivs[1],
+        hpatch, image->xDivs[0], image->xDivs[1],
         image->width, &left, &right);
     select_patch(
-        vpatch, image->info9Patch.yDivs[0], image->info9Patch.yDivs[1],
+        vpatch, image->yDivs[0], image->yDivs[1],
         image->height, &top, &bottom);
     //printf("Selecting h=%d v=%d: (%d,%d)-(%d,%d)\n",
     //       hpatch, vpatch, left, top, right, bottom);
@@ -462,10 +473,11 @@ static status_t do_9patch(const char* imageName, image_info* image)
 
     int maxSizeXDivs = W * sizeof(int32_t);
     int maxSizeYDivs = H * sizeof(int32_t);
-    int32_t* xDivs = image->info9Patch.xDivs = (int32_t*) malloc(maxSizeXDivs);
-    int32_t* yDivs = image->info9Patch.yDivs = (int32_t*) malloc(maxSizeYDivs);
-    uint8_t  numXDivs = 0;
-    uint8_t  numYDivs = 0;
+    int32_t* xDivs = image->xDivs = (int32_t*) malloc(maxSizeXDivs);
+    int32_t* yDivs = image->yDivs = (int32_t*) malloc(maxSizeYDivs);
+    uint8_t numXDivs = 0;
+    uint8_t numYDivs = 0;
+
     int8_t numColors;
     int numRows;
     int numCols;
@@ -618,7 +630,7 @@ static status_t do_9patch(const char* imageName, image_info* image)
 
     numColors = numRows * numCols;
     image->info9Patch.numColors = numColors;
-    image->info9Patch.colors = (uint32_t*)malloc(numColors * sizeof(uint32_t));
+    image->colors = (uint32_t*)malloc(numColors * sizeof(uint32_t));
 
     // Fill in color information for each patch.
 
@@ -661,7 +673,7 @@ static status_t do_9patch(const char* imageName, image_info* image)
                 right = xDivs[i];
             }
             c = get_color(image->rows, left, top, right - 1, bottom - 1);
-            image->info9Patch.colors[colorIndex++] = c;
+            image->colors[colorIndex++] = c;
             NOISY(if (c != Res_png_9patch::NO_COLOR) hasColor = true);
             left = right;
         }
@@ -673,14 +685,10 @@ static status_t do_9patch(const char* imageName, image_info* image)
     for (i=0; i<numColors; i++) {
         if (hasColor) {
             if (i == 0) printf("Colors in %s:\n ", imageName);
-            printf(" #%08x", image->info9Patch.colors[i]);
+            printf(" #%08x", image->colors[i]);
             if (i == numColors - 1) printf("\n");
         }
     }
-
-    image->is9Patch = true;
-    image->info9Patch.deviceToFile();
-
 getout:
     if (errorMsg) {
         fprintf(stderr,
@@ -700,14 +708,10 @@ getout:
     return NO_ERROR;
 }
 
-static void checkNinePatchSerialization(Res_png_9patch* inPatch,  void * data)
+static void checkNinePatchSerialization(Res_png_9patch* inPatch,  void* data)
 {
-    if (sizeof(void*) != sizeof(int32_t)) {
-        // can't deserialize on a non-32 bit system
-        return;
-    }
     size_t patchSize = inPatch->serializedSize();
-    void * newData = malloc(patchSize);
+    void* newData = malloc(patchSize);
     memcpy(newData, data, patchSize);
     Res_png_9patch* outPatch = inPatch->deserialize(newData);
     // deserialization is done in place, so outPatch == newData
@@ -728,34 +732,6 @@ static void checkNinePatchSerialization(Res_png_9patch* inPatch,  void * data)
         assert(outPatch->colors[i] == inPatch->colors[i]);
     }
     free(newData);
-}
-
-static bool patch_equals(Res_png_9patch& patch1, Res_png_9patch& patch2) {
-    if (!(patch1.numXDivs == patch2.numXDivs &&
-          patch1.numYDivs == patch2.numYDivs &&
-          patch1.numColors == patch2.numColors &&
-          patch1.paddingLeft == patch2.paddingLeft &&
-          patch1.paddingRight == patch2.paddingRight &&
-          patch1.paddingTop == patch2.paddingTop &&
-          patch1.paddingBottom == patch2.paddingBottom)) {
-            return false;
-    }
-    for (int i = 0; i < patch1.numColors; i++) {
-        if (patch1.colors[i] != patch2.colors[i]) {
-            return false;
-        }
-    }
-    for (int i = 0; i < patch1.numXDivs; i++) {
-        if (patch1.xDivs[i] != patch2.xDivs[i]) {
-            return false;
-        }
-    }
-    for (int i = 0; i < patch1.numYDivs; i++) {
-        if (patch1.yDivs[i] != patch2.yDivs[i]) {
-            return false;
-        }
-    }
-    return true;
 }
 
 static void dump_image(int w, int h, png_bytepp rows, int color_type)
@@ -1070,7 +1046,7 @@ static void write_png(const char* imageName,
                 : (png_byte*)"npTc";
         NOISY(printf("Adding 9-patch info...\n"));
         strcpy((char*)unknowns[p_index].name, "npTc");
-        unknowns[p_index].data = (png_byte*)imageInfo.info9Patch.serialize();
+        unknowns[p_index].data = (png_byte*)imageInfo.serialize9patch();
         unknowns[p_index].size = imageInfo.info9Patch.serializedSize();
         // TODO: remove the check below when everything works
         checkNinePatchSerialization(&imageInfo.info9Patch, unknowns[p_index].data);
