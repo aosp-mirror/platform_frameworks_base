@@ -341,8 +341,19 @@ final class ActivityStack {
         mCurrentUser = mService.mCurrentUserId;
     }
 
-    boolean okToShow(ActivityRecord r) {
-        return r.userId == mCurrentUser
+    /**
+     * Checks whether the userid is either the current user or a related user.
+     */
+    private boolean isRelatedToOrCurrentUserLocked(int userId) {
+        if (mCurrentUser == userId) return true;
+        for (int i = 0; i < mService.mRelatedUserIds.length; i++) {
+            if (mService.mRelatedUserIds[i] == userId) return true;
+        }
+        return false;
+    }
+
+    boolean okToShowLocked(ActivityRecord r) {
+        return isRelatedToOrCurrentUserLocked(r.userId)
                 || (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0;
     }
 
@@ -362,7 +373,7 @@ final class ActivityStack {
             final ArrayList<ActivityRecord> activities = task.mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 ActivityRecord r = activities.get(activityNdx);
-                if (!r.finishing && !r.delayedResume && r != notTop && okToShow(r)) {
+                if (!r.finishing && !r.delayedResume && r != notTop && okToShowLocked(r)) {
                     return r;
                 }
             }
@@ -389,7 +400,7 @@ final class ActivityStack {
             for (int i = activities.size() - 1; i >= 0; --i) {
                 final ActivityRecord r = activities.get(i);
                 // Note: the taskId check depends on real taskId fields being non-zero
-                if (!r.finishing && (token != r.appToken) && okToShow(r)) {
+                if (!r.finishing && (token != r.appToken) && okToShowLocked(r)) {
                     return r;
                 }
             }
@@ -542,7 +553,7 @@ final class ActivityStack {
 
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             TaskRecord task = mTaskHistory.get(taskNdx);
-            if (task.userId != mCurrentUser) {
+            if (!isRelatedToOrCurrentUserLocked(task.userId)) {
                 return null;
             }
             final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -573,7 +584,7 @@ final class ActivityStack {
         int index = mTaskHistory.size();
         for (int i = 0; i < index; ) {
             TaskRecord task = mTaskHistory.get(i);
-            if (task.userId == userId) {
+            if (isRelatedToOrCurrentUserLocked(task.userId)) {
                 if (DEBUG_TASKS) Slog.d(TAG, "switchUserLocked: stack=" + getStackId() +
                         " moving " + task + " to top");
                 mTaskHistory.remove(i);
@@ -1728,10 +1739,10 @@ final class ActivityStack {
         mTaskHistory.remove(task);
         // Now put task at top.
         int stackNdx = mTaskHistory.size();
-        if (task.userId != mCurrentUser) {
+        if (!isRelatedToOrCurrentUserLocked(task.userId)) {
             // Put non-current user tasks below current user tasks.
             while (--stackNdx >= 0) {
-                if (mTaskHistory.get(stackNdx).userId != mCurrentUser) {
+                if (!isRelatedToOrCurrentUserLocked(mTaskHistory.get(stackNdx).userId)) {
                     break;
                 }
             }

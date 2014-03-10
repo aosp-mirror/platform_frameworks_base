@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.*;
 
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-
 import android.app.AppOpsManager;
 import android.util.ArraySet;
 import android.util.TimeUtils;
@@ -302,8 +301,16 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     };
 
-    // Current user when multi-user is enabled. Don't show windows of non-current user.
+    /**
+     * Current user when multi-user is enabled. Don't show windows of
+     * non-current user. Also see mRelatedUserIds.
+     */
     int mCurrentUserId;
+    /**
+     * Users related to the current user. These are also allowed to show windows
+     * on the current user.
+     */
+    int[] mRelatedUserIds = new int[0];
 
     final Context mContext;
 
@@ -5284,10 +5291,16 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.setTouchExplorationEnabled(enabled);
     }
 
-    public void setCurrentUser(final int newUserId) {
+    public void updateRelatedUserIds(final int[] relatedUserIds) {
         synchronized (mWindowMap) {
-            int oldUserId = mCurrentUserId;
+            mRelatedUserIds = relatedUserIds;
+        }
+    }
+
+    public void setCurrentUser(final int newUserId, final int[] relatedUserIds) {
+        synchronized (mWindowMap) {
             mCurrentUserId = newUserId;
+            mRelatedUserIds = relatedUserIds;
             mAppTransition.setCurrentUser(newUserId);
             mPolicy.setCurrentUserLw(newUserId);
 
@@ -5300,6 +5313,15 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             performLayoutAndPlaceSurfacesLocked();
         }
+    }
+
+    /* Called by WindowState */
+    boolean isRelatedToOrCurrentUserLocked(int userId) {
+        if (userId == mCurrentUserId) return true;
+        for (int i = 0; i < mRelatedUserIds.length; i++) {
+            if (mRelatedUserIds[i] == userId) return true;
+        }
+        return false;
     }
 
     public void enableScreenAfterBoot() {
