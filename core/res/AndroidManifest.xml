@@ -2069,6 +2069,14 @@
         android:description="@string/permdesc_setPointerSpeed"
         android:protectionLevel="signature" />
 
+    <!-- Allows low-level access to setting input device calibration.
+         <p>Not for use by normal applications.
+         @hide -->
+    <permission android:name="android.permission.SET_INPUT_CALIBRATION"
+        android:label="@string/permlab_setInputCalibration"
+        android:description="@string/permdesc_setInputCalibration"
+        android:protectionLevel="signature" />
+
     <!-- Allows low-level access to setting the keyboard layout.
          <p>Not for use by third-party applications.
          @hide -->

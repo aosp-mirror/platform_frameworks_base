@@ -500,6 +500,44 @@ public final class InputManager {
     }
 
     /**
+     * Gets the TouchCalibration applied to the specified input device's coordinates.
+     *
+     * @param inputDeviceDescriptor The input device descriptor.
+     * @return The TouchCalibration currently assigned for use with the given
+     * input device. If none is set, an identity TouchCalibration is returned.
+     *
+     * @hide
+     */
+    public TouchCalibration getTouchCalibration(String inputDeviceDescriptor) {
+        try {
+            return mIm.getTouchCalibrationForInputDevice(inputDeviceDescriptor);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not get calibration matrix for input device.", ex);
+            return TouchCalibration.IDENTITY;
+        }
+    }
+
+    /**
+     * Sets the TouchCalibration to apply to the specified input device's coordinates.
+     * <p>
+     * This method may have the side-effect of causing the input device in question
+     * to be reconfigured. Requires {@link android.Manifest.permissions.SET_INPUT_CALIBRATION}.
+     * </p>
+     *
+     * @param inputDeviceDescriptor The input device descriptor.
+     * @param calibration The calibration to be applied
+     *
+     * @hide
+     */
+    public void setTouchCalibration(String inputDeviceDescriptor, TouchCalibration calibration) {
+        try {
+            mIm.setTouchCalibrationForInputDevice(inputDeviceDescriptor, calibration);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not set calibration matrix for input device.", ex);
+        }
+    }
+
+    /**
      * Gets the mouse pointer speed.
      * <p>
      * Only returns the permanent mouse pointer speed.  Ignores any temporary pointer

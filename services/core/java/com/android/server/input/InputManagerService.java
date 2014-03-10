@@ -52,6 +52,7 @@ import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerInternal;
 import android.hardware.input.KeyboardLayout;
+import android.hardware.input.TouchCalibration;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -183,6 +184,7 @@ public class InputManagerService extends IInputManager.Stub
             InputChannel fromChannel, InputChannel toChannel);
     private static native void nativeSetPointerSpeed(long ptr, int speed);
     private static native void nativeSetShowTouches(long ptr, boolean enabled);
+    private static native void nativeReloadCalibration(long ptr);
     private static native void nativeVibrate(long ptr, int deviceId, long[] pattern,
             int repeat, int token);
     private static native void nativeCancelVibrate(long ptr, int deviceId, int token);
@@ -698,6 +700,42 @@ public class InputManagerService extends IInputManager.Stub
             }
         }
         mTempFullKeyboards.clear();
+    }
+
+    @Override // Binder call & native callback
+    public TouchCalibration getTouchCalibrationForInputDevice(String inputDeviceDescriptor) {
+        if (inputDeviceDescriptor == null) {
+            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
+        }
+
+        synchronized (mDataStore) {
+            return mDataStore.getTouchCalibration(inputDeviceDescriptor);
+        }
+    }
+
+    @Override // Binder call
+    public void setTouchCalibrationForInputDevice(String inputDeviceDescriptor,
+            TouchCalibration calibration) {
+        if (!checkCallingPermission(android.Manifest.permission.SET_INPUT_CALIBRATION,
+                "setTouchCalibrationForInputDevice()")) {
+            throw new SecurityException("Requires SET_INPUT_CALIBRATION permission");
+        }
+        if (inputDeviceDescriptor == null) {
+            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
+        }
+        if (calibration == null) {
+            throw new IllegalArgumentException("calibration must not be null");
+        }
+
+        synchronized (mDataStore) {
+            try {
+                if (mDataStore.setTouchCalibration(inputDeviceDescriptor, calibration)) {
+                    nativeReloadCalibration(mPtr);
+                }
+            } finally {
+                mDataStore.saveIfNeeded();
+            }
+        }
     }
 
     // Must be called on handler.
