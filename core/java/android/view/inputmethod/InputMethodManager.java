@@ -1394,6 +1394,14 @@ public final class InputMethodManager {
     
     /**
      * Report the current selection range.
+     *
+     * <p><strong>Editor authors</strong>, you need to call this method whenever
+     * the cursor moves in your editor. Remember that in addition to doing this, your
+     * editor needs to always supply current cursor values in
+     * {@link EditorInfo#initialSelStart} and {@link EditorInfo#initialSelEnd} every
+     * time {@link android.view.View#onCreateInputConnection(EditorInfo)} is
+     * called, which happens whenever the keyboard shows up or the focus changes
+     * to a text field, among other cases.</p>
      */
     public void updateSelection(View view, int selStart, int selEnd,
             int candidatesStart, int candidatesEnd) {

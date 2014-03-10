@@ -8705,7 +8705,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * <p>When implementing this, you probably also want to implement
      * {@link #onCheckIsTextEditor()} to indicate you will return a
-     * non-null InputConnection.
+     * non-null InputConnection.</p>
+     *
+     * <p>Also, take good care to fill in the {@link android.view.inputmethod.EditorInfo}
+     * object correctly and in its entirety, so that the connected IME can rely
+     * on its values. For example, {@link android.view.inputmethod.EditorInfo#initialSelStart}
+     * and  {@link android.view.inputmethod.EditorInfo#initialSelEnd} members
+     * must be filled in with the correct cursor position for IMEs to work correctly
+     * with your application.</p>
      *
      * @param outAttrs Fill in with attribute information about the connection.
      */
