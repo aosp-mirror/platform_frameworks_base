@@ -2076,22 +2076,23 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         mInLayout = true;
+        final int childCount = getChildCount();
         if (changed) {
-            int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
                 getChildAt(i).forceLayout();
             }
             mRecycler.markChildrenDirty();
         }
 
-        if (mFastScroller != null && (mItemCount != mOldItemCount || mDataChanged)) {
-            mFastScroller.onItemCountChanged(mItemCount);
-        }
-
         layoutChildren();
         mInLayout = false;
 
         mOverscrollMax = (b - t) / OVERSCROLL_LIMIT_DIVISOR;
+
+        // TODO: Move somewhere sane. This doesn't belong in onLayout().
+        if (mFastScroller != null) {
+            mFastScroller.onItemCountChanged(getChildCount(), mItemCount);
+        }
     }
 
     /**
