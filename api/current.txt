@@ -4741,7 +4741,7 @@ package android.app.admin {
     field public static final java.lang.String ACTION_PASSWORD_EXPIRING = "android.app.action.ACTION_PASSWORD_EXPIRING";
     field public static final java.lang.String ACTION_PASSWORD_FAILED = "android.app.action.ACTION_PASSWORD_FAILED";
     field public static final java.lang.String ACTION_PASSWORD_SUCCEEDED = "android.app.action.ACTION_PASSWORD_SUCCEEDED";
-    field public static final java.lang.String ACTION_PROFILE_PROVISIONING_COMPLETE = "android.managedprovisioning.ACTION_PROVISIONING_COMPLETE";
+    field public static final java.lang.String ACTION_PROFILE_PROVISIONING_COMPLETE = "android.app.action.ACTION_PROFILE_PROVISIONING_COMPLETE";
     field public static final java.lang.String DEVICE_ADMIN_META_DATA = "android.app.device_admin";
     field public static final java.lang.String EXTRA_DISABLE_WARNING = "android.app.extra.DISABLE_WARNING";
   }
@@ -4794,6 +4794,7 @@ package android.app.admin {
     method public int setStorageEncryption(android.content.ComponentName, boolean);
     method public void wipeData(int);
     field public static final java.lang.String ACTION_ADD_DEVICE_ADMIN = "android.app.action.ADD_DEVICE_ADMIN";
+    field public static final java.lang.String ACTION_PROVISION_MANAGED_PROFILE = "android.managedprovisioning.ACTION_PROVISION_MANAGED_PROFILE";
     field public static final java.lang.String ACTION_SET_NEW_PASSWORD = "android.app.action.SET_NEW_PASSWORD";
     field public static final java.lang.String ACTION_START_ENCRYPTION = "android.app.action.START_ENCRYPTION";
     field public static final int ENCRYPTION_STATUS_ACTIVATING = 2; // 0x2
@@ -4802,6 +4803,8 @@ package android.app.admin {
     field public static final int ENCRYPTION_STATUS_UNSUPPORTED = 0; // 0x0
     field public static final java.lang.String EXTRA_ADD_EXPLANATION = "android.app.extra.ADD_EXPLANATION";
     field public static final java.lang.String EXTRA_DEVICE_ADMIN = "android.app.extra.DEVICE_ADMIN";
+    field public static final java.lang.String EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME = "defaultManagedProfileName";
+    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME = "deviceAdminPackageName";
     field public static final int KEYGUARD_DISABLE_FEATURES_ALL = 2147483647; // 0x7fffffff
     field public static final int KEYGUARD_DISABLE_FEATURES_NONE = 0; // 0x0
     field public static final int KEYGUARD_DISABLE_SECURE_CAMERA = 2; // 0x2
