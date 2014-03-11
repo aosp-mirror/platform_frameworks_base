@@ -111,7 +111,7 @@ getPointer(JNIEnv *_env, jobject buffer, jarray *array, jint *remaining, jint *o
             getBasePointerID, buffer);
     if (pointer != 0L) {
         *array = NULL;
-        return (void *) (jint) pointer;
+        return reinterpret_cast<void*>(pointer);
     }
 
     *array = (jarray) _env->CallStaticObjectMethod(nioAccessClass,
@@ -578,7 +578,7 @@ android_glColorPointer__IIII
         (GLint)size,
         (GLenum)type,
         (GLsizei)stride,
-        (GLvoid *)offset
+        reinterpret_cast<GLvoid *>(offset)
     );
 }
 
@@ -679,7 +679,7 @@ android_glDrawElements__IIII
         (GLenum)mode,
         (GLsizei)count,
         (GLenum)type,
-        (GLvoid *)offset
+        reinterpret_cast<GLvoid *>(offset)
     );
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -2302,7 +2302,7 @@ android_glNormalPointer__III
     glNormalPointer(
         (GLenum)type,
         (GLsizei)stride,
-        (GLvoid *)offset
+        reinterpret_cast<GLvoid *>(offset)
     );
 }
 
@@ -2529,7 +2529,7 @@ android_glTexCoordPointer__IIII
         (GLint)size,
         (GLenum)type,
         (GLsizei)stride,
-        (GLvoid *)offset
+        reinterpret_cast<GLvoid *>(offset)
     );
 }
 
@@ -2937,7 +2937,7 @@ android_glVertexPointer__IIII
         (GLint)size,
         (GLenum)type,
         (GLsizei)stride,
-        (GLvoid *)offset
+        reinterpret_cast<GLvoid *>(offset)
     );
 }
 
