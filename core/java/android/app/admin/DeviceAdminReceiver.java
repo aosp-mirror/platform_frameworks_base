@@ -164,13 +164,21 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     public static final String ACTION_PASSWORD_EXPIRING
             = "android.app.action.ACTION_PASSWORD_EXPIRING";
 
-
     /**
-     * Action broadcasted when provisioning of a managed profile has completed.
+     * Broadcast Action: This broadcast is sent to the newly created profile when
+     * the provisioning of a managed profile has completed successfully.
+     *
+     * <p>The broadcast is limited to the package which started the provisioning as specified in
+     * the extra {@link DevicePolicyManager#EXTRA_PROVISIONING_MDM_PACKAGE_NAME} of the
+     * {@link DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE} intent that started the
+     * provisioning. It is also limited to the managed profile.
+     *
+     * <p>Input: Nothing.</p>
+     * <p>Output: Nothing</p>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PROFILE_PROVISIONING_COMPLETE
-            = "android.managedprovisioning.ACTION_PROVISIONING_COMPLETE";
+    public static final String ACTION_PROFILE_PROVISIONING_COMPLETE =
+            "android.app.action.ACTION_PROFILE_PROVISIONING_COMPLETE";
 
     /**
      * Name under which a DevicePolicy component publishes information
