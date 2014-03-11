@@ -52,4 +52,10 @@ public final class TelecommConstants {
      */
     public static final String EXTRA_INCOMING_CALL_EXTRAS =
             "android.intent.extra.INCOMING_CALL_EXTRAS";
+
+    /**
+     * Optional extra for {@link TelephonyManager.ACTION_PHONE_STATE_CHANGED} containing the unique
+     * ID of the call.
+     */
+    public static final String EXTRA_CALL_ID = "android.telecomm.extra.CALL_ID";
 }

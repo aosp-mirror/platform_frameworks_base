@@ -24441,6 +24441,7 @@ package android.telecomm {
   public final class TelecommConstants {
     ctor public TelecommConstants();
     field public static final java.lang.String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
+    field public static final java.lang.String EXTRA_CALL_ID = "android.telecomm.extra.CALL_ID";
     field public static final java.lang.String EXTRA_CALL_SERVICE_DESCRIPTOR = "android.intent.extra.CALL_SERVICE_DESCRIPTOR";
     field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.intent.extra.INCOMING_CALL_EXTRAS";
   }
