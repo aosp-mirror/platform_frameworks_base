@@ -14,13 +14,8 @@
      limitations under the License.
 -->
 
-<reveal xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <nine-patch android:src="@drawable/btn_qntm_alpha"
-            android:tint="@color/btn_default_normal_quantum_light" />
-    </item>
-    <item>
-        <nine-patch android:src="@drawable/btn_qntm_alpha"
-            android:tint="@color/btn_default_pressed_quantum_light" />
-    </item>
-</reveal>
+<touch-feedback xmlns:android="http://schemas.android.com/apk/res/android"
+    android:tint="@color/btn_default_pressed_quantum_light">
+    <nine-patch android:src="@drawable/btn_qntm_alpha"
+        android:tint="@color/btn_default_normal_quantum_light" />
+</touch-feedback>
