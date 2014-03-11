@@ -16,8 +16,13 @@
 
 package android.media;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
+import java.nio.NioUtils;
 
+import android.annotation.IntDef;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -144,6 +149,28 @@ public class AudioTrack
 
     private final static String TAG = "android.media.AudioTrack";
 
+
+    /** @hide */
+    @IntDef({
+        WRITE_BLOCKING,
+        WRITE_NON_BLOCKING
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface WriteMode {}
+
+    /**
+     * @hide CANDIDATE FOR PUBLIC API
+     * The write mode indicating the write operation will block until all data has been written,
+     * to be used in {@link #write(ByteBuffer, int, int, int)}.
+     */
+    public final static int WRITE_BLOCKING = 0;
+    /**
+     * @hide CANDIDATE FOR PUBLIC API
+     * The write mode indicating the write operation will return immediately after
+     * queuing as much audio data for playback as possible without blocking, to be used in
+     * {@link #write(ByteBuffer, int, int, int)}.
+     */
+    public final static int WRITE_NON_BLOCKING = 1;
 
     //--------------------------------------------------------------------------
     // Member variables
@@ -1084,7 +1111,8 @@ public class AudioTrack
             return ERROR_BAD_VALUE;
         }
 
-        int ret = native_write_byte(audioData, offsetInBytes, sizeInBytes, mAudioFormat);
+        int ret = native_write_byte(audioData, offsetInBytes, sizeInBytes, mAudioFormat,
+                true /*isBlocking*/);
 
         if ((mDataLoadMode == MODE_STATIC)
                 && (mState == STATE_NO_STATIC_DATA)
@@ -1139,6 +1167,75 @@ public class AudioTrack
         return ret;
     }
 
+
+    /**
+     * @hide CANDIDATE FOR PUBLIC API
+     * Writes the audio data to the audio sink for playback (streaming mode),
+     * or copies audio data for later playback (static buffer mode).
+     * In static buffer mode, copies the data to the buffer starting at its 0 offset, and the write
+     * mode is ignored.
+     * In streaming mode, the blocking behavior will depend on the write mode.
+     * @param audioData the buffer that holds the data to play, starting at the position reported
+     *     by <code>audioData.position()</code>.
+     *     <BR>Note that this method will not update the position in this buffer, therefore when
+     *     writing a loop to write all the data in the buffer, you should increment the
+     *     <code>offsetInBytes</code> parameter at each pass by the amount that was previously
+     *     written for this buffer.
+     * @param offsetInBytes offset to read from in bytes (note this differs from
+     *     <code>audioData.position()</code>).
+     * @param sizeInBytes number of bytes to read (note this differs from
+     *     <code>audioData.remaining()</code>).
+     * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}. It has no
+     *     effect in static mode.
+     *     <BR>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
+     *         to the audio sink.
+     *     <BR>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
+     *     queuing as much audio data for playback as possible without blocking.
+     * @return 0 or a positive number of bytes that were written, or
+     *     {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}
+     */
+    public int write(ByteBuffer audioData, int offsetInBytes, int sizeInBytes,
+            @WriteMode int writeMode) {
+
+        if (mState == STATE_UNINITIALIZED) {
+            Log.e(TAG, "AudioTrack.write() called in invalid state STATE_UNINITIALIZED");
+            return ERROR_INVALID_OPERATION;
+        }
+
+        if ((writeMode != WRITE_BLOCKING) && (writeMode != WRITE_NON_BLOCKING)) {
+            Log.e(TAG, "AudioTrack.write() called with invalid blocking mode");
+            return ERROR_BAD_VALUE;
+        }
+
+        if ( (audioData == null) || (offsetInBytes < 0 ) || (sizeInBytes < 0)
+                || (offsetInBytes + sizeInBytes < 0)    // detect integer overflow
+                || (offsetInBytes + sizeInBytes > audioData.remaining())) {
+            Log.e(TAG, "AudioTrack.write() called with invalid size/offset values");
+            return ERROR_BAD_VALUE;
+        }
+
+        int ret = 0;
+        if (audioData.isDirect()) {
+            ret = native_write_native_bytes(audioData,
+                    audioData.position(),
+                    offsetInBytes, sizeInBytes, mAudioFormat,
+                    writeMode == WRITE_BLOCKING);
+        } else {
+            ret = native_write_byte(NioUtils.unsafeArray(audioData),
+                    NioUtils.unsafeArrayOffset(audioData) + audioData.position() + offsetInBytes,
+                    sizeInBytes, mAudioFormat,
+                    writeMode == WRITE_BLOCKING);
+        }
+
+        if ((mDataLoadMode == MODE_STATIC)
+                && (mState == STATE_NO_STATIC_DATA)
+                && (ret > 0)) {
+            // benign race with respect to other APIs that read mState
+            mState = STATE_INITIALIZED;
+        }
+
+        return ret;
+    }
 
     /**
      * Notifies the native resource to reuse the audio data already loaded in the native
@@ -1339,10 +1436,14 @@ public class AudioTrack
     private native final void native_flush();
 
     private native final int native_write_byte(byte[] audioData,
-                                               int offsetInBytes, int sizeInBytes, int format);
+                                               int offsetInBytes, int sizeInBytes, int format,
+                                               boolean isBlocking);
 
     private native final int native_write_short(short[] audioData,
                                                 int offsetInShorts, int sizeInShorts, int format);
+
+    private native final int native_write_native_bytes(Object audioData,
+            int positionInBytes, int offsetInBytes, int sizeInBytes, int format, boolean blocking);
 
     private native final int native_reload_static();
 
