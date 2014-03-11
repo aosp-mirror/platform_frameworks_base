@@ -71,6 +71,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.EventLog;
@@ -715,10 +716,17 @@ final class ActivityStack {
         int w = mThumbnailWidth;
         int h = mThumbnailHeight;
         if (w < 0) {
-            mThumbnailWidth = w =
-                res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_width);
-            mThumbnailHeight = h =
-                res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_height);
+            if (SystemProperties.getBoolean("persist.recents.use_alternate", false)) {
+                mThumbnailWidth = w =
+                   res.getDimensionPixelSize(com.android.internal.R.dimen.recents_thumbnail_width);
+                mThumbnailHeight = h =
+                   res.getDimensionPixelSize(com.android.internal.R.dimen.recents_thumbnail_height);
+            } else {
+                mThumbnailWidth = w =
+                    res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_width);
+                mThumbnailHeight = h =
+                    res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_height);
+            }
         }
 
         if (w > 0) {

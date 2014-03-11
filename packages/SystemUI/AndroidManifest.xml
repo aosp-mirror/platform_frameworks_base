@@ -52,6 +52,7 @@
     <uses-permission android:name="android.permission.START_ANY_ACTIVITY" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.GET_TOP_ACTIVITY_INFO" />
+    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
 
     <!-- WindowManager -->
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
@@ -139,6 +140,18 @@
                 <action android:name="com.android.systemui.recent.action.CANCEL_PRELOAD" />
             </intent-filter>
         </receiver>
+
+        <!-- Alternate Recents -->
+        <activity android:name=".recents.RecentsActivity"
+                  android:launchMode="singleInstance"
+                  android:excludeFromRecents="true"
+                  android:theme="@style/RecentsTheme">
+            <intent-filter>
+                <action android:name="com.android.systemui.recents.TOGGLE_RECENTS" />
+            </intent-filter>
+        </activity>
+
+        <service android:name=".recents.RecentsService" />
 
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbConfirmActivity"

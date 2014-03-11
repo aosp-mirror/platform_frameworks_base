@@ -20,6 +20,13 @@
         <item name="android:windowAnimationStyle">@style/Animation.RecentsActivity</item>
     </style>
 
+    <!-- Alternate Recents theme -->
+    <style name="RecentsTheme" parent="@android:style/Theme.Holo.Wallpaper.NoTitleBar">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowAnimationStyle">@style/Animation.RecentsActivity</item>
+    </style>
+
     <!-- Animations for a non-full-screen window or activity. -->
     <style name="Animation.RecentsActivity" parent="@android:style/Animation.Activity">
         <item name="android:activityOpenEnterAnimation">@anim/recents_launch_from_launcher_enter</item>

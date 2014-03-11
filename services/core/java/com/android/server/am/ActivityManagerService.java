@@ -7245,6 +7245,24 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public boolean isInHomeStack(int taskId) {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "getStackInfo()");
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                TaskRecord tr = recentTaskForIdLocked(taskId);
+                if (tr != null) {
+                    return tr.stack.isHomeStack();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        return false;
+    }
+
+    @Override
     public int getTaskForActivity(IBinder token, boolean onlyRoot) {
         synchronized(this) {
             return ActivityRecord.getTaskForActivityLocked(token, onlyRoot);
