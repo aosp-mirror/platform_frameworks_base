@@ -191,8 +191,6 @@ public class Patterns {
         for (int i = 1; i <= numGroups; i++) {
             String s = matcher.group(i);
 
-            System.err.println("Group(" + i + ") : " + s);
-
             if (s != null) {
                 b.append(s);
             }
