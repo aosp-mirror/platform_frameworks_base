@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.telephony.SignalStrength;
@@ -133,14 +134,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
             boolean unimportantForLogging) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteStartWakeLocked(uid, pid, name, historyName, type, unimportantForLogging);
+            mStats.noteStartWakeLocked(uid, pid, name, historyName, type, unimportantForLogging,
+                    SystemClock.elapsedRealtime());
         }
     }
 
     public void noteStopWakelock(int uid, int pid, String name, int type) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteStopWakeLocked(uid, pid, name, type);
+            mStats.noteStopWakeLocked(uid, pid, name, type, SystemClock.elapsedRealtime());
         }
     }
 
@@ -150,6 +152,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         synchronized (mStats) {
             mStats.noteStartWakeFromSourceLocked(ws, pid, name, historyName,
                     type, unimportantForLogging);
+        }
+    }
+
+    public void noteChangeWakelockFromSource(WorkSource ws, int pid, String name, int type,
+            WorkSource newWs, int newPid, String newName,
+            String newHistoryName, int newType, boolean newUnimportantForLogging) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteChangeWakelockFromSourceLocked(ws, pid, name, type,
+                    newWs, newPid, newName, newHistoryName, newType, newUnimportantForLogging);
         }
     }
 

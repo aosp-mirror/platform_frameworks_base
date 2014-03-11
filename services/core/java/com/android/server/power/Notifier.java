@@ -158,6 +158,39 @@ final class Notifier {
     }
 
     /**
+     * Called when a wake lock is changing.
+     */
+    public void onWakeLockChanging(int flags, String tag, String packageName,
+            int ownerUid, int ownerPid, WorkSource workSource, String historyTag,
+            int newFlags, String newTag, String newPackageName, int newOwnerUid,
+            int newOwnerPid, WorkSource newWorkSource, String newHistoryTag) {
+
+        final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
+        final int newMonitorType = getBatteryStatsWakeLockMonitorType(newFlags);
+        boolean unimportantForLogging = (flags&PowerManager.UNIMPORTANT_FOR_LOGGING) != 0
+                && ownerUid == Process.SYSTEM_UID;
+        if (workSource != null && newWorkSource != null) {
+            if (DEBUG) {
+                Slog.d(TAG, "onWakeLockChanging: flags=" + newFlags + ", tag=\"" + newTag
+                        + "\", packageName=" + newPackageName
+                        + ", ownerUid=" + newOwnerUid + ", ownerPid=" + newOwnerPid
+                        + ", workSource=" + newWorkSource);
+            }
+            try {
+                mBatteryStats.noteChangeWakelockFromSource(workSource, ownerPid, tag, monitorType,
+                        newWorkSource, newOwnerPid, newTag, newHistoryTag,
+                        newMonitorType, unimportantForLogging);
+            } catch (RemoteException ex) {
+                // Ignore
+            }
+        } else {
+            onWakeLockReleased(flags, tag, packageName, ownerUid, ownerPid, workSource);
+            onWakeLockAcquired(newFlags, newTag, newPackageName, newOwnerUid, newOwnerPid,
+                    newWorkSource, newHistoryTag);
+        }
+    }
+
+    /**
      * Called when a wake lock is released.
      */
     public void onWakeLockReleased(int flags, String tag, String packageName,

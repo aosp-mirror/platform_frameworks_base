@@ -87,7 +87,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 98 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 99 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -2274,9 +2274,8 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteStartWakeLocked(int uid, int pid, String name, String historyName, int type,
-            boolean unimportantForLogging) {
+            boolean unimportantForLogging, long elapsedRealtime) {
         uid = mapUid(uid);
-        final long elapsedRealtime = SystemClock.elapsedRealtime();
         if (type == WAKE_TYPE_PARTIAL) {
             // Only care about partial wake locks, since full wake locks
             // will be canceled when the user puts the screen to sleep.
@@ -2308,9 +2307,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void noteStopWakeLocked(int uid, int pid, String name, int type) {
+    public void noteStopWakeLocked(int uid, int pid, String name, int type, long elapsedRealtime) {
         uid = mapUid(uid);
-        final long elapsedRealtime = SystemClock.elapsedRealtime();
         if (type == WAKE_TYPE_PARTIAL) {
             mWakeLockNesting--;
             if (mWakeLockNesting == 0) {
@@ -2328,16 +2326,37 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     public void noteStartWakeFromSourceLocked(WorkSource ws, int pid, String name,
             String historyName, int type, boolean unimportantForLogging) {
-        int N = ws.size();
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final int N = ws.size();
         for (int i=0; i<N; i++) {
-            noteStartWakeLocked(ws.get(i), pid, name, historyName, type, unimportantForLogging);
+            noteStartWakeLocked(ws.get(i), pid, name, historyName, type, unimportantForLogging,
+                    elapsedRealtime);
+        }
+    }
+
+    public void noteChangeWakelockFromSourceLocked(WorkSource ws, int pid, String name, int type,
+            WorkSource newWs, int newPid, String newName,
+            String newHistoryName, int newType, boolean newUnimportantForLogging) {
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        // For correct semantics, we start the need worksources first, so that we won't
+        // make inappropriate history items as if all wake locks went away and new ones
+        // appeared.  This is okay because tracking of wake locks allows nesting.
+        final int NN = ws.size();
+        for (int i=0; i<NN; i++) {
+            noteStartWakeLocked(newWs.get(i), newPid, newName, newHistoryName, newType,
+                    newUnimportantForLogging, elapsedRealtime);
+        }
+        final int NO = ws.size();
+        for (int i=0; i<NO; i++) {
+            noteStopWakeLocked(ws.get(i), pid, name, type, elapsedRealtime);
         }
     }
 
     public void noteStopWakeFromSourceLocked(WorkSource ws, int pid, String name, int type) {
-        int N = ws.size();
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final int N = ws.size();
         for (int i=0; i<N; i++) {
-            noteStopWakeLocked(ws.get(i), pid, name, type);
+            noteStopWakeLocked(ws.get(i), pid, name, type, elapsedRealtime);
         }
     }
 
@@ -2466,7 +2485,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (u != null) {
             Uid.Pid p = u.mPids.get(pid);
             if (p != null) {
-                return p.mWakeSum + (p.mWakeStart != 0 ? (realtime - p.mWakeStart) : 0);
+                return p.mWakeSumMs + (p.mWakeNesting > 0 ? (realtime - p.mWakeStartMs) : 0);
             }
         }
         return 0;
@@ -2562,8 +2581,8 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             // Fake a wake lock, so we consider the device waked as long
             // as the screen is on.
-            noteStartWakeLocked(-1, -1, "screen", null, WAKE_TYPE_PARTIAL, false);
-            
+            noteStartWakeLocked(-1, -1, "screen", null, WAKE_TYPE_PARTIAL, false, elapsedRealtime);
+
             // Update discharge amounts.
             if (mOnBatteryInternal) {
                 updateDischargeScreenLevelsLocked(false, true);
@@ -2584,7 +2603,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mScreenBrightnessTimer[mScreenBrightnessBin].stopRunningLocked(elapsedRealtime);
             }
 
-            noteStopWakeLocked(-1, -1, "screen", WAKE_TYPE_PARTIAL);
+            noteStopWakeLocked(-1, -1, "screen", WAKE_TYPE_PARTIAL, elapsedRealtime);
 
             updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), true,
                     SystemClock.uptimeMillis() * 1000, elapsedRealtime * 1000);
@@ -3999,10 +4018,12 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mProcessStats.clear();
             }
             if (mPids.size() > 0) {
-                for (int i=0; !active && i<mPids.size(); i++) {
+                for (int i=mPids.size()-1; i>=0; i--) {
                     Pid pid = mPids.valueAt(i);
-                    if (pid.mWakeStart != 0) {
+                    if (pid.mWakeNesting > 0) {
                         active = true;
+                    } else {
+                        mPids.removeAt(i);
                     }
                 }
             }
@@ -4023,8 +4044,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
                 mPackageStats.clear();
             }
-
-            mPids.clear();
 
             if (!active) {
                 if (mWifiRunningTimer != null) {
@@ -4067,6 +4086,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                         mNetworkPacketActivityCounters[i].detach();
                     }
                 }
+                mPids.clear();
             }
 
             return !active;
@@ -5304,8 +5324,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             if (pid >= 0 && type == WAKE_TYPE_PARTIAL) {
                 Pid p = getPidStatsLocked(pid);
-                if (p.mWakeStart == 0) {
-                    p.mWakeStart = elapsedRealtimeMs;
+                if (p.mWakeNesting++ == 0) {
+                    p.mWakeStartMs = elapsedRealtimeMs;
                 }
             }
         }
@@ -5317,9 +5337,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             if (pid >= 0 && type == WAKE_TYPE_PARTIAL) {
                 Pid p = mPids.get(pid);
-                if (p != null && p.mWakeStart != 0) {
-                    p.mWakeSum += elapsedRealtimeMs - p.mWakeStart;
-                    p.mWakeStart = 0;
+                if (p != null && p.mWakeNesting > 0) {
+                    if (p.mWakeNesting-- == 1) {
+                        p.mWakeSumMs += elapsedRealtimeMs - p.mWakeStartMs;
+                        p.mWakeStartMs = 0;
+                    }
                 }
             }
         }
@@ -5765,6 +5787,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             mHistoryCur.states &= ~HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Battery unplugged to: "
                     + Integer.toHexString(mHistoryCur.states));
+            mHistoryCur.currentTime = System.currentTimeMillis();
+            addHistoryBufferLocked(mSecRealtime, HistoryItem.CMD_CURRENT_TIME);
+            mHistoryCur.currentTime = 0;
             addHistoryRecordLocked(mSecRealtime);
             mDischargeCurrentLevel = mDischargeUnplugLevel = level;
             if (mScreenOn) {
@@ -6414,11 +6439,16 @@ public final class BatteryStatsImpl extends BatteryStats {
             Slog.e("BatteryStats", "Error reading battery statistics", e);
         }
 
-        long now = SystemClock.elapsedRealtime();
-        if (USE_OLD_HISTORY) {
-            addHistoryRecordLocked(now, HistoryItem.CMD_START);
+        if (mHistoryBuffer.dataPosition() > 0) {
+            long now = SystemClock.elapsedRealtime();
+            if (USE_OLD_HISTORY) {
+                addHistoryRecordLocked(now, HistoryItem.CMD_START);
+            }
+            addHistoryBufferLocked(now, HistoryItem.CMD_START);
+            mHistoryCur.currentTime = System.currentTimeMillis();
+            addHistoryBufferLocked(now, HistoryItem.CMD_CURRENT_TIME);
+            mHistoryCur.currentTime = 0;
         }
-        addHistoryBufferLocked(now, HistoryItem.CMD_START);
     }
 
     public int describeContents() {

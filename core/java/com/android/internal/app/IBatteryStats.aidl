@@ -41,6 +41,9 @@ interface IBatteryStats {
 
     void noteStartWakelockFromSource(in WorkSource ws, int pid, String name, String historyName,
             int type, boolean unimportantForLogging);
+    void noteChangeWakelockFromSource(in WorkSource ws, int pid, String name, int type,
+            in WorkSource newWs, int newPid, String newName,
+            String newHistoryName, int newType, boolean newUnimportantForLogging);
     void noteStopWakelockFromSource(in WorkSource ws, int pid, String name, int type);
 
     void noteVibratorOn(int uid, long durationMillis);
