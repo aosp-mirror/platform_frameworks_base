@@ -2233,10 +2233,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         // data and discard the view if we fail.
         final View transientView = mRecycler.getTransientStateView(position);
         if (transientView != null) {
-            final View updatedView = mAdapter.getView(position, transientView, this);
-            if (updatedView != transientView) {
-                // Failed to re-bind the data, scrap the obtained view.
-                mRecycler.addScrapView(updatedView, position);
+            final LayoutParams params = (LayoutParams) transientView.getLayoutParams();
+
+            // If the view type hasn't changed, attempt to re-bind the data.
+            if (params.viewType == mAdapter.getItemViewType(position)) {
+                final View updatedView = mAdapter.getView(position, transientView, this);
+
+                // If we failed to re-bind the data, scrap the obtained view.
+                if (updatedView != transientView) {
+                    mRecycler.addScrapView(updatedView, position);
+                }
             }
 
             // Scrap view implies temporary detachment.
