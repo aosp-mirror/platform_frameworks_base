@@ -33,11 +33,6 @@ public class SystemClock_Delegate {
     private static long sBootTime = System.currentTimeMillis();
     private static long sBootTimeNano = System.nanoTime();
 
-    @LayoutlibDelegate
-    /*package*/ static boolean setCurrentTimeMillis(long millis) {
-        return true;
-    }
-
     /**
      * Returns milliseconds since boot, not counting time spent in deep sleep.
      * <b>Note:</b> This value may get reset occasionally (before it would
