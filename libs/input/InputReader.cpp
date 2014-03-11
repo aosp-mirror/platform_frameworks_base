@@ -2197,9 +2197,9 @@ int32_t KeyboardInputMapper::getMetaState() {
 }
 
 void KeyboardInputMapper::resetLedState() {
-    initializeLedState(mCapsLockLedState, LED_CAPSL);
-    initializeLedState(mNumLockLedState, LED_NUML);
-    initializeLedState(mScrollLockLedState, LED_SCROLLL);
+    initializeLedState(mCapsLockLedState, ALED_CAPS_LOCK);
+    initializeLedState(mNumLockLedState, ALED_NUM_LOCK);
+    initializeLedState(mScrollLockLedState, ALED_SCROLL_LOCK);
 
     updateLedState(true);
 }
@@ -2210,11 +2210,11 @@ void KeyboardInputMapper::initializeLedState(LedState& ledState, int32_t led) {
 }
 
 void KeyboardInputMapper::updateLedState(bool reset) {
-    updateLedStateForModifier(mCapsLockLedState, LED_CAPSL,
+    updateLedStateForModifier(mCapsLockLedState, ALED_CAPS_LOCK,
             AMETA_CAPS_LOCK_ON, reset);
-    updateLedStateForModifier(mNumLockLedState, LED_NUML,
+    updateLedStateForModifier(mNumLockLedState, ALED_NUM_LOCK,
             AMETA_NUM_LOCK_ON, reset);
-    updateLedStateForModifier(mScrollLockLedState, LED_SCROLLL,
+    updateLedStateForModifier(mScrollLockLedState, ALED_SCROLL_LOCK,
             AMETA_SCROLL_LOCK_ON, reset);
 }
 
