@@ -401,17 +401,17 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_addPath(long nPath, int src, float dx, float dy) {
+    /*package*/ static void native_addPath(long nPath, long src, float dx, float dy) {
         addPath(nPath, src, AffineTransform.getTranslateInstance(dx, dy));
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_addPath(long nPath, int src) {
+    /*package*/ static void native_addPath(long nPath, long src) {
         addPath(nPath, src, null /*transform*/);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_addPath(long nPath, int src, long matrix) {
+    /*package*/ static void native_addPath(long nPath, long src, long matrix) {
         Matrix_Delegate matrixDelegate = Matrix_Delegate.getDelegate(matrix);
         if (matrixDelegate == null) {
             return;
@@ -471,6 +471,12 @@ public final class Path_Delegate {
     @LayoutlibDelegate
     /*package*/ static void native_transform(long nPath, long matrix) {
         native_transform(nPath, matrix, 0);
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static boolean native_op(long nPath1, long nPath2, int op, long result) {
+        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED, "Path.op() not supported", null);
+        return false;
     }
 
     @LayoutlibDelegate
