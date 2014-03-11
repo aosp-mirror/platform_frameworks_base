@@ -26,19 +26,20 @@ namespace uirenderer {
 
 class SpotShadow {
 public:
-    static void createSpotShadow(const Vector3* poly, int polyLength,
-            const Vector3& lightCenter, float lightSize, int lightVertexCount,
-            VertexBuffer& retStrips);
+    static VertexBufferMode createSpotShadow(bool isCasterOpaque, const Vector3* poly,
+            int polyLength, const Vector3& lightCenter, float lightSize,
+            int lightVertexCount, VertexBuffer& retStrips);
 
 private:
-    static void computeSpotShadow(const Vector3* lightPoly, int lightPolyLength,
-            const Vector3& lightCenter, const Vector3* poly, int polyLength,
-            VertexBuffer& retstrips);
+    static int calculateOccludedUmbra(const Vector2* umbra, int umbraLength,
+            const Vector3* poly, int polyLength, Vector2* occludedUmbra);
+    static void computeSpotShadow(bool isCasterOpaque, const Vector3* lightPoly,
+            int lightPolyLength, const Vector3& lightCenter, const Vector3* poly,
+            int polyLength, VertexBuffer& retstrips);
 
     static void computeLightPolygon(int points, const Vector3& lightCenter,
             float size, Vector3* ret);
 
-    static int  getStripSize(int rays);
     static void smoothPolygon(int level, int rays, float* rayDist);
     static float rayIntersectPoly(const Vector2* poly, int polyLength,
             const Vector2& point, float dx, float dy);
@@ -46,7 +47,7 @@ private:
     static void xsort(Vector2* points, int pointsLength);
     static int hull(Vector2* points, int pointsLength, Vector2* retPoly);
     static bool ccw(double ax, double ay, double bx, double by, double cx, double cy);
-    static int intersection(Vector2* poly1, int poly1length, Vector2* poly2, int poly2length);
+    static int intersection(const Vector2* poly1, int poly1length, Vector2* poly2, int poly2length);
     static void sort(Vector2* poly, int polyLength, const Vector2& center);
 
     static void swap(Vector2* points, int i, int j);
@@ -55,13 +56,14 @@ private:
 
     static bool testPointInsidePolygon(const Vector2 testPoint, const Vector2* poly, int len);
     static void makeClockwise(Vector2* polygon, int len);
-    static bool isClockwise(Vector2* polygon, int len);
+    static bool isClockwise(const Vector2* polygon, int len);
     static void reverse(Vector2* polygon, int len);
     static inline bool lineIntersection(double x1, double y1, double x2, double y2,
             double x3, double y3, double x4, double y4, Vector2& ret);
 
-    static void generateTriangleStrip(const Vector2* penumbra, int penumbraLength,
-            const Vector2* umbra, int umbraLength, VertexBuffer& retstrips);
+    static void generateTriangleStrip(bool isCasterOpaque, const Vector2* penumbra,
+            int penumbraLength, const Vector2* umbra, int umbraLength,
+            const Vector3* poly, int polyLength, VertexBuffer& retstrips);
 
 #if DEBUG_SHADOW
     // Verification utility function.
