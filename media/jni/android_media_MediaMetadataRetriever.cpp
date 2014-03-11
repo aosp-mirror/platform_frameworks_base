@@ -245,7 +245,7 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
                         fields.createConfigMethod,
                         SkBitmap::kRGB_565_Config);
 
-    size_t width, height;
+    uint32_t width, height;
     bool swapWidthAndHeight = false;
     if (videoFrame->mRotationAngle == 90 || videoFrame->mRotationAngle == 270) {
         width = videoFrame->mHeight;
@@ -276,8 +276,8 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
 
     if (videoFrame->mDisplayWidth  != videoFrame->mWidth ||
         videoFrame->mDisplayHeight != videoFrame->mHeight) {
-        size_t displayWidth = videoFrame->mDisplayWidth;
-        size_t displayHeight = videoFrame->mDisplayHeight;
+        uint32_t displayWidth = videoFrame->mDisplayWidth;
+        uint32_t displayHeight = videoFrame->mDisplayHeight;
         if (swapWidthAndHeight) {
             displayWidth = videoFrame->mDisplayHeight;
             displayHeight = videoFrame->mDisplayWidth;
