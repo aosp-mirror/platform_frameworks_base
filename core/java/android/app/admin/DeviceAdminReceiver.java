@@ -169,7 +169,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * the provisioning of a managed profile has completed successfully.
      *
      * <p>The broadcast is limited to the package which started the provisioning as specified in
-     * the extra {@link DevicePolicyManager#EXTRA_PROVISIONING_MDM_PACKAGE_NAME} of the
+     * the extra {@link DevicePolicyManager#EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} of the
      * {@link DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE} intent that started the
      * provisioning. It is also limited to the managed profile.
      *
