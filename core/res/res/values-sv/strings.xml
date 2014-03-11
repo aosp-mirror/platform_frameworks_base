@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"avinstallera genvägar"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Tillåter att appen tar bort genvägar på startskärmen utan åtgärd från användaren."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"omdirigera utgående samtal"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Tillåter att appen hanterar utgående samtal och ändrar numret som ska ringas upp. Med den här behörigheten kan appen övervaka, omdirigera eller förhindra utgående samtal."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Tillåter att appen ser numret du slår under ett utgående samtal och har möjlighet att koppla samtalet till ett annat nummer eller avbryta samtalet helt."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ta emot textmeddelanden (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Tillåter att appen tar emot och hanterar SMS. Detta innebär att appen kan övervaka eller ta bort meddelanden som skickats till enheten utan att visa dem för dig."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ta emot textmeddelanden (MMS)"</string>

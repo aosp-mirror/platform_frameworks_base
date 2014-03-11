@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"הסר התקנה של קיצורי דרך"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"מאפשר לאפליקציה להסיר קיצורי דרך במסך דף הבית ללא התערבות המשתמש."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ניתוב מחדש של שיחות יוצאות"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"מאפשר לאפליקציה לעבד שיחות יוצאות ולשנות את המספר שיש לחייג. אישור זה מאפשר לאפליקציה לעקוב אחר שיחות יוצאות, לבצע הפניה מחדש שלהן או אף למנוע את ביצוען."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"מאפשרת לאפליקציה לראות את המספר המחויג במהלך ביצוע שיחה יוצאת, עם האפשרות להפנות את השיחה למספר אחר או לבטל את השיחה לחלוטין."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"‏קבלת הודעות טקסט (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"‏מאפשר לאפליקציה לקבל ולעבד הודעות SMS. משמעות הדבר היא שהאפליקציה יכולה לעקוב אחר הודעות שנשלחו למכשיר או למחוק אותן מבלי להציג לך אותן."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"‏קבלת הודעות טקסט (MMS)"</string>
@@ -597,7 +597,7 @@
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"הצג חיבורי רשת"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"מאפשר לאפליקציה להציג מידע לגבי חיבורי רשת, למשל, אילו רשתות קיימות ומחוברות."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"גישת רשת מלאה"</string>
-    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"‏מאפשר לאפליקציה ליצור Sockets ולהשתמש בפרוטוקולי רשת מותאמים אישית. הדפדפן ואפליקציות  אחרות מספקות אמצעים לשליחת נתונים לאינטרנט, כך שאישור זה אינו נחוץ לשליחת נתונים לאינטרנט."</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"‏מאפשר לאפליקציה ליצור Sockets ולהשתמש בפרוטוקולי רשת מותאמים אישית. הדפדפן, כמו אפליקציות  אחרות, מספק אמצעים לשליחת נתונים לאינטרנט, כך שאישור זה אינו נחוץ לשליחת נתונים לאינטרנט."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"שנה/עכב הגדרות רשת ותנועה"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"‏מאפשר לאפליקציה לשנות את הגדרות הרשת ולעכב ולבדוק את כל תנועת הרשת, לדוגמה, לשנות את ה-proxy והיציאה של כל רשת APN. אפליקציות זדוניות עלולות לעקוב אחר חבילות רשת, לבצע הפניה מחדש שלהן או לשנות אותן, ללא ידיעתך."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"שנה את קישוריות הרשת"</string>

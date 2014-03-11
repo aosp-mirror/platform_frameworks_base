@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"pašalinti sparčiuosius klavišus"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Programai leidžiama pašalinti sparčiuosius klavišus iš pagrindinio ekrano be naudotojo įsikišimo."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"peradresuoti išsiunčiamuosius skambučius"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Leidžiama programai atlikti išsiunčiamuosius skambučius ir keisti renkamą numerį. Šis leidimas suteikia teisę programai stebėti, peradresuoti ar neleisti išsiunčiamųjų skambučių."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Leidžiama programai peržiūrėti renkamą numerį išsiunčiamojo skambučio metu suteikiant galimybę peradresuoti skambutį kitu numeriu arba visiškai nutraukti skambutį."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"gauti teksto pranešimus (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Leidžiama programai gauti ir apdoroti SMS pranešimus. Tai reiškia, kad programa gali stebėti ir ištrinti į jūsų įrenginį siunčiamus pranešimus jums jų neparodžiusi."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"gauti teksto pranešimus (MMS)"</string>

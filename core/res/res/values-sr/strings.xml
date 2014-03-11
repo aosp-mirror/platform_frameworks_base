@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"деинсталирање пречица"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Омогућава апликацији да уклања пречице са почетног екрана без интервенције корисника."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"преусмеравање одлазних позива"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Дозвољава апликацији да обрађује одлазне позиве и промени број који се бира. Ова дозвола омогућава апликацији да надгледа, преусмерава или спречава одлазне позиве."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Дозвољава апликацији да види који број се бира при одлазном позиву уз опцију да преусмери позив на други број или га потпуно прекине."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"пријем текстуалних порука (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Дозвољава апликацији да прима и обрађује SMS поруке. То значи да апликација може да надгледа или брише поруке које се шаљу уређају, а да вам их не прикаже."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"пријем текстуалних порука (MMS)"</string>
@@ -1228,7 +1228,7 @@
     <string name="sim_removed_message" msgid="2333164559970958645">"Мобилна мрежа неће бити доступна док не покренете систем поново уз уметање важеће SIM картице."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM картица је додата"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"Поново покрените уређај да бисте могли да приступите мобилној мрежи."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"Рестартујте уређај да бисте могли да приступите мобилној мрежи."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Поново покрени"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Подешавање времена"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Подешавање датума"</string>

@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"odstranjevanje bližnjic"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Aplikaciji omogoča odstranjevanje bližnjic z začetnega zaslona brez posredovanja uporabnika."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"preusmeritev odhodnih klicev"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Aplikaciji omogoča, da obdela odhodne klice in spreminja klicne številke. S tem lahko aplikacija nadzira, preusmerja ali preprečuje odhodne klice."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Aplikaciji dovoli ogled klicane številke pri odhodnem klicu in ji omogoča preusmeritev klica na drugo številko ali prekinitev klica."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"prejemanje sporočil (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Aplikaciji omogoča prejemanje in obdelavo SMS-ov. S tem lahko aplikacija nadzoruje ali izbriše sporočila, poslana v napravo, ne da bi vam jih pokazala."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"prejemanje sporočil (MMS)"</string>

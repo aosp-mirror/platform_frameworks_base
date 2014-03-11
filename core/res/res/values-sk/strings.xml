@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"odinštalovať odkazy"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Povoľuje aplikácii odstrániť odkazy na ploche bez zásahu používateľa."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"presmerovať odchádzajúce hovory"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Umožňuje aplikácii spracovávať odchádzajúce hovory a meniť vytáčané číslo. Toto povolenie umožňuje aplikácii sledovať a presmerovať odchádzajúce hovory alebo im zabrániť."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Umožňuje aplikácii počas odchádzajúceho hovoru rozpoznať vytáčané číslo a poskytuje možnosť presmerovať daný hovor na odlišné číslo alebo ho úplne zrušiť."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"prijímať textové správy (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Umožňuje aplikácii prijímať a spracovávať správy SMS. Znamená to, že aplikácia môže sledovať správy odoslané na vaše zariadenie alebo ich odstrániť bez toho, aby sa vám zobrazili."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"prijímať textové správy (MMS)"</string>

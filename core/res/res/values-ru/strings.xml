@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"Удаление ярлыков"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Приложение сможет удалять ярлыки с главного экрана без вмешательства пользователя."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"Перенаправление исходящих вызовов"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Приложение сможет обрабатывать исходящие вызовы и изменять набираемые номера, а также отслеживать, перенаправлять или блокировать исходящие вызовы."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Приложение сможет видеть набранный номер во время исходящего вызова и при необходимости перенаправлять вызов или завершать его."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"Прием SMS-сообщений"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Приложение сможет получать и обрабатывать SMS. Это значит, что оно сможет отслеживать и удалять отправленные на ваше устройство сообщения, не показывая их."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"Прием MMS-сообщений"</string>

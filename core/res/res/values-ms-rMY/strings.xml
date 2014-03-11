@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"nyahpasang pintasan"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Membenarkan aplikasi mengalih keluar pintasan Skrin Laman Utama tanpa campur tangan pengguna."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"tukar laluan panggilan keluar"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Membenarkan apl memproses panggilan keluar dan menukar nombor yang perlu didail. Kebenaran ini membolehkan apl memantau, mengalih atau menghalang panggilan keluar."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Membenarkan apl melihat nombor yang didail semasa panggilan keluar dengan pilihan untuk mengubah hala panggilan ke nombor lain atau membatalkan terus panggilan."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"terima mesej teks (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Membenarkan apl menerima dan memproses mesej SMS. Ini bermakna apl boleh memantau atau memadam mesej yang dihantar ke peranti anda tanpa menunjukkannya kepada anda."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"terima mesej teks (MMS)"</string>

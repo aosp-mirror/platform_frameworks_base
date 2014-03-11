@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ຖອນທາງລັດ"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນລຶບທາງລັດໃນໜ້າຫຼັກໄດ້ ໂດຍບໍ່ຕ້ອງຮັບການຢືນຢັນຈາກຜູ່ໃຊ້."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ປ່ຽນເສັ້ນທາງການໂທອອກ"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"ອະນຸຍາດໃຫ້ແອັບຯປະມວນຜົນສາຍທີ່ໂທອອກ ແລະປ່ຽນໝາຍເລກທີ່ຈະໂທອອກ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດກວດສອບ, ໂອນສາຍ ຫຼືຂັດຂວາງບໍ່ໃຫ້ໂທອອກໄດ້."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ເບິ່ງ​​ໝາຍ​ເລກເບີ​ໂທ ໃນ​ລະ​ຫວ່າງ​ການ​ໂທ​ອອກ ພ້ອມ​ທັງ​ໂຕ​ເລືອກ​ໃນ​ການ​ປ່ຽນ​ເສັ້ນ​ທາງ​ການ​ໂທ​ໄປ​ຫາ​ເບີ​ອື່ນ ຫຼື ລາຍ​ລະ​ອຽດກ່ຽວ​ກັບ​ເບີ​ໂທ​ລະ​ສັບ."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ຮັບຂໍ້ຄວາມສັ້ນ (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"ອະນຸຍາດໃຫ້ແອັບຯຮັບ ແລະປະມວນຜົນຂໍ້ຄວາມ SMS. ນີ້ໝາຍຄວາມວ່າແອັບຯສາມາດຕິດຕາມ ຫຼືລຶບຂໍ້ຄວາມທີ່ສົ່ງເຂົ້າອຸປະກອນຂອງທ່ານ ໂດຍທີ່ບໍ່ສະແດງພວກມັນໃຫ້ທ່ານເຫັນ."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ຮັບຂໍ້ຄວາມ (MMS)"</string>

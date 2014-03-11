@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"إزالة الاختصارات"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"للسماح للتطبيق بإزالة اختصارات من الشاشة الرئيسية بدون تدخل المستخدم."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"إعادة توجيه المكالمات الصادرة"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"للسماح للتطبيق بمعالجة المكالمات الصادرة وتغيير الرقم المطلوب. يتيح هذا الإذن للتطبيق مراقبة المكالمات الصادرة أو إعادة توجيهها أو منعها."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"للسماح للتطبيق بالاطلاع على الرقم الذي يتم الاتصال به عند إجراء مكالمة صادرة مع وجود الخيار لإعادة توجيه المكالمة إلى رقم آخر أو إنهاء المكالمة تمامًا."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"‏تلقي رسائل نصية (رسائل قصيرة SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"‏للسماح للتطبيق بتلقي ومعالجة الرسائل القصيرة SMS. وهذا يعني أنه يمكن للتطبيق مراقبة الرسائل التي يتم إرسالها إلى جهازك أو حذفها بدون عرضها لك."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"تلقي رسائل نصية (رسائل وسائط متعددة)"</string>
