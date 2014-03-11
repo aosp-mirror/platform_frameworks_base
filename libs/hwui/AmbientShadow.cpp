@@ -47,9 +47,8 @@ void AmbientShadow::createAmbientShadow(const Vector3* vertices, int vertexCount
         const Vector3& centroid3d, float heightFactor, float geomFactor,
         VertexBuffer& shadowVertexBuffer) {
     const int rays = SHADOW_RAY_COUNT;
-    const int layers = SHADOW_LAYER_COUNT;
     // Validate the inputs.
-    if (vertexCount < 3 || heightFactor <= 0 || layers <= 0 || rays <= 0
+    if (vertexCount < 3 || heightFactor <= 0 || rays <= 0
         || geomFactor <= 0) {
 #if DEBUG_SHADOW
         ALOGE("Invalid input for createAmbientShadow(), early return!");
@@ -96,33 +95,32 @@ void AmbientShadow::createAmbientShadow(const Vector3* vertices, int vertexCount
     // calculate the normal N, which should be perpendicular to the edge of the
     // polygon (represented by the neighbor intersection points) .
     // Shadow's vertices will be generated as : P + N * scale.
-    int currentVertexIndex = 0;
-    for (int layerIndex = 0; layerIndex <= layers; layerIndex++) {
-        for (int rayIndex = 0; rayIndex < rays; rayIndex++) {
+    for (int rayIndex = 0; rayIndex < rays; rayIndex++) {
+        Vector2 normal(1.0f, 0.0f);
+        calculateNormal(rays, rayIndex, dir.array(), rayDist, normal);
 
-            Vector2 normal(1.0f, 0.0f);
-            calculateNormal(rays, rayIndex, dir.array(), rayDist, normal);
+        // The vertex should be start from rayDist[i] then scale the
+        // normalizeNormal!
+        Vector2 intersection = dir[rayIndex] * rayDist[rayIndex] +
+                Vector2(centroid3d.x, centroid3d.y);
 
-            float opacity = 1.0 / (1 + rayHeight[rayIndex] / heightFactor);
+        // outer ring of points, expanded based upon height of each ray intersection
+        float expansionDist = rayHeight[rayIndex] * heightFactor *
+                geomFactor;
+        AlphaVertex::set(&shadowVertices[rayIndex],
+                intersection.x + normal.x * expansionDist,
+                intersection.y + normal.y * expansionDist,
+                0.0f);
 
-            // The vertex should be start from rayDist[i] then scale the
-            // normalizeNormal!
-            Vector2 intersection = dir[rayIndex] * rayDist[rayIndex] +
-                    Vector2(centroid3d.x, centroid3d.y);
-
-            float layerRatio = layerIndex / (float)(layers);
-            // The higher the intersection is, the further the ambient shadow expanded.
-            float expansionDist = rayHeight[rayIndex] / heightFactor *
-                    geomFactor * (1 - layerRatio);
-            AlphaVertex::set(&shadowVertices[currentVertexIndex++],
-                    intersection.x + normal.x * expansionDist,
-                    intersection.y + normal.y * expansionDist,
-                    layerRatio * opacity);
-        }
-
+        // inner ring of points
+        float opacity = 1.0 / (1 + rayHeight[rayIndex] * heightFactor);
+        AlphaVertex::set(&shadowVertices[rayIndex + rays],
+                intersection.x,
+                intersection.y,
+                opacity);
     }
-    float centroidAlpha = 1.0 / (1 + centroid3d.z / heightFactor);
-    AlphaVertex::set(&shadowVertices[currentVertexIndex++],
+    float centroidAlpha = 1.0 / (1 + centroid3d.z * heightFactor);
+    AlphaVertex::set(&shadowVertices[SHADOW_VERTEX_COUNT - 1],
             centroid3d.x, centroid3d.y, centroidAlpha);
 
 #if DEBUG_SHADOW
