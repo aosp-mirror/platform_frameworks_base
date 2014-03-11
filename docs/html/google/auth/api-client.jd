@@ -112,7 +112,7 @@ GoogleApiClient}</a>, you must specify an implementation for the callback interf
 href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html"
 >{@code ConnectionCallbacks}</a> and <a
 href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html"
->{@code onConnectionFailedListener}</a>. These interfaces receive callbacks in
+>{@code OnConnectionFailedListener}</a>. These interfaces receive callbacks in
 response to the asynchronous <a
 href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()"
 >{@code connect()}</a> method when the connection to Google Play services
@@ -512,7 +512,7 @@ private void loadFile(String filename) {
     new GetFileTask().execute(filename);
 }
 
-private class GetFileTask extends AsyncTask<String, Void, Void> {
+private class GetFileTask extends AsyncTask&lt;String, Void, Void> {
     protected void doInBackground(String filename) {
         Query query = new Query.Builder()
                 .addFilter(Filters.eq(SearchableField.TITLE, filename))
