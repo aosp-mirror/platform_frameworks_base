@@ -2106,6 +2106,7 @@
   <public type="attr" name="transitionGroup" />
   <public type="attr" name="castsShadow" />
   <public type="attr" name="requiredForProfile"/>
+  <public type="attr" name="pinned" />
 
   <public type="id" name="shared_element_name" />
 
@@ -2311,4 +2312,10 @@
   <public type="style" name="Quantum.Light.ButtonBar.AlertDialog" />
   <public type="style" name="Quantum.Light.ButtonBar" />
   <public type="style" name="Quantum.Light.SegmentedButton" />
+
+  <public type="style" name="Widget.Quantum.Button.Paper" />
+  <public type="style" name="Widget.Quantum.Button.Paper.Color" />
+
+  <public type="style" name="Widget.Quantum.Light.Button.Paper" />
+  <public type="style" name="Widget.Quantum.Light.Button.Paper.Color" />
 </resources>
