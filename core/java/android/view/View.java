@@ -10541,7 +10541,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * by the layout system and should not generally be called otherwise, because the property
      * may be changed at any time by the layout.
      *
-     * @param left The bottom of this view, in pixels.
+     * @param left The left of this view, in pixels.
      */
     public final void setLeft(int left) {
         if (left != mLeft) {
@@ -10608,7 +10608,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * by the layout system and should not generally be called otherwise, because the property
      * may be changed at any time by the layout.
      *
-     * @param right The bottom of this view, in pixels.
+     * @param right The right of this view, in pixels.
      */
     public final void setRight(int right) {
         if (right != mRight) {
