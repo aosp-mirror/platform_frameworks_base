@@ -160,8 +160,8 @@ void DisplayList::updateMatrix() {
                     mPivotY = mPrevHeight / 2.0f;
                 }
             }
-            const bool perspectiveEnabled = Caches::getInstance().propertyEnable3d;
-            if (!perspectiveEnabled && (mMatrixFlags & ROTATION_3D) == 0) {
+
+            if ((mMatrixFlags & ROTATION_3D) == 0) {
                 mTransformMatrix->loadTranslate(
                         mPivotX + mTranslationX,
                         mPivotY + mTranslationY,
@@ -170,38 +170,25 @@ void DisplayList::updateMatrix() {
                 mTransformMatrix->scale(mScaleX, mScaleY, 1);
                 mTransformMatrix->translate(-mPivotX, -mPivotY);
             } else {
-                if (perspectiveEnabled) {
-                    mTransformMatrix->loadTranslate(
-                            mPivotX + mTranslationX,
-                            mPivotY + mTranslationY,
-                            mTranslationZ);
-                    mTransformMatrix->rotate(mRotationX, 1, 0, 0);
-                    mTransformMatrix->rotate(mRotationY, 0, 1, 0);
-                    mTransformMatrix->rotate(mRotation, 0, 0, 1);
-                    mTransformMatrix->scale(mScaleX, mScaleY, 1);
-                    mTransformMatrix->translate(-mPivotX, -mPivotY);
-                } else {
-                    /* TODO: support this old transform approach, based on API level */
-                    if (!mTransformCamera) {
-                        mTransformCamera = new Sk3DView();
-                        mTransformMatrix3D = new SkMatrix();
-                    }
-                    SkMatrix transformMatrix;
-                    transformMatrix.reset();
-                    mTransformCamera->save();
-                    transformMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
-                    mTransformCamera->rotateX(mRotationX);
-                    mTransformCamera->rotateY(mRotationY);
-                    mTransformCamera->rotateZ(-mRotation);
-                    mTransformCamera->getMatrix(mTransformMatrix3D);
-                    mTransformMatrix3D->preTranslate(-mPivotX, -mPivotY);
-                    mTransformMatrix3D->postTranslate(mPivotX + mTranslationX,
-                            mPivotY + mTranslationY);
-                    transformMatrix.postConcat(*mTransformMatrix3D);
-                    mTransformCamera->restore();
-
-                    mTransformMatrix->load(transformMatrix);
+                if (!mTransformCamera) {
+                    mTransformCamera = new Sk3DView();
+                    mTransformMatrix3D = new SkMatrix();
                 }
+                SkMatrix transformMatrix;
+                transformMatrix.reset();
+                mTransformCamera->save();
+                transformMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
+                mTransformCamera->rotateX(mRotationX);
+                mTransformCamera->rotateY(mRotationY);
+                mTransformCamera->rotateZ(-mRotation);
+                mTransformCamera->getMatrix(mTransformMatrix3D);
+                mTransformMatrix3D->preTranslate(-mPivotX, -mPivotY);
+                mTransformMatrix3D->postTranslate(mPivotX + mTranslationX,
+                        mPivotY + mTranslationY);
+                transformMatrix.postConcat(*mTransformMatrix3D);
+                mTransformCamera->restore();
+
+                mTransformMatrix->load(transformMatrix);
             }
         }
         mMatrixDirty = false;
@@ -278,8 +265,7 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
     }
     if (mMatrixFlags != 0) {
         if (mMatrixFlags == TRANSLATION) {
-            renderer.translate(mTranslationX, mTranslationY,
-                    Caches::getInstance().propertyEnable3d ? mTranslationZ : 0.0f); // TODO: necessary?
+            renderer.translate(mTranslationX, mTranslationY);
         } else {
             renderer.concatMatrix(*mTransformMatrix);
         }

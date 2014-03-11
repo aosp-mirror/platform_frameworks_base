@@ -702,9 +702,6 @@ TextureVertex* Caches::getRegionMesh() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Caches::initTempProperties() {
-    propertyDirtyViewport = false;
-    propertyEnable3d = false;
-    propertyCameraDistance = 1.0f;
     propertyAmbientShadowStrength = 25;
     propertySpotShadowStrength = 25;
 
@@ -715,17 +712,7 @@ void Caches::initTempProperties() {
 
 void Caches::setTempProperty(const char* name, const char* value) {
     ALOGD("setting property %s to %s", name, value);
-    if (!strcmp(name, "enable3d")) {
-        propertyEnable3d = !strcmp(value, "true");
-        propertyDirtyViewport = true;
-        ALOGD("enable3d = %d", propertyEnable3d);
-        return;
-    } else if (!strcmp(name, "cameraDistance")) {
-        propertyCameraDistance = fmin(fmax(atof(value), 0.001), 10);
-        propertyDirtyViewport = true;
-        ALOGD("camera dist multiplier = %.2f", propertyCameraDistance);
-        return;
-    } else if (!strcmp(name, "ambientShadowStrength")) {
+    if (!strcmp(name, "ambientShadowStrength")) {
         propertyAmbientShadowStrength = atoi(value);
         ALOGD("ambient shadow strength = 0x%x out of 0xff", propertyAmbientShadowStrength);
         return;
@@ -735,17 +722,14 @@ void Caches::setTempProperty(const char* name, const char* value) {
         return;
     } else if (!strcmp(name, "lightPosXScale")) {
         propertyLightPosXScale = fmin(fmax(atof(value), 0.0), 1.0);
-        propertyDirtyViewport = true;
         ALOGD("lightPos X Scale = %.2f", propertyLightPosXScale);
         return;
     }  else if (!strcmp(name, "lightPosYScale")) {
         propertyLightPosYScale = fmin(fmax(atof(value), 0.0), 1.0);
-        propertyDirtyViewport = true;
         ALOGD("lightPos Y Scale = %.2f", propertyLightPosXScale);
         return;
     }  else if (!strcmp(name, "lightPosZScale")) {
         propertyLightPosZScale = fmin(fmax(atof(value), 0.0), 1.0);
-        propertyDirtyViewport = true;
         ALOGD("lightPos Z Scale = %.2f", propertyLightPosXScale);
         return;
     }

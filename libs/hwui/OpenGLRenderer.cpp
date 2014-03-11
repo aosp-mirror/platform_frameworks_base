@@ -170,21 +170,7 @@ void OpenGLRenderer::setViewport(int width, int height) {
 }
 
 void OpenGLRenderer::initViewport(int width, int height) {
-    if (mCaches.propertyEnable3d) {
-        // TODO: make view proj app configurable
-        float dist = std::max(width, height) * 1.5;
-        dist *= mCaches.propertyCameraDistance;
-        Matrix4 projection;
-        projection.loadFrustum(-width / 2, -height / 2, width / 2, height / 2, dist, 0);
-        Matrix4 view;
-        view.loadLookAt(0, 0, dist,
-                0, 0, 0,
-                0, 1, 0);
-        mViewProjMatrix.loadMultiply(projection, view);
-        mViewProjMatrix.translate(-width/2, -height/2);
-    } else {
-        mViewProjMatrix.loadOrtho(0, width, height, 0, -1, 1);
-    }
+    mViewProjMatrix.loadOrtho(0, width, height, 0, -1, 1);
 
     initializeViewport(width, height);
 }
@@ -1929,13 +1915,6 @@ void OpenGLRenderer::setupDrawIndexedVertices(GLvoid* vertices) {
 status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
         int32_t replayFlags) {
     status_t status;
-
-    if (mCaches.propertyDirtyViewport) {
-        // force recalc of view/proj matrices
-        setViewport(getWidth(), getHeight());
-        mCaches.propertyDirtyViewport = false;
-    }
-
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList && displayList->isRenderable()) {

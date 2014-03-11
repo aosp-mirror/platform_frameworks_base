@@ -129,10 +129,6 @@ public:
     void loadRotate(float angle);
     void loadRotate(float angle, float x, float y, float z);
     void loadMultiply(const Matrix4& u, const Matrix4& v);
-    void loadFrustum(float left, float top, float right, float bottom, float near, float far);
-    void loadLookAt(float eyeX, float eyeY, float eyeZ,
-            float centerX, float centerY, float centerZ,
-            float upX, float upY, float upZ);
 
     void loadOrtho(float left, float right, float bottom, float top, float near, float far);
 

@@ -356,9 +356,6 @@ public:
     // TEMPORARY properties
     void initTempProperties();
     void setTempProperty(const char* name, const char* value);
-    bool propertyEnable3d;
-    bool propertyDirtyViewport; // flag set when dirtying the viewport
-    float propertyCameraDistance;
 
     // These scaling factors range from 0 to 1, to scale the light position
     // within the bound of (screenwidth, screenheight, max(screenwidth, screenheight));
