@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"товчлолыг устгах"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Аппликешн нь хэрэглэгчийн оролцоогүйгээр Нүүр дэлгэцний товчлолыг устгаж чадна."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"гарсан дуудлагыг чиглэлийг өөрчлөх"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Апп нь дуудлага хийх болон залгаж байгаа дугаарыг өөрчлөх боломжтой. Энэ зөвшөөрөл нь апп-г залгасан дуудлагыг хаах, хянах болон дахин чиглүүлэх боломжтой болгодог."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Гадагш дуудлага хийх үед залгасан дугаарыг харах, дуудлагыг өөр дугаар руу шилжүүлэх, таслах боломжтой болгоно."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"текст мессеж(SMS) хүлээж авах"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Апп нь SMS мессежийг хүлээн авах болон гүйцэтгэх боломжтой. Ингэснээр апп нь таны төхөөрөмжрүү илгээсэн мессежийг танд үзүүлэхгүйгээр хянах болон устгаж чадна."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"текст мессеж(МMS) хүлээж авах"</string>
@@ -963,7 +963,7 @@
     <string name="permlab_setAlarm" msgid="1379294556362091814">"сэрүүлэг тохируулах"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Апп нь суулгагдсан сэрүүлэгний апп дээр сэрүүлэг тохируулах боломжтой. Зарим сэрүүлэгний апп нь энэ функцийг дэмжихгүй байж болзошгүй."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"дуут шуудан нэмэх"</string>
-    <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Апп нь таны дуут шуудангийн ирсэн мэйлд мессеж нэмэх боломжтой."</string>
+    <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Таны дуут шуудангийн ирсэн мэйлд зурвас нэмэхийг апп-д зөвшөөрөх."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Хөтчийн геобайршлын зөвшөөрлийг өөрчлөх"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Апп нь Хөтчийн гео байршлын зөвшөөрлийг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан дурын веб хуудасруу байршлын мэдээллийг илгээх боломжтой."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"багцийг тулгах"</string>

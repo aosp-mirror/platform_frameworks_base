@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"afinstaller genveje"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Tillader, at applikationen fjerner genveje på startskærmen uden brugerindgriben."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"omdirigere udgående opkald"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Tillader, at appen kan behandle udgående opkald og ændre det nummer, der skal ringes til. Med denne tilladelse kan appen overvåge, omdirigere eller forhindre udgående opkald."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Tillader, at appen kan se det nummer, der ringes op til under et udgående opkald, og giver mulighed for at omdirigere opkaldet til et andet nummer eller afbryde opkaldet helt."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"modtage tekstbeskeder (sms)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Tillader, at appen kan modtage og behandle sms-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"modtage tekstbeskeder (mms)"</string>

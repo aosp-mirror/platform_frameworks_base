@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"uninstall shortcuts"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Allows the application to remove Home screen shortcuts without user intervention."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"reroute outgoing calls"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Allows the app to process outgoing calls and change the number to be dialled. This permission allows the app to monitor, redirect or prevent outgoing calls."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Allows the app to see the number being dialled during an outgoing call with the option to redirect the call to a different number or abort the call altogether."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"receive text messages (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Allows the app to receive and process SMS messages. This means that the app could monitor or delete messages sent to your device without showing them to you."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"receive text messages (MMS)"</string>

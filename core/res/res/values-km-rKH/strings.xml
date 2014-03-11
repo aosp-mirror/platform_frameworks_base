@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"លុប​ផ្លូវកាត់"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ឲ្យ​កម្មវិធី​លុប​ផ្លូវកាត់​អេក្រង់​ដើម​ដោយ​គ្មាន​អំពើ​ពី​អ្នកប្រើ។"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"នាំ​ផ្លូវ​ការ​ហៅ​ចេញ​ឡើងវិញ"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"ឲ្យ​កម្មវិធី​ដំណើរការ​ការ​ហៅ​ចេញ និង​ប្ដូរ​លេខ​ត្រូវ​ហៅ។ សិទ្ធិ​នេះ​អនុញ្ញាត​ឲ្យ​កម្មវិធី​តាមដាន ប្ដូរ​ទិស ឬ​ការពារ​ការ​ហៅ​ចេញ។"</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"ឲ្យ​កម្មវិធី​ឃើញ​លេខ​ដែល​កំពុង​ត្រូវ​បាន​ហៅ​អំឡុង​ពេល​ហៅ​ចេញ​​ដោយ​ប្រើ​​ជម្រើស​ ដើម្បី​បញ្ជូន​​ការ​ហៅ​បន្ត​ទៅ​លេខ​ផ្សេង ឬ​បោះបង់​ការ​ហៅ​រួម​គ្នា។"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ទទួល​សារ​អត្ថបទ (សារ SMS​)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"ឲ្យ​កម្មវិធី​ទទួល និង​ដំណើរការ​​សារ MMS ។ មាន​ន័យ​ថា កម្មវិធី​អាច​ត្រួតពិនិត្យ​ ឬ​លុប​សារ​ដែល​បាន​ផ្ញើ​ទៅ​ឧបករណ៍​របស់​អ្នក ដោយ​​មិន​បង្ហាញ​អ្នក។"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ទទួល​សារ​អត្ថបទ (MMS​)"</string>

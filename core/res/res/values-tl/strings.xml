@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"i-uninstall ang mga shortcut"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Pinapayagan ang application na alisin ang mga shortcut ng Homescreen nang walang panghihimasok ng user."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"baguhin ang ruta ng mga papalabas na tawag"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Pinapayagan ang app na magproseso ng mga papalabas na tawag at baguhin ang numerong ida-dial. Pinapayagan ng pahintulot na ito ang app na sumubaybay, mag-redirect, o pumigil ng mga papalabas na tawag."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Pinapayagan ang app na makita ang numerong idina-dial sa isang papalabas na tawag na may opsyon na i-redirect ang tawag sa ibang numero o itigil ang tawag nang tuluyan."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"tumanggap ng mga text message (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Pinapayagan ang app na tumanggap at magproseso ng mga mensaheng SMS. Nangangahulugan ito na maaaring sumubaybay o magtanggal ang app ng mga mensaheng ipinapadala sa iyong device nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"tumanggap ng mga text message (MMS)"</string>

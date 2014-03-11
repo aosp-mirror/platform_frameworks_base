@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"አቋራጮችን ያራግፋል"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"መተግበሪያው ያለተጠቃሚ ጣልቃ-ገብነት የመነሻ ማያ ገጽ አቋራጮችን እንዲያስወግድ ያስችለዋል።"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"የወጪ ጥሪዎች አቅጣጫ ቀይር"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"መተግበሪያው ወጪ ጥሪዎችን እንዲያስኬድና የሚደወለውን ቁጥር እንዲቀይር ይፈቅድለታል። ይህ ፈቃድ መተግበሪያው ወጪ ጥሪዎችን እንዲቆጣጠር፣ አቅጣጫ እንዲየስቀይር ወይም እንዲያግድ ይፈቅድለታል።"</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"በወጪ ጥሪ ጊዜ ጥሪውን ወደተለየ ቁጥር ከማዞር ወይም ጥሪውን በአጠቃላይ ከመተው አማራጭ ጋር እየተደወለለት ያለውን ቁጥር እንዲያይ ያስችለዋል።"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"የፅሁፍ መልዕክቶችን ተቀበል (ኤስ.ኤም.ኤስ.)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"መተግበሪያው የኤስ.ኤም.ኤስ. መልእክቶችን እንዲያነብ እና እንዲያካሂድ ይፈቅዳል። ይህ ማለት መተግበሪያው ወደ መሳሪያህ የተላኩ መልእክቶችን ላንተ ሳያሳይህ ሊቆጣጠር ወይም ሊሰርዝ ይችላል።"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"የፅሁፍ መልዕክቶችን ተቀበል (ኤም.ኤም.ኤስ.)"</string>

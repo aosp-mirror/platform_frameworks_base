@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ショートカットのアンインストール"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ユーザー操作なしでホーム画面のショートカットを削除することをアプリに許可します。"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"発信先の変更"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"通話の発信とダイヤルする番号の変更をアプリに許可します。これにより、アプリが発信を監視、転送、阻止できるようになります。"</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"発信を別の番号に転送するか完全に中止するオプションで、発信中にダイヤルされた番号にアクセスすることをアプリに許可します。"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"テキストメッセージ（SMS）の受信"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMSメッセージの受信と処理をアプリに許可します。これにより、アプリが端末に届いたメッセージを表示することなく監視または削除できるようになります。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"テキストメッセージ（MMS）の受信"</string>

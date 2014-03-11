@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"dezinstalează comenzi rapide"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permite aplicației să elimine comenzi rapide de pe ecranul de pornire, fără intervenția utilizatorului."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"redirecţionează apelurile efectuate"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Permite aplicaţiei să proceseze apelurile efectuate şi să schimbe numărul care trebuie format. Cu această permisiune aplicaţia poate monitoriza, redirecţiona sau împiedica apelurile efectuate."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Permite aplicației să vadă numărul format în timpul unui apel de ieșire, cu opțiunea de a redirecționa apelul către un alt număr sau de a întrerupe apelul."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"primeşte mesaje text (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Permite aplicaţiei să primească şi să proceseze mesaje SMS. Acest lucru înseamnă că aplicaţia ar putea monitoriza sau şterge mesajele trimise pe dispozitivul dvs. fără a vi le arăta."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"primeşte mesaje text (MMS)"</string>
