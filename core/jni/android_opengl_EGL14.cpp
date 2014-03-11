@@ -69,22 +69,22 @@ nativeClassInit(JNIEnv *_env, jclass glImplClass)
     jclass eglconfigClassLocal = _env->FindClass("android/opengl/EGLConfig");
     eglconfigClass = (jclass) _env->NewGlobalRef(eglconfigClassLocal);
 
-    egldisplayGetHandleID = _env->GetMethodID(egldisplayClass, "getHandle", "()I");
-    eglcontextGetHandleID = _env->GetMethodID(eglcontextClass, "getHandle", "()I");
-    eglsurfaceGetHandleID = _env->GetMethodID(eglsurfaceClass, "getHandle", "()I");
-    eglconfigGetHandleID = _env->GetMethodID(eglconfigClass, "getHandle", "()I");
+    egldisplayGetHandleID = _env->GetMethodID(egldisplayClass, "getNativeHandle", "()J");
+    eglcontextGetHandleID = _env->GetMethodID(eglcontextClass, "getNativeHandle", "()J");
+    eglsurfaceGetHandleID = _env->GetMethodID(eglsurfaceClass, "getNativeHandle", "()J");
+    eglconfigGetHandleID = _env->GetMethodID(eglconfigClass, "getNativeHandle", "()J");
 
 
-    egldisplayConstructor = _env->GetMethodID(egldisplayClass, "<init>", "(I)V");
-    eglcontextConstructor = _env->GetMethodID(eglcontextClass, "<init>", "(I)V");
-    eglsurfaceConstructor = _env->GetMethodID(eglsurfaceClass, "<init>", "(I)V");
-    eglconfigConstructor = _env->GetMethodID(eglconfigClass, "<init>", "(I)V");
+    egldisplayConstructor = _env->GetMethodID(egldisplayClass, "<init>", "(J)V");
+    eglcontextConstructor = _env->GetMethodID(eglcontextClass, "<init>", "(J)V");
+    eglsurfaceConstructor = _env->GetMethodID(eglsurfaceClass, "<init>", "(J)V");
+    eglconfigConstructor = _env->GetMethodID(eglconfigClass, "<init>", "(J)V");
 
-    jobject localeglNoContextObject = _env->NewObject(eglcontextClass, eglcontextConstructor, (jint)EGL_NO_CONTEXT);
+    jobject localeglNoContextObject = _env->NewObject(eglcontextClass, eglcontextConstructor, reinterpret_cast<jlong>(EGL_NO_CONTEXT));
     eglNoContextObject = _env->NewGlobalRef(localeglNoContextObject);
-    jobject localeglNoDisplayObject = _env->NewObject(egldisplayClass, egldisplayConstructor, (jint)EGL_NO_DISPLAY);
+    jobject localeglNoDisplayObject = _env->NewObject(egldisplayClass, egldisplayConstructor, reinterpret_cast<jlong>(EGL_NO_DISPLAY));
     eglNoDisplayObject = _env->NewGlobalRef(localeglNoDisplayObject);
-    jobject localeglNoSurfaceObject = _env->NewObject(eglsurfaceClass, eglsurfaceConstructor, (jint)EGL_NO_SURFACE);
+    jobject localeglNoSurfaceObject = _env->NewObject(eglsurfaceClass, eglsurfaceConstructor, reinterpret_cast<jlong>(EGL_NO_SURFACE));
     eglNoSurfaceObject = _env->NewGlobalRef(localeglNoSurfaceObject);
 
 
@@ -106,7 +106,8 @@ fromEGLHandle(JNIEnv *_env, jmethodID mid, jobject obj) {
                           "Object is set to null.");
     }
 
-    return (void*) (_env->CallIntMethod(obj, mid));
+    jlong handle = _env->CallLongMethod(obj, mid);
+    return reinterpret_cast<void*>(handle);
 }
 
 static jobject
@@ -126,7 +127,7 @@ toEGLHandle(JNIEnv *_env, jclass cls, jmethodID con, void * handle) {
            return eglNoSurfaceObject;
     }
 
-    return _env->NewObject(cls, con, (jint)handle);
+    return _env->NewObject(cls, con, reinterpret_cast<jlong>(handle));
 }
 
 // --------------------------------------------------------------------------
@@ -142,12 +143,24 @@ android_eglGetError
 /* EGLDisplay eglGetDisplay ( EGLNativeDisplayType display_id ) */
 static jobject
 android_eglGetDisplay
-  (JNIEnv *_env, jobject _this, jint display_id) {
+  (JNIEnv *_env, jobject _this, jlong display_id) {
     EGLDisplay _returnValue = (EGLDisplay) 0;
     _returnValue = eglGetDisplay(
-        (EGLNativeDisplayType)display_id
+        reinterpret_cast<EGLNativeDisplayType>(display_id)
     );
     return toEGLHandle(_env, egldisplayClass, egldisplayConstructor, _returnValue);
+}
+
+/* EGLDisplay eglGetDisplay ( EGLNativeDisplayType display_id ) */
+static jobject
+android_eglGetDisplayInt
+  (JNIEnv *_env, jobject _this, jint display_id) {
+
+    if (sizeof(void*) != sizeof(uint32_t)) {
+        jniThrowException(_env, "java/lang/UnsupportedOperationException", "eglGetDisplay");
+        return 0;
+    }
+    return android_eglGetDisplay(_env, _this, display_id);
 }
 
 /* EGLBoolean eglInitialize ( EGLDisplay dpy, EGLint *major, EGLint *minor ) */
@@ -852,7 +865,7 @@ android_eglReleaseThread
 /* EGLSurface eglCreatePbufferFromClientBuffer ( EGLDisplay dpy, EGLenum buftype, EGLClientBuffer buffer, EGLConfig config, const EGLint *attrib_list ) */
 static jobject
 android_eglCreatePbufferFromClientBuffer
-  (JNIEnv *_env, jobject _this, jobject dpy, jint buftype, jint buffer, jobject config, jintArray attrib_list_ref, jint offset) {
+  (JNIEnv *_env, jobject _this, jobject dpy, jint buftype, jlong buffer, jobject config, jintArray attrib_list_ref, jint offset) {
     jint _exception = 0;
     const char * _exceptionType = NULL;
     const char * _exceptionMessage = NULL;
@@ -897,7 +910,7 @@ android_eglCreatePbufferFromClientBuffer
     _returnValue = eglCreatePbufferFromClientBuffer(
         (EGLDisplay)dpy_native,
         (EGLenum)buftype,
-        (EGLClientBuffer)buffer,
+        reinterpret_cast<EGLClientBuffer>(buffer),
         (EGLConfig)config_native,
         (EGLint *)attrib_list
     );
@@ -911,6 +924,16 @@ exit:
         jniThrowException(_env, _exceptionType, _exceptionMessage);
     }
     return toEGLHandle(_env, eglsurfaceClass, eglsurfaceConstructor, _returnValue);
+}
+
+static jobject
+android_eglCreatePbufferFromClientBufferInt
+  (JNIEnv *_env, jobject _this, jobject dpy, jint buftype, jint buffer, jobject config, jintArray attrib_list_ref, jint offset) {
+    if(sizeof(void*) != sizeof(uint32_t)) {
+        jniThrowException(_env, "java/lang/UnsupportedOperationException", "eglCreatePbufferFromClientBuffer");
+        return 0;
+    }
+    return android_eglCreatePbufferFromClientBuffer(_env, _this, dpy, buftype, buffer, config, attrib_list_ref, offset);
 }
 
 /* EGLBoolean eglSurfaceAttrib ( EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint value ) */
@@ -1207,7 +1230,8 @@ static const char *classPathName = "android/opengl/EGL14";
 static JNINativeMethod methods[] = {
 {"_nativeClassInit", "()V", (void*)nativeClassInit },
 {"eglGetError", "()I", (void *) android_eglGetError },
-{"eglGetDisplay", "(I)Landroid/opengl/EGLDisplay;", (void *) android_eglGetDisplay },
+{"eglGetDisplay", "(I)Landroid/opengl/EGLDisplay;", (void *) android_eglGetDisplayInt },
+{"eglGetDisplay", "(J)Landroid/opengl/EGLDisplay;", (void *) android_eglGetDisplay },
 {"eglInitialize", "(Landroid/opengl/EGLDisplay;[II[II)Z", (void *) android_eglInitialize },
 {"eglTerminate", "(Landroid/opengl/EGLDisplay;)Z", (void *) android_eglTerminate },
 {"eglQueryString", "(Landroid/opengl/EGLDisplay;I)Ljava/lang/String;", (void *) android_eglQueryString__Landroind_opengl_EGLDisplay_2I },
@@ -1224,7 +1248,8 @@ static JNINativeMethod methods[] = {
 {"eglQueryAPI", "()I", (void *) android_eglQueryAPI },
 {"eglWaitClient", "()Z", (void *) android_eglWaitClient },
 {"eglReleaseThread", "()Z", (void *) android_eglReleaseThread },
-{"eglCreatePbufferFromClientBuffer", "(Landroid/opengl/EGLDisplay;IILandroid/opengl/EGLConfig;[II)Landroid/opengl/EGLSurface;", (void *) android_eglCreatePbufferFromClientBuffer },
+{"eglCreatePbufferFromClientBuffer", "(Landroid/opengl/EGLDisplay;IILandroid/opengl/EGLConfig;[II)Landroid/opengl/EGLSurface;", (void *) android_eglCreatePbufferFromClientBufferInt },
+{"eglCreatePbufferFromClientBuffer", "(Landroid/opengl/EGLDisplay;IJLandroid/opengl/EGLConfig;[II)Landroid/opengl/EGLSurface;", (void *) android_eglCreatePbufferFromClientBuffer },
 {"eglSurfaceAttrib", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLSurface;II)Z", (void *) android_eglSurfaceAttrib },
 {"eglBindTexImage", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLSurface;I)Z", (void *) android_eglBindTexImage },
 {"eglReleaseTexImage", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLSurface;I)Z", (void *) android_eglReleaseTexImage },
