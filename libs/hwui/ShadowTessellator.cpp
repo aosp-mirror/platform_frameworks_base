@@ -40,7 +40,7 @@ void ShadowTessellator::tessellateAmbientShadow(const Vector3* casterPolygon,
 
     // A bunch of parameters to tweak the shadow.
     // TODO: Allow some of these changable by debug settings or APIs.
-    const float heightFactor = 128;
+    const float heightFactor = 1.0f / 128;
     const float geomFactor = 64;
 
     AmbientShadow::createAmbientShadow(casterPolygon, casterVertexCount,
@@ -69,7 +69,7 @@ void ShadowTessellator::tessellateSpotShadow(const Vector3* casterPolygon, int c
     reverseReceiverTransform.mapPoint3d(lightCenter);
 
     const float lightSize = maximal / 4;
-    const int lightVertexCount = 16;
+    const int lightVertexCount = 8;
 
     SpotShadow::createSpotShadow(casterPolygon, casterVertexCount, lightCenter,
             lightSize, lightVertexCount, shadowVertexBuffer);
@@ -78,26 +78,23 @@ void ShadowTessellator::tessellateSpotShadow(const Vector3* casterPolygon, int c
 
 void ShadowTessellator::generateShadowIndices(uint16_t* shadowIndices) {
     int currentIndex = 0;
-    const int layers = SHADOW_LAYER_COUNT;
     const int rays = SHADOW_RAY_COUNT;
     // For the penumbra area.
-    for (int i = 0; i < layers; i++) {
-        for (int j = 0; j < rays; j++) {
-            shadowIndices[currentIndex++] = i * rays + j;
-            shadowIndices[currentIndex++] = (i + 1) * rays + j;
-        }
-        // To close the loop, back to the ray 0.
-        shadowIndices[currentIndex++] = i * rays;
-        shadowIndices[currentIndex++] = (i + 1) * rays;
+    for (int i = 0; i < rays; i++) {
+        shadowIndices[currentIndex++] = i;
+        shadowIndices[currentIndex++] = rays + i;
     }
-    uint16_t base = layers * rays;
-    uint16_t centroidIndex = (layers + 1) * rays;
+    // To close the loop, back to the ray 0.
+    shadowIndices[currentIndex++] = 0;
+    shadowIndices[currentIndex++] = rays;
+
+    uint16_t centroidIndex = 2 * rays;
     // For the umbra area, using strips to simulate the fans.
-    for (int k = 0; k < rays; k++) {
-        shadowIndices[currentIndex++] = base + k;
+    for (int i = 0; i < rays; i++) {
+        shadowIndices[currentIndex++] = rays + i;
         shadowIndices[currentIndex++] = centroidIndex;
     }
-    shadowIndices[currentIndex++] = base;
+    shadowIndices[currentIndex++] = rays;
 
 #if DEBUG_SHADOW
     if (currentIndex != SHADOW_INDEX_COUNT) {

@@ -46,17 +46,13 @@ namespace uirenderer {
 
 // The total number of rays starting from the centroid of shadow area, in order
 // to generate the shadow geometry.
-#define SHADOW_RAY_COUNT 256
-
-// The total number of layers in the outer shadow area, 1 being the minimum.
-#define SHADOW_LAYER_COUNT 2
+#define SHADOW_RAY_COUNT 128
 
 // The total number of all the vertices representing the shadow.
-#define SHADOW_VERTEX_COUNT ((SHADOW_LAYER_COUNT + 1) * SHADOW_RAY_COUNT + 1)
+#define SHADOW_VERTEX_COUNT (2 * SHADOW_RAY_COUNT + 1)
 
 // The total number of indices used for drawing the shadow geometry as triangle strips.
-#define SHADOW_INDEX_COUNT (2 * SHADOW_RAY_COUNT + 1 + 2 * (SHADOW_RAY_COUNT + 1) * \
-        SHADOW_LAYER_COUNT)
+#define SHADOW_INDEX_COUNT (2 * SHADOW_RAY_COUNT + 1 + 2 * (SHADOW_RAY_COUNT + 1))
 
 class ShadowTessellator {
 public:
