@@ -4429,6 +4429,20 @@
         <attr name="color" />
     </declare-styleable>
 
+    <!-- Drawable used to show animated touch feedback. -->
+    <declare-styleable name="TouchFeedbackDrawable">
+        <!-- The tint to use for feedback ripples. This attribute is mandatory. -->
+        <attr name="tint" />
+        <!-- Specifies the Porter-Duff blending mode used to apply the tint. The default vlaue is src_atop, which draws over the opaque parts of the drawable. -->
+        <attr name="tintMode" />
+        <!-- Whether to pin feedback ripples to the center of the drawable. Default value is false. -->
+        <attr name="pinned" format="boolean" />
+        <!-- Optional drawable used to mask ripple bounds before projection. -->
+        <attr name="mask" format="reference" />
+        <!-- Optional drawable onto which ripples are projected. -->
+        <attr name="drawable" />
+    </declare-styleable>
+
     <declare-styleable name="ScaleDrawable">
         <!-- Scale width, expressed as a percentage of the drawable's bound. The value's
              format is XX%. For instance: 100%, 12.5%, etc.-->

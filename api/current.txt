@@ -825,6 +825,7 @@ package android {
     field public static final int persistent = 16842765; // 0x101000d
     field public static final int persistentDrawingCache = 16842990; // 0x10100ee
     field public static final deprecated int phoneNumber = 16843111; // 0x1010167
+    field public static final int pinned = 16843776; // 0x1010400
     field public static final int pivotX = 16843189; // 0x10101b5
     field public static final int pivotY = 16843190; // 0x10101b6
     field public static final int popupAnimationStyle = 16843465; // 0x10102c9
@@ -2196,6 +2197,8 @@ package android {
     field public static final int Widget_Quantum_Button_Borderless = 16974393; // 0x1030239
     field public static final int Widget_Quantum_Button_Borderless_Small = 16974394; // 0x103023a
     field public static final int Widget_Quantum_Button_Inset = 16974395; // 0x103023b
+    field public static final int Widget_Quantum_Button_Paper = 16974503; // 0x10302a7
+    field public static final int Widget_Quantum_Button_Paper_Color = 16974504; // 0x10302a8
     field public static final int Widget_Quantum_Button_Small = 16974396; // 0x103023c
     field public static final int Widget_Quantum_Button_Toggle = 16974397; // 0x103023d
     field public static final int Widget_Quantum_CalendarView = 16974398; // 0x103023e
@@ -2232,6 +2235,8 @@ package android {
     field public static final int Widget_Quantum_Light_Button = 16974452; // 0x1030274
     field public static final int Widget_Quantum_Light_Button_Borderless_Small = 16974453; // 0x1030275
     field public static final int Widget_Quantum_Light_Button_Inset = 16974454; // 0x1030276
+    field public static final int Widget_Quantum_Light_Button_Paper = 16974505; // 0x10302a9
+    field public static final int Widget_Quantum_Light_Button_Paper_Color = 16974506; // 0x10302aa
     field public static final int Widget_Quantum_Light_Button_Small = 16974455; // 0x1030277
     field public static final int Widget_Quantum_Light_Button_Toggle = 16974456; // 0x1030278
     field public static final int Widget_Quantum_Light_CalendarView = 16974457; // 0x1030279
