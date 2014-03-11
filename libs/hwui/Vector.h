@@ -124,6 +124,10 @@ public:
     Vector3(float px, float py, float pz) :
         x(px), y(py), z(pz) {
     }
+
+    void dump() {
+        ALOGD("Vector3[%.2f, %.2f, %.2f]", x, y, z);
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
