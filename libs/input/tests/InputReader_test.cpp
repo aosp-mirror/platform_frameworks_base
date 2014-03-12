@@ -186,7 +186,7 @@ private:
         mInputDevices = inputDevices;
     }
 
-    virtual sp<KeyCharacterMap> getKeyboardLayoutOverlay(const String8& inputDeviceDescriptor) {
+    virtual sp<KeyCharacterMap> getKeyboardLayoutOverlay(const InputDeviceIdentifier& identifier) {
         return NULL;
     }
 

@@ -99,6 +99,12 @@ static struct {
     jclass clazz;
 } gMotionEventClassInfo;
 
+static struct {
+    jclass clazz;
+    jmethodID constructor;
+} gInputDeviceIdentifierInfo;
+
+
 
 // --- Global functions ---
 
@@ -181,7 +187,7 @@ public:
     virtual void getReaderConfiguration(InputReaderConfiguration* outConfig);
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId);
     virtual void notifyInputDevicesChanged(const Vector<InputDeviceInfo>& inputDevices);
-    virtual sp<KeyCharacterMap> getKeyboardLayoutOverlay(const String8& inputDeviceDescriptor);
+    virtual sp<KeyCharacterMap> getKeyboardLayoutOverlay(const InputDeviceIdentifier& identifier);
     virtual String8 getDeviceAlias(const InputDeviceIdentifier& identifier);
 
     /* --- InputDispatcherPolicyInterface implementation --- */
@@ -490,13 +496,16 @@ void NativeInputManager::notifyInputDevicesChanged(const Vector<InputDeviceInfo>
 }
 
 sp<KeyCharacterMap> NativeInputManager::getKeyboardLayoutOverlay(
-        const String8& inputDeviceDescriptor) {
+        const InputDeviceIdentifier& identifier) {
     JNIEnv* env = jniEnv();
 
     sp<KeyCharacterMap> result;
-    ScopedLocalRef<jstring> descriptorObj(env, env->NewStringUTF(inputDeviceDescriptor.string()));
+    ScopedLocalRef<jstring> descriptor(env, env->NewStringUTF(identifier.descriptor.string()));
+    ScopedLocalRef<jobject> identifierObj(env, env->NewObject(gInputDeviceIdentifierInfo.clazz,
+            gInputDeviceIdentifierInfo.constructor, descriptor.get(),
+            identifier.vendor, identifier.product));
     ScopedLocalRef<jobjectArray> arrayObj(env, jobjectArray(env->CallObjectMethod(mServiceObj,
-                gServiceClassInfo.getKeyboardLayoutOverlay, descriptorObj.get())));
+                gServiceClassInfo.getKeyboardLayoutOverlay, identifierObj.get())));
     if (arrayObj.get()) {
         ScopedLocalRef<jstring> filenameObj(env,
                 jstring(env->GetObjectArrayElement(arrayObj.get(), 0)));
@@ -1430,7 +1439,8 @@ int register_android_server_InputManager(JNIEnv* env) {
             "getPointerIcon", "()Landroid/view/PointerIcon;");
 
     GET_METHOD_ID(gServiceClassInfo.getKeyboardLayoutOverlay, clazz,
-            "getKeyboardLayoutOverlay", "(Ljava/lang/String;)[Ljava/lang/String;");
+            "getKeyboardLayoutOverlay",
+            "(Landroid/hardware/input/InputDeviceIdentifier;)[Ljava/lang/String;");
 
     GET_METHOD_ID(gServiceClassInfo.getDeviceAlias, clazz,
             "getDeviceAlias", "(Ljava/lang/String;)Ljava/lang/String;");
@@ -1449,6 +1459,13 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     FIND_CLASS(gMotionEventClassInfo.clazz, "android/view/MotionEvent");
     gMotionEventClassInfo.clazz = jclass(env->NewGlobalRef(gMotionEventClassInfo.clazz));
+
+    // InputDeviceIdentifier
+
+    FIND_CLASS(gInputDeviceIdentifierInfo.clazz, "android/hardware/input/InputDeviceIdentifier");
+    gInputDeviceIdentifierInfo.clazz = jclass(env->NewGlobalRef(gInputDeviceIdentifierInfo.clazz));
+    GET_METHOD_ID(gInputDeviceIdentifierInfo.constructor, gInputDeviceIdentifierInfo.clazz,
+            "<init>", "(Ljava/lang/String;II)V");
 
     return 0;
 }

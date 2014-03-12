@@ -911,7 +911,7 @@ void InputDevice::configure(nsecs_t when, const InputReaderConfiguration* config
         if (!changes || (changes & InputReaderConfiguration::CHANGE_KEYBOARD_LAYOUTS)) {
             if (!(mClasses & INPUT_DEVICE_CLASS_VIRTUAL)) {
                 sp<KeyCharacterMap> keyboardLayout =
-                        mContext->getPolicy()->getKeyboardLayoutOverlay(mIdentifier.descriptor);
+                        mContext->getPolicy()->getKeyboardLayoutOverlay(mIdentifier);
                 if (mContext->getEventHub()->setKeyboardLayoutOverlay(mId, keyboardLayout)) {
                     bumpGeneration();
                 }
