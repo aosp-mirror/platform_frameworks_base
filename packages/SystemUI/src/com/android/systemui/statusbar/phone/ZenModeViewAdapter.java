@@ -35,23 +35,19 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
     private final Handler mHandler = new Handler();
     private final SettingsObserver mObserver;
     private final List<ExitCondition> mExits = Arrays.asList(
-            newExit("Until you delete this", "Until", "You delete this"));
+            newExit("Until you turn this off", "Until", "You turn this off"));
 
     private Callbacks mCallbacks;
     private int mExitIndex;
-    private boolean mDeviceProvisioned;
     private int mMode;
+    private int mCommittedMode;
 
     public ZenModeViewAdapter(Context context) {
         mContext = context;
         mResolver = mContext.getContentResolver();
         mObserver = new SettingsObserver(mHandler);
         mObserver.init();
-    }
-
-    @Override
-    public boolean isApplicable() {
-        return mDeviceProvisioned;
+        init();
     }
 
     @Override
@@ -61,6 +57,18 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
 
     @Override
     public void setMode(int mode) {
+        if (mode == mMode) return;
+        mMode = mode;
+        dispatchChanged();
+    }
+
+    @Override
+    public int getCommittedMode() {
+        return mCommittedMode;
+    }
+
+    @Override
+    public void setCommittedMode(int mode) {
         final int v = mode == MODE_LIMITED ? Settings.Global.ZEN_MODE_LIMITED
                     : mode == MODE_FULL ? Settings.Global.ZEN_MODE_FULL
                     : Settings.Global.ZEN_MODE_OFF;
@@ -74,12 +82,21 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
     }
 
     @Override
-    public void cancel() {
+    public void init() {
         if (mExitIndex != 0) {
             mExitIndex = 0;
-            mHandler.post(mChange);
+            dispatchChanged();
         }
-        setMode(MODE_OFF);
+        final int mode = mCommittedMode == MODE_FULL ? MODE_FULL : MODE_LIMITED;
+        if (mode != mMode) {
+            mMode = mode;
+            dispatchChanged();
+        }
+    }
+
+    private void dispatchChanged() {
+        mHandler.removeCallbacks(mChanged);
+        mHandler.post(mChanged);
     }
 
     @Override
@@ -111,7 +128,7 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
             return;
         }
         mExitIndex = i;
-        mHandler.post(mChange);
+        dispatchChanged();
     }
 
     private static ExitCondition newExit(String summary, String line1, String line2) {
@@ -122,7 +139,7 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
         return rt;
     }
 
-    private final Runnable mChange = new Runnable() {
+    private final Runnable mChanged = new Runnable() {
         public void run() {
             if (mCallbacks == null) {
                 return;
@@ -145,24 +162,19 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
             mResolver.registerContentObserver(
                     Settings.Global.getUriFor(Settings.Global.ZEN_MODE),
                     false, this);
-            mResolver.registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED),
-                    false, this);
         }
 
         @Override
         public void onChange(boolean selfChange) {
             loadSettings();
-            mChange.run();  // already on handler
+            mChanged.run();  // already on handler
         }
 
         private void loadSettings() {
-            mDeviceProvisioned = Settings.Global.getInt(mResolver,
-                    Settings.Global.DEVICE_PROVISIONED, 0) != 0;
-            mMode = getMode();
+            mCommittedMode = getModeFromSetting();
         }
 
-        private int getMode() {
+        private int getModeFromSetting() {
             final int v = Settings.Global.getInt(mResolver,
                     Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
             if (v == Settings.Global.ZEN_MODE_LIMITED) return MODE_LIMITED;
