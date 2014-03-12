@@ -38,6 +38,7 @@ import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
@@ -111,6 +112,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     public static class RotationLockState extends State {
         boolean visible = false;
+    }
+    public static class ZenModeState extends State {
+        int zenMode = Settings.Global.ZEN_MODE_OFF;
     }
 
     /** The callback to update a given tile. */
@@ -294,6 +298,25 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
 
+    /** ContentObserver to watch display color space adjustment */
+    private class ZenModeObserver extends ContentObserver {
+        public ZenModeObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            onZenModeChanged();
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.unregisterContentObserver(this);
+            cr.registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.ZEN_MODE), false, this);
+        }
+    }
+
     /** Callback for changes to remote display routes. */
     private class RemoteDisplayRouteCallback extends MediaRouter.SimpleCallback {
         @Override
@@ -327,6 +350,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final DisplayInversionObserver mInversionObserver;
     private final DisplayContrastObserver mContrastObserver;
     private final DisplayColorSpaceObserver mColorSpaceObserver;
+    private final ZenModeObserver mZenModeObserver;
 
     private final MediaRouter mMediaRouter;
     private final RemoteDisplayRouteCallback mRemoteDisplayRouteCallback;
@@ -348,6 +372,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private QuickSettingsTileView mAirplaneModeTile;
     private RefreshCallback mAirplaneModeCallback;
     private State mAirplaneModeState = new State();
+
+    private QuickSettingsTileView mZenModeTile;
+    private RefreshCallback mZenModeCallback;
+    private ZenModeState mZenModeState = new ZenModeState();
 
     private QuickSettingsTileView mWifiTile;
     private RefreshCallback mWifiCallback;
@@ -445,6 +473,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mContrastObserver.startObserving();
         mColorSpaceObserver = new DisplayColorSpaceObserver(mHandler);
         mColorSpaceObserver.startObserving();
+        mZenModeObserver = new ZenModeObserver(mHandler);
+        mZenModeObserver.startObserving();
 
         mMediaRouter = (MediaRouter)context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
         rebindMediaRouterAsCurrentUser();
@@ -565,6 +595,30 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 R.drawable.ic_qs_airplane_off);
         mAirplaneModeState.label = r.getString(R.string.quick_settings_airplane_mode_label);
         mAirplaneModeCallback.refreshView(mAirplaneModeTile, mAirplaneModeState);
+    }
+
+    // Zen Mode
+    void addZenModeTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mZenModeTile = view;
+        mZenModeCallback = cb;
+        onZenModeChanged();
+    }
+    private void onZenModeChanged() {
+        final int mode = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
+        mZenModeState.enabled = mode != Settings.Global.ZEN_MODE_OFF;
+        mZenModeState.zenMode = mode;
+        if (mode == Settings.Global.ZEN_MODE_FULL) {
+            mZenModeState.iconId = R.drawable.stat_sys_zen_full;
+            mZenModeState.label = ZenModeView.modeToLabel(ZenModeView.Adapter.MODE_FULL);
+        } else if (mode == Settings.Global.ZEN_MODE_LIMITED) {
+            mZenModeState.iconId = R.drawable.stat_sys_zen_limited;
+            mZenModeState.label = ZenModeView.modeToLabel(ZenModeView.Adapter.MODE_LIMITED);
+        } else {
+            mZenModeState.iconId = R.drawable.stat_sys_zen_limited;
+            mZenModeState.label = ZenModeView.modeToLabel(ZenModeView.Adapter.MODE_LIMITED);
+        }
+        mZenModeCallback.refreshView(mZenModeTile, mZenModeState);
     }
 
     // Wifi
