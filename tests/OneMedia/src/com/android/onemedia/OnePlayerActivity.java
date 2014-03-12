@@ -1,7 +1,24 @@
+/*
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.onemedia;
 
 
 import android.app.Activity;
+import android.media.session.MediaMetadata;
+import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -79,10 +96,10 @@ public class OnePlayerActivity extends Activity {
             switch (v.getId()) {
                 case R.id.play_button:
                     Log.d(TAG, "Play button pressed, in state " + mPlaybackState);
-                    if (mPlaybackState == Renderer.STATE_PAUSED
-                            || mPlaybackState == Renderer.STATE_ENDED) {
+                    if (mPlaybackState == PlaybackState.PLAYSTATE_PAUSED
+                            || mPlaybackState == PlaybackState.PLAYSTATE_STOPPED) {
                         mPlayer.play();
-                    } else if (mPlaybackState == Renderer.STATE_PLAYING) {
+                    } else if (mPlaybackState == PlaybackState.PLAYSTATE_PLAYING) {
                         mPlayer.pause();
                     }
                     break;
@@ -97,48 +114,55 @@ public class OnePlayerActivity extends Activity {
 
     private PlayerController.Listener mListener = new PlayerController.Listener() {
         @Override
-        public void onSessionStateChange(int state) {
-            mPlaybackState = state;
+        public void onPlaybackStateChange(PlaybackState state) {
+            mPlaybackState = state.getState();
             boolean enablePlay = false;
+            StringBuilder statusBuilder = new StringBuilder();
             switch (mPlaybackState) {
-                case Renderer.STATE_PLAYING:
-                    mStatusView.setText("playing");
+                case PlaybackState.PLAYSTATE_PLAYING:
+                    statusBuilder.append("playing");
                     mPlayButton.setText("Pause");
                     enablePlay = true;
                     break;
-                case Renderer.STATE_PAUSED:
-                    mStatusView.setText("paused");
+                case PlaybackState.PLAYSTATE_PAUSED:
+                    statusBuilder.append("paused");
                     mPlayButton.setText("Play");
                     enablePlay = true;
                     break;
-                case Renderer.STATE_ENDED:
-                    mStatusView.setText("ended");
+                case PlaybackState.PLAYSTATE_STOPPED:
+                    statusBuilder.append("ended");
                     mPlayButton.setText("Play");
                     enablePlay = true;
                     break;
-                case Renderer.STATE_ERROR:
-                    mStatusView.setText("error");
+                case PlaybackState.PLAYSTATE_ERROR:
+                    statusBuilder.append("error: ").append(state.getErrorMessage());
                     break;
-                case Renderer.STATE_PREPARING:
-                    mStatusView.setText("preparing");
+                case PlaybackState.PLAYSTATE_BUFFERING:
+                    statusBuilder.append("buffering");
                     break;
-                case Renderer.STATE_READY:
-                    mStatusView.setText("ready");
+                case PlaybackState.PLAYSTATE_NONE:
+                    statusBuilder.append("none");
                     break;
-                case Renderer.STATE_STOPPED:
-                    mStatusView.setText("stopped");
-                    break;
+                default:
+                    statusBuilder.append(mPlaybackState);
             }
+            statusBuilder.append(" -- At position: ").append(state.getPosition());
+            mStatusView.setText(statusBuilder.toString());
             mPlayButton.setEnabled(enablePlay);
         }
 
         @Override
-        public void onPlayerStateChange(int state) {
+        public void onConnectionStateChange(int state) {
             if (state == PlayerController.STATE_DISCONNECTED) {
                 setControlsEnabled(false);
             } else if (state == PlayerController.STATE_CONNECTED) {
                 setControlsEnabled(true);
             }
+        }
+
+        @Override
+        public void onMetadataChange(MediaMetadata metadata) {
+            Log.d(TAG, "Metadata update! Title: " + metadata);
         }
     };
 }

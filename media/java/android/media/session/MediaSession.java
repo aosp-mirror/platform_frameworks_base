@@ -17,17 +17,21 @@
 package android.media.session;
 
 import android.content.Intent;
+import android.media.Rating;
 import android.media.session.IMediaController;
 import android.media.session.IMediaSession;
 import android.media.session.IMediaSessionCallback;
-import android.media.RemoteControlClient;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -58,12 +62,13 @@ import java.util.ArrayList;
 public final class MediaSession {
     private static final String TAG = "MediaSession";
 
-    private static final int MESSAGE_MEDIA_BUTTON = 1;
-    private static final int MESSAGE_COMMAND = 2;
-    private static final int MESSAGE_ROUTE_CHANGE = 3;
+    private static final int MSG_MEDIA_BUTTON = 1;
+    private static final int MSG_COMMAND = 2;
+    private static final int MSG_ROUTE_CHANGE = 3;
 
     private static final String KEY_COMMAND = "command";
     private static final String KEY_EXTRAS = "extras";
+    private static final String KEY_CALLBACK = "callback";
 
     private final Object mLock = new Object();
 
@@ -71,7 +76,14 @@ public final class MediaSession {
     private final IMediaSession mBinder;
     private final CallbackStub mCbStub;
 
-    private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
+    private final ArrayList<MessageHandler> mCallbacks = new ArrayList<MessageHandler>();
+    // TODO route interfaces
+    private final ArrayMap<String, RouteInterface.Stub> mInterfaces
+            = new ArrayMap<String, RouteInterface.Stub>();
+
+    private TransportPerformer mPerformer;
+
+    private boolean mPublished = false;;
 
     /**
      * @hide
@@ -81,7 +93,7 @@ public final class MediaSession {
         mCbStub = cbStub;
         IMediaController controllerBinder = null;
         try {
-            controllerBinder = mBinder.getMediaSessionToken();
+            controllerBinder = mBinder.getMediaController();
         } catch (RemoteException e) {
             throw new RuntimeException("Dead object in MediaSessionController constructor: ", e);
         }
@@ -102,34 +114,117 @@ public final class MediaSession {
             throw new IllegalArgumentException("Callback cannot be null");
         }
         synchronized (mLock) {
-            if (mCallbacks.contains(callback)) {
+            if (getHandlerForCallbackLocked(callback) != null) {
                 Log.w(TAG, "Callback is already added, ignoring");
+                return;
             }
             if (handler == null) {
                 handler = new Handler();
             }
             MessageHandler msgHandler = new MessageHandler(handler.getLooper(), callback);
-            callback.setHandler(msgHandler);
-            mCallbacks.add(callback);
+            mCallbacks.add(msgHandler);
         }
     }
 
     public void removeCallback(Callback callback) {
-        mCallbacks.remove(callback);
+        synchronized (mLock) {
+            removeCallbackLocked(callback);
+        }
     }
 
     /**
-     * Publish the current playback state to the system and any controllers.
-     * Valid values are defined in {@link RemoteControlClient}. TODO move play
-     * states somewhere else.
+     * Start using a TransportPerformer with this media session. This must be
+     * called before calling publish and cannot be called more than once.
+     * Calling this will allow MediaControllers to retrieve a
+     * TransportController.
      *
-     * @param state
+     * @see TransportController
+     * @return The TransportPerformer created for this session
      */
-    public void setPlaybackState(int state) {
+    public TransportPerformer setTransportPerformerEnabled() {
+        if (mPerformer != null) {
+            throw new IllegalStateException("setTransportPerformer can only be called once.");
+        }
+        if (mPublished) {
+            throw new IllegalStateException("setTransportPerformer cannot be called after publish");
+        }
+
+        mPerformer = new TransportPerformer(mBinder);
         try {
-            mBinder.setPlaybackState(state);
+            mBinder.setTransportPerformerEnabled();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setPlaybackState: ", e);
+            Log.wtf(TAG, "Failure in setTransportPerformerEnabled.", e);
+        }
+        return mPerformer;
+    }
+
+    /**
+     * Retrieves the TransportPerformer used by this session. If called before
+     * {@link #setTransportPerformerEnabled} null will be returned.
+     *
+     * @return The TransportPerformer associated with this session or null
+     */
+    public TransportPerformer getTransportPerformer() {
+        return mPerformer;
+    }
+
+    /**
+     * Call after you have finished setting up the session. This will make it
+     * available to listeners and begin pushing updates to MediaControllers.
+     * This can only be called once.
+     */
+    public void publish() {
+        if (mPublished) {
+            throw new RuntimeException("publish() may only be called once.");
+        }
+        try {
+            mBinder.publish();
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Failure in publish.", e);
+        }
+        mPublished = true;
+    }
+
+    /**
+     * Add an interface that can be used by MediaSessions. TODO make this a
+     * route provider api
+     *
+     * @see RouteInterface
+     * @param iface The interface to add
+     * @hide
+     */
+    public void addInterface(RouteInterface.Stub iface) {
+        if (iface == null) {
+            throw new IllegalArgumentException("Stub cannot be null");
+        }
+        String name = iface.getName();
+        if (TextUtils.isEmpty(name)) {
+            throw new IllegalArgumentException("Stub must return a valid name");
+        }
+        if (mInterfaces.containsKey(iface)) {
+            throw new IllegalArgumentException("Interface is already added");
+        }
+        synchronized (mLock) {
+            mInterfaces.put(iface.getName(), iface);
+        }
+    }
+
+    /**
+     * Send a proprietary event to all MediaControllers listening to this
+     * Session. It's up to the Controller/Session owner to determine the meaning
+     * of any events.
+     *
+     * @param event The name of the event to send
+     * @param extras Any extras included with the event
+     */
+    public void sendEvent(String event, Bundle extras) {
+        if (TextUtils.isEmpty(event)) {
+            throw new IllegalArgumentException("event cannot be null or empty");
+        }
+        try {
+            mBinder.sendEvent(event, extras);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error sending event", e);
         }
     }
 
@@ -142,7 +237,7 @@ public final class MediaSession {
         try {
             mBinder.destroy();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in onDestroy: ", e);
+            Log.wtf(TAG, "Error releasing session: ", e);
         }
     }
 
@@ -158,15 +253,38 @@ public final class MediaSession {
         return mSessionToken;
     }
 
-    private void postCommand(String command, Bundle extras) {
-        Bundle commandBundle = new Bundle();
-        commandBundle.putString(KEY_COMMAND, command);
-        commandBundle.putBundle(KEY_EXTRAS, extras);
+    private MessageHandler getHandlerForCallbackLocked(Callback cb) {
+        if (cb == null) {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+        for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+            MessageHandler handler = mCallbacks.get(i);
+            if (cb == handler.mCallback) {
+                return handler;
+            }
+        }
+        return null;
+    }
+
+    private boolean removeCallbackLocked(Callback cb) {
+        if (cb == null) {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+        for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+            MessageHandler handler = mCallbacks.get(i);
+            if (cb == handler.mCallback) {
+                mCallbacks.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void postCommand(String command, Bundle extras, ResultReceiver resultCb) {
+        Command cmd = new Command(command, extras, resultCb);
         synchronized (mLock) {
             for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                Callback cb = mCallbacks.get(i);
-                Message msg = cb.mHandler.obtainMessage(MESSAGE_COMMAND, commandBundle);
-                cb.mHandler.sendMessage(msg);
+                mCallbacks.get(i).post(MSG_COMMAND, cmd);
             }
         }
     }
@@ -174,9 +292,7 @@ public final class MediaSession {
     private void postMediaButton(Intent mediaButtonIntent) {
         synchronized (mLock) {
             for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                Callback cb = mCallbacks.get(i);
-                Message msg = cb.mHandler.obtainMessage(MESSAGE_MEDIA_BUTTON, mediaButtonIntent);
-                cb.mHandler.sendMessage(msg);
+                mCallbacks.get(i).post(MSG_MEDIA_BUTTON, mediaButtonIntent);
             }
         }
     }
@@ -184,9 +300,7 @@ public final class MediaSession {
     private void postRequestRouteChange(Bundle mediaRouteDescriptor) {
         synchronized (mLock) {
             for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                Callback cb = mCallbacks.get(i);
-                Message msg = cb.mHandler.obtainMessage(MESSAGE_ROUTE_CHANGE, mediaRouteDescriptor);
-                cb.mHandler.sendMessage(msg);
+                mCallbacks.get(i).post(MSG_ROUTE_CHANGE, mediaRouteDescriptor);
             }
         }
     }
@@ -197,7 +311,6 @@ public final class MediaSession {
      * MediaSession (TODO).
      */
     public abstract static class Callback {
-        private MessageHandler mHandler;
 
         public Callback() {
         }
@@ -225,7 +338,7 @@ public final class MediaSession {
          * @param command
          * @param extras optional
          */
-        public void onCommand(String command, Bundle extras) {
+        public void onCommand(String command, Bundle extras, ResultReceiver cb) {
         }
 
         /**
@@ -237,35 +350,140 @@ public final class MediaSession {
          */
         public void onRequestRouteChange(Bundle descriptor) {
         }
-
-        private void setHandler(MessageHandler handler) {
-            mHandler = handler;
-        }
     }
 
     /**
      * @hide
      */
     public static class CallbackStub extends IMediaSessionCallback.Stub {
-        private MediaSession mMediaSession;
+        private WeakReference<MediaSession> mMediaSession;
 
         public void setMediaSession(MediaSession session) {
-            mMediaSession = session;
+            mMediaSession = new WeakReference<MediaSession>(session);
         }
 
         @Override
-        public void onCommand(String command, Bundle extras) throws RemoteException {
-            mMediaSession.postCommand(command, extras);
+        public void onCommand(String command, Bundle extras, ResultReceiver cb)
+                throws RemoteException {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                session.postCommand(command, extras, cb);
+            }
         }
 
         @Override
         public void onMediaButton(Intent mediaButtonIntent) throws RemoteException {
-            mMediaSession.postMediaButton(mediaButtonIntent);
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                session.postMediaButton(mediaButtonIntent);
+            }
         }
 
         @Override
         public void onRequestRouteChange(Bundle mediaRouteDescriptor) throws RemoteException {
-            mMediaSession.postRequestRouteChange(mediaRouteDescriptor);
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                session.postRequestRouteChange(mediaRouteDescriptor);
+            }
+        }
+
+        @Override
+        public void onPlay() throws RemoteException {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                TransportPerformer tp = session.getTransportPerformer();
+                if (tp != null) {
+                    tp.onPlay();
+                }
+            }
+        }
+
+        @Override
+        public void onPause() throws RemoteException {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                TransportPerformer tp = session.getTransportPerformer();
+                if (tp != null) {
+                    tp.onPause();
+                }
+            }
+        }
+
+        @Override
+        public void onStop() throws RemoteException {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                TransportPerformer tp = session.getTransportPerformer();
+                if (tp != null) {
+                    tp.onStop();
+                }
+            }
+        }
+
+        @Override
+        public void onNext() throws RemoteException {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                TransportPerformer tp = session.getTransportPerformer();
+                if (tp != null) {
+                    tp.onNext();
+                }
+            }
+        }
+
+        @Override
+        public void onPrevious() throws RemoteException {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                TransportPerformer tp = session.getTransportPerformer();
+                if (tp != null) {
+                    tp.onPrevious();
+                }
+            }
+        }
+
+        @Override
+        public void onFastForward() throws RemoteException {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                TransportPerformer tp = session.getTransportPerformer();
+                if (tp != null) {
+                    tp.onFastForward();
+                }
+            }
+        }
+
+        @Override
+        public void onRewind() throws RemoteException {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                TransportPerformer tp = session.getTransportPerformer();
+                if (tp != null) {
+                    tp.onRewind();
+                }
+            }
+        }
+
+        @Override
+        public void onSeekTo(long pos) throws RemoteException {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                TransportPerformer tp = session.getTransportPerformer();
+                if (tp != null) {
+                    tp.onSeekTo(pos);
+                }
+            }
+        }
+
+        @Override
+        public void onRate(Rating rating) throws RemoteException {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                TransportPerformer tp = session.getTransportPerformer();
+                if (tp != null) {
+                    tp.onRate(rating);
+                }
+            }
         }
 
     }
@@ -274,7 +492,7 @@ public final class MediaSession {
         private MediaSession.Callback mCallback;
 
         public MessageHandler(Looper looper, MediaSession.Callback callback) {
-            super(looper);
+            super(looper, null, true);
             mCallback = callback;
         }
 
@@ -285,21 +503,35 @@ public final class MediaSession {
                     return;
                 }
                 switch (msg.what) {
-                    case MESSAGE_MEDIA_BUTTON:
+                    case MSG_MEDIA_BUTTON:
                         mCallback.onMediaButton((Intent) msg.obj);
                         break;
-                    case MESSAGE_COMMAND:
-                        Bundle commandBundle = (Bundle) msg.obj;
-                        String command = commandBundle.getString(KEY_COMMAND);
-                        Bundle extras = commandBundle.getBundle(KEY_EXTRAS);
-                        mCallback.onCommand(command, extras);
+                    case MSG_COMMAND:
+                        Command cmd = (Command) msg.obj;
+                        mCallback.onCommand(cmd.command, cmd.extras, cmd.stub);
                         break;
-                    case MESSAGE_ROUTE_CHANGE:
+                    case MSG_ROUTE_CHANGE:
                         mCallback.onRequestRouteChange((Bundle) msg.obj);
                         break;
                 }
             }
             msg.recycle();
+        }
+
+        public void post(int what, Object obj) {
+            obtainMessage(what, obj).sendToTarget();
+        }
+    }
+
+    private static final class Command {
+        public final String command;
+        public final Bundle extras;
+        public final ResultReceiver stub;
+
+        public Command(String command, Bundle extras, ResultReceiver stub) {
+            this.command = command;
+            this.extras = extras;
+            this.stub = stub;
         }
     }
 }
