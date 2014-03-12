@@ -120,7 +120,7 @@ static void android_view_HardwareLayer_updateRenderLayer(JNIEnv* env, jobject cl
         jlong layerUpdaterPtr, jlong displayListPtr,
         jint left, jint top, jint right, jint bottom) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
-    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
+    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
     layer->setDisplayList(displayList, left, top, right, bottom);
 }
 

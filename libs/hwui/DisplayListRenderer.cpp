@@ -179,7 +179,7 @@ bool DisplayListRenderer::clipRegion(const SkRegion* region, SkRegion::Op op) {
     return StatefulBaseRenderer::clipRegion(region, op);
 }
 
-status_t DisplayListRenderer::drawDisplayList(DisplayList* displayList,
+status_t DisplayListRenderer::drawDisplayList(RenderNode* displayList,
         Rect& dirty, int32_t flags) {
     // dirty is an out parameter and should not be recorded,
     // it matters only when replaying the display list

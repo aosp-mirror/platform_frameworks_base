@@ -29,7 +29,7 @@
 namespace android {
 namespace uirenderer {
 
-void DisplayList::outputLogBuffer(int fd) {
+void RenderNode::outputLogBuffer(int fd) {
     DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
     if (logBuffer.isEmpty()) {
         return;
@@ -48,7 +48,7 @@ void DisplayList::outputLogBuffer(int fd) {
     fflush(file);
 }
 
-DisplayList::DisplayList() :
+RenderNode::RenderNode() :
         mDisplayListData(0), mDestroyed(false), mTransformMatrix(NULL), mTransformCamera(NULL),
         mTransformMatrix3D(NULL), mStaticMatrix(NULL), mAnimationMatrix(NULL) {
 
@@ -87,7 +87,7 @@ DisplayList::DisplayList() :
     mCaching = false;
 }
 
-DisplayList::~DisplayList() {
+RenderNode::~RenderNode() {
     LOG_ALWAYS_FATAL_IF(mDestroyed, "Double destroyed DisplayList %p", this);
 
     mDestroyed = true;
@@ -99,14 +99,14 @@ DisplayList::~DisplayList() {
     delete mAnimationMatrix;
 }
 
-void DisplayList::destroyDisplayListDeferred(DisplayList* displayList) {
+void RenderNode::destroyDisplayListDeferred(RenderNode* displayList) {
     if (displayList) {
         DISPLAY_LIST_LOGD("Deferring display list destruction");
         Caches::getInstance().deleteDisplayListDeferred(displayList);
     }
 }
 
-void DisplayList::setData(DisplayListData* data) {
+void RenderNode::setData(DisplayListData* data) {
     delete mDisplayListData;
     mDisplayListData = data;
     if (mDisplayListData) {
@@ -118,7 +118,7 @@ void DisplayList::setData(DisplayListData* data) {
  * This function is a simplified version of replay(), where we simply retrieve and log the
  * display list. This function should remain in sync with the replay() function.
  */
-void DisplayList::output(uint32_t level) {
+void RenderNode::output(uint32_t level) {
     ALOGD("%*sStart display list (%p, %s, render=%d)", (level - 1) * 2, "", this,
             mName.string(), isRenderable());
     ALOGD("%*s%s %d", level * 2, "", "Save",
@@ -133,17 +133,17 @@ void DisplayList::output(uint32_t level) {
     ALOGD("%*sDone (%p, %s)", (level - 1) * 2, "", this, mName.string());
 }
 
-float DisplayList::getPivotX() {
+float RenderNode::getPivotX() {
     updateMatrix();
     return mPivotX;
 }
 
-float DisplayList::getPivotY() {
+float RenderNode::getPivotY() {
     updateMatrix();
     return mPivotY;
 }
 
-void DisplayList::updateMatrix() {
+void RenderNode::updateMatrix() {
     if (mMatrixDirty) {
         // NOTE: mTransformMatrix won't be up to date if a DisplayList goes from a complex transform
         // to a pure translate. This is safe because the matrix isn't read in pure translate cases.
@@ -195,7 +195,7 @@ void DisplayList::updateMatrix() {
     }
 }
 
-void DisplayList::outputViewProperties(const int level) {
+void RenderNode::outputViewProperties(const int level) {
     updateMatrix();
     if (mLeft != 0 || mTop != 0) {
         ALOGD("%*sTranslate (left, top) %d, %d", level * 2, "", mLeft, mTop);
@@ -249,7 +249,7 @@ void DisplayList::outputViewProperties(const int level) {
 #define PROPERTY_SAVECOUNT 0
 
 template <class T>
-void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
+void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler,
         const int level) {
 #if DEBUG_DISPLAY_LIST
     outputViewProperties(level);
@@ -308,7 +308,7 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
  * If true3dTransform is set to true, the transform applied to the input matrix will use true 4x4
  * matrix computation instead of the Skia 3x3 matrix + camera hackery.
  */
-void DisplayList::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform) {
+void RenderNode::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform) {
     if (mLeft != 0 || mTop != 0) {
         matrix.translate(mLeft, mTop);
     }
@@ -353,7 +353,7 @@ void DisplayList::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform
  * Each DisplayList that serves as a 3d root builds its list of composited children,
  * which are flagged to not draw in the standard draw loop.
  */
-void DisplayList::computeOrdering() {
+void RenderNode::computeOrdering() {
     ATRACE_CALL();
     mProjectedNodes.clear();
 
@@ -367,7 +367,7 @@ void DisplayList::computeOrdering() {
     }
 }
 
-void DisplayList::computeOrderingImpl(
+void RenderNode::computeOrderingImpl(
         DrawDisplayListOp* opState,
         Vector<DrawDisplayListOp*>* compositedChildrenOfProjectionSurface,
         const mat4* transformFromProjectionSurface) {
@@ -394,7 +394,7 @@ void DisplayList::computeOrderingImpl(
         bool haveAppliedPropertiesToProjection = false;
         for (unsigned int i = 0; i < mDisplayListData->children.size(); i++) {
             DrawDisplayListOp* childOp = mDisplayListData->children[i];
-            DisplayList* child = childOp->mDisplayList;
+            RenderNode* child = childOp->mDisplayList;
 
             Vector<DrawDisplayListOp*>* projectionChildren = NULL;
             const mat4* projectionTransform = NULL;
@@ -434,7 +434,7 @@ private:
     const int mLevel;
 };
 
-void DisplayList::defer(DeferStateStruct& deferStruct, const int level) {
+void RenderNode::defer(DeferStateStruct& deferStruct, const int level) {
     DeferOperationHandler handler(deferStruct, level);
     iterate<DeferOperationHandler>(deferStruct.mRenderer, handler, level);
 }
@@ -456,7 +456,7 @@ private:
     const int mLevel;
 };
 
-void DisplayList::replay(ReplayStateStruct& replayStruct, const int level) {
+void RenderNode::replay(ReplayStateStruct& replayStruct, const int level) {
     ReplayOperationHandler handler(replayStruct, level);
 
     replayStruct.mRenderer.startMark(mName.string());
@@ -467,12 +467,12 @@ void DisplayList::replay(ReplayStateStruct& replayStruct, const int level) {
             replayStruct.mDrawGlStatus);
 }
 
-void DisplayList::buildZSortedChildList(Vector<ZDrawDisplayListOpPair>& zTranslatedNodes) {
+void RenderNode::buildZSortedChildList(Vector<ZDrawDisplayListOpPair>& zTranslatedNodes) {
     if (mDisplayListData == NULL || mDisplayListData->children.size() == 0) return;
 
     for (unsigned int i = 0; i < mDisplayListData->children.size(); i++) {
         DrawDisplayListOp* childOp = mDisplayListData->children[i];
-        DisplayList* child = childOp->mDisplayList;
+        RenderNode* child = childOp->mDisplayList;
         float childZ = child->mTranslationZ;
 
         if (childZ != 0.0f) {
@@ -491,7 +491,7 @@ void DisplayList::buildZSortedChildList(Vector<ZDrawDisplayListOpPair>& zTransla
 #define SHADOW_DELTA 0.1f
 
 template <class T>
-void DisplayList::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
+void RenderNode::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
         ChildrenSelectMode mode, OpenGLRenderer& renderer, T& handler) {
     const int size = zTranslatedNodes.size();
     if (size == 0
@@ -529,7 +529,7 @@ void DisplayList::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTrans
     while (shadowIndex < endIndex || drawIndex < endIndex) {
         if (shadowIndex < endIndex) {
             DrawDisplayListOp* casterOp = zTranslatedNodes[shadowIndex].value;
-            DisplayList* caster = casterOp->mDisplayList;
+            RenderNode* caster = casterOp->mDisplayList;
             const float casterZ = zTranslatedNodes[shadowIndex].key;
             // attempt to render the shadow if the caster about to be drawn is its caster,
             // OR if its caster's Z value is similar to the previous potential caster
@@ -560,7 +560,7 @@ void DisplayList::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTrans
         int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
 
         DrawDisplayListOp* childOp = zTranslatedNodes[drawIndex].value;
-        DisplayList* child = childOp->mDisplayList;
+        RenderNode* child = childOp->mDisplayList;
 
         renderer.concatMatrix(childOp->mTransformFromParent);
         childOp->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
@@ -574,7 +574,7 @@ void DisplayList::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTrans
 }
 
 template <class T>
-void DisplayList::iterateProjectedChildren(OpenGLRenderer& renderer, T& handler, const int level) {
+void RenderNode::iterateProjectedChildren(OpenGLRenderer& renderer, T& handler, const int level) {
     int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     LinearAllocator& alloc = handler.allocator();
     ClipRectOp* clipOp = new (alloc) ClipRectOp(0, 0, mWidth, mHeight,
@@ -605,7 +605,7 @@ void DisplayList::iterateProjectedChildren(OpenGLRenderer& renderer, T& handler,
  * defer vs replay logic, per operation
  */
 template <class T>
-void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level) {
+void RenderNode::iterate(OpenGLRenderer& renderer, T& handler, const int level) {
     if (CC_UNLIKELY(mDestroyed)) { // temporary debug logging
         ALOGW("Error: %s is drawing after destruction", getName());
         CRASH();

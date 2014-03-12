@@ -31,7 +31,7 @@ struct Res_png_9patch;
 
 namespace uirenderer {
 
-class DisplayList;
+class RenderNode;
 class Layer;
 class Matrix4;
 class SkiaColorFilter;
@@ -232,7 +232,7 @@ public:
 // Canvas draw operations - special
 // ----------------------------------------------------------------------------
     virtual status_t drawLayer(Layer* layer, float x, float y) = 0;
-    virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty,
+    virtual status_t drawDisplayList(RenderNode* displayList, Rect& dirty,
             int32_t replayFlags) = 0;
 
     // TODO: rename for consistency

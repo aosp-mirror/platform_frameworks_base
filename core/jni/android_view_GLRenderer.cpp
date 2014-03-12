@@ -143,7 +143,7 @@ static void android_view_GLRenderer_destroyLayer(JNIEnv* env, jobject clazz,
 static void android_view_GLRenderer_setDisplayListData(JNIEnv* env, jobject clazz,
         jlong displayListPtr, jlong newDataPtr) {
     using namespace android::uirenderer;
-    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
+    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
     DisplayListData* newData = reinterpret_cast<DisplayListData*>(newDataPtr);
     displayList->setData(newData);
 }

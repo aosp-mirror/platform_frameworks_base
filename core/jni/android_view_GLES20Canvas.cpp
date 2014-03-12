@@ -879,7 +879,7 @@ static jint android_view_GLES20Canvas_drawDisplayList(JNIEnv* env,
         jobject clazz, jlong rendererPtr, jlong displayListPtr,
         jobject dirty, jint flags) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
+    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
     android::uirenderer::Rect bounds;
     status_t status = renderer->drawDisplayList(displayList, bounds, flags);
     if (status != DrawGlInfo::kStatusDone && dirty != NULL) {
@@ -975,7 +975,7 @@ static void
 android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject javaFileDescriptor) {
 #ifdef USE_OPENGL_RENDERER
     int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
-    android::uirenderer::DisplayList::outputLogBuffer(fd);
+    android::uirenderer::RenderNode::outputLogBuffer(fd);
 #endif // USE_OPENGL_RENDERER
 }
 

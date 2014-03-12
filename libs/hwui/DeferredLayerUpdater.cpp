@@ -54,7 +54,7 @@ void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
     SkRefCnt_SafeAssign(mColorFilter, colorFilter);
 }
 
-void DeferredLayerUpdater::setDisplayList(DisplayList* displayList,
+void DeferredLayerUpdater::setDisplayList(RenderNode* displayList,
         int left, int top, int right, int bottom) {
     mDisplayList = displayList;
     if (mDirtyRect.isEmpty()) {

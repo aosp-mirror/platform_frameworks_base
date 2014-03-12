@@ -43,7 +43,7 @@ namespace uirenderer {
 // Forward declarations
 class Caches;
 class OpenGLRenderer;
-class DisplayList;
+class RenderNode;
 class DeferredDisplayList;
 class DeferStateStruct;
 
@@ -84,7 +84,7 @@ public:
         regionRect.translate(layer.left, layer.top);
     }
 
-    void updateDeferred(OpenGLRenderer* renderer, DisplayList* displayList,
+    void updateDeferred(OpenGLRenderer* renderer, RenderNode* displayList,
             int left, int top, int right, int bottom) {
         this->renderer = renderer;
         this->displayList = displayList;
@@ -294,7 +294,7 @@ public:
      */
     bool deferredUpdateScheduled;
     OpenGLRenderer* renderer;
-    DisplayList* displayList;
+    RenderNode* displayList;
     Rect dirtyRect;
     bool debugDrawUpdate;
     bool hasDrawnSinceUpdate;

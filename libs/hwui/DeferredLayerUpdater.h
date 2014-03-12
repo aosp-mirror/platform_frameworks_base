@@ -72,7 +72,7 @@ public:
         mTransform = matrix ? new SkMatrix(*matrix) : 0;
     }
 
-    ANDROID_API void setDisplayList(DisplayList* displayList,
+    ANDROID_API void setDisplayList(RenderNode* displayList,
                 int left, int top, int right, int bottom);
 
     ANDROID_API void setPaint(const SkPaint* paint);
@@ -101,7 +101,7 @@ private:
     // Layer type specific properties
     // displayList and surfaceTexture are mutually exclusive, only 1 may be set
     // dirtyRect is only valid if displayList is set
-    DisplayList* mDisplayList;
+    RenderNode* mDisplayList;
     Rect mDirtyRect;
     sp<GLConsumer> mSurfaceTexture;
     SkMatrix* mTransform;

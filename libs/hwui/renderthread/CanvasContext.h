@@ -31,7 +31,7 @@ namespace android {
 namespace uirenderer {
 
 class DeferredLayerUpdater;
-class DisplayList;
+class RenderNode;
 class DisplayListData;
 class OpenGLRenderer;
 class Rect;
@@ -63,9 +63,9 @@ public:
     bool initialize(EGLNativeWindowType window);
     void updateSurface(EGLNativeWindowType window);
     void setup(int width, int height);
-    void setDisplayListData(DisplayList* displayList, DisplayListData* newData);
+    void setDisplayListData(RenderNode* displayList, DisplayListData* newData);
     void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters);
-    void drawDisplayList(DisplayList* displayList, Rect* dirty);
+    void drawDisplayList(RenderNode* displayList, Rect* dirty);
     void destroyCanvas();
 
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);

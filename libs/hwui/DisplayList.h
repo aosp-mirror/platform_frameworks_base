@@ -160,17 +160,17 @@ private:
  * recorded stream of canvas operations is refreshed. The DisplayList (and its properties) stay
  * attached.
  */
-class DisplayList {
+class RenderNode {
 public:
-    ANDROID_API DisplayList();
-    ANDROID_API ~DisplayList();
+    ANDROID_API RenderNode();
+    ANDROID_API ~RenderNode();
 
     // See flags defined in DisplayList.java
     enum ReplayFlag {
         kReplayFlag_ClipChildren = 0x1
     };
 
-    ANDROID_API static void destroyDisplayListDeferred(DisplayList* displayList);
+    ANDROID_API static void destroyDisplayListDeferred(RenderNode* displayList);
     ANDROID_API static void outputLogBuffer(int fd);
 
     ANDROID_API void setData(DisplayListData* newData);
