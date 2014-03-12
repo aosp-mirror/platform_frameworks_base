@@ -140,12 +140,33 @@ public abstract class RegisteredServicesCache<V> {
         mContext.registerReceiver(mExternalReceiver, sdFilter);
     }
 
+    private final void handlePackageEvent(Intent intent, int userId) {
+        // Don't regenerate the services map when the package is removed or its
+        // ASEC container unmounted as a step in replacement.  The subsequent
+        // _ADDED / _AVAILABLE call will regenerate the map in the final state.
+        final String action = intent.getAction();
+        // it's a new-component action if it isn't some sort of removal
+        final boolean isRemoval = Intent.ACTION_PACKAGE_REMOVED.equals(action)
+                || Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action);
+        // if it's a removal, is it part of an update-in-place step?
+        final boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+
+        if (isRemoval && replacing) {
+            // package is going away, but it's the middle of an upgrade: keep the current
+            // state and do nothing here.  This clause is intentionally empty.
+        } else {
+            // either we're adding/changing, or it's a removal without replacement, so
+            // we need to recalculate the set of available services
+            generateServicesMap(userId);
+        }
+    }
+
     private final BroadcastReceiver mPackageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
             if (uid != -1) {
-                generateServicesMap(UserHandle.getUserId(uid));
+                handlePackageEvent(intent, UserHandle.getUserId(uid));
             }
         }
     };
@@ -154,7 +175,7 @@ public abstract class RegisteredServicesCache<V> {
         @Override
         public void onReceive(Context context, Intent intent) {
             // External apps can't coexist with multi-user, so scan owner
-            generateServicesMap(UserHandle.USER_OWNER);
+            handlePackageEvent(intent, UserHandle.USER_OWNER);
         }
     };
 
