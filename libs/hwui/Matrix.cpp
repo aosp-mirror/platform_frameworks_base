@@ -385,9 +385,14 @@ void Matrix4::loadOrtho(float left, float right, float bottom, float top, float 
     mType = kTypeTranslate | kTypeScale | kTypeRectToRect;
 }
 
+float Matrix4::mapZ(const Vector3& orig) const {
+    // duplicates logic for mapPoint3d's z coordinate
+    return orig.x * data[2] + orig.y * data[6] + orig.z * data[kScaleZ] + data[kTranslateZ];
+}
+
 void Matrix4::mapPoint3d(Vector3& vec) const {
     //TODO: optimize simple case
-    Vector3 orig(vec);
+    const Vector3 orig(vec);
     vec.x = orig.x * data[kScaleX] + orig.y * data[kSkewX] + orig.z * data[8] + data[kTranslateX];
     vec.y = orig.x * data[kSkewY] + orig.y * data[kScaleY] + orig.z * data[9] + data[kTranslateY];
     vec.z = orig.x * data[2] + orig.y * data[6] + orig.z * data[kScaleZ] + data[kTranslateZ];

@@ -1534,10 +1534,10 @@ private:
     const mat4 mTransformFromParent;
 
     /**
-     * Holds the transformation between the 3d root OR projection surface ViewGroup and this
-     * DisplayList drawing instance. Represents any translations / transformations done within the
-     * drawing of the compositing ancestor ViewGroup's draw, before the draw of the View represented
-     * by this DisplayList draw instance.
+     * Holds the transformation between the projection surface ViewGroup and this DisplayList
+     * drawing instance. Represents any translations / transformations done within the drawing of
+     * the compositing ancestor ViewGroup's draw, before the draw of the View represented by this
+     * DisplayList draw instance.
      *
      * Note: doesn't include any transformation recorded within the DisplayList and its properties.
      */
@@ -1550,19 +1550,20 @@ private:
  */
 class DrawShadowOp : public DrawOp {
 public:
-    DrawShadowOp(const mat4& transform, float alpha, const SkPath* outline,
+    DrawShadowOp(const mat4& transformXY, const mat4& transformZ, float alpha, const SkPath* outline,
             float fallbackWidth, float fallbackHeight)
-            : DrawOp(NULL), mTransform(transform), mAlpha(alpha), mOutline(outline),
+            : DrawOp(NULL), mTransformXY(transformXY), mTransformZ(transformZ),
+            mAlpha(alpha), mOutline(outline),
             mFallbackWidth(fallbackWidth), mFallbackHeight(fallbackHeight) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        if (!mOutline->isEmpty()) {
-            return renderer.drawShadow(mTransform, mAlpha, mOutline);
+        if (mOutline->isEmpty()) {
+            SkPath fakeOutline;
+            fakeOutline.addRect(0, 0, mFallbackWidth, mFallbackHeight);
+            return renderer.drawShadow(mTransformXY, mTransformZ, mAlpha, &fakeOutline);
         }
 
-        SkPath fakeOutline;
-        fakeOutline.addRect(0, 0, mFallbackWidth, mFallbackHeight);
-        return renderer.drawShadow(mTransform, mAlpha, &fakeOutline);
+        return renderer.drawShadow(mTransformXY, mTransformZ, mAlpha, mOutline);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1572,7 +1573,8 @@ public:
     virtual const char* name() { return "DrawShadow"; }
 
 private:
-    const mat4 mTransform;
+    const mat4 mTransformXY;
+    const mat4 mTransformZ;
     const float mAlpha;
     const SkPath* mOutline;
     const float mFallbackWidth;

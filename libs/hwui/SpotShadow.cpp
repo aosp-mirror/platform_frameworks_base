@@ -35,7 +35,7 @@ static const double EPSILON = 1e-7;
  * Calculate the angle between and x and a y coordinate.
  * The atan2 range from -PI to PI.
  */
-float angle(const Vector2& point, const Vector2& center) {
+static float angle(const Vector2& point, const Vector2& center) {
     return atan2(point.y - center.y, point.x - center.x);
 }
 
@@ -51,7 +51,7 @@ float angle(const Vector2& point, const Vector2& center) {
  * @param p2 The second point defining the line segment
  * @return The distance along the ray if it intersects with the line segment, negative if otherwise
  */
-float rayIntersectPoints(const Vector2& rayOrigin, float dx, float dy,
+static float rayIntersectPoints(const Vector2& rayOrigin, float dx, float dy,
         const Vector2& p1, const Vector2& p2) {
     // The math below is derived from solving this formula, basically the
     // intersection point should stay on both the ray and the edge of (p1, p2).
@@ -550,12 +550,12 @@ void SpotShadow::computeSpotShadow(const Vector3* lightPoly, int lightPolyLength
     for (int i = 0; i < polyLength; i++) {
         if (poly[i].z <= 0.00001) {
             inputPolyPositionValid = false;
-            ALOGE("polygon below the surface");
+            ALOGW("polygon below the surface");
             break;
         }
         if (poly[i].z >= lightPoly[0].z) {
             inputPolyPositionValid = false;
-            ALOGE("polygon above the light");
+            ALOGW("polygon above the light");
             break;
         }
     }
