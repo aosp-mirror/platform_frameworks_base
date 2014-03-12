@@ -206,6 +206,8 @@
     <string name="quick_settings_inversion_label" msgid="1666358784283020762">"色彩反轉模式"</string>
     <string name="quick_settings_contrast_label" msgid="3319507551689108692">"增強對比模式"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"色彩校準模式"</string>
+    <!-- no translation found for recents_empty_message (2269156590813544104) -->
+    <skip />
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"網絡可能會\n受到監控"</string>
     <string name="description_target_search" msgid="3091587249776033139">"搜尋"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"向上滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
