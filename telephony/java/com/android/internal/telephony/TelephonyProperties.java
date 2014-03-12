@@ -109,6 +109,12 @@ public interface TelephonyProperties
      */
     static String PROPERTY_APN_SIM_OPERATOR_NUMERIC = "gsm.apn.sim.operator.numeric";
 
+    /** The MCC+MNC (mobile country code+mobile network code) of the
+     *  provider of the CDMA RUIM/CSIM to be used for APNs lookup. 5 or 6 decimal digits.
+     *  Availability: RUIM state must be "READY"
+     */
+    static String PROPERTY_APN_RUIM_OPERATOR_NUMERIC = "net.cdma.ruim.operator.numeric";
+
     /** PROPERTY_ICC_OPERATOR_ALPHA is also known as the SPN, or Service Provider Name.
      *  Availability: SIM state must be "READY"
      */
