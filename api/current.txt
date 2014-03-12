@@ -6772,6 +6772,7 @@ package android.content {
     field public static final java.lang.String CATEGORY_HOME = "android.intent.category.HOME";
     field public static final java.lang.String CATEGORY_INFO = "android.intent.category.INFO";
     field public static final java.lang.String CATEGORY_LAUNCHER = "android.intent.category.LAUNCHER";
+    field public static final java.lang.String CATEGORY_LEANBACK_LAUNCHER = "android.intent.category.LEANBACK_LAUNCHER";
     field public static final java.lang.String CATEGORY_LE_DESK_DOCK = "android.intent.category.LE_DESK_DOCK";
     field public static final java.lang.String CATEGORY_MONKEY = "android.intent.category.MONKEY";
     field public static final java.lang.String CATEGORY_OPENABLE = "android.intent.category.OPENABLE";
