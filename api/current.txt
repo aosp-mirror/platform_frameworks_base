@@ -38419,6 +38419,11 @@ package java.net {
     method public abstract java.net.SocketImpl createSocketImpl();
   }
 
+  public abstract interface SocketOption {
+    method public abstract java.lang.String name();
+    method public abstract java.lang.Class<T> type();
+  }
+
   public abstract interface SocketOptions {
     method public abstract java.lang.Object getOption(int) throws java.net.SocketException;
     method public abstract void setOption(int, java.lang.Object) throws java.net.SocketException;
@@ -38447,6 +38452,21 @@ package java.net {
   public class SocketTimeoutException extends java.io.InterruptedIOException {
     ctor public SocketTimeoutException();
     ctor public SocketTimeoutException(java.lang.String);
+  }
+
+  public final class StandardSocketOptions {
+    ctor public StandardSocketOptions();
+    field public static final java.net.SocketOption IP_MULTICAST_IF;
+    field public static final java.net.SocketOption IP_MULTICAST_LOOP;
+    field public static final java.net.SocketOption IP_MULTICAST_TTL;
+    field public static final java.net.SocketOption IP_TOS;
+    field public static final java.net.SocketOption SO_BROADCAST;
+    field public static final java.net.SocketOption SO_KEEPALIVE;
+    field public static final java.net.SocketOption SO_LINGER;
+    field public static final java.net.SocketOption SO_RCVBUF;
+    field public static final java.net.SocketOption SO_REUSEADDR;
+    field public static final java.net.SocketOption SO_SNDBUF;
+    field public static final java.net.SocketOption TCP_NODELAY;
   }
 
   public final class URI implements java.lang.Comparable java.io.Serializable {
@@ -38544,6 +38564,7 @@ package java.net {
     method public java.lang.Object getContent(java.lang.Class[]) throws java.io.IOException;
     method public java.lang.String getContentEncoding();
     method public int getContentLength();
+    method public long getContentLengthLong();
     method public java.lang.String getContentType();
     method public long getDate();
     method public static boolean getDefaultAllowUserInteraction();
@@ -38558,6 +38579,7 @@ package java.net {
     method public long getHeaderFieldDate(java.lang.String, long);
     method public int getHeaderFieldInt(java.lang.String, int);
     method public java.lang.String getHeaderFieldKey(int);
+    method public long getHeaderFieldLong(java.lang.String, long);
     method public java.util.Map<java.lang.String, java.util.List<java.lang.String>> getHeaderFields();
     method public long getIfModifiedSince();
     method public java.io.InputStream getInputStream() throws java.io.IOException;
@@ -38908,6 +38930,10 @@ package java.nio {
 
 package java.nio.channels {
 
+  public class AlreadyBoundException extends java.lang.IllegalStateException {
+    ctor public AlreadyBoundException();
+  }
+
   public class AlreadyConnectedException extends java.lang.IllegalStateException {
     ctor public AlreadyConnectedException();
   }
@@ -38957,8 +38983,11 @@ package java.nio.channels {
 
   public abstract class DatagramChannel extends java.nio.channels.spi.AbstractSelectableChannel implements java.nio.channels.ByteChannel java.nio.channels.GatheringByteChannel java.nio.channels.ScatteringByteChannel {
     ctor protected DatagramChannel(java.nio.channels.spi.SelectorProvider);
+    method public java.nio.channels.DatagramChannel bind(java.net.SocketAddress) throws java.io.IOException;
     method public abstract java.nio.channels.DatagramChannel connect(java.net.SocketAddress) throws java.io.IOException;
     method public abstract java.nio.channels.DatagramChannel disconnect() throws java.io.IOException;
+    method public java.net.SocketAddress getLocalAddress() throws java.io.IOException;
+    method public T getOption(java.net.SocketOption<T>) throws java.io.IOException;
     method public abstract boolean isConnected();
     method public static java.nio.channels.DatagramChannel open() throws java.io.IOException;
     method public abstract int read(java.nio.ByteBuffer) throws java.io.IOException;
@@ -38966,14 +38995,16 @@ package java.nio.channels {
     method public final synchronized long read(java.nio.ByteBuffer[]) throws java.io.IOException;
     method public abstract java.net.SocketAddress receive(java.nio.ByteBuffer) throws java.io.IOException;
     method public abstract int send(java.nio.ByteBuffer, java.net.SocketAddress) throws java.io.IOException;
+    method public java.nio.channels.DatagramChannel setOption(java.net.SocketOption<T>, T) throws java.io.IOException;
     method public abstract java.net.DatagramSocket socket();
+    method public java.util.Set<java.net.SocketOption<?>> supportedOptions();
     method public final int validOps();
     method public abstract int write(java.nio.ByteBuffer) throws java.io.IOException;
     method public abstract long write(java.nio.ByteBuffer[], int, int) throws java.io.IOException;
     method public final synchronized long write(java.nio.ByteBuffer[]) throws java.io.IOException;
   }
 
-  public abstract class FileChannel extends java.nio.channels.spi.AbstractInterruptibleChannel implements java.nio.channels.ByteChannel java.nio.channels.GatheringByteChannel java.nio.channels.ScatteringByteChannel {
+  public abstract class FileChannel extends java.nio.channels.spi.AbstractInterruptibleChannel implements java.nio.channels.GatheringByteChannel java.nio.channels.ScatteringByteChannel java.nio.channels.SeekableByteChannel {
     ctor protected FileChannel();
     method public abstract void force(boolean) throws java.io.IOException;
     method public final java.nio.channels.FileLock lock() throws java.io.IOException;
@@ -39037,6 +39068,14 @@ package java.nio.channels {
     method public abstract void close() throws java.io.IOException;
   }
 
+  public abstract interface NetworkChannel implements java.lang.AutoCloseable java.nio.channels.Channel java.io.Closeable {
+    method public abstract java.nio.channels.NetworkChannel bind(java.net.SocketAddress) throws java.io.IOException;
+    method public abstract java.net.SocketAddress getLocalAddress() throws java.io.IOException;
+    method public abstract T getOption(java.net.SocketOption<T>) throws java.io.IOException;
+    method public abstract java.nio.channels.NetworkChannel setOption(java.net.SocketOption<T>, T) throws java.io.IOException;
+    method public abstract java.util.Set<java.net.SocketOption<?>> supportedOptions();
+  }
+
   public class NoConnectionPendingException extends java.lang.IllegalStateException {
     ctor public NoConnectionPendingException();
   }
@@ -39087,6 +39126,15 @@ package java.nio.channels {
     method public abstract long read(java.nio.ByteBuffer[], int, int) throws java.io.IOException;
   }
 
+  public abstract interface SeekableByteChannel implements java.nio.channels.ByteChannel {
+    method public abstract long position() throws java.io.IOException;
+    method public abstract java.nio.channels.SeekableByteChannel position(long) throws java.io.IOException;
+    method public abstract int read(java.nio.ByteBuffer) throws java.io.IOException;
+    method public abstract long size() throws java.io.IOException;
+    method public abstract java.nio.channels.SeekableByteChannel truncate(long) throws java.io.IOException;
+    method public abstract int write(java.nio.ByteBuffer) throws java.io.IOException;
+  }
+
   public abstract class SelectableChannel extends java.nio.channels.spi.AbstractInterruptibleChannel implements java.nio.channels.Channel {
     ctor protected SelectableChannel();
     method public abstract java.lang.Object blockingLock();
@@ -39135,18 +39183,27 @@ package java.nio.channels {
     method public abstract java.nio.channels.Selector wakeup();
   }
 
-  public abstract class ServerSocketChannel extends java.nio.channels.spi.AbstractSelectableChannel {
+  public abstract class ServerSocketChannel extends java.nio.channels.spi.AbstractSelectableChannel implements java.nio.channels.NetworkChannel {
     ctor protected ServerSocketChannel(java.nio.channels.spi.SelectorProvider);
     method public abstract java.nio.channels.SocketChannel accept() throws java.io.IOException;
+    method public final java.nio.channels.ServerSocketChannel bind(java.net.SocketAddress) throws java.io.IOException;
+    method public java.nio.channels.ServerSocketChannel bind(java.net.SocketAddress, int) throws java.io.IOException;
+    method public java.net.SocketAddress getLocalAddress() throws java.io.IOException;
+    method public T getOption(java.net.SocketOption<T>) throws java.io.IOException;
     method public static java.nio.channels.ServerSocketChannel open() throws java.io.IOException;
+    method public java.nio.channels.ServerSocketChannel setOption(java.net.SocketOption<T>, T) throws java.io.IOException;
     method public abstract java.net.ServerSocket socket();
+    method public java.util.Set<java.net.SocketOption<?>> supportedOptions();
     method public final int validOps();
   }
 
-  public abstract class SocketChannel extends java.nio.channels.spi.AbstractSelectableChannel implements java.nio.channels.ByteChannel java.nio.channels.GatheringByteChannel java.nio.channels.ScatteringByteChannel {
+  public abstract class SocketChannel extends java.nio.channels.spi.AbstractSelectableChannel implements java.nio.channels.ByteChannel java.nio.channels.GatheringByteChannel java.nio.channels.NetworkChannel java.nio.channels.ScatteringByteChannel {
     ctor protected SocketChannel(java.nio.channels.spi.SelectorProvider);
+    method public java.nio.channels.SocketChannel bind(java.net.SocketAddress) throws java.io.IOException;
     method public abstract boolean connect(java.net.SocketAddress) throws java.io.IOException;
     method public abstract boolean finishConnect() throws java.io.IOException;
+    method public java.net.SocketAddress getLocalAddress() throws java.io.IOException;
+    method public T getOption(java.net.SocketOption<T>) throws java.io.IOException;
     method public abstract boolean isConnected();
     method public abstract boolean isConnectionPending();
     method public static java.nio.channels.SocketChannel open() throws java.io.IOException;
@@ -39154,7 +39211,9 @@ package java.nio.channels {
     method public abstract int read(java.nio.ByteBuffer) throws java.io.IOException;
     method public abstract long read(java.nio.ByteBuffer[], int, int) throws java.io.IOException;
     method public final synchronized long read(java.nio.ByteBuffer[]) throws java.io.IOException;
+    method public java.nio.channels.SocketChannel setOption(java.net.SocketOption<T>, T) throws java.io.IOException;
     method public abstract java.net.Socket socket();
+    method public java.util.Set<java.net.SocketOption<?>> supportedOptions();
     method public final int validOps();
     method public abstract int write(java.nio.ByteBuffer) throws java.io.IOException;
     method public abstract long write(java.nio.ByteBuffer[], int, int) throws java.io.IOException;
@@ -45204,6 +45263,7 @@ package java.util.concurrent.locks {
     method public final int getWaitQueueLength(java.util.concurrent.locks.AbstractQueuedLongSynchronizer.ConditionObject);
     method public final java.util.Collection<java.lang.Thread> getWaitingThreads(java.util.concurrent.locks.AbstractQueuedLongSynchronizer.ConditionObject);
     method public final boolean hasContended();
+    method public final boolean hasQueuedPredecessors();
     method public final boolean hasQueuedThreads();
     method public final boolean hasWaiters(java.util.concurrent.locks.AbstractQueuedLongSynchronizer.ConditionObject);
     method protected boolean isHeldExclusively();
