@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ondoa njia za mikato"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Huruhusu programu kuondoa njia za mkato za Skrini ya kwanza bila mtumiaji kuingilia."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"panga upya simu zinazotoka"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Huruhusu programu kuona nambari inayopigwa wakati simu inapigwa ikiwa na chaguo la kuelekeza simu kwa nambari tofauti au kukata simu kabisa."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Huruhusu programu kuona nambari inayopigwa wakati simu inapigwa ikiwa na chaguo la kuelekeza simu kwenye nambari tofauti au kukata simu kabisa."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"pokea ujumbe wa maandishi wa SMS"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Inaruhusu programu kupokea na kuchakata ujumbe wa SMS. Hii inamaanisha programu hii inaweza kuchunguza na kufuta ujumbe uliotumwa katika kifaa chako bila ya kukuonyesha."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"pokea ujumbe wa maandishi wa MMS"</string>
