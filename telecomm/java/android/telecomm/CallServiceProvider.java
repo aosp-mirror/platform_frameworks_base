@@ -26,11 +26,11 @@ import com.android.internal.telecomm.ICallServiceLookupResponse;
 import com.android.internal.telecomm.ICallServiceProvider;
 
 /**
- * Base implementation of {@link ICallServiceProvider} which extends {@link Service}. This class
+ * Base implementation of a call service provider which extends {@link Service}. This class
  * should be extended by an app that wants to supply phone calls to be handled and managed by
- * the device's in-call interface. All method-calls from the framework to
- * {@link ICallServiceProvider} are passed through to the main thread for before executing the
- * overriden methods of CallServiceProvider.
+ * the device's in-call interface. All method-calls from the framework to the call service provider
+ * are passed through to the main thread for before executing the overriden methods of
+ * CallServiceProvider.
  *
  * TODO(santoscordon): Improve paragraph above once the final design is in place. Needs more
  * about how this can be used.
