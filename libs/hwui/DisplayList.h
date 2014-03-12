@@ -573,20 +573,20 @@ private:
 
     void outputViewProperties(const int level);
 
-    void applyViewPropertyTransforms(mat4& matrix);
+    void applyViewPropertyTransforms(mat4& matrix, bool true3dTransform = false);
 
     void computeOrderingImpl(DrawDisplayListOp* opState,
-            Vector<ZDrawDisplayListOpPair>* compositedChildrenOf3dRoot,
-            const mat4* transformFrom3dRoot,
             Vector<DrawDisplayListOp*>* compositedChildrenOfProjectionSurface,
             const mat4* transformFromProjectionSurface);
 
     template <class T>
     inline void setViewProperties(OpenGLRenderer& renderer, T& handler, const int level);
 
+    void buildZSortedChildList(Vector<ZDrawDisplayListOpPair>& zTranslatedNodes);
+
     template <class T>
-    inline void iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& renderer,
-        T& handler, const int level);
+    inline void iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
+            ChildrenSelectMode mode, OpenGLRenderer& renderer, T& handler);
 
     template <class T>
     inline void iterateProjectedChildren(OpenGLRenderer& renderer, T& handler, const int level);
@@ -656,9 +656,6 @@ private:
     /**
      * Draw time state - these properties are only set and used during rendering
      */
-
-    // for 3d roots, contains a z sorted list of all children items
-    Vector<ZDrawDisplayListOpPair> m3dNodes;
 
     // for projection surfaces, contains a list of all children items
     Vector<DrawDisplayListOp*> mProjectedNodes;

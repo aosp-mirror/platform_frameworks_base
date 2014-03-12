@@ -304,8 +304,11 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
 
 /**
  * Apply property-based transformations to input matrix
+ *
+ * If true3dTransform is set to true, the transform applied to the input matrix will use true 4x4
+ * matrix computation instead of the Skia 3x3 matrix + camera hackery.
  */
-void DisplayList::applyViewPropertyTransforms(mat4& matrix) {
+void DisplayList::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform) {
     if (mLeft != 0 || mTop != 0) {
         matrix.translate(mLeft, mTop);
     }
@@ -319,15 +322,31 @@ void DisplayList::applyViewPropertyTransforms(mat4& matrix) {
     if (mMatrixFlags != 0) {
         updateMatrix();
         if (mMatrixFlags == TRANSLATION) {
-            matrix.translate(mTranslationX, mTranslationY, mTranslationZ);
+            matrix.translate(mTranslationX, mTranslationY,
+                    true3dTransform ? mTranslationZ : 0.0f);
         } else {
-            matrix.multiply(*mTransformMatrix);
+            if (!true3dTransform) {
+                matrix.multiply(*mTransformMatrix);
+            } else {
+                mat4 true3dMat;
+                true3dMat.loadTranslate(
+                        mPivotX + mTranslationX,
+                        mPivotY + mTranslationY,
+                        mTranslationZ);
+                true3dMat.rotate(mRotationX, 1, 0, 0);
+                true3dMat.rotate(mRotationY, 0, 1, 0);
+                true3dMat.rotate(mRotation, 0, 0, 1);
+                true3dMat.scale(mScaleX, mScaleY, 1);
+                true3dMat.translate(-mPivotX, -mPivotY);
+
+                matrix.multiply(true3dMat);
+            }
         }
     }
 }
 
 /**
- * Organizes the DisplayList hierarchy to prepare for Z-based draw order.
+ * Organizes the DisplayList hierarchy to prepare for background projection reordering.
  *
  * This should be called before a call to defer() or drawDisplayList()
  *
@@ -336,7 +355,6 @@ void DisplayList::applyViewPropertyTransforms(mat4& matrix) {
  */
 void DisplayList::computeOrdering() {
     ATRACE_CALL();
-    m3dNodes.clear();
     mProjectedNodes.clear();
 
     // TODO: create temporary DDLOp and call computeOrderingImpl on top DisplayList so that
@@ -345,40 +363,23 @@ void DisplayList::computeOrdering() {
     for (unsigned int i = 0; i < mDisplayListData->children.size(); i++) {
         DrawDisplayListOp* childOp = mDisplayListData->children[i];
         childOp->mDisplayList->computeOrderingImpl(childOp,
-                &m3dNodes, &mat4::identity(),
                 &mProjectedNodes, &mat4::identity());
     }
 }
 
 void DisplayList::computeOrderingImpl(
         DrawDisplayListOp* opState,
-        Vector<ZDrawDisplayListOpPair>* compositedChildrenOf3dRoot,
-        const mat4* transformFrom3dRoot,
         Vector<DrawDisplayListOp*>* compositedChildrenOfProjectionSurface,
         const mat4* transformFromProjectionSurface) {
-    m3dNodes.clear();
     mProjectedNodes.clear();
     if (mDisplayListData == NULL || mDisplayListData->isEmpty()) return;
 
     // TODO: should avoid this calculation in most cases
     // TODO: just calculate single matrix, down to all leaf composited elements
-    Matrix4 localTransformFrom3dRoot(*transformFrom3dRoot);
-    localTransformFrom3dRoot.multiply(opState->mTransformFromParent);
     Matrix4 localTransformFromProjectionSurface(*transformFromProjectionSurface);
     localTransformFromProjectionSurface.multiply(opState->mTransformFromParent);
 
-    if (mTranslationZ != 0.0f) { // TODO: other signals for 3d compositing, such as custom matrix4
-        // composited 3d layer, flag for out of order draw and save matrix...
-        opState->mSkipInOrderDraw = true;
-        opState->mTransformFromCompositingAncestor.load(localTransformFrom3dRoot);
-
-        // ... and insert into current 3d root, keyed with pivot z for later sorting
-        Vector3 pivot(mPivotX, mPivotY, 0.0f);
-        mat4 totalTransform(localTransformFrom3dRoot);
-        applyViewPropertyTransforms(totalTransform);
-        totalTransform.mapPoint3d(pivot);
-        compositedChildrenOf3dRoot->add(ZDrawDisplayListOpPair(pivot.z, opState));
-    } else if (mProjectBackwards) {
+    if (mProjectBackwards) {
         // composited projectee, flag for out of order draw, save matrix, and store in proj surface
         opState->mSkipInOrderDraw = true;
         opState->mTransformFromCompositingAncestor.load(localTransformFromProjectionSurface);
@@ -389,15 +390,6 @@ void DisplayList::computeOrderingImpl(
     }
 
     if (mDisplayListData->children.size() > 0) {
-        if (mIsolatedZVolume) {
-            // create a new 3d space for descendents by collecting them
-            compositedChildrenOf3dRoot = &m3dNodes;
-            transformFrom3dRoot = &mat4::identity();
-        } else {
-            applyViewPropertyTransforms(localTransformFrom3dRoot);
-            transformFrom3dRoot = &localTransformFrom3dRoot;
-        }
-
         const bool isProjectionReceiver = mDisplayListData->projectionReceiveIndex >= 0;
         bool haveAppliedPropertiesToProjection = false;
         for (unsigned int i = 0; i < mDisplayListData->children.size(); i++) {
@@ -422,9 +414,7 @@ void DisplayList::computeOrderingImpl(
                 projectionChildren = compositedChildrenOfProjectionSurface;
                 projectionTransform = &localTransformFromProjectionSurface;
             }
-            child->computeOrderingImpl(childOp,
-                    compositedChildrenOf3dRoot, transformFrom3dRoot,
-                    projectionChildren, projectionTransform);
+            child->computeOrderingImpl(childOp, projectionChildren, projectionTransform);
         }
     }
 
@@ -477,14 +467,36 @@ void DisplayList::replay(ReplayStateStruct& replayStruct, const int level) {
             replayStruct.mDrawGlStatus);
 }
 
+void DisplayList::buildZSortedChildList(Vector<ZDrawDisplayListOpPair>& zTranslatedNodes) {
+    if (mDisplayListData == NULL || mDisplayListData->children.size() == 0) return;
+
+    for (unsigned int i = 0; i < mDisplayListData->children.size(); i++) {
+        DrawDisplayListOp* childOp = mDisplayListData->children[i];
+        DisplayList* child = childOp->mDisplayList;
+        float childZ = child->mTranslationZ;
+
+        if (childZ != 0.0f) {
+            zTranslatedNodes.add(ZDrawDisplayListOpPair(childZ, childOp));
+            childOp->mSkipInOrderDraw = true;
+        } else if (!child->mProjectBackwards) {
+            // regular, in order drawing DisplayList
+            childOp->mSkipInOrderDraw = false;
+        }
+    }
+
+    // Z sort 3d children (stable-ness makes z compare fall back to standard drawing order)
+    std::stable_sort(zTranslatedNodes.begin(), zTranslatedNodes.end());
+}
+
 #define SHADOW_DELTA 0.1f
 
 template <class T>
-void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& renderer,
-        T& handler, const int level) {
-    if (m3dNodes.size() == 0 ||
-            (mode == kNegativeZChildren && m3dNodes[0].key > 0.0f) ||
-            (mode == kPositiveZChildren && m3dNodes[m3dNodes.size() - 1].key < 0.0f)) {
+void DisplayList::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
+        ChildrenSelectMode mode, OpenGLRenderer& renderer, T& handler) {
+    const int size = zTranslatedNodes.size();
+    if (size == 0
+            || (mode == kNegativeZChildren && zTranslatedNodes[0].key > 0.0f)
+            || (mode == kPositiveZChildren && zTranslatedNodes[size - 1].key < 0.0f)) {
         // no 3d children to draw
         return;
     }
@@ -502,7 +514,7 @@ void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& ren
      * This way, if Views A & B have the same Z height and are both casting shadows, the shadows are
      * underneath both, and neither's shadow is drawn on top of the other.
      */
-    const size_t nonNegativeIndex = findNonNegativeIndex(m3dNodes);
+    const size_t nonNegativeIndex = findNonNegativeIndex(zTranslatedNodes);
     size_t drawIndex, shadowIndex, endIndex;
     if (mode == kNegativeZChildren) {
         drawIndex = 0;
@@ -510,24 +522,29 @@ void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& ren
         shadowIndex = endIndex; // draw no shadows
     } else {
         drawIndex = nonNegativeIndex;
-        endIndex = m3dNodes.size();
+        endIndex = size;
         shadowIndex = drawIndex; // potentially draw shadow for each pos Z child
     }
     float lastCasterZ = 0.0f;
     while (shadowIndex < endIndex || drawIndex < endIndex) {
         if (shadowIndex < endIndex) {
-            DrawDisplayListOp* casterOp = m3dNodes[shadowIndex].value;
+            DrawDisplayListOp* casterOp = zTranslatedNodes[shadowIndex].value;
             DisplayList* caster = casterOp->mDisplayList;
-            const float casterZ = m3dNodes[shadowIndex].key;
+            const float casterZ = zTranslatedNodes[shadowIndex].key;
             // attempt to render the shadow if the caster about to be drawn is its caster,
             // OR if its caster's Z value is similar to the previous potential caster
             if (shadowIndex == drawIndex || casterZ - lastCasterZ < SHADOW_DELTA) {
 
                 if (caster->mCastsShadow && caster->mAlpha > 0.0f) {
-                    mat4 shadowMatrix(casterOp->mTransformFromCompositingAncestor);
-                    caster->applyViewPropertyTransforms(shadowMatrix);
+                    mat4 shadowMatrixXY(casterOp->mTransformFromParent);
+                    caster->applyViewPropertyTransforms(shadowMatrixXY);
 
-                    DisplayListOp* shadowOp  = new (alloc) DrawShadowOp(shadowMatrix,
+                    // Z matrix needs actual 3d transformation, so mapped z values will be correct
+                    mat4 shadowMatrixZ(casterOp->mTransformFromParent);
+                    caster->applyViewPropertyTransforms(shadowMatrixZ, true);
+
+                    DisplayListOp* shadowOp  = new (alloc) DrawShadowOp(
+                            shadowMatrixXY, shadowMatrixZ,
                             caster->mAlpha, &(caster->mOutline), caster->mWidth, caster->mHeight);
                     handler(shadowOp, PROPERTY_SAVECOUNT, mClipToBounds);
                 }
@@ -542,10 +559,10 @@ void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& ren
         // since it modifies the renderer's matrix
         int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
 
-        DrawDisplayListOp* childOp = m3dNodes[drawIndex].value;
+        DrawDisplayListOp* childOp = zTranslatedNodes[drawIndex].value;
         DisplayList* child = childOp->mDisplayList;
 
-        renderer.concatMatrix(childOp->mTransformFromCompositingAncestor);
+        renderer.concatMatrix(childOp->mTransformFromParent);
         childOp->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
         handler(childOp, renderer.getSaveCount() - 1, mClipToBounds);
         childOp->mSkipInOrderDraw = true;
@@ -617,11 +634,11 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
 
     bool quickRejected = mClipToBounds && renderer.quickRejectConservative(0, 0, mWidth, mHeight);
     if (!quickRejected) {
-        // Z sort 3d children (stable-ness makes z compare fall back to standard drawing order)
-        std::stable_sort(m3dNodes.begin(), m3dNodes.end());
+        Vector<ZDrawDisplayListOpPair> zTranslatedNodes;
+        buildZSortedChildList(zTranslatedNodes);
 
         // for 3d root, draw children with negative z values
-        iterate3dChildren(kNegativeZChildren, renderer, handler, level);
+        iterate3dChildren(zTranslatedNodes, kNegativeZChildren, renderer, handler);
 
         DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
         const int saveCountOffset = renderer.getSaveCount() - 1;
@@ -642,7 +659,7 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
         }
 
         // for 3d root, draw children with positive z values
-        iterate3dChildren(kPositiveZChildren, renderer, handler, level);
+        iterate3dChildren(zTranslatedNodes, kPositiveZChildren, renderer, handler);
     }
 
     DISPLAY_LIST_LOGD("%*sRestoreToCount %d", (level + 1) * 2, "", restoreTo);

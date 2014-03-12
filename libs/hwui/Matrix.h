@@ -199,6 +199,7 @@ public:
     void copyTo(float* v) const;
     void copyTo(SkMatrix& v) const;
 
+    float mapZ(const Vector3& orig) const;
     void mapPoint3d(Vector3& vec) const;
     void mapPoint(float& x, float& y) const; // 2d only
     void mapRect(Rect& r) const; // 2d only

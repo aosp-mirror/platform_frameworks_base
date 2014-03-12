@@ -3190,8 +3190,16 @@ status_t OpenGLRenderer::drawRects(const float* rects, int count, const SkPaint*
     return drawColorRects(rects, count, paint, false, true, true);
 }
 
-status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlpha,
-        const SkPath* casterOutline) {
+static void mapPointFakeZ(Vector3& point, const mat4& transformXY, const mat4& transformZ) {
+    // map z coordinate with true 3d matrix
+    point.z = transformZ.mapZ(point);
+
+    // map x,y coordinates with draw/Skia matrix
+    transformXY.mapPoint(point.x, point.y);
+}
+
+status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& casterTransformZ,
+        float casterAlpha, const SkPath* casterOutline) {
     if (currentSnapshot()->isIgnored()) return DrawGlInfo::kStatusDone;
 
     // TODO: use quickRejectWithScissor. For now, always force enable scissor.
@@ -3217,7 +3225,7 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlp
     for (int i = 0; i < casterVertexCount; i++) {
         const Vertex& point2d = casterVertices2d[i];
         casterPolygon[i] = Vector3(point2d.x, point2d.y, 0);
-        casterTransform.mapPoint3d(casterPolygon[i]);
+        mapPointFakeZ(casterPolygon[i], casterTransformXY, casterTransformZ);
     }
 
     // map the centroid of the caster into 3d
@@ -3225,7 +3233,7 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlp
             reinterpret_cast<const Vector2*>(casterVertices2d.array()),
             casterVertexCount);
     Vector3 centroid3d(centroid.x, centroid.y, 0);
-    casterTransform.mapPoint3d(centroid3d);
+    mapPointFakeZ(centroid3d, casterTransformXY, casterTransformZ);
 
     // draw caster's shadows
     if (mCaches.propertyAmbientShadowStrength > 0) {
@@ -3244,7 +3252,6 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlp
         ShadowTessellator::tessellateSpotShadow(casterPolygon, casterVertexCount,
                 lightPosScale, *currentTransform(), getWidth(), getHeight(),
                 spotShadowVertexBuffer);
-
         drawVertexBuffer(kVertexBufferMode_Shadow, spotShadowVertexBuffer, &paint);
     }
 
