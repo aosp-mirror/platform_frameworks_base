@@ -77,6 +77,7 @@ public final class BluetoothAdvScanData {
     try {
       return mBluetoothGatt.setAdvManufacturerCodeAndData(manufacturerCode, manufacturerData);
     } catch (RemoteException e) {
+      Log.e(TAG, "Unable to set manufacturer id and data.", e);
       return false;
     }
   }
@@ -92,6 +93,7 @@ public final class BluetoothAdvScanData {
     try {
       return mBluetoothGatt.setAdvServiceData(serviceData);
     } catch (RemoteException e) {
+      Log.e(TAG, "Unable to set service data.", e);
       return false;
     }
   }
@@ -103,6 +105,7 @@ public final class BluetoothAdvScanData {
     try {
       return Collections.unmodifiableList(mBluetoothGatt.getAdvServiceUuids());
     } catch (RemoteException e) {
+      Log.e(TAG, "Unable to get service uuids.", e);
       return null;
     }
   }
@@ -115,6 +118,7 @@ public final class BluetoothAdvScanData {
     try {
       return mBluetoothGatt.getAdvManufacturerData();
     } catch (RemoteException e) {
+      Log.e(TAG, "Unable to get manufacturer data.", e);
       return null;
     }
   }
@@ -127,6 +131,7 @@ public final class BluetoothAdvScanData {
     try {
       return mBluetoothGatt.getAdvServiceData();
     } catch (RemoteException e) {
+      Log.e(TAG, "Unable to get service data.", e);
       return null;
     }
   }
@@ -140,7 +145,7 @@ public final class BluetoothAdvScanData {
       try {
         mBluetoothGatt.removeAdvManufacturerCodeAndData(manufacturerCode);
       } catch (RemoteException e) {
-        Log.e(TAG, e.toString());
+        Log.e(TAG, "Unable to remove manufacturer : " + manufacturerCode, e);
       }
     }
   }
