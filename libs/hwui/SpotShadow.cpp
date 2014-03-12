@@ -548,11 +548,6 @@ void SpotShadow::computeSpotShadow(const Vector3* lightPoly, int lightPolyLength
     // Validate input, receiver is always at z = 0 plane.
     bool inputPolyPositionValid = true;
     for (int i = 0; i < polyLength; i++) {
-        if (poly[i].z <= 0.00001) {
-            inputPolyPositionValid = false;
-            ALOGW("polygon below the surface");
-            break;
-        }
         if (poly[i].z >= lightPoly[0].z) {
             inputPolyPositionValid = false;
             ALOGW("polygon above the light");
