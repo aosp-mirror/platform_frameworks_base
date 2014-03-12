@@ -931,6 +931,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         if (contentViewLocal != null) {
+            contentViewLocal.setIsRootNamespace(true);
             SizeAdaptiveLayout.LayoutParams params =
                     new SizeAdaptiveLayout.LayoutParams(contentViewLocal.getLayoutParams());
             params.minHeight = minHeight;
@@ -938,6 +939,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             expanded.addView(contentViewLocal, params);
         }
         if (bigContentViewLocal != null) {
+            bigContentViewLocal.setIsRootNamespace(true);
             SizeAdaptiveLayout.LayoutParams params =
                     new SizeAdaptiveLayout.LayoutParams(bigContentViewLocal.getLayoutParams());
             params.minHeight = minHeight+1;
@@ -955,6 +957,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         expandedPublic, mOnClickHandler);
 
                 if (publicViewLocal != null) {
+                    publicViewLocal.setIsRootNamespace(true);
                     SizeAdaptiveLayout.LayoutParams params =
                             new SizeAdaptiveLayout.LayoutParams(publicViewLocal.getLayoutParams());
                     params.minHeight = minHeight;
