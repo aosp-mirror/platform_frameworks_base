@@ -1243,7 +1243,8 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
         device->classes |= INPUT_DEVICE_CLASS_EXTERNAL;
     }
 
-    if (device->classes & (INPUT_DEVICE_CLASS_JOYSTICK | INPUT_DEVICE_CLASS_GAMEPAD)) {
+    if (device->classes & (INPUT_DEVICE_CLASS_JOYSTICK | INPUT_DEVICE_CLASS_DPAD)
+            && device->classes & INPUT_DEVICE_CLASS_GAMEPAD) {
         device->controllerNumber = getNextControllerNumberLocked(device);
         setLedForController(device);
     }
