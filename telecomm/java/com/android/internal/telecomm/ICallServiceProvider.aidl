@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package android.telecomm;
+package com.android.internal.telecomm;
 
-import android.telecomm.ICallServiceLookupResponse;
+import android.telecomm.CallServiceDescriptor;
+
+import com.android.internal.telecomm.ICallServiceLookupResponse;
 
 /**
  * Interface for applications interested in providing call-service implementations.  Only used in
@@ -30,11 +32,12 @@ import android.telecomm.ICallServiceLookupResponse;
  * processed by the CallsManager and its helpers (potentially requesting input from the user) to
  * identify the best CallService.  The user should obviously be notified upon zero candidates as
  * well as all (one or more) candidates failing to issue the call.
+ * {@hide}
  */
 oneway interface ICallServiceProvider {
 
     /**
-     * Initiates the process to retrieve the list of {@link ICallService}s implemented by
+     * Initiates the process to retrieve the list of {@link CallServiceDescriptor}s implemented by
      * this provider.
      * TODO(santoscordon): Needs comments on how to populate the list within
      * ICallServiceLookupResponse and how to handle error conditions.

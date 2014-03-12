@@ -14,38 +14,37 @@
  * limitations under the License.
  */
 
-package android.telecomm;
+package com.android.internal.telecomm;
 
 import android.telecomm.CallInfo;
 
 /**
  * Provides methods for ICallService implementations to interact with the system phone app.
  * TODO(santoscordon): Need final public-facing comments in this file.
+ * {@hide}
  */
 oneway interface ICallServiceAdapter {
 
     /**
      * Receives confirmation of a call service's ability to place a call. This method is used in
      * response to {@link ICallService#isCompatibleWith}.
-     * TODO(santoscordon): rename to setIsCompatibleWith().
      *
      * @param callId The identifier of the call for which compatibility is being received. This ID
      *     should correspond to the ID given as part of the call information in
      *     {@link ICallService#isCompatibleWith}.
      * @param isCompatible True if the call service can place the call.
      */
-    void setCompatibleWith(String callId, boolean isCompatible);
+    void setIsCompatibleWith(String callId, boolean isCompatible);
 
     /**
      * Provides Telecomm with the details of an incoming call. An invocation of this method must
      * follow {@link CallService#setIncomingCallId} and use the call ID specified therein. Upon
      * the invocation of this method, Telecomm will bring up the incoming-call interface where the
      * user can elect to answer or reject a call.
-     * TODO(santoscordon): Consider renaming from handle* to notify*.
      *
      * @param callInfo The details of the relevant call.
      */
-    void handleIncomingCall(in CallInfo callInfo);
+    void notifyIncomingCall(in CallInfo callInfo);
 
     /**
      * Tells Telecomm that an attempt to place the specified outgoing call succeeded.

@@ -26,6 +26,9 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.os.SomeArgs;
+import com.android.internal.telecomm.ICallServiceSelector;
+import com.android.internal.telecomm.ICallServiceSelectionResponse;
+import com.android.internal.telecomm.ICallSwitchabilityResponse;
 
 import java.util.List;
 
@@ -108,7 +111,7 @@ public abstract class CallServiceSelector extends Service {
         }
     };
 
-    /** Manages the binder calls so that the implementor does not need to deal it. */
+    /** Manages the binder calls so that the implementor does not need to deal with it. */
     private final class CallServiceSelectorBinder extends ICallServiceSelector.Stub
             implements CallSwitchabilityResponse, CallServiceSelectionResponse {
         private ICallSwitchabilityResponse mSwitchabilityResponse;

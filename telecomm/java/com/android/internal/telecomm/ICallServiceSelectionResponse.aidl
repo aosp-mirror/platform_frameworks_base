@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-package android.telecomm;
+package com.android.internal.telecomm;
 
 import android.os.IBinder;
 import android.telecomm.CallServiceDescriptor;
 import java.util.List;
 
 /**
- * Used by {@link ICallServiceProvider} to return a list of {@link CallServiceDescriptor}s.
+ * Used by {@link ICallServiceSelector} to return the preferred list of {@link ICallService}
+ * implementations with which to connect the corresponding outgoing call.
+ * {@hide}
  */
-oneway interface ICallServiceLookupResponse {
+oneway interface ICallServiceSelectionResponse {
     /**
-     * Passes the sorted list of preferred {@link CallServiceDescriptor}s back to Telecomm.  Used
-     * in the context of attempting to place a pending outgoing call.
+     * Records the sorted set of call services that are preferred by the corresponding
+     * call-service selector.
      *
-     * @param callServiceDescriptors The set of call-service descriptors from
-     * {@link ICallServiceProvider}.
+     * @param selectedCallServiceDescriptors The prioritized list of preferred call-service
+     *        descriptors to use for completing the call.
      */
-    void setCallServiceDescriptors(in List<CallServiceDescriptor> callServiceDescriptors);
+    void setSelectedCallServiceDescriptors(
+            in List<CallServiceDescriptor> selectedCallServiceDescriptors);
 }
