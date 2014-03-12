@@ -3319,20 +3319,35 @@ public final class ActivityManagerService extends ActivityManagerNative
             return;
         }
         // Remove any existing entries that are the same kind of task.
+        final Intent intent = task.intent;
+        final boolean document = intent != null && intent.isDocument();
         for (int i=0; i<N; i++) {
             TaskRecord tr = mRecentTasks.get(i);
-            if (task.userId == tr.userId
-                    && ((task.affinity != null && task.affinity.equals(tr.affinity))
-                    || (task.intent != null && task.intent.filterEquals(tr.intent)))) {
-                tr.disposeThumbnail();
-                mRecentTasks.remove(i);
-                i--;
-                N--;
-                if (task.intent == null) {
-                    // If the new recent task we are adding is not fully
-                    // specified, then replace it with the existing recent task.
-                    task = tr;
+            if (task != tr) {
+                if (task.userId != tr.userId) {
+                    continue;
                 }
+                final Intent trIntent = tr.intent;
+                if ((task.affinity == null || !task.affinity.equals(tr.affinity)) &&
+                    (intent == null || !intent.filterEquals(trIntent))) {
+                    continue;
+                }
+                if (document || trIntent != null && trIntent.isDocument()) {
+                    // Document tasks do not match other tasks.
+                    continue;
+                }
+            }
+
+            // Either task and tr are the same or, their affinities match or their intents match
+            // and neither of them is a document.
+            tr.disposeThumbnail();
+            mRecentTasks.remove(i);
+            i--;
+            N--;
+            if (task.intent == null) {
+                // If the new recent task we are adding is not fully
+                // specified, then replace it with the existing recent task.
+                task = tr;
             }
         }
         if (N >= MAX_RECENT_TASKS) {

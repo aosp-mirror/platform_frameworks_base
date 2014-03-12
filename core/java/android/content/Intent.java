@@ -3457,7 +3457,16 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final int FLAG_ACTIVITY_NEW_TASK = 0x10000000;
     /**
-     * <strong>Do not use this flag unless you are implementing your own
+     * This flag is used to create a new task and launch an activity into it.
+     * This flag is always paired with either {@link #FLAG_ACTIVITY_NEW_DOCUMENT}
+     * or {@link #FLAG_ACTIVITY_NEW_TASK}. In both cases these flags alone would
+     * search through existing tasks for ones matching this Intent. Only if no such
+     * task is found would a new task be created. When paired with
+     * FLAG_ACTIVITY_MULTIPLE_TASK both of these behaviors are modified to skip
+     * the search for a matching task and unconditionally start a new task.
+     *
+     * <strong>When used with {@link #FLAG_ACTIVITY_NEW_TASK} do not use this
+     * flag unless you are implementing your own
      * top-level application launcher.</strong>  Used in conjunction with
      * {@link #FLAG_ACTIVITY_NEW_TASK} to disable the
      * behavior of bringing an existing task to the foreground.  When set,
@@ -3469,12 +3478,18 @@ public class Intent implements Parcelable, Cloneable {
      * you should not use this flag unless you provide some way for a user to
      * return back to the tasks you have launched.</strong>
      *
-     * <p>This flag is ignored if
-     * {@link #FLAG_ACTIVITY_NEW_TASK} is not set.
+     * See {@link #FLAG_ACTIVITY_NEW_DOCUMENT} for details of this flag's use for
+     * creating new document tasks.
+     *
+     * <p>This flag is ignored if one of {@link #FLAG_ACTIVITY_NEW_TASK} or
+     * {@link #FLAG_ACTIVITY_NEW_TASK} is not also set.
      *
      * <p>See
      * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
      * Stack</a> for more information about tasks.
+     *
+     * @see #FLAG_ACTIVITY_NEW_DOCUMENT
+     * @see #FLAG_ACTIVITY_NEW_TASK
      */
     public static final int FLAG_ACTIVITY_MULTIPLE_TASK = 0x08000000;
     /**
@@ -3580,6 +3595,34 @@ public class Intent implements Parcelable, Cloneable {
      * to mail.
      */
     public static final int FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET = 0x00080000;
+    /**
+     * This flag is used to break out "documents" into separate tasks that can
+     * be reached via the Recents mechanism. Such a document is any kind of
+     * item for which an application may want to maintain multiple simultaneous
+     * instances. Examples might be text files, web pages, spreadsheets, or
+     * emails. Each such document will be in a separate task in the Recents list.
+     *
+     * <p>When set, the activity specified by this Intent will launch into a
+     * separate task rooted at that activity. The activity launched must be
+     * defined with {@link android.R.attr#launchMode} "standard" or "singleTop".
+     *
+     * <p>If FLAG_ACTIVITY_NEW_DOCUMENT is used without
+     * {@link #FLAG_ACTIVITY_MULTIPLE_TASK} then the activity manager will
+     * search for an existing task with a matching target activity and Intent
+     * data URI and relaunch that task, first finishing all activities down to
+     * the root activity and then calling the root activity's
+     * {@link android.app.Activity#onNewIntent(Intent)} method. If no existing
+     * task's root activity matches the Intent's data URI then a new task will
+     * be launched with the target activity as root.
+     *
+     * <p>When paired with {@link #FLAG_ACTIVITY_MULTIPLE_TASK} this will
+     * always create a new task. Thus the same document may be made to appear
+     * more than one time in Recents.
+     *
+     * @see #FLAG_ACTIVITY_MULTIPLE_TASK
+     */
+    public static final int FLAG_ACTIVITY_NEW_DOCUMENT =
+            FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET | FLAG_ACTIVITY_NEW_TASK;
     /**
      * If set, this flag will prevent the normal {@link android.app.Activity#onUserLeaveHint}
      * callback from occurring on the current frontmost activity before it is
@@ -6246,6 +6289,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #FLAG_ACTIVITY_FORWARD_RESULT
      * @see #FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
      * @see #FLAG_ACTIVITY_MULTIPLE_TASK
+     * @see #FLAG_ACTIVITY_NEW_DOCUMENT
      * @see #FLAG_ACTIVITY_NEW_TASK
      * @see #FLAG_ACTIVITY_NO_ANIMATION
      * @see #FLAG_ACTIVITY_NO_HISTORY
@@ -7341,5 +7385,10 @@ public class Intent implements Parcelable, Cloneable {
         CharSequence text = texts != null ? texts.get(which) : null;
         String htmlText = htmlTexts != null ? htmlTexts.get(which) : null;
         return new ClipData.Item(text, htmlText, null, uri);
+    }
+
+    /** @hide */
+    public boolean isDocument() {
+        return (mFlags & FLAG_ACTIVITY_NEW_DOCUMENT) == FLAG_ACTIVITY_NEW_DOCUMENT;
     }
 }
