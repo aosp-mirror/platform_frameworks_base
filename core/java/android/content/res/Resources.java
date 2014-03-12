@@ -1568,6 +1568,15 @@ public class Resources {
 
         /** Resource identifier for the theme. */
         private int mThemeResId = 0;
+
+        // Needed by layoutlib.
+        /*package*/ long getNativeTheme() {
+            return mTheme;
+        }
+
+        /*package*/ int getAppliedStyleResId() {
+            return mThemeResId;
+        }
     }
 
     /**
