@@ -373,7 +373,7 @@ void CanvasContext::setup(int width, int height) {
     mCanvas->setViewport(width, height);
 }
 
-void CanvasContext::setDisplayListData(DisplayList* displayList, DisplayListData* newData) {
+void CanvasContext::setDisplayListData(RenderNode* displayList, DisplayListData* newData) {
     displayList->setData(newData);
 }
 
@@ -388,7 +388,7 @@ void CanvasContext::processLayerUpdates(const Vector<DeferredLayerUpdater*>* lay
     }
 }
 
-void CanvasContext::drawDisplayList(DisplayList* displayList, Rect* dirty) {
+void CanvasContext::drawDisplayList(RenderNode* displayList, Rect* dirty) {
     LOG_ALWAYS_FATAL_IF(!mCanvas || mEglSurface == EGL_NO_SURFACE,
             "drawDisplayList called on a context with no canvas or surface!");
 

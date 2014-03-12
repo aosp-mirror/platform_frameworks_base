@@ -102,7 +102,7 @@ struct CacheLogger {
 // Caches
 ///////////////////////////////////////////////////////////////////////////////
 
-class DisplayList;
+class RenderNode;
 
 class ANDROID_API Caches: public Singleton<Caches> {
     Caches();
@@ -169,7 +169,7 @@ public:
     /*
      * Can be used to delete a display list from a non EGL thread.
      */
-    void deleteDisplayListDeferred(DisplayList* layer);
+    void deleteDisplayListDeferred(RenderNode* layer);
 
     /**
      * Binds the VBO used to render simple textured quads.
@@ -420,7 +420,7 @@ private:
 
     mutable Mutex mGarbageLock;
     Vector<Layer*> mLayerGarbage;
-    Vector<DisplayList*> mDisplayListGarbage;
+    Vector<RenderNode*> mDisplayListGarbage;
 
     DebugLevel mDebugLevel;
     bool mInitialized;

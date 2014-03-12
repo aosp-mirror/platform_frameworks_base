@@ -194,7 +194,7 @@ void Layer::defer() {
     deferredList = new DeferredDisplayList(dirtyRect);
 
     DeferStateStruct deferredState(*deferredList, *renderer,
-            DisplayList::kReplayFlag_ClipChildren);
+            RenderNode::kReplayFlag_ClipChildren);
 
     renderer->initViewport(width, height);
     renderer->setupFrameState(dirtyRect.left, dirtyRect.top,
@@ -238,7 +238,7 @@ void Layer::render() {
     renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,
             !isBlend());
 
-    renderer->drawDisplayList(displayList, dirtyRect, DisplayList::kReplayFlag_ClipChildren);
+    renderer->drawDisplayList(displayList, dirtyRect, RenderNode::kReplayFlag_ClipChildren);
 
     renderer->finish();
     renderer = NULL;

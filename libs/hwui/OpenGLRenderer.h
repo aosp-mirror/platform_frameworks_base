@@ -54,7 +54,7 @@ namespace android {
 namespace uirenderer {
 
 class DeferredDisplayState;
-class DisplayList;
+class RenderNode;
 class TextSetupFunctor;
 class VertexBuffer;
 class SkiaShader;
@@ -165,7 +165,7 @@ public:
     int saveLayerDeferred(float left, float top, float right, float bottom,
             const SkPaint* paint, int flags);
 
-    virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t replayFlags = 1);
+    virtual status_t drawDisplayList(RenderNode* displayList, Rect& dirty, int32_t replayFlags = 1);
     virtual status_t drawLayer(Layer* layer, float x, float y);
     virtual status_t drawBitmap(const SkBitmap* bitmap, float left, float top,
             const SkPaint* paint);

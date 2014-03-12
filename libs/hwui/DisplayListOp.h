@@ -1488,9 +1488,9 @@ private:
 };
 
 class DrawDisplayListOp : public DrawBoundedOp {
-    friend class DisplayList; // grant DisplayList access to info of child
+    friend class RenderNode; // grant DisplayList access to info of child
 public:
-    DrawDisplayListOp(DisplayList* displayList, int flags, const mat4& transformFromParent)
+    DrawDisplayListOp(RenderNode* displayList, int flags, const mat4& transformFromParent)
             : DrawBoundedOp(0, 0, displayList->getWidth(), displayList->getHeight(), 0),
             mDisplayList(displayList), mFlags(flags), mTransformFromParent(transformFromParent) {}
 
@@ -1522,7 +1522,7 @@ public:
     virtual const char* name() { return "DrawDisplayList"; }
 
 private:
-    DisplayList* mDisplayList;
+    RenderNode* mDisplayList;
     const int mFlags;
 
     ///////////////////////////
