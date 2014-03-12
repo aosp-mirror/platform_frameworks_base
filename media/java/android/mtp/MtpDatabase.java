@@ -16,15 +16,19 @@
 
 package android.mtp;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContentValues;
 import android.content.IContentProvider;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaScanner;
 import android.net.Uri;
+import android.os.BatteryManager;
+import android.os.BatteryStats;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
@@ -113,10 +117,34 @@ public class MtpDatabase {
                                             + Files.FileColumns.PARENT + "=?";
 
     private final MediaScanner mMediaScanner;
+    private MtpServer mServer;
+
+    // read from native code
+    private int mBatteryLevel;
+    private int mBatteryScale;
 
     static {
         System.loadLibrary("media_jni");
     }
+
+    private BroadcastReceiver mBatteryReceiver = new BroadcastReceiver() {
+          @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
+                mBatteryScale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 0);
+                int newLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+                if (newLevel != mBatteryLevel) {
+                    mBatteryLevel = newLevel;
+                    if (mServer != null) {
+                        // send device property changed event
+                        mServer.sendDevicePropertyChanged(
+                                MtpConstants.DEVICE_PROPERTY_BATTERY_LEVEL);
+                    }
+                }
+            }
+        }
+    };
 
     public MtpDatabase(Context context, String volumeName, String storagePath,
             String[] subDirectories) {
@@ -169,6 +197,18 @@ public class MtpDatabase {
             }
         }
         initDeviceProperties(context);
+    }
+
+    public void setServer(MtpServer server) {
+        mServer = server;
+
+        // register for battery notifications when we are connected
+        if (server != null) {
+            mContext.registerReceiver(mBatteryReceiver,
+                    new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        } else {
+            mContext.unregisterReceiver(mBatteryReceiver);
+        }
     }
 
     @Override
@@ -663,6 +703,7 @@ public class MtpDatabase {
             MtpConstants.DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER,
             MtpConstants.DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME,
             MtpConstants.DEVICE_PROPERTY_IMAGE_SIZE,
+            MtpConstants.DEVICE_PROPERTY_BATTERY_LEVEL,
         };
     }
 
@@ -818,6 +859,8 @@ public class MtpDatabase {
                 imageSize.getChars(0, imageSize.length(), outStringValue, 0);
                 outStringValue[imageSize.length()] = 0;
                 return MtpConstants.RESPONSE_OK;
+
+            // DEVICE_PROPERTY_BATTERY_LEVEL is implemented in the JNI code
 
             default:
                 return MtpConstants.RESPONSE_DEVICE_PROP_NOT_SUPPORTED;
