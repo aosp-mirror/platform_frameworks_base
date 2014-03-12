@@ -315,7 +315,7 @@ void Caches::clearGarbage() {
     pathCache.clearGarbage();
     patchCache.clearGarbage();
 
-    Vector<DisplayList*> displayLists;
+    Vector<RenderNode*> displayLists;
     Vector<Layer*> layers;
 
     { // scope for the lock
@@ -328,7 +328,7 @@ void Caches::clearGarbage() {
 
     size_t count = displayLists.size();
     for (size_t i = 0; i < count; i++) {
-        DisplayList* displayList = displayLists.itemAt(i);
+        RenderNode* displayList = displayLists.itemAt(i);
         delete displayList;
     }
 
@@ -345,7 +345,7 @@ void Caches::deleteLayerDeferred(Layer* layer) {
     mLayerGarbage.push(layer);
 }
 
-void Caches::deleteDisplayListDeferred(DisplayList* displayList) {
+void Caches::deleteDisplayListDeferred(RenderNode* displayList) {
     Mutex::Autolock _l(mGarbageLock);
     mDisplayListGarbage.push(displayList);
 }

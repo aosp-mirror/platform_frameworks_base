@@ -1912,7 +1912,7 @@ void OpenGLRenderer::setupDrawIndexedVertices(GLvoid* vertices) {
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
 
-status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
+status_t OpenGLRenderer::drawDisplayList(RenderNode* displayList, Rect& dirty,
         int32_t replayFlags) {
     status_t status;
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)

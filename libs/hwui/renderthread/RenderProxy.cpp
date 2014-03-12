@@ -117,13 +117,13 @@ void RenderProxy::setup(int width, int height) {
     post(task);
 }
 
-CREATE_BRIDGE3(setDisplayListData, CanvasContext* context, DisplayList* displayList,
+CREATE_BRIDGE3(setDisplayListData, CanvasContext* context, RenderNode* displayList,
         DisplayListData* newData) {
     args->context->setDisplayListData(args->displayList, args->newData);
     return NULL;
 }
 
-void RenderProxy::setDisplayListData(DisplayList* displayList, DisplayListData* newData) {
+void RenderProxy::setDisplayListData(RenderNode* displayList, DisplayListData* newData) {
     SETUP_TASK(setDisplayListData);
     args->context = mContext;
     args->displayList = displayList;
@@ -131,7 +131,7 @@ void RenderProxy::setDisplayListData(DisplayList* displayList, DisplayListData* 
     post(task);
 }
 
-CREATE_BRIDGE4(drawDisplayList, CanvasContext* context, DisplayList* displayList,
+CREATE_BRIDGE4(drawDisplayList, CanvasContext* context, RenderNode* displayList,
         Rect dirty, const Vector<DeferredLayerUpdater*>* layerUpdates) {
     Rect* dirty = &args->dirty;
     if (dirty->bottom == -1 && dirty->left == -1 &&
@@ -143,7 +143,7 @@ CREATE_BRIDGE4(drawDisplayList, CanvasContext* context, DisplayList* displayList
     return NULL;
 }
 
-void RenderProxy::drawDisplayList(DisplayList* displayList,
+void RenderProxy::drawDisplayList(RenderNode* displayList,
         int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom) {
     SETUP_TASK(drawDisplayList);
     args->context = mContext;

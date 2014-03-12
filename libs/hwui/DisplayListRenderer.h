@@ -156,7 +156,7 @@ public:
 // Canvas draw operations - special
 // ----------------------------------------------------------------------------
     virtual status_t drawLayer(Layer* layer, float x, float y);
-    virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty,
+    virtual status_t drawDisplayList(RenderNode* displayList, Rect& dirty,
             int32_t replayFlags);
 
     // TODO: rename for consistency
@@ -309,7 +309,7 @@ private:
 
     int mRestoreSaveCount;
 
-    friend class DisplayList;
+    friend class RenderNode;
 
 }; // class DisplayListRenderer
 
