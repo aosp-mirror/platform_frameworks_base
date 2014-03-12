@@ -190,7 +190,7 @@ public abstract class CallService extends Service {
 
     /**
      * Determines if the CallService can place the specified call. Response is sent via
-     * {@link CallServiceAdapter#setCompatibleWith}. When responding, the correct call ID must be
+     * {@link CallServiceAdapter#setIsCompatibleWith}. When responding, the correct call ID must be
      * specified.  Only used in the context of outgoing calls and call switching (handoff).
      *
      * @param callInfo The details of the relevant call.
@@ -224,7 +224,7 @@ public abstract class CallService extends Service {
      * Receives a new call ID to use with an incoming call. Invoked by Telecomm after it is notified
      * that this call service has a pending incoming call, see
      * {@link TelecommConstants#ACTION_INCOMING_CALL}. The call service must first give Telecomm
-     * additional information about the call through {@link CallServiceAdapter#handleIncomingCall}.
+     * additional information about the call through {@link CallServiceAdapter#notifyIncomingCall}.
      * Following that, the call service can update the call at will using the specified call ID.
      *
      * If a {@link Bundle} was passed (via {@link TelecommConstants#EXTRA_INCOMING_CALL_EXTRAS}) in
