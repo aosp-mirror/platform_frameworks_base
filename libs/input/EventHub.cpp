@@ -576,6 +576,57 @@ bool EventHub::setKeyboardLayoutOverlay(int32_t deviceId,
     return false;
 }
 
+static String8 generateDescriptor(InputDeviceIdentifier& identifier) {
+    String8 rawDescriptor;
+    rawDescriptor.appendFormat(":%04x:%04x:", identifier.vendor,
+            identifier.product);
+    // TODO add handling for USB devices to not uniqueify kbs that show up twice
+    if (!identifier.uniqueId.isEmpty()) {
+        rawDescriptor.append("uniqueId:");
+        rawDescriptor.append(identifier.uniqueId);
+    } else if (identifier.nonce != 0) {
+        rawDescriptor.appendFormat("nonce:%04x", identifier.nonce);
+    }
+
+    if (identifier.vendor == 0 && identifier.product == 0) {
+        // If we don't know the vendor and product id, then the device is probably
+        // built-in so we need to rely on other information to uniquely identify
+        // the input device.  Usually we try to avoid relying on the device name or
+        // location but for built-in input device, they are unlikely to ever change.
+        if (!identifier.name.isEmpty()) {
+            rawDescriptor.append("name:");
+            rawDescriptor.append(identifier.name);
+        } else if (!identifier.location.isEmpty()) {
+            rawDescriptor.append("location:");
+            rawDescriptor.append(identifier.location);
+        }
+    }
+    identifier.descriptor = sha1(rawDescriptor);
+    return rawDescriptor;
+}
+
+void EventHub::assignDescriptorLocked(InputDeviceIdentifier& identifier) {
+    // Compute a device descriptor that uniquely identifies the device.
+    // The descriptor is assumed to be a stable identifier.  Its value should not
+    // change between reboots, reconnections, firmware updates or new releases
+    // of Android. In practice we sometimes get devices that cannot be uniquely
+    // identified. In this case we enforce uniqueness between connected devices.
+    // Ideally, we also want the descriptor to be short and relatively opaque.
+
+    identifier.nonce = 0;
+    String8 rawDescriptor = generateDescriptor(identifier);
+    if (identifier.uniqueId.isEmpty()) {
+        // If it didn't have a unique id check for conflicts and enforce
+        // uniqueness if necessary.
+        while(getDeviceByDescriptorLocked(identifier.descriptor) != NULL) {
+            identifier.nonce++;
+            rawDescriptor = generateDescriptor(identifier);
+        }
+    }
+    ALOGV("Created descriptor: raw=%s, cooked=%s", rawDescriptor.string(),
+            identifier.descriptor.string());
+}
+
 void EventHub::vibrate(int32_t deviceId, nsecs_t duration) {
     AutoMutex _l(mLock);
     Device* device = getDeviceLocked(deviceId);
@@ -630,6 +681,17 @@ void EventHub::cancelVibrate(int32_t deviceId) {
             }
         }
     }
+}
+
+EventHub::Device* EventHub::getDeviceByDescriptorLocked(String8& descriptor) const {
+    size_t size = mDevices.size();
+    for (size_t i = 0; i < size; i++) {
+        Device* device = mDevices.valueAt(i);
+        if (descriptor.compare(device->identifier.descriptor) == 0) {
+            return device;
+        }
+    }
+    return NULL;
 }
 
 EventHub::Device* EventHub::getDeviceLocked(int32_t deviceId) const {
@@ -1071,7 +1133,7 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
     }
 
     // Fill in the descriptor.
-    setDescriptor(identifier);
+    assignDescriptorLocked(identifier);
 
     // Make file descriptor non-blocking for use with poll().
     if (fcntl(fd, F_SETFL, O_NONBLOCK)) {
@@ -1306,7 +1368,7 @@ void EventHub::createVirtualKeyboardLocked() {
     InputDeviceIdentifier identifier;
     identifier.name = "Virtual";
     identifier.uniqueId = "<virtual>";
-    setDescriptor(identifier);
+    assignDescriptorLocked(identifier);
 
     Device* device = new Device(-1, VIRTUAL_KEYBOARD_ID, String8("<virtual>"), identifier);
     device->classes = INPUT_DEVICE_CLASS_KEYBOARD
