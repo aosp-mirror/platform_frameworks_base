@@ -15,7 +15,7 @@
 ** limitations under the License.
 -->
 
-<com.android.systemui.statusbar.phone.PanelHeaderView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/header"
@@ -106,4 +106,4 @@
             android:contentDescription="@string/accessibility_notifications_button"
             />
     </FrameLayout>
-</com.android.systemui.statusbar.phone.PanelHeaderView>
+</LinearLayout>

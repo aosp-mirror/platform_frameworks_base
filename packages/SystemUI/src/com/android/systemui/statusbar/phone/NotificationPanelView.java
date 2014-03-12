@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.view.MotionEvent;
@@ -57,17 +56,6 @@ public class NotificationPanelView extends PanelView {
         mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
         mHandleBarHeight = resources.getDimensionPixelSize(R.dimen.close_handle_height);
         mHandleView = findViewById(R.id.handle);
-        PanelHeaderView header = (PanelHeaderView) findViewById(R.id.header);
-        ZenModeView zenModeView = (ZenModeView) findViewById(R.id.zenmode);
-        zenModeView.setAdapter(new ZenModeViewAdapter(mContext) {
-            @Override
-            public void configure() {
-                if (mStatusBar != null) {
-                    mStatusBar.startSettingsActivity(Settings.ACTION_ZEN_MODE_SETTINGS);
-                }
-            }
-        });
-        header.setZenModeView(zenModeView);
     }
 
     @Override

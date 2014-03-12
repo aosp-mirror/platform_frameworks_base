@@ -52,13 +52,16 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Profile;
 import android.provider.Settings;
 import android.security.KeyChain;
+import android.text.TextUtils.TruncateAt;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -586,6 +589,31 @@ class QuickSettings {
         });
         parent.addView(airplaneTile);
 
+        // Zen Mode
+        final QuickSettingsBasicTile zenModeTile = new QuickSettingsBasicTile(mContext);
+        zenModeTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showZenModeDialog();
+            }
+        });
+        mModel.addZenModeTile(zenModeTile, new QuickSettingsModel.RefreshCallback() {
+            @Override
+            public void refreshView(QuickSettingsTileView unused, State state) {
+                zenModeTile.setImageResource(state.iconId);
+                // TODO cut new assets
+                zenModeTile.getImageView().setAlpha(state.enabled ? 1 : .2f);
+                zenModeTile.getImageView().setScaleX(1.5f);
+                zenModeTile.getImageView().setScaleY(1.5f);
+                // for landscape version
+                zenModeTile.getTextView().setMaxLines(2);
+                zenModeTile.getTextView().setEllipsize(TruncateAt.END);
+                // TODO content description
+                zenModeTile.setText(state.label);
+            }
+        });
+        parent.addView(zenModeTile);
+
         // Bluetooth
         if (mModel.deviceSupportsBluetooth()
                 || DEBUG_GONE_TILES) {
@@ -862,6 +890,31 @@ class QuickSettings {
         } catch (RemoteException e) {
         }
         dialog.show();
+    }
+
+    private void showZenModeDialog() {
+        final Dialog d = new Dialog(mContext);
+        d.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        d.setCancelable(true);
+        d.setCanceledOnTouchOutside(true);
+        final ZenModeView v = new ZenModeView(mContext);
+        v.setAdapter(new ZenModeViewAdapter(mContext) {
+            @Override
+            public void configure() {
+                if (mStatusBarService != null) {
+                    mStatusBarService.startSettingsActivity(Settings.ACTION_ZEN_MODE_SETTINGS);
+                }
+                d.dismiss();
+            }
+            @Override
+            public void close() {
+                d.dismiss();
+            }
+        });
+        d.setContentView(v);
+        d.create();
+        d.getWindow().setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
+        d.show();
     }
 
     private void applyBluetoothStatus() {
