@@ -1885,14 +1885,17 @@ int doPackage(Bundle* bundle)
     FILE* fp;
     String8 dependencyFile;
 
-    // -c zz_ZZ means do pseudolocalization
+    // -c en_XA or/and ar_XB means do pseudolocalization
     ResourceFilter filter;
     err = filter.parse(bundle->getConfigurations());
     if (err != NO_ERROR) {
         goto bail;
     }
     if (filter.containsPseudo()) {
-        bundle->setPseudolocalize(true);
+        bundle->setPseudolocalize(bundle->getPseudolocalize() | PSEUDO_ACCENTED);
+    }
+    if (filter.containsPseudoBidi()) {
+        bundle->setPseudolocalize(bundle->getPseudolocalize() | PSEUDO_BIDI);
     }
 
     N = bundle->getFileSpecCount();

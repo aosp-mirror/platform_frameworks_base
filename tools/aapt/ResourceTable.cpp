@@ -25,7 +25,7 @@ status_t compileXmlFile(const sp<AaptAssets>& assets,
     if (root == NULL) {
         return UNKNOWN_ERROR;
     }
-    
+
     return compileXmlFile(assets, root, target, table, options);
 }
 
@@ -577,13 +577,13 @@ status_t parseAndAddBag(Bundle* bundle,
                         int32_t curFormat,
                         bool isFormatted,
                         const String16& product,
-                        bool pseudolocalize,
+                        PseudolocalizationMethod pseudolocalize,
                         const bool overwrite,
                         ResourceTable* outTable)
 {
     status_t err;
     const String16 item16("item");
-    
+
     String16 str;
     Vector<StringPool::entry_style_span> spans;
     err = parseStyledString(bundle, in->getPrintableSource().string(),
@@ -672,7 +672,7 @@ status_t parseAndAddEntry(Bundle* bundle,
                         int32_t curFormat,
                         bool isFormatted,
                         const String16& product,
-                        bool pseudolocalize,
+                        PseudolocalizationMethod pseudolocalize,
                         const bool overwrite,
                         KeyedVector<type_ident_pair_t, bool>* skippedResourceNames,
                         ResourceTable* outTable)
@@ -854,10 +854,16 @@ status_t compileResourceFile(Bundle* bundle,
     ResTable_config curParams(defParams);
 
     ResTable_config pseudoParams(curParams);
-        pseudoParams.language[0] = 'z';
-        pseudoParams.language[1] = 'z';
-        pseudoParams.country[0] = 'Z';
-        pseudoParams.country[1] = 'Z';
+        pseudoParams.language[0] = 'e';
+        pseudoParams.language[1] = 'n';
+        pseudoParams.country[0] = 'X';
+        pseudoParams.country[1] = 'A';
+
+    ResTable_config pseudoBidiParams(curParams);
+        pseudoBidiParams.language[0] = 'a';
+        pseudoBidiParams.language[1] = 'r';
+        pseudoBidiParams.country[0] = 'X';
+        pseudoBidiParams.country[1] = 'B';
 
     while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
         if (code == ResXMLTree::START_TAG) {
@@ -1334,6 +1340,7 @@ status_t compileResourceFile(Bundle* bundle,
                                 name,
                                 locale,
                                 SourcePos(in->getPrintableSource(), block.getLineNumber()));
+                        curIsPseudolocalizable = fileIsTranslatable;
                     }
 
                     if (formatted == false16) {
@@ -1389,6 +1396,7 @@ status_t compileResourceFile(Bundle* bundle,
                 curTag = &plurals16;
                 curType = plurals16;
                 curIsBag = true;
+                curIsPseudolocalizable = fileIsTranslatable;
             } else if (strcmp16(block.getElementName(&len), array16.string()) == 0) {
                 curTag = &array16;
                 curType = array16;
@@ -1410,25 +1418,23 @@ status_t compileResourceFile(Bundle* bundle,
             } else if (strcmp16(block.getElementName(&len), string_array16.string()) == 0) {
                 // Check whether these strings need valid formats.
                 // (simplified form of what string16 does above)
+                bool isTranslatable = false;
                 size_t n = block.getAttributeCount();
 
                 // Pseudolocalizable by default, unless this string array isn't
                 // translatable.
-                curIsPseudolocalizable = true;
                 for (size_t i = 0; i < n; i++) {
                     size_t length;
                     const uint16_t* attr = block.getAttributeName(i, &length);
-                    if (strcmp16(attr, translatable16.string()) == 0) {
-                        const uint16_t* value = block.getAttributeStringValue(i, &length);
-                        if (strcmp16(value, false16.string()) == 0) {
-                            curIsPseudolocalizable = false;
-                        }
-                    }
-
                     if (strcmp16(attr, formatted16.string()) == 0) {
                         const uint16_t* value = block.getAttributeStringValue(i, &length);
                         if (strcmp16(value, false16.string()) == 0) {
                             curIsFormatted = false;
+                        }
+                    } else if (strcmp16(attr, translatable16.string()) == 0) {
+                        const uint16_t* value = block.getAttributeStringValue(i, &length);
+                        if (strcmp16(value, false16.string()) == 0) {
+                            isTranslatable = false;
                         }
                     }
                 }
@@ -1438,6 +1444,7 @@ status_t compileResourceFile(Bundle* bundle,
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_STRING;
                 curIsBag = true;
                 curIsBagReplaceOnOverwrite = true;
+                curIsPseudolocalizable = isTranslatable && fileIsTranslatable;
             } else if (strcmp16(block.getElementName(&len), integer_array16.string()) == 0) {
                 curTag = &integer_array16;
                 curType = array16;
@@ -1559,19 +1566,29 @@ status_t compileResourceFile(Bundle* bundle,
 
                         err = parseAndAddBag(bundle, in, &block, curParams, myPackage, curType,
                                 ident, parentIdent, itemIdent, curFormat, curIsFormatted,
-                                product, false, overwrite, outTable);
+                                product, NO_PSEUDOLOCALIZATION, overwrite, outTable);
                         if (err == NO_ERROR) {
                             if (curIsPseudolocalizable && localeIsDefined(curParams)
-                                    && bundle->getPseudolocalize()) {
+                                    && bundle->getPseudolocalize() > 0) {
                                 // pseudolocalize here
-#if 1
-                                block.setPosition(parserPosition);
-                                err = parseAndAddBag(bundle, in, &block, pseudoParams, myPackage,
-                                        curType, ident, parentIdent, itemIdent, curFormat,
-                                        curIsFormatted, product, true, overwrite, outTable);
-#endif
+                                if ((PSEUDO_ACCENTED & bundle->getPseudolocalize()) ==
+                                   PSEUDO_ACCENTED) {
+                                    block.setPosition(parserPosition);
+                                    err = parseAndAddBag(bundle, in, &block, pseudoParams, myPackage,
+                                            curType, ident, parentIdent, itemIdent, curFormat,
+                                            curIsFormatted, product, PSEUDO_ACCENTED,
+                                            overwrite, outTable);
+                                }
+                                if ((PSEUDO_BIDI & bundle->getPseudolocalize()) ==
+                                   PSEUDO_BIDI) {
+                                    block.setPosition(parserPosition);
+                                    err = parseAndAddBag(bundle, in, &block, pseudoBidiParams, myPackage,
+                                            curType, ident, parentIdent, itemIdent, curFormat,
+                                            curIsFormatted, product, PSEUDO_BIDI,
+                                            overwrite, outTable);
+                                }
                             }
-                        } 
+                        }
                         if (err != NO_ERROR) {
                             hasErrors = localHasErrors = true;
                         }
@@ -1592,20 +1609,31 @@ status_t compileResourceFile(Bundle* bundle,
 
                 err = parseAndAddEntry(bundle, in, &block, curParams, myPackage, curType, ident,
                         *curTag, curIsStyled, curFormat, curIsFormatted,
-                        product, false, overwrite, &skippedResourceNames, outTable);
+                        product, NO_PSEUDOLOCALIZATION, overwrite, &skippedResourceNames, outTable);
 
                 if (err < NO_ERROR) { // Why err < NO_ERROR instead of err != NO_ERROR?
                     hasErrors = localHasErrors = true;
                 }
                 else if (err == NO_ERROR) {
                     if (curIsPseudolocalizable && localeIsDefined(curParams)
-                            && bundle->getPseudolocalize()) {
+                            && bundle->getPseudolocalize() > 0) {
                         // pseudolocalize here
-                        block.setPosition(parserPosition);
-                        err = parseAndAddEntry(bundle, in, &block, pseudoParams, myPackage, curType,
-                                ident, *curTag, curIsStyled, curFormat,
-                                curIsFormatted, product,
-                                true, overwrite, &skippedResourceNames, outTable);
+                        if ((PSEUDO_ACCENTED & bundle->getPseudolocalize()) ==
+                           PSEUDO_ACCENTED) {
+                            block.setPosition(parserPosition);
+                            err = parseAndAddEntry(bundle, in, &block, pseudoParams, myPackage, curType,
+                                    ident, *curTag, curIsStyled, curFormat,
+                                    curIsFormatted, product,
+                                    PSEUDO_ACCENTED, overwrite, &skippedResourceNames, outTable);
+                        }
+                        if ((PSEUDO_BIDI & bundle->getPseudolocalize()) ==
+                           PSEUDO_BIDI) {
+                            block.setPosition(parserPosition);
+                            err = parseAndAddEntry(bundle, in, &block, pseudoBidiParams,
+                                    myPackage, curType, ident, *curTag, curIsStyled, curFormat,
+                                    curIsFormatted, product,
+                                    PSEUDO_BIDI, overwrite, &skippedResourceNames, outTable);
+                        }
                         if (err != NO_ERROR) {
                             hasErrors = localHasErrors = true;
                         }
@@ -2636,8 +2664,8 @@ ResourceTable::validateLocalizations(void)
                     continue;
                 }
 
-                // don't bother with the pseudolocale "zz_ZZ"
-                if (config != "zz_ZZ") {
+                // don't bother with the pseudolocale "en_XA" or "ar_XB"
+                if (config != "en_XA" && config != "ar_XB") {
                     if (configSrcMap.find(config) == configSrcMap.end()) {
                         // okay, no specific localization found.  it's possible that we are
                         // requiring a specific regional localization [e.g. de_DE] but there is an
