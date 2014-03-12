@@ -204,10 +204,6 @@ public:
         mClipToBounds = clipToBounds;
     }
 
-    void setIsolatedZVolume(bool shouldIsolate) {
-        mIsolatedZVolume = shouldIsolate;
-    }
-
     void setCastsShadow(bool castsShadow) {
         mCastsShadow = castsShadow;
     }
@@ -617,7 +613,6 @@ private:
 
     // Rendering properties
     bool mClipToBounds;
-    bool mIsolatedZVolume;
     bool mProjectBackwards;
     bool mProjectionReceiver;
     SkPath mOutline;
