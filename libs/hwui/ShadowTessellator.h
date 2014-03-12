@@ -54,6 +54,8 @@ namespace uirenderer {
 // The total number of indices used for drawing the shadow geometry as triangle strips.
 #define SHADOW_INDEX_COUNT (2 * SHADOW_RAY_COUNT + 1 + 2 * (SHADOW_RAY_COUNT + 1))
 
+#define SHADOW_MIN_CASTER_Z 0.001f
+
 class ShadowTessellator {
 public:
     static void tessellateAmbientShadow(const Vector3* casterPolygon,

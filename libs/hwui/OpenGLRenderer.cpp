@@ -3222,10 +3222,12 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& c
     // map 2d caster poly into 3d
     const int casterVertexCount = casterVertices2d.size();
     Vector3 casterPolygon[casterVertexCount];
+    float minZ = FLT_MAX;
     for (int i = 0; i < casterVertexCount; i++) {
         const Vertex& point2d = casterVertices2d[i];
         casterPolygon[i] = Vector3(point2d.x, point2d.y, 0);
         mapPointFakeZ(casterPolygon[i], casterTransformXY, casterTransformZ);
+        minZ = fmin(minZ, casterPolygon[i].z);
     }
 
     // map the centroid of the caster into 3d
@@ -3234,6 +3236,15 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& c
             casterVertexCount);
     Vector3 centroid3d(centroid.x, centroid.y, 0);
     mapPointFakeZ(centroid3d, casterTransformXY, casterTransformZ);
+
+    // if the caster intersects the z=0 plane, lift it in Z so it doesn't
+    if (minZ < SHADOW_MIN_CASTER_Z) {
+        float casterLift = SHADOW_MIN_CASTER_Z - minZ;
+        for (int i = 0; i < casterVertexCount; i++) {
+            casterPolygon[i].z += casterLift;
+        }
+        centroid3d.z += casterLift;
+    }
 
     // draw caster's shadows
     if (mCaches.propertyAmbientShadowStrength > 0) {
