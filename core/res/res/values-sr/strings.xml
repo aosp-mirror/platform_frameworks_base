@@ -689,6 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Дозвољава власнику да позива апликацију са конфигурацијом коју одређује оператер. Уобичајене апликације никада не би требало да је користе."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"праћење података о условима на мрежи"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Дозвољава апликацији да прати податке о условима на мрежи. Не би никада требало да буде потребно за нормалне апликације."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"промени калибрацију улазног уређаја"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Дозвољава апликацији да модификује параметре калибрације додирног екрана. Не би требало да буде потребно за нормалне апликације."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Подешавање правила за лозинку"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролишите дужину и знакове дозвољене у лозинкама за откључавање екрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Надгледање покушаја откључавања екрана"</string>

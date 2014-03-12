@@ -689,6 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Laat die houer toe om die opstellingsprogram wat deur die diensverskaffer voorsien word, op te roep. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"luister vir waarnemings oor netwerktoestande"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Laat \'n program luister vir waarnemings oor netwerktoestande. Behoort nooit nodig te wees vir normale programme nie."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"verander invoertoestelkalibrasie"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Laat die program toe om die kalibrasieparameters van die raakskerm te wysig. Dit behoort nooit vir normale programme nodig te wees nie."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Stel wagwoordreëls"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Beheer lengte en watter karakters wat in die skermontsluit-wagwoorde gebruik word."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitor pogings om skerm te ontsluit"</string>

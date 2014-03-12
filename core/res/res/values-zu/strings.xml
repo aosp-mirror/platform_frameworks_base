@@ -689,6 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ivumela umnikazi ukuthi abuyisele uhlelo lokusebenza lokulungiselelwa. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Lalela okubonwayo kuzimo zenethiwekhi"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Ivumela uhlelo lokusebenza ukuthi lulalele okubonwa kuzimo zenethiwekhi. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"guqula ukulinganisa kokufaka kwedivayisi"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Ivumela uhlelo lokusebenza ukuthi lushintshe imingcele yokulinganisa yesikrini esithintwayo. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Misa imithetho yephasiwedi"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Lawula ubude nezinhlamvu ezivunyelwe kumaphasiwedi okuvula isikrini"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gaka imizamo yokuvula isikrini"</string>

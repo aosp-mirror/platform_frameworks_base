@@ -689,6 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Lehetővé teszi a használó számára a szolgáltató által biztosított konfigurációs alkalmazás hívását. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"hálózati körülményekkel kapcsolatos észrevételek figyelemmel kísérése"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Lehetővé teszi egy alkalmazás számára, hogy figyelemmel kísérje a hálózati körülményekkel kapcsolatos észrevételeket. A normál alkalmazásoknak erre soha nincs szükségük."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"beviteli eszköz kalibrációjának módosítása"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Lehetővé teszi, hogy alkalmazás módosítsa az érintőképernyő kalibrációs paramétereit. A normál alkalmazásoknál erre elvileg soha nincs szükség."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Jelszavakkal kapcsolatos szabályok beállítása"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"A képernyőzár-feloldási jelszavakban engedélyezett karakterek és hosszúság vezérlése."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Képernyőzár-feloldási kísérletek figyelése"</string>

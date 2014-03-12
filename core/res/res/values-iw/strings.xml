@@ -689,6 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"ההרשאה הזו מאפשרת לבעלים להפעיל את אפליקציית התצורה שסופקה על ידי ספק. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"קליטת מעקב אחר תנאי רשת"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"מאפשרת לאפליקציה לקלוט מעקב אחר תנאי רשת. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"שינוי הכיול של מכשיר קלט"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"מאפשרת לאפליקציה לשנות את פרמטרי הכיול של מסך המגע. לעולם לא אמורה להיות נחוצה לאפליקציות רגילות."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"הגדר כללי סיסמה"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"שלוט באורך ובתווים המותרים בסיסמאות לביטול נעילת מסך."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"עקוב אחר ניסיונות לביטול נעילת מסך"</string>

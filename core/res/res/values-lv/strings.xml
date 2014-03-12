@@ -689,6 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ļauj īpašniekam izsaukt operatora nodrošināto konfigurācijas lietotni. Parastām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"iegūt informāciju par tīkla stāvokļa novērojumiem"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Ļauj lietojumprogrammai iegūt informāciju par tīkla stāvokļa novērojumiem. Parastām lietotnēm šī atļauja nekad nav nepieciešama."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"mainīt ievadierīces kalibrēšanu"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Ļauj lietotnei pārveidot skārienekrāna kalibrēšanas parametrus. Parastām lietotnēm šī atļauja nekad nav nepieciešama."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Paroles kārtulu iestatīšana"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrolē ekrāna atbloķēšanas parolē atļautās rakstzīmes un garumu."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekrāna atbloķēšanas mēģinājumu pārraudzīšana"</string>
