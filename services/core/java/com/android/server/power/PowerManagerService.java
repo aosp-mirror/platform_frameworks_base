@@ -1816,7 +1816,12 @@ public final class PowerManagerService extends com.android.server.SystemService
 
     private boolean isScreenOnInternal() {
         synchronized (mLock) {
-            return isScreenOnLocked();
+            // XXX This is a temporary hack to let certain parts of the system pretend the
+            // screen is still on even when dozing and we would normally want to report
+            // screen off.  Will be removed when the window manager is modified to use
+            // the true blanking state of the display.
+            return isScreenOnLocked()
+                    || mWakefulness == WAKEFULNESS_DOZING;
         }
     }
 
