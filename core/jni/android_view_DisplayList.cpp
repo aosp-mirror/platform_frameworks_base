@@ -100,8 +100,7 @@ static void android_view_DisplayList_setClipToBounds(JNIEnv* env,
 
 static void android_view_DisplayList_setIsolatedZVolume(JNIEnv* env,
         jobject clazz, jlong displayListPtr, jboolean shouldIsolate) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->setIsolatedZVolume(shouldIsolate);
+    // No-op, TODO: Remove Java usage of this method
 }
 
 static void android_view_DisplayList_setProjectBackwards(JNIEnv* env,

@@ -57,7 +57,6 @@ RenderNode::RenderNode() :
     mRight = 0;
     mBottom = 0;
     mClipToBounds = true;
-    mIsolatedZVolume = true;
     mProjectBackwards = false;
     mProjectionReceiver = false;
     mOutline.rewind();
