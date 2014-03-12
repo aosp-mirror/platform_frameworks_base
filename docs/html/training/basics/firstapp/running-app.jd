@@ -62,7 +62,7 @@ href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code andro
 attributes. For your first app, it should look like this:</p>
 <pre>
 &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android" ... >
-    &lt;uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17" />
+    &lt;uses-sdk android:minSdkVersion="8" android:targetSdkVersion="19" />
     ...
 &lt;/manifest>
 </pre>
