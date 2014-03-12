@@ -16,9 +16,12 @@
 package android.media.session;
 
 import android.content.Intent;
+import android.media.Rating;
 import android.media.session.IMediaControllerCallback;
+import android.media.session.MediaMetadata;
+import android.media.session.PlaybackState;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.os.ResultReceiver;
 import android.view.KeyEvent;
 
 /**
@@ -26,9 +29,23 @@ import android.view.KeyEvent;
  * @hide
  */
 interface IMediaController {
-    void sendCommand(String command, in Bundle extras);
+    void sendCommand(String command, in Bundle extras, in ResultReceiver cb);
     void sendMediaButton(in KeyEvent mediaButton);
     void registerCallbackListener(in IMediaControllerCallback cb);
     void unregisterCallbackListener(in IMediaControllerCallback cb);
-    int getPlaybackState();
+    boolean isTransportControlEnabled();
+
+    // These commands are for the TransportController
+    void play();
+    void pause();
+    void stop();
+    void next();
+    void previous();
+    void fastForward();
+    void rewind();
+    void seekTo(long pos);
+    void rate(in Rating rating);
+    MediaMetadata getMetadata();
+    PlaybackState getPlaybackState();
+    int getRatingType();
 }
