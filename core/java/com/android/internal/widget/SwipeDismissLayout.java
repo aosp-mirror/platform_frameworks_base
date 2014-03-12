@@ -126,6 +126,20 @@ public class SwipeDismissLayout extends FrameLayout {
                 mVelocityTracker.addMovement(ev);
                 break;
 
+            case MotionEvent.ACTION_POINTER_DOWN:
+                int actionIndex = ev.getActionIndex();
+                mActiveTouchId = ev.getPointerId(actionIndex);
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                actionIndex = ev.getActionIndex();
+                int pointerId = ev.getPointerId(actionIndex);
+                if (pointerId == mActiveTouchId) {
+                    // This was our active pointer going up. Choose a new active pointer.
+                    int newActionIndex = actionIndex == 0 ? 1 : 0;
+                    mActiveTouchId = ev.getPointerId(newActionIndex);
+                }
+                break;
+
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 resetMembers();
@@ -137,6 +151,11 @@ public class SwipeDismissLayout extends FrameLayout {
                 }
 
                 int pointerIndex = ev.findPointerIndex(mActiveTouchId);
+                if (pointerIndex == -1) {
+                    Log.e(TAG, "Invalid pointer index: ignoring.");
+                    mDiscardIntercept = true;
+                    break;
+                }
                 float dx = ev.getRawX() - mDownX;
                 float x = ev.getX(pointerIndex);
                 float y = ev.getY(pointerIndex);
@@ -228,11 +247,11 @@ public class SwipeDismissLayout extends FrameLayout {
     }
 
     private void updateDismiss(MotionEvent ev) {
+        float deltaX = ev.getRawX() - mDownX;
         if (!mDismissed) {
             mVelocityTracker.addMovement(ev);
             mVelocityTracker.computeCurrentVelocity(1000);
 
-            float deltaX = ev.getRawX() - mDownX;
             float velocityX = mVelocityTracker.getXVelocity();
             float absVelocityX = Math.abs(velocityX);
             float absVelocityY = Math.abs(mVelocityTracker.getYVelocity());
@@ -245,6 +264,13 @@ public class SwipeDismissLayout extends FrameLayout {
                     && velocityX > 0
                     && deltaX > 0) {
                 mDismissed = true;
+            }
+        }
+        // Check if the user tried to undo this.
+        if (mDismissed && mSwiping) {
+            // Check if the user's finger is actually back
+            if (deltaX < getWidth() / 2) {
+                mDismissed = false;
             }
         }
     }
