@@ -5784,19 +5784,25 @@ class BackupManagerService extends IBackupManager.Stub {
             return;
         }
 
+        boolean skip = false;
+
         long restoreSet = getAvailableRestoreToken(packageName);
         if (DEBUG) Slog.v(TAG, "restoreAtInstall pkg=" + packageName
                 + " token=" + Integer.toHexString(token)
                 + " restoreSet=" + Long.toHexString(restoreSet));
+        if (restoreSet == 0) {
+            if (MORE_DEBUG) Slog.i(TAG, "No restore set");
+            skip = true;
+        }
 
-        if (mAutoRestore && mProvisioned && restoreSet != 0) {
-            // Do we have a transport to fetch data for us?
-            IBackupTransport transport = getTransport(mCurrentTransport);
-            if (transport == null) {
-                if (DEBUG) Slog.w(TAG, "No transport for install-time restore");
-                return;
-            }
+        // Do we have a transport to fetch data for us?
+        IBackupTransport transport = getTransport(mCurrentTransport);
+        if (transport == null) {
+            if (DEBUG) Slog.w(TAG, "No transport");
+            skip = true;
+        }
 
+        if (!skip && mAutoRestore && mProvisioned) {
             try {
                 // okay, we're going to attempt a restore of this package from this restore set.
                 // The eventual message back into the Package Manager to run the post-install
@@ -5818,12 +5824,15 @@ class BackupManagerService extends IBackupManager.Stub {
                 mBackupHandler.sendMessage(msg);
             } catch (RemoteException e) {
                 // Binding to the transport broke; back off and proceed with the installation.
-                Slog.e(TAG, "Unable to contact transport for install-time restore");
+                Slog.e(TAG, "Unable to contact transport");
+                skip = true;
             }
-        } else {
+        }
+
+        if (skip) {
             // Auto-restore disabled or no way to attempt a restore; just tell the Package
             // Manager to proceed with the post-install handling for this package.
-            if (DEBUG) Slog.v(TAG, "No restore set -- skipping restore");
+            if (DEBUG) Slog.v(TAG, "Skipping");
             try {
                 mPackageManagerBinder.finishPackageInstall(token);
             } catch (RemoteException e) { /* can't happen */ }
