@@ -165,11 +165,11 @@ final class Notifier {
             int newFlags, String newTag, String newPackageName, int newOwnerUid,
             int newOwnerPid, WorkSource newWorkSource, String newHistoryTag) {
 
-        final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
-        final int newMonitorType = getBatteryStatsWakeLockMonitorType(newFlags);
-        boolean unimportantForLogging = (flags&PowerManager.UNIMPORTANT_FOR_LOGGING) != 0
-                && ownerUid == Process.SYSTEM_UID;
         if (workSource != null && newWorkSource != null) {
+            final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
+            final int newMonitorType = getBatteryStatsWakeLockMonitorType(newFlags);
+            boolean unimportantForLogging = (newFlags&PowerManager.UNIMPORTANT_FOR_LOGGING) != 0
+                    && newOwnerUid == Process.SYSTEM_UID;
             if (DEBUG) {
                 Slog.d(TAG, "onWakeLockChanging: flags=" + newFlags + ", tag=\"" + newTag
                         + "\", packageName=" + newPackageName
