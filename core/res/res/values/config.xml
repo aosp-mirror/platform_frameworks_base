@@ -1212,6 +1212,10 @@
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
 
+    <!-- If true, then we do not ask user for permission for apps to connect to USB devices.
+         Do not set this to true for production devices. Doing so will cause you to fail CTS. -->
+    <bool name="config_disableUsbPermissionDialogs">false</bool>
+
     <!-- Minimum span needed to begin a touch scaling gesture.
          If the span is equal to or greater than this size, a scaling gesture
          will begin, where supported. (See android.view.ScaleGestureDetector)

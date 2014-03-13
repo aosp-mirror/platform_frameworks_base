@@ -27,6 +27,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
@@ -73,6 +74,7 @@ class UsbSettingsManager {
 
     private final UserHandle mUser;
     private final AtomicFile mSettingsFile;
+    private final boolean mDisablePermissionDialogs;
 
     private final Context mContext;
     private final Context mUserContext;
@@ -510,6 +512,9 @@ class UsbSettingsManager {
                 Environment.getUserSystemDirectory(user.getIdentifier()),
                 "usb_device_manager.xml"));
 
+        mDisablePermissionDialogs = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_disableUsbPermissionDialogs);
+
         synchronized (mLock) {
             if (UserHandle.OWNER.equals(user)) {
                 upgradeSingleUserLocked();
@@ -815,6 +820,14 @@ class UsbSettingsManager {
                     (rInfo.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
                 defaultRI = rInfo;
             }
+
+            if (mDisablePermissionDialogs) {
+                // bypass dialog and launch the only matching activity
+                rInfo = matches.get(0);
+                if (rInfo.activityInfo != null) {
+                    defaultPackage = rInfo.activityInfo.packageName;
+                }
+            }
         }
 
         if (defaultRI == null && defaultPackage != null) {
@@ -970,7 +983,7 @@ class UsbSettingsManager {
     public boolean hasPermission(UsbDevice device) {
         synchronized (mLock) {
             int uid = Binder.getCallingUid();
-            if (uid == Process.SYSTEM_UID) {
+            if (uid == Process.SYSTEM_UID || mDisablePermissionDialogs) {
                 return true;
             }
             SparseBooleanArray uidList = mDevicePermissionMap.get(device.getDeviceName());
@@ -984,7 +997,7 @@ class UsbSettingsManager {
     public boolean hasPermission(UsbAccessory accessory) {
         synchronized (mLock) {
             int uid = Binder.getCallingUid();
-            if (uid == Process.SYSTEM_UID) {
+            if (uid == Process.SYSTEM_UID || mDisablePermissionDialogs) {
                 return true;
             }
             SparseBooleanArray uidList = mAccessoryPermissionMap.get(accessory);
