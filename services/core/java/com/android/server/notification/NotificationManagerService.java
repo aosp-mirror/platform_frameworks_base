@@ -223,6 +223,20 @@ public class NotificationManagerService extends SystemService {
     // Users related to the current user.
     final protected SparseArray<UserInfo> mRelatedUsers = new SparseArray<UserInfo>();
 
+    private static final int MY_UID = Process.myUid();
+    private static final int MY_PID = Process.myPid();
+    private static final int REASON_DELEGATE_CLICK = 1;
+    private static final int REASON_DELEGATE_CANCEL = 2;
+    private static final int REASON_DELEGATE_CANCEL_ALL = 3;
+    private static final int REASON_DELEGATE_ERROR = 4;
+    private static final int REASON_PACKAGE_CHANGED = 5;
+    private static final int REASON_USER_STOPPED = 6;
+    private static final int REASON_PACKAGE_BANNED = 7;
+    private static final int REASON_NOMAN_CANCEL = 8;
+    private static final int REASON_NOMAN_CANCEL_ALL = 9;
+    private static final int REASON_LISTENER_CANCEL = 10;
+    private static final int REASON_LISTENER_CANCEL_ALL = 11;
+
     private class NotificationListenerInfo implements IBinder.DeathRecipient {
         INotificationListener listener;
         ComponentName component;
@@ -916,21 +930,23 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onClearAll(int userId) {
-            cancelAll(userId);
+        public void onClearAll(int callingUid, int callingPid, int userId) {
+            cancelAll(callingUid, callingPid, userId, REASON_DELEGATE_CANCEL_ALL, null);
         }
 
         @Override
-        public void onNotificationClick(String pkg, String tag, int id, int userId) {
-            cancelNotification(pkg, tag, id, Notification.FLAG_AUTO_CANCEL,
-                    Notification.FLAG_FOREGROUND_SERVICE, false, userId);
+        public void onNotificationClick(int callingUid, int callingPid,
+                String pkg, String tag, int id, int userId) {
+            cancelNotification(callingUid, callingPid, pkg, tag, id, Notification.FLAG_AUTO_CANCEL,
+                    Notification.FLAG_FOREGROUND_SERVICE, false, userId, REASON_DELEGATE_CLICK, null);
         }
 
         @Override
-        public void onNotificationClear(String pkg, String tag, int id, int userId) {
-            cancelNotification(pkg, tag, id, 0,
+        public void onNotificationClear(int callingUid, int callingPid,
+                String pkg, String tag, int id, int userId) {
+            cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
                     Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE,
-                    true, userId);
+                    true, userId, REASON_DELEGATE_CANCEL, null);
         }
 
         @Override
@@ -967,11 +983,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onNotificationError(String pkg, String tag, int id,
+        public void onNotificationError(int callingUid, int callingPid, String pkg, String tag, int id,
                 int uid, int initialPid, String message, int userId) {
             Slog.d(TAG, "onNotification error pkg=" + pkg + " tag=" + tag + " id=" + id
                     + "; will crashApplication(uid=" + uid + ", pid=" + initialPid + ")");
-            cancelNotification(pkg, tag, id, 0, 0, false, userId);
+            cancelNotification(callingUid, callingPid, pkg, tag, id, 0, 0, false, userId,
+                    REASON_DELEGATE_ERROR, null);
             long ident = Binder.clearCallingIdentity();
             try {
                 ActivityManagerNative.getDefault().crashApplication(uid, initialPid, pkg,
@@ -1048,8 +1065,8 @@ public class NotificationManagerService extends SystemService {
                 if (pkgList != null && (pkgList.length > 0)) {
                     for (String pkgName : pkgList) {
                         if (cancelNotifications) {
-                            cancelAllNotificationsInt(pkgName, 0, 0, !queryRestart,
-                                    UserHandle.USER_ALL);
+                            cancelAllNotificationsInt(MY_UID, MY_PID, pkgName, 0, 0, !queryRestart,
+                                    UserHandle.USER_ALL, REASON_PACKAGE_CHANGED, null);
                         }
                         if (mEnabledListenerPackageNames.contains(pkgName)) {
                             anyListenersInvolved = true;
@@ -1079,7 +1096,8 @@ public class NotificationManagerService extends SystemService {
             } else if (action.equals(Intent.ACTION_USER_STOPPED)) {
                 int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 if (userHandle >= 0) {
-                    cancelAllNotificationsInt(null, 0, 0, true, userHandle);
+                    cancelAllNotificationsInt(MY_UID, MY_PID, null, 0, 0, true, userHandle,
+                            REASON_USER_STOPPED, null);
                 }
             } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
                 // turn off LED when user passes through lock screen
@@ -1305,7 +1323,8 @@ public class NotificationManagerService extends SystemService {
 
         // Now, cancel any outstanding notifications that are part of a just-disabled app
         if (ENABLE_BLOCKED_NOTIFICATIONS && !enabled) {
-            cancelAllNotificationsInt(pkg, 0, 0, true, UserHandle.getUserId(uid));
+            cancelAllNotificationsInt(MY_UID, MY_PID, pkg, 0, 0, true, UserHandle.getUserId(uid),
+                    REASON_PACKAGE_BANNED, null);
         }
     }
 
@@ -1421,9 +1440,10 @@ public class NotificationManagerService extends SystemService {
             userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), userId, true, false, "cancelNotificationWithTag", pkg);
             // Don't allow client applications to cancel foreground service notis.
-            cancelNotification(pkg, tag, id, 0,
+            cancelNotification(Binder.getCallingUid(), Binder.getCallingPid(), pkg, tag, id, 0,
                     Binder.getCallingUid() == Process.SYSTEM_UID
-                    ? 0 : Notification.FLAG_FOREGROUND_SERVICE, false, userId);
+                    ? 0 : Notification.FLAG_FOREGROUND_SERVICE, false, userId, REASON_NOMAN_CANCEL,
+                    null);
         }
 
         @Override
@@ -1435,7 +1455,9 @@ public class NotificationManagerService extends SystemService {
 
             // Calling from user space, don't allow the canceling of actively
             // running foreground services.
-            cancelAllNotificationsInt(pkg, 0, Notification.FLAG_FOREGROUND_SERVICE, true, userId);
+            cancelAllNotificationsInt(Binder.getCallingUid(), Binder.getCallingPid(),
+                    pkg, 0, Notification.FLAG_FOREGROUND_SERVICE, true, userId,
+                    REASON_NOMAN_CANCEL_ALL, null);
         }
 
         @Override
@@ -1544,9 +1566,12 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void cancelAllNotificationsFromListener(INotificationListener token) {
             NotificationListenerInfo info = checkListenerToken(token);
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
             long identity = Binder.clearCallingIdentity();
             try {
-                cancelAll(info.userid);
+                cancelAll(callingUid, callingPid, info.userid,
+                        REASON_LISTENER_CANCEL_ALL, info);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1563,12 +1588,14 @@ public class NotificationManagerService extends SystemService {
         public void cancelNotificationFromListener(INotificationListener token, String pkg,
                 String tag, int id) {
             NotificationListenerInfo info = checkListenerToken(token);
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
             long identity = Binder.clearCallingIdentity();
             try {
-                cancelNotification(pkg, tag, id, 0,
+                cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
                         Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE,
                         true,
-                        info.userid);
+                        info.userid, REASON_LISTENER_CANCEL, info);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1736,8 +1763,8 @@ public class NotificationManagerService extends SystemService {
         //     behalf of the download manager without affecting other apps.
         if (!pkg.equals("com.android.providers.downloads")
                 || Log.isLoggable("DownloadManager", Log.VERBOSE)) {
-            EventLog.writeEvent(EventLogTags.NOTIFICATION_ENQUEUE, pkg, id, tag, userId,
-                    notification.toString());
+            EventLogTags.writeNotificationEnqueue(callingUid, callingPid,
+                    pkg, id, tag, userId, notification.toString());
         }
 
         if (pkg == null || notification == null) {
@@ -2288,9 +2315,10 @@ public class NotificationManagerService extends SystemService {
      * Cancels a notification ONLY if it has all of the {@code mustHaveFlags}
      * and none of the {@code mustNotHaveFlags}.
      */
-    void cancelNotification(final String pkg, final String tag, final int id,
+    void cancelNotification(final int callingUid, final int callingPid,
+            final String pkg, final String tag, final int id,
             final int mustHaveFlags, final int mustNotHaveFlags, final boolean sendDelete,
-            final int userId) {
+            final int userId, final int reason, final NotificationListenerInfo listener) {
         // In enqueueNotificationInternal notifications are added by scheduling the
         // work on the worker handler. Hence, we also schedule the cancel on this
         // handler to avoid a scenario where an add notification call followed by a
@@ -2298,8 +2326,9 @@ public class NotificationManagerService extends SystemService {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                EventLog.writeEvent(EventLogTags.NOTIFICATION_CANCEL, pkg, id, tag, userId,
-                        mustHaveFlags, mustNotHaveFlags);
+                EventLogTags.writeNotificationCancel(callingUid, callingPid, pkg, id, tag, userId,
+                        mustHaveFlags, mustNotHaveFlags, reason,
+                        listener == null ? null : listener.component.toShortString());
 
                 synchronized (mNotificationList) {
                     int index = indexOfNotificationLocked(pkg, tag, id, userId);
@@ -2353,10 +2382,12 @@ public class NotificationManagerService extends SystemService {
      * Cancels all notifications from a given package that have all of the
      * {@code mustHaveFlags}.
      */
-    boolean cancelAllNotificationsInt(String pkg, int mustHaveFlags,
-            int mustNotHaveFlags, boolean doit, int userId) {
-        EventLog.writeEvent(EventLogTags.NOTIFICATION_CANCEL_ALL, pkg, userId,
-                mustHaveFlags, mustNotHaveFlags);
+    boolean cancelAllNotificationsInt(int callingUid, int callingPid, String pkg, int mustHaveFlags,
+            int mustNotHaveFlags, boolean doit, int userId, int reason,
+            NotificationListenerInfo listener) {
+        EventLogTags.writeNotificationCancelAll(callingUid, callingPid,
+                pkg, userId, mustHaveFlags, mustNotHaveFlags, reason,
+                listener == null ? null : listener.component.toShortString());
 
         synchronized (mNotificationList) {
             final int N = mNotificationList.size();
@@ -2431,7 +2462,11 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    void cancelAll(int userId) {
+    void cancelAll(int callingUid, int callingPid, int userId, int reason,
+            NotificationListenerInfo listener) {
+        EventLogTags.writeNotificationCancelAll(callingUid, callingPid,
+                null, userId, 0, 0, reason,
+                listener == null ? null : listener.component.toShortString());
         synchronized (mNotificationList) {
             final int N = mNotificationList.size();
             for (int i=N-1; i>=0; i--) {
