@@ -183,22 +183,31 @@ class ContextImpl extends Context {
      */
     private static ArrayMap<String, ArrayMap<String, SharedPreferencesImpl>> sSharedPrefs;
 
-    /*package*/ LoadedApk mPackageInfo;
-    private String mBasePackageName;
-    private String mOpPackageName;
-    private Resources mResources;
-    /*package*/ ActivityThread mMainThread;
+    final ActivityThread mMainThread;
+    final LoadedApk mPackageInfo;
+
+    private final IBinder mActivityToken;
+
+    private final UserHandle mUser;
+
+    private final ApplicationContentResolver mContentResolver;
+
+    private final String mBasePackageName;
+    private final String mOpPackageName;
+
+    private final ResourcesManager mResourcesManager;
+    private final Resources mResources;
+    private final Display mDisplay; // may be null if default display
+    private final DisplayAdjustments mDisplayAdjustments = new DisplayAdjustments();
+    private final Configuration mOverrideConfiguration;
+
+    private final boolean mRestricted;
+
     private Context mOuterContext;
-    private IBinder mActivityToken = null;
-    private ApplicationContentResolver mContentResolver;
     private int mThemeResource = 0;
     private Resources.Theme mTheme = null;
     private PackageManager mPackageManager;
-    private Display mDisplay; // may be null if default display
     private Context mReceiverRestrictedContext = null;
-    private boolean mRestricted;
-    private UserHandle mUser;
-    private ResourcesManager mResourcesManager;
 
     private final Object mSync = new Object();
 
@@ -219,8 +228,6 @@ class ContextImpl extends Context {
     private File[] mExternalCacheDirs;
 
     private static final String[] EMPTY_FILE_LIST = {};
-
-    final private DisplayAdjustments mDisplayAdjustments = new DisplayAdjustments();
 
     /**
      * Override this class when the system service constructor needs a
@@ -1879,20 +1886,17 @@ class ContextImpl extends Context {
     @Override
     public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
             throws NameNotFoundException {
+        final boolean restricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
         if (packageName.equals("system") || packageName.equals("android")) {
-            final ContextImpl context = new ContextImpl(mMainThread.getSystemContext());
-            context.mRestricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
-            context.init(mPackageInfo, null, mMainThread, mResources, mBasePackageName, user);
-            return context;
+            return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
+                    user, restricted, mDisplay, mOverrideConfiguration);
         }
 
-        LoadedApk pi =
-            mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(), flags,
-                    user.getIdentifier());
+        LoadedApk pi = mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(),
+                flags, user.getIdentifier());
         if (pi != null) {
-            ContextImpl c = new ContextImpl();
-            c.mRestricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
-            c.init(pi, null, mMainThread, mResources, mBasePackageName, user);
+            ContextImpl c = new ContextImpl(this, mMainThread, pi, mActivityToken,
+                    user, restricted, mDisplay, mOverrideConfiguration);
             if (c.mResources != null) {
                 return c;
             }
@@ -1900,7 +1904,7 @@ class ContextImpl extends Context {
 
         // Should be a better exception.
         throw new PackageManager.NameNotFoundException(
-            "Application package " + packageName + " not found");
+                "Application package " + packageName + " not found");
     }
 
     @Override
@@ -1909,12 +1913,8 @@ class ContextImpl extends Context {
             throw new IllegalArgumentException("overrideConfiguration must not be null");
         }
 
-        ContextImpl c = new ContextImpl();
-        c.init(mPackageInfo, null, mMainThread);
-        c.mResources = mResourcesManager.getTopLevelResources(mPackageInfo.getResDir(),
-                getDisplayId(), overrideConfiguration, mResources.getCompatibilityInfo(),
-                mActivityToken);
-        return c;
+        return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
+                mUser, mRestricted, mDisplay, overrideConfiguration);
     }
 
     @Override
@@ -1923,15 +1923,8 @@ class ContextImpl extends Context {
             throw new IllegalArgumentException("display must not be null");
         }
 
-        int displayId = display.getDisplayId();
-
-        ContextImpl context = new ContextImpl();
-        context.init(mPackageInfo, null, mMainThread);
-        context.mDisplay = display;
-        DisplayAdjustments daj = getDisplayAdjustments(displayId);
-        context.mResources = mResourcesManager.getTopLevelResources(mPackageInfo.getResDir(),
-                displayId, null, daj.getCompatibilityInfo(), null);
-        return context;
+        return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
+                mUser, mRestricted, display, mOverrideConfiguration);
     }
 
     private int getDisplayId() {
@@ -1973,43 +1966,76 @@ class ContextImpl extends Context {
     }
 
     static ContextImpl createSystemContext(ActivityThread mainThread) {
-        final ContextImpl context = new ContextImpl();
-        context.init(Resources.getSystem(), mainThread, Process.myUserHandle());
+        LoadedApk packageInfo = new LoadedApk(mainThread);
+        ContextImpl context = new ContextImpl(null, mainThread,
+                packageInfo, null, null, false, null, null);
+        context.mResources.updateConfiguration(context.mResourcesManager.getConfiguration(),
+                context.mResourcesManager.getDisplayMetricsLocked(Display.DEFAULT_DISPLAY));
         return context;
     }
 
-    ContextImpl() {
+    static ContextImpl createAppContext(ActivityThread mainThread, LoadedApk packageInfo) {
+        if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
+        return new ContextImpl(null, mainThread,
+                packageInfo, null, null, false, null, null);
+    }
+
+    static ContextImpl createActivityContext(ActivityThread mainThread,
+            LoadedApk packageInfo, IBinder activityToken) {
+        if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
+        if (activityToken == null) throw new IllegalArgumentException("activityInfo");
+        return new ContextImpl(null, mainThread,
+                packageInfo, activityToken, null, false, null, null);
+    }
+
+    private ContextImpl(ContextImpl container, ActivityThread mainThread,
+            LoadedApk packageInfo, IBinder activityToken, UserHandle user, boolean restricted,
+            Display display, Configuration overrideConfiguration) {
         mOuterContext = this;
-    }
 
-    /**
-     * Create a new ApplicationContext from an existing one.  The new one
-     * works and operates the same as the one it is copying.
-     *
-     * @param context Existing application context.
-     */
-    public ContextImpl(ContextImpl context) {
-        mPackageInfo = context.mPackageInfo;
-        mBasePackageName = context.mBasePackageName;
-        mOpPackageName = context.mOpPackageName;
-        mResources = context.mResources;
-        mMainThread = context.mMainThread;
-        mContentResolver = context.mContentResolver;
-        mUser = context.mUser;
-        mDisplay = context.mDisplay;
-        mOuterContext = this;
-        mDisplayAdjustments.setCompatibilityInfo(mPackageInfo.getCompatibilityInfo());
-    }
+        mMainThread = mainThread;
+        mActivityToken = activityToken;
+        mRestricted = restricted;
 
-    final void init(LoadedApk packageInfo, IBinder activityToken, ActivityThread mainThread) {
-        init(packageInfo, activityToken, mainThread, null, null, Process.myUserHandle());
-    }
+        if (user == null) {
+            user = Process.myUserHandle();
+        }
+        mUser = user;
 
-    final void init(LoadedApk packageInfo, IBinder activityToken, ActivityThread mainThread,
-            Resources container, String basePackageName, UserHandle user) {
         mPackageInfo = packageInfo;
-        if (basePackageName != null) {
-            mBasePackageName = mOpPackageName = basePackageName;
+        mContentResolver = new ApplicationContentResolver(this, mainThread, user);
+        mResourcesManager = ResourcesManager.getInstance();
+        mDisplay = display;
+        mOverrideConfiguration = overrideConfiguration;
+
+        final int displayId = getDisplayId();
+        CompatibilityInfo compatInfo = null;
+        if (container != null) {
+            compatInfo = container.getDisplayAdjustments(displayId).getCompatibilityInfo();
+        }
+        if (compatInfo == null && displayId == Display.DEFAULT_DISPLAY) {
+            compatInfo = packageInfo.getCompatibilityInfo();
+        }
+        mDisplayAdjustments.setCompatibilityInfo(compatInfo);
+        mDisplayAdjustments.setActivityToken(activityToken);
+
+        Resources resources = packageInfo.getResources(mainThread);
+        if (resources != null) {
+            if (activityToken != null
+                    || displayId != Display.DEFAULT_DISPLAY
+                    || overrideConfiguration != null
+                    || (compatInfo != null && compatInfo.applicationScale
+                            != resources.getCompatibilityInfo().applicationScale)) {
+                resources = mResourcesManager.getTopLevelResources(
+                        packageInfo.getResDir(), displayId,
+                        overrideConfiguration, compatInfo, activityToken);
+            }
+        }
+        mResources = resources;
+
+        if (container != null) {
+            mBasePackageName = container.mBasePackageName;
+            mOpPackageName = container.mOpPackageName;
         } else {
             mBasePackageName = packageInfo.mPackageName;
             ApplicationInfo ainfo = packageInfo.getApplicationInfo();
@@ -2023,44 +2049,10 @@ class ContextImpl extends Context {
                 mOpPackageName = mBasePackageName;
             }
         }
-        mResources = mPackageInfo.getResources(mainThread);
-        mResourcesManager = ResourcesManager.getInstance();
-
-        CompatibilityInfo compatInfo =
-                container == null ? null : container.getCompatibilityInfo();
-        if (mResources != null &&
-                ((compatInfo != null && compatInfo.applicationScale !=
-                        mResources.getCompatibilityInfo().applicationScale)
-                || activityToken != null)) {
-            if (DEBUG) {
-                Log.d(TAG, "loaded context has different scaling. Using container's" +
-                        " compatiblity info:" + container.getDisplayMetrics());
-            }
-            if (compatInfo == null) {
-                compatInfo = packageInfo.getCompatibilityInfo();
-            }
-            mDisplayAdjustments.setCompatibilityInfo(compatInfo);
-            mDisplayAdjustments.setActivityToken(activityToken);
-            mResources = mResourcesManager.getTopLevelResources(mPackageInfo.getResDir(),
-                    Display.DEFAULT_DISPLAY, null, compatInfo, activityToken);
-        } else {
-            mDisplayAdjustments.setCompatibilityInfo(packageInfo.getCompatibilityInfo());
-            mDisplayAdjustments.setActivityToken(activityToken);
-        }
-        mMainThread = mainThread;
-        mActivityToken = activityToken;
-        mContentResolver = new ApplicationContentResolver(this, mainThread, user);
-        mUser = user;
     }
 
-    final void init(Resources resources, ActivityThread mainThread, UserHandle user) {
-        mPackageInfo = null;
-        mBasePackageName = null;
-        mOpPackageName = null;
-        mResources = resources;
-        mMainThread = mainThread;
-        mContentResolver = new ApplicationContentResolver(this, mainThread, user);
-        mUser = user;
+    void installSystemApplicationInfo(ApplicationInfo info) {
+        mPackageInfo.installSystemApplicationInfo(info);
     }
 
     final void scheduleFinalCleanup(String who, String what) {
