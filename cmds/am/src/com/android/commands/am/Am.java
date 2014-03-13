@@ -114,6 +114,8 @@ public class Am extends BaseCommand {
                 "       am stack resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
                 "       am stack list\n" +
                 "       am stack info <STACK_ID>\n" +
+                "       am lock-task <TASK_ID>\n" +
+                "       am lock-task stop\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
@@ -218,6 +220,8 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am stack info: display the information about activity stack <STACK_ID>.\n" +
                 "\n" +
+                "am lock-task: bring <TASK_ID> to the front and don't allow other tasks to run\n" +
+                "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
                 "    [-c <CATEGORY> [-c <CATEGORY>] ...]\n" +
@@ -309,6 +313,8 @@ public class Am extends BaseCommand {
             runStopUser();
         } else if (op.equals("stack")) {
             runStack();
+        } else if (op.equals("lock-task")) {
+            runLockTask();
         } else {
             showError("Error: unknown command '" + op + "'");
         }
@@ -1638,6 +1644,21 @@ public class Am extends BaseCommand {
             int stackId = Integer.valueOf(stackIdStr);
             StackInfo info = mAm.getStackInfo(stackId);
             System.out.println(info);
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runLockTask() throws Exception {
+        String taskIdStr = nextArgRequired();
+        try {
+            if (taskIdStr.equals("stop")) {
+                mAm.stopLockTaskMode();
+            } else {
+                int taskId = Integer.valueOf(taskIdStr);
+                mAm.startLockTaskMode(taskId);
+            }
+            System.err.println("Activity manager is " + (mAm.isInLockTaskMode() ? "" : "not ") +
+                    "in lockTaskMode");
         } catch (RemoteException e) {
         }
     }

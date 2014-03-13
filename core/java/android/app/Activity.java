@@ -5606,6 +5606,22 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    /** @hide */
+    public void startLockTask() {
+        try {
+            ActivityManagerNative.getDefault().startLockTaskMode(mToken);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /** @hide */
+    public void stopLockTask() {
+        try {
+            ActivityManagerNative.getDefault().stopLockTaskMode();
+        } catch (RemoteException e) {
+        }
+    }
+
     /**
      * Interface for informing a translucent {@link Activity} once all visible activities below it
      * have completed drawing. This is necessary only after an {@link Activity} has been made

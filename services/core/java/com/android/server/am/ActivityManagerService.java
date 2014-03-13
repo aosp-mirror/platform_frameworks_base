@@ -7047,11 +7047,11 @@ public final class ActivityManagerService extends ActivityManagerNative
      * TODO: Add mController hook
      */
     @Override
-    public void moveTaskToFront(int task, int flags, Bundle options) {
+    public void moveTaskToFront(int taskId, int flags, Bundle options) {
         enforceCallingPermission(android.Manifest.permission.REORDER_TASKS,
                 "moveTaskToFront()");
 
-        if (DEBUG_STACK) Slog.d(TAG, "moveTaskToFront: moving task=" + task);
+        if (DEBUG_STACK) Slog.d(TAG, "moveTaskToFront: moving taskId=" + taskId);
         synchronized(this) {
             if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
                     Binder.getCallingUid(), "Task to front")) {
@@ -7060,6 +7060,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             final long origId = Binder.clearCallingIdentity();
             try {
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                if (task == null) {
+                    return;
+                }
+                if (mStackSupervisor.isLockTaskModeViolation(task)) {
+                    Slog.e(TAG, "moveTaskToFront: Attempt to violate Lock Task Mode");
+                    return;
+                }
                 mStackSupervisor.findTaskToMoveToFrontLocked(task, flags, options);
             } finally {
                 Binder.restoreCallingIdentity(origId);
@@ -7266,6 +7274,85 @@ public final class ActivityManagerService extends ActivityManagerNative
     public int getTaskForActivity(IBinder token, boolean onlyRoot) {
         synchronized(this) {
             return ActivityRecord.getTaskForActivityLocked(token, onlyRoot);
+        }
+    }
+
+    private boolean isLockTaskAuthorized(ComponentName name) {
+//        enforceCallingPermission(android.Manifest.permission.REORDER_TASKS,
+//                "startLockTaskMode()");
+//        DevicePolicyManager dpm = (DevicePolicyManager)
+//                mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+//        return dpm != null && dpm.isLockTaskPermitted(name);
+        return true;
+    }
+
+    private void startLockTaskMode(TaskRecord task) {
+        if (!isLockTaskAuthorized(task.intent.getComponent())) {
+            return;
+        }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                // Since we lost lock on task, make sure it is still there.
+                task = mStackSupervisor.anyTaskForIdLocked(task.taskId);
+                if (task != null) {
+                    mStackSupervisor.setLockTaskModeLocked(task);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public void startLockTaskMode(int taskId) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            final TaskRecord task;
+            synchronized (this) {
+                task = mStackSupervisor.anyTaskForIdLocked(taskId);
+            }
+            if (task != null) {
+                startLockTaskMode(task);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public void startLockTaskMode(IBinder token) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            final TaskRecord task;
+            synchronized (this) {
+                final ActivityRecord r = ActivityRecord.forToken(token);
+                if (r == null) {
+                    return;
+                }
+                task = r.task;
+            }
+            if (task != null) {
+                startLockTaskMode(task);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public void stopLockTaskMode() {
+//        enforceCallingPermission(android.Manifest.permission.REORDER_TASKS,
+//                "stopLockTaskMode()");
+        synchronized (this) {
+            mStackSupervisor.setLockTaskModeLocked(null);
+        }
+    }
+
+    @Override
+    public boolean isInLockTaskMode() {
+        synchronized (this) {
+            return mStackSupervisor.isInLockTaskMode();
         }
     }
 
@@ -16185,6 +16272,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (oldUserId == userId) {
                     return true;
                 }
+
+                mStackSupervisor.setLockTaskModeLocked(null);
 
                 final UserInfo userInfo = getUserManagerLocked().getUserInfo(userId);
                 if (userInfo == null) {

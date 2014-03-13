@@ -155,6 +155,13 @@ public class ActivityManager {
     public static final int START_SWITCHES_CANCELED = 4;
 
     /**
+     * Result for IActivityManaqer.startActivity: a new activity was attempted to be started
+     * while in Lock Task Mode.
+     * @hide
+     */
+    public static final int START_RETURN_LOCK_TASK_MODE_VIOLATION = 5;
+
+    /**
      * Flag for IActivityManaqer.startActivity: do special start mode where
      * a new activity is launched only if it is needed.
      * @hide
@@ -2230,6 +2237,37 @@ public class ActivityManager {
             }
             pw.println("Failure dumping service:");
             e.printStackTrace(pw);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void startLockTaskMode(int taskId) {
+        try {
+            ActivityManagerNative.getDefault().startLockTaskMode(taskId);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void stopLockTaskMode() {
+        try {
+            ActivityManagerNative.getDefault().stopLockTaskMode();
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isInLockTaskMode() {
+        try {
+            return ActivityManagerNative.getDefault().isInLockTaskMode();
+        } catch (RemoteException e) {
+            return false;
         }
     }
 }
