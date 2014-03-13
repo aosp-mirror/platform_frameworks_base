@@ -4797,7 +4797,7 @@ package android.app.admin {
     method public int setStorageEncryption(android.content.ComponentName, boolean);
     method public void wipeData(int);
     field public static final java.lang.String ACTION_ADD_DEVICE_ADMIN = "android.app.action.ADD_DEVICE_ADMIN";
-    field public static final java.lang.String ACTION_PROVISION_MANAGED_PROFILE = "android.managedprovisioning.ACTION_PROVISION_MANAGED_PROFILE";
+    field public static final java.lang.String ACTION_PROVISION_MANAGED_PROFILE = "android.app.action.ACTION_PROVISION_MANAGED_PROFILE";
     field public static final java.lang.String ACTION_SET_NEW_PASSWORD = "android.app.action.SET_NEW_PASSWORD";
     field public static final java.lang.String ACTION_START_ENCRYPTION = "android.app.action.START_ENCRYPTION";
     field public static final int ENCRYPTION_STATUS_ACTIVATING = 2; // 0x2
