@@ -132,6 +132,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private static final String TEMPORARY_ENABLE_ACCESSIBILITY_UNTIL_KEYGUARD_REMOVED =
             "temporaryEnableAccessibilityStateUntilKeyguardRemoved";
 
+    private static final String GET_WINDOW_TOKEN = "getWindowToken";
+
     private static final ComponentName sFakeAccessibilityServiceComponentName =
             new ComponentName("foo.bar", "FakeService");
 
@@ -360,6 +362,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }, UserHandle.ALL, intentFilter, null, null);
     }
 
+    @Override
     public int addClient(IAccessibilityManagerClient client, int userId) {
         synchronized (mLock) {
             final int resolvedUserId = mSecurityPolicy
@@ -388,6 +391,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    @Override
     public boolean sendAccessibilityEvent(AccessibilityEvent event, int userId) {
         synchronized (mLock) {
             final int resolvedUserId = mSecurityPolicy
@@ -412,6 +416,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         return (OWN_PROCESS_ID != Binder.getCallingPid());
     }
 
+    @Override
     public List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId) {
         synchronized (mLock) {
             final int resolvedUserId = mSecurityPolicy
@@ -430,6 +435,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    @Override
     public List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType,
             int userId) {
         List<AccessibilityServiceInfo> result = null;
@@ -463,6 +469,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         return result;
     }
 
+    @Override
     public void interrupt(int userId) {
         CopyOnWriteArrayList<Service> services;
         synchronized (mLock) {
@@ -485,6 +492,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    @Override
     public int addAccessibilityInteractionConnection(IWindow windowToken,
             IAccessibilityInteractionConnection connection, int userId) throws RemoteException {
         synchronized (mLock) {
@@ -521,6 +529,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    @Override
     public void removeAccessibilityInteractionConnection(IWindow window) {
         synchronized (mLock) {
             mSecurityPolicy.resolveCallingUserIdEnforcingPermissionsLocked(
@@ -570,6 +579,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         return -1;
     }
 
+    @Override
     public void registerUiTestAutomationService(IBinder owner,
             IAccessibilityServiceClient serviceClient,
             AccessibilityServiceInfo accessibilityServiceInfo) {
@@ -612,6 +622,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    @Override
     public void unregisterUiTestAutomationService(IAccessibilityServiceClient serviceClient) {
         synchronized (mLock) {
             UserState userState = getCurrentUserStateLocked();
@@ -630,6 +641,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    @Override
     public void temporaryEnableAccessibilityStateUntilKeyguardRemoved(
             ComponentName service, boolean touchExplorationEnabled) {
         mSecurityPolicy.enforceCallingPermission(
@@ -662,6 +674,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    @Override
+    public IBinder getWindowToken(int windowId) {
+        mSecurityPolicy.enforceCallingPermission(
+                Manifest.permission.RETRIEVE_WINDOW_TOKEN,
+                GET_WINDOW_TOKEN);
+        synchronized (mLock) {
+            final int resolvedUserId = mSecurityPolicy
+                    .resolveCallingUserIdEnforcingPermissionsLocked(
+                            UserHandle.getCallingUserId());
+            if (resolvedUserId != mCurrentUserId) {
+                return null;
+            }
+            if (mSecurityPolicy.findWindowById(windowId) == null) {
+                return null;
+            }
+            IBinder token = mGlobalWindowTokens.get(windowId);
+            if (token != null) {
+                return token;
+            }
+            return getCurrentUserStateLocked().mWindowTokens.get(windowId);
+        }
+    }
+
     boolean onGesture(int gestureId) {
         synchronized (mLock) {
             boolean handled = notifyGestureLocked(gestureId, false);
@@ -689,7 +724,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * @param outBounds The output to which to write the focus bounds.
      * @return Whether accessibility focus was found and the bounds are populated.
      */
-    // TODO: (multi-display) Make sure this works for multiple displays. 
+    // TODO: (multi-display) Make sure this works for multiple displays.
     boolean getAccessibilityFocusBoundsInActiveWindow(Rect outBounds) {
         // Instead of keeping track of accessibility focus events per
         // window to be able to find the focus in the active window,

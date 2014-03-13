@@ -34,6 +34,7 @@
 #include <gui/SurfaceComposerClient.h>
 
 #include <ui/DisplayInfo.h>
+#include <ui/FrameStats.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
 
@@ -63,6 +64,16 @@ void DeleteScreenshot(void* addr, void* context) {
     SkASSERT(addr == ((ScreenshotClient*) context)->getPixels());
     delete ((ScreenshotClient*) context);
 }
+
+static struct {
+    nsecs_t UNDEFINED_TIME_NANO;
+    jmethodID init;
+} gWindowContentFrameStatsClassInfo;
+
+static struct {
+    nsecs_t UNDEFINED_TIME_NANO;
+    jmethodID init;
+} gWindowAnimationFrameStatsClassInfo;
 
 // ----------------------------------------------------------------------------
 
@@ -371,6 +382,151 @@ static void nativeUnblankDisplay(JNIEnv* env, jclass clazz, jobject tokenObj) {
     SurfaceComposerClient::unblankDisplay(token);
 }
 
+static jboolean nativeClearContentFrameStats(JNIEnv* env, jclass clazz, jlong nativeObject) {
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    status_t err = ctrl->clearLayerFrameStats();
+
+    if (err < 0 && err != NO_INIT) {
+        doThrowIAE(env);
+    }
+
+    // The other end is not ready, just report we failed.
+    if (err == NO_INIT) {
+        return JNI_FALSE;
+    }
+
+    return JNI_TRUE;
+}
+
+static jboolean nativeGetContentFrameStats(JNIEnv* env, jclass clazz, jlong nativeObject,
+    jobject outStats) {
+    FrameStats stats;
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    status_t err = ctrl->getLayerFrameStats(&stats);
+    if (err < 0 && err != NO_INIT) {
+        doThrowIAE(env);
+    }
+
+    // The other end is not ready, fine just return empty stats.
+    if (err == NO_INIT) {
+        return JNI_FALSE;
+    }
+
+    jlong refreshPeriodNano = static_cast<jlong>(stats.refreshPeriodNano);
+    size_t frameCount = stats.desiredPresentTimesNano.size();
+
+    jlongArray postedTimesNanoDst = env->NewLongArray(frameCount);
+    if (postedTimesNanoDst == NULL) {
+        return JNI_FALSE;
+    }
+
+    jlongArray presentedTimesNanoDst = env->NewLongArray(frameCount);
+    if (presentedTimesNanoDst == NULL) {
+        return JNI_FALSE;
+    }
+
+    jlongArray readyTimesNanoDst = env->NewLongArray(frameCount);
+    if (readyTimesNanoDst == NULL) {
+        return JNI_FALSE;
+    }
+
+    nsecs_t postedTimesNanoSrc[frameCount];
+    nsecs_t presentedTimesNanoSrc[frameCount];
+    nsecs_t readyTimesNanoSrc[frameCount];
+
+    for (size_t i = 0; i < frameCount; i++) {
+        nsecs_t postedTimeNano = stats.desiredPresentTimesNano[i];
+        if (postedTimeNano == INT64_MAX) {
+            postedTimeNano = gWindowContentFrameStatsClassInfo.UNDEFINED_TIME_NANO;
+        }
+        postedTimesNanoSrc[i] = postedTimeNano;
+
+        nsecs_t presentedTimeNano = stats.actualPresentTimesNano[i];
+        if (presentedTimeNano == INT64_MAX) {
+            presentedTimeNano = gWindowContentFrameStatsClassInfo.UNDEFINED_TIME_NANO;
+        }
+        presentedTimesNanoSrc[i] = presentedTimeNano;
+
+        nsecs_t readyTimeNano = stats.frameReadyTimesNano[i];
+        if (readyTimeNano == INT64_MAX) {
+            readyTimeNano = gWindowContentFrameStatsClassInfo.UNDEFINED_TIME_NANO;
+        }
+        readyTimesNanoSrc[i] = readyTimeNano;
+    }
+
+    env->SetLongArrayRegion(postedTimesNanoDst, 0, frameCount, postedTimesNanoSrc);
+    env->SetLongArrayRegion(presentedTimesNanoDst, 0, frameCount, presentedTimesNanoSrc);
+    env->SetLongArrayRegion(readyTimesNanoDst, 0, frameCount, readyTimesNanoSrc);
+
+    env->CallVoidMethod(outStats, gWindowContentFrameStatsClassInfo.init, refreshPeriodNano,
+            postedTimesNanoDst, presentedTimesNanoDst, readyTimesNanoDst);
+
+    if (env->ExceptionCheck()) {
+        return JNI_FALSE;
+    }
+
+    return JNI_TRUE;
+}
+
+static jboolean nativeClearAnimationFrameStats(JNIEnv* env, jclass clazz) {
+    status_t err = SurfaceComposerClient::clearAnimationFrameStats();
+
+    if (err < 0 && err != NO_INIT) {
+        doThrowIAE(env);
+    }
+
+    // The other end is not ready, just report we failed.
+    if (err == NO_INIT) {
+        return JNI_FALSE;
+    }
+
+    return JNI_TRUE;
+}
+
+static jboolean nativeGetAnimationFrameStats(JNIEnv* env, jclass clazz, jobject outStats) {
+    FrameStats stats;
+
+    status_t err = SurfaceComposerClient::getAnimationFrameStats(&stats);
+    if (err < 0 && err != NO_INIT) {
+        doThrowIAE(env);
+    }
+
+    // The other end is not ready, fine just return empty stats.
+    if (err == NO_INIT) {
+        return JNI_FALSE;
+    }
+
+    jlong refreshPeriodNano = static_cast<jlong>(stats.refreshPeriodNano);
+    size_t frameCount = stats.desiredPresentTimesNano.size();
+
+    jlongArray presentedTimesNanoDst = env->NewLongArray(frameCount);
+    if (presentedTimesNanoDst == NULL) {
+        return JNI_FALSE;
+    }
+
+    nsecs_t presentedTimesNanoSrc[frameCount];
+
+    for (size_t i = 0; i < frameCount; i++) {
+        nsecs_t presentedTimeNano = stats.desiredPresentTimesNano[i];
+        if (presentedTimeNano == INT64_MAX) {
+            presentedTimeNano = gWindowContentFrameStatsClassInfo.UNDEFINED_TIME_NANO;
+        }
+        presentedTimesNanoSrc[i] = presentedTimeNano;
+    }
+
+    env->SetLongArrayRegion(presentedTimesNanoDst, 0, frameCount, presentedTimesNanoSrc);
+
+    env->CallVoidMethod(outStats, gWindowAnimationFrameStatsClassInfo.init, refreshPeriodNano,
+            presentedTimesNanoDst);
+
+    if (env->ExceptionCheck()) {
+        return JNI_FALSE;
+    }
+
+    return JNI_TRUE;
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod sSurfaceControlMethods[] = {
@@ -426,6 +582,14 @@ static JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeBlankDisplay },
     {"nativeUnblankDisplay", "(Landroid/os/IBinder;)V",
             (void*)nativeUnblankDisplay },
+    {"nativeClearContentFrameStats", "(J)Z",
+            (void*)nativeClearContentFrameStats },
+    {"nativeGetContentFrameStats", "(JLandroid/view/WindowContentFrameStats;)Z",
+            (void*)nativeGetContentFrameStats },
+    {"nativeClearAnimationFrameStats", "()Z",
+            (void*)nativeClearAnimationFrameStats },
+    {"nativeGetAnimationFrameStats", "(Landroid/view/WindowAnimationFrameStats;)Z",
+            (void*)nativeGetAnimationFrameStats },
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)
@@ -441,6 +605,19 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gPhysicalDisplayInfoClassInfo.xDpi = env->GetFieldID(clazz, "xDpi", "F");
     gPhysicalDisplayInfoClassInfo.yDpi = env->GetFieldID(clazz, "yDpi", "F");
     gPhysicalDisplayInfoClassInfo.secure = env->GetFieldID(clazz, "secure", "Z");
+
+    jclass frameStatsClazz = env->FindClass("android/view/FrameStats");
+    jfieldID undefined_time_nano_field =  env->GetStaticFieldID(frameStatsClazz, "UNDEFINED_TIME_NANO", "J");
+    nsecs_t undefined_time_nano = env->GetStaticLongField(frameStatsClazz, undefined_time_nano_field);
+
+    jclass contFrameStatsClazz = env->FindClass("android/view/WindowContentFrameStats");
+    gWindowContentFrameStatsClassInfo.init =  env->GetMethodID(contFrameStatsClazz, "init", "(J[J[J[J)V");
+    gWindowContentFrameStatsClassInfo.UNDEFINED_TIME_NANO = undefined_time_nano;
+
+    jclass animFrameStatsClazz = env->FindClass("android/view/WindowAnimationFrameStats");
+    gWindowAnimationFrameStatsClassInfo.init =  env->GetMethodID(animFrameStatsClazz, "init", "(J[J)V");
+    gWindowAnimationFrameStatsClassInfo.UNDEFINED_TIME_NANO = undefined_time_nano;
+
     return err;
 }
 

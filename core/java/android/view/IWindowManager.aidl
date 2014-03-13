@@ -37,6 +37,7 @@ import android.view.MotionEvent;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.IInputFilter;
+import android.view.WindowContentFrameStats;
 
 /**
  * System private interface to the window manager.
@@ -233,4 +234,20 @@ interface IWindowManager
      * Device is in safe mode.
      */
     boolean isSafeModeEnabled();
+
+    /**
+     * Clears the frame statistics for a given window.
+     *
+     * @param token The window token.
+     * @return Whether the frame statistics were cleared.
+     */
+    boolean clearWindowContentFrameStats(IBinder token);
+
+    /**
+     * Gets the content frame statistics for a given window.
+     *
+     * @param token The window token.
+     * @return The frame statistics or null if the window does not exist.
+     */
+    WindowContentFrameStats getWindowContentFrameStats(IBinder token);
 }

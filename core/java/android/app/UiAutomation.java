@@ -33,6 +33,8 @@ import android.view.Display;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.Surface;
+import android.view.WindowAnimationFrameStats;
+import android.view.WindowContentFrameStats;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -672,6 +674,148 @@ public final class UiAutomation {
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while setting run as monkey!", re);
         }
+    }
+
+    /**
+     * Clears the frame statistics for the content of a given window. These
+     * statistics contain information about the most recently rendered content
+     * frames.
+     *
+     * @param windowId The window id.
+     * @return Whether the window is present and its frame statistics
+     *         were cleared.
+     *
+     * @see android.view.WindowContentFrameStats
+     * @see #getWindowContentFrameStats(int)
+     * @see #getWindows()
+     * @see AccessibilityWindowInfo#getId() AccessibilityWindowInfo.getId()
+     */
+    public boolean clearWindowContentFrameStats(int windowId) {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "Clearing content frame stats for window: " + windowId);
+            }
+            // Calling out without a lock held.
+            return mUiAutomationConnection.clearWindowContentFrameStats(windowId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error clearing window content frame stats!", re);
+        }
+        return false;
+    }
+
+    /**
+     * Gets the frame statistics for a given window. These statistics contain
+     * information about the most recently rendered content frames.
+     * <p>
+     * A typical usage requires clearing the window frame statistics via {@link
+     * #clearWindowContentFrameStats(int)} followed by an interaction with the UI and
+     * finally getting the window frame statistics via calling this method.
+     * </p>
+     * <pre>
+     * // Assume we have at least one window.
+     * final int windowId = getWindows().get(0).getId();
+     *
+     * // Start with a clean slate.
+     * uiAutimation.clearWindowContentFrameStats(windowId);
+     *
+     * // Do stuff with the UI.
+     *
+     * // Get the frame statistics.
+     * WindowContentFrameStats stats = uiAutomation.getWindowContentFrameStats(windowId);
+     * </pre>
+     *
+     * @param windowId The window id.
+     * @return The window frame statistics, or null if the window is not present.
+     *
+     * @see android.view.WindowContentFrameStats
+     * @see #clearWindowContentFrameStats(int)
+     * @see #getWindows()
+     * @see AccessibilityWindowInfo#getId() AccessibilityWindowInfo.getId()
+     */
+    public WindowContentFrameStats getWindowContentFrameStats(int windowId) {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "Getting content frame stats for window: " + windowId);
+            }
+            // Calling out without a lock held.
+            return mUiAutomationConnection.getWindowContentFrameStats(windowId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error getting window content frame stats!", re);
+        }
+        return null;
+    }
+
+    /**
+     * Clears the window animation rendering statistics. These statistics contain
+     * information about the most recently rendered window animation frames, i.e.
+     * for window transition animations.
+     *
+     * @see android.view.WindowAnimationFrameStats
+     * @see #getWindowAnimationFrameStats()
+     * @see android.R.styleable#WindowAnimation
+     */
+    public void clearWindowAnimationFrameStats() {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "Clearing window animation frame stats");
+            }
+            // Calling out without a lock held.
+            mUiAutomationConnection.clearWindowAnimationFrameStats();
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error clearing window animation frame stats!", re);
+        }
+    }
+
+    /**
+     * Gets the window animation frame statistics. These statistics contain
+     * information about the most recently rendered window animation frames, i.e.
+     * for window transition animations.
+     *
+     * <p>
+     * A typical usage requires clearing the window animation frame statistics via
+     * {@link #clearWindowAnimationFrameStats()} followed by an interaction that causes
+     * a window transition which uses a window animation and finally getting the window
+     * animation frame statistics by calling this method.
+     * </p>
+     * <pre>
+     * // Start with a clean slate.
+     * uiAutimation.clearWindowAnimationFrameStats();
+     *
+     * // Do stuff to trigger a window transition.
+     *
+     * // Get the frame statistics.
+     * WindowAnimationFrameStats stats = uiAutomation.getWindowAnimationFrameStats();
+     * </pre>
+     *
+     * @return The window animation frame statistics.
+     *
+     * @see android.view.WindowAnimationFrameStats
+     * @see #clearWindowAnimationFrameStats()
+     * @see android.R.styleable#WindowAnimation
+     */
+    public WindowAnimationFrameStats getWindowAnimationFrameStats() {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "Getting window animation frame stats");
+            }
+            // Calling out without a lock held.
+            return mUiAutomationConnection.getWindowAnimationFrameStats();
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error getting window animation frame stats!", re);
+        }
+        return null;
     }
 
     private static float getDegreesForRotation(int value) {

@@ -57,4 +57,6 @@ interface IAccessibilityManager {
 
     void temporaryEnableAccessibilityStateUntilKeyguardRemoved(in ComponentName service,
             boolean touchExplorationEnabled);
+
+    IBinder getWindowToken(int windowId);
 }
