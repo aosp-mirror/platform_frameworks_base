@@ -41,11 +41,11 @@ interface IStatusBarService
             out List<IBinder> notificationKeys, out List<StatusBarNotification> notifications,
             out int[] switches, out List<IBinder> binders);
     void onPanelRevealed();
-    void onNotificationClick(String pkg, String tag, int id);
+    void onNotificationClick(String pkg, String tag, int id, int userId);
     void onNotificationError(String pkg, String tag, int id,
-            int uid, int initialPid, String message);
-    void onClearAllNotifications();
-    void onNotificationClear(String pkg, String tag, int id);
+            int uid, int initialPid, String message, int userId);
+    void onClearAllNotifications(int userId);
+    void onNotificationClear(String pkg, String tag, int id, int userId);
     void setSystemUiVisibility(int vis, int mask);
     void setHardKeyboardEnabled(boolean enabled);
     void toggleRecentApps();

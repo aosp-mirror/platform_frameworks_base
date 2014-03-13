@@ -28,6 +28,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
@@ -46,6 +47,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
@@ -55,6 +57,7 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.TextAppearanceSpan;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
@@ -140,6 +143,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected PopupMenu mNotificationBlamePopup;
 
     protected int mCurrentUserId = 0;
+    final protected SparseArray<UserInfo> mRelatedUsers = new SparseArray<UserInfo>();
 
     protected int mLayoutDirection = -1; // invalid
     private Locale mLocale;
@@ -155,6 +159,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     private final SparseBooleanArray mUsersAllowingPrivateNotifications = new SparseBooleanArray();
     private Context mLightThemeContext;
     private ImageUtils mImageUtils = new ImageUtils();
+
+    private UserManager mUserManager;
 
     // UI-specific methods
 
@@ -248,11 +254,25 @@ public abstract class BaseStatusBar extends SystemUI implements
             String action = intent.getAction();
             if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                updateRelatedUserCache();
                 if (true) Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
                 userSwitched(mCurrentUserId);
+            } else if (Intent.ACTION_USER_ADDED.equals(action)) {
+                updateRelatedUserCache();
             }
         }
     };
+
+    private void updateRelatedUserCache() {
+        synchronized (mRelatedUsers) {
+            mRelatedUsers.clear();
+            if (mUserManager != null) {
+                for (UserInfo related : mUserManager.getRelatedUsers(mCurrentUserId)) {
+                    mRelatedUsers.put(related.id, related);
+                }
+            }
+        }
+    }
 
     public void start() {
         mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
@@ -286,6 +306,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         mLocale = mContext.getResources().getConfiguration().locale;
         mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
+
+        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
 
         // Connect in to the status bar manager service
         StatusBarIconList iconList = new StatusBarIconList();
@@ -348,22 +370,28 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
+        filter.addAction(Intent.ACTION_USER_ADDED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
+
+        updateRelatedUserCache();
     }
 
     public void userSwitched(int newUserId) {
         // should be overridden
     }
 
-    public boolean notificationIsForCurrentUser(StatusBarNotification n) {
+    public boolean notificationIsForCurrentOrRelatedUser(StatusBarNotification n) {
         final int thisUserId = mCurrentUserId;
         final int notificationUserId = n.getUserId();
         if (DEBUG && MULTIUSER_DEBUG) {
             Log.v(TAG, String.format("%s: current userid: %d, notification userid: %d",
                     n, thisUserId, notificationUserId));
         }
-        return notificationUserId == UserHandle.USER_ALL
-                || thisUserId == notificationUserId;
+        synchronized (mRelatedUsers) {
+            return notificationUserId == UserHandle.USER_ALL
+                    || thisUserId == notificationUserId
+                    || mRelatedUsers.get(notificationUserId) != null;
+        }
     }
 
     @Override
@@ -389,13 +417,14 @@ public abstract class BaseStatusBar extends SystemUI implements
             final String _pkg = n.getPackageName();
             final String _tag = n.getTag();
             final int _id = n.getId();
+            final int _userId = n.getUserId();
             vetoButton.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         // Accessibility feedback
                         v.announceForAccessibility(
                                 mContext.getString(R.string.accessibility_notification_dismissed));
                         try {
-                            mBarService.onNotificationClear(_pkg, _tag, _id);
+                            mBarService.onNotificationClear(_pkg, _tag, _id, _userId);
 
                         } catch (RemoteException ex) {
                             // system process is dead if we're here.
@@ -907,7 +936,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         PendingIntent contentIntent = sbn.getNotification().contentIntent;
         if (contentIntent != null) {
             final View.OnClickListener listener = makeClicker(contentIntent,
-                    sbn.getPackageName(), sbn.getTag(), sbn.getId(), isHeadsUp);
+                    sbn.getPackageName(), sbn.getTag(), sbn.getId(), isHeadsUp, sbn.getUserId());
             content.setOnClickListener(listener);
         } else {
             content.setOnClickListener(null);
@@ -1017,7 +1046,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             TextView debug = (TextView) row.findViewById(R.id.debug_info);
             if (debug != null) {
                 debug.setVisibility(View.VISIBLE);
-                debug.setText("U " + entry.notification.getUserId());
+                debug.setText("CU " + mCurrentUserId +" NU " + entry.notification.getUserId());
             }
         }
         entry.row = row;
@@ -1030,9 +1059,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         return true;
     }
 
-    public NotificationClicker makeClicker(PendingIntent intent, String pkg, String tag, int id,
-            boolean forHun) {
-        return new NotificationClicker(intent, pkg, tag, id, forHun);
+    public NotificationClicker makeClicker(PendingIntent intent, String pkg, String tag,
+            int id, boolean forHun, int userId) {
+        return new NotificationClicker(intent, pkg, tag, id, forHun, userId);
     }
 
     protected class NotificationClicker implements View.OnClickListener {
@@ -1041,14 +1070,16 @@ public abstract class BaseStatusBar extends SystemUI implements
         private String mTag;
         private int mId;
         private boolean mIsHeadsUp;
+        private int mUserId;
 
         public NotificationClicker(PendingIntent intent, String pkg, String tag, int id,
-                boolean forHun) {
+                boolean forHun, int userId) {
             mIntent = intent;
             mPkg = pkg;
             mTag = tag;
             mId = id;
             mIsHeadsUp = forHun;
+            mUserId = userId;
         }
 
         public void onClick(View v) {
@@ -1084,7 +1115,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 if (mIsHeadsUp) {
                     mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
                 }
-                mBarService.onNotificationClick(mPkg, mTag, mId);
+                mBarService.onNotificationClick(mPkg, mTag, mId, mUserId);
             } catch (RemoteException ex) {
                 // system process is dead if we're here.
             }
@@ -1122,7 +1153,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     void handleNotificationError(IBinder key, StatusBarNotification n, String message) {
         removeNotification(key);
         try {
-            mBarService.onNotificationError(n.getPackageName(), n.getTag(), n.getId(), n.getUid(), n.getInitialPid(), message);
+            mBarService.onNotificationError(n.getPackageName(), n.getTag(), n.getId(), n.getUid(),
+                    n.getInitialPid(), message, n.getUserId());
         } catch (RemoteException ex) {
             // The end is nigh.
         }
@@ -1391,7 +1423,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         updateNotificationVetoButton(oldEntry.row, notification);
 
         // Is this for you?
-        boolean isForCurrentUser = notificationIsForCurrentUser(notification);
+        boolean isForCurrentUser = notificationIsForCurrentOrRelatedUser(notification);
         if (DEBUG) Log.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
 
         // Restart the ticker if it's still running
@@ -1443,7 +1475,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (contentIntent != null) {
             final View.OnClickListener listener = makeClicker(contentIntent,
                     notification.getPackageName(), notification.getTag(), notification.getId(),
-                    isHeadsUp);
+                    isHeadsUp, notification.getUserId());
             entry.content.setOnClickListener(listener);
         } else {
             entry.content.setOnClickListener(null);

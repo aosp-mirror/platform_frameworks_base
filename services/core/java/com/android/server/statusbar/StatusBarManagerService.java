@@ -535,11 +535,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     @Override
-    public void onNotificationClick(String pkg, String tag, int id) {
+    public void onNotificationClick(String pkg, String tag, int id, int userId) {
         enforceStatusBarService();
         long identity = Binder.clearCallingIdentity();
         try {
-            mNotificationDelegate.onNotificationClick(pkg, tag, id);
+            mNotificationDelegate.onNotificationClick(pkg, tag, id, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -547,34 +547,35 @@ public class StatusBarManagerService extends IStatusBarService.Stub
 
     @Override
     public void onNotificationError(String pkg, String tag, int id,
-            int uid, int initialPid, String message) {
+            int uid, int initialPid, String message, int userId) {
         enforceStatusBarService();
         long identity = Binder.clearCallingIdentity();
         try {
             // WARNING: this will call back into us to do the remove.  Don't hold any locks.
-            mNotificationDelegate.onNotificationError(pkg, tag, id, uid, initialPid, message);
+            mNotificationDelegate.onNotificationError(pkg, tag, id, uid, initialPid, message,
+                    userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
     @Override
-    public void onNotificationClear(String pkg, String tag, int id) {
+    public void onNotificationClear(String pkg, String tag, int id, int userId) {
         enforceStatusBarService();
         long identity = Binder.clearCallingIdentity();
         try {
-            mNotificationDelegate.onNotificationClear(pkg, tag, id);
+            mNotificationDelegate.onNotificationClear(pkg, tag, id, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
     @Override
-    public void onClearAllNotifications() {
+    public void onClearAllNotifications(int userId) {
         enforceStatusBarService();
         long identity = Binder.clearCallingIdentity();
         try {
-            mNotificationDelegate.onClearAll();
+            mNotificationDelegate.onClearAll(userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

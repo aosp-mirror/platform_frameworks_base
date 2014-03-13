@@ -43,6 +43,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -56,6 +57,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.INotificationListener;
@@ -67,6 +69,7 @@ import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.Xml;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -216,6 +219,9 @@ public class NotificationManagerService extends SystemService {
             "com.google.android.deskclock"
             ));
     private static final String EXTRA_INTERCEPT = "android.intercept";
+
+    // Users related to the current user.
+    final protected SparseArray<UserInfo> mRelatedUsers = new SparseArray<UserInfo>();
 
     private class NotificationListenerInfo implements IBinder.DeathRecipient {
         INotificationListener listener;
@@ -910,28 +916,21 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onClearAll() {
-            // XXX to be totally correct, the caller should tell us which user
-            // this is for.
-            cancelAll(ActivityManager.getCurrentUser());
+        public void onClearAll(int userId) {
+            cancelAll(userId);
         }
 
         @Override
-        public void onNotificationClick(String pkg, String tag, int id) {
-            // XXX to be totally correct, the caller should tell us which user
-            // this is for.
+        public void onNotificationClick(String pkg, String tag, int id, int userId) {
             cancelNotification(pkg, tag, id, Notification.FLAG_AUTO_CANCEL,
-                    Notification.FLAG_FOREGROUND_SERVICE, false,
-                    ActivityManager.getCurrentUser());
+                    Notification.FLAG_FOREGROUND_SERVICE, false, userId);
         }
 
         @Override
-        public void onNotificationClear(String pkg, String tag, int id) {
-            // XXX to be totally correct, the caller should tell us which user
-            // this is for.
+        public void onNotificationClear(String pkg, String tag, int id, int userId) {
             cancelNotification(pkg, tag, id, 0,
-                Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE,
-                true, ActivityManager.getCurrentUser());
+                    Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE,
+                    true, userId);
         }
 
         @Override
@@ -969,12 +968,10 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onNotificationError(String pkg, String tag, int id,
-                int uid, int initialPid, String message) {
+                int uid, int initialPid, String message, int userId) {
             Slog.d(TAG, "onNotification error pkg=" + pkg + " tag=" + tag + " id=" + id
                     + "; will crashApplication(uid=" + uid + ", pid=" + initialPid + ")");
-            // XXX to be totally correct, the caller should tell us which user
-            // this is for.
-            cancelNotification(pkg, tag, id, 0, 0, false, UserHandle.getUserId(uid));
+            cancelNotification(pkg, tag, id, 0, 0, false, userId);
             long ident = Binder.clearCallingIdentity();
             try {
                 ActivityManagerNative.getDefault().crashApplication(uid, initialPid, pkg,
@@ -1090,6 +1087,9 @@ public class NotificationManagerService extends SystemService {
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
                 // reload per-user settings
                 mSettingsObserver.update(null);
+                updateRelatedUserCache(context);
+            } else if (action.equals(Intent.ACTION_USER_ADDED)) {
+                updateRelatedUserCache(context);
             }
         }
     };
@@ -1223,6 +1223,7 @@ public class NotificationManagerService extends SystemService {
         filter.addAction(Intent.ACTION_USER_PRESENT);
         filter.addAction(Intent.ACTION_USER_STOPPED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
+        filter.addAction(Intent.ACTION_USER_ADDED);
         getContext().registerReceiver(mIntentReceiver, filter);
         IntentFilter pkgFilter = new IntentFilter();
         pkgFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -2337,6 +2338,18 @@ public class NotificationManagerService extends SystemService {
     }
 
     /**
+     * Determine whether the userId applies to the notification in question, either because
+     * they match exactly, or one of them is USER_ALL (which is treated as a wildcard) or
+     * because it matches a related user.
+     */
+    private boolean notificationMatchesUserIdOrRelated(NotificationRecord r, int userId) {
+        synchronized (mRelatedUsers) {
+            return notificationMatchesUserId(r, userId)
+                    || mRelatedUsers.get(r.getUserId()) != null;
+        }
+    }
+
+    /**
      * Cancels all notifications from a given package that have all of the
      * {@code mustHaveFlags}.
      */
@@ -2424,7 +2437,7 @@ public class NotificationManagerService extends SystemService {
             for (int i=N-1; i>=0; i--) {
                 NotificationRecord r = mNotificationList.get(i);
 
-                if (!notificationMatchesUserId(r, userId)) {
+                if (!notificationMatchesUserIdOrRelated(r, userId)) {
                     continue;
                 }
 
@@ -2577,6 +2590,20 @@ public class NotificationManagerService extends SystemService {
                     if (DBG) Slog.d(TAG, "Restoring STREAM_ALARM volume to " + mPreZenAlarmVolume);
                     mAudioManager.setStreamVolume(AudioManager.STREAM_ALARM, mPreZenAlarmVolume, 0);
                     mPreZenAlarmVolume = -1;
+                }
+            }
+        }
+    }
+
+    private void updateRelatedUserCache(Context context) {
+        UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        int currentUserId = ActivityManager.getCurrentUser();
+        if (userManager != null) {
+            List<UserInfo> relatedUsers = userManager.getRelatedUsers(currentUserId);
+            synchronized (mRelatedUsers) {
+                mRelatedUsers.clear();
+                for (UserInfo related : relatedUsers) {
+                    mRelatedUsers.put(related.id, related);
                 }
             }
         }
