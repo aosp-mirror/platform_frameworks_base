@@ -58,8 +58,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     // how many cells the user has to cross before we poke the wakelock
     private static final int MIN_PATTERN_BEFORE_POKE_WAKELOCK = 2;
 
-    private int mFailedPatternAttemptsSinceLastTimeout = 0;
-    private int mTotalFailedPatternAttempts = 0;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+
     private CountDownTimer mCountdownTimer = null;
     private LockPatternUtils mLockPatternUtils;
     private LockPatternView mLockPatternView;
@@ -100,6 +100,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
     public KeyguardPatternView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
     }
 
     public void setKeyguardCallback(KeyguardSecurityCallback callback) {
@@ -202,7 +203,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         if (mCallback.isVerifyUnlockOnly()) {
             updateFooter(FooterMode.VerifyUnlocked);
         } else if (mEnableFallback &&
-                (mTotalFailedPatternAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
+                (mKeyguardUpdateMonitor.getFailedUnlockAttempts()
+                        >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
             updateFooter(FooterMode.ForgotLockPattern);
         } else {
             updateFooter(FooterMode.Normal);
@@ -211,7 +213,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     }
 
     private void displayDefaultSecurityMessage() {
-        if (KeyguardUpdateMonitor.getInstance(mContext).getMaxBiometricUnlockAttemptsReached()) {
+        if (mKeyguardUpdateMonitor.getMaxBiometricUnlockAttemptsReached()) {
             mSecurityMessageDisplay.setMessage(R.string.faceunlock_multiple_failures, true);
         } else {
             mSecurityMessageDisplay.setMessage(R.string.kg_pattern_instructions, false);
@@ -262,20 +264,20 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             if (mLockPatternUtils.checkPattern(pattern)) {
                 mCallback.reportSuccessfulUnlockAttempt();
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Correct);
-                mTotalFailedPatternAttempts = 0;
                 mCallback.dismiss(true);
             } else {
                 if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
                     mCallback.userActivity(UNLOCK_PATTERN_WAKE_INTERVAL_MS);
                 }
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Wrong);
-                if (pattern.size() >= LockPatternUtils.MIN_PATTERN_REGISTER_FAIL) {
-                    mTotalFailedPatternAttempts++;
-                    mFailedPatternAttemptsSinceLastTimeout++;
+                boolean registeredAttempt =
+                        pattern.size() >= LockPatternUtils.MIN_PATTERN_REGISTER_FAIL;
+                if (registeredAttempt) {
                     mCallback.reportFailedUnlockAttempt();
                 }
-                if (mFailedPatternAttemptsSinceLastTimeout
-                        >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) {
+                int attempts = mKeyguardUpdateMonitor.getFailedUnlockAttempts();
+                if (registeredAttempt &&
+                        0 == (attempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
                     long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
                     handleAttemptLockout(deadline);
                 } else {
@@ -363,7 +365,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 mLockPatternView.setEnabled(true);
                 displayDefaultSecurityMessage();
                 // TODO mUnlockIcon.setVisibility(View.VISIBLE);
-                mFailedPatternAttemptsSinceLastTimeout = 0;
                 if (mEnableFallback) {
                     updateFooter(FooterMode.ForgotLockPattern);
                 } else {
