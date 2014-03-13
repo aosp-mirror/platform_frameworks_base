@@ -537,9 +537,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     @Override
     public void onNotificationClick(String pkg, String tag, int id, int userId) {
         enforceStatusBarService();
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
         long identity = Binder.clearCallingIdentity();
         try {
-            mNotificationDelegate.onNotificationClick(pkg, tag, id, userId);
+            mNotificationDelegate.onNotificationClick(callingUid, callingPid, pkg, tag, id, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -549,11 +551,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     public void onNotificationError(String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId) {
         enforceStatusBarService();
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
         long identity = Binder.clearCallingIdentity();
         try {
             // WARNING: this will call back into us to do the remove.  Don't hold any locks.
-            mNotificationDelegate.onNotificationError(pkg, tag, id, uid, initialPid, message,
-                    userId);
+            mNotificationDelegate.onNotificationError(callingUid, callingPid,
+                    pkg, tag, id, uid, initialPid, message, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -562,9 +566,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     @Override
     public void onNotificationClear(String pkg, String tag, int id, int userId) {
         enforceStatusBarService();
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
         long identity = Binder.clearCallingIdentity();
         try {
-            mNotificationDelegate.onNotificationClear(pkg, tag, id, userId);
+            mNotificationDelegate.onNotificationClear(callingUid, callingPid, pkg, tag, id, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -573,9 +579,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     @Override
     public void onClearAllNotifications(int userId) {
         enforceStatusBarService();
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
         long identity = Binder.clearCallingIdentity();
         try {
-            mNotificationDelegate.onClearAll(userId);
+            mNotificationDelegate.onClearAll(callingUid, callingPid, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

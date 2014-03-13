@@ -20,10 +20,13 @@ import android.os.IBinder;
 
 public interface NotificationDelegate {
     void onSetDisabled(int status);
-    void onClearAll(int userId);
-    void onNotificationClick(String pkg, String tag, int id, int userId);
-    void onNotificationClear(String pkg, String tag, int id, int userId);
-    void onNotificationError(String pkg, String tag, int id,
+    void onClearAll(int callingUid, int callingPid, int userId);
+    void onNotificationClick(int callingUid, int callingPid,
+            String pkg, String tag, int id, int userId);
+    void onNotificationClear(int callingUid, int callingPid,
+            String pkg, String tag, int id, int userId);
+    void onNotificationError(int callingUid, int callingPid,
+            String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId);
     void onPanelRevealed();
     boolean allowDisable(int what, IBinder token, String pkg);
