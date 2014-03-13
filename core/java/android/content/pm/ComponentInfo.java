@@ -128,6 +128,17 @@ public class ComponentInfo extends PackageItemInfo {
         return logo != 0 ? logo : applicationInfo.logo;
     }
     
+    /**
+     * Return the banner resource identifier to use for this component. If the
+     * component defines a banner, that is used; else, the application banner is
+     * used.
+     *
+     * @return The banner associated with this component.
+     */
+    public final int getBannerResource() {
+        return banner != 0 ? banner : applicationInfo.banner;
+    }
+
     protected void dumpFront(Printer pw, String prefix) {
         super.dumpFront(pw, prefix);
         pw.println(prefix + "enabled=" + enabled + " exported=" + exported
@@ -172,6 +183,13 @@ public class ComponentInfo extends PackageItemInfo {
         return applicationInfo.loadIcon(pm);
     }
     
+    /**
+     * @hide
+     */
+    @Override protected Drawable loadDefaultBanner(PackageManager pm) {
+        return applicationInfo.loadBanner(pm);
+    }
+
     /**
      * @hide
      */

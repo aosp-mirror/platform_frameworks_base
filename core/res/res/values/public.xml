@@ -2087,4 +2087,10 @@
   <public type="style" name="Theme.DeviceDefault.NoActionBar.TranslucentDecor" id="0x010301e3" />
   <public type="style" name="Theme.DeviceDefault.Light.NoActionBar.TranslucentDecor" id="0x010301e4" />
 
+<!-- ===============================================================
+    Resources added in version 20 of the platform
+    =============================================================== -->
+  <eat-comment />
+
+  <public type="attr" name="banner" id="0x10103f2" />
 </resources>

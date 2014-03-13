@@ -62,6 +62,21 @@
          a reference to a Drawable resource containing the image definition. -->
     <attr name="icon" format="reference" />
 
+    <!-- A Drawable resource providing an extended graphical banner for its
+         associated item. Use with the application tag (to supply a default
+         banner for all application activities), or with the activity, tag to
+         supply a banner for a specific activity.
+
+         <p>The given banner will be used to display to the user a graphical
+         representation of an activity in the Leanback application launcher.
+         Since banners are displayed only in the Leanback launcher, they should
+         only be used with activities (and applications) that support Leanback
+         mode. These are activities that handle Intents of category
+         {@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER
+         Intent.CATEGORY_LEANBACK_LAUNCHER}.
+         <p>This must be a reference to a Drawable resource containing the image definition. -->
+    <attr name="banner" format="reference" />
+
     <!-- A Drawable resource providing an extended graphical logo for its
          associated item. Use with the application tag (to supply a default
          logo for all application components), or with the activity, receiver,
@@ -888,6 +903,7 @@
         <attr name="theme" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="description" />
         <attr name="permission" />
@@ -970,6 +986,7 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="permissionGroup" />
         <attr name="description" />
@@ -996,6 +1013,7 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="description" />
         <attr name="permissionGroupFlags" />
@@ -1028,6 +1046,7 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
     </declare-styleable>
     
@@ -1294,6 +1313,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="process" />
         <attr name="authorities" />
@@ -1375,6 +1395,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="permission" />
         <attr name="process" />
@@ -1417,6 +1438,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="permission" />
         <attr name="process" />
@@ -1451,6 +1473,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="launchMode" />
         <attr name="screenOrientation" />
@@ -1514,6 +1537,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="permission" />
         <!-- Specify whether the activity-alias is enabled or not (that is, can be instantiated by the system).
@@ -1585,6 +1609,7 @@
          parent="AndroidManifestActivity AndroidManifestReceiver AndroidManifestService">
         <attr name="label" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="priority" />
     </declare-styleable>
@@ -1713,6 +1738,7 @@
         <attr name="targetPackage" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="handleProfiling" />
         <attr name="functionalTest" />
