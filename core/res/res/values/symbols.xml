@@ -318,6 +318,7 @@
   <java-symbol type="integer" name="config_mobile_mtu" />
   <java-symbol type="integer" name="config_volte_replacement_rat"/>
   <java-symbol type="integer" name="config_valid_wappush_index" />
+  <java-symbol type="integer" name="config_overrideHasPermanentMenuKey" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
