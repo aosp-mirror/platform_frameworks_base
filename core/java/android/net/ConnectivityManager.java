@@ -175,6 +175,11 @@ public class ConnectivityManager {
      * {@hide}
      */
     public static final String EXTRA_IS_ACTIVE = "isActive";
+    /**
+     * The lookup key for a long that contains the timestamp (nanos) of the radio state change.
+     * {@hide}
+     */
+    public static final String EXTRA_REALTIME_NS = "tsNanos";
 
     /**
      * Broadcast Action: The setting for background data usage has changed
