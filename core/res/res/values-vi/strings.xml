@@ -256,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"gỡ cài đặt lối tắt"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Cho phép ứng dụng xóa lối tắt trên Màn hình chính mà không cần sự can thiệp của người dùng."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"định tuyến lại cuộc gọi đi"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Cho phép ứng dụng xem số được quay trong một cuộc gọi đi với tùy chọn chuyển hướng cuộc gọi đến một số khác hoặc hủy cuộc gọi đó hoàn toàn."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Cho phép ứng dụng xem số được gọi trong một cuộc gọi đi với tùy chọn chuyển hướng cuộc gọi đến một số khác hoặc hủy cuộc gọi đó hoàn toàn."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"nhận tin nhắn văn bản (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Cho phép ứng dụng nhận và xử lý tin nhắn SMS. Điều này có nghĩa là ứng dụng có thể theo dõi hoặc xóa tin nhắn được gửi đến thiết bị của bạn mà không hiển thị chúng cho bạn."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"nhận tin nhắn văn bản (MMS)"</string>
