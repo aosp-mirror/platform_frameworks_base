@@ -140,4 +140,18 @@ public final class CallServiceAdapter {
         } catch (RemoteException e) {
         }
     }
+
+    /**
+     * Sets a call's state to be on hold.
+     *
+     * @param callId - The unique ID of the call whose state is changing to be on hold.
+     */
+    public void setOnHold(String callId) {
+        try {
+            mAdapter.setOnHold(callId);
+        } catch (RemoteException e) {
+        }
+    }
+
+
 }

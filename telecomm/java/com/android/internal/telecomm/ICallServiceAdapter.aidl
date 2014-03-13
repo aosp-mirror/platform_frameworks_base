@@ -91,4 +91,11 @@ oneway interface ICallServiceAdapter {
      * @param callId The unique ID of the call whose state is changing to disconnected.
      */
     void setDisconnected(String callId);
+
+    /**
+     * Sets a call's state to be on hold.
+     *
+     * @param callId The unique ID of the call whose state is changing to be on hold.
+     */
+    void setOnHold(String callId);
 }

@@ -66,4 +66,12 @@ oneway interface IInCallService {
      * @param callId The identifier of the call that was disconnected.
      */
     void setDisconnected(String callId);
+
+    /**
+     * Indicates to the in-call app that a call has been moved to the
+     * {@link android.telecomm.CallState#HOLD} state and the user should be notified.
+     *
+     * @param callId The identifier of the call that was put on hold.
+     */
+    void setOnHold(String callId);
 }

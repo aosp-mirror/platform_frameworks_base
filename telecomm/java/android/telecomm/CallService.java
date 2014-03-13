@@ -86,6 +86,12 @@ public abstract class CallService extends Service {
                 case MSG_DISCONNECT:
                     disconnect((String) msg.obj);
                     break;
+                case MSG_HOLD:
+                    hold((String) msg.obj);
+                    break;
+                case MSG_UNHOLD:
+                    unhold((String) msg.obj);
+                    break;
                 default:
                     break;
             }
@@ -139,6 +145,16 @@ public abstract class CallService extends Service {
         public void disconnect(String callId) {
             mMessageHandler.obtainMessage(MSG_DISCONNECT, callId).sendToTarget();
         }
+
+        @Override
+        public void hold(String callId) {
+            mMessageHandler.obtainMessage(MSG_HOLD, callId).sendToTarget();
+        }
+
+        @Override
+        public void unhold(String callId) {
+            mMessageHandler.obtainMessage(MSG_UNHOLD, callId).sendToTarget();
+        }
     }
 
     // Only used internally by this class.
@@ -154,7 +170,9 @@ public abstract class CallService extends Service {
             MSG_SET_INCOMING_CALL_ID = 5,
             MSG_ANSWER = 6,
             MSG_REJECT = 7,
-            MSG_DISCONNECT = 8;
+            MSG_DISCONNECT = 8,
+            MSG_HOLD = 9,
+            MSG_UNHOLD = 10;
 
     /**
      * Message handler for consolidating binder callbacks onto a single thread.
@@ -258,4 +276,18 @@ public abstract class CallService extends Service {
      * @param callId The ID of the call to disconnect.
      */
     public abstract void disconnect(String callId);
+
+    /**
+     * Puts the specified call on hold.
+     *
+     * @param callId The ID of the call to put on hold.
+     */
+    public abstract void hold(String callId);
+
+    /**
+     * Removes the specified call from hold.
+     *
+     * @param callId The ID of the call to unhold.
+     */
+    public abstract void unhold(String callId);
 }
