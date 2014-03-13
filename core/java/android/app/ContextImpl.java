@@ -363,10 +363,11 @@ class ContextImpl extends Context {
                             ctx.mMainThread.getHandler());
                 }});
 
-        registerService(CONNECTIVITY_SERVICE, new StaticServiceFetcher() {
-                public Object createStaticService() {
+        registerService(CONNECTIVITY_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
                     IBinder b = ServiceManager.getService(CONNECTIVITY_SERVICE);
-                    return new ConnectivityManager(IConnectivityManager.Stub.asInterface(b));
+                    return new ConnectivityManager(IConnectivityManager.Stub.asInterface(b),
+                        ctx.getPackageName());
                 }});
 
         registerService(COUNTRY_DETECTOR, new StaticServiceFetcher() {
