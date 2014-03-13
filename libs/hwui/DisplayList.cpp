@@ -48,42 +48,7 @@ void RenderNode::outputLogBuffer(int fd) {
     fflush(file);
 }
 
-RenderNode::RenderNode() :
-        mDisplayListData(0), mDestroyed(false), mTransformMatrix(NULL), mTransformCamera(NULL),
-        mTransformMatrix3D(NULL), mStaticMatrix(NULL), mAnimationMatrix(NULL) {
-
-    mLeft = 0;
-    mTop = 0;
-    mRight = 0;
-    mBottom = 0;
-    mClipToBounds = true;
-    mProjectBackwards = false;
-    mProjectionReceiver = false;
-    mOutline.rewind();
-    mClipToOutline = false;
-    mCastsShadow = false;
-    mUsesGlobalCamera = false;
-    mAlpha = 1;
-    mHasOverlappingRendering = true;
-    mTranslationX = 0;
-    mTranslationY = 0;
-    mTranslationZ = 0;
-    mRotation = 0;
-    mRotationX = 0;
-    mRotationY= 0;
-    mScaleX = 1;
-    mScaleY = 1;
-    mPivotX = 0;
-    mPivotY = 0;
-    mCameraDistance = 0;
-    mMatrixDirty = false;
-    mMatrixFlags = 0;
-    mPrevWidth = -1;
-    mPrevHeight = -1;
-    mWidth = 0;
-    mHeight = 0;
-    mPivotExplicitlySet = false;
-    mCaching = false;
+RenderNode::RenderNode() : mDestroyed(false), mDisplayListData(0) {
 }
 
 RenderNode::~RenderNode() {
@@ -91,11 +56,6 @@ RenderNode::~RenderNode() {
 
     mDestroyed = true;
     delete mDisplayListData;
-    delete mTransformMatrix;
-    delete mTransformCamera;
-    delete mTransformMatrix3D;
-    delete mStaticMatrix;
-    delete mAnimationMatrix;
 }
 
 void RenderNode::destroyDisplayListDeferred(RenderNode* displayList) {
@@ -132,97 +92,35 @@ void RenderNode::output(uint32_t level) {
     ALOGD("%*sDone (%p, %s)", (level - 1) * 2, "", this, mName.string());
 }
 
-float RenderNode::getPivotX() {
-    updateMatrix();
-    return mPivotX;
-}
-
-float RenderNode::getPivotY() {
-    updateMatrix();
-    return mPivotY;
-}
-
-void RenderNode::updateMatrix() {
-    if (mMatrixDirty) {
-        // NOTE: mTransformMatrix won't be up to date if a DisplayList goes from a complex transform
-        // to a pure translate. This is safe because the matrix isn't read in pure translate cases.
-        if (mMatrixFlags && mMatrixFlags != TRANSLATION) {
-            if (!mTransformMatrix) {
-                // only allocate a matrix if we have a complex transform
-                mTransformMatrix = new Matrix4();
-            }
-            if (!mPivotExplicitlySet) {
-                if (mWidth != mPrevWidth || mHeight != mPrevHeight) {
-                    mPrevWidth = mWidth;
-                    mPrevHeight = mHeight;
-                    mPivotX = mPrevWidth / 2.0f;
-                    mPivotY = mPrevHeight / 2.0f;
-                }
-            }
-
-            if ((mMatrixFlags & ROTATION_3D) == 0) {
-                mTransformMatrix->loadTranslate(
-                        mPivotX + mTranslationX,
-                        mPivotY + mTranslationY,
-                        0);
-                mTransformMatrix->rotate(mRotation, 0, 0, 1);
-                mTransformMatrix->scale(mScaleX, mScaleY, 1);
-                mTransformMatrix->translate(-mPivotX, -mPivotY);
-            } else {
-                if (!mTransformCamera) {
-                    mTransformCamera = new Sk3DView();
-                    mTransformMatrix3D = new SkMatrix();
-                }
-                SkMatrix transformMatrix;
-                transformMatrix.reset();
-                mTransformCamera->save();
-                transformMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
-                mTransformCamera->rotateX(mRotationX);
-                mTransformCamera->rotateY(mRotationY);
-                mTransformCamera->rotateZ(-mRotation);
-                mTransformCamera->getMatrix(mTransformMatrix3D);
-                mTransformMatrix3D->preTranslate(-mPivotX, -mPivotY);
-                mTransformMatrix3D->postTranslate(mPivotX + mTranslationX,
-                        mPivotY + mTranslationY);
-                transformMatrix.postConcat(*mTransformMatrix3D);
-                mTransformCamera->restore();
-
-                mTransformMatrix->load(transformMatrix);
-            }
-        }
-        mMatrixDirty = false;
-    }
-}
-
 void RenderNode::outputViewProperties(const int level) {
-    updateMatrix();
-    if (mLeft != 0 || mTop != 0) {
-        ALOGD("%*sTranslate (left, top) %d, %d", level * 2, "", mLeft, mTop);
+    properties().updateMatrix();
+    if (properties().mLeft != 0 || properties().mTop != 0) {
+        ALOGD("%*sTranslate (left, top) %d, %d", level * 2, "", properties().mLeft, properties().mTop);
     }
-    if (mStaticMatrix) {
+    if (properties().mStaticMatrix) {
         ALOGD("%*sConcatMatrix (static) %p: " SK_MATRIX_STRING,
-                level * 2, "", mStaticMatrix, SK_MATRIX_ARGS(mStaticMatrix));
+                level * 2, "", properties().mStaticMatrix, SK_MATRIX_ARGS(properties().mStaticMatrix));
     }
-    if (mAnimationMatrix) {
+    if (properties().mAnimationMatrix) {
         ALOGD("%*sConcatMatrix (animation) %p: " SK_MATRIX_STRING,
-                level * 2, "", mAnimationMatrix, SK_MATRIX_ARGS(mAnimationMatrix));
+                level * 2, "", properties().mAnimationMatrix, SK_MATRIX_ARGS(properties().mAnimationMatrix));
     }
-    if (mMatrixFlags != 0) {
-        if (mMatrixFlags == TRANSLATION) {
+    if (properties().mMatrixFlags != 0) {
+        if (properties().mMatrixFlags == TRANSLATION) {
             ALOGD("%*sTranslate %.2f, %.2f, %.2f",
-                    level * 2, "", mTranslationX, mTranslationY, mTranslationZ);
+                    level * 2, "", properties().mTranslationX, properties().mTranslationY, properties().mTranslationZ);
         } else {
             ALOGD("%*sConcatMatrix %p: " MATRIX_4_STRING,
-                    level * 2, "", mTransformMatrix, MATRIX_4_ARGS(mTransformMatrix));
+                    level * 2, "", properties().mTransformMatrix, MATRIX_4_ARGS(properties().mTransformMatrix));
         }
     }
 
-    bool clipToBoundsNeeded = mCaching ? false : mClipToBounds;
-    if (mAlpha < 1) {
-        if (mCaching) {
-            ALOGD("%*sSetOverrideLayerAlpha %.2f", level * 2, "", mAlpha);
-        } else if (!mHasOverlappingRendering) {
-            ALOGD("%*sScaleAlpha %.2f", level * 2, "", mAlpha);
+    bool clipToBoundsNeeded = properties().mCaching ? false : properties().mClipToBounds;
+    if (properties().mAlpha < 1) {
+        if (properties().mCaching) {
+            ALOGD("%*sSetOverrideLayerAlpha %.2f", level * 2, "", properties().mAlpha);
+        } else if (!properties().mHasOverlappingRendering) {
+            ALOGD("%*sScaleAlpha %.2f", level * 2, "", properties().mAlpha);
         } else {
             int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
             if (clipToBoundsNeeded) {
@@ -230,20 +128,20 @@ void RenderNode::outputViewProperties(const int level) {
                 clipToBoundsNeeded = false; // clipping done by save layer
             }
             ALOGD("%*sSaveLayerAlpha %.2f, %.2f, %.2f, %.2f, %d, 0x%x", level * 2, "",
-                    (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
-                    (int)(mAlpha * 255), flags);
+                    (float) 0, (float) 0, (float) properties().mRight - properties().mLeft, (float) properties().mBottom - properties().mTop,
+                    (int)(properties().mAlpha * 255), flags);
         }
     }
     if (clipToBoundsNeeded) {
         ALOGD("%*sClipRect %.2f, %.2f, %.2f, %.2f", level * 2, "", 0.0f, 0.0f,
-                (float) mRight - mLeft, (float) mBottom - mTop);
+                (float) properties().mRight - properties().mLeft, (float) properties().mBottom - properties().mTop);
     }
 }
 
 /*
  * For property operations, we pass a savecount of 0, since the operations aren't part of the
  * displaylist, and thus don't have to compensate for the record-time/playback-time discrepancy in
- * base saveCount (i.e., how RestoreToCount uses saveCount + mCount)
+ * base saveCount (i.e., how RestoreToCount uses saveCount + properties().mCount)
  */
 #define PROPERTY_SAVECOUNT 0
 
@@ -253,28 +151,28 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler,
 #if DEBUG_DISPLAY_LIST
     outputViewProperties(level);
 #endif
-    updateMatrix();
-    if (mLeft != 0 || mTop != 0) {
-        renderer.translate(mLeft, mTop);
+    properties().updateMatrix();
+    if (properties().mLeft != 0 || properties().mTop != 0) {
+        renderer.translate(properties().mLeft, properties().mTop);
     }
-    if (mStaticMatrix) {
-        renderer.concatMatrix(mStaticMatrix);
-    } else if (mAnimationMatrix) {
-        renderer.concatMatrix(mAnimationMatrix);
+    if (properties().mStaticMatrix) {
+        renderer.concatMatrix(properties().mStaticMatrix);
+    } else if (properties().mAnimationMatrix) {
+        renderer.concatMatrix(properties().mAnimationMatrix);
     }
-    if (mMatrixFlags != 0) {
-        if (mMatrixFlags == TRANSLATION) {
-            renderer.translate(mTranslationX, mTranslationY);
+    if (properties().mMatrixFlags != 0) {
+        if (properties().mMatrixFlags == TRANSLATION) {
+            renderer.translate(properties().mTranslationX, properties().mTranslationY);
         } else {
-            renderer.concatMatrix(*mTransformMatrix);
+            renderer.concatMatrix(*properties().mTransformMatrix);
         }
     }
-    bool clipToBoundsNeeded = mCaching ? false : mClipToBounds;
-    if (mAlpha < 1) {
-        if (mCaching) {
-            renderer.setOverrideLayerAlpha(mAlpha);
-        } else if (!mHasOverlappingRendering) {
-            renderer.scaleAlpha(mAlpha);
+    bool clipToBoundsNeeded = properties().mCaching ? false : properties().mClipToBounds;
+    if (properties().mAlpha < 1) {
+        if (properties().mCaching) {
+            renderer.setOverrideLayerAlpha(properties().mAlpha);
+        } else if (!properties().mHasOverlappingRendering) {
+            renderer.scaleAlpha(properties().mAlpha);
         } else {
             // TODO: should be able to store the size of a DL at record time and not
             // have to pass it into this call. In fact, this information might be in the
@@ -286,18 +184,18 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler,
             }
 
             SaveLayerOp* op = new (handler.allocator()) SaveLayerOp(
-                    0, 0, mRight - mLeft, mBottom - mTop, mAlpha * 255, saveFlags);
-            handler(op, PROPERTY_SAVECOUNT, mClipToBounds);
+                    0, 0, properties().mRight - properties().mLeft, properties().mBottom - properties().mTop, properties().mAlpha * 255, saveFlags);
+            handler(op, PROPERTY_SAVECOUNT, properties().mClipToBounds);
         }
     }
     if (clipToBoundsNeeded) {
         ClipRectOp* op = new (handler.allocator()) ClipRectOp(0, 0,
-                mRight - mLeft, mBottom - mTop, SkRegion::kIntersect_Op);
-        handler(op, PROPERTY_SAVECOUNT, mClipToBounds);
+                properties().mRight - properties().mLeft, properties().mBottom - properties().mTop, SkRegion::kIntersect_Op);
+        handler(op, PROPERTY_SAVECOUNT, properties().mClipToBounds);
     }
-    if (CC_UNLIKELY(mClipToOutline && !mOutline.isEmpty())) {
-        ClipPathOp* op = new (handler.allocator()) ClipPathOp(&mOutline, SkRegion::kIntersect_Op);
-        handler(op, PROPERTY_SAVECOUNT, mClipToBounds);
+    if (CC_UNLIKELY(properties().mClipToOutline && !properties().mOutline.isEmpty())) {
+        ClipPathOp* op = new (handler.allocator()) ClipPathOp(&properties().mOutline, SkRegion::kIntersect_Op);
+        handler(op, PROPERTY_SAVECOUNT, properties().mClipToBounds);
     }
 }
 
@@ -308,35 +206,35 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler,
  * matrix computation instead of the Skia 3x3 matrix + camera hackery.
  */
 void RenderNode::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform) {
-    if (mLeft != 0 || mTop != 0) {
-        matrix.translate(mLeft, mTop);
+    if (properties().mLeft != 0 || properties().mTop != 0) {
+        matrix.translate(properties().mLeft, properties().mTop);
     }
-    if (mStaticMatrix) {
-        mat4 stat(*mStaticMatrix);
+    if (properties().mStaticMatrix) {
+        mat4 stat(*properties().mStaticMatrix);
         matrix.multiply(stat);
-    } else if (mAnimationMatrix) {
-        mat4 anim(*mAnimationMatrix);
+    } else if (properties().mAnimationMatrix) {
+        mat4 anim(*properties().mAnimationMatrix);
         matrix.multiply(anim);
     }
-    if (mMatrixFlags != 0) {
-        updateMatrix();
-        if (mMatrixFlags == TRANSLATION) {
-            matrix.translate(mTranslationX, mTranslationY,
-                    true3dTransform ? mTranslationZ : 0.0f);
+    if (properties().mMatrixFlags != 0) {
+        properties().updateMatrix();
+        if (properties().mMatrixFlags == TRANSLATION) {
+            matrix.translate(properties().mTranslationX, properties().mTranslationY,
+                    true3dTransform ? properties().mTranslationZ : 0.0f);
         } else {
             if (!true3dTransform) {
-                matrix.multiply(*mTransformMatrix);
+                matrix.multiply(*properties().mTransformMatrix);
             } else {
                 mat4 true3dMat;
                 true3dMat.loadTranslate(
-                        mPivotX + mTranslationX,
-                        mPivotY + mTranslationY,
-                        mTranslationZ);
-                true3dMat.rotate(mRotationX, 1, 0, 0);
-                true3dMat.rotate(mRotationY, 0, 1, 0);
-                true3dMat.rotate(mRotation, 0, 0, 1);
-                true3dMat.scale(mScaleX, mScaleY, 1);
-                true3dMat.translate(-mPivotX, -mPivotY);
+                        properties().mPivotX + properties().mTranslationX,
+                        properties().mPivotY + properties().mTranslationY,
+                        properties().mTranslationZ);
+                true3dMat.rotate(properties().mRotationX, 1, 0, 0);
+                true3dMat.rotate(properties().mRotationY, 0, 1, 0);
+                true3dMat.rotate(properties().mRotation, 0, 0, 1);
+                true3dMat.scale(properties().mScaleX, properties().mScaleY, 1);
+                true3dMat.translate(-properties().mPivotX, -properties().mPivotY);
 
                 matrix.multiply(true3dMat);
             }
@@ -378,7 +276,7 @@ void RenderNode::computeOrderingImpl(
     Matrix4 localTransformFromProjectionSurface(*transformFromProjectionSurface);
     localTransformFromProjectionSurface.multiply(opState->mTransformFromParent);
 
-    if (mProjectBackwards) {
+    if (properties().mProjectBackwards) {
         // composited projectee, flag for out of order draw, save matrix, and store in proj surface
         opState->mSkipInOrderDraw = true;
         opState->mTransformFromCompositingAncestor.load(localTransformFromProjectionSurface);
@@ -397,7 +295,7 @@ void RenderNode::computeOrderingImpl(
 
             Vector<DrawDisplayListOp*>* projectionChildren = NULL;
             const mat4* projectionTransform = NULL;
-            if (isProjectionReceiver && !child->mProjectBackwards) {
+            if (isProjectionReceiver && !child->properties().mProjectBackwards) {
                 // if receiving projections, collect projecting descendent
 
                 // Note that if a direct descendent is projecting backwards, we pass it's
@@ -444,7 +342,7 @@ public:
         : mReplayStruct(replayStruct), mLevel(level) {}
     inline void operator()(DisplayListOp* operation, int saveCount, bool clipToBounds) {
 #if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
-        mReplayStruct.mRenderer.eventMark(operation->name());
+        properties().mReplayStruct.mRenderer.eventMark(operation->name());
 #endif
         operation->replay(mReplayStruct, saveCount, mLevel, clipToBounds);
     }
@@ -472,12 +370,12 @@ void RenderNode::buildZSortedChildList(Vector<ZDrawDisplayListOpPair>& zTranslat
     for (unsigned int i = 0; i < mDisplayListData->children.size(); i++) {
         DrawDisplayListOp* childOp = mDisplayListData->children[i];
         RenderNode* child = childOp->mDisplayList;
-        float childZ = child->mTranslationZ;
+        float childZ = child->properties().mTranslationZ;
 
         if (childZ != 0.0f) {
             zTranslatedNodes.add(ZDrawDisplayListOpPair(childZ, childOp));
             childOp->mSkipInOrderDraw = true;
-        } else if (!child->mProjectBackwards) {
+        } else if (!child->properties().mProjectBackwards) {
             // regular, in order drawing DisplayList
             childOp->mSkipInOrderDraw = false;
         }
@@ -502,9 +400,9 @@ void RenderNode::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTransl
 
     int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     LinearAllocator& alloc = handler.allocator();
-    ClipRectOp* clipOp = new (alloc) ClipRectOp(0, 0, mWidth, mHeight,
+    ClipRectOp* clipOp = new (alloc) ClipRectOp(0, 0, properties().mWidth, properties().mHeight,
             SkRegion::kIntersect_Op); // clip to 3d root bounds
-    handler(clipOp, PROPERTY_SAVECOUNT, mClipToBounds);
+    handler(clipOp, PROPERTY_SAVECOUNT, properties().mClipToBounds);
 
     /**
      * Draw shadows and (potential) casters mostly in order, but allow the shadows of casters
@@ -534,7 +432,7 @@ void RenderNode::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTransl
             // OR if its caster's Z value is similar to the previous potential caster
             if (shadowIndex == drawIndex || casterZ - lastCasterZ < SHADOW_DELTA) {
 
-                if (caster->mCastsShadow && caster->mAlpha > 0.0f) {
+                if (caster->properties().mCastsShadow && caster->properties().mAlpha > 0.0f) {
                     mat4 shadowMatrixXY(casterOp->mTransformFromParent);
                     caster->applyViewPropertyTransforms(shadowMatrixXY);
 
@@ -544,8 +442,9 @@ void RenderNode::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTransl
 
                     DisplayListOp* shadowOp  = new (alloc) DrawShadowOp(
                             shadowMatrixXY, shadowMatrixZ,
-                            caster->mAlpha, &(caster->mOutline), caster->mWidth, caster->mHeight);
-                    handler(shadowOp, PROPERTY_SAVECOUNT, mClipToBounds);
+                            caster->properties().mAlpha, &(caster->properties().mOutline),
+                            caster->properties().mWidth, caster->properties().mHeight);
+                    handler(shadowOp, PROPERTY_SAVECOUNT, properties().mClipToBounds);
                 }
 
                 lastCasterZ = casterZ; // must do this even if current caster not casting a shadow
@@ -563,22 +462,22 @@ void RenderNode::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTransl
 
         renderer.concatMatrix(childOp->mTransformFromParent);
         childOp->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
-        handler(childOp, renderer.getSaveCount() - 1, mClipToBounds);
+        handler(childOp, renderer.getSaveCount() - 1, properties().mClipToBounds);
         childOp->mSkipInOrderDraw = true;
 
         renderer.restoreToCount(restoreTo);
         drawIndex++;
     }
-    handler(new (alloc) RestoreToCountOp(rootRestoreTo), PROPERTY_SAVECOUNT, mClipToBounds);
+    handler(new (alloc) RestoreToCountOp(rootRestoreTo), PROPERTY_SAVECOUNT, properties().mClipToBounds);
 }
 
 template <class T>
 void RenderNode::iterateProjectedChildren(OpenGLRenderer& renderer, T& handler, const int level) {
     int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     LinearAllocator& alloc = handler.allocator();
-    ClipRectOp* clipOp = new (alloc) ClipRectOp(0, 0, mWidth, mHeight,
+    ClipRectOp* clipOp = new (alloc) ClipRectOp(0, 0, properties().mWidth, properties().mHeight,
             SkRegion::kReplace_Op); // clip to projection surface root bounds
-    handler(clipOp, PROPERTY_SAVECOUNT, mClipToBounds);
+    handler(clipOp, PROPERTY_SAVECOUNT, properties().mClipToBounds);
 
     for (size_t i = 0; i < mProjectedNodes.size(); i++) {
         DrawDisplayListOp* childOp = mProjectedNodes[i];
@@ -587,11 +486,11 @@ void RenderNode::iterateProjectedChildren(OpenGLRenderer& renderer, T& handler, 
         int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
         renderer.concatMatrix(childOp->mTransformFromCompositingAncestor);
         childOp->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
-        handler(childOp, renderer.getSaveCount() - 1, mClipToBounds);
+        handler(childOp, renderer.getSaveCount() - 1, properties().mClipToBounds);
         childOp->mSkipInOrderDraw = true;
         renderer.restoreToCount(restoreTo);
     }
-    handler(new (alloc) RestoreToCountOp(rootRestoreTo), PROPERTY_SAVECOUNT, mClipToBounds);
+    handler(new (alloc) RestoreToCountOp(rootRestoreTo), PROPERTY_SAVECOUNT, properties().mClipToBounds);
 }
 
 /**
@@ -606,10 +505,10 @@ void RenderNode::iterateProjectedChildren(OpenGLRenderer& renderer, T& handler, 
 template <class T>
 void RenderNode::iterate(OpenGLRenderer& renderer, T& handler, const int level) {
     if (CC_UNLIKELY(mDestroyed)) { // temporary debug logging
-        ALOGW("Error: %s is drawing after destruction", getName());
+        ALOGW("Error: %s is drawing after destruction", mName.string());
         CRASH();
     }
-    if (mDisplayListData->isEmpty() || mAlpha <= 0) {
+    if (mDisplayListData->isEmpty() || properties().mAlpha <= 0) {
         DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, mName.string());
         return;
     }
@@ -624,14 +523,14 @@ void RenderNode::iterate(OpenGLRenderer& renderer, T& handler, const int level) 
     LinearAllocator& alloc = handler.allocator();
     int restoreTo = renderer.getSaveCount();
     handler(new (alloc) SaveOp(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag),
-            PROPERTY_SAVECOUNT, mClipToBounds);
+            PROPERTY_SAVECOUNT, properties().mClipToBounds);
 
     DISPLAY_LIST_LOGD("%*sSave %d %d", (level + 1) * 2, "",
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag, restoreTo);
 
     setViewProperties<T>(renderer, handler, level + 1);
 
-    bool quickRejected = mClipToBounds && renderer.quickRejectConservative(0, 0, mWidth, mHeight);
+    bool quickRejected = properties().mClipToBounds && renderer.quickRejectConservative(0, 0, properties().mWidth, properties().mHeight);
     if (!quickRejected) {
         Vector<ZDrawDisplayListOpPair> zTranslatedNodes;
         buildZSortedChildList(zTranslatedNodes);
@@ -650,7 +549,7 @@ void RenderNode::iterate(OpenGLRenderer& renderer, T& handler, const int level) 
 #endif
 
             logBuffer.writeCommand(level, op->name());
-            handler(op, saveCountOffset, mClipToBounds);
+            handler(op, saveCountOffset, properties().mClipToBounds);
 
             if (CC_UNLIKELY(i == projectionReceiveIndex && mProjectedNodes.size() > 0)) {
                 iterateProjectedChildren(renderer, handler, level);
@@ -663,7 +562,7 @@ void RenderNode::iterate(OpenGLRenderer& renderer, T& handler, const int level) 
 
     DISPLAY_LIST_LOGD("%*sRestoreToCount %d", (level + 1) * 2, "", restoreTo);
     handler(new (alloc) RestoreToCountOp(restoreTo),
-            PROPERTY_SAVECOUNT, mClipToBounds);
+            PROPERTY_SAVECOUNT, properties().mClipToBounds);
     renderer.setOverrideLayerAlpha(1.0f);
 }
 

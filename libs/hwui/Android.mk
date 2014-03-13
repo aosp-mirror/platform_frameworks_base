@@ -38,6 +38,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		Program.cpp \
 		ProgramCache.cpp \
 		RenderBufferCache.cpp \
+		RenderProperties.cpp \
 		ResourceCache.cpp \
 		ShadowTessellator.cpp \
 		SkiaShader.cpp \
