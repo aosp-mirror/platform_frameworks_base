@@ -16,7 +16,7 @@
 
 package android.renderscript;
 
-import android.util.Log;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * BaseObj is the base class for all RenderScript objects owned by a RS context.
@@ -126,12 +126,14 @@ public class BaseObj {
             if(mRS.isAlive() && mID != 0) {
                 mRS.nObjDestroy(mID);
             }
+            rlock.unlock();
             mRS = null;
             mID = 0;
-            mDestroyed = true;
-            //Log.v(RenderScript.LOG_TAG, getClass() +
-            // " auto finalizing object without having released the RS reference.");
         }
+    }
+
+    protected void finalize() throws Throwable {
+        helpDestroy();
         super.finalize();
     }
 
@@ -140,12 +142,11 @@ public class BaseObj {
      * primary use is to force immediate cleanup of resources when it is
      * believed the GC will not respond quickly enough.
      */
-    synchronized public void destroy() {
+    public void destroy() {
         if(mDestroyed) {
             throw new RSInvalidStateException("Object already destroyed.");
         }
-        mDestroyed = true;
-        mRS.nObjDestroy(mID);
+        helpDestroy();
     }
 
     /**
