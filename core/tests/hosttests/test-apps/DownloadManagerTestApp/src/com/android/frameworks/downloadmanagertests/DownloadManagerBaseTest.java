@@ -27,14 +27,14 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
 
-import java.io.File;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
@@ -47,7 +47,6 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     protected DownloadManager mDownloadManager = null;
     protected String mFileType = "text/plain";
     protected Context mContext = null;
-    protected MultipleDownloadsCompletedReceiver mReceiver = null;
     protected static final int DEFAULT_FILE_SIZE = 10 * 1024;  // 10kb
     protected static final int FILE_BLOCK_READ_SIZE = 1024 * 1024;
 
@@ -65,70 +64,9 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     protected static final int MAX_WAIT_FOR_DOWNLOAD_TIME = 5 * 60 * 1000; // 5 minutes
     protected static final int MAX_WAIT_FOR_LARGE_DOWNLOAD_TIME = 15 * 60 * 1000; // 15 minutes
 
-    public static class MultipleDownloadsCompletedReceiver extends BroadcastReceiver {
-        private volatile int mNumDownloadsCompleted = 0;
-        private Set<Long> downloadIds = Collections.synchronizedSet(new HashSet<Long>());
+    private DownloadFinishedListener mListener;
+    private Thread mListenerThread;
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equalsIgnoreCase(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
-                synchronized(this) {
-                    long id = intent.getExtras().getLong(DownloadManager.EXTRA_DOWNLOAD_ID);
-                    Log.i(LOG_TAG, "Received Notification for download: " + id);
-                    if (!downloadIds.contains(id)) {
-                        ++mNumDownloadsCompleted;
-                        Log.i(LOG_TAG, "MultipleDownloadsCompletedReceiver got intent: " +
-                                intent.getAction() + " --> total count: " + mNumDownloadsCompleted);
-                        downloadIds.add(id);
-
-                        DownloadManager dm = (DownloadManager)context.getSystemService(
-                                Context.DOWNLOAD_SERVICE);
-
-                        Cursor cursor = dm.query(new Query().setFilterById(id));
-                        try {
-                            if (cursor.moveToFirst()) {
-                                int status = cursor.getInt(cursor.getColumnIndex(
-                                        DownloadManager.COLUMN_STATUS));
-                                Log.i(LOG_TAG, "Download status is: " + status);
-                            } else {
-                                fail("No status found for completed download!");
-                            }
-                        } finally {
-                            cursor.close();
-                        }
-                    } else {
-                        Log.i(LOG_TAG, "Notification for id: " + id + " has already been made.");
-                    }
-                }
-            }
-        }
-
-        /**
-         * Gets the number of times the {@link #onReceive} callback has been called for the
-         * {@link DownloadManager#ACTION_DOWNLOAD_COMPLETE} action, indicating the number of
-         * downloads completed thus far.
-         *
-         * @return the number of downloads completed so far.
-         */
-        public int numDownloadsCompleted() {
-            return mNumDownloadsCompleted;
-        }
-
-        /**
-         * Gets the list of download IDs.
-         * @return A Set<Long> with the ids of the completed downloads.
-         */
-        public Set<Long> getDownloadIds() {
-            synchronized(this) {
-                Set<Long> returnIds = new HashSet<Long>(downloadIds);
-                return returnIds;
-            }
-        }
-
-    }
 
     public static class WiFiChangedReceiver extends BroadcastReceiver {
         private Context mContext = null;
@@ -172,13 +110,138 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     }
 
     /**
+     * Broadcast receiver to listen for broadcast from DownloadManager indicating that downloads
+     * are finished.
+     */
+    private class DownloadFinishedListener extends BroadcastReceiver implements Runnable {
+        private Handler mHandler = null;
+        private Looper mLooper;
+        private Set<Long> mFinishedDownloads = new HashSet<Long>();
+
+        /**
+         * Event loop for the thread that listens to broadcasts.
+         */
+        @Override
+        public void run() {
+            Looper.prepare();
+            synchronized (this) {
+                mLooper = Looper.myLooper();
+                mHandler = new Handler();
+                notifyAll();
+            }
+            Looper.loop();
+        }
+
+        /**
+         * Handles the incoming notifications from DownloadManager.
+         */
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(intent.getAction())) {
+                long id = intent.getExtras().getLong(DownloadManager.EXTRA_DOWNLOAD_ID);
+                Log.i(LOG_TAG, "Received Notification for download: " + id);
+                synchronized (this) {
+                    if(!mFinishedDownloads.contains(id)) {
+                        mFinishedDownloads.add(id);
+                        notifyAll();
+                    } else {
+                        Log.i(LOG_TAG,
+                              String.format("Notification for %d was already received", id));
+                    }
+                }
+            }
+        }
+
+        /**
+         * Returns the handler for this thread. Need this to make sure that the events are handled
+         * in it is own thread and don't interfere with the instrumentation thread.
+         * @return Handler for the receiver thread.
+         * @throws InterruptedException
+         */
+        private Handler getHandler() throws InterruptedException {
+            synchronized (this) {
+                if (mHandler != null) return mHandler;
+                while (mHandler == null) {
+                    wait();
+                }
+                return mHandler;
+            }
+        }
+
+        /**
+         * Stops the thread that receives notification from DownloadManager.
+         */
+        public void cancel() {
+            synchronized(this) {
+                if (mLooper != null) {
+                    mLooper.quit();
+                }
+            }
+        }
+
+        /**
+         * Waits for a given download to finish, or until the timeout expires.
+         * @param id id of the download to wait for.
+         * @param timeout maximum time to wait, in milliseconds
+         * @return true if the download finished, false otherwise.
+         * @throws InterruptedException
+         */
+        public boolean waitForDownloadToFinish(long id, long timeout) throws InterruptedException {
+            long startTime = SystemClock.uptimeMillis();
+            synchronized (this) {
+                while (!mFinishedDownloads.contains(id)) {
+                    if (SystemClock.uptimeMillis() - startTime > timeout) {
+                        Log.i(LOG_TAG, String.format("Timeout while waiting for %d to finish", id));
+                        return false;
+                    } else {
+                        wait(timeout);
+                    }
+                }
+                return true;
+            }
+        }
+
+        /**
+         * Waits for multiple downloads to finish, or until timeout expires.
+         * @param ids ids of the downloads to wait for.
+         * @param timeout maximum time to wait, in milliseconds
+         * @return true of all the downloads finished, false otherwise.
+         * @throws InterruptedException
+         */
+        public boolean waitForMultipleDownloadsToFinish(Set<Long> ids, long timeout)
+                throws InterruptedException {
+            long startTime = SystemClock.uptimeMillis();
+            synchronized (this) {
+                while (!mFinishedDownloads.containsAll(ids)) {
+                    if (SystemClock.uptimeMillis() - startTime > timeout) {
+                        Log.i(LOG_TAG, "Timeout waiting for multiple downloads to finish");
+                        return false;
+                    } else {
+                        wait(timeout);
+                    }
+                }
+                return true;
+            }
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
     public void setUp() throws Exception {
+        super.setUp();
         mContext = getInstrumentation().getContext();
         mDownloadManager = (DownloadManager)mContext.getSystemService(Context.DOWNLOAD_SERVICE);
-        mReceiver = registerNewMultipleDownloadsReceiver();
+        mListener = registerDownloadsListener();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        mContext.unregisterReceiver(mListener);
+        mListener.cancel();
+        mListenerThread.join();
+        super.tearDown();
     }
 
     /**
@@ -198,12 +261,15 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      * that have completed.
      *
      * @return A new receiver that records and can be queried on how many downloads have completed.
+     * @throws InterruptedException
      */
-    protected MultipleDownloadsCompletedReceiver registerNewMultipleDownloadsReceiver() {
-        MultipleDownloadsCompletedReceiver receiver = new MultipleDownloadsCompletedReceiver();
-        mContext.registerReceiver(receiver, new IntentFilter(
-                DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        return receiver;
+    protected DownloadFinishedListener registerDownloadsListener() throws InterruptedException {
+        DownloadFinishedListener listener = new DownloadFinishedListener();
+        mListenerThread = new Thread(listener);
+        mListenerThread.start();
+        mContext.registerReceiver(listener, new IntentFilter(
+                DownloadManager.ACTION_DOWNLOAD_COMPLETE), null, listener.getHandler());
+        return listener;
     }
 
     /**
@@ -283,76 +349,35 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     }
 
     /**
-     * Helper to wait for a particular download to finish, or else a timeout to occur
-     *
-     * Does not wait for a receiver notification of the download.
-     *
-     * @param id The download id to query on (wait for)
-     */
-    protected void waitForDownloadOrTimeout_skipNotification(long id) throws TimeoutException,
-            InterruptedException {
-        doWaitForDownloadsOrTimeout(new Query().setFilterById(id),
-                WAIT_FOR_DOWNLOAD_POLL_TIME, MAX_WAIT_FOR_DOWNLOAD_TIME);
-    }
-
-    /**
-     * Helper to wait for a particular download to finish, or else a timeout to occur
-     *
-     * Also guarantees a notification has been posted for the download.
-     *
-     * @param id The download id to query on (wait for)
-     */
-    protected void waitForDownloadOrTimeout(long id) throws TimeoutException,
-            InterruptedException {
-        waitForDownloadOrTimeout(id, WAIT_FOR_DOWNLOAD_POLL_TIME, MAX_WAIT_FOR_DOWNLOAD_TIME);
-    }
-
-    /**
-     * Helper to wait for a particular download to finish, or else a timeout to occur
-     *
-     * Also guarantees a notification has been posted for the download.
+     * Helper to wait for a particular download to finish, or else a timeout to occur.
      *
      * @param id The download id to query on (wait for)
      * @param poll The amount of time to wait
      * @param timeoutMillis The max time (in ms) to wait for the download(s) to complete
      */
-    protected void waitForDownloadOrTimeout(long id, long poll, long timeoutMillis)
-            throws TimeoutException, InterruptedException {
-        doWaitForDownloadsOrTimeout(new Query().setFilterById(id), poll, timeoutMillis);
-        waitForReceiverNotifications(1);
+    protected boolean waitForDownload(long id, long timeoutMillis)
+            throws InterruptedException {
+        return mListener.waitForDownloadToFinish(id, timeoutMillis);
+    }
+
+    protected boolean waitForMultipleDownloads(Set<Long> ids, long timeout)
+            throws InterruptedException {
+        return mListener.waitForMultipleDownloadsToFinish(ids, timeout);
     }
 
     /**
-     * Helper to wait for all downloads to finish, or else a specified timeout to occur
-     *
-     * Makes no guaranee that notifications have been posted for all downloads.
-     *
-     * @param poll The amount of time to wait
-     * @param timeoutMillis The max time (in ms) to wait for the download(s) to complete
+     * Checks with the download manager if the give download is finished.
+     * @param id id of the download to check
+     * @return true if download is finished, false otherwise.
      */
-    protected void waitForDownloadsOrTimeout(long poll, long timeoutMillis) throws TimeoutException,
-            InterruptedException {
-        doWaitForDownloadsOrTimeout(new Query(), poll, timeoutMillis);
-    }
-
-    /**
-     * Helper to wait for all downloads to finish, or else a timeout to occur, but does not throw
-     *
-     * Also guarantees a notification has been posted for the download.
-     *
-     * @param id The id of the download to query against
-     * @param poll The amount of time to wait
-     * @param timeoutMillis The max time (in ms) to wait for the download(s) to complete
-     * @return true if download completed successfully (didn't timeout), false otherwise
-     */
-    private boolean waitForDownloadOrTimeoutNoThrow(long id, long poll, long timeoutMillis) {
-        try {
-            doWaitForDownloadsOrTimeout(new Query().setFilterById(id), poll, timeoutMillis);
-            waitForReceiverNotifications(1);
-        } catch (TimeoutException e) {
-            return false;
-        }
-        return true;
+    private boolean hasDownloadFinished(long id) {
+        Query q = new Query();
+        q.setFilterById(id);
+        q.setFilterByStatus(DownloadManager.STATUS_SUCCESSFUL);
+        Cursor cursor = mDownloadManager.query(q);
+        boolean finished = cursor.getCount() == 1;
+        cursor.close();
+        return finished;
     }
 
     /**
@@ -386,34 +411,6 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
             throw new TimeoutException(timedOutMessage);
         }
         return currentTotalWaitTime;
-    }
-
-    /**
-     * Helper to wait for all downloads to finish, or else a timeout to occur
-     *
-     * @param query The query to pass to the download manager
-     * @param poll The poll time to wait between checks
-     * @param timeoutMillis The max amount of time (in ms) to wait for the download(s) to complete
-     */
-    private void doWaitForDownloadsOrTimeout(Query query, long poll, long timeoutMillis)
-            throws TimeoutException {
-        int currentWaitTime = 0;
-        while (true) {
-            query.setFilterByStatus(DownloadManager.STATUS_PENDING | DownloadManager.STATUS_PAUSED
-                    | DownloadManager.STATUS_RUNNING);
-            Cursor cursor = mDownloadManager.query(query);
-
-            try {
-                if (cursor.getCount() == 0) {
-                    Log.i(LOG_TAG, "All downloads should be done...");
-                    break;
-                }
-                currentWaitTime = timeoutWait(currentWaitTime, poll, timeoutMillis,
-                        "Timed out waiting for all downloads to finish");
-            } finally {
-                cursor.close();
-            }
-        }
     }
 
     /**
@@ -465,51 +462,48 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     }
 
     /**
-     * Synchronously waits for our receiver to receive notification for a given number of
-     * downloads.
+     * Synchronously waits for the download manager to start incrementing the number of
+     * bytes downloaded so far.
      *
-     * @param targetNumber The number of notifications for unique downloads to wait for; pass in
-     *         -1 to not wait for notification.
-     * @throws Exception if timed out while waiting
-     */
-    private void waitForReceiverNotifications(int targetNumber) throws TimeoutException {
-        int count = mReceiver.numDownloadsCompleted();
-        int currentWaitTime = 0;
-
-        while (count < targetNumber) {
-            Log.i(LOG_TAG, "Waiting for notification of downloads...");
-            currentWaitTime = timeoutWait(currentWaitTime, WAIT_FOR_DOWNLOAD_POLL_TIME,
-                    MAX_WAIT_FOR_DOWNLOAD_TIME, "Timed out waiting for download notifications!"
-                    + " Received " + count + "notifications.");
-            count = mReceiver.numDownloadsCompleted();
-        }
-    }
-
-    /**
-     * Synchronously waits for a file to increase in size (such as to monitor that a download is
-     * progressing).
-     *
-     * @param file The file whose size to track.
+     * @param id DownloadManager download id that needs to be checked.
      * @throws Exception if timed out while waiting for the file to grow in size.
      */
-    protected void waitForFileToGrow(File file) throws Exception {
+    protected void waitToReceiveData(long id) throws Exception {
         int currentWaitTime = 0;
-
-        // File may not even exist yet, so wait until it does (or we timeout)
-        while (!file.exists()) {
-            Log.i(LOG_TAG, "Waiting for file to exist...");
-            currentWaitTime = timeoutWait(currentWaitTime, WAIT_FOR_DOWNLOAD_POLL_TIME,
-                    MAX_WAIT_FOR_DOWNLOAD_TIME, "Timed out waiting for file to be created.");
-        }
-
-        // Get original file size...
-        long originalSize = file.length();
-
-        while (file.length() <= originalSize) {
-            Log.i(LOG_TAG, "Waiting for file to be written to...");
+        long originalSize = getBytesDownloaded(id);
+        long currentSize = 0;
+        while ((currentSize = getBytesDownloaded(id)) <= originalSize) {
+            Log.i(LOG_TAG, String.format("orig: %d, cur: %d. Waiting for file to be written to...",
+                    originalSize, currentSize));
             currentWaitTime = timeoutWait(currentWaitTime, WAIT_FOR_DOWNLOAD_POLL_TIME,
                     MAX_WAIT_FOR_DOWNLOAD_TIME, "Timed out waiting for file to be written to.");
         }
+    }
+
+    private long getBytesDownloaded(long id) {
+        DownloadManager.Query q = new DownloadManager.Query();
+        q.setFilterById(id);
+        Cursor response = mDownloadManager.query(q);
+        if (response.getCount() < 1) {
+            Log.i(LOG_TAG, String.format("Query to download manager returned nothing for id %d",id));
+            response.close();
+            return -1;
+        }
+        while(response.moveToNext()) {
+            int index = response.getColumnIndex(DownloadManager.COLUMN_ID);
+            if (id == response.getLong(index)) {
+                break;
+            }
+        }
+        int index = response.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);
+        if (index < 0) {
+            Log.i(LOG_TAG, String.format("No downloaded bytes for id %d", id));
+            response.close();
+            return -1;
+        }
+        long size = response.getLong(index);
+        response.close();
+        return size;
     }
 
     /**
@@ -533,19 +527,6 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
         } finally {
             cursor.close();
         }
-    }
-
-    /**
-     * Helper to verify an int value in a Cursor
-     *
-     * @param cursor The cursor containing the query results
-     * @param columnName The name of the column to query
-     * @param expected The expected int value
-     */
-    private void verifyInt(Cursor cursor, String columnName, int expected) {
-        int index = cursor.getColumnIndex(columnName);
-        int actual = cursor.getInt(index);
-        assertEquals(expected, actual);
     }
 
     /**
