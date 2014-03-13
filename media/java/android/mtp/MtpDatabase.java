@@ -596,6 +596,11 @@ public class MtpDatabase {
             MtpConstants.PROPERTY_DURATION,
             MtpConstants.PROPERTY_GENRE,
             MtpConstants.PROPERTY_COMPOSER,
+            MtpConstants.PROPERTY_AUDIO_WAVE_CODEC,
+            MtpConstants.PROPERTY_BITRATE_TYPE,
+            MtpConstants.PROPERTY_AUDIO_BITRATE,
+            MtpConstants.PROPERTY_NUMBER_OF_CHANNELS,
+            MtpConstants.PROPERTY_SAMPLE_RATE,
     };
 
     static final int[] VIDEO_PROPERTIES = {
