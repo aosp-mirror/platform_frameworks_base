@@ -17,6 +17,7 @@
 package android.telecomm;
 
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 
 /**
  * Defines constants for use with the Telecomm system.
