@@ -2469,7 +2469,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 stack.switchUserLocked(userId);
-                mWindowManager.moveTaskToTop(stack.topTask().taskId);
+                TaskRecord task = stack.topTask();
+                if (task != null) {
+                    mWindowManager.moveTaskToTop(task.taskId);
+                }
             }
         }
 
@@ -2480,7 +2483,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final boolean homeInFront = stack.isHomeStack();
         if (stack.isOnHomeDisplay()) {
             moveHomeStack(homeInFront);
-            mWindowManager.moveTaskToTop(stack.topTask().taskId);
+            TaskRecord task = stack.topTask();
+            if (task != null) {
+                mWindowManager.moveTaskToTop(task.taskId);
+            }
         } else {
             // Stack was moved to another display while user was swapped out.
             resumeHomeActivity(null);
