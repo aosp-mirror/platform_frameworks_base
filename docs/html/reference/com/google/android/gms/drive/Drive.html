@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -848,8 +854,19 @@ Summary:
           static
           final
           <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/Drive.html#SCOPE_APPFOLDER">SCOPE_APPFOLDER</a></td>
+          <td class="jd-descrcol" width="100%">A Scope that gives 'drive.appfolder' access to a user's drive.</td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/Drive.html#SCOPE_FILE">SCOPE_FILE</a></td>
-          <td class="jd-descrcol" width="100%">A Scope that gives 'drive.file' access to user's drive.</td>
+          <td class="jd-descrcol" width="100%">A Scope that gives 'drive.file' access to a user's drive.</td>
       </tr>
       
     
@@ -1169,6 +1186,38 @@ From class
 
 
 
+<A NAME="SCOPE_APPFOLDER"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a>
+      </span>
+        SCOPE_APPFOLDER
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>A Scope that gives 'drive.appfolder' access to a user's drive.  This scope gives access to
+files that have been created by the app in the App Folder.
+ <p> This scope can be provided in
+ <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addScope(com.google.android.gms.common.api.Scope)">addScope(Scope)</a></code>
+</p></div>
+
+
+    </div>
+</div>
+
+
+
 <A NAME="SCOPE_FILE"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1189,7 +1238,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>A Scope that gives 'drive.file' access to user's drive.  This scope give per-file access to
+  <div class="jd-tagdata jd-tagdescr"><p>A Scope that gives 'drive.file' access to a user's drive. This scope give per-file access to
  files that have been created with, or specifically opened by the app.
  <p> This scope can be provided in
  <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addScope(com.google.android.gms.common.api.Scope)">addScope(Scope)</a></code>
