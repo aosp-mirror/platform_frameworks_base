@@ -689,6 +689,10 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"İzin sahibine, operatör tarafından sağlanan yapılandırma uygulamasını çalıştırma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ağ koşullarındaki gözlemleri dinle"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Bir uygulamaya, ağ koşullarındaki gözlemleri dinleme izni verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
+    <!-- no translation found for permlab_setInputCalibration (4902620118878467615) -->
+    <skip />
+    <!-- no translation found for permdesc_setInputCalibration (4527511047549456929) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ekran kilidini açma şifrelerinde izin verilen uzunluğu ve karakterleri denetleme."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekran kilidini açma denemelerini izle"</string>

@@ -689,6 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Zezwala na wywoływanie aplikacji konfiguracyjnej udostępnionej przez operatora. Nieprzeznaczone dla zwykłych aplikacji."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"śledź stan sieci"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Pozwala aplikacji śledzić stan sieci. Nieprzeznaczone dla zwykłych aplikacji."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"zmiana kalibracji urządzenia wejściwego"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Zezwala aplikacji na modyfikowanie parametrów kalibracji ekranu dotykowego. Nieprzeznaczone dla zwykłych aplikacji."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Określ reguły hasła"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrolowanie długości haseł odblokowania ekranu i dozwolonych w nich znaków"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitoruj próby odblokowania ekranu"</string>

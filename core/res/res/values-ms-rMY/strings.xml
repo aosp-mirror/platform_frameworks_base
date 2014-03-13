@@ -689,6 +689,10 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Membenarkan pemegang menggunakan apl konfigurasi yang diberikan oleh pembawa. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"dengar pemerhatian mengenai keadaan rangkaian"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Membenarkan aplikasi mendengar pemerhatian tentang keadaan rangkaian. Tidak sekali-kali diperlukan untuk apl biasa."</string>
+    <!-- no translation found for permlab_setInputCalibration (4902620118878467615) -->
+    <skip />
+    <!-- no translation found for permdesc_setInputCalibration (4527511047549456929) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Tetapkan peraturan kata laluan"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Mengawal panjang dan aksara yang dibenarkan dalam kata laluan buka kunci skrin."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Memantau percubaan buka kunci skrin"</string>

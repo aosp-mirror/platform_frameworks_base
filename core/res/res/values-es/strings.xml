@@ -689,6 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite ejecutar la aplicación de configuración proporcionada por el operador. No debe ser necesario para aplicaciones normales."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"detectar cambios en el estado de la red"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permite que una aplicación detecte cambios en el estado de la red. No debe ser necesario para aplicaciones normales."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"cambiar la calibración del dispositivo de entrada"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permite que la aplicación modifique los parámetros de calibración de la pantalla táctil. No debe ser necesario para las aplicaciones normales."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecimiento de reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controlar la longitud y los caracteres permitidos en las contraseñas de bloqueo de pantalla"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Control de intentos de bloqueo de pantalla"</string>
