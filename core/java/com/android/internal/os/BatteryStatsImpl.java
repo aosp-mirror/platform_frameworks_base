@@ -270,7 +270,6 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     boolean mWifiOn;
     StopwatchTimer mWifiOnTimer;
-    int mWifiOnUid = -1;
 
     boolean mGlobalWifiRunning;
     StopwatchTimer mGlobalWifiRunningTimer;
@@ -2911,10 +2910,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime);
             mWifiOn = false;
             mWifiOnTimer.stopRunningLocked(elapsedRealtime);
-        }
-        if (mWifiOnUid >= 0) {
-            getUidStatsLocked(mWifiOnUid).noteWifiStoppedLocked(elapsedRealtime);
-            mWifiOnUid = -1;
         }
     }
 
@@ -5973,7 +5968,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
                     if (entry.rxBytes == 0 || entry.txBytes == 0) continue;
 
-                    final Uid u = getUidStatsLocked(entry.uid);
+                    final Uid u = getUidStatsLocked(mapUid(entry.uid));
                     u.noteNetworkActivityLocked(NETWORK_MOBILE_RX_DATA, entry.rxBytes,
                             entry.rxPackets);
                     u.noteNetworkActivityLocked(NETWORK_MOBILE_TX_DATA, entry.txBytes,
@@ -6040,7 +6035,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
                     if (entry.rxBytes == 0 || entry.txBytes == 0) continue;
 
-                    final Uid u = getUidStatsLocked(entry.uid);
+                    final Uid u = getUidStatsLocked(mapUid(entry.uid));
                     u.noteNetworkActivityLocked(NETWORK_WIFI_RX_DATA, entry.rxBytes,
                             entry.rxPackets);
                     u.noteNetworkActivityLocked(NETWORK_WIFI_TX_DATA, entry.txBytes,
@@ -6240,6 +6235,7 @@ public final class BatteryStatsImpl extends BatteryStats {
      * if needed.
      */
     public Uid.Proc getProcessStatsLocked(int uid, String name) {
+        uid = mapUid(uid);
         Uid u = getUidStatsLocked(uid);
         return u.getProcessStatsLocked(name);
     }
@@ -6249,6 +6245,7 @@ public final class BatteryStatsImpl extends BatteryStats {
      * if needed.
      */
     public Uid.Pkg getPackageStatsLocked(int uid, String pkg) {
+        uid = mapUid(uid);
         Uid u = getUidStatsLocked(uid);
         return u.getPackageStatsLocked(pkg);
     }
@@ -6258,6 +6255,7 @@ public final class BatteryStatsImpl extends BatteryStats {
      * if needed.
      */
     public Uid.Pkg.Serv getServiceStatsLocked(int uid, String pkg, String name) {
+        uid = mapUid(uid);
         Uid u = getUidStatsLocked(uid);
         return u.getServiceStatsLocked(pkg, name);
     }
