@@ -109,9 +109,21 @@ public class BaseObj {
         return mName;
     }
 
-    protected void finalize() throws Throwable {
-        if (!mDestroyed) {
-            if(mID != 0 && mRS.isAlive()) {
+    private void helpDestroy() {
+        boolean shouldDestroy = false;
+        synchronized(this) {
+            if (!mDestroyed) {
+                shouldDestroy = true;
+                mDestroyed = true;
+            }
+        }
+
+        if (shouldDestroy) {
+            // must include nObjDestroy in the critical section
+            ReentrantReadWriteLock.ReadLock rlock = mRS.mRWLock.readLock();
+            rlock.lock();
+            // AllocationAdapters are BaseObjs with an ID of 0 but should not be passed to nObjDestroy
+            if(mRS.isAlive() && mID != 0) {
                 mRS.nObjDestroy(mID);
             }
             mRS = null;
