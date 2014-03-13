@@ -61,4 +61,12 @@ interface ICameraService
     int removeListener(ICameraServiceListener listener);
 
     int getCameraCharacteristics(int cameraId, out CameraMetadataNative info);
+
+    /**
+     * The java stubs for this method are not intended to be used.  Please use
+     * the native stub in frameworks/av/include/camera/ICameraService.h instead.
+     * The BinderHolder output is being used as a placeholder, and will not be
+     * well-formatted in the generated java method.
+     */
+    int getCameraVendorTagDescriptor(out BinderHolder desc);
 }

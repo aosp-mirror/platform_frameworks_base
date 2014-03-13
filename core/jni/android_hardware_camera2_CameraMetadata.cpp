@@ -19,13 +19,18 @@
 // #define LOG_NNDEBUG 0
 #define LOG_TAG "CameraMetadata-JNI"
 #include <utils/Log.h>
+#include <utils/RefBase.h>
+#include <string.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_os_Parcel.h"
 #include "android_runtime/AndroidRuntime.h"
 
+#include <binder/IServiceManager.h>
 #include <camera/CameraMetadata.h>
+#include <camera/ICameraService.h>
+#include <camera/VendorTagDescriptor.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 
@@ -112,6 +117,7 @@ extern "C" {
 static void CameraMetadata_classInit(JNIEnv *env, jobject thiz);
 static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyName);
 static jint CameraMetadata_getTypeFromTag(JNIEnv *env, jobject thiz, jint tag);
+static jint CameraMetadata_setupGlobalVendorTagDescriptor(JNIEnv *env, jobject thiz);
 
 // Less safe access to native pointer. Does NOT throw any Java exceptions if NULL.
 static CameraMetadata* CameraMetadata_getPointerNoThrow(JNIEnv *env, jobject thiz) {
@@ -372,6 +378,9 @@ static JNINativeMethod gCameraMetadataMethods[] = {
   { "nativeGetTypeFromTag",
     "(I)I",
     (void *)CameraMetadata_getTypeFromTag },
+  { "nativeSetupGlobalVendorTagDescriptor",
+    "()I",
+    (void*)CameraMetadata_setupGlobalVendorTagDescriptor },
 // instance methods
   { "nativeAllocate",
     "()J",
@@ -554,6 +563,31 @@ static jint CameraMetadata_getTypeFromTag(JNIEnv *env, jobject thiz, jint tag) {
     }
 
     return tagType;
+}
+
+static jint CameraMetadata_setupGlobalVendorTagDescriptor(JNIEnv *env, jobject thiz) {
+    const String16 NAME("media.camera");
+    sp<ICameraService> cameraService;
+    status_t err = getService(NAME, /*out*/&cameraService);
+
+    if (err != OK) {
+        ALOGE("%s: Failed to get camera service, received error %s (%d)", __FUNCTION__,
+                strerror(-err), err);
+        return err;
+    }
+
+    sp<VendorTagDescriptor> desc;
+    err = cameraService->getCameraVendorTagDescriptor(/*out*/desc);
+
+    if (err != OK) {
+        ALOGE("%s: Failed to setup vendor tag descriptors, received error %s (%d)", __FUNCTION__,
+                strerror(-err), err);
+        return err;
+    }
+
+    err = VendorTagDescriptor::setAsGlobalVendorTagDescriptor(desc);
+
+    return err;
 }
 
 } // extern "C"
