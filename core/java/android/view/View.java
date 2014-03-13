@@ -13953,7 +13953,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return A new or reused DisplayList object.
      */
     private DisplayList getDisplayList(DisplayList displayList, boolean isLayer) {
-        if (!canHaveDisplayList()) {
+        final HardwareRenderer renderer = getHardwareRenderer();
+        if (renderer == null || !canHaveDisplayList()) {
             return null;
         }
 
@@ -14032,12 +14033,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                 }
             } finally {
-                displayList.end(getHardwareRenderer(), canvas);
+                displayList.end(renderer, canvas);
                 displayList.setCaching(caching);
                 if (isLayer) {
                     displayList.setLeftTopRightBottom(0, 0, width, height);
                 } else {
                     setDisplayListProperties(displayList);
+                }
+
+                if (renderer != getHardwareRenderer()) {
+                    Log.w(VIEW_LOG_TAG, "View was detached during a draw() call!");
+                    // TODO: Should this be elevated to a crash?
+                    // For now have it behaves the same as it previously did, it
+                    // will result in the DisplayListData being destroyed later
+                    // than it could be but oh well...
                 }
             }
         } else if (!isLayer) {
