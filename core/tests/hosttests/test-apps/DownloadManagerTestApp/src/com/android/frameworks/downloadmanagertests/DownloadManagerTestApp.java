@@ -23,9 +23,6 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
-import com.android.frameworks.downloadmanagertests.DownloadManagerBaseTest;
-import com.android.frameworks.downloadmanagertests.DownloadManagerTestRunner;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -193,9 +190,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             int status = cursor.getInt(columnIndex);
             int currentWaitTime = 0;
 
-            // Wait until the download finishes; don't wait for a notification b/c
-            // the download may well have been completed before the last reboot.
-            waitForDownloadOrTimeout_skipNotification(dlRequest);
+            assertTrue(waitForDownload(dlRequest, 15 * 60 * 1000));
 
             Log.i(LOG_TAG, "Verifying download information...");
             // Verify specific info about the file (size, name, etc)...
@@ -235,7 +230,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
         dlRequest = mDownloadManager.enqueue(request);
 
         // Rather large file, so wait up to 15 mins...
-        waitForDownloadOrTimeout(dlRequest, WAIT_FOR_DOWNLOAD_POLL_TIME, 15 * 60 * 1000);
+        assertTrue(waitForDownload(dlRequest, 15 * 60 * 1000));
 
         Cursor cursor = getCursor(dlRequest);
         ParcelFileDescriptor pfd = null;
@@ -289,7 +284,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             dlRequest = mDownloadManager.enqueue(request);
             waitForDownloadToStart(dlRequest);
             // make sure we're starting to download some data...
-            waitForFileToGrow(downloadedFile);
+            waitToReceiveData(dlRequest);
 
             // download disable
             setWiFiStateOn(false);
@@ -317,7 +312,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             Log.i(LOG_TAG, "Turning on WiFi...");
             setWiFiStateOn(true);
             Log.i(LOG_TAG, "Waiting up to 3 minutes for download to complete...");
-            waitForDownloadsOrTimeout(dlRequest, 3 * 60 * 1000);
+            assertTrue(waitForDownload(dlRequest, 3 * 60 * 1000));
             ParcelFileDescriptor pfd = mDownloadManager.openDownloadedFile(dlRequest);
             verifyFileSize(pfd, filesize);
         } finally {
@@ -363,7 +358,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             dlRequest = mDownloadManager.enqueue(request);
             waitForDownloadToStart(dlRequest);
             // are we making any progress?
-            waitForFileToGrow(downloadedFile);
+            waitToReceiveData(dlRequest);
 
             // download disable
             Log.i(LOG_TAG, "Turning off WiFi...");
@@ -373,7 +368,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             // enable download...
             Log.i(LOG_TAG, "Turning on WiFi again...");
             setWiFiStateOn(true);
-            waitForFileToGrow(downloadedFile);
+            waitToReceiveData(dlRequest);
 
             // download disable
             Log.i(LOG_TAG, "Turning off WiFi...");
@@ -385,7 +380,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             setWiFiStateOn(true);
 
             Log.i(LOG_TAG, "Waiting up to 3 minutes for download to complete...");
-            waitForDownloadsOrTimeout(dlRequest, 3 * 60 * 1000);
+            assertTrue(waitForDownload(dlRequest, 3 * 60 * 1000));
             ParcelFileDescriptor pfd = mDownloadManager.openDownloadedFile(dlRequest);
             verifyFileSize(pfd, filesize);
         } finally {
@@ -433,7 +428,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             dlRequest = mDownloadManager.enqueue(request);
             waitForDownloadToStart(dlRequest);
             // are we making any progress?
-            waitForFileToGrow(downloadedFile);
+            waitToReceiveData(dlRequest);
 
             // download disable
             Log.i(LOG_TAG, "Turning on Airplane mode...");
@@ -444,7 +439,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             Log.i(LOG_TAG, "Turning off Airplane mode...");
             setAirplaneModeOn(false);
             // make sure we're starting to download some data...
-            waitForFileToGrow(downloadedFile);
+            waitToReceiveData(dlRequest);
 
             // reenable the connection to start up the download again
             Log.i(LOG_TAG, "Turning on Airplane mode again...");
@@ -456,7 +451,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             setAirplaneModeOn(false);
 
             Log.i(LOG_TAG, "Waiting up to 3 minutes for donwload to complete...");
-            waitForDownloadsOrTimeout(dlRequest, 180 * 1000);  // wait up to 3 mins before timeout
+            assertTrue(waitForDownload(dlRequest, 180 * 1000));  // wait up to 3 mins before timeout
             ParcelFileDescriptor pfd = mDownloadManager.openDownloadedFile(dlRequest);
             verifyFileSize(pfd, filesize);
         } finally {
@@ -476,7 +471,6 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
     public void runDownloadMultipleSimultaneously() throws Exception {
         final int TOTAL_DOWNLOADS = 15;
         HashSet<Long> downloadIds = new HashSet<Long>(TOTAL_DOWNLOADS);
-        MultipleDownloadsCompletedReceiver receiver = registerNewMultipleDownloadsReceiver();
 
         // Make sure there are no pending downloads currently going on
         removeAllCurrentDownloads();
@@ -494,8 +488,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
                 downloadIds.add(dlRequest);
             }
 
-            waitForDownloadsOrTimeout(DEFAULT_WAIT_POLL_TIME, 15 * 60 * 2000);  // wait 15 mins max
-            assertEquals(TOTAL_DOWNLOADS, receiver.numDownloadsCompleted());
+            assertTrue(waitForMultipleDownloads(downloadIds, 15 * 60 * 2000));  // wait 15 mins max
         } finally {
             removeAllCurrentDownloads();
         }
