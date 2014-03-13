@@ -105,6 +105,18 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
     }
 
     /**
+     * Set the global client-side vendor tag descriptor to allow use of vendor
+     * tags in camera applications.
+     *
+     * @return int A native status_t value corresponding to one of the
+     * {@link CameraBinderDecorator} integer constants.
+     * @see CameraBinderDecorator#throwOnError
+     *
+     * @hide
+     */
+    public static native int nativeSetupGlobalVendorTagDescriptor();
+
+    /**
      * Set a camera metadata field to a value. The field definitions can be
      * found in {@link CameraCharacteristics}, {@link CaptureResult}, and
      * {@link CaptureRequest}.

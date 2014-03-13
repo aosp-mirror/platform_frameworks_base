@@ -48,6 +48,8 @@ import java.util.ArrayList;
  */
 public final class CameraManager {
 
+    private static final String TAG = "CameraManager";
+
     /**
      * This should match the ICameraService definition
      */
@@ -77,6 +79,19 @@ public final class CameraManager {
          * into exceptions, and RemoteExceptions into other exceptions.
          */
         mCameraService = CameraBinderDecorator.newInstance(cameraServiceRaw);
+
+        try {
+            int err = CameraMetadataNative.nativeSetupGlobalVendorTagDescriptor();
+            if (err == CameraBinderDecorator.EOPNOTSUPP) {
+                Log.w(TAG, "HAL version doesn't vendor tags.");
+            } else {
+                CameraBinderDecorator.throwOnError(CameraMetadataNative.
+                        nativeSetupGlobalVendorTagDescriptor());
+            }
+        } catch(CameraRuntimeException e) {
+            throw new IllegalStateException("Failed to setup camera vendor tags",
+                    e.asChecked());
+        }
 
         try {
             mCameraService.addListener(new CameraServiceListener());
