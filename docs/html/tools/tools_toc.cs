@@ -34,7 +34,9 @@
               Migrating from Eclipse</a></li>
           <li><a href="<?cs var:toroot ?>sdk/installing/studio-tips.html">
               Tips and Tricks</a></li>
-        </ul>
+          <li><a href="<?cs var:toroot ?>sdk/installing/studio-layout.html">
+              Using the Layout Editor</a></li>
+          </ul>
       </li>
       <li><a href="<?cs var:toroot ?>sdk/exploring.html">
           <span class="en">Exploring the SDK</span></a></li>
