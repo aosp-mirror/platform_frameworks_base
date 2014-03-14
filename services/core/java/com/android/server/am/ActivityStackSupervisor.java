@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.START_ANY_ACTIVITY;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -1443,13 +1444,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
 
+        final boolean newDocument = intent.isDocument();
         if (sourceRecord == null) {
             // This activity is not being started from another...  in this
             // case we -always- start a new task.
-            if ((launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
+            if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
                 Slog.w(TAG, "startActivity called from non-Activity context; forcing " +
                         "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
                 launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
+            }
+        } else if (newDocument) {
+            if (r.launchMode != ActivityInfo.LAUNCH_MULTIPLE) {
+                Slog.w(TAG, "FLAG_ACTIVITY_NEW_DOCUMENT and launchMode != \"standard\"");
+                r.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             }
         } else if (sourceRecord.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
             // The original activity who is starting us is running as a single
@@ -1473,7 +1480,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 // so we don't want to blindly throw it in to that task.  Instead we will take
                 // the NEW_TASK flow and try to find a task for it. But save the task information
                 // so it can be used when creating the new task.
-                if ((launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
+                if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
                     Slog.w(TAG, "startActivity called from finishing " + sourceRecord
                             + "; forcing " + "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
                     launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -1489,7 +1496,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             sourceStack = null;
         }
 
-        if (r.resultTo != null && (launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
+        if (r.resultTo != null && (launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             // For whatever reason this activity is being launched into a new
             // task...  yet the caller has requested a result back.  Well, that
             // is pretty messed up, so instead immediately send back a cancel
@@ -1506,8 +1513,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         boolean movedHome = false;
         TaskRecord reuseTask = null;
         ActivityStack targetStack;
-        if (((launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
-                (launchFlags&Intent.FLAG_ACTIVITY_MULTIPLE_TASK) == 0)
+        if (((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
+                (launchFlags & Intent.FLAG_ACTIVITY_MULTIPLE_TASK) == 0)
                 || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK
                 || r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
             // If bring to front is requested, and no result is requested, and
@@ -1696,7 +1703,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (top != null && r.resultTo == null) {
                 if (top.realActivity.equals(r.realActivity) && top.userId == r.userId) {
                     if (top.app != null && top.app.thread != null) {
-                        if ((launchFlags&Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
+                        if ((launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
                             || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP
                             || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK) {
                             ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, top,

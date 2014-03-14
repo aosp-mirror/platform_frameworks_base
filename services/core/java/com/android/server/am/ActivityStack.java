@@ -492,6 +492,9 @@ final class ActivityStack {
             cls = new ComponentName(info.packageName, info.targetActivity);
         }
         final int userId = UserHandle.getUserId(info.applicationInfo.uid);
+        boolean isDocument = intent != null & intent.isDocument();
+        // If documentData is non-null then it must match the existing task data.
+        Uri documentData = isDocument ? intent.getData() : null;
 
         if (DEBUG_TASKS) Slog.d(TAG, "Looking for task of " + target + " in " + this);
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
@@ -508,23 +511,39 @@ final class ActivityStack {
                 continue;
             }
 
+            final Intent taskIntent = task.intent;
+            final Intent affinityIntent = task.affinityIntent;
+            final boolean taskIsDocument;
+            final Uri taskDocumentData;
+            if (taskIntent != null && taskIntent.isDocument()) {
+                taskIsDocument = true;
+                taskDocumentData = taskIntent.getData();
+            } else if (affinityIntent != null && affinityIntent.isDocument()) {
+                taskIsDocument = true;
+                taskDocumentData = affinityIntent.getData();
+            } else {
+                taskIsDocument = false;
+                taskDocumentData = null;
+            }
+
             if (DEBUG_TASKS) Slog.d(TAG, "Comparing existing cls="
-                    + r.task.intent.getComponent().flattenToShortString()
+                    + taskIntent.getComponent().flattenToShortString()
                     + "/aff=" + r.task.affinity + " to new cls="
                     + intent.getComponent().flattenToShortString() + "/aff=" + info.taskAffinity);
-            if (task.affinity != null) {
-                if (task.affinity.equals(info.taskAffinity)) {
+            if (!isDocument && !taskIsDocument && task.affinity != null) {
+                if (task.affinity.equals(target.taskAffinity)) {
                     if (DEBUG_TASKS) Slog.d(TAG, "Found matching affinity!");
                     return r;
                 }
-            } else if (task.intent != null && task.intent.getComponent().equals(cls)) {
+            } else if (taskIntent != null && taskIntent.getComponent().equals(cls) &&
+                    Objects.equals(documentData, taskDocumentData)) {
                 if (DEBUG_TASKS) Slog.d(TAG, "Found matching class!");
                 //dump();
                 if (DEBUG_TASKS) Slog.d(TAG, "For Intent " + intent + " bringing to top: "
                         + r.intent);
                 return r;
-            } else if (task.affinityIntent != null
-                    && task.affinityIntent.getComponent().equals(cls)) {
+            } else if (affinityIntent != null && affinityIntent.getComponent().equals(cls) &&
+                    Objects.equals(documentData, taskDocumentData)) {
                 if (DEBUG_TASKS) Slog.d(TAG, "Found matching class!");
                 //dump();
                 if (DEBUG_TASKS) Slog.d(TAG, "For Intent " + intent + " bringing to top: "
@@ -1857,7 +1876,7 @@ final class ActivityStack {
                 // If the caller has requested that the target task be
                 // reset, then do so.
                 if ((r.intent.getFlags()
-                        &Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
+                        & Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
                     resetTaskIfNeededLocked(r, r);
                     doShow = topRunningNonDelayedActivityLocked(null) == r;
                 }
@@ -2006,14 +2025,7 @@ final class ActivityStack {
                             + " out to new task " + target.task);
                 }
 
-                if (clearWhenTaskReset) {
-                    // This is the start of a new sub-task.
-                    if (target.thumbHolder == null) {
-                        target.thumbHolder = new ThumbnailHolder();
-                    }
-                } else {
-                    target.thumbHolder = newThumbHolder;
-                }
+                target.thumbHolder = newThumbHolder;
 
                 final int targetTaskId = targetTask.taskId;
                 mWindowManager.setAppGroupId(target.appToken, targetTaskId);
@@ -2484,7 +2496,7 @@ final class ActivityStack {
         final int index = activities.indexOf(r);
         if (index < (activities.size() - 1)) {
             task.setFrontOfTask();
-            if ((r.intent.getFlags()&Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
+            if ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
                 // If the caller asked that this activity (and all above it)
                 // be cleared when the task is reset, don't lose that information,
                 // but propagate it up to the next activity.

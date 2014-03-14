@@ -6849,6 +6849,7 @@ package android.content {
     field public static final int FLAG_ACTIVITY_FORWARD_RESULT = 33554432; // 0x2000000
     field public static final int FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY = 1048576; // 0x100000
     field public static final int FLAG_ACTIVITY_MULTIPLE_TASK = 134217728; // 0x8000000
+    field public static final int FLAG_ACTIVITY_NEW_DOCUMENT = 268959744; // 0x10080000
     field public static final int FLAG_ACTIVITY_NEW_TASK = 268435456; // 0x10000000
     field public static final int FLAG_ACTIVITY_NO_ANIMATION = 65536; // 0x10000
     field public static final int FLAG_ACTIVITY_NO_HISTORY = 1073741824; // 0x40000000
