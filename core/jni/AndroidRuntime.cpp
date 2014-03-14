@@ -435,6 +435,14 @@ void AndroidRuntime::parseExtraOpts(char* extraOptsBuf, const char* quotingArg)
  * Various arguments, most determined by system properties, are passed in.
  * The "mOptions" vector is updated.
  *
+ * CAUTION: when adding options in here, be careful not to put the
+ * char buffer inside a nested scope.  Adding the buffer to the
+ * options using mOptions.add() does not copy the buffer, so if the
+ * buffer goes out of scope the option may be overwritten.  It's best
+ * to put the buffer at the top of the function so that it is more
+ * unlikely that someone will surround it in a scope at a later time
+ * and thus introduce a bug.
+ *
  * Returns 0 on success.
  */
 int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
@@ -469,7 +477,15 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
       kEMIntFast,
       kEMJitCompiler,
     } executionMode = kEMDefault;
-
+    char profile_period[sizeof("-Xprofile-period:") + PROPERTY_VALUE_MAX];
+    char profile_duration[sizeof("-Xprofile-duration:") + PROPERTY_VALUE_MAX];
+    char profile_interval[sizeof("-Xprofile-interval:") + PROPERTY_VALUE_MAX];
+    char profile_backoff[sizeof("-Xprofile-backoff:") + PROPERTY_VALUE_MAX];
+    char langOption[sizeof("-Duser.language=") + 3];
+    char regionOption[sizeof("-Duser.region=") + 3];
+    char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:") + sizeof(propBuf)];
+    char jitOpBuf[sizeof("-Xjitop:") + PROPERTY_VALUE_MAX];
+    char jitMethodBuf[sizeof("-Xjitmethod:") + PROPERTY_VALUE_MAX];
 
     property_get("dalvik.vm.checkjni", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
@@ -670,7 +686,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         //mOptions.add(opt);
     }
 
-    char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:") + sizeof(propBuf)];
     property_get("dalvik.vm.lockprof.threshold", propBuf, "");
     if (strlen(propBuf) > 0) {
       strcpy(lockProfThresholdBuf, "-Xlockprofthreshold:");
@@ -680,7 +695,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     }
 
     /* Force interpreter-only mode for selected opcodes. Eg "1-0a,3c,f1-ff" */
-    char jitOpBuf[sizeof("-Xjitop:") + PROPERTY_VALUE_MAX];
     property_get("dalvik.vm.jit.op", propBuf, "");
     if (strlen(propBuf) > 0) {
         strcpy(jitOpBuf, "-Xjitop:");
@@ -690,7 +704,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     }
 
     /* Force interpreter-only mode for selected methods */
-    char jitMethodBuf[sizeof("-Xjitmethod:") + PROPERTY_VALUE_MAX];
     property_get("dalvik.vm.jit.method", propBuf, "");
     if (strlen(propBuf) > 0) {
         strcpy(jitMethodBuf, "-Xjitmethod:");
@@ -770,8 +783,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
 
     /* Set the properties for locale */
     {
-        char langOption[sizeof("-Duser.language=") + 3];
-        char regionOption[sizeof("-Duser.region=") + 3];
         strcpy(langOption, "-Duser.language=");
         strcpy(regionOption, "-Duser.region=");
         readLocale(langOption, regionOption);
@@ -786,35 +797,30 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
      * Set profiler options
      */
     if (libart) {
-      char period[sizeof("-Xprofile-period:") + PROPERTY_VALUE_MAX];
-      char duration[sizeof("-Xprofile-duration:") + PROPERTY_VALUE_MAX];
-      char interval[sizeof("-Xprofile-interval:") + PROPERTY_VALUE_MAX];
-      char backoff[sizeof("-Xprofile-backoff:") + PROPERTY_VALUE_MAX];
-
       // Number of seconds during profile runs.
-      strcpy(period, "-Xprofile-period:");
-      property_get("dalvik.vm.profile.period_secs", period+17, "10");
-      opt.optionString = period;
+      strcpy(profile_period, "-Xprofile-period:");
+      property_get("dalvik.vm.profile.period_secs", profile_period+17, "10");
+      opt.optionString = profile_period;
       mOptions.add(opt);
 
       // Length of each profile run (seconds).
-      strcpy(duration, "-Xprofile-duration:");
-      property_get("dalvik.vm.profile.duration_secs", duration+19, "30");
-      opt.optionString = duration;
+      strcpy(profile_duration, "-Xprofile-duration:");
+      property_get("dalvik.vm.profile.duration_secs", profile_duration+19, "30");
+      opt.optionString = profile_duration;
       mOptions.add(opt);
 
 
       // Polling interval during profile run (microseconds).
-      strcpy(interval, "-Xprofile-interval:");
-      property_get("dalvik.vm.profile.interval_us", interval+19, "10000");
-      opt.optionString = interval;
+      strcpy(profile_interval, "-Xprofile-interval:");
+      property_get("dalvik.vm.profile.interval_us", profile_interval+19, "10000");
+      opt.optionString = profile_interval;
       mOptions.add(opt);
 
       // Coefficient for period backoff.  The the period is multiplied
       // by this value after each profile run.
-      strcpy(backoff, "-Xprofile-backoff:");
-      property_get("dalvik.vm.profile.backoff_coeff", backoff+18, "2.0");
-      opt.optionString = backoff;
+      strcpy(profile_backoff, "-Xprofile-backoff:");
+      property_get("dalvik.vm.profile.backoff_coeff", profile_backoff+18, "2.0");
+      opt.optionString = profile_backoff;
       mOptions.add(opt);
     }
 
