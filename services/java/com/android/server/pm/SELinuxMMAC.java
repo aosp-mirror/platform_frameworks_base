@@ -52,24 +52,48 @@ public final class SELinuxMMAC {
     private static final boolean DEBUG_POLICY_INSTALL = DEBUG_POLICY || false;
 
     // Signature seinfo values read from policy.
-    private static HashMap<Signature, Policy> sSigSeinfo =
-        new HashMap<Signature, Policy>();
+    private static HashMap<Signature, Policy> sSigSeinfo = new HashMap<Signature, Policy>();
 
     // Default seinfo read from policy.
     private static String sDefaultSeinfo = null;
 
-    // Locations of potential install policy files.
-    private static final File[] INSTALL_POLICY_FILE = {
-        new File(Environment.getDataDirectory(), "security/mac_permissions.xml"),
-        new File(Environment.getRootDirectory(), "etc/security/mac_permissions.xml"),
-        null};
+    // Data policy override version file.
+    private static final String DATA_VERSION_FILE =
+            Environment.getDataDirectory() + "/security/current/selinux_version";
 
-    // Location of seapp_contexts policy file.
-    private static final String SEAPP_CONTEXTS_FILE = "/seapp_contexts";
+    // Base policy version file.
+    private static final String BASE_VERSION_FILE = "/selinux_version";
+
+    // Whether override security policies should be loaded.
+    private static final boolean USE_OVERRIDE_POLICY = useOverridePolicy();
+
+    // Data override mac_permissions.xml policy file.
+    private static final String DATA_MAC_PERMISSIONS =
+            Environment.getDataDirectory() + "/security/current/mac_permissions.xml";
+
+    // Base mac_permissions.xml policy file.
+    private static final String BASE_MAC_PERMISSIONS =
+            Environment.getRootDirectory() + "/etc/security/mac_permissions.xml";
+
+    // Determine which mac_permissions.xml file to use.
+    private static final String MAC_PERMISSIONS = USE_OVERRIDE_POLICY ?
+            DATA_MAC_PERMISSIONS : BASE_MAC_PERMISSIONS;
+
+    // Data override seapp_contexts policy file.
+    private static final String DATA_SEAPP_CONTEXTS =
+            Environment.getDataDirectory() + "/security/current/seapp_contexts";
+
+    // Base seapp_contexts policy file.
+    private static final String BASE_SEAPP_CONTEXTS = "/seapp_contexts";
+
+    // Determine which seapp_contexts file to use.
+    private static final String SEAPP_CONTEXTS = USE_OVERRIDE_POLICY ?
+            DATA_SEAPP_CONTEXTS : BASE_SEAPP_CONTEXTS;
 
     // Stores the hash of the last used seapp_contexts file.
     private static final String SEAPP_HASH_FILE =
             Environment.getDataDirectory().toString() + "/system/seapp_hash";
+
 
     // Signature policy stanzas
     static class Policy {
@@ -112,51 +136,17 @@ public final class SELinuxMMAC {
         sDefaultSeinfo = null;
     }
 
-    /**
-     * Parses an MMAC install policy from a predefined list of locations.
-     * @return boolean indicating whether an install policy was correctly parsed.
-     */
     public static boolean readInstallPolicy() {
-
-        return readInstallPolicy(INSTALL_POLICY_FILE);
-    }
-
-    /**
-     * Parses an MMAC install policy given as an argument.
-     * @param policyFile object representing the path of the policy.
-     * @return boolean indicating whether the install policy was correctly parsed.
-     */
-    public static boolean readInstallPolicy(File policyFile) {
-
-        return readInstallPolicy(new File[]{policyFile,null});
-    }
-
-    private static boolean readInstallPolicy(File[] policyFiles) {
         // Temp structures to hold the rules while we parse the xml file.
         // We add all the rules together once we know there's no structural problems.
         HashMap<Signature, Policy> sigSeinfo = new HashMap<Signature, Policy>();
         String defaultSeinfo = null;
 
         FileReader policyFile = null;
-        int i = 0;
-        while (policyFile == null && policyFiles != null && policyFiles[i] != null) {
-            try {
-                policyFile = new FileReader(policyFiles[i]);
-                break;
-            } catch (FileNotFoundException e) {
-                Slog.d(TAG,"Couldn't find install policy " + policyFiles[i].getPath());
-            }
-            i++;
-        }
-
-        if (policyFile == null) {
-            Slog.d(TAG, "No policy file found. All seinfo values will be null.");
-            return false;
-        }
-
-        Slog.d(TAG, "Using install policy file " + policyFiles[i].getPath());
-
         try {
+            policyFile = new FileReader(MAC_PERMISSIONS);
+            Slog.d(TAG, "Using policy file " + MAC_PERMISSIONS);
+
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(policyFile);
 
@@ -199,20 +189,14 @@ public final class SELinuxMMAC {
                     XmlUtils.skipCurrentTag(parser);
                 }
             }
-        } catch (XmlPullParserException e) {
-            // An error outside of a stanza means a structural problem
-            // with the xml file. So ignore it.
-            Slog.w(TAG, "Got exception parsing ", e);
+        } catch (XmlPullParserException xpe) {
+            Slog.w(TAG, "Got exception parsing " + MAC_PERMISSIONS, xpe);
             return false;
-        } catch (IOException e) {
-            Slog.w(TAG, "Got exception parsing ", e);
+        } catch (IOException ioe) {
+            Slog.w(TAG, "Got exception parsing " + MAC_PERMISSIONS, ioe);
             return false;
         } finally {
-            try {
-                policyFile.close();
-            } catch (IOException e) {
-                //omit
-            }
+            IoUtils.closeQuietly(policyFile);
         }
 
         flushInstallPolicy();
@@ -412,7 +396,7 @@ public final class SELinuxMMAC {
         // Any error with the seapp_contexts file should be fatal
         byte[] currentHash = null;
         try {
-            currentHash = returnHash(SEAPP_CONTEXTS_FILE);
+            currentHash = returnHash(SEAPP_CONTEXTS);
         } catch (IOException ioe) {
             Slog.e(TAG, "Error with hashing seapp_contexts.", ioe);
             return false;
@@ -434,7 +418,7 @@ public final class SELinuxMMAC {
      */
     public static void setRestoreconDone() {
         try {
-            final byte[] currentHash = returnHash(SEAPP_CONTEXTS_FILE);
+            final byte[] currentHash = returnHash(SEAPP_CONTEXTS);
             dumpHash(new File(SEAPP_HASH_FILE), currentHash);
         } catch (IOException ioe) {
             Slog.e(TAG, "Error with saving hash to " + SEAPP_HASH_FILE, ioe);
@@ -484,5 +468,22 @@ public final class SELinuxMMAC {
         } catch (NoSuchAlgorithmException nsae) {
             throw new RuntimeException(nsae);  // impossible
         }
+    }
+
+    private static boolean useOverridePolicy() {
+        try {
+            final String overrideVersion = IoUtils.readFileAsString(DATA_VERSION_FILE);
+            final String baseVersion = IoUtils.readFileAsString(BASE_VERSION_FILE);
+            if (overrideVersion.equals(baseVersion)) {
+                return true;
+            }
+            Slog.e(TAG, "Override policy version '" + overrideVersion + "' doesn't match " +
+                   "base version '" + baseVersion + "'. Skipping override policy files.");
+        } catch (FileNotFoundException fnfe) {
+            // Override version file doesn't have to exist so silently ignore.
+        } catch (IOException ioe) {
+            Slog.w(TAG, "Skipping override policy files.", ioe);
+        }
+        return false;
     }
 }
