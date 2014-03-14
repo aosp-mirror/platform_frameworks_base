@@ -39,7 +39,7 @@ oneway interface ICallService {
     /**
      * Sets an implementation of ICallServiceAdapter which the call service can use to add new calls
      * and communicate state changes of existing calls. This is the first method that is called
-     * after a the framework binds to the call service.
+     * after the framework binds to the call service.
      *
      * @param callServiceAdapter Interface to CallsManager for adding and updating calls.
      */
@@ -120,4 +120,20 @@ oneway interface ICallService {
      * @param callId The identifier of the call to disconnect.
      */
     void disconnect(String callId);
+
+    /**
+     * Puts the call identified by callId on hold. Telecomm invokes this method when a call should
+     * be placed on hold per user request or because a different call was made active.
+     *
+     * @param callId The identifier of the call to put on hold.
+     */
+    void hold(String callId);
+
+    /**
+     * Removes the call identified by callId from hold. Telecomm invokes this method when a call
+     * should be removed on hold per user request or because a different call was put on hold.
+     *
+     * @param callId The identifier of the call to remove from hold.
+     */
+    void unhold(String callId);
 }

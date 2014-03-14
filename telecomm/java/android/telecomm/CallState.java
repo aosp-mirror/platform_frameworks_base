@@ -56,6 +56,14 @@ public enum CallState {
     ACTIVE,
 
     /**
+     * Indicates that the call is currently on hold. In this state, the call is not terminated
+     * but no communication is allowed until the call is no longer on hold. The typical transition
+     * to this state is by the user putting an {@link #ACTIVE} call on hold by explicitly performing
+     * an action, such as clicking the hold button.
+     */
+    ON_HOLD,
+
+    /**
      * Indicates that a call is currently disconnected. All states can transition to this state
      * by the call service giving notice that the connection has been severed. When the user
      * explicitly ends a call, it will not transition to this state until the call service confirms

@@ -53,4 +53,18 @@ oneway interface IInCallAdapter {
      * @param callId The identifier of the call to disconnect.
      */
     void disconnectCall(String callId);
+
+    /**
+     * Instructs Telecomm to put the specified call on hold.
+     *
+     * @param callId The identifier of the call to put on hold.
+     */
+    void holdCall(String callId);
+
+    /**
+     * Instructs Telecomm to release the specified call from hold.
+     *
+     * @param callId The identifier of the call to release from hold.
+     */
+    void unholdCall(String callId);
 }

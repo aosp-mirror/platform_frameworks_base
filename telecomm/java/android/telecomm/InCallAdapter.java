@@ -78,4 +78,28 @@ public final class InCallAdapter {
         } catch (RemoteException e) {
         }
     }
+
+    /**
+     * Instructs Telecomm to put the specified call on hold.
+     *
+     * @param callId The identifier of the call to put on hold.
+     */
+    public void holdCall(String callId) {
+        try {
+            mAdapter.holdCall(callId);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Instructs Telecomm to release the specified call from hold.
+     *
+     * @param callId The identifier of the call to release from hold.
+     */
+    public void unholdCall(String callId) {
+        try {
+            mAdapter.unholdCall(callId);
+        } catch (RemoteException e) {
+        }
+    }
 }

@@ -24465,11 +24465,13 @@ package android.telecomm {
     method public abstract void call(android.telecomm.CallInfo);
     method public abstract void disconnect(java.lang.String);
     method public final android.os.IBinder getBinder();
+    method public abstract void hold(java.lang.String);
     method public abstract void isCompatibleWith(android.telecomm.CallInfo);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void reject(java.lang.String);
     method public abstract void setCallServiceAdapter(android.telecomm.CallServiceAdapter);
     method public abstract void setIncomingCallId(java.lang.String, android.os.Bundle);
+    method public abstract void unhold(java.lang.String);
   }
 
   public final class CallServiceAdapter {
@@ -24480,6 +24482,7 @@ package android.telecomm {
     method public void setDialing(java.lang.String);
     method public void setDisconnected(java.lang.String);
     method public void setIsCompatibleWith(java.lang.String, boolean);
+    method public void setOnHold(java.lang.String);
     method public void setRinging(java.lang.String);
   }
 
@@ -24533,13 +24536,16 @@ package android.telecomm {
     enum_constant public static final android.telecomm.CallState ACTIVE;
     enum_constant public static final android.telecomm.CallState DIALING;
     enum_constant public static final android.telecomm.CallState DISCONNECTED;
+    enum_constant public static final android.telecomm.CallState ON_HOLD;
     enum_constant public static final android.telecomm.CallState RINGING;
   }
 
   public final class InCallAdapter {
     method public void answerCall(java.lang.String);
     method public void disconnectCall(java.lang.String);
+    method public void holdCall(java.lang.String);
     method public void rejectCall(java.lang.String);
+    method public void unholdCall(java.lang.String);
   }
 
   public abstract class InCallService extends android.app.Service {
@@ -24549,6 +24555,7 @@ package android.telecomm {
     method protected abstract void setActive(java.lang.String);
     method protected abstract void setDisconnected(java.lang.String);
     method protected abstract void setInCallAdapter(android.telecomm.InCallAdapter);
+    method protected abstract void setOnHold(java.lang.String);
   }
 
   public final class TelecommConstants {
