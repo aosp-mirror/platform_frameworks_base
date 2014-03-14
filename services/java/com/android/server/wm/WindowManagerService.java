@@ -2373,6 +2373,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void removeWindowLocked(Session session, WindowState win) {
+        removeWindowLocked(session, win, false);
+    }
+
+    private void removeWindowLocked(Session session, WindowState win,
+            boolean forceRemove) {
         if (win.mAttrs.type == TYPE_APPLICATION_STARTING) {
             if (DEBUG_STARTING_WINDOW) Slog.d(TAG, "Starting window removed " + win);
             removeStartingWindowTimeout(win.mAppToken);
@@ -2423,7 +2428,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mDisplayMagnifier.onWindowTransitionLocked(win, transit);
                 }
             }
-            if (win.mExiting || win.mWinAnimator.isAnimating()) {
+            if (!forceRemove && (win.mExiting || win.mWinAnimator.isAnimating())) {
                 // The exit animation is running... wait for it!
                 //Slog.i(TAG, "*** Running exit animation...");
                 win.mExiting = true;
@@ -10840,7 +10845,7 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowList windows = displayContent.getWindowList();
             while (!windows.isEmpty()) {
                 final WindowState win = windows.get(windows.size() - 1);
-                removeWindowLocked(win.mSession, win);
+                removeWindowLocked(win.mSession, win, true);
             }
         }
         mAnimator.removeDisplayLocked(displayId);
