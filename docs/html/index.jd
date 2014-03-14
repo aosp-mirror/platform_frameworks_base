@@ -22,12 +22,13 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
                       <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
                       <div style="box-shadow: 3px 10px 18px 1px #999;width:600px;height:336px">
                         <div id="ytapiplayer">
-                          <a href="http://www.youtube.com/watch?v=WWArLD6nqrk"><img width=600 src="{@docRoot}images/video-kiwi.jpg"></a><!--You need Flash player 8+ and JavaScript enabled to view this video. -->
+                          <a href="http://www.youtube.com/watch?v=i2uvYI6blEE"><img width=600 
+                          src="https://i1.ytimg.com/vi/i2uvYI6blEE/maxresdefault.jpg"></a><!--You need Flash player 8+ and JavaScript enabled to view this video. -->
                         </div>
                         <script type="text/javascript">
                             var params = { allowScriptAccess: "always" };
                             var atts = { id: "ytapiplayer" };
-                            swfobject.embedSWF("//www.youtube.com/v/WWArLD6nqrk?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1",
+                            swfobject.embedSWF("//www.youtube.com/v/i2uvYI6blEE?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1",
                               "ytapiplayer", "600", "336", "8", null, null, params, atts);
 
                             // Callback used to pause/resume carousel based on video state
@@ -56,9 +57,8 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
                       </div>
                     </div>
                     <div class="content-right col-4">
-                    <h1 style="white-space:nowrap;line-height:1.2em;">Developer Story: <br />Kiwi, Inc.</h1>
-                    <p>Game developer Kiwi has had five titles in the top 25 grossing on Google Play. Hear how Google Play
-                      has helped them double revenue every six months.</p>
+                    <h1 style="white-space:nowrap;line-height:1.2em;">Developer Story: <br />Box Inc.</h1>
+                    <p>Box is a cloud-based platform and app for users to share business information. See how they got over 5 million downloads by leveraging the flexibility in the Android platform.</p>
                       <p><a href="{@docRoot}distribute/googleplay/spotlight/index.html" class="button">Watch more videos </a></p>
                     </div>
                 </li>
