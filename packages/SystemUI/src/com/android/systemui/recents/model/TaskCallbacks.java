@@ -20,4 +20,8 @@ package com.android.systemui.recents.model;
 public interface TaskCallbacks {
     /* Notifies when a task's data has been updated */
     public void onTaskDataChanged(Task task);
+    /* Notifies when a task has been bound */
+    public void onTaskBound();
+    /* Notifies when a task has been unbound */
+    public void onTaskUnbound();
 }

@@ -255,13 +255,13 @@ public class TaskView extends FrameLayout implements View.OnClickListener, TaskC
     }
 
     /** Actually synchronizes the model data into the views */
-    void syncToTask() {
+    private void syncToTask() {
         mThumbnailView.rebindToTask(mTask, false);
         mIconView.rebindToTask(mTask, false);
     }
 
     /** Unset the task and callback */
-    void unbindFromTask() {
+    private void unbindFromTask() {
         mTask.setCallbacks(null);
         mThumbnailView.unbindFromTask();
         mIconView.unbindFromTask();
@@ -357,15 +357,15 @@ public class TaskView extends FrameLayout implements View.OnClickListener, TaskC
 
     /** Enable the hw layers on this task view */
     void enableHwLayers() {
-        Console.log(Constants.DebugFlags.UI.HwLayers, "[TaskView|enableHwLayers]");
         mThumbnailView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
     }
 
     /** Disable the hw layers on this task view */
     void disableHwLayers() {
-        Console.log(Constants.DebugFlags.UI.HwLayers, "[TaskView|disableHwLayers]");
         mThumbnailView.setLayerType(View.LAYER_TYPE_NONE, null);
     }
+
+    /**** TaskCallbacks Implementation ****/
 
     @Override
     public void onTaskDataChanged(Task task) {
@@ -377,6 +377,16 @@ public class TaskView extends FrameLayout implements View.OnClickListener, TaskC
             mThumbnailView.rebindToTask(mTask, true);
             mIconView.rebindToTask(mTask, true);
         }
+    }
+
+    @Override
+    public void onTaskBound() {
+        syncToTask();
+    }
+
+    @Override
+    public void onTaskUnbound() {
+        unbindFromTask();
     }
 
     @Override

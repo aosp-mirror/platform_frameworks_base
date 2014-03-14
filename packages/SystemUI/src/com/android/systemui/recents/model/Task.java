@@ -54,6 +54,24 @@ public class Task {
         }
     }
 
+    /** Notifies the callback listeners that this task has been loaded */
+    public void notifyTaskLoaded(Bitmap thumbnail, Drawable icon) {
+        this.icon = icon;
+        this.thumbnail = thumbnail;
+        if (mCb != null) {
+            mCb.onTaskBound();
+        }
+    }
+
+    /** Notifies the callback listeners that this task has been unloaded */
+    public void notifyTaskUnloaded(Bitmap defaultThumbnail, Drawable defaultIcon) {
+        icon = defaultIcon;
+        thumbnail = defaultThumbnail;
+        if (mCb != null) {
+            mCb.onTaskUnbound();
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         // If we have multiple task entries for the same task, then we do the simple object
