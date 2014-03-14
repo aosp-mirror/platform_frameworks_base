@@ -142,6 +142,13 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static boolean native_isConvex(long nPath) {
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Path.isConvex is not supported.", null, null);
+        return true;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static int native_getFillType(long nPath) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
