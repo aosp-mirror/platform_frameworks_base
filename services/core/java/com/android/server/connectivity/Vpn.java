@@ -284,13 +284,12 @@ public class Vpn extends BaseNetworkStateTracker {
     }
 
     /**
-     * Protect a socket from routing changes by binding it to the given
-     * interface. The socket is NOT closed by this method.
+     * Protect a socket from VPN rules by binding it to the main routing table.
+     * The socket is NOT closed by this method.
      *
      * @param socket The socket to be bound.
-     * @param interfaze The name of the interface.
      */
-    public void protect(ParcelFileDescriptor socket, String interfaze) throws Exception {
+    public void protect(ParcelFileDescriptor socket) throws Exception {
 
         PackageManager pm = mContext.getPackageManager();
         int appUid = pm.getPackageUid(mPackage, mUserId);
@@ -304,8 +303,6 @@ public class Vpn extends BaseNetworkStateTracker {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-        // bind the socket to the interface
-        jniProtect(socket.getFd(), interfaze);
 
     }
 
@@ -684,7 +681,6 @@ public class Vpn extends BaseNetworkStateTracker {
     private native int jniSetRoutes(String interfaze, String routes);
     private native void jniReset(String interfaze);
     private native int jniCheck(String interfaze);
-    private native void jniProtect(int socket, String interfaze);
 
     private static RouteInfo findIPv4DefaultRoute(LinkProperties prop) {
         for (RouteInfo route : prop.getAllRoutes()) {
