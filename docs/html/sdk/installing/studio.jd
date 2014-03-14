@@ -318,6 +318,12 @@ information about how to resolve them.</p>
 
 
 <h2 id="Installing">Installing Android Studio</h2>
+<p>Android Studio requires JDK 6 or greater (JRE alone is not sufficient). To check if you 
+have JDK installed (and which version), open a terminal and type <code>javac -version</code>.
+If JDK is not available or the version is lower than 6,
+<a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">download
+JDK from here</a>.</p>
+<p>To install Android Studio:</p>
 <ol>
 <li>Download the <strong>Android Studio</strong> package from above.</li>
 <li>Install Android Studio and the SDK tools:
