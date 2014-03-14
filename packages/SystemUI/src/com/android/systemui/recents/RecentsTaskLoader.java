@@ -36,7 +36,6 @@ import com.android.systemui.recents.model.TaskStack;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 
@@ -84,7 +83,9 @@ class TaskResourceLoader implements Runnable {
     TaskResourceLoadQueue mLoadQueue;
     DrawableLruCache mIconCache;
     BitmapLruCache mThumbnailCache;
+
     boolean mCancelled;
+    boolean mWaitingOnLoadQueue;
 
     /** Constructor, creates a new loading thread that loads task resources in the background */
     public TaskResourceLoader(TaskResourceLoadQueue loadQueue, DrawableLruCache iconCache,
@@ -116,6 +117,11 @@ class TaskResourceLoader implements Runnable {
         Console.log(Constants.DebugFlags.App.TaskDataLoader, "[TaskResourceLoader|stop]");
         // Mark as cancelled for the thread to pick up
         mCancelled = true;
+        // If we are waiting for the load queue for more tasks, then we can just reset the
+        // Context now, since nothing is using it
+        if (mWaitingOnLoadQueue) {
+            mContext = null;
+        }
     }
 
     @Override
@@ -124,6 +130,8 @@ class TaskResourceLoader implements Runnable {
             Console.log(Constants.DebugFlags.App.TaskDataLoader,
                     "[TaskResourceLoader|run|" + Thread.currentThread().getId() + "]");
             if (mCancelled) {
+                Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                        "[TaskResourceLoader|cancel|" + Thread.currentThread().getId() + "]");
                 // We have to unset the context here, since the background thread may be using it
                 // when we call stop()
                 mContext = null;
@@ -142,50 +150,52 @@ class TaskResourceLoader implements Runnable {
                 final Task t = mLoadQueue.nextTask();
                 if (t != null) {
                     try {
-                        Drawable cachedIcon = mIconCache.get(t);
-                        Bitmap cachedThumbnail = mThumbnailCache.get(t);
+                        Drawable loadIcon = mIconCache.get(t.key);
+                        Bitmap loadThumbnail = mThumbnailCache.get(t.key);
                         Console.log(Constants.DebugFlags.App.TaskDataLoader,
                                 "  [TaskResourceLoader|load]",
-                                t + " icon: " + cachedIcon + " thumbnail: " + cachedThumbnail);
+                                t + " icon: " + loadIcon + " thumbnail: " + loadThumbnail);
                         // Load the icon
-                        if (cachedIcon == null) {
+                        if (loadIcon == null) {
                             PackageManager pm = mContext.getPackageManager();
-                            ActivityInfo info = pm.getActivityInfo(t.intent.getComponent(),
+                            ActivityInfo info = pm.getActivityInfo(t.key.intent.getComponent(),
                                     PackageManager.GET_META_DATA);
                             Drawable icon = info.loadIcon(pm);
                             if (!mCancelled) {
                                 Console.log(Constants.DebugFlags.App.TaskDataLoader,
                                         "    [TaskResourceLoader|loadIcon]",
                                         icon);
-                                t.icon = icon;
-                                mIconCache.put(t, icon);
+                                loadIcon = icon;
+                                mIconCache.put(t.key, icon);
                             }
                         }
                         // Load the thumbnail
-                        if (cachedThumbnail == null) {
+                        if (loadThumbnail == null) {
                             ActivityManager am = (ActivityManager)
                                     mContext.getSystemService(Context.ACTIVITY_SERVICE);
-                            Bitmap thumbnail = am.getTaskTopThumbnail(t.id);
+                            Bitmap thumbnail = am.getTaskTopThumbnail(t.key.id);
                             if (!mCancelled) {
                                 if (thumbnail != null) {
                                     Console.log(Constants.DebugFlags.App.TaskDataLoader,
                                             "    [TaskResourceLoader|loadThumbnail]",
                                             thumbnail);
-                                    t.thumbnail = thumbnail;
-                                    mThumbnailCache.put(t, thumbnail);
+                                    loadThumbnail = thumbnail;
+                                    mThumbnailCache.put(t.key, thumbnail);
                                 } else {
                                     Console.logError(mContext,
                                             "Failed to load task top thumbnail for: " +
-                                                    t.intent.getComponent().getPackageName());
+                                                    t.key.intent.getComponent().getPackageName());
                                 }
                             }
                         }
                         if (!mCancelled) {
                             // Notify that the task data has changed
+                            final Drawable newIcon = loadIcon;
+                            final Bitmap newThumbnail = loadThumbnail;
                             mMainThreadHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    t.notifyTaskDataChanged();
+                                    t.notifyTaskDataLoaded(newThumbnail, newIcon);
                                 }
                             });
                         }
@@ -200,7 +210,9 @@ class TaskResourceLoader implements Runnable {
                         try {
                             Console.log(Constants.DebugFlags.App.TaskDataLoader,
                                     "[TaskResourceLoader|waitOnLoadQueue]");
+                            mWaitingOnLoadQueue = true;
                             mLoadQueue.wait();
+                            mWaitingOnLoadQueue = false;
                         } catch (InterruptedException ie) {
                             ie.printStackTrace();
                         }
@@ -211,14 +223,17 @@ class TaskResourceLoader implements Runnable {
     }
 }
 
-/** The drawable cache */
-class DrawableLruCache extends LruCache<Task, Drawable> {
+/**
+ * The drawable cache.  By using the Task's key, we can prevent holding onto a reference to the Task
+ * resource data, while keeping the cache data in memory where necessary.
+ */
+class DrawableLruCache extends LruCache<Task.TaskKey, Drawable> {
     public DrawableLruCache(int cacheSize) {
         super(cacheSize);
     }
 
     @Override
-    protected int sizeOf(Task t, Drawable d) {
+    protected int sizeOf(Task.TaskKey t, Drawable d) {
         // The cache size will be measured in kilobytes rather than number of items
         // NOTE: this isn't actually correct, as the icon may be smaller
         int maxBytes = (d.getIntrinsicWidth() * d.getIntrinsicHeight() * 4);
@@ -226,14 +241,17 @@ class DrawableLruCache extends LruCache<Task, Drawable> {
     }
 }
 
-/** The bitmap cache */
-class BitmapLruCache extends LruCache<Task, Bitmap> {
+/**
+ * The bitmap cache.  By using the Task's key, we can prevent holding onto a reference to the Task
+ * resource data, while keeping the cache data in memory where necessary.
+ */
+class BitmapLruCache extends LruCache<Task.TaskKey, Bitmap> {
     public BitmapLruCache(int cacheSize) {
         super(cacheSize);
     }
 
     @Override
-    protected int sizeOf(Task t, Bitmap bitmap) {
+    protected int sizeOf(Task.TaskKey t, Bitmap bitmap) {
         // The cache size will be measured in kilobytes rather than number of items
         return bitmap.getAllocationByteCount() / 1024;
     }
@@ -257,16 +275,18 @@ public class RecentsTaskLoader {
 
     /** Private Constructor */
     private RecentsTaskLoader(Context context) {
-        // Calculate the cache sizes
+        // Calculate the cache sizes, we just use a reasonable number here similar to those
+        // suggested in the Android docs, 1/8th for the thumbnail cache and 1/32 of the max memory
+        // for icons.
         int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
         mMaxThumbnailCacheSize = maxMemory / 8;
         mMaxIconCacheSize = mMaxThumbnailCacheSize / 4;
-        int iconCacheSize = Constants.DebugFlags.App.ForceDisableBackgroundCache ? 1 :
+        int iconCacheSize = Constants.DebugFlags.App.DisableBackgroundCache ? 1 :
                 mMaxIconCacheSize;
-        int thumbnailCacheSize = Constants.DebugFlags.App.ForceDisableBackgroundCache ? 1 :
+        int thumbnailCacheSize = Constants.DebugFlags.App.DisableBackgroundCache ? 1 :
                 mMaxThumbnailCacheSize;
 
-        Console.log(Constants.DebugFlags.App.EnableBackgroundTaskLoading,
+        Console.log(Constants.DebugFlags.App.TaskDataLoader,
                 "[RecentsTaskLoader|init]", "thumbnailCache: " + thumbnailCacheSize +
                 " iconCache: " + iconCacheSize);
 
@@ -351,36 +371,34 @@ public class RecentsTaskLoader {
                 ActivityInfo info = pm.getActivityInfo(t.baseIntent.getComponent(),
                         PackageManager.GET_META_DATA);
                 String title = info.loadLabel(pm).toString();
-                Task task;
+                boolean isForemostTask = (i == (taskCount - 1));
+
                 // Preload the specified number of apps
-                if (i >= (taskCount - preloadCount) ||
-                        !Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
+                if (i >= (taskCount - preloadCount)) {
                     Console.log(Constants.DebugFlags.App.TaskDataLoader,
                             "[RecentsTaskLoader|preloadTask]",
                             "i: " + i + " task: " + t.baseIntent.getComponent().getPackageName());
 
-                    task = new Task(t.persistentId, t.baseIntent, title, null, null);
+                    Task task = new Task(t.persistentId, t.baseIntent, title);
 
-                    // Load the icon (if possible from the cache)
-                    if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
-                        task.icon = mIconCache.get(task);
+                    // Load the icon (if possible and not the foremost task, from the cache)
+                    if (!isForemostTask) {
+                        task.icon = mIconCache.get(task.key);
                     }
                     if (task.icon == null) {
                         task.icon = info.loadIcon(pm);
-                        if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
-                            mIconCache.put(task, task.icon);
-                        }
+                        mIconCache.put(task.key, task.icon);
                     }
 
-                    // Load the thumbnail (if possible from the cache)
-                    if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
-                        task.thumbnail = mThumbnailCache.get(task);
+                    // Load the thumbnail (if possible and not the foremost task, from the cache)
+                    if (!isForemostTask) {
+                        task.thumbnail = mThumbnailCache.get(task.key);
                     }
                     if (task.thumbnail == null) {
+                        Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                                "[RecentsTaskLoader|loadingTaskThumbnail]");
                         task.thumbnail = am.getTaskTopThumbnail(t.id);
-                        if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
-                            mThumbnailCache.put(task, task.thumbnail);
-                        }
+                        mThumbnailCache.put(task.key, task.thumbnail);
                     }
 
                     // Create as many tasks a we want to multiply by
@@ -394,19 +412,9 @@ public class RecentsTaskLoader {
                     for (int j = 0; j < Constants.Values.RecentsTaskLoader.TaskEntryMultiplier; j++) {
                         Console.log(Constants.DebugFlags.App.TaskDataLoader,
                                 "  [RecentsTaskLoader|task]", t.baseIntent.getComponent().getPackageName());
-                        task = new Task(t.persistentId, t.baseIntent, title, null, null);
-                        stack.addTask(task);
+                        stack.addTask(new Task(t.persistentId, t.baseIntent, title));
                     }
                 }
-
-                /*
-                if (stacks.containsKey(t.stackId)) {
-                    builder = stacks.get(t.stackId);
-                } else {
-                    builder = new TaskStackBuilder();
-                    stacks.put(t.stackId, builder);
-                }
-                */
             }
             Console.log(Constants.DebugFlags.App.TimeSystemCalls,
                     "[RecentsTaskLoader|getAllTaskTopThumbnail]",
@@ -428,64 +436,59 @@ public class RecentsTaskLoader {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // Start the task loader
         mLoader.start(context);
+
         return root;
     }
 
     /** Acquires the task resource data from the pool. */
     public void loadTaskData(Task t) {
-        if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
-            Drawable icon = mIconCache.get(t);
-            Bitmap thumbnail = mThumbnailCache.get(t);
+        Drawable icon = mIconCache.get(t.key);
+        Bitmap thumbnail = mThumbnailCache.get(t.key);
 
-            Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|loadTask]",
-                    t + " icon: " + icon + " thumbnail: " + thumbnail +
-                            " thumbnailCacheSize: " + mThumbnailCache.size());
+        Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|loadTask]",
+                t + " icon: " + icon + " thumbnail: " + thumbnail +
+                        " thumbnailCacheSize: " + mThumbnailCache.size());
 
-            boolean requiresLoad = false;
-            if (icon == null) {
-                icon = mDefaultIcon;
-                requiresLoad = true;
-            }
-            if (thumbnail == null) {
-                thumbnail = mDefaultThumbnail;
-                requiresLoad = true;
-            }
-            if (requiresLoad) {
-                mLoadQueue.addTask(t);
-            }
-            t.notifyTaskLoaded(thumbnail, icon);
+        boolean requiresLoad = false;
+        if (icon == null) {
+            icon = mDefaultIcon;
+            requiresLoad = true;
         }
+        if (thumbnail == null) {
+            thumbnail = mDefaultThumbnail;
+            requiresLoad = true;
+        }
+        if (requiresLoad) {
+            mLoadQueue.addTask(t);
+        }
+        t.notifyTaskDataLoaded(thumbnail, icon);
     }
 
     /** Releases the task resource data back into the pool. */
     public void unloadTaskData(Task t) {
-        if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
-            Console.log(Constants.DebugFlags.App.TaskDataLoader,
-                    "[RecentsTaskLoader|unloadTask]", t +
-                    " thumbnailCacheSize: " + mThumbnailCache.size());
-            mLoadQueue.removeTask(t);
-            t.notifyTaskUnloaded(mDefaultThumbnail, mDefaultIcon);
-        } else {
-            t.notifyTaskUnloaded(null, null);
-        }
+        Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                "[RecentsTaskLoader|unloadTask]", t +
+                " thumbnailCacheSize: " + mThumbnailCache.size());
+
+        mLoadQueue.removeTask(t);
+        t.notifyTaskDataUnloaded(mDefaultThumbnail, mDefaultIcon);
     }
 
     /** Completely removes the resource data from the pool. */
     public void deleteTaskData(Task t) {
-        if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
-            Console.log(Constants.DebugFlags.App.TaskDataLoader,
-                    "[RecentsTaskLoader|deleteTask]", t);
-            mLoadQueue.removeTask(t);
-            mThumbnailCache.remove(t);
-            mIconCache.remove(t);
-            t.notifyTaskUnloaded(mDefaultThumbnail, mDefaultIcon);
-        } else {
-            t.notifyTaskUnloaded(null, null);
-        }
+        Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                "[RecentsTaskLoader|deleteTask]", t);
+
+        mLoadQueue.removeTask(t);
+        mThumbnailCache.remove(t.key);
+        mIconCache.remove(t.key);
+        t.notifyTaskDataUnloaded(mDefaultThumbnail, mDefaultIcon);
     }
 
-    /** Stops the task loader */
+    /** Stops the task loader and clears all pending tasks */
     void stopLoader() {
         Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|stopLoader]");
         mLoader.stop();
@@ -496,46 +499,30 @@ public class RecentsTaskLoader {
         Console.log(Constants.DebugFlags.App.Memory, "[RecentsTaskLoader|onTrimMemory]",
                 Console.trimMemoryLevelToString(level));
 
-        if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
-            // If we are hidden, then we should unload each of the task keys
-            if (level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
-                Console.log(Constants.DebugFlags.App.Memory, "[RecentsTaskLoader|unloadTasks]"
-                );
-                // Unload each of the keys in the thumbnail cache
-                Map<Task, Bitmap> thumbnailCache = mThumbnailCache.snapshot();
-                for (Task t : thumbnailCache.keySet()) {
-                    unloadTaskData(t);
-                }
-                // As well as the keys in the icon cache
-                Map<Task, Drawable> iconCache = mIconCache.snapshot();
-                for (Task t : iconCache.keySet()) {
-                    unloadTaskData(t);
-                }
-            }
-
-            switch (level) {
-                case ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
-                case ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
-                case ComponentCallbacks2.TRIM_MEMORY_BACKGROUND:
-                    // We are leaving recents, so trim the data a bit
-                    mThumbnailCache.trimToSize(mMaxThumbnailCacheSize / 2);
-                    mIconCache.trimToSize(mMaxIconCacheSize / 2);
-                    break;
-                case ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW:
-                case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
-                    // We are going to be low on memory
-                    mThumbnailCache.trimToSize(mMaxThumbnailCacheSize / 4);
-                    mIconCache.trimToSize(mMaxIconCacheSize / 4);
-                    break;
-                case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
-                case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
-                    // We are low on memory, so release everything
-                    mThumbnailCache.evictAll();
-                    mIconCache.evictAll();
-                    break;
-                default:
-                    break;
-            }
+        switch (level) {
+            case ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
+                // Do nothing
+                break;
+            case ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
+            case ComponentCallbacks2.TRIM_MEMORY_BACKGROUND:
+                // We are leaving recents, so trim the data a bit
+                mThumbnailCache.trimToSize(mMaxThumbnailCacheSize / 2);
+                mIconCache.trimToSize(mMaxIconCacheSize / 2);
+                break;
+            case ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW:
+            case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
+                // We are going to be low on memory
+                mThumbnailCache.trimToSize(mMaxThumbnailCacheSize / 4);
+                mIconCache.trimToSize(mMaxIconCacheSize / 4);
+                break;
+            case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
+            case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
+                // We are low on memory, so release everything
+                mThumbnailCache.evictAll();
+                mIconCache.evictAll();
+                break;
+            default:
+                break;
         }
     }
 }

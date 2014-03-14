@@ -33,7 +33,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.OverScroller;
-import android.widget.Toast;
 import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -41,18 +40,20 @@ import com.android.systemui.recents.RecentsTaskLoader;
 import com.android.systemui.recents.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.recents.model.TaskStackCallbacks;
 
 import java.util.ArrayList;
 
-/** The TaskView callbacks */
-interface TaskStackViewCallbacks {
-    public void onTaskLaunched(TaskStackView stackView, TaskView tv, TaskStack stack, Task t);
-}
 
 /* The visual representation of a task stack view */
-public class TaskStackView extends FrameLayout implements TaskStackCallbacks, TaskViewCallbacks,
-        ViewPoolConsumer<TaskView, Task>, View.OnClickListener {
+public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCallbacks,
+        TaskView.TaskViewCallbacks, ViewPool.ViewPoolConsumer<TaskView, Task>,
+        View.OnClickListener {
+
+    /** The TaskView callbacks */
+    interface TaskStackViewCallbacks {
+        public void onTaskLaunched(TaskStackView stackView, TaskView tv, TaskStack stack, Task t);
+    }
+
     TaskStack mStack;
     TaskStackViewTouchHandler mTouchHandler;
     TaskStackViewCallbacks mCb;
@@ -348,7 +349,8 @@ public class TaskStackView extends FrameLayout implements TaskStackCallbacks, Ta
                 tv.disableHwLayers();
             }
         } else if (mHwLayersRefCount < 0) {
-            throw new RuntimeException("Invalid hw layers ref count");
+            new Throwable("Invalid hw layers ref count").printStackTrace();
+            Console.logError(getContext(), "Invalid HW layers ref count");
         }
     }
 
@@ -598,7 +600,7 @@ public class TaskStackView extends FrameLayout implements TaskStackCallbacks, Ta
         // Setup and attach the view to the window
         Task task = prepareData;
         // We try and rebind the task (this MUST be done before the task filled)
-        tv.bindToTask(task, this);
+        tv.onTaskBound(task);
         // Request that this tasks's data be filled
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         loader.loadTaskData(task);
@@ -619,7 +621,10 @@ public class TaskStackView extends FrameLayout implements TaskStackCallbacks, Ta
                 "" + insertIndex);
         if (isNewView) {
             addView(tv, insertIndex);
+
+            // Set the callbacks and listeners for this new view
             tv.setOnClickListener(this);
+            tv.setCallbacks(this);
         } else {
             attachViewToParent(tv, insertIndex, tv.getLayoutParams());
         }
@@ -649,7 +654,7 @@ public class TaskStackView extends FrameLayout implements TaskStackCallbacks, Ta
                 mStack.filterTasks(tv.getTask());
             }
         } else {
-            Toast.makeText(getContext(), "Task Filtering TBD", Toast.LENGTH_SHORT).show();
+            Console.logError(getContext(), "Task Filtering TBD");
         }
     }
 
@@ -995,7 +1000,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         final ActivityManager am = (ActivityManager)
                 activity.getSystemService(Context.ACTIVITY_SERVICE);
         if (am != null) {
-            am.removeTask(tv.getTask().id,
+            am.removeTask(tv.getTask().key.id,
                     ActivityManager.REMOVE_TASK_KILL_PROCESS);
         }
 

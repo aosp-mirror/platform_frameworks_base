@@ -24,6 +24,15 @@ import java.util.LinkedList;
 
 /* A view pool to manage more views than we can visibly handle */
 public class ViewPool<V, T> {
+
+    /* An interface to the consumer of a view pool */
+    public interface ViewPoolConsumer<V, T> {
+        public V createView(Context context);
+        public void prepareViewToEnterPool(V v);
+        public void prepareViewToLeavePool(V v, T prepareData, boolean isNewView);
+        public boolean hasPreferredData(V v, T preferredData);
+    }
+
     Context mContext;
     ViewPoolConsumer<V, T> mViewCreator;
     LinkedList<V> mPool = new LinkedList<V>();

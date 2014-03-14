@@ -28,10 +28,10 @@ public class Constants {
         public static class App {
             public static final boolean EnableTaskFiltering = false;
             public static final boolean EnableTaskStackClipping = false;
-            public static final boolean EnableBackgroundTaskLoading = true;
-            public static final boolean ForceDisableBackgroundCache = false;
+            // This disables the bitmap and icon caches to
+            public static final boolean DisableBackgroundCache = false;
 
-            public static final boolean TaskDataLoader = false;
+            public static final boolean TaskDataLoader = true;
             public static final boolean SystemUIHandshake = false;
             public static final boolean TimeSystemCalls = false;
             public static final boolean Memory = false;
@@ -43,7 +43,7 @@ public class Constants {
             public static final boolean TouchEvents = false;
             public static final boolean MeasureAndLayout = false;
             public static final boolean Clipping = false;
-            public static final boolean HwLayers = false;
+            public static final boolean HwLayers = true;
         }
 
         public static class TaskStack {
@@ -74,8 +74,6 @@ public class Constants {
             public static class Animation {
                 public static final int TaskRemovedReshuffleDuration = 200;
                 public static final int SnapScrollBackDuration = 650;
-                public static final int SwipeDismissDuration = 350;
-                public static final int SwipeSnapBackDuration = 350;
             }
 
             // The padding will be applied to the smallest dimension, and then applied to all sides

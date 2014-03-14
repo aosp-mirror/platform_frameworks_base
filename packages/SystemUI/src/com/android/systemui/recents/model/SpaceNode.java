@@ -17,6 +17,7 @@
 package com.android.systemui.recents.model;
 
 import android.content.Context;
+import android.graphics.Rect;
 
 import java.util.ArrayList;
 
@@ -26,6 +27,14 @@ import java.util.ArrayList;
  * stacks should be placed.
  */
 public class SpaceNode {
+    /* BSP node callbacks */
+    public interface SpaceNodeCallbacks {
+        /** Notifies when a node is added */
+        public void onSpaceNodeAdded(SpaceNode node);
+        /** Notifies when a node is measured */
+        public void onSpaceNodeMeasured(SpaceNode node, Rect rect);
+    }
+
     Context mContext;
 
     SpaceNode mStartNode;
