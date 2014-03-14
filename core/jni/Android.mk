@@ -42,7 +42,6 @@ LOCAL_SRC_FILES:= \
 	android_database_SQLiteDebug.cpp \
 	android_emoji_EmojiFactory.cpp \
 	android_view_DisplayEventReceiver.cpp \
-	android_view_DisplayList.cpp \
 	android_view_Surface.cpp \
 	android_view_SurfaceControl.cpp \
 	android_view_SurfaceSession.cpp \
@@ -61,6 +60,7 @@ LOCAL_SRC_FILES:= \
 	android_view_ThreadedRenderer.cpp \
 	android_view_MotionEvent.cpp \
 	android_view_PointerIcon.cpp \
+	android_view_RenderNode.cpp \
 	android_view_VelocityTracker.cpp \
 	android_text_AndroidCharacter.cpp \
 	android_text_AndroidBidi.cpp \
