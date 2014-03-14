@@ -1233,6 +1233,26 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports leanback UI. This is
+     * typically used in a living room television experience, but is a software
+     * feature unlike {@link #FEATURE_TELEVISION}. Devices running with this
+     * feature will use resources associated with the "television" UI mode.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_LEANBACK = "android.software.leanback";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports only leanback UI. Only
+     * applications designed for this experience should be run, though this is
+     * not enforced by the system.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_LEANBACK_ONLY = "android.software.leanback_only";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports WiFi (802.11) networking.
      */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -1252,6 +1272,7 @@ public abstract class PackageManager {
      * room television experience: displayed on a big screen, where the user
      * is sitting far away from it, and the dominant form of input will be
      * something like a DPAD, not through touch or mouse.
+     * @deprecated use {@link #FEATURE_LEANBACK} instead.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEVISION = "android.hardware.type.television";
