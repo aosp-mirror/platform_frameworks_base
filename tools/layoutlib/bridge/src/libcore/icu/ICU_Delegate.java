@@ -18,6 +18,7 @@ package libcore.icu;
 
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 import com.ibm.icu.text.DateTimePatternGenerator;
+import com.ibm.icu.util.Currency;
 import com.ibm.icu.util.ULocale;
 
 import java.util.Locale;
@@ -114,6 +115,11 @@ public class ICU_Delegate {
     @LayoutlibDelegate
     /*package*/ static int getCurrencyFractionDigits(String currencyCode) {
         return 0;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static int getCurrencyNumericCode(String currencyCode) {
+        return Currency.getInstance(currencyCode).getNumericCode();
     }
 
     @LayoutlibDelegate
