@@ -17,6 +17,7 @@
 package com.android.systemui.recents;
 
 import android.app.ActivityManager;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -35,6 +36,7 @@ import com.android.systemui.recents.model.TaskStack;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 
@@ -233,7 +235,7 @@ class BitmapLruCache extends LruCache<Task, Bitmap> {
     @Override
     protected int sizeOf(Task t, Bitmap bitmap) {
         // The cache size will be measured in kilobytes rather than number of items
-        return bitmap.getByteCount() / 1024;
+        return bitmap.getAllocationByteCount() / 1024;
     }
 }
 
@@ -247,17 +249,28 @@ public class RecentsTaskLoader {
     TaskResourceLoadQueue mLoadQueue;
     TaskResourceLoader mLoader;
 
+    int mMaxThumbnailCacheSize;
+    int mMaxIconCacheSize;
+
     BitmapDrawable mDefaultIcon;
     Bitmap mDefaultThumbnail;
 
     /** Private Constructor */
     private RecentsTaskLoader(Context context) {
+        // Calculate the cache sizes
         int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-        int iconCacheSize = Constants.DebugFlags.App.ForceDisableBackgroundCache ? 1 : maxMemory / 16;
-        int thumbnailCacheSize = Constants.DebugFlags.App.ForceDisableBackgroundCache ? 1 : maxMemory / 8;
-        Console.log(Constants.DebugFlags.App.SystemUIHandshake,
+        mMaxThumbnailCacheSize = maxMemory / 8;
+        mMaxIconCacheSize = mMaxThumbnailCacheSize / 4;
+        int iconCacheSize = Constants.DebugFlags.App.ForceDisableBackgroundCache ? 1 :
+                mMaxIconCacheSize;
+        int thumbnailCacheSize = Constants.DebugFlags.App.ForceDisableBackgroundCache ? 1 :
+                mMaxThumbnailCacheSize;
+
+        Console.log(Constants.DebugFlags.App.EnableBackgroundTaskLoading,
                 "[RecentsTaskLoader|init]", "thumbnailCache: " + thumbnailCacheSize +
                 " iconCache: " + iconCacheSize);
+
+        // Initialize the cache and loaders
         mLoadQueue = new TaskResourceLoadQueue();
         mIconCache = new DrawableLruCache(iconCacheSize);
         mThumbnailCache = new BitmapLruCache(thumbnailCacheSize);
@@ -293,7 +306,7 @@ public class RecentsTaskLoader {
 
     /** Reload the set of recent tasks */
     SpaceNode reload(Context context, int preloadCount) {
-        Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsTaskLoader|reload]");
+        Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|reload]");
         TaskStack stack = new TaskStack(context);
         SpaceNode root = new SpaceNode(context);
         root.setStack(stack);
@@ -310,7 +323,7 @@ public class RecentsTaskLoader {
             Console.log(Constants.DebugFlags.App.TimeSystemCalls,
                     "[RecentsTaskLoader|getRecentTasks]",
                     "" + (System.currentTimeMillis() - t1) + "ms");
-            Console.log(Constants.DebugFlags.App.SystemUIHandshake,
+            Console.log(Constants.DebugFlags.App.TaskDataLoader,
                     "[RecentsTaskLoader|tasks]", "" + tasks.size());
 
             // Remove home/recents tasks
@@ -335,35 +348,51 @@ public class RecentsTaskLoader {
             int taskCount = tasks.size();
             for (int i = 0; i < taskCount; i++) {
                 ActivityManager.RecentTaskInfo t = tasks.get(i);
-
-                // Load the label, icon and thumbnail
                 ActivityInfo info = pm.getActivityInfo(t.baseIntent.getComponent(),
                         PackageManager.GET_META_DATA);
                 String title = info.loadLabel(pm).toString();
-                Drawable icon = null;
-                Bitmap thumbnail = null;
                 Task task;
-                if (i >= (taskCount - preloadCount) || !Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
-                    Console.log(Constants.DebugFlags.App.SystemUIHandshake,
+                // Preload the specified number of apps
+                if (i >= (taskCount - preloadCount) ||
+                        !Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
+                    Console.log(Constants.DebugFlags.App.TaskDataLoader,
                             "[RecentsTaskLoader|preloadTask]",
                             "i: " + i + " task: " + t.baseIntent.getComponent().getPackageName());
-                    icon = info.loadIcon(pm);
-                    thumbnail = am.getTaskTopThumbnail(t.id);
-                    for (int j = 0; j < Constants.Values.RecentsTaskLoader.TaskEntryMultiplier; j++) {
-                        Console.log(Constants.DebugFlags.App.SystemUIHandshake,
-                                "  [RecentsTaskLoader|task]", t.baseIntent.getComponent().getPackageName());
-                        task = new Task(t.persistentId, t.baseIntent, title, icon, thumbnail);
+
+                    task = new Task(t.persistentId, t.baseIntent, title, null, null);
+
+                    // Load the icon (if possible from the cache)
+                    if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
+                        task.icon = mIconCache.get(task);
+                    }
+                    if (task.icon == null) {
+                        task.icon = info.loadIcon(pm);
                         if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
-                            if (thumbnail != null) mThumbnailCache.put(task, thumbnail);
-                            if (icon != null) {
-                                mIconCache.put(task, icon);
-                            }
+                            mIconCache.put(task, task.icon);
                         }
+                    }
+
+                    // Load the thumbnail (if possible from the cache)
+                    if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
+                        task.thumbnail = mThumbnailCache.get(task);
+                    }
+                    if (task.thumbnail == null) {
+                        task.thumbnail = am.getTaskTopThumbnail(t.id);
+                        if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
+                            mThumbnailCache.put(task, task.thumbnail);
+                        }
+                    }
+
+                    // Create as many tasks a we want to multiply by
+                    for (int j = 0; j < Constants.Values.RecentsTaskLoader.TaskEntryMultiplier; j++) {
+                        Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                                "  [RecentsTaskLoader|task]", t.baseIntent.getComponent().getPackageName());
                         stack.addTask(task);
                     }
                 } else {
+                    // Create as many tasks a we want to multiply by
                     for (int j = 0; j < Constants.Values.RecentsTaskLoader.TaskEntryMultiplier; j++) {
-                        Console.log(Constants.DebugFlags.App.SystemUIHandshake,
+                        Console.log(Constants.DebugFlags.App.TaskDataLoader,
                                 "  [RecentsTaskLoader|task]", t.baseIntent.getComponent().getPackageName());
                         task = new Task(t.persistentId, t.baseIntent, title, null, null);
                         stack.addTask(task);
@@ -388,9 +417,9 @@ public class RecentsTaskLoader {
             t1 = System.currentTimeMillis();
             List<ActivityManager.StackInfo> stackInfos = ams.getAllStackInfos();
             Console.log(Constants.DebugFlags.App.TimeSystemCalls, "[RecentsTaskLoader|getAllStackInfos]", "" + (System.currentTimeMillis() - t1) + "ms");
-            Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsTaskLoader|stacks]", "" + tasks.size());
+            Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|stacks]", "" + tasks.size());
             for (ActivityManager.StackInfo s : stackInfos) {
-                Console.log(Constants.DebugFlags.App.SystemUIHandshake, "  [RecentsTaskLoader|stack]", s.toString());
+                Console.log(Constants.DebugFlags.App.TaskDataLoader, "  [RecentsTaskLoader|stack]", s.toString());
                 if (stacks.containsKey(s.stackId)) {
                     stacks.get(s.stackId).setRect(s.bounds);
                 }
@@ -403,45 +432,46 @@ public class RecentsTaskLoader {
         return root;
     }
 
-    /** Acquires the task resource data from the pool.
-     * XXX: Move this into Task? */
+    /** Acquires the task resource data from the pool. */
     public void loadTaskData(Task t) {
         if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
-            t.icon = mIconCache.get(t);
-            t.thumbnail = mThumbnailCache.get(t);
+            Drawable icon = mIconCache.get(t);
+            Bitmap thumbnail = mThumbnailCache.get(t);
 
             Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|loadTask]",
-                    t + " icon: " + t.icon + " thumbnail: " + t.thumbnail);
+                    t + " icon: " + icon + " thumbnail: " + thumbnail +
+                            " thumbnailCacheSize: " + mThumbnailCache.size());
 
             boolean requiresLoad = false;
-            if (t.icon == null) {
-                t.icon = mDefaultIcon;
+            if (icon == null) {
+                icon = mDefaultIcon;
                 requiresLoad = true;
             }
-            if (t.thumbnail == null) {
-                t.thumbnail = mDefaultThumbnail;
+            if (thumbnail == null) {
+                thumbnail = mDefaultThumbnail;
                 requiresLoad = true;
             }
             if (requiresLoad) {
                 mLoadQueue.addTask(t);
             }
+            t.notifyTaskLoaded(thumbnail, icon);
         }
     }
 
-    /** Releases the task resource data back into the pool.
-     * XXX: Move this into Task? */
+    /** Releases the task resource data back into the pool. */
     public void unloadTaskData(Task t) {
         if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
             Console.log(Constants.DebugFlags.App.TaskDataLoader,
-                    "[RecentsTaskLoader|unloadTask]", t);
+                    "[RecentsTaskLoader|unloadTask]", t +
+                    " thumbnailCacheSize: " + mThumbnailCache.size());
             mLoadQueue.removeTask(t);
-            t.icon = mDefaultIcon;
-            t.thumbnail = mDefaultThumbnail;
+            t.notifyTaskUnloaded(mDefaultThumbnail, mDefaultIcon);
+        } else {
+            t.notifyTaskUnloaded(null, null);
         }
     }
 
-    /** Completely removes the resource data from the pool.
-     * XXX: Move this into Task? */
+    /** Completely removes the resource data from the pool. */
     public void deleteTaskData(Task t) {
         if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
             Console.log(Constants.DebugFlags.App.TaskDataLoader,
@@ -449,9 +479,10 @@ public class RecentsTaskLoader {
             mLoadQueue.removeTask(t);
             mThumbnailCache.remove(t);
             mIconCache.remove(t);
+            t.notifyTaskUnloaded(mDefaultThumbnail, mDefaultIcon);
+        } else {
+            t.notifyTaskUnloaded(null, null);
         }
-        t.icon = mDefaultIcon;
-        t.thumbnail = mDefaultThumbnail;
     }
 
     /** Stops the task loader */
@@ -459,5 +490,52 @@ public class RecentsTaskLoader {
         Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|stopLoader]");
         mLoader.stop();
         mLoadQueue.clearTasks();
+    }
+
+    void onTrimMemory(int level) {
+        Console.log(Constants.DebugFlags.App.Memory, "[RecentsTaskLoader|onTrimMemory]",
+                Console.trimMemoryLevelToString(level));
+
+        if (Constants.DebugFlags.App.EnableBackgroundTaskLoading) {
+            // If we are hidden, then we should unload each of the task keys
+            if (level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+                Console.log(Constants.DebugFlags.App.Memory, "[RecentsTaskLoader|unloadTasks]"
+                );
+                // Unload each of the keys in the thumbnail cache
+                Map<Task, Bitmap> thumbnailCache = mThumbnailCache.snapshot();
+                for (Task t : thumbnailCache.keySet()) {
+                    unloadTaskData(t);
+                }
+                // As well as the keys in the icon cache
+                Map<Task, Drawable> iconCache = mIconCache.snapshot();
+                for (Task t : iconCache.keySet()) {
+                    unloadTaskData(t);
+                }
+            }
+
+            switch (level) {
+                case ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
+                case ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
+                case ComponentCallbacks2.TRIM_MEMORY_BACKGROUND:
+                    // We are leaving recents, so trim the data a bit
+                    mThumbnailCache.trimToSize(mMaxThumbnailCacheSize / 2);
+                    mIconCache.trimToSize(mMaxIconCacheSize / 2);
+                    break;
+                case ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW:
+                case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
+                    // We are going to be low on memory
+                    mThumbnailCache.trimToSize(mMaxThumbnailCacheSize / 4);
+                    mIconCache.trimToSize(mMaxIconCacheSize / 4);
+                    break;
+                case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
+                case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
+                    // We are low on memory, so release everything
+                    mThumbnailCache.evictAll();
+                    mIconCache.evictAll();
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }

@@ -435,19 +435,12 @@ public class TaskStackView extends FrameLayout implements TaskStackCallbacks, Ta
         mStackRectSansPeek.top += Constants.Values.TaskStackView.StackPeekHeightPct * mStackRect.height();
 
         // Compute the task rect
-        if (RecentsConfiguration.getInstance().layoutVerticalStack) {
-            int minHeight = (int) (mStackRect.height() -
-                    (Constants.Values.TaskStackView.StackPeekHeightPct * mStackRect.height()));
-            int size = Math.min(minHeight, Math.min(mStackRect.width(), mStackRect.height()));
-            int centerX = mStackRect.centerX();
-            mTaskRect.set(centerX - size / 2, mStackRectSansPeek.top,
-                    centerX + size / 2, mStackRectSansPeek.top + size);
-        } else {
-            int size = Math.min(mStackRect.width(), mStackRect.height());
-            int centerY = mStackRect.centerY();
-            mTaskRect.set(mStackRectSansPeek.top, centerY - size / 2,
-                    mStackRectSansPeek.top + size, centerY + size / 2);
-        }
+        int minHeight = (int) (mStackRect.height() -
+                (Constants.Values.TaskStackView.StackPeekHeightPct * mStackRect.height()));
+        int size = Math.min(minHeight, Math.min(mStackRect.width(), mStackRect.height()));
+        int centerX = mStackRect.centerX();
+        mTaskRect.set(centerX - size / 2, mStackRectSansPeek.top,
+                centerX + size / 2, mStackRectSansPeek.top + size);
 
         // Update the scroll bounds
         updateMinMaxScroll(false);
@@ -589,7 +582,6 @@ public class TaskStackView extends FrameLayout implements TaskStackCallbacks, Ta
         // Report that this tasks's data is no longer being used
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         loader.unloadTaskData(task);
-        tv.unbindFromTask();
 
         // Detach the view from the hierarchy
         detachViewFromParent(tv);
@@ -610,7 +602,6 @@ public class TaskStackView extends FrameLayout implements TaskStackCallbacks, Ta
         // Request that this tasks's data be filled
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         loader.loadTaskData(task);
-        tv.syncToTask();
 
         // Find the index where this task should be placed in the children
         int insertIndex = -1;
@@ -678,14 +669,13 @@ public class TaskStackView extends FrameLayout implements TaskStackCallbacks, Ta
 }
 
 /* Handles touch events */
-class TaskStackViewTouchHandler {
+class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     static int INACTIVE_POINTER_ID = -1;
 
     TaskStackView mSv;
     VelocityTracker mVelocityTracker;
 
     boolean mIsScrolling;
-    boolean mIsSwiping;
 
     int mInitialMotionX, mInitialMotionY;
     int mLastMotionX, mLastMotionY;
@@ -697,21 +687,24 @@ class TaskStackViewTouchHandler {
     int mMaximumVelocity;
     // The scroll touch slop is used to calculate when we start scrolling
     int mScrollTouchSlop;
-    // The swipe touch slop is used to calculate when we start swiping left/right, this takes
-    // precendence over the scroll touch slop in case the user makes a gesture that starts scrolling
-    // but is intended to be a swipe
-    int mSwipeTouchSlop;
-    // After a certain amount of scrolling, we should start ignoring checks for swiping
-    int mMaxScrollMotionToRejectSwipe;
+    // The page touch slop is used to calculate when we start swiping
+    float mPagingTouchSlop;
+
+    SwipeHelper mSwipeHelper;
+    boolean mInterceptedBySwipeHelper;
 
     public TaskStackViewTouchHandler(Context context, TaskStackView sv) {
         ViewConfiguration configuration = ViewConfiguration.get(context);
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mScrollTouchSlop = configuration.getScaledTouchSlop();
-        mSwipeTouchSlop = 2 * mScrollTouchSlop;
-        mMaxScrollMotionToRejectSwipe = 4 * mScrollTouchSlop;
+        mPagingTouchSlop = configuration.getScaledPagingTouchSlop();
         mSv = sv;
+
+
+        float densityScale = context.getResources().getDisplayMetrics().density;
+        mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, mPagingTouchSlop);
+        mSwipeHelper.setMinAlpha(1f);
     }
 
     /** Velocity tracker helpers */
@@ -754,9 +747,16 @@ class TaskStackViewTouchHandler {
                 "[TaskStackViewTouchHandler|interceptTouchEvent]",
                 Console.motionEventActionToString(ev.getAction()), Console.AnsiBlue);
 
+        // Return early if we have no children
         boolean hasChildren = (mSv.getChildCount() > 0);
         if (!hasChildren) {
             return false;
+        }
+
+        // Pass through to swipe helper if we are swiping
+        mInterceptedBySwipeHelper = mSwipeHelper.onInterceptTouchEvent(ev);
+        if (mInterceptedBySwipeHelper) {
+            return true;
         }
 
         boolean wasScrolling = !mSv.mScroller.isFinished() ||
@@ -777,7 +777,8 @@ class TaskStackViewTouchHandler {
                 mVelocityTracker.addMovement(ev);
                 // Check if the scroller is finished yet
                 mIsScrolling = !mSv.mScroller.isFinished();
-                mIsSwiping = false;
+                // Enable HW layers
+                mSv.addHwLayersRefCount();
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -786,25 +787,7 @@ class TaskStackViewTouchHandler {
                 int activePointerIndex = ev.findPointerIndex(mActivePointerId);
                 int y = (int) ev.getY(activePointerIndex);
                 int x = (int) ev.getX(activePointerIndex);
-                if (mActiveTaskView != null &&
-                        mTotalScrollMotion < mMaxScrollMotionToRejectSwipe &&
-                        Math.abs(x - mInitialMotionX) > Math.abs(y - mInitialMotionY) &&
-                        Math.abs(x - mInitialMotionX) > mSwipeTouchSlop) {
-                    // Start swiping and stop scrolling
-                    mIsScrolling = false;
-                    mIsSwiping = true;
-                    System.out.println("SWIPING: " + mActiveTaskView);
-                    // Initialize the velocity tracker if necessary
-                    initOrResetVelocityTracker();
-                    mVelocityTracker.addMovement(ev);
-                    // Disallow parents from intercepting touch events
-                    final ViewParent parent = mSv.getParent();
-                    if (parent != null) {
-                        parent.requestDisallowInterceptTouchEvent(true);
-                    }
-                    // Enable HW layers
-                    mSv.addHwLayersRefCount();
-                } else if (Math.abs(y - mInitialMotionY) > mScrollTouchSlop) {
+                if (Math.abs(y - mInitialMotionY) > mScrollTouchSlop) {
                     // Save the touch move info
                     mIsScrolling = true;
                     // Initialize the velocity tracker if necessary
@@ -815,8 +798,6 @@ class TaskStackViewTouchHandler {
                     if (parent != null) {
                         parent.requestDisallowInterceptTouchEvent(true);
                     }
-                    // Enable HW layers
-                    mSv.addHwLayersRefCount();
                 }
 
                 mLastMotionX = x;
@@ -829,16 +810,17 @@ class TaskStackViewTouchHandler {
                 mSv.animateBoundScroll(Constants.Values.TaskStackView.Animation.SnapScrollBackDuration);
                 // Reset the drag state and the velocity tracker
                 mIsScrolling = false;
-                mIsSwiping = false;
                 mActivePointerId = INACTIVE_POINTER_ID;
                 mActiveTaskView = null;
                 mTotalScrollMotion = 0;
                 recycleVelocityTracker();
+                // Disable HW layers
+                mSv.decHwLayersRefCount();
                 break;
             }
         }
 
-        return wasScrolling || mIsScrolling || mIsSwiping;
+        return wasScrolling || mIsScrolling;
     }
 
     /** Handles touch events once we have intercepted them */
@@ -851,6 +833,11 @@ class TaskStackViewTouchHandler {
         boolean hasChildren = (mSv.getChildCount() > 0);
         if (!hasChildren) {
             return false;
+        }
+
+        // Pass through to swipe helper if we are swiping
+        if (mInterceptedBySwipeHelper && mSwipeHelper.onTouchEvent(ev)) {
+            return true;
         }
 
         // Update the velocity tracker
@@ -871,7 +858,6 @@ class TaskStackViewTouchHandler {
                 // Initialize the velocity tracker
                 initOrResetVelocityTracker();
                 mVelocityTracker.addMovement(ev);
-                // XXX: Set mIsScrolling or mIsSwiping?
                 // Disallow parents from intercepting touch events
                 final ViewParent parent = mSv.getParent();
                 if (parent != null) {
@@ -886,28 +872,7 @@ class TaskStackViewTouchHandler {
                 int x = (int) ev.getX(activePointerIndex);
                 int y = (int) ev.getY(activePointerIndex);
                 int deltaY = mLastMotionY - y;
-                int deltaX = x - mLastMotionX;
-                if (!mIsSwiping) {
-                    if (mActiveTaskView != null &&
-                            mTotalScrollMotion < mMaxScrollMotionToRejectSwipe &&
-                            Math.abs(x - mInitialMotionX) > Math.abs(y - mInitialMotionY) &&
-                            Math.abs(x - mInitialMotionX) > mSwipeTouchSlop) {
-                        mIsScrolling = false;
-                        mIsSwiping = true;
-                        System.out.println("SWIPING: " + mActiveTaskView);
-                        // Initialize the velocity tracker if necessary
-                        initOrResetVelocityTracker();
-                        mVelocityTracker.addMovement(ev);
-                        // Disallow parents from intercepting touch events
-                        final ViewParent parent = mSv.getParent();
-                        if (parent != null) {
-                            parent.requestDisallowInterceptTouchEvent(true);
-                        }
-                        // Enable HW layers
-                        mSv.addHwLayersRefCount();
-                    }
-                }
-                if (!mIsSwiping && !mIsScrolling) {
+                if (!mIsScrolling) {
                     if (Math.abs(y - mInitialMotionY) > mScrollTouchSlop) {
                         mIsScrolling = true;
                         // Initialize the velocity tracker
@@ -927,8 +892,6 @@ class TaskStackViewTouchHandler {
                     if (mSv.isScrollOutOfBounds()) {
                         mVelocityTracker.clear();
                     }
-                } else if (mIsSwiping) {
-                    mActiveTaskView.setTranslationX(mActiveTaskView.getTranslationX() + deltaX);
                 }
                 mLastMotionX = x;
                 mLastMotionY = y;
@@ -936,107 +899,33 @@ class TaskStackViewTouchHandler {
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                if (mIsScrolling || mIsSwiping) {
-                    final TaskView activeTv = mActiveTaskView;
-                    final VelocityTracker velocityTracker = mVelocityTracker;
-                    velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                final VelocityTracker velocityTracker = mVelocityTracker;
+                velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                int velocity = (int) velocityTracker.getYVelocity(mActivePointerId);
 
-                    if (mIsSwiping) {
-                        int initialVelocity = (int) velocityTracker.getXVelocity(mActivePointerId);
-                        if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
-                            // Fling to dismiss
-                            int newScrollX = (int) (Math.signum(initialVelocity) *
-                                    activeTv.getMeasuredWidth());
-                            int duration = Math.min(Constants.Values.TaskStackView.Animation.SwipeDismissDuration,
-                                    (int) (Math.abs(newScrollX - activeTv.getScrollX()) *
-                                            1000f / Math.abs(initialVelocity)));
-                            activeTv.animate()
-                                    .translationX(newScrollX)
-                                    .alpha(0f)
-                                    .setDuration(duration)
-                                    .setListener(new AnimatorListenerAdapter() {
-                                        @Override
-                                        public void onAnimationEnd(Animator animation) {
-                                            Task task = activeTv.getTask();
-                                            Activity activity = (Activity) mSv.getContext();
-
-                                            // We have to disable the listener to ensure that we
-                                            // don't hit this again
-                                            activeTv.animate().setListener(null);
-
-                                            // Remove the task from the view
-                                            mSv.mStack.removeTask(task);
-
-                                            // Remove any stored data from the loader
-                                            RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-                                            loader.deleteTaskData(task);
-
-                                            // Remove the task from activity manager
-                                            final ActivityManager am = (ActivityManager)
-                                                activity.getSystemService(Context.ACTIVITY_SERVICE);
-                                            if (am != null) {
-                                                am.removeTask(activeTv.getTask().id,
-                                                        ActivityManager.REMOVE_TASK_KILL_PROCESS);
-                                            }
-
-                                            // If there are no remaining tasks, then just close the activity
-                                            if (mSv.mStack.getTaskCount() == 0) {
-                                                activity.finish();
-                                            }
-
-                                            // Disable HW layers
-                                            mSv.decHwLayersRefCount();
-                                        }
-                                    })
-                                    .start();
-                            // Enable HW layers
-                            mSv.addHwLayersRefCount();
-                        } else {
-                            // Animate it back into place
-                            // XXX: Make this animation a function of the velocity OR distance
-                            int duration = Constants.Values.TaskStackView.Animation.SwipeSnapBackDuration;
-                            activeTv.animate()
-                                    .translationX(0)
-                                    .setDuration(duration)
-                                    .setListener(new AnimatorListenerAdapter() {
-                                        @Override
-                                        public void onAnimationEnd(Animator animation) {
-                                            // Disable HW layers
-                                            mSv.decHwLayersRefCount();
-                                        }
-                                    })
-                                    .start();
-                            // Enable HW layers
-                            mSv.addHwLayersRefCount();
-                        }
-                    } else {
-                        int velocity = (int) velocityTracker.getYVelocity(mActivePointerId);
-                        if ((Math.abs(velocity) > mMinimumVelocity)) {
-                            Console.log(Constants.DebugFlags.UI.TouchEvents,
-                                "[TaskStackViewTouchHandler|fling]",
-                                "scroll: " + mSv.getStackScroll() + " velocity: " + velocity,
-                                    Console.AnsiGreen);
-                            // Enable HW layers on the stack
-                            mSv.addHwLayersRefCount();
-                            // Fling scroll
-                            mSv.mScroller.fling(0, mSv.getStackScroll(),
-                                    0, -velocity,
-                                    0, 0,
-                                    mSv.mMinScroll, mSv.mMaxScroll,
-                                    0, 0);
-                            // Invalidate to kick off computeScroll
-                            mSv.invalidate();
-                        } else if (mSv.isScrollOutOfBounds()) {
-                            // Animate the scroll back into bounds
-                            // XXX: Make this animation a function of the velocity OR distance
-                            mSv.animateBoundScroll(Constants.Values.TaskStackView.Animation.SnapScrollBackDuration);
-                        }
-                    }
+                if (mIsScrolling && (Math.abs(velocity) > mMinimumVelocity)) {
+                    Console.log(Constants.DebugFlags.UI.TouchEvents,
+                        "[TaskStackViewTouchHandler|fling]",
+                        "scroll: " + mSv.getStackScroll() + " velocity: " + velocity,
+                            Console.AnsiGreen);
+                    // Enable HW layers on the stack
+                    mSv.addHwLayersRefCount();
+                    // Fling scroll
+                    mSv.mScroller.fling(0, mSv.getStackScroll(),
+                            0, -velocity,
+                            0, 0,
+                            mSv.mMinScroll, mSv.mMaxScroll,
+                            0, 0);
+                    // Invalidate to kick off computeScroll
+                    mSv.invalidate();
+                } else if (mSv.isScrollOutOfBounds()) {
+                    // Animate the scroll back into bounds
+                    // XXX: Make this animation a function of the velocity OR distance
+                    mSv.animateBoundScroll(Constants.Values.TaskStackView.Animation.SnapScrollBackDuration);
                 }
 
                 mActivePointerId = INACTIVE_POINTER_ID;
                 mIsScrolling = false;
-                mIsSwiping = false;
                 mTotalScrollMotion = 0;
                 recycleVelocityTracker();
                 // Disable HW layers
@@ -1044,25 +933,14 @@ class TaskStackViewTouchHandler {
                 break;
             }
             case MotionEvent.ACTION_CANCEL: {
-                if (mIsScrolling || mIsSwiping) {
-                    if (mIsSwiping) {
-                        // Animate it back into place
-                        // XXX: Make this animation a function of the velocity OR distance
-                        int duration = Constants.Values.TaskStackView.Animation.SwipeSnapBackDuration;
-                        mActiveTaskView.animate()
-                                .translationX(0)
-                                .setDuration(duration)
-                                .start();
-                    } else {
-                        // Animate the scroll back into bounds
-                        // XXX: Make this animation a function of the velocity OR distance
-                        mSv.animateBoundScroll(Constants.Values.TaskStackView.Animation.SnapScrollBackDuration);
-                    }
+                if (mSv.isScrollOutOfBounds()) {
+                    // Animate the scroll back into bounds
+                    // XXX: Make this animation a function of the velocity OR distance
+                    mSv.animateBoundScroll(Constants.Values.TaskStackView.Animation.SnapScrollBackDuration);
                 }
 
                 mActivePointerId = INACTIVE_POINTER_ID;
                 mIsScrolling = false;
-                mIsSwiping = false;
                 mTotalScrollMotion = 0;
                 recycleVelocityTracker();
                 // Disable HW layers
@@ -1071,5 +949,73 @@ class TaskStackViewTouchHandler {
             }
         }
         return true;
+    }
+
+    /**** SwipeHelper Implementation ****/
+
+    @Override
+    public View getChildAtPosition(MotionEvent ev) {
+        return findViewAtPoint((int) ev.getX(), (int) ev.getY());
+    }
+
+    @Override
+    public boolean canChildBeDismissed(View v) {
+        return true;
+    }
+
+    @Override
+    public void onBeginDrag(View v) {
+        // Enable HW layers
+        mSv.addHwLayersRefCount();
+        // Disallow parents from intercepting touch events
+        final ViewParent parent = mSv.getParent();
+        if (parent != null) {
+            parent.requestDisallowInterceptTouchEvent(true);
+        }
+    }
+
+    @Override
+    public void onChildDismissed(View v) {
+        TaskView tv = (TaskView) v;
+        Task task = tv.getTask();
+        Activity activity = (Activity) mSv.getContext();
+
+        // We have to disable the listener to ensure that we
+        // don't hit this again
+        tv.animate().setListener(null);
+
+        // Remove the task from the view
+        mSv.mStack.removeTask(task);
+
+        // Remove any stored data from the loader
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        loader.deleteTaskData(task);
+
+        // Remove the task from activity manager
+        final ActivityManager am = (ActivityManager)
+                activity.getSystemService(Context.ACTIVITY_SERVICE);
+        if (am != null) {
+            am.removeTask(tv.getTask().id,
+                    ActivityManager.REMOVE_TASK_KILL_PROCESS);
+        }
+
+        // If there are no remaining tasks, then just close the activity
+        if (mSv.mStack.getTaskCount() == 0) {
+            activity.finish();
+        }
+
+        // Disable HW layers
+        mSv.decHwLayersRefCount();
+    }
+
+    @Override
+    public void onSnapBackCompleted(View v) {
+        // Do Nothing
+    }
+
+    @Override
+    public void onDragCancelled(View v) {
+        // Disable HW layers
+        mSv.decHwLayersRefCount();
     }
 }

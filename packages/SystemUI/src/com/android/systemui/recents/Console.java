@@ -17,6 +17,7 @@
 package com.android.systemui.recents;
 
 
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -36,20 +37,20 @@ public class Console {
 
     /** Logs a key */
     public static void log(String key) {
-        Console.log(true, key, "", AnsiReset);
+        log(true, key, "", AnsiReset);
     }
 
     /** Logs a conditioned key */
     public static void log(boolean condition, String key) {
         if (condition) {
-            Console.log(condition, key, "", AnsiReset);
+            log(condition, key, "", AnsiReset);
         }
     }
 
     /** Logs a key in a specific color */
     public static void log(boolean condition, String key, Object data) {
         if (condition) {
-            Console.log(condition, key, data, AnsiReset);
+            log(condition, key, data, AnsiReset);
         }
     }
 
@@ -74,6 +75,50 @@ public class Console {
         }
     }
 
+    /** Logs a stack trace */
+    public static void logStackTrace() {
+        logStackTrace("", 99);
+    }
+
+    /** Logs a stack trace to a certain depth */
+    public static void logStackTrace(int depth) {
+        logStackTrace("", depth);
+    }
+
+    /** Logs a stack trace to a certain depth with a key */
+    public static void logStackTrace(String key, int depth) {
+        int offset = 0;
+        StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
+        String tinyStackTrace = "";
+        // Skip over the known stack trace classes
+        for (int i = 0; i < callStack.length; i++) {
+            StackTraceElement el = callStack[i];
+            String className = el.getClassName();
+            if (className.indexOf("dalvik.system.VMStack") == -1 &&
+                className.indexOf("java.lang.Thread") == -1 &&
+                className.indexOf("recents.Console") == -1) {
+                break;
+            } else {
+                offset++;
+            }
+        }
+        // Build the pretty stack trace
+        int start = Math.min(offset + depth, callStack.length);
+        int end = offset;
+        String indent = "";
+        for (int i = start - 1; i >= end; i--) {
+            StackTraceElement el = callStack[i];
+            tinyStackTrace += indent + " -> " + el.getClassName() +
+                    "[" + el.getLineNumber() + "]." + el.getMethodName();
+            if (i > end) {
+                tinyStackTrace += "\n";
+                indent += "  ";
+            }
+        }
+        log(true, key, tinyStackTrace, AnsiRed);
+    }
+
+
     /** Returns the stringified MotionEvent action */
     public static String motionEventActionToString(int action) {
         switch (action) {
@@ -91,6 +136,27 @@ public class Console {
                 return "Pointer Up";
             default:
                 return "" + action;
+        }
+    }
+
+    public static String trimMemoryLevelToString(int level) {
+        switch (level) {
+            case ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
+                return "UI Hidden";
+            case ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
+                return "Running Moderate";
+            case ComponentCallbacks2.TRIM_MEMORY_BACKGROUND:
+                return "Background";
+            case ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW:
+                return "Running Low";
+            case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
+                return "Moderate";
+            case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
+                return "Critical";
+            case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
+                return "Complete";
+            default:
+                return "" + level;
         }
     }
 }
