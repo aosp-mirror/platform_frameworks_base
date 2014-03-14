@@ -100,11 +100,12 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
-    public void setHidden(boolean isHidden) {
+    public int setHidden(boolean isHidden) {
         try {
-            mService.setHidden(isHidden);
+            return mService.setHidden(isHidden);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
+            return 0;
         }
     }
 

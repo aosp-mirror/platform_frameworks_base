@@ -20,7 +20,7 @@
     carrier-provided PUK code and entering a new SIM PIN for it. -->
 <com.android.keyguard.KeyguardSimPukView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
+    xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_sim_puk_view"
     android:orientation="vertical"
     android:layout_width="match_parent"

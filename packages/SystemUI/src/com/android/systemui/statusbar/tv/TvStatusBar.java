@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 
+import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.statusbar.BaseStatusBar;
 
@@ -90,6 +91,11 @@ public class TvStatusBar extends BaseStatusBar {
 
     @Override // CommandQueue
     public void setWindowState(int window, int state) {
+    }
+
+    @Override
+    public void setKeyguardShown(boolean showKeyguard, IKeyguardShowCallback callback,
+            boolean updateKeyguardFlags) {
     }
 
     @Override

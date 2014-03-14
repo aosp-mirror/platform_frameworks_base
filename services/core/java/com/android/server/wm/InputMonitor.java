@@ -284,7 +284,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 final boolean hasFocus = (child == mInputFocus);
                 final boolean isVisible = child.isVisibleLw();
                 final boolean hasWallpaper = (child == mService.mWallpaperTarget)
-                        && (type != WindowManager.LayoutParams.TYPE_KEYGUARD);
+                        && (privateFlags & WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD) == 0;
                 final boolean onDefaultDisplay = (child.getDisplayId() == Display.DEFAULT_DISPLAY);
 
                 // If there's a drag in progress and 'child' is a potential drop target,

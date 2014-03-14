@@ -19,7 +19,7 @@
 <!-- This is the SIM PIN view that allows the user to enter a SIM PIN to unlock the device. -->
 <com.android.keyguard.KeyguardSimPinView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
+    xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_sim_pin_view"
     android:orientation="vertical"
     android:layout_width="match_parent"

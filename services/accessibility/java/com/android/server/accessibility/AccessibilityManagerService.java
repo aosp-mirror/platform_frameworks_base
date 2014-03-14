@@ -2972,7 +2972,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     return AccessibilityWindowInfo.TYPE_INPUT_METHOD;
                 }
 
-                case WindowManager.LayoutParams.TYPE_KEYGUARD:
                 case WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG:
                 case WindowManager.LayoutParams.TYPE_NAVIGATION_BAR:
                 case WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL:

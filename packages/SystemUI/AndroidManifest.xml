@@ -240,6 +240,10 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name=".keyguard.KeyguardService"
+            android:exported="true" />
+
         <activity android:name=".Somnambulator"
             android:label="@string/start_dreams"
             android:icon="@mipmap/ic_launcher_dreams"

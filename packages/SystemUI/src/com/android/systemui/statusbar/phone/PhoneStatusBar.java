@@ -65,6 +65,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -72,17 +73,22 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.keyguard.KeyguardHostView;
+import com.android.keyguard.KeyguardSimpleHostView;
 import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
@@ -350,6 +356,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
         }};
 
+    private boolean mKeyguardShowing;
+
+    private ViewGroup mKeyguard;
+
+    private Button mDismissKeyguard;
+
     @Override
     public void setZenMode(int mode) {
         super.setZenMode(mode);
@@ -431,6 +443,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     }
                 });
 
+        mKeyguard = (ViewGroup) mStatusBarWindow.findViewById(R.id.keyguard);
         if (!ActivityManager.isHighEndGfx()) {
             mStatusBarWindow.setBackground(null);
             mNotificationPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
@@ -1495,15 +1508,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         // Expand the window to encompass the full screen in anticipation of the drag.
         // This is only possible to do atomically because the status bar is at the top of the screen!
+        expandWindow();
+
+        visibilityChanged(true);
+
+        setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
+    }
+
+    private void expandWindow() {
         WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
         lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         lp.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
         mWindowManager.updateViewLayout(mStatusBarWindow, lp);
-
-        visibilityChanged(true);
-
-        setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
     }
 
     private void releaseFocus() {
@@ -1539,7 +1556,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mHandler.sendEmptyMessage(MSG_CLOSE_SEARCH_PANEL);
         }
 
-        if (mStatusBarWindow != null) {
+        if (mStatusBarWindow != null && !mKeyguardShowing) {
             mStatusBarWindow.cancelExpandHelper();
             mStatusBarView.collapseAllPanels(true);
         }
@@ -1751,7 +1768,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (SPEW) Log.d(TAG, "makeExpandedInvisible: mExpandedVisible=" + mExpandedVisible
                 + " mExpandedVisible=" + mExpandedVisible);
 
-        if (!mExpandedVisible || mStatusBarWindow == null) {
+        if (!mExpandedVisible || mStatusBarWindow == null || mKeyguardShowing) {
             return;
         }
 
@@ -1785,11 +1802,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         visibilityChanged(false);
 
         // Shrink the window to the size of the status bar only
-        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
-        lp.height = getStatusBarHeight();
-        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        lp.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-        mWindowManager.updateViewLayout(mStatusBarWindow, lp);
+        contractWindow();
 
         if ((mDisabled & StatusBarManager.DISABLE_NOTIFICATION_ICONS) == 0) {
             setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
@@ -1804,6 +1817,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
+    }
+
+    private void contractWindow() {
+        WindowManager.LayoutParams lp =
+                (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
+        lp.height = getStatusBarHeight();
+        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        lp.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+        mWindowManager.updateViewLayout(mStatusBarWindow, lp);
     }
 
     /**
@@ -1914,7 +1936,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 && mStatusBarWindowState != state) {
             mStatusBarWindowState = state;
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Status bar " + windowStateToString(state));
-            if (!showing) {
+            if (!showing && !mKeyguardShowing) {
                 mStatusBarView.collapseAllPanels(false);
             }
         }
@@ -2356,7 +2378,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 PixelFormat.TRANSLUCENT);
 
         lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-
         lp.gravity = getStatusBarGravity();
         lp.setTitle("StatusBar");
         lp.packageName = mContext.getPackageName();
@@ -2669,6 +2690,67 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 // oh well
             }
         }
+    }
+
+    @Override
+    public void setKeyguardShown(boolean showKeyguard, final IKeyguardShowCallback callback,
+            boolean updateWindowFlags) {
+        mKeyguardShowing = showKeyguard;
+        if (updateWindowFlags) {
+            WindowManager.LayoutParams lp =
+                    (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
+            if (showKeyguard) {
+                lp.flags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+                lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+            } else {
+                lp.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+                lp.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+            }
+            mWindowManager.updateViewLayout(mStatusBarWindow, lp);
+        }
+        if (!showKeyguard) {
+            mKeyguard.setVisibility(View.GONE);
+            mKeyguard.removeAllViews();
+            contractWindow();
+        } else {
+            expandWindow();
+            mKeyguard.setVisibility(View.VISIBLE);
+            KeyguardSimpleHostView view = (KeyguardSimpleHostView) LayoutInflater.from(mContext)
+                    .inflate(R.layout.keyguard_simple_host_view, mKeyguard, false);
+            mKeyguard.addView(view);
+            view.setOnDismissAction(new KeyguardHostView.OnDismissAction() {
+                @Override
+                public boolean onDismiss() {
+                    contractWindow();
+                    if (mKeyguardService != null) {
+                        mKeyguardService.dismissKeyguard();
+                    }
+                    return false;
+                }
+            });
+            view.show();
+        }
+        if (callback != null) {
+            mStatusBarView.getViewTreeObserver().addOnPreDrawListener(
+                    new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    mStatusBarView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    mStatusBarView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                callback.onShown(mStatusBarWindow.getWindowToken());
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Could not call show callback", e);
+                            }
+                        }
+                    });
+                    return true;
+                }
+            });
+        }
+
     }
 
     /**

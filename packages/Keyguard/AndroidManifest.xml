@@ -45,8 +45,5 @@
         android:persistent="true"
         android:supportsRtl="true">
 
-        <service android:name=".KeyguardService"
-            android:exported="true" />
-
     </application>
 </manifest>

@@ -57,12 +57,10 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         public void onTrigger(View v, int target) {
             final int resId = mGlowPadView.getResourceIdForTarget(target);
 
-            switch (resId) {
-                case R.drawable.ic_lockscreen_unlock_phantom:
-                case R.drawable.ic_lockscreen_unlock:
-                    mCallback.userActivity(0);
-                    mCallback.dismiss(false);
-                break;
+            if (resId == R.drawable.ic_lockscreen_unlock_phantom
+                    || resId == R.drawable.ic_lockscreen_unlock) {
+                mCallback.userActivity(0);
+                mCallback.dismiss(false);
             }
         }
 

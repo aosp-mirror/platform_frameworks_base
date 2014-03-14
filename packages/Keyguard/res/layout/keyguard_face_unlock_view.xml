@@ -20,7 +20,7 @@
 <!-- This is the screen that allows the user to unlock by showing their face.  -->
 <com.android.keyguard.KeyguardFaceUnlockView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
+    xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_face_unlock_view"
     android:orientation="vertical"
     android:layout_width="match_parent"

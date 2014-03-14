@@ -1885,7 +1885,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 int insertionIndex = 0;
                 if (visible && foundW != null) {
                     final int type = foundW.mAttrs.type;
-                    if (type == TYPE_KEYGUARD || type == TYPE_KEYGUARD_SCRIM) {
+                    final int privateFlags = foundW.mAttrs.privateFlags;
+                    if ((privateFlags & PRIVATE_FLAG_KEYGUARD) != 0
+                            || type == TYPE_KEYGUARD_SCRIM) {
                         insertionIndex = windows.indexOf(foundW);
                     }
                 }
@@ -5347,7 +5349,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int N = windows.size();
                 for (int i=0; i<N; i++) {
                     WindowState w = windows.get(i);
-                    if (w.mAttrs.type == TYPE_KEYGUARD) {
+                    if ((w.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                         // Only if there is a keyguard attached to the window manager
                         // will we consider ourselves as having a keyguard.  If it
                         // isn't attached, we don't know if it wants to be shown or
@@ -5369,7 +5371,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             haveApp = true;
                         } else if (w.mAttrs.type == TYPE_WALLPAPER) {
                             haveWallpaper = true;
-                        } else if (w.mAttrs.type == TYPE_KEYGUARD) {
+                        } else if ((w.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                             haveKeyguard = true;
                         }
                     }
@@ -8307,7 +8309,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // just don't display").
             if (!gone || !win.mHaveFrame || win.mLayoutNeeded
                     || ((win.isConfigChanged() || win.setInsetsChanged()) &&
-                            (win.mAttrs.type == TYPE_KEYGUARD ||
+                            ((win.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 ||
                             win.mAppToken != null && win.mAppToken.layoutConfigChanges))
                     || win.mAttrs.type == TYPE_UNIVERSE_BACKGROUND) {
                 if (!win.mLayoutAttached) {
@@ -8847,8 +8849,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (canBeSeen
                     && (type == TYPE_SYSTEM_DIALOG
                      || type == TYPE_RECENTS_OVERLAY
-                     || type == TYPE_KEYGUARD
-                     || type == TYPE_SYSTEM_ERROR)) {
+                     || type == TYPE_SYSTEM_ERROR
+                     || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0)) {
                 mInnerFields.mSyswin = true;
             }
 
@@ -8861,7 +8863,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // content on secondary displays (by forcibly enabling mirroring unless
                     // there is other content we want to show) but still allow opaque
                     // keyguard dialogs to be shown.
-                    if (type == TYPE_DREAM || type == TYPE_KEYGUARD) {
+                    if (type == TYPE_DREAM || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                         mInnerFields.mObscureApplicationContentOnSecondaryDisplays = true;
                     }
                     mInnerFields.mDisplayHasContent = true;

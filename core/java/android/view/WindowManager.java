@@ -49,7 +49,7 @@ import android.util.Log;
 public interface WindowManager extends ViewManager {
     /**
      * Exception that is thrown when trying to add view whose
-     * {@link WindowManager.LayoutParams} {@link WindowManager.LayoutParams#token}
+     * {@link LayoutParams} {@link LayoutParams#token}
      * is invalid.
      */
     public static class BadTokenException extends RuntimeException {
@@ -173,7 +173,6 @@ public interface WindowManager extends ViewManager {
          * @see #TYPE_SEARCH_BAR
          * @see #TYPE_PHONE
          * @see #TYPE_SYSTEM_ALERT
-         * @see #TYPE_KEYGUARD
          * @see #TYPE_TOAST
          * @see #TYPE_SYSTEM_OVERLAY
          * @see #TYPE_PRIORITY_PHONE
@@ -197,7 +196,6 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.IntToString(from = TYPE_SEARCH_BAR, to = "TYPE_SEARCH_BAR"),
             @ViewDebug.IntToString(from = TYPE_PHONE, to = "TYPE_PHONE"),
             @ViewDebug.IntToString(from = TYPE_SYSTEM_ALERT, to = "TYPE_SYSTEM_ALERT"),
-            @ViewDebug.IntToString(from = TYPE_KEYGUARD, to = "TYPE_KEYGUARD"),
             @ViewDebug.IntToString(from = TYPE_TOAST, to = "TYPE_TOAST"),
             @ViewDebug.IntToString(from = TYPE_SYSTEM_OVERLAY, to = "TYPE_SYSTEM_OVERLAY"),
             @ViewDebug.IntToString(from = TYPE_PRIORITY_PHONE, to = "TYPE_PRIORITY_PHONE"),
@@ -341,13 +339,13 @@ public interface WindowManager extends ViewManager {
          * In multiuser systems shows only on the owning user's window.
          */
         public static final int TYPE_SYSTEM_ALERT       = FIRST_SYSTEM_WINDOW+3;
-        
+
         /**
          * Window type: keyguard window.
          * In multiuser systems shows on all users' windows.
          */
         public static final int TYPE_KEYGUARD           = FIRST_SYSTEM_WINDOW+4;
-        
+
         /**
          * Window type: transient notifications.
          * In multiuser systems shows only on the owning user's window.
@@ -913,7 +911,6 @@ public interface WindowManager extends ViewManager {
          */
         public static final int FLAG_NEEDS_MENU_KEY = 0x40000000;
 
-
         /**
          * Various behavioral options/flags.  Default is none.
          * 
@@ -1085,6 +1082,14 @@ public interface WindowManager extends ViewManager {
          * becomes top-most.
          * {@hide} */
         public static final int PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR = 0x00000200;
+
+        /**
+         * Flag whether the current window is a keyguard window, meaning that it will hide all other
+         * windows behind it except for windows with flag {@link #FLAG_SHOW_WHEN_LOCKED} set.
+         * Further, this can only be set by {@link LayoutParams#TYPE_STATUS_BAR}.
+         * {@hide}
+         */
+        public static final int PRIVATE_FLAG_KEYGUARD = 0x00000400;
 
         /**
          * Control flags that are private to the platform.
