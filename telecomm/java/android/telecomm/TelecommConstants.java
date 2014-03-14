@@ -70,7 +70,7 @@ public final class TelecommConstants {
             "android.intent.extra.INCOMING_CALL_EXTRAS";
 
     /**
-     * Optional extra for {@link TelephonyManager.ACTION_PHONE_STATE_CHANGED} containing the unique
+     * Optional extra for {@link TelephonyManager#ACTION_PHONE_STATE_CHANGED} containing the unique
      * ID of the call.
      */
     public static final String EXTRA_CALL_ID = "android.telecomm.extra.CALL_ID";
