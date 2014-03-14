@@ -878,7 +878,7 @@ public class AppOpsManager {
     }
 
     /**
-     * Like {@link #checkOp but instead of throwing a {@link SecurityException} it
+     * Like {@link #checkOp} but instead of throwing a {@link SecurityException} it
      * returns {@link #MODE_ERRORED}.
      */
     public int checkOpNoThrow(String op, int uid, String packageName) {
