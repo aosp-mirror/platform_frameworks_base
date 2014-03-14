@@ -231,7 +231,7 @@ public class ICU_Delegate {
         result.percent = '%';
         result.perMill = '\u2030';
         result.monetarySeparator = ' ';
-        result.minusSign = '-';
+        result.minusSign = "-";
         result.exponentSeparator = "e";
         result.infinity = "\u221E";
         result.NaN = "NaN";
