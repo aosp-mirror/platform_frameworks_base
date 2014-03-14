@@ -452,6 +452,9 @@ public class LocationManagerService extends ILocationManager.Stub {
      * @param userId the new active user's UserId
      */
     private void switchUser(int userId) {
+        if (mCurrentUserId == userId) {
+            return;
+        }
         mBlacklist.switchUser(userId);
         mLocationHandler.removeMessages(MSG_LOCATION_CHANGED);
         synchronized (mLock) {
