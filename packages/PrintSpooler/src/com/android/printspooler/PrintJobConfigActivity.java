@@ -2190,12 +2190,16 @@ public class PrintJobConfigActivity extends Activity {
                         // Select the old color mode - nothing really changed.
                         setColorModeSpinnerSelectionNoCallback(oldColorModeNewIndex);
                     } else {
-                        final int selectedColorModeIndex = Integer.numberOfTrailingZeros(
-                                    (colorModes & defaultAttributes.getColorMode()));
-                        setColorModeSpinnerSelectionNoCallback(selectedColorModeIndex);
-                        mCurrPrintAttributes.setColorMode(mColorModeSpinnerAdapter
-                                .getItem(selectedColorModeIndex).value);
-                        someAttributeSelectionChanged = true;
+                        final int selectedColorMode = colorModes & defaultAttributes.getColorMode();
+                        final int itemCount = mColorModeSpinnerAdapter.getCount();
+                        for (int i = 0; i < itemCount; i++) {
+                            SpinnerItem<Integer> item = mColorModeSpinnerAdapter.getItem(i);
+                            if (selectedColorMode == item.value) {
+                                setColorModeSpinnerSelectionNoCallback(i);
+                                mCurrPrintAttributes.setColorMode(selectedColorMode);
+                                someAttributeSelectionChanged = true;
+                            }
+                        }
                     }
                 }
                 mColorModeSpinner.setEnabled(true);
