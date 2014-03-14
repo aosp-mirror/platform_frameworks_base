@@ -7307,6 +7307,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_FAKETOUCH_MULTITOUCH_JAZZHAND = "android.hardware.faketouch.multitouch.jazzhand";
     field public static final java.lang.String FEATURE_HOME_SCREEN = "android.software.home_screen";
     field public static final java.lang.String FEATURE_INPUT_METHODS = "android.software.input_methods";
+    field public static final java.lang.String FEATURE_LEANBACK = "android.software.leanback";
     field public static final java.lang.String FEATURE_LIVE_WALLPAPER = "android.software.live_wallpaper";
     field public static final java.lang.String FEATURE_LOCATION = "android.hardware.location";
     field public static final java.lang.String FEATURE_LOCATION_GPS = "android.hardware.location.gps";
@@ -7330,7 +7331,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_TELEPHONY = "android.hardware.telephony";
     field public static final java.lang.String FEATURE_TELEPHONY_CDMA = "android.hardware.telephony.cdma";
     field public static final java.lang.String FEATURE_TELEPHONY_GSM = "android.hardware.telephony.gsm";
-    field public static final java.lang.String FEATURE_TELEVISION = "android.hardware.type.television";
+    field public static final deprecated java.lang.String FEATURE_TELEVISION = "android.hardware.type.television";
     field public static final java.lang.String FEATURE_TOUCHSCREEN = "android.hardware.touchscreen";
     field public static final java.lang.String FEATURE_TOUCHSCREEN_MULTITOUCH = "android.hardware.touchscreen.multitouch";
     field public static final java.lang.String FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT = "android.hardware.touchscreen.multitouch.distinct";
@@ -21813,7 +21814,7 @@ package android.renderscript {
   }
 
   public class BaseObj {
-    method public synchronized void destroy();
+    method public void destroy();
     method public java.lang.String getName();
     method public void setName(java.lang.String);
   }
