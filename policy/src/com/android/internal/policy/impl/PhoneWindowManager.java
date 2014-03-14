@@ -3421,18 +3421,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         && attrs.height == WindowManager.LayoutParams.MATCH_PARENT) {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "Fullscreen window: " + win);
                     mTopFullscreenOpaqueWindowState = win;
-                    if (showWhenLocked && !mHideWindowBehindKeyguard) {
-                        if (DEBUG_LAYOUT) Slog.v(TAG, "Setting mHideLockScreen to true by win " + win);
-                        mHideLockScreen = true;
-                        mForceStatusBarFromKeyguard = false;
-                    }
-                    if ((attrs.flags & FLAG_DISMISS_KEYGUARD) != 0
-                            && mDismissKeyguard == DISMISS_KEYGUARD_NONE) {
-                        if (DEBUG_LAYOUT) Slog.v(TAG, "Setting mDismissKeyguard true by win " + win);
-                        mDismissKeyguard = mWinDismissingKeyguard == win ?
-                                DISMISS_KEYGUARD_CONTINUE : DISMISS_KEYGUARD_START;
-                        mWinDismissingKeyguard = win;
-                        mForceStatusBarFromKeyguard = mShowingLockscreen && isKeyguardSecure();
+                    if (!mHideWindowBehindKeyguard) {
+                        if (showWhenLocked) {
+                            if (DEBUG_LAYOUT) Slog.v(TAG,
+                                    "Setting mHideLockScreen to true by win " + win);
+                            mHideLockScreen = true;
+                            mForceStatusBarFromKeyguard = false;
+                        }
+                        if ((attrs.flags & FLAG_DISMISS_KEYGUARD) != 0
+                                && mDismissKeyguard == DISMISS_KEYGUARD_NONE) {
+                            if (DEBUG_LAYOUT) Slog.v(TAG,
+                                    "Setting mDismissKeyguard true by win " + win);
+                            mDismissKeyguard = mWinDismissingKeyguard == win ?
+                                    DISMISS_KEYGUARD_CONTINUE : DISMISS_KEYGUARD_START;
+                            mWinDismissingKeyguard = win;
+                            mForceStatusBarFromKeyguard = mShowingLockscreen && isKeyguardSecure();
+                        }
                     }
                     if ((attrs.flags & FLAG_ALLOW_LOCK_WHILE_SCREEN_ON) != 0) {
                         mAllowLockscreenWhenOn = true;
