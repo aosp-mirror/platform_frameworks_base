@@ -2058,6 +2058,11 @@ public class PackageParser {
             ai.enabled = sa.getBoolean(
                     com.android.internal.R.styleable.AndroidManifestApplication_enabled, true);
             
+            if (sa.getBoolean(
+                    com.android.internal.R.styleable.AndroidManifestApplication_isGame, false)) {
+                ai.flags |= ApplicationInfo.FLAG_IS_GAME;
+            }
+
             if (false) {
                 if (sa.getBoolean(
                         com.android.internal.R.styleable.AndroidManifestApplication_cantSaveState,
