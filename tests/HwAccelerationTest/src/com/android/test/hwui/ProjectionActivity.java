@@ -8,7 +8,7 @@ import android.os.Bundle;
 
 import android.app.Activity;
 import android.util.AttributeSet;
-import android.view.DisplayList;
+import android.view.RenderNode;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -46,7 +46,7 @@ public class ProjectionActivity extends Activity {
         }
 
         private void setProject(boolean value) {
-            DisplayList displayList = getDisplayList();
+            RenderNode displayList = getDisplayList();
             if (displayList != null) {
                 displayList.setProjectBackwards(value);
             }
