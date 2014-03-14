@@ -31773,7 +31773,8 @@ package android.webkit {
     method public void clearSslPreferences();
     method public deprecated void clearView();
     method public android.webkit.WebBackForwardList copyBackForwardList();
-    method public android.print.PrintDocumentAdapter createPrintDocumentAdapter();
+    method public deprecated android.print.PrintDocumentAdapter createPrintDocumentAdapter();
+    method public android.print.PrintDocumentAdapter createPrintDocumentAdapter(java.lang.String);
     method public void destroy();
     method public void documentHasImages(android.os.Message);
     method public void evaluateJavascript(java.lang.String, android.webkit.ValueCallback<java.lang.String>);

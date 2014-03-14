@@ -1135,9 +1135,18 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * @deprecated Use {@link #createPrintDocumentAdapter(String)} which requires user
+     *             to provide a print document name.
+     */
+    @Deprecated
+    public PrintDocumentAdapter createPrintDocumentAdapter() {
+        checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "createPrintDocumentAdapter");
+        return mProvider.createPrintDocumentAdapter("default");
+    }
+
+    /**
      * Creates a PrintDocumentAdapter that provides the content of this Webview for printing.
-     * Only supported for API levels
-     * {@link android.os.Build.VERSION_CODES#KITKAT} and above.
      *
      * The adapter works by converting the Webview contents to a PDF stream. The Webview cannot
      * be drawn during the conversion process - any such draws are undefined. It is recommended
@@ -1145,11 +1154,14 @@ public class WebView extends AbsoluteLayout
      * temporarily hide a visible WebView by using a custom PrintDocumentAdapter instance
      * wrapped around the object returned and observing the onStart and onFinish methods. See
      * {@link android.print.PrintDocumentAdapter} for more information.
+     *
+     * @param documentName  The user-facing name of the printed document. See
+     *                      {@link android.print.PrintDocumentInfo}
      */
-    public PrintDocumentAdapter createPrintDocumentAdapter() {
+    public PrintDocumentAdapter createPrintDocumentAdapter(String documentName) {
         checkThread();
         if (DebugFlags.TRACE_API) Log.d(LOGTAG, "createPrintDocumentAdapter");
-        return mProvider.createPrintDocumentAdapter();
+        return mProvider.createPrintDocumentAdapter(documentName);
     }
 
     /**
