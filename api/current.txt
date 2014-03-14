@@ -314,6 +314,7 @@ package android {
     field public static final int backgroundSplit = 16843659; // 0x101038b
     field public static final int backgroundStacked = 16843658; // 0x101038a
     field public static final int backupAgent = 16843391; // 0x101027f
+    field public static final int banner = 16843762; // 0x10103f2
     field public static final int baseline = 16843548; // 0x101031c
     field public static final int baselineAlignBottom = 16843042; // 0x1010122
     field public static final int baselineAligned = 16843046; // 0x1010126
@@ -345,7 +346,7 @@ package android {
     field public static final int canRetrieveWindowContent = 16843653; // 0x1010385
     field public static final int candidatesTextStyleSpans = 16843312; // 0x1010230
     field public static final deprecated int capitalize = 16843113; // 0x1010169
-    field public static final int castsShadow = 16843774; // 0x10103fe
+    field public static final int castsShadow = 16843775; // 0x10103ff
     field public static final int category = 16843752; // 0x10103e8
     field public static final int centerBright = 16842956; // 0x10100cc
     field public static final int centerColor = 16843275; // 0x101020b
@@ -399,10 +400,10 @@ package android {
     field public static final int content = 16843355; // 0x101025b
     field public static final int contentAuthority = 16843408; // 0x1010290
     field public static final int contentDescription = 16843379; // 0x1010273
-    field public static final int controlX1 = 16843768; // 0x10103f8
-    field public static final int controlX2 = 16843770; // 0x10103fa
-    field public static final int controlY1 = 16843769; // 0x10103f9
-    field public static final int controlY2 = 16843771; // 0x10103fb
+    field public static final int controlX1 = 16843769; // 0x10103f9
+    field public static final int controlX2 = 16843771; // 0x10103fb
+    field public static final int controlY1 = 16843770; // 0x10103fa
+    field public static final int controlY2 = 16843772; // 0x10103fc
     field public static final int cropToPadding = 16843043; // 0x1010123
     field public static final int cursorVisible = 16843090; // 0x1010152
     field public static final int customNavigationLayout = 16843474; // 0x10102d2
@@ -505,7 +506,7 @@ package android {
     field public static final int fastScrollOverlayPosition = 16843578; // 0x101033a
     field public static final int fastScrollPreviewBackgroundLeft = 16843575; // 0x1010337
     field public static final int fastScrollPreviewBackgroundRight = 16843576; // 0x1010338
-    field public static final int fastScrollStyle = 16843763; // 0x10103f3
+    field public static final int fastScrollStyle = 16843764; // 0x10103f4
     field public static final int fastScrollTextColor = 16843609; // 0x1010359
     field public static final int fastScrollThumbDrawable = 16843574; // 0x1010336
     field public static final int fastScrollTrackDrawable = 16843577; // 0x1010339
@@ -531,7 +532,7 @@ package android {
     field public static final int format12Hour = 16843722; // 0x10103ca
     field public static final int format24Hour = 16843723; // 0x10103cb
     field public static final int fragment = 16843491; // 0x10102e3
-    field public static final int fragmentBreadCrumbsStyle = 16843762; // 0x10103f2
+    field public static final int fragmentBreadCrumbsStyle = 16843763; // 0x10103f3
     field public static final int fragmentCloseEnterAnimation = 16843495; // 0x10102e7
     field public static final int fragmentCloseExitAnimation = 16843496; // 0x10102e8
     field public static final int fragmentFadeEnterAnimation = 16843497; // 0x10102e9
@@ -825,7 +826,7 @@ package android {
     field public static final int persistent = 16842765; // 0x101000d
     field public static final int persistentDrawingCache = 16842990; // 0x10100ee
     field public static final deprecated int phoneNumber = 16843111; // 0x1010167
-    field public static final int pinned = 16843776; // 0x1010400
+    field public static final int pinned = 16843777; // 0x1010401
     field public static final int pivotX = 16843189; // 0x10101b5
     field public static final int pivotY = 16843190; // 0x10101b6
     field public static final int popupAnimationStyle = 16843465; // 0x10102c9
@@ -889,7 +890,7 @@ package android {
     field public static final int required = 16843406; // 0x101028e
     field public static final int requiredAccountType = 16843734; // 0x10103d6
     field public static final int requiredForAllUsers = 16843728; // 0x10103d0
-    field public static final int requiredForProfile = 16843775; // 0x10103ff
+    field public static final int requiredForProfile = 16843776; // 0x1010400
     field public static final int requiresFadingEdge = 16843685; // 0x10103a5
     field public static final int requiresSmallestWidthDp = 16843620; // 0x1010364
     field public static final int resizeMode = 16843619; // 0x1010363
@@ -960,7 +961,7 @@ package android {
     field public static final int shadowRadius = 16843108; // 0x1010164
     field public static final int shape = 16843162; // 0x101019a
     field public static final int shareInterpolator = 16843195; // 0x10101bb
-    field public static final int sharedElementName = 16843772; // 0x10103fc
+    field public static final int sharedElementName = 16843773; // 0x10103fd
     field public static final int sharedUserId = 16842763; // 0x101000b
     field public static final int sharedUserLabel = 16843361; // 0x1010261
     field public static final int shouldDisableView = 16843246; // 0x10101ee
@@ -1137,7 +1138,7 @@ package android {
     field public static final int tileMode = 16843265; // 0x1010201
     field public static final int timeZone = 16843724; // 0x10103cc
     field public static final int tint = 16843041; // 0x1010121
-    field public static final int tintMode = 16843767; // 0x10103f7
+    field public static final int tintMode = 16843768; // 0x10103f8
     field public static final int title = 16843233; // 0x10101e1
     field public static final int titleCondensed = 16843234; // 0x10101e2
     field public static final int titleTextStyle = 16843512; // 0x10102f8
@@ -1159,11 +1160,11 @@ package android {
     field public static final int transformPivotX = 16843552; // 0x1010320
     field public static final int transformPivotY = 16843553; // 0x1010321
     field public static final int transition = 16843743; // 0x10103df
-    field public static final int transitionGroup = 16843773; // 0x10103fd
+    field public static final int transitionGroup = 16843774; // 0x10103fe
     field public static final int transitionOrdering = 16843744; // 0x10103e0
     field public static final int translationX = 16843554; // 0x1010322
     field public static final int translationY = 16843555; // 0x1010323
-    field public static final int translationZ = 16843766; // 0x10103f6
+    field public static final int translationZ = 16843767; // 0x10103f7
     field public static final int type = 16843169; // 0x10101a1
     field public static final int typeface = 16842902; // 0x1010096
     field public static final int uiOptions = 16843672; // 0x1010398
@@ -1220,8 +1221,8 @@ package android {
     field public static final int windowBackground = 16842836; // 0x1010054
     field public static final int windowCloseOnTouchOutside = 16843611; // 0x101035b
     field public static final int windowContentOverlay = 16842841; // 0x1010059
-    field public static final int windowContentTransitionManager = 16843765; // 0x10103f5
-    field public static final int windowContentTransitions = 16843764; // 0x10103f4
+    field public static final int windowContentTransitionManager = 16843766; // 0x10103f6
+    field public static final int windowContentTransitions = 16843765; // 0x10103f5
     field public static final int windowDisablePreview = 16843298; // 0x1010222
     field public static final int windowEnableSplitTouch = 16843543; // 0x1010317
     field public static final int windowEnterAnimation = 16842932; // 0x10100b4
@@ -7417,6 +7418,7 @@ package android.content.pm {
     ctor public ComponentInfo();
     ctor public ComponentInfo(android.content.pm.ComponentInfo);
     ctor protected ComponentInfo(android.os.Parcel);
+    method public final int getBannerResource();
     method public final int getIconResource();
     method public final int getLogoResource();
     method public boolean isEnabled();
@@ -7520,11 +7522,13 @@ package android.content.pm {
     ctor protected PackageItemInfo(android.os.Parcel);
     method protected void dumpBack(android.util.Printer, java.lang.String);
     method protected void dumpFront(android.util.Printer, java.lang.String);
+    method public android.graphics.drawable.Drawable loadBanner(android.content.pm.PackageManager);
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
     method public android.graphics.drawable.Drawable loadLogo(android.content.pm.PackageManager);
     method public android.content.res.XmlResourceParser loadXmlMetaData(android.content.pm.PackageManager, java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
+    field public int banner;
     field public int icon;
     field public int labelRes;
     field public int logo;
@@ -7552,12 +7556,16 @@ package android.content.pm {
     method public abstract void clearPackagePreferredActivities(java.lang.String);
     method public abstract java.lang.String[] currentToCanonicalPackageNames(java.lang.String[]);
     method public abstract void extendVerificationTimeout(int, int, long);
+    method public abstract android.graphics.drawable.Drawable getActivityBanner(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public abstract android.graphics.drawable.Drawable getActivityBanner(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.graphics.drawable.Drawable getActivityIcon(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.graphics.drawable.Drawable getActivityIcon(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.graphics.drawable.Drawable getActivityLogo(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.graphics.drawable.Drawable getActivityLogo(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract java.util.List<android.content.pm.PermissionGroupInfo> getAllPermissionGroups(int);
+    method public abstract android.graphics.drawable.Drawable getApplicationBanner(android.content.pm.ApplicationInfo);
+    method public abstract android.graphics.drawable.Drawable getApplicationBanner(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract int getApplicationEnabledSetting(java.lang.String);
     method public abstract android.graphics.drawable.Drawable getApplicationIcon(android.content.pm.ApplicationInfo);
     method public abstract android.graphics.drawable.Drawable getApplicationIcon(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -25474,12 +25482,16 @@ package android.test.mock {
     method public void clearPackagePreferredActivities(java.lang.String);
     method public java.lang.String[] currentToCanonicalPackageNames(java.lang.String[]);
     method public void extendVerificationTimeout(int, int, long);
+    method public android.graphics.drawable.Drawable getActivityBanner(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.graphics.drawable.Drawable getActivityBanner(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.graphics.drawable.Drawable getActivityIcon(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.graphics.drawable.Drawable getActivityIcon(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.graphics.drawable.Drawable getActivityLogo(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.graphics.drawable.Drawable getActivityLogo(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method public java.util.List<android.content.pm.PermissionGroupInfo> getAllPermissionGroups(int);
+    method public android.graphics.drawable.Drawable getApplicationBanner(android.content.pm.ApplicationInfo);
+    method public android.graphics.drawable.Drawable getApplicationBanner(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public int getApplicationEnabledSetting(java.lang.String);
     method public android.graphics.drawable.Drawable getApplicationIcon(android.content.pm.ApplicationInfo);
     method public android.graphics.drawable.Drawable getApplicationIcon(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;

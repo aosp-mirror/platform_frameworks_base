@@ -727,6 +727,39 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public Drawable getActivityBanner(ComponentName activityName)
+            throws NameNotFoundException {
+        return getActivityInfo(activityName, 0).loadBanner(this);
+    }
+
+    @Override
+    public Drawable getActivityBanner(Intent intent)
+            throws NameNotFoundException {
+        if (intent.getComponent() != null) {
+            return getActivityBanner(intent.getComponent());
+        }
+
+        ResolveInfo info = resolveActivity(
+                intent, PackageManager.MATCH_DEFAULT_ONLY);
+        if (info != null) {
+            return info.activityInfo.loadBanner(this);
+        }
+
+        throw new NameNotFoundException(intent.toUri(0));
+    }
+
+    @Override
+    public Drawable getApplicationBanner(ApplicationInfo info) {
+        return info.loadBanner(this);
+    }
+
+    @Override
+    public Drawable getApplicationBanner(String packageName)
+            throws NameNotFoundException {
+        return getApplicationBanner(getApplicationInfo(packageName, 0));
+    }
+
+    @Override
     public Drawable getActivityLogo(ComponentName activityName)
             throws NameNotFoundException {
         return getActivityInfo(activityName, 0).loadLogo(this);

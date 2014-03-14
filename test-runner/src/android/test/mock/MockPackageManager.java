@@ -335,6 +335,27 @@ public class MockPackageManager extends PackageManager {
     }
 
     @Override
+    public Drawable getActivityBanner(ComponentName activityName)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Drawable getActivityBanner(Intent intent) throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Drawable getApplicationBanner(ApplicationInfo info) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Drawable getApplicationBanner(String packageName) throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Drawable getApplicationIcon(ApplicationInfo info) {
         throw new UnsupportedOperationException();
     }

@@ -167,18 +167,20 @@ public class PackageParser {
         final int labelRes;
         final int iconRes;
         final int logoRes;
+        final int bannerRes;
         
         String tag;
         TypedArray sa;
         
         ParsePackageItemArgs(Package _owner, String[] _outError,
-                int _nameRes, int _labelRes, int _iconRes, int _logoRes) {
+                int _nameRes, int _labelRes, int _iconRes, int _logoRes, int _bannerRes) {
             owner = _owner;
             outError = _outError;
             nameRes = _nameRes;
             labelRes = _labelRes;
             iconRes = _iconRes;
             logoRes = _logoRes;
+            bannerRes = _bannerRes;
         }
     }
     
@@ -190,10 +192,10 @@ public class PackageParser {
         int flags;
         
         ParseComponentArgs(Package _owner, String[] _outError,
-                int _nameRes, int _labelRes, int _iconRes, int _logoRes,
+                int _nameRes, int _labelRes, int _iconRes, int _logoRes, int _bannerRes,
                 String[] _sepProcesses, int _processRes,
                 int _descriptionRes, int _enabledRes) {
-            super(_owner, _outError, _nameRes, _labelRes, _iconRes, _logoRes);
+            super(_owner, _outError, _nameRes, _labelRes, _iconRes, _logoRes, _bannerRes);
             sepProcesses = _sepProcesses;
             processRes = _processRes;
             descriptionRes = _descriptionRes;
@@ -1688,7 +1690,8 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_name,
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_label,
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_icon,
-                com.android.internal.R.styleable.AndroidManifestPermissionGroup_logo)) {
+                com.android.internal.R.styleable.AndroidManifestPermissionGroup_logo,
+                com.android.internal.R.styleable.AndroidManifestPermissionGroup_banner)) {
             sa.recycle();
             mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
             return null;
@@ -1731,7 +1734,8 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestPermission_name,
                 com.android.internal.R.styleable.AndroidManifestPermission_label,
                 com.android.internal.R.styleable.AndroidManifestPermission_icon,
-                com.android.internal.R.styleable.AndroidManifestPermission_logo)) {
+                com.android.internal.R.styleable.AndroidManifestPermission_logo,
+                com.android.internal.R.styleable.AndroidManifestPermission_banner)) {
             sa.recycle();
             mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
             return null;
@@ -1800,7 +1804,8 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestPermissionTree_name,
                 com.android.internal.R.styleable.AndroidManifestPermissionTree_label,
                 com.android.internal.R.styleable.AndroidManifestPermissionTree_icon,
-                com.android.internal.R.styleable.AndroidManifestPermissionTree_logo)) {
+                com.android.internal.R.styleable.AndroidManifestPermissionTree_logo,
+                com.android.internal.R.styleable.AndroidManifestPermissionTree_banner)) {
             sa.recycle();
             mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
             return null;
@@ -1845,7 +1850,8 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestInstrumentation_name,
                     com.android.internal.R.styleable.AndroidManifestInstrumentation_label,
                     com.android.internal.R.styleable.AndroidManifestInstrumentation_icon,
-                    com.android.internal.R.styleable.AndroidManifestInstrumentation_logo);
+                    com.android.internal.R.styleable.AndroidManifestInstrumentation_logo,
+                    com.android.internal.R.styleable.AndroidManifestInstrumentation_banner);
             mParseInstrumentationArgs.tag = "<instrumentation>";
         }
         
@@ -1961,6 +1967,8 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestApplication_icon, 0);
         ai.logo = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestApplication_logo, 0);
+        ai.banner = sa.getResourceId(
+                com.android.internal.R.styleable.AndroidManifestApplication_banner, 0);
         ai.theme = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestApplication_theme, 0);
         ai.descriptionRes = sa.getResourceId(
@@ -2256,7 +2264,7 @@ public class PackageParser {
 
     private boolean parsePackageItemInfo(Package owner, PackageItemInfo outInfo,
             String[] outError, String tag, TypedArray sa,
-            int nameRes, int labelRes, int iconRes, int logoRes) {
+            int nameRes, int labelRes, int iconRes, int logoRes, int bannerRes) {
         String name = sa.getNonConfigurationString(nameRes, 0);
         if (name == null) {
             outError[0] = tag + " does not specify android:name";
@@ -2278,6 +2286,11 @@ public class PackageParser {
         int logoVal = sa.getResourceId(logoRes, 0);
         if (logoVal != 0) {
             outInfo.logo = logoVal;
+        }
+
+        int bannerVal = sa.getResourceId(bannerRes, 0);
+        if (bannerVal != 0) {
+            outInfo.banner = bannerVal;
         }
 
         TypedValue v = sa.peekValue(labelRes);
@@ -2303,6 +2316,7 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestActivity_label,
                     com.android.internal.R.styleable.AndroidManifestActivity_icon,
                     com.android.internal.R.styleable.AndroidManifestActivity_logo,
+                    com.android.internal.R.styleable.AndroidManifestActivity_banner,
                     mSeparateProcesses,
                     com.android.internal.R.styleable.AndroidManifestActivity_process,
                     com.android.internal.R.styleable.AndroidManifestActivity_description,
@@ -2588,6 +2602,7 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_label,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_icon,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_logo,
+                    com.android.internal.R.styleable.AndroidManifestActivityAlias_banner,
                     mSeparateProcesses,
                     0,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_description,
@@ -2622,6 +2637,7 @@ public class PackageParser {
         info.flags = target.info.flags;
         info.icon = target.info.icon;
         info.logo = target.info.logo;
+        info.banner = target.info.banner;
         info.labelRes = target.info.labelRes;
         info.nonLocalizedLabel = target.info.nonLocalizedLabel;
         info.launchMode = target.info.launchMode;
@@ -2735,6 +2751,7 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestProvider_label,
                     com.android.internal.R.styleable.AndroidManifestProvider_icon,
                     com.android.internal.R.styleable.AndroidManifestProvider_logo,
+                    com.android.internal.R.styleable.AndroidManifestProvider_banner,
                     mSeparateProcesses,
                     com.android.internal.R.styleable.AndroidManifestProvider_process,
                     com.android.internal.R.styleable.AndroidManifestProvider_description,
@@ -3041,6 +3058,7 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestService_label,
                     com.android.internal.R.styleable.AndroidManifestService_icon,
                     com.android.internal.R.styleable.AndroidManifestService_logo,
+                    com.android.internal.R.styleable.AndroidManifestService_banner,
                     mSeparateProcesses,
                     com.android.internal.R.styleable.AndroidManifestService_process,
                     com.android.internal.R.styleable.AndroidManifestService_description,
@@ -3337,6 +3355,9 @@ public class PackageParser {
         
         outInfo.logo = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestIntentFilter_logo, 0);
+
+        outInfo.banner = sa.getResourceId(
+                com.android.internal.R.styleable.AndroidManifestIntentFilter_banner, 0);
 
         sa.recycle();
 
@@ -3705,6 +3726,11 @@ public class PackageParser {
             int logoVal = args.sa.getResourceId(args.logoRes, 0);
             if (logoVal != 0) {
                 outInfo.logo = logoVal;
+            }
+
+            int bannerVal = args.sa.getResourceId(args.bannerRes, 0);
+            if (bannerVal != 0) {
+                outInfo.banner = bannerVal;
             }
 
             TypedValue v = args.sa.peekValue(args.labelRes);
@@ -4131,6 +4157,7 @@ public class PackageParser {
         public CharSequence nonLocalizedLabel;
         public int icon;
         public int logo;
+        public int banner;
         public int preferred;
     }
 
