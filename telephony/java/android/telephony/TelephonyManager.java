@@ -1806,8 +1806,7 @@ public class TelephonyManager {
     }
 
     /**
-     * Send ENVELOPE to the SIM, after processing a proactive command sent by
-     * the SIM.
+     * Send ENVELOPE to the SIM and return the response.
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#SIM_COMMUNICATION SIM_COMMUNICATION}
@@ -1815,11 +1814,13 @@ public class TelephonyManager {
      * @param content String containing SAT/USAT response in hexadecimal
      *                format starting with command tag. See TS 102 223 for
      *                details.
-     * @return The APDU response from the ICC card.
+     * @return The APDU response from the ICC card, with the last 4 bytes
+     *         being the status word. If the command fails, returns an empty
+     *         string.
      */
-    public String sendEnvelope(String content) {
+    public String sendEnvelopeWithStatus(String content) {
         try {
-            return getITelephony().sendEnvelope(content);
+            return getITelephony().sendEnvelopeWithStatus(content);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
