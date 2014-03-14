@@ -106,7 +106,7 @@ public abstract class FragmentTransaction {
     public abstract FragmentTransaction detach(Fragment fragment);
 
     /**
-     * Re-attach a fragment after it had previously been deatched from
+     * Re-attach a fragment after it had previously been detached from
      * the UI with {@link #detach(Fragment)}.  This
      * causes its view hierarchy to be re-created, attached to the UI,
      * and displayed.
