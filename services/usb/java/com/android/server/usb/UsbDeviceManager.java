@@ -89,6 +89,7 @@ public class UsbDeviceManager {
     private static final int MSG_SYSTEM_READY = 3;
     private static final int MSG_BOOT_COMPLETED = 4;
     private static final int MSG_USER_SWITCHED = 5;
+    private static final int MSG_START_ACCESSORY_MODE = 6;
 
     private static final int AUDIO_MODE_NONE = 0;
     private static final int AUDIO_MODE_SOURCE = 1;
@@ -151,7 +152,7 @@ public class UsbDeviceManager {
                 mHandler.updateState(state);
             } else if ("START".equals(accessory)) {
                 if (DEBUG) Slog.d(TAG, "got accessory start");
-                startAccessoryMode();
+                 mHandler.sendEmptyMessage(MSG_START_ACCESSORY_MODE);
             }
         }
     };
@@ -169,7 +170,7 @@ public class UsbDeviceManager {
 
         if (nativeIsStartRequested()) {
             if (DEBUG) Slog.d(TAG, "accessory attached at boot");
-            startAccessoryMode();
+             mHandler.sendEmptyMessage(MSG_START_ACCESSORY_MODE);
         }
 
         boolean secureAdbEnabled = SystemProperties.getBoolean("ro.adb.secure", false);
@@ -230,6 +231,8 @@ public class UsbDeviceManager {
         } else if (enableAudio) {
             functions = UsbManager.USB_FUNCTION_AUDIO_SOURCE;
         }
+
+        if (DEBUG) Slog.d(TAG, "startAccessoryMode: " + functions);
 
         if (functions != null) {
             mAccessoryModeRequestTime = SystemClock.elapsedRealtime();
@@ -310,6 +313,7 @@ public class UsbDeviceManager {
         // current USB state
         private boolean mConnected;
         private boolean mConfigured;
+        private boolean mAccessoryStartPending;
         private String mCurrentFunctions;
         private String mDefaultFunctions;
         private UsbAccessory mCurrentAccessory;
@@ -616,6 +620,11 @@ public class UsbDeviceManager {
                 case MSG_UPDATE_STATE:
                     mConnected = (msg.arg1 == 1);
                     mConfigured = (msg.arg2 == 1);
+
+                    if (!mConnected) {
+                        mAccessoryStartPending = false;
+                    }
+
                     updateUsbNotification();
                     updateAdbNotification();
                     if (containsFunction(mCurrentFunctions,
@@ -628,6 +637,10 @@ public class UsbDeviceManager {
                     if (mBootCompleted) {
                         updateUsbState();
                         updateAudioSourceFunction();
+                    }
+                    if (mConnected && mConfigured && mAccessoryStartPending) {
+                        startAccessoryMode();
+                        mAccessoryStartPending = false;
                     }
                     break;
                 case MSG_ENABLE_ADB:
@@ -665,6 +678,16 @@ public class UsbDeviceManager {
                     mCurrentUser = msg.arg1;
                     break;
                 }
+                case MSG_START_ACCESSORY_MODE:
+                    if (mConnected && mConfigured) {
+                        startAccessoryMode();
+                    } else {
+                        // we sometimes receive the kernel "accessory start" uevent
+                        // before the "configured" uevent. In this case we need to defer
+                        // handling this event until after we received the configured event
+                        mAccessoryStartPending = true;
+                    }
+                    break;
             }
         }
 
