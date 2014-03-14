@@ -57,8 +57,9 @@ public class RecentsService extends Service {
                     tsv.computeRects(windowRect.width(), windowRect.height() - systemInsets.top);
                     tsv.boundScroll();
                     TaskViewTransform transform = tsv.getStackTransform(0);
+                    Rect taskRect = new Rect(transform.rect);
 
-                    data.putParcelable("taskRect", transform.rect);
+                    data.putParcelable("taskRect", taskRect);
                     Message reply = Message.obtain(null, MSG_UPDATE_RECENTS_FOR_CONFIGURATION, 0, 0);
                     reply.setData(data);
                     msg.replyTo.send(reply);
@@ -99,5 +100,13 @@ public class RecentsService extends Service {
     public void onDestroy() {
         Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsService|onDestroy]");
         super.onDestroy();
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        if (loader != null) {
+            loader.onTrimMemory(level);
+        }
     }
 }

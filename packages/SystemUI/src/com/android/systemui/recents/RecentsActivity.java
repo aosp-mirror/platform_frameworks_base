@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recents.model.SpaceNode;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.RecentsView;
@@ -165,6 +166,14 @@ public class RecentsActivity extends Activity {
                 Console.AnsiRed);
         super.onStop();
         mVisible = false;
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        if (loader != null) {
+            loader.onTrimMemory(level);
+        }
     }
 
     @Override

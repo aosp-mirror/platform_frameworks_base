@@ -30,7 +30,6 @@ public class RecentsConfiguration {
 
     DisplayMetrics mDisplayMetrics;
 
-    public boolean layoutVerticalStack;
     public Rect systemInsets = new Rect();
 
     /** Private constructor */
@@ -56,7 +55,6 @@ public class RecentsConfiguration {
 
         boolean isPortrait = context.getResources().getConfiguration().orientation ==
                 Configuration.ORIENTATION_PORTRAIT;
-        layoutVerticalStack = isPortrait || Constants.LANDSCAPE_LAYOUT_VERTICAL_STACK;
     }
 
     public void updateSystemInsets(Rect insets) {

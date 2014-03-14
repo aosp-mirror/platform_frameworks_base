@@ -30,9 +30,11 @@ public class Constants {
             public static final boolean EnableTaskStackClipping = false;
             public static final boolean EnableBackgroundTaskLoading = true;
             public static final boolean ForceDisableBackgroundCache = false;
+
             public static final boolean TaskDataLoader = false;
             public static final boolean SystemUIHandshake = false;
             public static final boolean TimeSystemCalls = false;
+            public static final boolean Memory = false;
         }
 
         public static class UI {
@@ -41,7 +43,7 @@ public class Constants {
             public static final boolean TouchEvents = false;
             public static final boolean MeasureAndLayout = false;
             public static final boolean Clipping = false;
-            public static final boolean HwLayers = true;
+            public static final boolean HwLayers = false;
         }
 
         public static class TaskStack {
@@ -55,13 +57,16 @@ public class Constants {
 
     public static class Values {
         public static class Window {
+            // The dark background dim is set behind the empty recents view
             public static final float DarkBackgroundDim = 0.5f;
+            // The background dim is set behind the card stack
             public static final float BackgroundDim = 0.35f;
         }
 
         public static class RecentsTaskLoader {
             // XXX: This should be calculated on the first load
             public static final int PreloadFirstTasksCount = 5;
+            // For debugging, this allows us to multiply the number of cards for each task
             public static final int TaskEntryMultiplier = 1;
         }
 
