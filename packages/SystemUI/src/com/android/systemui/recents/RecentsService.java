@@ -30,18 +30,31 @@ import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskViewTransform;
 
+import java.lang.ref.WeakReference;
+
 
 /* Service */
 public class RecentsService extends Service {
     // XXX: This should be getting the message from recents definition
     final static int MSG_UPDATE_RECENTS_FOR_CONFIGURATION = 0;
 
-    class MessageHandler extends Handler {
+    /** This Handler should be static to prevent holding onto a reference to the service. */
+    static class MessageHandler extends Handler {
+        WeakReference<Context> mContext;
+
+        MessageHandler(Context context) {
+            // Keep a weak ref to the context instead of a strong ref
+            mContext = new WeakReference<Context>(context);
+        }
+
         @Override
         public void handleMessage(Message msg) {
-            Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsService|handleMessage]", msg);
+            Console.log(Constants.DebugFlags.App.SystemUIHandshake,
+                    "[RecentsService|handleMessage]", msg);
             if (msg.what == MSG_UPDATE_RECENTS_FOR_CONFIGURATION) {
-                Context context = RecentsService.this;
+                Context context = mContext.get();
+                if (context == null) return;
+
                 RecentsTaskLoader.initialize(context);
                 RecentsConfiguration.reinitialize(context);
 
@@ -70,7 +83,7 @@ public class RecentsService extends Service {
         }
     }
 
-    Messenger mMessenger = new Messenger(new MessageHandler());
+    Messenger mMessenger = new Messenger(new MessageHandler(this));
 
     @Override
     public void onCreate() {
