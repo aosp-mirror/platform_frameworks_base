@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.view.DisplayList;
+import android.view.RenderNode;
 import android.view.HardwareRenderer;
 import android.view.ThreadedRenderer;
 import android.view.View;
@@ -70,7 +70,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
         private static final TimeInterpolator sDefaultInterpolator =
                 new AccelerateDecelerateInterpolator();
 
-        DisplayList mDisplayList;
+        RenderNode mDisplayList;
         float mFromValue;
         float mDelta;
         long mDuration = DURATION * 2;
