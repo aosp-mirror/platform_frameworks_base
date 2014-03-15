@@ -173,7 +173,9 @@ final class UiModeManagerService extends SystemService {
         mDeskModeKeepsScreenOn = (context.getResources().getInteger(
                 com.android.internal.R.integer.config_deskDockKeepsScreenOn) == 1);
         mTelevision = context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_TELEVISION);
+                PackageManager.FEATURE_TELEVISION) ||
+            context.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_LEANBACK);
 
         mNightMode = Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.UI_NIGHT_MODE, UiModeManager.MODE_NIGHT_AUTO);
