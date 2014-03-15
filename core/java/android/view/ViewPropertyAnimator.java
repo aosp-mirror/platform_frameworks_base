@@ -925,7 +925,7 @@ public class ViewPropertyAnimator {
      */
     private void setValue(int propertyConstant, float value) {
         final View.TransformationInfo info = mView.mTransformationInfo;
-        final RenderNode displayList = mView.mDisplayList;
+        final DisplayList displayList = mView.mDisplayList;
         switch (propertyConstant) {
             case TRANSLATION_X:
                 info.mTranslationX = value;

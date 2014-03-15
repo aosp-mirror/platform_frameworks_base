@@ -37,7 +37,7 @@ final class HardwareLayer {
 
     private HardwareRenderer mRenderer;
     private Finalizer mFinalizer;
-    private RenderNode mDisplayList;
+    private DisplayList mDisplayList;
     private final int mLayerType;
 
     private HardwareLayer(HardwareRenderer renderer, long deferredUpdater, int type) {
@@ -122,11 +122,11 @@ final class HardwareLayer {
         }
     }
 
-    public RenderNode startRecording() {
+    public DisplayList startRecording() {
         assertType(LAYER_TYPE_DISPLAY_LIST);
 
         if (mDisplayList == null) {
-            mDisplayList = RenderNode.create("HardwareLayer");
+            mDisplayList = DisplayList.create("HardwareLayer");
         }
         return mDisplayList;
     }
