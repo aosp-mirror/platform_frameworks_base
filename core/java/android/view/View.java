@@ -3269,7 +3269,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * of the background drawable. It is cleared on temporary detach and reset
      * on cleanup.
      */
-    private RenderNode mBackgroundDisplayList;
+    private DisplayList mBackgroundDisplayList;
 
     private int mBackgroundResource;
     private boolean mBackgroundSizeChanged;
@@ -3559,7 +3559,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * of the View content. It is cleared on temporary detach and reset on
      * cleanup.
      */
-    RenderNode mDisplayList;
+    DisplayList mDisplayList;
 
     /**
      * Set to true when the view is sending hover accessibility events because it
@@ -13802,7 +13802,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             mHardwareLayer.setLayerPaint(mLayerPaint);
-            RenderNode displayList = mHardwareLayer.startRecording();
+            DisplayList displayList = mHardwareLayer.startRecording();
             if (getDisplayList(displayList, true) != displayList) {
                 throw new IllegalStateException("getDisplayList() didn't return"
                         + " the input displaylist for a hardware layer!");
@@ -13952,7 +13952,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * the view will avoid creating a layer inside the resulting display list.
      * @return A new or reused DisplayList object.
      */
-    private RenderNode getDisplayList(RenderNode displayList, boolean isLayer) {
+    private DisplayList getDisplayList(DisplayList displayList, boolean isLayer) {
         final HardwareRenderer renderer = getHardwareRenderer();
         if (renderer == null || !canHaveDisplayList()) {
             return null;
@@ -13978,7 +13978,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mRecreateDisplayList = true;
             }
             if (displayList == null) {
-                displayList = RenderNode.create(getClass().getName());
+                displayList = DisplayList.create(getClass().getName());
                 // If we're creating a new display list, make sure our parent gets invalidated
                 // since they will need to recreate their display list to account for this
                 // new child display list.
@@ -14065,7 +14065,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    public RenderNode getDisplayList() {
+    public DisplayList getDisplayList() {
         mDisplayList = getDisplayList(mDisplayList, false);
         return mDisplayList;
     }
@@ -14671,7 +14671,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * necessary when a display list is being re-created, because we need to make sure that
      * previously-set transform values
      */
-    void setDisplayListProperties(RenderNode displayList) {
+    void setDisplayListProperties(DisplayList displayList) {
         if (displayList != null) {
             displayList.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
             displayList.setHasOverlappingRendering(hasOverlappingRendering());
@@ -14816,7 +14816,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags &= ~PFLAG_INVALIDATED;
         }
 
-        RenderNode displayList = null;
+        DisplayList displayList = null;
         Bitmap cache = null;
         boolean hasDisplayList = false;
         if (caching) {
@@ -15295,7 +15295,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 && mAttachInfo.mHardwareRenderer != null) {
             mBackgroundDisplayList = getDrawableDisplayList(background, mBackgroundDisplayList);
 
-            final RenderNode displayList = mBackgroundDisplayList;
+            final DisplayList displayList = mBackgroundDisplayList;
             if (displayList != null && displayList.isValid()) {
                 setBackgroundDisplayListProperties(displayList);
                 ((HardwareCanvas) canvas).drawDisplayList(displayList);
@@ -15319,7 +15319,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param displayList Valid display list for the background drawable
      */
-    private void setBackgroundDisplayListProperties(RenderNode displayList) {
+    private void setBackgroundDisplayListProperties(DisplayList displayList) {
         displayList.setTranslationX(mScrollX);
         displayList.setTranslationY(mScrollY);
     }
@@ -15332,9 +15332,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param displayList Existing display list, or {@code null}
      * @return A valid display list for the specified drawable
      */
-    private RenderNode getDrawableDisplayList(Drawable drawable, RenderNode displayList) {
+    private DisplayList getDrawableDisplayList(Drawable drawable, DisplayList displayList) {
         if (displayList == null) {
-            displayList = RenderNode.create(drawable.getClass().getName());
+            displayList = DisplayList.create(drawable.getClass().getName());
         }
 
         final Rect bounds = drawable.getBounds();
