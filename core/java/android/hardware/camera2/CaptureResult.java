@@ -1166,24 +1166,14 @@ public final class CaptureResult extends CameraMetadata {
             new Key<Integer>("android.flash.state", int.class);
 
     /**
-     * <p>List of <code>(x, y)</code> coordinates of hot/defective pixels on the
-     * sensor, where <code>(x, y)</code> lies between <code>(0, 0)</code>, which is the top-left
-     * of the pixel array, and the width,height of the pixel array given in
-     * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}.  This may include hot pixels
-     * that lie outside of the active array bounds given by
-     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
-     *
-     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
-     * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
-     */
-    public static final Key<int[]> HOT_PIXEL_MAP =
-            new Key<int[]>("android.hotPixel.map", int[].class);
-
-    /**
      * <p>Set operational mode for hot pixel correction.</p>
+     * <p>Valid modes for this camera device are listed in
+     * {@link CameraCharacteristics#HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES android.hotPixel.availableHotPixelModes}.</p>
      * <p>Hotpixel correction interpolates out, or otherwise removes, pixels
      * that do not accurately encode the incoming light (i.e. pixels that
      * are stuck at an arbitrary value).</p>
+     *
+     * @see CameraCharacteristics#HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES
      * @see #HOT_PIXEL_MODE_OFF
      * @see #HOT_PIXEL_MODE_FAST
      * @see #HOT_PIXEL_MODE_HIGH_QUALITY
@@ -1969,6 +1959,33 @@ public final class CaptureResult extends CameraMetadata {
      */
     public static final Key<Integer> STATISTICS_SCENE_FLICKER =
             new Key<Integer>("android.statistics.sceneFlicker", int.class);
+
+    /**
+     * <p>Operating mode for hotpixel map generation.</p>
+     * <p>If set to ON, a hotpixel map is returned in {@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}.
+     * If set to OFF, no hotpixel map should be returned.</p>
+     * <p>This must be set to a valid mode from {@link CameraCharacteristics#STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES android.statistics.info.availableHotPixelMapModes}.</p>
+     *
+     * @see CaptureResult#STATISTICS_HOT_PIXEL_MAP
+     * @see CameraCharacteristics#STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES
+     */
+    public static final Key<Boolean> STATISTICS_HOT_PIXEL_MAP_MODE =
+            new Key<Boolean>("android.statistics.hotPixelMapMode", boolean.class);
+
+    /**
+     * <p>List of <code>(x, y)</code> coordinates of hot/defective pixels on the sensor.</p>
+     * <p>A coordinate <code>(x, y)</code> must lie between <code>(0, 0)</code>, and
+     * <code>(width - 1, height - 1)</code> (inclusive), which are the top-left and
+     * bottom-right of the pixel array, respectively. The width and
+     * height dimensions are given in {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}.
+     * This may include hot pixels that lie outside of the active array
+     * bounds given by {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
+     */
+    public static final Key<int[]> STATISTICS_HOT_PIXEL_MAP =
+            new Key<int[]>("android.statistics.hotPixelMap", int[].class);
 
     /**
      * <p>Tonemapping / contrast / gamma curve for the blue
