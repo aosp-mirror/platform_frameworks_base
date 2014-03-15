@@ -2399,6 +2399,12 @@
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signature" />
 
+    <!-- Internal permission to allows an application to read indexable data.
+        @hide -->
+    <permission android:name="android.permission.READ_SEARCH_INDEXABLES"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature|system" />
+
     <!-- Allows applications to set a live wallpaper.
          @hide XXX Change to signature once the picker is moved to its
          own apk as Ghod Intended. -->
