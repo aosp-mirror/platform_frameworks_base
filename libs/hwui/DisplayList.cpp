@@ -432,7 +432,7 @@ void RenderNode::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTransl
             // OR if its caster's Z value is similar to the previous potential caster
             if (shadowIndex == drawIndex || casterZ - lastCasterZ < SHADOW_DELTA) {
 
-                if (caster->properties().mCastsShadow && caster->properties().mAlpha > 0.0f) {
+                if (caster->properties().mAlpha > 0.0f) {
                     mat4 shadowMatrixXY(casterOp->mTransformFromParent);
                     caster->applyViewPropertyTransforms(shadowMatrixXY);
 

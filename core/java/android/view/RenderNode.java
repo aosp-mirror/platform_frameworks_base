@@ -365,25 +365,6 @@ public class RenderNode {
     }
 
     /**
-     * Set whether the DisplayList should cast a shadow.
-     *
-     * The shape of the shadow casting area is defined by the outline of the display list, if set
-     * and non-empty, otherwise it will be the bounds rect.
-     */
-    public void setCastsShadow(boolean castsShadow) {
-        nSetCastsShadow(mNativeDisplayList, castsShadow);
-    }
-
-    /**
-     * Sets whether the DisplayList should be drawn with perspective applied from the global camera.
-     *
-     * If set to true, camera distance will be ignored. Defaults to false.
-     */
-    public void setUsesGlobalCamera(boolean usesGlobalCamera) {
-        nSetUsesGlobalCamera(mNativeDisplayList, usesGlobalCamera);
-    }
-
-    /**
      * Set the static matrix on the display list. The specified matrix is combined with other
      * transforms (such as {@link #setScaleX(float)}, {@link #setRotation(float)}, etc.)
      *
