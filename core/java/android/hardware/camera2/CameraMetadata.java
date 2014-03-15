@@ -1199,7 +1199,10 @@ public abstract class CameraMetadata {
     /**
      * <p>The frame rate must not be reduced relative to sensor raw output
      * for this option.</p>
-     * <p>No hot pixel correction is applied.</p>
+     * <p>No hot pixel correction is applied.
+     * The hotpixel map may be returned in {@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}.</p>
+     *
+     * @see CaptureResult#STATISTICS_HOT_PIXEL_MAP
      * @see CaptureRequest#HOT_PIXEL_MODE
      */
     public static final int HOT_PIXEL_MODE_OFF = 0;
@@ -1207,7 +1210,10 @@ public abstract class CameraMetadata {
     /**
      * <p>The frame rate must not be reduced relative to sensor raw output
      * for this option.</p>
-     * <p>Hot pixel correction is applied.</p>
+     * <p>Hot pixel correction is applied.
+     * The hotpixel map may be returned in {@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}.</p>
+     *
+     * @see CaptureResult#STATISTICS_HOT_PIXEL_MAP
      * @see CaptureRequest#HOT_PIXEL_MODE
      */
     public static final int HOT_PIXEL_MODE_FAST = 1;
@@ -1215,7 +1221,10 @@ public abstract class CameraMetadata {
     /**
      * <p>The frame rate may be reduced relative to sensor raw output
      * for this option.</p>
-     * <p>A high-quality hot pixel correction is applied.</p>
+     * <p>A high-quality hot pixel correction is applied.
+     * The hotpixel map may be returned in {@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}.</p>
+     *
+     * @see CaptureResult#STATISTICS_HOT_PIXEL_MAP
      * @see CaptureRequest#HOT_PIXEL_MODE
      */
     public static final int HOT_PIXEL_MODE_HIGH_QUALITY = 2;

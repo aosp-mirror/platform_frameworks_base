@@ -148,7 +148,7 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <p>All camera devices support ON, and all camera devices with
      * flash units support ON_AUTO_FLASH and
      * ON_ALWAYS_FLASH.</p>
-     * <p>Full-capability camera devices always support OFF mode,
+     * <p>FULL mode camera devices always support OFF mode,
      * which enables application control of camera exposure time,
      * sensitivity, and frame duration.</p>
      *
@@ -244,7 +244,7 @@ public final class CameraCharacteristics extends CameraMetadata {
      * given camera device. This entry lists the valid modes for
      * {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} for this camera device.</p>
      * <p>All camera devices will support ON mode.</p>
-     * <p>Full-capability camera devices will always support OFF mode,
+     * <p>FULL mode camera devices will always support OFF mode,
      * which enables application control of white balance, by using
      * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform} and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}({@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} must be set to TRANSFORM_MATRIX).</p>
      *
@@ -278,6 +278,17 @@ public final class CameraCharacteristics extends CameraMetadata {
      */
     public static final Key<Boolean> FLASH_INFO_AVAILABLE =
             new Key<Boolean>("android.flash.info.available", boolean.class);
+
+    /**
+     * <p>The set of hot pixel correction modes that are supported by this
+     * camera device.</p>
+     * <p>This tag lists valid modes for {@link CaptureRequest#HOT_PIXEL_MODE android.hotPixel.mode}.</p>
+     * <p>FULL mode camera devices will always support FAST.</p>
+     *
+     * @see CaptureRequest#HOT_PIXEL_MODE
+     */
+    public static final Key<byte[]> HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES =
+            new Key<byte[]>("android.hotPixel.availableHotPixelModes", byte[].class);
 
     /**
      * <p>Supported resolutions for the JPEG thumbnail</p>
@@ -1086,6 +1097,18 @@ public final class CameraCharacteristics extends CameraMetadata {
      */
     public static final Key<Integer> STATISTICS_INFO_MAX_FACE_COUNT =
             new Key<Integer>("android.statistics.info.maxFaceCount", int.class);
+
+    /**
+     * <p>The set of hot pixel map output modes supported by this camera device.</p>
+     * <p>This tag lists valid output modes for {@link CaptureRequest#STATISTICS_HOT_PIXEL_MAP_MODE android.statistics.hotPixelMapMode}.</p>
+     * <p>If no hotpixel map is available for this camera device, this will contain
+     * only OFF.  If the hotpixel map is available, this should include both
+     * the ON and OFF options.</p>
+     *
+     * @see CaptureRequest#STATISTICS_HOT_PIXEL_MAP_MODE
+     */
+    public static final Key<boolean[]> STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES =
+            new Key<boolean[]>("android.statistics.info.availableHotPixelMapModes", boolean[].class);
 
     /**
      * <p>Maximum number of supported points in the
