@@ -74,7 +74,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
-import android.view.DisplayList;
+import android.view.RenderNode;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.HardwareCanvas;
@@ -138,11 +138,11 @@ public class Editor {
     InputMethodState mInputMethodState;
 
     private static class TextDisplayList {
-        DisplayList displayList;
+        RenderNode displayList;
         boolean isDirty;
         public TextDisplayList(String name) {
             isDirty = true;
-            displayList = DisplayList.create(name);
+            displayList = RenderNode.create(name);
         }
         boolean needsRecord() { return isDirty || !displayList.isValid(); }
     }
@@ -289,7 +289,7 @@ public class Editor {
     private void destroyDisplayListsData() {
         if (mTextDisplayLists != null) {
             for (int i = 0; i < mTextDisplayLists.length; i++) {
-                DisplayList displayList = mTextDisplayLists[i] != null
+                RenderNode displayList = mTextDisplayLists[i] != null
                         ? mTextDisplayLists[i].displayList : null;
                 if (displayList != null && displayList.isValid()) {
                     displayList.destroyDisplayListData();
@@ -1371,7 +1371,7 @@ public class Editor {
                 }
 
                 final boolean blockDisplayListIsInvalid = mTextDisplayLists[blockIndex].needsRecord();
-                DisplayList blockDisplayList = mTextDisplayLists[blockIndex].displayList;
+                RenderNode blockDisplayList = mTextDisplayLists[blockIndex].displayList;
                 if (i >= indexFirstChangedBlock || blockDisplayListIsInvalid) {
                     final int blockBeginLine = endOfPreviousBlock + 1;
                     final int top = layout.getLineTop(blockBeginLine);
