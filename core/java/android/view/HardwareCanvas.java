@@ -42,7 +42,7 @@ public abstract class HardwareCanvas extends Canvas {
      * Invoked before any drawing operation is performed in this canvas.
      * 
      * @param dirty The dirty rectangle to update, can be null.
-     * @return {@link RenderNode#STATUS_DREW} if anything was drawn (such as a call to clear
+     * @return {@link DisplayList#STATUS_DREW} if anything was drawn (such as a call to clear
      *         the canvas).
      *
      * @hide
@@ -58,12 +58,12 @@ public abstract class HardwareCanvas extends Canvas {
 
     /**
      * Draws the specified display list onto this canvas. The display list can only
-     * be drawn if {@link android.view.RenderNode#isValid()} returns true.
+     * be drawn if {@link android.view.DisplayList#isValid()} returns true.
      *
      * @param displayList The display list to replay.
      */
-    public void drawDisplayList(RenderNode displayList) {
-        drawDisplayList(displayList, null, RenderNode.FLAG_CLIP_CHILDREN);
+    public void drawDisplayList(DisplayList displayList) {
+        drawDisplayList(displayList, null, DisplayList.FLAG_CLIP_CHILDREN);
     }
 
     /**
@@ -71,17 +71,17 @@ public abstract class HardwareCanvas extends Canvas {
      *
      * @param displayList The display list to replay.
      * @param dirty The dirty region to redraw in the next pass, matters only
-     *        if this method returns {@link RenderNode#STATUS_DRAW}, can be null.
-     * @param flags Optional flags about drawing, see {@link RenderNode} for
+     *        if this method returns {@link DisplayList#STATUS_DRAW}, can be null.
+     * @param flags Optional flags about drawing, see {@link DisplayList} for
      *              the possible flags.
      *
-     * @return One of {@link RenderNode#STATUS_DONE}, {@link RenderNode#STATUS_DRAW}, or
-     *         {@link RenderNode#STATUS_INVOKE}, or'd with {@link RenderNode#STATUS_DREW}
+     * @return One of {@link DisplayList#STATUS_DONE}, {@link DisplayList#STATUS_DRAW}, or
+     *         {@link DisplayList#STATUS_INVOKE}, or'd with {@link DisplayList#STATUS_DREW}
      *         if anything was drawn.
      *
      * @hide
      */
-    public abstract int drawDisplayList(RenderNode displayList, Rect dirty, int flags);
+    public abstract int drawDisplayList(DisplayList displayList, Rect dirty, int flags);
 
     /**
      * Draws the specified layer onto this canvas.
@@ -102,28 +102,28 @@ public abstract class HardwareCanvas extends Canvas {
      *
      * @param drawGLFunction A native function pointer
      *                       
-     * @return One of {@link RenderNode#STATUS_DONE}, {@link RenderNode#STATUS_DRAW} or
-     *         {@link RenderNode#STATUS_INVOKE}
+     * @return One of {@link DisplayList#STATUS_DONE}, {@link DisplayList#STATUS_DRAW} or
+     *         {@link DisplayList#STATUS_INVOKE}
      *
      * @hide
      */
     public int callDrawGLFunction(long drawGLFunction) {
         // Noop - this is done in the display list recorder subclass
-        return RenderNode.STATUS_DONE;
+        return DisplayList.STATUS_DONE;
     }
 
     /**
      * Invoke all the functors who requested to be invoked during the previous frame.
      * 
-     * @param dirty The region to redraw when the functors return {@link RenderNode#STATUS_DRAW}
+     * @param dirty The region to redraw when the functors return {@link DisplayList#STATUS_DRAW}
      *              
-     * @return One of {@link RenderNode#STATUS_DONE}, {@link RenderNode#STATUS_DRAW} or
-     *         {@link RenderNode#STATUS_INVOKE}
+     * @return One of {@link DisplayList#STATUS_DONE}, {@link DisplayList#STATUS_DRAW} or
+     *         {@link DisplayList#STATUS_INVOKE}
      *
      * @hide
      */
     public int invokeFunctors(Rect dirty) {
-        return RenderNode.STATUS_DONE;
+        return DisplayList.STATUS_DONE;
     }
 
     /**

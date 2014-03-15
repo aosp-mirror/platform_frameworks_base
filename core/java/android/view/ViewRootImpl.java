@@ -1465,7 +1465,7 @@ public final class ViewRootImpl implements ViewParent,
                                     mWidth, mHeight);
                         }
                         mResizeBuffer.prepare(mWidth, mHeight, false);
-                        RenderNode layerDisplayList = mResizeBuffer.startRecording();
+                        DisplayList layerDisplayList = mResizeBuffer.startRecording();
                         HardwareCanvas layerCanvas = layerDisplayList.start(mWidth, mHeight);
                         final int restoreCount = layerCanvas.save();
 
@@ -1484,10 +1484,10 @@ public final class ViewRootImpl implements ViewParent,
                             mTranslator.translateCanvas(layerCanvas);
                         }
 
-                        RenderNode displayList = mView.mDisplayList;
+                        DisplayList displayList = mView.mDisplayList;
                         if (displayList != null && displayList.isValid()) {
                             layerCanvas.drawDisplayList(displayList, null,
-                                    RenderNode.FLAG_CLIP_CHILDREN);
+                                    DisplayList.FLAG_CLIP_CHILDREN);
                         } else {
                             mView.draw(layerCanvas);
                         }
@@ -2178,7 +2178,7 @@ public final class ViewRootImpl implements ViewParent,
      * @hide
      */
     void outputDisplayList(View view) {
-        RenderNode displayList = view.getDisplayList();
+        DisplayList displayList = view.getDisplayList();
         if (displayList != null) {
             displayList.output();
         }
@@ -5206,7 +5206,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private static void getGfxInfo(View view, int[] info) {
-        RenderNode displayList = view.mDisplayList;
+        DisplayList displayList = view.mDisplayList;
         info[0]++;
         if (displayList != null) {
             info[1] += 0; /* TODO: Memory used by display lists */
