@@ -106,6 +106,24 @@ public class EthernetDataTracker extends BaseNetworkStateTracker {
         mLinkCapabilities = new LinkCapabilities();
     }
 
+    private void interfaceUpdated() {
+        // we don't get link status indications unless the iface is up - bring it up
+        try {
+            mNMService.setInterfaceUp(mIface);
+            String hwAddr = null;
+            InterfaceConfiguration config = mNMService.getInterfaceConfig(mIface);
+            if (config != null) {
+                hwAddr = config.getHardwareAddress();
+            }
+            synchronized (this) {
+                mHwAddr = hwAddr;
+                mNetworkInfo.setExtraInfo(mHwAddr);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error upping interface " + mIface + ": " + e);
+        }
+    }
+
     private void interfaceAdded(String iface) {
         if (!iface.matches(sIfaceMatch))
             return;
@@ -118,12 +136,7 @@ public class EthernetDataTracker extends BaseNetworkStateTracker {
             mIface = iface;
         }
 
-        // we don't get link status indications unless the iface is up - bring it up
-        try {
-            mNMService.setInterfaceUp(iface);
-        } catch (Exception e) {
-            Log.e(TAG, "Error upping interface " + iface + ": " + e);
-        }
+        interfaceUpdated();
 
         mNetworkInfo.setIsAvailable(true);
         Message msg = mCsHandler.obtainMessage(EVENT_CONFIGURATION_CHANGED, mNetworkInfo);
@@ -159,7 +172,11 @@ public class EthernetDataTracker extends BaseNetworkStateTracker {
 
         Log.d(TAG, "Removing " + iface);
         disconnect();
-        mIface = "";
+        synchronized (this) {
+            mIface = "";
+            mHwAddr = null;
+            mNetworkInfo.setExtraInfo(null);
+        }
     }
 
     private void runDhcp() {
@@ -220,15 +237,7 @@ public class EthernetDataTracker extends BaseNetworkStateTracker {
             for (String iface : ifaces) {
                 if (iface.matches(sIfaceMatch)) {
                     mIface = iface;
-                    mNMService.setInterfaceUp(iface);
-                    InterfaceConfiguration config = mNMService.getInterfaceConfig(iface);
-                    mLinkUp = config.hasFlag("up");
-                    if (config != null && mHwAddr == null) {
-                        mHwAddr = config.getHardwareAddress();
-                        if (mHwAddr != null) {
-                            mNetworkInfo.setExtraInfo(mHwAddr);
-                        }
-                    }
+                    interfaceUpdated();
 
                     // if a DHCP client had previously been started for this interface, then stop it
                     NetworkUtils.stopDhcp(mIface);
