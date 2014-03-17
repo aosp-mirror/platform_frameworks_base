@@ -19,6 +19,7 @@
 #define ANDROID_HWUI_AMBIENT_SHADOW_H
 
 #include "Debug.h"
+#include "OpenGLRenderer.h"
 #include "Vector.h"
 #include "VertexBuffer.h"
 
@@ -34,9 +35,9 @@ namespace uirenderer {
  */
 class AmbientShadow {
 public:
-    static void createAmbientShadow(const Vector3* poly, int polyLength,
-            const Vector3& centroid3d, float heightFactor, float geomFactor,
-            VertexBuffer& shadowVertexBuffer);
+    static VertexBufferMode createAmbientShadow(bool isCasterOpaque, const Vector3* poly,
+            int polyLength, const Vector3& centroid3d, float heightFactor,
+            float geomFactor, VertexBuffer& shadowVertexBuffer);
 
 private:
     static void calculateRayDirections(int rays, Vector2* dir);

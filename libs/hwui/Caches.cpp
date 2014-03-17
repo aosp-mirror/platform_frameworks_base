@@ -445,11 +445,11 @@ bool Caches::bindQuadIndicesBuffer() {
 
 bool Caches::bindShadowIndicesBuffer() {
     if (!mShadowStripsIndices) {
-        uint16_t* shadowIndices = new uint16_t[SHADOW_INDEX_COUNT];
+        uint16_t* shadowIndices = new uint16_t[MAX_SHADOW_INDEX_COUNT];
         ShadowTessellator::generateShadowIndices(shadowIndices);
         glGenBuffers(1, &mShadowStripsIndices);
         bool force = bindIndicesBufferInternal(mShadowStripsIndices);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, SHADOW_INDEX_COUNT * sizeof(uint16_t),
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_SHADOW_INDEX_COUNT * sizeof(uint16_t),
             shadowIndices, GL_STATIC_DRAW);
 
         delete[] shadowIndices;
