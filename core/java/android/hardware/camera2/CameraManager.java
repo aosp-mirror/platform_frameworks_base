@@ -81,13 +81,8 @@ public final class CameraManager {
         mCameraService = CameraBinderDecorator.newInstance(cameraServiceRaw);
 
         try {
-            int err = CameraMetadataNative.nativeSetupGlobalVendorTagDescriptor();
-            if (err == CameraBinderDecorator.EOPNOTSUPP) {
-                Log.w(TAG, "HAL version doesn't vendor tags.");
-            } else {
-                CameraBinderDecorator.throwOnError(CameraMetadataNative.
-                        nativeSetupGlobalVendorTagDescriptor());
-            }
+            CameraBinderDecorator.throwOnError(
+                    CameraMetadataNative.nativeSetupGlobalVendorTagDescriptor());
         } catch(CameraRuntimeException e) {
             throw new IllegalStateException("Failed to setup camera vendor tags",
                     e.asChecked());

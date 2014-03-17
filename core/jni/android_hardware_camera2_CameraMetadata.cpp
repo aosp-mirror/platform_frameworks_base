@@ -579,9 +579,14 @@ static jint CameraMetadata_setupGlobalVendorTagDescriptor(JNIEnv *env, jobject t
     sp<VendorTagDescriptor> desc;
     err = cameraService->getCameraVendorTagDescriptor(/*out*/desc);
 
-    if (err != OK) {
-        ALOGE("%s: Failed to setup vendor tag descriptors, received error %s (%d)", __FUNCTION__,
-                strerror(-err), err);
+    if (err == -EOPNOTSUPP) {
+        ALOGW("%s: Camera HAL too old; does not support vendor tags", __FUNCTION__);
+        VendorTagDescriptor::clearGlobalVendorTagDescriptor();
+
+        return OK;
+    } else if (err != OK) {
+        ALOGE("%s: Failed to setup vendor tag descriptors, received error %s (%d)",
+                __FUNCTION__, strerror(-err), err);
         return err;
     }
 
