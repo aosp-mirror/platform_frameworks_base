@@ -58,7 +58,7 @@
     <item quantity="one" msgid="5866624638054847057">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> የህትመት ስራ"</item>
     <item quantity="other" msgid="8746611264734222865">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> የህትመት ስራዎች"</item>
   </plurals>
-    <string name="cancel" msgid="4373674107267141885">"ሰርዝ"</string>
+    <string name="cancel" msgid="4373674107267141885">"ይቅር"</string>
     <string name="restart" msgid="2472034227037808749">"እንደገና ጀምር"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"ከአታሚ ጋር ምንም ግንኙነት የለም"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"አይታወቅም"</string>
