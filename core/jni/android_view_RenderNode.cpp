@@ -128,18 +128,6 @@ static void android_view_RenderNode_setClipToOutline(JNIEnv* env,
     displayList->properties().setClipToOutline(clipToOutline);
 }
 
-static void android_view_RenderNode_setCastsShadow(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jboolean castsShadow) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->properties().setCastsShadow(castsShadow);
-}
-
-static void android_view_RenderNode_setUsesGlobalCamera(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jboolean usesGlobalCamera) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->properties().setUsesGlobalCamera(usesGlobalCamera);
-}
-
 static void android_view_RenderNode_setAlpha(JNIEnv* env,
         jobject clazz, jlong displayListPtr, float alpha) {
     RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
@@ -398,8 +386,6 @@ static JNINativeMethod gMethods[] = {
     { "nSetProjectionReceiver","(JZ)V",  (void*) android_view_RenderNode_setProjectionReceiver },
     { "nSetOutline",           "(JJ)V",  (void*) android_view_RenderNode_setOutline },
     { "nSetClipToOutline",     "(JZ)V",  (void*) android_view_RenderNode_setClipToOutline },
-    { "nSetCastsShadow",       "(JZ)V",  (void*) android_view_RenderNode_setCastsShadow },
-    { "nSetUsesGlobalCamera",  "(JZ)V",  (void*) android_view_RenderNode_setUsesGlobalCamera },
     { "nSetAlpha",             "(JF)V",  (void*) android_view_RenderNode_setAlpha },
     { "nSetHasOverlappingRendering", "(JZ)V",
             (void*) android_view_RenderNode_setHasOverlappingRendering },
