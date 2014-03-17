@@ -2132,10 +2132,6 @@
         <!-- scale of the view in the y direction. -->
         <attr name="scaleY" format="float" />
 
-        <!-- Defines whether the View casts a shadow when it has a 3D rotation or Z
-             translation.-->
-        <attr name="castsShadow" format="boolean" />
-
         <!-- Determines which side the vertical scroll bar should be placed on. -->
         <attr name="verticalScrollbarPosition">
             <!-- Place the scroll bar wherever the system default determines. -->
