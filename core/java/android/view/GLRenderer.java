@@ -1125,7 +1125,7 @@ public class GLRenderer extends HardwareRenderer {
 
                 dirty = beginFrame(canvas, dirty, surfaceState);
 
-                DisplayList displayList = buildDisplayList(view, canvas);
+                RenderNode displayList = buildDisplayList(view, canvas);
 
                 flushLayerChanges();
 
@@ -1137,7 +1137,7 @@ public class GLRenderer extends HardwareRenderer {
                 }
 
                 int saveCount = 0;
-                int status = DisplayList.STATUS_DONE;
+                int status = RenderNode.STATUS_DONE;
 
                 long start = getSystemTime();
                 try {
@@ -1201,7 +1201,7 @@ public class GLRenderer extends HardwareRenderer {
     }
     private static native void nSetDisplayListData(long displayList, long newData);
 
-    private DisplayList buildDisplayList(View view, HardwareCanvas canvas) {
+    private RenderNode buildDisplayList(View view, HardwareCanvas canvas) {
         if (mDrawDelta <= 0) {
             return view.mDisplayList;
         }
@@ -1214,7 +1214,7 @@ public class GLRenderer extends HardwareRenderer {
         canvas.clearLayerUpdates();
 
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
-        DisplayList displayList = view.getDisplayList();
+        RenderNode displayList = view.getDisplayList();
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
 
         endBuildDisplayListProfiling(buildDisplayListStartTime);
@@ -1279,7 +1279,7 @@ public class GLRenderer extends HardwareRenderer {
     }
 
     private int drawDisplayList(View.AttachInfo attachInfo, HardwareCanvas canvas,
-            DisplayList displayList, int status) {
+            RenderNode displayList, int status) {
 
         long drawDisplayListStartTime = 0;
         if (mProfileEnabled) {
@@ -1289,7 +1289,7 @@ public class GLRenderer extends HardwareRenderer {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "drawDisplayList");
         try {
             status |= canvas.drawDisplayList(displayList, mRedrawClip,
-                    DisplayList.FLAG_CLIP_CHILDREN);
+                    RenderNode.FLAG_CLIP_CHILDREN);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
@@ -1305,7 +1305,7 @@ public class GLRenderer extends HardwareRenderer {
     }
 
     private void swapBuffers(int status) {
-        if ((status & DisplayList.STATUS_DREW) == DisplayList.STATUS_DREW) {
+        if ((status & RenderNode.STATUS_DREW) == RenderNode.STATUS_DREW) {
             long eglSwapBuffersStartTime = 0;
             if (mProfileEnabled) {
                 eglSwapBuffersStartTime = System.nanoTime();
@@ -1339,7 +1339,7 @@ public class GLRenderer extends HardwareRenderer {
     private void handleFunctorStatus(View.AttachInfo attachInfo, int status) {
         // If the draw flag is set, functors will be invoked while executing
         // the tree of display lists
-        if ((status & DisplayList.STATUS_DRAW) != 0) {
+        if ((status & RenderNode.STATUS_DRAW) != 0) {
             if (mRedrawClip.isEmpty()) {
                 attachInfo.mViewRootImpl.invalidate();
             } else {
@@ -1348,7 +1348,7 @@ public class GLRenderer extends HardwareRenderer {
             }
         }
 
-        if ((status & DisplayList.STATUS_INVOKE) != 0 ||
+        if ((status & RenderNode.STATUS_INVOKE) != 0 ||
                 attachInfo.mHandler.hasCallbacks(mFunctorsRunnable)) {
             attachInfo.mHandler.removeCallbacks(mFunctorsRunnable);
             mFunctorsRunnable.attachInfo = attachInfo;

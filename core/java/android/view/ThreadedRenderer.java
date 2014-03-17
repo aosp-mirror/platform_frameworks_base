@@ -163,7 +163,7 @@ public class ThreadedRenderer extends HardwareRenderer {
         view.mPrivateFlags &= ~View.PFLAG_INVALIDATED;
 
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
-        DisplayList displayList = view.getDisplayList();
+        RenderNode displayList = view.getDisplayList();
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
 
         view.mRecreateDisplayList = false;
