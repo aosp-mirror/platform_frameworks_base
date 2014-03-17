@@ -657,7 +657,7 @@
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"čitanje sadržaja SD kartice"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Aplikaciji omogućuje čitanje sadržaja vaše USB pohrane."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Aplikaciji omogućuje čitanje sadržaja vaše SD kartice."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"izmjena/brisanje sadrž. USB-a"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"izmjena/brisanje sadržaja USB-a"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"izmjena ili brisanje sadržaja SD kartice"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Dopušta pisanje u USB pohranu."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Aplikaciji omogućuje pisanje na SD karticu."</string>

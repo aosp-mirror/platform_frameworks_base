@@ -689,10 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Lastniku omogoča sproženje operaterjeve aplikacije za konfiguracijo. Tega nikoli ni treba uporabiti za navadne aplikacije."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"spremljanje razmer v omrežju"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Aplikaciji omogoča spremljanje razmer v omrežju. Pri navadnih aplikacijah to ne bi smelo biti potrebno."</string>
-    <!-- no translation found for permlab_setInputCalibration (4902620118878467615) -->
-    <skip />
-    <!-- no translation found for permdesc_setInputCalibration (4527511047549456929) -->
-    <skip />
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"sprememba umerjanja vhodne naprave"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Aplikaciji dovoli spreminjanje parametrov za umerjanje zaslona na dotik. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavitev pravil za geslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Nadzor nad dolžino in znaki, ki so dovoljeni v geslih za odklepanje zaslona."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"nadzor nad poskusi odklepanja zaslona"</string>

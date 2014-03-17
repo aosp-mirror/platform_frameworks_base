@@ -689,10 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permet à l\'application autorisée de faire appel à l\'application de configuration fournie par le fournisseur de services. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"détecter des observations sur les conditions du réseau"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permet à une application de détecter les observations sur les conditions du réseau. Ne devrait jamais être nécessaire pour les applications standards."</string>
-    <!-- no translation found for permlab_setInputCalibration (4902620118878467615) -->
-    <skip />
-    <!-- no translation found for permdesc_setInputCalibration (4527511047549456929) -->
-    <skip />
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"modifier le calibrage du périphérique d\'entrée"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permet à l\'application de modifier les paramètres de calibrage de l\'écran tactile. Ne devrait jamais être nécessaire pour les applications standards."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Choisir le nombre et le type de caractères autorisés dans les mots de passe de déverrouillage de l\'écran"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gérer les tentatives de déverrouillage de l\'écran"</string>

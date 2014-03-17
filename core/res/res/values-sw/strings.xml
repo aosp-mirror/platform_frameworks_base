@@ -689,10 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Inaruhusu kishikiliaji kuomba programu ya usakinishaji inayotolewa na mto huduma. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"sikiliza matukio katika hali za mtandao"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Huruhusu programu kusikiliza matukio katika hali za mtandao. Haipaswi kuhitajika kamwe kwa programu za kawaida."</string>
-    <!-- no translation found for permlab_setInputCalibration (4902620118878467615) -->
-    <skip />
-    <!-- no translation found for permdesc_setInputCalibration (4527511047549456929) -->
-    <skip />
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"badilisha urekebishaji wa kifaa cha kuingiza data"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Huruhusu programu kubadilisha vigezo vya urekebishaji vya skrini ya kugusa. Havipaswi kuhitajika kamwe kwa programu za kawaida."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Kuweka kanuni za nenosiri"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kudhibiti urefu na herufi zinazoruhusiwa katika manenosiri ya kufungua skrini."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Kuhesabu idadi ya mara ambazo skrini inajaribu kufunguliwa"</string>

@@ -689,10 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"允許應用程式調用流動網絡供應商提供的設定應用程式 (不建議一般應用程式使用)。"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"監聽對網絡狀況的觀察"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"允許應用程式監聽對網絡狀況的觀察 (不建議一般應用程式使用)。"</string>
-    <!-- no translation found for permlab_setInputCalibration (4902620118878467615) -->
-    <skip />
-    <!-- no translation found for permdesc_setInputCalibration (4527511047549456929) -->
-    <skip />
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"變更輸入裝置校正設定"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"允許應用程式修改觸控式螢幕的校正參數，而一般應用程式並不需要作出類似修改。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"控制屏幕解鎖密碼所允許的長度和字元。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"監控屏幕解鎖嘗試次數"</string>

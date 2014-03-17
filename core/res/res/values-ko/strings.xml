@@ -689,10 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"권한을 가진 프로그램이 이동통신사에서 제공한 구성 앱을 호출하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"네트워크 상태에 대한 관측 보고 수신"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"애플리케이션이 네트워크 상태에 대한 관측 보고를 수신하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <!-- no translation found for permlab_setInputCalibration (4902620118878467615) -->
-    <skip />
-    <!-- no translation found for permdesc_setInputCalibration (4527511047549456929) -->
-    <skip />
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"입력 기기 보정 변경"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"앱이 터치 스크린의 보정 매개변수를 수정할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"화면 잠금해제 비밀번호에 허용되는 길이 및 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"화면 잠금해제 시도 모니터링"</string>

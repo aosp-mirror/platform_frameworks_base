@@ -689,10 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"อนุญาตให้ผู้ใช้สามารถเรียกใช้แอปการกำหนดค่าของผู้ให้บริการ ซึ่งแอปทั่วไปไม่จำเป็นต้องใช้"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ฟังข้อสังเกตเกี่ยวกับสภาวะของเครือข่าย"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"อนุญาตให้แอปพลิเคชันฟังข้อสังเกตเกี่ยวกับสภาวะของเครือข่าย ไม่จำเป็นสำหรับแอปปกติ"</string>
-    <!-- no translation found for permlab_setInputCalibration (4902620118878467615) -->
-    <skip />
-    <!-- no translation found for permdesc_setInputCalibration (4527511047549456929) -->
-    <skip />
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"เปลี่ยนการเทียบมาตรฐานอุปกรณ์อินพุต"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"อนุญาตให้แอปสามารถปรับพารามิเตอร์การเทียบมาตรฐานของหน้าจอสัมผัส ไม่ควรใช้สำหรับแอปทั่วไป"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ตั้งค่ากฎรหัสผ่าน"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"ควบคุมความยาวและอักขระที่อนุญาตให้ใช้ในรหัสผ่านการปลดล็อกหน้าจอ"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>
