@@ -336,7 +336,12 @@ public class FileRotator {
         final long deleteBefore = currentTimeMillis - mDeleteAgeMillis;
 
         final FileInfo info = new FileInfo(mPrefix);
-        for (String name : mBasePath.list()) {
+        String[] baseFiles = mBasePath.list();
+        if (baseFiles == null) {
+            return;
+        }
+
+        for (String name : baseFiles) {
             if (!info.parse(name)) continue;
 
             if (info.isActive()) {
