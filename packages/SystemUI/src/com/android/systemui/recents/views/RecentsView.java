@@ -90,7 +90,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        Console.log(Constants.DebugFlags.UI.MeasureAndLayout, "[RecentsView|measure]", "width: " + width + " height: " + height, Console.AnsiGreen);
+        Console.log(Constants.DebugFlags.UI.MeasureAndLayout, "[RecentsView|measure]",
+                "width: " + width + " height: " + height, Console.AnsiGreen);
 
         // We measure our stack views sans the status bar.  It will handle the nav bar itself.
         RecentsConfiguration config = RecentsConfiguration.getInstance();
@@ -111,7 +112,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        Console.log(Constants.DebugFlags.UI.MeasureAndLayout, "[RecentsView|layout]", new Rect(left, top, right, bottom) + " changed: " + changed, Console.AnsiGreen);
+        Console.log(Constants.DebugFlags.UI.MeasureAndLayout, "[RecentsView|layout]",
+                new Rect(left, top, right, bottom) + " changed: " + changed, Console.AnsiGreen);
         // We offset our stack views by the status bar height.  It will handle the nav bar itself.
         RecentsConfiguration config = RecentsConfiguration.getInstance();
         top += config.systemInsets.top;

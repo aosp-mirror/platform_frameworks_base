@@ -162,11 +162,13 @@ class TaskResourceLoader implements Runnable {
                                     PackageManager.GET_META_DATA);
                             Drawable icon = info.loadIcon(pm);
                             if (!mCancelled) {
-                                Console.log(Constants.DebugFlags.App.TaskDataLoader,
-                                        "    [TaskResourceLoader|loadIcon]",
-                                        icon);
-                                loadIcon = icon;
-                                mIconCache.put(t.key, icon);
+                                if (icon != null) {
+                                    Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                                            "    [TaskResourceLoader|loadIcon]",
+                                            icon);
+                                    loadIcon = icon;
+                                    mIconCache.put(t.key, icon);
+                                }
                             }
                         }
                         // Load the thumbnail
@@ -387,7 +389,11 @@ public class RecentsTaskLoader {
                     }
                     if (task.icon == null) {
                         task.icon = info.loadIcon(pm);
-                        mIconCache.put(task.key, task.icon);
+                        if (task.icon != null) {
+                            mIconCache.put(task.key, task.icon);
+                        } else {
+                            task.icon = mDefaultIcon;
+                        }
                     }
 
                     // Load the thumbnail (if possible and not the foremost task, from the cache)
@@ -398,7 +404,11 @@ public class RecentsTaskLoader {
                         Console.log(Constants.DebugFlags.App.TaskDataLoader,
                                 "[RecentsTaskLoader|loadingTaskThumbnail]");
                         task.thumbnail = am.getTaskTopThumbnail(t.id);
-                        mThumbnailCache.put(task.key, task.thumbnail);
+                        if (task.thumbnail != null) {
+                            mThumbnailCache.put(task.key, task.thumbnail);
+                        } else {
+                            task.thumbnail = mDefaultThumbnail;
+                        }
                     }
 
                     // Create as many tasks a we want to multiply by

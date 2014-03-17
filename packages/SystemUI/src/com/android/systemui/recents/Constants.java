@@ -31,7 +31,7 @@ public class Constants {
             // This disables the bitmap and icon caches to
             public static final boolean DisableBackgroundCache = false;
 
-            public static final boolean TaskDataLoader = true;
+            public static final boolean TaskDataLoader = false;
             public static final boolean SystemUIHandshake = false;
             public static final boolean TimeSystemCalls = false;
             public static final boolean Memory = false;
@@ -43,7 +43,7 @@ public class Constants {
             public static final boolean TouchEvents = false;
             public static final boolean MeasureAndLayout = false;
             public static final boolean Clipping = false;
-            public static final boolean HwLayers = true;
+            public static final boolean HwLayers = false;
         }
 
         public static class TaskStack {
