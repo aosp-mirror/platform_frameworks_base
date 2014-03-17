@@ -1776,7 +1776,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
             targetStack = sourceTask.stack;
-            targetStack.moveToFront();
+            mWindowManager.moveTaskToTop(sourceTask.taskId);
             if (!addingToTask &&
                     (launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
                 // In this case, we are adding the activity to an existing
@@ -1818,10 +1818,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // An existing activity is starting this new activity, so we want
             // to keep the new one in the same task as the one that is starting
             // it.
-            if (isLockTaskModeViolation(sourceTask)) {
-                Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
-                return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
-            }
             r.setTask(sourceTask, sourceRecord.thumbHolder, false);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in existing task " + r.task + " from source " + sourceRecord);
@@ -1831,11 +1827,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // of a new task...  just put it in the top task, though these days
             // this case should never happen.
             targetStack = adjustStackFocus(r);
-            targetStack.moveToFront();
             ActivityRecord prev = targetStack.topActivity();
             r.setTask(prev != null ? prev.task
                     : targetStack.createTaskRecord(getNextTaskId(), r.info, intent, true),
                     null, true);
+            mWindowManager.moveTaskToTop(r.task.taskId);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in new guessed " + r.task);
         }
