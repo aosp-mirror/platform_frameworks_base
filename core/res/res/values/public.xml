@@ -2111,7 +2111,6 @@
   <public type="attr" name="controlY2" />
   <public type="attr" name="sharedElementName" />
   <public type="attr" name="transitionGroup" />
-  <public type="attr" name="castsShadow" />
   <public type="attr" name="requiredForProfile"/>
   <public type="attr" name="pinned" />
 

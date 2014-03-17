@@ -27,8 +27,6 @@ RenderProperties::RenderProperties()
         , mProjectBackwards(false)
         , mProjectionReceiver(false)
         , mClipToOutline(false)
-        , mCastsShadow(false)
-        , mUsesGlobalCamera(false) // TODO: respect value when rendering
         , mAlpha(1)
         , mHasOverlappingRendering(true)
         , mTranslationX(0), mTranslationY(0), mTranslationZ(0)
