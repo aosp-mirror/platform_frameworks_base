@@ -467,6 +467,19 @@ public class Build {
          * </ul>
          */
         public static final int KITKAT = 19;
+
+        /**
+         * L!
+         *
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li> {@link android.content.Context#bindService Context.bindService} now
+         * requires an explicit Intent, and will throw an exception if given an explicit
+         * Intent.</li>
+         * </ul>
+         */
+        public static final int L = CUR_DEVELOPMENT;
     }
     
     /** The type of build, like "user" or "eng". */
