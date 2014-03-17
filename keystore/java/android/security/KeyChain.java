@@ -89,6 +89,11 @@ public final class KeyChain {
     public static final String ACCOUNT_TYPE = "com.android.keychain";
 
     /**
+     * Package name for KeyChain chooser.
+     */
+    private static final String KEYCHAIN_PACKAGE = "com.android.keychain";
+
+    /**
      * Action to bring up the KeyChainActivity
      */
     private static final String ACTION_CHOOSER = "com.android.keychain.CHOOSER";
@@ -272,7 +277,7 @@ public final class KeyChain {
             throw new NullPointerException("response == null");
         }
         Intent intent = new Intent(ACTION_CHOOSER);
-        intent.setPackage(CERT_INSTALLER_PACKAGE);
+        intent.setPackage(KEYCHAIN_PACKAGE);
         intent.putExtra(EXTRA_RESPONSE, new AliasResponse(response));
         intent.putExtra(EXTRA_HOST, host);
         intent.putExtra(EXTRA_PORT, port);
