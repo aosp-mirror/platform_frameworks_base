@@ -689,10 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Թույլ է տալիս սեփականատիրոջը գործարկել օպերատորի կողմից տրամադրված կազմաձևման ծրագիրը: Սովորական ծրագրերի համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"լսել դիտարկումներ ցանցային պայմանների վերաբերյալ"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Հավելվածին թույլ է տալիս լսել դիտարկումներ ցանցային պայմանների վերաբերյալ: Սովորական հավելվածների համար երբեք պետք չի գալիս:"</string>
-    <!-- no translation found for permlab_setInputCalibration (4902620118878467615) -->
-    <skip />
-    <!-- no translation found for permdesc_setInputCalibration (4527511047549456929) -->
-    <skip />
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"փոփոխել մուտքի սարքի չափաբերումը"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Թույլ է տալիս ծրագրին փոփոխել հպէկրանի չափաբերման կարգավորումները: Սովորական ծրագրերի համար երբեք պետք չի գալու:"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Սահմանել գաղտնաբառի կանոնները"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Վերահսկել էկրանի ապակողպման գաղտնաբառերի թույլատրելի երկարությունն ու գրանշանները:"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Վերահսկել էկրանի ապակողպման փորձերը"</string>

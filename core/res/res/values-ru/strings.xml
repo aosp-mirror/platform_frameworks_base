@@ -689,10 +689,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Владелец сможет запускать приложение настроек, предоставленное оператором. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Использование данных о состоянии сети"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Приложение сможет использовать данные о состоянии сети. Это разрешение обычно используется только специальными приложениями."</string>
-    <!-- no translation found for permlab_setInputCalibration (4902620118878467615) -->
-    <skip />
-    <!-- no translation found for permdesc_setInputCalibration (4527511047549456929) -->
-    <skip />
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"изменение параметров калибровки экрана"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Приложение сможет изменять параметры калибровки сенсорного экрана. Это разрешение обычно используется только специальными приложениями."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Правила выбора паролей"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролировать длину и символы при вводе паролей для снятия блокировки экрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Отслеживать попытки снятия блокировки экрана"</string>
