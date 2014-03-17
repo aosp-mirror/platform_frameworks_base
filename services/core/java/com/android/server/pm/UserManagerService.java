@@ -234,9 +234,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     void systemReady() {
-        final Context context = ActivityThread.systemMain().getSystemContext();
-        mUserPackageMonitor.register(context,
-                null, UserHandle.ALL, false);
+        mUserPackageMonitor.register(mContext, null, UserHandle.ALL, false);
         userForeground(UserHandle.USER_OWNER);
     }
 
@@ -457,7 +455,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     /**
      * Enforces that only the system UID or root's UID or apps that have the
-     * {@link android.Manifest.permission.MANAGE_USERS MANAGE_USERS}
+     * {@link android.Manifest.permission#MANAGE_USERS MANAGE_USERS}
      * permission can make certain calls to the UserManager.
      *
      * @param message used as message if SecurityException is thrown
@@ -1046,7 +1044,7 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * Removes a user and all data directories created for that user. This method should be called
      * after the user's processes have been terminated.
-     * @param id the user's id
+     * @param userHandle the user's id
      */
     public boolean removeUser(int userHandle) {
         checkManageUsersPermission("Only the system can remove users");

@@ -1479,13 +1479,13 @@ class ContextImpl extends Context {
 
     private void validateServiceIntent(Intent service) {
         if (service.getComponent() == null && service.getPackage() == null) {
-            if (true || getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KITKAT) {
+            if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.L) {
+                IllegalArgumentException ex = new IllegalArgumentException(
+                        "Service Intent must be explicit: " + service);
+                throw ex;
+            } else {
                 Log.w(TAG, "Implicit intents with startService are not safe: " + service
                         + " " + Debug.getCallers(2, 3));
-                //IllegalArgumentException ex = new IllegalArgumentException(
-                //        "Service Intent must be explicit: " + service);
-                //Log.e(TAG, "This will become an error", ex);
-                //throw ex;
             }
         }
     }
