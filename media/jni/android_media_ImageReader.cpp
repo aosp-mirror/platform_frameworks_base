@@ -86,8 +86,8 @@ public:
     void setCpuConsumer(const sp<CpuConsumer>& consumer) { mConsumer = consumer; }
     CpuConsumer* getCpuConsumer() { return mConsumer.get(); }
 
-    void setBufferQueue(const sp<BufferQueue>& bq) { mBufferQueue = bq; }
-    BufferQueue* getBufferQueue() { return mBufferQueue.get(); }
+    void setProducer(const sp<IGraphicBufferProducer>& producer) { mProducer = producer; }
+    IGraphicBufferProducer* getProducer() { return mProducer.get(); }
 
     void setBufferFormat(int format) { mFormat = format; }
     int getBufferFormat() { return mFormat; }
@@ -104,7 +104,7 @@ private:
 
     List<CpuConsumer::LockedBuffer*> mBuffers;
     sp<CpuConsumer> mConsumer;
-    sp<BufferQueue> mBufferQueue;
+    sp<IGraphicBufferProducer> mProducer;
     jobject mWeakThiz;
     jclass mClazz;
     int mFormat;
@@ -222,7 +222,7 @@ static CpuConsumer* ImageReader_getCpuConsumer(JNIEnv* env, jobject thiz)
     return ctx->getCpuConsumer();
 }
 
-static BufferQueue* ImageReader_getBufferQueue(JNIEnv* env, jobject thiz)
+static IGraphicBufferProducer* ImageReader_getProducer(JNIEnv* env, jobject thiz)
 {
     ALOGV("%s:", __FUNCTION__);
     JNIImageReaderContext* const ctx = ImageReader_getContext(env, thiz);
@@ -230,7 +230,7 @@ static BufferQueue* ImageReader_getBufferQueue(JNIEnv* env, jobject thiz)
         jniThrowRuntimeException(env, "ImageReaderContext is not initialized");
         return NULL;
     }
-    return ctx->getBufferQueue();
+    return ctx->getProducer();
 }
 
 static void ImageReader_setNativeContext(JNIEnv* env,
@@ -613,8 +613,10 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
 
     nativeFormat = Image_getPixelFormat(env, format);
 
-    sp<BufferQueue> bq = new BufferQueue();
-    sp<CpuConsumer> consumer = new CpuConsumer(bq, maxImages,
+    sp<IGraphicBufferProducer> gbProducer;
+    sp<IGraphicBufferConsumer> gbConsumer;
+    BufferQueue::createBufferQueue(&gbProducer, &gbConsumer);
+    sp<CpuConsumer> consumer = new CpuConsumer(gbConsumer, maxImages,
                                                /*controlledByApp*/true);
     // TODO: throw dvm exOutOfMemoryError?
     if (consumer == NULL) {
@@ -629,7 +631,7 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
     }
     sp<JNIImageReaderContext> ctx(new JNIImageReaderContext(env, weakThiz, clazz, maxImages));
     ctx->setCpuConsumer(consumer);
-    ctx->setBufferQueue(bq);
+    ctx->setProducer(gbProducer);
     consumer->setFrameAvailableListener(ctx);
     ImageReader_setNativeContext(env, thiz, ctx);
     ctx->setBufferFormat(nativeFormat);
@@ -794,14 +796,14 @@ static jobject ImageReader_getSurface(JNIEnv* env, jobject thiz)
 {
     ALOGV("%s: ", __FUNCTION__);
 
-    BufferQueue* bq = ImageReader_getBufferQueue(env, thiz);
-    if (bq == NULL) {
+    IGraphicBufferProducer* gbp = ImageReader_getProducer(env, thiz);
+    if (gbp == NULL) {
         jniThrowRuntimeException(env, "CpuConsumer is uninitialized");
         return NULL;
     }
 
     // Wrap the IGBP in a Java-language Surface.
-    return android_view_Surface_createFromIGraphicBufferProducer(env, bq);
+    return android_view_Surface_createFromIGraphicBufferProducer(env, gbp);
 }
 
 static jobject Image_createSurfacePlane(JNIEnv* env, jobject thiz, int idx)
