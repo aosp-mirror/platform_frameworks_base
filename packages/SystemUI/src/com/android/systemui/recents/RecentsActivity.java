@@ -45,7 +45,6 @@ public class RecentsActivity extends Activity {
         SpaceNode root = loader.reload(this, Constants.Values.RecentsTaskLoader.PreloadFirstTasksCount);
         ArrayList<TaskStack> stacks = root.getStacks();
         if (!stacks.isEmpty()) {
-            // XXX: We just replace the root every time for now, we will change this in the future
             mRecentsView.setBSP(root);
         }
 
@@ -155,7 +154,7 @@ public class RecentsActivity extends Activity {
                 Console.AnsiRed);
         super.onPause();
 
-        // Stop the loader when we leave Recents
+        // Stop the loader immediately when we leave Recents
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         loader.stopLoader();
     }

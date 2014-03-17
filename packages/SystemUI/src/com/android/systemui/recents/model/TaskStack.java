@@ -119,6 +119,18 @@ class FilteredTaskList {
  * The task stack contains a list of multiple tasks.
  */
 public class TaskStack {
+    /* Task stack callbacks */
+    public interface TaskStackCallbacks {
+        /* Notifies when a task has been added to the stack */
+        public void onStackTaskAdded(TaskStack stack, Task t);
+        /* Notifies when a task has been removed from the stack */
+        public void onStackTaskRemoved(TaskStack stack, Task t);
+        /** Notifies when the stack was filtered */
+        public void onStackFiltered(TaskStack stack);
+        /** Notifies when the stack was un-filtered */
+        public void onStackUnfiltered(TaskStack stack);
+    }
+
     Context mContext;
 
     FilteredTaskList mTaskList = new FilteredTaskList();
