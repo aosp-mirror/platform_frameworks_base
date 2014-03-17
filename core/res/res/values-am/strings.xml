@@ -1115,9 +1115,9 @@
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> እያሄደ ነው"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"ተጨማሪ መረጃ ለማግኘት ወይም መተግበሪያውን ለማቆም ይንኩ።"</string>
     <string name="ok" msgid="5970060430562524910">"እሺ"</string>
-    <string name="cancel" msgid="6442560571259935130">"ሰርዝ"</string>
+    <string name="cancel" msgid="6442560571259935130">"ይቅር"</string>
     <string name="yes" msgid="5362982303337969312">"እሺ"</string>
-    <string name="no" msgid="5141531044935541497">"ሰርዝ"</string>
+    <string name="no" msgid="5141531044935541497">"ይቅር"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"ትኩረት"</string>
     <string name="loading" msgid="7933681260296021180">"በመጫን ላይ…"</string>
     <string name="capital_on" msgid="1544682755514494298">"በ"</string>
@@ -1219,7 +1219,7 @@
     <string name="sms_short_code_details" msgid="3492025719868078457">"ይሄ በተንቀሳቃሽ ስልክ መለያዎ ላይ "<font fgcolor="#ffffb060">"ክፍያዎችን ሊያስከትል ይችላል"</font>"።"</string>
     <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"ይሄ በተንቀሳቃሽ ስልክ መለያዎ ላይ ክፍያዎችን ያስከትላል።"</font></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"ላክ"</string>
-    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"ሰርዝ"</string>
+    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"ይቅር"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"ምርጫዬን አስታውስ"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"ይሄንን በኋላ ላይ በቅንብሮች &gt; መተግበሪያዎች ውስጥ ሊቀይሩት ይችላሉ"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"ሁልጊዜ ፍቀድ"</string>
@@ -1415,7 +1415,7 @@
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"ዓመት ጨምር"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"ዓመት ቀንስ"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ተወው"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ይቅር"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ሰርዝ"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"ተከናውኗል"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"ሞድ ለውጥ"</string>
