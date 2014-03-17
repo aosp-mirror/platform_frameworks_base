@@ -357,7 +357,8 @@ public class Recents extends SystemUI implements RecentsComponent {
     Bitmap loadFirstTaskThumbnail() {
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RecentTaskInfo> tasks = am.getRecentTasksForUser(1,
-                ActivityManager.RECENT_IGNORE_UNAVAILABLE, UserHandle.CURRENT.getIdentifier());
+                ActivityManager.RECENT_IGNORE_UNAVAILABLE | ActivityManager.RECENT_INCLUDE_RELATED,
+                UserHandle.CURRENT.getIdentifier());
         for (ActivityManager.RecentTaskInfo t : tasks) {
             // Skip tasks in the home stack
             if (am.isInHomeStack(t.persistentId)) {
@@ -374,7 +375,8 @@ public class Recents extends SystemUI implements RecentsComponent {
     boolean hasFirstTask() {
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RecentTaskInfo> tasks = am.getRecentTasksForUser(1,
-                ActivityManager.RECENT_IGNORE_UNAVAILABLE, UserHandle.CURRENT.getIdentifier());
+                ActivityManager.RECENT_IGNORE_UNAVAILABLE | ActivityManager.RECENT_INCLUDE_RELATED,
+                UserHandle.CURRENT.getIdentifier());
         for (ActivityManager.RecentTaskInfo t : tasks) {
             // Skip tasks in the home stack
             if (am.isInHomeStack(t.persistentId)) {
