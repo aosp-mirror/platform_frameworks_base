@@ -243,10 +243,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int newScroll = Math.max(mMinScroll, Math.min(mMaxScroll, curScroll));
         if (newScroll != curScroll) {
             // Enable hw layers on the stack
-            addHwLayersRefCount();
+            addHwLayersRefCount("animateBoundScroll");
 
             // Abort any current animations
-            mScroller.abortAnimation();
+            abortScroller();
             if (mScrollAnimator != null) {
                 mScrollAnimator.cancel();
                 mScrollAnimator.removeAllListeners();
@@ -265,7 +265,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     // Disable hw layers on the stack
-                    decHwLayersRefCount();
+                    decHwLayersRefCount("animateBoundScroll");
                 }
             });
             mScrollAnimator.start();
@@ -277,6 +277,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     void abortBoundScrollAnimation() {
         if (mScrollAnimator != null) {
             mScrollAnimator.cancel();
+        }
+    }
+
+    void abortScroller() {
+        if (!mScroller.isFinished()) {
+            // Abort the scroller
+            mScroller.abortAnimation();
+            // And disable hw layers on the stack
+            decHwLayersRefCount("flingScroll");
         }
     }
 
@@ -319,10 +328,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /** Enables the hw layers and increments the hw layer requirement ref count */
-    void addHwLayersRefCount() {
+    void addHwLayersRefCount(String reason) {
         Console.log(Constants.DebugFlags.UI.HwLayers,
                 "[TaskStackView|addHwLayersRefCount] refCount: " +
-                        mHwLayersRefCount + "->" + (mHwLayersRefCount + 1));
+                        mHwLayersRefCount + "->" + (mHwLayersRefCount + 1) + " " + reason);
         if (mHwLayersRefCount == 0) {
             // Enable hw layers on each of the children
             int childCount = getChildCount();
@@ -336,10 +345,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /** Decrements the hw layer requirement ref count and disables the hw layers when we don't
         need them anymore. */
-    void decHwLayersRefCount() {
+    void decHwLayersRefCount(String reason) {
         Console.log(Constants.DebugFlags.UI.HwLayers,
                 "[TaskStackView|decHwLayersRefCount] refCount: " +
-                        mHwLayersRefCount + "->" + (mHwLayersRefCount - 1));
+                        mHwLayersRefCount + "->" + (mHwLayersRefCount - 1) + " " + reason);
         mHwLayersRefCount--;
         if (mHwLayersRefCount == 0) {
             // Disable hw layers on each of the children
@@ -362,7 +371,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
             // If we just finished scrolling, then disable the hw layers
             if (mScroller.isFinished()) {
-                decHwLayersRefCount();
+                decHwLayersRefCount("finishedFlingScroll");
             }
         }
     }
@@ -775,15 +784,13 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 mActivePointerId = ev.getPointerId(0);
                 mActiveTaskView = findViewAtPoint(mLastMotionX, mLastMotionY);
                 // Stop the current scroll if it is still flinging
-                mSv.mScroller.abortAnimation();
+                mSv.abortScroller();
                 mSv.abortBoundScrollAnimation();
                 // Initialize the velocity tracker
                 initOrResetVelocityTracker();
                 mVelocityTracker.addMovement(ev);
                 // Check if the scroller is finished yet
                 mIsScrolling = !mSv.mScroller.isFinished();
-                // Enable HW layers
-                mSv.addHwLayersRefCount();
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -803,6 +810,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     if (parent != null) {
                         parent.requestDisallowInterceptTouchEvent(true);
                     }
+                    // Enable HW layers
+                    mSv.addHwLayersRefCount("stackScroll");
                 }
 
                 mLastMotionX = x;
@@ -813,14 +822,16 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             case MotionEvent.ACTION_UP: {
                 // Animate the scroll back if we've cancelled
                 mSv.animateBoundScroll(Constants.Values.TaskStackView.Animation.SnapScrollBackDuration);
+                // Disable HW layers
+                if (mIsScrolling) {
+                    mSv.decHwLayersRefCount("stackScroll");
+                }
                 // Reset the drag state and the velocity tracker
                 mIsScrolling = false;
                 mActivePointerId = INACTIVE_POINTER_ID;
                 mActiveTaskView = null;
                 mTotalScrollMotion = 0;
                 recycleVelocityTracker();
-                // Disable HW layers
-                mSv.decHwLayersRefCount();
                 break;
             }
         }
@@ -858,7 +869,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 mActivePointerId = ev.getPointerId(0);
                 mActiveTaskView = findViewAtPoint(mLastMotionX, mLastMotionY);
                 // Stop the current scroll if it is still flinging
-                mSv.mScroller.abortAnimation();
+                mSv.abortScroller();
                 mSv.abortBoundScrollAnimation();
                 // Initialize the velocity tracker
                 initOrResetVelocityTracker();
@@ -889,7 +900,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                             parent.requestDisallowInterceptTouchEvent(true);
                         }
                         // Enable HW layers
-                        mSv.addHwLayersRefCount();
+                        mSv.addHwLayersRefCount("stackScroll");
                     }
                 }
                 if (mIsScrolling) {
@@ -914,7 +925,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                         "scroll: " + mSv.getStackScroll() + " velocity: " + velocity,
                             Console.AnsiGreen);
                     // Enable HW layers on the stack
-                    mSv.addHwLayersRefCount();
+                    mSv.addHwLayersRefCount("flingScroll");
                     // Fling scroll
                     mSv.mScroller.fling(0, mSv.getStackScroll(),
                             0, -velocity,
@@ -929,27 +940,30 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     mSv.animateBoundScroll(Constants.Values.TaskStackView.Animation.SnapScrollBackDuration);
                 }
 
+                if (mIsScrolling) {
+                    // Disable HW layers
+                    mSv.decHwLayersRefCount("stackScroll");
+                }
                 mActivePointerId = INACTIVE_POINTER_ID;
                 mIsScrolling = false;
                 mTotalScrollMotion = 0;
                 recycleVelocityTracker();
-                // Disable HW layers
-                mSv.decHwLayersRefCount();
                 break;
             }
             case MotionEvent.ACTION_CANCEL: {
+                if (mIsScrolling) {
+                    // Disable HW layers
+                    mSv.decHwLayersRefCount("stackScroll");
+                }
                 if (mSv.isScrollOutOfBounds()) {
                     // Animate the scroll back into bounds
                     // XXX: Make this animation a function of the velocity OR distance
                     mSv.animateBoundScroll(Constants.Values.TaskStackView.Animation.SnapScrollBackDuration);
                 }
-
                 mActivePointerId = INACTIVE_POINTER_ID;
                 mIsScrolling = false;
                 mTotalScrollMotion = 0;
                 recycleVelocityTracker();
-                // Disable HW layers
-                mSv.decHwLayersRefCount();
                 break;
             }
         }
@@ -971,7 +985,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     @Override
     public void onBeginDrag(View v) {
         // Enable HW layers
-        mSv.addHwLayersRefCount();
+        mSv.addHwLayersRefCount("swipeBegin");
         // Disallow parents from intercepting touch events
         final ViewParent parent = mSv.getParent();
         if (parent != null) {
@@ -1010,7 +1024,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         }
 
         // Disable HW layers
-        mSv.decHwLayersRefCount();
+        mSv.decHwLayersRefCount("swipeComplete");
     }
 
     @Override
@@ -1021,6 +1035,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     @Override
     public void onDragCancelled(View v) {
         // Disable HW layers
-        mSv.decHwLayersRefCount();
+        mSv.decHwLayersRefCount("swipeCancelled");
     }
 }
