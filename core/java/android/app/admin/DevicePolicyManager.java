@@ -95,7 +95,7 @@ public class DevicePolicyManager {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_MANAGED_PROFILE
-        = "android.managedprovisioning.ACTION_PROVISION_MANAGED_PROFILE";
+        = "android.app.action.ACTION_PROVISION_MANAGED_PROFILE";
 
     /**
      * A String extra holding the name of the package of the mobile device management application
