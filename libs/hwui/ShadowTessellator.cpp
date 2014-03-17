@@ -33,9 +33,9 @@ static inline T max(T a, T b) {
     return a > b ? a : b;
 }
 
-void ShadowTessellator::tessellateAmbientShadow(const Vector3* casterPolygon,
-        int casterVertexCount, const Vector3& centroid3d,
-        VertexBuffer& shadowVertexBuffer) {
+VertexBufferMode ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
+        const Vector3* casterPolygon, int casterVertexCount,
+        const Vector3& centroid3d, VertexBuffer& shadowVertexBuffer) {
     ATRACE_CALL();
 
     // A bunch of parameters to tweak the shadow.
@@ -43,12 +43,14 @@ void ShadowTessellator::tessellateAmbientShadow(const Vector3* casterPolygon,
     const float heightFactor = 1.0f / 128;
     const float geomFactor = 64;
 
-    AmbientShadow::createAmbientShadow(casterPolygon, casterVertexCount,
-            centroid3d, heightFactor, geomFactor, shadowVertexBuffer);
+    return AmbientShadow::createAmbientShadow(isCasterOpaque, casterPolygon,
+            casterVertexCount, centroid3d, heightFactor, geomFactor,
+            shadowVertexBuffer);
 
 }
 
-void ShadowTessellator::tessellateSpotShadow(const Vector3* casterPolygon, int casterVertexCount,
+VertexBufferMode ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
+        const Vector3* casterPolygon, int casterVertexCount,
         const Vector3& lightPosScale, const mat4& receiverTransform,
         int screenWidth, int screenHeight, VertexBuffer& shadowVertexBuffer) {
     ATRACE_CALL();
@@ -71,37 +73,40 @@ void ShadowTessellator::tessellateSpotShadow(const Vector3* casterPolygon, int c
     const float lightSize = maximal / 4;
     const int lightVertexCount = 8;
 
-    SpotShadow::createSpotShadow(casterPolygon, casterVertexCount, lightCenter,
-            lightSize, lightVertexCount, shadowVertexBuffer);
+    VertexBufferMode mode = SpotShadow::createSpotShadow(isCasterOpaque,
+            casterPolygon, casterVertexCount, lightCenter, lightSize,
+            lightVertexCount, shadowVertexBuffer);
 
+#if DEBUG_SHADOW
+     if(shadowVertexBuffer.getVertexCount() <= 0) {
+        ALOGD("Spot shadow generation failed %d", shadowVertexBuffer.getVertexCount());
+     }
+#endif
+     return mode;
 }
 
 void ShadowTessellator::generateShadowIndices(uint16_t* shadowIndices) {
     int currentIndex = 0;
     const int rays = SHADOW_RAY_COUNT;
     // For the penumbra area.
-    for (int i = 0; i < rays; i++) {
-        shadowIndices[currentIndex++] = i;
-        shadowIndices[currentIndex++] = rays + i;
+    for (int layer = 0; layer < 2; layer ++) {
+        int baseIndex = layer * rays;
+        for (int i = 0; i < rays; i++) {
+            shadowIndices[currentIndex++] = i + baseIndex;
+            shadowIndices[currentIndex++] = rays + i + baseIndex;
+        }
+        // To close the loop, back to the ray 0.
+        shadowIndices[currentIndex++] = 0 + baseIndex;
+         // Note this is the same as the first index of next layer loop.
+        shadowIndices[currentIndex++] = rays + baseIndex;
     }
-    // To close the loop, back to the ray 0.
-    shadowIndices[currentIndex++] = 0;
-    shadowIndices[currentIndex++] = rays;
-
-    uint16_t centroidIndex = 2 * rays;
-    // For the umbra area, using strips to simulate the fans.
-    for (int i = 0; i < rays; i++) {
-        shadowIndices[currentIndex++] = rays + i;
-        shadowIndices[currentIndex++] = centroidIndex;
-    }
-    shadowIndices[currentIndex++] = rays;
 
 #if DEBUG_SHADOW
-    if (currentIndex != SHADOW_INDEX_COUNT) {
-        ALOGE("vertex index count is wrong. current %d, expected %d",
-                currentIndex, SHADOW_INDEX_COUNT);
+    if (currentIndex != MAX_SHADOW_INDEX_COUNT) {
+        ALOGW("vertex index count is wrong. current %d, expected %d",
+                currentIndex, MAX_SHADOW_INDEX_COUNT);
     }
-    for (int i = 0; i < SHADOW_INDEX_COUNT; i++) {
+    for (int i = 0; i < MAX_SHADOW_INDEX_COUNT; i++) {
         ALOGD("vertex index is (%d, %d)", i, shadowIndices[i]);
     }
 #endif
@@ -135,7 +140,7 @@ Vector2 ShadowTessellator::centroid2d(const Vector2* poly, int polyLength) {
     if (area != 0) {
         centroid = Vector2(sumx / (3 * area), sumy / (3 * area));
     } else {
-        ALOGE("Area is 0 while computing centroid!");
+        ALOGW("Area is 0 while computing centroid!");
     }
     return centroid;
 }

@@ -31,6 +31,7 @@ namespace uirenderer {
  * Calculate the shadows as a triangle strips while alpha value as the
  * shadow values.
  *
+ * @param isCasterOpaque Whether the caster is opaque.
  * @param vertices The shadow caster's polygon, which is represented in a Vector3
  *                  array.
  * @param vertexCount The length of caster's polygon in terms of number of
@@ -43,17 +44,18 @@ namespace uirenderer {
  * @param shadowVertexBuffer Return an floating point array of (x, y, a)
  *               triangle strips mode.
  */
-void AmbientShadow::createAmbientShadow(const Vector3* vertices, int vertexCount,
-        const Vector3& centroid3d, float heightFactor, float geomFactor,
-        VertexBuffer& shadowVertexBuffer) {
+VertexBufferMode AmbientShadow::createAmbientShadow(bool isCasterOpaque,
+        const Vector3* vertices, int vertexCount, const Vector3& centroid3d,
+        float heightFactor, float geomFactor, VertexBuffer& shadowVertexBuffer) {
     const int rays = SHADOW_RAY_COUNT;
+    VertexBufferMode mode = kVertexBufferMode_OnePolyRingShadow;
     // Validate the inputs.
     if (vertexCount < 3 || heightFactor <= 0 || rays <= 0
         || geomFactor <= 0) {
 #if DEBUG_SHADOW
-        ALOGE("Invalid input for createAmbientShadow(), early return!");
+        ALOGW("Invalid input for createAmbientShadow(), early return!");
 #endif
-        return;
+        return mode; // vertex buffer is empty, so any mode doesn't matter.
     }
 
     Vector<Vector2> dir; // TODO: use C++11 unique_ptr
@@ -75,7 +77,7 @@ void AmbientShadow::createAmbientShadow(const Vector3* vertices, int vertexCount
         rayDist[i] = rayDistance;
         if (edgeIndex < 0 || edgeIndex >= vertexCount) {
 #if DEBUG_SHADOW
-            ALOGE("Invalid edgeIndex!");
+            ALOGW("Invalid edgeIndex!");
 #endif
             edgeIndex = 0;
         }
@@ -86,7 +88,8 @@ void AmbientShadow::createAmbientShadow(const Vector3* vertices, int vertexCount
 
     // The output buffer length basically is roughly rays * layers, but since we
     // need triangle strips, so we need to duplicate vertices to accomplish that.
-    AlphaVertex* shadowVertices = shadowVertexBuffer.alloc<AlphaVertex>(SHADOW_VERTEX_COUNT);
+    AlphaVertex* shadowVertices =
+            shadowVertexBuffer.alloc<AlphaVertex>(SHADOW_VERTEX_COUNT);
 
     // Calculate the vertex of the shadows.
     //
@@ -95,6 +98,7 @@ void AmbientShadow::createAmbientShadow(const Vector3* vertices, int vertexCount
     // calculate the normal N, which should be perpendicular to the edge of the
     // polygon (represented by the neighbor intersection points) .
     // Shadow's vertices will be generated as : P + N * scale.
+    const Vector2 centroid2d = Vector2(centroid3d.x, centroid3d.y);
     for (int rayIndex = 0; rayIndex < rays; rayIndex++) {
         Vector2 normal(1.0f, 0.0f);
         calculateNormal(rays, rayIndex, dir.array(), rayDist, normal);
@@ -102,7 +106,7 @@ void AmbientShadow::createAmbientShadow(const Vector3* vertices, int vertexCount
         // The vertex should be start from rayDist[i] then scale the
         // normalizeNormal!
         Vector2 intersection = dir[rayIndex] * rayDist[rayIndex] +
-                Vector2(centroid3d.x, centroid3d.y);
+                centroid2d;
 
         // outer ring of points, expanded based upon height of each ray intersection
         float expansionDist = rayHeight[rayIndex] * heightFactor *
@@ -114,25 +118,31 @@ void AmbientShadow::createAmbientShadow(const Vector3* vertices, int vertexCount
 
         // inner ring of points
         float opacity = 1.0 / (1 + rayHeight[rayIndex] * heightFactor);
-        AlphaVertex::set(&shadowVertices[rayIndex + rays],
+        AlphaVertex::set(&shadowVertices[rays + rayIndex],
                 intersection.x,
                 intersection.y,
                 opacity);
     }
-    float centroidAlpha = 1.0 / (1 + centroid3d.z * heightFactor);
-    AlphaVertex::set(&shadowVertices[SHADOW_VERTEX_COUNT - 1],
-            centroid3d.x, centroid3d.y, centroidAlpha);
+
+    // If caster isn't opaque, we need to to fill the umbra by storing the umbra's
+    // centroid in the innermost ring of vertices.
+    if (!isCasterOpaque) {
+        mode = kVertexBufferMode_TwoPolyRingShadow;
+        float centroidAlpha = 1.0 / (1 + centroid3d.z * heightFactor);
+        AlphaVertex centroidXYA;
+        AlphaVertex::set(&centroidXYA, centroid2d.x, centroid2d.y, centroidAlpha);
+        for (int rayIndex = 0; rayIndex < rays; rayIndex++) {
+            shadowVertices[2 * rays + rayIndex] = centroidXYA;
+        }
+    }
 
 #if DEBUG_SHADOW
-    if (currentVertexIndex != SHADOW_VERTEX_COUNT) {
-        ALOGE("number of vertex generated for ambient shadow is wrong! "
-              "current: %d , expected: %d", currentVertexIndex, SHADOW_VERTEX_COUNT);
-    }
     for (int i = 0; i < SHADOW_VERTEX_COUNT; i++) {
         ALOGD("ambient shadow value: i %d, (x:%f, y:%f, a:%f)", i, shadowVertices[i].x,
                 shadowVertices[i].y, shadowVertices[i].alpha);
     }
 #endif
+    return mode;
 }
 
 /**

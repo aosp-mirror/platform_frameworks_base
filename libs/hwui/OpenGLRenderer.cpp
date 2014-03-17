@@ -2414,9 +2414,12 @@ status_t OpenGLRenderer::drawVertexBuffer(VertexBufferMode mode,
     if (mode == kVertexBufferMode_Standard) {
         mCaches.unbindIndicesBuffer();
         glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexBuffer.getVertexCount());
-    } else {
+    } else if (mode == kVertexBufferMode_OnePolyRingShadow) {
         mCaches.bindShadowIndicesBuffer();
-        glDrawElements(GL_TRIANGLE_STRIP, SHADOW_INDEX_COUNT, GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_TRIANGLE_STRIP, ONE_POLY_RING_SHADOW_INDEX_COUNT, GL_UNSIGNED_SHORT, 0);
+    } else if (mode == kVertexBufferMode_TwoPolyRingShadow) {
+        mCaches.bindShadowIndicesBuffer();
+        glDrawElements(GL_TRIANGLE_STRIP, TWO_POLY_RING_SHADOW_INDEX_COUNT, GL_UNSIGNED_SHORT, 0);
     }
 
     if (isAA) {
@@ -3245,14 +3248,15 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& c
         }
         centroid3d.z += casterLift;
     }
-
+    bool isCasterOpaque = (casterAlpha == 1.0f);
     // draw caster's shadows
     if (mCaches.propertyAmbientShadowStrength > 0) {
         paint.setARGB(casterAlpha * mCaches.propertyAmbientShadowStrength, 0, 0, 0);
         VertexBuffer ambientShadowVertexBuffer;
-        ShadowTessellator::tessellateAmbientShadow(casterPolygon, casterVertexCount,
-                centroid3d, ambientShadowVertexBuffer);
-        drawVertexBuffer(kVertexBufferMode_Shadow, ambientShadowVertexBuffer, &paint);
+        VertexBufferMode vertexBufferMode = ShadowTessellator::tessellateAmbientShadow(
+                isCasterOpaque, casterPolygon, casterVertexCount, centroid3d,
+                ambientShadowVertexBuffer);
+        drawVertexBuffer(vertexBufferMode, ambientShadowVertexBuffer, &paint);
     }
 
     if (mCaches.propertySpotShadowStrength > 0) {
@@ -3260,10 +3264,10 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& c
         VertexBuffer spotShadowVertexBuffer;
         Vector3 lightPosScale(mCaches.propertyLightPosXScale,
                 mCaches.propertyLightPosYScale, mCaches.propertyLightPosZScale);
-        ShadowTessellator::tessellateSpotShadow(casterPolygon, casterVertexCount,
-                lightPosScale, *currentTransform(), getWidth(), getHeight(),
-                spotShadowVertexBuffer);
-        drawVertexBuffer(kVertexBufferMode_Shadow, spotShadowVertexBuffer, &paint);
+        VertexBufferMode vertexBufferMode = ShadowTessellator::tessellateSpotShadow(
+                isCasterOpaque, casterPolygon, casterVertexCount, lightPosScale,
+                *currentTransform(), getWidth(), getHeight(), spotShadowVertexBuffer);
+        drawVertexBuffer(vertexBufferMode, spotShadowVertexBuffer, &paint);
     }
 
     return DrawGlInfo::kStatusDrew;

@@ -119,7 +119,8 @@ enum ModelViewMode {
 
 enum VertexBufferMode {
     kVertexBufferMode_Standard = 0,
-    kVertexBufferMode_Shadow = 1
+    kVertexBufferMode_OnePolyRingShadow = 1,
+    kVertexBufferMode_TwoPolyRingShadow = 2
 };
 
 ///////////////////////////////////////////////////////////////////////////////
