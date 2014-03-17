@@ -33,57 +33,71 @@ import com.android.systemui.recents.views.TaskViewTransform;
 import java.lang.ref.WeakReference;
 
 
-/* Service */
-public class RecentsService extends Service {
-    // XXX: This should be getting the message from recents definition
-    final static int MSG_UPDATE_RECENTS_FOR_CONFIGURATION = 0;
+/** The message handler to process Recents SysUI messages */
+class SystemUIMessageHandler extends Handler {
+    WeakReference<Context> mContext;
 
-    /** This Handler should be static to prevent holding onto a reference to the service. */
-    static class MessageHandler extends Handler {
-        WeakReference<Context> mContext;
-
-        MessageHandler(Context context) {
-            // Keep a weak ref to the context instead of a strong ref
-            mContext = new WeakReference<Context>(context);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            Console.log(Constants.DebugFlags.App.SystemUIHandshake,
-                    "[RecentsService|handleMessage]", msg);
-            if (msg.what == MSG_UPDATE_RECENTS_FOR_CONFIGURATION) {
-                Context context = mContext.get();
-                if (context == null) return;
-
-                RecentsTaskLoader.initialize(context);
-                RecentsConfiguration.reinitialize(context);
-
-                try {
-                    Bundle data = msg.getData();
-                    Rect windowRect = (Rect) data.getParcelable("windowRect");
-                    Rect systemInsets = (Rect) data.getParcelable("systemInsets");
-                    RecentsConfiguration.getInstance().updateSystemInsets(systemInsets);
-
-                    // Create a dummy task stack & compute the rect for the thumbnail to animate to
-                    TaskStack stack = new TaskStack(context);
-                    TaskStackView tsv = new TaskStackView(context, stack);
-                    tsv.computeRects(windowRect.width(), windowRect.height() - systemInsets.top);
-                    tsv.boundScroll();
-                    TaskViewTransform transform = tsv.getStackTransform(0);
-                    Rect taskRect = new Rect(transform.rect);
-
-                    data.putParcelable("taskRect", taskRect);
-                    Message reply = Message.obtain(null, MSG_UPDATE_RECENTS_FOR_CONFIGURATION, 0, 0);
-                    reply.setData(data);
-                    msg.replyTo.send(reply);
-                } catch (RemoteException re) {
-                    re.printStackTrace();
-                }
-            }
-        }
+    SystemUIMessageHandler(Context context) {
+        // Keep a weak ref to the context instead of a strong ref
+        mContext = new WeakReference<Context>(context);
     }
 
-    Messenger mMessenger = new Messenger(new MessageHandler(this));
+    @Override
+    public void handleMessage(Message msg) {
+        Console.log(Constants.DebugFlags.App.SystemUIHandshake,
+                "[RecentsService|handleMessage]", msg);
+
+        Context context = mContext.get();
+        if (context == null) return;
+
+        if (msg.what == RecentsService.MSG_UPDATE_RECENTS_FOR_CONFIGURATION) {
+            RecentsTaskLoader.initialize(context);
+            RecentsConfiguration.reinitialize(context);
+
+            try {
+                Bundle data = msg.getData();
+                Rect windowRect = (Rect) data.getParcelable("windowRect");
+                Rect systemInsets = (Rect) data.getParcelable("systemInsets");
+                RecentsConfiguration.getInstance().updateSystemInsets(systemInsets);
+
+                // Create a dummy task stack & compute the rect for the thumbnail to animate to
+                TaskStack stack = new TaskStack(context);
+                TaskStackView tsv = new TaskStackView(context, stack);
+                tsv.computeRects(windowRect.width(), windowRect.height() - systemInsets.top);
+                tsv.boundScroll();
+                TaskViewTransform transform = tsv.getStackTransform(0);
+                Rect taskRect = new Rect(transform.rect);
+
+                data.putParcelable("taskRect", taskRect);
+                Message reply = Message.obtain(null,
+                        RecentsService.MSG_UPDATE_RECENTS_FOR_CONFIGURATION, 0, 0);
+                reply.setData(data);
+                msg.replyTo.send(reply);
+            } catch (RemoteException re) {
+                re.printStackTrace();
+            }
+        } else if (msg.what == RecentsService.MSG_CLOSE_RECENTS) {
+            // Do nothing
+        } else if (msg.what == RecentsService.MSG_TOGGLE_RECENTS) {
+            // Send a broadcast to toggle recents
+            Intent intent = new Intent(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY);
+            intent.setPackage(context.getPackageName());
+            context.sendBroadcast(intent);
+        }
+    }
+}
+
+/* Service */
+public class RecentsService extends Service {
+    final static String ACTION_FINISH_RECENTS_ACTIVITY = "action_finish_recents_activity";
+    final static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
+
+    // XXX: This should be getting the message from recents definition
+    final static int MSG_UPDATE_RECENTS_FOR_CONFIGURATION = 0;
+    final static int MSG_CLOSE_RECENTS = 4;
+    final static int MSG_TOGGLE_RECENTS = 5;
+
+    Messenger mSystemUIMessenger = new Messenger(new SystemUIMessageHandler(this));
 
     @Override
     public void onCreate() {
@@ -94,7 +108,7 @@ public class RecentsService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsService|onBind]");
-        return mMessenger.getBinder();
+        return mSystemUIMessenger.getBinder();
     }
 
     @Override

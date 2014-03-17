@@ -40,12 +40,25 @@ import java.util.ArrayList;
  * to their SpaceNode bounds.
  */
 public class RecentsView extends FrameLayout implements TaskStackView.TaskStackViewCallbacks {
+
+    /** The RecentsView callbacks */
+    public interface RecentsViewCallbacks {
+        public void onTaskLaunching();
+    }
+
     // The space partitioning root of this container
     SpaceNode mBSP;
+    // Recents view callbacks
+    RecentsViewCallbacks mCb;
 
     public RecentsView(Context context) {
         super(context);
         setWillNotDraw(false);
+    }
+
+    /** Sets the callbacks */
+    public void setCallbacks(RecentsViewCallbacks cb) {
+        mCb = cb;
     }
 
     /** Set/get the bsp root node */
@@ -64,14 +77,19 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     /** Launches the first task from the first stack if possible */
     public boolean launchFirstTask() {
+        // Get the first stack view
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             TaskStackView stackView = (TaskStackView) getChildAt(i);
             TaskStack stack = stackView.mStack;
             ArrayList<Task> tasks = stack.getTasks();
+
+            // Get the first task in the stack
             if (!tasks.isEmpty()) {
                 Task task = tasks.get(tasks.size() - 1);
                 TaskView tv = null;
+
+                // Try and use the first child task view as the source of the launch animation
                 if (stackView.getChildCount() > 0) {
                     TaskView stv = (TaskView) stackView.getChildAt(stackView.getChildCount() - 1);
                     if (stv.getTask() == task) {
@@ -133,13 +151,15 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        Console.log(Constants.DebugFlags.UI.Draw, "[RecentsView|dispatchDraw]", "", Console.AnsiPurple);
+        Console.log(Constants.DebugFlags.UI.Draw, "[RecentsView|dispatchDraw]", "",
+                Console.AnsiPurple);
         super.dispatchDraw(canvas);
     }
 
     @Override
     protected boolean fitSystemWindows(Rect insets) {
-        Console.log(Constants.DebugFlags.UI.MeasureAndLayout, "[RecentsView|fitSystemWindows]", "insets: " + insets, Console.AnsiGreen);
+        Console.log(Constants.DebugFlags.UI.MeasureAndLayout,
+                "[RecentsView|fitSystemWindows]", "insets: " + insets, Console.AnsiGreen);
 
         // Update the configuration with the latest system insets and trigger a relayout
         RecentsConfiguration config = RecentsConfiguration.getInstance();
@@ -166,11 +186,16 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return false;
     }
 
-    /**** View.OnClickListener Implementation ****/
+    /**** TaskStackView.TaskStackCallbacks Implementation ****/
 
     @Override
     public void onTaskLaunched(final TaskStackView stackView, final TaskView tv,
                                final TaskStack stack, final Task task) {
+        // Notify any callbacks of the launching of a new task
+        if (mCb != null) {
+            mCb.onTaskLaunching();
+        }
+
         final Runnable launchRunnable = new Runnable() {
             @Override
             public void run() {
@@ -221,7 +246,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
         // Launch the app right away if there is no task view, otherwise, animate the icon out first
         if (tv == null || !Constants.Values.TaskView.AnimateFrontTaskIconOnLeavingRecents) {
-            launchRunnable.run();
+            post(launchRunnable);
         } else {
             tv.animateOnLeavingRecents(launchRunnable);
         }
