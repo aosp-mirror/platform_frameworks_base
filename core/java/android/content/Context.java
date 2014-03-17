@@ -242,6 +242,16 @@ public abstract class Context {
     public static final int BIND_ADJUST_WITH_ACTIVITY = 0x0080;
 
     /**
+     * @hide Flag for {@link #bindService}: Treat the binding as hosting
+     * an activity, an unbinding as the activity going in the background.
+     * That is, when unbinding, the process when empty will go on the activity
+     * LRU list instead of the regular one, keeping it around more aggressively
+     * than it otherwise would be.  This is intended for use with IMEs to try
+     * to keep IME processes around for faster keyboard switching.
+     */
+    public static final int BIND_TREAT_LIKE_ACTIVITY = 0x08000000;
+
+    /**
      * @hide An idea that is not yet implemented.
      * Flag for {@link #bindService}: If binding from an activity, consider
      * this service to be visible like the binding activity is.  That is,

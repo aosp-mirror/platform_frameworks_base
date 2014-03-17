@@ -667,8 +667,7 @@ public final class ActiveServices {
             // what they are, so we can report this elsewhere for
             // others to know why certain services are running.
             try {
-                clientIntent = (PendingIntent)service.getParcelableExtra(
-                        Intent.EXTRA_CLIENT_INTENT);
+                clientIntent = service.getParcelableExtra(Intent.EXTRA_CLIENT_INTENT);
             } catch (RuntimeException e) {
             }
             if (clientIntent != null) {
@@ -680,6 +679,11 @@ public final class ActiveServices {
                     service = service.cloneFilter();
                 }
             }
+        }
+
+        if ((flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
+            mAm.enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                    "BIND_TREAT_LIKE_ACTIVITY");
         }
 
         final boolean callerFg = callerApp.setSchedGroup != Process.THREAD_GROUP_BG_NONINTERACTIVE;
@@ -755,8 +759,12 @@ public final class ActiveServices {
             }
 
             if (s.app != null) {
+                if ((flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
+                    s.app.treatLikeActivity = true;
+                }
                 // This could have made the service more important.
-                mAm.updateLruProcessLocked(s.app, s.app.hasClientActivities, b.client);
+                mAm.updateLruProcessLocked(s.app, s.app.hasClientActivities
+                        || s.app.treatLikeActivity, b.client);
                 mAm.updateOomAdjLocked(s.app);
             }
 
@@ -858,6 +866,12 @@ public final class ActiveServices {
 
                 if (r.binding.service.app != null) {
                     // This could have made the service less important.
+                    if ((r.flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
+                        r.binding.service.app.treatLikeActivity = true;
+                        mAm.updateLruProcessLocked(r.binding.service.app,
+                                r.binding.service.app.hasClientActivities
+                                || r.binding.service.app.treatLikeActivity, null);
+                    }
                     mAm.updateOomAdjLocked(r.binding.service.app);
                 }
             }
