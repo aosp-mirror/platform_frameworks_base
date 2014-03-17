@@ -1271,9 +1271,10 @@
     <!-- @hide Fuller form of {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
          that removes restrictions on where broadcasts can be sent and allows other
          types of interactions. -->
+    <!-- TODO: Remove the system protection level.-->
     <permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="signature"
+        android:protectionLevel="signature|system"
         android:label="@string/permlab_interactAcrossUsersFull"
         android:description="@string/permdesc_interactAcrossUsersFull" />
 
