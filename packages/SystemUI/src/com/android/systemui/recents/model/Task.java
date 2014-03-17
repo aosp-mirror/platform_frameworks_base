@@ -26,17 +26,53 @@ import com.android.systemui.recents.Constants;
  * A task represents the top most task in the system's task stack.
  */
 public class Task {
-    public final int id;
-    public final Intent intent;
+    /* Task callbacks */
+    public interface TaskCallbacks {
+        /* Notifies when a task has been bound */
+        public void onTaskDataLoaded();
+        /* Notifies when a task has been unbound */
+        public void onTaskDataUnloaded();
+    }
+
+    /* The Task Key represents the unique primary key for the task */
+    public static class TaskKey {
+        public final int id;
+        public final Intent intent;
+
+        public TaskKey(int id, Intent intent) {
+            this.id = id;
+            this.intent = intent;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return hashCode() == o.hashCode();
+        }
+
+        @Override
+        public int hashCode() {
+            return id;
+        }
+
+        @Override
+        public String toString() {
+            return "Task.Key: " + id + ", " + intent.getComponent().getPackageName();
+        }
+    }
+
+    public TaskKey key;
     public String title;
     public Drawable icon;
     public Bitmap thumbnail;
 
     TaskCallbacks mCb;
 
+    public Task(int id, Intent intent, String activityTitle) {
+        this(id, intent, activityTitle, null, null);
+    }
+
     public Task(int id, Intent intent, String activityTitle, Drawable icon, Bitmap thumbnail) {
-        this.id = id;
-        this.intent = intent;
+        this.key = new TaskKey(id, intent);
         this.title = activityTitle;
         this.icon = icon;
         this.thumbnail = thumbnail;
@@ -47,28 +83,21 @@ public class Task {
         mCb = cb;
     }
 
-    /** Notifies the callback listeners that this task's data has changed */
-    public void notifyTaskDataChanged() {
-        if (mCb != null) {
-            mCb.onTaskDataChanged(this);
-        }
-    }
-
     /** Notifies the callback listeners that this task has been loaded */
-    public void notifyTaskLoaded(Bitmap thumbnail, Drawable icon) {
+    public void notifyTaskDataLoaded(Bitmap thumbnail, Drawable icon) {
         this.icon = icon;
         this.thumbnail = thumbnail;
         if (mCb != null) {
-            mCb.onTaskBound();
+            mCb.onTaskDataLoaded();
         }
     }
 
     /** Notifies the callback listeners that this task has been unloaded */
-    public void notifyTaskUnloaded(Bitmap defaultThumbnail, Drawable defaultIcon) {
+    public void notifyTaskDataUnloaded(Bitmap defaultThumbnail, Drawable defaultIcon) {
         icon = defaultIcon;
         thumbnail = defaultThumbnail;
         if (mCb != null) {
-            mCb.onTaskUnbound();
+            mCb.onTaskDataUnloaded();
         }
     }
 
@@ -83,12 +112,11 @@ public class Task {
         // Otherwise, check that the id and intent match (the other fields can be asynchronously
         // loaded and is unsuitable to testing the identity of this Task)
         Task t = (Task) o;
-        return (id == t.id) &&
-                (intent.equals(t.intent));
+        return key.equals(t.key);
     }
 
     @Override
     public String toString() {
-        return "Task: " + intent.getComponent().getPackageName() + " [" + super.toString() + "]";
+        return "Task: " + key.intent.getComponent().getPackageName() + " [" + super.toString() + "]";
     }
 }

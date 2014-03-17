@@ -39,13 +39,7 @@ import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.model.TaskCallbacks;
 
-/** The TaskView callbacks */
-interface TaskViewCallbacks {
-    public void onTaskIconClicked(TaskView tv);
-    // public void onTaskViewReboundToTask(TaskView tv, Task t);
-}
 
 /** The task thumbnail view */
 class TaskThumbnailView extends ImageView {
@@ -66,7 +60,7 @@ class TaskThumbnailView extends ImageView {
             // Update the bar color
             if (Constants.Values.TaskView.DrawColoredTaskBars) {
                 int[] colors = {0xFFCC0C39, 0xFFE6781E, 0xFFC8CF02, 0xFF1693A7};
-                mBarColor = colors[mTask.intent.getComponent().getPackageName().length() % colors.length];
+                mBarColor = colors[mTask.key.intent.getComponent().getPackageName().length() % colors.length];
             }
 
             setImageBitmap(t.thumbnail);
@@ -213,7 +207,13 @@ class TaskIconView extends ImageView {
 }
 
 /* A task view */
-public class TaskView extends FrameLayout implements View.OnClickListener, TaskCallbacks {
+public class TaskView extends FrameLayout implements View.OnClickListener, Task.TaskCallbacks {
+    /** The TaskView callbacks */
+    interface TaskViewCallbacks {
+        public void onTaskIconClicked(TaskView tv);
+        // public void onTaskViewReboundToTask(TaskView tv, Task t);
+    }
+
     Task mTask;
     TaskThumbnailView mThumbnailView;
     TaskIconView mIconView;
@@ -247,24 +247,9 @@ public class TaskView extends FrameLayout implements View.OnClickListener, TaskC
         ((LayoutParams) mIconView.getLayoutParams()).rightMargin = offset;
     }
 
-    /** Set the task and callback */
-    void bindToTask(Task t, TaskViewCallbacks cb) {
-        mTask = t;
-        mTask.setCallbacks(this);
+    /** Set callback */
+    void setCallbacks(TaskViewCallbacks cb) {
         mCb = cb;
-    }
-
-    /** Actually synchronizes the model data into the views */
-    private void syncToTask() {
-        mThumbnailView.rebindToTask(mTask, false);
-        mIconView.rebindToTask(mTask, false);
-    }
-
-    /** Unset the task and callback */
-    private void unbindFromTask() {
-        mTask.setCallbacks(null);
-        mThumbnailView.unbindFromTask();
-        mIconView.unbindFromTask();
     }
 
     /** Gets the task */
@@ -367,26 +352,25 @@ public class TaskView extends FrameLayout implements View.OnClickListener, TaskC
 
     /**** TaskCallbacks Implementation ****/
 
-    @Override
-    public void onTaskDataChanged(Task task) {
-        Console.log(Constants.DebugFlags.App.EnableBackgroundTaskLoading,
-                "[TaskView|onTaskDataChanged]", task);
-
-        // Only update this task view if the changed task is the same as the task for this view
-        if (mTask == task) {
-            mThumbnailView.rebindToTask(mTask, true);
-            mIconView.rebindToTask(mTask, true);
-        }
+    /** Binds this task view to the task */
+    public void onTaskBound(Task t) {
+        mTask = t;
+        mTask.setCallbacks(this);
     }
 
     @Override
-    public void onTaskBound() {
-        syncToTask();
+    public void onTaskDataLoaded() {
+        // Bind each of the views to the new task data
+        mThumbnailView.rebindToTask(mTask, false);
+        mIconView.rebindToTask(mTask, false);
     }
 
     @Override
-    public void onTaskUnbound() {
-        unbindFromTask();
+    public void onTaskDataUnloaded() {
+        // Unbind each of the views from the task data and remove the task callback
+        mTask.setCallbacks(null);
+        mThumbnailView.unbindFromTask();
+        mIconView.unbindFromTask();
     }
 
     @Override

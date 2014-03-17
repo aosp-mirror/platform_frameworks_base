@@ -39,7 +39,7 @@ import java.util.ArrayList;
  * This view is the the top level layout that contains TaskStacks (which are laid out according
  * to their SpaceNode bounds.
  */
-public class RecentsView extends FrameLayout implements TaskStackViewCallbacks {
+public class RecentsView extends FrameLayout implements TaskStackView.TaskStackViewCallbacks {
     // The space partitioning root of this container
     SpaceNode mBSP;
 
@@ -52,8 +52,7 @@ public class RecentsView extends FrameLayout implements TaskStackViewCallbacks {
     public void setBSP(SpaceNode n) {
         mBSP = n;
 
-        // XXX: We shouldn't be recereating new stacks every time, but for now, that is OK
-        // Add all the stacks for this partition
+        // Create and add all the stacks for this partition of space.
         removeAllViews();
         ArrayList<TaskStack> stacks = mBSP.getStacks();
         for (TaskStack stack : stacks) {
@@ -206,7 +205,7 @@ public class RecentsView extends FrameLayout implements TaskStackViewCallbacks {
                 }
 
                 // Launch the activity with the desired animation
-                Intent i = new Intent(task.intent);
+                Intent i = new Intent(task.key.intent);
                 i.setFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
                         | Intent.FLAG_ACTIVITY_TASK_ON_HOME
                         | Intent.FLAG_ACTIVITY_NEW_TASK);
