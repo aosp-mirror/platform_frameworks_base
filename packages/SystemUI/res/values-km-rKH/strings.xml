@@ -204,8 +204,7 @@
     <string name="quick_settings_inversion_label" msgid="1666358784283020762">"របៀប​​បញ្ច្រាស​ពណ៌"</string>
     <string name="quick_settings_contrast_label" msgid="3319507551689108692">"របៀប​កម្រិត​ពណ៌​ប្រ​សើ​រ​ឡើង"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"របៀប​កែ​ពណ៌"</string>
-    <!-- no translation found for recents_empty_message (2269156590813544104) -->
-    <skip />
+    <string name="recents_empty_message" msgid="2269156590813544104">"ថ្មីៗ"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"បណ្ដាញ​អាច​\nត្រូវ​បាន​ត្រួតពិនិត្យ"</string>
     <string name="description_target_search" msgid="3091587249776033139">"ស្វែងរក"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"រុញ​ឡើង​លើ​ដើម្បី <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ។"</string>
