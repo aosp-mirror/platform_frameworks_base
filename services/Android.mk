@@ -8,6 +8,10 @@ LOCAL_MODULE := services
 
 LOCAL_SRC_FILES := $(call all-java-files-under,java)
 
+# EventLogTags files.
+LOCAL_SRC_FILES += \
+        core/java/com/android/server/EventLogTags.logtags
+
 # Uncomment to enable output of certain warnings (deprecated, unchecked)
 # LOCAL_JAVACFLAGS := -Xlint
 
