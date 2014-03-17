@@ -52,6 +52,14 @@ public:
         mClipToBounds = clipToBounds;
     }
 
+    void setCastsShadow(bool castsShadow) {
+        mCastsShadow = castsShadow;
+    }
+
+    void setUsesGlobalCamera(bool usesGlobalCamera) {
+        mUsesGlobalCamera = usesGlobalCamera;
+    }
+
     void setProjectBackwards(bool shouldProject) {
         mProjectBackwards = shouldProject;
     }
@@ -401,6 +409,8 @@ private:
     bool mProjectionReceiver;
     SkPath mOutline;
     bool mClipToOutline;
+    bool mCastsShadow;
+    bool mUsesGlobalCamera; // TODO: respect value when rendering
     float mAlpha;
     bool mHasOverlappingRendering;
     float mTranslationX, mTranslationY, mTranslationZ;

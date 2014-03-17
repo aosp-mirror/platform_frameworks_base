@@ -2386,6 +2386,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int PFLAG3_FITTING_SYSTEM_WINDOWS = 0x80;
 
+    /**
+     * Flag indicating that an view will cast a shadow onto the Z=0 plane if elevated.
+     */
+    static final int PFLAG3_CASTS_SHADOW = 0x100;
+
+    /**
+     * Flag indicating that view will be transformed by the global camera if rotated in 3d, or given
+     * a non-0 Z translation.
+     */
+    static final int PFLAG3_USES_GLOBAL_CAMERA = 0x200;
+
     /* End of masks for mPrivateFlags3 */
 
     static final int DRAG_MASK = PFLAG2_DRAG_CAN_ACCEPT | PFLAG2_DRAG_HOVERED;
@@ -4027,6 +4038,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case R.styleable.View_layerType:
                     setLayerType(a.getInt(attr, LAYER_TYPE_NONE), null);
+                    break;
+                case R.styleable.View_castsShadow:
+                    if (a.getBoolean(attr, false)) {
+                        mPrivateFlags3 |= PFLAG3_CASTS_SHADOW;
+                    }
                     break;
                 case R.styleable.View_textDirection:
                     // Clear any text direction flag already set
@@ -10836,6 +10852,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param outline The new outline of the view. Must be non-null, and convex.
      *
+     * @see #setCastsShadow(boolean)
      * @see #getOutline(Path)
      * @see #getClipToOutline()
      * @see #setClipToOutline(boolean)
@@ -10894,6 +10911,95 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             if (mDisplayList != null) {
                 mDisplayList.setClipToOutline(clipToOutline);
+            }
+        }
+    }
+
+    /**
+     * Returns whether the View will cast shadows when its
+     * {@link #setTranslationZ(float) z translation} is greater than 0, or it is
+     * rotated in 3D.
+     *
+     * @see #setTranslationZ(float)
+     * @see #setRotationX(float)
+     * @see #setRotationY(float)
+     * @see #setCastsShadow(boolean)
+     * @attr ref android.R.styleable#View_castsShadow
+     */
+    public final boolean getCastsShadow() {
+        return ((mPrivateFlags3 & PFLAG3_CASTS_SHADOW) != 0);
+    }
+
+    /**
+     * Set to true to enable this View to cast shadows.
+     * <p>
+     * If enabled, and the View has a z translation greater than 0, or is
+     * rotated in 3D, the shadow will be cast onto its parent at the z = 0
+     * plane.
+     * <p>
+     * The shape of the shadow being cast is defined by the
+     * {@link #setOutline(Path) outline} of the view, or the rectangular bounds
+     * of the view if the outline is not set or is empty.
+     *
+     * @see #setTranslationZ(float)
+     * @see #getCastsShadow()
+     * @attr ref android.R.styleable#View_castsShadow
+     */
+    public void setCastsShadow(boolean castsShadow) {
+        // TODO : Add a fast invalidation here.
+        if (getCastsShadow() != castsShadow) {
+            if (castsShadow) {
+                mPrivateFlags3 |= PFLAG3_CASTS_SHADOW;
+            } else {
+                mPrivateFlags3 &= ~PFLAG3_CASTS_SHADOW;
+            }
+            if (mDisplayList != null) {
+                mDisplayList.setCastsShadow(castsShadow);
+            }
+        }
+    }
+
+    /**
+     * Returns whether the View will be transformed by the global camera.
+     *
+     * @see #setUsesGlobalCamera(boolean)
+     *
+     * @hide
+     */
+    public final boolean getUsesGlobalCamera() {
+        return ((mPrivateFlags3 & PFLAG3_USES_GLOBAL_CAMERA) != 0);
+    }
+
+    /**
+     * Sets whether the View should be transformed by the global camera.
+     * <p>
+     * If the view has a Z translation or 3D rotation, perspective from the
+     * global camera will be applied. This enables an app to transform multiple
+     * views in 3D with coherent perspective projection among them all.
+     * <p>
+     * Setting this to true will cause {@link #setCameraDistance() camera distance}
+     * to be ignored, as the global camera's position will dictate perspective
+     * transform.
+     * <p>
+     * This should not be used in conjunction with {@link android.graphics.Camera}.
+     *
+     * @see #getUsesGlobalCamera()
+     * @see #setTranslationZ(float)
+     * @see #setRotationX(float)
+     * @see #setRotationY(float)
+     *
+     * @hide
+     */
+    public void setUsesGlobalCamera(boolean usesGlobalCamera) {
+        // TODO : Add a fast invalidation here.
+        if (getUsesGlobalCamera() != usesGlobalCamera) {
+            if (usesGlobalCamera) {
+                mPrivateFlags3 |= PFLAG3_USES_GLOBAL_CAMERA;
+            } else {
+                mPrivateFlags3 &= ~PFLAG3_USES_GLOBAL_CAMERA;
+            }
+            if (mDisplayList != null) {
+                mDisplayList.setUsesGlobalCamera(usesGlobalCamera);
             }
         }
     }
@@ -11461,7 +11567,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             // Damage the entire IsolatedZVolume recieving this view's shadow.
-            if (getTranslationZ() != 0) {
+            if (getCastsShadow() && getTranslationZ() != 0) {
                 damageIsolatedZVolume();
             }
         }
@@ -11541,7 +11647,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             damageInParent();
         }
-        if (invalidateParent && getTranslationZ() != 0) {
+        if (invalidateParent && getCastsShadow() && getTranslationZ() != 0) {
             damageIsolatedZVolume();
         }
     }
@@ -14579,6 +14685,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             displayList.setOutline(mOutline);
             displayList.setClipToOutline(getClipToOutline());
+            displayList.setCastsShadow(getCastsShadow());
+            displayList.setUsesGlobalCamera(getUsesGlobalCamera());
             float alpha = 1;
             if (mParent instanceof ViewGroup && (((ViewGroup) mParent).mGroupFlags &
                     ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
