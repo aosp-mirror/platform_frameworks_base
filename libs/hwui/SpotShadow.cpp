@@ -62,7 +62,9 @@ static float rayIntersectPoints(const Vector2& rayOrigin, float dx, float dy,
 
 #if DEBUG_SHADOW
     double interpVal = (dx * (p1.y - rayOrigin.y) + dy * rayOrigin.x - dy * p1.x) / divisor;
-    if (interpVal < 0 || interpVal > 1) return -1.0f; // error, doesn't intersect between points
+    if (interpVal < 0 || interpVal > 1) {
+        ALOGW("rayIntersectPoints is hitting outside the segment %f", interpVal);
+    }
 #endif
 
     double distance = (p1.x * (rayOrigin.y - p2.y) + p2.x * (p1.y - rayOrigin.y) +
