@@ -80,7 +80,7 @@ public class ViewConfiguration {
      * is a tap or a scroll. If the user does not move within this interval, it is
      * considered to be a tap.
      */
-    private static final int TAP_TIMEOUT = 180;
+    private static final int TAP_TIMEOUT = 100;
 
     /**
      * Defines the duration in milliseconds we will wait to see if a touch event
