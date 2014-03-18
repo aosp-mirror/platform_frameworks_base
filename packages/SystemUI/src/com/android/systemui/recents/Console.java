@@ -67,6 +67,11 @@ public class Console {
         Log.e("Recents", msg);
     }
 
+    /** Logs a raw error */
+    public static void logRawError(String msg, Exception e) {
+        Log.e("Recents", msg, e);
+    }
+
     /** Logs a divider bar */
     public static void logDivider(boolean condition) {
         if (condition) {
