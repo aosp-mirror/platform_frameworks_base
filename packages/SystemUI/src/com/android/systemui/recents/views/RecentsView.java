@@ -108,8 +108,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+
         Console.log(Constants.DebugFlags.UI.MeasureAndLayout, "[RecentsView|measure]",
                 "width: " + width + " height: " + height, Console.AnsiGreen);
+        Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsStartup,
+                Constants.DebugFlags.App.TimeRecentsStartupKey, "RecentsView.onMeasure");
 
         // We measure our stack views sans the status bar.  It will handle the nav bar itself.
         RecentsConfiguration config = RecentsConfiguration.getInstance();
@@ -132,6 +135,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         Console.log(Constants.DebugFlags.UI.MeasureAndLayout, "[RecentsView|layout]",
                 new Rect(left, top, right, bottom) + " changed: " + changed, Console.AnsiGreen);
+        Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsStartup,
+                Constants.DebugFlags.App.TimeRecentsStartupKey, "RecentsView.onLayout");
+
         // We offset our stack views by the status bar height.  It will handle the nav bar itself.
         RecentsConfiguration config = RecentsConfiguration.getInstance();
         top += config.systemInsets.top;
@@ -241,8 +247,14 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 } else {
                     getContext().startActivityAsUser(i, UserHandle.CURRENT);
                 }
+
+                Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsLaunchTask,
+                        Constants.DebugFlags.App.TimeRecentsLaunchKey, "startActivity");
             }
         };
+
+        Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsLaunchTask,
+                Constants.DebugFlags.App.TimeRecentsLaunchKey, "onTaskLaunched");
 
         // Launch the app right away if there is no task view, otherwise, animate the icon out first
         if (tv == null || !Constants.Values.TaskView.AnimateFrontTaskIconOnLeavingRecents) {

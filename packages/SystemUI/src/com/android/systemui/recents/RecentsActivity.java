@@ -101,6 +101,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         Console.logDivider(Constants.DebugFlags.App.SystemUIHandshake);
         Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsActivity|onCreate]",
                 getIntent().getAction() + " visible: " + mVisible, Console.AnsiRed);
+        Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsStartup,
+                Constants.DebugFlags.App.TimeRecentsStartupKey, "onCreate");
 
         // Initialize the loader and the configuration
         RecentsTaskLoader.initialize(this);
@@ -135,13 +137,14 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-
         // Reset the task launched flag if we encounter an onNewIntent() before onStop()
         mTaskLaunched = false;
 
         Console.logDivider(Constants.DebugFlags.App.SystemUIHandshake);
         Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsActivity|onNewIntent]",
                 intent.getAction() + " visible: " + mVisible, Console.AnsiRed);
+        Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsStartup,
+                Constants.DebugFlags.App.TimeRecentsStartupKey, "onNewIntent");
 
         // Initialize the loader and the configuration
         RecentsTaskLoader.initialize(this);
