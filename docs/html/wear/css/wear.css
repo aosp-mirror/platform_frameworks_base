@@ -1,0 +1,442 @@
+/**
+ * UTILITIES
+ */
+
+.border-box {
+  box-sizing: border-box;
+}
+
+.vertical-center-outer {
+  display: table;
+  height: 100%;
+  width: 100%;
+}
+
+.vertical-center-inner {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+/**
+ * TYPE STYLES
+ */
+
+.wear-h1 {
+  font-weight: 300;
+  font-size: 60px;
+  line-height: 78px;
+  text-align: center;
+  letter-spacing: -1px;
+}
+
+.wear-pre-h1 {
+  font-weight: 400;
+  font-size: 28px;
+  color: #93B73F;
+  line-height: 36px;
+  text-align: center;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+
+}
+
+.wear-h1.hero {
+  text-align: left;
+}
+
+.wear-h2 {
+  font-weight: 300;
+  font-size: 42px;
+  line-height: 64px;
+  text-align: center;
+}
+
+
+.wear-subhead {
+  color: #999999;
+  font-size: 20px;
+  line-height: 28px;
+  text-align: center;
+}
+.wear-subhead.hero {
+  text-align: left;
+  color: white;
+}
+
+.wear-hero-description {
+  text-align: left;
+  margin: 1em 0;
+}
+
+.wear-hero-description p {
+  font-weight: 300;
+  margin: 0;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.wear-body .wear-small {
+  font-size: 14px;
+  line-height: 19px;
+}
+
+.wear-body.wear-align-center {
+  text-align: center;
+}
+
+.wear-align-left {
+  text-align: left;
+}
+
+/**
+ * LAYOUT
+ */
+
+.wear-body-content {
+  height: 100%;
+}
+
+.wear-section {
+  padding: 80px 10px 80px;
+  width: 100%;
+  margin-left: -10px;
+  text-rendering: optimizeLegibility;
+}
+
+#extending-android-to-wearables {
+  padding-top: 30px;
+}
+
+.wear-short-section {
+  padding: 40px 10px 28px;
+}
+
+.wear-gray-background {
+  background-color: #e9e9e9;
+}
+
+.wear-white-background {
+  background-color: white;
+}
+
+.wear-red-background {
+  color: white;
+  background-color: hsl(8, 70%, 54%);
+}
+
+.wear-subhead-red {
+  color: hsl(8, 71%, 84%);
+  text-align: left;
+}
+
+.wear-subhead-red p {
+  margin-top: 20px;
+}
+
+.wear-hero-container {
+  height: 800px;
+  height: 100vh;
+}
+
+.wear-hero {
+  height: 100%;
+  height: calc(100% - 72px);
+  min-height: 504px;
+  margin-top: -4px;
+  padding-top: 0;
+  padding-bottom: 0;
+  background-image: url(/wear/images/hero.jpg);
+  background-size: cover;
+  background-position: right center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.wear-hero-scrim {
+  background: black;
+  opacity: .2;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  margin-left: -10px;
+}
+
+.wear-hero-wrap {
+  margin: 0 auto;
+  width: 940px;
+  clear: both;
+  height: 100%;
+  position: relative;
+}
+
+.wear-section-header {
+  margin-bottom: 40px;
+}
+
+.wear-hero-wrap .wear-section-header {
+  margin-bottom: 16px;
+}
+
+.wear-body {
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.wear-button {
+  display: inline-block;
+  padding: 16px 32px;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 24px;
+  cursor: pointer;
+  color: white;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+       -o-user-select: none;
+  user-select: none;
+  -webkit-transition: .2s background-color ease-in-out;
+     -moz-transition: .2s background-color ease-in-out;
+       -o-transition: .2s background-color ease-in-out;
+  transition: .2s background-color ease-in-out;
+}
+
+.wear-primary {
+  background-color: hsl(8, 70%, 54%); /* #dc4b35 */
+  color: #f8f8f8;
+}
+
+.wear-button.wear-primary:hover {
+  background-color: hsl(8, 70%, 44%); /* #bf3722 */
+}
+
+.wear-button.wear-primary:active {
+  background-color: hsl(8, 70%, 36%); /* # */
+}
+
+.wear-button.wear-secondary {
+  background-color: hsl(8, 70%, 44%);
+}
+
+.wear-button.wear-secondary:hover {
+  background-color: hsl(8, 70%, 36%);
+}
+
+.wear-button.wear-secondary:active {
+  background-color: hsl(8, 70%, 30%);
+}
+
+a.wear-button,
+a.wear-button:hover,
+a.wear-button:visited {
+  color: white !important;
+}
+
+.wear-video-link {
+  display: inline-block;
+  padding: 16px 32px 16px 82px;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 24px;
+  cursor: pointer;
+  color: hsla(0, 0%, 100%, .8);
+  -webkit-user-select: none;
+     -moz-user-select: none;
+       -o-user-select: none;
+  user-select: none;
+  -webkit-transition: .2s color ease-in-out;
+     -moz-transition: .2s color ease-in-out;
+       -o-transition: .2s color ease-in-out;
+  transition: .2s color ease-in-out;
+}
+
+.wear-video-link:before {
+  height: 64px;
+  width: 64px;
+  display: inline-block;
+  background-image: url(data:image/png;base64,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);
+  background-size: contain;
+  position: absolute;
+  content: "";
+  opacity: .7;
+  margin-top: -19px;
+  margin-left: -64px;
+  -webkit-transition: .2s opacity ease-in-out;
+     -moz-transition: .2s opacity ease-in-out;
+       -o-transition: .2s opacity ease-in-out;
+  transition: .2s opacity ease-in-out;
+}
+
+.wear-video-link:hover {
+  color: hsla(0, 0%, 100%, 1);
+}
+
+.wear-video-link:hover:before {
+  opacity: 1;
+}
+
+.wear-social-image {
+  float: left;
+  margin-right: 14px;
+  height: 64px;
+  width: 64px;
+}
+
+.wear-social-copy {
+  padding-left: 78px;
+}
+
+.wear-scroll-down-affordance {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  z-index: 10;
+}
+
+.wear-down-arrow {
+  padding: 24px;
+  display: inline-block;
+  opacity: .5;
+  -webkit-transition: .2s opacity ease-in-out;
+     -moz-transition: .2s opacity ease-in-out;
+       -o-transition: .2s opacity ease-in-out;
+  transition: .2s opacity ease-in-out;
+
+  -webkit-animation-name: pulse-opacity;
+  -webkit-animation-duration: 4s;
+}
+
+.wear-down-arrow:hover {
+  opacity: 1;
+}
+
+.wear-down-arrow img {
+  height: 28px;
+  width: 28px;
+  margin: 0 auto;
+  display: block;
+}
+
+.wear-divider {
+  display: inline-block;
+  height: 2px;
+  background-color: white;
+  position: relative;
+  margin: 10px 0;
+}
+
+/* 3 CLOLUMN LAYOUT */
+
+.wear-breakout {
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+.wear-breakout img {
+  margin-bottom: 20px;
+}
+
+.wear-partners img {
+  margin-bottom: 20px;
+}
+
+.wear-breakout p {
+  padding: 0 23px;
+}
+
+.wear-inset-video-container {
+  position: relative;
+}
+
+.wear-inset-video-container img.gif {
+  max-width: 222px;
+  position: absolute;
+  top: 40px;
+  left: 40px;
+}
+
+img.wear-bezel-only {
+  height:302px;
+  width:302px;
+}
+
+.wear-breakout.wear-partners img {
+  margin-bottom: 20px;
+}
+
+.col-3-wide {
+  display: inline;
+  float: left;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.col-3-wide {
+  width: 302px;
+}
+
+/**
+ * ANIMATION
+ */
+
+@-webkit-keyframes pulse-opacity {
+  0% {
+    opacity: .5;
+  }
+  20% {
+    opacity: .5;
+  }
+  40% {
+    opacity: 1;
+  }
+  60% {
+    opacity: .5;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: .5;
+  }
+}
+
+
+
+/**
+ * VIDEO
+ */
+
+#video-container {
+  display:none;
+  position:fixed;
+  top:0;
+  left:-10px; 
+  width:102%;
+  height:100%;
+  background-color:rgba(0,0,0,0.7);
+  z-index:99;
+}
+
+#video-frame {
+  width:940px;
+  height:526.4px;
+  margin:80px auto 0;
+  display:none;
+}
+
+.video-close {
+cursor: pointer;
+position: relative;
+left: 940px;
+top: 0;
+pointer-events: all;
+}
+
+#icon-video-close {
+background-image: url("../images/close.png");
+background-position: 0 0;
+height: 48px;
+width: 48px;
+display:block;
+}
