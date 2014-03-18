@@ -31,7 +31,6 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/notifications/Aldebaran.ogg:system/media/audio/notifications/Aldebaran.ogg \
 	$(LOCAL_PATH)/notifications/Altair.ogg:system/media/audio/notifications/Altair.ogg \
 	$(LOCAL_PATH)/notifications/Antares.ogg:system/media/audio/notifications/Antares.ogg \
-	$(LOCAL_PATH)/notifications/arcturus.ogg:system/media/audio/notifications/arcturus.ogg \
 	$(LOCAL_PATH)/notifications/Betelgeuse.ogg:system/media/audio/notifications/Betelgeuse.ogg \
 	$(LOCAL_PATH)/notifications/Canopus.ogg:system/media/audio/notifications/Canopus.ogg \
 	$(LOCAL_PATH)/notifications/Capella.ogg:system/media/audio/notifications/Capella.ogg \
@@ -47,7 +46,6 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/notifications/regulus.ogg:system/media/audio/notifications/regulus.ogg \
 	$(LOCAL_PATH)/notifications/sirius.ogg:system/media/audio/notifications/sirius.ogg \
 	$(LOCAL_PATH)/notifications/Sirrah.ogg:system/media/audio/notifications/Sirrah.ogg \
-	$(LOCAL_PATH)/notifications/vega.ogg:system/media/audio/notifications/vega.ogg \
 	$(LOCAL_PATH)/ringtones/ANDROMEDA.ogg:system/media/audio/ringtones/ANDROMEDA.ogg \
 	$(LOCAL_PATH)/ringtones/Aquila.ogg:system/media/audio/ringtones/Aquila.ogg \
 	$(LOCAL_PATH)/ringtones/ArgoNavis.ogg:system/media/audio/ringtones/ArgoNavis.ogg \
