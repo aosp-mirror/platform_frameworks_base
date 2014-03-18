@@ -271,6 +271,16 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<int[]>("android.control.maxRegions", int[].class);
 
     /**
+     * <p>The set of edge enhancement modes supported by this camera device.</p>
+     * <p>This tag lists the valid modes for {@link CaptureRequest#EDGE_MODE android.edge.mode}.</p>
+     * <p>Full-capability camera devices must always support OFF and FAST.</p>
+     *
+     * @see CaptureRequest#EDGE_MODE
+     */
+    public static final Key<byte[]> EDGE_AVAILABLE_EDGE_MODES =
+            new Key<byte[]>("android.edge.availableEdgeModes", byte[].class);
+
+    /**
      * <p>Whether this camera device has a
      * flash.</p>
      * <p>If no flash, none of the flash controls do
@@ -415,6 +425,16 @@ public final class CameraCharacteristics extends CameraMetadata {
      */
     public static final Key<Integer> LENS_FACING =
             new Key<Integer>("android.lens.facing", int.class);
+
+    /**
+     * <p>The set of noise reduction modes supported by this camera device.</p>
+     * <p>This tag lists the valid modes for {@link CaptureRequest#NOISE_REDUCTION_MODE android.noiseReduction.mode}.</p>
+     * <p>Full-capability camera devices must laways support OFF and FAST.</p>
+     *
+     * @see CaptureRequest#NOISE_REDUCTION_MODE
+     */
+    public static final Key<byte[]> NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES =
+            new Key<byte[]>("android.noiseReduction.availableNoiseReductionModes", byte[].class);
 
     /**
      * <p>If set to 1, the HAL will always split result
@@ -1128,6 +1148,17 @@ public final class CameraCharacteristics extends CameraMetadata {
      */
     public static final Key<Integer> TONEMAP_MAX_CURVE_POINTS =
             new Key<Integer>("android.tonemap.maxCurvePoints", int.class);
+
+    /**
+     * <p>The set of tonemapping modes supported by this camera device.</p>
+     * <p>This tag lists the valid modes for {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode}.</p>
+     * <p>Full-capability camera devices must always support CONTRAST_CURVE and
+     * FAST.</p>
+     *
+     * @see CaptureRequest#TONEMAP_MODE
+     */
+    public static final Key<byte[]> TONEMAP_AVAILABLE_TONE_MAP_MODES =
+            new Key<byte[]>("android.tonemap.availableToneMapModes", byte[].class);
 
     /**
      * <p>A list of camera LEDs that are available on this system.</p>

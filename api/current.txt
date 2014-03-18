@@ -11294,6 +11294,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AWB_AVAILABLE_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_MAX_REGIONS;
+    field public static final android.hardware.camera2.CameraMetadata.Key EDGE_AVAILABLE_EDGE_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key FLASH_INFO_AVAILABLE;
     field public static final android.hardware.camera2.CameraMetadata.Key HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key INFO_SUPPORTED_HARDWARE_LEVEL;
@@ -11307,6 +11308,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_HYPERFOCAL_DISTANCE;
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_MINIMUM_FOCUS_DISTANCE;
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_SHADING_MAP_SIZE;
+    field public static final android.hardware.camera2.CameraMetadata.Key NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_AVAILABLE_CAPABILITIES;
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_MAX_NUM_INPUT_STREAMS;
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_MAX_NUM_OUTPUT_STREAMS;
@@ -11339,6 +11341,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_INFO_MAX_FACE_COUNT;
     field public static final android.hardware.camera2.CameraMetadata.Key SYNC_MAX_LATENCY;
+    field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_AVAILABLE_TONE_MAP_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_MAX_CURVE_POINTS;
   }
 
