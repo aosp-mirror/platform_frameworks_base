@@ -650,6 +650,8 @@
         <!-- Default ActivityChooserView style. -->
         <attr name="activityChooserViewStyle" format="reference" />
 
+        <attr name="toolbarStyle" format="reference" />
+
         <!-- Fast scroller styles -->
         <eat-comment />
 
@@ -6235,10 +6237,6 @@
         <attr name="inputType" />
     </declare-styleable>
 
-    <declare-styleable name="ActionBar_LayoutParams">
-        <attr name="layout_gravity" />
-    </declare-styleable>
-
     <declare-styleable name="Switch">
         <!-- Drawable to use as the "thumb" that switches back and forth. -->
         <attr name="thumb" />
@@ -6445,6 +6443,23 @@
     <declare-styleable name="NumPadKey">
         <attr name="digit" format="integer" />
         <attr name="textView" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="Toolbar">
+        <attr name="titleTextAppearance" format="reference" />
+        <attr name="subtitleTextAppearance" format="reference" />
+        <attr name="title" />
+        <attr name="subtitle" />
+        <attr name="gravity" />
+        <attr name="titleMargins" format="dimension" />
+        <attr name="titleMarginStart" format="dimension" />
+        <attr name="titleMarginEnd" format="dimension" />
+        <attr name="titleMarginTop" format="dimension" />
+        <attr name="titleMarginBottom" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="Toolbar_LayoutParams">
+        <attr name="layout_gravity" />
     </declare-styleable>
 
 </resources>

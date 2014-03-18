@@ -20,6 +20,7 @@ import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import android.view.accessibility.AccessibilityEvent;
 import com.android.internal.view.menu.ActionMenuItemView;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuItemImpl;
+import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.MenuView;
 
 /**
@@ -49,6 +51,8 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     private int mFormatItemsWidth;
     private int mMinCellSize;
     private int mGeneratedItemPadding;
+
+    private OnMenuItemClickListener mOnMenuItemClickListener;
 
     public ActionMenuView(Context context) {
         this(context, null);
@@ -78,6 +82,10 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         }
     }
 
+    public void setOnMenuItemClickListener(OnMenuItemClickListener listener) {
+        mOnMenuItemClickListener = listener;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // If we've been given an exact size to match, apply special formatting during layout.
@@ -96,11 +104,11 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             mMenu.onItemsChanged(true);
         }
 
-        if (mFormatItems) {
+        final int childCount = getChildCount();
+        if (mFormatItems && childCount > 0) {
             onMeasureExactFormat(widthMeasureSpec, heightMeasureSpec);
         } else {
             // Previous measurement at exact format may have set margins - reset them.
-            final int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
                 final View child = getChildAt(i);
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
@@ -559,9 +567,11 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         if (mMenu == null) {
             final Context context = getContext();
             mMenu = new MenuBuilder(context);
+            mMenu.setCallback(new MenuBuilderCallback());
             mPresenter = new ActionMenuPresenter(context);
-            mPresenter.initForMenu(context, mMenu);
             mPresenter.setMenuView(this);
+            mPresenter.setCallback(new ActionMenuPresenterCallback());
+            mMenu.addMenuPresenter(mPresenter);
         }
 
         return mMenu;
@@ -589,6 +599,44 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
         return false;
+    }
+
+    /**
+     * Interface responsible for receiving menu item click events if the items themselves
+     * do not have individual item click listeners.
+     */
+    public interface OnMenuItemClickListener {
+        /**
+         * This method will be invoked when a menu item is clicked if the item itself did
+         * not already handle the event.
+         *
+         * @param item {@link MenuItem} that was clicked
+         * @return <code>true</code> if the event was handled, <code>false</code> otherwise.
+         */
+        public boolean onMenuItemClick(MenuItem item);
+    }
+
+    private class MenuBuilderCallback implements MenuBuilder.Callback {
+        @Override
+        public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
+            return mOnMenuItemClickListener != null &&
+                    mOnMenuItemClickListener.onMenuItemClick(item);
+        }
+
+        @Override
+        public void onMenuModeChange(MenuBuilder menu) {
+        }
+    }
+
+    private class ActionMenuPresenterCallback implements ActionMenuPresenter.Callback {
+        @Override
+        public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
+        }
+
+        @Override
+        public boolean onOpenSubMenu(MenuBuilder subMenu) {
+            return false;
+        }
     }
 
     /** @hide */

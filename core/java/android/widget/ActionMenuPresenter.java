@@ -640,16 +640,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         }
 
         @Override
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST) {
-                // Fill available height
-                heightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                        MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.EXACTLY);
-            }
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        }
-
-        @Override
         public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(info);
             info.setCanOpenPopup(true);

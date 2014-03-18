@@ -17,7 +17,7 @@
 package android.app;
 
 import android.content.pm.ApplicationInfo;
-import com.android.internal.app.ActionBarImpl;
+import com.android.internal.app.WindowDecorActionBar;
 import com.android.internal.policy.PolicyManager;
 
 import android.content.ComponentName;
@@ -87,7 +87,7 @@ public class Dialog implements DialogInterface, Window.Callback,
     final WindowManager mWindowManager;
     Window mWindow;
     View mDecor;
-    private ActionBarImpl mActionBar;
+    private ActionBar mActionBar;
     /**
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -280,7 +280,7 @@ public class Dialog implements DialogInterface, Window.Callback,
             final ApplicationInfo info = mContext.getApplicationInfo();
             mWindow.setDefaultIcon(info.icon);
             mWindow.setDefaultLogo(info.logo);
-            mActionBar = new ActionBarImpl(this);
+            mActionBar = new WindowDecorActionBar(this);
         }
 
         WindowManager.LayoutParams l = mWindow.getAttributes();
