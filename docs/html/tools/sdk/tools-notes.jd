@@ -25,10 +25,57 @@ Tools you are using, refer to the "Installed Packages" listing in the Android SD
 <p>For a summary of all known issues in SDK Tools, see <a
 href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
 
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 22.6.1</a> <em>(March 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 18 or later.</li>
+        <li>If you are developing in Eclipse with ADT, note that this version of SDK Tools is
+          designed for use with ADT 22.6.1 and later. If you haven't already, update your
+        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 22.6.1.</li>
+        <li>If you are developing outside Eclipse, you must have
+          <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Fixed a problem where the Android Virtual Device Manager could not create new virtual
+            devices. (<a href="http://b.android.com/66661">Issue 66661</a>)</li>
+        <li><p>Fixed a problem with virtual devices created using ADT 22.3 or earlier.</p>
+            <p>If you created an Android Virtual Device using ADT 22.3 or earlier, the
+            AVD may be listed as <em>broken</em> in the AVD Manager in 22.6.1. To fix
+            this problem, select the virtual device on the AVD Manager and click
+            <strong>Repair</strong>.</p>
+        </li>
+        <li>Fixed a problem with the command line tools when creating virtual devices.
+            (<a href="http://b.android.com/66740">Issue 66740</a>)</li>
+        <li>Fixed a problem with the command line <code>lint</code> script.</li>
+      </ul>
+    </dd>
+
+    <dt>Known Issues:</dt>
+    <dd>
+      <p>When you create an Android virtual device using the Nexus 5 device definition,
+         you must enable the <em>Use Host GPU</em> option, otherwise the virtual device
+         will not start.</p>
+    </dd>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.6</a> <em>(March 2014)</em>
   </p>
 

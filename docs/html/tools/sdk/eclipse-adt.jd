@@ -53,9 +53,59 @@ the ADT Plugin, as denoted by revision number. </p>
 <p>For a summary of all known issues in ADT, see <a
 href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
 
+
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>ADT 22.6.1</a> <em>(March 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Indigo (Version 3.7.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r22.6.1</a>.
+        If you haven't already installed SDK Tools r22.6.1 into your SDK, use the
+        Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>Fixed a problem where the Android Virtual Device Manager could not create new virtual
+          devices. (<a href="http://b.android.com/66661">Issue 66661</a>)</li>
+      <li><p>Fixed a problem with virtual devices created using ADT 22.3 or earlier.</p>
+          <p>If you created an Android Virtual Device using ADT 22.3 or earlier, the
+          AVD may be listed as <em>broken</em> in the AVD Manager in 22.6.1. To fix
+          this problem, select the virtual device on the AVD Manager and click
+          <strong>Repair</strong>.</p>
+      </li>
+      <li>Fixed a problem with the command line tools when creating virtual devices.
+          (<a href="http://b.android.com/66740">Issue 66740</a>)</li>
+      <li>Fixed a problem with the command line <code>lint</code> script.</li>
+    </ul>
+  </dd>
+
+  <dt>Known Issues:</dt>
+  <dd>
+    <p>When you create an Android virtual device using the Nexus 5 device definition,
+       you must enable the <em>Use Host GPU</em> option, otherwise the virtual device
+       will not start.</p>
+  </dd>
+</dl>
+</div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>ADT 22.6.0</a> <em>(March 2014)</em>
   </p>
 
@@ -119,7 +169,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>ADT 22.3.0</a> <em>(October 2013)</em>
   </p>
 
