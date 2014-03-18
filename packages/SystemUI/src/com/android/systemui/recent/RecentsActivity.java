@@ -164,7 +164,8 @@ public class RecentsActivity extends Activity {
             final List<ActivityManager.RecentTaskInfo> recentTasks =
                     am.getRecentTasks(2,
                             ActivityManager.RECENT_WITH_EXCLUDED |
-                            ActivityManager.RECENT_IGNORE_UNAVAILABLE);
+                            ActivityManager.RECENT_IGNORE_UNAVAILABLE |
+                            ActivityManager.RECENT_INCLUDE_RELATED);
             if (recentTasks.size() > 1 &&
                     mRecentsPanel.simulateClick(recentTasks.get(1).persistentId)) {
                 // recents panel will take care of calling show(false) through simulateClick

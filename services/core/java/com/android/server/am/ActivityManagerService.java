@@ -6856,10 +6856,19 @@ public final class ActivityManagerService extends ActivityManagerNative
             ArrayList<ActivityManager.RecentTaskInfo> res
                     = new ArrayList<ActivityManager.RecentTaskInfo>(
                             maxNum < N ? maxNum : N);
+
+            final Set<Integer> includedUsers;
+            if ((flags & ActivityManager.RECENT_INCLUDE_RELATED) != 0) {
+                includedUsers = getRelatedUsersLocked(userId);
+            } else {
+                includedUsers = new HashSet<Integer>();
+            }
+            includedUsers.add(Integer.valueOf(userId));
             for (int i=0; i<N && maxNum > 0; i++) {
                 TaskRecord tr = mRecentTasks.get(i);
-                // Only add calling user's recent tasks
-                if (tr.userId != userId) continue;
+                // Only add calling user or related users recent tasks
+                if (!includedUsers.contains(Integer.valueOf(tr.userId))) continue;
+
                 // Return the entry if desired by the caller.  We always return
                 // the first entry, because callers always expect this to be the
                 // foreground app.  We may filter others if the caller has
@@ -6883,6 +6892,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     rti.origActivity = tr.origActivity;
                     rti.description = tr.lastDescription;
                     rti.stackId = tr.stack.mStackId;
+                    rti.userId = tr.userId;
 
                     if ((flags&ActivityManager.RECENT_IGNORE_UNAVAILABLE) != 0) {
                         // Check whether this activity is currently available.
@@ -6902,7 +6912,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             // Will never happen.
                         }
                     }
-                    
+
                     res.add(rti);
                     maxNum--;
                 }
@@ -16260,6 +16270,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             relatedUserIds[i] = relatedUsers.get(i).id;
         }
         mRelatedUserIds = relatedUserIds;
+    }
+
+    private Set getRelatedUsersLocked(int userId) {
+        Set userIds = new HashSet<Integer>();
+        final List<UserInfo> relatedUsers = getUserManagerLocked().getRelatedUsers(userId);
+        for (UserInfo user : relatedUsers) {
+            userIds.add(Integer.valueOf(user.id));
+        }
+        return userIds;
     }
 
     @Override
