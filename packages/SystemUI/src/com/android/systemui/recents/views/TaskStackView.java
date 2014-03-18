@@ -428,16 +428,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /** Computes the stack and task rects */
-    public void computeRects(int width, int height) {
+    public void computeRects(int width, int height, int insetBottom) {
         // Note: We let the stack view be the full height because we want the cards to go under the
         //       navigation bar if possible.  However, the stack rects which we use to calculate
         //       max scroll, etc. need to take the nav bar into account
 
         // Compute the stack rects
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
         mRect.set(0, 0, width, height);
         mStackRect.set(mRect);
-        mStackRect.bottom -= config.systemInsets.bottom;
+        mStackRect.bottom -= insetBottom;
 
         int smallestDimension = Math.min(width, height);
         int padding = (int) (Constants.Values.TaskStackView.StackPaddingPct * smallestDimension / 2f);
@@ -466,7 +465,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 " awaitingFirstLayout: " + mAwaitingFirstLayout, Console.AnsiGreen);
 
         // Compute our stack/task rects
-        computeRects(width, height);
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        computeRects(width, height, config.systemInsets.bottom);
 
         // Debug logging
         if (Constants.DebugFlags.UI.MeasureAndLayout) {

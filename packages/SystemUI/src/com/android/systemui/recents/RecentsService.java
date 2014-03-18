@@ -58,12 +58,13 @@ class SystemUIMessageHandler extends Handler {
                 Bundle data = msg.getData();
                 Rect windowRect = (Rect) data.getParcelable("windowRect");
                 Rect systemInsets = (Rect) data.getParcelable("systemInsets");
-                RecentsConfiguration.getInstance().updateSystemInsets(systemInsets);
 
                 // Create a dummy task stack & compute the rect for the thumbnail to animate to
                 TaskStack stack = new TaskStack(context);
                 TaskStackView tsv = new TaskStackView(context, stack);
-                tsv.computeRects(windowRect.width(), windowRect.height() - systemInsets.top);
+                // Since the nav bar height is already accounted for in the windowRect, don't pass
+                // in a bottom inset
+                tsv.computeRects(windowRect.width(), windowRect.height() - systemInsets.top, 0);
                 tsv.boundScroll();
                 TaskViewTransform transform = tsv.getStackTransform(0);
                 Rect taskRect = new Rect(transform.rect);
