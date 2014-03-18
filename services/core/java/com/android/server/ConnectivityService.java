@@ -1183,9 +1183,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private INetworkManagementEventObserver mDataActivityObserver = new BaseNetworkObserver() {
         @Override
-        public void interfaceClassDataActivityChanged(String label, boolean active) {
+        public void interfaceClassDataActivityChanged(String label, boolean active, long tsNanos) {
             int deviceType = Integer.parseInt(label);
-            sendDataActivityBroadcast(deviceType, active);
+            sendDataActivityBroadcast(deviceType, active, tsNanos);
         }
     };
 
@@ -2169,10 +2169,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         sendStickyBroadcastDelayed(makeGeneralIntent(info, bcastType), delayMs);
     }
 
-    private void sendDataActivityBroadcast(int deviceType, boolean active) {
+    private void sendDataActivityBroadcast(int deviceType, boolean active, long tsNanos) {
         Intent intent = new Intent(ConnectivityManager.ACTION_DATA_ACTIVITY_CHANGE);
         intent.putExtra(ConnectivityManager.EXTRA_DEVICE_TYPE, deviceType);
         intent.putExtra(ConnectivityManager.EXTRA_IS_ACTIVE, active);
+        intent.putExtra(ConnectivityManager.EXTRA_REALTIME_NS, tsNanos);
         final long ident = Binder.clearCallingIdentity();
         try {
             mContext.sendOrderedBroadcastAsUser(intent, UserHandle.ALL,

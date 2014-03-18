@@ -346,7 +346,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /**
      * Notify our observers of a change in the data activity state of the interface
      */
-    private void notifyInterfaceClassActivity(int type, boolean active) {
+    private void notifyInterfaceClassActivity(int type, boolean active, long tsNanos) {
         try {
             getBatteryStats().noteDataConnectionActive(type, active);
         } catch (RemoteException e) {
@@ -356,7 +356,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         for (int i = 0; i < length; i++) {
             try {
                 mObservers.getBroadcastItem(i).interfaceClassDataActivityChanged(
-                        Integer.toString(type), active);
+                        Integer.toString(type), active, tsNanos);
             } catch (RemoteException e) {
             } catch (RuntimeException e) {
             }
@@ -571,8 +571,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     if (cooked.length < 4 || !cooked[1].equals("IfaceClass")) {
                         throw new IllegalStateException(errorMessage);
                     }
+                    long timestampNanos = 0;
+                    if (cooked.length == 5) {
+                        try {
+                            timestampNanos = Long.parseLong(cooked[4]);
+                        } catch(NumberFormatException ne) {}
+                    }
                     boolean isActive = cooked[2].equals("active");
-                    notifyInterfaceClassActivity(Integer.parseInt(cooked[3]), isActive);
+                    notifyInterfaceClassActivity(Integer.parseInt(cooked[3]),
+                            isActive, timestampNanos);
                     return true;
                     // break;
             case NetdResponseCode.InterfaceAddressChange:
@@ -1261,7 +1268,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             }
             mMainHandler.post(new Runnable() {
                 @Override public void run() {
-                    notifyInterfaceClassActivity(type, true);
+                    notifyInterfaceClassActivity(type, true, SystemClock.elapsedRealtimeNanos());
                 }
             });
         }
@@ -1288,7 +1295,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             mActiveIdleTimers.remove(iface);
             mMainHandler.post(new Runnable() {
                 @Override public void run() {
-                    notifyInterfaceClassActivity(params.type, false);
+                    notifyInterfaceClassActivity(params.type, false,
+                            SystemClock.elapsedRealtimeNanos());
                 }
             });
         }

@@ -86,8 +86,9 @@ interface INetworkManagementEventObserver {
      *
      * @param iface The interface.
      * @param active  True if the interface is actively transmitting data, false if it is idle.
+     * @param tsNanos Elapsed realtime in nanos when the state of the network interface changed.
      */
-    void interfaceClassDataActivityChanged(String label, boolean active);
+    void interfaceClassDataActivityChanged(String label, boolean active, long tsNanos);
 
     /**
      * Information about available DNS servers has been received.
