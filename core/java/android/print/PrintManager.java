@@ -359,6 +359,15 @@ public final class PrintManager {
      * selected the hinted options in the print dialog, given the current printer
      * supports them.
      * </p>
+     * <p>
+     * <strong>Note:</strong> Calling this method will bring the print dialog and
+     * the system will connect to the provided {@link PrintDocumentAdapter}. If a
+     * configuration change occurs, such as rotation, the system will drop the
+     * connection to the adapter as the activity has to be recreated and the old
+     * adapter may be invalid in this context. As a consequence, if your activity
+     * does not handle rotation, you have to save the state that you were printing
+     * and call this method again when your activity is recreated.
+     * </p>
      *
      * @param printJobName A name for the new print job which is shown to the user.
      * @param documentAdapter An adapter that emits the document to print.
