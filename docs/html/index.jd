@@ -17,6 +17,22 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
             <ul>
                 <!-- set explicit widths as needed to prevent overflow issues -->
 
+
+                <li class="item carousel-home">
+                  <div class="content-left col-10" style="width:580px;">
+                    <a href="{@docRoot}design/patterns/new.html">
+                      <img src="{@docRoot}images/home/aw_dac.png" style="margin-top:50px" >
+                    </a>
+                  </div>
+                  <div class="content-right col-5" style="width:280px;">
+                    <h1>Introducing Android Wear</h1>
+                    <p>We’re extending the Android platform to wearables. You can start building richer wearable experiences for your apps today using the enhanced Notification APIs in this Developer Preview.</p>
+                    <p>We can’t wait to see what you will create.</p>
+                    <p><a href="{@docRoot}wear/index.html" class="button">Learn more</a></p>
+                  </div>
+                </li>
+
+
                 <li class="item carousel-home">
                     <div class="content-left col-11" style="padding-top:65px;">
                       <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
