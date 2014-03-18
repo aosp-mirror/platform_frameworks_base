@@ -1483,7 +1483,6 @@ public final class CaptureResult extends CameraMetadata {
      * light.</p>
      * <p>If the sensor can't expose this exact duration, it should shorten the
      * duration exposed to the nearest possible value (rather than expose longer).</p>
-     * <p>1/10000 - 30 sec range. No bulb mode</p>
      */
     public static final Key<Long> SENSOR_EXPOSURE_TIME =
             new Key<Long>("android.sensor.exposureTime", long.class);
