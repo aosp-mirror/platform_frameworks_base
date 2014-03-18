@@ -141,14 +141,21 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
         /**
          * Interface class activity.
          */
+
         sendMessage("613 IfaceClass active rmnet0");
-        expectSoon(observer).interfaceClassDataActivityChanged("rmnet0", true);
+        expectSoon(observer).interfaceClassDataActivityChanged("rmnet0", true, 0);
+
+        sendMessage("613 IfaceClass active rmnet0 1234");
+        expectSoon(observer).interfaceClassDataActivityChanged("rmnet0", true, 1234);
 
         sendMessage("613 IfaceClass idle eth0");
-        expectSoon(observer).interfaceClassDataActivityChanged("eth0", false);
+        expectSoon(observer).interfaceClassDataActivityChanged("eth0", false, 0);
 
-        sendMessage("613 IfaceClass reallyactive rmnet0");
-        expectSoon(observer).interfaceClassDataActivityChanged("rmnet0", false);
+        sendMessage("613 IfaceClass idle eth0 1234");
+        expectSoon(observer).interfaceClassDataActivityChanged("eth0", false, 1234);
+
+        sendMessage("613 IfaceClass reallyactive rmnet0 1234");
+        expectSoon(observer).interfaceClassDataActivityChanged("rmnet0", false, 1234);
 
         sendMessage("613 InterfaceClass reallyactive rmnet0");
         // Invalid group.
