@@ -32,6 +32,12 @@ public class Constants {
             // This disables the bitmap and icon caches to
             public static final boolean DisableBackgroundCache = false;
 
+            // Timing certain paths
+            public static final String TimeRecentsStartupKey = "startup";
+            public static final String TimeRecentsLaunchKey = "launchTask";
+            public static final boolean TimeRecentsStartup = false;
+            public static final boolean TimeRecentsLaunchTask = false;
+
             public static final boolean RecentsComponent = false;
             public static final boolean TaskDataLoader = false;
             public static final boolean SystemUIHandshake = false;
