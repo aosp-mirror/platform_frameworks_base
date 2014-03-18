@@ -37,13 +37,15 @@ public class MasterClearReceiver extends BroadcastReceiver {
             }
         }
 
+        final boolean shutdown = intent.getBooleanExtra("shutdown", false);
+
         Slog.w(TAG, "!!! FACTORY RESET !!!");
         // The reboot call is blocking, so we need to do it on another thread.
         Thread thr = new Thread("Reboot") {
             @Override
             public void run() {
                 try {
-                    RecoverySystem.rebootWipeUserData(context);
+                    RecoverySystem.rebootWipeUserData(context, shutdown);
                     Log.wtf(TAG, "Still running after master clear?!");
                 } catch (IOException e) {
                     Slog.e(TAG, "Can't perform master clear/factory reset", e);
