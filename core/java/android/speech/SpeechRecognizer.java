@@ -409,7 +409,7 @@ public class SpeechRecognizer {
      * Internal wrapper of IRecognitionListener which will propagate the results to
      * RecognitionListener
      */
-    private class InternalListener extends IRecognitionListener.Stub {
+    private static class InternalListener extends IRecognitionListener.Stub {
         private RecognitionListener mInternalListener;
 
         private final static int MSG_BEGINNING_OF_SPEECH = 1;
