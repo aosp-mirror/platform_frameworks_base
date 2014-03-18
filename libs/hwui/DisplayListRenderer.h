@@ -22,9 +22,9 @@
 #include <SkPath.h>
 #include <cutils/compiler.h>
 
-#include "DisplayList.h"
 #include "DisplayListLogBuffer.h"
 #include "OpenGLRenderer.h"
+#include "RenderNode.h"
 
 namespace android {
 namespace uirenderer {

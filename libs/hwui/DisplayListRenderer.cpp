@@ -21,12 +21,12 @@
 
 #include <private/hwui/DrawGlInfo.h>
 
-#include "DisplayList.h"
+#include "Caches.h"
 #include "DeferredDisplayList.h"
 #include "DisplayListLogBuffer.h"
 #include "DisplayListOp.h"
 #include "DisplayListRenderer.h"
-#include "Caches.h"
+#include "RenderNode.h"
 
 namespace android {
 namespace uirenderer {
