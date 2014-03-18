@@ -105,7 +105,7 @@ public class AlternateRecentsComponent {
     final static int MSG_CLOSE_RECENTS = 4;
     final static int MSG_TOGGLE_RECENTS = 5;
 
-    final static int sMinToggleDelay = 475;
+    final static int sMinToggleDelay = 425;
 
     final static String sToggleRecentsAction = "com.android.systemui.recents.SHOW_RECENTS";
     final static String sRecentsPackage = "com.android.systemui";
@@ -139,6 +139,10 @@ public class AlternateRecentsComponent {
 
     /** Toggles the alternate recents activity */
     public void onToggleRecents(Display display, int layoutDirection, View statusBarView) {
+        Console.logStartTracingTime(Constants.DebugFlags.App.TimeRecentsStartup,
+                Constants.DebugFlags.App.TimeRecentsStartupKey);
+        Console.logStartTracingTime(Constants.DebugFlags.App.TimeRecentsLaunchTask,
+                Constants.DebugFlags.App.TimeRecentsLaunchKey);
         Console.log(Constants.DebugFlags.App.RecentsComponent, "[RecentsComponent|toggleRecents]",
                 "serviceIsBound: " + mServiceIsBound);
         mStatusBarView = statusBarView;
@@ -304,6 +308,12 @@ public class AlternateRecentsComponent {
                     Message msg = Message.obtain(null, MSG_TOGGLE_RECENTS, 0, 0);
                     msg.setData(data);
                     mService.send(msg);
+
+                    // Time this path
+                    Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsStartup,
+                            Constants.DebugFlags.App.TimeRecentsStartupKey, "sendToggleRecents");
+                    Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsLaunchTask,
+                            Constants.DebugFlags.App.TimeRecentsLaunchKey, "sendToggleRecents");
                 } catch (RemoteException re) {
                     re.printStackTrace();
                 }
@@ -357,6 +367,9 @@ public class AlternateRecentsComponent {
                     R.anim.recents_from_launcher_exit);
             startAlternateRecentsActivity(opts);
         }
+
+        Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsStartup,
+                Constants.DebugFlags.App.TimeRecentsStartupKey, "startRecentsActivity");
         mLastToggleTime = System.currentTimeMillis();
     }
 

@@ -330,6 +330,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
         } else {
             mIconView.animate()
                 .alpha(0f)
+                .setStartDelay(0)
                 .setDuration(Constants.Values.TaskView.Animation.TaskIconOnLeavingDuration)
                 .setInterpolator(new DecelerateInterpolator())
                 .setListener(

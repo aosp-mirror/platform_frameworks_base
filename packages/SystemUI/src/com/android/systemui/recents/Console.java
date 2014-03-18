@@ -23,7 +23,14 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
+import java.util.HashMap;
+import java.util.Map;
+
+
 public class Console {
+    // Timer
+    public static final Map<Object, Long> mTimeLogs = new HashMap<Object, Long>();
+
     // Colors
     public static final String AnsiReset = "\u001B[0m";
     public static final String AnsiBlack = "\u001B[30m";
@@ -77,6 +84,25 @@ public class Console {
         if (condition) {
             System.out.println("==== [" + System.currentTimeMillis() +
                     "] ============================================================");
+        }
+    }
+
+    /** Starts a time trace */
+    public static void logStartTracingTime(boolean condition, String key) {
+        if (condition) {
+            long curTime = System.currentTimeMillis();
+            mTimeLogs.put(key, curTime);
+            Console.log(condition, "[Recents|" + key + "]",
+                    "started @ " + curTime);
+        }
+    }
+
+    /** Continues a time trace */
+    public static void logTraceTime(boolean condition, String key, String desc) {
+        if (condition) {
+            long timeDiff = System.currentTimeMillis() - mTimeLogs.get(key);
+            Console.log(condition, "[Recents|" + key + "|" + desc + "]",
+                    "+" + timeDiff + "ms");
         }
     }
 

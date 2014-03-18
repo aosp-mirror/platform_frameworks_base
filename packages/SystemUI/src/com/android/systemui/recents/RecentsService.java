@@ -84,6 +84,12 @@ class SystemUIMessageHandler extends Handler {
             Intent intent = new Intent(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY);
             intent.setPackage(context.getPackageName());
             context.sendBroadcast(intent);
+
+            // Time this path
+            Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsStartup,
+                    Constants.DebugFlags.App.TimeRecentsStartupKey, "receivedToggleRecents");
+            Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsLaunchTask,
+                    Constants.DebugFlags.App.TimeRecentsLaunchKey, "receivedToggleRecents");
         }
     }
 }
