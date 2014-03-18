@@ -1521,17 +1521,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     // A: Almost none! Only things coming from the system (package is "android") that also
     // have special "kind" tags marking them as relevant for setup (see below).
     protected boolean showNotificationEvenIfUnprovisioned(StatusBarNotification sbn) {
-        if ("android".equals(sbn.getPackageName())) {
-            if (sbn.getNotification().kind != null) {
-                for (String aKind : sbn.getNotification().kind) {
-                    // IME switcher, created by InputMethodManagerService
-                    if ("android.system.imeswitcher".equals(aKind)) return true;
-                    // OTA availability & errors, created by SystemUpdateService
-                    if ("android.system.update".equals(aKind)) return true;
-                }
-            }
-        }
-        return false;
+        return "android".equals(sbn.getPackageName())
+                && sbn.getNotification().extras.getBoolean(Notification.EXTRA_ALLOW_DURING_SETUP);
     }
 
     public boolean inKeyguardRestrictedInputMode() {
