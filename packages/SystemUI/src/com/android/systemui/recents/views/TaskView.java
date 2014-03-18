@@ -290,17 +290,36 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
 
     /** Animates this task view as it enters recents */
     public void animateOnEnterRecents() {
-        mIconView.setCircularClipRadius(0f);
-        mIconView.animateCircularClip(true, 1f,
-            Constants.Values.TaskView.Animation.TaskIconCircularClipInDuration,
-            300, new AccelerateInterpolator(), null);
+        if (Constants.Values.TaskView.AnimateFrontTaskIconOnEnterUseClip) {
+            mIconView.setCircularClipRadius(0f);
+            mIconView.animateCircularClip(true, 1f,
+                Constants.Values.TaskView.Animation.TaskIconOnEnterDuration,
+                300, new AccelerateInterpolator(), null);
+        } else {
+            RecentsConfiguration config = RecentsConfiguration.getInstance();
+            int translate = config.pxFromDp(10);
+            mIconView.setScaleX(1.25f);
+            mIconView.setScaleY(1.25f);
+            mIconView.setAlpha(0f);
+            mIconView.setTranslationX(translate / 2);
+            mIconView.setTranslationY(-translate);
+            mIconView.animate()
+                    .alpha(1f)
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .translationX(0)
+                    .translationY(0)
+                    .setStartDelay(235)
+                    .setDuration(Constants.Values.TaskView.Animation.TaskIconOnEnterDuration)
+                    .start();
+        }
     }
 
     /** Animates this task view as it exits recents */
     public void animateOnLeavingRecents(final Runnable r) {
         if (Constants.Values.TaskView.AnimateFrontTaskIconOnLeavingUseClip) {
             mIconView.animateCircularClip(false, 0f,
-                Constants.Values.TaskView.Animation.TaskIconCircularClipOutDuration, 0,
+                Constants.Values.TaskView.Animation.TaskIconOnLeavingDuration, 0,
                 new DecelerateInterpolator(),
                 new AnimatorListenerAdapter() {
                     @Override
@@ -311,7 +330,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
         } else {
             mIconView.animate()
                 .alpha(0f)
-                .setDuration(Constants.Values.TaskView.Animation.TaskIconCircularClipOutDuration)
+                .setDuration(Constants.Values.TaskView.Animation.TaskIconOnLeavingDuration)
                 .setInterpolator(new DecelerateInterpolator())
                 .setListener(
                     new AnimatorListenerAdapter() {

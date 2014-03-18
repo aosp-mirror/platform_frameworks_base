@@ -28,6 +28,7 @@ public class Constants {
         public static class App {
             public static final boolean EnableTaskFiltering = false;
             public static final boolean EnableTaskStackClipping = false;
+            public static final boolean EnableToggleNewRecentsActivity = false;
             // This disables the bitmap and icon caches to
             public static final boolean DisableBackgroundCache = false;
 
@@ -76,6 +77,8 @@ public class Constants {
                 public static final int SnapScrollBackDuration = 650;
             }
 
+            public static final int TaskStackOverscrollRange = 150;
+
             // The padding will be applied to the smallest dimension, and then applied to all sides
             public static final float StackPaddingPct = 0.15f;
             // The overlap height relative to the task height
@@ -91,12 +94,13 @@ public class Constants {
         public static class TaskView {
             public static class Animation {
                 public static final int TaskDataUpdatedFadeDuration = 250;
-                public static final int TaskIconCircularClipInDuration = 225;
-                public static final int TaskIconCircularClipOutDuration = 85;
+                public static final int TaskIconOnEnterDuration = 175;
+                public static final int TaskIconOnLeavingDuration = 75;
             }
 
             public static final boolean AnimateFrontTaskIconOnEnterRecents = true;
             public static final boolean AnimateFrontTaskIconOnLeavingRecents = true;
+            public static final boolean AnimateFrontTaskIconOnEnterUseClip = false;
             public static final boolean AnimateFrontTaskIconOnLeavingUseClip = false;
             public static final boolean DrawColoredTaskBars = false;
             public static final boolean UseRoundedCorners = true;
@@ -106,9 +110,4 @@ public class Constants {
             public static final float TaskIconSizeDps = 60;
         }
     }
-
-    // UNMIGRATED CONSTANTS:
-
-    /** Determines whether to layout the stack vertically in landscape mode */
-    public static final boolean LANDSCAPE_LAYOUT_VERTICAL_STACK = true;
 }

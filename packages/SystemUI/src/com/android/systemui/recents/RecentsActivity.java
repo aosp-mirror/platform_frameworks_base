@@ -17,27 +17,48 @@
 package com.android.systemui.recents;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import com.android.systemui.recent.RecentTasksLoader;
+import com.android.systemui.R;
 import com.android.systemui.recents.model.SpaceNode;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.RecentsView;
-import com.android.systemui.R;
 
 import java.util.ArrayList;
 
 
 /* Activity */
-public class RecentsActivity extends Activity {
+public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks {
     FrameLayout mContainerView;
     RecentsView mRecentsView;
     View mEmptyView;
+
     boolean mVisible;
+    boolean mTaskLaunched;
+
+    BroadcastReceiver mServiceBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            Console.log(Constants.DebugFlags.App.SystemUIHandshake,
+                    "[RecentsActivity|serviceBroadcast]", action, Console.AnsiRed);
+            if (action.equals(RecentsService.ACTION_FINISH_RECENTS_ACTIVITY)) {
+                if (Constants.DebugFlags.App.EnableToggleNewRecentsActivity) {
+                    finish();
+                }
+            } else if (action.equals(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
+                // Dismiss recents and launch the first task if possible
+                dismissRecentsIfVisible();
+            }
+        }
+    };
 
     /** Updates the set of recent tasks */
     void updateRecentsTasks() {
@@ -63,14 +84,12 @@ public class RecentsActivity extends Activity {
     }
 
     /** Dismisses recents if we are already visible and the intent is to toggle the recents view */
-    boolean dismissRecentsIfVisible(Intent intent) {
-        if ("com.android.systemui.recents.TOGGLE_RECENTS".equals(intent.getAction())) {
-            if (mVisible) {
-                if (!mRecentsView.launchFirstTask()) {
-                    finish();
-                }
-                return true;
+    boolean dismissRecentsIfVisible() {
+        if (mVisible) {
+            if (!mRecentsView.launchFirstTask()) {
+                finish();
             }
+            return true;
         }
         return false;
     }
@@ -87,9 +106,6 @@ public class RecentsActivity extends Activity {
         RecentsTaskLoader.initialize(this);
         RecentsConfiguration.reinitialize(this);
 
-        // Dismiss recents if it is visible and we are toggling
-        if (dismissRecentsIfVisible(getIntent())) return;
-
         // Set the background dim
         WindowManager.LayoutParams wlp = getWindow().getAttributes();
         wlp.dimAmount = Constants.Values.Window.BackgroundDim;
@@ -98,6 +114,7 @@ public class RecentsActivity extends Activity {
 
         // Create the view hierarchy
         mRecentsView = new RecentsView(this);
+        mRecentsView.setCallbacks(this);
         mRecentsView.setLayoutParams(new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT));
@@ -118,12 +135,13 @@ public class RecentsActivity extends Activity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+
+        // Reset the task launched flag if we encounter an onNewIntent() before onStop()
+        mTaskLaunched = false;
+
         Console.logDivider(Constants.DebugFlags.App.SystemUIHandshake);
         Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsActivity|onNewIntent]",
                 intent.getAction() + " visible: " + mVisible, Console.AnsiRed);
-
-        // Dismiss recents if it is visible and we are toggling
-        if (dismissRecentsIfVisible(intent)) return;
 
         // Initialize the loader and the configuration
         RecentsTaskLoader.initialize(this);
@@ -146,6 +164,12 @@ public class RecentsActivity extends Activity {
         Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsActivity|onResume]", "",
                 Console.AnsiRed);
         super.onResume();
+
+        // Register the broadcast receiver to handle messages from our service
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY);
+        filter.addAction(RecentsService.ACTION_FINISH_RECENTS_ACTIVITY);
+        registerReceiver(mServiceBroadcastReceiver, filter);
     }
 
     @Override
@@ -154,9 +178,8 @@ public class RecentsActivity extends Activity {
                 Console.AnsiRed);
         super.onPause();
 
-        // Stop the loader immediately when we leave Recents
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        loader.stopLoader();
+        // Unregister any broadcast receivers we have registered
+        unregisterReceiver(mServiceBroadcastReceiver);
     }
 
     @Override
@@ -164,7 +187,21 @@ public class RecentsActivity extends Activity {
         Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsActivity|onStop]", "",
                 Console.AnsiRed);
         super.onStop();
+
+        // Finish the current recents activity after we have launched a task
+        if (mTaskLaunched && Constants.DebugFlags.App.EnableToggleNewRecentsActivity) {
+            finish();
+        }
+
         mVisible = false;
+        mTaskLaunched = false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsActivity|onDestroy]", "",
+                Console.AnsiRed);
+        super.onDestroy();
     }
 
     @Override
@@ -180,5 +217,10 @@ public class RecentsActivity extends Activity {
         if (!mRecentsView.unfilterFilteredStacks()) {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public void onTaskLaunching() {
+        mTaskLaunched = true;
     }
 }

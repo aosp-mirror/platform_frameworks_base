@@ -920,18 +920,25 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 int velocity = (int) velocityTracker.getYVelocity(mActivePointerId);
 
                 if (mIsScrolling && (Math.abs(velocity) > mMinimumVelocity)) {
-                    Console.log(Constants.DebugFlags.UI.TouchEvents,
-                        "[TaskStackViewTouchHandler|fling]",
-                        "scroll: " + mSv.getStackScroll() + " velocity: " + velocity,
-                            Console.AnsiGreen);
                     // Enable HW layers on the stack
                     mSv.addHwLayersRefCount("flingScroll");
+                    int overscrollRange = (int) (Math.min(1f,
+                            Math.abs((float) velocity / mMaximumVelocity)) *
+                            Constants.Values.TaskStackView.TaskStackOverscrollRange);
+
+                    Console.log(Constants.DebugFlags.UI.TouchEvents,
+                            "[TaskStackViewTouchHandler|fling]",
+                            "scroll: " + mSv.getStackScroll() + " velocity: " + velocity +
+                                    " maxVelocity: " + mMaximumVelocity +
+                                    " overscrollRange: " + overscrollRange,
+                            Console.AnsiGreen);
+
                     // Fling scroll
                     mSv.mScroller.fling(0, mSv.getStackScroll(),
                             0, -velocity,
                             0, 0,
                             mSv.mMinScroll, mSv.mMaxScroll,
-                            0, 0);
+                            0, overscrollRange);
                     // Invalidate to kick off computeScroll
                     mSv.invalidate();
                 } else if (mSv.isScrollOutOfBounds()) {
