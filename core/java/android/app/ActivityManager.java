@@ -509,6 +509,12 @@ public class ActivityManager {
          */
         public int stackId;
 
+        /**
+         * The id the of the user the task was running as.
+         * @hide
+         */
+        public int userId;
+
         public RecentTaskInfo() {
         }
 
@@ -531,6 +537,7 @@ public class ActivityManager {
             TextUtils.writeToParcel(description, dest,
                     Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
             dest.writeInt(stackId);
+            dest.writeInt(userId);
         }
 
         public void readFromParcel(Parcel source) {
@@ -544,6 +551,7 @@ public class ActivityManager {
             origActivity = ComponentName.readFromParcel(source);
             description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
             stackId = source.readInt();
+            userId = source.readInt();
         }
 
         public static final Creator<RecentTaskInfo> CREATOR
@@ -567,12 +575,19 @@ public class ActivityManager {
      * {@link android.content.Intent#FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS} flag.
      */
     public static final int RECENT_WITH_EXCLUDED = 0x0001;
-    
+
     /**
      * Provides a list that does not contain any
      * recent tasks that currently are not available to the user.
      */
     public static final int RECENT_IGNORE_UNAVAILABLE = 0x0002;
+
+    /**
+     * Provides a list that also contains recent tasks for user
+     * and related users.
+     * @hide
+     */
+    public static final int RECENT_INCLUDE_RELATED = 0x0004;
 
     /**
      * Return a list of the tasks that the user has recently launched, with
