@@ -2314,11 +2314,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final void updateLruProcessLocked(ProcessRecord app, boolean activityChange,
             ProcessRecord client) {
-        final boolean hasActivity = app.activities.size() > 0 || app.hasClientActivities;
+        final boolean hasActivity = app.activities.size() > 0 || app.hasClientActivities
+                || app.treatLikeActivity;
         final boolean hasService = false; // not impl yet. app.services.size() > 0;
         if (!activityChange && hasActivity) {
-            // The process has activties, so we are only going to allow activity-based
-            // adjustments move it.  It should be kept in the front of the list with other
+            // The process has activities, so we are only allowing activity-based adjustments
+            // to move it.  It should be kept in the front of the list with other
             // processes that have activities, and we don't want those to change their
             // order except due to activity operations.
             return;
@@ -12571,6 +12572,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         updateProcessForegroundLocked(app, false, false);
         app.foregroundActivities = false;
         app.hasShownUi = false;
+        app.treatLikeActivity = false;
         app.hasAboveClient = false;
 
         mServices.killServicesLocked(app, allowRestart);
@@ -14862,6 +14864,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                             app.adjTarget = s.name;
                         }
                     }
+                    if ((cr.flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
+                        app.treatLikeActivity = true;
+                    }
                     final ActivityRecord a = cr.activity;
                     if ((cr.flags&Context.BIND_ADJUST_WITH_ACTIVITY) != 0) {
                         if (a != null && adj > ProcessList.FOREGROUND_APP_ADJ &&
@@ -14994,10 +14999,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        if (procState >= ActivityManager.PROCESS_STATE_CACHED_EMPTY && app.hasClientActivities) {
-            // This is a cached process, but with client activities.  Mark it so.
-            procState = ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT;
-            app.adjType = "cch-client-act";
+        if (procState >= ActivityManager.PROCESS_STATE_CACHED_EMPTY) {
+            if (app.hasClientActivities) {
+                // This is a cached process, but with client activities.  Mark it so.
+                procState = ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT;
+                app.adjType = "cch-client-act";
+            } else if (app.treatLikeActivity) {
+                // This is a cached process, but somebody wants us to treat it like it has
+                // an activity, okay!
+                procState = ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
+                app.adjType = "cch-as-act";
+            }
         }
 
         if (adj == ProcessList.SERVICE_ADJ) {
