@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
+
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+<title>Creating Notifications for Android Wear | Android Developers</title>
+
+<!-- STYLESHEETS -->
+<link rel="stylesheet"
+href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold" title="roboto">
+<link href="/assets/css/default.css" rel="stylesheet" type="text/css">
+
+
+
+<!-- JAVASCRIPT -->
+<script src="//www.google.com/jsapi" type="text/javascript"></script>
+<script src="/assets/js/android_3p-bundle.js" type="text/javascript"></script>
+<script type="text/javascript">
+  var toRoot = "/";
+  var metaTags = [];
+  var devsite = false;
+</script>
+<script src="/assets/js/docs.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-5831155-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+</head>
+
+<body class="gc-documentation 
+  " itemscope itemtype="http://schema.org/Article">
+
+
+  
+<a name="top"></a>
+
+    <!-- Header -->
+    <div id="header">
+        <div class="wrap" id="header-wrap">
+          <div class="col-3 logo-wear">
+          <a href="/wear/index.html">
+            <img src="/wear/images/android-wear.png" height="16" alt="Android Wear" />
+          </a>
+          </div>
+
+
+	<div class="col-8" style="margin:0"><h1 style="margin:1px 0 0 20px;padding:0;line-height:16px;
+  color:#666;font-weight:100;font-size:24px;">Developer Preview</h1></div>
+            
+
+          <!-- New Search -->
+          <div class="menu-container">
+            <div class="moremenu">
+	        <div id="more-btn"></div>
+	    </div>
+  <div class="morehover" id="moremenu">
+    <div class="top"></div>
+    <div class="mid">
+      <div class="header">Links</div>
+      <ul>
+        <li><a href="https://play.google.com/apps/publish/">Google Play Developer Console</a></li>
+        <li><a href="http://android-developers.blogspot.com/">Android Developers Blog</a></li>
+        <li><a href="/about/index.html">About Android</a></li>
+      </ul>
+      <div class="header">Android Sites</div>
+      <ul>
+        <li><a href="http://www.android.com">Android.com</a></li>
+        <li class="active"><a>Android Developers</a></li>
+        <li><a href="http://source.android.com">Android Open Source Project</a></li>
+      </ul>
+      
+      
+      
+        <div class="header">Language</div>
+          <div id="language" class="locales">
+            <select name="language" onChange="changeLangPref(this.value, true)">
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="ja">日本語</option>
+                <option value="ko">한국어</option>
+                <option value="ru">Русский</option>
+                <option value="zh-cn">中文 (中国)</option>
+                <option value="zh-tw">中文 (台灣)</option>
+            </select>
+          </div>
+        <script type="text/javascript">
+          <!--
+          loadLangPref();
+            //-->
+        </script>
+      
+      
+
+
+      <br class="clearfix" />
+    </div><!-- end mid -->
+    <div class="bottom"></div>
+  </div><!-- end morehover -->
+
+  <div class="search" id="search-container">
+    <div class="search-inner">
+      <div id="search-btn"></div>
+      <div class="left"></div>
+      <form onsubmit="return submit_search()">
+        <input id="search_autocomplete" type="text" value="" autocomplete="off" name="q"
+onfocus="search_focus_changed(this, true)" onblur="search_focus_changed(this, false)"
+onkeydown="return search_changed(event, true, '/')" 
+onkeyup="return search_changed(event, false, '/')" />
+      </form>
+      <div class="right"></div>
+        <a class="close hide">close</a>
+        <div class="left"></div>
+        <div class="right"></div>
+    </div>
+  </div><!--  end search -->
+
+  <div class="search_filtered_wrapper reference">
+    <div class="suggest-card reference no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+  </div>
+
+  <div class="search_filtered_wrapper docs">
+    <div class="suggest-card dummy no-display">&nbsp;</div>
+    <div class="suggest-card develop no-display">
+      <ul class="search_filtered">
+      </ul>
+      <div class="child-card guides no-display">
+      </div>
+      <div class="child-card training no-display">
+      </div>
+      <div class="child-card samples no-display">
+      </div>
+    </div>
+    <div class="suggest-card design no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+    <div class="suggest-card distribute no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+  </div><!-- end search_filtered_wrapper -->
+
+  </div>
+  <!-- end menu_container -->
+
+
+        </div><!-- end header-wrap -->
+    </div>
+    <!-- /Header -->
+
+
+  <div id="searchResults" class="wrap" style="display:none;">
+          <h2 id="searchTitle">Results</h2>
+          <div id="leftSearchControl" class="search-control">Loading...</div>
+  </div>
+
+  
+
+  
+
+  <div class="wrap clearfix" id="body-content">
+    <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
+      <div id="devdoc-nav" class="scroll-pane">
+<a class="totop" href="#top" data-g-event="left-nav-top">to top</a>
+
+<ul id="nav">
+
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/wear/preview/start.html">Get Started
+      </a></div>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/wear/design/user-interface.html">UI Overview
+      </a></div>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/wear/design/index.html">Design Principles
+      </a></div>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/wear/notifications/creating.html">Creating Notifications for Android Wear
+      </a></div>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/wear/notifications/remote-input.html">Receiving Voice Input from a Notification
+      </a></div>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/wear/notifications/pages.html">Adding Pages to a Notification
+      </a></div>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/wear/notifications/stacks.html">Stacking Notifications
+      </a></div>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/reference/android/preview/support/package-summary.html">Notification Reference</a></div>
+    <ul class="tree-list-children">
+<li class="nav-section">
+<div class="nav-section-header-ref"><span class="tree-list-subtitle package" title="android.preview.support.v4.app">android.preview.support.v4.app</span></div>
+  <ul>
+<li><a href="/reference/android/preview/support/v4/app/NotificationManagerCompat.html">NotificationManagerCompat</a></li>
+  </ul>
+</li>
+
+<li class="nav-section">
+<div class="nav-section-header-ref"><span class="tree-list-subtitle package" title="android.preview.support.wearable.notifications">android.preview.support.wearable.notifications</span></div>
+<ul>
+
+<li><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html">RemoteInput</a></li>
+<li><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.Builder.html" >RemoteInput.Builder</a></li>
+
+<li><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html">WearableNotifications</a></li>
+
+<li><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></li>
+
+<li><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.Builder.html">WearableNotifications.Action.Builder</a></li>
+
+<li><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html">WearableNotifications.Builder</a></li>
+	</ul>
+  </li>
+</ul>
+</li>
+
+
+
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/wear/license.html">License Agreement</a></div>
+  </li>
+
+
+</ul>
+
+        
+
+      </div>
+    </div> <!-- end side-nav -->
+    <script>
+      $(document).ready(function() {
+        scrollIntoView("devdoc-nav");
+        });
+    </script>
+
+
+
+
+<div class="col-12" id="doc-col" >
+
+
+  
+    
+      
+        <h1 itemprop="name" >Creating Notifications for Android Wear</h1>
+      
+    
+  
+
+
+  
+  <div id="jd-content">
+
+
+    <div class="jd-descr" itemprop="articleBody">
+    <p>When an Android device such as a phone or tablet is connected to an Android wearable,
+all notifications are shared between the devices by default. On the Android wearable, each
+notification appears as a new card in the <a href="/wear/design/user-interface.html#Stream"
+>context stream</a>.</p>
+
+<img src="/wear/images/notification_phone@2x.png" width="700" height="265" />
+
+
+<p>So without any effort, your app notifications are available to users on Android Wear.
+However, you can enhance the user experience in several ways. For instance,
+if users may respond to a notification by entering text, such as to reply to
+a message, you can add the ability for users to reply by voice directly from the
+wearable.</p>
+
+<p>To help you provide the best user experience
+for your notifications on Android Wear, this guide shows you how to
+build notifications using standard templates in
+the <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code> APIs, plus how to begin
+extending your notification's capabilities for the wearable user experience.</p>
+
+<p class="note"><strong>Note:</strong>
+Notifications using <code><a href="/reference/android/widget/RemoteViews.html">RemoteViews</a></code> are stripped of custom
+layouts and the system uses only the text and icons in the
+<code><a href="/reference/android/app/Notification.html">Notification</a></code> object to
+display the notification in a card. However, custom card layouts will be supported by
+the official Android Wear SDK that is coming later.</p>
+</div>
+
+
+
+
+<h2 id="Import">Import the Necessary Classes</h2>
+
+<p>To begin development, you must first complete the instructions in the <a
+href="/wear/preview/start">Get Started with the Developer Preview</a> document.
+As mentioned in that document, your app must include
+both the <a href="http://developer.android.com/tools/support-library/features.html#v4">v4 support
+library</a> and the Developer Preview support library. So to get started,
+you should include the following imports in your project code:</p>
+
+<pre>
+import android.preview.support.wearable.notifications.*;
+import android.preview.support.v4.app.NotificationManagerCompat;
+import android.support.v4.app.NotificationCompat;
+</pre>
+
+<p class="caution"><strong>Caution:</strong>
+The APIs in the current Android Wear Developer Preview are intended for <b>development and testing purposes only</b>, not for production apps. Google may change this Developer Preview significantly prior to the official release of the Android Wear SDK. You may not publicly distribute or ship any application using this Developer Preview, as this Developer Preview will no longer be supported after the official SDK is released (which will cause applications based only on the Developer Preview to break).</p>
+
+
+
+<h2 id="NotificationBuilder">Create Notifications with the Notification Builder</h2>
+
+<p>The <a href="http://developer.android.com/tools/support-library/features.html#v4">v4
+support library</a> allows you to create notifications using the latest notification features
+such as action buttons and large icons, while remaining compatible with Android 1.6 (API level
+4) and higher.</p>
+
+
+<p>For example, here's some code that creates and issues a notification using the
+<code><a href="/reference/android/support/v4/app/NotificationCompat.html">NotificationCompat</a></code> APIs combined with the new
+<a href="/reference/android/preview/support/v4/app/NotificationManagerCompat.html">
+<code>NotificationManagerCompat</code></a> API:</p>
+
+
+<pre>
+int notificationId = 001;
+// Build intent for notification content
+Intent viewIntent = new Intent(this, ViewEventActivity.class);
+viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
+PendingIntent viewPendingIntent =
+        PendingIntent.getActivity(this, 0, viewIntent, 0);
+
+NotificationCompat.Builder notificationBuilder =
+        new NotificationCompat.Builder(this)
+        .setSmallIcon(R.drawable.ic_event)
+        .setContentTitle(eventTitle)
+        .setContentText(eventLocation)
+        .setContentIntent(viewPendingIntent);
+
+// Get an instance of the NotificationManager service
+NotificationManagerCompat notificationManager =
+        NotificationManagerCompat.from(this);
+
+// Build the notification and issues it with notification manager.
+notificationManager.notify(notificationId, notificationBuilder.build());
+</pre>
+
+<p>When this notification appears on a handheld device, the user can invoke the
+<code><a href="/reference/android/app/PendingIntent.html">PendingIntent</a></code>
+specified by the <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html#setContentIntent(android.app.PendingIntent)">setContentIntent()</a></code> method by touching the notification. When this
+notification appears on an Android wearable, the user can swipe the notification to the left to
+reveal the <strong>Open</strong> action, which invokes the intent on the handheld device.</p>
+
+
+
+
+
+
+<img src="/wear/images/circle_email_action.png" height="200" style="float:right;clear:right;margin:0 0 20px 60px" />
+
+<h2 id="ActionButtons">Add Action Buttons</h2>
+
+<p>In addition to the primary content action defined by
+<code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html#setContentIntent(android.app.PendingIntent)">setContentIntent()</a></code>, you can add other actions by passing a <code><a href="/reference/android/app/PendingIntent.html">PendingIntent</a></code> to
+the <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html#addAction(int, java.lang.CharSequence, android.app.PendingIntent)">addAction()</a></code> method.</p>
+
+<p>For example, the following code shows the same type of notification from above, but adds an
+action to view the event location on a map.</p>
+
+<pre style="clear:right">
+// Build an intent for an action to view a map
+Intent mapIntent = new Intent(Intent.ACTION_VIEW);
+Uri geoUri = Uri.parse("geo:0,0?q=" + Uri.encode(location));
+mapIntent.setData(geoUri);
+PendingIntent mapPendingIntent =
+        PendingIntent.getActivity(this, 0, mapIntent, 0);
+
+NotificationCompat.Builder notificationBuilder =
+        new NotificationCompat.Builder(this)
+        .setSmallIcon(R.drawable.ic_event)
+        .setContentTitle(eventTitle)
+        .setContentText(eventLocation)
+        .setContentIntent(viewPendingIntent)
+        <b>.addAction(R.drawable.ic_map,
+                getString(R.string.map), mapPendingIntent);</b>
+</pre>
+
+<p>On a handheld device, the action appears as an
+additional button attached to the notification. On an Android wearable, the action appears as
+a large button when the user swipes the notification to the left. When the user taps the action,
+the associated <code><a href="/reference/android/content/Intent.html">Intent</a></code> is invoked on the handheld device.</p>
+
+<p class="note"><strong>Tip:</strong> If your notifications includes a "Reply" action
+  (such as for a messaging app), you can enhance the behavior by enabling
+  voice input replies directly from the Android wearable. For more information, read
+  <a href="/wear/notifications/remote-input.html">Receiving Voice Input from a Notification</a>.
+</p>
+
+<p>For details about designing action buttons (including the icon specifications), see the
+<a href="/wear/design/index.html#NotifictionActions">Design Principles of Android
+Wear</a>.</p>
+
+
+<h2 id="BigView">Add a Big View</h2>
+
+<img src="/wear/images/06_images.png" height="200" style="float:right;margin:0 0 20px 40px" />
+
+<p>You can insert extended text content
+to your notification by adding one of the "big view" styles to your notification. On a
+handheld device, users can see the big view content by expanding the notification,
+while on Android Wear, the big view content is visible by default.</p>
+
+<p>To add the extended content to your notification, call <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html#setStyle(android.support.v4.app.NotificationCompat.Style)">setStyle()</a></code> on the <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code> object, passing it an instance of either
+<code><a href="/reference/android/support/v4/app/NotificationCompat.BigTextStyle.html">BigTextStyle</a></code> or
+<code><a href="/reference/android/support/v4/app/NotificationCompat.InboxStyle.html">InboxStyle</a></code>.</p>
+
+<p>For example, the following code adds an instance of
+<code><a href="/reference/android/support/v4/app/NotificationCompat.BigTextStyle.html">NotificationCompat.BigTextStyle</a></code> to the event notification,
+in order to include the complete event description (which includes more text than can fit
+into the space provided for <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html#setContentText(java.lang.CharSequence)">setContentText()</a></code>).</p>
+
+
+<pre style="clear:right">
+// Specify the 'big view' content to display the long
+// event description that may not fit the normal content text.
+BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
+bigStyle.bigText(eventDescription);
+
+NotificationCompat.Builder notificationBuilder =
+        new NotificationCompat.Builder(this)
+        .setSmallIcon(R.drawable.ic_event)
+        .setLargeIcon(BitmapFractory.decodeResource(
+                getResources(), R.drawable.notif_background))
+        .setContentTitle(eventTitle)
+        .setContentText(eventLocation)
+        .setContentIntent(viewPendingIntent)
+        .addAction(R.drawable.ic_map,
+                getString(R.string.map), mapPendingIntent)
+        <b>.setStyle(bigStyle);</b>
+</pre>
+
+<p>Notice that you can add a large background image to any notification using the
+<code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html#setLargeIcon(android.graphics.Bitmap)">setLargeIcon()</a></code>
+method. For more information about designing notifications with large images, see the
+<a href="/wear/design/index.html#Images">Design Principles of Android
+Wear</a>.</p>
+
+
+
+<h2 id="NewFeatures">Add New Features for Wearables</h2>
+
+<p>The Android Wear preview support library provides new APIs that
+  allow you to enhance the user experience for notifications on a wearable device. For example,
+  you can add additional pages of content that users can view by swiping to the left, or add the ability
+for users to deliver your app a text response using voice input.</p>
+
+<p>To use these new APIs, pass your instance of
+<code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code> to the
+  <a href="/reference/android/preview/support/notifications/WearableNotifications.html"> <code>WearableNotifications.Builder()</code></a> constructor. You can then add new
+features to your notification using the
+  <a href="/wear/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html"
+  ><code>WearableNotifications.Builder</code></a> methods. For example:</p>
+
+<pre>
+// Create a NotificationCompat.Builder for standard notification features
+NotificationCompat.Builder notificationBuilder =
+        new NotificationCompat.Builder(mContext)
+        .setContentTitle("New mail from " + sender.toString())
+        .setContentText(subject)
+        .setSmallIcon(R.drawable.new_mail);
+
+// Create a WearablesNotification.Builder to add special functionality for wearables
+Notification notification =
+        new WearableNotifications.Builder(notificationBuilder)
+        .setHintHideIcon(true)
+        .build();
+</pre>
+
+<p>The <a href="/reference/android/preview/support/notifications/WearableNotifications.Builder.html#setBigActionIcon(int)">
+  <code>setHintHideIcon()</code></a> method removes your app icon from the notification card.
+  This method is just one example of new notification features available from the
+  <a href="/wear/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html"
+  ><code>WearableNotifications.Builder</code></a> class.</p>
+
+<p>When you want to deliver your notifications, be certain to always use the
+  <a href="/reference/android/preview/support/v4/app/NotificationManagerCompat.html">
+    <code>NotificationManagerCompat</code></a> API:</p>
+
+<pre>
+// Get an instance of the NotificationManager service
+NotificationManagerCompat notificationManager =
+        NotificationManagerCompat.from(this);
+
+// Build the notification and issues it with notification manager.
+notificationManager.notify(notificationId, notification);
+</pre>
+
+<p>If you instead use the framework's <code><a href="/reference/android/app/NotificationManager.html">NotificationManager</a></code>, some
+features from <a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html"><code>WearableNotifications.Builder</code></a>
+will not work.</p>
+
+<p>To continue enhancing your notifications for wearables using
+  <a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder"
+  ><code>WearableNotifications.Builder</code></a> and other APIs in the
+  preview support library, see the following developer guides:</p>
+
+  <dl>
+    <dt><a href="/wear/notifications/remote-input.html">Receiving Voice Input
+from a Notification</a></dt>
+      <dd>Add an action that receives voice input from the user and delivers the
+transcribed message to your app.</dd>
+    <dt><a href="/wear/notifications/pages.html">Adding Pages to a Notification</a></dt>
+      <dd>Add additional pages of information that are visible when the user
+swipes to the left.</dd>
+    <dt><a href="/wear/notifications/stacks.html">Stacking Notifications</a></dt>
+      <dd>Place all similar notifications from your app in a stack, allowing each to be
+viewed individually without adding multiple cards to the card stream.</dd>
+  </dl>
+
+
+<div class="next-docs">
+
+<div class="col-12">
+  <h2 class="norule">You might also want to read:</h2>
+  <dl>
+    <dt><a href="/training/notify-user/index.html">Notifying the User</a></dt>
+    <dd>Learn more about how to create notifications.</dd>
+    <dt><a href="/guide/components/intents-filters.html">Intents and Intent Filters</a></dt>
+    <dd>Learn everything you need to know about the <code><a href="/reference/android/content/Intent.html">Intent</a></code>
+APIs, used by notificaton actions.</dd>
+  </dl>
+</div>
+</div>
+
+
+</body>
+</html>
+
+    </div>
+
+      <div class="content-footer layout-content-row"
+                    itemscope itemtype="http://schema.org/SiteNavigationElement">
+        <div class="layout-content-col col-9" style="padding-top:4px">
+          
+            <div class="g-plusone" data-size="medium"></div>
+          
+        </div>
+        
+        <div class="paging-links layout-content-col col-4">
+          
+        </div>
+        
+      </div>
+
+      
+      
+
+  </div> <!-- end jd-content -->
+
+<div id="footer" class="wrap" >
+        
+
+  <div id="copyright">
+    
+  Except as noted, this content is 
+  licensed under <a href="http://creativecommons.org/licenses/by/2.5/">
+  Creative Commons Attribution 2.5</a>. For details and 
+  restrictions, see the <a href="/license.html">Content 
+  License</a>.
+  </div>
+
+
+  <div id="footerlinks">
+    
+  <p>
+    <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
+    <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
+    <a href="/support.html">Support</a>
+  </p>
+  </div>
+
+</div> <!-- end footer -->
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+
+
+
+
+
+<!-- Start of Tag -->
+<script type="text/javascript">
+var axel = Math.random() + "";
+var a = axel * 10000000000000;
+document.write('<iframe src="https://2507573.fls.doubleclick.net/activityi;src=2507573;type=other026;cat=googl348;ord=' + a + '?" width="1" height="1" frameborder="0" style="display:none"></iframe>');
+</script>
+<noscript>
+<iframe src="https://2507573.fls.doubleclick.net/activityi;src=2507573;type=other026;cat=googl348;ord=1?" width="1" height="1" frameborder="0" style="display:none"></iframe>
+</noscript>
+<!-- End of Tag -->
+</body>
+</html>
+
+
+
