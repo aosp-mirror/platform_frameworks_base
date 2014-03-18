@@ -32,6 +32,7 @@ public class Constants {
             // This disables the bitmap and icon caches to
             public static final boolean DisableBackgroundCache = false;
 
+            public static final boolean RecentsComponent = false;
             public static final boolean TaskDataLoader = false;
             public static final boolean SystemUIHandshake = false;
             public static final boolean TimeSystemCalls = false;
