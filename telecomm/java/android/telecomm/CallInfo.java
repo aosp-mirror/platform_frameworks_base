@@ -16,7 +16,9 @@
 
 package android.telecomm;
 
+import android.net.Uri;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.Parcelable;
 
 import java.util.Date;
@@ -43,7 +45,7 @@ public final class CallInfo implements Parcelable {
      * Endpoint to which the call is connected.
      * This could be the dialed value for outgoing calls or the caller id of incoming calls.
      */
-    private final String mHandle;
+    private final Uri mHandle;
 
     // There are 4 timestamps that are important to a call:
     // 1) Created timestamp - The time at which the user explicitly chose to make the call.
@@ -64,7 +66,7 @@ public final class CallInfo implements Parcelable {
      * @param state The state of the call.
      * @param handle The handle to the other party in this call.
      */
-    public CallInfo(String id, CallState state, String handle) {
+    public CallInfo(String id, CallState state, Uri handle) {
         mId = id;
         mState = state;
         mHandle = handle;
@@ -78,7 +80,7 @@ public final class CallInfo implements Parcelable {
         return mState;
     }
 
-    public String getHandle() {
+    public Uri getHandle() {
         return mHandle;
     }
 
@@ -96,7 +98,7 @@ public final class CallInfo implements Parcelable {
         public CallInfo createFromParcel(Parcel source) {
             String id = source.readString();
             CallState state = CallState.valueOf(source.readString());
-            String handle = source.readString();
+            Uri handle = Uri.CREATOR.createFromParcel(source);
 
             return new CallInfo(id, state, handle);
         }
@@ -122,6 +124,6 @@ public final class CallInfo implements Parcelable {
     public void writeToParcel(Parcel destination, int flags) {
         destination.writeString(mId);
         destination.writeString(mState.name());
-        destination.writeString(mHandle);
+        mHandle.writeToParcel(destination, 0);
     }
 }

@@ -24456,9 +24456,9 @@ package android.speech.tts {
 package android.telecomm {
 
   public final class CallInfo implements android.os.Parcelable {
-    ctor public CallInfo(java.lang.String, android.telecomm.CallState, java.lang.String);
+    ctor public CallInfo(java.lang.String, android.telecomm.CallState, android.net.Uri);
     method public int describeContents();
-    method public java.lang.String getHandle();
+    method public android.net.Uri getHandle();
     method public java.lang.String getId();
     method public android.telecomm.CallState getState();
     method public void writeToParcel(android.os.Parcel, int);
