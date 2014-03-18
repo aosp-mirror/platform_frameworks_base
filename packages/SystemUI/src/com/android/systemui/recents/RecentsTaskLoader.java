@@ -511,7 +511,8 @@ public class RecentsTaskLoader {
 
         switch (level) {
             case ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
-                // Do nothing
+                // Stop the loader immediately when the UI is no longer visible
+                stopLoader();
                 break;
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
             case ComponentCallbacks2.TRIM_MEMORY_BACKGROUND:

@@ -107,8 +107,10 @@ public class Recents extends SystemUI implements RecentsComponent {
     final static int MSG_UPDATE_TASK_THUMBNAIL = 1;
     final static int MSG_PRELOAD_TASKS = 2;
     final static int MSG_CANCEL_PRELOAD_TASKS = 3;
+    final static int MSG_CLOSE_RECENTS = 4;
+    final static int MSG_TOGGLE_RECENTS = 5;
 
-    final static String sToggleRecentsAction = "com.android.systemui.recents.TOGGLE_RECENTS";
+    final static String sToggleRecentsAction = "com.android.systemui.recents.SHOW_RECENTS";
     final static String sRecentsPackage = "com.android.systemui";
     final static String sRecentsActivity = "com.android.systemui.recents.RecentsActivity";
     final static String sRecentsService = "com.android.systemui.recents.RecentsService";
@@ -419,6 +421,33 @@ public class Recents extends SystemUI implements RecentsComponent {
 
     /** Starts the recents activity */
     void startAlternateRecentsActivity() {
+        // If Recents is the front most activity, then we should just communicate with it directly
+        // to launch the first task or dismiss itself
+        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
+        if (!tasks.isEmpty()) {
+            ComponentName topActivity = tasks.get(0).topActivity;
+            Log.d(TAG, "[RecentsComponent|topActivity] " + topActivity);
+
+            // Check if the front most activity is recents
+            if (topActivity.getPackageName().equals(sRecentsPackage) &&
+                    topActivity.getClassName().equals(sRecentsActivity)) {
+                // Notify Recents to toggle itself
+                try {
+                    Bundle data = new Bundle();
+                    Message msg = Message.obtain(null, MSG_TOGGLE_RECENTS, 0, 0);
+                    msg.setData(data);
+                    mService.send(msg);
+                } catch (RemoteException re) {
+                    re.printStackTrace();
+                }
+                return;
+            }
+        }
+
+        // XXX: If window transitions are currently happening, then we should eat up the event here
+
+        // Otherwise, Recents is not the front-most activity and we should animate into it
         Rect taskRect = mFirstTaskRect;
         if (taskRect != null && taskRect.width() > 0 && taskRect.height() > 0 && hasFirstTask()) {
             // Loading from thumbnail
@@ -511,6 +540,17 @@ public class Recents extends SystemUI implements RecentsComponent {
     public void closeRecents() {
         if (mUseAlternateRecents) {
             Log.d(TAG, "[RecentsComponent|closeRecents]");
+            if (mServiceIsBound) {
+                // Try and update the recents configuration
+                try {
+                    Bundle data = new Bundle();
+                    Message msg = Message.obtain(null, MSG_CLOSE_RECENTS, 0, 0);
+                    msg.setData(data);
+                    mService.send(msg);
+                } catch (RemoteException re) {
+                    re.printStackTrace();
+                }
+            }
         } else {
             Intent intent = new Intent(RecentsActivity.CLOSE_RECENTS_INTENT);
             intent.setPackage("com.android.systemui");
