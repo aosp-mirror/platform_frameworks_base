@@ -469,6 +469,7 @@ void CanvasContext::handleFunctorStatus(int status, const Rect& redrawClip) {
 void CanvasContext::removeFunctorsTask() {
     if (!mInvokeFunctorsPending) return;
 
+    mInvokeFunctorsPending = false;
     mRenderThread.remove(&mInvokeFunctorsTask);
 }
 
