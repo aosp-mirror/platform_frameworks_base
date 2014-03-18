@@ -95,6 +95,7 @@ final class ProcessRecord {
     boolean hasShownUi;         // Has UI been shown in this process since it was started?
     boolean pendingUiClean;     // Want to clean up resources from showing UI?
     boolean hasAboveClient;     // Bound using BIND_ABOVE_CLIENT, so want to be lower
+    boolean treatLikeActivity;  // Bound using BIND_TREAT_LIKE_ACTIVITY
     boolean bad;                // True if disabled in the bad process list
     boolean killedByAm;         // True when proc has been killed by activity manager, not for RAM
     boolean procStateChanged;   // Keep track of whether we changed 'setAdj'.
@@ -251,10 +252,11 @@ final class ProcessRecord {
                 pw.print(" lastStateTime=");
                 TimeUtils.formatDuration(lastStateTime, now, pw);
                 pw.println();
-        if (hasShownUi || pendingUiClean || hasAboveClient) {
+        if (hasShownUi || pendingUiClean || hasAboveClient || treatLikeActivity) {
             pw.print(prefix); pw.print("hasShownUi="); pw.print(hasShownUi);
                     pw.print(" pendingUiClean="); pw.print(pendingUiClean);
-                    pw.print(" hasAboveClient="); pw.println(hasAboveClient);
+                    pw.print(" hasAboveClient="); pw.print(hasAboveClient);
+                    pw.print(" treatLikeActivity="); pw.println(treatLikeActivity);
         }
         if (setIsForeground || foregroundServices || forcingToForeground != null) {
             pw.print(prefix); pw.print("setIsForeground="); pw.print(setIsForeground);
