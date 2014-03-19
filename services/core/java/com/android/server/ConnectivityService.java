@@ -2434,7 +2434,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (timeout > 0 && iface != null) {
             try {
                 mNetd.addIdleTimer(iface, timeout, type);
-            } catch (RemoteException e) {
+            } catch (Exception e) {
+                // You shall not crash!
+                loge("Exception in setupDataActivityTracking " + e);
             }
         }
     }
@@ -2451,7 +2453,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             try {
                 // the call fails silently if no idletimer setup for this interface
                 mNetd.removeIdleTimer(iface);
-            } catch (RemoteException e) {
+            } catch (Exception e) {
+                loge("Exception in removeDataActivityTracking " + e);
             }
         }
     }
