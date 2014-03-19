@@ -27,9 +27,9 @@
 #include <utils/Timers.h>
 
 #include <Caches.h>
-#include <DisplayList.h>
 #include <Extensions.h>
 #include <LayerRenderer.h>
+#include <RenderNode.h>
 
 #ifdef USE_OPENGL_RENDERER
     EGLAPI void EGLAPIENTRY eglBeginFrame(EGLDisplay dpy, EGLSurface surface);

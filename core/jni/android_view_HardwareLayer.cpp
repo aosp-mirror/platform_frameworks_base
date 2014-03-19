@@ -32,10 +32,10 @@
 #include <SkXfermode.h>
 
 #include <DeferredLayerUpdater.h>
-#include <DisplayList.h>
 #include <LayerRenderer.h>
 #include <SkiaShader.h>
 #include <Rect.h>
+#include <RenderNode.h>
 
 namespace android {
 
