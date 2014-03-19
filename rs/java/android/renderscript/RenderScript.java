@@ -239,8 +239,8 @@ public class RenderScript {
         rsnContextSendMessage(mContext, id, data);
     }
 
-    native void rsnContextBindRootScript(long con, int script);
-    synchronized void nContextBindRootScript(int script) {
+    native void rsnContextBindRootScript(long con, long script);
+    synchronized void nContextBindRootScript(long script) {
         validate();
         rsnContextBindRootScript(mContext, script);
     }
@@ -249,23 +249,23 @@ public class RenderScript {
         validate();
         rsnContextBindSampler(mContext, sampler, slot);
     }
-    native void rsnContextBindProgramStore(long con, int pfs);
-    synchronized void nContextBindProgramStore(int pfs) {
+    native void rsnContextBindProgramStore(long con, long pfs);
+    synchronized void nContextBindProgramStore(long pfs) {
         validate();
         rsnContextBindProgramStore(mContext, pfs);
     }
-    native void rsnContextBindProgramFragment(long con, int pf);
-    synchronized void nContextBindProgramFragment(int pf) {
+    native void rsnContextBindProgramFragment(long con, long pf);
+    synchronized void nContextBindProgramFragment(long pf) {
         validate();
         rsnContextBindProgramFragment(mContext, pf);
     }
-    native void rsnContextBindProgramVertex(long con, int pv);
-    synchronized void nContextBindProgramVertex(int pv) {
+    native void rsnContextBindProgramVertex(long con, long pv);
+    synchronized void nContextBindProgramVertex(long pv) {
         validate();
         rsnContextBindProgramVertex(mContext, pv);
     }
-    native void rsnContextBindProgramRaster(long con, int pr);
-    synchronized void nContextBindProgramRaster(int pr) {
+    native void rsnContextBindProgramRaster(long con, long pr);
+    synchronized void nContextBindProgramRaster(long pr) {
         validate();
         rsnContextBindProgramRaster(mContext, pr);
     }
