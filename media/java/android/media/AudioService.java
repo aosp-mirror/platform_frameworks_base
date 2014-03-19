@@ -258,7 +258,7 @@ public class AudioService extends IAudioService.Stub {
     private final boolean mUseFixedVolume;
 
     // stream names used by dumpStreamStates()
-    private final String[] STREAM_NAMES = new String[] {
+    private static final String[] STREAM_NAMES = new String[] {
             "STREAM_VOICE_CALL",
             "STREAM_SYSTEM",
             "STREAM_RING",
@@ -614,6 +614,12 @@ public class AudioService extends IAudioService.Stub {
         pw.println(Integer.toHexString(mMuteAffectedStreams));
     }
 
+    /** @hide */
+    public static String streamToString(int stream) {
+        if (stream >= 0 && stream < STREAM_NAMES.length) return STREAM_NAMES[stream];
+        if (stream == AudioManager.USE_DEFAULT_STREAM_TYPE) return "USE_DEFAULT_STREAM_TYPE";
+        return "UNKNOWN_STREAM_" + stream;
+    }
 
     private void updateStreamVolumeAlias(boolean updateVolumes) {
         int dtmfStreamAlias;

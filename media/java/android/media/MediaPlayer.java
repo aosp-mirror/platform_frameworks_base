@@ -16,6 +16,8 @@
 
 package android.media;
 
+import android.app.ActivityThread;
+import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -32,6 +34,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.PowerManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -41,6 +45,8 @@ import android.media.MediaFormat;
 import android.media.MediaTimeProvider;
 import android.media.SubtitleController;
 import android.media.SubtitleData;
+
+import com.android.internal.app.IAppOpsService;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -576,6 +582,8 @@ public class MediaPlayer implements SubtitleController.Listener
     private PowerManager.WakeLock mWakeLock = null;
     private boolean mScreenOnWhilePlaying;
     private boolean mStayAwake;
+    private final IAppOpsService mAppOps;
+    private int mStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
 
     /**
      * Default constructor. Consider using one of the create() methods for
@@ -599,6 +607,8 @@ public class MediaPlayer implements SubtitleController.Listener
         mOutOfBandSubtitleTracks = new Vector<SubtitleTrack>();
         mOpenSubtitleSources = new Vector<InputStream>();
         mInbandSubtitleTracks = new SubtitleTrack[0];
+        IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
+        mAppOps = IAppOpsService.Stub.asInterface(b);
 
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
@@ -1055,12 +1065,34 @@ public class MediaPlayer implements SubtitleController.Listener
      *
      * @throws IllegalStateException if it is called in an invalid state
      */
-    public  void start() throws IllegalStateException {
+    public void start() throws IllegalStateException {
+        if (isRestricted()) {
+            _setVolume(0, 0);
+        }
         stayAwake(true);
         _start();
     }
 
     private native void _start() throws IllegalStateException;
+
+    private boolean isRestricted() {
+        try {
+            final int mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO,
+                    getAudioStreamType(), Process.myUid(), ActivityThread.currentPackageName());
+            return mode != AppOpsManager.MODE_ALLOWED;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    private int getAudioStreamType() {
+        if (mStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
+            mStreamType = _getAudioStreamType();
+        }
+        return mStreamType;
+    }
+
+    private native int _getAudioStreamType() throws IllegalStateException;
 
     /**
      * Stops playback after playback has been stopped or paused.
@@ -1402,7 +1434,12 @@ public class MediaPlayer implements SubtitleController.Listener
      * @param streamtype the audio stream type
      * @see android.media.AudioManager
      */
-    public native void setAudioStreamType(int streamtype);
+    public void setAudioStreamType(int streamtype) {
+        _setAudioStreamType(streamtype);
+        mStreamType = streamtype;
+    }
+
+    private native void _setAudioStreamType(int streamtype);
 
     /**
      * Sets the player to be looping or non-looping.
@@ -1435,7 +1472,14 @@ public class MediaPlayer implements SubtitleController.Listener
      * The single parameter form below is preferred if the channel volumes don't need
      * to be set independently.
      */
-    public native void setVolume(float leftVolume, float rightVolume);
+    public void setVolume(float leftVolume, float rightVolume) {
+        if (isRestricted()) {
+            return;
+        }
+        _setVolume(leftVolume, rightVolume);
+    }
+
+    private native void _setVolume(float leftVolume, float rightVolume);
 
     /**
      * Similar, excepts sets volume of all channels to same value.
@@ -1500,7 +1544,14 @@ public class MediaPlayer implements SubtitleController.Listener
      * 0 < x <= R -> level = 10^(72*(x-R)/20/R)
      * @param level send level scalar
      */
-    public native void setAuxEffectSendLevel(float level);
+    public void setAuxEffectSendLevel(float level) {
+        if (isRestricted()) {
+            return;
+        }
+        _setAuxEffectSendLevel(level);
+    }
+
+    private native void _setAuxEffectSendLevel(float level);
 
     /*
      * @param request Parcel destinated to the media player. The
