@@ -568,8 +568,8 @@ int write_tarfile(const String8& packageName, const String8& domain,
 
     // [ 108 :   8 ] uid -- ignored in Android format; uids are remapped at restore time
     // [ 116 :   8 ] gid -- ignored in Android format
-    snprintf(buf + 108, 8, "0%lo", s.st_uid);
-    snprintf(buf + 116, 8, "0%lo", s.st_gid);
+    snprintf(buf + 108, 8, "0%lo", (unsigned long)s.st_uid);
+    snprintf(buf + 116, 8, "0%lo", (unsigned long)s.st_gid);
 
     // [ 124 :  12 ] file size in bytes
     if (s.st_size > 077777777777LL) {
@@ -778,7 +778,7 @@ RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
         ALOGW("Could not open file %s -- %s", filename.string(), strerror(errno));
         return errno;
     }
-    
+
     while ((amt = in->ReadEntityData(buf, RESTORE_BUF_SIZE)) > 0) {
         err = write(fd, buf, amt);
         if (err != amt) {
