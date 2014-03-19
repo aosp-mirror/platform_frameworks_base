@@ -286,7 +286,7 @@ public class ActionBarOverlayLayout extends ViewGroup {
                     topInset += mActionBarHeight;
                 }
             }
-        } else if (mActionBarTop.getVisibility() == VISIBLE) {
+        } else if (mActionBarTop.getVisibility() != GONE) {
             // This is the space needed on top of the window for all of the action bar
             // and tabs.
             topInset = mActionBarTop.getMeasuredHeight();
