@@ -289,7 +289,7 @@ BackupDataReader::ReadNextHeader(bool* done, int* type)
                     (int)(m_pos - sizeof(m_header)), (int)m_header.type);
             m_status = EINVAL;
     }
-    
+
     return m_status;
 }
 
