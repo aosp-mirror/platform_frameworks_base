@@ -17,6 +17,7 @@
 package android.view.animation;
 
 import android.graphics.Matrix;
+import android.graphics.Rect;
 
 import java.io.PrintWriter;
 
@@ -47,6 +48,9 @@ public class Transformation {
     protected float mAlpha;
     protected int mTransformationType;
 
+    private boolean mHasClipRect;
+    private Rect mClipRect = new Rect();
+
     /**
      * Creates a new transformation with alpha = 1 and the identity matrix.
      */
@@ -65,6 +69,8 @@ public class Transformation {
         } else {
             mMatrix.reset();
         }
+        mClipRect.setEmpty();
+        mHasClipRect = false;
         mAlpha = 1.0f;
         mTransformationType = TYPE_BOTH;
     }
@@ -98,9 +104,15 @@ public class Transformation {
     public void set(Transformation t) {
         mAlpha = t.getAlpha();
         mMatrix.set(t.getMatrix());
+        if (t.mHasClipRect) {
+            setClipRect(t.getClipRect());
+        } else {
+            mHasClipRect = false;
+            mClipRect.setEmpty();
+        }
         mTransformationType = t.getTransformationType();
     }
-    
+
     /**
      * Apply this Transformation to an existing Transformation, e.g. apply
      * a scale effect to something that has already been rotated.
@@ -109,6 +121,9 @@ public class Transformation {
     public void compose(Transformation t) {
         mAlpha *= t.getAlpha();
         mMatrix.preConcat(t.getMatrix());
+        if (t.mHasClipRect) {
+            setClipRect(t.getClipRect());
+        }
     }
     
     /**
@@ -119,6 +134,9 @@ public class Transformation {
     public void postCompose(Transformation t) {
         mAlpha *= t.getAlpha();
         mMatrix.postConcat(t.getMatrix());
+        if (t.mHasClipRect) {
+            setClipRect(t.getClipRect());
+        }
     }
 
     /**
@@ -135,6 +153,39 @@ public class Transformation {
      */
     public void setAlpha(float alpha) {
         mAlpha = alpha;
+    }
+
+    /**
+     * Sets the current Transform's clip rect
+     * @hide
+     */
+    public void setClipRect(Rect r) {
+        setClipRect(r.left, r.top, r.right, r.bottom);
+    }
+
+    /**
+     * Sets the current Transform's clip rect
+     * @hide
+     */
+    public void setClipRect(int l, int t, int r, int b) {
+        mClipRect.set(l, t, r, b);
+        mHasClipRect = true;
+    }
+
+    /**
+     * Returns the current Transform's clip rect
+     * @hide
+     */
+    public Rect getClipRect() {
+        return mClipRect;
+    }
+
+    /**
+     * Returns whether the current Transform's clip rect is set
+     * @hide
+     */
+    public boolean hasClipRect() {
+        return mHasClipRect;
     }
 
     /**

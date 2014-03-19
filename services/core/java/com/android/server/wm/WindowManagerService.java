@@ -3235,7 +3235,22 @@ public class WindowManagerService extends IWindowManager.Stub
             final int height = displayInfo.appHeight;
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG, "applyAnimation: atoken="
                     + atoken);
-            Animation a = mAppTransition.loadAnimation(lp, transit, enter, width, height);
+
+            // Determine the visible rect to calculate the thumbnail clip
+            WindowState win = atoken.findMainWindow();
+            Rect containingFrame = new Rect(0, 0, width, height);
+            Rect contentInsets = new Rect();
+            if (win != null) {
+                if (win.mContainingFrame != null) {
+                    containingFrame.set(win.mContainingFrame);
+                }
+                if (win.mContentInsets != null) {
+                    contentInsets.set(win.mContentInsets);
+                }
+            }
+
+            Animation a = mAppTransition.loadAnimation(lp, transit, enter, width, height,
+                    containingFrame, contentInsets);
             if (a != null) {
                 if (DEBUG_ANIM) {
                     RuntimeException e = null;
@@ -8716,11 +8731,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.deferClearAllDrawn = false;
             }
 
+            boolean useAlternateThumbnailAnimation =
+                            SystemProperties.getBoolean("persist.anim.use_alt_thumbnail", false);
             AppWindowAnimator appAnimator =
                     topOpeningApp == null ? null : topOpeningApp.mAppAnimator;
             Bitmap nextAppTransitionThumbnail = mAppTransition.getNextAppTransitionThumbnail();
-            if (nextAppTransitionThumbnail != null && appAnimator != null
-                    && appAnimator.animation != null) {
+            if (!useAlternateThumbnailAnimation && nextAppTransitionThumbnail != null
+                    && appAnimator != null && appAnimator.animation != null) {
                 // This thumbnail animation is very special, we need to have
                 // an extra surface with the thumbnail included with the animation.
                 Rect dirty = new Rect(0, 0, nextAppTransitionThumbnail.getWidth(),
@@ -8744,8 +8761,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     drawSurface.release();
                     appAnimator.thumbnailLayer = topOpeningLayer;
                     DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
-                    Animation anim = mAppTransition.createThumbnailAnimationLocked(
-                            transit, true, true, displayInfo.appWidth, displayInfo.appHeight);
+                    Animation anim = mAppTransition.createThumbnailScaleAnimationLocked(
+                            displayInfo.appWidth, displayInfo.appHeight, transit);
                     appAnimator.thumbnailAnimation = anim;
                     anim.restrictDuration(MAX_ANIMATION_DURATION);
                     anim.scaleCurrentDuration(mTransitionAnimationScale);

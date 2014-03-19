@@ -113,6 +113,11 @@ class WindowStateAnimator {
     float mAlpha = 0;
     float mLastAlpha = 0;
 
+    boolean mHasClipRect;
+    Rect mClipRect = new Rect();
+    Rect mTmpClipRect = new Rect();
+    Rect mLastClipRect = new Rect();
+
     // Used to save animation distances between the time they are calculated and when they are
     // used.
     int mAnimDw;
@@ -951,6 +956,7 @@ class WindowStateAnimator {
             if (screenAnimation) {
                 tmpMatrix.postConcat(screenRotationAnimation.getEnterTransformation().getMatrix());
             }
+
             //TODO (multidisplay): Magnification is supported only for the default display.
             if (mService.mDisplayMagnifier != null && displayId == Display.DEFAULT_DISPLAY) {
                 MagnificationSpec spec = mService.mDisplayMagnifier
@@ -985,6 +991,7 @@ class WindowStateAnimator {
             // transforming since it is more important to have that
             // animation be smooth.
             mShownAlpha = mAlpha;
+            mHasClipRect = false;
             if (!mService.mLimitedAlphaCompositing
                     || (!PixelFormat.formatHasAlpha(mWin.mAttrs.format)
                     || (mWin.isIdentityMatrix(mDsDx, mDtDx, mDsDy, mDtDy)
@@ -998,6 +1005,10 @@ class WindowStateAnimator {
                 }
                 if (appTransformation != null) {
                     mShownAlpha *= appTransformation.getAlpha();
+                    if (appTransformation.hasClipRect()) {
+                        mClipRect.set(appTransformation.getClipRect());
+                        mHasClipRect = true;
+                    }
                 }
                 if (mAnimator.mUniverseBackground != null) {
                     mShownAlpha *= mAnimator.mUniverseBackground.mUniverseTransform.getAlpha();
@@ -1149,15 +1160,29 @@ class WindowStateAnimator {
             applyDecorRect(w.mDecorFrame);
         }
 
-        if (!w.mSystemDecorRect.equals(w.mLastSystemDecorRect)) {
-            w.mLastSystemDecorRect.set(w.mSystemDecorRect);
+        // By default, the clip rect is the system decor rect
+        Rect clipRect = w.mSystemDecorRect;
+        if (mHasClipRect) {
+
+            // If we have an animated clip rect, intersect it with the system decor rect
+            int offsetTop = w.mSystemDecorRect.top;
+            mTmpClipRect.set(w.mSystemDecorRect);
+            mTmpClipRect.offset(0, -offsetTop);
+            mTmpClipRect.intersect(mClipRect);
+            mTmpClipRect.offset(0, offsetTop);
+            clipRect = mTmpClipRect;
+
+        }
+
+        if (!clipRect.equals(mLastClipRect)) {
+            mLastClipRect.set(clipRect);
             try {
                 if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                        "CROP " + w.mSystemDecorRect.toShortString(), null);
-                mSurfaceControl.setWindowCrop(w.mSystemDecorRect);
+                        "CROP " + clipRect.toShortString(), null);
+                mSurfaceControl.setWindowCrop(clipRect);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Error setting crop surface of " + w
-                        + " crop=" + w.mSystemDecorRect.toShortString(), e);
+                        + " crop=" + clipRect.toShortString(), e);
                 if (!recoveringMemory) {
                     mService.reclaimSomeSurfaceMemoryLocked(this, "crop", true);
                 }
@@ -1302,8 +1327,8 @@ class WindowStateAnimator {
                     mSurfaceLayer = mAnimLayer;
                     mSurfaceControl.setLayer(mAnimLayer);
                     mSurfaceControl.setMatrix(
-                        mDsDx*w.mHScale, mDtDx*w.mVScale,
-                        mDsDy*w.mHScale, mDtDy*w.mVScale);
+                            mDsDx * w.mHScale, mDtDx * w.mVScale,
+                            mDsDy * w.mHScale, mDtDy * w.mVScale);
 
                     if (mLastHidden && mDrawState == HAS_DRAWN) {
                         if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
