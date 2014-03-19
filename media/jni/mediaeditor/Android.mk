@@ -48,7 +48,6 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \
-    libaudioflinger \
     libaudioutils \
     libbinder \
     libcutils \
