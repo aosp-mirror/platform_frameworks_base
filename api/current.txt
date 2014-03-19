@@ -19546,8 +19546,10 @@ package android.os {
   public abstract class Vibrator {
     method public abstract void cancel();
     method public abstract boolean hasVibrator();
-    method public abstract void vibrate(long);
-    method public abstract void vibrate(long[], int);
+    method public void vibrate(long);
+    method public void vibrate(long, int);
+    method public void vibrate(long[], int);
+    method public void vibrate(long[], int, int);
   }
 
   public class WorkSource implements android.os.Parcelable {

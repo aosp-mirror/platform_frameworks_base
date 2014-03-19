@@ -500,6 +500,20 @@ android_media_MediaPlayer_setAudioStreamType(JNIEnv *env, jobject thiz, jint str
     process_media_player_call( env, thiz, mp->setAudioStreamType((audio_stream_type_t) streamtype) , NULL, NULL );
 }
 
+static jint
+android_media_MediaPlayer_getAudioStreamType(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return 0;
+    }
+    audio_stream_type_t streamtype;
+    process_media_player_call( env, thiz, mp->getAudioStreamType(&streamtype), NULL, NULL );
+    ALOGV("getAudioStreamType: %d (streamtype)", streamtype);
+    return (jint) streamtype;
+}
+
 static void
 android_media_MediaPlayer_setLooping(JNIEnv *env, jobject thiz, jboolean looping)
 {
@@ -841,10 +855,11 @@ static JNINativeMethod gMethods[] = {
     {"getDuration",         "()I",                              (void *)android_media_MediaPlayer_getDuration},
     {"_release",            "()V",                              (void *)android_media_MediaPlayer_release},
     {"_reset",              "()V",                              (void *)android_media_MediaPlayer_reset},
-    {"setAudioStreamType",  "(I)V",                             (void *)android_media_MediaPlayer_setAudioStreamType},
+    {"_setAudioStreamType", "(I)V",                             (void *)android_media_MediaPlayer_setAudioStreamType},
+    {"_getAudioStreamType", "()I",                              (void *)android_media_MediaPlayer_getAudioStreamType},
     {"setLooping",          "(Z)V",                             (void *)android_media_MediaPlayer_setLooping},
     {"isLooping",           "()Z",                              (void *)android_media_MediaPlayer_isLooping},
-    {"setVolume",           "(FF)V",                            (void *)android_media_MediaPlayer_setVolume},
+    {"_setVolume",          "(FF)V",                            (void *)android_media_MediaPlayer_setVolume},
     {"native_invoke",       "(Landroid/os/Parcel;Landroid/os/Parcel;)I",(void *)android_media_MediaPlayer_invoke},
     {"native_setMetadataFilter", "(Landroid/os/Parcel;)I",      (void *)android_media_MediaPlayer_setMetadataFilter},
     {"native_getMetadata", "(ZZLandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_getMetadata},
@@ -853,7 +868,7 @@ static JNINativeMethod gMethods[] = {
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
     {"getAudioSessionId",   "()I",                              (void *)android_media_MediaPlayer_get_audio_session_id},
     {"setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer_set_audio_session_id},
-    {"setAuxEffectSendLevel", "(F)V",                           (void *)android_media_MediaPlayer_setAuxEffectSendLevel},
+    {"_setAuxEffectSendLevel", "(F)V",                          (void *)android_media_MediaPlayer_setAuxEffectSendLevel},
     {"attachAuxEffect",     "(I)V",                             (void *)android_media_MediaPlayer_attachAuxEffect},
     {"native_pullBatteryData", "(Landroid/os/Parcel;)I",        (void *)android_media_MediaPlayer_pullBatteryData},
     {"native_setRetransmitEndpoint", "(Ljava/lang/String;I)I",  (void *)android_media_MediaPlayer_setRetransmitEndpoint},

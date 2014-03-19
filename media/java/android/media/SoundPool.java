@@ -20,15 +20,23 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.lang.ref.WeakReference;
 
+import android.app.ActivityThread;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
+
+import com.android.internal.app.IAppOpsService;
 
 
 /**
@@ -449,6 +457,8 @@ public class SoundPool {
         private SoundPool mProxy;
 
         private final Object mLock;
+        private final int mStreamType;
+        private final IAppOpsService mAppOps;
 
         // SoundPool messages
         //
@@ -463,6 +473,9 @@ public class SoundPool {
             }
             mLock = new Object();
             mProxy = proxy;
+            mStreamType = streamType;
+            IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
+            mAppOps = IAppOpsService.Stub.asInterface(b);
         }
 
         public int load(String path, int priority)
@@ -522,8 +535,26 @@ public class SoundPool {
 
         public native final boolean unload(int soundID);
 
-        public native final int play(int soundID, float leftVolume, float rightVolume,
+        public final int play(int soundID, float leftVolume, float rightVolume,
+                int priority, int loop, float rate) {
+            if (isRestricted()) {
+                leftVolume = rightVolume = 0;
+            }
+            return _play(soundID, leftVolume, rightVolume, priority, loop, rate);
+        }
+
+        public native final int _play(int soundID, float leftVolume, float rightVolume,
                 int priority, int loop, float rate);
+
+        private boolean isRestricted() {
+            try {
+                final int mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO,
+                        mStreamType, Process.myUid(), ActivityThread.currentPackageName());
+                return mode != AppOpsManager.MODE_ALLOWED;
+            } catch (RemoteException e) {
+                return false;
+            }
+        }
 
         public native final void pause(int streamID);
 
@@ -535,8 +566,14 @@ public class SoundPool {
 
         public native final void stop(int streamID);
 
-        public native final void setVolume(int streamID,
-                float leftVolume, float rightVolume);
+        public final void setVolume(int streamID, float leftVolume, float rightVolume) {
+            if (isRestricted()) {
+                return;
+            }
+            _setVolume(streamID, leftVolume, rightVolume);
+        }
+
+        private native final void _setVolume(int streamID, float leftVolume, float rightVolume);
 
         public void setVolume(int streamID, float volume) {
             setVolume(streamID, volume, volume);

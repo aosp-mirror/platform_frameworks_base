@@ -33,6 +33,7 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.media.AudioService;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Handler;
@@ -42,6 +43,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Pair;
@@ -123,6 +125,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             = new ArrayMap<String, ArrayList<Callback>>();
     final ArrayMap<IBinder, Callback> mModeWatchers
             = new ArrayMap<IBinder, Callback>();
+    final SparseArray<SparseArray<Restriction>> mAudioRestrictions
+            = new SparseArray<SparseArray<Restriction>>();
 
     public final class Callback implements DeathRecipient {
         final IAppOpsCallback mCallback;
@@ -549,6 +553,58 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return AppOpsManager.opToDefaultMode(code);
             }
             return op.mode;
+        }
+    }
+
+    @Override
+    public int checkAudioOperation(int code, int stream, int uid, String packageName) {
+        synchronized (this) {
+            final int mode = checkRestrictionLocked(code, stream, uid, packageName);
+            if (mode != AppOpsManager.MODE_ALLOWED) {
+                return mode;
+            }
+        }
+        return checkOperation(code, uid, packageName);
+    }
+
+    private int checkRestrictionLocked(int code, int stream, int uid, String packageName) {
+        final SparseArray<Restriction> streamRestrictions = mAudioRestrictions.get(code);
+        if (streamRestrictions != null) {
+            final Restriction r = streamRestrictions.get(stream);
+            if (r != null && !r.exceptionPackages.contains(packageName)) {
+                return r.mode;
+            }
+        }
+        return AppOpsManager.MODE_ALLOWED;
+    }
+
+    @Override
+    public void setAudioRestriction(int code, int stream, int uid, int mode,
+            String[] exceptionPackages) {
+        verifyIncomingUid(uid);
+        verifyIncomingOp(code);
+        synchronized (this) {
+            SparseArray<Restriction> streamRestrictions = mAudioRestrictions.get(code);
+            if (streamRestrictions == null) {
+                streamRestrictions = new SparseArray<Restriction>();
+                mAudioRestrictions.put(code, streamRestrictions);
+            }
+            streamRestrictions.remove(stream);
+            if (mode != AppOpsManager.MODE_ALLOWED) {
+                final Restriction r = new Restriction();
+                r.mode = mode;
+                if (exceptionPackages != null) {
+                    final int N = exceptionPackages.length;
+                    r.exceptionPackages = new ArraySet<String>(N);
+                    for (int i = 0; i < N; i++) {
+                        final String pkg = exceptionPackages[i];
+                        if (pkg != null) {
+                            r.exceptionPackages.add(pkg.trim());
+                        }
+                    }
+                }
+                streamRestrictions.put(stream, r);
+            }
         }
     }
 
@@ -1048,6 +1104,31 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
             }
+            if (mAudioRestrictions.size() > 0) {
+                boolean printedHeader = false;
+                for (int o=0; o<mAudioRestrictions.size(); o++) {
+                    final String op = AppOpsManager.opToName(mAudioRestrictions.keyAt(o));
+                    final SparseArray<Restriction> restrictions = mAudioRestrictions.valueAt(o);
+                    for (int i=0; i<restrictions.size(); i++) {
+                        if (!printedHeader){
+                            pw.println("  Audio Restrictions:");
+                            printedHeader = true;
+                            needSep = true;
+                        }
+                        final int stream = restrictions.keyAt(i);
+                        pw.print("    "); pw.print(op);
+                        pw.print(" stream="); pw.print(AudioService.streamToString(stream));
+                        Restriction r = restrictions.valueAt(i);
+                        pw.print(": mode="); pw.println(r.mode);
+                        if (!r.exceptionPackages.isEmpty()) {
+                            pw.println("      Exceptions:");
+                            for (int j=0; j<r.exceptionPackages.size(); j++) {
+                                pw.print("        "); pw.println(r.exceptionPackages.valueAt(j));
+                            }
+                        }
+                    }
+                }
+            }
             if (needSep) {
                 pw.println();
             }
@@ -1079,5 +1160,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
         }
+    }
+
+    private static final class Restriction {
+        private static final ArraySet<String> NO_EXCEPTIONS = new ArraySet<String>();
+        int mode;
+        ArraySet<String> exceptionPackages = NO_EXCEPTIONS;
     }
 }

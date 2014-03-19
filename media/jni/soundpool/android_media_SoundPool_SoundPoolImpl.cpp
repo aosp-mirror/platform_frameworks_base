@@ -229,7 +229,7 @@ static JNINativeMethod gMethods[] = {
         "(I)Z",
         (void *)android_media_SoundPool_SoundPoolImpl_unload
     },
-    {   "play",
+    {   "_play",
         "(IFFIIF)I",
         (void *)android_media_SoundPool_SoundPoolImpl_play
     },
@@ -253,7 +253,7 @@ static JNINativeMethod gMethods[] = {
         "(I)V",
         (void *)android_media_SoundPool_SoundPoolImpl_stop
     },
-    {   "setVolume",
+    {   "_setVolume",
         "(IFF)V",
         (void *)android_media_SoundPool_SoundPoolImpl_setVolume
     },
