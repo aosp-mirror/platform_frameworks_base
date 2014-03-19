@@ -566,6 +566,17 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
         return false;
     }
 
+
+    public void setInternalDataEnable(boolean enabled) {
+        if (DBG) log("setInternalDataEnable: E enabled=" + enabled);
+        final AsyncChannel channel = mDataConnectionTrackerAc;
+        if (channel != null) {
+            channel.sendMessage(DctConstants.EVENT_SET_INTERNAL_DATA_ENABLE,
+                    enabled ? DctConstants.ENABLED : DctConstants.DISABLED);
+        }
+        if (VDBG) log("setInternalDataEnable: X enabled=" + enabled);
+    }
+
     @Override
     public void setUserDataEnable(boolean enabled) {
         if (DBG) log("setUserDataEnable: E enabled=" + enabled);
