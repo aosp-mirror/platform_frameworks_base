@@ -19,7 +19,6 @@ package android.telecomm;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable;
 
 import java.util.Date;
 import java.util.UUID;

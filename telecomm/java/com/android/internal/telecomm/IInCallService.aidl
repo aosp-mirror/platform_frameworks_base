@@ -16,6 +16,7 @@
 
 package com.android.internal.telecomm;
 
+import android.telecomm.CallAudioState;
 import android.telecomm.CallInfo;
 
 import com.android.internal.telecomm.IInCallAdapter;
@@ -74,4 +75,11 @@ oneway interface IInCallService {
      * @param callId The identifier of the call that was put on hold.
      */
     void setOnHold(String callId);
+
+    /**
+     * Called when the audio state changes.
+     *
+     * @param audioState The new {@link CallAudioState}.
+     */
+    void onAudioStateChanged(in CallAudioState audioState);
 }

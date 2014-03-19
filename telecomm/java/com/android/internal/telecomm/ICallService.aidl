@@ -17,6 +17,7 @@
 package com.android.internal.telecomm;
 
 import android.os.Bundle;
+import android.telecomm.CallAudioState;
 import android.telecomm.CallInfo;
 
 import com.android.internal.telecomm.ICallServiceAdapter;
@@ -136,4 +137,12 @@ oneway interface ICallService {
      * @param callId The identifier of the call to remove from hold.
      */
     void unhold(String callId);
+
+    /**
+     * Called when the audio state changes.
+     *
+     * @param activeCallId The identifier of the call that was active during the state change.
+     * @param audioState The new {@link CallAudioState}.
+     */
+    void onAudioStateChanged(String activeCallId, in CallAudioState audioState);
 }

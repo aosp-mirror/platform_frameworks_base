@@ -102,4 +102,28 @@ public final class InCallAdapter {
         } catch (RemoteException e) {
         }
     }
+
+    /**
+     * Mute the microphone.
+     *
+     * @param shouldMute True if the microphone should be muted.
+     */
+    public void mute(boolean shouldMute) {
+        try {
+            mAdapter.mute(shouldMute);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Sets the audio route (speaker, bluetooth, etc...). See {@link CallAudioState}.
+     *
+     * @param route The audio route to use.
+     */
+    public void setAudioRoute(int route) {
+        try {
+            mAdapter.setAudioRoute(route);
+        } catch (RemoteException e) {
+        }
+    }
 }

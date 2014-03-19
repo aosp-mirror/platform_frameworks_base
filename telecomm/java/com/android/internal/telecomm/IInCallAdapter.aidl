@@ -16,6 +16,8 @@
 
 package com.android.internal.telecomm;
 
+import android.telecomm.CallAudioState;
+
 /**
  * Receives commands from {@link IInCallService} implementations which should be executed by
  * Telecomm. When Telecomm binds to a {@link IInCallService}, an instance of this class is given to
@@ -67,4 +69,18 @@ oneway interface IInCallAdapter {
      * @param callId The identifier of the call to release from hold.
      */
     void unholdCall(String callId);
+
+    /**
+     * Mute the microphone.
+     *
+     * @param shouldMute True if the microphone should be muted.
+     */
+    void mute(boolean shouldMute);
+
+    /**
+     * Sets the audio route (speaker, bluetooth, etc...). See {@link CallAudioState}.
+     *
+     * @param route The audio route to use.
+     */
+    void setAudioRoute(int route);
 }
