@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -2149,10 +2150,20 @@ public class Camera {
         private static final String PIXEL_FORMAT_JPEG = "jpeg";
         private static final String PIXEL_FORMAT_BAYER_RGGB = "bayer-rggb";
 
-        private HashMap<String, String> mMap;
+        /**
+         * Order matters: Keys that are {@link #set(String, String) set} later
+         * will take precedence over keys that are set earlier (if the two keys
+         * conflict with each other).
+         *
+         * <p>One example is {@link #setPreviewFpsRange(int, int)} , since it
+         * conflicts with {@link #setPreviewFrameRate(int)} whichever key is set later
+         * is the one that will take precedence.
+         * </p>
+         */
+        private final LinkedHashMap<String, String> mMap;
 
         private Parameters() {
-            mMap = new HashMap<String, String>(64);
+            mMap = new LinkedHashMap<String, String>(/*initialCapacity*/64);
         }
 
         /**
@@ -2232,7 +2243,7 @@ public class Camera {
                 return;
             }
 
-            mMap.put(key, value);
+            put(key, value);
         }
 
         /**
@@ -2242,7 +2253,18 @@ public class Camera {
          * @param value the int value of the parameter
          */
         public void set(String key, int value) {
-            mMap.put(key, Integer.toString(value));
+            put(key, Integer.toString(value));
+        }
+
+        private void put(String key, String value) {
+            /*
+             * Remove the key if it already exists.
+             *
+             * This way setting a new value for an already existing key will always move
+             * that key to be ordered the latest in the map.
+             */
+            mMap.remove(key);
+            mMap.put(key, value);
         }
 
         private void set(String key, List<Area> areas) {
