@@ -886,11 +886,14 @@ From class
       <table class="jd-tagtable">
         <tr>
           <th>returnKey</td>
-          <td>the extras key to be set with input collected from the user
-         when the intent is sent.
-</td>
+          <td>the intent extras key that refers to the input collected from the user</td>
         </tr>
       </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining
+</li></ul>
   </div>
 
     </div>
@@ -966,10 +969,24 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Specifies whether the user can provide arbitrary values.  The
- default is <code>true</code>.  If this is set to <code>false</code>, a
- non-null non-empty value should be passed to <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.Builder.html#setChoices(java.lang.String[])">setChoices(String[])</a></code>.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Specifies whether the user can provide arbitrary values.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>allowFreeFormInput</td>
+          <td>The default is <code>true</code>.
+         If you specify <code>false</code>, you must
+         provide a non-null and non-empty array to <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.Builder.html#setChoices(java.lang.String[])">setChoices(String[])</a></code> or
+         an <code><a href="http://developer.android.com/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></code> is thrown.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -998,8 +1015,23 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Specifies choices available to the user to satisfy this input.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Specifies choices available to the user to satisfy this input.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>choices</td>
+          <td>an array of pre-defined choices for users input.
+        You must provide a non-null and non-empty array if
+        you set <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html#allowFreeFormInput">allowFreeFormInput</a></code> to <code>false</code>.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1028,8 +1060,21 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Set a label to be displayed to the user when collecting this input.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Set a label to be displayed to the user when collecting this input.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>label</td>
+          <td>The label to show to users when they input a response.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining
+</li></ul>
+  </div>
 
     </div>
 </div>

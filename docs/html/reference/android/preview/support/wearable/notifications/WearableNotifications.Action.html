@@ -474,13 +474,10 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Subclass of <code><a href="/reference/android/support/v4/app/NotificationCompat.Action.html">NotificationCompat.Action</a></code> which adds support for additional
- wearable extensions.
-
- <p>To create a new Action, use the <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.Builder.html">WearableNotifications.Action.Builder</a></code> class and then call
+<p itemprop="articleBody">Subclass of <code><a href="/reference/android/support/v4/app/NotificationCompat.Action.html">NotificationCompat.Action</a></code> that adds additional
+ wearable extensions for actions.
+ <p>Always use the <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.Builder.html">WearableNotifications.Action.Builder</a></code> to build instances of this class and call
  <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#addAction(android.preview.support.wearable.notifications.WearableNotifications.Action)">addAction(WearableNotifications.Action)</a></code> to add the action to a notification.
-
- <p>Example:
 
  <pre class="prettyprint">
  WearableNotifications.Builder builder = new WearableNotifications.Builder(mContext)
@@ -991,8 +988,12 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Get a list of inputs to be collected from the user when this action is sent.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Get a list of inputs to be collected from the user when this action is sent.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the array of <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html">RemoteInput</a></code> objects associated with this action
+</li></ul>
+  </div>
 
     </div>
 </div>
