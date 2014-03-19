@@ -16,8 +16,6 @@
 
 package android.bluetooth;
 
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -543,6 +541,15 @@ public final class BluetoothGatt implements BluetoothProfile {
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception in callback", ex);
                 }
+            }
+
+            /**
+             * Advertise state change callback
+             * @hide
+             */
+            public void onAdvertiseStateChange(int state, int status) {
+                if (DBG) Log.d(TAG, "onAdvertiseStateChange() - state = "
+                        + state + " status=" + status);
             }
         };
 
