@@ -35,6 +35,7 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_MODULE := libjni_pacprocessor
 LOCAL_MODULE_TAGS := optional
+LOCAL_32_BIT_ONLY := true
 
 include external/stlport/libstlport.mk
 
