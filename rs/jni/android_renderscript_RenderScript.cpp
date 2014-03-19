@@ -455,7 +455,7 @@ nElementGetNativeData(JNIEnv *_env, jobject _this, jlong con, jlong id, jintArra
     // we will pack mType; mKind; mNormalized; mVectorSize; NumSubElements
     assert(dataSize == 5);
 
-    uint32_t elementData[5];
+    uintptr_t elementData[5];
     rsaElementGetNativeData((RsContext)con, (RsElement)id, elementData, dataSize);
 
     for(jint i = 0; i < dataSize; i ++) {
@@ -476,7 +476,7 @@ nElementGetSubElements(JNIEnv *_env, jobject _this, jlong con, jlong id,
 
     uintptr_t *ids = (uintptr_t*)malloc(dataSize * sizeof(uintptr_t));
     const char **names = (const char **)malloc(dataSize * sizeof(const char *));
-    size_t *arraySizes = (size_t *)malloc(dataSize * sizeof(size_t));
+    uint32_t *arraySizes = (uint32_t *)malloc(dataSize * sizeof(uint32_t));
 
     rsaElementGetSubElements((RsContext)con, (RsElement)id, ids, names, arraySizes, (uint32_t)dataSize);
 
@@ -1407,35 +1407,35 @@ nProgramRasterCreate(JNIEnv *_env, jobject _this, jlong con, jboolean pointSprit
 // ---------------------------------------------------------------------------
 
 static void
-nContextBindRootScript(JNIEnv *_env, jobject _this, jlong con, jint script)
+nContextBindRootScript(JNIEnv *_env, jobject _this, jlong con, jlong script)
 {
     LOG_API("nContextBindRootScript, con(%p), script(%p)", (RsContext)con, (RsScript)script);
     rsContextBindRootScript((RsContext)con, (RsScript)script);
 }
 
 static void
-nContextBindProgramStore(JNIEnv *_env, jobject _this, jlong con, jint pfs)
+nContextBindProgramStore(JNIEnv *_env, jobject _this, jlong con, jlong pfs)
 {
     LOG_API("nContextBindProgramStore, con(%p), pfs(%p)", (RsContext)con, (RsProgramStore)pfs);
     rsContextBindProgramStore((RsContext)con, (RsProgramStore)pfs);
 }
 
 static void
-nContextBindProgramFragment(JNIEnv *_env, jobject _this, jlong con, jint pf)
+nContextBindProgramFragment(JNIEnv *_env, jobject _this, jlong con, jlong pf)
 {
     LOG_API("nContextBindProgramFragment, con(%p), pf(%p)", (RsContext)con, (RsProgramFragment)pf);
     rsContextBindProgramFragment((RsContext)con, (RsProgramFragment)pf);
 }
 
 static void
-nContextBindProgramVertex(JNIEnv *_env, jobject _this, jlong con, jint pf)
+nContextBindProgramVertex(JNIEnv *_env, jobject _this, jlong con, jlong pf)
 {
     LOG_API("nContextBindProgramVertex, con(%p), pf(%p)", (RsContext)con, (RsProgramVertex)pf);
     rsContextBindProgramVertex((RsContext)con, (RsProgramVertex)pf);
 }
 
 static void
-nContextBindProgramRaster(JNIEnv *_env, jobject _this, jlong con, jint pf)
+nContextBindProgramRaster(JNIEnv *_env, jobject _this, jlong con, jlong pf)
 {
     LOG_API("nContextBindProgramRaster, con(%p), pf(%p)", (RsContext)con, (RsProgramRaster)pf);
     rsContextBindProgramRaster((RsContext)con, (RsProgramRaster)pf);
@@ -1679,11 +1679,11 @@ static JNINativeMethod methods[] = {
 {"rsnProgramRasterCreate",           "(JZI)J",                                (void*)nProgramRasterCreate },
 {"rsnProgramVertexCreate",           "(JLjava/lang/String;[Ljava/lang/String;[J)J",              (void*)nProgramVertexCreate },
 
-{"rsnContextBindRootScript",         "(JI)V",                                 (void*)nContextBindRootScript },
-{"rsnContextBindProgramStore",       "(JI)V",                                 (void*)nContextBindProgramStore },
-{"rsnContextBindProgramFragment",    "(JI)V",                                 (void*)nContextBindProgramFragment },
-{"rsnContextBindProgramVertex",      "(JI)V",                                 (void*)nContextBindProgramVertex },
-{"rsnContextBindProgramRaster",      "(JI)V",                                 (void*)nContextBindProgramRaster },
+{"rsnContextBindRootScript",         "(JJ)V",                                 (void*)nContextBindRootScript },
+{"rsnContextBindProgramStore",       "(JJ)V",                                 (void*)nContextBindProgramStore },
+{"rsnContextBindProgramFragment",    "(JJ)V",                                 (void*)nContextBindProgramFragment },
+{"rsnContextBindProgramVertex",      "(JJ)V",                                 (void*)nContextBindProgramVertex },
+{"rsnContextBindProgramRaster",      "(JJ)V",                                 (void*)nContextBindProgramRaster },
 
 {"rsnSamplerCreate",                 "(JIIIIIF)J",                            (void*)nSamplerCreate },
 
