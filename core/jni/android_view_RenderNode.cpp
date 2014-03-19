@@ -23,8 +23,8 @@
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 
-#include <DisplayList.h>
 #include <DisplayListRenderer.h>
+#include <RenderNode.h>
 
 namespace android {
 
