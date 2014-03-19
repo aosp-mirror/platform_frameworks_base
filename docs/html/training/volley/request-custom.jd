@@ -1,0 +1,163 @@
+page.title=Implementing a Custom Request
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#custom-request">Write a Custom Request</a></li>
+</ol>
+
+</div>
+</div>
+
+<a class="notice-developers-video wide" href="https://developers.google.com/events/io/sessions/325304728">
+<div>
+    <h3>Video</h3>
+    <p>Volley: Easy, Fast Networking for Android</p>
+</div>
+</a>
+
+<p>This lesson describes how to implement your own custom request types, for types that
+don't have out-of-the-box Volley support.</p>
+
+<h2 id="custom-request">Write a Custom Request</h2>
+
+Most requests have ready-to-use implementations in the toolbox; if your response is a string,
+image, or JSON, you probably won't need to implement a custom {@code Request}.</p>
+
+<p>For cases where you do need to implement a custom request, this is all you need
+to do:</p>
+
+<ul>
+
+<li>Extend the {@code Request&lt;T&gt;} class, where
+{@code &lt;T&gt;} represents the type of parsed response
+the request expects. So if your parsed response is a string, for example,
+create your custom request by extending {@code Request&lt;String&gt;}. See the Volley
+toolbox classes {@code StringRequest} and {@code ImageRequest} for examples of
+extending {@code Request&lt;T&gt;}.</li>
+
+<li>Implement the abstract methods {@code parseNetworkResponse()}
+and {@code deliverResponse()}, described in more detail below.</li>
+
+</ul>
+
+<h3>parseNetworkResponse</h3>
+
+<p>A {@code Response} encapsulates a parsed response for delivery, for a given type
+(such as string, image, or JSON). Here is a sample implementation of
+{@code parseNetworkResponse()}:</p>
+
+<pre>
+&#64;Override
+protected Response&lt;T&gt; parseNetworkResponse(
+        NetworkResponse response) {
+    try {
+        String json = new String(response.data,
+        HttpHeaderParser.parseCharset(response.headers));
+    return Response.success(gson.fromJson(json, clazz),
+    HttpHeaderParser.parseCacheHeaders(response));
+    }
+    // handle errors
+...
+}
+</pre>
+
+<p>Note the following:</p>
+
+<ul>
+<li>{@code parseNetworkResponse()} takes as its parameter a {@code NetworkResponse}, which
+contains the response payload as a byte[], HTTP status code, and response headers.</li>
+<li>Your implementation must return a {@code Response&lt;T&gt;}, which contains your typed
+response object and cache metadata or an error, such as in the case of a parse failure.</li>
+</ul>
+
+<p>If your protocol has non-standard cache semantics, you can build a {@code Cache.Entry}
+yourself, but most requests are fine with something like this:
+</p>
+<pre>return Response.success(myDecodedObject,
+        HttpHeaderParser.parseCacheHeaders(response));</pre>
+<p>
+Volley calls {@code parseNetworkResponse()} from a worker thread. This ensures that
+expensive parsing operations, such as decoding a JPEG into a Bitmap, don't block the UI
+thread.</p>
+
+<h3>deliverResponse</h3>
+
+<p>Volley calls you back on the main thread with the object you returned in
+{@code parseNetworkResponse()}. Most requests invoke a callback interface here,
+for example:
+</p>
+
+<pre>
+protected void deliverResponse(T response) {
+        listener.onResponse(response);
+</pre>
+
+<h3>Example: GsonRequest</h3>
+
+<p><a href="http://code.google.com/p/google-gson/">Gson</a> is a library for converting
+Java objects to and from JSON using reflection. You can define Java objects that have the
+same names as their corresponding JSON keys, pass Gson the class object, and Gson will fill
+in the fields for you. Here's a complete implementation of a Volley request that uses
+Gson for parsing:</p>
+
+<pre>
+public class GsonRequest&lt;T&gt; extends Request&lt;T&gt; {
+    private final Gson gson = new Gson();
+    private final Class&lt;T&gt; clazz;
+    private final Map&lt;String, String&gt; headers;
+    private final Listener&lt;T&gt; listener;
+
+    /**
+     * Make a GET request and return a parsed object from JSON.
+     *
+     * &#64;param url URL of the request to make
+     * &#64;param clazz Relevant class object, for Gson's reflection
+     * &#64;param headers Map of request headers
+     */
+    public GsonRequest(String url, Class&lt;T&gt; clazz, Map&lt;String, String&gt; headers,
+            Listener&lt;T&gt; listener, ErrorListener errorListener) {
+        super(Method.GET, url, errorListener);
+        this.clazz = clazz;
+        this.headers = headers;
+        this.listener = listener;
+    }
+
+    &#64;Override
+    public Map&lt;String, String&gt; getHeaders() throws AuthFailureError {
+        return headers != null ? headers : super.getHeaders();
+    }
+
+    &#64;Override
+    protected void deliverResponse(T response) {
+        listener.onResponse(response);
+    }
+
+    &#64;Override
+    protected Response&lt;T&gt; parseNetworkResponse(NetworkResponse response) {
+        try {
+            String json = new String(
+                    response.data,
+                    HttpHeaderParser.parseCharset(response.headers));
+            return Response.success(
+                    gson.fromJson(json, clazz),
+                    HttpHeaderParser.parseCacheHeaders(response));
+        } catch (UnsupportedEncodingException e) {
+            return Response.error(new ParseError(e));
+        } catch (JsonSyntaxException e) {
+            return Response.error(new ParseError(e));
+        }
+    }
+}
+</pre>
+
+<p>Volley provides ready-to-use {@code JsonArrayRequest} and {@code JsonArrayObject} classes
+if you prefer to take that approach. See <a href="request.html">
+Using Standard Request Types</a> for more information.</p>

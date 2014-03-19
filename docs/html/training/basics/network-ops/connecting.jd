@@ -25,6 +25,7 @@ next.link=managing.html
 
 <h2>You should also read</h2>
 <ul>
+  <li><a href="{@docRoot}training/volley/index.html">Transmitting Network Data Using Volley</a></li>
   <li><a href="{@docRoot}training/monitoring-device-state/index.html">Optimizing Battery Life</a></li>
   <li><a href="{@docRoot}training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a></li>
   <li><a href="{@docRoot}guide/webapps/index.html">Web Apps Overview</a></li>
