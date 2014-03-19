@@ -567,6 +567,8 @@ public class WallpaperCropActivity extends Activity {
                 Rect roundedTrueCrop = new Rect();
                 Matrix rotateMatrix = new Matrix();
                 Matrix inverseRotateMatrix = new Matrix();
+
+                Point bounds = getImageBounds();
                 if (mRotation > 0) {
                     rotateMatrix.setRotate(mRotation);
                     inverseRotateMatrix.setRotate(-mRotation);
@@ -574,7 +576,6 @@ public class WallpaperCropActivity extends Activity {
                     mCropBounds.roundOut(roundedTrueCrop);
                     mCropBounds = new RectF(roundedTrueCrop);
 
-                    Point bounds = getImageBounds();
                     if (bounds == null) {
                         Log.w(LOGTAG, "cannot get bounds for image");
                         failure = true;
@@ -646,11 +647,37 @@ public class WallpaperCropActivity extends Activity {
                         Utils.closeSilently(is);
                     }
                     if (fullSize != null) {
+                        // Find out the true sample size that was used by the decoder
+                        scaleDownSampleSize = bounds.x / fullSize.getWidth();
                         mCropBounds.left /= scaleDownSampleSize;
                         mCropBounds.top /= scaleDownSampleSize;
                         mCropBounds.bottom /= scaleDownSampleSize;
                         mCropBounds.right /= scaleDownSampleSize;
                         mCropBounds.roundOut(roundedTrueCrop);
+
+                        // Adjust values to account for issues related to rounding
+                        if (roundedTrueCrop.width() > fullSize.getWidth()) {
+                            // Adjust the width
+                            roundedTrueCrop.right = roundedTrueCrop.left + fullSize.getWidth();
+                        }
+                        if (roundedTrueCrop.right > fullSize.getWidth()) {
+                            // Adjust the left value
+                            int adjustment = roundedTrueCrop.left -
+                                    Math.max(0, roundedTrueCrop.right - roundedTrueCrop.width());
+                            roundedTrueCrop.left -= adjustment;
+                            roundedTrueCrop.right -= adjustment;
+                        }
+                        if (roundedTrueCrop.height() > fullSize.getHeight()) {
+                            // Adjust the height
+                            roundedTrueCrop.bottom = roundedTrueCrop.top + fullSize.getHeight();
+                        }
+                        if (roundedTrueCrop.bottom > fullSize.getHeight()) {
+                            // Adjust the top value
+                            int adjustment = roundedTrueCrop.top -
+                                    Math.max(0, roundedTrueCrop.bottom - roundedTrueCrop.height());
+                            roundedTrueCrop.top -= adjustment;
+                            roundedTrueCrop.bottom -= adjustment;
+                        }
 
                         crop = Bitmap.createBitmap(fullSize, roundedTrueCrop.left,
                                 roundedTrueCrop.top, roundedTrueCrop.width(),
@@ -776,14 +803,15 @@ public class WallpaperCropActivity extends Activity {
             final WallpaperManager wallpaperManager) {
         final Point defaultWallpaperSize = getDefaultWallpaperSize(res, windowManager);
 
-        new Thread("suggestWallpaperDimension") {
-            public void run() {
+        new AsyncTask<Void, Void, Void>() {
+            public Void doInBackground(Void ... args) {
                 // If we have saved a wallpaper width/height, use that instead
                 int savedWidth = sharedPrefs.getInt(WALLPAPER_WIDTH_KEY, defaultWallpaperSize.x);
                 int savedHeight = sharedPrefs.getInt(WALLPAPER_HEIGHT_KEY, defaultWallpaperSize.y);
                 wallpaperManager.suggestDesiredDimensions(savedWidth, savedHeight);
+                return null;
             }
-        }.start();
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
     }
 
     protected static RectF getMaxCropRect(
