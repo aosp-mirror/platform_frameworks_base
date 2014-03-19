@@ -573,10 +573,8 @@ void SpotShadow::computeSpotShadow(bool isCasterOpaque, const Vector3* lightPoly
     for (int j = 0; j < lightPolyLength; j++) {
         int m = 0;
         for (int i = 0; i < polyLength; i++) {
+            // After validating the input, deltaZ is guaranteed to be positive.
             float deltaZ = lightPoly[j].z - poly[i].z;
-            if (deltaZ == 0) {
-                return;
-            }
             float ratioZ = lightPoly[j].z / deltaZ;
             float x = lightPoly[j].x - ratioZ * (lightPoly[j].x - poly[i].x);
             float y = lightPoly[j].y - ratioZ * (lightPoly[j].y - poly[i].y);
@@ -615,9 +613,6 @@ void SpotShadow::computeSpotShadow(bool isCasterOpaque, const Vector3* lightPoly
         // If there is no real umbra, make a fake one.
         for (int i = 0; i < polyLength; i++) {
             float deltaZ = lightCenter.z - poly[i].z;
-            if (deltaZ == 0) {
-                return;
-            }
             float ratioZ = lightCenter.z / deltaZ;
             float x = lightCenter.x - ratioZ * (lightCenter.x - poly[i].x);
             float y = lightCenter.y - ratioZ * (lightCenter.y - poly[i].y);
