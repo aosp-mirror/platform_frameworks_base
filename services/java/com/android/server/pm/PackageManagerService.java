@@ -1486,6 +1486,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             // can downgrade to reader
             mSettings.writeLPr();
 
+            if (SELinuxMMAC.shouldRestorecon()) {
+                Slog.i(TAG, "Relabeling of /data/data and /data/user issued.");
+                if (mInstaller.restoreconData()) {
+                    SELinuxMMAC.setRestoreconDone();
+                }
+            }
+
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_READY,
                     SystemClock.uptimeMillis());
 
