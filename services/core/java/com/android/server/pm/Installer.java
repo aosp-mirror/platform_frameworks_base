@@ -406,4 +406,8 @@ public final class Installer extends SystemService {
 
         return execute(builder.toString());
     }
+
+    public boolean restoreconData() {
+        return (execute("restorecondata") == 0);
+    }
 }
