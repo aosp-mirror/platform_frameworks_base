@@ -4309,6 +4309,7 @@ public final class ViewRootImpl implements ViewParent,
      * Creates dpad events from unhandled joystick movements.
      */
     final class SyntheticJoystickHandler extends Handler {
+        private final static String TAG = "SyntheticJoystickHandler";
         private final static int MSG_ENQUEUE_X_AXIS_KEY_REPEAT = 1;
         private final static int MSG_ENQUEUE_Y_AXIS_KEY_REPEAT = 2;
 
@@ -4341,10 +4342,21 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         public void process(MotionEvent event) {
-            update(event, true);
+            switch(event.getActionMasked()) {
+            case MotionEvent.ACTION_CANCEL:
+                cancel(event);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                update(event, true);
+                break;
+            default:
+                Log.w(TAG, "Unexpected action: " + event.getActionMasked());
+            }
         }
 
-        public void cancel(MotionEvent event) {
+        private void cancel(MotionEvent event) {
+            removeMessages(MSG_ENQUEUE_X_AXIS_KEY_REPEAT);
+            removeMessages(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT);
             update(event, false);
         }
 
