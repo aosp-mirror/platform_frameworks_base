@@ -41,6 +41,7 @@ public class Environment {
     private static final String ENV_MEDIA_STORAGE = "MEDIA_STORAGE";
     private static final String ENV_SECONDARY_STORAGE = "SECONDARY_STORAGE";
     private static final String ENV_ANDROID_ROOT = "ANDROID_ROOT";
+    private static final String ENV_OEM_ROOT = "OEM_ROOT";
 
     /** {@hide} */
     public static final String DIR_ANDROID = "Android";
@@ -55,6 +56,7 @@ public class Environment {
     public static final String DIRECTORY_ANDROID = DIR_ANDROID;
 
     private static final File DIR_ANDROID_ROOT = getDirectory(ENV_ANDROID_ROOT, "/system");
+    private static final File DIR_OEM_ROOT = getDirectory(ENV_OEM_ROOT, "/oem");
     private static final File DIR_MEDIA_STORAGE = getDirectory(ENV_MEDIA_STORAGE, "/data/media");
 
     private static final String CANONCIAL_EMULATED_STORAGE_TARGET = getCanonicalPathOrNull(
@@ -205,10 +207,21 @@ public class Environment {
     }
 
     /**
-     * Gets the Android root directory.
+     * Return root of the "system" partition holding the core Android OS.
+     * Always present and mounted read-only.
      */
     public static File getRootDirectory() {
         return DIR_ANDROID_ROOT;
+    }
+
+    /**
+     * Return root directory of the "oem" partition holding OEM customizations,
+     * if any. If present, the partition is mounted read-only.
+     *
+     * @hide
+     */
+    public static File getOemDirectory() {
+        return DIR_OEM_ROOT;
     }
 
     /**
