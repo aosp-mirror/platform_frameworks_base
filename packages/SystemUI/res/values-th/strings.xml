@@ -151,7 +151,7 @@
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g> <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"มือถือ <xliff:g id="SIGNAL">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> <xliff:g id="NETWORK">%3$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"แบตเตอรี่ <xliff:g id="STATE">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"โหมดใช้งานบนเครื่องบิน <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"โหมดใช้บนเครื่องบิน <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"บลูทูธ <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"สถานที่ <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"ตั้งเวลาปลุกไว้ที่ <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -174,7 +174,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"ชั้นแสดงของหวาน"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Daydream"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"อีเทอร์เน็ต"</string>
-    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"โหมดใช้งานบนเครื่องบิน"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"โหมดใช้บนเครื่องบิน"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"กำลังชาร์จ, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"ชาร์จแล้ว"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"บลูทูธ"</string>
