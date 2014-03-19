@@ -127,7 +127,7 @@ static const unsigned long kReadBufSize = 32768;
             goto z_bail;
         }
 
-		/* output buffer holds all, so no need to write the output */
+        /* output buffer holds all, so no need to write the output */
     } while (zerr == Z_OK);
 
     assert(zerr == Z_STREAM_END);       /* other errors should've been caught */
@@ -197,7 +197,7 @@ public:
     {
     }
 
-    long read(unsigned char** nextBuffer, long readSize) {
+    long read(unsigned char** nextBuffer, long /*readSize*/) {
         if (!mBufferReturned) {
             mBufferReturned = true;
             *nextBuffer = mInput;
