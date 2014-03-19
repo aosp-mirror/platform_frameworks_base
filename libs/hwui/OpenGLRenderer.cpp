@@ -3226,11 +3226,13 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& c
     const int casterVertexCount = casterVertices2d.size();
     Vector3 casterPolygon[casterVertexCount];
     float minZ = FLT_MAX;
+    float maxZ = -FLT_MAX;
     for (int i = 0; i < casterVertexCount; i++) {
         const Vertex& point2d = casterVertices2d[i];
         casterPolygon[i] = Vector3(point2d.x, point2d.y, 0);
         mapPointFakeZ(casterPolygon[i], casterTransformXY, casterTransformZ);
         minZ = fmin(minZ, casterPolygon[i].z);
+        maxZ = fmax(maxZ, casterPolygon[i].z);
     }
 
     // map the centroid of the caster into 3d
@@ -3248,6 +3250,15 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& c
         }
         centroid3d.z += casterLift;
     }
+
+    // Check whether we want to draw the shadow at all by checking the caster's
+    // bounds against clip.
+    // We only have ortho projection, so we can just ignore the Z in caster for
+    // simple rejection calculation.
+    Rect localClip = mSnapshot->getLocalClip();
+    Rect casterBounds(casterOutline->getBounds());
+    casterTransformXY.mapRect(casterBounds);
+
     bool isCasterOpaque = (casterAlpha == 1.0f);
     // draw caster's shadows
     if (mCaches.propertyAmbientShadowStrength > 0) {
@@ -3255,7 +3266,7 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& c
         VertexBuffer ambientShadowVertexBuffer;
         VertexBufferMode vertexBufferMode = ShadowTessellator::tessellateAmbientShadow(
                 isCasterOpaque, casterPolygon, casterVertexCount, centroid3d,
-                ambientShadowVertexBuffer);
+                casterBounds, localClip, maxZ, ambientShadowVertexBuffer);
         drawVertexBuffer(vertexBufferMode, ambientShadowVertexBuffer, &paint);
     }
 
@@ -3266,7 +3277,8 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& c
                 mCaches.propertyLightPosYScale, mCaches.propertyLightPosZScale);
         VertexBufferMode vertexBufferMode = ShadowTessellator::tessellateSpotShadow(
                 isCasterOpaque, casterPolygon, casterVertexCount, lightPosScale,
-                *currentTransform(), getWidth(), getHeight(), spotShadowVertexBuffer);
+                *currentTransform(), getWidth(), getHeight(), casterBounds, localClip,
+                spotShadowVertexBuffer);
         drawVertexBuffer(vertexBufferMode, spotShadowVertexBuffer, &paint);
     }
 

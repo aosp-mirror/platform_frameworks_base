@@ -35,13 +35,24 @@ static inline T max(T a, T b) {
 
 VertexBufferMode ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
         const Vector3* casterPolygon, int casterVertexCount,
-        const Vector3& centroid3d, VertexBuffer& shadowVertexBuffer) {
+        const Vector3& centroid3d, const Rect& casterBounds,
+        const Rect& localClip, float maxZ, VertexBuffer& shadowVertexBuffer) {
     ATRACE_CALL();
 
     // A bunch of parameters to tweak the shadow.
     // TODO: Allow some of these changable by debug settings or APIs.
     const float heightFactor = 1.0f / 128;
     const float geomFactor = 64;
+
+    Rect ambientShadowBounds(casterBounds);
+    ambientShadowBounds.outset(maxZ * geomFactor * heightFactor);
+
+    if (!localClip.intersects(ambientShadowBounds)) {
+#if DEBUG_SHADOW
+        ALOGD("Ambient shadow is out of clip rect!");
+#endif
+        return kVertexBufferMode_OnePolyRingShadow;
+    }
 
     return AmbientShadow::createAmbientShadow(isCasterOpaque, casterPolygon,
             casterVertexCount, centroid3d, heightFactor, geomFactor,
@@ -52,7 +63,8 @@ VertexBufferMode ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
 VertexBufferMode ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
         const Vector3* casterPolygon, int casterVertexCount,
         const Vector3& lightPosScale, const mat4& receiverTransform,
-        int screenWidth, int screenHeight, VertexBuffer& shadowVertexBuffer) {
+        int screenWidth, int screenHeight, const Rect& casterBounds,
+        const Rect& localClip, VertexBuffer& shadowVertexBuffer) {
     ATRACE_CALL();
 
     // A bunch of parameters to tweak the shadow.
@@ -72,6 +84,18 @@ VertexBufferMode ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
 
     const float lightSize = maximal / 4;
     const int lightVertexCount = 8;
+
+    // Now light and caster are both in local space, we will check whether
+    // the shadow is within the clip area.
+    Rect lightRect = Rect(lightCenter.x - lightSize, lightCenter.y - lightSize,
+            lightCenter.x + lightSize, lightCenter.y + lightSize);
+    lightRect.unionWith(localClip);
+    if (!lightRect.intersects(casterBounds)) {
+#if DEBUG_SHADOW
+        ALOGD("Spot shadow is out of clip rect!");
+#endif
+        return kVertexBufferMode_OnePolyRingShadow;
+    }
 
     VertexBufferMode mode = SpotShadow::createSpotShadow(isCasterOpaque,
             casterPolygon, casterVertexCount, lightCenter, lightSize,
