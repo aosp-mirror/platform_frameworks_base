@@ -18,6 +18,7 @@ package com.android.systemui.recents;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -31,6 +32,7 @@ public class RecentsConfiguration {
     DisplayMetrics mDisplayMetrics;
 
     public Rect systemInsets = new Rect();
+    public Rect displayRect = new Rect();
 
     /** Private constructor */
     private RecentsConfiguration() {}
@@ -51,10 +53,11 @@ public class RecentsConfiguration {
 
     /** Updates the state, given the specified context */
     void update(Context context) {
-        mDisplayMetrics = context.getResources().getDisplayMetrics();
+        Resources res = context.getResources();
+        DisplayMetrics dm = res.getDisplayMetrics();
+        mDisplayMetrics = dm;
 
-        boolean isPortrait = context.getResources().getConfiguration().orientation ==
-                Configuration.ORIENTATION_PORTRAIT;
+        displayRect.set(0, 0, dm.widthPixels, dm.heightPixels);
     }
 
     public void updateSystemInsets(Rect insets) {
