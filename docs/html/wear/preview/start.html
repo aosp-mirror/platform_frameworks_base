@@ -376,12 +376,11 @@ onkeyup="return search_changed(event, false, '/')" />
     <div class="cols">
 
   <div class="col-5">
-<p>The Android Wear Developer Preview provides tools and APIs that allow you to
+<p>The Android Wear Developer Preview includes tools and APIs that allow you to
 enhance your app notifications
-to provide an optimized user experience on Android Wear.</p>
+to provide an optimized user experience on Android wearables.</p>
 
-<p>With the Android Wear
-Developer Preview, you can:</p>
+<p>With the Android Wear Developer Preview, you can:</p>
 
 <ul>
   <li>Run the Android Wear platform in the Android emulator.</li>
@@ -438,12 +437,12 @@ preview support library and receive access to the
 </ol>
 
 <p class="note"><strong>Note:</strong>
-If you're already using the ADT plugin for Eclipse, you must update to version 22.6.1 or higher.
-To check for updates, select <strong>Help &gt; Check for updates</strong> in the Eclipse toolbar. </p>
+If you're using the ADT plugin for Eclipse, you must update to version 22.6.1 or higher.
+If you're using Android Studio, you must update to version 0.5.1 or higher</p>
 
 
 
-<h2 id="Install">1. Install the Android Wear system image</h2>
+<h2 id="Install">1. Install the Android Wear System Image</h2>
 
 
 <ol>
@@ -464,7 +463,9 @@ To check for updates, select <strong>Help &gt; Check for updates</strong> in the
     </ol>
   </li>
 
-  <li>Below Android 4.4.2, select <strong>Android Wear ARM EABI v7a System Image</strong>.</li>
+  <li>Below Android 4.4.2, select <strong>Android Wear ARM EABI v7a System Image</strong>.
+<p class="note"><strong>Note:</strong> Android Wear is designed to support multiple processor architectures.
+</p></li>
   <li>Below Extras, ensure that you have the latest version of the
 <a href="/tools/support-library/index.html">Android Support Library</a>.
     If an update is available, select <strong>Android Support Library</strong>. If you're using Android Studio, also select <strong>Android Support Repository</strong>.</li>
@@ -490,11 +491,13 @@ you want to create an emulator with a square or round display.</li>
 <li>For the Device, select <strong>Android Wear Square</strong> or
 	<strong>Android Wear Round</strong>.</li>
 <li>For the Target, select <strong>Android 4.4.2 - API Level 19</strong> (or higher).</li>
-<li>For the CPU/ABI, select <strong>Android Wear ARM (armeabi-v7a)</strong>.</li>
+<li>For the CPU/ABI, select <strong>Android Wear ARM (armeabi-v7a)</strong>.
+<p class="note"><strong>Note:</strong> Android Wear is designed to support multiple processor architectures.
+</p></li>
 <li>For the Skin, select <strong>AndroidWearSquare</strong> or
 <strong>AndroidWearRound</strong>.</li>
 <li>Leave all other options set to their defaults and click <strong>OK</strong>.
-  <p>Although real Android Wear devices do not provide a keyboard as an input method,
+  <p>Although real Android wearables do not provide a keyboard as an input method,
     you should keep <strong>Hardware keyboard present</strong> selected so you can
     provide text input on screens where users will instead provide voice input.</p>
 </li>
@@ -526,8 +529,8 @@ unpredictable.</p>
 
 <h2 id="SetupApp">3. Set Up the Android Wear Preview App</h2>
 
-<p>The <em>Android Wear Preview</em> app is an app you must have installed on your Android
-device (a phone or tablet) in order to deliver app notifications to the Android Wear emulator.</p>
+<p>To view your app's notifications on the Android Wear emulator, you must have the
+<em>Android Wear Preview</em> app installed on your Android device (a phone or tablet).</p>
 
 <p>To receive the Android Wear Preview app, you must <a
 href="/wear/preview/signup.html">sign up for the Developer Preview</a> using the same
