@@ -228,7 +228,7 @@ public final class AccessibilityManager {
      * @hide
      */
     public IAccessibilityManagerClient getClient() {
-        return mClient
+        return mClient;
     }
 
     /**
