@@ -38,7 +38,7 @@
     <string name="mmiFdnError" msgid="5224398216385316471">"Operácia je obmedzená len na režim čísla pevného vytáčania."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Služba bola povolená."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Služba bola povolená pre:"</string>
-    <string name="serviceDisabled" msgid="1937553226592516411">"Služba bola zakázaná."</string>
+    <string name="serviceDisabled" msgid="1937553226592516411">"Služba bola vypnutá."</string>
     <string name="serviceRegistered" msgid="6275019082598102493">"Registrácia prebehla úspešne."</string>
     <string name="serviceErased" msgid="1288584695297200972">"Vymazanie prebehlo úspešne."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"Nesprávne heslo."</string>
@@ -522,14 +522,14 @@
     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Umožňuje aplikácii formátovať vymeniteľný ukladací priestor."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"získať informácie o internom ukladacom priestore"</string>
     <string name="permdesc_asec_access" msgid="3094563844593878548">"Umožňuje aplikácii získať informácie o internom ukladacom priestore."</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"vytvoriť interný ukladací priestor"</string>
-    <string name="permdesc_asec_create" msgid="4558869273585856876">"Umožňuje aplikácii vytvoriť interný ukladací priestor."</string>
-    <string name="permlab_asec_destroy" msgid="526928328301618022">"zničiť interný ukladací priestor"</string>
-    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Umožňuje aplikácii zničiť interný ukladací priestor."</string>
-    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"pripojiť alebo odpojiť interný ukladací priestor"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Umožňuje aplikácii pripojiť alebo odpojiť interný ukladací priestor."</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"premenovať interný ukladací priestor"</string>
-    <string name="permdesc_asec_rename" msgid="1794757588472127675">"Umožňuje aplikácii premenovať interný ukladací priestor."</string>
+    <string name="permlab_asec_create" msgid="6414757234789336327">"vytvoriť interné úložisko"</string>
+    <string name="permdesc_asec_create" msgid="4558869273585856876">"Umožňuje aplikácii vytvoriť interné úložisko."</string>
+    <string name="permlab_asec_destroy" msgid="526928328301618022">"zničiť interné úložisko"</string>
+    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Umožňuje aplikácii zničiť interné úložisko."</string>
+    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"pripojiť alebo odpojiť interné úložisko"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Umožňuje aplikácii pripojiť alebo odpojiť interné úložisko."</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"premenovať interné úložisko"</string>
+    <string name="permdesc_asec_rename" msgid="1794757588472127675">"Umožňuje aplikácii premenovať interné úložisko."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"ovládať vibrovanie"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Umožňuje aplikácii ovládať vibrácie."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"ovládanie kontrolky"</string>

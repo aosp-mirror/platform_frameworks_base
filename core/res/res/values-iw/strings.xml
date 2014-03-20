@@ -1101,7 +1101,7 @@
     <string name="cut" msgid="3092569408438626261">"חתוך"</string>
     <string name="copy" msgid="2681946229533511987">"העתק"</string>
     <string name="paste" msgid="5629880836805036433">"הדבק"</string>
-    <string name="replace" msgid="5781686059063148930">"להחליף..."</string>
+    <string name="replace" msgid="5781686059063148930">"החלף..."</string>
     <string name="delete" msgid="6098684844021697789">"מחק"</string>
     <string name="copyUrl" msgid="2538211579596067402">"העתק כתובת אתר"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"בחר טקסט"</string>
