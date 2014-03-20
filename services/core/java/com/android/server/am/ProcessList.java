@@ -181,6 +181,11 @@ final class ProcessList {
     };
     // The actual OOM killer memory levels we are using.
     private final int[] mOomMinFree = new int[mOomAdj.length];
+    // Optimal OOM killer memory levels for Low-Tier devices.
+    private final int[] mOomMinFreeLowRam = new int[] {
+            12288, 20478, 32766,
+            40962, 49152, 57342
+    };
 
     private final long mTotalMemMb;
 
@@ -237,7 +242,13 @@ final class ProcessList {
 
         final boolean is64bit = Build.SUPPORTED_64_BIT_ABIS.length > 0;
 
+        // Overwrite calculated LMK parameters with the low-tier tested/validated values
+        boolean is_lowram = SystemProperties.getBoolean("ro.config.low_ram",false);
         for (int i=0; i<mOomAdj.length; i++) {
+            if (is_lowram) {
+                mOomMinFree[i] = mOomMinFreeLowRam[i];
+            }
+            else {
             int low = mOomMinFreeLow[i];
             int high = mOomMinFreeHigh[i];
             if (is64bit) {
@@ -246,6 +257,7 @@ final class ProcessList {
                 else if (i == 5) high = (high*7)/4;
             }
             mOomMinFree[i] = (int)(low + ((high-low)*scale));
+            }
         }
 
         if (minfree_abs >= 0) {
