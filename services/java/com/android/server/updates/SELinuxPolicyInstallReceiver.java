@@ -40,12 +40,20 @@ public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
     private static final String fileContextsPath = "file_contexts";
     private static final String propertyContextsPath = "property_contexts";
     private static final String seappContextsPath = "seapp_contexts";
+    private static final String versionPath = "selinux_version";
+    private static final String macPermissionsPath = "mac_permissions.xml";
 
     public SELinuxPolicyInstallReceiver() {
         super("/data/security/bundle", "sepolicy_bundle", "metadata/", "version");
     }
 
     private void backupContexts(File contexts) {
+        new File(contexts, versionPath).renameTo(
+                new File(contexts, versionPath + "_backup"));
+
+        new File(contexts, macPermissionsPath).renameTo(
+                new File(contexts, macPermissionsPath + "_backup"));
+
         new File(contexts, seappContextsPath).renameTo(
                 new File(contexts, seappContextsPath + "_backup"));
 
@@ -60,6 +68,8 @@ public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
     }
 
     private void copyUpdate(File contexts) {
+        new File(updateDir, versionPath).renameTo(new File(contexts, versionPath));
+        new File(updateDir, macPermissionsPath).renameTo(new File(contexts, macPermissionsPath));
         new File(updateDir, seappContextsPath).renameTo(new File(contexts, seappContextsPath));
         new File(updateDir, propertyContextsPath).renameTo(new File(contexts, propertyContextsPath));
         new File(updateDir, fileContextsPath).renameTo(new File(contexts, fileContextsPath));
@@ -75,11 +85,13 @@ public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
     }
 
     private int[] readChunkLengths(BufferedInputStream bundle) throws IOException {
-        int[] chunks = new int[4];
+        int[] chunks = new int[6];
         chunks[0] = readInt(bundle);
         chunks[1] = readInt(bundle);
         chunks[2] = readInt(bundle);
         chunks[3] = readInt(bundle);
+        chunks[4] = readInt(bundle);
+        chunks[5] = readInt(bundle);
         return chunks;
     }
 
@@ -94,10 +106,12 @@ public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
         BufferedInputStream stream = new BufferedInputStream(new FileInputStream(updateContent));
         try {
             int[] chunkLengths = readChunkLengths(stream);
-            installFile(new File(updateDir, seappContextsPath), stream, chunkLengths[0]);
-            installFile(new File(updateDir, propertyContextsPath), stream, chunkLengths[1]);
-            installFile(new File(updateDir, fileContextsPath), stream, chunkLengths[2]);
-            installFile(new File(updateDir, sepolicyPath), stream, chunkLengths[3]);
+            installFile(new File(updateDir, versionPath), stream, chunkLengths[0]);
+            installFile(new File(updateDir, macPermissionsPath), stream, chunkLengths[1]);
+            installFile(new File(updateDir, seappContextsPath), stream, chunkLengths[2]);
+            installFile(new File(updateDir, propertyContextsPath), stream, chunkLengths[3]);
+            installFile(new File(updateDir, fileContextsPath), stream, chunkLengths[4]);
+            installFile(new File(updateDir, sepolicyPath), stream, chunkLengths[5]);
         } finally {
             IoUtils.closeQuietly(stream);
         }
