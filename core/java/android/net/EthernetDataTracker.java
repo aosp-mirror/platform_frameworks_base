@@ -183,8 +183,10 @@ public class EthernetDataTracker extends BaseNetworkStateTracker {
         Thread dhcpThread = new Thread(new Runnable() {
             public void run() {
                 DhcpResults dhcpResults = new DhcpResults();
+                mNetworkInfo.setDetailedState(DetailedState.OBTAINING_IPADDR, null, mHwAddr);
                 if (!NetworkUtils.runDhcp(mIface, dhcpResults)) {
                     Log.e(TAG, "DHCP request error:" + NetworkUtils.getDhcpError());
+                    mNetworkInfo.setDetailedState(DetailedState.DISCONNECTED, null, mHwAddr);
                     return;
                 }
                 mLinkProperties = dhcpResults.linkProperties;
