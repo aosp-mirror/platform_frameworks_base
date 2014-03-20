@@ -18,6 +18,7 @@
 #define ANDROID_HWUI_RECT_H
 
 #include <cmath>
+#include <SkRect.h>
 
 #include <utils/Log.h>
 
@@ -66,6 +67,13 @@ public:
             top(0.0f),
             right(width),
             bottom(height) {
+    }
+
+    inline Rect(const SkRect& rect):
+            left(rect.fLeft),
+            top(rect.fTop),
+            right(rect.fRight),
+            bottom(rect.fBottom) {
     }
 
     friend int operator==(const Rect& a, const Rect& b) {
