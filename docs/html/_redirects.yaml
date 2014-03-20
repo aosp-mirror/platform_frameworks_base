@@ -313,6 +313,9 @@ redirects:
 
 # -------------------- MISC ----------------------
 
+- from: /shareables/training/BitmapFun.zip
+  to: /downloads/samples/DisplayingBitmaps.zip
+
 - from: /shareables/...
   to: http://commondatastorage.googleapis.com/androiddevelopers/shareables/...
 
