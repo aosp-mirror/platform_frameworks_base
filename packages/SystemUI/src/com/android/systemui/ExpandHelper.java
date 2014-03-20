@@ -22,6 +22,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.media.AudioManager;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.Gravity;
@@ -605,7 +606,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             mVibrator = (android.os.Vibrator)
                     mContext.getSystemService(Context.VIBRATOR_SERVICE);
         }
-        mVibrator.vibrate(duration);
+        mVibrator.vibrate(duration, AudioManager.STREAM_SYSTEM);
     }
 }
 
