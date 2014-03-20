@@ -690,7 +690,7 @@
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"conèixer les observacions sobre les condicions de la xarxa"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permet que una aplicació conegui les observacions sobre les condicions de la xarxa. No s\'ha de necessitar mai per a aplicacions normals."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"canviar el calibratge del dispositiu d\'entrada"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permet que l\'aplicació modifiqui els paràmetres de calibratge de la pantalla tàctil. S\'ha de procurar no fer servir mai aquesta opció per a les aplicacions normals."</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permet que l\'aplicació modifiqui els paràmetres de calibratge de la pantalla tàctil. No ha de ser mai necessari per a aplicacions normals."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controla la longitud i els caràcters permesos a les contrasenyes de desbloqueig de pantalla."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Controlar intents de desbloqueig de pantalla"</string>
