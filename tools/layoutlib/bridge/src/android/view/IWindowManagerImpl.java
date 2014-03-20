@@ -458,44 +458,8 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public IBinder getFocusedWindowToken() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void setInputFilter(IInputFilter filter) throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void getWindowFrame(IBinder token, Rect outFrame) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void setMagnificationCallbacks(IMagnificationCallbacks callbacks) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void setMagnificationSpec(MagnificationSpec spec) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public MagnificationSpec getCompatibleMagnificationSpecForWindow(IBinder windowToken) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean isRotationFrozen() throws RemoteException {
         // TODO Auto-generated method stub
         return false;
-    }
-
-    @Override
-    public void setTouchExplorationEnabled(boolean enabled) {
     }
 }
