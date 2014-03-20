@@ -106,7 +106,7 @@ static void android_media_MediaHTTPConnection_native_init(JNIEnv *env) {
             env, env->FindClass("android/media/MediaHTTPConnection"));
     CHECK(clazz.get() != NULL);
 
-    gFields.context = env->GetFieldID(clazz.get(), "mNativeContext", "I");
+    gFields.context = env->GetFieldID(clazz.get(), "mNativeContext", "J");
     CHECK(gFields.context != NULL);
 
     gFields.readAtMethodID = env->GetMethodID(clazz.get(), "readAt", "(J[BI)I");
