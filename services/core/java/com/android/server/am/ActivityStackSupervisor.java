@@ -1776,6 +1776,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
             targetStack = sourceTask.stack;
+            targetStack.moveToFront();
             mWindowManager.moveTaskToTop(sourceTask.taskId);
             if (!addingToTask &&
                     (launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
@@ -1827,6 +1828,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // of a new task...  just put it in the top task, though these days
             // this case should never happen.
             targetStack = adjustStackFocus(r);
+            targetStack.moveToFront();
             ActivityRecord prev = targetStack.topActivity();
             r.setTask(prev != null ? prev.task
                     : targetStack.createTaskRecord(getNextTaskId(), r.info, intent, true),
