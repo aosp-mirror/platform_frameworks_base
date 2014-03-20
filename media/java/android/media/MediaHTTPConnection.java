@@ -269,6 +269,6 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
         native_init();
     }
 
-    private int mNativeContext;
+    private long mNativeContext;
 
 }
