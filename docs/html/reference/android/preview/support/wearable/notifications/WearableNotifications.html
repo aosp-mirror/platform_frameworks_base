@@ -450,15 +450,39 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Helper providing extensions to android notifications for use with wearable devices.
+<p itemprop="articleBody">Helper class that contains wearable extensions for notifications.
+ Always use the <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html">WearableNotifications.Builder</a></code> to create instances of this class.
+ <p class="note"> See
+ <a href="/wear/notifications/creating.html">Creating Notifications
+ for Android Wear</a> for more information on how to use this class.
+ <p>
+ To create a notification with wearable extensions:
+ <ol>
+   <li>Create a <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code>, setting any desired
+   properties.
+   <li>Create a <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html">WearableNotifications.Builder</a></code>, passing in the
+   <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code> as a starting point.
+   <li>Set wearable-specific properties using the
+   <code>add</code> and <code>set</code> methods of <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html">WearableNotifications.Builder</a></code>.
+   <li>Call <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#build()">build()</a></code> to create the notification.
+   <li>Post the notification to the notification
+   system with the <code>NotificationManagerCompat.notify(...)</code> methods
+   and not the <code>NotificationManager.notify(...)</code> methods.
+ </ol>
 
- <p>To build notifications with wearable extensions, use the <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html">WearableNotifications.Builder</a></code> class.
- Notifications created using Builder should be posted to the notification system
- using the <code>NotificationManagerCompat.notify(...)</code> methods instead of
- <code>NotificationManager.notify(...)</code>.
-
- <p>Once a notification is built, a variety of methods are provide in this utility to access
- the value of various notification fields in a backwards compatible manner.
+ <pre class="prettyprint">
+ NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext)
+         .setContentTitle(&quot;New mail from &quot; + sender.toString())
+         .setContentText(subject)
+         .setSmallIcon(R.drawable.new_mail);
+ Notification notif = new WearableNotifications.Builder(builder)
+         .setLocalOnly(true)
+         .setMinPriority()
+         .build();
+ NotificationManagerCompat.from(mContext).notify(0, notif);</pre>
+ <p>When you receive a notification object from the builder, the methods in
+ this class let you access the values of various notification fields in
+ a backward-compatible manner.
 </p>
 
 
@@ -502,8 +526,8 @@ Summary:
         
         class</nobr></td>
       <td class="jd-linkcol"><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></td>
-      <td class="jd-descrcol" width="100%">Subclass of <code><a href="/reference/android/support/v4/app/NotificationCompat.Action.html">NotificationCompat.Action</a></code> which adds support for additional
- wearable extensions.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">Subclass of <code><a href="/reference/android/support/v4/app/NotificationCompat.Action.html">NotificationCompat.Action</a></code> that adds additional
+ wearable extensions for actions.&nbsp;</td>
     </tr>
     
     
@@ -515,8 +539,8 @@ Summary:
         
         class</nobr></td>
       <td class="jd-linkcol"><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html">WearableNotifications.Builder</a></td>
-      <td class="jd-descrcol" width="100%">Builder object that wraps a <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code> to provide
- methods for adding wearable extensions to a notification.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">Builder class that wraps a <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code> to add
+ wearable extensions for a notification.&nbsp;</td>
     </tr>
     
     
@@ -548,8 +572,9 @@ Summary:
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#GROUP_ORDER_SUMMARY">GROUP_ORDER_SUMMARY</a></td>
-        <td class="jd-descrcol" width="100%">Sentinel value provided to the groupOrder parameter <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#setGroup(android.app.Notification, java.lang.String)">setGroup(Notification, String)</a></code> to indicate that
- this member of a notification group is the summary of the group.</td>
+        <td class="jd-descrcol" width="100%">Sentinel value provided to the <code>groupOrder</code> parameter of the
+ <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#setGroup(android.app.Notification, java.lang.String, int)">setGroup(android.app.Notification, java.lang.String, int)</a></code>
+ method.</td>
     </tr>
     
     
@@ -589,8 +614,8 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#getAction(android.app.Notification, int)">getAction</a></span>(<a href="http://developer.android.com/reference/android/app/Notification.html">Notification</a> notif, int actionIndex)</nobr>
         
-        <div class="jd-descrdiv">Get a <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></code> wrapper for the notification at index <code>actionIndex</code>
- in the <code><a href="/http://developer.android.com/reference/android/app/Notification.html#actions">actions</a></code> array.</div>
+        <div class="jd-descrdiv">Get a <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></code> wrapper for the notification at <code>actionIndex</code>
+ in the <code><a href="http://developer.android.com/reference/android/app/Notification.html#actions">actions</a></code> array.</div>
   
   </td></tr>
 
@@ -662,7 +687,7 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#getContentIntentRemoteInputs(android.app.Notification)">getContentIntentRemoteInputs</a></span>(<a href="http://developer.android.com/reference/android/app/Notification.html">Notification</a> notif)</nobr>
         
-        <div class="jd-descrdiv">Gets the <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html">RemoteInput</a></code>s associated with the content intent.</div>
+        <div class="jd-descrdiv">Gets the <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html">RemoteInput</a></code> objects associated with the content intent.</div>
   
   </td></tr>
 
@@ -680,8 +705,8 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#getExtras(android.app.Notification)">getExtras</a></span>(<a href="http://developer.android.com/reference/android/app/Notification.html">Notification</a> notif)</nobr>
         
-        <div class="jd-descrdiv">Gets the <code><a href="/http://developer.android.com/reference/android/app/Notification.html#extras">extras</a></code> field from a notification in a backwards
- compatible manner.</div>
+        <div class="jd-descrdiv">Gets the <code><a href="http://developer.android.com/reference/android/app/Notification.html#extras">extras</a></code> field from a notification in a backward-compatible
+ manner.</div>
   
   </td></tr>
 
@@ -919,7 +944,7 @@ Summary:
         <span class="sympad"><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#setMinPriority(android.app.Notification)">setMinPriority</a></span>(<a href="http://developer.android.com/reference/android/app/Notification.html">Notification</a> notif)</nobr>
         
         <div class="jd-descrdiv">Set the priority of this notification to be minimum priority level
- (<code><a href="/http://developer.android.com/reference/android/app/Notification.html#PRIORITY_MIN">PRIORITY_MIN</a></code>).</div>
+ (<code><a href="http://developer.android.com/reference/android/app/Notification.html#PRIORITY_MIN">PRIORITY_MIN</a></code>).</div>
   
   </td></tr>
 
@@ -1246,8 +1271,10 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sentinel value provided to the groupOrder parameter <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#setGroup(android.app.Notification, java.lang.String)">setGroup(Notification, String)</a></code> to indicate that
- this member of a notification group is the summary of the group.
+  <div class="jd-tagdata jd-tagdescr"><p>Sentinel value provided to the <code>groupOrder</code> parameter of the
+ <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#setGroup(android.app.Notification, java.lang.String, int)">setGroup(android.app.Notification, java.lang.String, int)</a></code>
+ method. This value indicates that this index of the
+ notification group is the summary of the group.
 </p></div>
 
     
@@ -1309,9 +1336,22 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Get a <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></code> wrapper for the notification at index <code>actionIndex</code>
- in the <code><a href="/http://developer.android.com/reference/android/app/Notification.html#actions">actions</a></code> array.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Get a <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></code> wrapper for the notification at <code>actionIndex</code>
+ in the <code><a href="http://developer.android.com/reference/android/app/Notification.html#actions">actions</a></code> array.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to inspect</td>
+        </tr>
+        <tr>
+          <th>actionIndex</td>
+          <td>the index of the desired action
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
@@ -1341,6 +1381,20 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Get the number of actions present on this notification.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to inspect</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the number of actions for this notification
+</li></ul>
+  </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
       <ul class="nolist"><li><code><a href="/http://developer.android.com/reference/android/app/Notification.html#actions">actions</a></code></li>
@@ -1377,6 +1431,19 @@ From class
   <div class="jd-tagdata jd-tagdescr"><p>Get the big action icon to be displayed with this notification. Big actions show
  a hint to users about the action taken when the content intent is triggered.</p></div>
   <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to inspect</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the icon or <code>0</code> if it wasn't set</li></ul>
+  </div>
+  <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
       <ul class="nolist"><li><code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#setBigActionIcon(android.app.Notification, int)">setBigActionIcon(Notification, int)</a></code></li>
       </ul>
@@ -1411,6 +1478,19 @@ From class
       
   <div class="jd-tagdata jd-tagdescr"><p>Get the big action icon subtext to be shown with a big action icon.</p></div>
   <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to inspect</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the subtext of the big action icon or <code>null</code> if it wasn't exist.</li></ul>
+  </div>
+  <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
       <ul class="nolist"><li><code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#setBigActionIcon(android.app.Notification, int)">setBigActionIcon(Notification, int)</a></code></li>
       </ul>
@@ -1443,8 +1523,21 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Gets the <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html">RemoteInput</a></code>s associated with the content intent.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html">RemoteInput</a></code> objects associated with the content intent.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to inspect</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>array of RemoteInput objects or <code>null</code> if it doesn't exist
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1473,10 +1566,23 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Gets the <code><a href="/http://developer.android.com/reference/android/app/Notification.html#extras">extras</a></code> field from a notification in a backwards
- compatible manner. Extras field was supported from JellyBean (Api level 16)
- forwards. This function will return null on older api levels.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the <code><a href="http://developer.android.com/reference/android/app/Notification.html#extras">extras</a></code> field from a notification in a backward-compatible
+ manner. Extras field was supported from JellyBean (API level 16)
+ forwards. This function will return null on older API levels.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to inspect</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the extras associated with this notification.
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1506,8 +1612,17 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Get the key used to group this notification into a cluster or stack
- with other notifications. This key is unique within a package.
-</p></div>
+ with other notifications. This key is unique within a package.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to inspect
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
@@ -1539,8 +1654,21 @@ From class
   <div class="jd-tagdata jd-tagdescr"><p>Get the sort order of this notification within a group of notifications
  with the same group key set. Group orders are 0-indexed integers that are used
  to sort notifications in ascending order. Can also be the sentinel value
- <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#GROUP_ORDER_SUMMARY">GROUP_ORDER_SUMMARY</a></code> if this is the summary notification for a group.
-</p></div>
+ <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#GROUP_ORDER_SUMMARY">GROUP_ORDER_SUMMARY</a></code> if this is the summary notification for a group.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to inspect</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the sort order of this notification within this group
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1569,8 +1697,22 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Get a hint that this notification's icon should not be displayed.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Get a hint that this notification's icon should not be displayed.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to inspect</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li><code>true</code> if this icon should not be displayed, false otherwise.
+ The default value is <code>false</code> if this was never set.
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1602,8 +1744,22 @@ From class
   <div class="jd-tagdata jd-tagdescr"><p>Get whether or not this notification is only relevant to the current device.
 
  <p>Some notifications can be bridged to other devices for remote display.
- If this hint is set, it is recommended that this notification not be bridged.
-</p></div>
+ If this hint is set, it is recommended that this notification not be bridged.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to inspect</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li><code>true</code> if this notification is local only, <code>false</code> otherwise.
+        Default value is <code>false</code> if not set.
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1635,8 +1791,21 @@ From class
   <div class="jd-tagdata jd-tagdescr"><p>Get the array of additional pages of content for displaying this notification. The
  current notification forms the first page, and elements within this array form
  subsequent pages. This field can be used to separate a notification into multiple
- sections.
-</p></div>
+ sections.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to inspect</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the pages for this notification
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1671,8 +1840,12 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
+          <th>notif</td>
+          <td>the notification to modify</td>
+        </tr>
+        <tr>
           <th>icon</td>
-          <td>Icon to display for the content action.
+          <td>icon to display for the content action.
 </td>
         </tr>
       </table>
@@ -1711,8 +1884,12 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
+          <th>notif</td>
+          <td>the notification to modify</td>
+        </tr>
+        <tr>
           <th>icon</td>
-          <td>Icon to display for the content action.</td>
+          <td>icon to display for the content action.</td>
         </tr>
         <tr>
           <th>subtext</td>
@@ -1751,8 +1928,21 @@ From class
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html">RemoteInput</a></code>s to be collected when the user triggers the
  <code>contentIntent</code>.  These function just as if they were attached to
- an <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></code>.
-</p></div>
+ an <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to modify</td>
+        </tr>
+        <tr>
+          <th>inputs</td>
+          <td>array of <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html">RemoteInput</a></code> objects desired from the user.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
@@ -1787,6 +1977,10 @@ From class
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to modify</td>
+        </tr>
         <tr>
           <th>groupKey</td>
           <td>The group key of the group. Unique within a package.
@@ -1829,6 +2023,10 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
+          <th>notif</td>
+          <td>the notification to modify</td>
+        </tr>
+        <tr>
           <th>groupKey</td>
           <td>The group key of the group. Unique within a package.</td>
         </tr>
@@ -1869,8 +2067,21 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Set a hint that this notification's icon should not be displayed.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Set a hint that this notification's icon should not be displayed.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to modify</td>
+        </tr>
+        <tr>
+          <th>hintHideIcon</td>
+          <td><code>true</code> to hide this icon, <code>false</code> otherwise.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
@@ -1902,8 +2113,22 @@ From class
   <div class="jd-tagdata jd-tagdescr"><p>Set whether or not this notification is only relevant to the current device.
 
  <p>Some notifications can be bridged to other devices for remote display.
- This hint can be set to recommend this notification not be bridged.
-</p></div>
+ This hint can be set to recommend this notification not be bridged.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to modify</td>
+        </tr>
+        <tr>
+          <th>localOnly</td>
+          <td>set to <code>true</code> to keep the notification on this device only,
+        <code>false</code> otherwise.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
@@ -1933,10 +2158,19 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Set the priority of this notification to be minimum priority level
- (<code><a href="/http://developer.android.com/reference/android/app/Notification.html#PRIORITY_MIN">PRIORITY_MIN</a></code>). When set via WearableNotifications, these
+ (<code><a href="http://developer.android.com/reference/android/app/Notification.html#PRIORITY_MIN">PRIORITY_MIN</a></code>). When set via WearableNotifications, these
  minimum priority notifications will bypass the notification manager on platforms
- that do not support ambient level notifications.
-</p></div>
+ that do not support ambient level notifications.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to modify
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
@@ -1968,8 +2202,22 @@ From class
   <div class="jd-tagdata jd-tagdescr"><p>Set additional pages of content to display with this notification. The current
  notification forms the first page, and pages set using this function form
  subsequent pages. This field can be used to separate a notification into multiple
- sections.
-</p></div>
+ sections.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notif</td>
+          <td>the notification to modify</td>
+        </tr>
+        <tr>
+          <th>pages</td>
+          <td>the pages to add to the current notification. Replaces any
+ existing pages with this value.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>

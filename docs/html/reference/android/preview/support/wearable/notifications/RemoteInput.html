@@ -467,22 +467,27 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">A RemoteInput specifies a response to be collected from the user as part of an intent being
- sent. For example, when used with a notification Action, a response may be collected
- when the user triggers the action, and the results sent as data along with the action's
- PendingIntent. The result value is set in the extras of the triggered Intent with the key
- <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html#returnKey">returnKey</a></code>.
+<p itemprop="articleBody">A <code>RemoteInput</code> object collects a response from users and sets the
+ response as an intent extra inside the <code><a href="http://developer.android.com/reference/android/app/PendingIntent.html">PendingIntent</a></code> that is sent.
+ Always use <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.Builder.html">RemoteInput.Builder</a></code> to create instances of this class.
+ <p class="note"> See
+ <a href="/wear/notifications/remote-input.html">Receiving Voice Input from
+ a Notification</a> for more information on how to use this class.
 
- <p>Use the builder class <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.Builder.html">RemoteInput.Builder</a></code> to create this object.
-
- <p>Example which adds a RemoteInput to an Action:
+ <p>The following example adds a <code>RemoteInput</code> to a <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></code>,
+ sets the intent extra key as <code>quick_reply</code>, and sets the label as <code>Quick Reply</code>.
+ Users are prompted to input a response when they trigger the action. The results are sent as an
+ intent extra with the key of <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html#returnKey">returnKey</a></code> in the action's
+ <code><a href="http://developer.android.com/reference/android/app/PendingIntent.html">PendingIntent</a></code>.
 
  <pre class="prettyprint">
+ public static final String EXTRA_QUICK_REPLY_TEXT = "quick_reply";
  WearableNotifications.Action action = new WearableNotifications.Action.Builder(
          R.drawable.reply, &quot;Reply&quot;, actionIntent)
-         .addRemoteInput(new RemoteInput.Builder(EXTRA_QUICK_REPLY_TEXT)
-                 .setLabel("Quick reply").build())
+         <b>.addRemoteInput(new RemoteInput.Builder(EXTRA_QUICK_REPLY_TEXT)
+                 .setLabel("Quick reply").build()</b>)
          .build();</pre>
+
 </p>
 
 
@@ -619,8 +624,8 @@ android.os.Parcelable
           final
           boolean</nobr></td>
           <td class="jd-linkcol"><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html#allowFreeFormInput">allowFreeFormInput</a></td>
-          <td class="jd-descrcol" width="100%">Indicates whether or not the user may provide an arbitrary value for
- this input.</td>
+          <td class="jd-descrcol" width="100%">Indicates whether or not users can provide an arbitrary value for
+ input.</td>
       </tr>
       
     
@@ -631,7 +636,7 @@ android.os.Parcelable
           final
           <a href="http://developer.android.com/reference/java/lang/String.html">String[]</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html#choices">choices</a></td>
-          <td class="jd-descrcol" width="100%">The choices available to the user.</td>
+          <td class="jd-descrcol" width="100%">Possible input choices.</td>
       </tr>
       
     
@@ -642,7 +647,7 @@ android.os.Parcelable
           final
           <a href="http://developer.android.com/reference/java/lang/String.html">String</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html#label">label</a></td>
-          <td class="jd-descrcol" width="100%">The label to be displayed to the user when collecting this input.</td>
+          <td class="jd-descrcol" width="100%">The label to display to users when collecting this input.</td>
       </tr>
       
     
@@ -653,8 +658,7 @@ android.os.Parcelable
           final
           <a href="http://developer.android.com/reference/java/lang/String.html">String</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html#returnKey">returnKey</a></td>
-          <td class="jd-descrcol" width="100%">The extras key to be populated with input from the user when the
- intent is sent.</td>
+          <td class="jd-descrcol" width="100%">The lookup key for the intent extra that the response is set in.</td>
       </tr>
       
     
@@ -1062,10 +1066,10 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Indicates whether or not the user may provide an arbitrary value for
- this input.  If set to false, then the user should select one of the
- provided choices.  It is an error to set this to <code>false</code> and
- not provide <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html#choices">choices</a></code>.
+  <div class="jd-tagdata jd-tagdescr"><p>Indicates whether or not users can provide an arbitrary value for
+ input. If you set this to <code>false</code>, users must select one of the
+ provided <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html#choices">choices</a></code>. An <code><a href="http://developer.android.com/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></code> is thrown
+ if you set this to false and <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html#choices">choices</a></code> is <code>null</code> or empty.
 </p></div>
 
     
@@ -1094,8 +1098,8 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The choices available to the user.  May be null if there are no choices
- to present to the user.
+  <div class="jd-tagdata jd-tagdescr"><p>Possible input choices. This can be <code>null</code>
+ if there are no choices to present.
 </p></div>
 
     
@@ -1124,7 +1128,7 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The label to be displayed to the user when collecting this input.
+  <div class="jd-tagdata jd-tagdescr"><p>The label to display to users when collecting this input.
 </p></div>
 
     
@@ -1153,8 +1157,8 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The extras key to be populated with input from the user when the
- intent is sent.
+  <div class="jd-tagdata jd-tagdescr"><p>The lookup key for the intent extra that the response is set in. This is populated
+ when the <code><a href="http://developer.android.com/reference/android/app/PendingIntent.html">PendingIntent</a></code> is sent.
 </p></div>
 
     
