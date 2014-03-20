@@ -84,7 +84,7 @@ static fields_t gFields;
 static sp<JMediaHTTPConnection> setObject(
         JNIEnv *env, jobject thiz, const sp<JMediaHTTPConnection> &conn) {
     sp<JMediaHTTPConnection> old =
-        (JMediaHTTPConnection *)env->GetIntField(thiz, gFields.context);
+        (JMediaHTTPConnection *)env->GetLongField(thiz, gFields.context);
 
     if (conn != NULL) {
         conn->incStrong(thiz);
@@ -92,13 +92,13 @@ static sp<JMediaHTTPConnection> setObject(
     if (old != NULL) {
         old->decStrong(thiz);
     }
-    env->SetIntField(thiz, gFields.context, (int)conn.get());
+    env->SetLongField(thiz, gFields.context, (jlong)conn.get());
 
     return old;
 }
 
 static sp<JMediaHTTPConnection> getObject(JNIEnv *env, jobject thiz) {
-    return (JMediaHTTPConnection *)env->GetIntField(thiz, gFields.context);
+    return (JMediaHTTPConnection *)env->GetLongField(thiz, gFields.context);
 }
 
 static void android_media_MediaHTTPConnection_native_init(JNIEnv *env) {
