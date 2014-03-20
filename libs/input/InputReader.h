@@ -1054,6 +1054,7 @@ private:
     struct Parameters {
         bool hasAssociatedDisplay;
         bool orientationAware;
+        bool handlesKeyRepeat;
     } mParameters;
 
     void configureParameters();
