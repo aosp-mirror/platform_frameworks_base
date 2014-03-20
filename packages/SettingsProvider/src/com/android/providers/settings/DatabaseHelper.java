@@ -69,7 +69,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 100;
+    private static final int DATABASE_VERSION = 101;
 
     private Context mContext;
     private int mUserHandle;
@@ -1591,6 +1591,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 100;
         }
+        if (upgradeVersion == 100) {
+           // Catch devices that were initialized to version 100 and missed these in onCreate()
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                SQLiteStatement stmt = null;
+                try {
+                    stmt = db.compileStatement("INSERT OR IGNORE INTO global(name,value)"
+                            + " VALUES(?,?);");
+                    loadIntegerSetting(stmt, Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS,
+                            R.integer.def_lock_screen_show_notifications);
+
+                    loadIntegerSetting(stmt, Global.HEADS_UP_NOTIFICATIONS_ENABLED,
+                            R.integer.def_heads_up_enabled);
+
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                    if (stmt != null) stmt.close();
+                }
+            }
+            upgradeVersion = 101;
+        }
 
         // *** Remember to update DATABASE_VERSION above!
 
@@ -2313,6 +2335,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE,
                     R.integer.def_wifi_scan_always_available);
+
+            loadIntegerSetting(stmt, Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS,
+                    R.integer.def_lock_screen_show_notifications);
+
+            loadIntegerSetting(stmt, Global.HEADS_UP_NOTIFICATIONS_ENABLED,
+                    R.integer.def_heads_up_enabled);
 
             // --- New global settings start here
         } finally {
