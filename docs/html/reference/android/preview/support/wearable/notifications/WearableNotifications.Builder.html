@@ -447,29 +447,11 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Builder object that wraps a <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code> to provide
- methods for adding wearable extensions to a notification.
+<p itemprop="articleBody">Builder class that wraps a <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code> to add
+ wearable extensions for a notification.
 
- <p>Methods on the wrapped <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code> and this object
- can be called in any order, but the final Notification must be built with
- the <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#build()">build()</a></code> method of this class.
-
- <p>Note: Notifications created using this builder should be posted to the notification
- system using the <code>NotificationManagerCompat.notify(...)</code> methods instead of
- <code>NotificationManager.notify(...)</code>.
-
- <p>Example:
-
- <pre class="prettyprint">
- NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext)
-         .setContentTitle(&quot;New mail from &quot; + sender.toString())
-         .setContentText(subject)
-         .setSmallIcon(R.drawable.new_mail);
- Notification notif = new WearableNotifications.Builder(builder)
-         .setLocalOnly(true)
-         .setMinPriority()
-         .build();
- NotificationManagerCompat.from(mContext).notify(0, notif);</pre>
+ <p>You can chain the "set" methods for this builder in any order,
+ but you must call the <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#build()">build()</a></code> method last to build the final notification.
 </p>
 
 
@@ -662,7 +644,7 @@ Summary:
         
         <div class="jd-descrdiv">Combine all of the options that have been set by both this builder and
  the wrapped <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code> object and return a new
- <code><a href="/http://developer.android.com/reference/android/app/Notification.html">Notification</a></code> object.</div>
+ <code><a href="http://developer.android.com/reference/android/app/Notification.html">Notification</a></code> object.</div>
   
   </td></tr>
 
@@ -826,7 +808,7 @@ Summary:
         <span class="sympad"><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#setMinPriority()">setMinPriority</a></span>()</nobr>
         
         <div class="jd-descrdiv">Set the priority of this notification to be minimum priority level
- (<code><a href="/http://developer.android.com/reference/android/app/Notification.html#PRIORITY_MIN">PRIORITY_MIN</a></code>).</div>
+ (<code><a href="http://developer.android.com/reference/android/app/Notification.html#PRIORITY_MIN">PRIORITY_MIN</a></code>).</div>
   
   </td></tr>
 
@@ -1105,14 +1087,12 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Construct a builder to be used for adding wearable extensions to notifications. Both the
- wrapped builder (accessible via <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#getCompatBuilder()">getCompatBuilder()</a></code> and this builder can be used
+ wrapped builder (accessible via <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#getCompatBuilder()">getCompatBuilder()</a></code>) and this builder can be used
  simultaneously, but the build() method from this object must be called in the end.
 
- <p>Note: Notifications created using this builder should be posted to the notification
- system using the <code>NotificationManagerCompat.notify(...)</code> methods instead of
- <code>NotificationManager.notify(...)</code>.
-
- <p>Example:
+ <p>Always post notifications to the notification
+ system with the <code>NotificationManagerCompat.notify(...)</code> methods
+ instead of the <code>NotificationManager.notify(...)</code> methods.
 
  <pre class="prettyprint">
  WearableNotifications.Builder builder = new WearableNotifications.Builder(mContext)
@@ -1156,12 +1136,9 @@ From class
  a <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code>. Both the wrapped builder and this
  builder can be used simultaneously, but the build() method from this object must be
  called in the end.
-
- <p>Note: Notifications created using this builder should be posted to the notification
- system using the <code>NotificationManagerCompat.notify(...)</code> methods instead of
- <code>NotificationManager.notify(...)</code>.
-
- <p>Example:
+ <p>Always post notifications to the notification
+ system with the <code>NotificationManagerCompat.notify(...)</code> methods
+ instead of the <code>NotificationManager.notify(...)</code> methods.
 
  <pre class="prettyprint">
  NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext)
@@ -1221,6 +1198,19 @@ From class
  accepts <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></code> extension wrappers. Actions added by this function
  are appended when <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#build()">build()</a></code> is called.</p></div>
   <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>action</td>
+          <td>the action to add to this notification</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining</li></ul>
+  </div>
+  <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
       <ul class="nolist"><li><code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></code></li>
       </ul>
@@ -1257,6 +1247,19 @@ From class
  notification forms the first page, and pages added using this function form
  subsequent pages. This field can be used to separate a notification into multiple
  sections.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>page</td>
+          <td>the notification to add as another page</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining</li></ul>
+  </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
       <ul class="nolist"><li><code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#getPages(android.app.Notification)">getPages(Notification)</a></code></li>
@@ -1295,6 +1298,19 @@ From class
  subsequent pages. This field can be used to separate a notification into multiple
  sections.</p></div>
   <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>pages</td>
+          <td>a collection of notifications</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining</li></ul>
+  </div>
+  <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
       <ul class="nolist"><li><code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#getPages(android.app.Notification)">getPages(Notification)</a></code></li>
       </ul>
@@ -1328,8 +1344,21 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Adds a <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html">RemoteInput</a></code> for the content intent.  The collected
- data will be overlayed onto the content intent.
-</p></div>
+ data will be overlayed onto the content intent.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>input</td>
+          <td>a <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html">RemoteInput</a></code> object to obtain a user response</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1360,8 +1389,12 @@ From class
       
   <div class="jd-tagdata jd-tagdescr"><p>Combine all of the options that have been set by both this builder and
  the wrapped <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code> object and return a new
- <code><a href="/http://developer.android.com/reference/android/app/Notification.html">Notification</a></code> object.
-</p></div>
+ <code><a href="http://developer.android.com/reference/android/app/Notification.html">Notification</a></code> object.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the notification
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1390,8 +1423,12 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Return the <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code> being wrapped by this object.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Return the <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code> being wrapped by this object.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the wrapped <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a></code>
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1423,8 +1460,12 @@ From class
   <div class="jd-tagdata jd-tagdescr"><p>Get the current metadata Bundle used by this Builder, creating a new one
  as necessary.
 
- <p>The returned Bundle is shared with this Builder.
-</p></div>
+ <p>The returned Bundle is shared with this Builder.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the extras bundle
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1460,14 +1501,18 @@ From class
       <table class="jd-tagtable">
         <tr>
           <th>icon</td>
-          <td>Icon to display for the content action.</td>
+          <td>icon to display for the content action.</td>
         </tr>
         <tr>
           <th>subtext</td>
-          <td>Optional subtext to display with the big action icon.
-</td>
+          <td>Optional subtext to display with the big action icon.</td>
         </tr>
       </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining
+</li></ul>
   </div>
 
     </div>
@@ -1504,10 +1549,14 @@ From class
       <table class="jd-tagtable">
         <tr>
           <th>icon</td>
-          <td>Icon to display for the content action.
-</td>
+          <td>icon to display for the content action.</td>
         </tr>
       </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining
+</li></ul>
   </div>
 
     </div>
@@ -1551,10 +1600,14 @@ From class
           <th>groupOrder</td>
           <td>The 0-indexed sort order within the group. Can also be set
          to the sentinel value <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#GROUP_ORDER_SUMMARY">GROUP_ORDER_SUMMARY</a></code> to mark this
-         notification as being the group summary.
-</td>
+         notification as being the group summary.</td>
         </tr>
       </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining
+</li></ul>
   </div>
 
     </div>
@@ -1592,10 +1645,14 @@ From class
       <table class="jd-tagtable">
         <tr>
           <th>groupKey</td>
-          <td>The group key of the group. Unique within a package.
-</td>
+          <td>The group key of the group. Unique within a package.</td>
         </tr>
       </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining
+</li></ul>
   </div>
 
     </div>
@@ -1625,8 +1682,21 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Set a hint that this notification's icon should not be displayed.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Set a hint that this notification's icon should not be displayed.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>hintHideIcon</td>
+          <td><code>true</code> to hide the icon, <code>false</code> otherwise.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1659,6 +1729,20 @@ From class
 
  <p>Some notifications can be bridged to other devices for remote display.
  This hint can be set to recommend this notification not be bridged.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>localOnly</td>
+          <td><code>true</code> to keep the notification on this device,
+ <code>false</code> otherwise. Default value is <code>false</code>.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining</li></ul>
+  </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
       <ul class="nolist"><li><code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.html#getLocalOnly(android.app.Notification)">getLocalOnly(Notification)</a></code></li>
@@ -1693,10 +1777,14 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Set the priority of this notification to be minimum priority level
- (<code><a href="/http://developer.android.com/reference/android/app/Notification.html#PRIORITY_MIN">PRIORITY_MIN</a></code>). When set via WearableNotifications, these
+ (<code><a href="http://developer.android.com/reference/android/app/Notification.html#PRIORITY_MIN">PRIORITY_MIN</a></code>). When set via WearableNotifications, these
  minimum priority notifications will bypass the notification manager on platforms
- that do not support ambient level notifications.
-</p></div>
+ that do not support ambient level notifications.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining
+</li></ul>
+  </div>
 
     </div>
 </div>

@@ -2,6 +2,7 @@
  * UTILITIES
  */
 
+
 .border-box {
   box-sizing: border-box;
 }
@@ -92,6 +93,10 @@
  * LAYOUT
  */
 
+#body-content,
+.fullpage,
+#jd-content,
+.jd-descr,
 .wear-body-content {
   height: 100%;
 }
@@ -134,13 +139,11 @@
 }
 
 .wear-hero-container {
-  height: 800px;
-  height: 100vh;
+  height: 100%;
 }
 
 .wear-hero {
-  height: 100%;
-  height: calc(100% - 72px);
+  height: calc(100% - 70px);
   min-height: 504px;
   margin-top: -4px;
   padding-top: 0;
@@ -184,6 +187,7 @@
 }
 
 .wear-button {
+  white-space: nowrap;
   display: inline-block;
   padding: 16px 32px;
   font-size: 18px;
@@ -233,6 +237,7 @@ a.wear-button:visited {
 }
 
 .wear-video-link {
+  white-space: nowrap;
   display: inline-block;
   padding: 16px 32px 16px 82px;
   font-size: 18px;
@@ -436,7 +441,7 @@ pointer-events: all;
 #icon-video-close {
 background-image: url("../images/close.png");
 background-position: 0 0;
-height: 48px;
-width: 48px;
+height: 36px;
+width: 36px;
 display:block;
 }
