@@ -145,7 +145,8 @@ public final class BluetoothPan implements BluetoothProfile {
         Intent intent = new Intent(IBluetoothPan.class.getName());
         ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
         intent.setComponent(comp);
-        if (comp == null || !mContext.bindService(intent, mConnection, 0)) {
+        if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
+                android.os.Process.myUserHandle())) {
             Log.e(TAG, "Could not bind to Bluetooth Pan Service with " + intent);
             return false;
         }
