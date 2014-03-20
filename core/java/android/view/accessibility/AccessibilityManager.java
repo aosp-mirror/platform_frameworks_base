@@ -225,6 +225,13 @@ public final class AccessibilityManager {
     }
 
     /**
+     * @hide
+     */
+    public IAccessibilityManagerClient getClient() {
+        return mClient
+    }
+
+    /**
      * Returns if the accessibility in the system is enabled.
      *
      * @return True if accessibility is enabled, false otherwise.
