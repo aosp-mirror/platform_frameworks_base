@@ -685,7 +685,8 @@ final class ActivityRecord {
     }
 
     void applyOptionsLocked() {
-        if (pendingOptions != null) {
+        if (pendingOptions != null
+                && pendingOptions.getAnimationType() != ActivityOptions.ANIM_SCENE_TRANSITION) {
             final int animationType = pendingOptions.getAnimationType();
             switch (animationType) {
                 case ActivityOptions.ANIM_CUSTOM:

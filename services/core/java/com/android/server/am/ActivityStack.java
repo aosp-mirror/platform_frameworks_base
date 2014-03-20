@@ -1145,7 +1145,7 @@ final class ActivityStack {
                                 mWindowManager.setAppVisibility(r.appToken, true);
                             }
                             if (r != starting) {
-                                mStackSupervisor.startSpecificActivityLocked(r, false, false, null);
+                                mStackSupervisor.startSpecificActivityLocked(r, false, false);
                             }
                         }
 
@@ -1678,6 +1678,7 @@ final class ActivityStack {
                 mService.showAskCompatModeDialogLocked(next);
                 next.app.pendingUiClean = true;
                 next.app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_TOP);
+                next.clearOptionsLocked();
                 next.app.thread.scheduleResumeActivity(next.appToken, next.app.repProcState,
                         mService.isNextTransitionForward(), resumeAnimOptions);
 
@@ -1703,7 +1704,7 @@ final class ActivityStack {
                             next.nonLocalizedLabel, next.labelRes, next.icon, next.logo,
                             next.windowFlags, null, true);
                 }
-                mStackSupervisor.startSpecificActivityLocked(next, true, false, resumeAnimOptions);
+                mStackSupervisor.startSpecificActivityLocked(next, true, false);
                 if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
                 return true;
             }
@@ -1741,7 +1742,7 @@ final class ActivityStack {
                 if (DEBUG_SWITCH) Slog.v(TAG, "Restarting: " + next);
             }
             if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: Restarting " + next);
-            mStackSupervisor.startSpecificActivityLocked(next, true, true, resumeAnimOptions);
+            mStackSupervisor.startSpecificActivityLocked(next, true, true);
         }
 
         if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
