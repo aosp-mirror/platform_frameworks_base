@@ -590,7 +590,6 @@ public final class BluetoothAdapter {
                 return false;
             }
             mAdvertisingGattCallback.stopAdvertising();
-            mAdvertisingGattCallback = null;
             return true;
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1794,15 +1793,12 @@ public final class BluetoothAdapter {
                     try {
                         IBluetoothGatt iGatt = adapter.getBluetoothManager().getBluetoothGatt();
                         iGatt.stopAdvertising();
-                        Log.d(TAG, "unregistering client " + mLeHandle);
-                        iGatt.unregisterClient(mLeHandle);
                     } catch (RemoteException e) {
-                        Log.e(TAG, "Failed to stop advertising and unregister" + e);
+                        Log.e(TAG, "Failed to stop advertising" + e);
                     }
                 } else {
                     Log.e(TAG, "stopAdvertising, BluetoothAdapter is null");
                 }
-                mLeHandle = -1;
                 notifyAll();
             }
         }
@@ -1992,6 +1988,26 @@ public final class BluetoothAdapter {
             if (advertiseState == STATE_ADVERTISE_STARTED) {
                 mAdvertiseCallback.onAdvertiseStart(status);
             } else {
+                synchronized (this) {
+                    if (status == ADVERTISE_CALLBACK_SUCCESS) {
+                        BluetoothAdapter adapter = mBluetoothAdapter.get();
+                        if (adapter != null) {
+                            try {
+                                IBluetoothGatt iGatt =
+                                        adapter.getBluetoothManager().getBluetoothGatt();
+                                Log.d(TAG, "unregistering client " + mLeHandle);
+                                iGatt.unregisterClient(mLeHandle);
+                                // Reset advertise app handle.
+                                mLeHandle = -1;
+                                adapter.mAdvertisingGattCallback = null;
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Failed to unregister client" + e);
+                            }
+                        } else {
+                            Log.e(TAG, "cannot unregister client, BluetoothAdapter is null");
+                        }
+                    }
+                }
                 mAdvertiseCallback.onAdvertiseStop(status);
             }
         }
