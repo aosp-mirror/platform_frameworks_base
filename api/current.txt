@@ -4976,15 +4976,19 @@ package android.appwidget {
     field public static final java.lang.String ACTION_APPWIDGET_DELETED = "android.appwidget.action.APPWIDGET_DELETED";
     field public static final java.lang.String ACTION_APPWIDGET_DISABLED = "android.appwidget.action.APPWIDGET_DISABLED";
     field public static final java.lang.String ACTION_APPWIDGET_ENABLED = "android.appwidget.action.APPWIDGET_ENABLED";
+    field public static final java.lang.String ACTION_APPWIDGET_HOST_RESTORED = "android.appwidget.action.APPWIDGET_HOST_RESTORED";
     field public static final java.lang.String ACTION_APPWIDGET_OPTIONS_CHANGED = "android.appwidget.action.APPWIDGET_UPDATE_OPTIONS";
     field public static final java.lang.String ACTION_APPWIDGET_PICK = "android.appwidget.action.APPWIDGET_PICK";
+    field public static final java.lang.String ACTION_APPWIDGET_RESTORED = "android.appwidget.action.APPWIDGET_RESTORED";
     field public static final java.lang.String ACTION_APPWIDGET_UPDATE = "android.appwidget.action.APPWIDGET_UPDATE";
     field public static final java.lang.String EXTRA_APPWIDGET_ID = "appWidgetId";
     field public static final java.lang.String EXTRA_APPWIDGET_IDS = "appWidgetIds";
+    field public static final java.lang.String EXTRA_APPWIDGET_OLD_IDS = "appWidgetOldIds";
     field public static final java.lang.String EXTRA_APPWIDGET_OPTIONS = "appWidgetOptions";
     field public static final java.lang.String EXTRA_APPWIDGET_PROVIDER = "appWidgetProvider";
     field public static final java.lang.String EXTRA_CUSTOM_EXTRAS = "customExtras";
     field public static final java.lang.String EXTRA_CUSTOM_INFO = "customInfo";
+    field public static final java.lang.String EXTRA_HOST_ID = "hostId";
     field public static final int INVALID_APPWIDGET_ID = 0; // 0x0
     field public static final java.lang.String META_DATA_APPWIDGET_PROVIDER = "android.appwidget.provider";
     field public static final java.lang.String OPTION_APPWIDGET_HOST_CATEGORY = "appWidgetCategory";
@@ -5001,6 +5005,7 @@ package android.appwidget {
     method public void onDisabled(android.content.Context);
     method public void onEnabled(android.content.Context);
     method public void onReceive(android.content.Context, android.content.Intent);
+    method public void onRestored(android.content.Context, int[], int[]);
     method public void onUpdate(android.content.Context, android.appwidget.AppWidgetManager, int[]);
   }
 

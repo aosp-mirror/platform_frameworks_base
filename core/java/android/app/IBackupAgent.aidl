@@ -76,8 +76,9 @@ oneway interface IBackupAgent {
      * @param callbackBinder Binder on which to indicate operation completion,
      *        passed here as a convenience to the agent.
      */
-    void doRestore(in ParcelFileDescriptor data, int appVersionCode,
-            in ParcelFileDescriptor newState, int token, IBackupManager callbackBinder);
+    void doRestore(in ParcelFileDescriptor data,
+            int appVersionCode, in ParcelFileDescriptor newState,
+            int token, IBackupManager callbackBinder);
 
     /**
      * Perform a "full" backup to the given file descriptor.  The output file is presumed
@@ -112,8 +113,15 @@ oneway interface IBackupAgent {
      * @param path Relative path of the file within its semantic domain.
      * @param mode Access mode of the file system entity, e.g. 0660.
      * @param mtime Last modification time of the file system entity.
+     * @param token Opaque token identifying this transaction.  This must
+     *        be echoed back to the backup service binder once the agent is
+     *        finished restoring the application based on the restore data
+     *        contents.
+     * @param callbackBinder Binder on which to indicate operation completion,
+     *        passed here as a convenience to the agent.
      */
     void doRestoreFile(in ParcelFileDescriptor data, long size,
             int type, String domain, String path, long mode, long mtime,
             int token, IBackupManager callbackBinder);
+
 }

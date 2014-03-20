@@ -68,6 +68,7 @@ public final class Backup {
         boolean saveObbs = false;
         boolean saveShared = false;
         boolean doEverything = false;
+        boolean doWidgets = false;
         boolean allIncludesSystem = true;
 
         String arg;
@@ -89,6 +90,10 @@ public final class Backup {
                     allIncludesSystem = true;
                 } else if ("-nosystem".equals(arg)) {
                     allIncludesSystem = false;
+                } else if ("-widgets".equals(arg)) {
+                    doWidgets = true;
+                } else if ("-nowidgets".equals(arg)) {
+                    doWidgets = false;
                 } else if ("-all".equals(arg)) {
                     doEverything = true;
                 } else {
@@ -114,8 +119,8 @@ public final class Backup {
         try {
             fd = ParcelFileDescriptor.adoptFd(socketFd);
             String[] packArray = new String[packages.size()];
-            mBackupManager.fullBackup(fd, saveApks, saveObbs, saveShared, doEverything,
-                    allIncludesSystem, packages.toArray(packArray));
+            mBackupManager.fullBackup(fd, saveApks, saveObbs, saveShared, doWidgets,
+                    doEverything, allIncludesSystem, packages.toArray(packArray));
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to invoke backup manager for backup");
         } finally {
