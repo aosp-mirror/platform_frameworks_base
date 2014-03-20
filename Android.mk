@@ -196,7 +196,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/accessibility/IAccessibilityManagerClient.aidl \
 	core/java/android/view/IApplicationToken.aidl \
 	core/java/android/view/IAssetAtlas.aidl \
-	core/java/android/view/IMagnificationCallbacks.aidl \
 	core/java/android/view/IInputFilter.aidl \
 	core/java/android/view/IInputFilterHost.aidl \
 	core/java/android/view/IOnKeyguardExitResult.aidl \
@@ -412,6 +411,7 @@ aidl_files := \
 	frameworks/base/core/java/android/view/accessibility/AccessibilityEvent.aidl \
 	frameworks/base/core/java/android/view/accessibility/AccessibilityNodeInfo.aidl \
 	frameworks/base/core/java/android/view/accessibility/AccessibilityRecord.aidl \
+	frameworks/base/core/java/android/view/accessibility/AccessibilityWindowInfo.aidl \
 	frameworks/base/core/java/android/view/KeyEvent.aidl \
 	frameworks/base/core/java/android/view/MotionEvent.aidl \
 	frameworks/base/core/java/android/view/Surface.aidl \

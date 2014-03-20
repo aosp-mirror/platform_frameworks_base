@@ -103,12 +103,12 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IApplicationToken;
 import android.view.IInputFilter;
-import android.view.IMagnificationCallbacks;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
 import android.view.IWindow;
 import android.view.IWindowManager;
 import android.view.IWindowSession;
+import android.view.IWindowsForAccessibilityCallback;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -418,7 +418,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     IInputMethodManager mInputMethodManager;
 
-    DisplayMagnifier mDisplayMagnifier;
+    AccessibilityController mAccessibilityController;
 
     final SurfaceSession mFxSession;
     Watermark mWatermark;
@@ -2439,9 +2439,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     win.mExiting = true;
                 }
                 //TODO (multidisplay): Magnification is supported only for the default display.
-                if (mDisplayMagnifier != null
+                if (mAccessibilityController != null
                         && win.getDisplayId() == Display.DEFAULT_DISPLAY) {
-                    mDisplayMagnifier.onWindowTransitionLocked(win, transit);
+                    mAccessibilityController.onWindowTransitionLocked(win, transit);
                 }
             }
             if (win.mExiting || win.mWinAnimator.isAnimating()) {
@@ -2759,11 +2759,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void onRectangleOnScreenRequested(IBinder token, Rect rectangle, boolean immediate) {
         synchronized (mWindowMap) {
-            if (mDisplayMagnifier != null) {
+            if (mAccessibilityController != null) {
                 WindowState window = mWindowMap.get(token);
                 //TODO (multidisplay): Magnification is supported only for the default display.
                 if (window != null && window.getDisplayId() == Display.DEFAULT_DISPLAY) {
-                    mDisplayMagnifier.onRectangleOnScreenRequestedLocked(rectangle, immediate);
+                    mAccessibilityController.onRectangleOnScreenRequestedLocked(rectangle,
+                            immediate);
                 }
             }
         }
@@ -2998,9 +2999,9 @@ public class WindowManagerService extends IWindowManager.Stub
                             winAnimator.destroySurfaceLocked();
                         }
                         //TODO (multidisplay): Magnification is supported only for the default
-                        if (mDisplayMagnifier != null
+                        if (mAccessibilityController != null
                                 && win.getDisplayId() == Display.DEFAULT_DISPLAY) {
-                            mDisplayMagnifier.onWindowTransitionLocked(win, transit);
+                            mAccessibilityController.onWindowTransitionLocked(win, transit);
                         }
                     }
                 }
@@ -3140,86 +3141,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    @Override
-    public void getWindowFrame(IBinder token, Rect outBounds) {
-        if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
-                "getWindowInfo()")) {
-            throw new SecurityException("Requires RETRIEVE_WINDOW_INFO permission.");
-        }
-        synchronized (mWindowMap) {
-            WindowState windowState = mWindowMap.get(token);
-            if (windowState != null) {
-                outBounds.set(windowState.mFrame);
-            } else {
-                outBounds.setEmpty();
-            }
-        }
-    }
-
-    @Override
-    public void setMagnificationSpec(MagnificationSpec spec) {
-        if (!checkCallingPermission(android.Manifest.permission.MAGNIFY_DISPLAY,
-                "setMagnificationSpec()")) {
-            throw new SecurityException("Requires MAGNIFY_DISPLAY permission.");
-        }
-        synchronized (mWindowMap) {
-            if (mDisplayMagnifier != null) {
-                mDisplayMagnifier.setMagnificationSpecLocked(spec);
-            } else {
-                throw new IllegalStateException("Magnification callbacks not set!");
-            }
-        }
-        if (Binder.getCallingPid() != android.os.Process.myPid()) {
-            spec.recycle();
-        }
-    }
-
-    @Override
-    public MagnificationSpec getCompatibleMagnificationSpecForWindow(IBinder windowToken) {
-        if (!checkCallingPermission(android.Manifest.permission.MAGNIFY_DISPLAY,
-                "getCompatibleMagnificationSpecForWindow()")) {
-            throw new SecurityException("Requires MAGNIFY_DISPLAY permission.");
-        }
-        synchronized (mWindowMap) {
-            WindowState windowState = mWindowMap.get(windowToken);
-            if (windowState == null) {
-                return null;
-            }
-            MagnificationSpec spec = null;
-            if (mDisplayMagnifier != null) {
-                spec = mDisplayMagnifier.getMagnificationSpecForWindowLocked(windowState);
-            }
-            if ((spec == null || spec.isNop()) && windowState.mGlobalScale == 1.0f) {
-                return null;
-            }
-            spec = (spec == null) ? MagnificationSpec.obtain() : MagnificationSpec.obtain(spec);
-            spec.scale *= windowState.mGlobalScale;
-            return spec;
-        }
-    }
-
-    @Override
-    public void setMagnificationCallbacks(IMagnificationCallbacks callbacks) {
-        if (!checkCallingPermission(android.Manifest.permission.MAGNIFY_DISPLAY,
-                "setMagnificationCallbacks()")) {
-            throw new SecurityException("Requires MAGNIFY_DISPLAY permission.");
-        }
-        synchronized (mWindowMap) {
-            if (mDisplayMagnifier == null) {
-                mDisplayMagnifier = new DisplayMagnifier(this, callbacks);
-            } else {
-                if (callbacks == null) {
-                    if (mDisplayMagnifier != null) {
-                        mDisplayMagnifier.destroyLocked();
-                        mDisplayMagnifier = null;
-                    }
-                } else {
-                    throw new IllegalStateException("Magnification callbacks already set!");
-                }
-            }
         }
     }
 
@@ -3402,8 +3323,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             win.mWinAnimator.applyAnimationLocked(WindowManagerPolicy.TRANSIT_EXIT,
                                     false);
                             //TODO (multidisplay): Magnification is supported only for the default
-                            if (mDisplayMagnifier != null && win.isDefaultDisplay()) {
-                                mDisplayMagnifier.onWindowTransitionLocked(win,
+                            if (mAccessibilityController != null && win.isDefaultDisplay()) {
+                                mAccessibilityController.onWindowTransitionLocked(win,
                                         WindowManagerPolicy.TRANSIT_EXIT);
                             }
                             changed = true;
@@ -4259,9 +4180,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 WindowState window = wtoken.findMainWindow();
                 //TODO (multidisplay): Magnification is supported only for the default display.
-                if (window != null && mDisplayMagnifier != null
+                if (window != null && mAccessibilityController != null
                         && window.getDisplayId() == Display.DEFAULT_DISPLAY) {
-                    mDisplayMagnifier.onAppWindowTransitionLocked(window, transit);
+                    mAccessibilityController.onAppWindowTransitionLocked(window, transit);
                 }
                 changed = true;
             }
@@ -4281,9 +4202,9 @@ public class WindowManagerService extends IWindowManager.Stub
                             win.mWinAnimator.applyAnimationLocked(
                                     WindowManagerPolicy.TRANSIT_ENTER, true);
                             //TODO (multidisplay): Magnification is supported only for the default
-                            if (mDisplayMagnifier != null
+                            if (mAccessibilityController != null
                                     && win.getDisplayId() == Display.DEFAULT_DISPLAY) {
-                                mDisplayMagnifier.onWindowTransitionLocked(win,
+                                mAccessibilityController.onWindowTransitionLocked(win,
                                         WindowManagerPolicy.TRANSIT_ENTER);
                             }
                         }
@@ -4298,9 +4219,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         win.mWinAnimator.applyAnimationLocked(
                                 WindowManagerPolicy.TRANSIT_EXIT, false);
                         //TODO (multidisplay): Magnification is supported only for the default
-                        if (mDisplayMagnifier != null
+                        if (mAccessibilityController != null
                                 && win.getDisplayId() == Display.DEFAULT_DISPLAY) {
-                            mDisplayMagnifier.onWindowTransitionLocked(win,
+                            mAccessibilityController.onWindowTransitionLocked(win,
                                     WindowManagerPolicy.TRANSIT_EXIT);
                         }
                     }
@@ -5278,19 +5199,6 @@ public class WindowManagerService extends IWindowManager.Stub
         ShutdownThread.rebootSafeMode(mContext, confirm);
     }
 
-    @Override
-    public void setInputFilter(IInputFilter filter) {
-        if (!checkCallingPermission(android.Manifest.permission.FILTER_EVENTS, "setInputFilter()")) {
-            throw new SecurityException("Requires FILTER_EVENTS permission");
-        }
-        mInputManager.setInputFilter(filter);
-    }
-
-    @Override
-    public void setTouchExplorationEnabled(boolean enabled) {
-        mPolicy.setTouchExplorationEnabled(enabled);
-    }
-
     public void updateRelatedUserIds(final int[] relatedUserIds) {
         synchronized (mWindowMap) {
             mRelatedUserIds = relatedUserIds;
@@ -6106,9 +6014,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         //TODO (multidisplay): Magnification is supported only for the default display.
-        if (mDisplayMagnifier != null
+        if (mAccessibilityController != null
                 && displayContent.getDisplayId() == Display.DEFAULT_DISPLAY) {
-            mDisplayMagnifier.onRotationChangedLocked(getDefaultDisplayContentLocked(), rotation);
+            mAccessibilityController.onRotationChangedLocked(getDefaultDisplayContentLocked(), rotation);
         }
 
         return true;
@@ -7012,21 +6920,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 mInputMonitor.setEventDispatchingLw(enabled);
             }
             sendScreenStatusToClientsLocked();
-        }
-    }
-
-    @Override
-    public IBinder getFocusedWindowToken() {
-        if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
-                "getFocusedWindowToken()")) {
-            throw new SecurityException("Requires RETRIEVE_WINDOW_INFO permission.");
-        }
-        synchronized (mWindowMap) {
-            WindowState windowState = getFocusedWindowLocked();
-            if (windowState != null) {
-                return windowState.mClient.asBinder();
-            }
-            return null;
         }
     }
 
@@ -8209,9 +8102,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         //TODO (multidisplay): Magnification is supported only for the default display.
-        if (mDisplayMagnifier != null && anyLayerChanged
+        if (mAccessibilityController != null && anyLayerChanged
                 && windows.get(windows.size() - 1).getDisplayId() == Display.DEFAULT_DISPLAY) {
-            mDisplayMagnifier.onWindowLayersChangedLocked();
+            mAccessibilityController.onWindowLayersChangedLocked();
         }
     }
 
@@ -9844,6 +9737,11 @@ public class WindowManagerService extends IWindowManager.Stub
             final WindowState oldFocus = mCurrentFocus;
             mCurrentFocus = newFocus;
             mLosingFocus.remove(newFocus);
+
+            if (mAccessibilityController != null) {
+                mAccessibilityController.onWindowFocusChangedLocked();
+            }
+
             int focusChanged = mPolicy.focusChangedLw(oldFocus, newFocus);
 
             if (imWindowChanged && oldFocus != mInputMethodWindow) {
@@ -10956,6 +10854,101 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void requestTraversalFromDisplayManager() {
             requestTraversal();
+        }
+
+        @Override
+        public void setMagnificationSpec(MagnificationSpec spec) {
+            synchronized (mWindowMap) {
+                if (mAccessibilityController != null) {
+                    mAccessibilityController.setMagnificationSpecLocked(spec);
+                } else {
+                    throw new IllegalStateException("Magnification callbacks not set!");
+                }
+            }
+            if (Binder.getCallingPid() != android.os.Process.myPid()) {
+                spec.recycle();
+            }
+        }
+
+        @Override
+        public MagnificationSpec getCompatibleMagnificationSpecForWindow(IBinder windowToken) {
+            synchronized (mWindowMap) {
+                WindowState windowState = mWindowMap.get(windowToken);
+                if (windowState == null) {
+                    return null;
+                }
+                MagnificationSpec spec = null;
+                if (mAccessibilityController != null) {
+                    spec = mAccessibilityController.getMagnificationSpecForWindowLocked(windowState);
+                }
+                if ((spec == null || spec.isNop()) && windowState.mGlobalScale == 1.0f) {
+                    return null;
+                }
+                spec = (spec == null) ? MagnificationSpec.obtain() : MagnificationSpec.obtain(spec);
+                spec.scale *= windowState.mGlobalScale;
+                return spec;
+            }
+        }
+
+        @Override
+        public void setMagnificationCallbacks(MagnificationCallbacks callbacks) {
+            synchronized (mWindowMap) {
+                if (mAccessibilityController == null) {
+                    mAccessibilityController = new AccessibilityController(
+                            WindowManagerService.this);
+                }
+                mAccessibilityController.setMagnificationCallbacksLocked(callbacks);
+                if (!mAccessibilityController.hasCallbacksLocked()) {
+                     mAccessibilityController = null;
+                }
+            }
+        }
+
+        @Override
+        public void setWindowsForAccessibilityCallback(WindowsForAccessibilityCallback callback) {
+            synchronized (mWindowMap) {
+                if (mAccessibilityController == null) {
+                    mAccessibilityController = new AccessibilityController(
+                            WindowManagerService.this);
+                }
+                mAccessibilityController.setWindowsForAccessibilityCallback(callback);
+                if (!mAccessibilityController.hasCallbacksLocked()) {
+                     mAccessibilityController = null;
+                }
+            }
+        }
+
+        @Override
+        public void setInputFilter(IInputFilter filter) {
+            mInputManager.setInputFilter(filter);
+        }
+
+        @Override
+        public IBinder getFocusedWindowToken() {
+            synchronized (mWindowMap) {
+                WindowState windowState = getFocusedWindowLocked();
+                if (windowState != null) {
+                    return windowState.mClient.asBinder();
+                }
+                return null;
+            }
+        }
+
+        @Override
+        public boolean isKeyguardLocked() {
+            return isKeyguardLocked();
+        }
+
+        @Override
+        public void getWindowFrame(IBinder token, Rect outBounds) {
+            synchronized (mWindowMap) {
+                WindowState windowState = mWindowMap.get(token);
+                if (windowState != null) {
+                    outBounds.set(windowState.mFrame);
+                } else {
+                    outBounds.setEmpty();
+                }
+            }
         }
     }
 }

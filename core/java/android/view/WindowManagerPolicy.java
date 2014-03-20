@@ -1187,11 +1187,4 @@ public interface WindowManagerPolicy {
      * @return True if the window is a top level one.
      */
     public boolean isTopLevelWindow(int windowType);
-
-    /**
-     * Sets the current touch exploration state.
-     *
-     * @param enabled Whether touch exploration is enabled.
-     */
-    public void setTouchExplorationEnabled(boolean enabled);
 }

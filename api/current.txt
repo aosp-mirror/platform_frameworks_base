@@ -2328,6 +2328,7 @@ package android.accessibilityservice {
     ctor public AccessibilityService();
     method public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow();
     method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
+    method public java.util.List<android.view.accessibility.AccessibilityWindowInfo> getWindows();
     method public abstract void onAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     method public final android.os.IBinder onBind(android.content.Intent);
     method protected boolean onGesture(int);
@@ -2393,6 +2394,7 @@ package android.accessibilityservice {
     field public static final int FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 8; // 0x8
     field public static final int FLAG_REQUEST_FILTER_KEY_EVENTS = 32; // 0x20
     field public static final int FLAG_REQUEST_TOUCH_EXPLORATION_MODE = 4; // 0x4
+    field public static final int FLAG_RETRIEVE_INTERACTIVE_WINDOWS = 64; // 0x40
     field public int eventTypes;
     field public int feedbackType;
     field public int flags;
@@ -4600,6 +4602,7 @@ package android.app {
     method public android.view.accessibility.AccessibilityEvent executeAndWaitForEvent(java.lang.Runnable, android.app.UiAutomation.AccessibilityEventFilter, long) throws java.util.concurrent.TimeoutException;
     method public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow();
     method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
+    method public java.util.List<android.view.accessibility.AccessibilityWindowInfo> getWindows();
     method public boolean injectInputEvent(android.view.InputEvent, boolean);
     method public final boolean performGlobalAction(int);
     method public void setOnAccessibilityEventListener(android.app.UiAutomation.OnAccessibilityEventListener);
@@ -30559,6 +30562,7 @@ package android.view.accessibility {
     field public static final int TYPE_VIEW_TEXT_CHANGED = 16; // 0x10
     field public static final int TYPE_VIEW_TEXT_SELECTION_CHANGED = 8192; // 0x2000
     field public static final int TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY = 131072; // 0x20000
+    field public static final int TYPE_WINDOWS_CHANGED = 4194304; // 0x400000
     field public static final int TYPE_WINDOW_CONTENT_CHANGED = 2048; // 0x800
     field public static final int TYPE_WINDOW_STATE_CHANGED = 32; // 0x20
   }
@@ -30622,6 +30626,7 @@ package android.view.accessibility {
     method public int getTextSelectionEnd();
     method public int getTextSelectionStart();
     method public java.lang.String getViewIdResourceName();
+    method public android.view.accessibility.AccessibilityWindowInfo getWindow();
     method public int getWindowId();
     method public boolean isAccessibilityFocused();
     method public boolean isCheckable();
@@ -30768,6 +30773,7 @@ package android.view.accessibility {
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(java.lang.String, int);
     method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
     method public boolean performAction(int, int, android.os.Bundle);
+    field public static final int HOST_VIEW_ID = -1; // 0xffffffff
   }
 
   public class AccessibilityRecord {
@@ -30817,6 +30823,28 @@ package android.view.accessibility {
     method public void setSource(android.view.View);
     method public void setSource(android.view.View, int);
     method public void setToIndex(int);
+  }
+
+  public final class AccessibilityWindowInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public void getBoundsInScreen(android.graphics.Rect);
+    method public android.view.accessibility.AccessibilityWindowInfo getChild(int);
+    method public int getChildCount();
+    method public int getId();
+    method public int getLayer();
+    method public android.view.accessibility.AccessibilityWindowInfo getParent();
+    method public android.view.accessibility.AccessibilityNodeInfo getRoot();
+    method public int getType();
+    method public boolean isActive();
+    method public boolean isFocused();
+    method public static android.view.accessibility.AccessibilityWindowInfo obtain();
+    method public static android.view.accessibility.AccessibilityWindowInfo obtain(android.view.accessibility.AccessibilityWindowInfo);
+    method public void recycle();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int TYPE_APPLICATION = 1; // 0x1
+    field public static final int TYPE_INPUT_METHOD = 2; // 0x2
+    field public static final int TYPE_SYSTEM = 3; // 0x3
   }
 
   public class CaptioningManager {

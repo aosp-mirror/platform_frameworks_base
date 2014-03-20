@@ -952,8 +952,8 @@ class WindowStateAnimator {
                 tmpMatrix.postConcat(screenRotationAnimation.getEnterTransformation().getMatrix());
             }
             //TODO (multidisplay): Magnification is supported only for the default display.
-            if (mService.mDisplayMagnifier != null && displayId == Display.DEFAULT_DISPLAY) {
-                MagnificationSpec spec = mService.mDisplayMagnifier
+            if (mService.mAccessibilityController != null && displayId == Display.DEFAULT_DISPLAY) {
+                MagnificationSpec spec = mService.mAccessibilityController
                         .getMagnificationSpecForWindowLocked(mWin);
                 if (spec != null && !spec.isNop()) {
                     tmpMatrix.postScale(spec.scale, spec.scale);
@@ -1032,8 +1032,8 @@ class WindowStateAnimator {
                 && mWin.mBaseLayer < mAnimator.mAboveUniverseLayer);
         MagnificationSpec spec = null;
         //TODO (multidisplay): Magnification is supported only for the default display.
-        if (mService.mDisplayMagnifier != null && displayId == Display.DEFAULT_DISPLAY) {
-            spec = mService.mDisplayMagnifier.getMagnificationSpecForWindowLocked(mWin);
+        if (mService.mAccessibilityController != null && displayId == Display.DEFAULT_DISPLAY) {
+            spec = mService.mAccessibilityController.getMagnificationSpecForWindowLocked(mWin);
         }
         if (applyUniverseTransformation || spec != null) {
             final Rect frame = mWin.mFrame;
@@ -1565,9 +1565,9 @@ class WindowStateAnimator {
         }
         applyAnimationLocked(transit, true);
         //TODO (multidisplay): Magnification is supported only for the default display.
-        if (mService.mDisplayMagnifier != null
+        if (mService.mAccessibilityController != null
                 && mWin.getDisplayId() == Display.DEFAULT_DISPLAY) {
-            mService.mDisplayMagnifier.onWindowTransitionLocked(mWin, transit);
+            mService.mAccessibilityController.onWindowTransitionLocked(mWin, transit);
         }
     }
 

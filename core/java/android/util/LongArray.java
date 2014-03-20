@@ -111,7 +111,6 @@ public class LongArray implements Cloneable {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public LongArray clone() {
         LongArray clone = null;
         try {
@@ -154,7 +153,8 @@ public class LongArray implements Cloneable {
         if (index >= mSize) {
             throw new ArrayIndexOutOfBoundsException(mSize, index);
         }
-        System.arraycopy(mValues, index, mValues, index + 1, mSize - index);
+        System.arraycopy(mValues, index + 1, mValues, index, mSize - index - 1);
+        mSize--;
     }
 
     /**

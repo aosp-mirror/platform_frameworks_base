@@ -44,7 +44,6 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.input.InputManager;
 import android.net.Uri;
-import android.opengl.Matrix;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -52,7 +51,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -63,24 +61,27 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
+import android.util.LongArray;
 import android.util.Pools.Pool;
 import android.util.Pools.SimplePool;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.IWindow;
-import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.InputEventConsistencyVerifier;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
+import android.view.WindowInfo;
 import android.view.WindowManager;
+import android.view.WindowManagerInternal;
 import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.accessibility.IAccessibilityManager;
@@ -89,6 +90,7 @@ import android.view.accessibility.IAccessibilityManagerClient;
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -166,7 +168,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private final PackageManager mPackageManager;
 
-    private final IWindowManager mWindowManagerService;
+    private final WindowManagerInternal mWindowManagerService;
 
     private final SecurityPolicy mSecurityPolicy;
 
@@ -197,8 +199,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private int mCurrentUserId = UserHandle.USER_OWNER;
 
+    private final LongArray mTempLongArray = new LongArray();
+
     //TODO: Remove this hack
     private boolean mInitialized;
+
+    private WindowsForAccessibilityCallback mWindowsForAccessibilityCallback;
 
     private UserState getCurrentUserStateLocked() {
         return getUserStateLocked(mCurrentUserId);
@@ -221,7 +227,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     public AccessibilityManagerService(Context context) {
         mContext = context;
         mPackageManager = mContext.getPackageManager();
-        mWindowManagerService = (IWindowManager) ServiceManager.getService(Context.WINDOW_SERVICE);
+        mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
         mSecurityPolicy = new SecurityPolicy();
         mMainHandler = new MainHandler(mContext.getMainLooper());
         //TODO: (multi-display) We need to support multiple displays.
@@ -390,7 +396,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if (resolvedUserId != mCurrentUserId) {
                 return true; // yes, recycle the event
             }
-            if (mSecurityPolicy.canDispatchAccessibilityEvent(event)) {
+            if (mSecurityPolicy.canDispatchAccessibilityEventLocked(event)) {
                 mSecurityPolicy.updateEventSourceLocked(event);
                 mMainHandler.obtainMessage(MainHandler.MSG_UPDATE_ACTIVE_WINDOW,
                         event.getWindowId(), event.getEventType()).sendToTarget();
@@ -632,11 +638,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         mSecurityPolicy.enforceCallingPermission(
                 Manifest.permission.TEMPORARY_ENABLE_ACCESSIBILITY,
                 TEMPORARY_ENABLE_ACCESSIBILITY_UNTIL_KEYGUARD_REMOVED);
-        try {
-            if (!mWindowManagerService.isKeyguardLocked()) {
-                return;
-            }
-        } catch (RemoteException re) {
+        if (!mWindowManagerService.isKeyguardLocked()) {
             return;
         }
         synchronized (mLock) {
@@ -739,6 +741,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * @param outBounds The output to which to write the bounds.
      */
     boolean getActiveWindowBounds(Rect outBounds) {
+        // TODO: This should be refactored to work with accessibility
+        // focus in multiple windows.
         IBinder token;
         synchronized (mLock) {
             final int windowId = mSecurityPolicy.mActiveWindowId;
@@ -747,13 +751,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 token = getCurrentUserStateLocked().mWindowTokens.get(windowId);
             }
         }
-        try {
-            mWindowManagerService.getWindowFrame(token, outBounds);
-            if (!outBounds.isEmpty()) {
-                return true;
-            }
-        } catch (RemoteException re) {
-            /* ignore */
+        mWindowManagerService.getWindowFrame(token, outBounds);
+        if (!outBounds.isEmpty()) {
+            return true;
         }
         return false;
     }
@@ -771,7 +771,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     void onMagnificationStateChanged() {
-        notifyClearAccessibilityNodeInfoCacheLocked();
+        notifyClearAccessibilityCacheLocked();
     }
 
     private void switchUser(int userId) {
@@ -879,11 +879,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         return false;
     }
 
-    private void notifyClearAccessibilityNodeInfoCacheLocked() {
+    private void notifyClearAccessibilityCacheLocked() {
         UserState state = getCurrentUserStateLocked();
         for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
             Service service = state.mBoundServices.get(i);
             service.notifyClearAccessibilityNodeInfoCache();
+        }
+    }
+
+    private void notifyWindowsChangedLocked(List<AccessibilityWindowInfo> windows) {
+        UserState state = getCurrentUserStateLocked();
+        for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
+            Service service = state.mBoundServices.get(i);
+            if (mSecurityPolicy.canRetrieveWindowsLocked(service)) {
+                service.notifyWindowsChangedLocked(windows);
+            }
         }
     }
 
@@ -994,7 +1004,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 Service service = state.mBoundServices.get(i);
 
                 if (service.mIsDefault == isDefault) {
-                    if (canDispathEventLocked(service, event, state.mHandledFeedbackTypes)) {
+                    if (canDispatchEventToServiceLocked(service, event,
+                            state.mHandledFeedbackTypes)) {
                         state.mHandledFeedbackTypes |= service.mFeedbackType;
                         service.notifyAccessibilityEvent(event);
                     }
@@ -1043,7 +1054,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * @param handledFeedbackTypes The feedback types for which services have been notified.
      * @return True if the listener should be notified, false otherwise.
      */
-    private boolean canDispathEventLocked(Service service, AccessibilityEvent event,
+    private boolean canDispatchEventToServiceLocked(Service service, AccessibilityEvent event,
             int handledFeedbackTypes) {
 
         if (!service.canReceiveEventsLocked()) {
@@ -1232,11 +1243,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
         }
         if (setInputFilter) {
-            try {
-                mWindowManagerService.setInputFilter(inputFilter);
-            } catch (RemoteException re) {
-                /* ignore */
-            }
+            mWindowManagerService.setInputFilter(inputFilter);
         }
     }
 
@@ -1296,12 +1303,50 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         mInitialized = true;
         updateLegacyCapabilities(userState);
         updateServicesLocked(userState);
+        updateWindowsForAccessibilityCallback(userState);
         updateFilterKeyEventsLocked(userState);
         updateTouchExplorationLocked(userState);
         updateEnhancedWebAccessibilityLocked(userState);
         updateDisplayColorAdjustmentSettingsLocked(userState);
         scheduleUpdateInputFilter(userState);
         scheduleUpdateClientsIfNeededLocked(userState);
+    }
+
+    private void updateWindowsForAccessibilityCallback(UserState userState) {
+        if (userState.mIsAccessibilityEnabled) {
+            // We observe windows for accessibility only if there is at least
+            // one bound service that can retrieve window content that specified
+            // it is interested in accessing such windows. For services that are
+            // binding we do an update pass after each bind event, so we run this
+            // code and register the callback if needed.
+            boolean boundServiceCanRetrieveInteractiveWindows = false;
+
+            List<Service> boundServices = userState.mBoundServices;
+            final int boundServiceCount = boundServices.size();
+            for (int i = 0; i < boundServiceCount; i++) {
+                Service boundService = boundServices.get(i);
+                if (mSecurityPolicy.canRetrieveWindowContentLocked(boundService)
+                        && boundService.mRetrieveInteractiveWindows) {
+                    boundServiceCanRetrieveInteractiveWindows = true;
+                    break;
+                }
+            }
+
+            if (boundServiceCanRetrieveInteractiveWindows) {
+                if (mWindowsForAccessibilityCallback == null) {
+                    mWindowsForAccessibilityCallback = new WindowsForAccessibilityCallback();
+                    mWindowManagerService.setWindowsForAccessibilityCallback(
+                            mWindowsForAccessibilityCallback);
+                }
+                return;
+            }
+        }
+
+        if (mWindowsForAccessibilityCallback != null) {
+            mWindowsForAccessibilityCallback = null;
+            mWindowManagerService.setWindowsForAccessibilityCallback(
+                    mWindowsForAccessibilityCallback);
+        }
     }
 
     private void updateLegacyCapabilities(UserState userState) {
@@ -1434,11 +1479,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
                     Settings.Secure.TOUCH_EXPLORATION_ENABLED, enabled ? 1 : 0,
                     userState.mUserId);
-        }
-        try {
-            mWindowManagerService.setTouchExplorationEnabled(enabled);
-        } catch (RemoteException e) {
-            e.printStackTrace();
         }
     }
 
@@ -1605,6 +1645,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                     event.recycle();
                 } break;
+
                 case MSG_SEND_KEY_EVENT_TO_INPUT_FILTER: {
                     KeyEvent event = (KeyEvent) msg.obj;
                     final int policyFlags = msg.arg1;
@@ -1615,28 +1656,34 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                     event.recycle();
                 } break;
+
                 case MSG_SEND_STATE_TO_CLIENTS: {
                     final int clientState = msg.arg1;
                     final int userId = msg.arg2;
                     sendStateToClients(clientState, mGlobalClients);
                     sendStateToClientsForUser(clientState, userId);
                 } break;
+
                 case MSG_SEND_CLEARED_STATE_TO_CLIENTS_FOR_USER: {
                     final int userId = msg.arg1;
                     sendStateToClientsForUser(0, userId);
                 } break;
+
                 case MSG_UPDATE_ACTIVE_WINDOW: {
                     final int windowId = msg.arg1;
                     final int eventType = msg.arg2;
                     mSecurityPolicy.updateActiveWindow(windowId, eventType);
                 } break;
+
                 case MSG_ANNOUNCE_NEW_USER_IF_NEEDED: {
                     announceNewUserIfNeeded();
                 } break;
+
                 case MSG_UPDATE_INPUT_FILTER: {
                     UserState userState = (UserState) msg.obj;
                     updateInputFilter(userState);
                 } break;
+
                 case MSG_SHOW_ENABLED_TOUCH_EXPLORATION_DIALOG: {
                     Service service = (Service) msg.obj;
                     showEnableTouchExplorationDialog(service);
@@ -1655,7 +1702,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     AccessibilityEvent event = AccessibilityEvent.obtain(
                             AccessibilityEvent.TYPE_ANNOUNCEMENT);
                     event.getText().add(message);
-                    event.setWindowId(mSecurityPolicy.getRetrievalAllowingWindowLocked());
                     sendAccessibilityEvent(event, mCurrentUserId);
                 }
             }
@@ -1703,6 +1749,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         mPendingEventPool.release(pendingEvent);
     }
 
+    private int findWindowIdLocked(IBinder token) {
+        final int globalIndex = mGlobalWindowTokens.indexOfValue(token);
+        if (globalIndex >= 0) {
+            return mGlobalWindowTokens.keyAt(globalIndex);
+        }
+        UserState userState = getCurrentUserStateLocked();
+        final int userIndex = userState.mWindowTokens.indexOfValue(token);
+        if (userIndex >= 0) {
+            return userState.mWindowTokens.keyAt(userIndex);
+        }
+        return -1;
+    }
+
     /**
      * This class represents an accessibility service. It stores all per service
      * data required for the service management, provides API for starting/stopping the
@@ -1738,6 +1797,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         boolean mRequestFilterKeyEvents;
 
+        boolean mRetrieveInteractiveWindows;
+
         int mFetchFlags;
 
         long mNotificationTimeout;
@@ -1748,7 +1809,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         boolean mIsAutomation;
 
-        final Rect mTempBounds = new Rect();
+        final Rect mTempBounds1 = new Rect();
+
+        final Rect mTempBounds2 = new Rect();
 
         final ResolveInfo mResolveInfo;
 
@@ -1757,6 +1820,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             new SparseArray<AccessibilityEvent>();
 
         final KeyEventDispatcher mKeyEventDispatcher = new KeyEventDispatcher();
+
+        final SparseArray<AccessibilityWindowInfo> mIntrospectedWindows =
+                new SparseArray<AccessibilityWindowInfo>();
 
         boolean mWasConnectedAndDied;
 
@@ -1822,7 +1888,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mRequestEnhancedWebAccessibility = (info.flags
                     & AccessibilityServiceInfo.FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY) != 0;
             mRequestFilterKeyEvents = (info.flags
-                    & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS)  != 0;
+                    & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS) != 0;
+            mRetrieveInteractiveWindows = (info.flags
+                    & AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS) != 0;
+
+            if (!mRetrieveInteractiveWindows) {
+                clearIntrospectedWindows();
+            }
         }
 
         /**
@@ -1932,6 +2004,59 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         @Override
+        public List<AccessibilityWindowInfo> getWindows() {
+            synchronized (mLock) {
+                final int resolvedUserId = mSecurityPolicy
+                        .resolveCallingUserIdEnforcingPermissionsLocked(
+                                UserHandle.getCallingUserId());
+                if (resolvedUserId != mCurrentUserId) {
+                    return null;
+                }
+                final boolean permissionGranted =
+                        mSecurityPolicy.canRetrieveWindowsLocked(this);
+                if (!permissionGranted) {
+                    return null;
+                }
+                List<AccessibilityWindowInfo> windows = new ArrayList<AccessibilityWindowInfo>();
+                final int windowCount = mSecurityPolicy.mWindows.size();
+                for (int i = 0; i < windowCount; i++) {
+                    AccessibilityWindowInfo window = mSecurityPolicy.mWindows.get(i);
+                    AccessibilityWindowInfo windowClone =
+                            AccessibilityWindowInfo.obtain(window);
+                    windowClone.setConnectionId(mId);
+                    mIntrospectedWindows.put(window.getId(), windowClone);
+                    windows.add(windowClone);
+                }
+                return windows;
+            }
+        }
+
+        @Override
+        public AccessibilityWindowInfo getWindow(int windowId) {
+            synchronized (mLock) {
+                final int resolvedUserId = mSecurityPolicy
+                        .resolveCallingUserIdEnforcingPermissionsLocked(
+                                UserHandle.getCallingUserId());
+                if (resolvedUserId != mCurrentUserId) {
+                    return null;
+                }
+                final boolean permissionGranted =
+                        mSecurityPolicy.canRetrieveWindowsLocked(this);
+                if (!permissionGranted) {
+                    return null;
+                }
+                AccessibilityWindowInfo window = mSecurityPolicy.findWindowById(windowId);
+                if (window != null) {
+                    AccessibilityWindowInfo windowClone = AccessibilityWindowInfo.obtain(window);
+                    windowClone.setConnectionId(mId);
+                    mIntrospectedWindows.put(windowId, windowClone);
+                    return windowClone;
+                }
+                return null;
+            }
+        }
+
+        @Override
         public boolean findAccessibilityNodeInfosByViewId(int accessibilityWindowId,
                 long accessibilityNodeId, String viewIdResName, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
@@ -1945,12 +2070,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
-                mSecurityPolicy.enforceCanRetrieveWindowContent(this);
-                final boolean permissionGranted = mSecurityPolicy.canRetrieveWindowContent(this);
+                resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
+                final boolean permissionGranted =
+                        mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId);
                 if (!permissionGranted) {
                     return false;
                 } else {
-                    resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
                     connection = getConnectionLocked(resolvedWindowId);
                     if (connection == null) {
                         return false;
@@ -1989,7 +2114,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
-                mSecurityPolicy.enforceCanRetrieveWindowContent(this);
                 resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
                 final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId);
@@ -2034,7 +2158,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
-                mSecurityPolicy.enforceCanRetrieveWindowContent(this);
                 resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
                 final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId);
@@ -2079,7 +2202,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
-                mSecurityPolicy.enforceCanRetrieveWindowContent(this);
                 resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
                 final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId);
@@ -2123,7 +2245,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
-                mSecurityPolicy.enforceCanRetrieveWindowContent(this);
                 resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
                 final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId);
@@ -2167,7 +2288,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
-                mSecurityPolicy.enforceCanRetrieveWindowContent(this);
                 resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
                 final boolean permissionGranted = mSecurityPolicy.canPerformActionLocked(this,
                         resolvedWindowId, action, arguments);
@@ -2365,7 +2485,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
 
                 mPendingEvents.remove(eventType);
-                if (mSecurityPolicy.canRetrieveWindowContent(this)) {
+                if (mSecurityPolicy.canRetrieveWindowContentLocked(this)) {
                     event.setConnectionId(mId);
                 } else {
                     event.setSource(null);
@@ -2396,12 +2516,69 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         public void notifyClearAccessibilityNodeInfoCache() {
+            clearIntrospectedWindows();
             mInvocationHandler.sendEmptyMessage(
-                    InvocationHandler.MSG_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE);
+                    InvocationHandler.MSG_CLEAR_ACCESSIBILITY_CACHE);
+        }
+
+        private void clearIntrospectedWindows() {
+            final int windowCount = mIntrospectedWindows.size();
+            for (int i = windowCount - 1; i >= 0; i--) {
+                mIntrospectedWindows.valueAt(i).recycle();
+                mIntrospectedWindows.removeAt(i);
+            }
+        }
+
+        public void notifyWindowsChangedLocked(List<AccessibilityWindowInfo> windows) {
+            LongArray changedWindows = mTempLongArray;
+            changedWindows.clear();
+
+            // Figure out which windows the service cares about changed.
+            final int windowCount = windows.size();
+            for (int i = 0; i < windowCount; i++) {
+                AccessibilityWindowInfo newState = windows.get(i);
+                final int windowId = newState.getId();
+                AccessibilityWindowInfo oldState = mIntrospectedWindows.get(windowId);
+                if (oldState != null && oldState.changed(newState)) {
+                    oldState.recycle();
+                    mIntrospectedWindows.put(newState.getId(),
+                            AccessibilityWindowInfo.obtain(newState));
+                    changedWindows.add(windowId);
+                }
+            }
+
+            // Figure out which windows the service cares about went away.
+            final int introspectedWindowCount = mIntrospectedWindows.size();
+            for (int i = introspectedWindowCount - 1; i >= 0; i--) {
+                AccessibilityWindowInfo window = mIntrospectedWindows.valueAt(i);
+                if (changedWindows.indexOf(window.getId()) < 0 && !windows.contains(window)) {
+                    changedWindows.add(window.getId());
+                    mIntrospectedWindows.removeAt(i);
+                    window.recycle();
+                }
+            }
+
+            int[] windowIds = null;
+
+            final int changedWindowCount = changedWindows.size();
+            if (changedWindowCount > 0) {
+                windowIds = new int[changedWindowCount];
+                for (int i = 0; i < changedWindowCount; i++) {
+                    // Cast is fine as we use long array to cache ints.
+                    windowIds[i] = (int) changedWindows.get(i);
+                }
+                changedWindows.clear();
+            }
+
+            mInvocationHandler.obtainMessage(InvocationHandler.MSG_ON_WINDOWS_CHANGED,
+                    windowIds).sendToTarget();
         }
 
         private void notifyGestureInternal(int gestureId) {
-            IAccessibilityServiceClient listener = mServiceInterface;
+            final IAccessibilityServiceClient listener;
+            synchronized (mLock) {
+                listener = mServiceInterface;
+            }
             if (listener != null) {
                 try {
                     listener.onGesture(gestureId);
@@ -2416,14 +2593,31 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mKeyEventDispatcher.notifyKeyEvent(event, policyFlags);
         }
 
-        private void notifyClearAccessibilityNodeInfoCacheInternal() {
-            IAccessibilityServiceClient listener = mServiceInterface;
+        private void notifyClearAccessibilityCacheInternal() {
+            final IAccessibilityServiceClient listener;
+            synchronized (mLock) {
+                listener = mServiceInterface;
+            }
             if (listener != null) {
                 try {
-                    listener.clearAccessibilityNodeInfoCache();
+                    listener.clearAccessibilityCache();
                 } catch (RemoteException re) {
                     Slog.e(LOG_TAG, "Error during requesting accessibility info cache"
                             + " to be cleared.", re);
+                }
+            }
+        }
+
+        private void notifyWindowsChangedInternal(int[] windowIds) {
+            final IAccessibilityServiceClient listener;
+            synchronized (mLock) {
+                listener = mServiceInterface;
+            }
+            if (listener != null) {
+                try {
+                    listener.onWindowsChanged(windowIds);
+                } catch (RemoteException re) {
+                    Slog.e(LOG_TAG, "Error during sending windows to: " + mService, re);
                 }
             }
         }
@@ -2511,27 +2705,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         private MagnificationSpec getCompatibleMagnificationSpec(int windowId) {
-            try {
-                IBinder windowToken = mGlobalWindowTokens.get(windowId);
-                if (windowToken == null) {
-                    windowToken = getCurrentUserStateLocked().mWindowTokens.get(windowId);
-                }                    
-                if (windowToken != null) {
-                    return mWindowManagerService.getCompatibleMagnificationSpecForWindow(
-                            windowToken);
-                }
-            } catch (RemoteException re) {
-                /* ignore */
+            IBinder windowToken = mGlobalWindowTokens.get(windowId);
+            if (windowToken == null) {
+                windowToken = getCurrentUserStateLocked().mWindowTokens.get(windowId);
+            }
+            if (windowToken != null) {
+                return mWindowManagerService.getCompatibleMagnificationSpecForWindow(
+                        windowToken);
             }
             return null;
         }
 
         private final class InvocationHandler extends Handler {
-
             public static final int MSG_ON_GESTURE = 1;
             public static final int MSG_ON_KEY_EVENT = 2;
-            public static final int MSG_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE = 3;
+            public static final int MSG_CLEAR_ACCESSIBILITY_CACHE = 3;
             public static final int MSG_ON_KEY_EVENT_TIMEOUT = 4;
+            public static final int MSG_ON_WINDOWS_CHANGED = 5;
 
             public InvocationHandler(Looper looper) {
                 super(looper, null, true);
@@ -2545,18 +2735,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         final int gestureId = message.arg1;
                         notifyGestureInternal(gestureId);
                     } break;
+
                     case MSG_ON_KEY_EVENT: {
                         KeyEvent event = (KeyEvent) message.obj;
                         final int policyFlags = message.arg1;
                         notifyKeyEventInternal(event, policyFlags);
                     } break;
-                    case MSG_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE: {
-                        notifyClearAccessibilityNodeInfoCacheInternal();
+
+                    case MSG_CLEAR_ACCESSIBILITY_CACHE: {
+                        notifyClearAccessibilityCacheInternal();
                     } break;
+
                     case MSG_ON_KEY_EVENT_TIMEOUT: {
                         PendingEvent eventState = (PendingEvent) message.obj;
                         setOnKeyEventResult(false, eventState.sequence);
                     } break;
+
+                    case MSG_ON_WINDOWS_CHANGED: {
+                        final int[] windowIds = (int[]) message.obj;
+                        notifyWindowsChangedInternal(windowIds);
+                    } break;
+
                     default: {
                         throw new IllegalArgumentException("Unknown message: " + type);
                     }
@@ -2700,6 +2899,113 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    final class WindowsForAccessibilityCallback implements
+            WindowManagerInternal.WindowsForAccessibilityCallback {
+
+        @Override
+        public void onWindowsForAccessibilityChanged(List<WindowInfo> windows) {
+            synchronized (mLock) {
+                List<WindowInfo> receivedWindows = (List<WindowInfo>) windows;
+
+                // Populate the windows to report.
+                List<AccessibilityWindowInfo> reportedWindows =
+                        new ArrayList<AccessibilityWindowInfo>();
+                final int receivedWindowCount = receivedWindows.size();
+                for (int i = 0; i < receivedWindowCount; i++) {
+                    WindowInfo receivedWindow = receivedWindows.get(i);
+                    AccessibilityWindowInfo reportedWindow = populateReportedWindow(
+                            receivedWindow);
+                    if (reportedWindow != null) {
+                        reportedWindows.add(reportedWindow);
+                    }
+                }
+
+                if (DEBUG) {
+                    Slog.i(LOG_TAG, "Windows changed: " + reportedWindows);
+                }
+
+                // Let the policy update the focused and active windows.
+                mSecurityPolicy.updateWindowsLocked(reportedWindows);
+            }
+        }
+
+        private AccessibilityWindowInfo populateReportedWindow(WindowInfo window) {
+            final int windowId = findWindowIdLocked(window.token);
+            if (windowId < 0) {
+                return null;
+            }
+
+            AccessibilityWindowInfo reportedWindow = AccessibilityWindowInfo.obtain();
+
+            reportedWindow.setId(windowId);
+            reportedWindow.setType(getTypeForWindowManagerWindowType(window.type));
+            reportedWindow.setLayer(window.layer);
+            reportedWindow.setFocused(window.focused);
+            reportedWindow.setBoundsInScreen(window.boundsInScreen);
+
+            final int parentId = findWindowIdLocked(window.parentToken);
+            if (parentId >= 0) {
+                reportedWindow.setParentId(parentId);
+            }
+
+            if (window.childTokens != null) {
+                final int childCount = window.childTokens.size();
+                for (int i = 0; i < childCount; i++) {
+                    IBinder childToken = window.childTokens.get(i);
+                    final int childId = findWindowIdLocked(childToken);
+                    if (childId >= 0) {
+                        reportedWindow.addChild(childId);
+                    }
+                }
+            }
+
+            return reportedWindow;
+        }
+
+        private int getTypeForWindowManagerWindowType(int windowType) {
+            switch (windowType) {
+                case WindowManager.LayoutParams.TYPE_APPLICATION:
+                case WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA:
+                case WindowManager.LayoutParams.TYPE_APPLICATION_PANEL:
+                case WindowManager.LayoutParams.TYPE_APPLICATION_STARTING:
+                case WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL:
+                case WindowManager.LayoutParams.TYPE_BASE_APPLICATION:
+                case WindowManager.LayoutParams.TYPE_PHONE:
+                case WindowManager.LayoutParams.TYPE_PRIORITY_PHONE:
+                case WindowManager.LayoutParams.TYPE_TOAST:
+                case WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG: {
+                    return AccessibilityWindowInfo.TYPE_APPLICATION;
+                }
+
+                case WindowManager.LayoutParams.TYPE_INPUT_METHOD:
+                case WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG: {
+                    return AccessibilityWindowInfo.TYPE_INPUT_METHOD;
+                }
+
+                case WindowManager.LayoutParams.TYPE_KEYGUARD:
+                case WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG:
+                case WindowManager.LayoutParams.TYPE_NAVIGATION_BAR:
+                case WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL:
+                case WindowManager.LayoutParams.TYPE_SEARCH_BAR:
+                case WindowManager.LayoutParams.TYPE_STATUS_BAR:
+                case WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL:
+                case WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL:
+                case WindowManager.LayoutParams.TYPE_RECENTS_OVERLAY:
+                case WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY:
+                case WindowManager.LayoutParams.TYPE_SYSTEM_ALERT:
+                case WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG:
+                case WindowManager.LayoutParams.TYPE_SYSTEM_ERROR:
+                case WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY: {
+                    return AccessibilityWindowInfo.TYPE_SYSTEM;
+                }
+
+                default: {
+                    return -1;
+                }
+            }
+        }
+    }
+
     final class SecurityPolicy {
         private static final int VALID_ACTIONS =
             AccessibilityNodeInfo.ACTION_CLICK
@@ -2738,17 +3044,37 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             | AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED
             | AccessibilityEvent.TYPE_VIEW_SCROLLED
             | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED
-            | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED;
+            | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED
+            | AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY;
 
-        private int mActiveWindowId;
+        public final List<AccessibilityWindowInfo> mWindows =
+                new ArrayList<AccessibilityWindowInfo>();
+
+        public int mActiveWindowId;
+        public int mFocusedWindowId;
+        public AccessibilityEvent mShowingFocusedWindowEvent;
+
         private boolean mTouchInteractionInProgress;
 
-        private boolean canDispatchAccessibilityEvent(AccessibilityEvent event) {
+        private boolean canDispatchAccessibilityEventLocked(AccessibilityEvent event) {
             final int eventType = event.getEventType();
             switch (eventType) {
                 // All events that are for changes in a global window
                 // state should *always* be dispatched.
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+                    if (mWindowsForAccessibilityCallback != null) {
+                        // OK, this is fun. Sometimes the focused window is notified
+                        // it has focus before being shown. Historically this event
+                        // means that the window is focused and can be introspected.
+                        // But we still have not gotten the window state from the
+                        // window manager, so delay the notification until then.
+                        AccessibilityWindowInfo window = findWindowById(event.getWindowId());
+                        if (window == null || !window.isFocused()) {
+                            mShowingFocusedWindowEvent = AccessibilityEvent.obtain(event);
+                            return false;
+                        }
+                    }
+                // $fall-through$
                 case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
                 // All events generated by the user touching the
                 // screen should *always* be dispatched.
@@ -2758,15 +3084,81 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case AccessibilityEvent.TYPE_GESTURE_DETECTION_END:
                 case AccessibilityEvent.TYPE_TOUCH_INTERACTION_START:
                 case AccessibilityEvent.TYPE_TOUCH_INTERACTION_END:
-                // These will change the active window, so dispatch.
                 case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
                 case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT: {
                     return true;
                 }
                 // All events for changes in window content should be
-                // dispatched *only* if this window is the active one.
-                default:
-                    return event.getWindowId() == mActiveWindowId;
+                // dispatched *only* if this window is one of the windows
+                // the accessibility layer reports which are windows
+                // that a sighted user can touch.
+                default: {
+                    return isRetrievalAllowingWindow(event.getWindowId());
+                }
+            }
+        }
+
+        public void updateWindowsLocked(List<AccessibilityWindowInfo> windows) {
+            final int oldWindowCount = mWindows.size();
+            for (int i = oldWindowCount - 1; i >= 0; i--) {
+                mWindows.remove(i).recycle();
+            }
+
+            mFocusedWindowId = -1;
+            if (!mTouchInteractionInProgress) {
+                mActiveWindowId = -1;
+            }
+
+            // If the active window goes away while the user is touch exploring we
+            // reset the active window id and wait for the next hover event from
+            // under the user's finger to determine which one is the new one. It
+            // is possible that the finger is not moving and the input system
+            // filters out such events.
+            boolean activeWindowGone = true;
+
+            final int windowCount = windows.size();
+            if (windowCount > 0) {
+                for (int i = 0; i < windowCount; i++) {
+                    AccessibilityWindowInfo window = windows.get(i);
+                    final int windowId = window.getId();
+                    if (window.isFocused()) {
+                        mFocusedWindowId = windowId;
+                        if (!mTouchInteractionInProgress) {
+                            mActiveWindowId = windowId;
+                            window.setActive(true);
+                        } else if (windowId == mActiveWindowId) {
+                            activeWindowGone = false;
+                        }
+                    }
+                    mWindows.add(window);
+                }
+
+                if (mTouchInteractionInProgress && activeWindowGone) {
+                    mActiveWindowId = -1;
+                }
+
+                // Focused window may change the active one, so set the
+                // active window once we decided which it is.
+                for (int i = 0; i < windowCount; i++) {
+                    AccessibilityWindowInfo window = mWindows.get(i);
+                    if (window.getId() == mActiveWindowId) {
+                       window.setActive(true);
+                    }
+                }
+            }
+
+            notifyWindowsChangedLocked(mWindows);
+
+            // If we are delaying a window state change event as the window
+            // source was showing when it was fired, now is the time to send.
+            if (mShowingFocusedWindowEvent != null) {
+                final int windowId = mShowingFocusedWindowEvent.getWindowId();
+                AccessibilityWindowInfo window = findWindowById(windowId);
+                if (window != null && window.isFocused()) {
+                    // Sending does the recycle.
+                    sendAccessibilityEvent(mShowingFocusedWindowEvent, mCurrentUserId);
+                }
+                mShowingFocusedWindowEvent = null;
             }
         }
 
@@ -2781,67 +3173,96 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             // the window that the user is currently touching. If the user is
             // touching a window that does not have input focus as soon as the
             // the user stops touching that window the focused window becomes
-            // the active one.
+            // the active one. Here we detect the touched window and make it
+            // active. In updateWindowsLocked() we update the focused window
+            // and if the user is not touching the screen, we make the focused
+            // window the active one.
             switch (eventType) {
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
-                    if (getFocusedWindowId() == windowId) {
-                        mActiveWindowId = windowId;
+                    // If no service has the capability to introspect screen,
+                    // we do not register callback in the window manager for
+                    // window changes, so we have to ask the window manager
+                    // what the focused window is to update the active one.
+                    // The active window also determined events from which
+                    // windows are delivered.
+                    boolean focusedWindowActive = false;
+                    synchronized (mLock) {
+                        if (mWindowsForAccessibilityCallback == null) {
+                            focusedWindowActive = true;
+                        }
+                    }
+                    if (focusedWindowActive) {
+                        if (windowId == getFocusedWindowId()) {
+                            synchronized (mLock) {
+                                mActiveWindowId = windowId;
+                            }
+                        }
                     }
                 } break;
+
                 case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER: {
                     // Do not allow delayed hover events to confuse us
                     // which the active window is.
-                    if (mTouchInteractionInProgress) {
-                        mActiveWindowId = windowId;
+                    synchronized (mLock) {
+                        if (mTouchInteractionInProgress && mActiveWindowId != windowId) {
+                            setActiveWindowLocked(windowId);
+                        }
                     }
                 } break;
             }
         }
 
         public void onTouchInteractionStart() {
-            mTouchInteractionInProgress = true;
+            synchronized (mLock) {
+                mTouchInteractionInProgress = true;
+            }
         }
 
         public void onTouchInteractionEnd() {
-            mTouchInteractionInProgress = false;
-            // We want to set the active window to be current immediately
-            // after the user has stopped touching the screen since if the
-            // user types with the IME he should get a feedback for the
-            // letter typed in the text view which is in the input focused
-            // window. Note that we always deliver hover accessibility events
-            // (they are a result of user touching the screen) so change of
-            // the active window before all hover accessibility events from
-            // the touched window are delivered is fine.
-            mActiveWindowId = getFocusedWindowId();
+            synchronized (mLock) {
+                mTouchInteractionInProgress = false;
+                // We want to set the active window to be current immediately
+                // after the user has stopped touching the screen since if the
+                // user types with the IME he should get a feedback for the
+                // letter typed in the text view which is in the input focused
+                // window. Note that we always deliver hover accessibility events
+                // (they are a result of user touching the screen) so change of
+                // the active window before all hover accessibility events from
+                // the touched window are delivered is fine.
+                setActiveWindowLocked(mFocusedWindowId);
+            }
         }
 
-        public int getRetrievalAllowingWindowLocked() {
-            return mActiveWindowId;
+        private void setActiveWindowLocked(int windowId) {
+            if (mActiveWindowId != windowId) {
+                mActiveWindowId = windowId;
+                final int windowCount = mWindows.size();
+                for (int i = 0; i < windowCount; i++) {
+                    AccessibilityWindowInfo window = mWindows.get(i);
+                    window.setActive(window.getId() == windowId);
+                }
+                notifyWindowsChangedLocked(mWindows);
+            }
         }
 
         public boolean canGetAccessibilityNodeInfoLocked(Service service, int windowId) {
-            return canRetrieveWindowContent(service) && isRetrievalAllowingWindow(windowId);
+            return canRetrieveWindowContentLocked(service) && isRetrievalAllowingWindow(windowId);
         }
 
         public boolean canPerformActionLocked(Service service, int windowId, int action,
                 Bundle arguments) {
-            return canRetrieveWindowContent(service)
+            return canRetrieveWindowContentLocked(service)
                 && isRetrievalAllowingWindow(windowId)
                 && isActionPermitted(action);
         }
 
-        public boolean canRetrieveWindowContent(Service service) {
-            return (service.mAccessibilityServiceInfo.getCapabilities()
-                    & AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT) != 0;
+        public boolean canRetrieveWindowsLocked(Service service) {
+            return canRetrieveWindowContentLocked(service) && service.mRetrieveInteractiveWindows;
         }
 
-        public void enforceCanRetrieveWindowContent(Service service) throws RemoteException {
-            // This happens due to incorrect registration so make it apparent.
-            if (!canRetrieveWindowContent(service)) {
-                Slog.e(LOG_TAG, "Accessibility serivce " + service.mComponentName + " does not " +
-                        "declare android:canRetrieveWindowContent.");
-                throw new RemoteException();
-            }
+        public boolean canRetrieveWindowContentLocked(Service service) {
+            return (service.mAccessibilityServiceInfo.getCapabilities()
+                    & AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT) != 0;
         }
 
         public int resolveCallingUserIdEnforcingPermissionsLocked(int userId) {
@@ -2878,7 +3299,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         private boolean isRetrievalAllowingWindow(int windowId) {
-            return (mActiveWindowId == windowId);
+            if (windowId == mActiveWindowId) {
+                return true;
+            }
+            return findWindowById(windowId) != null;
+        }
+
+        private AccessibilityWindowInfo findWindowById(int windowId) {
+            final int windowCount = mWindows.size();
+            for (int i = 0; i < windowCount; i++) {
+                AccessibilityWindowInfo window = mWindows.get(i);
+                if (window.getId() == windowId) {
+                    return window;
+                }
+            }
+            return null;
         }
 
         private boolean isActionPermitted(int action) {
@@ -2901,35 +3336,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         private int getFocusedWindowId() {
-            try {
-                // We call this only on window focus change or after touch
-                // exploration gesture end and the shown windows are not that
-                // many, so the linear look up is just fine.
-                IBinder token = mWindowManagerService.getFocusedWindowToken();
-                if (token != null) {
-                    synchronized (mLock) {
-                        int windowId = getFocusedWindowIdLocked(token, mGlobalWindowTokens);
-                        if (windowId < 0) {
-                            windowId = getFocusedWindowIdLocked(token,
-                                    getCurrentUserStateLocked().mWindowTokens);
-                        }
-                        return windowId;
-                    }
-                }
-            } catch (RemoteException re) {
-                /* ignore */
-            }
-            return -1;
-        }
-
-        private int getFocusedWindowIdLocked(IBinder token, SparseArray<IBinder> windows) {
-            final int windowCount = windows.size();
-            for (int i = 0; i < windowCount; i++) {
-                if (windows.valueAt(i) == token) {
-                    return windows.keyAt(i);
-                }
-            }
-            return -1;
+            IBinder token = mWindowManagerService.getFocusedWindowToken();
+            return findWindowIdLocked(token);
         }
     }
 

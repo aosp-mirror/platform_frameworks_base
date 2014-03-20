@@ -100,14 +100,11 @@ public final class AccessibilityInteractionClient
 
     private Message mSameThreadMessage;
 
-    // The connection cache is shared between all interrogating threads.
     private static final SparseArray<IAccessibilityServiceConnection> sConnectionCache =
         new SparseArray<IAccessibilityServiceConnection>();
 
-    // The connection cache is shared between all interrogating threads since
-    // at any given time there is only one window allowing querying.
-    private static final AccessibilityNodeInfoCache sAccessibilityNodeInfoCache =
-        new AccessibilityNodeInfoCache();
+    private static final AccessibilityCache sAccessibilityCache =
+        new AccessibilityCache();
 
     /**
      * @return The client for the current thread.
@@ -166,6 +163,86 @@ public final class AccessibilityInteractionClient
     }
 
     /**
+     * Gets the info for a window.
+     *
+     * @param connectionId The id of a connection for interacting with the system.
+     * @param accessibilityWindowId A unique window id. Use
+     *     {@link android.view.accessibility.AccessibilityNodeInfo#ACTIVE_WINDOW_ID}
+     *     to query the currently active window.
+     * @return The {@link AccessibilityWindowInfo}.
+     */
+    public AccessibilityWindowInfo getWindow(int connectionId, int accessibilityWindowId) {
+        try {
+            IAccessibilityServiceConnection connection = getConnection(connectionId);
+            if (connection != null) {
+                AccessibilityWindowInfo window = sAccessibilityCache.getWindow(
+                        accessibilityWindowId);
+                if (window != null) {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "Window cache hit");
+                    }
+                    return window;
+                }
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Window cache miss");
+                }
+                window = connection.getWindow(accessibilityWindowId);
+                if (window != null) {
+                    sAccessibilityCache.addWindow(window);
+                    return window;
+                }
+            } else {
+                if (DEBUG) {
+                    Log.w(LOG_TAG, "No connection for connection id: " + connectionId);
+                }
+            }
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while calling remote getWindow", re);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the info for all windows.
+     *
+     * @param connectionId The id of a connection for interacting with the system.
+     * @return The {@link AccessibilityWindowInfo} list.
+     */
+    public List<AccessibilityWindowInfo> getWindows(int connectionId) {
+        try {
+            IAccessibilityServiceConnection connection = getConnection(connectionId);
+            if (connection != null) {
+                List<AccessibilityWindowInfo> windows = sAccessibilityCache.getWindows();
+                if (windows != null) {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "Window cache hit");
+                    }
+                    return windows;
+                }
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Window cache miss");
+                }
+                windows = connection.getWindows();
+                if (windows != null) {
+                    final int windowCount = windows.size();
+                    for (int i = 0; i < windowCount; i++) {
+                        AccessibilityWindowInfo window = windows.get(i);
+                        sAccessibilityCache.addWindow(window);
+                    }
+                    return windows;
+                }
+            } else {
+                if (DEBUG) {
+                    Log.w(LOG_TAG, "No connection for connection id: " + connectionId);
+                }
+            }
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while calling remote getWindows", re);
+        }
+        return Collections.emptyList();
+    }
+
+    /**
      * Finds an {@link AccessibilityNodeInfo} by accessibility id.
      *
      * @param connectionId The id of a connection for interacting with the system.
@@ -183,14 +260,25 @@ public final class AccessibilityInteractionClient
     public AccessibilityNodeInfo findAccessibilityNodeInfoByAccessibilityId(int connectionId,
             int accessibilityWindowId, long accessibilityNodeId, boolean bypassCache,
             int prefetchFlags) {
+        if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS) != 0
+                && (prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS) == 0) {
+            throw new IllegalArgumentException("FLAG_PREFETCH_SIBLINGS"
+                + " requires FLAG_PREFETCH_PREDECESSORS");
+        }
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 if (!bypassCache) {
-                    AccessibilityNodeInfo cachedInfo = sAccessibilityNodeInfoCache.get(
-                            accessibilityNodeId);
+                    AccessibilityNodeInfo cachedInfo = sAccessibilityCache.getNode(
+                            accessibilityWindowId, accessibilityNodeId);
                     if (cachedInfo != null) {
+                        if (DEBUG) {
+                            Log.i(LOG_TAG, "Node cache hit");
+                        }
                         return cachedInfo;
+                    }
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "Node cache miss");
                     }
                 }
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
@@ -212,10 +300,8 @@ public final class AccessibilityInteractionClient
                 }
             }
         } catch (RemoteException re) {
-            if (DEBUG) {
-                Log.w(LOG_TAG, "Error while calling remote"
-                        + " findAccessibilityNodeInfoByAccessibilityId", re);
-            }
+            Log.e(LOG_TAG, "Error while calling remote"
+                    + " findAccessibilityNodeInfoByAccessibilityId", re);
         }
         return null;
     }
@@ -259,10 +345,8 @@ public final class AccessibilityInteractionClient
                 }
             }
         } catch (RemoteException re) {
-            if (DEBUG) {
-                Log.w(LOG_TAG, "Error while calling remote"
-                        + " findAccessibilityNodeInfoByViewIdInActiveWindow", re);
-            }
+            Log.w(LOG_TAG, "Error while calling remote"
+                    + " findAccessibilityNodeInfoByViewIdInActiveWindow", re);
         }
         return Collections.emptyList();
     }
@@ -307,10 +391,8 @@ public final class AccessibilityInteractionClient
                 }
             }
         } catch (RemoteException re) {
-            if (DEBUG) {
-                Log.w(LOG_TAG, "Error while calling remote"
-                        + " findAccessibilityNodeInfosByViewText", re);
-            }
+            Log.w(LOG_TAG, "Error while calling remote"
+                    + " findAccessibilityNodeInfosByViewText", re);
         }
         return Collections.emptyList();
     }
@@ -352,9 +434,7 @@ public final class AccessibilityInteractionClient
                 }
             }
         } catch (RemoteException re) {
-            if (DEBUG) {
-                Log.w(LOG_TAG, "Error while calling remote findFocus", re);
-            }
+            Log.w(LOG_TAG, "Error while calling remote findFocus", re);
         }
         return null;
     }
@@ -396,9 +476,7 @@ public final class AccessibilityInteractionClient
                 }
             }
         } catch (RemoteException re) {
-            if (DEBUG) {
-                Log.w(LOG_TAG, "Error while calling remote accessibilityFocusSearch", re);
-            }
+            Log.w(LOG_TAG, "Error while calling remote accessibilityFocusSearch", re);
         }
         return null;
     }
@@ -436,19 +514,21 @@ public final class AccessibilityInteractionClient
                 }
             }
         } catch (RemoteException re) {
-            if (DEBUG) {
-                Log.w(LOG_TAG, "Error while calling remote performAccessibilityAction", re);
-            }
+            Log.w(LOG_TAG, "Error while calling remote performAccessibilityAction", re);
         }
         return false;
     }
 
     public void clearCache() {
-        sAccessibilityNodeInfoCache.clear();
+        sAccessibilityCache.clear();
     }
 
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        sAccessibilityNodeInfoCache.onAccessibilityEvent(event);
+        sAccessibilityCache.onAccessibilityEvent(event);
+    }
+
+    public void removeWindows(int[] windowIds) {
+        sAccessibilityCache.removeWindows(windowIds);
     }
 
     /**
@@ -613,7 +693,7 @@ public final class AccessibilityInteractionClient
         if (info != null) {
             info.setConnectionId(connectionId);
             info.setSealed(true);
-            sAccessibilityNodeInfoCache.add(info);
+            sAccessibilityCache.add(info);
         }
     }
 

@@ -284,6 +284,27 @@ public class AccessibilityServiceInfo implements Parcelable {
     public static final int FLAG_REQUEST_FILTER_KEY_EVENTS = 0x00000020;
 
     /**
+     * This flag indicates to the system that the accessibility service wants
+     * to access content of all interactive windows. An interactive window is a
+     * window that can be touched by a sighted user when explore by touch is not
+     * enabled. If this flag is not set your service will not receive
+     * {@link android.view.accessibility.AccessibilityEvent#TYPE_WINDOWS_CHANGED}
+     * events, calling AccessibilityService{@link AccessibilityService#getWindows()
+     * AccessibilityService.getWindows()} will return an empty list, and {@link
+     * AccessibilityNodeInfo#getWindow() AccessibilityNodeInfo.getWindow()} will
+     * return null.
+     * <p>
+     * Services that want to set this flag have to declare the capability
+     * to retrieve window content in their meta-data by setting the attribute
+     * {@link android.R.attr#canRetrieveWindowContent canRetrieveWindowContent} to
+     * true, otherwise this flag will be ignored. For how to declare the meta-data
+     * of a service refer to {@value AccessibilityService#SERVICE_META_DATA}.
+     * </p>
+     * @see android.R.styleable#AccessibilityService_canRetrieveWindowContent
+     */
+    public static final int FLAG_RETRIEVE_INTERACTIVE_WINDOWS = 0x00000040;
+
+    /**
      * The event types an {@link AccessibilityService} is interested in.
      * <p>
      *   <strong>Can be dynamically set at runtime.</strong>
@@ -302,6 +323,15 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see android.view.accessibility.AccessibilityEvent#TYPE_VIEW_SCROLLED
      * @see android.view.accessibility.AccessibilityEvent#TYPE_VIEW_TEXT_SELECTION_CHANGED
      * @see android.view.accessibility.AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_TOUCH_INTERACTION_START
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_TOUCH_INTERACTION_END
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_ANNOUNCEMENT
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_GESTURE_DETECTION_START
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_GESTURE_DETECTION_END
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_VIEW_ACCESSIBILITY_FOCUSED
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_WINDOWS_CHANGED
      */
     public int eventTypes;
 
@@ -354,6 +384,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY
      * @see #FLAG_REQUEST_FILTER_KEY_EVENTS
      * @see #FLAG_REPORT_VIEW_IDS
+     * @see #FLAG_RETRIEVE_INTERACTIVE_WINDOWS
      */
     public int flags;
 
@@ -449,7 +480,7 @@ public class AccessibilityServiceInfo implements Parcelable {
                     com.android.internal.R.styleable.AccessibilityService_accessibilityFeedbackType,
                     0);
             notificationTimeout = asAttributes.getInt(
-                    com.android.internal.R.styleable.AccessibilityService_notificationTimeout, 
+                    com.android.internal.R.styleable.AccessibilityService_notificationTimeout,
                     0);
             flags = asAttributes.getInt(
                     com.android.internal.R.styleable.AccessibilityService_accessibilityFlags, 0);
@@ -861,6 +892,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "FLAG_REPORT_VIEW_IDS";
             case FLAG_REQUEST_FILTER_KEY_EVENTS:
                 return "FLAG_REQUEST_FILTER_KEY_EVENTS";
+            case FLAG_RETRIEVE_INTERACTIVE_WINDOWS:
+                return "FLAG_RETRIEVE_INTERACTIVE_WINDOWS";
             default:
                 return null;
         }
