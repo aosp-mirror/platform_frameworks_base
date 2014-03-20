@@ -66,12 +66,14 @@ class ShadowTessellator {
 public:
     static VertexBufferMode tessellateAmbientShadow(bool isCasterOpaque,
             const Vector3* casterPolygon, int casterVertexCount,
-            const Vector3& centroid3d, VertexBuffer& shadowVertexBuffer);
+            const Vector3& centroid3d,  const Rect& casterBounds,
+            const Rect& localClip, float maxZ, VertexBuffer& shadowVertexBuffer);
 
     static VertexBufferMode tessellateSpotShadow(bool isCasterOpaque,
             const Vector3* casterPolygon, int casterVertexCount,
             const Vector3& lightPosScale, const mat4& receiverTransform,
-            int screenWidth, int screenHeight, VertexBuffer& shadowVertexBuffer);
+            int screenWidth, int screenHeight, const Rect& casterBounds,
+            const Rect& localClip, VertexBuffer& shadowVertexBuffer);
 
     static void generateShadowIndices(uint16_t*  shadowIndices);
 
