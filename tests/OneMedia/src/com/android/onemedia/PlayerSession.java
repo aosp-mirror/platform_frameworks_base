@@ -17,9 +17,13 @@ package com.android.onemedia;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.session.MediaSession;
-import android.media.session.MediaSessionManager;
-import android.media.session.MediaSessionToken;
+import android.media.session.Route;
+import android.media.session.RouteInfo;
+import android.media.session.RouteOptions;
+import android.media.session.RoutePlaybackControls;
+import android.media.session.Session;
+import android.media.session.SessionManager;
+import android.media.session.SessionToken;
 import android.media.session.PlaybackState;
 import android.media.session.TransportPerformer;
 import android.os.Bundle;
@@ -27,41 +31,55 @@ import android.util.Log;
 import android.view.KeyEvent;
 
 import com.android.onemedia.playback.LocalRenderer;
+import com.android.onemedia.playback.OneMRPRenderer;
 import com.android.onemedia.playback.Renderer;
-import com.android.onemedia.playback.RendererFactory;
+import com.android.onemedia.playback.RequestUtils;
+
+import java.util.ArrayList;
 
 public class PlayerSession {
     private static final String TAG = "PlayerSession";
 
-    protected MediaSession mSession;
+    protected Session mSession;
     protected Context mContext;
-    protected RendererFactory mRendererFactory;
-    protected LocalRenderer mRenderer;
-    protected MediaSession.Callback mCallback;
+    protected Renderer mRenderer;
+    protected Session.Callback mCallback;
     protected Renderer.Listener mRenderListener;
     protected TransportPerformer mPerformer;
 
     protected PlaybackState mPlaybackState;
     protected Listener mListener;
+    protected ArrayList<RouteOptions> mRouteOptions;
+    protected Route mRoute;
+    protected RoutePlaybackControls mRouteControls;
+    protected RouteListener mRouteListener;
+
+    private String mContent;
 
     public PlayerSession(Context context) {
         mContext = context;
-        mRendererFactory = new RendererFactory();
         mRenderer = new LocalRenderer(context, null);
-        mCallback = new ControllerCb();
+        mCallback = new SessionCb();
         mRenderListener = new RenderListener();
         mPlaybackState = new PlaybackState();
         mPlaybackState.setActions(PlaybackState.ACTION_PAUSE
                 | PlaybackState.ACTION_PLAY);
 
         mRenderer.registerListener(mRenderListener);
+
+        // TODO need an easier way to build route options
+        mRouteOptions = new ArrayList<RouteOptions>();
+        RouteOptions.Builder bob = new RouteOptions.Builder();
+        bob.addInterface(RoutePlaybackControls.NAME);
+        mRouteOptions.add(bob.build());
+        mRouteListener = new RouteListener();
     }
 
     public void createSession() {
         if (mSession != null) {
             mSession.release();
         }
-        MediaSessionManager man = (MediaSessionManager) mContext
+        SessionManager man = (SessionManager) mContext
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
         Log.d(TAG, "Creating session for package " + mContext.getBasePackageName());
         mSession = man.createSession("OneMedia");
@@ -69,6 +87,7 @@ public class PlayerSession {
         mPerformer = mSession.setTransportPerformerEnabled();
         mPerformer.addListener(new TransportListener());
         mPerformer.setPlaybackState(mPlaybackState);
+        mSession.setRouteOptions(mRouteOptions);
         mSession.publish();
     }
 
@@ -86,16 +105,22 @@ public class PlayerSession {
         mListener = listener;
     }
 
-    public MediaSessionToken getSessionToken() {
+    public SessionToken getSessionToken() {
         return mSession.getSessionToken();
     }
 
     public void setContent(Bundle request) {
         mRenderer.setContent(request);
+        mContent = request.getString(RequestUtils.EXTRA_KEY_SOURCE);
     }
 
     public void setNextContent(Bundle request) {
         mRenderer.setNextContent(request);
+    }
+
+    private void updateState(int newState) {
+        mPlaybackState.setState(newState);
+        mPerformer.setPlaybackState(mPlaybackState);
     }
 
     public interface Listener {
@@ -145,7 +170,11 @@ public class PlayerSession {
                     mPlaybackState.setErrorMessage("unkown state");
                     break;
             }
-            mPlaybackState.setPosition(mRenderer.getSeekPosition());
+            if (mRenderer != null) {
+                mPlaybackState.setPosition(mRenderer.getSeekPosition());
+            } else {
+                mPlaybackState.setPosition(-1);
+            }
             mPerformer.setPlaybackState(mPlaybackState);
             if (mListener != null) {
                 mListener.onPlayStateChanged(mPlaybackState);
@@ -173,8 +202,7 @@ public class PlayerSession {
 
     }
 
-    private class ControllerCb extends MediaSession.Callback {
-
+    private class SessionCb extends Session.Callback {
         @Override
         public void onMediaButton(Intent mediaRequestIntent) {
             if (Intent.ACTION_MEDIA_BUTTON.equals(mediaRequestIntent.getAction())) {
@@ -192,6 +220,40 @@ public class PlayerSession {
                 }
             }
         }
+
+        @Override
+        public void onRequestRouteChange(RouteInfo route) {
+            if (mRenderer != null) {
+                mRenderer.onStop();
+            }
+            if (route == null) {
+                // Use local route
+                mRoute = null;
+                mRenderer = new LocalRenderer(mContext, null);
+                mRenderer.registerListener(mRenderListener);
+                updateState(PlaybackState.PLAYSTATE_NONE);
+            } else {
+                // Use remote route
+                mSession.connect(route, mRouteOptions.get(0));
+                mRenderer = null;
+                updateState(PlaybackState.PLAYSTATE_CONNECTING);
+            }
+        }
+
+        @Override
+        public void onRouteConnected(Route route) {
+            mRoute = route;
+            mRouteControls = RoutePlaybackControls.from(route);
+            mRouteControls.addListener(mRouteListener);
+            Log.d(TAG, "Connected to route, registering listener");
+            mRenderer = new OneMRPRenderer(mRouteControls);
+            updateState(PlaybackState.PLAYSTATE_NONE);
+        }
+
+        @Override
+        public void onRouteDisconnected(Route route, int reason) {
+
+        }
     }
 
     private class TransportListener extends TransportPerformer.Listener {
@@ -203,6 +265,14 @@ public class PlayerSession {
         @Override
         public void onPause() {
             mRenderer.onPause();
+        }
+    }
+
+    private class RouteListener extends RoutePlaybackControls.Listener {
+        @Override
+        public void onPlaybackStateChange(int state) {
+            Log.d(TAG, "Updating state to " + state);
+            updateState(state);
         }
     }
 

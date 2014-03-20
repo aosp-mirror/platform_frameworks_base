@@ -34,12 +34,12 @@ public final class TransportPerformer {
     private final Object mLock = new Object();
     private final ArrayList<MessageHandler> mListeners = new ArrayList<MessageHandler>();
 
-    private IMediaSession mBinder;
+    private ISession mBinder;
 
     /**
      * @hide
      */
-    public TransportPerformer(IMediaSession binder) {
+    public TransportPerformer(ISession binder) {
         mBinder = binder;
     }
 

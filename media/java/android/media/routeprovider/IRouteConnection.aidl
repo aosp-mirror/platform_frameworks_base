@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-package android.media.session;
+package android.media.routeprovider;
 
-import android.media.session.IMediaSession;
-import android.media.session.IMediaSessionCallback;
-import android.os.Bundle;
+import android.media.session.RouteCommand;
+import android.os.ResultReceiver;
 
 /**
- * Interface to the MediaSessionManagerService
+ * Interface for a specific connected route.
  * @hide
  */
-interface IMediaSessionManager {
-    IMediaSession createSession(String packageName, in IMediaSessionCallback cb, String tag);
+oneway interface IRouteConnection {
+    void onCommand(in RouteCommand command, in ResultReceiver cb);
+    void disconnect();
 }

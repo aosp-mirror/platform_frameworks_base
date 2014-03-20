@@ -16,28 +16,28 @@
 
 package android.media.session;
 
-import android.media.session.IMediaController;
+import android.media.session.ISessionController;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class MediaSessionToken implements Parcelable {
-    private IMediaController mBinder;
+public class SessionToken implements Parcelable {
+    private ISessionController mBinder;
 
     /**
      * @hide
      */
-    MediaSessionToken(IMediaController binder) {
+    SessionToken(ISessionController binder) {
         mBinder = binder;
     }
 
-    private MediaSessionToken(Parcel in) {
-        mBinder = IMediaController.Stub.asInterface(in.readStrongBinder());
+    private SessionToken(Parcel in) {
+        mBinder = ISessionController.Stub.asInterface(in.readStrongBinder());
     }
 
     /**
      * @hide
      */
-    IMediaController getBinder() {
+    ISessionController getBinder() {
         return mBinder;
     }
 
@@ -51,16 +51,16 @@ public class MediaSessionToken implements Parcelable {
         dest.writeStrongBinder(mBinder.asBinder());
     }
 
-    public static final Parcelable.Creator<MediaSessionToken> CREATOR
-            = new Parcelable.Creator<MediaSessionToken>() {
+    public static final Parcelable.Creator<SessionToken> CREATOR
+            = new Parcelable.Creator<SessionToken>() {
         @Override
-        public MediaSessionToken createFromParcel(Parcel in) {
-            return new MediaSessionToken(in);
+        public SessionToken createFromParcel(Parcel in) {
+            return new SessionToken(in);
         }
 
         @Override
-        public MediaSessionToken[] newArray(int size) {
-            return new MediaSessionToken[size];
+        public SessionToken[] newArray(int size) {
+            return new SessionToken[size];
         }
     };
 }
