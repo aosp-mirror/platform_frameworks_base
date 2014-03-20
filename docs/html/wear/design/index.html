@@ -379,11 +379,15 @@ h3 {
 }
 </style>
 <p>
-Android Wear devices provide just the right information at just the right time, allowing you to be connected to the virtual world and present in the real world.</p>
+Android wearables provide just the right information at just the right time, allowing you to be connected to the virtual world and present in the real world.</p>
 
 <img src="/wear/images/05_images.png" height="200" width="169" style="float:right;clear:right;margin:0 0 60px 60px" />
 
-<p>Here you’ll find some guidelines for designing great user experiences on the Android Wear platform. Designing for Android Wear is substantially different than designing for phones or tablets, so we’ll start by describing how your content can work in tandem with the overall Android Wear vision.</p>
+<p>Here you’ll find some guidelines for designing great user experiences on the Android Wear
+platform. Designing for Android Wear is substantially different than designing for phones or
+tablets, so we’ll start by describing how your content can work in tandem with the overall
+Android Wear vision. To better understand the user experience on Android Wear, also be sure
+to read the <a href="/wear/design/user-interface.html">UI Overview</a>.</p>
 
 
 <img src="/wear/images/02_notifications.png" height="200" width="169" style="float:right;clear:right;margin:0 0 20px 60px" />
@@ -393,7 +397,7 @@ Android Wear devices provide just the right information at just the right time, 
 <p>Android Wear experiences are:</p>
 
 <ul>
-  <li><strong>Contextually aware and smart.</strong> These devices bring a new level of awareness to computing. Rather than requiring attention and input from users, Android Wear devices are aware of their situation and state, and helpfully display the right information at the right time. <em>Timely, relevant, specific</em>.</li>
+  <li><strong>Contextually aware and smart.</strong> These devices bring a new level of awareness to computing. Rather than requiring attention and input from users, Android wearables are aware of their situation and state, and helpfully display the right information at the right time. <em>Timely, relevant, specific</em>.</li>
 
   <li><strong>Glanceable.</strong> Wearable devices are used all throughout the day, even when they sit in our peripheral vision. Effective apps provide the maximum payload of information with a minimum of fuss, optimized to provide tiny snippets of relevant information throughout the day. <em>Short, sharp, immediate.</em></li>
 
@@ -462,7 +466,8 @@ Notifications for Android Wear</a>.</p>
 
 <img src="/wear/images/07_appicons.png" height="200" style="float:right;margin:0 0 20px 60px" />
 
-<p>Your application’s launcher icon will be automatically placed on the card, identifying your notification. Do not use the notification title or background image to identify or brand your application. Instead, allow your icon to identify itself and focus on delivering a clear, succinct message in the card and image. You can choose not to display this icon.
+<p>Your application’s launcher icon will be automatically placed on the card, identifying your notification. Do not use the notification title or background image to identify or brand your application. Instead, allow your icon to identify itself and focus on delivering a clear, succinct message in the card and image. You can choose not to display this icon using
+ <a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#setHintHideIcon(boolean)"><code>setHintHideIcon()</code></a>.
 </p>
 
 

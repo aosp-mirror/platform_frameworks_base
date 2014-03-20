@@ -280,7 +280,17 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
     <div class="jd-descr" itemprop="articleBody">
-    <div id="video-container">
+    <style>
+.fullpage>#footer,
+#jd-content>.content-footer.wrap {
+  display:none;
+}
+</style>
+
+
+
+
+<div id="video-container">
   <div id="video-frame">
     <div class="video-close">
       <span id="icon-video-close">&nbsp;</span>
@@ -292,6 +302,7 @@ onkeyup="return search_changed(event, false, '/')" />
     </div>
   </div>
 </div>
+
 
 
 <div class="wear-body-content">
@@ -319,7 +330,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <a href="/wear/preview/start.html" class="wear-button wear-primary" style="margin-top: 40px;">
                   Get the Developer Preview
                 </a>
-                <a id="watchVideo" href="https://youtube.googleapis.com/v/i2uvYI6blEE">
+                <a id="watchVideo" href="https://youtube.googleapis.com/v/0xQ3y902DEQ">
                   <div class="wear-video-link">Watch the video</div>
                 </a>
 <script>
@@ -328,7 +339,7 @@ $("#watchVideo").on("click", function(e) {
 
   var params = { allowScriptAccess: "always"};
   var atts = { id: "ytapiplayer" };
-  swfobject.embedSWF("//www.youtube.com/v/i2uvYI6blEE?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1;autoplay=1",
+  swfobject.embedSWF("//www.youtube.com/v/0xQ3y902DEQ?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1;autoplay=1",
     "ytapiplayer", "940", "526.4", "8", null, null, params, atts);
 
   e.preventDefault();
@@ -491,7 +502,7 @@ $("#icon-video-close").on("click", function() {
                 <img src="/wear/images/features/ts2.png" alt="">
                 <p>Send Data</p>
                 <p class="wear-small">
-                  Send data and actions between a phone and a wearable with a data replication APIs and RPCs.
+                  Send data and actions between a phone and a wearable with data replication APIs and RPCs.
                 </p>
               </div>
               <div class="col-4">
@@ -505,7 +516,7 @@ $("#icon-video-close").on("click", function() {
                 <img src="/wear/images/features/ts4.png" alt="">
                 <p>Voice Actions</p>
                 <p class="wear-small">
-                  Register your app to handle voice actions, like "Ok Google, take a note.""
+                  Register your app to handle voice actions, like "Ok Google, take a note."
                 </p>
               </div>
             </div>
@@ -590,30 +601,30 @@ $("#icon-video-close").on("click", function() {
           <div class="cols">
             <div class="wear-body">
               <div class="col-3-wide">
-                  <a href="/TODO">
+                  <a target="_blank" href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-kIrPiq098QH9dOle-fLef">
                     <img class="wear-social-image" src="//www.google.com/images/icons/product/youtube-128.png" alt="">
                   </a>
                 <div class="wear-social-copy">
                   <p>DevBytes</p>
                   <p class="wear-small">
-                    Learn how to optimize your app notifications for wearable devices in this <a href="/TODO">DevBytes video</a> using the Android Wear Developer Preview.
+                    Learn how to optimize your app notifications for wearable devices in this <a target="_blank" href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-kIrPiq098QH9dOle-fLef">DevBytes video</a> using the Android Wear Developer Preview.
                   </p>
                 </div>
               </div>
               <div class="col-3-wide">
-                <a href="http://android-developers.blogspot.com/">
+                <a target="_blank" href="http://android-developers.blogspot.com/2014/03/android-wear-developer-preview.html">
                   <img class="wear-social-image" src="/wear/images/blogger.png" alt="">
                 </a>
                 <div class="wear-social-copy">
                   <p>Blog Post</p>
                   <p class="wear-small">
                     Read more about the Android Wear Developer Preview announcement
-                    at the <a href="http://android-developers.blogspot.com/">Android Developers Blog</a>.
+                    at the <a target="_blank" href="http://android-developers.blogspot.com/2014/03/android-wear-developer-preview.html">Android Developers Blog</a>.
                   </p>
                 </div>
               </div>
               <div class="col-3-wide">
-                <a href="http://g.co/androidweardev">
+                <a target="_blank" href="http://g.co/androidweardev">
                   <img class="wear-social-image" src="//www.google.com/images/icons/product/gplus-128.png" alt="+Android Wear Developers">
                 </a>
                 <div class="wear-social-copy">
@@ -622,7 +633,7 @@ $("#icon-video-close").on("click", function() {
                     Follow us on Google+ to stay up-to-date on Android Wear development and join the discussion!
                   </p>
                   <p class="wear-small">
-                    <a href="http://g.co/androidweardev">+Android Wear Developers</a>
+                    <a target="_blank" href="http://g.co/androidweardev">+Android Wear Developers</a>
                   </p>
                 </div>
               </div>
@@ -631,6 +642,25 @@ $("#icon-video-close").on("click", function() {
         </div> <!-- end .wrap -->
       </div> <!-- end .wear-section -->
     </div> <!-- end .wear-rest-of-page -->
+
+
+    <div class="content-footer wrap" itemscope="" itemtype="http://schema.org/SiteNavigationElement">
+      <div class="layout-content-col col-16" style="padding-top:4px">
+        <style>#___plusone_0 {float:right !important;}</style>
+        <div class="g-plusone" data-size="medium"></div>
+      </div>
+    </div>
+    <div id="footer" class="wrap" style="width:940px;position:relative;top:-35px">
+      <div id="copyright">
+        Except as noted, this content is
+        licensed under <a href="http://creativecommons.org/licenses/by/2.5/">
+        Creative Commons Attribution 2.5</a>. For details and
+        restrictions, see the <a href="/license.html">Content
+        License</a>.
+      </div>
+    </div>
+
+
   </div> <!-- end wear-body-content -->
 
   <script>
@@ -641,6 +671,8 @@ $("#icon-video-close").on("click", function() {
     e.preventDefault();
   });
   </script>
+
+
     </div>
 
       <div class="content-footer wrap"
