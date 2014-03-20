@@ -13372,6 +13372,18 @@ package android.media {
     ctor public DeniedByServerException(java.lang.String);
   }
 
+  public final class DngCreator {
+    ctor public DngCreator(android.hardware.camera2.CameraCharacteristics, android.hardware.camera2.CaptureResult);
+    method public android.media.DngCreator setDescription(java.lang.String);
+    method public android.media.DngCreator setLocation(android.location.Location);
+    method public android.media.DngCreator setOrientation(int);
+    method public android.media.DngCreator setThumbnail(android.graphics.Bitmap);
+    method public android.media.DngCreator setThumbnail(android.media.Image);
+    method public void writeByteBuffer(java.io.OutputStream, java.nio.ByteBuffer, int, long) throws java.io.IOException;
+    method public void writeImage(java.io.OutputStream, android.media.Image) throws java.io.IOException;
+    method public void writeInputStream(java.io.OutputStream, java.io.InputStream, int, long) throws java.io.IOException;
+  }
+
   public class ExifInterface {
     ctor public ExifInterface(java.lang.String) throws java.io.IOException;
     method public double getAltitude(double);
