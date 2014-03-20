@@ -34,6 +34,8 @@ import android.view.KeyEvent;
  */
 interface IAudioService {
     
+    int verifyX509CertChain(int chainsize, in byte[] chain, String host, String authtype);
+
     void adjustVolume(int direction, int flags);
 
     oneway void adjustLocalOrRemoteStreamVolume(int streamType, int direction);
