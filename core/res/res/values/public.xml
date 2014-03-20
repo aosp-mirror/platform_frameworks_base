@@ -2093,4 +2093,5 @@
   <eat-comment />
 
   <public type="attr" name="banner" id="0x10103f2" />
+  <public type="attr" name="windowSwipeToDismiss" id="0x10103f3" />
 </resources>
