@@ -100,6 +100,8 @@ final class Settings {
     private static final String TAG_ENABLED_COMPONENTS = "enabled-components";
     private static final String TAG_PACKAGE_RESTRICTIONS = "package-restrictions";
     private static final String TAG_PACKAGE = "pkg";
+    private static final String TAG_PERSISTENT_PREFERRED_ACTIVITIES =
+            "persistent-preferred-activities";
 
     private static final String ATTR_NAME = "name";
     private static final String ATTR_USER = "user";
@@ -864,7 +866,8 @@ final class Settings {
                 editPersistentPreferredActivitiesLPw(userId).addFilter(ppa);
             } else {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Unknown element under <hard-preferred-activities>: " + parser.getName());
+                        "Unknown element under <" + TAG_PERSISTENT_PREFERRED_ACTIVITIES + ">: "
+                        + parser.getName());
                 XmlUtils.skipCurrentTag(parser);
             }
         }
@@ -996,7 +999,7 @@ final class Settings {
                             enabledCaller, enabledComponents, disabledComponents);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
-                } else if (tagName.equals("hard-preferred-activities")) {
+                } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
                     readPersistentPreferredActivitiesLPw(parser, userId);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <stopped-packages>: "
@@ -1063,7 +1066,7 @@ final class Settings {
 
     void writePersistentPreferredActivitiesLPr(XmlSerializer serializer, int userId)
             throws IllegalArgumentException, IllegalStateException, IOException {
-        serializer.startTag(null, "hard-preferred-activities");
+        serializer.startTag(null, TAG_PERSISTENT_PREFERRED_ACTIVITIES);
         PersistentPreferredIntentResolver ppir = mPersistentPreferredActivities.get(userId);
         if (ppir != null) {
             for (final PersistentPreferredActivity ppa : ppir.filterSet()) {
@@ -1072,7 +1075,7 @@ final class Settings {
                 serializer.endTag(null, TAG_ITEM);
             }
         }
-        serializer.endTag(null, "hard-preferred-activities");
+        serializer.endTag(null, TAG_PERSISTENT_PREFERRED_ACTIVITIES);
     }
 
     void writePackageRestrictionsLPr(int userId) {
@@ -1774,7 +1777,7 @@ final class Settings {
                     // Upgrading from old single-user implementation;
                     // these are the preferred activities for user 0.
                     readPreferredActivitiesLPw(parser, 0);
-                } else if (tagName.equals("hard-preferred-activities")) {
+                } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
                     // TODO: check whether this is okay! as it is very
                     // similar to how preferred-activities are treated
                     readPersistentPreferredActivitiesLPw(parser, 0);
