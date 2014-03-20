@@ -70,15 +70,6 @@ void android_Configuration_getFromJava(
             gConfigurationClassInfo.smallestScreenWidthDp);
 }
 
-/*
- * JNI registration.
- */
-static JNINativeMethod gMethods[] = {
-    /* name, signature, funcPtr */
-    //{ "getObbInfo_native", "(Ljava/lang/String;Landroid/content/res/ObbInfo;)Z",
-    //        (void*) android_content_res_ObbScanner_getObbInfo },
-};
-
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
         LOG_FATAL_IF(! var, "Unable to find class " className);
@@ -123,8 +114,7 @@ int register_android_content_res_Configuration(JNIEnv* env)
     GET_FIELD_ID(gConfigurationClassInfo.smallestScreenWidthDp, clazz,
             "smallestScreenWidthDp", "I");
 
-    return AndroidRuntime::registerNativeMethods(env, "android/content/res/Configuration", gMethods,
-            NELEM(gMethods));
+    return 0;
 }
 
 }; // namespace android
