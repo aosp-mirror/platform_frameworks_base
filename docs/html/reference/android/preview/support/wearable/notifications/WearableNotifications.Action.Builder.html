@@ -448,15 +448,6 @@ Summary:
 
 <h2>Class Overview</h2>
 <p itemprop="articleBody">Builder class for <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></code> objects.
-
- <p>Example:
-
- <pre class="prettyprint">
- WearableNotifications.Builder builder = new WearableNotifications.Builder(mContext)
-         .addAction(new WearableNotifications.Action.Builder(
-                 R.drawable.navigate, &quot;Navigate&quot, pendingIntent)
-                 .build());
- Notification notif = builder.build();</pre>
 </p>
 
 
@@ -525,7 +516,7 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.Builder.html#WearableNotifications.Action.Builder(int, java.lang.CharSequence, android.app.PendingIntent)">WearableNotifications.Action.Builder</a></span>(int icon, <a href="http://developer.android.com/reference/java/lang/CharSequence.html">CharSequence</a> title, <a href="http://developer.android.com/reference/android/app/PendingIntent.html">PendingIntent</a> intent)</nobr>
         
-        <div class="jd-descrdiv">Construct a new builder for an <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></code> object.</div>
+        <div class="jd-descrdiv">Construct a new builder for <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></code> object.</div>
   
   </td></tr>
 
@@ -872,8 +863,25 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Construct a new builder for an <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></code> object.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Construct a new builder for <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></code> object.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>icon</td>
+          <td>icon to show for this action</td>
+        </tr>
+        <tr>
+          <th>title</td>
+          <td>the title of the action</td>
+        </tr>
+        <tr>
+          <th>intent</td>
+          <td>the <code><a href="http://developer.android.com/reference/android/app/PendingIntent.html">PendingIntent</a></code> to fire when users trigger this action
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
@@ -918,9 +926,22 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Add an input to be collected from the user when this action is sent.
- Response values are sent as extras to this Action's pending intent when
- sent.
-</p></div>
+ Response values are sent as extras to this action's pending intent when
+ sent.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>remoteInput</td>
+          <td>a <code><a href="/reference/android/preview/support/wearable/notifications/RemoteInput.html">RemoteInput</a></code> to add to the action</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this object for method chaining
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -950,8 +971,12 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Combine all of the options that have been set and return a new <code><a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">WearableNotifications.Action</a></code>
- object.
-</p></div>
+ object.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the built action
+</li></ul>
+  </div>
 
     </div>
 </div>
