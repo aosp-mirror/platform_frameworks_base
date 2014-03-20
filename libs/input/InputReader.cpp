@@ -2030,6 +2030,10 @@ void KeyboardInputMapper::configureParameters() {
     if (mParameters.orientationAware) {
         mParameters.hasAssociatedDisplay = true;
     }
+
+    mParameters.handlesKeyRepeat = false;
+    getDevice()->getConfiguration().tryGetProperty(String8("keyboard.handlesKeyRepeat"),
+            mParameters.handlesKeyRepeat);
 }
 
 void KeyboardInputMapper::dumpParameters(String8& dump) {
@@ -2038,6 +2042,8 @@ void KeyboardInputMapper::dumpParameters(String8& dump) {
             toString(mParameters.hasAssociatedDisplay));
     dump.appendFormat(INDENT4 "OrientationAware: %s\n",
             toString(mParameters.orientationAware));
+    dump.appendFormat(INDENT4 "HandlesKeyRepeat: %s\n",
+            toString(mParameters.handlesKeyRepeat));
 }
 
 void KeyboardInputMapper::reset(nsecs_t when) {
@@ -2153,6 +2159,10 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
     if (down && getDevice()->isExternal()
             && !(policyFlags & (POLICY_FLAG_WAKE | POLICY_FLAG_WAKE_DROPPED))) {
         policyFlags |= POLICY_FLAG_WAKE_DROPPED;
+    }
+
+    if (mParameters.handlesKeyRepeat) {
+        policyFlags |= POLICY_FLAG_DISABLE_KEY_REPEAT;
     }
 
     if (metaStateChanged) {
