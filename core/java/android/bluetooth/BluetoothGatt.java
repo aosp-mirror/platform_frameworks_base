@@ -553,6 +553,15 @@ public final class BluetoothGatt implements BluetoothProfile {
                     Log.w(TAG, "Unhandled exception in callback", ex);
                 }
             }
+
+            /**
+             * Advertise state change callback
+             * @hide
+             */
+            public void onAdvertiseStateChange(int state, int status) {
+                if (DBG) Log.d(TAG, "onAdvertiseStateChange() - state = "
+                        + state + " status=" + status);
+            }
         };
 
     /*package*/ BluetoothGatt(Context context, IBluetoothGatt iGatt, BluetoothDevice device) {
