@@ -214,6 +214,12 @@ public class AppWidgetManager {
     public static final String EXTRA_CUSTOM_INFO = "customInfo";
 
     /**
+     * An intent extra attached to the {@link #ACTION_APPWIDGET_HOST_RESTORED} broadcast,
+     * indicating the integer ID of the host whose widgets have just been restored.
+     */
+    public static final String EXTRA_HOST_ID = "hostId";
+
+    /**
      * An intent extra to pass to the AppWidget picker containing a {@link java.util.List} of
      * {@link android.os.Bundle} objects to mix in to the list of AppWidgets that are
      * installed.  It will be added to the extras object on the {@link android.content.Intent}
@@ -308,6 +314,86 @@ public class AppWidgetManager {
      * @see AppWidgetProvider#onEnabled AppWidgetProvider.onEnabled(Context context)
      */
     public static final String ACTION_APPWIDGET_ENABLED = "android.appwidget.action.APPWIDGET_ENABLED";
+
+    /**
+     * Sent to providers after AppWidget state related to the provider has been restored from
+     * backup. The intent contains information about how to translate AppWidget ids from the
+     * restored data to their new equivalents.
+     *
+     * <p>The intent will contain the following extras:
+     *
+     * <table>
+     *   <tr>
+     *     <td>{@link #EXTRA_APPWIDGET_OLD_IDS}</td>
+     *     <td>The set of appWidgetIds represented in a restored backup that have been successfully
+     *     incorporated into the current environment.  This may be all of the AppWidgets known
+     *     to this application, or just a subset.  Each entry in this array of appWidgetIds has
+     *     a corresponding entry in the {@link #EXTRA_APPWIDGET_IDS} extra.</td>
+     *  </tr>
+     *   <tr>
+     *     <td>{@link #EXTRA_APPWIDGET_IDS}</td>
+     *     <td>The set of appWidgetIds now valid for this application.  The app should look at
+     *     its restored widget configuration and translate each appWidgetId in the
+     *     {@link #EXTRA_APPWIDGET_OLD_IDS} array to its new value found at the corresponding
+     *     index within this array.</td>
+     *  </tr>
+     * </table>
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * @see {@link #ACTION_APPWIDGET_HOST_RESTORED} for the corresponding host broadcast
+     */
+    public static final String ACTION_APPWIDGET_RESTORED
+            = "android.appwidget.action.APPWIDGET_RESTORED";
+
+    /**
+     * Sent to widget hosts after AppWidget state related to the host has been restored from
+     * backup. The intent contains information about how to translate AppWidget ids from the
+     * restored data to their new equivalents.  If an application maintains multiple separate
+     * widget hosts instances, it will receive this broadcast separately for each one.
+     *
+     * <p>The intent will contain the following extras:
+     *
+     * <table>
+     *   <tr>
+     *     <td>{@link #EXTRA_APPWIDGET_OLD_IDS}</td>
+     *     <td>The set of appWidgetIds represented in a restored backup that have been successfully
+     *     incorporated into the current environment.  This may be all of the AppWidgets known
+     *     to this application, or just a subset.  Each entry in this array of appWidgetIds has
+     *     a corresponding entry in the {@link #EXTRA_APPWIDGET_IDS} extra.</td>
+     *  </tr>
+     *   <tr>
+     *     <td>{@link #EXTRA_APPWIDGET_IDS}</td>
+     *     <td>The set of appWidgetIds now valid for this application.  The app should look at
+     *     its restored widget configuration and translate each appWidgetId in the
+     *     {@link #EXTRA_APPWIDGET_OLD_IDS} array to its new value found at the corresponding
+     *     index within this array.</td>
+     *  </tr>
+     *  <tr>
+     *     <td>{@link #EXTRA_HOST_ID}</td>
+     *     <td>The integer ID of the widget host instance whose state has just been restored.</td>
+     *  </tr>
+     * </table>
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * @see {@link #ACTION_APPWIDGET_RESTORED} for the corresponding provider broadcast
+     */
+    public static final String ACTION_APPWIDGET_HOST_RESTORED
+            = "android.appwidget.action.APPWIDGET_HOST_RESTORED";
+
+    /**
+     * An intent extra that contains multiple appWidgetIds.  These are id values as
+     * they were provided to the application during a recent restore from backup.  It is
+     * attached to the {@link #ACTION_APPWIDGET_RESTORED} broadcast intent.
+     *
+     * <p>
+     * The value will be an int array that can be retrieved like this:
+     * {@sample frameworks/base/tests/appwidgets/AppWidgetHostTest/src/com/android/tests/appwidgethost/TestAppWidgetProvider.java getExtra_EXTRA_APPWIDGET_IDS}
+     */
+    public static final String EXTRA_APPWIDGET_OLD_IDS = "appWidgetOldIds";
 
     /**
      * Field for the manifest meta-data tag.

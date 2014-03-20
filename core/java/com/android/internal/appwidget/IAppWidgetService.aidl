@@ -59,6 +59,5 @@ interface IAppWidgetService {
     void bindRemoteViewsService(int appWidgetId, in Intent intent, in IBinder connection, int userId);
     void unbindRemoteViewsService(int appWidgetId, in Intent intent, int userId);
     int[] getAppWidgetIds(in ComponentName provider, int userId);
-
 }
 
