@@ -9792,6 +9792,13 @@ package android.graphics {
     method public void setPaint(android.graphics.Paint);
   }
 
+  public class Outline {
+    ctor public Outline();
+    method public final boolean isValid();
+    method public void set(android.graphics.Outline);
+    method public void setRoundRect(int, int, int, int, float);
+  }
+
   public class Paint {
     ctor public Paint();
     ctor public Paint(int);
@@ -10501,6 +10508,7 @@ package android.graphics.drawable {
     method public int getMinimumHeight();
     method public int getMinimumWidth();
     method public abstract int getOpacity();
+    method public android.graphics.Outline getOutline();
     method public boolean getPadding(android.graphics.Rect);
     method public int[] getState();
     method public android.graphics.Region getTransparentRegion();
@@ -29097,7 +29105,6 @@ package android.view {
     method public int getNextFocusRightId();
     method public int getNextFocusUpId();
     method public android.view.View.OnFocusChangeListener getOnFocusChangeListener();
-    method public final void getOutline(android.graphics.Path);
     method public int getOverScrollMode();
     method public android.view.ViewOverlay getOverlay();
     method public int getPaddingBottom();
@@ -29361,7 +29368,7 @@ package android.view {
     method public void setOnLongClickListener(android.view.View.OnLongClickListener);
     method public void setOnSystemUiVisibilityChangeListener(android.view.View.OnSystemUiVisibilityChangeListener);
     method public void setOnTouchListener(android.view.View.OnTouchListener);
-    method public void setOutline(android.graphics.Path);
+    method public void setOutline(android.graphics.Outline);
     method public void setOverScrollMode(int);
     method public void setPadding(int, int, int, int);
     method public void setPaddingRelative(int, int, int, int);
