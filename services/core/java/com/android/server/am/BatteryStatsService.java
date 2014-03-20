@@ -135,14 +135,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteStartWakeLocked(uid, pid, name, historyName, type, unimportantForLogging,
-                    SystemClock.elapsedRealtime());
+                    SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
         }
     }
 
     public void noteStopWakelock(int uid, int pid, String name, int type) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteStopWakeLocked(uid, pid, name, type, SystemClock.elapsedRealtime());
+            mStats.noteStopWakeLocked(uid, pid, name, type, SystemClock.elapsedRealtime(),
+                    SystemClock.uptimeMillis());
         }
     }
 

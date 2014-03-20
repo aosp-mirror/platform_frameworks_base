@@ -208,7 +208,8 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mNumHistoryTagChars = 0;
     int mHistoryBufferLastPos = -1;
     boolean mHistoryOverflow = false;
-    long mLastHistoryTime = 0;
+    long mLastHistoryElapsedRealtime = 0;
+    long mLastHistoryUptime = 0;
 
     final HistoryItem mHistoryCur = new HistoryItem();
 
@@ -1957,12 +1958,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    void addHistoryBufferLocked(long curTime) {
+    void addHistoryBufferLocked(long elapsedRealtimeMs, long uptimeMs) {
         if (!mHaveBatteryLevel || !mRecordingHistory) {
             return;
         }
 
-        final long timeDiff = (mHistoryBaseTime+curTime) - mHistoryLastWritten.time;
+        final long timeDiff = (mHistoryBaseTime+elapsedRealtimeMs) - mHistoryLastWritten.time;
         final int diffStates = mHistoryLastWritten.states^mHistoryCur.states;
         final int lastDiffStates = mHistoryLastWritten.states^mHistoryLastLastWritten.states;
         if (DEBUG) Slog.i(TAG, "ADD: tdelta=" + timeDiff + " diff="
@@ -1981,14 +1982,14 @@ public final class BatteryStatsImpl extends BatteryStats {
                 && mHistoryLastWritten.batteryTemperature == mHistoryCur.batteryTemperature
                 && mHistoryLastWritten.batteryVoltage == mHistoryCur.batteryVoltage) {
             // We can merge this new change in with the last one.  Merging is
-            // allows as long as only the states have changed, and within those states
+            // allowed as long as only the states have changed, and within those states
             // as long as no bit has changed both between now and the last entry, as
             // well as the last entry and the one before it (so we capture any toggles).
             if (DEBUG) Slog.i(TAG, "ADD: rewinding back to " + mHistoryBufferLastPos);
             mHistoryBuffer.setDataSize(mHistoryBufferLastPos);
             mHistoryBuffer.setDataPosition(mHistoryBufferLastPos);
             mHistoryBufferLastPos = -1;
-            curTime = mHistoryLastWritten.time - mHistoryBaseTime;
+            elapsedRealtimeMs = mHistoryLastWritten.time - mHistoryBaseTime;
             // If the last written history had a wakelock tag, we need to retain it.
             // Note that the condition above made sure that we aren't in a case where
             // both it and the current history item have a wakelock tag.
@@ -2018,8 +2019,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (dataSize >= MAX_HISTORY_BUFFER) {
             if (!mHistoryOverflow) {
                 mHistoryOverflow = true;
-                addHistoryBufferLocked(curTime, HistoryItem.CMD_UPDATE);
-                addHistoryBufferLocked(curTime, HistoryItem.CMD_OVERFLOW);
+                addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_UPDATE);
+                addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_OVERFLOW);
                 return;
             }
 
@@ -2034,22 +2035,23 @@ public final class BatteryStatsImpl extends BatteryStats {
                 return;
             }
 
-            addHistoryBufferLocked(curTime, HistoryItem.CMD_UPDATE);
+            addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_UPDATE);
             return;
         }
 
-        addHistoryBufferLocked(curTime, HistoryItem.CMD_UPDATE);
+        addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_UPDATE);
     }
 
-    private void addHistoryBufferLocked(long curTime, byte cmd) {
+    private void addHistoryBufferLocked(long elapsedRealtimeMs, long uptimeMs, byte cmd) {
         if (mIteratingHistory) {
             throw new IllegalStateException("Can't do this while iterating history!");
         }
         mHistoryBufferLastPos = mHistoryBuffer.dataPosition();
         mHistoryLastLastWritten.setTo(mHistoryLastWritten);
-        mHistoryLastWritten.setTo(mHistoryBaseTime + curTime, cmd, mHistoryCur);
+        mHistoryLastWritten.setTo(mHistoryBaseTime + elapsedRealtimeMs, cmd, mHistoryCur);
         writeHistoryDelta(mHistoryBuffer, mHistoryLastWritten, mHistoryLastLastWritten);
-        mLastHistoryTime = curTime;
+        mLastHistoryElapsedRealtime = elapsedRealtimeMs;
+        mLastHistoryUptime = uptimeMs;
         mHistoryCur.wakelockTag = null;
         mHistoryCur.wakeReasonTag = null;
         mHistoryCur.eventCode = HistoryItem.EVENT_NONE;
@@ -2061,8 +2063,8 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     int mChangedStates = 0;
 
-    void addHistoryRecordLocked(long curTime) {
-        addHistoryBufferLocked(curTime);
+    void addHistoryRecordLocked(long elapsedRealtimeMs, long uptimeMs) {
+        addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs);
 
         if (!USE_OLD_HISTORY) {
             return;
@@ -2077,12 +2079,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         // are now resetting back to their original value, then just collapse
         // into one record.
         if (mHistoryEnd != null && mHistoryEnd.cmd == HistoryItem.CMD_UPDATE
-                && (mHistoryBaseTime+curTime) < (mHistoryEnd.time+2000)
+                && (mHistoryBaseTime+elapsedRealtimeMs) < (mHistoryEnd.time+1000)
                 && ((mHistoryEnd.states^mHistoryCur.states)&mChangedStates) == 0) {
             // If the current is the same as the one before, then we no
             // longer need the entry.
             if (mHistoryLastEnd != null && mHistoryLastEnd.cmd == HistoryItem.CMD_UPDATE
-                    && (mHistoryBaseTime+curTime) < (mHistoryEnd.time+500)
+                    && (mHistoryBaseTime+elapsedRealtimeMs) < (mHistoryEnd.time+500)
                     && mHistoryLastEnd.sameNonEvent(mHistoryCur)) {
                 mHistoryLastEnd.next = null;
                 mHistoryEnd.next = mHistoryCache;
@@ -2100,7 +2102,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         if (mNumHistoryItems == MAX_HISTORY_ITEMS
                 || mNumHistoryItems == MAX_MAX_HISTORY_ITEMS) {
-            addHistoryRecordLocked(curTime, HistoryItem.CMD_OVERFLOW);
+            addHistoryRecordLocked(elapsedRealtimeMs, HistoryItem.CMD_OVERFLOW);
         }
 
         if (mNumHistoryItems >= MAX_HISTORY_ITEMS) {
@@ -2117,25 +2119,26 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        addHistoryRecordLocked(curTime, HistoryItem.CMD_UPDATE);
+        addHistoryRecordLocked(elapsedRealtimeMs, HistoryItem.CMD_UPDATE);
     }
 
-    void addHistoryEventLocked(long curTime, int code, String name, int uid) {
+    void addHistoryEventLocked(long elapsedRealtimeMs, long uptimeMs, int code,
+            String name, int uid) {
         mHistoryCur.eventCode = code;
         mHistoryCur.eventTag = mHistoryCur.localEventTag;
         mHistoryCur.eventTag.string = name;
         mHistoryCur.eventTag.uid = uid;
-        addHistoryBufferLocked(curTime);
+        addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs);
     }
 
-    void addHistoryRecordLocked(long curTime, byte cmd) {
+    void addHistoryRecordLocked(long elapsedRealtimeMs, long uptimeMs, byte cmd) {
         HistoryItem rec = mHistoryCache;
         if (rec != null) {
             mHistoryCache = rec.next;
         } else {
             rec = new HistoryItem();
         }
-        rec.setTo(mHistoryBaseTime + curTime, cmd, mHistoryCur);
+        rec.setTo(mHistoryBaseTime + elapsedRealtimeMs, cmd, mHistoryCur);
 
         addHistoryRecordLocked(rec);
     }
@@ -2164,7 +2167,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         mHistoryBaseTime = 0;
-        mLastHistoryTime = 0;
+        mLastHistoryElapsedRealtime = 0;
+        mLastHistoryUptime = 0;
 
         mHistoryBuffer.setDataSize(0);
         mHistoryBuffer.setDataPosition(0);
@@ -2262,7 +2266,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                 active.remove(name);
             }
         }
-        addHistoryEventLocked(SystemClock.elapsedRealtime(), code, name, uid);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        addHistoryEventLocked(elapsedRealtime, uptime, code, name, uid);
     }
 
     private void requestWakelockCpuUpdate() {
@@ -2273,7 +2279,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteStartWakeLocked(int uid, int pid, String name, String historyName, int type,
-            boolean unimportantForLogging, long elapsedRealtime) {
+            boolean unimportantForLogging, long elapsedRealtime, long uptime) {
         uid = mapUid(uid);
         if (type == WAKE_TYPE_PARTIAL) {
             // Only care about partial wake locks, since full wake locks
@@ -2286,7 +2292,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mHistoryCur.wakelockTag.string = historyName != null ? historyName : name;
                 mHistoryCur.wakelockTag.uid = uid;
                 mWakeLockImportant = !unimportantForLogging;
-                addHistoryRecordLocked(elapsedRealtime);
+                addHistoryRecordLocked(elapsedRealtime, uptime);
             } else if (!mWakeLockImportant && !unimportantForLogging) {
                 if (mHistoryLastWritten.wakelockTag != null) {
                     // We'll try to update the last tag.
@@ -2294,19 +2300,23 @@ public final class BatteryStatsImpl extends BatteryStats {
                     mHistoryCur.wakelockTag = mHistoryCur.localWakelockTag;
                     mHistoryCur.wakelockTag.string = historyName != null ? historyName : name;
                     mHistoryCur.wakelockTag.uid = uid;
-                    addHistoryRecordLocked(elapsedRealtime);
+                    addHistoryRecordLocked(elapsedRealtime, uptime);
                 }
                 mWakeLockImportant = true;
             }
             mWakeLockNesting++;
         }
         if (uid >= 0) {
+            //if (uid == 0) {
+            //    Slog.wtf(TAG, "Acquiring wake lock from root: " + name);
+            //}
             requestWakelockCpuUpdate();
             getUidStatsLocked(uid).noteStartWakeLocked(pid, name, type, elapsedRealtime);
         }
     }
 
-    public void noteStopWakeLocked(int uid, int pid, String name, int type, long elapsedRealtime) {
+    public void noteStopWakeLocked(int uid, int pid, String name, int type, long elapsedRealtime,
+            long uptime) {
         uid = mapUid(uid);
         if (type == WAKE_TYPE_PARTIAL) {
             mWakeLockNesting--;
@@ -2314,7 +2324,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mHistoryCur.states &= ~HistoryItem.STATE_WAKE_LOCK_FLAG;
                 if (DEBUG_HISTORY) Slog.v(TAG, "Stop wake lock to: "
                         + Integer.toHexString(mHistoryCur.states));
-                addHistoryRecordLocked(elapsedRealtime);
+                addHistoryRecordLocked(elapsedRealtime, uptime);
             }
         }
         if (uid >= 0) {
@@ -2326,10 +2336,11 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteStartWakeFromSourceLocked(WorkSource ws, int pid, String name,
             String historyName, int type, boolean unimportantForLogging) {
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         final int N = ws.size();
         for (int i=0; i<N; i++) {
             noteStartWakeLocked(ws.get(i), pid, name, historyName, type, unimportantForLogging,
-                    elapsedRealtime);
+                    elapsedRealtime, uptime);
         }
     }
 
@@ -2337,36 +2348,39 @@ public final class BatteryStatsImpl extends BatteryStats {
             WorkSource newWs, int newPid, String newName,
             String newHistoryName, int newType, boolean newUnimportantForLogging) {
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         // For correct semantics, we start the need worksources first, so that we won't
         // make inappropriate history items as if all wake locks went away and new ones
         // appeared.  This is okay because tracking of wake locks allows nesting.
-        final int NN = ws.size();
+        final int NN = newWs.size();
         for (int i=0; i<NN; i++) {
             noteStartWakeLocked(newWs.get(i), newPid, newName, newHistoryName, newType,
-                    newUnimportantForLogging, elapsedRealtime);
+                    newUnimportantForLogging, elapsedRealtime, uptime);
         }
         final int NO = ws.size();
         for (int i=0; i<NO; i++) {
-            noteStopWakeLocked(ws.get(i), pid, name, type, elapsedRealtime);
+            noteStopWakeLocked(ws.get(i), pid, name, type, elapsedRealtime, uptime);
         }
     }
 
     public void noteStopWakeFromSourceLocked(WorkSource ws, int pid, String name, int type) {
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         final int N = ws.size();
         for (int i=0; i<N; i++) {
-            noteStopWakeLocked(ws.get(i), pid, name, type, elapsedRealtime);
+            noteStopWakeLocked(ws.get(i), pid, name, type, elapsedRealtime, uptime);
         }
     }
 
     public void noteWakeupReasonLocked(int irq, String reason) {
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         if (DEBUG_HISTORY) Slog.v(TAG, "Wakeup reason irq #" + irq + "\"" + reason +"\": "
                 + Integer.toHexString(mHistoryCur.states));
         mHistoryCur.wakeReasonTag = mHistoryCur.localWakeReasonTag;
         mHistoryCur.wakeReasonTag.string = reason;
         mHistoryCur.wakeReasonTag.uid = irq;
-        addHistoryRecordLocked(elapsedRealtime);
+        addHistoryRecordLocked(elapsedRealtime, uptime);
     }
 
     public int startAddingCpuLocked() {
@@ -2511,11 +2525,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteStartSensorLocked(int uid, int sensor) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         if (mSensorNesting == 0) {
             mHistoryCur.states |= HistoryItem.STATE_SENSOR_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Start sensor to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
         }
         mSensorNesting++;
         getUidStatsLocked(uid).noteStartSensor(sensor, elapsedRealtime);
@@ -2524,12 +2539,13 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteStopSensorLocked(int uid, int sensor) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         mSensorNesting--;
         if (mSensorNesting == 0) {
             mHistoryCur.states &= ~HistoryItem.STATE_SENSOR_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Stop sensor to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
         }
         getUidStatsLocked(uid).noteStopSensor(sensor, elapsedRealtime);
     }
@@ -2539,11 +2555,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteStartGpsLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         if (mGpsNesting == 0) {
             mHistoryCur.states |= HistoryItem.STATE_GPS_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Start GPS to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
         }
         mGpsNesting++;
         getUidStatsLocked(uid).noteStartGps(elapsedRealtime);
@@ -2552,12 +2569,13 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteStopGpsLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         mGpsNesting--;
         if (mGpsNesting == 0) {
             mHistoryCur.states &= ~HistoryItem.STATE_GPS_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Stop GPS to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
         }
         getUidStatsLocked(uid).noteStopGps(elapsedRealtime);
     }
@@ -2565,10 +2583,11 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteScreenOnLocked() {
         if (!mScreenOn) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
             mHistoryCur.states |= HistoryItem.STATE_SCREEN_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Screen on to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             mScreenOn = true;
             mScreenOnTimer.startRunningLocked(elapsedRealtime);
             if (mScreenBrightnessBin >= 0) {
@@ -2580,7 +2599,8 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             // Fake a wake lock, so we consider the device waked as long
             // as the screen is on.
-            noteStartWakeLocked(-1, -1, "screen", null, WAKE_TYPE_PARTIAL, false, elapsedRealtime);
+            noteStartWakeLocked(-1, -1, "screen", null, WAKE_TYPE_PARTIAL, false,
+                    elapsedRealtime, uptime);
 
             // Update discharge amounts.
             if (mOnBatteryInternal) {
@@ -2592,17 +2612,19 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteScreenOffLocked() {
         if (mScreenOn) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
             mHistoryCur.states &= ~HistoryItem.STATE_SCREEN_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Screen off to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             mScreenOn = false;
             mScreenOnTimer.stopRunningLocked(elapsedRealtime);
             if (mScreenBrightnessBin >= 0) {
                 mScreenBrightnessTimer[mScreenBrightnessBin].stopRunningLocked(elapsedRealtime);
             }
 
-            noteStopWakeLocked(-1, -1, "screen", WAKE_TYPE_PARTIAL, elapsedRealtime);
+            noteStopWakeLocked(-1, -1, "screen", WAKE_TYPE_PARTIAL,
+                    elapsedRealtime, uptime);
 
             updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), true,
                     SystemClock.uptimeMillis() * 1000, elapsedRealtime * 1000);
@@ -2621,11 +2643,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         else if (bin >= NUM_SCREEN_BRIGHTNESS_BINS) bin = NUM_SCREEN_BRIGHTNESS_BINS-1;
         if (mScreenBrightnessBin != bin) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
             mHistoryCur.states = (mHistoryCur.states&~HistoryItem.STATE_BRIGHTNESS_MASK)
                     | (bin << HistoryItem.STATE_BRIGHTNESS_SHIFT);
             if (DEBUG_HISTORY) Slog.v(TAG, "Screen brightness " + bin + " to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             if (mScreenOn) {
                 if (mScreenBrightnessBin >= 0) {
                     mScreenBrightnessTimer[mScreenBrightnessBin].stopRunningLocked(elapsedRealtime);
@@ -2650,12 +2673,13 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteDataConnectionActive(int type, boolean active) {
         if (ConnectivityManager.isNetworkTypeMobile(type)) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
             if (mMobileRadioActive != active) {
                 if (active) mHistoryCur.states |= HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG;
                 else mHistoryCur.states &= ~HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG;
                 if (DEBUG_HISTORY) Slog.v(TAG, "Mobile network active " + active + " to: "
                         + Integer.toHexString(mHistoryCur.states));
-                addHistoryRecordLocked(elapsedRealtime);
+                addHistoryRecordLocked(elapsedRealtime, uptime);
                 mMobileRadioActive = active;
                 if (active) {
                     mMobileRadioActiveTimer.startRunningLocked(elapsedRealtime);
@@ -2672,10 +2696,11 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void notePhoneOnLocked() {
         if (!mPhoneOn) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
             mHistoryCur.states |= HistoryItem.STATE_PHONE_IN_CALL_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Phone on to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             mPhoneOn = true;
             mPhoneOnTimer.startRunningLocked(elapsedRealtime);
         }
@@ -2684,10 +2709,11 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void notePhoneOffLocked() {
         if (mPhoneOn) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
             mHistoryCur.states &= ~HistoryItem.STATE_PHONE_IN_CALL_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Phone off to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             mPhoneOn = false;
             mPhoneOnTimer.stopRunningLocked(elapsedRealtime);
         }
@@ -2727,6 +2753,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mPhoneSignalStrengthBinRaw = strengthBin;
 
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
 
         if (simState == TelephonyManager.SIM_STATE_ABSENT) {
             // In this case we will always be STATE_OUT_OF_SERVICE, so need
@@ -2800,7 +2827,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         if (newHistory) {
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
         }
     }
 
@@ -2875,11 +2902,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (DEBUG) Log.i(TAG, "Phone Data Connection -> " + dataType + " = " + hasData);
         if (mPhoneDataConnectionType != bin) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
             mHistoryCur.states = (mHistoryCur.states&~HistoryItem.STATE_DATA_CONNECTION_MASK)
                     | (bin << HistoryItem.STATE_DATA_CONNECTION_SHIFT);
             if (DEBUG_HISTORY) Slog.v(TAG, "Data connection " + bin + " to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             if (mPhoneDataConnectionType >= 0) {
                 mPhoneDataConnectionsTimer[mPhoneDataConnectionType].stopRunningLocked(
                         elapsedRealtime);
@@ -2892,10 +2920,11 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteWifiOnLocked() {
         if (!mWifiOn) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
             mHistoryCur.states |= HistoryItem.STATE_WIFI_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI on to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             mWifiOn = true;
             mWifiOnTimer.startRunningLocked(elapsedRealtime);
         }
@@ -2903,11 +2932,12 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     public void noteWifiOffLocked() {
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         if (mWifiOn) {
             mHistoryCur.states &= ~HistoryItem.STATE_WIFI_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI off to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             mWifiOn = false;
             mWifiOnTimer.stopRunningLocked(elapsedRealtime);
         }
@@ -2916,11 +2946,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteAudioOnLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         if (!mAudioOn) {
             mHistoryCur.states |= HistoryItem.STATE_AUDIO_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Audio on to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(SystemClock.elapsedRealtime());
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             mAudioOn = true;
             mAudioOnTimer.startRunningLocked(elapsedRealtime);
         }
@@ -2930,11 +2961,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteAudioOffLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         if (mAudioOn) {
             mHistoryCur.states &= ~HistoryItem.STATE_AUDIO_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Audio off to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(SystemClock.elapsedRealtime());
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             mAudioOn = false;
             mAudioOnTimer.stopRunningLocked(elapsedRealtime);
         }
@@ -2944,11 +2976,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteVideoOnLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         if (!mVideoOn) {
             mHistoryCur.states |= HistoryItem.STATE_VIDEO_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Video on to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(SystemClock.elapsedRealtime());
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             mVideoOn = true;
             mVideoOnTimer.startRunningLocked(elapsedRealtime);
         }
@@ -2958,11 +2991,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteVideoOffLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         if (mVideoOn) {
             mHistoryCur.states &= ~HistoryItem.STATE_VIDEO_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Video off to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(SystemClock.elapsedRealtime());
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             mVideoOn = false;
             mVideoOnTimer.stopRunningLocked(elapsedRealtime);
         }
@@ -2992,10 +3026,11 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteWifiRunningLocked(WorkSource ws) {
         if (!mGlobalWifiRunning) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
             mHistoryCur.states |= HistoryItem.STATE_WIFI_RUNNING_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI running to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(SystemClock.elapsedRealtime());
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             mGlobalWifiRunning = true;
             mGlobalWifiRunningTimer.startRunningLocked(elapsedRealtime);
             int N = ws.size();
@@ -3029,10 +3064,11 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteWifiStoppedLocked(WorkSource ws) {
         if (mGlobalWifiRunning) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
             mHistoryCur.states &= ~HistoryItem.STATE_WIFI_RUNNING_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI stopped to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             mGlobalWifiRunning = false;
             mGlobalWifiRunningTimer.stopRunningLocked(elapsedRealtime);
             int N = ws.size();
@@ -3060,10 +3096,11 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteBluetoothOnLocked() {
         if (!mBluetoothOn) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
             mHistoryCur.states |= HistoryItem.STATE_BLUETOOTH_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Bluetooth on to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             mBluetoothOn = true;
             mBluetoothOnTimer.startRunningLocked(elapsedRealtime);
         }
@@ -3072,10 +3109,11 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteBluetoothOffLocked() {
         if (mBluetoothOn) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
             mHistoryCur.states &= ~HistoryItem.STATE_BLUETOOTH_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Bluetooth off to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
             mBluetoothOn = false;
             mBluetoothOnTimer.stopRunningLocked(elapsedRealtime);
         }
@@ -3098,11 +3136,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteFullWifiLockAcquiredLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         if (mWifiFullLockNesting == 0) {
             mHistoryCur.states |= HistoryItem.STATE_WIFI_FULL_LOCK_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI full lock on to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
         }
         mWifiFullLockNesting++;
         getUidStatsLocked(uid).noteFullWifiLockAcquiredLocked(elapsedRealtime);
@@ -3111,12 +3150,13 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteFullWifiLockReleasedLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         mWifiFullLockNesting--;
         if (mWifiFullLockNesting == 0) {
             mHistoryCur.states &= ~HistoryItem.STATE_WIFI_FULL_LOCK_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI full lock off to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
         }
         getUidStatsLocked(uid).noteFullWifiLockReleasedLocked(elapsedRealtime);
     }
@@ -3126,11 +3166,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteWifiScanStartedLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         if (mWifiScanNesting == 0) {
             mHistoryCur.states |= HistoryItem.STATE_WIFI_SCAN_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI scan started for: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
         }
         mWifiScanNesting++;
         getUidStatsLocked(uid).noteWifiScanStartedLocked(elapsedRealtime);
@@ -3139,12 +3180,13 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteWifiScanStoppedLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         mWifiScanNesting--;
         if (mWifiScanNesting == 0) {
             mHistoryCur.states &= ~HistoryItem.STATE_WIFI_SCAN_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI scan stopped for: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
         }
         getUidStatsLocked(uid).noteWifiScanStoppedLocked(elapsedRealtime);
     }
@@ -3166,11 +3208,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteWifiMulticastEnabledLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         if (mWifiMulticastNesting == 0) {
             mHistoryCur.states |= HistoryItem.STATE_WIFI_MULTICAST_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI multicast on to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
         }
         mWifiMulticastNesting++;
         getUidStatsLocked(uid).noteWifiMulticastEnabledLocked(elapsedRealtime);
@@ -3179,12 +3222,13 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteWifiMulticastDisabledLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         mWifiMulticastNesting--;
         if (mWifiMulticastNesting == 0) {
             mHistoryCur.states &= ~HistoryItem.STATE_WIFI_MULTICAST_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI multicast off to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
         }
         getUidStatsLocked(uid).noteWifiMulticastDisabledLocked(elapsedRealtime);
     }
@@ -5627,12 +5671,13 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     public void resetAllStatsCmdLocked() {
         resetAllStatsLocked();
-        long uptime = SystemClock.uptimeMillis() * 1000;
+        final long mSecUptime = SystemClock.uptimeMillis();
+        long uptime = mSecUptime * 1000;
         long mSecRealtime = SystemClock.elapsedRealtime();
         long realtime = mSecRealtime * 1000;
         mDischargeStartLevel = mHistoryCur.batteryLevel;
         pullPendingStateUpdatesLocked();
-        addHistoryRecordLocked(mSecRealtime);
+        addHistoryRecordLocked(mSecRealtime, mSecUptime);
         mDischargeCurrentLevel = mDischargeUnplugLevel = mHistoryCur.batteryLevel;
         mOnBatteryTimeBase.reset(uptime, realtime);
         mOnBatteryScreenOffTimeBase.reset(uptime, realtime);
@@ -5647,7 +5692,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mDischargeAmountScreenOn = 0;
             mDischargeAmountScreenOff = 0;
         }
-        initActiveHistoryEventsLocked(mSecRealtime);
+        initActiveHistoryEventsLocked(mSecRealtime, mSecUptime);
     }
 
     private void resetAllStatsLocked() {
@@ -5705,7 +5750,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         clearHistoryLocked();
     }
 
-    private void initActiveHistoryEventsLocked(long nowRealtime) {
+    private void initActiveHistoryEventsLocked(long elapsedRealtimeMs, long uptimeMs) {
         for (int i=0; i<HistoryItem.EVENT_COUNT; i++) {
             HashMap<String, SparseBooleanArray> active = mActiveEvents[i];
             if (active == null) {
@@ -5715,7 +5760,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 SparseBooleanArray uids = ent.getValue();
                 for (int j=0; j<uids.size(); j++) {
                     if (uids.valueAt(j)) {
-                        addHistoryEventLocked(nowRealtime, i, ent.getKey(), uids.keyAt(j));
+                        addHistoryEventLocked(elapsedRealtimeMs, uptimeMs, i, ent.getKey(),
+                                uids.keyAt(j));
                     }
                 }
             }
@@ -5753,16 +5799,16 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    void setOnBatteryLocked(boolean onBattery, int oldStatus, int level) {
+    void setOnBatteryLocked(final long mSecRealtime, final long mSecUptime, final boolean onBattery,
+            final int oldStatus, final int level) {
         boolean doWrite = false;
         Message m = mHandler.obtainMessage(MSG_REPORT_POWER_CHANGE);
         m.arg1 = onBattery ? 1 : 0;
         mHandler.sendMessage(m);
         mOnBattery = mOnBatteryInternal = onBattery;
 
-        long uptime = SystemClock.uptimeMillis() * 1000;
-        long mSecRealtime = SystemClock.elapsedRealtime();
-        long realtime = mSecRealtime * 1000;
+        final long uptime = mSecUptime * 1000;
+        final long realtime = mSecRealtime * 1000;
         if (onBattery) {
             // We will reset our status if we are unplugging after the
             // battery was last full, or the level is at 100, or
@@ -5783,9 +5829,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "Battery unplugged to: "
                     + Integer.toHexString(mHistoryCur.states));
             mHistoryCur.currentTime = System.currentTimeMillis();
-            addHistoryBufferLocked(mSecRealtime, HistoryItem.CMD_CURRENT_TIME);
+            addHistoryBufferLocked(mSecRealtime, mSecUptime, HistoryItem.CMD_CURRENT_TIME);
             mHistoryCur.currentTime = 0;
-            addHistoryRecordLocked(mSecRealtime);
+            addHistoryRecordLocked(mSecRealtime, mSecUptime);
             mDischargeCurrentLevel = mDischargeUnplugLevel = level;
             if (mScreenOn) {
                 mDischargeScreenOnUnplugLevel = level;
@@ -5798,7 +5844,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mDischargeAmountScreenOff = 0;
             updateTimeBasesLocked(true, !mScreenOn, uptime, realtime);
             if (reset) {
-                initActiveHistoryEventsLocked(mSecRealtime);
+                initActiveHistoryEventsLocked(mSecRealtime, mSecUptime);
             }
         } else {
             pullPendingStateUpdatesLocked();
@@ -5806,7 +5852,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mHistoryCur.states |= HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Battery plugged to: "
                     + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(mSecRealtime);
+            addHistoryRecordLocked(mSecRealtime, mSecUptime);
             mDischargeCurrentLevel = level;
             if (level < mDischargeUnplugLevel) {
                 mLowDischargeAmountSinceCharge += mDischargeUnplugLevel-level-1;
@@ -5828,7 +5874,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void setBatteryState(int status, int health, int plugType, int level,
             int temp, int volt) {
         synchronized(this) {
-            boolean onBattery = plugType == BATTERY_PLUGGED_NONE;
+            final boolean onBattery = plugType == BATTERY_PLUGGED_NONE;
+            final long uptime = SystemClock.uptimeMillis();
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
             int oldStatus = mHistoryCur.batteryStatus;
             if (!mHaveBatteryLevel) {
                 mHaveBatteryLevel = true;
@@ -5856,7 +5904,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mHistoryCur.batteryPlugType = (byte)plugType;
                 mHistoryCur.batteryTemperature = (short)temp;
                 mHistoryCur.batteryVoltage = (char)volt;
-                setOnBatteryLocked(onBattery, oldStatus, level);
+                setOnBatteryLocked(elapsedRealtime, uptime, onBattery, oldStatus, level);
             } else {
                 boolean changed = false;
                 if (mHistoryCur.batteryLevel != level) {
@@ -5886,7 +5934,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     changed = true;
                 }
                 if (changed) {
-                    addHistoryRecordLocked(SystemClock.elapsedRealtime());
+                    addHistoryRecordLocked(elapsedRealtime, uptime);
                 }
             }
             if (!onBattery && status == BatteryManager.BATTERY_STATUS_FULL) {
@@ -6161,7 +6209,18 @@ public final class BatteryStatsImpl extends BatteryStats {
             return val;
         }
     }
-    
+
+    @Override
+    public int getDischargeAmount(int which) {
+        int dischargeAmount = which == STATS_SINCE_CHARGED
+                ? getHighDischargeAmountSinceCharge()
+                : (getDischargeStartLevel() - getDischargeCurrentLevel());
+        if (dischargeAmount < 0) {
+            dischargeAmount = 0;
+        }
+        return dischargeAmount;
+    }
+
     public int getDischargeAmountScreenOn() {
         synchronized(this) {
             int val = mDischargeAmountScreenOn;
@@ -6438,13 +6497,14 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         if (mHistoryBuffer.dataPosition() > 0) {
-            long now = SystemClock.elapsedRealtime();
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
             if (USE_OLD_HISTORY) {
-                addHistoryRecordLocked(now, HistoryItem.CMD_START);
+                addHistoryRecordLocked(elapsedRealtime, uptime, HistoryItem.CMD_START);
             }
-            addHistoryBufferLocked(now, HistoryItem.CMD_START);
+            addHistoryBufferLocked(elapsedRealtime, uptime, HistoryItem.CMD_START);
             mHistoryCur.currentTime = System.currentTimeMillis();
-            addHistoryBufferLocked(now, HistoryItem.CMD_CURRENT_TIME);
+            addHistoryBufferLocked(elapsedRealtime, uptime, HistoryItem.CMD_CURRENT_TIME);
             mHistoryCur.currentTime = 0;
         }
     }
@@ -6540,11 +6600,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             StringBuilder sb = new StringBuilder(128);
             sb.append("****************** WRITING mHistoryBaseTime: ");
             TimeUtils.formatDuration(mHistoryBaseTime, sb);
-            sb.append(" mLastHistoryTime: ");
-            TimeUtils.formatDuration(mLastHistoryTime, sb);
+            sb.append(" mLastHistoryElapsedRealtime: ");
+            TimeUtils.formatDuration(mLastHistoryElapsedRealtime, sb);
             Slog.i(TAG, sb.toString());
         }
-        out.writeLong(mHistoryBaseTime + mLastHistoryTime);
+        out.writeLong(mHistoryBaseTime + mLastHistoryElapsedRealtime);
         out.writeInt(mHistoryTagPool.size());
         for (HashMap.Entry<HistoryTag, Integer> ent : mHistoryTagPool.entrySet()) {
             HistoryTag tag = ent.getKey();

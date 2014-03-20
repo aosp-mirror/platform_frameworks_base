@@ -2087,10 +2087,12 @@ public final class ActiveServices {
 
             // Sanity check: if the service listed for the app is not one
             // we actually are maintaining, just let it drop.
-            if (smap.mServicesByName.get(sr.name) != sr) {
-                ServiceRecord cur = smap.mServicesByName.get(sr.name);
-                Slog.wtf(TAG, "Service " + sr + " in process " + app
-                        + " not same as in map: " + cur);
+            final ServiceRecord curRec = smap.mServicesByName.get(sr.name);
+            if (curRec != sr) {
+                if (curRec != null) {
+                    Slog.wtf(TAG, "Service " + sr + " in process " + app
+                            + " not same as in map: " + curRec);
+                }
                 continue;
             }
 

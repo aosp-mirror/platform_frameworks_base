@@ -570,12 +570,14 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE_PHONE_IN_CALL_FLAG = 1<<18;
         public static final int STATE_WIFI_ON_FLAG = 1<<17;
         public static final int STATE_BLUETOOTH_ON_FLAG = 1<<16;
-        
+
         public static final int MOST_INTERESTING_STATES =
             STATE_BATTERY_PLUGGED_FLAG | STATE_SCREEN_ON_FLAG
             | STATE_GPS_ON_FLAG | STATE_PHONE_IN_CALL_FLAG;
 
         public int states;
+
+        public int states2;
 
         // The wake lock that was acquired at this point.
         public HistoryTag wakelockTag;
@@ -1214,6 +1216,11 @@ public abstract class BatteryStats implements Parcelable {
      * last reset after charging, as an upper-end approximation.
      */
     public abstract int getHighDischargeAmountSinceCharge();
+
+    /**
+     * Retrieve the discharge amount over the selected discharge period <var>which</var>.
+     */
+    public abstract int getDischargeAmount(int which);
 
     /**
      * Get the amount the battery has discharged while the screen was on,
