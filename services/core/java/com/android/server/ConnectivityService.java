@@ -65,6 +65,7 @@ import android.net.LinkProperties;
 import android.net.LinkProperties.CompareResult;
 import android.net.LinkQualityInfo;
 import android.net.MobileDataStateTracker;
+import android.net.Network;
 import android.net.NetworkConfig;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
@@ -164,6 +165,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
+
+import static android.net.ConnectivityManager.INVALID_NET_ID;
 
 /**
  * @hide
@@ -442,6 +445,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     TelephonyManager mTelephonyManager;
 
+    private final static int MIN_NET_ID = 10; // some reserved marks
+    private final static int MAX_NET_ID = 65535;
+    private int mNextNetId = MIN_NET_ID;
+
     public ConnectivityService(Context context, INetworkManagementService netd,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
         // Currently, omitting a NetworkFactory will create one internally
@@ -704,6 +711,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mContext.registerReceiver(mProvisioningReceiver, filter);
 
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+    }
+
+    private synchronized int nextNetId() {
+        int netId = mNextNetId;
+        if (++mNextNetId > MAX_NET_ID) mNextNetId = MIN_NET_ID;
+        return netId;
     }
 
     /**
@@ -1984,6 +1997,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         int prevNetType = info.getType();
 
         mNetTrackers[prevNetType].setTeardownRequested(false);
+        int thisNetId = mNetTrackers[prevNetType].getNetwork().netId;
 
         // Remove idletimer previously setup in {@code handleConnect}
         if (mNetConfigs[prevNetType].isDefault()) {
@@ -2068,6 +2082,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (mActiveDefaultNetwork != -1) {
             sendConnectedBroadcastDelayed(mNetTrackers[mActiveDefaultNetwork].getNetworkInfo(),
                     getConnectivityChangeDelay());
+        }
+        try {
+            mNetd.removeNetwork(thisNetId);
+        } catch (Exception e) {
+            loge("Exception removing network: " + e);
+        } finally {
+            mNetTrackers[prevNetType].setNetId(INVALID_NET_ID);
         }
     }
 
@@ -2336,17 +2357,23 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (mNetConfigs[newNetType].isDefault()) {
             if (mActiveDefaultNetwork != -1 && mActiveDefaultNetwork != newNetType) {
                 if (isNewNetTypePreferredOverCurrentNetType(newNetType)) {
-                    // tear down the other
-                    NetworkStateTracker otherNet =
-                            mNetTrackers[mActiveDefaultNetwork];
-                    if (DBG) {
-                        log("Policy requires " + otherNet.getNetworkInfo().getTypeName() +
-                            " teardown");
-                    }
-                    if (!teardown(otherNet)) {
-                        loge("Network declined teardown request");
-                        teardown(thisNet);
-                        return;
+                   String teardownPolicy = SystemProperties.get("net.teardownPolicy");
+                   if (TextUtils.equals(teardownPolicy, "keep") == false) {
+                        // tear down the other
+                        NetworkStateTracker otherNet =
+                                mNetTrackers[mActiveDefaultNetwork];
+                        if (DBG) {
+                            log("Policy requires " + otherNet.getNetworkInfo().getTypeName() +
+                                " teardown");
+                        }
+                        if (!teardown(otherNet)) {
+                            loge("Network declined teardown request");
+                            teardown(thisNet);
+                            return;
+                        }
+                    } else {
+                        //TODO - remove
+                        loge("network teardown skipped due to net.teardownPolicy setting");
                     }
                 } else {
                        // don't accept this one
@@ -2357,6 +2384,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         teardown(thisNet);
                         return;
                 }
+            }
+            int thisNetId = nextNetId();
+            thisNet.setNetId(thisNetId);
+            try {
+                mNetd.createNetwork(thisNetId, thisIface);
+            } catch (Exception e) {
+                loge("Exception creating network :" + e);
+                teardown(thisNet);
+                return;
             }
             setupDataActivityTracking(newNetType);
             synchronized (ConnectivityService.this) {
@@ -2380,6 +2416,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             // Don't do this - if we never sign in stay, grey
             //reportNetworkCondition(mActiveDefaultNetwork, 100);
             updateNetworkSettings(thisNet);
+        } else {
+            int thisNetId = nextNetId();
+            thisNet.setNetId(thisNetId);
+            try {
+                mNetd.createNetwork(thisNetId, thisIface);
+            } catch (Exception e) {
+                loge("Exception creating network :" + e);
+                teardown(thisNet);
+                return;
+            }
         }
         thisNet.setTeardownRequested(false);
         updateMtuSizeSettings(thisNet);

@@ -455,4 +455,14 @@ interface INetworkManagementService
      * Check whether the mobile radio is currently active.
      */
     boolean isNetworkActive();
+
+    /**
+     * setup a new network
+     */
+    void createNetwork(int netId, String iface);
+
+    /**
+     * remove a network
+     */
+    void removeNetwork(int netId);
 }

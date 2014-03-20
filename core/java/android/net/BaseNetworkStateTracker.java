@@ -45,6 +45,7 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
     protected NetworkInfo mNetworkInfo;
     protected LinkProperties mLinkProperties;
     protected LinkCapabilities mLinkCapabilities;
+    protected Network mNetwork = new Network(ConnectivityManager.INVALID_NET_ID);
 
     private AtomicBoolean mTeardownRequested = new AtomicBoolean(false);
     private AtomicBoolean mPrivateDnsRouteSet = new AtomicBoolean(false);
@@ -200,5 +201,15 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
     @Override
     public void stopSampling(SamplingDataTracker.SamplingSnapshot s) {
         // nothing to do
+    }
+
+    @Override
+    public void setNetId(int netId) {
+        mNetwork = new Network(netId);
+    }
+
+    @Override
+    public Network getNetwork() {
+        return mNetwork;
     }
 }
