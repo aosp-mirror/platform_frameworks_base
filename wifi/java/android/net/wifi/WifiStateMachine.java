@@ -1542,8 +1542,11 @@ public class WifiStateMachine extends StateMachine {
         // If it's empty, delay it in case it's a momentary dropout
         int countryCodeSequence = mCountryCodeSequence.incrementAndGet();
         if (TextUtils.isEmpty(countryCode)) {
+            String defaultCountryCode = mContext.getResources().getString(
+                    R.string.config_wifi_unknown_country_code);
+
             sendMessageDelayed(CMD_SET_COUNTRY_CODE, countryCodeSequence, persist ? 1 : 0,
-                    countryCode, COUNTRY_CODE_DELAY_MS);
+                    defaultCountryCode, COUNTRY_CODE_DELAY_MS);
         } else {
             sendMessage(CMD_SET_COUNTRY_CODE, countryCodeSequence, persist ? 1 : 0, countryCode);
         }
