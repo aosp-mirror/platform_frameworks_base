@@ -3907,7 +3907,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 boolean forwardDns) {
             try {
                 mNetd.clearUidRangeRoute(interfaze, uidStart, uidEnd);
-                if (forwardDns) mNetd.clearDnsInterfaceForUidRange(uidStart, uidEnd);
+                if (forwardDns) mNetd.clearDnsInterfaceForUidRange(interfaze, uidStart, uidEnd);
             } catch (RemoteException e) {
             }
 
