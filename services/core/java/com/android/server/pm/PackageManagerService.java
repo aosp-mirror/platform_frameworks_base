@@ -200,6 +200,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static final boolean GET_CERTIFICATES = true;
 
+    // Cap the size of permission trees that 3rd party apps can define
+    private static final int MAX_PERMISSION_TREE_FOOTPRINT = 32768;     // characters of text
+
     private static final int REMOVE_EVENTS =
         FileObserver.CLOSE_WRITE | FileObserver.DELETE | FileObserver.MOVED_FROM;
     private static final int ADD_EVENTS =
@@ -2357,7 +2360,35 @@ public class PackageManagerService extends IPackageManager.Stub {
         //if (pi1.descriptionRes != pi2.descriptionRes) return false;
         return true;
     }
-    
+
+    int permissionInfoFootprint(PermissionInfo info) {
+        int size = info.name.length();
+        if (info.nonLocalizedLabel != null) size += info.nonLocalizedLabel.length();
+        if (info.nonLocalizedDescription != null) size += info.nonLocalizedDescription.length();
+        return size;
+    }
+
+    int calculateCurrentPermissionFootprintLocked(BasePermission tree) {
+        int size = 0;
+        for (BasePermission perm : mSettings.mPermissions.values()) {
+            if (perm.uid == tree.uid) {
+                size += perm.name.length() + permissionInfoFootprint(perm.perm.info);
+            }
+        }
+        return size;
+    }
+
+    void enforcePermissionCapLocked(PermissionInfo info, BasePermission tree) {
+        // We calculate the max size of permissions defined by this uid and throw
+        // if that plus the size of 'info' would exceed our stated maximum.
+        if (tree.uid != Process.SYSTEM_UID) {
+            final int curTreeSize = calculateCurrentPermissionFootprintLocked(tree);
+            if (curTreeSize + permissionInfoFootprint(info) > MAX_PERMISSION_TREE_FOOTPRINT) {
+                throw new SecurityException("Permission tree size cap exceeded");
+            }
+        }
+    }
+
     boolean addPermissionLocked(PermissionInfo info, boolean async) {
         if (info.labelRes == 0 && info.nonLocalizedLabel == null) {
             throw new SecurityException("Label must be specified in permission");
@@ -2368,6 +2399,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean changed = true;
         int fixedLevel = PermissionInfo.fixProtectionLevel(info.protectionLevel);
         if (added) {
+            enforcePermissionCapLocked(info, tree);
             bp = new BasePermission(info.name, tree.sourcePackage,
                     BasePermission.TYPE_DYNAMIC);
         } else if (bp.type != BasePermission.TYPE_DYNAMIC) {
