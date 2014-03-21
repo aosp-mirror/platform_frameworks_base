@@ -312,6 +312,7 @@ public class StorageNotification extends SystemUI {
 
             mUsbStorageNotification.setLatestEventInfo(mContext, title, message, pi);
             mUsbStorageNotification.visibility = Notification.VISIBILITY_PUBLIC;
+            mUsbStorageNotification.category = Notification.CATEGORY_SYSTEM;
 
             final boolean adbOn = 1 == Settings.Global.getInt(
                 mContext.getContentResolver(),
@@ -404,6 +405,7 @@ public class StorageNotification extends SystemUI {
             mMediaStorageNotification.icon = icon;
             mMediaStorageNotification.setLatestEventInfo(mContext, title, message, pi);
             mMediaStorageNotification.visibility = Notification.VISIBILITY_PUBLIC;
+            mMediaStorageNotification.category = Notification.CATEGORY_SYSTEM;
         }
 
         final int notificationId = mMediaStorageNotification.icon;

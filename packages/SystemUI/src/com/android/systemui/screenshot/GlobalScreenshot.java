@@ -172,6 +172,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
                 .setContentTitle(r.getString(R.string.screenshot_saving_title))
                 .setContentText(r.getString(R.string.screenshot_saving_text))
                 .setSmallIcon(R.drawable.stat_notify_image)
+                .setCategory(Notification.CATEGORY_PROGRESS)
                 .setWhen(now);
 
         mNotificationBuilder.setPublicVersion(mPublicNotificationBuilder.build());
@@ -694,6 +695,7 @@ class GlobalScreenshot {
             .setSmallIcon(R.drawable.stat_notify_image_error)
             .setWhen(System.currentTimeMillis())
             .setVisibility(Notification.VISIBILITY_PUBLIC) // ok to show outside lockscreen
+            .setCategory(Notification.CATEGORY_ERROR)
             .setAutoCancel(true);
         Notification n =
             new Notification.BigTextStyle(b)
