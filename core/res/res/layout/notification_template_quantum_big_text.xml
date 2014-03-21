@@ -101,7 +101,7 @@
                 android:layout_marginEnd="8dp"
                 android:visibility="gone"
                 android:layout_weight="0"
-                style="?android:attr/progressBarStyleHorizontal"
+                style="@style/Widget.Quantum.Light.ProgressBar.Horizontal"
                 />
             <TextView android:id="@+id/big_text"
                 android:textAppearance="@style/TextAppearance.StatusBar.Quantum.EventContent"
@@ -121,7 +121,7 @@
             android:layout_height="1dip"
             android:id="@+id/action_divider"
             android:visibility="gone"
-            android:background="?android:attr/dividerHorizontal" />
+            android:background="@drawable/list_divider_quantum_light" />
         <include
             layout="@layout/notification_quantum_action_list"
             android:layout_width="match_parent"
@@ -135,7 +135,7 @@
             android:id="@+id/overflow_divider"
             android:layout_marginBottom="8dp"
             android:visibility="visible"
-            android:background="?android:attr/dividerHorizontal" />
+            android:background="@drawable/list_divider_quantum_light" />
         <LinearLayout
             android:id="@+id/line3"
             android:layout_width="match_parent"

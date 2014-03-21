@@ -14,12 +14,14 @@
  * limitations under the License
  */
 
-package com.android.systemui;
+package com.android.internal.util;
 
 import android.graphics.Bitmap;
 
 /**
  * Utility class for image analysis and processing.
+ *
+ * @hide
  */
 public class ImageUtils {
 
@@ -65,7 +67,7 @@ public class ImageUtils {
      *
      * Note that really transparent colors are always grayscale.
      */
-    public boolean isGrayscale(int color) {
+    public static boolean isGrayscale(int color) {
         int alpha = 0xFF & (color >> 24);
         if (alpha < ALPHA_TOLERANCE) {
             return true;
