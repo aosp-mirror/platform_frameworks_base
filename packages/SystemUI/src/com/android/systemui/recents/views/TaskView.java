@@ -65,10 +65,7 @@ class TaskThumbnailView extends ImageView {
 
             setImageBitmap(t.thumbnail);
             if (animate) {
-                setAlpha(0f);
-                animate().alpha(1f)
-                        .setDuration(Constants.Values.TaskView.Animation.TaskDataUpdatedFadeDuration)
-                        .start();
+                // XXX: Investigate how expensive it will be to create a second bitmap and crossfade
             }
         }
     }
@@ -143,10 +140,7 @@ class TaskIconView extends ImageView {
         if (t.icon != null) {
             setImageDrawable(t.icon);
             if (animate) {
-                setAlpha(0f);
-                animate().alpha(1f)
-                        .setDuration(Constants.Values.TaskView.Animation.TaskDataUpdatedFadeDuration)
-                        .start();
+                // XXX: Investigate how expensive it will be to create a second bitmap and crossfade
             }
         }
     }
@@ -311,6 +305,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
                     .translationY(0)
                     .setStartDelay(235)
                     .setDuration(Constants.Values.TaskView.Animation.TaskIconOnEnterDuration)
+                    .withLayer()
                     .start();
         }
     }
@@ -333,13 +328,8 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
                 .setStartDelay(0)
                 .setDuration(Constants.Values.TaskView.Animation.TaskIconOnLeavingDuration)
                 .setInterpolator(new DecelerateInterpolator())
-                .setListener(
-                    new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            r.run();
-                        }
-                    })
+                .withLayer()
+                .withEndAction(r)
                 .start();
         }
     }
@@ -379,10 +369,10 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
     }
 
     @Override
-    public void onTaskDataLoaded() {
+    public void onTaskDataLoaded(boolean reloadingTaskData) {
         // Bind each of the views to the new task data
-        mThumbnailView.rebindToTask(mTask, false);
-        mIconView.rebindToTask(mTask, false);
+        mThumbnailView.rebindToTask(mTask, reloadingTaskData);
+        mIconView.rebindToTask(mTask, reloadingTaskData);
     }
 
     @Override
