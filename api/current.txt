@@ -4202,6 +4202,19 @@ package android.app {
     method public int describeContents();
     method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final java.lang.String CATEGORY_ALARM = "alarm";
+    field public static final java.lang.String CATEGORY_CALL = "call";
+    field public static final java.lang.String CATEGORY_EMAIL = "email";
+    field public static final java.lang.String CATEGORY_ERROR = "err";
+    field public static final java.lang.String CATEGORY_EVENT = "event";
+    field public static final java.lang.String CATEGORY_MESSAGE = "msg";
+    field public static final java.lang.String CATEGORY_PROGRESS = "progress";
+    field public static final java.lang.String CATEGORY_PROMO = "promo";
+    field public static final java.lang.String CATEGORY_SERVICE = "service";
+    field public static final java.lang.String CATEGORY_SOCIAL = "social";
+    field public static final java.lang.String CATEGORY_STATUS = "status";
+    field public static final java.lang.String CATEGORY_SYSTEM = "sys";
+    field public static final java.lang.String CATEGORY_TRANSPORT = "transport";
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int DEFAULT_ALL = -1; // 0xffffffff
     field public static final int DEFAULT_LIGHTS = 4; // 0x4
@@ -4246,6 +4259,7 @@ package android.app {
     field public android.app.Notification.Action[] actions;
     field public int audioStreamType;
     field public android.widget.RemoteViews bigContentView;
+    field public java.lang.String category;
     field public android.app.PendingIntent contentIntent;
     field public android.widget.RemoteViews contentView;
     field public int defaults;
@@ -4306,6 +4320,7 @@ package android.app {
     method public android.os.Bundle getExtras();
     method public deprecated android.app.Notification getNotification();
     method public android.app.Notification.Builder setAutoCancel(boolean);
+    method public android.app.Notification.Builder setCategory(java.lang.String);
     method public android.app.Notification.Builder setContent(android.widget.RemoteViews);
     method public android.app.Notification.Builder setContentInfo(java.lang.CharSequence);
     method public android.app.Notification.Builder setContentIntent(android.app.PendingIntent);
