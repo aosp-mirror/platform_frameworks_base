@@ -5994,6 +5994,7 @@ package android.content {
     field public static final java.lang.String DISPLAY_SERVICE = "display";
     field public static final java.lang.String DOWNLOAD_SERVICE = "download";
     field public static final java.lang.String DROPBOX_SERVICE = "dropbox";
+    field public static final java.lang.String HDMI_CEC_SERVICE = "hdmi_cec";
     field public static final java.lang.String INPUT_METHOD_SERVICE = "input_method";
     field public static final java.lang.String INPUT_SERVICE = "input";
     field public static final java.lang.String KEYGUARD_SERVICE = "keyguard";
@@ -10940,7 +10941,86 @@ package android.hardware.hdmi {
     field public static final int DEVICE_RESERVED = 2; // 0x2
     field public static final int DEVICE_TUNER = 3; // 0x3
     field public static final int DEVICE_TV = 0; // 0x0
-    field public static final int MESSAGE_ACTIVE_SOURCE = 157; // 0x9d
+    field public static final int MESSAGE_ABORT = 255; // 0xff
+    field public static final int MESSAGE_ACTIVE_SOURCE = 130; // 0x82
+    field public static final int MESSAGE_CEC_VERSION = 158; // 0x9e
+    field public static final int MESSAGE_CLEAR_ANALOG_TIMER = 51; // 0x33
+    field public static final int MESSAGE_CLEAR_DIGITAL_TIMER = 153; // 0x99
+    field public static final int MESSAGE_CLEAR_EXTERNAL_TIMER = 161; // 0xa1
+    field public static final int MESSAGE_DECK_CONTROL = 66; // 0x42
+    field public static final int MESSAGE_DECK_STATUS = 27; // 0x1b
+    field public static final int MESSAGE_DEVICE_VENDOR_ID = 135; // 0x87
+    field public static final int MESSAGE_FEATURE_ABORT = 0; // 0x0
+    field public static final int MESSAGE_GET_CEC_VERSION = 159; // 0x9f
+    field public static final int MESSAGE_GET_MENU_LANGUAGE = 145; // 0x91
+    field public static final int MESSAGE_GET_OSD_NAME = 70; // 0x46
+    field public static final int MESSAGE_GIVE_AUDIO_STATUS = 113; // 0x71
+    field public static final int MESSAGE_GIVE_DECK_STATUS = 26; // 0x1a
+    field public static final int MESSAGE_GIVE_DEVICE_POWER_STATUS = 143; // 0x8f
+    field public static final int MESSAGE_GIVE_DEVICE_VENDOR_ID = 140; // 0x8c
+    field public static final int MESSAGE_GIVE_PHYSICAL_ADDRESS = 131; // 0x83
+    field public static final int MESSAGE_GIVE_SYSTEM_AUDIO_MODE_STATUS = 125; // 0x7d
+    field public static final int MESSAGE_GIVE_TUNER_DEVICE_STATUS = 8; // 0x8
+    field public static final int MESSAGE_IMAGE_VIEW_ON = 4; // 0x4
+    field public static final int MESSAGE_INACTIVE_SOURCE = 157; // 0x9d
+    field public static final int MESSAGE_MENU_REQUEST = 141; // 0x8d
+    field public static final int MESSAGE_MENU_STATUS = 142; // 0x8e
+    field public static final int MESSAGE_PLAY = 65; // 0x41
+    field public static final int MESSAGE_RECORD_OFF = 11; // 0xb
+    field public static final int MESSAGE_RECORD_ON = 9; // 0x9
+    field public static final int MESSAGE_RECORD_STATUS = 10; // 0xa
+    field public static final int MESSAGE_RECORD_TV_SCREEN = 15; // 0xf
+    field public static final int MESSAGE_REPORT_AUDIO_STATUS = 122; // 0x7a
+    field public static final int MESSAGE_REPORT_PHYSICAL_ADDRESS = 132; // 0x84
+    field public static final int MESSAGE_REPORT_POWER_STATUS = 144; // 0x90
+    field public static final int MESSAGE_REQUEST_ACTIVE_SOURCE = 133; // 0x85
+    field public static final int MESSAGE_ROUTING_CHANGE = 128; // 0x80
+    field public static final int MESSAGE_ROUTING_INFORMATION = 129; // 0x81
+    field public static final int MESSAGE_SELECT_ANALOG_SERVICE = 146; // 0x92
+    field public static final int MESSAGE_SELECT_DIGITAL_SERVICE = 147; // 0x93
+    field public static final int MESSAGE_SET_ANALOG_TIMER = 52; // 0x34
+    field public static final int MESSAGE_SET_AUDIO_RATE = 154; // 0x9a
+    field public static final int MESSAGE_SET_DIGITAL_TIMER = 151; // 0x97
+    field public static final int MESSAGE_SET_EXTERNAL_TIMER = 162; // 0xa2
+    field public static final int MESSAGE_SET_MENU_LANGUAGE = 50; // 0x32
+    field public static final int MESSAGE_SET_OSD_NAME = 71; // 0x47
+    field public static final int MESSAGE_SET_OSD_STRING = 100; // 0x64
+    field public static final int MESSAGE_SET_STREAM_PATH = 134; // 0x86
+    field public static final int MESSAGE_SET_SYSTEM_AUDIO_MODE = 114; // 0x72
+    field public static final int MESSAGE_SET_TIMER_PROGRAM_TITLE = 103; // 0x67
+    field public static final int MESSAGE_STANDBY = 54; // 0x36
+    field public static final int MESSAGE_SYSTEM_AUDIO_MODE_REQUEST = 112; // 0x70
+    field public static final int MESSAGE_SYSTEM_AUDIO_MODE_STATUS = 126; // 0x7e
+    field public static final int MESSAGE_TEXT_VIEW_ON = 13; // 0xd
+    field public static final int MESSAGE_TIMER_CLEARED_STATUS = 67; // 0x43
+    field public static final int MESSAGE_TIMER_STATUS = 53; // 0x35
+    field public static final int MESSAGE_TUNER_DEVICE_STATUS = 7; // 0x7
+    field public static final int MESSAGE_TUNER_STEP_DECREMENT = 6; // 0x6
+    field public static final int MESSAGE_TUNER_STEP_INCREMENT = 5; // 0x5
+    field public static final int MESSAGE_USER_CONTROL_PRESSED = 68; // 0x44
+    field public static final int MESSAGE_USER_CONTROL_RELEASED = 69; // 0x45
+    field public static final int MESSAGE_VENDOR_COMMAND = 137; // 0x89
+    field public static final int MESSAGE_VENDOR_COMMAND_WITH_ID = 160; // 0xa0
+    field public static final int MESSAGE_VENDOR_REMOTE_BUTTON_DOWN = 138; // 0x8a
+    field public static final int MESSAGE_VENDOR_REMOTE_BUTTON_UP = 139; // 0x8b
+  }
+
+  public final class HdmiCecClient {
+    method public void sendActiveSource();
+    method public void sendGiveDevicePowerStatus(int);
+    method public void sendImageViewOn();
+    method public void sendInactiveSource();
+    method public void sendTextViewOn();
+  }
+
+  public static abstract class HdmiCecClient.Listener {
+    ctor public HdmiCecClient.Listener();
+    method public void onCableStatusChanged(boolean);
+    method public void onMessageReceived(android.hardware.hdmi.HdmiCecMessage);
+  }
+
+  public final class HdmiCecManager {
+    method public android.hardware.hdmi.HdmiCecClient getClient(int, android.hardware.hdmi.HdmiCecClient.Listener);
   }
 
   public final class HdmiCecMessage implements android.os.Parcelable {
