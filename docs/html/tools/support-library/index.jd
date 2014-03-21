@@ -58,10 +58,36 @@ page.title=Support Library
 
 <p>This section provides details about the Support Library package releases.</p>
 
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 19.1.0</a> <em>(March 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Added the {@link android.support.v4.widget.SwipeRefreshLayout} class,
+              which enables users to refresh the contents of a view with a vertical
+              swipe gesture.</li>
+          <li>Fixed accessibility issues with navigation drawers.</li>
+        </ul>
+      </dd>
+
+      <dt>Changes for v7 appcompat library:</dt>
+      <dd>
+        <ul>
+          <li>Fixed background issues with the action bar.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 19.0.1</a> <em>(December 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
