@@ -138,7 +138,7 @@ public class CertificateChainValidator {
     public static void handleTrustStorageUpdate() {
 
         try {
-            X509TrustManager x509TrustManager = SSLParametersImpl.getDefaultTrustManager();
+            X509TrustManager x509TrustManager = SSLParametersImpl.getDefaultX509TrustManager();
             if( x509TrustManager instanceof TrustManagerImpl ) {
                 TrustManagerImpl trustManager = (TrustManagerImpl) x509TrustManager;
                 trustManager.handleTrustStorageUpdate();
@@ -175,7 +175,7 @@ public class CertificateChainValidator {
         }
 
         try {
-            X509TrustManager x509TrustManager = SSLParametersImpl.getDefaultTrustManager();
+            X509TrustManager x509TrustManager = SSLParametersImpl.getDefaultX509TrustManager();
             if (x509TrustManager instanceof TrustManagerImpl) {
                 TrustManagerImpl trustManager = (TrustManagerImpl) x509TrustManager;
                 trustManager.checkServerTrusted(chain, authType, domain);
