@@ -606,7 +606,7 @@ static jint android_media_AudioTrack_write_byte(JNIEnv *env,  jobject thiz,
 
 // ----------------------------------------------------------------------------
 static jint android_media_AudioTrack_write_native_bytes(JNIEnv *env,  jobject thiz,
-        jbyteArray javaBytes, jint byteOffset, jint offsetInBytes, jint sizeInBytes,
+        jbyteArray javaBytes, jint byteOffset, jint sizeInBytes,
         jint javaAudioFormat, jboolean isWriteBlocking) {
     //ALOGV("android_media_AudioTrack_write_native_bytes(offset=%d, sizeInBytes=%d) called",
     //    offsetInBytes, sizeInBytes);
@@ -623,7 +623,7 @@ static jint android_media_AudioTrack_write_native_bytes(JNIEnv *env,  jobject th
         return AUDIOTRACK_ERROR_BAD_VALUE;
     }
 
-    jint written = writeToTrack(lpTrack, javaAudioFormat, bytes.get() + byteOffset, offsetInBytes,
+    jint written = writeToTrack(lpTrack, javaAudioFormat, bytes.get(), byteOffset,
             sizeInBytes, isWriteBlocking == JNI_TRUE /* blocking */);
 
     return written;
@@ -922,7 +922,7 @@ static JNINativeMethod gMethods[] = {
     {"native_release",       "()V",      (void *)android_media_AudioTrack_release},
     {"native_write_byte",    "([BIIIZ)I",(void *)android_media_AudioTrack_write_byte},
     {"native_write_native_bytes",
-                             "(Ljava/lang/Object;IIIIZ)I",
+                             "(Ljava/lang/Object;IIIZ)I",
                                          (void *)android_media_AudioTrack_write_native_bytes},
     {"native_write_short",   "([SIII)I", (void *)android_media_AudioTrack_write_short},
     {"native_setVolume",     "(FF)V",    (void *)android_media_AudioTrack_set_volume},
