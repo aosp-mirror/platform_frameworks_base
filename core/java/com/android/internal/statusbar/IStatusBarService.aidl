@@ -41,6 +41,7 @@ interface IStatusBarService
             out List<IBinder> notificationKeys, out List<StatusBarNotification> notifications,
             out int[] switches, out List<IBinder> binders);
     void onPanelRevealed();
+    void onPanelHidden();
     void onNotificationClick(String pkg, String tag, int id, int userId);
     void onNotificationError(String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId);

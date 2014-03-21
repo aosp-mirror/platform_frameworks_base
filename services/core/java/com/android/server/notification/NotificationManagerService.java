@@ -966,6 +966,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onPanelRevealed() {
+            EventLogTags.writeNotificationPanelRevealed();
             synchronized (mNotificationList) {
                 // sound
                 mSoundNotification = null;
@@ -995,6 +996,11 @@ public class NotificationManagerService extends SystemService {
                 mLedNotification = null;
                 updateLightsLocked();
             }
+        }
+
+        @Override
+        public void onPanelHidden() {
+            EventLogTags.writeNotificationPanelHidden();
         }
 
         @Override
