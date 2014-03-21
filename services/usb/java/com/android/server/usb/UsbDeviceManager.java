@@ -534,7 +534,6 @@ public class UsbDeviceManager {
 
             if (mConfigured && enteringAccessoryMode) {
                 // successfully entered accessory mode
-                mAccessoryModeRequestTime = 0;
 
                 if (mAccessoryStrings != null) {
                     mCurrentAccessory = new UsbAccessory(mAccessoryStrings);
