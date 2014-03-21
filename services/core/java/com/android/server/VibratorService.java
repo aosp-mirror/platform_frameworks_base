@@ -362,7 +362,7 @@ public class VibratorService extends IVibratorService.Stub
         } catch (RemoteException e) {
         }
         if (vib.mTimeout != 0) {
-            doVibratorOn(vib.mTimeout, vib.mUid);
+            doVibratorOn(vib.mTimeout, vib.mUid, vib.mStreamHint);
             mH.postDelayed(mVibrationRunnable, vib.mTimeout);
         } else {
             // mThread better be null here. doCancelVibrate should always be
@@ -481,7 +481,7 @@ public class VibratorService extends IVibratorService.Stub
         return vibratorExists();
     }
 
-    private void doVibratorOn(long millis, int uid) {
+    private void doVibratorOn(long millis, int uid, int streamHint) {
         synchronized (mInputDeviceVibrators) {
             try {
                 mBatteryStatsService.noteVibratorOn(uid, millis);
@@ -491,7 +491,7 @@ public class VibratorService extends IVibratorService.Stub
             final int vibratorCount = mInputDeviceVibrators.size();
             if (vibratorCount != 0) {
                 for (int i = 0; i < vibratorCount; i++) {
-                    mInputDeviceVibrators.get(i).vibrate(millis);
+                    mInputDeviceVibrators.get(i).vibrate(millis, streamHint);
                 }
             } else {
                 vibratorOn(millis);
@@ -554,6 +554,7 @@ public class VibratorService extends IVibratorService.Stub
                 final int len = pattern.length;
                 final int repeat = mVibration.mRepeat;
                 final int uid = mVibration.mUid;
+                final int streamHint = mVibration.mStreamHint;
                 int index = 0;
                 long duration = 0;
 
@@ -574,7 +575,7 @@ public class VibratorService extends IVibratorService.Stub
                         // duration is saved for delay() at top of loop
                         duration = pattern[index++];
                         if (duration > 0) {
-                            VibratorService.this.doVibratorOn(duration, uid);
+                            VibratorService.this.doVibratorOn(duration, uid, streamHint);
                         }
                     } else {
                         if (repeat < 0) {

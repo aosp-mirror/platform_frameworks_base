@@ -30,6 +30,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.Vibrator;
@@ -564,7 +565,7 @@ public class GlowPadView extends View {
                 mContext.getContentResolver(), Settings.System.HAPTIC_FEEDBACK_ENABLED, 1,
                 UserHandle.USER_CURRENT) != 0;
         if (mVibrator != null && hapticEnabled) {
-            mVibrator.vibrate(mVibrationDuration);
+            mVibrator.vibrate(mVibrationDuration, AudioManager.STREAM_SYSTEM);
         }
     }
 

@@ -49,6 +49,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -2713,7 +2714,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     void vibrate() {
         android.os.Vibrator vib = (android.os.Vibrator)mContext.getSystemService(
                 Context.VIBRATOR_SERVICE);
-        vib.vibrate(250);
+        vib.vibrate(250, AudioManager.STREAM_SYSTEM);
     }
 
     Runnable mStartTracing = new Runnable() {

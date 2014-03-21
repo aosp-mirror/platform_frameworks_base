@@ -25,6 +25,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.AudioManager;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -582,7 +583,7 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
                 mVibrator = (android.os.Vibrator) getContext()
                         .getSystemService(Context.VIBRATOR_SERVICE);
             }
-            mVibrator.vibrate(duration);
+            mVibrator.vibrate(duration, AudioManager.STREAM_SYSTEM);
         }
     }
 
