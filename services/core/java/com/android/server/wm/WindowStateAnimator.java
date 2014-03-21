@@ -1165,7 +1165,10 @@ class WindowStateAnimator {
         if (mHasClipRect) {
 
             // If we have an animated clip rect, intersect it with the system decor rect
-            int offsetTop = w.mSystemDecorRect.top;
+            // NOTE: We are adding a temporary workaround due to the status bar not always reporting
+            // the correct system decor rect.  In such cases, we take into account the specified
+            // content insets as well.
+            int offsetTop = Math.max(w.mSystemDecorRect.top, w.mContentInsets.top);
             mTmpClipRect.set(w.mSystemDecorRect);
             mTmpClipRect.offset(0, -offsetTop);
             mTmpClipRect.intersect(mClipRect);
