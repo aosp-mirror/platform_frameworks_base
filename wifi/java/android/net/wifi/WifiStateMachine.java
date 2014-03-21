@@ -3096,7 +3096,11 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_SET_BATCHED_SCAN:
                     if (recordBatchedScanSettings(message.arg1, message.arg2,
                             (Bundle)message.obj)) {
-                        startBatchedScan();
+                        if (mBatchedScanSettings != null) {
+                            startBatchedScan();
+                        } else {
+                            stopBatchedScan();
+                        }
                     }
                     break;
                 case CMD_SET_COUNTRY_CODE:
