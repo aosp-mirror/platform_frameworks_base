@@ -18,7 +18,6 @@ package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecMessage;
-import android.hardware.hdmi.IHdmiCecDevice;
 import android.hardware.hdmi.IHdmiCecListener;
 import android.os.Binder;
 import android.os.RemoteException;
