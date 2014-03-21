@@ -20,11 +20,15 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.CountDownTimer;
+import android.os.PowerManager;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.GestureDetector;
 import android.view.HapticFeedbackConstants;
+import android.view.MotionEvent;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -46,6 +50,8 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     protected View mEcaView;
     private Drawable mBouncerFrame;
     protected boolean mEnableHaptics;
+
+    private GestureDetector mDoubleTapGesture;
 
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
     // any passwords with length less than or equal to this length.
@@ -101,9 +107,31 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     protected void onFinishInflate() {
         mLockPatternUtils = new LockPatternUtils(mContext);
 
+        mDoubleTapGesture = new GestureDetector(mContext,
+                new GestureDetector.SimpleOnGestureListener() {
+                    @Override
+                    public boolean onDoubleTap(MotionEvent e) {
+                        PowerManager pm = (PowerManager) mContext
+                                .getSystemService(Context.POWER_SERVICE);
+                        if (pm != null)
+                            pm.goToSleep(e.getEventTime());
+                        return true;
+                    }
+                });
+
         mPasswordEntry = (TextView) findViewById(getPasswordTextViewId());
         mPasswordEntry.setOnEditorActionListener(this);
         mPasswordEntry.addTextChangedListener(this);
+
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.DOUBLE_TAP_SLEEP_STATUS_PIN_PASSWORD, 0) == 1) {
+            mPasswordEntry.setOnTouchListener(new OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return mDoubleTapGesture.onTouchEvent(event);
+                }
+            });
+        }
 
         // Set selected property on so the view can send accessibility events.
         mPasswordEntry.setSelected(true);

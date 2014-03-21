@@ -1757,4 +1757,9 @@
   <java-symbol type="dimen" name="subtitle_shadow_radius" />
   <java-symbol type="dimen" name="subtitle_shadow_offset" />
   <java-symbol type="dimen" name="subtitle_outline_width" />
+
+  <!-- Notification LED -->
+  <java-symbol type="array" name="notification_light_package_mapping" />
+  <java-symbol type="bool" name="config_intrusiveBatteryLed" />
+
 </resources>

@@ -46,6 +46,7 @@ import com.android.server.power.ShutdownThread;
 
 import android.Manifest;
 import android.app.ActivityManager.StackBoxInfo;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.StatusBarManager;
@@ -151,6 +152,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.List;
 
 /** {@hide} */
@@ -793,6 +795,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
+
+        mSplitViewTasks = new int[2];
+        mNextSplitViewLocation = 0;
+        mIsTaskSplitted = new HashMap<Integer, Boolean>();
+        mTaskLocation = new HashMap<Integer, Integer>();
+        mIsTokenSplitted = new HashMap<IBinder, Boolean>();
 
         SurfaceControl.openTransaction();
         try {
@@ -3481,8 +3489,9 @@ public class WindowManagerService extends IWindowManager.Stub
             Task newTask = mTaskIdToTask.get(groupId);
             if (newTask == null) {
                 newTask = createTask(groupId, oldTask.mStack.mStackId, oldTask.mUserId, atoken);
+            } else {
+                newTask.mAppTokens.add(atoken);
             }
-            newTask.mAppTokens.add(atoken);
         }
     }
 
@@ -5595,8 +5604,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     // We keep on including windows until we go past a full-screen
                     // window.
-                    boolean fullscreen = ws.isFullscreen(dw, dh);
-                    including = !ws.mIsImWindow && !fullscreen;
+                    including = !ws.mIsImWindow && !ws.isFullscreen(dw, dh);
 
                     final WindowStateAnimator winAnim = ws.mWinAnimator;
                     if (maxLayer < winAnim.mSurfaceLayer) {
@@ -5621,11 +5629,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (ws.mAppToken != null && ws.mAppToken.token == appToken &&
                             ws.isDisplayedLw()) {
                         screenshotReady = true;
-                    }
-
-                    if (fullscreen) {
-                        // No point in continuing down through windows.
-                        break;
                     }
                 }
 
@@ -9870,7 +9873,28 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (DEBUG_FOCUS_LIGHT) Slog.v(TAG, "findFocusedWindow: Found new focus @ " + i +
                         " = " + win);
-            return win;
+
+            // Dispatch to this window if it is wants key events.
+            if (win.canReceiveKeys()) {
+                if (mFocusedApp != null) {
+                    if (mIsTokenSplitted.containsKey(mFocusedApp.token) && mIsTokenSplitted.get(mFocusedApp.token)) {
+                        if ((mTaskTouched != null && mTaskTouched.equals(mFocusedApp.token)) || mTaskTouched == null) {
+                            if (DEBUG_FOCUS) Slog.v(
+                                TAG, "Found focus @ " + i + " = " + win);
+                            return win;
+                        } else {
+                            if (DEBUG_FOCUS || localLOGV) Slog.v(
+                                TAG, "Task " + win + " is split, but not last touched");
+                        }
+                    } else {
+                        if (DEBUG_FOCUS) Slog.v(TAG, "Task " + win + " has no split token");
+                        return win;
+                    }
+                } else {
+                    if (DEBUG_FOCUS) Slog.v(TAG, "Null thisApp");
+                    return win;
+                }
+            }
         }
 
         if (DEBUG_FOCUS_LIGHT) Slog.v(TAG, "findFocusedWindow: No focusable windows.");
@@ -10862,4 +10886,191 @@ public class WindowManagerService extends IWindowManager.Stub
     public Object getWindowManagerLock() {
         return mWindowMap;
     }
+
+    @Override
+    public void addSystemUIVisibilityFlag(int flag) {
+        mLastStatusBarVisibility |= flag;
+    }
+
+    /** SPLIT VIEW **/
+
+    private int mSplitViewTasks[];
+    private int mNextSplitViewLocation;
+    private Map<Integer, Boolean> mIsTaskSplitted;
+    private Map<IBinder, Boolean> mIsTokenSplitted;
+    private Map<Integer, Integer> mTaskLocation;
+    private IBinder mTaskTouched;
+    private Rect mSplitViewRect = new Rect();
+
+    /**
+     * Returns whether or not the provided taskId is in split view mode
+     * or not. Remember that the taskId is shared between all activities
+     * of an app, thus children activities from the root one shares the
+     * same taskId.
+     *
+     * @param taskId The task id of the activity
+     * @return True if the task is in split view mode
+     */
+    public boolean isTaskSplitView(int taskId) {
+        if (mIsTaskSplitted.containsKey(taskId)) {
+            return mIsTaskSplitted.get(taskId);
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Sets whether or not a task should be in split view or not. The
+     * update only occurs when activities performs a resume or restart
+     * operation.
+     *
+     * @param taskId The task id of the activity
+     * @param split True to enable split mode, false otherwise
+     */
+    public void setTaskSplitView(int taskId, boolean split) {
+        mIsTaskSplitted.put(taskId, split);
+        try {
+            mIsTokenSplitted.put(mActivityManager.getActivityForTask(taskId, false), split);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Cannot retrieve activity token for task " + taskId, e);
+        }
+    }
+
+    /**
+     * Notifies the WindowManager that the provided token is split
+     * or not. This is useful because children activities don't share
+     * the same token, so Activity can notify the window token is split
+     * as well based on the taskId it reads during performRestart.
+     *
+     * @param token The activity token
+     * @param split True if the token should be split
+     */
+    public void setTaskChildSplit(IBinder token, boolean split) {
+        mIsTokenSplitted.put(token, split);
+    }
+
+    /**
+     * Notifies that the provided activity token has been touched, and
+     * sets the focus to that activity, and move it to the front so it
+     * gets updated properly.
+     *
+     * @param token The activity token
+     * @param force Set this to true to force the focus update even if the
+     *              application was already focused
+     */
+    public void notifyActivityTouched(IBinder token, boolean force) {
+        mTaskTouched = token;
+        synchronized(mWindowMap) {
+            boolean changed = false;
+            if (token != null) {
+                AppWindowToken newFocus = findAppWindowToken(token);
+                if (newFocus == null) {
+                    Slog.w(TAG, "Attempted to set focus to non-existing app token: " + token);
+                    return;
+                }
+                changed = mFocusedApp != newFocus;
+                mFocusedApp = newFocus;
+                if (changed || force) {
+                    if (DEBUG_FOCUS) Slog.v(TAG, "Changed app focus to " + token);
+                    mInputMonitor.setFocusedAppLw(newFocus);
+                }
+            }
+
+            if (changed || force) {
+                final long origId = Binder.clearCallingIdentity();
+                updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true);
+                mH.removeMessages(H.REPORT_FOCUS_CHANGE);
+                mH.sendEmptyMessage(H.REPORT_FOCUS_CHANGE);
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+
+        // We only move the activity to front if it's not already the focused app.
+        // Not doing so causes a huge lag when opening an app in split view, because
+        // it is moved to front while starting.
+        if (!force) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                mActivityManager.moveTaskToFront(mActivityManager.getTaskForActivity(token, false), 0, null);
+                Log.e("XPLOD", "Moved activity to front because TOUCH!");
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot move the activity to front", e);
+            }
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    public void setSplitViewRect(int l, int t, int r, int b) {
+        Log.e("XPLOD", "Set split view rect ("+l+","+t+","+r+","+b+")");
+        mSplitViewRect.left = l;
+        mSplitViewRect.top = t;
+        mSplitViewRect.right = r;
+        mSplitViewRect.bottom = b;
+    }
+
+    /**
+     * Computes and return the final window metrics for the provided
+     * taskId. It will automatically set the task to the split mode.
+     *
+     * @param taskId The id of the task
+     * @param resetLocation True to reset the location to the next available spot
+     * @return A rect of the final window metrics
+     */
+    public Rect getSplitViewRect(int taskId, boolean resetLocation) {
+        Log.e("XPLOD", "Debug Activity " + taskId + " asked for split view rect");
+        mSplitViewTasks[mNextSplitViewLocation] = taskId;
+        mIsTaskSplitted.put(taskId, true);
+
+        // TODO(multidisplay): For now, apply Configuration to main screen only.
+        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+
+        // Use the effective "visual" dimensions based on current rotation
+        final boolean rotated = (mRotation == Surface.ROTATION_90
+                || mRotation == Surface.ROTATION_270);
+        final int realdw = rotated ?
+                displayContent.mBaseDisplayHeight : displayContent.mBaseDisplayWidth;
+        final int realdh = rotated ?
+                displayContent.mBaseDisplayWidth : displayContent.mBaseDisplayHeight;
+        final boolean nativeLandscape =
+                (displayContent.mBaseDisplayHeight < displayContent.mBaseDisplayWidth);
+
+        int dw = realdw;
+        int dh = realdh;
+
+
+        // Get application display metrics.
+        final int appWidth = /*((PhoneWindowManager) mPolicy).getContentRect().right - ((PhoneWindowManager) mPolicy).getContentRect().left;//*/ mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
+        final int appHeight = /*((PhoneWindowManager) mPolicy).getContentRect().bottom - ((PhoneWindowManager) mPolicy).getContentRect().top;//*/mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
+
+        int location = mNextSplitViewLocation;
+        if (mTaskLocation.containsKey(taskId)) {
+            location = mTaskLocation.get(taskId);
+        } else {
+            if (mNextSplitViewLocation == 0) {
+                mNextSplitViewLocation = 1;
+            } else {
+                mNextSplitViewLocation = 0;
+            }
+        }
+
+        mTaskLocation.put(taskId, location);
+
+        if (location == 0) {
+            if (nativeLandscape ^ rotated) {
+                return new Rect(0, 0, appWidth/2, appHeight);
+            } else {
+                return new Rect(0, 0, appWidth, appHeight/2);
+            }
+        } else {
+            if (nativeLandscape ^ rotated) {
+                return new Rect(appWidth/2, 0, appWidth, appHeight);
+            } else {
+                return new Rect(0, appHeight/2, appWidth, appHeight);
+            }
+        }
+
+    }
+
+    /** END SPLIT VIEW **/
+
 }

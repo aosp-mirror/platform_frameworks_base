@@ -189,6 +189,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    public void setButtonDrawable(int buttonId, int iconId) {
+        try {
+            mBar.setButtonDrawable(buttonId, iconId);
+        } catch (RemoteException ex) {
+        }
+    }
+
     public void setIcon(String slot, String iconPackage, int iconId, int iconLevel,
             String contentDescription) {
         enforceStatusBar();
@@ -261,7 +268,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
-    /** 
+    /**
      * Hide or show the on-screen Menu key. Only call this from the window manager, typically in
      * response to a window with FLAG_NEEDS_MENU_KEY set.
      */

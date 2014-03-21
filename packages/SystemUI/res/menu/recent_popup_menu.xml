@@ -18,6 +18,7 @@
 */
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/recent_add_split_view" android:title="@string/status_bar_recent_add_to_split_view" />
     <item android:id="@+id/recent_remove_item" android:title="@string/status_bar_recent_remove_item_title" />
     <item android:id="@+id/recent_inspect_item" android:title="@string/status_bar_recent_inspect_item_title" />
 </menu>

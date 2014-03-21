@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2008 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<!--
+	This is only used by the layoutlib to display
+	layouts in ADT.
+-->
+<fonts>
+    <font ttf="DroidSans">
+        <name>sans-serif</name>
+        <name>arial</name>
+        <name>helvetica</name>
+        <name>tahoma</name>
+        <name>verdana</name>
+    </font>
+   <font ttf="DroidSerif">
+        <name>serif</name>
+        <name>times</name>
+        <name>times new roman</name>
+        <name>palatino</name>
+        <name>georgia</name>
+        <name>baskerville</name>
+        <name>goudy</name>
+        <name>fantasy</name>
+        <name>cursive</name>
+        <name>ITC Stone Serif</name>
+    </font>
+    <font ttf="DroidSansMono">
+        <name>monospace</name>
+        <name>courier</name>
+        <name>courier new</name>
+        <name>monaco</name>
+    </font>
+    <fallback ttf="DroidSansFallback" />
+    <fallback ttf="DroidSansJapanese" />
+</fonts>

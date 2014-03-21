@@ -39,5 +39,6 @@ oneway interface IStatusBar
     void preloadRecentApps();
     void cancelPreloadRecentApps();
     void setWindowState(int window, int state);
+    void setButtonDrawable(int buttonId, int iconId);
 }
 

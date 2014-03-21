@@ -37,7 +37,6 @@ import static com.android.server.am.ActivityStackSupervisor.DEBUG_STATES;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 import com.android.internal.os.BatteryStatsImpl;
-import com.android.internal.util.Objects;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.wm.AppTransition;
@@ -73,8 +72,11 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
+import android.view.IWindowManager;
+import android.view.WindowManagerGlobal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -82,6 +84,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * State and management of a single stack of activities.
@@ -1094,19 +1097,18 @@ final class ActivityStack {
                             if (!r.visible) {
                                 if (DEBUG_VISBILITY) Slog.v(
                                         TAG, "Starting and making visible: " + r);
+                                r.visible = true;
                                 mWindowManager.setAppVisibility(r.appToken, true);
                             }
                             if (r != starting) {
                                 mStackSupervisor.startSpecificActivityLocked(r, false, false);
                             }
                         }
-
                     } else if (r.visible) {
                         // If this activity is already visible, then there is nothing
                         // else to do here.
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Skipping: already visible at " + r);
                         r.stopFreezingScreenLocked(false);
-
                     } else if (onlyThisProcess == null) {
                         // This activity is not currently visible, but is running.
                         // Tell it to become visible.
@@ -1137,14 +1139,23 @@ final class ActivityStack {
                     // Aggregate current change flags.
                     configChanges |= r.configChangeFlags;
 
-                    if (r.fullscreen) {
+                    boolean isSplitView = false;
+
+                    try {
+                        IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+                        isSplitView = wm.isTaskSplitView(r.task.taskId);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Cannot get split view status", e);
+                    }
+
+                    if (r.fullscreen && !isSplitView) {
                         // At this point, nothing else needs to be shown
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Fullscreen: at " + r);
                         behindFullscreen = true;
                     } else if (isActivityOverHome(r)) {
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Showing home: at " + r);
                         showHomeBehindStack = true;
-                        behindFullscreen = !isHomeStack();
+                        behindFullscreen = !isHomeStack() && r.frontOfTask && task.mOnTopOfHome;
                     }
                 } else {
                     if (DEBUG_VISBILITY) Slog.v(
@@ -1244,6 +1255,7 @@ final class ActivityStack {
      * nothing happened.
      */
     final boolean resumeTopActivityLocked(ActivityRecord prev) {
+        Log.e("XPLOD", "Resume Top Activity Locked " + prev);
         return resumeTopActivityLocked(prev, null);
     }
 
@@ -2359,7 +2371,7 @@ final class ActivityStack {
         ArrayList<ActivityRecord> activities = r.task.mActivities;
         for (int index = activities.indexOf(r); index >= 0; --index) {
             ActivityRecord cur = activities.get(index);
-            if (!Objects.equal(cur.taskAffinity, r.taskAffinity)) {
+            if (!Objects.equals(cur.taskAffinity, r.taskAffinity)) {
                 break;
             }
             finishActivityLocked(cur, Activity.RESULT_CANCELED, null, "request-affinity", true);
@@ -2526,6 +2538,7 @@ final class ActivityStack {
         // activity into the stopped state and then finish it.
         if (localLOGV) Slog.v(TAG, "Enqueueing pending finish: " + r);
         mStackSupervisor.mFinishingActivities.add(r);
+        r.resumeKeyDispatchingLocked();
         mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
         return r;
     }
@@ -3160,9 +3173,7 @@ final class ActivityStack {
 
         final TaskRecord task = mResumedActivity != null ? mResumedActivity.task : null;
         if (task == tr && task.mOnTopOfHome || numTasks <= 1) {
-            if (task != null) {
-                task.mOnTopOfHome = false;
-            }
+            tr.mOnTopOfHome = false;
             return mStackSupervisor.resumeHomeActivity(null);
         }
 

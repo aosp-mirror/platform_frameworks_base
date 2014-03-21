@@ -26,7 +26,9 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -39,6 +41,11 @@ import com.android.systemui.SystemUI;
 public class Recents extends SystemUI implements RecentsComponent {
     private static final String TAG = "Recents";
     private static final boolean DEBUG = false;
+
+    private boolean isImmersiveModeOn() {
+        return Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.IMMERSIVE_MODE, 0) == 1;
+    }
 
     @Override
     public void start() {
@@ -98,7 +105,11 @@ public class Recents extends SystemUI implements RecentsComponent {
 
 
                 DisplayMetrics dm = new DisplayMetrics();
-                display.getMetrics(dm);
+                if (isImmersiveModeOn()) {
+                    display.getRealMetrics(dm);
+                } else {
+                    display.getMetrics(dm);
+                }
                 // calculate it here, but consider moving it elsewhere
                 // first, determine which orientation you're in.
                 final Configuration config = res.getConfiguration();
@@ -152,6 +163,9 @@ public class Recents extends SystemUI implements RecentsComponent {
                     float statusBarHeight = res.getDimensionPixelSize(
                             com.android.internal.R.dimen.status_bar_height);
                     float recentsItemTopPadding = statusBarHeight;
+                    if (isImmersiveModeOn()) {
+                        statusBarHeight = 0;
+                    }
 
                     float height = thumbTopMargin
                             + thumbHeight

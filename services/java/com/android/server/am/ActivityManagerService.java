@@ -1058,6 +1058,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int IMMERSIVE_MODE_LOCK_MSG = 37;
     static final int PERSIST_URI_GRANTS_MSG = 38;
     static final int REQUEST_ALL_PSS_MSG = 39;
+    static final int UPDATE_TIME = 40;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1666,6 +1667,22 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             case REQUEST_ALL_PSS_MSG: {
                 requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
+                break;
+            }
+            case UPDATE_TIME: {
+                synchronized (ActivityManagerService.this) {
+                    for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
+                        ProcessRecord r = mLruProcesses.get(i);
+                        if (r.thread != null) {
+                            try {
+                                r.thread.updateTimePrefs(msg.arg1 == 0 ? false : true);
+                            } catch (RemoteException ex) {
+                                Slog.w(TAG, "Failed to update preferences for: " + r.info.processName);
+                            }
+                        }
+                    }
+                }
+
                 break;
             }
             }
@@ -4175,9 +4192,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         == PackageManager.PERMISSION_GRANTED) {
                     forceStopPackageLocked(packageName, pkgUid, "clear data");
                 } else {
-                    throw new SecurityException(pid+" does not have permission:"+
-                            android.Manifest.permission.CLEAR_APP_USER_DATA+" to clear data" +
-                                    "for process:"+packageName);
+                    throw new SecurityException("PID " + pid + " does not have permission "
+                            + android.Manifest.permission.CLEAR_APP_USER_DATA + " to clear data"
+                                    + " of package " + packageName);
                 }
             }
 
@@ -7252,6 +7269,24 @@ public final class ActivityManagerService extends ActivityManagerNative
             return ActivityRecord.getTaskForActivityLocked(token, onlyRoot);
         }
     }
+
+    public IBinder getActivityForTask(int task, boolean onlyRoot) {
+        final ActivityStack mainStack = mStackSupervisor.getFocusedStack();
+        synchronized(this) {
+            ArrayList<ActivityStack> stacks = mStackSupervisor.getStacks();
+            for (ActivityStack stack : stacks) {
+                TaskRecord r = stack.taskForIdLocked(task);
+
+                if (r != null && r.getTopActivity() != null) {
+                    return r.getTopActivity().appToken;
+                } else {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
 
     // =========================================================
     // THUMBNAILS
@@ -13430,11 +13465,20 @@ public final class ActivityManagerService extends ActivityManagerNative
          * of all currently running processes. This message will get queued up before the broadcast
          * happens.
          */
-        if (intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
+        if (Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
             mHandler.sendEmptyMessage(UPDATE_TIME_ZONE);
         }
 
-        if (intent.ACTION_CLEAR_DNS_CACHE.equals(intent.getAction())) {
+        /*
+         * If the user set the time, let all running processes know.
+         */
+        if (Intent.ACTION_TIME_CHANGED.equals(intent.getAction())) {
+            final int is24Hour = intent.getBooleanExtra(
+                    Intent.EXTRA_TIME_PREF_24_HOUR_FORMAT, false) ? 1 : 0;
+            mHandler.sendMessage(mHandler.obtainMessage(UPDATE_TIME, is24Hour, 0));
+        }
+
+        if (Intent.ACTION_CLEAR_DNS_CACHE.equals(intent.getAction())) {
             mHandler.sendEmptyMessage(CLEAR_DNS_CACHE_MSG);
         }
 
@@ -14139,6 +14183,26 @@ public final class ActivityManagerService extends ActivityManagerNative
             // And we need to make sure at this point that all other activities
             // are made visible with the correct configuration.
             mStackSupervisor.ensureActivitiesVisibleLocked(starting, changes);
+/*
+            if (mWindowManager.isTaskSplitView(starting.task.taskId)) {
+                Log.e("XPLOD", "Split view restoring task " + starting.task.taskId + " -- " + mIgnoreSplitViewUpdate.size());
+                ActivityRecord second = mainStack.topRunningActivityLocked(starting);
+                if (mWindowManager.isTaskSplitView(second.task.taskId)) {
+                    Log.e("XPLOD", "Split view restoring also task " + second.task.taskId);
+                    kept = kept && mainStack.ensureActivityConfigurationLocked(second, changes);
+                    mStackSupervisor.ensureActivitiesVisibleLocked(second, changes);
+                    if (mIgnoreSplitViewUpdate.contains(starting.task.taskId)) {
+                        Log.e("XPLOD", "Task "+ starting.task.taskId + " resuming ignored");
+                        mIgnoreSplitViewUpdate.removeAll(Collections.singleton((Integer) starting.task.taskId));
+                    } else {
+                        moveTaskToFront(second.task.taskId, 0, null);
+                        mIgnoreSplitViewUpdate.add(starting.task.taskId);
+                        mIgnoreSplitViewUpdate.add(second.task.taskId);
+                        mStackSupervisor.resumeTopActivitiesLocked();
+                        moveTaskToFront(starting.task.taskId, 0, null);
+                    }
+                }
+            }*/
         }
 
         if (values != null && mWindowManager != null) {
@@ -14147,6 +14211,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         return kept;
     }
+
+private ArrayList<Integer> mIgnoreSplitViewUpdate = new ArrayList<Integer>();
 
     /**
      * Decide based on the configuration whether we should shouw the ANR,
@@ -15363,8 +15429,61 @@ public final class ActivityManagerService extends ActivityManagerNative
                 reportingProcessState, now);
     }
 
+    private ArrayList<Integer> mIgnoreSplitViewUpdateResume = new ArrayList<Integer>();
+
     private final ActivityRecord resumedAppLocked() {
-        return mStackSupervisor.resumedAppLocked();
+        final ActivityRecord starting = mStackSupervisor.resumedAppLocked();
+
+        final long origId = Binder.clearCallingIdentity();
+
+        if (mSecondTaskToResume >= 0) {
+            /*moveTaskToFront(mSecondTaskToResume, 0, null);
+            mStackSupervisor.resumeTopActivitiesLocked();
+            moveTaskToFront(starting.task.taskId, 0, null);
+            mStackSupervisor.resumeTopActivitiesLocked();*/
+            moveTaskToFront(mSecondTaskToResume, 0, null);
+            mStackSupervisor.resumeTopActivitiesLocked();
+            mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
+            mIgnoreSplitViewUpdateResume.add(mSecondTaskToResume);
+
+            if (mIgnoreSplitViewUpdateResume.contains((Integer) starting.task.taskId)) {
+                mSecondTaskToResume = -1;
+            } else {
+                mSecondTaskToResume = starting.task.taskId;
+            }
+        }
+
+/*
+        if (mWindowManager != null && starting != null &&
+                mWindowManager.isTaskSplitView(starting.task.taskId)) {
+            Log.e("XPLOD", "[rAL] The current resumed task " + starting.task.taskId + " is split. Checking second");
+
+            // This task was split, we resume the second task if this task wasn't already a resumed task
+            if (mIgnoreSplitViewUpdateResume.contains(starting.task.taskId)) {
+                Log.e("XPLOD", "[rAL] This task (" + starting.task.taskId + ") was called from a split-initiated resume. Ignoring.");
+                mIgnoreSplitViewUpdateResume.remove((Integer) starting.task.taskId);
+            } else {
+                ActivityRecord second = getFocusedStack().topRunningActivityLocked(starting);
+
+                // Is that second task split as well?
+                if (mWindowManager.isTaskSplitView(second.task.taskId)) {
+                    // Don't restore me again
+                    mIgnoreSplitViewUpdateResume.add((Integer) second.task.taskId);
+                    mIgnoreSplitViewUpdateResume.add((Integer) starting.task.taskId);
+                    Log.e("XPLOD", "[rAL] There is a second task that I should be ignoring next: " + second.task.taskId);
+                    moveTaskToFront(second.task.taskId, 0, null);
+                    mStackSupervisor.resumeTopActivitiesLocked();
+                    mIgnoreSplitViewUpdateResume.add((Integer) second.task.taskId);
+                    mIgnoreSplitViewUpdateResume.add((Integer) starting.task.taskId);
+                    moveTaskToFront(starting.task.taskId, 0, null);
+                }
+            }
+        }
+*/
+
+        Binder.restoreCallingIdentity(origId);
+
+        return starting;
     }
 
     final boolean updateOomAdjLocked(ProcessRecord app) {
@@ -16613,5 +16732,39 @@ public final class ActivityManagerService extends ActivityManagerNative
         ActivityInfo info = new ActivityInfo(aInfo);
         info.applicationInfo = getAppInfoForUser(info.applicationInfo, userId);
         return info;
+    }
+
+    private int mSecondTaskToResume = -1;
+
+    public void notifySplitViewLayoutChanged() {
+        final long origId = Binder.clearCallingIdentity();
+
+        ActivityRecord starting = getFocusedStack().topRunningActivityLocked(null);
+
+        if (mWindowManager != null && starting != null &&
+                mWindowManager.isTaskSplitView(starting.task.taskId)) {
+            Log.e("XPLOD", "[rAL] The current resumed task " + starting.task.taskId + " is split. Checking second");
+
+            // This task was split, we resume the second task if this task wasn't already a resumed task
+            if (mIgnoreSplitViewUpdateResume.contains(starting.task.taskId)) {
+                Log.e("XPLOD", "[rAL] This task (" + starting.task.taskId + ") was called from a split-initiated resume. Ignoring.");
+                mIgnoreSplitViewUpdateResume.remove((Integer) starting.task.taskId);
+            } else {
+                ActivityRecord second = getFocusedStack().topRunningActivityLocked(starting);
+
+                // Is that second task split as well?
+                if (mWindowManager.isTaskSplitView(second.task.taskId)) {
+                    // Don't restore me again
+                    //mIgnoreSplitViewUpdateResume.add((Integer) second.task.taskId);
+                    Log.e("XPLOD", "[rAL] There is a second task that I should be ignoring next: " + second.task.taskId);
+                    /*moveTaskToFront(second.task.taskId, 0, null);
+                    mStackSupervisor.resumeTopActivitiesLocked();
+                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);*/
+                    mSecondTaskToResume = second.task.taskId;
+                }
+            }
+        }
+
+        Binder.restoreCallingIdentity(origId);
     }
 }

@@ -125,6 +125,7 @@ public interface IActivityManager extends IInterface {
     public StackBoxInfo getStackBoxInfo(int stackBoxId) throws RemoteException;
     public void setFocusedStack(int stackId) throws RemoteException;
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException;
+    public IBinder getActivityForTask(int task, boolean onlyRoot) throws RemoteException;
     /* oneway */
     public void reportThumbnail(IBinder token,
             Bitmap thumbnail, CharSequence description) throws RemoteException;
@@ -407,6 +408,9 @@ public interface IActivityManager extends IInterface {
     public void restart() throws RemoteException;
 
     public void performIdleMaintenance() throws RemoteException;
+
+    /* SPLIT VIEW */
+    public void notifySplitViewLayoutChanged() throws RemoteException;
 
     /*
      * Private non-Binder interfaces
@@ -694,4 +698,8 @@ public interface IActivityManager extends IInterface {
     int RELEASE_PERSISTABLE_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+180;
     int GET_PERSISTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+181;
     int APP_NOT_RESPONDING_VIA_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+182;
+
+    /* SPLIT VIEW */
+    int GET_ACTIVITY_FOR_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+200;
+    int NOTIFY_SPLIT_VIEW_LAYOUT_CHANGED = IBinder.FIRST_CALL_TRANSACTION+201;
 }

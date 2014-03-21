@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/*
- * Copyright 2013, The Android Open Source Project
+/**
+ * Copyright (C) 2013, ParanoidAndroid Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,9 @@
  * limitations under the License.
  */
 -->
-<animation-list
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:oneshot="false">
-    <item android:drawable="@drawable/ic_notification_cast_0" android:duration="500" />
-    <item android:drawable="@drawable/ic_notification_cast_1" android:duration="500" />
-    <item android:drawable="@drawable/ic_notification_cast_2" android:duration="500" />
-    <item android:drawable="@drawable/ic_notification_cast_1" android:duration="500" />
-</animation-list>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- QuickSettings: Immersive mode [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_immersive_mode_label">Immersive</string>
+    <!-- QuickSettings: Immersive mode (Off) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_immersive_mode_off_label">Immersive Off</string>
+</resources>

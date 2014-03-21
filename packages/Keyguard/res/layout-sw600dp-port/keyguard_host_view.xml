@@ -27,6 +27,27 @@
     android:layout_height="match_parent"
     android:orientation="horizontal">
 
+    <com.android.keyguard.NotificationHostView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/notification_host_view" >
+
+        <view class="com.android.keyguard.NotificationHostView$TouchModalScrollView"
+            android:fillViewport="false"
+            android:layout_width="match_parent"
+            android:layout_height="210dp"
+            android:id="@+id/scrollview" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:animateLayoutChanges="true"
+                android:id="@+id/linearlayout" />
+        </view>
+
+    </com.android.keyguard.NotificationHostView>
+
     <com.android.keyguard.MultiPaneChallengeLayout
         android:id="@+id/multi_pane_challenge"
         android:layout_width="match_parent"

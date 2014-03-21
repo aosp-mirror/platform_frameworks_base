@@ -142,6 +142,14 @@
         </LinearLayout>
 
         <com.android.systemui.statusbar.policy.KeyButtonView
+            android:layout_width="80dp"
+            android:id="@+id/show_notifs"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical|left"
+            android:scaleType="center"
+            android:visibility="gone" />
+
+        <com.android.systemui.statusbar.policy.KeyButtonView
             android:layout_width="128dp"
             android:id="@+id/search_light"
             android:layout_height="match_parent"
@@ -282,6 +290,14 @@
                 android:layout_weight="1"
                 />
         </LinearLayout>
+
+        <com.android.systemui.statusbar.policy.KeyButtonView
+            android:layout_width="80dp"
+            android:id="@+id/show_notifs"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical|left"
+            android:scaleType="center"
+            android:visibility="gone"/>
 
         <com.android.systemui.statusbar.policy.KeyButtonView
             android:layout_width="162dp"
