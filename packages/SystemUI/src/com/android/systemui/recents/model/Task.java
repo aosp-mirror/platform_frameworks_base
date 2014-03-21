@@ -29,7 +29,7 @@ public class Task {
     /* Task callbacks */
     public interface TaskCallbacks {
         /* Notifies when a task has been bound */
-        public void onTaskDataLoaded();
+        public void onTaskDataLoaded(boolean reloadingTaskData);
         /* Notifies when a task has been unbound */
         public void onTaskDataUnloaded();
     }
@@ -84,11 +84,11 @@ public class Task {
     }
 
     /** Notifies the callback listeners that this task has been loaded */
-    public void notifyTaskDataLoaded(Bitmap thumbnail, Drawable icon) {
+    public void notifyTaskDataLoaded(Bitmap thumbnail, Drawable icon, boolean reloadingTaskData) {
         this.icon = icon;
         this.thumbnail = thumbnail;
         if (mCb != null) {
-            mCb.onTaskDataLoaded();
+            mCb.onTaskDataLoaded(reloadingTaskData);
         }
     }
 
