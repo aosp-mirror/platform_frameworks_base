@@ -111,7 +111,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected static final boolean ENABLE_HEADS_UP = true;
     // scores above this threshold should be displayed in heads up mode.
-    protected static final int INTERRUPTION_THRESHOLD = 11;
+    protected static final int INTERRUPTION_THRESHOLD = 10;
     protected static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
 
     // Should match the value in PhoneWindowManager
