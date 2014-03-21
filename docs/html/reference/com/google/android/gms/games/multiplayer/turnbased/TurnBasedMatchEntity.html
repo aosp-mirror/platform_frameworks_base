@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -995,7 +1001,7 @@ android.os.Parcelable
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_VARIANT_ANY">MATCH_VARIANT_ANY</a></td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_VARIANT_DEFAULT">MATCH_VARIANT_DEFAULT</a></td>
         <td class="jd-descrcol" width="100%">Constant used to indicate that the variant for a match is unspecified.</td>
     </tr>
     
@@ -1258,6 +1264,77 @@ android.os.Parcelable
             
             
             
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getDescription()">getDescription</a></span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getDescription(android.database.CharArrayBuffer)">getDescription</a></span>(CharArrayBuffer dataOut)</nobr>
+
+        <div class="jd-descrdiv">Loads the match description into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getDescriptionParticipant()">getDescriptionParticipant</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Get the participant representing the primary opponent in the match.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getDescriptionParticipantId()">getDescriptionParticipantId</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Get the ID of another participant in the match that can be used when describing the
+ participants the user is playing with.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             <a href="/reference/com/google/android/gms/games/Game.html">Game</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -2142,6 +2219,77 @@ From interface
             
             
             
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getDescription()">getDescription</a></span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getDescription(android.database.CharArrayBuffer)">getDescription</a></span>(CharArrayBuffer dataOut)</nobr>
+
+        <div class="jd-descrdiv">Loads the match description into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getDescriptionParticipant()">getDescriptionParticipant</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Get the participant representing the primary opponent in the match.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getDescriptionParticipantId()">getDescriptionParticipantId</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Get the ID of another participant in the match that can be used when describing the
+ participants the user is playing with.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             <a href="/reference/com/google/android/gms/games/Game.html">Game</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -2809,6 +2957,144 @@ From interface
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Byte array representing the current (game-specific) match state data.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getDescription()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        String
+      </span>
+      <span class="sympad">getDescription</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getDescription(android.database.CharArrayBuffer)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">getDescription</span>
+      <span class="normal">(CharArrayBuffer dataOut)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Loads the match description into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>dataOut</td>
+          <td>The buffer to load the data into.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getDescriptionParticipant()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a>
+      </span>
+      <span class="sympad">getDescriptionParticipant</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Get the participant representing the primary opponent in the match.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The participant representing the primary opponent in the match.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getDescriptionParticipantId()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        String
+      </span>
+      <span class="sympad">getDescriptionParticipantId</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Get the ID of another participant in the match that can be used when describing the
+ participants the user is playing with. For example, in a four player match this might be
+ used to state "Martha (and 2 others)".</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The participant ID of the primary opponent in the match.
 </li></ul>
   </div>
 
