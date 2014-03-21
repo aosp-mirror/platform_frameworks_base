@@ -1177,14 +1177,11 @@ public class AudioTrack
      * In streaming mode, the blocking behavior will depend on the write mode.
      * @param audioData the buffer that holds the data to play, starting at the position reported
      *     by <code>audioData.position()</code>.
-     *     <BR>Note that this method will not update the position in this buffer, therefore when
-     *     writing a loop to write all the data in the buffer, you should increment the
-     *     <code>offsetInBytes</code> parameter at each pass by the amount that was previously
-     *     written for this buffer.
-     * @param offsetInBytes offset to read from in bytes (note this differs from
-     *     <code>audioData.position()</code>).
-     * @param sizeInBytes number of bytes to read (note this differs from
-     *     <code>audioData.remaining()</code>).
+     *     <BR>Note that upon return, the buffer position (<code>audioData.position()</code>) will
+     *     have been advanced to reflect the amount of data that was successfully written to
+     *     the AudioTrack.
+     * @param sizeInBytes number of bytes to write.
+     *     <BR>Note this may differ from <code>audioData.remaining()</code>, but cannot exceed it.
      * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}. It has no
      *     effect in static mode.
      *     <BR>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
@@ -1194,7 +1191,7 @@ public class AudioTrack
      * @return 0 or a positive number of bytes that were written, or
      *     {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}
      */
-    public int write(ByteBuffer audioData, int offsetInBytes, int sizeInBytes,
+    public int write(ByteBuffer audioData, int sizeInBytes,
             @WriteMode int writeMode) {
 
         if (mState == STATE_UNINITIALIZED) {
@@ -1207,22 +1204,19 @@ public class AudioTrack
             return ERROR_BAD_VALUE;
         }
 
-        if ( (audioData == null) || (offsetInBytes < 0 ) || (sizeInBytes < 0)
-                || (offsetInBytes + sizeInBytes < 0)    // detect integer overflow
-                || (offsetInBytes + sizeInBytes > audioData.remaining())) {
-            Log.e(TAG, "AudioTrack.write() called with invalid size/offset values");
+        if ( (audioData == null) || (sizeInBytes < 0) || (sizeInBytes > audioData.remaining())) {
+            Log.e(TAG, "AudioTrack.write() called with invalid size (" + sizeInBytes + ") value");
             return ERROR_BAD_VALUE;
         }
 
         int ret = 0;
         if (audioData.isDirect()) {
             ret = native_write_native_bytes(audioData,
-                    audioData.position(),
-                    offsetInBytes, sizeInBytes, mAudioFormat,
+                    audioData.position(), sizeInBytes, mAudioFormat,
                     writeMode == WRITE_BLOCKING);
         } else {
             ret = native_write_byte(NioUtils.unsafeArray(audioData),
-                    NioUtils.unsafeArrayOffset(audioData) + audioData.position() + offsetInBytes,
+                    NioUtils.unsafeArrayOffset(audioData) + audioData.position(),
                     sizeInBytes, mAudioFormat,
                     writeMode == WRITE_BLOCKING);
         }
@@ -1232,6 +1226,10 @@ public class AudioTrack
                 && (ret > 0)) {
             // benign race with respect to other APIs that read mState
             mState = STATE_INITIALIZED;
+        }
+
+        if (ret > 0) {
+            audioData.position(audioData.position() + ret);
         }
 
         return ret;
@@ -1443,7 +1441,7 @@ public class AudioTrack
                                                 int offsetInShorts, int sizeInShorts, int format);
 
     private native final int native_write_native_bytes(Object audioData,
-            int positionInBytes, int offsetInBytes, int sizeInBytes, int format, boolean blocking);
+            int positionInBytes, int sizeInBytes, int format, boolean blocking);
 
     private native final int native_reload_static();
 
