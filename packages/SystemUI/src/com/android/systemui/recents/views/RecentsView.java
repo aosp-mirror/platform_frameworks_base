@@ -17,6 +17,7 @@
 package com.android.systemui.recents.views;
 
 import android.app.ActivityOptions;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -210,11 +211,14 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 int offsetX = 0;
                 int offsetY = 0;
                 if (tv == null) {
-                    // Launch the activity
+                    // If there is no actual task view, then use the stack view as the source view
+                    // and then offset to the expected transform rect, but bound this to just
+                    // outside the display rect (to ensure we don't animate from too far away)
+                    RecentsConfiguration config = RecentsConfiguration.getInstance();
                     sourceView = stackView;
                     transform = stackView.getStackTransform(stack.indexOfTask(task));
                     offsetX = transform.rect.left;
-                    offsetY = transform.rect.top;
+                    offsetY = Math.min(transform.rect.top, config.displayRect.height());
                 } else {
                     transform = stackView.getStackTransform(stack.indexOfTask(task));
                 }
@@ -242,10 +246,14 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 i.setFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
                         | Intent.FLAG_ACTIVITY_TASK_ON_HOME
                         | Intent.FLAG_ACTIVITY_NEW_TASK);
-                if (opts != null) {
-                    getContext().startActivityAsUser(i, opts.toBundle(), UserHandle.CURRENT);
-                } else {
-                    getContext().startActivityAsUser(i, UserHandle.CURRENT);
+                try {
+                    if (opts != null) {
+                        getContext().startActivityAsUser(i, opts.toBundle(), UserHandle.CURRENT);
+                    } else {
+                        getContext().startActivityAsUser(i, UserHandle.CURRENT);
+                    }
+                } catch (ActivityNotFoundException anfe) {
+                    Console.logError(getContext(), "Could not start Activity");
                 }
 
                 Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsLaunchTask,
