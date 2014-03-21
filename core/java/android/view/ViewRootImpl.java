@@ -659,14 +659,14 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessageAtFrontOfQueue(mHandler.obtainMessage(MSG_FLUSH_LAYER_UPDATES));
     }
 
-    public void attachFunctor(int functor) {
+    public void attachFunctor(long functor) {
         //noinspection SimplifiableIfStatement
         if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
             mAttachInfo.mHardwareRenderer.attachFunctor(mAttachInfo, functor);
         }
     }
 
-    public void detachFunctor(int functor) {
+    public void detachFunctor(long functor) {
         mBlockResizeBuffer = true;
         if (mAttachInfo.mHardwareRenderer != null) {
             mAttachInfo.mHardwareRenderer.detachFunctor(functor);
