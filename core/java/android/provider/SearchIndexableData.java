@@ -21,15 +21,16 @@ import android.content.Context;
 import java.util.Locale;
 
 /**
- * The Indexable data for Search. This abstract class defines the common parts for all search
- * indexable data.
+ * The Indexable data for Search.
+ *
+ * This abstract class defines the common parts for all search indexable data.
  *
  * @hide
  */
 public abstract class SearchIndexableData {
 
     /**
-     * The context for the data. Will usually allow to retrieve some resources.
+     * The context for the data. Will usually allow retrieving some resources.
      *
      * @see Context
      */
@@ -39,6 +40,11 @@ public abstract class SearchIndexableData {
      * The locale for the data
      */
     public Locale locale;
+
+    /**
+     * Tells if the data will be included into the search results. This is application specific.
+     */
+    public boolean enabled;
 
     /**
      * The rank for the data. This is application specific.
@@ -103,6 +109,7 @@ public abstract class SearchIndexableData {
      * Default constructor.
      */
     public SearchIndexableData() {
+        enabled = true;
     }
 
     /**
@@ -113,5 +120,6 @@ public abstract class SearchIndexableData {
     public SearchIndexableData(Context ctx) {
         context = ctx;
         locale = Locale.getDefault();
+        enabled = true;
     }
 }
