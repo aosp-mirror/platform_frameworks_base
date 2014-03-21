@@ -10908,6 +10908,54 @@ package android.hardware.display {
 
 }
 
+package android.hardware.hdmi {
+
+  public final class HdmiCec {
+    method public static java.lang.String getDefaultDeviceName(int);
+    method public static int getTypeFromAddress(int);
+    method public static boolean isValidAddress(int);
+    method public static boolean isValidType(int);
+    field public static final int ADDR_AUDIO_SYSTEM = 5; // 0x5
+    field public static final int ADDR_BROADCAST = 15; // 0xf
+    field public static final int ADDR_FREE_USE = 14; // 0xe
+    field public static final int ADDR_INVALID = -1; // 0xffffffff
+    field public static final int ADDR_PLAYBACK_1 = 4; // 0x4
+    field public static final int ADDR_PLAYBACK_2 = 8; // 0x8
+    field public static final int ADDR_PLAYBACK_3 = 11; // 0xb
+    field public static final int ADDR_RECORDER_1 = 1; // 0x1
+    field public static final int ADDR_RECORDER_2 = 2; // 0x2
+    field public static final int ADDR_RECORDER_3 = 9; // 0x9
+    field public static final int ADDR_RESERVED_1 = 12; // 0xc
+    field public static final int ADDR_RESERVED_2 = 13; // 0xd
+    field public static final int ADDR_TUNER_1 = 3; // 0x3
+    field public static final int ADDR_TUNER_2 = 6; // 0x6
+    field public static final int ADDR_TUNER_3 = 7; // 0x7
+    field public static final int ADDR_TUNER_4 = 10; // 0xa
+    field public static final int ADDR_TV = 0; // 0x0
+    field public static final int ADDR_UNREGISTERED = 15; // 0xf
+    field public static final int DEVICE_AUDIO_SYSTEM = 5; // 0x5
+    field public static final int DEVICE_INACTIVE = -1; // 0xffffffff
+    field public static final int DEVICE_PLAYBACK = 4; // 0x4
+    field public static final int DEVICE_RECORDER = 1; // 0x1
+    field public static final int DEVICE_RESERVED = 2; // 0x2
+    field public static final int DEVICE_TUNER = 3; // 0x3
+    field public static final int DEVICE_TV = 0; // 0x0
+    field public static final int MESSAGE_ACTIVE_SOURCE = 157; // 0x9d
+  }
+
+  public final class HdmiCecMessage implements android.os.Parcelable {
+    ctor public HdmiCecMessage(int, int, int, byte[]);
+    method public int describeContents();
+    method public int getDestination();
+    method public int getOpcode();
+    method public byte[] getParams();
+    method public int getSource();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+}
+
 package android.hardware.input {
 
   public final class InputManager {
