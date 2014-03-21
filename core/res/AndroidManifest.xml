@@ -682,6 +682,12 @@
         android:label="@string/permlab_installLocationProvider"
         android:description="@string/permdesc_installLocationProvider" />
 
+    <!-- Allows HDMI-CEC service to access device and configuration files.
+         @hide This should only be used by HDMI-CEC service.
+    -->
+    <permission android:name="android.permission.HDMI_CEC"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- Allows an application to use location features in hardware,
          such as the geofencing api.
          <p>Not for use by third-party applications. -->
