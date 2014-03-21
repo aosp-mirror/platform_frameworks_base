@@ -68,15 +68,6 @@ public final class Bitmap implements Parcelable {
      */
     private boolean mIsPremultiplied;
 
-    /**
-     * Whether the Bitmap's content is expected to have alpha. Note that hasAlpha()
-     * does not directly return this value, because hasAlpha() may never return true
-     * for a 565 Bitmap.
-     *
-     * Any time this or mIsPremultiplied is changed, both are passed to native so they
-     * are not order dependent.
-     */
-    private boolean mHasAlpha;
     private byte[] mNinePatchChunk;   // may be null
     private int[] mLayoutBounds;   // may be null
     private int mWidth;
@@ -564,7 +555,7 @@ public final class Bitmap implements Parcelable {
         checkRecycled("Can't copy a recycled bitmap");
         Bitmap b = nativeCopy(mNativeBitmap, config.nativeInt, isMutable);
         if (b != null) {
-            b.setAlphaAndPremultiplied(mHasAlpha, mIsPremultiplied);
+            b.setAlphaAndPremultiplied(hasAlpha(), mIsPremultiplied);
             b.mDensity = mDensity;
         }
         return b;
@@ -741,7 +732,7 @@ public final class Bitmap implements Parcelable {
         // The new bitmap was created from a known bitmap source so assume that
         // they use the same density
         bitmap.mDensity = source.mDensity;
-        bitmap.setAlphaAndPremultiplied(source.mHasAlpha, source.mIsPremultiplied);
+        bitmap.setAlphaAndPremultiplied(source.hasAlpha(), source.mIsPremultiplied);
 
         canvas.setBitmap(bitmap);
         canvas.drawBitmap(source, srcR, dstR, paint);
@@ -894,7 +885,6 @@ public final class Bitmap implements Parcelable {
         if (display != null) {
             bm.mDensity = display.densityDpi;
         }
-        bm.mHasAlpha = true;
         return bm;
     }
 
@@ -1062,12 +1052,11 @@ public final class Bitmap implements Parcelable {
      */
     public final void setPremultiplied(boolean premultiplied) {
         mIsPremultiplied = premultiplied;
-        nativeSetAlphaAndPremultiplied(mNativeBitmap, mHasAlpha, premultiplied);
+        nativeSetAlphaAndPremultiplied(mNativeBitmap, hasAlpha(), premultiplied);
     }
 
     /** Helper function to set both alpha and premultiplied. **/
     private final void setAlphaAndPremultiplied(boolean hasAlpha, boolean premultiplied) {
-        mHasAlpha = hasAlpha;
         mIsPremultiplied = premultiplied;
         nativeSetAlphaAndPremultiplied(mNativeBitmap, hasAlpha, premultiplied);
     }
@@ -1230,7 +1219,6 @@ public final class Bitmap implements Parcelable {
      * non-opaque per-pixel alpha values.
      */
     public void setHasAlpha(boolean hasAlpha) {
-        mHasAlpha = hasAlpha;
         nativeSetAlphaAndPremultiplied(mNativeBitmap, hasAlpha, mIsPremultiplied);
     }
 
