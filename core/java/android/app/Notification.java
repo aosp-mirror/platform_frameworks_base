@@ -444,41 +444,75 @@ public class Notification implements Parcelable
     public static final int VISIBILITY_SECRET = -1;
 
     /**
-     * @hide
-     * Notification type: incoming call (voice or video) or similar synchronous communication request.
+     * Notification category: incoming call (voice or video) or similar synchronous communication request.
      */
-    public static final String KIND_CALL = "android.call";
+    public static final String CATEGORY_CALL = "call";
 
     /**
-     * @hide
-     * Notification type: incoming direct message (SMS, instant message, etc.).
+     * Notification category: incoming direct message (SMS, instant message, etc.).
      */
-    public static final String KIND_MESSAGE = "android.message";
+    public static final String CATEGORY_MESSAGE = "msg";
 
     /**
-     * @hide
-     * Notification type: asynchronous bulk message (email).
+     * Notification category: asynchronous bulk message (email).
      */
-    public static final String KIND_EMAIL = "android.email";
+    public static final String CATEGORY_EMAIL = "email";
 
     /**
-     * @hide
-     * Notification type: calendar event.
+     * Notification category: calendar event.
      */
-    public static final String KIND_EVENT = "android.event";
+    public static final String CATEGORY_EVENT = "event";
 
     /**
-     * @hide
-     * Notification type: promotion or advertisement.
+     * Notification category: promotion or advertisement.
      */
-    public static final String KIND_PROMO = "android.promo";
+    public static final String CATEGORY_PROMO = "promo";
 
     /**
-     * @hide
-     * If this notification matches of one or more special types (see the <code>KIND_*</code>
-     * constants), add them here, best match first.
+     * Notification category: alarm or timer.
      */
-    public String[] kind;
+    public static final String CATEGORY_ALARM = "alarm";
+
+    /**
+     * Notification category: progress of a long-running background operation.
+     */
+    public static final String CATEGORY_PROGRESS = "progress";
+
+    /**
+     * Notification category: social network or sharing update.
+     */
+    public static final String CATEGORY_SOCIAL = "social";
+
+    /**
+     * Notification category: error in background operation or authentication status.
+     */
+    public static final String CATEGORY_ERROR = "err";
+
+    /**
+     * Notification category: media transport control for playback.
+     */
+    public static final String CATEGORY_TRANSPORT = "transport";
+
+    /**
+     * Notification category: system or device status update.  Reserved for system use.
+     */
+    public static final String CATEGORY_SYSTEM = "sys";
+
+    /**
+     * Notification category: indication of running background service.
+     */
+    public static final String CATEGORY_SERVICE = "service";
+
+    /**
+     * Notification category: ongoing information about device or contextual status.
+     */
+    public static final String CATEGORY_STATUS = "status";
+
+    /**
+     * One of the predefined notification categories (see the <code>CATEGORY_*</code> constants)
+     * that best describes this Notification.  May be used by the system for ranking and filtering.
+     */
+    public String category;
 
     /**
      * Additional semantic data to be carried around with this Notification.
@@ -617,6 +651,13 @@ public class Notification implements Parcelable
      * @hide
      */
     public static final String EXTRA_BUILDER_REMOTE_VIEWS = "android.builderRemoteViews";
+
+    /**
+     * Allow certain system-generated notifications to appear before the device is provisioned.
+     * Only available to notifications coming from the android package.
+     * @hide
+     */
+    public static final String EXTRA_ALLOW_DURING_SETUP = "android.allowDuringSetup";
 
     /**
      * Value for {@link #EXTRA_AS_HEADS_UP}.
@@ -815,7 +856,7 @@ public class Notification implements Parcelable
 
         priority = parcel.readInt();
 
-        kind = parcel.createStringArray(); // may set kind to null
+        category = parcel.readString();
 
         extras = parcel.readBundle(); // may be null
 
@@ -890,12 +931,7 @@ public class Notification implements Parcelable
 
         that.priority = this.priority;
 
-        final String[] thiskind = this.kind;
-        if (thiskind != null) {
-            final int N = thiskind.length;
-            final String[] thatkind = that.kind = new String[N];
-            System.arraycopy(thiskind, 0, thatkind, 0, N);
-        }
+        that.category = this.category;
 
         if (this.extras != null) {
             try {
@@ -1044,7 +1080,7 @@ public class Notification implements Parcelable
 
         parcel.writeInt(priority);
 
-        parcel.writeStringArray(kind); // ok for null
+        parcel.writeString(category);
 
         parcel.writeBundle(extras); // null ok
 
@@ -1180,16 +1216,7 @@ public class Notification implements Parcelable
         sb.append(Integer.toHexString(this.defaults));
         sb.append(" flags=0x");
         sb.append(Integer.toHexString(this.flags));
-        sb.append(" kind=[");
-        if (this.kind == null) {
-            sb.append("null");
-        } else {
-            for (int i=0; i<this.kind.length; i++) {
-                if (i>0) sb.append(",");
-                sb.append(this.kind[i]);
-            }
-        }
-        sb.append("]");
+        sb.append(" category="); sb.append(this.category);
         if (actions != null) {
             sb.append(" ");
             sb.append(actions.length);
@@ -1271,7 +1298,7 @@ public class Notification implements Parcelable
         private int mProgressMax;
         private int mProgress;
         private boolean mProgressIndeterminate;
-        private ArrayList<String> mKindList = new ArrayList<String>(1);
+        private String mCategory;
         private Bundle mExtras;
         private int mPriority;
         private ArrayList<Action> mActions = new ArrayList<Action>(MAX_ACTION_BUTTONS);
@@ -1679,14 +1706,12 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @hide
+         * Set the notification category.
          *
-         * Add a kind (category) to this notification. Optional.
-         *
-         * @see Notification#kind
+         * @see Notification#category
          */
-        public Builder addKind(String k) {
-            mKindList.add(k);
+        public Builder setCategory(String category) {
+            mCategory = category;
             return this;
         }
 
@@ -2010,12 +2035,7 @@ public class Notification implements Parcelable
             if ((mDefaults & DEFAULT_LIGHTS) != 0) {
                 n.flags |= FLAG_SHOW_LIGHTS;
             }
-            if (mKindList.size() > 0) {
-                n.kind = new String[mKindList.size()];
-                mKindList.toArray(n.kind);
-            } else {
-                n.kind = null;
-            }
+            n.category = mCategory;
             n.priority = mPriority;
             if (mActions.size() > 0) {
                 n.actions = new Action[mActions.size()];
