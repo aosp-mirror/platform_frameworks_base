@@ -6820,7 +6820,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        if (pending == null && receiver != null) {
+        if (pending.pendingRecords.isEmpty() && receiver != null) {
             // In this case all thumbnails were available and the client
             // is being asked to be told when the remaining ones come in...
             // which is unusually, since the top-most currently running
@@ -6895,6 +6895,21 @@ public final class ActivityManagerService extends ActivityManagerNative
                     rti.stackId = tr.stack.mStackId;
                     rti.userId = tr.userId;
 
+                    final ArrayList<ActivityRecord> activities = tr.mActivities;
+                    int numSet = 0;
+                    for (int activityNdx = activities.size() - 1; activityNdx >= 0 && numSet < 2;
+                            --activityNdx) {
+                        final ActivityRecord r = activities.get(activityNdx);
+                        if (rti.activityLabel == null && r.recentsLabel != null) {
+                            rti.activityLabel = r.recentsLabel;
+                            ++numSet;
+                        }
+                        if (rti.activityIcon == null && r.recentsIcon != null) {
+                            rti.activityIcon = r.recentsIcon;
+                            ++numSet;
+                        }
+                    }
+
                     if ((flags&ActivityManager.RECENT_IGNORE_UNAVAILABLE) != 0) {
                         // Check whether this activity is currently available.
                         try {
@@ -6957,6 +6972,26 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         return null;
+    }
+
+    @Override
+    public void setRecentsLabel(IBinder token, CharSequence recentsLabel) {
+        synchronized (this) {
+            ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r != null) {
+                r.recentsLabel = recentsLabel.toString();
+            }
+        }
+    }
+
+    @Override
+    public void setRecentsIcon(IBinder token, Bitmap recentsIcon) {
+        synchronized (this) {
+            ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r != null) {
+                r.recentsIcon = recentsIcon;
+            }
+        }
     }
 
     @Override
