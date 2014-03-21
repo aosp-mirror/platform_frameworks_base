@@ -24,6 +24,7 @@ import android.app.IActivityManager;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.IBluetoothManager;
+import android.media.AudioManager;
 import android.nfc.NfcAdapter;
 import android.nfc.INfcAdapter;
 import android.content.BroadcastReceiver;
@@ -498,7 +499,7 @@ public final class ShutdownThread extends Thread {
             // vibrate before shutting down
             Vibrator vibrator = new SystemVibrator();
             try {
-                vibrator.vibrate(SHUTDOWN_VIBRATE_MS);
+                vibrator.vibrate(SHUTDOWN_VIBRATE_MS, AudioManager.STREAM_SYSTEM);
             } catch (Exception e) {
                 // Failure to vibrate shouldn't interrupt shutdown.  Just log it.
                 Log.w(TAG, "Failed to vibrate during shutdown.", e);
