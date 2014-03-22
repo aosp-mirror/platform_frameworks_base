@@ -125,7 +125,7 @@ public class KeyguardViewMediator {
     private static final int DISPATCH_EVENT = 15;
     private static final int LAUNCH_CAMERA = 16;
     private static final int DISMISS = 17;
-    private static final int DISPATCH_BUTTON_CLICK_EVENT = 19;
+    private static final int DISPATCH_BUTTON_CLICK_EVENT = 18;
 
     /**
      * The default amount of time we stay awake (used for all key input)
