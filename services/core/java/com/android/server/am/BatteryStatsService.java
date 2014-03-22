@@ -248,10 +248,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
-    public void noteDataConnectionActive(int type, boolean active) {
+    public void noteDataConnectionActive(int type, boolean active, long timestampNs) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteDataConnectionActive(type, active);
+            mStats.noteDataConnectionActive(type, active, timestampNs);
         }
     }
 
@@ -570,9 +570,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
                 int num;
                 while ((num=nativeWaitWakeup(mIrqs, mReasons)) >= 0) {
                     synchronized (mStats) {
-                        for (int i=0; i<num; i++) {
-                            //Slog.i(TAG, "Wakeup: irq #" + mIrqs[i] + " reason=" + mReasons[i]);
-                            mStats.noteWakeupReasonLocked(mIrqs[i], mReasons[i]);
+                        if (num > 0) {
+                            for (int i=0; i<num; i++) {
+                                mStats.noteWakeupReasonLocked(mReasons[i]);
+                            }
+                        } else {
+                            mStats.noteWakeupReasonLocked("unknown");
                         }
                     }
                 }
@@ -653,7 +656,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
                     dumpHelp(pw);
                     return;
                 } else if ("-a".equals(arg)) {
-                    // fall through
+                    flags |= BatteryStats.DUMP_VERBOSE;
                 } else if (arg.length() > 0 && arg.charAt(0) == '-'){
                     pw.println("Unknown option: " + arg);
                     dumpHelp(pw);
