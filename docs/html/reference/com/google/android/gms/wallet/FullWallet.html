@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -941,6 +947,42 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/FullWallet.html#getBillingAddress()">getBillingAddress</a></span>()</nobr>
         
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    No replacement.</em></div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/identity/intents/model/UserAddress.html">UserAddress</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/FullWallet.html#getBuyerBillingAddress()">getBuyerBillingAddress</a></span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/identity/intents/model/UserAddress.html">UserAddress</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/FullWallet.html#getBuyerShippingAddress()">getBuyerShippingAddress</a></span>()</nobr>
+
   </td></tr>
 
 
@@ -984,6 +1026,25 @@ android.os.Parcelable
             
             
             
+            <a href="/reference/com/google/android/gms/wallet/InstrumentInfo.html">InstrumentInfo[]</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/FullWallet.html#getInstrumentInfos()">getInstrumentInfos</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Returns an array of finer grained details about the instruments used in this Google Wallet
+ transaction.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -993,7 +1054,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1005,11 +1066,14 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/FullWallet.html#getPaymentDescriptions()">getPaymentDescriptions</a></span>()</nobr>
         
+        <div class="jd-descrdiv">Returns an array of strings used for user-facing messaging about payment instruments used
+ for funding this Google Wallet transaction.</div>
+
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1025,7 +1089,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1037,11 +1101,15 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/FullWallet.html#getShippingAddress()">getShippingAddress</a></span>()</nobr>
         
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    No replacement.</em></div>
+
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1057,7 +1125,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1474,11 +1542,87 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    No replacement.
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Billing address associated with the payment instrument.</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/">ERROR(/getBuyerBillingAddress)</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getBuyerBillingAddress()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/identity/intents/model/UserAddress.html">UserAddress</a>
+      </span>
+      <span class="sympad">getBuyerBillingAddress</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the billing address associated with the buyer's payment instrument
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getBuyerShippingAddress()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/identity/intents/model/UserAddress.html">UserAddress</a>
+      </span>
+      <span class="sympad">getBuyerShippingAddress</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>Billing address associated with the payment instrument.
+      <ul class="nolist"><li>the buyer's shipping address
 </li></ul>
   </div>
 
@@ -1555,6 +1699,45 @@ From interface
 </div>
 
 
+<A NAME="getInstrumentInfos()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/wallet/InstrumentInfo.html">InstrumentInfo[]</a>
+      </span>
+      <span class="sympad">getInstrumentInfos</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns an array of finer grained details about the instruments used in this Google Wallet
+ transaction. Details here can be parsed and used for customer support, etc..., but
+ <strong>should not</strong> be displayed to the user.
+ <p>
+ NOTE: This list of details is not guaranteed to have the same ordering or length as
+ <code><a href="/reference/com/google/android/gms/wallet/FullWallet.html#getPaymentDescriptions()">getPaymentDescriptions()</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>list of instrument info (if available), otherwise null.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="getMerchantTransactionId()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1613,14 +1796,19 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns an array of strings used for user-facing messaging about payment instruments used
+ for funding this Google Wallet transaction. Do not attempt to parse the contents of this
+ array as the format, contents and length may change at any time.
+ <p>
+ IMPORTANT: This list is sorted in the order of how messages should be displayed. You
+ are required to show each of these sources to inform the buyer of their funding sources for
+ the transaction. See Google Wallet UI guide for details. Each payment description is not
+ guaranteed to match a consistent pattern and you should not try to parse this data. See
+ <code><a href="/reference/com/google/android/gms/wallet/FullWallet.html#getInstrumentInfos()">getInstrumentInfos()</a></code> for a stable API of instrument information.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>A list of funding sources used to fund the Google Wallet transaction.
- <p>
- IMPORTANT: the list is sorted in the order in which funds will be applied. You are required
- to show each of these sources to inform the buyer of their funding sources for the
- transaction. See Google Wallet UI guide for details.
+      <ul class="nolist"><li>A list of user-facing messages about payment instruments used to fund the Google
+         Wallet transaction.
 </li></ul>
   </div>
 
@@ -1684,12 +1872,20 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    No replacement.
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>Buyer's shipping address
-</li></ul>
+      <ul class="nolist"><li>Buyer's shipping address</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/">ERROR(/getBuyerShippingAddress)</a></code></li>
+      </ul>
   </div>
 
     </div>
