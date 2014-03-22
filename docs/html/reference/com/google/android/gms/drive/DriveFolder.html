@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -985,6 +991,24 @@ From interface
             
             
             
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#addChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.DriveEvent.Listener<com.google.android.gms.drive.events.ChangeEvent>)">addChangeListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/events/DriveEvent.Listener.html">Listener</a>&lt;<a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a>&gt; listener)</nobr>
+
+        <div class="jd-descrdiv">Adds a new listener for changes on this resources.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             <a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -996,7 +1020,7 @@ From interface
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1014,6 +1038,25 @@ From interface
 
 
 	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#listParents(com.google.android.gms.common.api.GoogleApiClient)">listParents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
+
+        <div class="jd-descrdiv">Retrieves a collection of metadata for all of the parents of this resource that the calling
+ app has been authorized to view.</div>
+
+  </td></tr>
+
+
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
@@ -1021,6 +1064,24 @@ From interface
             
             
             
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#removeChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.DriveEvent.Listener<com.google.android.gms.drive.events.ChangeEvent>)">removeChangeListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/events/DriveEvent.Listener.html">Listener</a>&lt;<a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a>&gt; listener)</nobr>
+
+        <div class="jd-descrdiv">Removes a listener for changes on this resource that was previously added by</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1155,12 +1216,12 @@ From interface
         <tr>
           <th>apiClient</td>
           <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call. The client must be
-          connected before invoking this method.</td>
+ connected before invoking this method.</td>
         </tr>
         <tr>
           <th>changeSet</td>
           <td>A set of metadata fields that should be initially set.  This should
-          minimally include a title and mime type.</td>
+ minimally include a title and mime type.</td>
         </tr>
         <tr>
           <th>contents</td>
@@ -1208,12 +1269,12 @@ From interface
         <tr>
           <th>apiClient</td>
           <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call. The client must be
-          connected before invoking this method.</td>
+ connected before invoking this method.</td>
         </tr>
         <tr>
           <th>changeSet</td>
           <td>A set of metadata fields that should be initially set.  This should
-          minimally include a title.  The mime type will be set to the folder mime type.</td>
+ minimally include a title.  The mime type will be set to the folder mime type.</td>
         </tr>
       </table>
   </div>

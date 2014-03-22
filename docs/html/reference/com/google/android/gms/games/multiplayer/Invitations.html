@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -831,7 +837,7 @@ onkeyup="return search_changed(event, false, '/')" />
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/multiplayer/Invitations.LoadInvitationsResult.html">Invitations.LoadInvitationsResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Invitations.html#loadInvitations(com.google.android.gms.common.api.GoogleApiClient)">loadInvitations</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Invitations.html#loadInvitations(com.google.android.gms.common.api.GoogleApiClient, int)">loadInvitations</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int sortOrder)</nobr>
         
         <div class="jd-descrdiv">Asynchronously load the list of invitations for the current game.</div>
   
@@ -846,6 +852,24 @@ onkeyup="return search_changed(event, false, '/')" />
             
             
             
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/multiplayer/Invitations.LoadInvitationsResult.html">Invitations.LoadInvitationsResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Invitations.html#loadInvitations(com.google.android.gms.common.api.GoogleApiClient)">loadInvitations</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
+
+        <div class="jd-descrdiv">Asynchronously load the list of invitations for the current game.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -857,7 +881,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -975,6 +999,58 @@ onkeyup="return search_changed(event, false, '/')" />
 </div>
 
 
+<A NAME="loadInvitations(com.google.android.gms.common.api.GoogleApiClient, int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/multiplayer/Invitations.LoadInvitationsResult.html">Invitations.LoadInvitationsResult</a>&gt;
+      </span>
+      <span class="sympad">loadInvitations</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int sortOrder)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the list of invitations for the current game.
+ <p>
+ Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
+ Required Scopes: <code><a href="/reference/com/google/android/gms/games/Games.html#SCOPE_GAMES">SCOPE_GAMES</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>apiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call.</td>
+        </tr>
+        <tr>
+          <th>sortOrder</td>
+          <td>How to sort the returned invitations. Must be either
+            <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#SORT_ORDER_MOST_RECENT_FIRST">SORT_ORDER_MOST_RECENT_FIRST</a></code> or
+            <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#SORT_ORDER_SOCIAL_AGGREGATION">SORT_ORDER_SOCIAL_AGGREGATION</a></code>.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> to access the data when available.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="loadInvitations(com.google.android.gms.common.api.GoogleApiClient)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -998,7 +1074,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the list of invitations for the current game.
+  <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the list of invitations for the current game. Invitations are returned
+ sorted by most recent first.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
  Required Scopes: <code><a href="/reference/com/google/android/gms/games/Games.html#SCOPE_GAMES">SCOPE_GAMES</a></code></p></div>
