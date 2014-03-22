@@ -16,17 +16,22 @@
 
 package android.telephony;
 
+import android.annotation.PrivateApi;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.telephony.Rlog;
+import android.util.Log;
 
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
+import com.android.internal.telephony.ITelephonyListener;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
@@ -34,6 +39,7 @@ import com.android.internal.telephony.TelephonyProperties;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -60,7 +66,40 @@ public class TelephonyManager {
     private static final String TAG = "TelephonyManager";
 
     private static ITelephonyRegistry sRegistry;
+
+    private final HashMap<CallStateListener,Listener> mListeners
+            = new HashMap<CallStateListener,Listener>();
     private final Context mContext;
+
+    private static class Listener extends ITelephonyListener.Stub {
+        final CallStateListener mListener;
+        private static final int WHAT = 1;
+
+        private Handler mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                mListener.onCallStateChanged(msg.arg1, msg.arg2, (String)msg.obj);
+            }
+        };
+
+        Listener(CallStateListener listener) {
+            mListener = listener;
+        }
+
+        @Override
+        public void onUpdate(final int callId, final int state, final String number) {
+            if (mHandler != null) {
+                mHandler.sendMessage(mHandler.obtainMessage(WHAT, callId, state, number));
+            }
+        }
+
+        void clearQueue() {
+            mHandler.removeMessages(WHAT);
+
+            // Don't accept more incoming binder calls either.
+            mHandler = null;
+        }
+    }
 
     /** @hide */
     public TelephonyManager(Context context) {
@@ -1438,5 +1477,398 @@ public class TelephonyManager {
         if (mContext == null) return null;
         return mContext.getResources().getString(
                 com.android.internal.R.string.config_mms_user_agent_profile_url);
+    }
+
+    /** @hide */
+    @PrivateApi
+    public void dial(String number) {
+        try {
+            getITelephony().dial(number);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#dial", e);
+        }
+    }
+
+    /** @hide */
+    @PrivateApi
+    public void call(String callingPackage, String number) {
+        try {
+            getITelephony().call(callingPackage, number);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#call", e);
+        }
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean showCallScreen() {
+        try {
+            return getITelephony().showCallScreen();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#showCallScreen", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean showCallScreenWithDialpad(boolean showDialpad) {
+        try {
+            return getITelephony().showCallScreenWithDialpad(showDialpad);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#showCallScreenWithDialpad", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean endCall() {
+        try {
+            return getITelephony().endCall();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#endCall", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public void answerRingingCall() {
+        try {
+            getITelephony().answerRingingCall();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#answerRingingCall", e);
+        }
+    }
+
+    /** @hide */
+    @PrivateApi
+    public void toggleHold() {
+        try {
+            getITelephony().toggleHold();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#toggleHold", e);
+        }
+    }
+
+    /** @hide */
+    @PrivateApi
+    public void merge() {
+        try {
+            getITelephony().merge();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#merge", e);
+        }
+    }
+
+    /** @hide */
+    @PrivateApi
+    public void swap() {
+        try {
+            getITelephony().swap();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#swap", e);
+        }
+    }
+
+    /** @hide */
+    @PrivateApi
+    public void mute(boolean mute) {
+        try {
+            getITelephony().mute(mute);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#mute", e);
+        }
+    }
+
+    /** @hide */
+    @PrivateApi
+    public void silenceRinger() {
+        try {
+            getITelephony().silenceRinger();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#silenceRinger", e);
+        }
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean isOffhook() {
+        try {
+            return getITelephony().isOffhook();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isOffhook", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean isRinging() {
+        try {
+            return getITelephony().isRinging();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isRinging", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean isIdle() {
+        try {
+            return getITelephony().isIdle();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isIdle", e);
+        }
+        return true;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean isRadioOn() {
+        try {
+            return getITelephony().isRadioOn();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isRadioOn", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean isSimPinEnabled() {
+        try {
+            return getITelephony().isSimPinEnabled();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isSimPinEnabled", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public void cancelMissedCallsNotification() {
+        try {
+            getITelephony().cancelMissedCallsNotification();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#cancelMissedCallsNotification", e);
+        }
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean supplyPin(String pin) {
+        try {
+            return getITelephony().supplyPin(pin);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#supplyPin", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean supplyPuk(String puk, String pin) {
+        try {
+            return getITelephony().supplyPuk(puk, pin);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#supplyPuk", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public int[] supplyPinReportResult(String pin) {
+        try {
+            return getITelephony().supplyPinReportResult(pin);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#supplyPinReportResult", e);
+        }
+        return new int[0];
+    }
+
+    /** @hide */
+    @PrivateApi
+    public int[] supplyPukReportResult(String puk, String pin) {
+        try {
+            return getITelephony().supplyPukReportResult(puk, pin);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#]", e);
+        }
+        return new int[0];
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean handlePinMmi(String dialString) {
+        try {
+            return getITelephony().handlePinMmi(dialString);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#handlePinMmi", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public void toggleRadioOnOff() {
+        try {
+            getITelephony().toggleRadioOnOff();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#toggleRadioOnOff", e);
+        }
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean setRadio(boolean turnOn) {
+        try {
+            return getITelephony().setRadio(turnOn);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#setRadio", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean setRadioPower(boolean turnOn) {
+        try {
+            return getITelephony().setRadioPower(turnOn);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#setRadioPower", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public void updateServiceLocation() {
+        try {
+            getITelephony().updateServiceLocation();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#updateServiceLocation", e);
+        }
+    }
+
+    /** @hide */
+    @PrivateApi
+    public int enableApnType(String type) {
+        try {
+            return getITelephony().enableApnType(type);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#enableApnType", e);
+        }
+        return PhoneConstants.APN_REQUEST_FAILED;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public int disableApnType(String type) {
+        try {
+            return getITelephony().disableApnType(type);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#disableApnType", e);
+        }
+        return PhoneConstants.APN_REQUEST_FAILED;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean enableDataConnectivity() {
+        try {
+            return getITelephony().enableDataConnectivity();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#enableDataConnectivity", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean disableDataConnectivity() {
+        try {
+            return getITelephony().disableDataConnectivity();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#disableDataConnectivity", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean isDataConnectivityPossible() {
+        try {
+            return getITelephony().isDataConnectivityPossible();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isDataConnectivityPossible", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean needsOtaServiceProvisioning() {
+        try {
+            return getITelephony().needsOtaServiceProvisioning();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#needsOtaServiceProvisioning", e);
+        }
+        return false;
+    }
+
+    /** @hide */
+    @PrivateApi
+    public void playDtmfTone(char digit, boolean timedShortCode) {
+        try {
+            getITelephony().playDtmfTone(digit, timedShortCode);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#playDtmfTone", e);
+        }
+    }
+
+    /** @hide */
+    @PrivateApi
+    public void stopDtmfTone() {
+        try {
+            getITelephony().stopDtmfTone();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#stopDtmfTone", e);
+        }
+    }
+
+    /** @hide */
+    @PrivateApi
+    public void addCallStateListener(CallStateListener listener) {
+        try {
+            if (listener == null) {
+                throw new RuntimeException("Listener can't be null");
+            }
+            if (!mListeners.containsKey(listener)) {
+                final Listener l = new Listener(listener);
+                mListeners.put(listener, l);
+                getITelephony().addListener(l);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#addListener", e);
+        }
+    }
+
+    /** @hide */
+    @PrivateApi
+    public void removeCallStateListener(CallStateListener listener) {
+        try {
+            final Listener l = mListeners.remove(listener);
+            if (l != null) {
+                // Make sure that no callbacks that are already in flight come.
+                l.clearQueue();
+                getITelephony().removeListener(l);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#removeListener", e);
+        }
     }
 }
