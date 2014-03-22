@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -2315,7 +2321,7 @@ android.view.View
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#initialize(java.lang.String, int)">initialize</a></span>(String url, int activityRequestCode)</nobr>
         
-        <div class="jd-descrdiv">Updates the +1 button with a <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> and URL.</div>
+        <div class="jd-descrdiv">Updates the +1 button with a URL.</div>
   
   </td></tr>
 
@@ -13847,10 +13853,10 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Updates the +1 button with a <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> and URL.  Most apps call
- this method each time the button is in focus (for example, in the Activity onResume
- method).  To use this method, the PlusOneButton must be placed in an Activity.  Use
- <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#initialize(java.lang.String, com.google.android.gms.plus.PlusOneButton.OnPlusOneClickListener)">initialize(String, OnPlusOneClickListener)</a></code> otherwise.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Updates the +1 button with a URL.  Most apps call this method each time the button is in
+ focus (for example, in the Activity onResume method).  To use this method, the PlusOneButton
+ must be placed in an Activity.  Use <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#initialize(java.lang.String, com.google.android.gms.plus.PlusOneButton.OnPlusOneClickListener)">initialize(String, OnPlusOneClickListener)</a></code>
+ otherwise.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">

@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -685,6 +691,9 @@ Summary:
 
 
 
+  &#124; <a href="#constants">Constants</a>
+
+
 
 
   &#124; <a href="#lfields">Fields</a>
@@ -850,6 +859,22 @@ Summary:
 
 
 
+<!-- =========== ENUM CONSTANT SUMMARY =========== -->
+<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></td>
+        <td class="jd-descrcol" width="100%">Used to return a list of player IDs.</td>
+    </tr>
+
+
+
+</table>
+
+
 
 
 
@@ -953,13 +978,24 @@ Summary:
           public
           static
           final
+          <a href="/reference/com/google/android/gms/games/request/Requests.html">Requests</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Games.html#Requests">Requests</a></td>
+          <td class="jd-descrcol" width="100%">Methods for interacting with requests.</td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
           <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Games.html#SCOPE_GAMES">SCOPE_GAMES</a></td>
           <td class="jd-descrcol" width="100%">Scope for accessing data from Google Play Games.</td>
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1353,6 +1389,59 @@ From class
 <!-- Constants -->
 
 
+<!-- ========= ENUM CONSTANTS DETAIL ======== -->
+<h2>Constants</h2>
+
+
+
+
+<A NAME="EXTRA_PLAYER_IDS"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        EXTRA_PLAYER_IDS
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Used to return a list of player IDs. Retrieve with
+ <code><a href="/reference/android/content/Intent.html#getStringArrayListExtra(java.lang.String)">getStringArrayListExtra(String)</a></code>.
+
+ Also used to pass in a list of player IDs for preselecting players. Set with
+ <code><a href="/reference/android/content/Intent.html#putStringArrayListExtra(java.lang.String, java.util.ArrayList<java.lang.String>)">putStringArrayListExtra(String, java.util.ArrayList)</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#getSelectOpponentsIntent(com.google.android.gms.common.api.GoogleApiClient, int, int)">getSelectOpponentsIntent(GoogleApiClient, int, int)</a></code></li><li><code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#getSelectOpponentsIntent(com.google.android.gms.common.api.GoogleApiClient, int, int)">getSelectOpponentsIntent(GoogleApiClient, int, int)</a></code></li>
+      </ul>
+  </div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "players"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+
 <!-- Fields -->
 
 
@@ -1592,6 +1681,35 @@ From class
 </p></div>
 
     
+    </div>
+</div>
+
+
+
+<A NAME="Requests"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        <a href="/reference/com/google/android/gms/games/request/Requests.html">Requests</a>
+      </span>
+        Requests
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Methods for interacting with requests.
+</p></div>
+
+
     </div>
 </div>
 
