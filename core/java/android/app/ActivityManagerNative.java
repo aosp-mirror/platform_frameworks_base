@@ -2128,6 +2128,25 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeInt(isInLockTaskMode ? 1 : 0);
             return true;
         }
+
+        case SET_RECENTS_LABEL_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            CharSequence recentsLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(data);
+            setRecentsLabel(token, recentsLabel);
+            reply.writeNoException();
+            return true;
+        }
+
+        case SET_RECENTS_ICON_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            Bitmap recentsIcon = data.readInt() != 0
+                    ? Bitmap.CREATOR.createFromParcel(data) : null;
+            setRecentsIcon(token, recentsIcon);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -4897,6 +4916,37 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return isInLockTaskMode;
+    }
+
+    public void setRecentsLabel(IBinder token, CharSequence recentsLabel) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        TextUtils.writeToParcel(recentsLabel, data, 0);
+        mRemote.transact(SET_RECENTS_LABEL_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    public void setRecentsIcon(IBinder token, Bitmap recentsBitmap) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        if (recentsBitmap != null) {
+            data.writeInt(1);
+            recentsBitmap.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
+        mRemote.transact(SET_RECENTS_ICON_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
     }
 
     private IBinder mRemote;
