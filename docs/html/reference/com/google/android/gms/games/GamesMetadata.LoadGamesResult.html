@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -768,13 +774,14 @@ Summary:
  <p>
  Possible status codes include:
  <ul>
- <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_OK">STATUS_OK</a></code> if data was successfully loaded and is up-to-date.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_NETWORK_ERROR_NO_DATA">STATUS_NETWORK_ERROR_NO_DATA</a></code> if the device was unable to retrieve
- any data from the network and has no data cached locally.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_OK">STATUS_OK</a></code> if data was successfully loaded and is up-to-date.
+ </li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_NETWORK_ERROR_NO_DATA">STATUS_NETWORK_ERROR_NO_DATA</a></code> if the device was unable to
+ retrieve any data from the network and has no data cached locally.</li>
  <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_NETWORK_ERROR_STALE_DATA">STATUS_NETWORK_ERROR_STALE_DATA</a></code> if the device was unable to
  retrieve the latest data from the network, but has some data cached locally.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the client needs to reconnect
- to the service to access this data.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the client needs to
+ reconnect to the service to access this data.</li>
  <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_GAME_NOT_FOUND">STATUS_GAME_NOT_FOUND</a></code> if the game could not be found.</li>
  <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_LICENSE_CHECK_FAILED">STATUS_LICENSE_CHECK_FAILED</a></code> if the game is not licensed to the
  user.</li>

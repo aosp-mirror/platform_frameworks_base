@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -689,11 +695,14 @@ Summary:
 
 
 
+  <a href="#constants">Constants</a>
 
 
 
 
-  <a href="#pubctors">Ctors</a>
+
+
+  &#124; <a href="#pubctors">Ctors</a>
   
 
 
@@ -820,6 +829,29 @@ Summary:
 
 
 
+<!-- =========== ENUM CONSTANT SUMMARY =========== -->
+<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/Metadata.html#CONTENT_AVAILABLE_LOCALLY">CONTENT_AVAILABLE_LOCALLY</a></td>
+        <td class="jd-descrcol" width="100%">The content is available on the device.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/Metadata.html#CONTENT_NOT_AVAILABLE_LOCALLY">CONTENT_NOT_AVAILABLE_LOCALLY</a></td>
+        <td class="jd-descrcol" width="100%">The content is not available on the device.</td>
+    </tr>
+
+
+
+</table>
+
+
 
 
 
@@ -872,6 +904,44 @@ Summary:
             
             
             
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getAlternateLink()">getAlternateLink</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns a link for opening the file using a relevant Google editor or viewer.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getContentAvailability()">getContentAvailability</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns <code><a href="/reference/com/google/android/gms/drive/Metadata.html#CONTENT_NOT_AVAILABLE_LOCALLY">CONTENT_NOT_AVAILABLE_LOCALLY</a></code> when the content is not available on
+ the device or <code><a href="/reference/com/google/android/gms/drive/Metadata.html#CONTENT_AVAILABLE_LOCALLY">CONTENT_AVAILABLE_LOCALLY</a></code> when the content is available on the
+ device.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
             Date</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -890,6 +960,24 @@ Summary:
             
             
             
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getDescription()">getDescription</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">A short description of the file.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -901,7 +989,79 @@ Summary:
 
 
 	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getEmbedLink()">getEmbedLink</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">A link for embedding the file.</div>
+  
+  </td></tr>
+
+
+	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getFileExtension()">getFileExtension</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">The file extension used when downloading this file.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            long</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getFileSize()">getFileSize</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">The size of the file in bytes.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            Date</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getLastViewedByMeDate()">getLastViewedByMeDate</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns the last time this resource was viewed by the user.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -919,7 +1079,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -936,39 +1096,21 @@ Summary:
   </td></tr>
 
 
-	 
-    <tr class="alt-color api apilevel-" >
+
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             Date</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getModifiedDate()">getModifiedDate</a></span>()</nobr>
-        
+
         <div class="jd-descrdiv">Returns the last time this resource was modified by anyone.</div>
-  
-  </td></tr>
 
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            Date</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getSharedWithMeDate()">getSharedWithMeDate</a></span>()</nobr>
-        
-        <div class="jd-descrdiv">Returns the time at which this resource was shared with the user.</div>
-  
   </td></tr>
 
 
@@ -983,10 +1125,11 @@ Summary:
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getTitle()">getTitle</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getOriginalFilename()">getOriginalFilename</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the title of the resource </div>
-  
+        <div class="jd-descrdiv">The original filename if the file was uploaded manually, or the original title if the file
+ was inserted through the API.</div>
+
   </td></tr>
 
 
@@ -998,18 +1141,110 @@ Summary:
             
             
             
+            long</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getQuotaBytesUsed()">getQuotaBytesUsed</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">The number of quota bytes used by this file.</div>
+
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            Date</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getSharedWithMeDate()">getSharedWithMeDate</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns the time at which this resource was shared with the user.</div>
+
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getTitle()">getTitle</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns the title of the resource </div>
+
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getWebContentLink()">getWebContentLink</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">A link for downloading the content of the file in a browser using cookie based
+ authentication.</div>
+
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getWebViewLink()">getWebViewLink</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">A link only available on public folders for viewing their static web assets (HTML, CSS, JS,
+ etc) via Google Drive's Website Hosting.</div>
+
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isEditable()">isEditable</a></span>()</nobr>
         
         <div class="jd-descrdiv">Returns true if this resource can be edited by the current user.</div>
-  
+
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1022,7 +1257,25 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isFolder()">isFolder</a></span>()</nobr>
         
         <div class="jd-descrdiv">Returns true if this Metadata is for a folder.</div>
-  
+
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isInAppFolder()">isInAppFolder</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns true if this resource is in the Application Folder.</div>
+
   </td></tr>
 
 
@@ -1030,6 +1283,79 @@ Summary:
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
+            
+            
+            
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isPinnable()">isPinnable</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns true if the file can be pinned.</div>
+
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isPinned()">isPinned</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns true if this resource has been pinned (a request has been made to make the content
+ available offline).</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isRestricted()">isRestricted</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Whether viewers are prevented from downloading this file.</div>
+
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isShared()">isShared</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns true if this resource is a shared resource.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
             
             
             
@@ -1044,21 +1370,39 @@ Summary:
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isTrashed()">isTrashed</a></span>()</nobr>
-        
+
         <div class="jd-descrdiv">Returns true if this resource has been trashed.</div>
-  
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isViewed()">isViewed</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Whether this file has been viewed by this user.</div>
+
   </td></tr>
 
 
@@ -1093,182 +1437,182 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
-    
 
 
-	 
+
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">equals</span>(Object arg0)</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">finalize</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
+
+
             final
-            
-            
+
+
             Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">hashCode</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
+
+
             final
-            
-            
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notify</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
+
+
             final
-            
-            
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notifyAll</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
+
+
             final
-            
-            
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
+
+
             final
-            
-            
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
+
+
             final
-            
-            
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0)</nobr>
-        
+
   </td></tr>
 
 
@@ -1295,42 +1639,42 @@ From interface
   </div>
   <div id="inherited-methods-com.google.android.gms.common.data.Freezable-summary" style="display: none;">
     <table class="jd-sumtable-expando">
-    
 
 
-	 
+
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-            
-            
-            
-            
+
+
+
+
             T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#freeze()">freeze</a></span>()</nobr>
-        
+
         <div class="jd-descrdiv">Freeze a volatile representation into an immutable representation.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-            
-            
-            
-            
+
+
+
+
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#isDataValid()">isDataValid</a></span>()</nobr>
-        
+
         <div class="jd-descrdiv">Check to see if this object is valid for use.</div>
-  
+
   </td></tr>
 
 
@@ -1363,6 +1707,91 @@ From interface
 <!-- Constants -->
 
 
+<!-- ========= ENUM CONSTANTS DETAIL ======== -->
+<h2>Constants</h2>
+
+
+
+
+<A NAME="CONTENT_AVAILABLE_LOCALLY"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        CONTENT_AVAILABLE_LOCALLY
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>The content is available on the device.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                1
+                (0x00000001)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="CONTENT_NOT_AVAILABLE_LOCALLY"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        CONTENT_NOT_AVAILABLE_LOCALLY
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>The content is not available on the device.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                0
+                (0x00000000)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+
 <!-- Fields -->
 
 
@@ -1376,27 +1805,27 @@ From interface
 
 <A NAME="Metadata()"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
-        
+        public
+
+
+
+
+
       </span>
       <span class="sympad">Metadata</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div></div>
-        
-  
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1418,16 +1847,78 @@ From interface
 
 
 
-<A NAME="getCreatedDate()"></A>
+<A NAME="getAlternateLink()"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
+        String
+      </span>
+      <span class="sympad">getAlternateLink</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a link for opening the file using a relevant Google editor or viewer.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getContentAvailability()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        int
+      </span>
+      <span class="sympad">getContentAvailability</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns <code><a href="/reference/com/google/android/gms/drive/Metadata.html#CONTENT_NOT_AVAILABLE_LOCALLY">CONTENT_NOT_AVAILABLE_LOCALLY</a></code> when the content is not available on
+ the device or <code><a href="/reference/com/google/android/gms/drive/Metadata.html#CONTENT_AVAILABLE_LOCALLY">CONTENT_AVAILABLE_LOCALLY</a></code> when the content is available on the
+ device.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getCreatedDate()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
         Date
       </span>
       <span class="sympad">getCreatedDate</span>
@@ -1435,13 +1926,43 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-        
-  
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the create time for this resource.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getDescription()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        String
+      </span>
+      <span class="sympad">getDescription</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>A short description of the file.
 </p></div>
 
     </div>
@@ -1450,14 +1971,14 @@ From interface
 
 <A NAME="getDriveId()"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         <a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a>
       </span>
       <span class="sympad">getDriveId</span>
@@ -1465,13 +1986,135 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-        
-  
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the id of the resource </p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getEmbedLink()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        String
+      </span>
+      <span class="sympad">getEmbedLink</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>A link for embedding the file.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getFileExtension()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        String
+      </span>
+      <span class="sympad">getFileExtension</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>The file extension used when downloading this file.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getFileSize()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        long
+      </span>
+      <span class="sympad">getFileSize</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>The size of the file in bytes.
+
+ <p> This is only populated for files with content stored in Drive.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getLastViewedByMeDate()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        Date
+      </span>
+      <span class="sympad">getLastViewedByMeDate</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the last time this resource was viewed by the user.
+</p></div>
 
     </div>
 </div>
@@ -1479,14 +2122,14 @@ From interface
 
 <A NAME="getMimeType()"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         String
       </span>
       <span class="sympad">getMimeType</span>
@@ -1494,12 +2137,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-        
-  
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the MIME type of the resource </p></div>
 
     </div>
@@ -1508,14 +2151,14 @@ From interface
 
 <A NAME="getModifiedByMeDate()"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         Date
       </span>
       <span class="sympad">getModifiedByMeDate</span>
@@ -1523,12 +2166,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-        
-  
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the last time this resource was modified by the user.
 </p></div>
 
@@ -1560,6 +2203,67 @@ From interface
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the last time this resource was modified by anyone.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getOriginalFilename()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        String
+      </span>
+      <span class="sympad">getOriginalFilename</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>The original filename if the file was uploaded manually, or the original title if the file
+ was inserted through the API.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getQuotaBytesUsed()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        long
+      </span>
+      <span class="sympad">getQuotaBytesUsed</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>The number of quota bytes used by this file.
 </p></div>
 
     </div>
@@ -1625,6 +2329,68 @@ From interface
 </div>
 
 
+<A NAME="getWebContentLink()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        String
+      </span>
+      <span class="sympad">getWebContentLink</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>A link for downloading the content of the file in a browser using cookie based
+ authentication.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getWebViewLink()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        String
+      </span>
+      <span class="sympad">getWebViewLink</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>A link only available on public folders for viewing their static web assets (HTML, CSS, JS,
+ etc) via Google Drive's Website Hosting.
+</p></div>
+
+    </div>
+</div>
+
+
 <A NAME="isEditable()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1685,6 +2451,161 @@ From interface
 </div>
 
 
+<A NAME="isInAppFolder()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">isInAppFolder</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns true if this resource is in the Application Folder.
+
+ <p> The App Folder contains hidden files stored in a user's Drive that are only
+ accessible to the creating app. @see <a href="https://developers.google.com/drive/appdata">
+ https://developers.google.com/drive/appdata</a>
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="isPinnable()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">isPinnable</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns true if the file can be pinned.  Not all shortcut app MIME types are pinnable.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="isPinned()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">isPinned</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns true if this resource has been pinned (a request has been made to make the content
+ available offline).
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="isRestricted()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">isRestricted</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Whether viewers are prevented from downloading this file.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="isShared()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">isShared</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns true if this resource is a shared resource.
+</p></div>
+
+    </div>
+</div>
+
+
 <A NAME="isStarred()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1739,6 +2660,36 @@ From interface
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if this resource has been trashed.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="isViewed()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">isViewed</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Whether this file has been viewed by this user.
 </p></div>
 
     </div>
