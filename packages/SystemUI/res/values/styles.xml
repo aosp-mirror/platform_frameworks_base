@@ -86,7 +86,7 @@
     <style name="TextAppearance.QuickSettings" />
 
     <style name="TextAppearance.QuickSettings.TileView">
-        <item name="android:textSize">12dp</item>
+        <item name="android:textSize">10dp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">#CCCCCC</item>
         <item name="android:textAllCaps">true</item>

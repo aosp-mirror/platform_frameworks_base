@@ -355,10 +355,6 @@ public class KeyguardViewManager {
             mKeyguardView.requestFocus();
         }
 
-        if(mCustomBackground != null) {
-            mKeyguardHost.setCustomBackground(mCustomBackground);
-        }
-
         updateUserActivityTimeoutInWindowLayoutParams();
         mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
 
