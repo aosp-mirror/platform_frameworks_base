@@ -136,7 +136,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Забагато видалень <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Пам’ять планшетного ПК заповнено. Видаліть якісь файли, щоб звільнити місце."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Пам’ять телефону заповнено. Видаліть якісь файли, щоб звільнити місце."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Мережу можуть відстежувати"</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Мережа може відстежуватися"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Невідомою третьою стороною"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Доменом <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>
@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Дозволяє програмі отримувати вміст активного вікна. Шкідливі програми можуть отримувати весь вміст вікна та вивчати весь його текст, окрім паролів."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"тимчасово вмикати доступність"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Дозволяє програмі тимчасового вмикати доступність на пристрої. Шкідливі програми можуть вмикати доступність без згоди користувача."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"отримувати інформацію про вікна"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Дозволяє програмі отримувати інформацію про вікна від диспетчера вікон. Шкідливі програми можуть отримувати інформацію, яка призначена для внутрішнього користування системи."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"фільтрувати події"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Дозволяє програмі реєструвати вхідний фільтр, який фільтрує потік усіх подій користувача перед їх надсиланням. Шкідливі програми можуть контролювати інтерфейс системи без втручання користувача."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"збільшити екран"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Дозволяє програмі збільшувати вміст екрана. Зловмисні програми можуть змінювати вміст екрана так, що пристроєм стає неможливо користуватися."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"частк. заверш. роб."</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Переводить диспетчер дій у стан завершення роботи. Не виконує повне завершення роботи."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"запобіг. зміні програм"</string>

@@ -163,7 +163,7 @@
     <string name="global_action_lock" msgid="2844945191792119712">"נעילת מסך"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"כיבוי"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"דיווח על באג"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"מלא דיווח על באג"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"שלח דיווח על באג"</string>
     <string name="bugreport_message" msgid="398447048750350456">"פעולה זו תאסוף מידע על מצב המכשיר הנוכחי שלך על מנת לשלוח אותו כהודעת דוא\"ל. היא תימשך זמן קצר מרגע פתיחת דיווח הבאג ועד שיהיה ניתן לבצע שליחה. התאזר בסבלנות."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"מצב שקט"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"הקול כבוי"</string>
@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"מאפשר לאפליקציה לאחזר את התוכן של החלון הפעיל. אפליקציות זדוניות עלולות לאחזר את תוכן החלון כולו ולבחון את כל הטקסט שבו, מלבד סיסמאות."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"הפעלת נגישות זמנית"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"מאפשר לאפליקציה להפעיל באופן זמני נגישות במכשיר. אפליקציות זדוניות עלולות לאפשר נגישות ללא הסכמת משתמש."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"אחזר מידע חלון"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"מאפשר לאפליקציה לאחזר מידע לגבי החלונות ממנהל החלונות. אפליקציות זדוניות עשויות לאחזר מידע המיועד לשימוש מערכת פנימי."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"סנן אירועים"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"‏מאפשר לאפליקציה לרשום מסנן קלט שמסנן את הזרם של כל אירועי המשתמש לפני שהם נשלחים. אפליקציה זדונית עשויה לשלוט ב-UI של המערכת ללא התערבות משתמש."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"הגדלת תצוגה"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"מאפשר לאפליקציה להגדיל את התוכן של תצוגה. אפליקציות זדוניות עלולות לשנות את תוכן התצוגה כך שהמכשיר יהפוך לבלתי שמיש."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"כיבוי חלקי"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"מעביר את מנהל הפעילויות למצב כיבוי. לא מבצע כיבוי מלא."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"מנע החלפת אפליקציות"</string>

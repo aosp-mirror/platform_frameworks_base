@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Programu omogoča dostop do vsebine aktivnega okna. Zlonamerni programi lahko dobijo vso vsebino okna in pregledajo njeno besedilo razen gesel."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"začasno omogoči pripomočke za ljudi s posebnimi potrebami"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Aplikaciji omogoča, da v napravi začasno omogoči pripomočke za ljudi s posebnimi potrebami. Zlonamerne aplikacije jih lahko omogočijo brez soglasja uporabnika."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"prenos podatkov o oknih"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Omogoča, da aplikacija iz upravitelja oken pridobiva podatke o oknih. Zlonamerne aplikacije lahko pridobivajo podatke, namenjene za notranjo uporabo v sistemu."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtriranje dogodkov"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Omogoča, da aplikacija registrira vhodni filter, ki pred razpošiljanjem filtrira tok vseh uporabniških dogodkov. Zlonamerne aplikacije lahko nadzirajo uporabniški vmesnik sistema brez posega uporabnika."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"povečevanje zaslona"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Omogoča aplikaciji povečevanje vsebine zaslona. Zlonamerne aplikacije lahko preoblikujejo vsebino zaslona tako, da je naprava neuporabna."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"delna zaustavitev"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Upravitelja dejavnosti preklopi v stanje za zaustavitev. Ne izvede celotne zaustavitve."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"preprečevanje preklopa programov"</string>

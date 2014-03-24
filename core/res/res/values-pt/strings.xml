@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Permite que o aplicativo recupere o conteúdo da janela ativa. Aplicativos maliciosos podem recuperar o conteúdo da janela inteira e examinar todo o texto, exceto as senhas."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"ativar temporariamente a acessibilidade"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Permite que um aplicativo ative temporariamente a acessibilidade no dispositivo. Aplicativos maliciosos podem ativar a acessibilidade sem o consentimento do usuário."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"recuperar informações de janelas"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permite que o aplicativo recupere informações sobre as janelas do gerenciador de janelas. Aplicativos mal-intencionados podem recuperar informações destinadas ao uso interno do sistema."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrar eventos"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permite que o aplicativo registre um filtro de entrada que filtra o fluxo de todos os eventos do usuário antes que sejam enviados. Aplicativos mal-intencionados podem controlar a interface do sistema sem a intervenção do usuário."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"ampliar monitor"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Permite que o aplicativo amplie o conteúdo de um monitor. Aplicativos maliciosos podem manipular o conteúdo do monitor de modo a tornar o dispositivo inutilizável."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"desligamento parcial"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Coloca o gerenciador de atividades em um estado de desligamento. Não executa o desligamento completo."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"evitar trocas de aplicativo"</string>

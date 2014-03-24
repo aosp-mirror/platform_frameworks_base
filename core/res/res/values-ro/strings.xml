@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Permite aplicaţiei să preia conţinutul ferestrei active. Aplicaţiile rău intenţionate pot să preia întregul conţinut al ferestrei şi să examineze integral textul acesteia, cu excepţia parolelor."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"activare temporară a accesibilității"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Permite unei aplicaţii să activeze temporar accesibilitatea pe gadget. Aplicaţiile rău intenţionate o pot activa fără consimţământul utilizatorului."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"preluare informaţii despre ferestre"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permite unei aplicaţii să preia informaţii despre ferestrele din managerul de ferestre. Aplicaţiile rău intenţionate pot prelua informaţii care sunt destinate utilizării sistemului intern."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrare evenimente"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permite unei aplicaţii să înregistreze un filtru de intrare, care filtrează transmiterea în flux a tuturor evenimentelor utilizatorilor înainte ca acestea să fie expediate. Aplicaţiile rău intenţionate pot controla interfaţa de utilizare a sistemului fără intervenţia utilizatorului."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"măreşte afişajul"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Permite unei aplicaţii să mărească conţinutul unui afişaj. Aplicaţiile rău intenţionate pot transforma conţinutul afişajului într-un mod care ar face inutilizabil dispozitivul."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"închidere parţială"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Plasează Managerul de activităţi într-o stare de închidere. Nu efectuează o închidere completă."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"împiedicare comutare între aplicaţii"</string>

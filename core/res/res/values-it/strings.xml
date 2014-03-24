@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Consente all\'applicazione di recuperare i contenuti della finestra attiva. Le applicazioni dannose potrebbero recuperare l\'intero contenuto della finestra ed esaminare tutto il testo, tranne le password."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"attivazione temporanea dell\'accessibilità"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Consente a un\'applicazione di attivare temporaneamente l\'accessibilità sul dispositivo. Le applicazioni dannose potrebbero attivare l\'accessibilità senza il consenso dell\'utente."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"recupero di informazioni sulle finestre"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Consente a un\'applicazione di recuperare informazioni sulle finestre dalla gestione finestre. Le applicazioni dannose potrebbero recuperare informazioni destinate all\'utilizzo da parte del sistema interno."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtro eventi"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Consente a un\'applicazione di registrare un filtro di ingresso che filtra lo stream di tutti gli eventi degli utenti prima che vengano inviati. Un\'applicazione dannosa potrebbe controllare l\'interfaccia utente del sistema senza l\'intervento dell\'utente."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"ingrandimento dello schermo"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Consente a un\'applicazione di ingrandire i contenuti di uno schermo. Le applicazioni dannose potrebbero trasformare i contenuti dello schermo in modo da rendere inutilizzabile il dispositivo."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"chiusura parziale"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Mette il gestore delle attività in uno stato di chiusura. Non esegue una chiusura completa."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedire commutazione applicazione"</string>
@@ -458,7 +454,7 @@
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"scrittura del registro chiamate"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Consente all\'applicazione di modificare il registro chiamate del tablet, inclusi i dati sulle chiamate in arrivo e in uscita. Le applicazioni dannose potrebbero farne uso per cancellare o modificare il registro chiamate."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Consente all\'applicazione di modificare il registro chiamate del telefono, inclusi i dati sulle chiamate in arrivo e in uscita. Le applicazioni dannose potrebbero farne uso per cancellare o modificare il registro chiamate."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"lettura scheda cont. personale"</string>
+    <string name="permlab_readProfile" msgid="4701889852612716678">"lettura scheda contatti pers."</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Consente all\'applicazione di leggere informazioni del profilo personale memorizzate sul dispositivo, come il tuo nome e le tue informazioni di contatto. Ciò significa che l\'applicazione può identificarti e inviare le informazioni del tuo profilo ad altri."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"modifica scheda contatti"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Consente all\'applicazione di modificare o aggiungere informazioni ai dati del profilo personale memorizzati sul dispositivo, come il tuo nome e le tue informazioni di contatto. Significa che l\'applicazione può identificarti e inviare le informazioni del tuo profilo ad altri."</string>

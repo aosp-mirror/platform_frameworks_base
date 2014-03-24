@@ -478,17 +478,9 @@
     <skip />
     <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
     <skip />
-    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
-    <skip />
-    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
-    <skip />
     <!-- no translation found for permlab_filter_events (8675535648807427389) -->
     <skip />
     <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
-    <skip />
-    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
-    <skip />
-    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
     <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"serrar parzialmain"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Metta l\'administratur dad activitads en in stadi da pausa. El na vegn betg serrà dal tut."</string>

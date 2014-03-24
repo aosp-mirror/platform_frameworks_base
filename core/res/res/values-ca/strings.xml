@@ -136,7 +136,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Massa supressions de <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"L\'emmagatzematge de la tauleta és ple. Suprimeix uns quants fitxers per alliberar espai."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"L\'emmagatzematge del telèfon és ple. Suprimeix uns quants fitxers per alliberar espai."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Pot ser que la xarxa se supervisi."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"És possible que la xarxa estigui supervisada"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Per un tercer desconegut"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Per <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Mi"</string>
@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Permet que l\'aplicació recuperi el contingut de la finestra activa. Les aplicacions malicioses poden recuperar el contingut de tota la finestra i examinar-ne tot el text, excepte les contrasenyes."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"activació temporal de l\'accessibilitat"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Permet que una aplicació activi temporalment l\'accessibilitat al dispositiu. És possible que les aplicacions malicioses activin l\'accessibilitat sense el consentiment de l\'usuari."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"recupera informació de les finestres"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permet que una aplicació recuperi informació sobre les finestres del gestor de finestres. Aplicacions malicioses podrien recuperar informació dirigida a la utilització per part del sistema intern."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtra els esdeveniments"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permet que una aplicació registri un filtre d\'entrada per a l\'emissió de tots els esdeveniments d\'usuari abans no s\'enviïn. Aplicacions malicioses podrien controlar la IU del sistema sense la intervenció de l\'usuari."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"augment de la pantalla"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Permet a una aplicació augmentar el contingut d\'una pantalla. Les aplicacions malicioses poden transformar el contingut de la pantalla de manera que el dispositiu no es pugui fer servir."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"apagar parcialment"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Posa el gestor d\'activitats en estat d\'apagada. No fa una apagada completa."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedir els canvis d\'aplicació"</string>

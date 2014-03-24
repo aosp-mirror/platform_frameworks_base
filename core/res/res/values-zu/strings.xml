@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Ivumela uhlelo lokusebenza ukuthi ithole okuqukethe kwi-Window. Izuhlelo lokusebenza ezinobungozi zingathola kabush iwindi eliphelele bese ibheka konke okuqukethwe ngaphandle kwaaaphasiwedi."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"nika amandla okwesikhashana ukufinyelela"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Ivumela uhlelo lokusebenza ukunika amandla ukufinyelela kwesikhashana kuvidayisi. Izinhlelo zokusebenza ezingalungile zinganika amandla ukufinyelela ngaphandle kwemvume yomsebenzisi."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"buyisa ulwazi lewindi"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Ivumela uhlelo lokusebenza ukubuyisa ulwazi mayelana namawindi avela kumphathi wewindi. Izinhlelo zokusebenza zingabuyisa ulwazi olubhekiswe ukusetshenziselwa kohlelo lwangaphakathi."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"hlunga imicimbi"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Ivumela uhlelo lokusebenza ukubhalisa isihlungi sokufaka ukusakaza kwazo zonke izehlakalo zomsebenzisi ngaphambi kokuthunyelwa. Izinhlelo zokusebenza zingalawula i-UI yohlelo ngaphandle kokungena komsebenzisi."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"lungisa ukubuka"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Ivumela uhlelo lokusebenza ukusondeza okuqukethwe kokubukwa. Izinhlelo zokusebenza ezingalungile zidlulisela okuqukethwe kokubuka ngendlela eyenza idivayisi ingasebenziseki."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"ukuvala shaqa kwengxenye"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Ibeka imeneja yomsebenzi kwisimo sokuvala shaqa. Ayenzi ukuvala shaqa okuphelele."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"gwema ukushintsha kohlelo lokusebenza"</string>

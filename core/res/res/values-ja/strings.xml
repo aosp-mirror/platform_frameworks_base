@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"作業中のウィンドウの内容を取得することをアプリに許可します。この許可を悪意のあるアプリに利用されると、ウィンドウの内容全体が取得されてパスワード以外のテキストがすべてチェックされる恐れがあります。"</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"ユーザー補助を一時的に有効にする"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"この端末のユーザー補助を一時的に有効にすることをアプリに許可します。悪意のあるアプリはユーザーの同意を得ずにユーザー補助を有効にする場合があります。"</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"ウィンドウ情報の取得"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"ウィンドウマネージャからウィンドウに関する情報を取得することをアプリに許可します。悪意のあるアプリが内部システムの利用を目的に情報を取得する恐れがあります。"</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"イベントのフィルタリング"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"すべてのユーザーイベントが送られる前にストリームをフィルタリングする入力フィルタを登録することをアプリに許可します。悪意のあるアプリがユーザーの操作なしでシステムUIを制御する恐れがあります。"</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"表示の拡大"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"表示内容を拡大することをアプリに許可します。悪意のあるアプリが、端末を使用できなくなるように表示内容を変換する恐れがあります。"</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"部分的にシャットダウンする"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"アクティビティマネージャをシャットダウン状態にします。完全なシャットダウンは実行しません。"</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"アプリケーションの切り替えを禁止する"</string>

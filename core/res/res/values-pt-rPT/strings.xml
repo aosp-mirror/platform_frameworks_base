@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Permite que a aplicação obtenha o conteúdo da janela ativa. As aplicações maliciosas podem obter todo o conteúdo da janela e examinar todo o texto, exceto as palavras-passe."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"acessibilidade ativada temporariamente"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Permite que uma aplicação ative temporariamente a acessibilidade no dispositivo. As aplicações maliciosas podem ativar a acessibilidade sem o consentimento do utilizador."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"obter informações da janela"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permite que uma aplicação obtenha informações sobre as janelas a partir do gestor de janelas. Aplicações maliciosas podem obter informações que se destinam à utilização interna do sistema."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrar eventos"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permite que uma aplicação registe um filtro de entrada que filtra a transmissão em fluxo contínuo para todos os eventos de utilizador antes de serem entregues. Uma aplicação maliciosa pode controlar a IU do sistema sem intervenção do utilizador."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"ampliar o visor"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Permite que uma aplicação amplie o conteúdo de um visor. As aplicações maliciosas poderão transformar o conteúdo do visor de um modo que torne o dispositivo inutilizável."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"encerramento parcial"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Coloca o gestor de actividade num estado de encerramento. Não executa um encerramento completo."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedir trocas de aplicações"</string>
