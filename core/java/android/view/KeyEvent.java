@@ -1847,13 +1847,32 @@ public class KeyEvent extends InputEvent implements Parcelable {
         }
     }
 
-    /** Whether key will, by default, trigger a click on the focused view.
-     * @hide
+    /**
+     * Returns true if the key event should be treated as a confirming action.
+     * @return True for a confirmation key, such as {@link #KEYCODE_DPAD_CENTER},
+     * {@link #KEYCODE_ENTER}, or {@link #KEYCODE_BUTTON_A}.
      */
-    public static final boolean isConfirmKey(int keyCode) {
-        switch (keyCode) {
+    public final boolean isConfirmKey() {
+        switch (mKeyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_ENTER:
+            case KeyEvent.KEYCODE_BUTTON_A:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Returns true if the key event should be treated as a cancelling action.
+     * @return True for a cancellation key, such as {@link #KEYCODE_ESCAPE},
+     * {@link #KEYCODE_BACK}, or {@link #KEYCODE_BUTTON_B}.
+     */
+    public final boolean isCancelKey() {
+        switch (mKeyCode) {
+            case KeyEvent.KEYCODE_BUTTON_B:
+            case KeyEvent.KEYCODE_ESCAPE:
+            case KeyEvent.KEYCODE_BACK:
                 return true;
             default:
                 return false;

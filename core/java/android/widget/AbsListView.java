@@ -3039,7 +3039,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (KeyEvent.isConfirmKey(keyCode)) {
+        if (event.isConfirmKey()) {
             if (!isEnabled()) {
                 return true;
             }
