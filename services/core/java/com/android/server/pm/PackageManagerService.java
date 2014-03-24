@@ -28,6 +28,8 @@ import static android.system.OsConstants.S_IRGRP;
 import static android.system.OsConstants.S_IXGRP;
 import static android.system.OsConstants.S_IROTH;
 import static android.system.OsConstants.S_IXOTH;
+import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_USER_OWNER;
+import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.ArrayUtils.removeInt;
 
@@ -3124,6 +3126,33 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
+    /*
+     * Returns if intent can be forwarded from the userId from to dest
+     */
+    @Override
+    public boolean canForwardTo(Intent intent, String resolvedType, int userIdFrom, int userIdDest) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        List<ForwardingIntentFilter> matches =
+                getMatchingForwardingIntentFilters(intent, resolvedType, userIdFrom);
+        if (matches != null) {
+            int size = matches.size();
+            for (int i = 0; i < size; i++) {
+                if (matches.get(i).getUserIdDest() == userIdDest) return true;
+            }
+        }
+        return false;
+    }
+
+    private List<ForwardingIntentFilter> getMatchingForwardingIntentFilters(Intent intent,
+            String resolvedType, int userId) {
+        ForwardingIntentResolver fir = mSettings.mForwardingIntentResolvers.get(userId);
+        if (fir != null) {
+            return fir.queryIntent(intent, resolvedType, false, userId);
+        }
+        return null;
+    }
+
     @Override
     public List<ResolveInfo> queryIntentActivities(Intent intent,
             String resolvedType, int flags, int userId) {
@@ -3152,7 +3181,38 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             final String pkgName = intent.getPackage();
             if (pkgName == null) {
-                return mActivities.queryIntent(intent, resolvedType, flags, userId);
+                List<ResolveInfo> result =
+                        mActivities.queryIntent(intent, resolvedType, flags, userId);
+                // Checking if we can forward the intent to another user
+                List<ForwardingIntentFilter> fifs =
+                        getMatchingForwardingIntentFilters(intent, resolvedType, userId);
+                if (fifs != null) {
+                    ForwardingIntentFilter forwardingIntentFilterWithResult = null;
+                    HashSet<Integer> alreadyTriedUserIds = new HashSet<Integer>();
+                    for (ForwardingIntentFilter fif : fifs) {
+                        int userIdDest = fif.getUserIdDest();
+                        // Two {@link ForwardingIntentFilter}s can have the same userIdDest and
+                        // match the same an intent. For performance reasons, it is better not to
+                        // run queryIntent twice for the same userId
+                        if (!alreadyTriedUserIds.contains(userIdDest)) {
+                            List<ResolveInfo> resultUser = mActivities.queryIntent(intent,
+                                    resolvedType, flags, userIdDest);
+                            if (resultUser != null) {
+                                forwardingIntentFilterWithResult = fif;
+                                // As soon as there is a match in another user, we add the
+                                // intentForwarderActivity to the list of ResolveInfo.
+                                break;
+                            }
+                            alreadyTriedUserIds.add(userIdDest);
+                        }
+                    }
+                    if (forwardingIntentFilterWithResult != null) {
+                        ResolveInfo forwardingResolveInfo = createForwardingResolveInfo(
+                                forwardingIntentFilterWithResult, userId);
+                        result.add(forwardingResolveInfo);
+                    }
+                }
+                return result;
             }
             final PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
@@ -3161,6 +3221,28 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             return new ArrayList<ResolveInfo>();
         }
+    }
+
+    private ResolveInfo createForwardingResolveInfo(ForwardingIntentFilter fif, int userIdFrom) {
+        String className;
+        int userIdDest = fif.getUserIdDest();
+        if (userIdDest == UserHandle.USER_OWNER) {
+            className = FORWARD_INTENT_TO_USER_OWNER;
+        } else {
+            className = FORWARD_INTENT_TO_MANAGED_PROFILE;
+        }
+        ComponentName forwardingActivityComponentName = new ComponentName(
+                mAndroidApplication.packageName, className);
+        ActivityInfo forwardingActivityInfo = getActivityInfo(forwardingActivityComponentName, 0,
+                userIdFrom);
+        ResolveInfo forwardingResolveInfo = new ResolveInfo();
+        forwardingResolveInfo.activityInfo = forwardingActivityInfo;
+        forwardingResolveInfo.priority = 0;
+        forwardingResolveInfo.preferredOrder = 0;
+        forwardingResolveInfo.match = 0;
+        forwardingResolveInfo.isDefault = true;
+        forwardingResolveInfo.filter = fif;
+        return forwardingResolveInfo;
     }
 
     @Override
@@ -10814,6 +10896,47 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (changed) {
                 mSettings.writePackageRestrictionsLPr(userId);
             }
+        }
+    }
+
+    /*
+     * For filters that are added with this method:
+     * if an intent for the user whose id is userIdOrig matches the filter, then this intent can
+     * also be resolved in the user whose id is userIdDest.
+     */
+    @Override
+    public void addForwardingIntentFilter(IntentFilter filter, int userIdOrig, int userIdDest) {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException(
+                    "addForwardingIntentFilter can only be run by the system");
+        }
+        if (filter.countActions() == 0) {
+            Slog.w(TAG, "Cannot set a forwarding intent filter with no filter actions");
+            return;
+        }
+        synchronized (mPackages) {
+            mSettings.editForwardingIntentResolverLPw(userIdOrig).addFilter(
+                    new ForwardingIntentFilter(filter, userIdDest));
+            mSettings.writePackageRestrictionsLPr(userIdOrig);
+        }
+    }
+
+    @Override
+    public void clearForwardingIntentFilters(int userIdOrig) {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException(
+                    "clearForwardingIntentFilter can only be run by the system");
+        }
+        synchronized (mPackages) {
+            ForwardingIntentResolver fir = mSettings.editForwardingIntentResolverLPw(userIdOrig);
+            HashSet<ForwardingIntentFilter> set =
+                    new HashSet<ForwardingIntentFilter>(fir.filterSet());
+            for (ForwardingIntentFilter fif : set) {
+                fir.removeFilter(fif);
+            }
+            mSettings.writePackageRestrictionsLPr(userIdOrig);
         }
     }
 

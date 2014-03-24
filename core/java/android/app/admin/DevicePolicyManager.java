@@ -172,6 +172,16 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SET_NEW_PASSWORD
             = "android.app.action.SET_NEW_PASSWORD";
+    /**
+     * Flag for {@link #forwardMatchingIntents}: the intents will forwarded to the primary user.
+     */
+    public static int FLAG_TO_PRIMARY_USER = 0x0001;
+
+    /**
+     * Flag for {@link #forwardMatchingIntents}: the intents will be forwarded to the managed
+     * profile.
+     */
+    public static int FLAG_TO_MANAGED_PROFILE = 0x0002;
 
     /**
      * Return true if the given administrator component is currently
@@ -1946,6 +1956,39 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 mService.setApplicationRestrictions(admin, packageName, settings);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Called by a profile owner to forward intents sent from the managed profile to the owner, or
+     * from the owner to the managed profile.
+     * If an intent matches this intent filter, then activities belonging to the other user can
+     * respond to this intent.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param filter if an intent matches this IntentFilter, then it can be forwarded.
+     */
+    public void forwardMatchingIntents(ComponentName admin, IntentFilter filter, int flags) {
+        if (mService != null) {
+            try {
+                mService.forwardMatchingIntents(admin, filter, flags);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Called by a profile owner to remove all the forwarding intent filters from the current user
+     * and from the owner.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     */
+    public void clearForwardingIntentFilters(ComponentName admin) {
+        if (mService != null) {
+            try {
+                mService.clearForwardingIntentFilters(admin);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
