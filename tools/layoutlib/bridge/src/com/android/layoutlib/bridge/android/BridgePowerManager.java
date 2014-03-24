@@ -111,7 +111,7 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
-    public void updateWakeLockWorkSource(IBinder arg0, WorkSource arg1) throws RemoteException {
+    public void updateWakeLockWorkSource(IBinder arg0, WorkSource arg1, String arg2) throws RemoteException {
         // pass for now.
     }
 
