@@ -50,7 +50,6 @@ public class Constants {
             public static final boolean ClickEvents = false;
             public static final boolean TouchEvents = false;
             public static final boolean MeasureAndLayout = false;
-            public static final boolean Clipping = false;
             public static final boolean HwLayers = false;
         }
 
@@ -107,14 +106,9 @@ public class Constants {
 
             public static final boolean AnimateFrontTaskIconOnEnterRecents = true;
             public static final boolean AnimateFrontTaskIconOnLeavingRecents = true;
-            public static final boolean AnimateFrontTaskIconOnEnterUseClip = false;
-            public static final boolean AnimateFrontTaskIconOnLeavingUseClip = false;
-            public static final boolean DrawColoredTaskBars = false;
+
             public static final boolean UseRoundedCorners = true;
             public static final float RoundedCornerRadiusDps = 3;
-
-            public static final float TaskBarHeightDps = 54;
-            public static final float TaskIconSizeDps = 60;
         }
     }
 }

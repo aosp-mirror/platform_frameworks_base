@@ -67,8 +67,8 @@ public class Task {
 
     TaskCallbacks mCb;
 
-    public Task(int id, Intent intent, String activityTitle) {
-        this(id, intent, activityTitle, null, null);
+    public Task(int id, Intent intent, String activityTitle, Drawable icon) {
+        this(id, intent, activityTitle, icon, null);
     }
 
     public Task(int id, Intent intent, String activityTitle, Drawable icon, Bitmap thumbnail) {
