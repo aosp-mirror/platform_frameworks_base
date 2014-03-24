@@ -411,7 +411,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     if (hr.app == null && app.uid == hr.info.applicationInfo.uid
                             && processName.equals(hr.processName)) {
                         try {
-                            if (realStartActivityLocked(hr, app, true, true, null)) {
+                            if (realStartActivityLocked(hr, app, true, true)) {
                                 didSomething = true;
                             }
                         } catch (Exception e) {
@@ -935,7 +935,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     final boolean realStartActivityLocked(ActivityRecord r,
-            ProcessRecord app, boolean andResume, boolean checkConfig, Bundle resumeArgs)
+            ProcessRecord app, boolean andResume, boolean checkConfig)
             throws RemoteException {
 
         r.startFreezingScreenLocked(app, 0);
@@ -1029,12 +1029,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
 
             app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_TOP);
+            Bundle options = (r.pendingOptions == null) ? null : r.pendingOptions.toBundle();
+            r.clearOptionsLocked();
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info,
                     new Configuration(mService.mConfiguration), r.compat,
                     app.repProcState, r.icicle, results, newIntents, !andResume,
                     mService.isNextTransitionForward(), profileFile, profileFd,
-                    profileAutoStop, resumeArgs);
+                    profileAutoStop, options);
 
             if ((app.info.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Note that the package
@@ -1108,7 +1110,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void startSpecificActivityLocked(ActivityRecord r,
-            boolean andResume, boolean checkConfig, Bundle resumeArgs) {
+            boolean andResume, boolean checkConfig) {
         // Is this activity's application already running?
         ProcessRecord app = mService.getProcessRecordLocked(r.processName,
                 r.info.applicationInfo.uid, true);
@@ -1125,7 +1127,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     // separate apk in the process.
                     app.addPackage(r.info.packageName, mService.mProcessStats);
                 }
-                realStartActivityLocked(r, app, andResume, checkConfig, resumeArgs);
+                realStartActivityLocked(r, app, andResume, checkConfig);
                 return;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception when starting activity "
