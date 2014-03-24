@@ -645,7 +645,7 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Uygulamaya, kullanıcının kullanıcı sözlüğünde depolamış olabileceği kelimeleri, adları ve kelime öbeklerini okuma izni verir."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"kullanıcı tanımlı sözlüğe kelime ekle"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Uygulamaya, kullanıcı sözlüğüne yeni kelimeler yazma izni verir."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB belleğimin içeriğini oku"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB belleğini okuma"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD kartımın içeriğini oku"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Uygulamaya, USB depolama biriminizin içeriğini okuma izni verir."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Uygulamaya, SD kartınızın içeriğini okuma izni verir."</string>

@@ -137,7 +137,7 @@
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Pamięć tabletu jest pełna. Usuń niektóre pliki, aby zwolnić miejsce."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Pamięć telefonu jest pełna. Usuń niektóre pliki, aby zwolnić miejsce."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Sieć może być monitorowana"</string>
-    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Przez nieznaną firmę zewnętrzną"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Przez nieznany podmiot zewnętrzny"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Przez <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opcje tabletu"</string>

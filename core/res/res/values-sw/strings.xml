@@ -530,7 +530,7 @@
     <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Inaruhusu programu kupachika/kupachua hifadhi ya ndani."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"ipe hifadhi ya ndani jina jipya"</string>
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Inaruhusu programu kubadilisha jina la hifadhi ya ndani."</string>
-    <string name="permlab_vibrate" msgid="7696427026057705834">"dhibiti mtetemo"</string>
+    <string name="permlab_vibrate" msgid="7696427026057705834">"Kudhibiti mtetemo"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Inaruhusu programu kudhibiti kitingishi."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"dhibiti tochi"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Inaruhusu programu kudhibiti tochi."</string>
@@ -606,7 +606,7 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Inaruhusu programu kubadilisha hali ya muunganisho wa mtandao uliofungwa."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"badilisha mpangilio wa utumiaji data ya mandharinyuma"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Inaruhusu programu kubadilisha mpangilio wa matumizi ya data ya usuli."</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"ona miunganisho ya Wi-Fi"</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"Kuona miunganisho ya Wi-Fi"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Inaruhusu programu kuona taarifa kuhusu mtandao wa Wi-Fi, kama vile ikiwa Wi-Fi imewezeshwa mna jina la vifaa vya Wi-Fi vilivyounganishwa."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"unganisha na utenganishe kutoka kwa Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Inaruhusu programu kuunganisha kwenye au kukata kutoka pointi za ufikivu wa Wi-Fi na kufanya mabadiliko kwenye usanidi wa kifaa cha mitandao ya Wi-Fi."</string>
