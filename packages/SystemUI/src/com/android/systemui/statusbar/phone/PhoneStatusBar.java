@@ -2218,7 +2218,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         pw.println(BarTransitions.modeToString(mStatusBarMode));
         pw.print("  mZenMode=");
         pw.println(Settings.Global.zenModeToString(mZenMode));
-        pw.print("  mUseHeadsUp=" + mUseHeadsUp);
+        pw.print("  mUseHeadsUp=");
+        pw.println(mUseHeadsUp);
+        pw.print("  interrupting package: ");
+        pw.println(hunStateToString(mInterruptingNotificationEntry));
         dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
         if (mNavigationBarView != null) {
             pw.print("  mNavigationBarWindowState=");
@@ -2291,6 +2294,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         mNetworkController.dump(fd, pw, args);
+    }
+
+    private String hunStateToString(Entry entry) {
+        if (entry == null) return "null";
+        if (entry.notification == null) return "corrupt";
+        return entry.notification.getPackageName();
     }
 
     private static void dumpBarTransitions(PrintWriter pw, String var, BarTransitions transitions) {
