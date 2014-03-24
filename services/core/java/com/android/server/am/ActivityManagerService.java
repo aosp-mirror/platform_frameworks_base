@@ -15583,7 +15583,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         ActivityRecord act = mStackSupervisor.resumedAppLocked();
         String pkg;
         int uid;
-        if (act != null) {
+        if (act != null && !act.sleeping) {
             pkg = act.packageName;
             uid = act.info.applicationInfo.uid;
         } else {

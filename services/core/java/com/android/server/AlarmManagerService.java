@@ -1348,25 +1348,22 @@ class AlarmManagerService extends SystemService {
         try {
             final boolean unimportant = pi == mTimeTickSender;
             mWakeLock.setUnimportantForLogging(unimportant);
+            if (first || mLastWakeLockUnimportantForLogging) {
+                mWakeLock.setHistoryTag(pi.getTag(
+                        type == ELAPSED_REALTIME_WAKEUP || type == RTC_WAKEUP
+                                ? "*walarm*:" : "*alarm*:"));
+            } else {
+                mWakeLock.setHistoryTag(null);
+            }
+            mLastWakeLockUnimportantForLogging = unimportant;
             if (ws != null) {
-                if (first || mLastWakeLockUnimportantForLogging) {
-                    mWakeLock.setHistoryTag(pi.getTag(
-                            type == ELAPSED_REALTIME_WAKEUP || type == RTC_WAKEUP
-                                    ? "*walarm*:" : "*alarm*:"));
-                } else {
-                    mWakeLock.setHistoryTag(null);
-                }
-                mLastWakeLockUnimportantForLogging = unimportant;
                 mWakeLock.setWorkSource(ws);
                 return;
-            } else {
-                mLastWakeLockUnimportantForLogging = false;
             }
 
             final int uid = ActivityManagerNative.getDefault()
                     .getUidForIntentSender(pi.getTarget());
             if (uid >= 0) {
-                mWakeLock.setHistoryTag(null);
                 mWakeLock.setWorkSource(new WorkSource(uid));
                 return;
             }
