@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -694,13 +700,10 @@ Summary:
 
 
 
-  <a href="#proctors">Protected Ctors</a>
-  
 
 
 
-
-  &#124; <a href="#inhmethods">Inherited Methods</a>
+  <a href="#inhmethods">Inherited Methods</a>
 
 &#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
@@ -801,12 +804,12 @@ Summary:
  }
  </pre>
  <p>
- Note that you must pass a DateMetadataField to the <code>Filters.greaterThan</code>,
+ Note that you must pass an <code><a href="/reference/com/google/android/gms/drive/metadata/OrderedMetadataField.html">OrderedMetadataField</a></code> to the <code>Filters.greaterThan</code>,
  <code>Filters.lessThan</code>, <code>Filters.lessThanEquals</code>, or <code>Filters.greaterThanEquals</code>
  methods; a plain <code><a href="/reference/com/google/android/gms/drive/metadata/MetadataField.html">MetadataField</a></code> cannot be used as part of an inequality query. However,
- every <code>DateMetadataField</code> is also a <code>MetadataField</code>, so you can use a
- <code>DateMetadataField</code> with <code>Filters.eq</code> (for example, if you want to find a file that
- was modified at an exact time).</p>
+ every <code>OrderedMetadataField</code> is also a <code>MetadataField</code>, so you can use a
+ <code>OrderedMetadataField</code> with <code>Filters.eq</code> (for example, if you want to find a file
+ that was modified at an exact time).</p>
 
 
 
@@ -858,47 +861,6 @@ Summary:
 
 
 
-<!-- ======== CONSTRUCTOR SUMMARY ======== -->
-<table id="proctors" class="jd-sumtable"><tr><th colspan="12">Protected Constructors</th></tr>
-
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            </nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/metadata/OrderedMetadataField.html#OrderedMetadataField(java.lang.String)">OrderedMetadataField</a></span>(String fieldName)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            </nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/metadata/OrderedMetadataField.html#OrderedMetadataField(java.lang.String, java.util.Collection<java.lang.String>)">OrderedMetadataField</a></span>(String fieldName, Collection&lt;String&gt; dataHolderFieldNames)</nobr>
-        
-  </td></tr>
-
-
-
-</table>
-
-
 
 
 
@@ -936,6 +898,24 @@ From class
         <td class="jd-typecol"><nobr>
             
             
+            final
+
+
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/metadata/MetadataField.html#getVersionAdded()">getVersionAdded</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Returns the version of GMS Core that this field was added in.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
             
             
             
@@ -1187,69 +1167,6 @@ From class
 
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <!-- Protected ctors -->
-
-<h2>Protected Constructors</h2>
-
-
-
-<A NAME="OrderedMetadataField(java.lang.String)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        protected 
-         
-         
-         
-         
-        
-      </span>
-      <span class="sympad">OrderedMetadataField</span>
-      <span class="normal">(String fieldName)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
-<A NAME="OrderedMetadataField(java.lang.String, java.util.Collection<java.lang.String>)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        protected 
-         
-         
-         
-         
-        
-      </span>
-      <span class="sympad">OrderedMetadataField</span>
-      <span class="normal">(String fieldName, Collection&lt;String&gt; dataHolderFieldNames)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
 
 
 

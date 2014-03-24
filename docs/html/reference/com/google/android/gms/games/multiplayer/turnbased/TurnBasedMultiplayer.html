@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -1168,7 +1174,7 @@ onkeyup="return search_changed(event, false, '/')" />
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.LoadMatchesResult.html">TurnBasedMultiplayer.LoadMatchesResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#loadMatchesByStatus(com.google.android.gms.common.api.GoogleApiClient, int...)">loadMatchesByStatus</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int... matchTurnStatuses)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#loadMatchesByStatus(com.google.android.gms.common.api.GoogleApiClient, int, int[])">loadMatchesByStatus</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int invitationSortOrder, int[] matchTurnStatuses)</nobr>
         
         <div class="jd-descrdiv">Asynchronously load turn-based matches for the current game.</div>
   
@@ -1183,6 +1189,24 @@ onkeyup="return search_changed(event, false, '/')" />
             
             
             
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.LoadMatchesResult.html">TurnBasedMultiplayer.LoadMatchesResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#loadMatchesByStatus(com.google.android.gms.common.api.GoogleApiClient, int[])">loadMatchesByStatus</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int[] matchTurnStatuses)</nobr>
+
+        <div class="jd-descrdiv">Asynchronously load turn-based matches for the current game.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1194,7 +1218,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1212,7 +1236,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1230,7 +1254,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1248,7 +1272,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1266,7 +1290,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1972,13 +1996,16 @@ onkeyup="return search_changed(event, false, '/')" />
  not including the current player. So, for a game that can handle between 2 and 4 players,
  <code>minPlayers</code> would be 1 and <code>maxPlayers</code> would be 3.
  <p>
+ Players may be preselected by specifying a list of player IDs in the
+ <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> extra on the returned intent.
+ <p>
  If the user canceled, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_CANCELED">RESULT_CANCELED</a></code>. If the user
  selected players, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_OK">RESULT_OK</a></code>, and the data intent will
- contain the selected player IDs in <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_PLAYERS">EXTRA_PLAYERS</a></code> and the minimum and
+ contain the selected player IDs in <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> and the minimum and
  maximum numbers of additional auto-match players in
  <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MIN_AUTOMATCH_PLAYERS">EXTRA_MIN_AUTOMATCH_PLAYERS</a></code> and
  <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MAX_AUTOMATCH_PLAYERS">EXTRA_MAX_AUTOMATCH_PLAYERS</a></code> respectively. The player IDs in
- <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_PLAYERS">EXTRA_PLAYERS</a></code> will include only the other players selected,
+ <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> will include only the other players selected,
  not the current player.
  <p>
  If the <code>allowAutomatch</code> parameter is set to false, the UI will not display an option
@@ -2053,13 +2080,16 @@ onkeyup="return search_changed(event, false, '/')" />
  not including the current player. So, for a game that can handle between 2 and 4 players,
  <code>minPlayers</code> would be 1 and <code>maxPlayers</code> would be 3.
  <p>
+ Players may be preselected by specifying a list of player IDs in the
+ <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> extra on the returned intent.
+ <p>
  If the user canceled, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_CANCELED">RESULT_CANCELED</a></code>. If the user
  selected players, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_OK">RESULT_OK</a></code>, and the data intent will
- contain the selected player IDs in <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_PLAYERS">EXTRA_PLAYERS</a></code> and the minimum and
+ contain the selected player IDs in <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> and the minimum and
  maximum numbers of additional auto-match players in
  <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MIN_AUTOMATCH_PLAYERS">EXTRA_MIN_AUTOMATCH_PLAYERS</a></code> and
  <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MAX_AUTOMATCH_PLAYERS">EXTRA_MAX_AUTOMATCH_PLAYERS</a></code> respectively. The player IDs in
- <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_PLAYERS">EXTRA_PLAYERS</a></code> will include only the other players selected,
+ <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> will include only the other players selected,
  not the current player.
  <p>
  This method is the equivalent of calling
@@ -2267,7 +2297,72 @@ onkeyup="return search_changed(event, false, '/')" />
 </div>
 
 
-<A NAME="loadMatchesByStatus(com.google.android.gms.common.api.GoogleApiClient, int...)"></A>
+<A NAME="loadMatchesByStatus(com.google.android.gms.common.api.GoogleApiClient, int, int[])"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.LoadMatchesResult.html">TurnBasedMultiplayer.LoadMatchesResult</a>&gt;
+      </span>
+      <span class="sympad">loadMatchesByStatus</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int invitationSortOrder, int[] matchTurnStatuses)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load turn-based matches for the current game. Matches with any specified turn
+ status codes will be returned.
+ <p>
+ Valid turn status values are <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_INVITED">MATCH_TURN_STATUS_INVITED</a></code>,
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_MY_TURN">MATCH_TURN_STATUS_MY_TURN</a></code>,
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_THEIR_TURN">MATCH_TURN_STATUS_THEIR_TURN</a></code>, or
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_COMPLETE">MATCH_TURN_STATUS_COMPLETE</a></code>. Note that if your game implements both
+ turn-based and real-time multiplayer, requesting
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_INVITED">MATCH_TURN_STATUS_INVITED</a></code> will return invitations for both turn-based
+ matches and real-time matches.
+ <p>
+ Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
+ Required Scopes: <code><a href="/reference/com/google/android/gms/games/Games.html#SCOPE_GAMES">SCOPE_GAMES</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>apiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call.</td>
+        </tr>
+        <tr>
+          <th>invitationSortOrder</td>
+          <td>How to sort the returned invitations. Must be either
+            <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#SORT_ORDER_MOST_RECENT_FIRST">SORT_ORDER_MOST_RECENT_FIRST</a></code> or
+            <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#SORT_ORDER_SOCIAL_AGGREGATION">SORT_ORDER_SOCIAL_AGGREGATION</a></code>.</td>
+        </tr>
+        <tr>
+          <th>matchTurnStatuses</td>
+          <td>List of turn statuses to request.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> to access the data when available.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="loadMatchesByStatus(com.google.android.gms.common.api.GoogleApiClient, int[])"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -2280,7 +2375,7 @@ onkeyup="return search_changed(event, false, '/')" />
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.LoadMatchesResult.html">TurnBasedMultiplayer.LoadMatchesResult</a>&gt;
       </span>
       <span class="sympad">loadMatchesByStatus</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int... matchTurnStatuses)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int[] matchTurnStatuses)</span>
     </h4>
       <div class="api-level">
         <div></div>

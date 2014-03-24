@@ -1,0 +1,2047 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
+
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+<title>GoogleAnalytics | Android Developers</title>
+
+<!-- STYLESHEETS -->
+<link rel="stylesheet"
+href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,mediumitalic,bold" title="roboto">
+<link href="/assets/css/default.css" rel="stylesheet" type="text/css">
+
+
+
+<!-- JAVASCRIPT -->
+<script src="//www.google.com/jsapi" type="text/javascript"></script>
+<script src="/assets/js/android_3p-bundle.js" type="text/javascript"></script>
+<script type="text/javascript">
+  var toRoot = "/";
+  var metaTags = [];
+  var devsite = false;
+</script>
+<script src="/assets/js/docs.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-5831155-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+</head>
+<body class="gc-documentation google
+  develop" itemscope itemtype="http://schema.org/Article">
+  <div id="doc-api-level" class="" style="display:none"></div>
+  <a name="top"></a>
+
+<a name="top"></a>
+
+    <!-- Header -->
+    <div id="header">
+        <div class="wrap" id="header-wrap">
+          <div class="col-3 logo">
+          <a href="/index.html">
+            <img src="/assets/images/dac_logo.png" width="123" height="25" alt="Android Developers" />
+          </a>
+          <div class="btn-quicknav" id="btn-quicknav">
+		<a href="#" class="arrow-inactive">Quicknav</a>
+			      <a href="#" class="arrow-active">Quicknav</a>
+          </div>
+          </div>
+            <ul class="nav-x col-9">
+                <li class="design">
+                  <a href="/design/index.html"
+                  zh-tw-lang="設計"
+                  zh-cn-lang="设计"
+                  ru-lang="Проектирование"
+                  ko-lang="디자인"
+                  ja-lang="設計"
+                  es-lang="Diseñar"
+                  >Design</a></li>
+                <li class="develop"><a href="/develop/index.html"
+                  zh-tw-lang="開發"
+                  zh-cn-lang="开发"
+                  ru-lang="Разработка"
+                  ko-lang="개발"
+                  ja-lang="開発"
+                  es-lang="Desarrollar"
+                  >Develop</a></li>
+                <li class="distribute last"><a href="/distribute/index.html"
+                  zh-tw-lang="發佈"
+                  zh-cn-lang="分发"
+                  ru-lang="Распространение"
+                  ko-lang="배포"
+                  ja-lang="配布"
+                  es-lang="Distribuir"
+                  >Distribute</a></li>
+            </ul>
+
+            <!-- New Search -->
+            <div class="menu-container">
+            <div class="moremenu">
+    <div id="more-btn"></div>
+  </div>
+  <div class="morehover" id="moremenu">
+    <div class="top"></div>
+    <div class="mid">
+      <div class="header">Links</div>
+      <ul>
+        <li><a href="https://play.google.com/apps/publish/">Google Play Developer Console</a></li>
+        <li><a href="http://android-developers.blogspot.com/">Android Developers Blog</a></li>
+        <li><a href="/about/index.html">About Android</a></li>
+      </ul>
+      <div class="header">Android Sites</div>
+      <ul>
+        <li><a href="http://www.android.com">Android.com</a></li>
+        <li class="active"><a>Android Developers</a></li>
+        <li><a href="http://source.android.com">Android Open Source Project</a></li>
+      </ul>
+
+
+
+        <div class="header">Language</div>
+          <div id="language" class="locales">
+            <select name="language" onChange="changeLangPref(this.value, true)">
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="ja">日本語</option>
+                <option value="ko">한국어</option>
+                <option value="ru">Русский</option>
+                <option value="zh-cn">中文 (中国)</option>
+                <option value="zh-tw">中文 (台灣)</option>
+            </select>
+          </div>
+        <script type="text/javascript">
+          <!--
+          loadLangPref();
+            //-->
+        </script>
+
+
+
+
+      <br class="clearfix" />
+    </div>
+    <div class="bottom"></div>
+  </div>
+  <div class="search" id="search-container">
+    <div class="search-inner">
+      <div id="search-btn"></div>
+      <div class="left"></div>
+      <form onsubmit="return submit_search()">
+        <input id="search_autocomplete" type="text" value="" autocomplete="off" name="q"
+onfocus="search_focus_changed(this, true)" onblur="search_focus_changed(this, false)"
+onkeydown="return search_changed(event, true, '/')"
+onkeyup="return search_changed(event, false, '/')" />
+      </form>
+      <div class="right"></div>
+        <a class="close hide">close</a>
+        <div class="left"></div>
+        <div class="right"></div>
+    </div>
+  </div>
+
+  <div class="search_filtered_wrapper reference">
+    <div class="suggest-card reference no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+  </div>
+
+  <div class="search_filtered_wrapper docs">
+    <div class="suggest-card dummy no-display">&nbsp;</div>
+    <div class="suggest-card develop no-display">
+      <ul class="search_filtered">
+      </ul>
+      <div class="child-card guides no-display">
+      </div>
+      <div class="child-card training no-display">
+      </div>
+      <div class="child-card samples no-display">
+      </div>
+    </div>
+    <div class="suggest-card design no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+    <div class="suggest-card distribute no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+  </div>
+
+  </div>
+  <!-- /New Search>
+
+
+          <!-- Expanded quicknav -->
+           <div id="quicknav" class="col-9">
+                <ul>
+                    <li class="design">
+                      <ul>
+                        <li><a href="/design/index.html">Get Started</a></li>
+                        <li><a href="/design/style/index.html">Style</a></li>
+                        <li><a href="/design/patterns/index.html">Patterns</a></li>
+                        <li><a href="/design/building-blocks/index.html">Building Blocks</a></li>
+                        <li><a href="/design/downloads/index.html">Downloads</a></li>
+                        <li><a href="/design/videos/index.html">Videos</a></li>
+                      </ul>
+                    </li>
+                    <li class="develop">
+                      <ul>
+                        <li><a href="/training/index.html"
+                          zh-tw-lang="訓練課程"
+                          zh-cn-lang="培训"
+                          ru-lang="Курсы"
+                          ko-lang="교육"
+                          ja-lang="トレーニング"
+                          es-lang="Capacitación"
+                          >Training</a></li>
+                        <li><a href="/guide/index.html"
+                          zh-tw-lang="API 指南"
+                          zh-cn-lang="API 指南"
+                          ru-lang="Руководства по API"
+                          ko-lang="API 가이드"
+                          ja-lang="API ガイド"
+                          es-lang="Guías de la API"
+                          >API Guides</a></li>
+                        <li><a href="/reference/packages.html"
+                          zh-tw-lang="參考資源"
+                          zh-cn-lang="参考"
+                          ru-lang="Справочник"
+                          ko-lang="참조문서"
+                          ja-lang="リファレンス"
+                          es-lang="Referencia"
+                          >Reference</a></li>
+                        <li><a href="/tools/index.html"
+                          zh-tw-lang="相關工具"
+                          zh-cn-lang="工具"
+                          ru-lang="Инструменты"
+                          ko-lang="도구"
+                          ja-lang="ツール"
+                          es-lang="Herramientas"
+                          >Tools</a>
+                          <ul><li><a href="/sdk/index.html">Get the SDK</a></li></ul>
+                        </li>
+                        <li><a href="/google/index.html">Google Services</a>
+                        </li>
+
+                          <li><a href="/samples/index.html">Samples</a>
+                          </li>
+
+                      </ul>
+                    </li>
+                    <li class="distribute last">
+                      <ul>
+                        <li><a href="/distribute/index.html">Google Play</a></li>
+                        <li><a href="/distribute/googleplay/publish/index.html">Publishing</a></li>
+                        <li><a href="/distribute/googleplay/promote/index.html">Promoting</a></li>
+                        <li><a href="/distribute/googleplay/quality/index.html">App Quality</a></li>
+                        <li><a href="/distribute/googleplay/spotlight/index.html">Spotlight</a></li>
+                        <li><a href="/distribute/open.html">Open Distribution</a></li>
+                      </ul>
+                    </li>
+                </ul>
+          </div>
+          <!-- /Expanded quicknav -->
+        </div>
+    </div>
+    <!-- /Header -->
+
+
+  <div id="searchResults" class="wrap" style="display:none;">
+          <h2 id="searchTitle">Results</h2>
+          <div id="leftSearchControl" class="search-control">Loading...</div>
+  </div>
+
+
+
+    <!-- Secondary x-nav -->
+    <div id="nav-x">
+        <div class="wrap">
+            <ul class="nav-x col-9 develop" style="width:100%">
+                <li class="training"><a href="/training/index.html"
+                  zh-tw-lang="訓練課程"
+                  zh-cn-lang="培训"
+                  ru-lang="Курсы"
+                  ko-lang="교육"
+                  ja-lang="トレーニング"
+                  es-lang="Capacitación"
+                  >Training</a></li>
+                <li class="guide"><a href="/guide/index.html"
+                  zh-tw-lang="API 指南"
+                  zh-cn-lang="API 指南"
+                  ru-lang="Руководства по API"
+                  ko-lang="API 가이드"
+                  ja-lang="API ガイド"
+                  es-lang="Guías de la API"
+                  >API Guides</a></li>
+                <li class="reference"><a href="/reference/packages.html"
+                  zh-tw-lang="參考資源"
+                  zh-cn-lang="参考"
+                  ru-lang="Справочник"
+                  ko-lang="참조문서"
+                  ja-lang="リファレンス"
+                  es-lang="Referencia"
+                  >Reference</a></li>
+                <li class="tools"><a href="/tools/index.html"
+                  zh-tw-lang="相關工具"
+                  zh-cn-lang="工具"
+                  ru-lang="Инструменты"
+                  ko-lang="도구"
+                  ja-lang="ツール"
+                  es-lang="Herramientas"
+                  >Tools</a></li>
+                <li class="google"><a href="/google/index.html"
+                  >Google Services</a>
+                </li>
+
+                  <li class="samples"><a href="/samples/index.html"
+                    >Samples</a>
+                  </li>
+
+            </ul>
+        </div>
+
+    </div>
+    <!-- /Sendondary x-nav -->
+
+
+
+
+
+
+
+
+
+  <div class="wrap clearfix" id="body-content">
+    <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
+      <div id="devdoc-nav" class="scroll-pane">
+<a class="totop" href="#top" data-g-event="left-nav-top">to top</a>
+
+
+
+<ul id="nav">
+
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/index.html">
+          <span class="en">Overview</span>
+      </a></div>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/games.html">
+          <span class="en">Games</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/location.html">
+          <span class="en">Location</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/plus.html">
+          <span class="en">Google+</span>
+                </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
+      </a></div>
+  </li>
+
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/index.html">
+      <span class="en">Google Play Services</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/setup.html">
+          <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li id="gms-tree-list" class="nav-section">
+        <div class="nav-section-header">
+          <a href="/reference/gms-packages.html">
+            <span class="en">Reference</span>
+          </a>
+        <div>
+      </li>
+    </ul>
+  </li>
+
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+      <span class="en">Google Play In-app Billing</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play/billing/billing_overview.html">
+              <span class="en">Overview</span></a>
+      </li>
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+              <span class="en">Version 3 API</span></a></div>
+              <ul>
+              <li><a href="/google/play/billing/billing_integrate.html">
+              <span class="en">Implementing the API</span></a></li>
+              <li><a href="/google/play/billing/billing_reference.html">
+              <span class="en">Reference</span></a></li>
+              </ul>
+      </li>
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/v2/api.html">
+              <span class="en">Version 2 API</span></a></div>
+              <ul>
+              <li><a href="/google/play/billing/v2/billing_integrate.html">
+              <span class="en">Implementing the API</span></a></li>
+              <li><a href="/google/play/billing/v2/billing_subscriptions.html">
+              <span class="en">Subscriptions</span></a></li>
+              <li><a href="/google/play/billing/v2/billing_reference.html">
+              <span class="en">Reference</span></a></li>
+              </ul>
+      </li>
+      <li><a href="/google/play/billing/billing_subscriptions.html">
+              <span class="en">Subscriptions</span></a>
+      </li>
+      <li><a href="/google/play/billing/billing_best_practices.html">
+              <span class="en">Security and Design</span></a>
+      </li>
+      <li><a href="/google/play/billing/billing_testing.html">
+              <span class="en">Testing In-app Billing</span></a>
+      </li>
+      <li><a href="/google/play/billing/billing_admin.html">
+              <span class="en">Administering In-app Billing</span></a>
+      </li>
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Purchase Status API</span></a>
+      </li>
+      <li><a href="/google/play/billing/versions.html">
+              <span class="en">Version Notes</span></a>
+      </li>
+    </ul>
+  </li>
+
+
+
+   <li class="nav-section">
+      <div class="nav-section-header"><a href="/google/gcm/index.html">
+        <span class="en">Google Cloud Messaging</span></a>
+      </div>
+      <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
+        <li><a href="/google/gcm/gs.html">
+            <span class="en">Getting Started</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
+        </li>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
+        </li>
+        <li><a href="/google/gcm/notifications.html">
+              <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/adv.html">
+            <span class="en">Advanced Topics</span></a>
+        </li>
+        <li><a href="/google/gcm/c2dm.html">
+            <span class="en">Migration</span></a>
+        </li>
+        <li id="gcm-tree-list" class="nav-section">
+          <div class="nav-section-header">
+            <a href="/reference/gcm-packages.html">
+              <span class="en">Reference</span>
+            </a>
+          <div>
+        </li>
+      </ul>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/dist.html">
+      <span class="en">Google Play Distribution</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play/filters.html">
+          <span class="en">Filters on Google Play</span></a>
+      </li>
+
+      <li><a href="/google/play/publishing/multiple-apks.html">
+          <span class="en">Multiple APK Support</span></a>
+      </li>
+      <li><a href="/google/play/expansion-files.html">
+          <span class="en">APK Expansion Files</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/play/licensing/index.html">
+          <span class="en">Application Licensing</span></a>
+        </div>
+        <ul>
+          <li><a href="/google/play/licensing/overview.html">
+              <span class="en">Licensing Overview</span></a>
+          </li>
+          <li><a href="/google/play/licensing/setting-up.html">
+              <span class="en">Setting Up for Licensing</span></a>
+          </li>
+          <li><a href="/google/play/licensing/adding-licensing.html">
+              <span class="en">Adding Licensing to Your App</span></a>
+          </li>
+          <li><a href="/google/play/licensing/licensing-reference.html">
+              <span class="en">Licensing Reference</span></a>
+          </li>
+        </ul>
+      </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/backup/index.html">
+      Android Backup Service</a>
+    </div>
+    <ul>
+      <li><a href="/google/backup/signup.html">
+          Register</a>
+      </li>
+    </ul>
+  </li>
+
+  </ul>
+
+</li>
+
+
+
+</ul>
+
+<script type="text/javascript">
+<!--
+    buildToggleLists();
+    changeNavLang(getLangPref());
+//-->
+</script>
+
+
+
+
+      </div>
+      <script type="text/javascript">
+       showGoogleRefTree();
+
+      </script>
+    </div> <!-- end side-nav -->
+    <script>
+      $(document).ready(function() {
+        scrollIntoView("devdoc-nav");
+        });
+    </script>
+
+
+
+
+
+
+<div class="col-12"  id="doc-col">
+
+<div id="api-info-block">
+
+
+
+
+
+
+
+
+
+
+
+<div class="sum-details-links">
+
+Summary:
+
+
+
+
+
+
+
+
+
+
+  <a href="#proctors">Protected Ctors</a>
+
+
+
+  &#124; <a href="#pubmethods">Methods</a>
+
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
+
+</div><!-- end sum-details-links -->
+<div class="api-level">
+
+
+
+
+</div>
+</div><!-- end api-info-block -->
+
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<div id="jd-header">
+    public
+
+
+
+    class
+<h1 itemprop="name">GoogleAnalytics</h1>
+
+
+
+
+    extends Object<br/>
+
+
+
+
+
+
+
+
+
+</div><!-- end header -->
+
+<div id="naMessage"></div>
+
+<div id="jd-content" class="api apilevel-">
+<table class="jd-inheritance-table">
+
+
+    <tr>
+
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
+    </tr>
+
+
+    <tr>
+
+            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.analytics.GoogleAnalytics</td>
+    </tr>
+
+
+</table>
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Class Overview</h2>
+<p itemprop="articleBody">This class is a singleton that provides methods for controlling global configuration
+ and creating <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code> objects.
+ <p>
+ Applications can get an instance of this class by calling <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#getInstance(android.content.Context)">getInstance(Context)</a></code>.
+
+ Applications can optionally provide a metadata reference to a global configuration
+ XML resource file in the &lt;application&gt; element of their AndroidManifest.xml:
+ <p>
+ <pre>
+ &lt;meta-data
+     android:name="com.google.android.gms.analytics.globalConfigResource"
+     android:resource="@xml/analytics_global_config" /&gt;</pre>
+ The configuration file should be stored in the applications res/values/xml directory
+ and look like this:
+ <p>
+ <pre>
+ &lt;?xml version="1.0" encoding="utf-8" ?&gt;
+ &lt;resources&gt;
+     &lt;string name="ga_appName"&gt;TestAppName&lt;/string&gt;
+     &lt;string name="ga_appVersion"&gt;Version1.0&lt;/string&gt;
+     &lt;string name="ga_logLevel"&gt;verbose&lt;/string&gt;
+     &lt;integer name="ga_dispatchPeriod"&gt;1000&lt;/integer&gt;
+     &lt;bool name="ga_dryRun"&gt;true&lt;/bool&gt;
+ &lt;/resources&gt;</pre>
+
+ Following is a complete list of globally scoped configuration values that can be specified:
+ <ul>
+   <li>ga_appName(string) - name of application. Defaults to value found
+       in the package.</li>
+   <li>ga_appVersion(string) - version of application. Defaults to value
+       found in the package.</li>
+   <li>ga_dispatchPeriod(integer) - frequency of automatic dispatch (in
+       seconds). Default is 1800.</li>
+   <li>ga_dryRun(bool) - if true, enable dry run mode. Default is false.</li>
+   <li>ga_logLevel(string) - One of "verbose", "info", "warning", "error".</li>
+ </ul></p>
+
+
+
+
+
+</div><!-- jd-descr -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="proctors" class="jd-sumtable"><tr><th colspan="12">Protected Constructors</th></tr>
+
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#GoogleAnalytics(android.content.Context)">GoogleAnalytics</a></span>(Context context)</nobr>
+
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#dispatchLocalHits()">dispatchLocalHits</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Dispatches queued hits (view, events, or transactions) to Google Analytics
+ if a network connection is available, and the local dispatching service is
+ in use.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#enableAutoActivityReports(android.app.Application)">enableAutoActivityReports</a></span>(Application application)</nobr>
+
+        <div class="jd-descrdiv">On devices running API level 14 (ICE_CREAM_SANDWICH) or above, applications can
+ call this method in lieu of making explicit calls to <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStart(android.app.Activity)">reportActivityStart(Activity)</a></code>
+ and <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStop(android.app.Activity)">reportActivityStop(Activity)</a></code>.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#getAppOptOut()">getAppOptOut</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Returns whether the state of the application-level opt is on.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            <a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html">GoogleAnalytics</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#getInstance(android.content.Context)">getInstance</a></span>(Context context)</nobr>
+
+        <div class="jd-descrdiv">Get the instance of the <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html">GoogleAnalytics</a></code> class, creating it if necessary.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#getLogger()">getLogger</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Return the current <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> implementation in use.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#isDryRunEnabled()">isDryRunEnabled</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Returns whether dry run mode is on.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#newTracker(java.lang.String)">newTracker</a></span>(String trackingId)</nobr>
+
+        <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code> instance with the given <code>trackingId</code>.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#newTracker(int)">newTracker</a></span>(int configResId)</nobr>
+
+        <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code> instance preconfigured with the values specified in
+ <code>configResId</code>.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStart(android.app.Activity)">reportActivityStart</a></span>(Activity activity)</nobr>
+
+        <div class="jd-descrdiv">Report the start of an <code><a href="/reference/android/app/Activity.html">Activity</a></code>, so that it can be tracked by any <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>s
+ that have enabled auto activity tracking (see
+ <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#enableAutoActivityTracking(boolean)">enableAutoActivityTracking(boolean)</a></code>.) This will also start a new session if
+ necessary.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStop(android.app.Activity)">reportActivityStop</a></span>(Activity activity)</nobr>
+
+        <div class="jd-descrdiv">Report the end of an <code><a href="/reference/android/app/Activity.html">Activity</a></code>.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#setAppOptOut(boolean)">setAppOptOut</a></span>(boolean optOut)</nobr>
+
+        <div class="jd-descrdiv">Sets or resets the application-level opt out flag.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#setDryRun(boolean)">setDryRun</a></span>(boolean dryRun)</nobr>
+
+        <div class="jd-descrdiv">Toggles dry run mode.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#setLocalDispatchPeriod(int)">setLocalDispatchPeriod</a></span>(int dispatchPeriodInSeconds)</nobr>
+
+        <div class="jd-descrdiv">Sets dispatch period for the local dispatcher.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#setLogger(com.google.android.gms.analytics.Logger)">setLogger</a></span>(<a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a> logger)</nobr>
+
+        <div class="jd-descrdiv">Provide a custom implementation of <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> to use.</div>
+
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-java.lang.Object-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  java.lang.Object
+
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            Object</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">clone</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">finalize</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            Class&lt;?&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getClass</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">hashCode</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notify</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notifyAll</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">toString</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0)</nobr>
+
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
+
+
+</div><!-- jd-descr (summary) -->
+
+<!-- Details -->
+
+
+
+
+
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+<h2>Protected Constructors</h2>
+
+
+
+<A NAME="GoogleAnalytics(android.content.Context)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected
+
+
+
+
+
+      </span>
+      <span class="sympad">GoogleAnalytics</span>
+      <span class="normal">(Context context)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+
+
+<A NAME="dispatchLocalHits()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">dispatchLocalHits</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Dispatches queued hits (view, events, or transactions) to Google Analytics
+ if a network connection is available, and the local dispatching service is
+ in use. This method only works if local dispatching is in use. Local dispatching is only used
+ in the absence of Google Play services on the device. In general, applications should not
+ rely on the ability to dispatch hits manually.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="enableAutoActivityReports(android.app.Application)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">enableAutoActivityReports</span>
+      <span class="normal">(Application application)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>On devices running API level 14 (ICE_CREAM_SANDWICH) or above, applications can
+ call this method in lieu of making explicit calls to <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStart(android.app.Activity)">reportActivityStart(Activity)</a></code>
+ and <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStop(android.app.Activity)">reportActivityStop(Activity)</a></code>. This method is a noop if called on a device
+ running API level less than 14.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>application</td>
+          <td>The <code><a href="/reference/android/app/Application.html">Application</a></code> whose activities starts and stops should be
+ automatically reported.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getAppOptOut()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">getAppOptOut</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns whether the state of the application-level opt is on.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getInstance(android.content.Context)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        <a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html">GoogleAnalytics</a>
+      </span>
+      <span class="sympad">getInstance</span>
+      <span class="normal">(Context context)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Get the instance of the <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html">GoogleAnalytics</a></code> class, creating it if necessary.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getLogger()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a>
+      </span>
+      <span class="sympad">getLogger</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Return the current <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> implementation in use.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="isDryRunEnabled()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">isDryRunEnabled</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns whether dry run mode is on.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="newTracker(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a>
+      </span>
+      <span class="sympad">newTracker</span>
+      <span class="normal">(String trackingId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code> instance with the given <code>trackingId</code>. If the given
+ <code>trackingId</code> is not null or empty, it will be set on the tracker and it is ready to
+ send hits. Calling newTracker() multiple times with the same <code>trackingId</code> will
+ create multiple Tracker objects with the same <code>trackingId</code>.
+
+ If the <code>trackingId</code> is empty, you can still get a tracker, but you must
+ set the tracking id before sending any hits. This is useful if you do not know the tracking
+ id at the time of tracker creation, or if you want to use the same tracker instance to track
+ multiple tracking ids. Using the same instance to track multiple tracking ids is not
+ recommended since you need to be careful about not mixing the data you are sending to
+ multiple profiles. It can be useful if you have a lot of tracking ids and you want to avoid
+ object creation overhead involved in instantiating one tracker per tracking id.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>trackingId</td>
+          <td>string of the form UA-xxxx-y
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="newTracker(int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a>
+      </span>
+      <span class="sympad">newTracker</span>
+      <span class="normal">(int configResId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code> instance preconfigured with the values specified in
+ <code>configResId</code>. Calling newTracker() multiple times with the same
+ <code>trackingId</code> will create multiple Tracker objects with the same configuration.
+
+ If the <code>trackingId</code> is empty, you can still get a tracker, but you must
+ set the tracking id before sending any hits. This is useful if you do not know the tracking
+ id at the time of tracker creation, or if you want to use the same tracker instance to track
+ multiple tracking ids. Using the same instance to track multiple tracking ids is not
+ recommended since you need to be careful about not mixing the data you are sending to
+ multiple profiles. It can be useful if you have a lot of tracking ids and you want to avoid
+ object creation overhead involved in instantiating one tracker per tracking id.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>configResId</td>
+          <td>The resource id of your tracker configuration file. See <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>
+ for more information about what configuration elements can be included in that file.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="reportActivityStart(android.app.Activity)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">reportActivityStart</span>
+      <span class="normal">(Activity activity)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Report the start of an <code><a href="/reference/android/app/Activity.html">Activity</a></code>, so that it can be tracked by any <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>s
+ that have enabled auto activity tracking (see
+ <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#enableAutoActivityTracking(boolean)">enableAutoActivityTracking(boolean)</a></code>.) This will also start a new session if
+ necessary. This method should be called from the <code><a href="/reference/android/app/Activity.html#onStart()">onStart()</a></code> method in each
+ <code><a href="/reference/android/app/Activity.html">Activity</a></code> in your application that you'd like to track.
+
+ If auto activity reports are enabled (see <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#enableAutoActivityReports(android.app.Application)">enableAutoActivityReports(Application)</a></code>)
+ on a device running API level 14 or above, this method will be a noop.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>activity</td>
+          <td>the <code><a href="/reference/android/app/Activity.html">Activity</a></code> that is to be tracked.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="reportActivityStop(android.app.Activity)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">reportActivityStop</span>
+      <span class="normal">(Activity activity)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Report the end of an <code><a href="/reference/android/app/Activity.html">Activity</a></code>. Note that this method should be called
+ from the <code><a href="/reference/android/app/Activity.html#onStop()">onStop()</a></code> method in each <code><a href="/reference/android/app/Activity.html">Activity</a></code> in your application
+ that you'd like to track. For proper operation, this method must be called in all
+ Activities where <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStart(android.app.Activity)">reportActivityStart(Activity)</a></code> is called.
+
+ If auto activity reports are enabled (see <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#enableAutoActivityReports(android.app.Application)">enableAutoActivityReports(Application)</a></code>)
+ on a device running API level 14 or above, this method will be a noop.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>activity</td>
+          <td>the <code><a href="/reference/android/app/Activity.html">Activity</a></code> that is to be tracked.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setAppOptOut(boolean)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">setAppOptOut</span>
+      <span class="normal">(boolean optOut)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Sets or resets the application-level opt out flag. If set, no hits will be sent to Google
+ Analytics. The value of this flag will <i>not</i> persist across application starts. The
+ correct value should thus be set in application initialization code.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>optOut</td>
+          <td><code>true</code> if application-level opt out should be enforced.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setDryRun(boolean)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">setDryRun</span>
+      <span class="normal">(boolean dryRun)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Toggles dry run mode. In dry run mode, the normal code paths are executed locally, but hits
+ are not sent to Google Analytics servers. This is useful for debugging calls to the
+ Google Analytics SDK without polluting recorded data.
+ <p>
+ By default, this flag is disabled.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="setLocalDispatchPeriod(int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">setLocalDispatchPeriod</span>
+      <span class="normal">(int dispatchPeriodInSeconds)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Sets dispatch period for the local dispatcher.
+ The dispatcher will check for hits to dispatch every <code>dispatchPeriod</code>
+ seconds. If zero or a negative dispatch period is given, automatic dispatch will
+ not be enabled, and the application will need to dispatch events
+ manually using <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#dispatchLocalHits()">dispatchLocalHits()</a></code>.
+
+ This method only works if local dispatching is in use. Local dispatching is only used in the
+ absence of Google Play services on the device. In general, applications should not rely on
+ the ability to dispatch hits manually.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>dispatchPeriodInSeconds</td>
+          <td>the new dispatch period
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setLogger(com.google.android.gms.analytics.Logger)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">setLogger</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a> logger)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Provide a custom implementation of <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> to use. This custom <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code>
+ will replace the default <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> that prints to the console.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>logger</td>
+          <td>The <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> implementation to use for logging.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+<A NAME="navbar_top"></A>
+
+<div id="footer" class="wrap" >
+
+
+  <div id="copyright">
+
+  Except as noted, this content is licensed under <a
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  For details and restrictions, see the <a href="/license.html">
+  Content License</a>.
+  </div>
+  <div id="build_info">
+
+<script src="/timestamp.js" type="text/javascript"></script>
+<script>document.write(BUILD_TIMESTAMP)</script>
+
+  </div>
+
+
+  <div id="footerlinks">
+
+  <p>
+    <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
+    <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
+    <a href="/support.html">Support</a>
+  </p>
+  </div>
+
+</div> <!-- end footer -->
+</div> <!-- jd-content -->
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content -->
+
+
+
+
+
+
+</body>
+</html>
