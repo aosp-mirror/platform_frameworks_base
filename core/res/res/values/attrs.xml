@@ -2292,9 +2292,6 @@
         <!-- Defines whether the ViewGroup will clip its drawing surface so as to exclude
              the padding area. This property is set to true by default. -->
         <attr name="clipToPadding" format="boolean" />
-        <!-- Defines whether 3d composited descendents of the ViewGroup will be reordered into their
-             own independent Z volume. This property is set to true by default. -->
-        <attr name="isolatedZVolume" format="boolean" />
         <!-- Defines the layout animation to use the first time the ViewGroup is laid out.
              Layout animations can also be started manually after the first layout. -->
         <attr name="layoutAnimation" format="reference" />

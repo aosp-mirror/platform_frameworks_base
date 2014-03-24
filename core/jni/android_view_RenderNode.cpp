@@ -69,7 +69,7 @@ static void android_view_RenderNode_destroyDisplayList(JNIEnv* env,
 }
 
 // ----------------------------------------------------------------------------
-// DisplayList view properties
+// RenderProperties
 // ----------------------------------------------------------------------------
 
 static void android_view_RenderNode_setCaching(JNIEnv* env,
@@ -98,11 +98,6 @@ static void android_view_RenderNode_setClipToBounds(JNIEnv* env,
     displayList->properties().setClipToBounds(clipToBounds);
 }
 
-static void android_view_RenderNode_setIsolatedZVolume(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jboolean shouldIsolate) {
-    // No-op, TODO: Remove Java usage of this method
-}
-
 static void android_view_RenderNode_setProjectBackwards(JNIEnv* env,
         jobject clazz, jlong displayListPtr, jboolean shouldProject) {
     RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
@@ -115,17 +110,28 @@ static void android_view_RenderNode_setProjectionReceiver(JNIEnv* env,
     displayList->properties().setProjectionReceiver(shouldRecieve);
 }
 
-static void android_view_RenderNode_setOutline(JNIEnv* env,
+static void android_view_RenderNode_setOutlineRoundRect(JNIEnv* env,
+        jobject clazz, jlong displayListPtr, jint left, jint top,
+        jint right, jint bottom, jfloat radius) {
+    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
+    displayList->properties().outline().setRoundRect(left, top, right, bottom, radius);
+}
+static void android_view_RenderNode_setOutlineConvexPath(JNIEnv* env,
         jobject clazz, jlong displayListPtr, jlong outlinePathPtr) {
     RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    SkPath* outline = reinterpret_cast<SkPath*>(outlinePathPtr);
-    displayList->properties().setOutline(outline);
+    SkPath* outlinePath = reinterpret_cast<SkPath*>(outlinePathPtr);
+    displayList->properties().outline().setConvexPath(outlinePath);
+}
+static void android_view_RenderNode_setOutlineEmpty(JNIEnv* env,
+        jobject clazz, jlong displayListPtr) {
+    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
+    displayList->properties().outline().setEmpty();
 }
 
 static void android_view_RenderNode_setClipToOutline(JNIEnv* env,
         jobject clazz, jlong displayListPtr, jboolean clipToOutline) {
     RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->properties().setClipToOutline(clipToOutline);
+    displayList->properties().outline().setShouldClip(clipToOutline);
 }
 
 static void android_view_RenderNode_setAlpha(JNIEnv* env,
@@ -381,11 +387,14 @@ static JNINativeMethod gMethods[] = {
     { "nSetStaticMatrix",      "(JJ)V",  (void*) android_view_RenderNode_setStaticMatrix },
     { "nSetAnimationMatrix",   "(JJ)V",  (void*) android_view_RenderNode_setAnimationMatrix },
     { "nSetClipToBounds",      "(JZ)V",  (void*) android_view_RenderNode_setClipToBounds },
-    { "nSetIsolatedZVolume",   "(JZ)V",  (void*) android_view_RenderNode_setIsolatedZVolume },
     { "nSetProjectBackwards",  "(JZ)V",  (void*) android_view_RenderNode_setProjectBackwards },
     { "nSetProjectionReceiver","(JZ)V",  (void*) android_view_RenderNode_setProjectionReceiver },
-    { "nSetOutline",           "(JJ)V",  (void*) android_view_RenderNode_setOutline },
+
+    { "nSetOutlineRoundRect",  "(JIIIIF)V", (void*) android_view_RenderNode_setOutlineRoundRect },
+    { "nSetOutlineConvexPath", "(JJ)V",  (void*) android_view_RenderNode_setOutlineConvexPath },
+    { "nSetOutlineEmpty",      "(J)V",   (void*) android_view_RenderNode_setOutlineEmpty },
     { "nSetClipToOutline",     "(JZ)V",  (void*) android_view_RenderNode_setClipToOutline },
+
     { "nSetAlpha",             "(JF)V",  (void*) android_view_RenderNode_setAlpha },
     { "nSetHasOverlappingRendering", "(JZ)V",
             (void*) android_view_RenderNode_setHasOverlappingRendering },
