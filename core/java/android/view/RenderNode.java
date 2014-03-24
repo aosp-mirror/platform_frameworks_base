@@ -17,7 +17,7 @@
 package android.view;
 
 import android.graphics.Matrix;
-import android.graphics.Path;
+import android.graphics.Outline;
 
 /**
  * <p>A display list records a series of graphics related operations and can replay
@@ -311,16 +311,6 @@ public class RenderNode {
     }
 
     /**
-     * Set whether the display list should collect and Z order all 3d composited descendents, and
-     * draw them in order with the default Z=0 content.
-     *
-     * @param isolatedZVolume true if the display list should collect and Z order descendents.
-     */
-    public void setIsolatedZVolume(boolean isolatedZVolume) {
-        nSetIsolatedZVolume(mNativeDisplayList, isolatedZVolume);
-    }
-
-    /**
      * Sets whether the display list should be drawn immediately after the
      * closest ancestor display list where isolateZVolume is true. If the
      * display list itself satisfies this constraint, changing this attribute
@@ -346,13 +336,19 @@ public class RenderNode {
      * Sets the outline, defining the shape that casts a shadow, and the path to
      * be clipped if setClipToOutline is set.
      *
-     * Deep copies the native path to simplify reference ownership.
-     *
-     * @param outline Convex, CW Path to store in the DisplayList. May be null.
+     * Deep copies the data into native to simplify reference ownership.
      */
-    public void setOutline(Path outline) {
-        long nativePath = (outline == null) ? 0 : outline.mNativePath;
-        nSetOutline(mNativeDisplayList, nativePath);
+    public void setOutline(Outline outline) {
+        if (outline == null) {
+            nSetOutlineEmpty(mNativeDisplayList);
+        } else if (!outline.isValid()) {
+            throw new IllegalArgumentException("Outline must be valid");
+        } else if (outline.mRect != null) {
+            nSetOutlineRoundRect(mNativeDisplayList, outline.mRect.left, outline.mRect.top,
+                    outline.mRect.right, outline.mRect.bottom, outline.mRadius);
+        } else if (outline.mPath != null) {
+            nSetOutlineConvexPath(mNativeDisplayList, outline.mPath.mNativePath);
+        }
     }
 
     /**
@@ -855,8 +851,10 @@ public class RenderNode {
     private static native void nSetClipToBounds(long displayList, boolean clipToBounds);
     private static native void nSetProjectBackwards(long displayList, boolean shouldProject);
     private static native void nSetProjectionReceiver(long displayList, boolean shouldRecieve);
-    private static native void nSetIsolatedZVolume(long displayList, boolean isolateZVolume);
-    private static native void nSetOutline(long displayList, long nativePath);
+    private static native void nSetOutlineRoundRect(long displayList, int left, int top,
+            int right, int bottom, float radius);
+    private static native void nSetOutlineConvexPath(long displayList, long nativePath);
+    private static native void nSetOutlineEmpty(long displayList);
     private static native void nSetClipToOutline(long displayList, boolean clipToOutline);
     private static native void nSetAlpha(long displayList, float alpha);
     private static native void nSetHasOverlappingRendering(long displayList,
