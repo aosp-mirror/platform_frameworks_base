@@ -621,6 +621,7 @@ package android {
     field public static final int isAsciiCapable = 16843753; // 0x10103e9
     field public static final int isAuxiliary = 16843647; // 0x101037f
     field public static final int isDefault = 16843297; // 0x1010221
+    field public static final int isGame = 16843764; // 0x10103f4
     field public static final int isIndicator = 16843079; // 0x1010147
     field public static final int isModifier = 16843334; // 0x1010246
     field public static final int isRepeatable = 16843336; // 0x1010248
@@ -7034,6 +7035,7 @@ package android.content.pm {
     field public static final int FLAG_HAS_CODE = 4; // 0x4
     field public static final int FLAG_INSTALLED = 8388608; // 0x800000
     field public static final int FLAG_IS_DATA_ONLY = 16777216; // 0x1000000
+    field public static final int FLAG_IS_GAME = 33554432; // 0x2000000
     field public static final int FLAG_KILL_AFTER_RESTORE = 65536; // 0x10000
     field public static final int FLAG_LARGE_HEAP = 1048576; // 0x100000
     field public static final int FLAG_PERSISTENT = 8; // 0x8
