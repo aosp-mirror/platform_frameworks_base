@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Ermöglicht der App, den Inhalt des aktiven Fensters abzurufen. Schädliche Apps können so den gesamten Fensterinhalt abrufen und mit Ausnahme von Passwörtern den gesamten Text auswerten."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"Bedienungshilfen vorübergehend aktivieren"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Ermöglicht einer App, die Bedienungshilfen auf dem Gerät vorübergehend zu aktivieren. Schädliche Apps können Bedienungshilfen ohne die Zustimmung des Nutzers aktivieren."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"Fensterinformationen abrufen"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Ermöglicht einer App, Informationen über die Fenster vom Fenster-Manager abzurufen. Schädliche Apps können Informationen abrufen, die für die systeminterne Nutzung gedacht sind."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"Ereignisse filtern"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Ermöglicht einer App, einen Eingabefilter zu registrieren, der den Stream aller Nutzerereignisse vor ihrem Versand filtert. Eine schädliche App kann die System-UI ohne Eingriff des Nutzers kontrollieren."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"Anzeige vergrößern"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Erlaubt der App, den Inhalt einer Anzeige zu vergrößern. Schädliche Apps verändern eventuell die Ansicht, sodass Inhalte nicht richtig angezeigt werden."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"Partielles Herunterfahren"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Versetzt den Aktivitätsmanager in einen heruntergefahrenen Zustand. Führt kein vollständiges Herunterfahren aus."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"App-Wechsel verhindern"</string>

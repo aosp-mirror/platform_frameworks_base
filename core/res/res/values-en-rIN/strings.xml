@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Allows the app to retrieve the content of the active window. Malicious apps may retrieve the entire window content and examine all its text except passwords."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"temporary enable accessibility"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Allows an application to temporarily enable accessibility on the device. Malicious apps may enable accessibility without user consent."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"retrieve window info"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Allows an application to retrieve information about the windows from the window manager. Malicious apps may retrieve information that is intended for internal system usage."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filter events"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Allows an application to register an input filter which filters the stream of all user events before they are dispatched. Malicious app may control the system UI without user intervention."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"magnify display"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Allows an application to magnify the content of a display. Malicious apps may transform the display content in a way that renders the device unusable."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"partial shutdown"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Puts the activity manager into a shut-down state. Does not perform a complete shut down."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"prevent app switches"</string>

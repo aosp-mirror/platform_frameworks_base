@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Umožňuje aplikaci načíst obsah aktivního okna. Škodlivé aplikace mohou načíst obsah celého okna a prozkoumat všechen text kromě hesel."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"dočasná aktivace usnadnění přístupu"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Umožňuje aplikaci dočasně aktivovat usnadnění přístupu v zařízení. Škodlivé aplikace mohou usnadnění přístupu aktivovat bez souhlasu uživatele."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"načítání informací o oknech"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Umožňuje aplikaci načíst informace o oknech ze správce oken. Škodlivé aplikace mnohou načíst informace, které slouží k internímu systémovému využití."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrování událostí"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Umožní aplikaci registrovat vstupní filtr, který filtruje stream všech uživatelských přenosů před jejich odvysíláním. Škodlivé aplikace mohou používat uživatelské rozhraní systému bez zásahu uživatele."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"zvětšit zobrazení"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Povoluje aplikaci zvětšit obsah displeje. Škodlivé aplikace mohou změnit zobrazení obsahu způsobem, který učiní zařízení nepoužitelným."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"částečné vypnutí"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Uvede správce činností do vypnutého stavu. Nedojde však k úplnému vypnutí."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"zabránění přepínání aplikací"</string>

@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"允許應用程式擷取使用中的視窗內容。惡意應用程式可能會擷取整個視窗的內容，以及檢視密碼除外的所有文字。"</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"暫時啟用協助工具"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"允許應用程式在裝置上暫時啟用協助工具。惡意應用程式可能藉此在未經用戶同意的情況下擅自啟用協助工具。"</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"擷取視窗資訊"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"允許應用程式從視窗管理程式擷取視窗的相關資訊。惡意應用程式可能會擷取專供內部系統使用的資訊。"</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"篩選活動"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"允許應用程式註冊輸入篩選器，在分派所有用戶活動的串流前先行篩選。惡意應用程式可能會繞過用戶操作，直接控制系統用戶介面。"</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"放大畫面"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"允許應用程式放大畫面內容。惡意應用程式可能會改變顯示內容，導致裝置失靈。"</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"部分關機"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"讓活動管理員進入關機狀態，而不執行完整的關機程序。"</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"防止切換應用程式"</string>
