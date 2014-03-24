@@ -20,7 +20,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
@@ -49,7 +48,7 @@ public class PhoneStatusBarView extends PanelBar {
     PanelView mLastFullyOpenedPanel = null;
     PanelView mNotificationPanel, mSettingsPanel;
     private boolean mShouldFade;
-    private final BarTransitions mBarTransitions;
+    private final PhoneStatusBarTransitions mBarTransitions;
     private GestureDetector mDoubleTapGesture;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
@@ -64,8 +63,7 @@ public class PhoneStatusBarView extends PanelBar {
             mSettingsPanelDragzoneFrac = 0f;
         }
         mFullWidthNotifications = mSettingsPanelDragzoneFrac <= 0f;
-        final Drawable transparent = res.getDrawable(R.color.status_bar_background_transparent);
-        mBarTransitions = new BarTransitions(context, this, transparent);
+        mBarTransitions = new PhoneStatusBarTransitions(this);
 
         mDoubleTapGesture = new GestureDetector(mContext, new GestureDetector.SimpleOnGestureListener() {
             @Override
