@@ -118,14 +118,14 @@ void RenderProperties::debugOutputProperties(const int level) const {
                 flags |= SkCanvas::kClipToLayer_SaveFlag;
                 clipToBoundsNeeded = false; // clipping done by save layer
             }
-            ALOGD("%*sSaveLayerAlpha %.2f, %.2f, %.2f, %.2f, %d, 0x%x", level * 2, "",
-                    (float) 0, (float) 0, (float) mPrimitiveFields.mRight - mPrimitiveFields.mLeft, (float) mPrimitiveFields.mBottom - mPrimitiveFields.mTop,
+            ALOGD("%*sSaveLayerAlpha %d, %d, %d, %d, %d, 0x%x", level * 2, "",
+                    0, 0, getWidth(), getHeight(),
                     (int)(mPrimitiveFields.mAlpha * 255), flags);
         }
     }
     if (clipToBoundsNeeded) {
-        ALOGD("%*sClipRect %.2f, %.2f, %.2f, %.2f", level * 2, "", 0.0f, 0.0f,
-                (float) mPrimitiveFields.mRight - mPrimitiveFields.mLeft, (float) mPrimitiveFields.mBottom - mPrimitiveFields.mTop);
+        ALOGD("%*sClipRect %d, %d, %d, %d", level * 2, "",
+                0, 0, getWidth(), getHeight());
     }
 }
 
