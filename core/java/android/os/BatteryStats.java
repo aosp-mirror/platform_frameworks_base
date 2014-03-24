@@ -118,19 +118,14 @@ public abstract class BatteryStats implements Parcelable {
     public static final int STATS_SINCE_CHARGED = 0;
 
     /**
-     * Include only the last run in the stats.
-     */
-    public static final int STATS_LAST = 1;
-
-    /**
      * Include only the current run in the stats.
      */
-    public static final int STATS_CURRENT = 2;
+    public static final int STATS_CURRENT = 1;
 
     /**
      * Include only the run since the last time the device was unplugged in the stats.
      */
-    public static final int STATS_SINCE_UNPLUGGED = 3;
+    public static final int STATS_SINCE_UNPLUGGED = 2;
 
     // NOTE: Update this list if you add/change any stats above.
     // These characters are supposed to represent "total", "last", "current", 
