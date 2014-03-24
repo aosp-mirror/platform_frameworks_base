@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Upišite PUK koji se sastoji od barem 8 brojeva."</string>
     <string name="needPuk" msgid="919668385956251611">"Vaša je SIM kartica zaključana PUK-om. Unesite PUK kôd da biste je otključali."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Unesite PUK2 da biste odblokirali SIM karticu."</string>
+    <string name="enablePin" msgid="209412020907207950">"Neuspješno; omogući zaključavanje SIM/RUIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Imate još <xliff:g id="NUMBER">%d</xliff:g> pokušaj prije zaključavanja SIM kartice."</item>
+    <item quantity="other" msgid="7530597808358774740">"Imate još nekoliko preostalih pokušaja (<xliff:g id="NUMBER">%d</xliff:g>) prije zaključavanja SIM kartice."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ID dolaznog pozivatelja"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Nositelju omogućuje vezanje uz sučelje najviše razine VPN usluge. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"povezano s pozadinskom slikom"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Nositelju omogućuje povezivanje sa sučeljem pozadinske slike najviše razine. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"vezanje uz udaljeni zaslon"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Nositelju omogućuje vezanje uza sučelje najviše razine udaljenog zaslona. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vezanje na uslugu widgeta"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Nositelju omogućuje vezanje uz sučelje najviše razine usluge widgeta. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interakcija s administratorom uređaja"</string>
@@ -620,7 +627,7 @@
     <string name="permlab_bluetooth" msgid="6127769336339276828">"uparivanje s Bluetooth uređajima"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Aplikaciji omogućuje pregled konfiguracije Bluetootha na tabletnom računalu te uspostavljanje i prihvaćanje veza s uparenim uređajima."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Aplikaciji omogućuje pregled konfiguracije Bluetootha na telefonu te uspostavljanje i prihvaćanje veza s uparenim uređajima."</string>
-    <string name="permlab_nfc" msgid="4423351274757876953">"upravljaj beskontaktnom (NFC) komunikacijom"</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"upravljanje beskontaktnom komunikacijom (NFC)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Aplikaciji omogućuje komunikaciju s oznakama, karticama i čitačima komunikacije kratkog dometa (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"onemogućavanje zaključavanja zaslona"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Aplikaciji omogućuje onemogućavanje zaključavanja tipkovnice i svih pripadajućih sigurnosnih zaporki. Na primjer, telefon onemogućuje zaključavanje tipkovnice kod primanja dolaznog telefonskog poziva, nakon kojeg se zaključavanje tipkovnice ponovo omogućuje."</string>
@@ -642,7 +649,7 @@
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"čitanje sadržaja SD kartice"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Aplikaciji omogućuje čitanje sadržaja vaše USB pohrane."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Aplikaciji omogućuje čitanje sadržaja vaše SD kartice."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"izmjena/brisanje sadrž. USB-a"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"izmjena/brisanje sadržaja USB-a"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"izmjena ili brisanje sadržaja SD kartice"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Dopušta pisanje u USB pohranu."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Aplikaciji omogućuje pisanje na SD karticu."</string>
@@ -809,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Početna"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Posao"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Drugo"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Nema aplikacije za prikazivanje tog kontakta."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Unesite PIN kôd"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Unesite PUK i novi PIN kôd"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK kôd"</string>
@@ -1414,6 +1422,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Odabir aplikacije"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Nije moguće pokrenuti aplikaciju <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Dijeljenje sa"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Dijeli s aplikacijom <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Klizna ručka. Dodirnite i držite."</string>
@@ -1483,8 +1492,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sustav"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth zvuk"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Bežični prikaz"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Gotovo"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Medijski izlaz"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Povezivanje s uređajem"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Emitiranje zaslona na uređaj"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Traženje uređaja…"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Postavke"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Prekini vezu"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Skeniranje..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Povezivanje..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Dostupno"</string>
@@ -1495,8 +1508,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Preklapanje br. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", sigurno"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Bežični je prikaz povezan"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Ovaj se zaslon prikazuje na nekom drugom uređaju"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Emitiranje zaslona"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Povezivanje sa zaslonom <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Emitiranje zaslona"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Povezan sa zaslonom <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Isključi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Hitan poziv"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Zaboravili ste obrazac"</string>
@@ -1514,7 +1529,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Otključavanje SIM kartice…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Netočan PIN kôd."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Unesite PIN koji ima od 4 do 8 brojeva."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK kôd treba imati 8 brojeva ili više."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK kôd mora se sastojati od 8 brojeva."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Ponovo unesite ispravan PUK kôd. Ponovljeni pokušaji trajno će onemogućiti SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodovi nisu jednaki"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Previše pokušaja iscrtavanja obrasca"</string>

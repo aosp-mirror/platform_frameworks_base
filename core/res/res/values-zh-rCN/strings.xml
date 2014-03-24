@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"请键入至少 8 位数字的 PUK 码。"</string>
     <string name="needPuk" msgid="919668385956251611">"已对 SIM 卡进行 PUK 码锁定。键入 PUK 码将其解锁。"</string>
     <string name="needPuk2" msgid="4526033371987193070">"输入 PUK2 码以解锁 SIM 卡。"</string>
+    <string name="enablePin" msgid="209412020907207950">"失败，请启用 SIM/RUIM 卡锁定设置。"</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"您还有<xliff:g id="NUMBER">%d</xliff:g>次尝试机会。如果仍然失败，SIM 卡将被锁定。"</item>
+    <item quantity="other" msgid="7530597808358774740">"您还有<xliff:g id="NUMBER">%d</xliff:g>次尝试机会。如果仍然失败，SIM 卡将被锁定。"</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"来电显示"</string>
@@ -71,7 +76,7 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"默认显示本机号码，在下一次通话中也显示"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"未提供服务。"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"您无法更改来电显示设置。"</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"访问受限情况已发生变化"</string>
+    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"网络可用情况发生变化"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"数据服务已禁用。"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"紧急服务已禁用。"</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"已禁用语音服务。"</string>
@@ -122,7 +127,7 @@
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"不支持该协议。"</string>
     <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"无法建立安全连接。"</string>
     <string name="httpErrorBadUrl" msgid="3636929722728881972">"无法打开网页，因为该网址是无效的。"</string>
-    <string name="httpErrorFile" msgid="2170788515052558676">"无法访问该文件。"</string>
+    <string name="httpErrorFile" msgid="2170788515052558676">"无法使用该文件。"</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"找不到请求的文件。"</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"正在处理的请求太多，请稍后重试。"</string>
     <string name="notification_title" msgid="8967710025036163822">"登录 <xliff:g id="ACCOUNT">%1$s</xliff:g> 时出错"</string>
@@ -165,7 +170,7 @@
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"声音已开启"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"飞行模式"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"已开启飞行模式"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"已关闭飞行模式"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"未开启飞行模式"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"允许用户绑定到 VPN 服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"绑定到壁纸"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"允许用户绑定到壁纸的顶级接口。普通应用绝不需要此权限。"</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"绑定至远程显示屏"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"允许应用绑定至远程显示屏的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"绑定到小部件服务"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"允许应用绑定到小部件服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"与设备管理器交互"</string>
@@ -470,9 +477,9 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"允许安装位置信息提供程序"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"创建用于测试的模拟位置源或安装新的位置提供程序。此权限可让该应用覆盖由其他位置源（如 GPS）或位置提供程序返回的位置和/或状态信息。"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"精确位置（基于 GPS 和网络）"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"允许该应用通过全球定位系统 (GPS) 或网络位置信息源（例如基站和 WLAN）获取您的精确位置信息。您必须在设备上开启这些位置服务，应用才能获得位置信息。应用会使用此类服务确定您的位置，这可能会消耗更多电量。"</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"允许该应用通过全球定位系统(GPS)或网络位置信息源（例如基站和WLAN）获取您的精确位置信息。您必须在设备上开启这些位置信息服务，应用才能获得位置信息。应用会使用此类服务确定您的位置，这可能会消耗更多电量。"</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"大致位置（基于网络）"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"允许该应用获取您的大致位置信息。这类位置信息来自于使用网络位置信息源（例如基站和 WLAN）的位置服务。您必须在设备上开启这些位置服务，应用才能获得位置信息。应用会使用此类服务确定您的大概位置。"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"允许该应用获取您的大致位置信息。这类位置信息来自于使用网络位置信息源（例如基站和WLAN）的位置信息服务。您必须在设备上开启这些位置信息服务，应用才能获得位置信息。应用会使用此类服务确定您的大概位置。"</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"访问 SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"允许应用使用 SurfaceFlinger 低级功能。"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"读取帧缓冲区"</string>
@@ -483,8 +490,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允许应用控制 WLAN 显示设备的基础功能。"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"捕获音频输出"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"允许该应用捕获和重定向音频输出。"</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"检测关键词"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允许应用捕获音频以便检测语音指令的关键词。捕获操作会在后台进行，但不会妨碍其他音频捕获工具（例如摄像机）。"</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"启动指令检测"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允许应用捕获音频以便检测语音启动指令。捕获操作会在后台进行，但不会妨碍其他音频捕获工具（例如摄像机）。"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"捕获视频输出"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"允许该应用捕获和重定向视频输出。"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"捕获安全视频输出"</string>
@@ -545,7 +552,7 @@
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"访问检入属性"</string>
     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"允许应用对登记服务上传的属性拥有读取/写入权限。普通应用不应使用此权限。"</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"选择小部件"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"允许应用告知系统哪些小部件可供哪个应用使用。拥有此权限的应用可向其他应用授予对个人资料的访问权限。普通应用不应使用此权限。"</string>
+    <string name="permdesc_bindGadget" msgid="8261326938599049290">"允许应用告知系统哪些小部件可供哪个应用使用。拥有此权限的应用可向其他应用授予对个人数据的访问权限。普通应用不应使用此权限。"</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"修改手机状态"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"允许应用控制设备的电话功能。拥有此权限的应用可在不通知您的情况下执行切换网络、开关手机无线装置等此类操作。"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"读取手机状态和身份"</string>
@@ -621,7 +628,7 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"允许该应用查看平板电脑上的蓝牙配置，以及建立和接受与配对设备的连接。"</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"允许该应用查看手机上的蓝牙配置，以及建立和接受与配对设备的连接。"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"控制近距离通信"</string>
-    <string name="permdesc_nfc" msgid="7120611819401789907">"允许应用与近距离无线通信 (NFC) 标记、卡和阅读器进行通信。"</string>
+    <string name="permdesc_nfc" msgid="7120611819401789907">"允许应用与近距离无线通信(NFC)标签、卡和读取器通信。"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"停用屏幕锁定"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"允许该应用停用键锁以及任何关联的密码安全措施。例如，让手机在接听来电时停用键锁，在通话结束后重新启用键锁。"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"读取同步设置"</string>
@@ -809,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"住宅"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"单位"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"其他"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"找不到可用来查看此联系人的应用。"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"输入 PIN 码"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"请输入 PUK 码和新的 PIN 码"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK 码"</string>
@@ -1112,7 +1120,7 @@
     <string name="no" msgid="5141531044935541497">"取消"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"注意"</string>
     <string name="loading" msgid="7933681260296021180">"正在加载..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"打开"</string>
+    <string name="capital_on" msgid="1544682755514494298">"开启"</string>
     <string name="capital_off" msgid="6815870386972805832">"关闭"</string>
     <string name="whichApplication" msgid="4533185947064773386">"选择要使用的应用："</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"选择主屏幕应用"</string>
@@ -1414,6 +1422,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"选择应用"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"无法启动“<xliff:g id="APPLICATION_NAME">%s</xliff:g>”"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"分享方式"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"使用<xliff:g id="APPLICATION_NAME">%s</xliff:g>分享"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"滑动手柄。触摸并按住。"</string>
@@ -1483,8 +1492,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"系统"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"蓝牙音频"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"无线显示"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"完成"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"媒体输出线路"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"连接到设备"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"将屏幕投射到设备上"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"正在搜索设备…"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"设置"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"断开连接"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"正在扫描..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"正在连接..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"可连接"</string>
@@ -1495,8 +1508,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"叠加视图 #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>：<xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>，<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"，安全"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"已连接到无线显示设备"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"此屏幕的内容正显示在另一台设备上"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"正在投射屏幕"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"正在连接到“<xliff:g id="NAME">%1$s</xliff:g>”"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"正在投射屏幕"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"已连接到“<xliff:g id="NAME">%1$s</xliff:g>”"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"断开连接"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"紧急呼救"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘记了图案"</string>
@@ -1514,7 +1529,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"正在解锁 SIM 卡..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"PIN 码有误。"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"请输入 4 至 8 位数的 PIN。"</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK 码应至少包含 8 位数字。"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK码应包含8位数字。"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"请重新输入正确的 PUK 码。如果尝试错误次数过多，SIM 卡将永久停用。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN 码不匹配"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"图案尝试次数过多"</string>
@@ -1649,5 +1664,5 @@
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g>秒后重试"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍后重试"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"从顶部向下滑动即可退出全屏模式"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"从顶部向下滑动即可退出全屏模式。"</string>
 </resources>

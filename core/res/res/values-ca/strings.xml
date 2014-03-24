@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Introdueix un PUK compost com a mínim de 8 nombres."</string>
     <string name="needPuk" msgid="919668385956251611">"La targeta SIM està bloquejada pel PUK. Escriviu el codi PUK per desbloquejar-la."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Escriviu el PUK2 per desbloquejar la targeta SIM."</string>
+    <string name="enablePin" msgid="209412020907207950">"No és correcte; activa el bloqueig de RUIM/SIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Et queda <xliff:g id="NUMBER">%d</xliff:g> intent; si no l\'encertes, la SIM es bloquejarà."</item>
+    <item quantity="other" msgid="7530597808358774740">"Et queden <xliff:g id="NUMBER">%d</xliff:g> intents; si no l\'encertes, la SIM es bloquejarà."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Identificació de trucada entrant"</string>
@@ -131,7 +136,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Massa supressions de <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"L\'emmagatzematge de la tauleta és ple. Suprimeix uns quants fitxers per alliberar espai."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"L\'emmagatzematge del telèfon és ple. Suprimeix uns quants fitxers per alliberar espai."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Pot ser que la xarxa se supervisi."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"És possible que la xarxa estigui supervisada"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Per un tercer desconegut"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Per <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Mi"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Permet que el titular vinculi a la interfície de nivell superior d\'un servei de VPN. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"enllaça amb un fons de pantalla"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permet que el titular vinculi a la interfície de nivell superior d\'un fons de pantalla. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"vincula a una pantalla remota"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permet que el titular es vinculi a la interfície de nivell superior d\'una pantalla remota. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincula a un servei de widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permet que el titular vinculi a la interfície de nivell superior d\'un servei de widget. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar amb un administrador del dispositiu"</string>
@@ -668,8 +675,8 @@
     <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Permet que l\'aplicació modifiqui les marques de sòcols per a l\'encaminament"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"accedeix a les notificacions"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permet que l\'aplicació recuperi, examini i esborri les notificacions, incloses les que han publicat altres aplicacions."</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vincula a un servei de processament de notificacions"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permet que el titular vinculi la interfície de nivell superior d\'un servei de processament de notificacions. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vincula a un servei oient de notificacions"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permet que el titular vinculi la interfície de nivell superior d\'un servei oient de notificacions. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invoca l\'aplicació de configuració proporcionada per l\'operador"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permet que el titular invoqui l\'aplicació de configuració proporcionada per l\'operador. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"conèixer les observacions sobre les condicions de la xarxa"</string>
@@ -809,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Casa"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Feina"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Altres"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"No hem trobat cap aplicació per mostrar aquest contacte."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Introdueix el codi PIN"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Introdueix el codi PUK i el codi PIN nou"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"Codi PUK"</string>
@@ -981,10 +989,10 @@
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interactuar amb la tauleta."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració per tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interactuar amb el telèfon."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Fa 1 mes"</string>
-    <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Fa menys d\'1 mes"</string>
+    <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Fa més d\'1 mes"</string>
   <plurals name="num_seconds_ago">
     <item quantity="one" msgid="4869870056547896011">"Fa 1 segon"</item>
-    <item quantity="other" msgid="3903706804349556379">"fa <xliff:g id="COUNT">%d</xliff:g> segons"</item>
+    <item quantity="other" msgid="3903706804349556379">"Fa <xliff:g id="COUNT">%d</xliff:g> segons"</item>
   </plurals>
   <plurals name="num_minutes_ago">
     <item quantity="one" msgid="3306787433088810191">"Fa 1 minut"</item>
@@ -1000,7 +1008,7 @@
     <string name="last_month" msgid="3959346739979055432">"El mes passat"</string>
     <string name="older" msgid="5211975022815554840">"Més antigues"</string>
   <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"ahir"</item>
+    <item quantity="one" msgid="861358534398115820">"Ahir"</item>
     <item quantity="other" msgid="2479586466153314633">"Fa <xliff:g id="COUNT">%d</xliff:g> dies"</item>
   </plurals>
   <plurals name="in_num_seconds">
@@ -1328,7 +1336,7 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibilitat"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fons de pantalla"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Canvia el fons de pantalla"</string>
-    <string name="notification_listener_binding_label" msgid="2014162835481906429">"Processador de notificacions"</string>
+    <string name="notification_listener_binding_label" msgid="2014162835481906429">"Oient de notificacions"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN activada"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> ha activat VPN"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Toca per gestionar la xarxa."</string>
@@ -1414,6 +1422,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Maj"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Retorn"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Selecciona una aplicació"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"No s\'ha pogut iniciar <xliff:g id="APPLICATION_NAME">%s</xliff:g>."</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Comparteix amb"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Comparteix amb <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Llisca el dit. Mantén premut."</string>
@@ -1483,9 +1492,13 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Àudio per Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Pantalla sense fil"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Fet"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Sortida de contingut multimèdia"</string>
-    <string name="media_route_status_scanning" msgid="7279908761758293783">"S\'està explorant..."</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Connexió al dispositiu"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Emissió de pantalla al dispositiu"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"S\'estan cercant dispositius…"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Configuració"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Desconnecta"</string>
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"S\'està cercant…"</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"S\'està connectant..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Disponible"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"No disponible"</string>
@@ -1495,8 +1508,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposa #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", segur"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"La pantalla sense fil està connectada"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Aquesta pantalla es mostra en un altre dispositiu"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Emissió de pantalla"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"S\'està connectant a <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Emissió de pantalla"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Connectat a <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Desconnecta"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Trucada d\'emergència"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Patró oblidat"</string>
@@ -1514,7 +1529,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"S\'està desbloquejant la targeta SIM..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Codi PIN incorrecte."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Escriu un PIN que tingui de 4 a 8 números."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"El codi PUK ha de tenir 8 números o més."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"El codi PUK ha de tenir 8 números."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Torna a introduir el codi PUK correcte. Els intents repetits faran que es desactivi la SIM de manera permanent."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Els codis PIN no coincideixen"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Massa intents incorrectes"</string>
