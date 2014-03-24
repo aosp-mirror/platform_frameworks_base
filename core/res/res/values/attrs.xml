@@ -1639,6 +1639,7 @@
              that is, when in portrait. Can be either an absolute dimension
              or a fraction of the screen size in that dimension. -->
         <attr name="windowFixedHeightMajor" format="dimension|fraction" />
+        <attr name="windowOutsetBottom" format="dimension" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
