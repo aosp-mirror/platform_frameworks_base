@@ -52,6 +52,8 @@ import android.hardware.ConsumerIrManager;
 import android.hardware.ISerialManager;
 import android.hardware.SerialManager;
 import android.hardware.SystemSensorManager;
+import android.hardware.hdmi.HdmiCecManager;
+import android.hardware.hdmi.IHdmiCecService;
 import android.hardware.camera2.CameraManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.input.InputManager;
@@ -358,6 +360,13 @@ class ContextImpl extends Context {
                 public Object createService(ContextImpl ctx) {
                     return new BluetoothManager(ctx);
                 }});
+
+        registerService(HDMI_CEC_SERVICE, new StaticServiceFetcher() {
+                public Object createStaticService() {
+                    IBinder b = ServiceManager.getService(HDMI_CEC_SERVICE);
+                    return new HdmiCecManager(IHdmiCecService.Stub.asInterface(b));
+                }});
+
 
         registerService(CLIPBOARD_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
