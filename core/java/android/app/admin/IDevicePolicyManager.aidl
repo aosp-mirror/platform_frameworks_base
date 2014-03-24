@@ -129,4 +129,8 @@ interface IDevicePolicyManager {
 
     void setAccountManagementDisabled(in ComponentName who, in String accountType, in boolean disabled);
     String[] getAccountTypesWithManagementDisabled();
+
+    void setLockTaskComponents(in ComponentName[] components);
+    ComponentName[] getLockTaskComponents();
+    boolean isLockTaskPermitted(in ComponentName component);
 }
