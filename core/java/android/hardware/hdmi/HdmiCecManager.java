@@ -45,6 +45,9 @@ public final class HdmiCecManager {
      * @return {@link HdmiCecClient} instance. {@code null} on failure.
      */
     public HdmiCecClient getClient(int type, HdmiCecClient.Listener listener) {
+        if (mService == null) {
+            return null;
+        }
         try {
             IBinder b = mService.allocateLogicalDevice(type, getListenerWrapper(listener));
             return HdmiCecClient.create(mService, b);

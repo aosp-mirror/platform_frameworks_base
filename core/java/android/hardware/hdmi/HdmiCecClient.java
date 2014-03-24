@@ -110,16 +110,20 @@ public final class HdmiCecClient {
     }
 
     /**
-     * Send &lt;GiveDevicePowerStatus&gt; message.
+     * Returns true if the TV or attached display is powered on.
+     * <p>
+     * The result of this method is only meaningful on playback devices (where the device
+     * type is {@link HdmiCec#DEVICE_PLAYBACK}).
+     * </p>
      *
-     * @param address logical address of the device to send the message to, such as
-     *        {@link HdmiCec#ADDR_TV}.
+     * @return true if TV is on; otherwise false.
      */
-    public void sendGiveDevicePowerStatus(int address) {
+    public boolean isTvOn() {
         try {
-            mService.sendGiveDevicePowerStatus(mBinder, address);
+            return mService.isTvOn(mBinder);
         } catch (RemoteException e) {
-            Log.e(TAG, "sendGiveDevicePowerStatus threw exception ", e);
+            Log.e(TAG, "isTvOn threw exception ", e);
         }
+        return false;
     }
 }
