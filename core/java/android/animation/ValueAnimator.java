@@ -1124,27 +1124,26 @@ public class ValueAnimator extends Animator {
         if (!mStartedDelay) {
             mStartedDelay = true;
             mDelayStartTime = currentTime;
-        } else {
-            if (mPaused) {
-                if (mPauseTime < 0) {
-                    mPauseTime = currentTime;
-                }
-                return false;
-            } else if (mResumed) {
-                mResumed = false;
-                if (mPauseTime > 0) {
-                    // Offset by the duration that the animation was paused
-                    mDelayStartTime += (currentTime - mPauseTime);
-                }
+        }
+        if (mPaused) {
+            if (mPauseTime < 0) {
+                mPauseTime = currentTime;
             }
-            long deltaTime = currentTime - mDelayStartTime;
-            if (deltaTime > mStartDelay) {
-                // startDelay ended - start the anim and record the
-                // mStartTime appropriately
-                mStartTime = currentTime - (deltaTime - mStartDelay);
-                mPlayingState = RUNNING;
-                return true;
+            return false;
+        } else if (mResumed) {
+            mResumed = false;
+            if (mPauseTime > 0) {
+                // Offset by the duration that the animation was paused
+                mDelayStartTime += (currentTime - mPauseTime);
             }
+        }
+        long deltaTime = currentTime - mDelayStartTime;
+        if (deltaTime > mStartDelay) {
+            // startDelay ended - start the anim and record the
+            // mStartTime appropriately
+            mStartTime = currentTime - (deltaTime - mStartDelay);
+            mPlayingState = RUNNING;
+            return true;
         }
         return false;
     }
