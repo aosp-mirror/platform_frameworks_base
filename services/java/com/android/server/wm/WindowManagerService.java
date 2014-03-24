@@ -9921,9 +9921,21 @@ public class WindowManagerService extends IWindowManager.Stub
                 screenRotationAnimation.kill();
             }
 
+            // Check whether the current screen contains any secure content.
+            boolean isSecure = false;
+            final WindowList windows = getDefaultWindowListLocked();
+            final int N = windows.size();
+            for (int i = 0; i < N; i++) {
+                WindowState ws = windows.get(i);
+                if (ws.isOnScreen() && (ws.mAttrs.flags & FLAG_SECURE) != 0) {
+                    isSecure = true;
+                    break;
+                }
+            }
+
             // TODO(multidisplay): rotation on main screen only.
             screenRotationAnimation = new ScreenRotationAnimation(mContext, displayContent,
-                    mFxSession, inTransaction, mPolicy.isDefaultOrientationForced());
+                    mFxSession, inTransaction, mPolicy.isDefaultOrientationForced(), isSecure);
             mAnimator.setScreenRotationAnimationLocked(displayId, screenRotationAnimation);
         }
     }
