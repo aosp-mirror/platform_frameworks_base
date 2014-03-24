@@ -208,7 +208,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, NETD_TAG);
+        // Don't need this wake lock, since we now have a time stamp for when
+        // the network actually went inactive.  (It might be nice to still do this,
+        // but I don't want to do it through the power manager because that pollutes the
+        // battery stats history with pointless noise.)
+        PowerManager.WakeLock wl = null; //pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, NETD_TAG);
 
         mConnector = new NativeDaemonConnector(
                 new NetdCallbackReceiver(), socket, 10, NETD_TAG, 160, wl);

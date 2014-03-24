@@ -844,7 +844,7 @@ public final class PowerManager {
 
                 if (changed && mHeld) {
                     try {
-                        mService.updateWakeLockWorkSource(mToken, mWorkSource);
+                        mService.updateWakeLockWorkSource(mToken, mWorkSource, mHistoryTag);
                     } catch (RemoteException e) {
                     }
                 }
