@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -813,7 +819,7 @@ Summary:
           // Start the user recoverable action using the intent returned by
           // <code><a href="/reference/com/google/android/gms/auth/UserRecoverableAuthException.html#getIntent()">getIntent()</a></code>
           myActivity.startActivityForResult(
-                  userAuthEx.getIntent(),
+                  userAuthEx.buildIntent(),
                   MY_ACTIVITYS_AUTH_REQUEST_CODE);
           return;
        } catch (IOException transientEx) {
@@ -896,20 +902,13 @@ Summary:
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_CLIENT_PACKAGE_NAME">KEY_CLIENT_PACKAGE_NAME</a></td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_REQUEST_ACTIONS">KEY_REQUEST_ACTIONS</a></td>
         <td class="jd-descrcol" width="100%">Bundle key for specifying which user's app activity (moment) types can
  be written to Google.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_REQUEST_VISIBLE_ACTIVITIES">KEY_REQUEST_VISIBLE_ACTIVITIES</a></td>
         <td class="jd-descrcol" width="100%">See <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_REQUEST_ACTIONS">KEY_REQUEST_ACTIONS</a></code>
@@ -917,33 +916,12 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_SUPPRESS_PROGRESS_SCREEN">KEY_SUPPRESS_PROGRESS_SCREEN</a></td>
         <td class="jd-descrcol" width="100%">Adding KEY_SUPPRESS_PROGRESS will suppress the progress screen shown
  when getting a token when added as a boolean <code>true</code> option while
  calling <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getToken(Context, String, String, Bundle)</a></code>.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#OEM_ONLY_KEY_TARGET_ANDROID_ID">OEM_ONLY_KEY_TARGET_ANDROID_ID</a></td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#OEM_ONLY_KEY_VERIFIER">OEM_ONLY_KEY_VERIFIER</a></td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#OEM_ONLY_SCOPE_ACCOUNT_BOOTSTRAP">OEM_ONLY_SCOPE_ACCOUNT_BOOTSTRAP</a></td>
-        <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
@@ -978,6 +956,24 @@ Summary:
             
             static
             
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#clearToken(android.content.Context, java.lang.String)">clearToken</a></span>(Context context, String token)</nobr>
+
+        <div class="jd-descrdiv">Clear the specified token in local cache with respect to the <code><a href="/reference/android/content/Context.html">Context</a></code>.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -989,7 +985,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1008,7 +1004,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1027,7 +1023,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1046,7 +1042,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1065,7 +1061,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1077,7 +1073,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#invalidateToken(android.content.Context, java.lang.String)">invalidateToken</a></span>(Context context, String token)</nobr>
         
-        <div class="jd-descrdiv">Invalidates the specified token with respect to the <code><a href="/reference/android/content/Context.html">Context</a></code>.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    Deprecated because this function needs permissions
+ MANAGE_ACCOUNTS and USE_CREDENTIALS to run. Please call
+ <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#clearToken(android.content.Context, java.lang.String)">clearToken(Context, String)</a></code> instead.
+</em></div>
   
   </td></tr>
 
@@ -1365,43 +1366,6 @@ From class
 
 
 
-<A NAME="KEY_CLIENT_PACKAGE_NAME"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        KEY_CLIENT_PACKAGE_NAME
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "clientPackageName"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
 <A NAME="KEY_REQUEST_ACTIONS"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1535,117 +1499,6 @@ From class
 
 
 
-<A NAME="OEM_ONLY_KEY_TARGET_ANDROID_ID"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        OEM_ONLY_KEY_TARGET_ANDROID_ID
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "oauth2_target_device_id"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="OEM_ONLY_KEY_VERIFIER"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        OEM_ONLY_KEY_VERIFIER
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "oauth2_authcode_verifier"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="OEM_ONLY_SCOPE_ACCOUNT_BOOTSTRAP"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        OEM_ONLY_SCOPE_ACCOUNT_BOOTSTRAP
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "_account_setup"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
 
 <!-- Fields -->
 
@@ -1664,6 +1517,70 @@ From class
 
 <h2>Public Methods</h2>
 
+
+
+<A NAME="clearToken(android.content.Context, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+
+
+
+        void
+      </span>
+      <span class="sympad">clearToken</span>
+      <span class="normal">(Context context, String token)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Clear the specified token in local cache with respect to the <code><a href="/reference/android/content/Context.html">Context</a></code>.
+ Note that the context must be the same as that used to initialize
+ the token in a previous call to
+ <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String)">getToken(Context, String, String)</a></code> or
+ <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getToken(Context, String, String, Bundle)</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>context</td>
+          <td>Context of the token.</td>
+        </tr>
+        <tr>
+          <th>token</td>
+          <td>The token to clear.
+</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th><a href="/reference/com/google/android/gms/auth/GooglePlayServicesAvailabilityException.html">GooglePlayServicesAvailabilityException</a></td>
+            <td></td>
+        </tr>
+        <tr>
+            <th><a href="/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a></td>
+            <td></td>
+        </tr>
+        <tr>
+            <th>IOException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
 
 
 <A NAME="getToken(android.content.Context, java.lang.String, java.lang.String)"></A>
@@ -1769,8 +1686,8 @@ From class
          Activity.this,
          AUTH_REQUEST_CODE);
      // Use the dialog to present to the user.
- } catch (UserRecoverableAutException recoverableException) {
-     Intent recoveryIntent = recoverableException.getIntent();
+ } catch (UserRecoverableAuthException recoverableException) {
+     Intent recoveryIntent = recoverableException.buildIntent();
      // Use the intent in a custom dialog or just startActivityForResult.
      Activity.this.startActivityForResult(recoveryIntent, REQUEST_CODE);
  } catch (GoogleAuthException authEx) {
@@ -2226,7 +2143,14 @@ From class
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Deprecated because this function needs permissions
+ MANAGE_ACCOUNTS and USE_CREDENTIALS to run. Please call
+ <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#clearToken(android.content.Context, java.lang.String)">clearToken(Context, String)</a></code> instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Invalidates the specified token with respect to the <code><a href="/reference/android/content/Context.html">Context</a></code>.
  Note that the context must be the same as that used to initialize
  the token in a previous call to
@@ -2241,8 +2165,7 @@ From class
         </tr>
         <tr>
           <th>token</td>
-          <td>String containing the token to invalidate.
-</td>
+          <td>String containing the token to invalidate.</td>
         </tr>
       </table>
   </div>

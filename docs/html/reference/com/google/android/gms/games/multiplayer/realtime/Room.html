@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -892,7 +898,7 @@ Summary:
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#ROOM_VARIANT_ANY">ROOM_VARIANT_ANY</a></td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#ROOM_VARIANT_DEFAULT">ROOM_VARIANT_DEFAULT</a></td>
         <td class="jd-descrcol" width="100%">Constant used to indicate that the variant for a room is unspecified.</td>
     </tr>
     
@@ -1561,7 +1567,7 @@ From interface
 
 
 
-<A NAME="ROOM_VARIANT_ANY"></A>
+<A NAME="ROOM_VARIANT_DEFAULT"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1571,7 +1577,7 @@ From interface
         final 
         int
       </span>
-        ROOM_VARIANT_ANY
+        ROOM_VARIANT_DEFAULT
     </h4>
       <div class="api-level">
         
@@ -2122,7 +2128,7 @@ From interface
       <ul class="nolist"><li>Variant specified for this room, if any. A variant is an optional
          developer-controlled parameter describing the type of game to play. If specified,
          this value will be a positive integer. If this room had no variant specified, returns
-         <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#ROOM_VARIANT_ANY">ROOM_VARIANT_ANY</a></code>.
+         <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#ROOM_VARIANT_DEFAULT">ROOM_VARIANT_DEFAULT</a></code>.
 </li></ul>
   </div>
 
