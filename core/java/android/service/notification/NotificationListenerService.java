@@ -83,6 +83,17 @@ public abstract class NotificationListenerService extends Service {
      */
     public abstract void onNotificationRemoved(StatusBarNotification sbn);
 
+    /**
+     * Implement this method to learn about when the listener is enabled and connected to
+     * the notification manager.  You are safe to call {@link #getActiveNotifications(String[])
+     * at this time.
+     *
+     * @param notificationKeys The notification keys for all currently posted notifications.
+     */
+    public void onListenerConnected(String[] notificationKeys) {
+        // optional
+    }
+
     private final INotificationManager getNotificationInterface() {
         if (mNoMan == null) {
             mNoMan = INotificationManager.Stub.asInterface(
@@ -132,9 +143,23 @@ public abstract class NotificationListenerService extends Service {
      * {@see #cancelNotification(String, String, int)}
      */
     public final void cancelAllNotifications() {
+        cancelNotifications(null /*all*/);
+    }
+
+    /**
+     * Inform the notification manager about dismissal of specific notifications.
+     * <p>
+     * Use this if your listener has a user interface that allows the user to dismiss
+     * multiple notifications at once.
+     *
+     * @param keys Notifications to dismiss, or {@code null} to dismiss all.
+     *
+     * {@see #cancelNotification(String, String, int)}
+     */
+    public final void cancelNotifications(String[] keys) {
         if (!isBound()) return;
         try {
-            getNotificationInterface().cancelAllNotificationsFromListener(mWrapper);
+            getNotificationInterface().cancelNotificationsFromListener(mWrapper, keys);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
@@ -142,14 +167,43 @@ public abstract class NotificationListenerService extends Service {
 
     /**
      * Request the list of outstanding notifications (that is, those that are visible to the
-     * current user). Useful when starting up and you don't know what's already been posted.
+     * current user). Useful when you don't know what's already been posted.
      *
      * @return An array of active notifications.
      */
     public StatusBarNotification[] getActiveNotifications() {
+        return getActiveNotifications(null /*all*/);
+    }
+
+    /**
+     * Request the list of outstanding notifications (that is, those that are visible to the
+     * current user). Useful when you don't know what's already been posted.
+     *
+     * @param keys A specific list of notification keys, or {@code null} for all.
+     * @return An array of active notifications.
+     */
+    public StatusBarNotification[] getActiveNotifications(String[] keys) {
         if (!isBound()) return null;
         try {
-            return getNotificationInterface().getActiveNotificationsFromListener(mWrapper);
+            return getNotificationInterface().getActiveNotificationsFromListener(mWrapper, keys);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+        return null;
+    }
+
+    /**
+     * Request the list of outstanding notification keys(that is, those that are visible to the
+     * current user).  You can use the notification keys for subsequent retrieval via
+     * {@link #getActiveNotifications(String[]) or dismissal via
+     * {@link #cancelNotifications(String[]).
+     *
+     * @return An array of active notification keys.
+     */
+    public String[] getActiveNotificationKeys() {
+        if (!isBound()) return null;
+        try {
+            return getNotificationInterface().getActiveNotificationKeysFromListener(mWrapper);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
@@ -187,6 +241,14 @@ public abstract class NotificationListenerService extends Service {
                 NotificationListenerService.this.onNotificationRemoved(sbn);
             } catch (Throwable t) {
                 Log.w(TAG, "Error running onNotificationRemoved", t);
+            }
+        }
+        @Override
+        public void onListenerConnected(String[] notificationKeys) {
+            try {
+                NotificationListenerService.this.onListenerConnected(notificationKeys);
+            } catch (Throwable t) {
+                Log.w(TAG, "Error running onListenerConnected", t);
             }
         }
     }
