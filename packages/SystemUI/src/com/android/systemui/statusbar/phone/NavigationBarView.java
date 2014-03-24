@@ -32,6 +32,8 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.GradientDrawable.Orientation;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -89,6 +91,9 @@ public class NavigationBarView extends LinearLayout {
 
     private DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
+    private final BarTransitions mBarTransitions;
+    private final Drawable mTransparent;
+    private final Drawable mTransparentVertical;
     private final NavigationBarTransitions mBarTransitions;
 
     // workaround for LayoutTransitions leaving the nav buttons in a weird state (bug 5549288)
@@ -210,8 +215,12 @@ public class NavigationBarView extends LinearLayout {
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        mHidden = false;
+
         mDisplay = ((WindowManager)context.getSystemService(
                 Context.WINDOW_SERVICE)).getDefaultDisplay();
+        mBarService = IStatusBarService.Stub.asInterface(
+                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
         final Resources res = mContext.getResources();
         mBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
@@ -221,25 +230,13 @@ public class NavigationBarView extends LinearLayout {
 
         getIcons(res);
 
-        mBarTransitions = new NavigationBarTransitions(this);
-
-        mCameraDisabledByDpm = isCameraDisabledByDpm();
-        watchForDevicePolicyChanges();
-    }
-
-    private void watchForDevicePolicyChanges() {
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        mContext.registerReceiver(new BroadcastReceiver() {
-            public void onReceive(Context context, Intent intent) {
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mCameraDisabledByDpm = isCameraDisabledByDpm();
-                    }
-                });
-            }
-        }, filter);
+        final int[] gradientColors = new int[] {
+                res.getColor(R.color.navigation_bar_background_transparent_start),
+                res.getColor(R.color.navigation_bar_background_transparent_end)
+        };
+        mTransparent = new GradientDrawable(Orientation.BOTTOM_TOP, gradientColors);
+        mTransparentVertical = new GradientDrawable(Orientation.RIGHT_LEFT, gradientColors);
+        mBarTransitions = new BarTransitions(context, this, mTransparent);
     }
 
     public BarTransitions getBarTransitions() {
@@ -570,6 +567,7 @@ public class NavigationBarView extends LinearLayout {
         }
 
         setNavigationIconHints(mNavigationIconHints, true);
+        mBarTransitions.setTransparent(mVertical ? mTransparentVertical : mTransparent);
     }
 
     @Override
