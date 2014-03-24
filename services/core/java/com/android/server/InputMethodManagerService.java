@@ -632,7 +632,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mImeSwitcherNotification.vibrate = null;
 
         // Tag this notification specially so SystemUI knows it's important
-        mImeSwitcherNotification.kind = new String[] { "android.system.imeswitcher" };
+        mImeSwitcherNotification.extras.putBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, true);
+        mImeSwitcherNotification.category = Notification.CATEGORY_SYSTEM;
 
         Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
         mImeSwitchPendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
