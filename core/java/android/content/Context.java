@@ -1974,6 +1974,8 @@ public abstract class Context {
      * @see android.app.SearchManager
      * @see #SENSOR_SERVICE
      * @see android.hardware.SensorManager
+     * @see #HDMI_CEC_SERVICE
+     * @see android.hardware.hdmi.HdmiCecManager
      * @see #STORAGE_SERVICE
      * @see android.os.storage.StorageManager
      * @see #VIBRATOR_SERVICE
@@ -2386,6 +2388,16 @@ public abstract class Context {
      * @hide
      */
     public static final String SERIAL_SERVICE = "serial";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.hardware.hdmi.HdmiCecManager for controlling and managing
+     * HDMI-CEC protocol.
+     *
+     * @see #getSystemService
+     * @see android.hardware.hdmi.HdmiCecManager
+     */
+     public static final String HDMI_CEC_SERVICE = "hdmi_cec";
 
     /**
      * Use with {@link #getSystemService} to retrieve a
