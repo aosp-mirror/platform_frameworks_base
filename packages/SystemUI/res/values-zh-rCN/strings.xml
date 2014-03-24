@@ -116,7 +116,7 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"信号强度为两格。"</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"信号强度为三格。"</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"信号满格。"</string>
-    <string name="accessibility_desc_on" msgid="2385254693624345265">"打开。"</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"开启。"</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"关闭。"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"已连接。"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
@@ -189,7 +189,7 @@
     <string name="quick_settings_rotation_locked_landscape_label" msgid="7216265671276086593">"锁定为横向"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"输入法"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"位置信息"</string>
-    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"位置信息服务已关闭"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"位置信息：关闭"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"媒体设备"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"只能拨打紧急呼救电话"</string>
