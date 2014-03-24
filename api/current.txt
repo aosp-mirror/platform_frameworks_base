@@ -24537,8 +24537,10 @@ package android.telecomm {
   public final class CallInfo implements android.os.Parcelable {
     ctor public CallInfo(java.lang.String, android.telecomm.CallState, android.net.Uri);
     method public int describeContents();
+    method public android.telecomm.GatewayInfo getGatewayInfo();
     method public android.net.Uri getHandle();
     method public java.lang.String getId();
+    method public android.net.Uri getOriginalHandle();
     method public android.telecomm.CallState getState();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -24624,6 +24626,16 @@ package android.telecomm {
     enum_constant public static final android.telecomm.CallState DISCONNECTED;
     enum_constant public static final android.telecomm.CallState ON_HOLD;
     enum_constant public static final android.telecomm.CallState RINGING;
+  }
+
+  public class GatewayInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.net.Uri getGatewayHandle();
+    method public java.lang.String getGatewayProviderPackageName();
+    method public android.net.Uri getOriginalHandle();
+    method public boolean isEmpty();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public final class InCallAdapter {

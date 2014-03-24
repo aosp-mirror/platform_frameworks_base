@@ -19,7 +19,6 @@ package android.telecomm;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable;
 
 import java.util.Date;
 import java.util.UUID;
@@ -47,6 +46,11 @@ public final class CallInfo implements Parcelable {
      */
     private final Uri mHandle;
 
+    /**
+     * Gateway information for the call.
+     */
+    private final GatewayInfo mGatewayInfo;
+
     // There are 4 timestamps that are important to a call:
     // 1) Created timestamp - The time at which the user explicitly chose to make the call.
     // 2) Connected timestamp - The time at which a call service confirms that it has connected
@@ -59,17 +63,25 @@ public final class CallInfo implements Parcelable {
     //    other party.
     // 4) Disconnected timestamp - The time at which the call was disconnected.
 
+    public CallInfo(String id, CallState state, Uri handle) {
+        this(id, state, handle, null);
+    }
+
     /**
      * Persists handle of the other party of this call.
      *
      * @param id The unique ID of the call.
      * @param state The state of the call.
      * @param handle The handle to the other party in this call.
+     * @param gatewayInfo Gateway information pertaining to this call.
+     *
+     * @hide
      */
-    public CallInfo(String id, CallState state, Uri handle) {
+    public CallInfo(String id, CallState state, Uri handle, GatewayInfo gatewayInfo) {
         mId = id;
         mState = state;
         mHandle = handle;
+        mGatewayInfo = gatewayInfo;
     }
 
     public String getId() {
@@ -82,6 +94,22 @@ public final class CallInfo implements Parcelable {
 
     public Uri getHandle() {
         return mHandle;
+    }
+
+    /**
+     * @return The actual handle this call is associated with. This is used by call services to
+     * correctly indicate in their UI what handle the user is actually calling, and by other
+     * telecomm components that require the user-dialed handle to function.
+     */
+    public Uri getOriginalHandle() {
+        if (mGatewayInfo != null) {
+            return mGatewayInfo.getOriginalHandle();
+        }
+        return getHandle();
+    }
+
+    public GatewayInfo getGatewayInfo() {
+        return mGatewayInfo;
     }
 
     //
@@ -99,8 +127,13 @@ public final class CallInfo implements Parcelable {
             String id = source.readString();
             CallState state = CallState.valueOf(source.readString());
             Uri handle = Uri.CREATOR.createFromParcel(source);
+            boolean gatewayInfoPresent = source.readByte() != 0;
+            GatewayInfo gatewayInfo = null;
+            if (gatewayInfoPresent) {
+                gatewayInfo = GatewayInfo.CREATOR.createFromParcel(source);
+            }
 
-            return new CallInfo(id, state, handle);
+            return new CallInfo(id, state, handle, gatewayInfo);
         }
 
         @Override
@@ -125,5 +158,11 @@ public final class CallInfo implements Parcelable {
         destination.writeString(mId);
         destination.writeString(mState.name());
         mHandle.writeToParcel(destination, 0);
+        if (mGatewayInfo != null) {
+            destination.writeByte((byte) 1);
+            mGatewayInfo.writeToParcel(destination, 0);
+        } else {
+            destination.writeByte((byte) 0);
+        }
     }
 }
