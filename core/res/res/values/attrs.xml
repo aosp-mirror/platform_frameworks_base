@@ -448,7 +448,7 @@
         <attr name="windowTranslucentNavigation" format="boolean" />
 
         <!-- Flag to indicate that a window can be swiped away to be dismissed.
-             Corresponds to {@link android.view.Window.FEATURE_SWIPE_TO_DISMISS} -->
+             Corresponds to {@link android.view.Window#FEATURE_SWIPE_TO_DISMISS} -->
         <attr name="windowSwipeToDismiss" format="boolean" />
 
         <!-- Flag indicating whether this window requests that content changes be performed
