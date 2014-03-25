@@ -249,6 +249,16 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public static final int IME_VISIBLE = 0x2;
 
+    /**
+     * The IME does not require cursor/anchor position.
+     */
+    public static final int CURSOR_ANCHOR_MONITOR_MODE_NONE = 0x0;
+
+    /**
+     * The IME expects that {@link #onUpdateCursor(Rect)} is called back.
+     */
+    public static final int CURSOR_ANCHOR_MONITOR_MODE_CURSOR_RECT = 0x1;
+
     InputMethodManager mImm;
     
     int mTheme = 0;
@@ -1699,6 +1709,13 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public void onUpdateCursor(Rect newCursor) {
         // Intentionally empty
+    }
+
+    /**
+     * Update the cursor/anthor monitor mode.
+     */
+    public void setCursorAnchorMonitorMode(int monitorMode) {
+        mImm.setCursorAnchorMonitorMode(mToken, monitorMode);
     }
 
     /**
