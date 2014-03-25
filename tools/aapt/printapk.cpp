@@ -115,8 +115,8 @@ main(int argc, char** argv)
         size_t basePackageCount = res.getBasePackageCount();
         printf("Base Packages: %d\n", (int)basePackageCount);
         for (size_t bpIndex=0; bpIndex<basePackageCount; bpIndex++) {
-            const char16_t* ch = res.getBasePackageName(bpIndex);
-            String8 s = String8(String16(ch));
+            const String16 ch = res.getBasePackageName(bpIndex);
+            String8 s = String8(ch);
             printf("  [%3d] %s\n", (int)bpIndex, s.string());
         }
 #endif

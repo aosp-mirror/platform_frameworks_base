@@ -1673,7 +1673,7 @@ status_t compileResourceFile(Bundle* bundle,
 
 ResourceTable::ResourceTable(Bundle* bundle, const String16& assetsPackage)
     : mAssetsPackage(assetsPackage), mNextPackageId(1), mHaveAppPackage(false),
-      mIsAppPackage(!bundle->getExtending()),
+      mIsAppPackage(!bundle->getExtending()), mIsSharedLibrary(bundle->getBuildSharedLibrary()),
       mNumLocal(0),
       mBundle(bundle)
 {
@@ -1695,8 +1695,9 @@ status_t ResourceTable::addIncludedResources(Bundle* bundle, const sp<AaptAssets
     const size_t N = incl.getBasePackageCount();
     for (size_t phase=0; phase<2; phase++) {
         for (size_t i=0; i<N; i++) {
-            String16 name(incl.getBasePackageName(i));
+            const String16 name = incl.getBasePackageName(i);
             uint32_t id = incl.getBasePackageId(i);
+
             // First time through: only add base packages (id
             // is not 0); second time through add the other
             // packages.
@@ -1722,7 +1723,7 @@ status_t ResourceTable::addIncludedResources(Bundle* bundle, const sp<AaptAssets
                 }
             }
             if (id != 0) {
-                NOISY(printf("Including package %s with ID=%d\n",
+                NOISY(fprintf(stderr, "Including package %s with ID=%d\n",
                              String8(name).string(), id));
                 sp<Package> p = new Package(name, id);
                 mPackages.add(name, p);
@@ -2687,6 +2688,9 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
 
     bool useUTF8 = !bundle->getUTF16StringsOption();
 
+    // The libraries this table references.
+    Vector<sp<Package> > libraryPackages;
+
     // Iterate through all data, collecting all values (strings,
     // references, etc).
     StringPool valueStrings(useUTF8);
@@ -2694,8 +2698,22 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
     for (pi=0; pi<N; pi++) {
         sp<Package> p = mOrderedPackages.itemAt(pi);
         if (p->getTypes().size() == 0) {
-            // Empty, skip!
+            // Empty, this is an imported package being used as
+            // a shared library. We do not flatten this package.
+            if (p->getAssignedId() != 0x01 && p->getName() != String16("android")) {
+                // This is not the base Android package, and it is a library
+                // so we must add a reference to the library when flattening.
+                libraryPackages.add(p);
+            }
             continue;
+        } else if (p->getAssignedId() == 0x00) {
+            if (!bundle->getBuildSharedLibrary()) {
+                fprintf(stderr, "ERROR: Package %s can not have ID=0x00 unless building a shared library.",
+                        String8(p->getName()).string());
+                return UNKNOWN_ERROR;
+            }
+            // If this is a shared library, we also include ourselves as an entry.
+            libraryPackages.add(p);
         }
 
         StringPool typeStrings(useUTF8);
@@ -2778,7 +2796,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
     }
 
     ssize_t strAmt = 0;
-    
+
     // Now build the array of package chunks.
     Vector<sp<AaptFile> > flatPackages;
     for (pi=0; pi<N; pi++) {
@@ -2825,6 +2843,12 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
         strAmt += amt;
         if (amt < 0) {
             return amt;
+        }
+
+        err = flattenLibraryTable(data, libraryPackages);
+        if (err != NO_ERROR) {
+            fprintf(stderr, "ERROR: failed to write library table\n");
+            return err;
         }
 
         // Build the type chunks inside of this package.
@@ -3053,7 +3077,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
     fprintf(stderr, "**** value strings: %d\n", amt);
     fprintf(stderr, "**** total strings: %d\n", strAmt);
     #endif
-    
+
     for (pi=0; pi<flatPackages.size(); pi++) {
         err = dest->writeData(flatPackages[pi]->getData(),
                               flatPackages[pi]->getSize());
@@ -3075,6 +3099,38 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
         dest->getSize(), (strAmt*100)/dest->getSize());
     #endif
     
+    return NO_ERROR;
+}
+
+status_t ResourceTable::flattenLibraryTable(const sp<AaptFile>& dest, const Vector<sp<Package> >& libs) {
+    // Write out the library table if necessary
+    if (libs.size() > 0) {
+        NOISY(fprintf(stderr, "Writing library reference table\n"));
+
+        const size_t libStart = dest->getSize();
+        const size_t count = libs.size();
+        ResTable_lib_header* libHeader = (ResTable_lib_header*) dest->editDataInRange(libStart, sizeof(ResTable_lib_header));
+
+        memset(libHeader, 0, sizeof(*libHeader));
+        libHeader->header.type = htods(RES_TABLE_LIBRARY_TYPE);
+        libHeader->header.headerSize = htods(sizeof(*libHeader));
+        libHeader->header.size = htodl(sizeof(*libHeader) + (sizeof(ResTable_lib_entry) * count));
+        libHeader->count = htodl(count);
+
+        // Write the library entries
+        for (size_t i = 0; i < count; i++) {
+            const size_t entryStart = dest->getSize();
+            sp<Package> libPackage = libs[i];
+            NOISY(fprintf(stderr, "  Entry %s -> 0x%02x\n",
+                        String8(libPackage->getName()).string(),
+                        (uint8_t)libPackage->getAssignedId()));
+
+            ResTable_lib_entry* entry = (ResTable_lib_entry*) dest->editDataInRange(entryStart, sizeof(ResTable_lib_entry));
+            memset(entry, 0, sizeof(*entry));
+            entry->packageId = htodl(libPackage->getAssignedId());
+            strcpy16_htod(entry->packageName, libPackage->getName().string());
+        }
+    }
     return NO_ERROR;
 }
 
@@ -3847,7 +3903,7 @@ sp<ResourceTable::Package> ResourceTable::getPackage(const String16& package)
                 return NULL;
             }
             mHaveAppPackage = true;
-            p = new Package(package, 127);
+            p = new Package(package, mIsSharedLibrary ? 0 : 127);
         } else {
             p = new Package(package, mNextPackageId);
         }

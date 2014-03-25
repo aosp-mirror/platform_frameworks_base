@@ -16,4 +16,5 @@
 
 <resources>
     <string name="app_title">SharedLibrary client</string>
+    <string name="changes">@com.google.android.test.shared_library:string/shared_string</string>
 </resources>
