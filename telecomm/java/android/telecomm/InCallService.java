@@ -40,6 +40,7 @@ public abstract class InCallService extends Service {
     private static final int MSG_SET_ACTIVE = 3;
     private static final int MSG_SET_DISCONNECTED = 4;
     private static final int MSG_SET_HOLD = 5;
+    private static final int MSG_ON_AUDIO_STATE_CHANGED = 6;
 
     /** Default Handler used to consolidate binder method calls onto a single thread. */
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -61,6 +62,9 @@ public abstract class InCallService extends Service {
                     break;
                 case MSG_SET_HOLD:
                     setOnHold((String) msg.obj);
+                    break;
+                case MSG_ON_AUDIO_STATE_CHANGED:
+                    onAudioStateChanged((CallAudioState) msg.obj);
                 default:
                     break;
             }
@@ -97,6 +101,12 @@ public abstract class InCallService extends Service {
         @Override
         public void setOnHold(String callId) {
             mHandler.obtainMessage(MSG_SET_HOLD, callId).sendToTarget();
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void onAudioStateChanged(CallAudioState audioState) {
+            mHandler.obtainMessage(MSG_ON_AUDIO_STATE_CHANGED, audioState).sendToTarget();
         }
     }
 
@@ -153,4 +163,11 @@ public abstract class InCallService extends Service {
      * @param callId The identifier of the call that was put on hold.
      */
     protected abstract void setOnHold(String callId);
+
+    /**
+     * Called when the audio state changes.
+     *
+     * @param audioState The new {@link CallAudioState}.
+     */
+    protected abstract void onAudioStateChanged(CallAudioState audioState);
 }

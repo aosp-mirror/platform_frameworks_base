@@ -46,6 +46,18 @@ import com.android.internal.telecomm.ICallServiceAdapter;
  */
 public abstract class CallService extends Service {
 
+    private static final int MSG_SET_CALL_SERVICE_ADAPTER = 1;
+    private static final int MSG_IS_COMPATIBLE_WITH = 2;
+    private static final int MSG_CALL = 3;
+    private static final int MSG_ABORT = 4;
+    private static final int MSG_SET_INCOMING_CALL_ID = 5;
+    private static final int MSG_ANSWER = 6;
+    private static final int MSG_REJECT = 7;
+    private static final int MSG_DISCONNECT = 8;
+    private static final int MSG_HOLD = 9;
+    private static final int MSG_UNHOLD = 10;
+    private static final int MSG_ON_AUDIO_STATE_CHANGED = 11;
+
     /**
      * Default Handler used to consolidate binder method calls onto a single thread.
      */
@@ -67,7 +79,7 @@ public abstract class CallService extends Service {
                 case MSG_ABORT:
                     abort((String) msg.obj);
                     break;
-                case MSG_SET_INCOMING_CALL_ID:
+                case MSG_SET_INCOMING_CALL_ID: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         String callId = (String) args.arg1;
@@ -77,6 +89,7 @@ public abstract class CallService extends Service {
                         args.recycle();
                     }
                     break;
+                }
                 case MSG_ANSWER:
                     answer((String) msg.obj);
                     break;
@@ -92,6 +105,17 @@ public abstract class CallService extends Service {
                 case MSG_UNHOLD:
                     unhold((String) msg.obj);
                     break;
+                case MSG_ON_AUDIO_STATE_CHANGED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        String callId = (String) args.arg1;
+                        CallAudioState audioState = (CallAudioState) args.arg2;
+                        onAudioStateChanged(callId, audioState);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -155,24 +179,15 @@ public abstract class CallService extends Service {
         public void unhold(String callId) {
             mMessageHandler.obtainMessage(MSG_UNHOLD, callId).sendToTarget();
         }
-    }
 
-    // Only used internally by this class.
-    // Binder method calls on this service can occur on multiple threads. These messages are used
-    // in conjunction with {@link #mMessageHandler} to ensure that all callbacks are handled on a
-    // single thread.  Keeping it on a single thread allows CallService implementations to avoid
-    // needing multi-threaded code in their own callback routines.
-    private static final int
-            MSG_SET_CALL_SERVICE_ADAPTER = 1,
-            MSG_IS_COMPATIBLE_WITH = 2,
-            MSG_CALL = 3,
-            MSG_ABORT = 4,
-            MSG_SET_INCOMING_CALL_ID = 5,
-            MSG_ANSWER = 6,
-            MSG_REJECT = 7,
-            MSG_DISCONNECT = 8,
-            MSG_HOLD = 9,
-            MSG_UNHOLD = 10;
+        @Override
+        public void onAudioStateChanged(String callId, CallAudioState audioState) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            args.arg2 = audioState;
+            mMessageHandler.obtainMessage(MSG_ON_AUDIO_STATE_CHANGED, args).sendToTarget();
+        }
+    }
 
     /**
      * Message handler for consolidating binder callbacks onto a single thread.
@@ -290,4 +305,12 @@ public abstract class CallService extends Service {
      * @param callId The ID of the call to unhold.
      */
     public abstract void unhold(String callId);
+
+    /**
+     * Called when the audio state changes.
+     *
+     * @param activeCallId The identifier of the call that was active during the state change.
+     * @param audioState The new {@link CallAudioState}.
+     */
+    public abstract void onAudioStateChanged(String activeCallId, CallAudioState audioState);
 }

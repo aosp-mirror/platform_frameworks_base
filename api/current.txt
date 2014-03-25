@@ -24624,6 +24624,21 @@ package android.speech.tts {
 
 package android.telecomm {
 
+  public final class CallAudioState implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static int ROUTE_ALL;
+    field public static int ROUTE_BLUETOOTH;
+    field public static int ROUTE_EARPIECE;
+    field public static int ROUTE_SPEAKER;
+    field public static int ROUTE_WIRED_HEADSET;
+    field public static int ROUTE_WIRED_OR_EARPIECE;
+    field public final boolean isMuted;
+    field public final int route;
+    field public final int supportedRouteMask;
+  }
+
   public final class CallInfo implements android.os.Parcelable {
     ctor public CallInfo(java.lang.String, android.telecomm.CallState, android.net.Uri);
     method public int describeContents();
@@ -24645,6 +24660,7 @@ package android.telecomm {
     method public final android.os.IBinder getBinder();
     method public abstract void hold(java.lang.String);
     method public abstract void isCompatibleWith(android.telecomm.CallInfo);
+    method public abstract void onAudioStateChanged(java.lang.String, android.telecomm.CallAudioState);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void reject(java.lang.String);
     method public abstract void setCallServiceAdapter(android.telecomm.CallServiceAdapter);
@@ -24732,13 +24748,16 @@ package android.telecomm {
     method public void answerCall(java.lang.String);
     method public void disconnectCall(java.lang.String);
     method public void holdCall(java.lang.String);
+    method public void mute(boolean);
     method public void rejectCall(java.lang.String);
+    method public void setAudioRoute(int);
     method public void unholdCall(java.lang.String);
   }
 
   public abstract class InCallService extends android.app.Service {
     ctor protected InCallService();
     method protected abstract void addCall(android.telecomm.CallInfo);
+    method protected abstract void onAudioStateChanged(android.telecomm.CallAudioState);
     method public final android.os.IBinder onBind(android.content.Intent);
     method protected abstract void setActive(java.lang.String);
     method protected abstract void setDisconnected(java.lang.String);
