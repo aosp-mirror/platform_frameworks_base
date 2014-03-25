@@ -28,6 +28,41 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 22.6.2</a> <em>(March 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 18 or later.</li>
+        <li>If you are developing in Eclipse with ADT, note that this version of SDK Tools is
+          designed for use with ADT 22.6.2 and later. If you haven't already, update your
+        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 22.6.2.</li>
+        <li>If you are developing outside Eclipse, you must have
+          <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Fixed a problem where the SDK Manager threw a <code>NullPointerException</code> after
+            removing a virtual device that was created using the Android Wear
+            system image.</li>
+        <li>Fixed a problem with Nexus 5 Android virtual devices created from the command line
+            where the SD card file system was read-only.</li>
+      </ul>
+    </dd>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.6.1</a> <em>(March 2014)</em>
   </p>
 
@@ -124,7 +159,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
               </ul>
             </li>
             <li>Check that production builds do not use mock location providers.</li>
-            <li>Look for manifest values that are overwritten by values from Gradle build 
+            <li>Look for manifest values that are overwritten by values from Gradle build
                 scripts.</li>
           </ul>
         </li>
@@ -148,7 +183,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
                 (<a href="http://b.android.com/34233">Issue 34233</a>)</li>
           </ul>
         </li>
-        <li>Fixed an issue with RenderScript support. Using RenderScript support mode 
+        <li>Fixed an issue with RenderScript support. Using RenderScript support mode
           now requires version 19.0.3 of the Build Tools.</li>
       </ul>
     </dd>

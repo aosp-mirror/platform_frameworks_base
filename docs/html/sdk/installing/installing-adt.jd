@@ -1,8 +1,8 @@
 page.title=Installing the Eclipse Plugin
-adt.zip.version=22.6.0
-adt.zip.download=ADT-22.6.0.zip
-adt.zip.bytes=14585211
-adt.zip.checksum=d95c6d8e678881f6c89f063b58d4162f
+adt.zip.version=22.6.2
+adt.zip.download=ADT-22.6.2.zip
+adt.zip.bytes=14586842
+adt.zip.checksum=f660959fa71262b4285bcb64be284bf5
 
 @jd:body
 
@@ -75,7 +75,7 @@ To get these packages for your SDK, continue to
 <div class="sidebox-wrapper">
 <div class="sidebox">
 <h2>App Translations in Google Play</h2>
-<p>Google Play <a href="{@docRoot}distribute/googleplay/publish/localizing.html#gp-trans">App 
+<p>Google Play <a href="{@docRoot}distribute/googleplay/publish/localizing.html#gp-trans">App
 Translation Service</a> is available in the Developer Console to help you
 localize your app for a global user base. You can browse qualified vendors, get
 estimates, upload strings for translation, and then import the translations directly

@@ -57,6 +57,47 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>ADT 22.6.2</a> <em>(March 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Indigo (Version 3.7.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r22.6.2</a>.
+        If you haven't already installed SDK Tools r22.6.2 into your SDK, use the
+        Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>Fixed a problem where Eclipse was non-responsive for a few seconds after opening
+          an XML file. (<a href="http://b.android.com/67084">Issue 67084</a>)</li>
+      <li>Fixed a problem where the SDK Manager threw a <code>NullPointerException</code> after
+          removing a virtual device that was created using the Android Wear
+          system image.</li>
+      <li>Fixed a problem where the layout preview for large screens in Eclipse showed the
+          resources from the <code>drawable-*</code> directories instead of those from the
+          <code>drawable-large-*</code> directories.</li>
+      <li>Fixed a problem with Nexus 5 Android virtual devices created from the command line
+          where the SD card file system was read-only.</li>
+      <li>Changed the URL for the Android Developer Tools Update Site from HTTPS to HTTP.</li>
+    </ul>
+  </dd>
+</dl>
+</div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>ADT 22.6.1</a> <em>(March 2014)</em>
   </p>
 
@@ -78,8 +119,8 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
   <dt>General Notes:</dt>
   <dd>
     <ul>
-      <li>Fixed a problem where the Android Virtual Device Manager could not create new virtual
-          devices. (<a href="http://b.android.com/66661">Issue 66661</a>)</li>
+      <li>Fixed a problem where the Android Virtual Device Manager could not create new
+          virtual devices. (<a href="http://b.android.com/66661">Issue 66661</a>)</li>
       <li><p>Fixed a problem with virtual devices created using ADT 22.3 or earlier.</p>
           <p>If you created an Android Virtual Device using ADT 22.3 or earlier, the
           AVD may be listed as <em>broken</em> in the AVD Manager in 22.6.1. To fix
@@ -101,7 +142,6 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 </dl>
 </div>
 </div>
-
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
