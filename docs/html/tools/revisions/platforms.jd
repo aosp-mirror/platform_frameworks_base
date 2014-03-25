@@ -93,6 +93,21 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2013)</em>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 4</a> <em>(March 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>This release includes
+    <a href="{@docRoot}google/play-services/index.html">Google Play services</a> version 4.3,
+    allowing you to test your application in an emulator using the latest Google Play services.</p>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 3</a> <em>(February 2014)</em>
   </p>
 
