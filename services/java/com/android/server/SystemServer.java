@@ -116,6 +116,8 @@ public final class SystemServer {
             "com.android.server.usb.UsbService$Lifecycle";
     private static final String WIFI_SERVICE_CLASS =
             "com.android.server.wifi.WifiService";
+    private static final String WIFI_HOTSPOT_SERVICE_CLASS =
+            "com.android.server.wifi.hotspot.WifiHotspotService";
     private static final String WIFI_P2P_SERVICE_CLASS =
             "com.android.server.wifi.p2p.WifiP2pService";
     private static final String HDMI_CEC_SERVICE_CLASS =
@@ -611,6 +613,12 @@ public final class SystemServer {
                     mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
                 } catch (Throwable e) {
                     reportWtf("starting Wi-Fi P2pService", e);
+                }
+
+                try {
+                    mSystemServiceManager.startService(WIFI_HOTSPOT_SERVICE_CLASS);
+                } catch (Throwable e) {
+                    reportWtf("starting Wi-Fi HotspotService", e);
                 }
 
                 try {
