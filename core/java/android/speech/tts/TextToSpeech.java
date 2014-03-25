@@ -990,6 +990,7 @@ public class TextToSpeech {
      * must be behave as per {@link Boolean#parseBoolean(String)}.
      *
      * @param locale The locale to query features for.
+     * @return Set instance. May return {@code null} on error.
      */
     public Set<String> getFeatures(final Locale locale) {
         return runAction(new Action<Set<String>>() {
