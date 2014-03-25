@@ -297,7 +297,7 @@ onkeyup="return search_changed(event, false, '/')" />
     </div>
     <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
     <div id="ytapiplayer">
-      <a href="http://www.youtube.com/watch?v=0xQ3y902DEQ"><img width=600
+      <a href="http://www.youtube.com/watch?v=0xQ3y902DEQ"><img width=940
       src="https://i1.ytimg.com/vi/0xQ3y902DEQ/maxresdefault.jpg"></a><!--You need Flash player 8+ and JavaScript enabled to view this video. -->
     </div>
   </div>
@@ -346,9 +346,14 @@ $("#watchVideo").on("click", function(e) {
 });
 $("#icon-video-close").on("click", function() {
   ytplayer = document.getElementById("ytapiplayer");
-  ytplayer.stopVideo();
-  $(ytplayer).hide();
-  $("#video-container").fadeOut(400);
+  try {
+    ytplayer.stopVideo();
+    $(ytplayer).hide();
+    $("#video-container").fadeOut(400);
+  } catch(e) {
+    console.log('Video not available');
+    $("#video-container").fadeOut(400);
+  }
 });
 </script>
               </div>
