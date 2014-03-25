@@ -1260,8 +1260,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     private boolean shouldIntercept() {
-        return mZenMode == Settings.Global.ZEN_MODE_LIMITED
-                || mZenMode == Settings.Global.ZEN_MODE_FULL;
+        return mZenMode != Settings.Global.ZEN_MODE_OFF;
     }
 
     protected boolean shouldIntercept(Notification n) {
