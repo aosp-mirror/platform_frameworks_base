@@ -32,8 +32,6 @@ import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.view.accessibility.AccessibilityEvent;
 
-import java.util.Map;
-
 /**
  * Abstract base class for a top-level window look and behavior policy.  An
  * instance of this class should be used as the top-level view added to the
@@ -1385,86 +1383,132 @@ public abstract class Window {
     }
 
     /**
-     * Set options that can affect the transition behavior within this window.
-     * @param options Options to set or null for none
-     * @hide
+     * Sets the Transition that will be used to move Views into the initial scene. The entering
+     * Views will be those that are regular Views or ViewGroups that have
+     * {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
+     * {@link android.transition.Visibility} as entering is governed by changing visibility from
+     * {@link View#INVISIBLE} to {@link View#VISIBLE}. If <code>transition</code> is null,
+     * entering Views will remain unaffected.
+     * @param transition The Transition to use to move Views into the initial Scene.
      */
-    public void setTransitionOptions(Bundle options, SceneTransitionListener listener) {
-    }
+    public void setEnterTransition(Transition transition) {}
 
     /**
-     * A callback for Window transitions to be told when the shared element is ready to be shown
-     * and start the transition to its target location.
-     * @hide
+     * Sets the Transition that will be used to move Views out of the scene when starting a
+     * new Activity. The exiting Views will be those that are regular Views or ViewGroups that
+     * have {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
+     * {@link android.transition.Visibility} as exiting is governed by changing visibility
+     * from {@link View#VISIBLE} to {@link View#INVISIBLE}. If transition is null, the views will
+     * remain unaffected. Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * @param transition The Transition to use to move Views out of the scene when calling a
+     *                   new Activity.
      */
-    public interface SceneTransitionListener {
-        void nullPendingTransition();
-        void convertFromTranslucent();
-        void convertToTranslucent();
-        void sharedElementStart(Transition transition);
-        void sharedElementEnd();
-    }
+    public void setExitTransition(Transition transition) {}
 
     /**
-     * Controls how the Activity's start Scene is faded in and when the enter scene
-     * is triggered to start.
-     * <p>When allow is true, the enter Scene will begin as soon as possible
-     * and the background will fade in when all shared elements are ready to begin
-     * transitioning. If allow is false, the Activity enter Scene and
-     * background fade will be triggered when the calling Activity's exit transition
-     * completes.</p>
-     * @param allow Set to true to have the Activity enter scene transition in
-     *              as early as possible or set to false to wait for the calling
-     *              Activity to exit first. The default value is true.
+     * Returns the transition used to move Views into the initial scene. The entering
+     * Views will be those that are regular Views or ViewGroups that have
+     * {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
+     * {@link android.transition.Visibility} as entering is governed by changing visibility from
+     * {@link View#INVISIBLE} to {@link View#VISIBLE}. If <code>transition</code> is null,
+     * entering Views will remain unaffected.  Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     *
+     * @return the Transition to use to move Views into the initial Scene.
      */
-    public void setAllowOverlappingEnterTransition(boolean allow) {
-    }
+    public Transition getEnterTransition() { return null; }
 
     /**
-     * Controls how the Activity's Scene fades out and when the calling Activity's
-     * enter scene is triggered when finishing to return to a calling Activity.
-     * <p>When allow is true, the Scene will fade out quickly
-     * and inform the calling Activity to transition in when the fade completes.
-     * When allow is false, the calling Activity will transition in after
-     * the Activity's Scene has exited.
-     * </p>
-     * @param allow Set to true to have the Activity fade out as soon as possible
-     *              and transition in the calling Activity. The default value is
-     *              true.
+     * Returns the Transition that will be used to move Views out of the scene when starting a
+     * new Activity. The exiting Views will be those that are regular Views or ViewGroups that
+     * have {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
+     * {@link android.transition.Visibility} as exiting is governed by changing visibility
+     * from {@link View#VISIBLE} to {@link View#INVISIBLE}. If transition is null, the views will
+     * remain unaffected. Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * @return the Transition to use to move Views out of the scene when calling a
+     * new Activity.
      */
-    public void setAllowOverlappingExitTransition(boolean allow) {
-    }
+    public Transition getExitTransition() { return null; }
 
     /**
-     * Start the exit transition.
-     * @hide
+     * Sets the Transition that will be used for shared elements transferred into the content
+     * Scene. Typical Transitions will affect size and location, such as
+     * {@link android.transition.MoveImage} and {@link android.transition.ChangeBounds}. A null
+     * value will cause transferred shared elements to blink to the final position.
+     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * @param transition The Transition to use for shared elements transferred into the content
+     *                   Scene.
      */
-    public Bundle startExitTransitionToCallee(Bundle options) {
-        return null;
-    }
+    public void setSharedElementEnterTransition(Transition transition) {}
 
     /**
-     * Starts the transition back to the calling Activity.
-     * onTransitionEnd will be called on the current thread if there is no exit transition.
-     * @hide
+     * Returns the Transition that will be used for shared elements transferred into the content
+     * Scene. Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * @return Transition to use for sharend elements transferred into the content Scene.
      */
-    public void startExitTransitionToCaller(Runnable onTransitionEnd) {
-        onTransitionEnd.run();
-    }
-
-    /** @hide */
-    public void restoreViewVisibilityAfterTransitionToCallee() {
-    }
+    public Transition getSharedElementEnterTransition() { return null; }
 
     /**
-     * On entering Activity Scene transitions, shared element names may be mapped from a
-     * source Activity's specified name to a unique shared element name in the View hierarchy.
-     * Under most circumstances, mapping is not necessary - a single View will have the
-     * shared element name given by the calling Activity. However, if there are several similar
-     * Views (e.g. in a ListView), the correct shared element must be mapped.
-     * @param sharedElementNames A mapping from the calling Activity's assigned shared element
-     *                           name to a unique shared element name in the View hierarchy.
+     * Sets the Transition that will be used for shared elements after starting a new Activity
+     * before the shared elements are transferred to the called Activity. If the shared elements
+     * must animate during the exit transition, this Transition should be used. Upon completion,
+     * the shared elements may be transferred to the started Activity.
+     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * @param transition The Transition to use for shared elements in the launching Window
+     *                   prior to transferring to the launched Activity's Window.
      */
-    public void mapTransitionTargets(Map<String, String> sharedElementNames) {
-    }
+    public void setSharedElementExitTransition(Transition transition) {}
+
+    /**
+     * Returns the Transition to use for shared elements in the launching Window prior
+     * to transferring to the launched Activity's Window.
+     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     *
+     * @return the Transition to use for shared elements in the launching Window prior
+     * to transferring to the launched Activity's Window.
+     */
+    public Transition getSharedElementExitTransition() { return null; }
+
+    /**
+     * Controls how the transition set in
+     * {@link #setEnterTransition(android.transition.Transition)} overlaps with the exit
+     * transition of the calling Activity. When true, the transition will start as soon as possible.
+     * When false, the transition will wait until the remote exiting transition completes before
+     * starting.
+     * @param allow true to start the enter transition when possible or false to
+     *              wait until the exiting transition completes.
+     */
+    public void setAllowEnterTransitionOverlap(boolean allow) {}
+
+    /**
+     * Returns how the transition set in
+     * {@link #setEnterTransition(android.transition.Transition)} overlaps with the exit
+     * transition of the calling Activity. When true, the transition will start as soon as possible.
+     * When false, the transition will wait until the remote exiting transition completes before
+     * starting.
+     * @return true when the enter transition should start as soon as possible or false to
+     * when it should wait until the exiting transition completes.
+     */
+    public boolean getAllowEnterTransitionOverlap() { return true; }
+
+    /**
+     * Controls how the transition set in
+     * {@link #setExitTransition(android.transition.Transition)} overlaps with the exit
+     * transition of the called Activity when reentering after if finishes. When true,
+     * the transition will start as soon as possible. When false, the transition will wait
+     * until the called Activity's exiting transition completes before starting.
+     * @param allow true to start the transition when possible or false to wait until the
+     *              called Activity's exiting transition completes.
+     */
+    public void setAllowExitTransitionOverlap(boolean allow) {}
+
+    /**
+     * Returns how the transition set in
+     * {@link #setExitTransition(android.transition.Transition)} overlaps with the exit
+     * transition of the called Activity when reentering after if finishes. When true,
+     * the transition will start as soon as possible. When false, the transition will wait
+     * until the called Activity's exiting transition completes before starting.
+     * @return true when the transition should start when possible or false when it should wait
+     * until the called Activity's exiting transition completes.
+     */
+    public boolean getAllowExitTransitionOverlap() { return true; }
 }

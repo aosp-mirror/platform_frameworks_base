@@ -2305,11 +2305,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /**
      * Changes whether or not this ViewGroup should be treated as a single entity during
-     * ActivityTransitions.
+     * Activity Transitions.
      * @param isTransitionGroup Whether or not the ViewGroup should be treated as a unit
      *                          in Activity transitions. If false, the ViewGroup won't transition,
      *                          only its children. If true, the entire ViewGroup will transition
      *                          together.
+     * @see android.app.ActivityOptions#makeSceneTransitionAnimation(android.view.Window,
+     * android.app.ActivityOptions.ActivityTransitionListener)
      */
     public void setTransitionGroup(boolean isTransitionGroup) {
         mGroupFlags |= FLAG_IS_TRANSITION_GROUP_SET;

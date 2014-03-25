@@ -2389,4 +2389,11 @@
   <public type="interpolator" name="linear_out_slow_in" />
   <!-- An interpolator which accelerates fast and keeps accelerating until the end. -->
   <public type="interpolator" name="fast_out_linear_in" />
+  <public type="attr" name="windowEnterTransition" />
+  <public type="attr" name="windowExitTransition" />
+  <public type="attr" name="windowSharedElementEnterTransition" />
+  <public type="attr" name="windowSharedElementExitTransition" />
+  <public type="attr" name="windowAllowExitTransitionOverlap" />
+  <public type="attr" name="windowAllowEnterTransitionOverlap" />
+  <public type="transition" name="no_transition" id="0x010f0000"/>
 </resources>

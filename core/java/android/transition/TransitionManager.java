@@ -70,7 +70,6 @@ public class TransitionManager {
     private static final String[] EMPTY_STRINGS = new String[0];
 
     ArrayMap<Scene, Transition> mSceneTransitions = new ArrayMap<Scene, Transition>();
-    ArrayMap<Scene, Transition> mExitSceneTransitions = new ArrayMap<Scene, Transition>();
     ArrayMap<Scene, ArrayMap<Scene, Transition>> mScenePairTransitions =
             new ArrayMap<Scene, ArrayMap<Scene, Transition>>();
     private static ThreadLocal<WeakReference<ArrayMap<ViewGroup, ArrayList<Transition>>>>
@@ -116,21 +115,6 @@ public class TransitionManager {
      */
     public void setTransition(Scene scene, Transition transition) {
         mSceneTransitions.put(scene, transition);
-    }
-
-    /**
-     * Sets a specific transition to occur when the given scene is exited. This
-     * has the lowest priority -- if a Scene-to-Scene transition or
-     * Scene enter transition can be applied, it will.
-     *
-     * @param scene The scene which, when exited, will cause the given
-     * transition to run.
-     * @param transition The transition that will play when the given scene is
-     * exited. A value of null will result in the default behavior of
-     * using the default transition instead.
-     */
-    public void setExitTransition(Scene scene, Transition transition) {
-        mExitSceneTransitions.put(scene, transition);
     }
 
     /**
@@ -181,9 +165,6 @@ public class TransitionManager {
             }
         }
         transition = mSceneTransitions.get(scene);
-        if (transition == null && sceneRoot != null) {
-            transition = mExitSceneTransitions.get(Scene.getCurrentScene(sceneRoot));
-        }
         return (transition != null) ? transition : sDefaultTransition;
     }
 
@@ -236,34 +217,6 @@ public class TransitionManager {
             sceneRoot.addOnAttachStateChangeListener(listener);
             sceneRoot.getViewTreeObserver().addOnPreDrawListener(listener);
         }
-    }
-
-    /**
-     * Retrieve the transition to a target defined scene if one has been
-     * associated with this TransitionManager.
-     *
-     * @param toScene Target scene that this transition will move to
-     * @return Transition corresponding to the given toScene or null
-     *         if no association exists in this TransitionManager
-     *
-     * @see #setTransition(Scene, Transition)
-     * @hide
-     */
-    public Transition getEnterTransition(Scene toScene) {
-        return mSceneTransitions.get(toScene);
-    }
-
-    /**
-     * Retrieve the transition from a defined scene to a target named scene if one has been
-     * associated with this TransitionManager.
-     *
-     * @param fromScene Scene that this transition starts from
-     * @return Transition corresponding to the given fromScene or null
-     *         if no association exists in this TransitionManager
-     * @hide
-     */
-    public Transition getExitTransition(Scene fromScene) {
-        return mExitSceneTransitions.get(fromScene);
     }
 
     /**

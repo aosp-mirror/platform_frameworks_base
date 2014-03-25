@@ -362,10 +362,6 @@ public class WindowDecorActionBar extends ActionBar {
         setSubtitle(mContext.getString(resId));
     }
 
-    public void captureSharedElements(Map<String, View> sharedElements) {
-        mContainerView.findSharedElements(sharedElements);
-    }
-
     public void setSelectedNavigationItem(int position) {
         switch (mActionView.getNavigationMode()) {
         case NAVIGATION_MODE_TABS:

@@ -444,9 +444,4 @@ public class ToolbarActionBar extends ActionBar {
             mMenuVisibilityListeners.get(i).onMenuVisibilityChanged(isVisible);
         }
     }
-
-    @Override
-    public void captureSharedElements(Map<String, View> sharedElements) {
-        mToolbar.findSharedElements(sharedElements);
-    }
 }
