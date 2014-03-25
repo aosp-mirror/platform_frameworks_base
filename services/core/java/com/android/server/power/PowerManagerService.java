@@ -747,7 +747,7 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
     }
 
-    private void updateWakeLockWorkSourceInternal(IBinder lock, WorkSource ws) {
+    private void updateWakeLockWorkSourceInternal(IBinder lock, WorkSource ws, String historyTag) {
         synchronized (mLock) {
             int index = findWakeLockIndexLocked(lock);
             if (index < 0) {
@@ -767,7 +767,8 @@ public final class PowerManagerService extends com.android.server.SystemService
             if (!wakeLock.hasSameWorkSource(ws)) {
                 notifyWakeLockChangingLocked(wakeLock, wakeLock.mFlags, wakeLock.mTag,
                         wakeLock.mPackageName, wakeLock.mOwnerUid, wakeLock.mOwnerPid,
-                        ws, wakeLock.mHistoryTag);
+                        ws, historyTag);
+                wakeLock.mHistoryTag = historyTag;
                 wakeLock.updateWorkSource(ws);
             }
         }
@@ -2600,11 +2601,11 @@ public final class PowerManagerService extends com.android.server.SystemService
                     ws.add(uids[i]);
                 }
             }
-            updateWakeLockWorkSource(lock, ws);
+            updateWakeLockWorkSource(lock, ws, null);
         }
 
         @Override // Binder call
-        public void updateWakeLockWorkSource(IBinder lock, WorkSource ws) {
+        public void updateWakeLockWorkSource(IBinder lock, WorkSource ws, String historyTag) {
             if (lock == null) {
                 throw new IllegalArgumentException("lock must not be null");
             }
@@ -2619,7 +2620,7 @@ public final class PowerManagerService extends com.android.server.SystemService
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                updateWakeLockWorkSourceInternal(lock, ws);
+                updateWakeLockWorkSourceInternal(lock, ws, historyTag);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

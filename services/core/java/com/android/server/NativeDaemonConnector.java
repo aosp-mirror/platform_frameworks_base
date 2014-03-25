@@ -110,7 +110,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
         } catch (Exception e) {
             loge("Error handling '" + event + "': " + e);
         } finally {
-            if (mCallbacks.onCheckHoldWakeLock(msg.what)) {
+            if (mCallbacks.onCheckHoldWakeLock(msg.what) && mWakeLock != null) {
                 mWakeLock.release();
             }
         }
@@ -171,7 +171,8 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                                     rawEvent);
                             if (event.isClassUnsolicited()) {
                                 // TODO: migrate to sending NativeDaemonEvent instances
-                                if (mCallbacks.onCheckHoldWakeLock(event.getCode())) {
+                                if (mCallbacks.onCheckHoldWakeLock(event.getCode())
+                                        && mWakeLock != null) {
                                     mWakeLock.acquire();
                                     releaseWl = true;
                                 }

@@ -32,7 +32,7 @@ interface IPowerManager
     void releaseWakeLock(IBinder lock, int flags);
     void updateWakeLockUids(IBinder lock, in int[] uids);
 
-    void updateWakeLockWorkSource(IBinder lock, in WorkSource ws);
+    void updateWakeLockWorkSource(IBinder lock, in WorkSource ws, String historyTag);
     boolean isWakeLockLevelSupported(int level);
 
     void userActivity(long time, int event, int flags);
