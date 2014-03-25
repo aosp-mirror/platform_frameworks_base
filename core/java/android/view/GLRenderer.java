@@ -1287,6 +1287,7 @@ public class GLRenderer extends HardwareRenderer {
         }
 
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "drawDisplayList");
+        nUpdateRenderNodeProperties(displayList.getNativeDisplayList());
         try {
             status |= canvas.drawDisplayList(displayList, mRedrawClip,
                     RenderNode.FLAG_CLIP_CHILDREN);
@@ -1465,6 +1466,8 @@ public class GLRenderer extends HardwareRenderer {
     static native boolean isBackBufferPreserved();
 
     static native void nDestroyLayer(long layerPtr);
+
+    private static native void nUpdateRenderNodeProperties(long displayListPtr);
 
     class DrawPerformanceDataProvider extends GraphDataProvider {
         private final int mGraphType;
