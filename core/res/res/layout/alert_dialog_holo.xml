@@ -34,7 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="2dip"
             android:visibility="gone"
-            android:background="@android:color/holo_blue_light" />
+            android:background="@android:color/default_dialog_divider_holo_light" />
         <LinearLayout android:id="@+id/title_template"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -60,7 +60,7 @@
             android:layout_width="match_parent"
             android:layout_height="2dip"
             android:visibility="gone"
-            android:background="@android:color/holo_blue_light" />
+            android:background="@android:color/default_dialog_divider_holo_light" />
         <!-- If the client uses a customTitle, it will be added here. -->
     </LinearLayout>
 

@@ -145,8 +145,8 @@
     <color name="dim_foreground_inverse_holo_light">#bebebe</color>
     <color name="dim_foreground_inverse_disabled_holo_light">#80bebebe</color>
     <color name="hint_foreground_holo_light">#808080</color>
-    <color name="highlighted_text_holo_dark">#6633b5e5</color>
-    <color name="highlighted_text_holo_light">#6633b5e5</color>
+    <color name="highlighted_text_holo_dark">#66ffffff</color>
+    <color name="highlighted_text_holo_light">#66000000</color>
     <color name="link_text_holo_dark">#5c5cff</color>
     <color name="link_text_holo_light">#0000ee</color>
 
@@ -168,7 +168,7 @@
     <eat-comment />
 
     <!-- A light Holo shade of blue -->
-    <color name="holo_blue_light">#ff33b5e5</color>
+    <color name="holo_blue_light">#ffbdbdbd</color>
     <!-- A light Holo shade of gray -->
     <color name="holo_gray_light">#33999999</color>
     <!-- A light Holo shade of green -->
@@ -192,7 +192,7 @@
     <!-- A really bright Holo shade of gray -->
     <color name="holo_gray_bright">#33CCCCCC</color>
 
-    <drawable name="notification_template_icon_bg">#3333B5E5</drawable>
+    <drawable name="notification_template_icon_bg">#00000000</drawable>
     <drawable name="notification_template_icon_low_bg">#0cffffff</drawable>
 
     <!-- Keyguard colors -->
@@ -202,5 +202,9 @@
     <color name="keyguard_avatar_frame_pressed_color">#ff35b5e5</color>
 
     <color name="accessibility_focus_highlight">#80ffff00</color>
+    <color name="default_dialog_text_holo_dark">@android:color/background_holo_light</color>
+    <color name="default_dialog_text_holo_light">@android:color/background_holo_dark</color>
+    <color name="default_dialog_divider_holo_dark">@android:color/background_holo_light</color>
+    <color name="default_dialog_divider_holo_light">#ffacacac</color>
 </resources>
 
