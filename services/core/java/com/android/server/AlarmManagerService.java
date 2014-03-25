@@ -103,6 +103,7 @@ class AlarmManagerService extends SystemService {
     private long mNextNonWakeup;
     int mBroadcastRefCount = 0;
     PowerManager.WakeLock mWakeLock;
+    boolean mLastWakeLockUnimportantForLogging;
     ArrayList<InFlight> mInFlight = new ArrayList<InFlight>();
     final AlarmHandler mHandler = new AlarmHandler();
     ClockReceiver mClockReceiver;
@@ -1345,17 +1346,21 @@ class AlarmManagerService extends SystemService {
      */
     void setWakelockWorkSource(PendingIntent pi, WorkSource ws, int type, boolean first) {
         try {
-            mWakeLock.setUnimportantForLogging(pi == mTimeTickSender);
+            final boolean unimportant = pi == mTimeTickSender;
+            mWakeLock.setUnimportantForLogging(unimportant);
             if (ws != null) {
-                if (first) {
+                if (first || mLastWakeLockUnimportantForLogging) {
                     mWakeLock.setHistoryTag(pi.getTag(
                             type == ELAPSED_REALTIME_WAKEUP || type == RTC_WAKEUP
                                     ? "*walarm*:" : "*alarm*:"));
                 } else {
                     mWakeLock.setHistoryTag(null);
                 }
+                mLastWakeLockUnimportantForLogging = unimportant;
                 mWakeLock.setWorkSource(ws);
                 return;
+            } else {
+                mLastWakeLockUnimportantForLogging = false;
             }
 
             final int uid = ActivityManagerNative.getDefault()

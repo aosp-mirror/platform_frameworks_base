@@ -348,7 +348,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     private void notifyInterfaceClassActivity(int type, boolean active, long tsNanos) {
         try {
-            getBatteryStats().noteDataConnectionActive(type, active);
+            getBatteryStats().noteDataConnectionActive(type, active, tsNanos);
         } catch (RemoteException e) {
         }
 

@@ -139,16 +139,21 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jintArray outIrqs,
             }
             endpos++;
         }
-        if (i == 0) {
+        // For now we are not separating out the first irq.
+        // This is because in practice there are always multiple
+        // lines of wakeup reasons, so it is better to just treat
+        // them all together as a single string.
+        if (false && i == 0) {
             firstirq = irq;
         } else {
-            int len = snprintf(mergedreasonpos, remainreasonlen, ":%d", irq);
+            int len = snprintf(mergedreasonpos, remainreasonlen,
+                    i == 0 ? "%d" : ":%d", irq);
             if (len >= 0 && len < remainreasonlen) {
                 mergedreasonpos += len;
                 remainreasonlen -= len;
             }
         }
-        int len = snprintf(mergedreasonpos, remainreasonlen, i == 0 ? "%s" : ":%s", pos);
+        int len = snprintf(mergedreasonpos, remainreasonlen, ":%s", pos);
         if (len >= 0 && len < remainreasonlen) {
             mergedreasonpos += len;
             remainreasonlen -= len;
