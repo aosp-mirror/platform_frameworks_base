@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -879,6 +885,38 @@ Summary:
             <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html#setIndexableText(java.lang.String)">setIndexableText</a></span>(String text)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html#setLastViewedByMeDate(java.util.Date)">setLastViewedByMeDate</a></span>(Date date)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html#setMimeType(java.lang.String)">setMimeType</a></span>(String mimeType)</nobr>
         
   </td></tr>
@@ -895,7 +933,7 @@ Summary:
             <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html#setStarred(boolean)">setStarred</a></span>(boolean starred)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html#setPinned(boolean)">setPinned</a></span>(boolean pinned)</nobr>
         
   </td></tr>
 
@@ -911,8 +949,40 @@ Summary:
             <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html#setStarred(boolean)">setStarred</a></span>(boolean starred)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html#setTitle(java.lang.String)">setTitle</a></span>(String title)</nobr>
         
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html#setViewed(boolean)">setViewed</a></span>(boolean viewed)</nobr>
+
   </td></tr>
 
 
@@ -1239,6 +1309,64 @@ From class
 </div>
 
 
+<A NAME="setIndexableText(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a>
+      </span>
+      <span class="sympad">setIndexableText</span>
+      <span class="normal">(String text)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="setLastViewedByMeDate(java.util.Date)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a>
+      </span>
+      <span class="sympad">setLastViewedByMeDate</span>
+      <span class="normal">(Date date)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
 <A NAME="setMimeType(java.lang.String)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1262,6 +1390,35 @@ From class
       </div>
     <div class="jd-details-descr">
       
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="setPinned(boolean)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a>
+      </span>
+      <span class="sympad">setPinned</span>
+      <span class="normal">(boolean pinned)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1320,6 +1477,35 @@ From class
       </div>
     <div class="jd-details-descr">
       
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="setViewed(boolean)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a>
+      </span>
+      <span class="sympad">setViewed</span>
+      <span class="normal">(boolean viewed)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>

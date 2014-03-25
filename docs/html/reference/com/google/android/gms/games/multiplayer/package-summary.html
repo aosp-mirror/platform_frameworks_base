@@ -460,12 +460,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -475,6 +469,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -717,17 +723,10 @@ onkeyup="return search_changed(event, false, '/')" />
               <td class="jd-descrcol" width="100%">Listener to invoke when a new invitation is received.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/OnInvitationsLoadedListener.html">OnInvitationsLoadedListener</a></td>
-              <td class="jd-descrcol" width="100%"><em>
-      This interface is deprecated.
-    See <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitations.LoadInvitationsResult.html">Invitations.LoadInvitationsResult</a></code>.
-</em>&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></td>
               <td class="jd-descrcol" width="100%">Data interface for multiplayer participants.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Participatable.html">Participatable</a></td>
               <td class="jd-descrcol" width="100%">Interface defining methods for an object which can have participants.&nbsp;</td>
           </tr>

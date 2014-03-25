@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -666,39 +672,8 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-  
-   
-  
-  
-  
-  
-
 
 <div class="sum-details-links">
-
-Summary:
-
-  <a href="#nestedclasses">Nested Classes</a>
-  
-
-
-
-
-
-
-
-
-
-
-
-  &#124; <a href="#pubmethods">Methods</a>
-  
-
-
-
-  &#124; <a href="#inhmethods">Inherited Methods</a>
-
-&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
@@ -715,18 +690,12 @@ Summary:
 <div id="jd-header">
     public
      
-    final 
+
     
-    class
+    interface
 <h1 itemprop="name">GoogleApiClient</h1>
 
 
-
-  
-    extends Object<br/>
-  
-  
-  
 
   
   
@@ -742,14 +711,6 @@ Summary:
 
 
     <tr>
-         	
-        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
-    </tr>
-    
-
-    <tr>
-        
-            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.common.api.GoogleApiClient</td>
     </tr>
@@ -769,7 +730,7 @@ Summary:
 <h2>Class Overview</h2>
 <p itemprop="articleBody">The main entry point for Google Play services integration.
  <p>
- GooglePlayServicesClient is used with a variety of static methods. Some of these methods
+ GoogleApiClient is used with a variety of static methods. Some of these methods
  require that GoogleApiClient be connected, some will queue up calls before
  GoogleApiClient is connected; check the specific API documentation to determine
  whether you need to be connected.
@@ -781,8 +742,8 @@ Summary:
  When your app is done using this client, call <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#disconnect()">disconnect()</a></code>, even if the async result from
  <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> has not yet been delivered.
  <p>
- You should instantiate this object in your Activity's <code><a href="/reference/android/app/Activity.html#onCreate(android.os.Bundle)">onCreate(Bundle)</a></code> method and then
- call <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> in <code><a href="/reference/android/app/Activity.html#onStart()">onStart()</a></code> and <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#disconnect()">disconnect()</a></code> in
+ You should instantiate a client object in your Activity's <code><a href="/reference/android/app/Activity.html#onCreate(android.os.Bundle)">onCreate(Bundle)</a></code> method and
+ then call <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> in <code><a href="/reference/android/app/Activity.html#onStart()">onStart()</a></code> and <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#disconnect()">disconnect()</a></code> in
  <code><a href="/reference/android/app/Activity.html#onStop()">onStop()</a></code>, regardless of the state.
 </p>
 
@@ -904,10 +865,28 @@ Summary:
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
+            abstract
             
             
             
             
+            <a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#blockingConnect(long, java.util.concurrent.TimeUnit)">blockingConnect</a></span>(long timeout, TimeUnit unit)</nobr>
+
+        <div class="jd-descrdiv">Connects the client to Google Play services.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
             
             void</nobr>
         </td>
@@ -920,9 +899,9 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -938,9 +917,9 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -957,9 +936,9 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -975,9 +954,9 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -994,9 +973,9 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -1013,9 +992,9 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -1031,9 +1010,9 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -1049,9 +1028,9 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -1068,9 +1047,9 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -1086,9 +1065,9 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -1110,216 +1089,6 @@ Summary:
 
 
 
-
-
-<!-- ========== METHOD SUMMARY =========== -->
-<table id="inhmethods" class="jd-sumtable"><tr><th>
-  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
-  <div style="clear:left;">Inherited Methods</div></th></tr>
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-java.lang.Object-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From class
-
-  java.lang.Object
-
-<div id="inherited-methods-java.lang.Object">
-  <div id="inherited-methods-java.lang.Object-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-    
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            Object</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">clone</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(Object arg0)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">finalize</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            final
-            
-            
-            Class&lt;?&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getClass</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">hashCode</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            final
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">notify</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            final
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">notifyAll</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            String</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">toString</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            final
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">wait</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            final
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            final
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">wait</span>(long arg0)</nobr>
-        
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-</table>
 
 
 </div><!-- jd-descr (summary) -->
@@ -1361,7 +1130,7 @@ From class
 
 
 
-<A NAME="connect()"></A>
+<A NAME="blockingConnect(long, java.util.concurrent.TimeUnit)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1369,8 +1138,56 @@ From class
         public 
          
          
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a>
+      </span>
+      <span class="sympad">blockingConnect</span>
+      <span class="normal">(long timeout, TimeUnit unit)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Connects the client to Google Play services. Blocks until the connection either succeeds or
+ fails. This is not allowed on the UI thread.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>timeout</td>
+          <td>the maximum time to wait</td>
+        </tr>
+        <tr>
+          <th>unit</td>
+          <td>the time unit of the <code>timeout</code> argument</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the result of the connection
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="connect()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
          
          
+        abstract
+
         void
       </span>
       <span class="sympad">connect</span>
@@ -1402,7 +1219,7 @@ From class
         public 
          
          
-         
+        abstract
          
         void
       </span>
@@ -1438,7 +1255,7 @@ From class
         public 
          
          
-         
+        abstract
          
         boolean
       </span>
@@ -1474,7 +1291,7 @@ From class
         public 
          
          
-         
+        abstract
          
         boolean
       </span>
@@ -1508,7 +1325,7 @@ From class
         public 
          
          
-         
+        abstract
          
         boolean
       </span>
@@ -1557,7 +1374,7 @@ From class
         public 
          
          
-         
+        abstract
          
         boolean
       </span>
@@ -1606,7 +1423,7 @@ From class
         public 
          
          
-         
+        abstract
          
         void
       </span>
@@ -1647,7 +1464,7 @@ From class
         public 
          
          
-         
+        abstract
          
         void
       </span>
@@ -1699,7 +1516,7 @@ From class
         public 
          
          
-         
+        abstract
          
         void
       </span>
@@ -1751,7 +1568,7 @@ From class
         public 
          
          
-         
+        abstract
          
         void
       </span>
@@ -1794,7 +1611,7 @@ From class
         public 
          
          
-         
+        abstract
          
         void
       </span>

@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -967,7 +973,7 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Contents.html#getInputStream()">getInputStream</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets an OutputStream that allows you to read this file's contents.</div>
+        <div class="jd-descrdiv">Gets an InputStream that allows you to read this file's contents.</div>
   
   </td></tr>
 
@@ -1476,7 +1482,7 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Gets an OutputStream that allows you to read this file's contents. This method may only be
+  <div class="jd-tagdata jd-tagdescr"><p>Gets an InputStream that allows you to read this file's contents. This method may only be
  used with files opened with <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#MODE_READ_ONLY">MODE_READ_ONLY</a></code>; to read/write from a file
  opened with <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#MODE_READ_WRITE">MODE_READ_WRITE</a></code>, use the file descriptor returned by
  <code><a href="/reference/com/google/android/gms/drive/Contents.html#getParcelFileDescriptor()">getParcelFileDescriptor()</a></code>. This method may only be called once per <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code>

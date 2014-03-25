@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -883,6 +889,25 @@ onkeyup="return search_changed(event, false, '/')" />
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/Players.LoadPlayersResult.html">Players.LoadPlayersResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/Players.html#loadConnectedPlayers(com.google.android.gms.common.api.GoogleApiClient, boolean)">loadConnectedPlayers</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, boolean forceReload)</nobr>
+
+        <div class="jd-descrdiv">Asynchronously loads a list of players that have connected to this game (and that
+ the user has permission to know about).</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/Players.LoadPlayersResult.html">Players.LoadPlayersResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Players.html#loadInvitablePlayers(com.google.android.gms.common.api.GoogleApiClient, int, boolean)">loadInvitablePlayers</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int pageSize, boolean forceReload)</nobr>
         
         <div class="jd-descrdiv">Load the initial page of players the currently signed-in player can invite to a multiplayer
@@ -892,7 +917,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -910,7 +935,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -929,7 +954,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -947,7 +972,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1208,6 +1233,56 @@ onkeyup="return search_changed(event, false, '/')" />
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>An <code><a href="/reference/android/content/Intent.html">Intent</a></code> that can be started to display the player selector.
 </li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="loadConnectedPlayers(com.google.android.gms.common.api.GoogleApiClient, boolean)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/Players.LoadPlayersResult.html">Players.LoadPlayersResult</a>&gt;
+      </span>
+      <span class="sympad">loadConnectedPlayers</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, boolean forceReload)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Asynchronously loads a list of players that have connected to this game (and that
+ the user has permission to know about).
+ <p>
+ Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
+ Required Scopes: <code><a href="/reference/com/google/android/gms/games/Games.html#SCOPE_GAMES">SCOPE_GAMES</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>apiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call.</td>
+        </tr>
+        <tr>
+          <th>forceReload</td>
+          <td>If true, this call will clear any locally cached data and attempt to fetch
+            the latest data from the server. This would commonly be used for something like a
+            user-initiated refresh. Normally, this should be set to false to gain advantages
+            of data caching.
+</td>
+        </tr>
+      </table>
   </div>
 
     </div>

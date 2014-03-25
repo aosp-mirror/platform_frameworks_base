@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -850,6 +856,14 @@ Summary:
     
     
     <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesActivityResultCodes.html#RESULT_SEND_REQUEST_FAILED">RESULT_SEND_REQUEST_FAILED</a></td>
+        <td class="jd-descrcol" width="100%">Result code sent back to the calling Activity when sending a request from the "send request"
+ screen failed.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesActivityResultCodes.html#RESULT_SIGN_IN_FAILED">RESULT_SIGN_IN_FAILED</a></td>
         <td class="jd-descrcol" width="100%">Result code sent back to the calling Activity when signing in fails.</td>
@@ -1321,6 +1335,50 @@ From class
         </span>
         </div>
     
+    </div>
+</div>
+
+
+
+<A NAME="RESULT_SEND_REQUEST_FAILED"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        RESULT_SEND_REQUEST_FAILED
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Result code sent back to the calling Activity when sending a request from the "send request"
+ screen failed. The logs will contain more detailed information.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/request/Requests.html#getSendIntent(com.google.android.gms.common.api.GoogleApiClient, int, byte[], int, android.graphics.Bitmap, java.lang.String)">getSendIntent(GoogleApiClient, int, byte[], int, Bitmap, String)</a></code></li>
+      </ul>
+  </div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                10007
+                (0x00002717)
+
+        </span>
+        </div>
+
     </div>
 </div>
 

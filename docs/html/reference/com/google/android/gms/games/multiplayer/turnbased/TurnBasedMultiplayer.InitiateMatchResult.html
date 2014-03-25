@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -758,19 +764,20 @@ Summary:
 <p itemprop="articleBody">Result delivered when match has been initiated. This happens when the player creates a new
  match, or when the player joins an existing match. Possible status codes include:
  <ul>
- <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_OK">STATUS_OK</a></code> if data was successfully loaded and is up-to-date.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_OK">STATUS_OK</a></code> if data was successfully loaded and is up-to-date.
+ </li>
  <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MATCH_ERROR_ALREADY_REMATCHED">STATUS_MATCH_ERROR_ALREADY_REMATCHED</a></code> if this is an attempt to
  rematch a match which has already had a rematch created.</li>
  <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_NETWORK_ERROR_OPERATION_FAILED">STATUS_NETWORK_ERROR_OPERATION_FAILED</a></code> if the attempt to initiate
  the match failed due to network error.
  <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MULTIPLAYER_ERROR_NOT_TRUSTED_TESTER">STATUS_MULTIPLAYER_ERROR_NOT_TRUSTED_TESTER</a></code> if one of the users
  in the match is not a trusted tester of a game which is not yet published.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MULTIPLAYER_ERROR_INVALID_OPERATION">STATUS_MULTIPLAYER_ERROR_INVALID_OPERATION</a></code> if the server rejected
- the operation.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MULTIPLAYER_ERROR_INVALID_OPERATION">STATUS_MULTIPLAYER_ERROR_INVALID_OPERATION</a></code> if the server
+ rejected the operation.</li>
  <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MULTIPLAYER_DISABLED">STATUS_MULTIPLAYER_DISABLED</a></code> if the game does not support
  multiplayer.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the client needs to reconnect
- to the service to perform this operation.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the client needs to
+ reconnect to the service to access this data.</li>
  <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></code> if an unexpected error occurred in the
  service.</li>
  </ul>

@@ -460,12 +460,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -475,6 +469,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -692,33 +698,37 @@ onkeyup="return search_changed(event, false, '/')" />
     
   <table class="jd-sumtable-expando">
         <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></td>
+              <td class="jd-descrcol" width="100%">The main entry point for Google Play services integration.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ApiOptions.html">GoogleApiClient.ApiOptions</a></td>
               <td class="jd-descrcol" width="100%">Base interface for API options.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html">GoogleApiClient.ConnectionCallbacks</a></td>
               <td class="jd-descrcol" width="100%">Provides callbacks that are called when the client is connected or disconnected from the
  service.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a></td>
               <td class="jd-descrcol" width="100%">Provides callbacks for scenarios that result in a failed attempt to
  connect the client to the service.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;R&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/common/api/Result.html">Result</a>&gt;</td>
               <td class="jd-descrcol" width="100%">Represents a pending result from calling an API method in Google Play services.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/Releasable.html">Releasable</a></td>
               <td class="jd-descrcol" width="100%">Represents a resource, or a holder of resources, which may be released once they are no longer
  needed.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/Result.html">Result</a></td>
               <td class="jd-descrcol" width="100%">Represents the final result of invoking an API method in Google Play Services.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/ResultCallback.html">ResultCallback</a>&lt;R&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/common/api/Result.html">Result</a>&gt;</td>
               <td class="jd-descrcol" width="100%">An interface for receiving a <code><a href="/reference/com/google/android/gms/common/api/Result.html">Result</a></code> from a <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as an asynchronous
  callback.&nbsp;</td>
@@ -742,18 +752,14 @@ onkeyup="return search_changed(event, false, '/')" />
               <td class="jd-descrcol" width="100%">Common status codes that are often shared across API surfaces.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></td>
-              <td class="jd-descrcol" width="100%">The main entry point for Google Play services integration.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></td>
               <td class="jd-descrcol" width="100%">Builder to configure a <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a></td>
               <td class="jd-descrcol" width="100%">Describes an OAuth 2.0 scope to request.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/Status.html">Status</a></td>
               <td class="jd-descrcol" width="100%">Represents the results of work.&nbsp;</td>
           </tr>

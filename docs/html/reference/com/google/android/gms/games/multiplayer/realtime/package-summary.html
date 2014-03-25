@@ -460,12 +460,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -475,6 +469,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -710,27 +716,20 @@ onkeyup="return search_changed(event, false, '/')" />
               <td class="jd-descrcol" width="100%">The listener for callback that is called when a reliable message is sent successfully.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeReliableMessageSentListener.html">RealTimeReliableMessageSentListener</a></td>
-              <td class="jd-descrcol" width="100%"><em>
-      This interface is deprecated.
-    See <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.ReliableMessageSentCallback.html">RealTimeMultiplayer.ReliableMessageSentCallback</a></code>.
-</em>&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeSocket.html">RealTimeSocket</a></td>
               <td class="jd-descrcol" width="100%">Provides a Socket-like interface for a real-time data connection to a participant in a real-time
  room.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a></td>
               <td class="jd-descrcol" width="100%">Data interface for room functionality.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html">RoomStatusUpdateListener</a></td>
               <td class="jd-descrcol" width="100%">Listener invoked when the status of a room, status of its participants or connection status of
  the participants has changed.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomUpdateListener.html">RoomUpdateListener</a></td>
               <td class="jd-descrcol" width="100%">The listener invoked when the state of the room has changed.&nbsp;</td>
           </tr>

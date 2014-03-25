@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -819,19 +825,27 @@ Summary:
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#CANCELED">CANCELED</a></td>
+        <td class="jd-descrcol" width="100%">The client canceled the connection by calling
+ <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#disconnect()">disconnect()</a></code>.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#DATE_INVALID">DATE_INVALID</a></td>
         <td class="jd-descrcol" width="100%">The device date is likely set incorrectly.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#DEVELOPER_ERROR">DEVELOPER_ERROR</a></td>
         <td class="jd-descrcol" width="100%">The application is misconfigured.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#DRIVE_EXTERNAL_STORAGE_REQUIRED">DRIVE_EXTERNAL_STORAGE_REQUIRED</a></td>
         <td class="jd-descrcol" width="100%">The Drive API requires external storage (such as an SD card), but no external storage is
@@ -839,13 +853,20 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#INTERNAL_ERROR">INTERNAL_ERROR</a></td>
         <td class="jd-descrcol" width="100%">An internal error occurred.</td>
     </tr>
     
     
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#INTERRUPTED">INTERRUPTED</a></td>
+        <td class="jd-descrcol" width="100%">An interrupt occurred while waiting for the connection complete.</td>
+    </tr>
+
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#INVALID_ACCOUNT">INVALID_ACCOUNT</a></td>
@@ -918,6 +939,13 @@ Summary:
     </tr>
     
     
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#TIMEOUT">TIMEOUT</a></td>
+        <td class="jd-descrcol" width="100%">The timeout was exceeded while waiting for the connection to complete.</td>
+    </tr>
+
+
 
 </table>
 
@@ -1321,6 +1349,47 @@ From class
 
 
 
+<A NAME="CANCELED"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        CANCELED
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>The client canceled the connection by calling
+ <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#disconnect()">disconnect()</a></code>. Only returned by
+ <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#blockingConnect(long, java.util.concurrent.TimeUnit)">blockingConnect(long, TimeUnit)</a></code>.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                13
+                (0x0000000d)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
 <A NAME="DATE_INVALID"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1481,6 +1550,46 @@ From class
         </span>
         </div>
     
+    </div>
+</div>
+
+
+
+<A NAME="INTERRUPTED"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        INTERRUPTED
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>An interrupt occurred while waiting for the connection complete. Only returned by
+ <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#blockingConnect(long, java.util.concurrent.TimeUnit)">blockingConnect(long, TimeUnit)</a></code>.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                15
+                (0x0000000f)
+
+        </span>
+        </div>
+
     </div>
 </div>
 
@@ -1890,6 +1999,46 @@ From class
         </span>
         </div>
     
+    </div>
+</div>
+
+
+
+<A NAME="TIMEOUT"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        TIMEOUT
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>The timeout was exceeded while waiting for the connection to complete. Only returned by
+ <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#blockingConnect(long, java.util.concurrent.TimeUnit)">blockingConnect(long, TimeUnit)</a></code>.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                14
+                (0x0000000e)
+
+        </span>
+        </div>
+
     </div>
 </div>
 

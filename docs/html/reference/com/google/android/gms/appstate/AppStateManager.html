@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -1695,8 +1701,8 @@ From class
  receive a conflict callback after this call. This will occur if data on the server continues
  to change. In this case, resolution should be retried until a successful status is returned.
  <p>
- The value of <code>resolvedVersion</code> passed here must correspond to the value provided in the
- <code><a href="/reference/com/google/android/gms/appstate/OnStateLoadedListener.html#onStateConflict(int, java.lang.String, byte[], byte[])">onStateConflict(int, String, byte[], byte[])</a></code> call.
+ The value of <code>resolvedVersion</code> passed here must correspond to the value returned from
+ <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateConflictResult.html#getResolvedVersion()">getResolvedVersion()</a></code>.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#API">API</a></code><br>
  Required Scopes: <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#SCOPE_APP_STATE">SCOPE_APP_STATE</a></code></p></div>

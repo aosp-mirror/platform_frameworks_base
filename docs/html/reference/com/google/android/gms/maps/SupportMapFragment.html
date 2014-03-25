@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -829,7 +835,7 @@ Summary:
  not hold on to objects (e.g. <code><a href="/reference/com/google/android/gms/maps/model/Marker.html">Marker</a></code>) beyond the view's life. Otherwise it will cause a
  memory leak as the view cannot be released.
  <p>
- To use this class, you must include the Android support library in your build path.
+ Use this class only if you are targeting API 12 and above.  Otherwise, use SupportMapFragment.
  <p>
  <h3>Developer Guide</h3>
  <p>

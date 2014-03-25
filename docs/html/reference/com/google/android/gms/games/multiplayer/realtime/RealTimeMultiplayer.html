@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -1048,9 +1054,9 @@ onkeyup="return search_changed(event, false, '/')" />
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#sendUnreliableMessageToAll(com.google.android.gms.common.api.GoogleApiClient, byte[], java.lang.String)">sendUnreliableMessageToAll</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, byte[] messageData, String roomId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#sendUnreliableMessageToOthers(com.google.android.gms.common.api.GoogleApiClient, byte[], java.lang.String)">sendUnreliableMessageToOthers</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, byte[] messageData, String roomId)</nobr>
         
-        <div class="jd-descrdiv">Send a message to all participants in a real-time room.</div>
+        <div class="jd-descrdiv">Send a message to all participants in a real-time room, excluding the current player.</div>
   
   </td></tr>
 
@@ -1327,13 +1333,16 @@ onkeyup="return search_changed(event, false, '/')" />
  not including the current player. So, for a game that can handle between 2 and 4 players,
  <code>minPlayers</code> would be 1 and <code>maxPlayers</code> would be 3.
  <p>
+ Players may be preselected by specifying a list of player IDs in the
+ <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> extra on the returned intent.
+ <p>
  If the user canceled, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_CANCELED">RESULT_CANCELED</a></code>. If the user
  selected players, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_OK">RESULT_OK</a></code>, and the data intent will
- contain the selected player IDs in <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_PLAYERS">EXTRA_PLAYERS</a></code> and the minimum and
+ contain the selected player IDs in <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> and the minimum and
  maximum numbers of additional auto-match players in
  <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MIN_AUTOMATCH_PLAYERS">EXTRA_MIN_AUTOMATCH_PLAYERS</a></code> and
  <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MAX_AUTOMATCH_PLAYERS">EXTRA_MAX_AUTOMATCH_PLAYERS</a></code> respectively. The player IDs in
- <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_PLAYERS">EXTRA_PLAYERS</a></code> will include only the other players selected,
+ <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> will include only the other players selected,
  not the current player.
  <p>
  If the <code>allowAutomatch</code> parameter is set to false, the UI will not display an option
@@ -1408,13 +1417,16 @@ onkeyup="return search_changed(event, false, '/')" />
  not including the current player. So, for a game that can handle between 2 and 4 players,
  <code>minPlayers</code> would be 1 and <code>maxPlayers</code> would be 3.
  <p>
+ Players may be preselected by specifying a list of player IDs in the
+ <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> extra on the returned intent.
+ <p>
  If the user canceled, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_CANCELED">RESULT_CANCELED</a></code>. If the user
  selected players, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_OK">RESULT_OK</a></code>, and the data intent will
- contain the selected player IDs in <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_PLAYERS">EXTRA_PLAYERS</a></code> and the minimum and
+ contain the selected player IDs in <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> and the minimum and
  maximum numbers of additional auto-match players in
  <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MIN_AUTOMATCH_PLAYERS">EXTRA_MIN_AUTOMATCH_PLAYERS</a></code> and
  <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MAX_AUTOMATCH_PLAYERS">EXTRA_MAX_AUTOMATCH_PLAYERS</a></code> respectively. The player IDs in
- <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_PLAYERS">EXTRA_PLAYERS</a></code> will include only the other players selected,
+ <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> will include only the other players selected,
  not the current player.
  <p>
  This method is the equivalent of calling
@@ -1910,7 +1922,7 @@ onkeyup="return search_changed(event, false, '/')" />
 </div>
 
 
-<A NAME="sendUnreliableMessageToAll(com.google.android.gms.common.api.GoogleApiClient, byte[], java.lang.String)"></A>
+<A NAME="sendUnreliableMessageToOthers(com.google.android.gms.common.api.GoogleApiClient, byte[], java.lang.String)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1922,7 +1934,7 @@ onkeyup="return search_changed(event, false, '/')" />
          
         int
       </span>
-      <span class="sympad">sendUnreliableMessageToAll</span>
+      <span class="sympad">sendUnreliableMessageToOthers</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, byte[] messageData, String roomId)</span>
     </h4>
       <div class="api-level">
@@ -1933,9 +1945,9 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Send a message to all participants in a real-time room. The message delivery is not reliable
- and will not report status after completion. The maximum message size supported is
- <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#MAX_UNRELIABLE_MESSAGE_LEN">MAX_UNRELIABLE_MESSAGE_LEN</a></code> bytes.
+  <div class="jd-tagdata jd-tagdescr"><p>Send a message to all participants in a real-time room, excluding the current player. The
+ message delivery is not reliable and will not report status after completion. The maximum
+ message size supported is <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#MAX_UNRELIABLE_MESSAGE_LEN">MAX_UNRELIABLE_MESSAGE_LEN</a></code> bytes.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
  Required Scopes: <code><a href="/reference/com/google/android/gms/games/Games.html#SCOPE_GAMES">SCOPE_GAMES</a></code></p></div>

@@ -459,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -474,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -769,8 +775,8 @@ Summary:
 <h2>Class Overview</h2>
 <p itemprop="articleBody">Utility class for verifying that the Google Play services APK is available and
  up-to-date on this device.  The same checks are performed if one uses
- <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> or
- <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html">GoogleAuthUtil</a></code> connect to the service.
+ <code><a href="/reference/com/google/android/gms/ads/identifier/AdvertisingIdClient.html">AdvertisingIdClient</a></code> or
+ <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html">GoogleAuthUtil</a></code> to connect to the service.
 </p>
 
 
@@ -818,12 +824,19 @@ Summary:
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#GMS_ERROR_DIALOG">GMS_ERROR_DIALOG</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#GOOGLE_PLAY_SERVICES_PACKAGE">GOOGLE_PLAY_SERVICES_PACKAGE</a></td>
         <td class="jd-descrcol" width="100%">Package name for Google Play services.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#GOOGLE_PLAY_SERVICES_VERSION_CODE">GOOGLE_PLAY_SERVICES_VERSION_CODE</a></td>
         <td class="jd-descrcol" width="100%">Minimum Google Play services package version (declared in AndroidManifest.xml
@@ -831,7 +844,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#GOOGLE_PLAY_STORE_PACKAGE">GOOGLE_PLAY_STORE_PACKAGE</a></td>
         <td class="jd-descrcol" width="100%">Package name for Google Play services.</td>
@@ -1023,6 +1036,44 @@ Summary:
         
         <div class="jd-descrdiv">Determines whether an error is user-recoverable.</div>
   
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#showErrorDialogFragment(int, android.app.Activity, int)">showErrorDialogFragment</a></span>(int errorCode, Activity activity, int requestCode)</nobr>
+
+        <div class="jd-descrdiv">Display a DialogFragment for an error code returned by
+ <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable(Context)</a></code>.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#showErrorDialogFragment(int, android.app.Activity, int, android.content.DialogInterface.OnCancelListener)">showErrorDialogFragment</a></span>(int errorCode, Activity activity, int requestCode, DialogInterface.OnCancelListener cancelListener)</nobr>
+
+        <div class="jd-descrdiv">Display a DialogFragment for an error code returned by
+ <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable(Context)</a></code>.</div>
+
   </td></tr>
 
 
@@ -1271,6 +1322,43 @@ From class
 
 
 
+<A NAME="GMS_ERROR_DIALOG"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        GMS_ERROR_DIALOG
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "GooglePlayServicesErrorDialog"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
 <A NAME="GOOGLE_PLAY_SERVICES_PACKAGE"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1338,8 +1426,8 @@ From class
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
             
-                4241000
-                (0x0040b668)
+                4323000
+                (0x0041f6b8)
             
         </span>
         </div>
@@ -1779,6 +1867,153 @@ From class
       <ul class="nolist"><li>true if the error is recoverable with
          <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code>
 </li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="showErrorDialogFragment(int, android.app.Activity, int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        boolean
+      </span>
+      <span class="sympad">showErrorDialogFragment</span>
+      <span class="normal">(int errorCode, Activity activity, int requestCode)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Display a DialogFragment for an error code returned by
+ <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable(Context)</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>errorCode</td>
+          <td>error code returned by
+            <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable(Context)</a></code> call. If
+            errorCode is <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html#SUCCESS">SUCCESS</a></code> then this
+            does nothing.</td>
+        </tr>
+        <tr>
+          <th>activity</td>
+          <td>parent activity for creating the dialog, also used for
+            identifying language to display dialog in.</td>
+        </tr>
+        <tr>
+          <th>requestCode</td>
+          <td>The requestCode given when calling
+            startActivityForResult.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if the dialog is shown, false otherwise</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th>RuntimeException</td>
+            <td>if API level is below 11 and <code>activity</code> is not a
+            <code><a href="/reference/android/support/v4/app/FragmentActivity.html">FragmentActivity</a></code>.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/common/ErrorDialogFragment.html">ErrorDialogFragment</a></code></li><li><code><a href="/">ERROR(/SupportErrorDialogFragment)</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="showErrorDialogFragment(int, android.app.Activity, int, android.content.DialogInterface.OnCancelListener)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        boolean
+      </span>
+      <span class="sympad">showErrorDialogFragment</span>
+      <span class="normal">(int errorCode, Activity activity, int requestCode, DialogInterface.OnCancelListener cancelListener)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Display a DialogFragment for an error code returned by
+ <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable(Context)</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>errorCode</td>
+          <td>error code returned by
+            <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable(Context)</a></code> call. If
+            errorCode is <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html#SUCCESS">SUCCESS</a></code> then this
+            does nothing</td>
+        </tr>
+        <tr>
+          <th>activity</td>
+          <td>parent activity for creating the dialog, also used for
+            identifying language to display dialog in.</td>
+        </tr>
+        <tr>
+          <th>requestCode</td>
+          <td>The requestCode given when calling
+            startActivityForResult.</td>
+        </tr>
+        <tr>
+          <th>cancelListener</td>
+          <td>The <code><a href="/reference/android/content/DialogInterface.OnCancelListener.html">DialogInterface.OnCancelListener</a></code> to
+            invoke if the dialog is canceled.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if the dialog is shown, false otherwise.</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th>RuntimeException</td>
+            <td>if API level is below 11 and <code>activity</code> is not a
+            <code><a href="/reference/android/support/v4/app/FragmentActivity.html">FragmentActivity</a></code>.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/common/ErrorDialogFragment.html">ErrorDialogFragment</a></code></li><li><code><a href="/">ERROR(/SupportErrorDialogFragment)</a></code></li>
+      </ul>
   </div>
 
     </div>
