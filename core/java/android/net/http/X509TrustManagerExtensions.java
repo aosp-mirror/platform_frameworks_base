@@ -22,14 +22,25 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.X509ExtendedTrustManager;
 import javax.net.ssl.X509TrustManager;
 
 /**
  * X509TrustManager wrapper exposing Android-added features.
- *
- * <p> The checkServerTrusted method allows callers to perform additional
- * verification of certificate chains after they have been successfully
- * verified by the platform.</p>
+ * <p>
+ * The checkServerTrusted method allows callers to perform additional
+ * verification of certificate chains after they have been successfully verified
+ * by the platform.
+ * </p>
+ * <p>
+ * If the returned certificate list is not needed, see also
+ * {@code X509ExtendedTrustManager#checkServerTrusted(X509Certificate[], String, java.net.Socket)}
+ * where an {@link SSLSocket} can be used to verify the given hostname during
+ * handshake using
+ * {@code SSLParameters#setEndpointIdentificationAlgorithm(String)}.
+ * </p>
  */
 public class X509TrustManagerExtensions {
 
@@ -61,7 +72,8 @@ public class X509TrustManagerExtensions {
      */
     public List<X509Certificate> checkServerTrusted(X509Certificate[] chain, String authType,
                                                     String host) throws CertificateException {
-        return mDelegate.checkServerTrusted(chain, authType, host);
+        return mDelegate.checkServerTrusted(chain, authType,
+                new DelegatingSSLSession.HostnameWrap(host));
     }
 
     /**
