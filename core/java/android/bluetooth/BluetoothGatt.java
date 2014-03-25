@@ -561,6 +561,23 @@ public final class BluetoothGatt implements BluetoothProfile {
             public void onAdvertiseStateChange(int state, int status) {
                 if (DBG) Log.d(TAG, "onAdvertiseStateChange() - state = "
                         + state + " status=" + status);
+	    }
+
+            /**
+             * Callback invoked when the MTU for a given connection changes
+             * @hide
+             */
+            public void onConfigureMTU(String address, int mtu, int status) {
+                if (DBG) Log.d(TAG, "onConfigureMTU() - Device=" + address +
+                            " mtu=" + mtu + " status=" + status);
+                if (!address.equals(mDevice.getAddress())) {
+                    return;
+                }
+                try {
+                    mCallback.onConfigureMTU(BluetoothGatt.this, mtu, status);
+                } catch (Exception ex) {
+                    Log.w(TAG, "Unhandled exception in callback", ex);
+                }
             }
         };
 
@@ -1139,6 +1156,36 @@ public final class BluetoothGatt implements BluetoothProfile {
 
         try {
             mService.readRemoteRssi(mClientIf, mDevice.getAddress());
+        } catch (RemoteException e) {
+            Log.e(TAG,"",e);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Configure the MTU used for a given connection.
+     *
+     * <p>When performing a write request operation (write without response),
+     * the data sent is truncated to the MTU size. This function may be used
+     * to request a larget MTU size to be able to send more data at once.
+     *
+     * <p>A {@link BluetoothGattCallback#onConfigureMTU} callback will indicate
+     * whether this operation was successful.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @return true, if the new MTU value has been requested successfully
+     * @hide
+     */
+    public boolean configureMTU(int mtu) {
+        if (DBG) Log.d(TAG, "configureMTU() - device: " + mDevice.getAddress()
+                            + " mtu: " + mtu);
+        if (mService == null || mClientIf == 0) return false;
+
+        try {
+            mService.configureMTU(mClientIf, mDevice.getAddress(), mtu);
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
             return false;

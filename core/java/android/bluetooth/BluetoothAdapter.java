@@ -2014,5 +2014,13 @@ public final class BluetoothAdapter {
                 mAdvertiseCallback.onAdvertiseStop(status);
             }
         }
+
+        /**
+         * Callback reporting LE ATT MTU.
+         * @hide
+         */
+        public void onConfigureMTU(String address, int mtu, int status) {
+            // no op
+        }
     }
 }
