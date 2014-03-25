@@ -99,9 +99,11 @@ void RenderNode::updateProperties() {
         mProperties = mStagingProperties;
     }
 
-    for (size_t i = 0; i < mDisplayListData->children.size(); i++) {
-        RenderNode* childNode = mDisplayListData->children[i]->mDisplayList;
-        childNode->updateProperties();
+    if (mDisplayListData) {
+        for (size_t i = 0; i < mDisplayListData->children.size(); i++) {
+            RenderNode* childNode = mDisplayListData->children[i]->mDisplayList;
+            childNode->updateProperties();
+        }
     }
 }
 
