@@ -128,14 +128,14 @@ void RenderNode::outputViewProperties(const int level) {
                 flags |= SkCanvas::kClipToLayer_SaveFlag;
                 clipToBoundsNeeded = false; // clipping done by save layer
             }
-            ALOGD("%*sSaveLayerAlpha %.2f, %.2f, %.2f, %.2f, %d, 0x%x", level * 2, "",
-                    (float) 0, (float) 0, (float) properties().mRight - properties().mLeft, (float) properties().mBottom - properties().mTop,
+            ALOGD("%*sSaveLayerAlpha %d, %d, %d, %d, %d, 0x%x", level * 2, "",
+                    0, 0, properties().mWidth, properties().mHeight,
                     (int)(properties().mAlpha * 255), flags);
         }
     }
     if (clipToBoundsNeeded) {
-        ALOGD("%*sClipRect %.2f, %.2f, %.2f, %.2f", level * 2, "", 0.0f, 0.0f,
-                (float) properties().mRight - properties().mLeft, (float) properties().mBottom - properties().mTop);
+        ALOGD("%*sClipRect %d, %d, %d, %d", level * 2, "",
+                0, 0, properties().mWidth, properties().mHeight);
     }
 }
 
@@ -185,17 +185,20 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler,
             }
 
             SaveLayerOp* op = new (handler.allocator()) SaveLayerOp(
-                    0, 0, properties().mRight - properties().mLeft, properties().mBottom - properties().mTop, properties().mAlpha * 255, saveFlags);
+                    0, 0, properties().mWidth, properties().mHeight,
+                    properties().mAlpha * 255, saveFlags);
             handler(op, PROPERTY_SAVECOUNT, properties().mClipToBounds);
         }
     }
     if (clipToBoundsNeeded) {
-        ClipRectOp* op = new (handler.allocator()) ClipRectOp(0, 0,
-                properties().mRight - properties().mLeft, properties().mBottom - properties().mTop, SkRegion::kIntersect_Op);
+        ClipRectOp* op = new (handler.allocator()) ClipRectOp(
+                0, 0, properties().mWidth, properties().mHeight, SkRegion::kIntersect_Op);
         handler(op, PROPERTY_SAVECOUNT, properties().mClipToBounds);
     }
-    if (CC_UNLIKELY(properties().mClipToOutline && !properties().mOutline.isEmpty())) {
-        ClipPathOp* op = new (handler.allocator()) ClipPathOp(&properties().mOutline, SkRegion::kIntersect_Op);
+    if (CC_UNLIKELY(properties().mOutline.willClip())) {
+        // TODO: optimize RR case
+        ClipPathOp* op = new (handler.allocator()) ClipPathOp(properties().mOutline.getPath(),
+                SkRegion::kIntersect_Op);
         handler(op, PROPERTY_SAVECOUNT, properties().mClipToBounds);
     }
 }
@@ -443,7 +446,7 @@ void RenderNode::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTransl
 
                     DisplayListOp* shadowOp  = new (alloc) DrawShadowOp(
                             shadowMatrixXY, shadowMatrixZ,
-                            caster->properties().mAlpha, &(caster->properties().mOutline),
+                            caster->properties().mAlpha, caster->properties().mOutline.getPath(),
                             caster->properties().mWidth, caster->properties().mHeight);
                     handler(shadowOp, PROPERTY_SAVECOUNT, properties().mClipToBounds);
                 }

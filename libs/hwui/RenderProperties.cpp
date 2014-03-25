@@ -26,7 +26,6 @@ RenderProperties::RenderProperties()
         : mClipToBounds(true)
         , mProjectBackwards(false)
         , mProjectionReceiver(false)
-        , mClipToOutline(false)
         , mAlpha(1)
         , mHasOverlappingRendering(true)
         , mTranslationX(0), mTranslationY(0), mTranslationZ(0)
@@ -47,7 +46,6 @@ RenderProperties::RenderProperties()
         , mStaticMatrix(NULL)
         , mAnimationMatrix(NULL)
         , mCaching(false) {
-    mOutline.rewind();
 }
 
 RenderProperties::~RenderProperties() {

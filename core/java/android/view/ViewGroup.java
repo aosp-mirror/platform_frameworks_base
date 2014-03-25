@@ -357,15 +357,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     private static final int FLAG_LAYOUT_MODE_WAS_EXPLICITLY_SET = 0x800000;
 
-    /**
-     * When true, indicates that all 3d composited descendents are contained within this group, and
-     * will not be interleaved with other 3d composited content.
-     */
-    static final int FLAG_ISOLATED_Z_VOLUME = 0x1000000;
+    static final int FLAG_IS_TRANSITION_GROUP = 0x1000000;
 
-    static final int FLAG_IS_TRANSITION_GROUP = 0x2000000;
-
-    static final int FLAG_IS_TRANSITION_GROUP_SET = 0x4000000;
+    static final int FLAG_IS_TRANSITION_GROUP_SET = 0x2000000;
 
     /**
      * Indicates which types of drawing caches are to be kept in memory.
@@ -499,7 +493,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         mGroupFlags |= FLAG_ANIMATION_DONE;
         mGroupFlags |= FLAG_ANIMATION_CACHE;
         mGroupFlags |= FLAG_ALWAYS_DRAWN_WITH_CACHE;
-        mGroupFlags |= FLAG_ISOLATED_Z_VOLUME;
 
         if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB) {
             mGroupFlags |= FLAG_SPLIT_MOTION_EVENTS;
@@ -527,9 +520,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     break;
                 case R.styleable.ViewGroup_clipToPadding:
                     setClipToPadding(a.getBoolean(attr, true));
-                    break;
-                case R.styleable.ViewGroup_isolatedZVolume:
-                    setIsolatedZVolume(a.getBoolean(attr, true));
                     break;
                 case R.styleable.ViewGroup_animationCache:
                     setAnimationCacheEnabled(a.getBoolean(attr, true));
@@ -3156,43 +3146,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         return child.draw(canvas, this, drawingTime);
-    }
-
-    /**
-     * Returns whether this group's descendents are drawn in their own
-     * independent Z volume. Views drawn in one contained volume will not
-     * interleave with views in another, even if their Z values are interleaved.
-     * The default value is true.
-     * @see #setIsolatedZVolume(boolean)
-     *
-     * @return True if the ViewGroup has an isolated Z volume.
-     *
-     * @hide
-     */
-    public boolean hasIsolatedZVolume() {
-        return ((mGroupFlags & FLAG_ISOLATED_Z_VOLUME) != 0);
-    }
-
-    /**
-     * By default, only direct children of a group can interleave drawing order
-     * by interleaving Z values. Set to false on individual groups to enable Z
-     * interleaving of views that aren't direct siblings.
-     *
-     * @return True if the group should be an isolated Z volume with its own Z
-     *         ordering space, false if its decendents should inhabit the
-     *         inherited Z ordering volume.
-     * @attr ref android.R.styleable#ViewGroup_isolatedZVolume
-     *
-     * @hide
-     */
-    public void setIsolatedZVolume(boolean isolateZVolume) {
-        boolean previousValue = (mGroupFlags & FLAG_ISOLATED_Z_VOLUME) != 0;
-        if (isolateZVolume != previousValue) {
-            setBooleanFlag(FLAG_ISOLATED_Z_VOLUME, isolateZVolume);
-            if (mDisplayList != null) {
-                mDisplayList.setIsolatedZVolume(isolateZVolume);
-            }
-        }
     }
 
     /**

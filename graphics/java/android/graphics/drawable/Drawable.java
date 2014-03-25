@@ -30,6 +30,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.NinePatch;
+import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -858,6 +859,24 @@ public abstract class Drawable {
     public Insets getOpticalInsets() {
         return Insets.NONE;
     }
+
+    /**
+     * Returns the outline for this drawable if defined, null if not.
+     * <p>
+     * This method will be called by a View on its background Drawable after
+     * bounds change, if the View's Outline isn't set explicitly. This allows
+     * the background Drawable to provide the shape of the shadow casting
+     * portion of the View. It can also serve to clip the area of the View if
+     * if {@link View#setClipToOutline(boolean)} is set on the View.
+     * <p>
+     * The Outline queried by the View will not be modified, and is treated as
+     * a static shape that only needs to be requeried when the drawable's bounds
+     * change.
+     *
+     * @see View#setOutline(android.view.Outline)
+     * @see View#setClipToOutline(boolean)
+     */
+    public Outline getOutline() { return null; }
 
     /**
      * Make this drawable mutable. This operation cannot be reversed. A mutable

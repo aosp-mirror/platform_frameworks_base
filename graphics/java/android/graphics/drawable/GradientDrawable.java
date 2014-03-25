@@ -24,6 +24,7 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.DashPathEffect;
 import android.graphics.LinearGradient;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
@@ -133,6 +134,7 @@ public class GradientDrawable extends Drawable {
 
     private final Path mPath = new Path();
     private final RectF mRect = new RectF();
+    private Outline mOutline;
     
     private Paint mLayerPaint;    // internal, used if we use saveLayer()
     private boolean mRectIsDirty;   // internal state
@@ -585,11 +587,8 @@ public class GradientDrawable extends Drawable {
                     // to show it. If we did nothing, Skia would clamp the rad
                     // independently along each axis, giving us a thin ellipse
                     // if the rect were very wide but not very tall
-                    float rad = st.mRadius;
-                    float r = Math.min(mRect.width(), mRect.height()) * 0.5f;
-                    if (rad > r) {
-                        rad = r;
-                    }
+                    float rad = Math.min(st.mRadius,
+                            Math.min(mRect.width(), mRect.height()) * 0.5f);
                     canvas.drawRoundRect(mRect, rad, rad, mFillPaint);
                     if (haveStroke) {
                         canvas.drawRoundRect(mRect, rad, rad, mStrokePaint);
@@ -661,7 +660,7 @@ public class GradientDrawable extends Drawable {
         if (mRingPath == null) {
             mRingPath = new Path();
         } else {
-            mRingPath.reset();            
+            mRingPath.reset();
         }
 
         final Path ringPath = mRingPath;
@@ -1240,6 +1239,46 @@ public class GradientDrawable extends Drawable {
     public ConstantState getConstantState() {
         mGradientState.mChangingConfigurations = getChangingConfigurations();
         return mGradientState;
+    }
+
+    @Override
+    public Outline getOutline() {
+        final GradientState st = mGradientState;
+        final Rect bounds = getBounds();
+
+        switch (st.mShape) {
+            case RECTANGLE:
+                if (st.mRadiusArray != null) {
+                    return null;
+                }
+                float rad = 0;
+                if (st.mRadius > 0.0f) {
+                    // clamp the radius based on width & height, matching behavior in draw()
+                    rad = Math.min(st.mRadius,
+                            Math.min(bounds.width(), bounds.height()) * 0.5f);
+                }
+                if (mOutline == null) {
+                    mOutline = new Outline();
+                }
+                mOutline.setRoundRect(bounds.left, bounds.top,
+                        bounds.right, bounds.bottom, rad);
+                return mOutline;
+            case LINE: {
+                float halfStrokeWidth = mStrokePaint.getStrokeWidth() * 0.5f;
+                float centerY = bounds.centerY();
+                int top = (int) Math.floor(centerY - halfStrokeWidth);
+                int bottom = (int) Math.ceil(centerY + halfStrokeWidth);
+
+                if (mOutline == null) {
+                    mOutline = new Outline();
+                }
+                mOutline.setRoundRect(bounds.left, top, bounds.right, bottom, 0);
+                return mOutline;
+            }
+            default:
+                // TODO: investigate
+                return null;
+        }
     }
 
     @Override

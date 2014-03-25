@@ -31,6 +31,7 @@ import android.graphics.Insets;
 import android.graphics.Interpolator;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
@@ -2377,14 +2378,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int PFLAG3_CLIP_TO_OUTLINE = 0x20;
 
     /**
+     * Flag indicating that a view's outline has been specifically defined.
+     */
+    static final int PFLAG3_OUTLINE_DEFINED = 0x40;
+
+    /**
      * Flag indicating that we're in the process of applying window insets.
      */
-    static final int PFLAG3_APPLYING_INSETS = 0x40;
+    static final int PFLAG3_APPLYING_INSETS = 0x80;
 
     /**
      * Flag indicating that we're in the process of fitting system windows using the old method.
      */
-    static final int PFLAG3_FITTING_SYSTEM_WINDOWS = 0x80;
+    static final int PFLAG3_FITTING_SYSTEM_WINDOWS = 0x100;
 
     /* End of masks for mPrivateFlags3 */
 
@@ -3335,8 +3341,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Stores the outline of the view, passed down to the DisplayList level for
      * defining shadow shape and clipping.
+     *
+     * TODO: once RenderNode is long-lived, remove this and rely on native copy.
      */
-    private Path mOutline;
+    private Outline mOutline;
 
     /**
      * When this view has focus and the next focus is {@link #FOCUS_LEFT},
@@ -10802,66 +10810,44 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Copies the Outline of the View into the Path parameter.
-     * <p>
-     * If the outline is not set, the parameter Path is set to empty.
-     *
-     * @param outline Path into which View's outline will be copied. Must be non-null.
-     *
-     * @see #setOutline(Path)
-     * @see #getClipToOutline()
-     * @see #setClipToOutline(boolean)
-     */
-    public final void getOutline(@NonNull Path outline) {
-        if (outline == null) {
-            throw new IllegalArgumentException("Path must be non-null");
-        }
-        if (mOutline == null) {
-            outline.reset();
-        } else {
-            outline.set(mOutline);
-        }
-    }
-
-    /**
      * Sets the outline of the view, which defines the shape of the shadow it
      * casts, and can used for clipping.
      * <p>
-     * The outline path of a View must be {@link android.graphics.Path#isConvex() convex}.
-     * <p>
-     * If the outline is not set, or {@link Path#isEmpty()}, shadows will be
-     * cast from the bounds of the View, and clipToOutline will be ignored.
+     * If the outline is not set or is null, shadows will be cast from the
+     * bounds of the View, and clipToOutline will be ignored.
      *
-     * @param outline The new outline of the view. Must be non-null, and convex.
+     * @param outline The new outline of the view.
+     *         Must be {@link android.view.Outline#isValid() valid.}
      *
-     * @see #getOutline(Path)
      * @see #getClipToOutline()
      * @see #setClipToOutline(boolean)
      */
-    public void setOutline(@NonNull Path outline) {
+    public void setOutline(@Nullable Outline outline) {
+        if (outline != null && !outline.isValid()) {
+            throw new IllegalArgumentException("Outline must not be invalid");
+        }
+
+        mPrivateFlags3 |= PFLAG3_OUTLINE_DEFINED;
+
         if (outline == null) {
-            throw new IllegalArgumentException("Path must be non-null");
-        }
-        if (!outline.isConvex()) {
-            throw new IllegalArgumentException("Path must be convex");
-        }
-        // always copy the path since caller may reuse
-        if (mOutline == null) {
-            mOutline = new Path(outline);
+            mOutline = null;
         } else {
+            // always copy the path since caller may reuse
+            if (mOutline == null) {
+                mOutline = new Outline();
+            }
             mOutline.set(outline);
         }
 
         if (mDisplayList != null) {
-            mDisplayList.setOutline(outline);
+            mDisplayList.setOutline(mOutline);
         }
     }
 
     /**
      * Returns whether the outline of the View will be used for clipping.
      *
-     * @see #getOutline(Path)
-     * @see #setOutline(Path)
+     * @see #setOutline(Outline)
      */
     public final boolean getClipToOutline() {
         return ((mPrivateFlags3 & PFLAG3_CLIP_TO_OUTLINE) != 0);
@@ -10879,8 +10865,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * If the outline of the view is not set or is empty, no clipping will be
      * performed.
      *
-     * @see #getOutline(Path)
-     * @see #setOutline(Path)
+     * @see #setOutline(Outline)
      */
     public void setClipToOutline(boolean clipToOutline) {
         // TODO : Add a fast invalidation here.
@@ -11460,7 +11445,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             // Damage the entire IsolatedZVolume recieving this view's shadow.
             if (getTranslationZ() != 0) {
-                damageIsolatedZVolume();
+                damageShadowReceiver();
             }
         }
     }
@@ -11489,24 +11474,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Damage area of the screen covered by the current isolated Z volume
+     * Damage area of the screen that can be covered by this View's shadow.
      *
      * This method will guarantee that any changes to shadows cast by a View
      * are damaged on the screen for future redraw.
      */
-    private void damageIsolatedZVolume() {
+    private void damageShadowReceiver() {
         final AttachInfo ai = mAttachInfo;
         if (ai != null) {
             ViewParent p = getParent();
-            while (p != null) {
-                if (p instanceof ViewGroup) {
-                    final ViewGroup vg = (ViewGroup) p;
-                    if (vg.hasIsolatedZVolume()) {
-                        vg.damageInParent();
-                        return;
-                    }
-                }
-                p = p.getParent();
+            if (p != null && p instanceof ViewGroup) {
+                final ViewGroup vg = (ViewGroup) p;
+                vg.damageInParent();
             }
         }
     }
@@ -11540,7 +11519,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             damageInParent();
         }
         if (invalidateParent && getTranslationZ() != 0) {
-            damageIsolatedZVolume();
+            damageShadowReceiver();
         }
     }
 
@@ -14571,10 +14550,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 displayList.setClipToBounds(
                         (((ViewGroup) mParent).mGroupFlags & ViewGroup.FLAG_CLIP_CHILDREN) != 0);
             }
-            if (this instanceof ViewGroup) {
-                displayList.setIsolatedZVolume(
-                        (((ViewGroup) this).mGroupFlags & ViewGroup.FLAG_ISOLATED_Z_VOLUME) != 0);
-            }
             displayList.setOutline(mOutline);
             displayList.setClipToOutline(getClipToOutline());
             float alpha = 1;
@@ -15178,6 +15153,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mBackgroundSizeChanged) {
             background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
             mBackgroundSizeChanged = false;
+            if ((mPrivateFlags3 & PFLAG3_OUTLINE_DEFINED) == 0) {
+                // Outline not currently define, query from background
+                mOutline = background.getOutline();
+                if (mDisplayList != null) {
+                    mDisplayList.setOutline(mOutline);
+                }
+            }
         }
 
         // Attempt to use a display list if requested.

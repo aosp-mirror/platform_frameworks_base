@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef RENDERNODEPROPERTIES_H_
-#define RENDERNODEPROPERTIES_H_
+#ifndef RENDERNODEPROPERTIES_H
+#define RENDERNODEPROPERTIES_H
 
 #include <stddef.h>
 #include <cutils/compiler.h>
@@ -22,7 +22,9 @@
 
 #include <SkCamera.h>
 #include <SkMatrix.h>
-#include <SkPath.h>
+
+#include "Rect.h"
+#include "Outline.h"
 
 #define TRANSLATION 0x0001
 #define ROTATION    0x0002
@@ -62,18 +64,6 @@ public:
 
     bool isProjectionReceiver() {
         return mProjectionReceiver;
-    }
-
-    void setOutline(const SkPath* outline) {
-        if (!outline) {
-            mOutline.reset();
-        } else {
-            mOutline = *outline;
-        }
-    }
-
-    void setClipToOutline(bool clipToOutline) {
-        mClipToOutline = clipToOutline;
     }
 
     void setStaticMatrix(SkMatrix* matrix) {
@@ -375,12 +365,16 @@ public:
         mCaching = caching;
     }
 
-    int getWidth() {
+    int getWidth() const {
         return mWidth;
     }
 
-    int getHeight() {
+    int getHeight() const {
         return mHeight;
+    }
+
+    Outline& outline() {
+        return mOutline;
     }
 
 private:
@@ -396,11 +390,10 @@ private:
     void updateMatrix();
 
     // Rendering properties
+    Outline mOutline;
     bool mClipToBounds;
     bool mProjectBackwards;
     bool mProjectionReceiver;
-    SkPath mOutline;
-    bool mClipToOutline;
     float mAlpha;
     bool mHasOverlappingRendering;
     float mTranslationX, mTranslationY, mTranslationZ;
@@ -436,4 +429,4 @@ private:
 } /* namespace uirenderer */
 } /* namespace android */
 
-#endif /* RENDERNODEPROPERTIES_H_ */
+#endif /* RENDERNODEPROPERTIES_H */
