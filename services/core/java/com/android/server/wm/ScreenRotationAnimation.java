@@ -199,7 +199,8 @@ class ScreenRotationAnimation {
     }
 
     public ScreenRotationAnimation(Context context, DisplayContent displayContent,
-            SurfaceSession session, boolean inTransaction, boolean forceDefaultOrientation) {
+            SurfaceSession session, boolean inTransaction, boolean forceDefaultOrientation,
+            boolean isSecure) {
         mContext = context;
         mDisplayContent = displayContent;
         displayContent.getLogicalDisplayRect(mOriginalDisplayRect);
@@ -241,16 +242,21 @@ class ScreenRotationAnimation {
 
         try {
             try {
+                int flags = SurfaceControl.HIDDEN;
+                if (isSecure) {
+                    flags |= SurfaceControl.SECURE;
+                }
+
                 if (WindowManagerService.DEBUG_SURFACE_TRACE) {
                     mSurfaceControl = new SurfaceTrace(session, "ScreenshotSurface",
                             mWidth, mHeight,
-                            PixelFormat.OPAQUE, SurfaceControl.HIDDEN);
+                            PixelFormat.OPAQUE, flags);
                     Slog.w(TAG, "ScreenRotationAnimation ctor: displayOffset="
                             + mOriginalDisplayRect.toShortString());
                 } else {
                     mSurfaceControl = new SurfaceControl(session, "ScreenshotSurface",
                             mWidth, mHeight,
-                            PixelFormat.OPAQUE, SurfaceControl.HIDDEN);
+                            PixelFormat.OPAQUE, flags);
                 }
                 // capture a screenshot into the surface we just created
                 Surface sur = new Surface();
