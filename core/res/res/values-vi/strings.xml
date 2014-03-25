@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Cho phép ứng dụng truy xuất nội dung của cửa sổ hiện hành. Ứng dụng độc hại có thể truy xuất toàn bộ nội dung của cửa sổ cũng như xem xét toàn bộ văn bản của cửa sổ ngoại trừ mật khẩu."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"tạm thời bật trợ năng"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Cho phép ứng dụng tạm thời bật trợ năng trên thiết bị. Các ứng dụng độc hại có thể bật trợ năng mà không có sự đồng ý của người dùng."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"truy xuất thông tin cửa sổ"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Cho phép ứng dụng truy xuất thông tin về các cửa sổ từ trình quản lý cửa sổ. Các ứng dụng độc hại có thể truy xuất thông tin được dành để sử dụng trong hệ thống nội bộ."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"lọc sự kiện"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Cho phép ứng dụng đăng ký bộ lọc dữ liệu nhập để lọc luồng tất cả các sự kiện người dùng trước khi chúng được gửi đi. Ứng dụng độc hại có thể kiểm soát Giao diện người dùng hệ thống mà không cần sự can thiệp của người dùng."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"thu phóng màn hình"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Cho phép ứng dụng thu phóng nội dung trên màn hình. Ứng dụng độc hại có thể biến đổi nội dung trên màn hình theo cách kết xuất thiết bị không thể sử dụng được."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"tắt từng phần"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Đặt trình quản lý hoạt động sang trạng thái tắt. Không thực hiện tắt hoàn toàn."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ngăn chuyển đổi ứng dụng"</string>

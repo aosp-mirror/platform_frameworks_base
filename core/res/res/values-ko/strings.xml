@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"앱이 활성 창의 콘텐츠를 검색할 수 있도록 허용합니다. 이 경우 악성 앱이 전체 창의 콘텐츠를 검색하여 비밀번호를 제외한 모든 텍스트를 살펴볼 수 있습니다."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"일시적인 접근성 사용"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"애플리케이션이 기기에서 일시적으로 접근성을 사용하도록 허용합니다. 이 경우 악성 앱이 사용자의 동의 없이 접근성을 사용할 수 있습니다."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"창 관련 정보 가져오기"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"애플리케이션이 Window Manager에서 창 관련 정보를 가져오도록 허용합니다. 이 경우 악성 앱이 내부 시스템에서만 사용하도록 되어 있는 정보를 가져올 수 있습니다."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"일정 필터링"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"애플리케이션에 입력 필터를 등록할 수 있도록 하여 모든 사용자 일정 스트림을 전달하기 전에 필터링합니다. 이 경우 사용자의 개입 없이 악성 앱이 시스템 UI를 제어할 수 있습니다."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"디스플레이 확대"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"앱이 표시된 콘텐츠를 확대하도록 허용합니다. 악성 앱은 표시된 콘텐츠를 변형시켜 기기를 사용할 수 없게 만들 수 있습니다."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"부분 종료"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"작업 관리자를 종료 상태로 설정합니다. 전체 종료를 수행하지는 않습니다."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"애플리케이션 전환 방지"</string>

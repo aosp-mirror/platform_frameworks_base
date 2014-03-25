@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"የነቃ መስኮት ይዘትን ለመበርበር ለመተግበሪያው ይፈቅዳሉ፡፡ ጠቅላላውን የመስኮት ይዘት ለመበርበር እና ከይለፍ ቃል በስተቀር ሁሉንም ጽሑፉን ለማየት ጎጂ መተግበሪያዎች ይችላሉ፡፡"</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"ተደራሽነት በጊዜያዊነት ያነቃል"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"አንድ መተግበሪያ በጊዜያዊነት በመሣሪያው ላይ ተደራሽነትን እንዲያነቃ ያስችለዋል። ተንኮል-አዘል መተግበሪያዎች ያለተጠቃሚው ፍቃድ ተደራሽነትን ሊያነቁ ይችላሉ።"</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"የመስኮት መረጃን አምጣ"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"አንድ መተግበሪያ ከመስኮት አቀናባሪው ሆኖ ስለመስኮቱ መረጃ እንዲያመጣ ያስችለዋል። ተንኮል-አዘል መተግበሪያዎች ለውስጣዊ ስርዓት ጥቅም የታሰበ መረጃን ሊወስዱ ይችላሉ።"</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"ክስተቶችን አጣራ"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"አንድ መተግበሪያ የሁሉንም ተጠቃሚዎች ክስተቶች ከመላካቸው በፊት እነሱን የሚያጣራ የግቤት ማጣሪያ እንዲመዘግብ ያስችለዋል። ተንኮል-አዘል መተግበሪያዎች ተጠቃሚው ጣልቃ ሳይገባ የስርዓቱን በይነገጽ ሊቆጣጠሩት ይችላሉ።"</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"ማሳያን አጉላ"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"አንድ መተግበሪያ የአንድ ማሳያ ይዘት እንዲያጎላ ይፈቅድለታል። ተንኮል-አዘል መተግበሪያዎች መሣሪያውን ከጥቅም ውጪ በሚያደርገው ሁኔታ የማሳያ ይዘቱ ሊለውጡት ይችላሉ።"</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"ከፊል ዝጋ"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"የእንቅስቃሴውን አደራጅ ወደ ዝጋ ሁነታ አስቀምጥ።ሙሉ ለሙሉ ዝጋ አያከናውንም።"</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"የትግበራ መቀያየርን ተከላከል"</string>

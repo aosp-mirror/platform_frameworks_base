@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Antaa sovelluksen noutaa aktiivisen ikkunan sisällön. Haitalliset sovellukset voivat noutaa koko ikkunan sisällön ja tarkastella sen kaikkea tekstiä lukuun ottamatta salasanoja."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"ota esteettömyystila käyttöön väliaikaisesti"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Antaa sovelluksen ottaa esteettömyystilan käyttöön laitteessa väliaikaisesti. Haitalliset sovellukset voivat ottaa esteettömyystilan käyttöön ilman käyttäjän lupaa."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"nouda ikkunoiden tietoja"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Antaa sovelluksen noutaa ikkunoiden tietoja ikkunanhallinnasta. Haitalliset sovellukset voivat noutaa tietoja, jotka on tarkoitettu järjestelmän sisäiseen käyttöön."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"suodata tapahtumat"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Antaa sovelluksen rekisteröidä syöttösuodattimen, joka suodattaa kaikkien käyttäjätapahtumien streamin ennen tapahtumien näyttämistä. Haitalliset sovellukset voivat hallita järjestelmän käyttöliittymää ilman käyttäjän lupaa."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"suurenna ruutu"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Antaa sovelluksen suurentaa ruudun sisällön. Haitalliset sovellukset voivat muuttaa näytettävää sisältöä siten, ettei laitetta enää voi käyttää."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"sulje puhelin osittain"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Asettaa toimintojen hallinnan sulkeutumistilaan. Ei sulje puhelinta kokonaan."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"estä sovellusten vaihto"</string>
