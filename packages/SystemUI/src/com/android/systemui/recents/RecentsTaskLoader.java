@@ -422,7 +422,7 @@ public class RecentsTaskLoader {
                     if (t.activityIcon != null) {
                         bd = new BitmapDrawable(res, t.activityIcon);
                     }
-                    Task task = new Task(t.persistentId, t.baseIntent, label, bd);
+                    Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, label, bd);
 
                     // Load the icon (if possible and not the foremost task, from the cache)
                     if (task.icon != null) {
@@ -477,7 +477,8 @@ public class RecentsTaskLoader {
                     for (int j = 0; j < Constants.Values.RecentsTaskLoader.TaskEntryMultiplier; j++) {
                         Console.log(Constants.DebugFlags.App.TaskDataLoader,
                                 "  [RecentsTaskLoader|task]", t.baseIntent.getComponent().getPackageName());
-                        stack.addTask(new Task(t.persistentId, t.baseIntent, title, null, null));
+                        stack.addTask(new Task(t.persistentId, (t.id > -1), t.baseIntent, title,
+                                null, null));
                     }
                 }
             }

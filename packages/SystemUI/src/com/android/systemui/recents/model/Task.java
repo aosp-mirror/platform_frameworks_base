@@ -64,18 +64,21 @@ public class Task {
     public String title;
     public Drawable icon;
     public Bitmap thumbnail;
+    public boolean isActive;
 
     TaskCallbacks mCb;
 
-    public Task(int id, Intent intent, String activityTitle, Drawable icon) {
-        this(id, intent, activityTitle, icon, null);
+    public Task(int id, boolean isActive, Intent intent, String activityTitle, Drawable icon) {
+        this(id, isActive, intent, activityTitle, icon, null);
     }
 
-    public Task(int id, Intent intent, String activityTitle, Drawable icon, Bitmap thumbnail) {
+    public Task(int id, boolean isActive, Intent intent, String activityTitle, Drawable icon,
+                Bitmap thumbnail) {
         this.key = new TaskKey(id, intent);
         this.title = activityTitle;
         this.icon = icon;
         this.thumbnail = thumbnail;
+        this.isActive = isActive;
     }
 
     /** Set the callbacks */
