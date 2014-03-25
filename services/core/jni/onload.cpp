@@ -21,6 +21,7 @@
 
 namespace android {
 int register_android_server_AlarmManagerService(JNIEnv* env);
+int register_android_server_AssetAtlasService(JNIEnv* env);
 int register_android_server_BatteryStatsService(JNIEnv* env);
 int register_android_server_ConsumerIrService(JNIEnv *env);
 int register_android_server_InputApplicationHandle(JNIEnv* env);
@@ -29,15 +30,15 @@ int register_android_server_InputManager(JNIEnv* env);
 int register_android_server_LightsService(JNIEnv* env);
 int register_android_server_PowerManagerService(JNIEnv* env);
 int register_android_server_SerialService(JNIEnv* env);
+int register_android_server_SystemServer(JNIEnv* env);
 int register_android_server_UsbDeviceManager(JNIEnv* env);
 int register_android_server_UsbHostManager(JNIEnv* env);
 int register_android_server_VibratorService(JNIEnv* env);
-int register_android_server_SystemServer(JNIEnv* env);
 int register_android_server_location_GpsLocationProvider(JNIEnv* env);
 int register_android_server_location_FlpHardwareProvider(JNIEnv* env);
 int register_android_server_connectivity_Vpn(JNIEnv* env);
-int register_android_server_AssetAtlasService(JNIEnv* env);
 int register_android_server_dreams_McuHal(JNIEnv* env);
+int register_android_server_hdmi_HdmiCecService(JNIEnv* env);
 };
 
 using namespace android;
@@ -71,6 +72,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
     register_android_server_ConsumerIrService(env);
     register_android_server_dreams_McuHal(env);
     register_android_server_BatteryStatsService(env);
+    register_android_server_hdmi_HdmiCecService(env);
 
     return JNI_VERSION_1_4;
 }

@@ -118,6 +118,8 @@ public final class SystemServer {
             "com.android.server.wifi.WifiService";
     private static final String WIFI_P2P_SERVICE_CLASS =
             "com.android.server.wifi.p2p.WifiP2pService";
+    private static final String HDMI_CEC_SERVICE_CLASS =
+            "com.android.server.hdmi.HdmiCecService";
 
     private final int mFactoryTestMode;
     private Timer mProfilerSnapshotTimer;
@@ -887,6 +889,12 @@ public final class SystemServer {
                 mSystemServiceManager.startService(MediaSessionService.class);
             } catch (Throwable e) {
                 reportWtf("starting MediaSessionService", e);
+            }
+
+            try {
+                mSystemServiceManager.startService(HDMI_CEC_SERVICE_CLASS);
+            } catch (Throwable e) {
+                reportWtf("starting HdmiCec Service", e);
             }
 
             if (!disableNonCoreServices) {
