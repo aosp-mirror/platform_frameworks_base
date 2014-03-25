@@ -1007,7 +1007,7 @@ public final class CameraCharacteristics extends CameraMetadata {
      * each channel is specified by the offset in the
      * {@link CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN android.sensor.blackLevelPattern} tag.</p>
      * <p>The white level is typically determined either by sensor bit depth
-     * (10-14 bits is expected), or by the point where the sensor response
+     * (8-14 bits is expected), or by the point where the sensor response
      * becomes too non-linear to be useful.  The default value for this is
      * maximum representable value for a 16-bit raw sample (2^16 - 1).</p>
      *
