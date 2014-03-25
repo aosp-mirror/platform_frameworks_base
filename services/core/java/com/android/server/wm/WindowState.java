@@ -709,11 +709,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mAppToken != null ? mAppToken.appToken : null;
     }
 
-    @Override
-    public int getTaskId() {
-        return mAppToken != null ? mAppToken.groupId : UNKNOWN_TASK_ID;
-    }
-
     boolean setInsetsChanged() {
         mOverscanInsetsChanged |= !mLastOverscanInsets.equals(mOverscanInsets);
         mContentInsetsChanged |= !mLastContentInsets.equals(mContentInsets);

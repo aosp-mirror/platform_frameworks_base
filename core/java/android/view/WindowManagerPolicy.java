@@ -124,8 +124,6 @@ public interface WindowManagerPolicy {
      * to prepareAddWindow() until removeWindow().
      */
     public interface WindowState {
-        public final static int UNKNOWN_TASK_ID = -1;
-
         /**
          * Return the uid of the app that owns this window.
          */
@@ -274,7 +272,7 @@ public interface WindowManagerPolicy {
          * Get the layer at which this window's surface will be Z-ordered.
          */
         public int getSurfaceLayer();
-
+        
         /**
          * Return the token for the application (actually activity) that owns 
          * this window.  May return null for system windows. 
@@ -282,11 +280,6 @@ public interface WindowManagerPolicy {
          * @return An IApplicationToken identifying the owning activity.
          */
         public IApplicationToken getAppToken();
-
-        /**
-         * Return the taskId of the task that owns this window.
-         */
-        public int getTaskId();
 
         /**
          * Return true if, at any point, the application token associated with 
