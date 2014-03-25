@@ -1009,7 +1009,7 @@ public class GradientDrawable extends Drawable {
             }
 
             if (state.mInnerRadius == -1
-                    && themeAttrs == null || themeAttrs[R.styleable.GradientDrawable_thicknessRatio] == 0) {
+                    && (themeAttrs == null || themeAttrs[R.styleable.GradientDrawable_thicknessRatio] == 0)) {
                 state.mInnerRadiusRatio = a.getFloat(
                         R.styleable.GradientDrawable_innerRadiusRatio, DEFAULT_INNER_RADIUS_RATIO);
             }
@@ -1020,7 +1020,7 @@ public class GradientDrawable extends Drawable {
             }
 
             if (state.mThickness == -1
-                    && themeAttrs == null || themeAttrs[R.styleable.GradientDrawable_thicknessRatio] == 0) {
+                    && (themeAttrs == null || themeAttrs[R.styleable.GradientDrawable_thicknessRatio] == 0)) {
                 state.mThicknessRatio = a.getFloat(
                         R.styleable.GradientDrawable_thicknessRatio, DEFAULT_THICKNESS_RATIO);
             }
