@@ -3372,11 +3372,11 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                         throw new IllegalArgumentException("Axis out of range.");
                     }
                     final long bits = mPackedAxisBits;
-                    final long axisBit = 1L << axis;
+                    final long axisBit = 0x8000000000000000L >>> axis;
                     if ((bits & axisBit) == 0) {
                         return 0;
                     }
-                    final int index = Long.bitCount(bits & (axisBit - 1L));
+                    final int index = Long.bitCount(bits & ~(0xFFFFFFFFFFFFFFFFL >>> axis));
                     return mPackedAxisValues[index];
                 }
             }
@@ -3425,8 +3425,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                         throw new IllegalArgumentException("Axis out of range.");
                     }
                     final long bits = mPackedAxisBits;
-                    final long axisBit = 1L << axis;
-                    final int index = Long.bitCount(bits & (axisBit - 1L));
+                    final long axisBit = 0x8000000000000000L >>> axis;
+                    final int index = Long.bitCount(bits & ~(0xFFFFFFFFFFFFFFFFL >>> axis));
                     float[] values = mPackedAxisValues;
                     if ((bits & axisBit) == 0) {
                         if (values == null) {
