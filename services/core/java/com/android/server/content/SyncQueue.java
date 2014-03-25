@@ -76,12 +76,11 @@ public class SyncQueue {
                 operationToAdd = new SyncOperation(
                         info.account, info.userId, op.reason, op.syncSource, info.provider,
                         op.extras,
-                        0 /* delay */,
+                        op.expedited ? -1 : 0 /* delay */,
                         0 /* flex */,
-                        backoff != null ? backoff.first : 0,
+                        backoff != null ? backoff.first : 0L,
                         mSyncStorageEngine.getDelayUntilTime(info),
                         syncAdapterInfo.type.allowParallelSyncs());
-                operationToAdd.expedited = op.expedited;
                 operationToAdd.pendingOperation = op;
                 add(operationToAdd, op);
             } else if (info.target_service) {
@@ -96,11 +95,10 @@ public class SyncQueue {
                 operationToAdd = new SyncOperation(
                         info.service, info.userId, op.reason, op.syncSource,
                         op.extras,
-                        0 /* delay */,
+                        op.expedited ? -1 : 0 /* delay */,
                         0 /* flex */,
                         backoff != null ? backoff.first : 0,
                         mSyncStorageEngine.getDelayUntilTime(info));
-                operationToAdd.expedited = op.expedited;
                 operationToAdd.pendingOperation = op;
                 add(operationToAdd, op);
             }
@@ -129,7 +127,6 @@ public class SyncQueue {
         if (existingOperation != null) {
             boolean changed = false;
             if (operation.compareTo(existingOperation) <= 0 ) {
-                existingOperation.expedited = operation.expedited;
                 long newRunTime =
                         Math.min(existingOperation.latestRunTime, operation.latestRunTime);
                 // Take smaller runtime.

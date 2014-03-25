@@ -1088,7 +1088,7 @@ public class SyncStorageEngine extends Handler {
             }
 
             pop = new PendingOperation(authority, op.reason, op.syncSource, op.extras,
-                    op.expedited);
+                    op.isExpedited());
             mPendingOperations.add(pop);
             appendPendingOperationLocked(pop);
 

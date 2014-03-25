@@ -131,7 +131,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         assertEquals(sop.target.userId, popRetrieved.target.userId);
         assertEquals(sop.reason, popRetrieved.reason);
         assertEquals(sop.syncSource, popRetrieved.syncSource);
-        assertEquals(sop.expedited, popRetrieved.expedited);
+        assertEquals(sop.isExpedited(), popRetrieved.expedited);
         assert(android.content.PeriodicSync.syncExtrasEquals(sop.extras, popRetrieved.extras));
     }
 
@@ -169,7 +169,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         assertEquals(deleted.target.userId, popDeleted.target.userId);
         assertEquals(deleted.reason, popDeleted.reason);
         assertEquals(deleted.syncSource, popDeleted.syncSource);
-        assertEquals(deleted.expedited, popDeleted.expedited);
+        assertEquals(deleted.isExpedited(), popDeleted.expedited);
         assert(android.content.PeriodicSync.syncExtrasEquals(deleted.extras, popDeleted.extras));
         // Delete one to force write-all
         engine.deleteFromPending(popDeleted);
@@ -192,7 +192,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         assertEquals(sop.target.userId, popRetrieved.target.userId);
         assertEquals(sop.reason, popRetrieved.reason);
         assertEquals(sop.syncSource, popRetrieved.syncSource);
-        assertEquals(sop.expedited, popRetrieved.expedited);
+        assertEquals(sop.isExpedited(), popRetrieved.expedited);
         assert(android.content.PeriodicSync.syncExtrasEquals(sop.extras, popRetrieved.extras));
 
         popRetrieved = pops.get(1);
@@ -202,7 +202,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         assertEquals(sop1.target.userId, popRetrieved.target.userId);
         assertEquals(sop1.reason, popRetrieved.reason);
         assertEquals(sop1.syncSource, popRetrieved.syncSource);
-        assertEquals(sop1.expedited, popRetrieved.expedited);
+        assertEquals(sop1.isExpedited(), popRetrieved.expedited);
         assert(android.content.PeriodicSync.syncExtrasEquals(sop1.extras, popRetrieved.extras));
     }
 

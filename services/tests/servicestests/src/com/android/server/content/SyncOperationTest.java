@@ -18,11 +18,12 @@ package com.android.server.content;
 
 import android.accounts.Account;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.provider.Settings;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
-
-import com.android.server.content.SyncOperation;
 
 /**
  * You can run those tests with:
@@ -34,6 +35,21 @@ import com.android.server.content.SyncOperation;
  */
 
 public class SyncOperationTest extends AndroidTestCase {
+
+    Account mDummy;
+    /** Indicate an unimportant long that we're not testing. */
+    long mUnimportantLong = 0L;
+    /** Empty bundle. */
+    Bundle mEmpty;
+    /** Silly authority. */
+    String mAuthority;
+
+    @Override
+    public void setUp() {
+        mDummy = new Account("account1", "type1");
+        mEmpty = new Bundle();
+        mAuthority = "authority1";
+    }
 
     @SmallTest
     public void testToKey() {
@@ -111,35 +127,64 @@ public class SyncOperationTest extends AndroidTestCase {
 
     @SmallTest
     public void testCompareTo() {
-        Account dummy = new Account("account1", "type1");
-        Bundle b1 = new Bundle();
-        final long unimportant = 0L;
         long soon = 1000;
         long soonFlex = 50;
         long after = 1500;
         long afterFlex = 100;
-        SyncOperation op1 = new SyncOperation(dummy, 0, 0, SyncOperation.REASON_PERIODIC,
-                "authority1", b1, soon, soonFlex, unimportant, unimportant, true);
+        SyncOperation op1 = new SyncOperation(mDummy, 0, 0, SyncOperation.REASON_PERIODIC,
+                "authority1", mEmpty, soon, soonFlex, mUnimportantLong, mUnimportantLong, true);
 
         // Interval disjoint from and after op1.
-        SyncOperation op2 = new SyncOperation(dummy, 0, 0, SyncOperation.REASON_PERIODIC,
-                "authority1", b1, after, afterFlex, unimportant, unimportant, true);
+        SyncOperation op2 = new SyncOperation(mDummy, 0, 0, SyncOperation.REASON_PERIODIC,
+                "authority1", mEmpty, after, afterFlex, mUnimportantLong, mUnimportantLong, true);
 
         // Interval equivalent to op1, but expedited.
         Bundle b2 = new Bundle();
         b2.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        SyncOperation op3 = new SyncOperation(dummy, 0, 0, 0,
-                "authority1", b2, soon, soonFlex, unimportant, unimportant, true);
+        SyncOperation op3 = new SyncOperation(mDummy, 0, 0, 0,
+                "authority1", b2, -1, soonFlex, mUnimportantLong, mUnimportantLong, true);
 
         // Interval overlaps but not equivalent to op1.
-        SyncOperation op4 = new SyncOperation(dummy, 0, 0, SyncOperation.REASON_PERIODIC,
-                "authority1", b1, soon + 100, soonFlex + 100, unimportant, unimportant, true);
+        SyncOperation op4 = new SyncOperation(mDummy, 0, 0, SyncOperation.REASON_PERIODIC,
+                "authority1", mEmpty, soon + 100, soonFlex + 100, mUnimportantLong, mUnimportantLong, true);
 
         assertTrue(op1.compareTo(op2) == -1);
         assertTrue("less than not transitive.", op2.compareTo(op1) == 1);
-        assertTrue(op1.compareTo(op3) == 1);
+        assertTrue("Expedited sync not smaller than non-expedited.", op1.compareTo(op3) == 1);
         assertTrue("greater than not transitive. ", op3.compareTo(op1) == -1);
-        assertTrue("overlapping intervals not the same.", op1.compareTo(op4) == 0);
-        assertTrue("equality not transitive.", op4.compareTo(op1) == 0);
+        assertTrue("overlapping intervals not correctly compared.", op1.compareTo(op4) == -1);
+        assertTrue("equality not transitive.", op4.compareTo(op1) == 1);
+    }
+
+    @SmallTest
+    public void testCopyConstructor() {
+        long fiveSecondsFromNow = 5 * 1000L;
+        long twoSecondsFlex = 2 * 1000L;
+        long eightSeconds = 8 * 1000L;
+        long fourSeconds = 4 * 1000L;
+
+        Bundle withExpedited = new Bundle();
+        withExpedited.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        SyncOperation op = new SyncOperation(mDummy, 0, 0, SyncOperation.REASON_USER_START,
+                mAuthority, withExpedited, fiveSecondsFromNow, twoSecondsFlex,
+                eightSeconds /* backoff */, fourSeconds /* delayUntil */, true);
+        // Create another sync op to be rerun in 5 minutes.
+        long now = SystemClock.elapsedRealtime();
+        SyncOperation copy = new SyncOperation(op, fiveSecondsFromNow * 60);
+        // Copying an expedited sync to be re-run should not keep expedited property.
+        assertFalse("A rescheduled sync based off an expedited should not be expedited!",
+                copy.isExpedited());
+        assertFalse("A rescheduled sync based off an expedited should not have expedited=true in"
+                + "its bundle.",
+                copy.extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false));
+        assertTrue("Copied sync is not respecting new provided run-time.",
+                copy.latestRunTime == (now + fiveSecondsFromNow * 60));
+        assertTrue("A rescheduled sync should not have any flex.",
+                copy.flexTime == 0L);
+        assertTrue("A rescheduled op should honour the old op's backoff.",
+                copy.backoff == eightSeconds);
+        assertTrue("A rescheduled op should honour the old op's delayUntil param.",
+                copy.delayUntil == fourSeconds);
+
     }
 }

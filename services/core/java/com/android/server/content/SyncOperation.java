@@ -65,17 +65,18 @@ public class SyncOperation implements Comparable {
     /** Why this sync was kicked off. {@link #REASON_NAMES} */
     public final int reason;
     /** Where this sync was initiated. */
-    public int syncSource;
+    public final int syncSource;
     public final boolean allowParallelSyncs;
-    public Bundle extras;
     public final String key;
-    public boolean expedited;
+    /** Internal boolean to avoid reading a bundle everytime we want to compare operations. */
+    private final boolean expedited;
+    public Bundle extras;
     /** Bare-bones version of this operation that is persisted across reboots. */
     public SyncStorageEngine.PendingOperation pendingOperation;
     /** Elapsed real time in millis at which to run this sync. */
     public long latestRunTime;
     /** Set by the SyncManager in order to delay retries. */
-    public Long backoff;
+    public long backoff;
     /** Specified by the adapter to delay subsequent sync operations. */
     public long delayUntil;
     /**
@@ -92,61 +93,58 @@ public class SyncOperation implements Comparable {
     public SyncOperation(Account account, int userId, int reason, int source, String provider,
             Bundle extras, long runTimeFromNow, long flexTime, long backoff,
             long delayUntil, boolean allowParallelSyncs) {
-        this.target = new SyncStorageEngine.EndPoint(account, provider, userId);
-        this.reason = reason;
-        this.allowParallelSyncs = allowParallelSyncs;
-        this.key = initialiseOperation(this.target, source, extras, runTimeFromNow, flexTime,
-                backoff, delayUntil);
+        this(new SyncStorageEngine.EndPoint(account, provider, userId),
+                reason, source, extras, runTimeFromNow, flexTime, backoff, delayUntil,
+                allowParallelSyncs);
     }
 
     public SyncOperation(ComponentName service, int userId, int reason, int source,
             Bundle extras, long runTimeFromNow, long flexTime, long backoff,
             long delayUntil) {
-        this.target = new SyncStorageEngine.EndPoint(service, userId);
-        // Default to true for sync service. The service itself decides how to handle this.
-        this.allowParallelSyncs = true;
+        this(new SyncStorageEngine.EndPoint(service, userId), reason, source, extras,
+                runTimeFromNow, flexTime, backoff, delayUntil, true /* allowParallelSyncs */);
+    }
+
+    private SyncOperation(SyncStorageEngine.EndPoint info, int reason, int source, Bundle extras,
+            long runTimeFromNow, long flexTime, long backoff, long delayUntil,
+            boolean allowParallelSyncs) {
+        this.target = info;
         this.reason = reason;
-        this.key =
-                initialiseOperation(this.target,
-                        source, extras, runTimeFromNow, flexTime, backoff, delayUntil);
-    }
-
-    /** Used to reschedule a sync at a new point in time. */
-    SyncOperation(SyncOperation other, long newRunTimeFromNow) {
-        this.target = other.target;
-        this.reason = other.reason;
-        this.expedited = other.expedited;
-        this.allowParallelSyncs = other.allowParallelSyncs;
-        // re-use old flex, but only 
-        long newFlexTime = Math.min(other.flexTime, newRunTimeFromNow);
-        this.key =
-                initialiseOperation(this.target,
-                    other.syncSource, other.extras,
-                    newRunTimeFromNow /* runTimeFromNow*/,
-                    newFlexTime /* flexTime */,
-                    other.backoff,
-                    0L /* delayUntil */);
-    }
-
-    private String initialiseOperation(SyncStorageEngine.EndPoint info, int source, Bundle extras,
-            long runTimeFromNow, long flexTime, long backoff, long delayUntil) {
         this.syncSource = source;
         this.extras = new Bundle(extras);
         cleanBundle(this.extras);
         this.delayUntil = delayUntil;
         this.backoff = backoff;
+        this.allowParallelSyncs = allowParallelSyncs;
         final long now = SystemClock.elapsedRealtime();
-        if (runTimeFromNow < 0 || isExpedited()) {
+        // Set expedited based on runTimeFromNow. The SyncManager specifies whether the op is
+        // expedited (Not done solely based on bundle).
+        if (runTimeFromNow < 0) {
             this.expedited = true;
+            // Sanity check: Will always be true.
+            if (!this.extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false)) {
+                this.extras.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+            }
             this.latestRunTime = now;
             this.flexTime = 0;
         } else {
             this.expedited = false;
+            this.extras.remove(ContentResolver.SYNC_EXTRAS_EXPEDITED);
             this.latestRunTime = now + runTimeFromNow;
             this.flexTime = flexTime;
         }
         updateEffectiveRunTime();
-        return toKey(info, this.extras);
+        this.key = toKey(info, this.extras);
+    }
+
+    /** Used to reschedule a sync at a new point in time. */
+    public SyncOperation(SyncOperation other, long newRunTimeFromNow) {
+        this(other.target, other.reason, other.syncSource, new Bundle(other.extras),
+                newRunTimeFromNow,
+                0L /* In back-off so no flex */,
+                other.backoff,
+                other.delayUntil,
+                other.allowParallelSyncs);
     }
 
     public boolean matchesAuthority(SyncOperation other) {
@@ -264,7 +262,7 @@ public class SyncOperation implements Comparable {
     }
 
     public boolean isExpedited() {
-        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false) || expedited;
+        return expedited;
     }
 
     public boolean ignoreBackoff() {
