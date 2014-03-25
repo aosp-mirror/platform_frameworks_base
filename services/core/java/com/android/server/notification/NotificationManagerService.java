@@ -1242,7 +1242,6 @@ public class NotificationManagerService extends SystemService {
         getContext().registerReceiver(mIntentReceiver, sdFilter);
 
         mSettingsObserver = new SettingsObserver(mHandler);
-        mSettingsObserver.observe();
 
         // spin up NotificationScorers
         String[] notificationScorerNames = resources.getStringArray(
@@ -1297,8 +1296,10 @@ public class NotificationManagerService extends SystemService {
             // Grab our optional AudioService
             mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
 
-            // make sure our listener services are properly bound
-            rebindListenerServices();
+        } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
+            // This observer will force an update when observe is called, causing us to
+            // bind to listener services.
+            mSettingsObserver.observe();
         }
     }
 
