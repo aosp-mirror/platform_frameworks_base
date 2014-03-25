@@ -33,7 +33,6 @@ import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Outline;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
@@ -10879,6 +10878,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (mDisplayList != null) {
                 mDisplayList.setClipToOutline(clipToOutline);
             }
+        }
+    }
+
+    /**
+     * Private API to be used for reveal animation
+     *
+     * @hide
+     */
+    public void setRevealClip(boolean shouldClip, boolean inverseClip,
+            float x, float y, float radius) {
+        if (mDisplayList != null) {
+            mDisplayList.setRevealClip(shouldClip, inverseClip, x, y, radius);
         }
     }
 

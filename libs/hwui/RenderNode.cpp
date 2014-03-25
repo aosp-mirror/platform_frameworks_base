@@ -152,18 +152,21 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler,
             }
 
             SaveLayerOp* op = new (handler.allocator()) SaveLayerOp(
-                    0, 0, properties().getWidth(), properties().getHeight(), properties().getAlpha() * 255, saveFlags);
+                    0, 0, properties().getWidth(), properties().getHeight(),
+                    properties().getAlpha() * 255, saveFlags);
             handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
         }
     }
     if (clipToBoundsNeeded) {
-        ClipRectOp* op = new (handler.allocator()) ClipRectOp(0, 0,
-                properties().getWidth(), properties().getHeight(), SkRegion::kIntersect_Op);
+        ClipRectOp* op = new (handler.allocator()) ClipRectOp(
+                0, 0, properties().getWidth(), properties().getHeight(), SkRegion::kIntersect_Op);
         handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
     }
-    if (CC_UNLIKELY(properties().getOutline().willClip())) {
-        ClipPathOp* op = new (handler.allocator()) ClipPathOp(properties().getOutline().getPath(),
-                SkRegion::kIntersect_Op);
+
+    if (CC_UNLIKELY(properties().hasClippingPath())) {
+        // TODO: optimize for round rect/circle clipping
+        const SkPath* path = properties().getClippingPath();
+        ClipPathOp* op = new (handler.allocator()) ClipPathOp(path, SkRegion::kIntersect_Op);
         handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
     }
 }
@@ -408,10 +411,15 @@ void RenderNode::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTransl
                     mat4 shadowMatrixZ(casterOp->mTransformFromParent);
                     caster->applyViewPropertyTransforms(shadowMatrixZ, true);
 
+                    const SkPath* outlinePath = caster->properties().getOutline().getPath();
+                    const RevealClip& revealClip = caster->properties().getRevealClip();
+                    const SkPath* revealClipPath = revealClip.hasConvexClip()
+                            ?  revealClip.getPath() : NULL; // only pass the reveal clip's path if it's convex
+
                     DisplayListOp* shadowOp  = new (alloc) DrawShadowOp(
-                            shadowMatrixXY, shadowMatrixZ,
-                            caster->properties().getAlpha(), caster->properties().getOutline().getPath(),
-                            caster->properties().getWidth(), caster->properties().getHeight());
+                            shadowMatrixXY, shadowMatrixZ, caster->properties().getAlpha(),
+                            caster->properties().getWidth(), caster->properties().getHeight(),
+                            outlinePath, revealClipPath);
                     handler(shadowOp, PROPERTY_SAVECOUNT, properties().getClipToBounds());
                 }
 
@@ -498,7 +506,8 @@ void RenderNode::iterate(OpenGLRenderer& renderer, T& handler, const int level) 
 
     setViewProperties<T>(renderer, handler, level + 1);
 
-    bool quickRejected = properties().getClipToBounds() && renderer.quickRejectConservative(0, 0, properties().getWidth(), properties().getHeight());
+    bool quickRejected = properties().getClipToBounds()
+            && renderer.quickRejectConservative(0, 0, properties().getWidth(), properties().getHeight());
     if (!quickRejected) {
         Vector<ZDrawDisplayListOpPair> zTranslatedNodes;
         buildZSortedChildList(zTranslatedNodes);

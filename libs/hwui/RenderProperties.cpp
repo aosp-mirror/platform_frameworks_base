@@ -22,6 +22,8 @@
 
 #include <SkCanvas.h>
 #include <SkMatrix.h>
+#include <SkPath.h>
+#include <SkPathOps.h>
 
 #include "Matrix.h"
 
@@ -51,13 +53,15 @@ RenderProperties::PrimitiveFields::PrimitiveFields()
 RenderProperties::ComputedFields::ComputedFields()
         : mTransformMatrix(NULL)
         , mTransformCamera(NULL)
-        , mTransformMatrix3D(NULL) {
+        , mTransformMatrix3D(NULL)
+        , mClipPath(NULL) {
 }
 
 RenderProperties::ComputedFields::~ComputedFields() {
     delete mTransformMatrix;
     delete mTransformCamera;
     delete mTransformMatrix3D;
+    delete mClipPath;
 }
 
 RenderProperties::RenderProperties()
@@ -80,6 +84,7 @@ RenderProperties& RenderProperties::operator=(const RenderProperties& other) {
 
         // Update the computed fields
         updateMatrix();
+        updateClipPath();
     }
     return *this;
 }
@@ -178,6 +183,40 @@ void RenderProperties::updateMatrix() {
             }
         }
         mPrimitiveFields.mMatrixDirty = false;
+    }
+}
+
+void RenderProperties::updateClipPath() {
+    const SkPath* outlineClipPath = mPrimitiveFields.mOutline.willClip()
+            ? mPrimitiveFields.mOutline.getPath() : NULL;
+    const SkPath* revealClipPath = mPrimitiveFields.mRevealClip.getPath();
+
+    if (!outlineClipPath && !revealClipPath) {
+        // mComputedFields.mClipPath doesn't need to be updated, since it won't be used
+        return;
+    }
+
+    if (mComputedFields.mClipPath == NULL) {
+        mComputedFields.mClipPath = new SkPath();
+    }
+    SkPath* clipPath = mComputedFields.mClipPath;
+    mComputedFields.mClipPathOp = SkRegion::kIntersect_Op;
+
+    if (outlineClipPath && revealClipPath) {
+        SkPathOp op = kIntersect_PathOp;
+        if (mPrimitiveFields.mRevealClip.isInverseClip()) {
+            op = kDifference_PathOp; // apply difference step in the Op below, instead of draw time
+        }
+
+        Op(*outlineClipPath, *revealClipPath, op, clipPath);
+    } else if (outlineClipPath) {
+        *clipPath = *outlineClipPath;
+    } else {
+        *clipPath = *revealClipPath;
+        if (mPrimitiveFields.mRevealClip.isInverseClip()) {
+            // apply difference step at draw time
+            mComputedFields.mClipPathOp = SkRegion::kDifference_Op;
+        }
     }
 }
 
