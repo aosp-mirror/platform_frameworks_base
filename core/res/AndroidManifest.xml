@@ -481,6 +481,13 @@
         android:label="@string/permlab_writeProfile"
         android:description="@string/permdesc_writeProfile" />
 
+    <!-- Allows an application to access data from sensors that the user uses to
+         measure what is happening inside his/her body, such as heart rate. -->
+    <permission android:name="android.permission.BODY_SENSORS"
+        android:permissionGroup="android.permission-group.PERSONAL_INFO"
+        android:label="@string/permlab_bodySensors"
+        android:description="@string/permdesc_bodySensors" />
+
     <!-- =============================================================== -->
     <!-- Permissions for accessing the device calendar                   -->
     <!-- =============================================================== -->
