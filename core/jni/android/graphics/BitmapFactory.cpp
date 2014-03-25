@@ -115,7 +115,7 @@ static void scaleNinePatchChunk(android::Res_png_9patch* chunk, float scale) {
         }
     }
 
-    int32_t* yDivs = chunk->getXDivs();
+    int32_t* yDivs = chunk->getYDivs();
     for (int i = 0; i < chunk->numYDivs; i++) {
         yDivs[i] = int32_t(yDivs[i] * scale + 0.5f);
         if (i > 0 && yDivs[i] == yDivs[i - 1]) {
