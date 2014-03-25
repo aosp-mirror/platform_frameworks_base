@@ -136,7 +136,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Забагато видалень <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Пам’ять планшетного ПК заповнено. Видаліть якісь файли, щоб звільнити місце."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Пам’ять телефону заповнено. Видаліть якісь файли, щоб звільнити місце."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Мережу можуть відстежувати"</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Мережа може відстежуватися"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Невідомою третьою стороною"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Доменом <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>

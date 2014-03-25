@@ -973,7 +973,7 @@
     <string name="save_password_remember" msgid="6491879678996749466">"Ingat"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Jangan"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Anda tidak memiliki izin untuk membuka laman ini."</string>
-    <string name="text_copied" msgid="4985729524670131385">"Teks disalin ke clipboard."</string>
+    <string name="text_copied" msgid="4985729524670131385">"Teks disalin ke papan klip."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Lainnya"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"spasi"</string>

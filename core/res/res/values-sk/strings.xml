@@ -145,7 +145,7 @@
     <string name="silent_mode" msgid="7167703389802618663">"Tichý režim"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Zapnúť bezdrôtové pripojenie"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Vypnúť bezdrôtové pripojenie"</string>
-    <string name="screen_lock" msgid="799094655496098153">"Uzamknutie obrazovky"</string>
+    <string name="screen_lock" msgid="799094655496098153">"Zámka obrazovky"</string>
     <string name="power_off" msgid="4266614107412865048">"Vypnúť"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"Zvonenie je vypnuté"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibračné zvonenie"</string>
@@ -160,11 +160,11 @@
     <string name="no_recent_tasks" msgid="8794906658732193473">"Žiadne nedávne aplikácie"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Možnosti tabletu"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Možnosti telefónu"</string>
-    <string name="global_action_lock" msgid="2844945191792119712">"Uzamknutie obrazovky"</string>
+    <string name="global_action_lock" msgid="2844945191792119712">"Zámka obrazovky"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Vypnúť"</string>
-    <string name="global_action_bug_report" msgid="7934010578922304799">"Správa o chybe"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Zaznamenať správu o chybe"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Zhromažďuje informácie o aktuálnom stave zariadenia a tieto informácie je následne možné odoslať prostredníctvom e-mailovej správy. Od spustenia vytvárania správy o chybe až do chvíle, kedy je tento nástroj pripravený odoslať prvú správu, môže uplynúť nejaký čas. Prosíme vás preto o trpezlivosť."</string>
+    <string name="global_action_bug_report" msgid="7934010578922304799">"Hlásenie o chybách"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Vytvoriť hlásenie o chybách"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Zhromaždí informácie o aktuálnom stave zariadenia na odoslanie v e-mailovej správe. Chvíľu však potrvá, kým bude hlásenie o chybách pripravené na odoslanie. Prosíme vás preto o trpezlivosť."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Tichý režim"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Zvuk je VYPNUTÝ."</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Zvuk je zapnutý"</string>
@@ -558,7 +558,7 @@
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"čítať stav a identitu telefónu"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Umožňuje aplikácii pristupovať k telefónnym funkciám zariadenia. Aplikácia s týmto povolením môže určiť telefónne číslo a ID zariadenia, či práve prebieha hovor, a vzdialené číslo, s ktorým je prostredníctvom hovoru nadviazané spojenie."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"zabránenie prechodu tabletu do režimu spánku"</string>
-    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"deaktivácia režimu spánku"</string>
+    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"deaktivovať režim spánku"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Umožňuje aplikácii zabrániť prechodu tabletu do režimu spánku."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Umožňuje aplikácii zabrániť prechodu telefónu do režimu spánku."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"infračervený prenos"</string>
@@ -695,7 +695,7 @@
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Bez predchádzajúceho upozornenia zmazať všetky údaje tým, že sa obnovia továrenské nastavenia telefónu."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Nastaviť globálny server proxy zariadenia"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Vyberte globálny server proxy, ktorý sa bude používať po aktivácii pravidiel. Platný globálny server proxy nastavuje iba prvý správca zariadenia."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Nastav. koniec platnosti hesla"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Nastaviť vypršanie hesla zámky"</string>
     <string name="policydesc_expirePassword" msgid="1729725226314691591">"Nastavte, ako často sa musí zmeniť heslo na uzamknutie obrazovky."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nastaviť šifr. ukl. priestoru"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Vyžadovať šifrovanie uložených údajov aplikácií."</string>
@@ -1138,7 +1138,7 @@
     <string name="anr_application_process" msgid="8941757607340481057">"Aplikácia <xliff:g id="APPLICATION">%1$s</xliff:g> neodpovedá. Chcete ju zavrieť?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> neodpovedá. \n\nChcete ho zavrieť?"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
-    <string name="report" msgid="4060218260984795706">"Prehľad"</string>
+    <string name="report" msgid="4060218260984795706">"Nahlásiť"</string>
     <string name="wait" msgid="7147118217226317732">"Čakajte"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Stránka nereaguje.\n\nChcete ju zavrieť?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Presmerovaná aplikácia"</string>

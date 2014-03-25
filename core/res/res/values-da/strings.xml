@@ -46,7 +46,7 @@
     <string name="badPin" msgid="9015277645546710014">"Den gamle pinkode, som du har indtastet, er ikke korrekt."</string>
     <string name="badPuk" msgid="5487257647081132201">"Den indtastede PUK-kode er forkert."</string>
     <string name="mismatchPin" msgid="609379054496863419">"De indtastede pinkoder er ikke ens"</string>
-    <string name="invalidPin" msgid="3850018445187475377">"Indtast en PIN-kode på mellem 4 og 8 tal."</string>
+    <string name="invalidPin" msgid="3850018445187475377">"Indtast en pinkode på mellem 4 og 8 tal."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Angiv en PUK-kode på 8 eller flere cifre."</string>
     <string name="needPuk" msgid="919668385956251611">"Dit SIM-kort er låst med PUK-koden. Indtast PUK-koden for at låse den op."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Indtast PUK2-koden for at låse op for SIM-kortet."</string>
@@ -63,12 +63,12 @@
     <string name="CwMmi" msgid="9129678056795016867">"Ventende opkald"</string>
     <string name="BaMmi" msgid="455193067926770581">"Opkaldsspærring"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Ændring af adgangskode"</string>
-    <string name="PinMmi" msgid="3113117780361190304">"ændring af PIN-kode"</string>
+    <string name="PinMmi" msgid="3113117780361190304">"ændring af pinkode"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"Opkaldsnummeret er til stede"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"Opkaldsnummeret er begrænset"</string>
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Trevejsopkald"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"Afvisning af uønskede, irriterende opkald"</string>
-    <string name="CndMmi" msgid="3116446237081575808">"Levering af opkaldsnummer"</string>
+    <string name="CndMmi" msgid="3116446237081575808">"Levering af nummervisning"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Forstyr ikke"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Standarder for opkalds-id til begrænset. Næste opkald: Begrænset"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Standarder for opkalds-id til begrænset. Næste opkald: Ikke begrænset"</string>
@@ -241,7 +241,7 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"undersøge indholdet i et vindue, du interagerer med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"aktivere Udforsk ved berøring"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"De emner, der trykkes på, læses højt, og skærmen kan udforskes ved hjælp af bevægelser."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"aktivere forbedret webhjælpefunktioner"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"aktivere forbedrede webhjælpefunktioner"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Der installeres muligvis scripts for at gøre appindhold mere tilgængeligt."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"observere tekst, du skriver"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Dette omfatter personlige data såsom kreditkortnumre og adgangskoder."</string>
@@ -263,8 +263,8 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Tillader, at appen kan modtage og behandle mms-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"modtage nødudsendelser"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Tillader, at appen kan modtage og behandle nødtransmissioner. Denne tilladelse er kun tilgængelig for systemapps."</string>
-    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"læse mobiltransmissionsbeskeder"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillader, at appen læser mobiltransmissionsbeskeder, der modtages af din enhed. I nogle områder sendes mobiltransmissionsbeskeder for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når en mobiltransmission om en nødsituation modtages."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"læse Cell Broadcast-beskeder"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillader, at appen læser Cell Broadcast-beskeder, der modtages af din enhed. I nogle områder sendes der Cell Broadcast-beskeder for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når der modtages en Cell Broadcast-besked om en nødsituation."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"send sms-beskeder"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Tillader, at appen kan sende sms-beskeder. Dette kan resultere i uventede opkrævninger. Skadelige apps kan koste dig penge ved at sende beskeder uden din bekræftelse."</string>
     <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"send hændelser, hvor der skal svares pr. besked"</string>
@@ -380,7 +380,7 @@
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Tillader, at ejeren kan binde en teksttjenestes grænseflade (f. eks. SpellCheckerService) på øverste niveau. Dette bør aldrig være nødvendigt til normale apps."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"bind til en VPN-tjeneste"</string>
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Tillader, at brugeren forpligter sig til en VPN-tjenestes grænseflade på øverste niveau. Bør aldrig være nødvendigt i almindelige apps."</string>
-    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"forpligt til et tapet"</string>
+    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"knyt til en baggrund"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Tillader, at indehaveren kan binde en baggrunds grænseflade på øverste niveau. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"bind til en ekstern skærm"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Tillader, at brugeren kan foretage en binding til grænsefladens øverste niveau på en ekstern skærm. Bør aldrig være nødvendigt til almindelige apps."</string>
@@ -571,7 +571,7 @@
     <string name="permlab_factoryTest" msgid="3715225492696416187">"kør i fabriksindstillet testtilstand"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Kør som en producenttest på lavt niveau, der giver fuld adgang til tabletens hardware. Kun tilgængeligt når en tablet kører i producenttesttilstand."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Kør som en producenttest på lavt niveau. Giver fuld adgang til telefonens hardware. Kun tilgængeligt når en telefon kører i producenttesttilstand."</string>
-    <string name="permlab_setWallpaper" msgid="6627192333373465143">"angiv tapet"</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"angive baggrund"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Tillader, at appen kan konfigurere systembaggrunden."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"ændre størrelsen på din baggrund"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Tillader, at appen giver tips til systembaggrundens størrelse."</string>
@@ -1334,8 +1334,8 @@
     <string name="input_method_binding_label" msgid="1283557179944992649">"Inputmetode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synkroniser"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Hjælpefunktioner"</string>
-    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Tapet"</string>
-    <string name="chooser_wallpaper" msgid="7873476199295190279">"Skift tapet"</string>
+    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Baggrund"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Skift baggrund"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Underretningslytter"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN er aktiveret."</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN aktiveres af <xliff:g id="APP">%s</xliff:g>"</string>
