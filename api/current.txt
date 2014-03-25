@@ -11578,6 +11578,7 @@ package android.hardware.camera2 {
     field public static final int FLASH_MODE_TORCH = 2; // 0x2
     field public static final int FLASH_STATE_CHARGING = 1; // 0x1
     field public static final int FLASH_STATE_FIRED = 3; // 0x3
+    field public static final int FLASH_STATE_PARTIAL = 4; // 0x4
     field public static final int FLASH_STATE_READY = 2; // 0x2
     field public static final int FLASH_STATE_UNAVAILABLE = 0; // 0x0
     field public static final int HOT_PIXEL_MODE_FAST = 1; // 0x1
