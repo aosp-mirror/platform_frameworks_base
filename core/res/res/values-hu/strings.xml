@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Lehetővé teszi az alkalmazás számára az aktív ablak tartalmának letöltését. A rosszindulatú alkalmazások letölthetik az ablak teljes tartalmát, és a jelszavak kivételével az összes szöveget megvizsgálhatják."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"Ideiglenes hozzáférés engedélyezése"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Engedélyezi egy alkalmazás számára, hogy ideiglenesen hozzáférést biztosítson az eszközhöz. A kártékony alkalmazások a felhasználó beleegyezése nélkül engedélyezhetik a hozzáférést."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"ablakkal kapcsolatos információk lekérése"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Lehetővé teszi, hogy az alkalmazás információkat kérjen le az ablakkezelőben lévő ablakokkal kapcsolatban. A rosszindulatú alkalmazások belső rendszerhasználathoz szükséges információkat kérhetnek le."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"események szűrése"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Lehetővé teszi az alkalmazás számára, hogy egy bemeneti szűrőt használjon, amely megszűri a falon megjelenő felhasználói eseményeket, még mielőtt megjelennének. A rosszindulatú alkalmazások felhasználói beavatkozás nélkül irányíthatják a rendszer kezelőfelületét."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"kijelző nagyítása"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Lehetővé teszi egy alkalmazás számára, hogy kinagyítsa a kijelzőn megjelenő tartalmat. Előfordulhat, hogy a rosszindulatú alkalmazások úgy alakítják át a kijelző tartalmát, hogy használhatatlanná válik az eszköz."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"részleges rendszerleállítás"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Leállítás állapotba helyezi a tevékenységkezelőt. Nem hajtja végre a teljes leállítást."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"alkalmazásváltás megakadályozása"</string>

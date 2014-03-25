@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Tillåter att appen hämtar innehållet i det aktiva fönstret. Skadliga appar kan hämta allt innehåll i fönstret och läsa all text utom lösenord."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"aktivera tillgänglighetsläget tillfälligt"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Tillåt att en app tillfälligt aktiverar tillgänglighetsläget på enheten. Skadliga appar kan aktivera tillgänglighetsläget utan användarens medgivande."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"hämta information om fönster"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Tillåter att appen hämtar information om fönstren från fönsterhanteraren. Skadliga appar kan hämta information som är avsedd för användning i det interna systemet."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrera händelser"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Tillåter att appen registrerar indatafilter som filtrerar flödet med användarhändelser innan de skickas. Skadliga appar kan styra systemets användargränssnitt utan att användaren gör något."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"förstora skärmen"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Tillåter att en app förstorar innehållet på en skärm. Skadliga appar kan förvandla skärminnehållet på ett sätt som gör att enheten blir oanvändbar."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"avsluta delvis"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Sätter aktivitetshanteraren i avstängningsläge. Utför inte en fullständig avstängning."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"förhindrar programbyten"</string>

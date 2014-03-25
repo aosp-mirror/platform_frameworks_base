@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Permite que la aplicación recupere el contenido de la ventana activa. Las aplicaciones maliciosas pueden recuperar el contenido completo de la ventana y examinar todo el texto, excepto las contraseñas."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"Activación temporal de la accesibilidad"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Permite a una aplicación activar temporalmente la accesibilidad en el dispositivo. Las aplicaciones maliciosas pueden activar la accesibilidad sin el consentimiento del usuario."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"recuperar información de ventanas"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permite que una aplicación recupere la información del administrador de ventanas relacionada con estas. Las aplicaciones maliciosas pueden recuperar información destinada al uso interno del sistema."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrar eventos"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permite que una aplicación registre un filtro de entrada que filtre la transmisión de todos los eventos del usuario antes de ser enviados. Las aplicaciones maliciosas pueden controlar la IU del sistema sin la intervención del usuario."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"ampliar la pantalla"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Permite que una aplicación amplíe el contenido de una pantalla. Las aplicaciones malintencionadas pueden transformar el contenido de la pantalla de manera que el dispositivo quede inutilizable."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"cierre parcial"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Pone al administrador de la actividad en estado de cierre. No realiza un cierre completo."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedir conmutadores de aplicación"</string>

@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Mengizinkan apl mengambil konten jendela aktif. Apl berbahaya dapat mengambil seluruh konten jendela dan memeriksa semua teksnya kecuali sandi."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"aktifkan aksesibilitas untuk sementara"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Memungkinkan aplikasi mengaktifkan aksesibilitas pada perangkat untuk sementara. Aplikasi berbahaya dapat mengaktifkan aksesibilitas tanpa izin pengguna."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"mengambil info jendela"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Mengizinkan aplikasi mengambil informasi tentang jendela dari pengelola jendela. Aplikasi berbahaya dapat mengambil informasi yang ditujukan untuk penggunaan sistem internal."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"memfilter acara"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Mengizinkan aplikasi mendaftarkan filter masukan yang memfilter streaming semua acara pengguna sebelum acara dikirimkan. Aplikasi berbahaya dapat mengontrol UI sistem tanpa campur tangan pengguna."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"memperbesar tampilan"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Izinkan aplikasi memperbesar konten tampilan. Aplikasi berbahaya dapat mengubah konten tampilan dengan merender perangkat menjadi tidak dapat digunakan."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"penghentian sebagian"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Letakkan pengelola aktivitas dalam kondisi mati. Tidak melakukan penonaktifan penuh."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"cegah pergantian aplikasi"</string>
@@ -983,7 +979,7 @@
     <string name="save_password_remember" msgid="6491879678996749466">"Ingat"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Jangan"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Anda tidak memiliki izin untuk membuka laman ini."</string>
-    <string name="text_copied" msgid="4985729524670131385">"Teks disalin ke clipboard."</string>
+    <string name="text_copied" msgid="4985729524670131385">"Teks disalin ke papan klip."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Lainnya"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"spasi"</string>

@@ -170,7 +170,7 @@
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"声音已开启"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"飞行模式"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"已开启飞行模式"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"已关闭飞行模式"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"未开启飞行模式"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"允许应用检索活动窗口的内容。恶意应用可能会检索整个窗口的内容，并检查其中除密码以外的所有文字。"</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"暂时启用辅助功能"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"允许应用在设备上暂时启用辅助功能。恶意应用可能会在未经用户同意的情况下擅自启用辅助功能。"</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"检索窗口信息"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"允许应用通过窗口管理器检索窗口信息。恶意应用可能会检索供内部系统使用的信息。"</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"过滤事件"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"允许应用注册输入过滤器，这类过滤器会在所有用户事件分派之前对用户事件流进行过滤。恶意应用可能会在没有用户干预的情况下控制系统用户界面。"</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"放大显示内容"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"允许应用放大显示内容。恶意应用可能会以特定方式改变显示内容，使得设备无法使用。"</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"部分关机"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"使活动管理器进入关闭状态。不执行彻底关机。"</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"禁止切换应用"</string>
@@ -479,9 +475,9 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"允许安装位置信息提供程序"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"创建用于测试的模拟位置源或安装新的位置提供程序。此权限可让该应用覆盖由其他位置源（如 GPS）或位置提供程序返回的位置和/或状态信息。"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"精确位置（基于 GPS 和网络）"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"允许该应用通过全球定位系统 (GPS) 或网络位置信息源（例如基站和 WLAN）获取您的精确位置信息。您必须在设备上开启这些位置服务，应用才能获得位置信息。应用会使用此类服务确定您的位置，这可能会消耗更多电量。"</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"允许该应用通过全球定位系统(GPS)或网络位置信息源（例如基站和WLAN）获取您的精确位置信息。您必须在设备上开启这些位置信息服务，应用才能获得位置信息。应用会使用此类服务确定您的位置，这可能会消耗更多电量。"</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"大致位置（基于网络）"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"允许该应用获取您的大致位置信息。这类位置信息来自于使用网络位置信息源（例如基站和 WLAN）的位置服务。您必须在设备上开启这些位置服务，应用才能获得位置信息。应用会使用此类服务确定您的大概位置。"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"允许该应用获取您的大致位置信息。这类位置信息来自于使用网络位置信息源（例如基站和WLAN）的位置信息服务。您必须在设备上开启这些位置信息服务，应用才能获得位置信息。应用会使用此类服务确定您的大概位置。"</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"访问 SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"允许应用使用 SurfaceFlinger 低级功能。"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"读取帧缓冲区"</string>
@@ -1130,7 +1126,7 @@
     <string name="no" msgid="5141531044935541497">"取消"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"注意"</string>
     <string name="loading" msgid="7933681260296021180">"正在加载..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"打开"</string>
+    <string name="capital_on" msgid="1544682755514494298">"开启"</string>
     <string name="capital_off" msgid="6815870386972805832">"关闭"</string>
     <string name="whichApplication" msgid="4533185947064773386">"选择要使用的应用："</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"选择主屏幕应用"</string>

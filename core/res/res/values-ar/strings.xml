@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"للسماح للتطبيق باسترداد محتوى النافذة النشطة. يمكن للبرامج الضارة استرداد محتوى النافذة بالكامل وفحص جميع النصوص الموجودة بها باستثناء كلمات المرور."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"تمكين إمكانية الدخول مؤقتًا"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"يتيح لتطبيق تمكين إمكانية الدخول مؤقتًا بالجهاز. قد تتيح التطبيقات الضارة تمكين إمكانية الدخول بدون موافقة المستخدم."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"استرداد معلومات النوافذ"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"للسماح لأحد التطبيقات باستعادة معلومات حول النوافذ من مدير النوافذ. يمكن أن تستعيد التطبيقات الضارة معلومات الغرض منها استخدام النظام الداخلي."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"تصفية الأحداث"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"للسماح لأحد التطبيقات بتسجيل فلتر إدخال يعمل على تصفية مجموعة البث من جميع أحداث المستخدمين قبل إرسالها. يمكن أن يتحكم برنامج ضار في واجهة المستخدم النظام دون تدخل المستخدم."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"تكبير الشاشة"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"للسماح للتطبيق بتكبير محتوى شاشة. قد تؤدي التطبيقات الضارة إلى نقل محتوى الشاشة بطريقة تعرض الجهاز في وضع غير قابل للاستخدام."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"إيقاف تشغيل جزئي"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"لوضع مدير الأنشطة في حالة إيقاف التشغيل. لا يتم تنفيذ إيقاف تشغيل كامل."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"منع التبديل بين التطبيقات"</string>

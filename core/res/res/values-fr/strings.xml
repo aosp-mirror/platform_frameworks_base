@@ -315,12 +315,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Permet à l\'application de récupérer le contenu de la fenêtre active. Des applications malveillantes peuvent exploiter cette fonctionnalité pour récupérer et lire la totalité du contenu de la fenêtre, à l\'exception des mots de passe."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"activer temporairement l\'accessibilité"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Permet à une application d\'activer temporairement l\'accessibilité sur l\'appareil. Des applications malveillantes peuvent activer l\'accessibilité sans le consentement de l\'utilisateur."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"récupérer les informations sur les fenêtres"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permet à une application de récupérer les informations sur les fenêtres depuis le gestionnaire de fenêtres. Des applications malveillantes peuvent récupérer des informations destinées à un usage interne du système."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrer les événements"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permet à une application d\'enregistrer un filtre d\'entrée pour filtrer le flux de tous les événements des utilisateurs avant qu\'ils ne soient traités. Des applications malveillantes peuvent contrôler l\'interface utilisateur du système sans l\'intervention de l\'utilisateur."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"agrandir l\'écran"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Permet à une application d\'agrandir le contenu à l\'écran. Les applications malveillantes peuvent transformer ce contenu et rendre l\'appareil inutilisable."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"arrêt partiel"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Place le gestionnaire d\'activités en état d\'arrêt. N\'effectue pas un arrêt complet."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"empêcher les changements d\'applications"</string>
@@ -719,7 +715,7 @@
     <item msgid="7897544654242874543">"Bureau"</item>
     <item msgid="1103601433382158155">"Télécopie bureau"</item>
     <item msgid="1735177144948329370">"Télécopie domicile"</item>
-    <item msgid="603878674477207394">"Pager"</item>
+    <item msgid="603878674477207394">"Bipeur"</item>
     <item msgid="1650824275177931637">"Autre"</item>
     <item msgid="9192514806975898961">"Personnalisé"</item>
   </string-array>
@@ -762,7 +758,7 @@
     <string name="phoneTypeWork" msgid="8863939667059911633">"Bureau"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Télécopie bureau"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Télécopie domicile"</string>
-    <string name="phoneTypePager" msgid="7582359955394921732">"Pager"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"Bipeur"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Autre"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Rappel"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Voiture"</string>
