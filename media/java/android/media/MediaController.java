@@ -18,7 +18,7 @@ package android.media;
 
 import android.app.PendingIntent;
 import android.content.ComponentName;
-import android.media.MediaFocusControl.RcClientDeathHandler;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
@@ -44,34 +44,33 @@ class MediaController implements DeathRecipient {
      */
     private static int sLastRccId = 0;
 
-    //FIXME should be final static
-    public MediaFocusControl mController;
+    public static MediaFocusControl sController;
 
     /**
      * The target for the ACTION_MEDIA_BUTTON events.
-     * Always non null.
+     * Always non null. //FIXME verify
      */
-    final public PendingIntent mMediaIntent;
+    final private PendingIntent mMediaIntent;
     /**
      * The registered media button event receiver.
-     * Always non null.
      */
-    final public ComponentName mReceiverComponent;
+    final private ComponentName mReceiverComponent;
 
-    public int mRccId = RemoteControlClient.RCSE_ID_UNREGISTERED;
+    private int mRccId = RemoteControlClient.RCSE_ID_UNREGISTERED;
 
-    public IBinder mToken;
-    public String mCallingPackageName;
-    public int mCallingUid;
+    private IBinder mToken;
+    private String mCallingPackageName;
+    private int mCallingUid;
     /**
      * Provides access to the information to display on the remote control.
      * May be null (when a media button event receiver is registered,
      *     but no remote control client has been registered) */
-    public IRemoteControlClient mRcClient;
-    public RcClientDeathHandler mRcClientDeathHandler;
+    private IRemoteControlClient mRcClient;
+    private RcClientDeathHandler mRcClientDeathHandler;
     /**
      * Information only used for non-local playback
      */
+    //FIXME private?
     public int mPlaybackType;
     public int mPlaybackVolume;
     public int mPlaybackVolumeMax;
@@ -142,24 +141,80 @@ class MediaController implements DeathRecipient {
     }
 
 
-    void dump(PrintWriter pw) {
-        // FIXME to implement, remove dump from MediaFocusControl that accesses private members
+    /**
+     * Inner class to monitor remote control client deaths, and remove the client for the
+     * remote control stack if necessary.
+     */
+    private class RcClientDeathHandler implements IBinder.DeathRecipient {
+        final private IBinder mCb; // To be notified of client's death
+        //FIXME needed?
+        final private PendingIntent mMediaIntent;
+
+        RcClientDeathHandler(IBinder cb, PendingIntent pi) {
+            mCb = cb;
+            mMediaIntent = pi;
+        }
+
+        public void binderDied() {
+            Log.w(TAG, "  RemoteControlClient died");
+            // remote control client died, make sure the displays don't use it anymore
+            //  by setting its remote control client to null
+            sController.registerRemoteControlClient(mMediaIntent, null/*rcClient*/, null/*ignored*/);
+            // the dead client was maybe handling remote playback, the controller should reevaluate
+            sController.postReevaluateRemote();
+        }
+
+        public IBinder getBinder() {
+            return mCb;
+        }
     }
 
-    public void resetPlaybackInfo() {
-        mPlaybackType = RemoteControlClient.PLAYBACK_TYPE_LOCAL;
-        mPlaybackVolume = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME;
-        mPlaybackVolumeMax = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME;
-        mPlaybackVolumeHandling = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME_HANDLING;
-        mPlaybackStream = AudioManager.STREAM_MUSIC;
-        mPlaybackState.reset();
-        mRemoteVolumeObs = null;
+
+    protected static class RemotePlaybackState {
+        int mRccId;
+        int mVolume;
+        int mVolumeMax;
+        int mVolumeHandling;
+
+        protected RemotePlaybackState(int id, int vol, int volMax) {
+            mRccId = id;
+            mVolume = vol;
+            mVolumeMax = volMax;
+            mVolumeHandling = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME_HANDLING;
+        }
+    }
+
+
+    void dump(PrintWriter pw, boolean registrationInfo) {
+        if (registrationInfo) {
+            pw.println("  pi: " + mMediaIntent +
+                    " -- pack: " + mCallingPackageName +
+                    "  -- ercvr: " + mReceiverComponent +
+                    "  -- client: " + mRcClient +
+                    "  -- uid: " + mCallingUid +
+                    "  -- type: " + mPlaybackType +
+                    "  state: " + mPlaybackState);
+        } else {
+            // emphasis on state
+            pw.println("  uid: " + mCallingUid +
+                    "  -- id: " + mRccId +
+                    "  -- type: " + mPlaybackType +
+                    "  -- state: " + mPlaybackState +
+                    "  -- vol handling: " + mPlaybackVolumeHandling +
+                    "  -- vol: " + mPlaybackVolume +
+                    "  -- volMax: " + mPlaybackVolumeMax +
+                    "  -- volObs: " + mRemoteVolumeObs);
+        }
+    }
+
+
+    static protected void setMediaFocusControl(MediaFocusControl mfc) {
+        sController = mfc;
     }
 
     /** precondition: mediaIntent != null */
-    public MediaController(MediaFocusControl controller, PendingIntent mediaIntent,
-            ComponentName eventReceiver, IBinder token) {
-        mController = controller;
+    protected MediaController(PendingIntent mediaIntent, ComponentName eventReceiver, IBinder token)
+    {
         mMediaIntent = mediaIntent;
         mReceiverComponent = eventReceiver;
         mToken = token;
@@ -176,11 +231,95 @@ class MediaController implements DeathRecipient {
             try {
                 mToken.linkToDeath(this, 0);
             } catch (RemoteException e) {
-                mController.unregisterMediaButtonIntentAsync(mMediaIntent);
+                sController.unregisterMediaButtonIntentAsync(mMediaIntent);
             }
         }
     }
 
+    //---------------------------------------------
+    // Accessors
+    protected int getRccId() {
+        return mRccId;
+    }
+
+    protected IRemoteControlClient getRcc() {
+        return mRcClient;
+    }
+
+    protected ComponentName getMediaButtonReceiver() {
+        return mReceiverComponent;
+    }
+
+    protected PendingIntent getMediaButtonIntent() {
+        return mMediaIntent;
+    }
+
+    // FIXME this is only used when comparing with the audio focus owner calling package name,
+    //       accessor to be removed once audio focus and media button owner are dissociated
+    protected String getCallingPackageName() {
+        return mCallingPackageName;
+    }
+
+    // FIXME this is only used when comparing with the audio focus owner calling package name,
+    //       accessor to be removed once audio focus and media button owner are dissociated
+    protected int getCallingUid() {
+        return mCallingUid;
+    }
+
+    protected boolean hasMatchingMediaButtonIntent(PendingIntent pi) {
+        return mMediaIntent.equals(pi);
+    }
+
+    //---------------------------------------------
+    // Modify the records stored in the instance
+    protected void resetControllerInfoForRcc(IRemoteControlClient rcClient,
+            String callingPackageName, int uid) {
+        // already had a remote control client?
+        if (mRcClientDeathHandler != null) {
+            // stop monitoring the old client's death
+            unlinkToRcClientDeath();
+        }
+        // save the new remote control client
+        mRcClient = rcClient;
+        mCallingPackageName = callingPackageName;
+        mCallingUid = uid;
+        if (rcClient == null) {
+            // here mcse.mRcClientDeathHandler is null;
+            resetPlaybackInfo();
+        } else {
+            IBinder b = mRcClient.asBinder();
+            RcClientDeathHandler rcdh =
+                    new RcClientDeathHandler(b, mMediaIntent);
+            try {
+                b.linkToDeath(rcdh, 0);
+            } catch (RemoteException e) {
+                // remote control client is DOA, disqualify it
+                Log.w(TAG, "registerRemoteControlClient() has a dead client " + b);
+                mRcClient = null;
+            }
+            mRcClientDeathHandler = rcdh;
+        }
+    }
+
+    protected void resetControllerInfoForNoRcc() {
+        // stop monitoring the RCC death
+        unlinkToRcClientDeath();
+        // reset the RCC-related fields
+        mRcClient = null;
+        mCallingPackageName = null;
+    }
+
+    public void resetPlaybackInfo() {
+        mPlaybackType = RemoteControlClient.PLAYBACK_TYPE_LOCAL;
+        mPlaybackVolume = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME;
+        mPlaybackVolumeMax = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME;
+        mPlaybackVolumeHandling = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME_HANDLING;
+        mPlaybackStream = AudioManager.STREAM_MUSIC;
+        mPlaybackState.reset();
+        mRemoteVolumeObs = null;
+    }
+
+    //---------------------------------------------
     public void unlinkToRcClientDeath() {
         if ((mRcClientDeathHandler != null) && (mRcClientDeathHandler.mCb != null)) {
             try {
@@ -204,7 +343,7 @@ class MediaController implements DeathRecipient {
 
     @Override
     public void binderDied() {
-        mController.unregisterMediaButtonIntentAsync(mMediaIntent);
+        sController.unregisterMediaButtonIntentAsync(mMediaIntent);
     }
 
     @Override
