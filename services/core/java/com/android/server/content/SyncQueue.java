@@ -73,10 +73,9 @@ public class SyncQueue {
             }
             SyncOperation syncOperation = new SyncOperation(
                     op.account, op.userId, op.reason, op.syncSource, op.authority, op.extras,
-                    0 /* delay */, 0 /* flex */, backoff != null ? backoff.first : 0,
+                    op.expedited ? -1: 0 /* delay */, 0 /* flex */, backoff != null ? backoff.first : 0,
                     mSyncStorageEngine.getDelayUntilTime(op.account, op.userId, op.authority),
                     syncAdapterInfo.type.allowParallelSyncs());
-            syncOperation.expedited = op.expedited;
             syncOperation.pendingOperation = op;
             add(syncOperation, op);
         }
@@ -104,7 +103,6 @@ public class SyncQueue {
         if (existingOperation != null) {
             boolean changed = false;
             if (operation.compareTo(existingOperation) <= 0 ) {
-                existingOperation.expedited = operation.expedited;
                 long newRunTime =
                         Math.min(existingOperation.latestRunTime, operation.latestRunTime);
                 // Take smaller runtime.
@@ -123,7 +121,7 @@ public class SyncQueue {
         if (operation.pendingOperation == null) {
             pop = new SyncStorageEngine.PendingOperation(
                     operation.account, operation.userId, operation.reason, operation.syncSource,
-                    operation.authority, operation.extras, operation.expedited);
+                    operation.authority, operation.extras, operation.isExpedited());
             pop = mSyncStorageEngine.insertIntoPending(pop);
             if (pop == null) {
                 throw new IllegalStateException("error adding pending sync operation "
