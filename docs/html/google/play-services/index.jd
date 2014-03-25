@@ -4,14 +4,14 @@ header.hide=1
 @jd:body
 
 <div class="landing-banner">
-        
+
 <div class="col-6">
   <img src="/images/google/gps.png" alt="">
 </div>
 <div class="col-6">
 
   <h1 itemprop="name" style="margin-bottom:0;">Google Play Services</h1>
-  <p itemprop="description"> 
+  <p itemprop="description">
   </p>
 
   <p>Give your apps more features to attract users on a wider range of devices.
@@ -24,7 +24,6 @@ header.hide=1
 
 </div>
 </div>
-
 
   <div class="layout-content-row">
   <div class="layout-content-col span-4">
@@ -60,6 +59,37 @@ about your users' Android version.</p>
 
 </div>
 
+<h2 style="margin-top:0" id="newfeatures">New Features in Version 4.3</h2>
+<p>For a summary of the feature highlights in Google Play services 4.3, see the
+announcement <a href="http://android-developers.blogspot.com/2014/03/google-play-services-43.html" class="external-link">blog post</a>.</p>
+<ul>
+<li><strong>Play Games</strong> - The new Game Gifts API enables games to send virtual in-game requests to anyone in a player’s circles or through player search.
+   <ul>
+      <li><a href="http://developers.google.com/games/services/android/giftRequests.html" class="external-link">Developing Game Gifts in Android</a></li>
+      <li><a href="/reference/com/google/android/gms/games/request/package-summary.html">Game Gifts API reference</a></li>
+   </ul>
+</li>
+<li><strong>Analytics</strong> - Google Analytics and Tag Manager are now part of Google Play services.
+   <ul>
+      <li><a href="http://developers.google.com/analytics/devguides/collection/android/v3/" class="external-link">Getting Started with the Analytics API in Android</a></li>
+      <li><a href="/reference/com/google/android/gms/analytics/package-summary.html">Analytics API reference</a></li>
+      <li><a href="http://developers.google.com/tag-manager/android/" class="external-link">Getting Started with the Tag Manager API in Android</a></li>
+      <li><a href="/reference/com/google/android/gms/tagmanager/package-summary.html">Tag Manager API reference</a></li>
+   </ul>
+</li>
+<li><strong>Drive</strong> - Change notifications, offline content, and more.
+   <ul>
+      <li><a href="http://developers.google.com/drive/android/pinning.html" class="external-link">Pinning Files</a> - Make files available offline.</li>
+      <li><a href="http://developers.google.com/drive/android/events.html" class="external-link">Listening for Change Events</a> - Receive notifications for change events asynchronously.</li>
+      <li><a href="http://developers.google.com/drive/android/appfolder.html" class="external-link">Storing Application Data</a> - Store application data in a special hidden folder.</li>
+   </ul>
+</li>
+<li><strong>Address</strong> - Let your users provide complete addresses in a single click.
+   <ul>
+      <li><a href="/reference/com/google/android/gms/identity/intents/package-summary.html">Address API reference</a> </li>
+   </ul>
+</li>
+</ul>
 
 <h2>How It Works</h2>
 
@@ -71,7 +101,7 @@ about your users' Android version.</p>
     you to resolve any issues at  runtime, such as a missing, disabled, or out-of-date
     Google Play services APK. The client library has a light footprint if you use
     <a href="/tools/help/proguard.html">ProGuard</a> as part of your build process, so it won't have
-    an adverse impact on your app's file size.  
+    an adverse impact on your app's file size.
 </p>
 <p>
     If you want to access added features or products, you can upgrade to a new version of the
@@ -92,7 +122,7 @@ about your users' Android version.</p>
         through the client library and the service carries out the actions on your behalf.
         An easy-to-use authorization flow is also
         provided to gain access to the each Google service, which provides consistency for both
-        you and your users. 
+        you and your users.
     </p>
     <p>
       The Google Play services APK is delivered through the Google Play Store, so
