@@ -1720,8 +1720,12 @@ public final class CaptureResult extends CameraMetadata {
      * filter array.</p>
      * <p>The green split is calculated as follows:</p>
      * <ol>
-     * <li>A representative 5x5 pixel window W within the active
-     * sensor array is chosen.</li>
+     * <li>A 5x5 pixel (or larger) window W within the active sensor array is
+     * chosen. The term 'pixel' here is taken to mean a group of 4 Bayer
+     * mosaic channels (R, Gr, Gb, B).  The location and size of the window
+     * chosen is implementation defined, and should be chosen to provide a
+     * green split estimate that is both representative of the entire image
+     * for this camera sensor, and can be calculated quickly.</li>
      * <li>The arithmetic mean of the green channels from the red
      * rows (mean_Gr) within W is computed.</li>
      * <li>The arithmetic mean of the green channels from the blue
