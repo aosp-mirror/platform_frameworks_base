@@ -21,6 +21,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.res.Resources.Theme;
 import android.graphics.*;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -72,10 +73,10 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
             drawable.setCallback(this);
         }
     }
-    
-    @Override public void inflate(Resources r, XmlPullParser parser,
-                                  AttributeSet attrs)
-    throws XmlPullParserException, IOException {
+
+    @Override
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
+            throws XmlPullParserException, IOException {
         int type;
         
         TypedArray a = r.obtainAttributes(attrs,
@@ -110,7 +111,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
                         + ": <inset> tag requires a 'drawable' attribute or "
                         + "child tag defining a drawable");
             }
-            dr = Drawable.createFromXmlInner(r, parser, attrs);
+            dr = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme);
         }
 
         if (dr == null) {
