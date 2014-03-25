@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Geben Sie eine mindestens achtstellige PUK ein."</string>
     <string name="needPuk" msgid="919668385956251611">"Ihre SIM-Karte ist mit einem PUK gesperrt. Geben Sie zum Entsperren den PUK-Code ein."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Geben Sie zum Entsperren der SIM-Karte den PUK2 ein."</string>
+    <string name="enablePin" msgid="209412020907207950">"Fehler. SIM-/RUIM-Sperre aktivieren."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Sie haben noch <xliff:g id="NUMBER">%d</xliff:g> Versuch, bevor Ihre SIM-Karte gesperrt wird."</item>
+    <item quantity="other" msgid="7530597808358774740">"Sie haben noch <xliff:g id="NUMBER">%d</xliff:g> Versuche, bevor Ihre SIM-Karte gesperrt wird."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Anrufer-ID für eingehenden Anruf"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Ermöglicht dem Halter, sich an die Oberfläche eines VPN-Dienstes auf oberster Ebene zu binden. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"An einen Hintergrund binden"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Ermöglicht dem Halter, sich an die Oberfläche eines Hintergrunds auf oberster Ebene zu binden. Sollte nie für normale Apps benötigt werden."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"An Remote-Display binden"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Ermöglicht dem Halter, sich an die Oberfläche eines Remote-Displays auf oberster Ebene zu binden. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"An einen Widget-Dienst binden"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Ermöglicht dem Halter, sich an die Oberfläche eines Widget-Dienstes auf oberster Ebene zu binden. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"Interaktion mit einem Geräteadministrator"</string>
@@ -449,9 +456,9 @@
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"Anrufliste bearbeiten"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Ermöglicht der App, die Anrufliste Ihres Tablets zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so Ihre Anrufliste löschen oder ändern."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Ermöglicht der App, die Anrufliste Ihres Telefons zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so Ihre Anrufliste löschen oder ändern."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"Meine Kontaktkarten lesen"</string>
+    <string name="permlab_readProfile" msgid="4701889852612716678">"Ihre Kontaktkarten lesen"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Ermöglicht der App, auf Ihrem Gerät gespeicherte personenbezogene Profildaten zu lesen, einschließlich Ihres Namens und Ihrer Kontaktdaten. Die App kann Sie somit identifizieren und Ihre Profildaten an andere senden."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"Meine Kontaktkarten ändern"</string>
+    <string name="permlab_writeProfile" msgid="907793628777397643">"Ihre Kontaktkarten ändern"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Ermöglicht der App, auf Ihrem Gerät gespeicherte personenbezogene Profildaten zu ändern, einschließlich Ihres Namens und Ihrer Kontaktdaten, sowie Daten hinzuzufügen. Die App kann Sie so identifizieren und Ihre Profildaten an andere senden."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"In sozialem Stream lesen"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Ermöglicht der App, auf Updates aus sozialen Netzwerken von Ihnen und Ihren Freunden zuzugreifen und diese zu synchronisieren. Seien Sie vorsichtig, wenn Sie Informationen teilen: Der App wird erlaubt, die Kommunikation zwischen Ihnen und Ihren Freunden in sozialen Netzwerken zu lesen, unabhängig von der Vertraulichkeit der kommunizierten Informationen. Hinweis: Diese Berechtigung kann möglicherweise nicht in allen sozialen Netzwerken erzwungen werden."</string>
@@ -809,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Privat"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Geschäftlich"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Sonstige"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Es wurde keine App zum Anzeigen dieses Kontakts gefunden."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN-Code eingeben"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK und neuen PIN-Code eingeben"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-Code"</string>
@@ -830,7 +838,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Erneut versuchen"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Erneut versuchen"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Die maximal zulässige Anzahl an Face Unlock-Versuchen wurde überschritten."</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Wird geladen... (<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Wird aufgeladen... (<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="321635745684060624">"Aufgeladen"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Ladegerät anschließen"</string>
@@ -1198,7 +1206,7 @@
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Einladung zum Aufbau einer Verbindung"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"Von:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"An:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Geben Sie die erforderliche PIN ein:"</string>
+    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Geben Sie die PIN ein:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Das Tablet wird vorübergehend vom WLAN getrennt, während eine Verbindung mit <xliff:g id="DEVICE_NAME">%1$s</xliff:g> besteht."</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Das Telefon wird vorübergehend vom WLAN getrennt, während eine Verbindung mit <xliff:g id="DEVICE_NAME">%1$s</xliff:g> hergestellt wird."</string>
@@ -1411,9 +1419,10 @@
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Löschen"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Fertig"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modusänderung"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Umschalttaste"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Eingabetaste"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"App auswählen"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> konnte nicht gestartet werden."</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Teilen mit"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Mit <xliff:g id="APPLICATION_NAME">%s</xliff:g> teilen"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Schieberegler: Berühren und halten"</string>
@@ -1483,8 +1492,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-Audio"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Kabellose Übertragung (WiDi)"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Fertig"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Medienausgabe"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Mit Gerät verbinden"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Bildschirm auf Gerät übertragen"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Geräte werden gesucht…"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Einstellungen"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Verbindung trennen"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Wird gescannt..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Verbindung wird hergestellt..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Verfügbar"</string>
@@ -1495,8 +1508,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlay-Nr. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", sicher"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Kabellose Übertragung (WiDi) ist aktiviert."</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Dieser Bildschirm wird auf einem anderen Gerät angezeigt."</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Bildschirm wird übertragen"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Verbindung mit <xliff:g id="NAME">%1$s</xliff:g> wird hergestellt."</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Bildschirm wird übertragen"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Verbunden mit <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Verbindung trennen"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Notruf"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Muster vergessen"</string>
@@ -1514,7 +1529,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM-Karte wird entsperrt…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Falscher PIN-Code"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Geben Sie eine 4- bis 8-stellige PIN ein."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Der PUK-Code muss mindestens 8 Ziffern betragen."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"Der PUK-Code muss 8 Ziffern aufweisen."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Geben Sie den richtigen PUK-Code ein. Bei wiederholten Versuchen wird die SIM-Karte dauerhaft deaktiviert."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-Codes stimmen nicht überein"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Zu viele Musterversuche"</string>

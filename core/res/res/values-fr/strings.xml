@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Saisissez un code PUK comportant au moins huit chiffres."</string>
     <string name="needPuk" msgid="919668385956251611">"Votre carte SIM est verrouillée par clé PUK. Saisissez la clé PUK pour la déverrouiller."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Saisissez la clé PUK2 pour débloquer la carte SIM."</string>
+    <string name="enablePin" msgid="209412020907207950">"Échec de l\'opération. Veuillez activer le verrouillage de la carte SIM/RUIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentative avant que votre carte SIM ne soit verrouillée."</item>
+    <item quantity="other" msgid="7530597808358774740">"Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentatives avant que votre carte SIM ne soit verrouillée."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"Code IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"Code MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Numéro de l\'appelant (entrant)"</string>
@@ -225,7 +230,7 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Accès et contrôle de faible niveau du système."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Outils de développement"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Ces fonctionnalités sont destinées uniquement aux développeurs d\'applications."</string>
-    <string name="permgrouplab_display" msgid="4279909676036402636">"Interface utilisateur d\'une autre application"</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"Interface des autres applis"</string>
     <string name="permgroupdesc_display" msgid="6051002031933013714">"Effet sur l\'interface utilisateur d\'autres applications"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stockage"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Accéder à la  mémoire de stockage USB"</string>
@@ -348,7 +353,7 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Permet à l\'application de lancer l\'interface utilisateur de confirmation de sauvegarde complète. Seules certaines applications peuvent bénéficier de cette permission."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"Affichage de fenêtres non autorisées"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Permet à l\'application de créer des fenêtres destinées à être utilisées par l\'interface utilisateur du système interne. Les applications standards ne doivent pas utiliser cette fonctionnalité."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"ignorer les autres applications"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"S\'afficher en surimpression dans les autres applis"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Permet à l\'application d\'ignorer d\'autres applications ou certaines parties de l\'interface utilisateur. Cela peut altérer votre utilisation de l\'interface de n\'importe quelle application, ou modifier ce que vous pensez voir dans d\'autres applications."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"Réglage de la vitesse des animations"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Permet à l\'application de modifier à tout moment la vitesse générale des animations pour les ralentir ou les accélérer."</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service VPN. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"Se fixer sur un fond d\'écran"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un fond d\'écran. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"s\'associer à un écran à distance"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permettre à l\'application autorisée de s\'associer à l\'interface de niveau supérieur d\'un écran à distance. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"associer à un service widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service widget. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interagir avec l\'administrateur du périphérique"</string>
@@ -493,7 +500,7 @@
     <string name="permdesc_mediaContentControl" msgid="1637478200272062">"Permet à l\'application de contrôler la lecture des contenus multimédias et d\'accéder aux informations associées, telles que le titre ou l\'auteur."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifier vos paramètres audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet à l\'application de modifier les paramètres audio généraux, tels que le volume et la sortie audio utilisée."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"Enregistrer des fichiers audio"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"enregistrer des fichiers audio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permet à l\'application d\'enregistrer des contenus audio à l\'aide du microphone. Cette autorisation lui donne la possibilité d\'enregistrer du contenu audio à tout moment sans votre consentement."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"prendre des photos et enregistrer des vidéos"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Permet à l\'application de prendre des photos et de filmer des vidéos avec l\'appareil photo. Cette autorisation lui permet d\'utiliser l\'appareil photo à tout moment sans votre consentement."</string>
@@ -702,7 +709,7 @@
     <item msgid="7897544654242874543">"Bureau"</item>
     <item msgid="1103601433382158155">"Télécopie bureau"</item>
     <item msgid="1735177144948329370">"Télécopie domicile"</item>
-    <item msgid="603878674477207394">"Pager"</item>
+    <item msgid="603878674477207394">"Bipeur"</item>
     <item msgid="1650824275177931637">"Autre"</item>
     <item msgid="9192514806975898961">"Personnalisé"</item>
   </string-array>
@@ -745,7 +752,7 @@
     <string name="phoneTypeWork" msgid="8863939667059911633">"Bureau"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Télécopie bureau"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Télécopie domicile"</string>
-    <string name="phoneTypePager" msgid="7582359955394921732">"Pager"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"Bipeur"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Autre"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Rappel"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Voiture"</string>
@@ -809,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Domicile"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Professionnelle"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Autre"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Aucune application permettant d\'afficher ce contact n\'a été trouvée."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Saisissez le code PIN."</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Saisissez la clé PUK et le nouveau code PIN."</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"Code PUK"</string>
@@ -1414,6 +1422,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Maj"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Entrée"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Sélectionnez une application"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Impossible de lancer l\'application <xliff:g id="APPLICATION_NAME">%s</xliff:g>."</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Partager avec"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Partager avec <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Poignée coulissante. Appuyez de manière prolongée."</string>
@@ -1483,8 +1492,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Système"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Affichage sans fil"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"OK"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Sortie multimédia"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Connexion à l\'appareil"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Caster l\'écran sur l\'appareil"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Recherche d\'appareils en cours…"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Paramètres"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Déconnecter"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Analyse en cours..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Connexion en cours..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Disponible"</string>
@@ -1495,8 +1508,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposition n° <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g> : <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", sécurisé"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"L\'affichage sans fil est connecté."</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Cet écran s\'affiche sur un autre appareil."</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Diffusion de l\'écran en cours"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Connexion à <xliff:g id="NAME">%1$s</xliff:g> en cours…"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Diffusion de l\'écran en cours"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Connecté à <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Déconnecter"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Appel d\'urgence"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"J\'ai oublié le schéma"</string>
@@ -1514,7 +1529,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Déblocage de la carte SIM en cours…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Le code PIN est erroné."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Veuillez saisir un code PIN comprenant entre quatre et huit chiffres."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Le code PUK doit contenir au moins 8 chiffres."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"La clé PUK doit contenir 8 chiffres."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Veuillez saisir de nouveau le code PUK correct. Des tentatives répétées désactivent définitivement la carte SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Les codes PIN ne correspondent pas."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Trop de tentatives."</string>
@@ -1649,5 +1664,5 @@
     <item quantity="other" msgid="4730868920742952817">"Réessayer dans <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Veuillez réessayer ultérieurement."</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Balayer vers le bas pour quitter le plein écran"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Faites glisser le doigt vers le bas pour quitter le mode plein écran."</string>
 </resources>

@@ -48,8 +48,13 @@
     <string name="mismatchPin" msgid="609379054496863419">"A beírt PIN kódok nem egyeznek."</string>
     <string name="invalidPin" msgid="3850018445187475377">"Írjon be egy 4-8 számjegyű PIN-kódot."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"8 számjegyű vagy hosszabb PUK kódot írjon be."</string>
-    <string name="needPuk" msgid="919668385956251611">"A SIM-kártya le van zárva a PUK-kóddal. A feloldáshoz adja meg a PUK-kódot."</string>
-    <string name="needPuk2" msgid="4526033371987193070">"A SIM-kártya feloldásához adja meg a PUK2-kódot."</string>
+    <string name="needPuk" msgid="919668385956251611">"A SIM kártya le van zárva a PUK kóddal. A feloldáshoz adja meg a PUK kódot."</string>
+    <string name="needPuk2" msgid="4526033371987193070">"A SIM kártya feloldásához adja meg a PUK2 kódot."</string>
+    <string name="enablePin" msgid="209412020907207950">"Sikertelen, engedélyezze a SIM-/RUIM-zárolást."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van, mielőtt zároljuk a SIM kártyát."</item>
+    <item quantity="other" msgid="7530597808358774740">"Még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van, mielőtt zároljuk a SIM kártyát."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Beérkező hívóazonosító"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Lehetővé teszi a használó számára, hogy csatlakozzon egy VPN-szolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szüksége."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"összekapcsolás háttérképpel"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Lehetővé teszi, hogy a tulajdonos kötelezővé tegye egy háttérkép legfelső szintű felületét. A normál alkalmazásoknak erre soha nincs szüksége."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"csatlakozás egy távoli kijelzőhöz"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Lehetővé teszi a használó számára, hogy csatlakozzon egy távoli kijelző legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"csatlakozás modulszolgáltatáshoz"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Lehetővé teszi a használó számára, hogy csatlakozzon egy modulszolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szüksége."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"az eszközkezelő használata"</string>
@@ -809,6 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Otthoni"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Munkahely"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Egyéb"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Nem található alkalmazás a névjegy megtekintéshez."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Írja be a PIN kódot"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Írja be a PUK kódot, majd az új PIN kódot"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK kód"</string>
@@ -835,8 +843,8 @@
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Csatlakoztassa a töltőt."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nincs SIM kártya."</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nincs SIM-kártya a táblagépben."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Nincs SIM-kártya a telefonban."</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nincs SIM kártya a táblagépben."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Nincs SIM kártya a telefonban."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Helyezzen be egy SIM kártyát."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"A SIM kártya hiányzik vagy nem olvasható. Helyezzen be egy SIM kártyát."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"A SIM kártya nem használható."</string>
@@ -850,8 +858,8 @@
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"A hálózat lezárva"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"A SIM-kártya le van zárva a PUK-kóddal."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Nézze meg a felhasználói útmutatót, vagy vegye fel a kapcsolatot az ügyfélszolgálattal."</string>
-    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"A SIM-kártya le van zárva."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM-kártya feloldása..."</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"A SIM kártya le van zárva."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM kártya feloldása..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal rosszul rajzolta le feloldási mintát. \n\nKérjük, <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva próbálja újra."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Ön helytelenül adta meg a jelszót <xliff:g id="NUMBER_0">%d</xliff:g> alkalommal. \n \n Próbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Ön <xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül adta meg PIN kódját. \n \n Próbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
@@ -865,7 +873,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Elfelejtette a mintát?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Fiók feloldása"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Túl sok mintarajzolási próbálkozás"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"A feloldáshoz jelentkezzen be Google Fiókjával."</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"A feloldáshoz jelentkezzen be Google-fiókjával."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Felhasználónév (e-mail cím)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Jelszó"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Bejelentkezés"</string>
@@ -1216,10 +1224,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Módosítás: Beállítások &gt; Alkalmazások"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Engedélyezés mindig"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Soha nem engedélyezem"</string>
-    <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kártya eltávolítva"</string>
+    <string name="sim_removed_title" msgid="6227712319223226185">"SIM kártya eltávolítva"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"A mobilhálózat nem lesz elérhető, amíg újra nem indítja egy érvényes SIM kártya behelyezése után."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Kész"</string>
-    <string name="sim_added_title" msgid="3719670512889674693">"SIM-kártya hozzáadva"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"SIM kártya hozzáadva"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"A mobilhálózathoz eléréséhez indítsa újra az eszközt."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Újraindítás"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Idő beállítása"</string>
@@ -1414,6 +1422,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Válasszon ki egy alkalmazást"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"A(z) <xliff:g id="APPLICATION_NAME">%s</xliff:g> alkalmazást indítása nem sikerült"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Megosztás a következővel:"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Ossza meg a következő alkalmazással: <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Csúsztatható fogantyú. Érintse meg és tartsa."</string>
@@ -1483,8 +1492,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Rendszer"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth hang"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Vezeték nélküli kijelző"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Kész"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Médiakimenet"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Csatlakozás adott eszközhöz"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Képernyő átküldése az eszközre"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Eszközkeresés…"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Beállítások"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Leválasztás"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Keresés..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Kapcsolódás..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Elérhető"</string>
@@ -1495,8 +1508,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"<xliff:g id="ID">%1$d</xliff:g>. fedvény"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> képpont"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", biztonságos"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Vezeték nélküli kijelző csatlakoztatva"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Ez a kijelző megjelenítést végez egy másik eszközön"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Képernyő átküldése…"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Csatlakozás a következőhöz: <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Képernyő átküldése…"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Csatlakozva a következőhöz: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Szétkapcsol"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Segélyhívás"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Elfelejtett minta"</string>
@@ -1514,11 +1529,11 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM kártya feloldása..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Helytelen PIN kód."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4–8 számjegyű PIN kódot írjon be."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"A PUK kód legalább  8 számjegyből kell, hogy álljon."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"A PUK kód 8 karakter hosszú kell, hogy legyen."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Adja meg újra a helyes PUK kódot. Az ismételt próbálkozással véglegesen letiltja a SIM kártyát."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"A PIN kódok nem egyeznek."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Túl sok mintarajzolási próbálkozás"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"A feloldáshoz jelentkezzen be Google Fiókjával."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"A feloldáshoz jelentkezzen be Google-fiókjával."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Felhasználónév (e-mail cím)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Jelszó"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Bejelentkezés"</string>
@@ -1649,5 +1664,5 @@
     <item quantity="other" msgid="4730868920742952817">"Próbálja újra <xliff:g id="COUNT">%d</xliff:g> másodperc múlva"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Próbálkozzon később"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"A teljes képernyős nézetből való kilépéshez húzza ujját a tetejétől lefelé."</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"A teljes képernyős nézetből való kilépéshez húzza ujját a képernyő tetejétől lefelé."</string>
 </resources>
