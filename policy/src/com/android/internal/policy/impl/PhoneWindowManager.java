@@ -153,6 +153,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashSet;
 
 /**
  * WindowManagerPolicy implementation for the Android phone UI.  This
@@ -408,7 +409,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final Rect mTmpNavigationFrame = new Rect();
     
     WindowState mTopFullscreenOpaqueWindowState;
-    boolean mHideWindowBehindKeyguard;
+    HashSet<IApplicationToken> mAppsToBeHidden = new HashSet<IApplicationToken>();
     boolean mTopIsFullscreen;
     boolean mForceStatusBar;
     boolean mForceStatusBarFromKeyguard;
@@ -2937,7 +2938,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void beginPostLayoutPolicyLw(int displayWidth, int displayHeight) {
         mTopFullscreenOpaqueWindowState = null;
-        mHideWindowBehindKeyguard = false;
+        mAppsToBeHidden.clear();
         mForceStatusBar = false;
         mForceStatusBarFromKeyguard = false;
         mForcingShowNavBar = false;
@@ -2989,12 +2990,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             final boolean showWhenLocked = (attrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
             if (appWindow) {
+                if (showWhenLocked) {
+                    mAppsToBeHidden.remove(win.getAppToken());
+                } else {
+                    mAppsToBeHidden.add(win.getAppToken());
+                }
                 if (attrs.x == 0 && attrs.y == 0
                         && attrs.width == WindowManager.LayoutParams.MATCH_PARENT
                         && attrs.height == WindowManager.LayoutParams.MATCH_PARENT) {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "Fullscreen window: " + win);
                     mTopFullscreenOpaqueWindowState = win;
-                    if (!mHideWindowBehindKeyguard) {
+                    if (mAppsToBeHidden.isEmpty()) {
                         if (showWhenLocked) {
                             if (DEBUG_LAYOUT) Slog.v(TAG, "Setting mHideLockScreen to true by win " + win);
                             mHideLockScreen = true;
@@ -3012,8 +3018,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if ((attrs.flags & FLAG_ALLOW_LOCK_WHILE_SCREEN_ON) != 0) {
                         mAllowLockscreenWhenOn = true;
                     }
-                } else if (!showWhenLocked) {
-                    mHideWindowBehindKeyguard = true;
                 }
             }
         }
