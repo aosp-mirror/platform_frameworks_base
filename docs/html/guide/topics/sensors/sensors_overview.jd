@@ -710,7 +710,7 @@ have negative Z values. This coordinate system is used by the following sensors:
 href="{@docRoot}guide/topics/sensors/sensors_motion.html#sensors-motion-accel">Acceleration
 sensor</a></li>
 <li><a
-href="{@docRoot}guide/topics/sensors/sensors_motion.html#sensors-motion-gravity">Gravity
+href="{@docRoot}guide/topics/sensors/sensors_motion.html#sensors-motion-grav">Gravity
 sensor</a></li>
 <li><a
 href="{@docRoot}guide/topics/sensors/sensors_motion.html#sensors-motion-gyro">Gyroscope</a></li>
