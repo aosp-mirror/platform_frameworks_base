@@ -65,6 +65,17 @@
             <file>RobotoCondensed-BoldItalic.ttf</file>
         </fileset>
     </family>
+
+    <family>
+        <nameset>
+            <name>sans-serif-condensed-light</name>
+        </nameset>
+        <fileset>
+            <file>RobotoCondensed-Light.ttf</file>
+            <file>RobotoCondensed-LightItalic.ttf</file>
+        </fileset>
+    </family>
+
     <family>
         <nameset>
             <name>serif</name>
