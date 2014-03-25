@@ -74,6 +74,7 @@ import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.DecoderException;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
@@ -570,6 +571,14 @@ class MountService extends IMountService.Stub
             } catch (InterruptedException e) {
                 Slog.w(TAG, "Interrupt while waiting for MountService to be ready.");
             }
+        }
+    }
+
+    private boolean isReady() {
+        try {
+            return mConnectedSignal.await(0, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            return false;
         }
     }
 
@@ -2081,6 +2090,19 @@ class MountService extends IMountService.Stub
         return new String(Hex.encodeHex(bytes));
     }
 
+    private String fromHex(String hexPassword) {
+        if (hexPassword == null) {
+            return null;
+        }
+
+        try {
+            byte[] bytes = Hex.decodeHex(hexPassword.toCharArray());
+            return new String(bytes, StandardCharsets.UTF_8);
+        } catch (DecoderException e) {
+            return null;
+        }
+    }
+
     @Override
     public int decryptStorage(String password) {
         if (TextUtils.isEmpty(password)) {
@@ -2224,6 +2246,35 @@ class MountService extends IMountService.Stub
             }
 
             throw new IllegalStateException("unexpected return from cryptfs");
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public String getPassword() throws RemoteException {
+        if (!isReady()) {
+            return new String();
+        }
+
+        final NativeDaemonEvent event;
+        try {
+            event = mConnector.execute("cryptfs", "getpw");
+            return fromHex(event.getMessage());
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void clearPassword() throws RemoteException {
+        if (!isReady()) {
+            return;
+        }
+
+        final NativeDaemonEvent event;
+        try {
+            event = mConnector.execute("cryptfs", "clearpw");
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }

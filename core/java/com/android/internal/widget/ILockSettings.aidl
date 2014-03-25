@@ -28,6 +28,7 @@ interface ILockSettings {
     boolean checkPattern(in String pattern, int userId);
     void setLockPassword(in String password, int userId);
     boolean checkPassword(in String password, int userId);
+    boolean checkVoldPassword(int userId);
     boolean havePattern(int userId);
     boolean havePassword(int userId);
     void removeUser(int userId);
