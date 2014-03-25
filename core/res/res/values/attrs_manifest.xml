@@ -323,6 +323,12 @@
          content providers. -->
     <attr name="exported" format="boolean" />
 
+    <!-- A boolean flag used to indicate if an application is a Game or not.
+         <p>This information can be used by the system to group together
+         applications that are classified as games, and display them separately
+         from the other applications. -->
+    <attr name="isGame" format="boolean" />
+
     <!-- If set to true, a single instance of this component will run for
          all users.  That instance will run as user 0, the default/primary
          user.  When the app running is in processes for other users and interacts
@@ -979,6 +985,7 @@
              any accounts. The type should correspond to the account authenticator type, such as
              "com.google". -->
         <attr name="requiredAccountType" format="string"/>
+        <attr name="isGame" />
     </declare-styleable>
     
     <!-- The <code>permission</code> tag declares a security permission that can be

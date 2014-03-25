@@ -2094,6 +2094,7 @@
 
   <public type="attr" name="banner" id="0x10103f2" />
   <public type="attr" name="windowSwipeToDismiss" id="0x10103f3" />
+  <public type="attr" name="isGame" />
 
 <!-- ===============================================================
      Resources added in version 21 of the platform
