@@ -112,8 +112,17 @@ public:
         }
     }
 
-    RenderProperties& properties() {
+    const RenderProperties& properties() {
         return mProperties;
+    }
+
+    const RenderProperties& stagingProperties() {
+        return mStagingProperties;
+    }
+
+    RenderProperties& mutateStagingProperties() {
+        mNeedsPropertiesSync = true;
+        return mStagingProperties;
     }
 
     bool isProjectionReceiver() {
@@ -127,6 +136,8 @@ public:
     int getHeight() {
         return properties().getHeight();
     }
+
+    void updateProperties();
 
 private:
     typedef key_value_pair_t<float, DrawDisplayListOp*> ZDrawDisplayListOpPair;
@@ -142,8 +153,6 @@ private:
         kNegativeZChildren,
         kPositiveZChildren
     };
-
-    void outputViewProperties(const int level);
 
     void applyViewPropertyTransforms(mat4& matrix, bool true3dTransform = false);
 
@@ -183,7 +192,10 @@ private:
     String8 mName;
     bool mDestroyed; // used for debugging crash, TODO: remove once invalid state crash fixed
 
+    bool mNeedsPropertiesSync;
     RenderProperties mProperties;
+    RenderProperties mStagingProperties;
+
     DisplayListData* mDisplayListData;
 
     /**

@@ -64,7 +64,7 @@ public:
         return mShouldClip && (mType == kOutlineType_RoundRect);
     }
 
-    const SkPath* getPath() {
+    const SkPath* getPath() const {
         if (mType == kOutlineType_None) return NULL;
 
         return &mPath;

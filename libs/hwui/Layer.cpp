@@ -200,6 +200,7 @@ void Layer::defer() {
     renderer->setupFrameState(dirtyRect.left, dirtyRect.top,
             dirtyRect.right, dirtyRect.bottom, !isBlend());
 
+    displayList->updateProperties();
     displayList->computeOrdering();
     displayList->defer(deferredState, 0);
 
