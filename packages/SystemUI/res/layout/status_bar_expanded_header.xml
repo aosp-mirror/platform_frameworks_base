@@ -32,7 +32,7 @@
         android:layout_height="match_parent"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
-        android:background="@drawable/ic_notify_button_bg"
+        android:background="@drawable/notification_header_bg"
         android:enabled="false"
         >
         <com.android.systemui.statusbar.policy.Clock
@@ -79,7 +79,7 @@
         android:layout_height="50dp"
         android:scaleType="center"
         android:src="@drawable/ic_notify_clear"
-        android:background="@drawable/ic_notify_button_bg"
+        android:background="@drawable/notification_header_bg"
         android:contentDescription="@string/accessibility_clear_all"
         />     
 
@@ -93,7 +93,7 @@
             android:layout_height="50dp"
             android:scaleType="center"
             android:src="@drawable/ic_notify_settings"
-            android:background="@drawable/ic_notify_button_bg"
+            android:background="@drawable/notification_header_bg"
             android:contentDescription="@string/accessibility_desc_quick_settings"
             />
         <ImageView android:id="@+id/notification_button"
@@ -101,7 +101,7 @@
             android:layout_height="50dp"
             android:scaleType="center"
             android:src="@drawable/ic_notifications"
-            android:background="@drawable/ic_notify_button_bg"
+            android:background="@drawable/notification_header_bg"
             android:visibility="gone"
             android:contentDescription="@string/accessibility_notifications_button"
             />

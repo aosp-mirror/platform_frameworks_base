@@ -24,7 +24,7 @@
     android:id="@+id/notification_panel"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:background="@drawable/notification_panel_bg"
+    android:background="@color/notification_panel_solid_background"
     android:paddingTop="@dimen/notification_panel_padding_top"
     android:layout_marginStart="@dimen/notification_panel_margin_left"
     >
@@ -33,7 +33,7 @@
         android:id="@+id/handle"
         android:layout_width="match_parent"
         android:layout_height="@dimen/close_handle_height"
-        android:background="@drawable/status_bar_close"
+        android:background="@color/notification_panel_solid_background"
         android:visibility="invisible"
         />
 
