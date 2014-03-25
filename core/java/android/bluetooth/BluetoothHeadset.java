@@ -280,7 +280,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
         Intent intent = new Intent(IBluetoothHeadset.class.getName());
         ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
         intent.setComponent(comp);
-        if (comp == null || !mContext.bindService(intent, mConnection, 0)) {
+        if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
+                android.os.Process.myUserHandle())) {
             Log.e(TAG, "Could not bind to Bluetooth Headset Service with " + intent);
             return false;
         }
