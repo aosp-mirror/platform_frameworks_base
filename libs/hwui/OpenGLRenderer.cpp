@@ -1919,7 +1919,6 @@ status_t OpenGLRenderer::drawDisplayList(RenderNode* displayList, Rect& dirty,
     // will be performed by the display list itself
     if (displayList && displayList->isRenderable()) {
         // compute 3d ordering
-        displayList->updateProperties();
         displayList->computeOrdering();
         if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
             status = startFrame();

@@ -148,6 +148,13 @@ static void android_view_GLRenderer_setDisplayListData(JNIEnv* env, jobject claz
     displayList->setData(newData);
 }
 
+static void android_view_GLRenderer_updateRenderNodeProperties(JNIEnv* env, jobject clazz,
+        jlong renderNodePtr) {
+    using namespace android::uirenderer;
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->updateProperties();
+}
+
 #endif // USE_OPENGL_RENDERER
 
 // ----------------------------------------------------------------------------
@@ -179,6 +186,7 @@ static JNINativeMethod gMethods[] = {
     { "getSystemTime",         "()J",   (void*) android_view_GLRenderer_getSystemTime },
     { "nDestroyLayer",         "(J)V",  (void*) android_view_GLRenderer_destroyLayer },
     { "nSetDisplayListData",  "(JJ)V", (void*) android_view_GLRenderer_setDisplayListData },
+    { "nUpdateRenderNodeProperties", "(J)V", (void*) android_view_GLRenderer_updateRenderNodeProperties },
 #endif
 
     { "setupShadersDiskCache", "(Ljava/lang/String;)V",

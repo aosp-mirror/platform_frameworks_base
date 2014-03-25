@@ -137,7 +137,7 @@ public:
         return properties().getHeight();
     }
 
-    void updateProperties();
+    ANDROID_API void updateProperties();
 
 private:
     typedef key_value_pair_t<float, DrawDisplayListOp*> ZDrawDisplayListOpPair;
