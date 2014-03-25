@@ -251,6 +251,7 @@ public:
     size_t getSize() const { return mDataSize; }
     void* editData(size_t size);
     void* editData(size_t* outSize = NULL);
+    void* editDataInRange(size_t offset, size_t size);
     void* padData(size_t wordSize);
     status_t writeData(const void* data, size_t size);
     void clearData();

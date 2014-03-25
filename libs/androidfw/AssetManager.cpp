@@ -74,6 +74,7 @@ static const char* kAssetsRoot = "assets";
 static const char* kAppZipName = NULL; //"classes.jar";
 static const char* kSystemAssets = "framework/framework-res.apk";
 static const char* kResourceCache = "resource-cache";
+static const char* kAndroidManifest = "AndroidManifest.xml";
 
 static const char* kExcludeExtension = ".EXCLUDE";
 
@@ -204,6 +205,16 @@ bool AssetManager::addAssetPath(const String8& path, int32_t* cookie)
 
     ALOGV("In %p Asset %s path: %s", this,
          ap.type == kFileTypeDirectory ? "dir" : "zip", ap.path.string());
+
+    // Check that the path has an AndroidManifest.xml
+    Asset* manifestAsset = const_cast<AssetManager*>(this)->openNonAssetInPathLocked(
+            kAndroidManifest, Asset::ACCESS_BUFFER, ap);
+    if (manifestAsset == NULL) {
+        // This asset path does not contain any resources.
+        delete manifestAsset;
+        return false;
+    }
+    delete manifestAsset;
 
     mAssetPaths.add(ap);
 
@@ -461,7 +472,7 @@ Asset* AssetManager::open(const char* fileName, AccessMode mode)
  * The "fileName" is the partial path starting from the application
  * name.
  */
-Asset* AssetManager::openNonAsset(const char* fileName, AccessMode mode)
+Asset* AssetManager::openNonAsset(const char* fileName, AccessMode mode, int32_t* outCookie)
 {
     AutoMutex _l(mLock);
 
@@ -482,6 +493,7 @@ Asset* AssetManager::openNonAsset(const char* fileName, AccessMode mode)
         Asset* pAsset = openNonAssetInPathLocked(
             fileName, mode, mAssetPaths.itemAt(i));
         if (pAsset != NULL) {
+            if (outCookie != NULL) *outCookie = static_cast<int32_t>(i + 1);
             return pAsset != kExcludedAsset ? pAsset : NULL;
         }
     }
@@ -556,9 +568,14 @@ const ResTable* AssetManager::getResTable(bool required) const
         LOG_FATAL_IF(mAssetPaths.size() == 0, "No assets added to AssetManager");
     }
 
-    if (mCacheMode != CACHE_OFF && !mCacheValid)
+    if (mCacheMode != CACHE_OFF && !mCacheValid) {
         const_cast<AssetManager*>(this)->loadFileNameCacheLocked();
+    }
 
+    mResources = new ResTable();
+    updateResourceParamsLocked();
+
+    bool onlyEmptyResources = true;
     const size_t N = mAssetPaths.size();
     for (size_t i=0; i<N; i++) {
         Asset* ass = NULL;
@@ -621,35 +638,39 @@ const ResTable* AssetManager::getResTable(bool required) const
                                          ap);
             shared = false;
         }
+
         if ((ass != NULL || sharedRes != NULL) && ass != kExcludedAsset) {
-            if (rt == NULL) {
-                mResources = rt = new ResTable();
-                updateResourceParamsLocked();
-            }
             ALOGV("Installing resource asset %p in to table %p\n", ass, mResources);
             if (sharedRes != NULL) {
                 ALOGV("Copying existing resources for %s", ap.path.string());
-                rt->add(sharedRes);
+                mResources->add(sharedRes);
             } else {
                 ALOGV("Parsing resources for %s", ap.path.string());
-                rt->add(ass, i + 1, !shared, idmap);
+                mResources->add(ass, i + 1, !shared, idmap);
             }
+            onlyEmptyResources = false;
 
             if (!shared) {
                 delete ass;
             }
+        } else {
+            ALOGW("Installing empty resources in to table %p\n", mResources);
+            mResources->addEmpty(i + 1);
         }
+
         if (idmap != NULL) {
             delete idmap;
         }
         MY_TRACE_END();
     }
 
-    if (required && !rt) ALOGW("Unable to find resources file resources.arsc");
-    if (!rt) {
-        mResources = rt = new ResTable();
+    if (required && onlyEmptyResources) {
+        ALOGW("Unable to find resources file resources.arsc");
+        delete mResources;
+        mResources = NULL;
     }
-    return rt;
+
+    return mResources;
 }
 
 void AssetManager::updateResourceParamsLocked() const
