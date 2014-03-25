@@ -1625,37 +1625,36 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>No flash on camera</p>
+     * <p>No flash on camera.</p>
      * @see CaptureResult#FLASH_STATE
      */
     public static final int FLASH_STATE_UNAVAILABLE = 0;
 
     /**
-     * <p>if {@link CameraCharacteristics#FLASH_INFO_AVAILABLE android.flash.info.available} is true Flash is
-     * charging and cannot be fired</p>
-     *
-     * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
+     * <p>Flash is charging and cannot be fired.</p>
      * @see CaptureResult#FLASH_STATE
      */
     public static final int FLASH_STATE_CHARGING = 1;
 
     /**
-     * <p>if {@link CameraCharacteristics#FLASH_INFO_AVAILABLE android.flash.info.available} is true Flash is
-     * ready to fire</p>
-     *
-     * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
+     * <p>Flash is ready to fire.</p>
      * @see CaptureResult#FLASH_STATE
      */
     public static final int FLASH_STATE_READY = 2;
 
     /**
-     * <p>if {@link CameraCharacteristics#FLASH_INFO_AVAILABLE android.flash.info.available} is true Flash fired
-     * for this capture</p>
-     *
-     * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
+     * <p>Flash fired for this capture.</p>
      * @see CaptureResult#FLASH_STATE
      */
     public static final int FLASH_STATE_FIRED = 3;
+
+    /**
+     * <p>Flash partially illuminated this frame. This is usually due to the next
+     * or previous frame having the flash fire, and the flash spilling into this capture
+     * due to hardware limitations.</p>
+     * @see CaptureResult#FLASH_STATE
+     */
+    public static final int FLASH_STATE_PARTIAL = 4;
 
     //
     // Enumeration values for CaptureResult#LENS_STATE
