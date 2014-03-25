@@ -56,7 +56,7 @@ LogRing::LogRing(const char* header, size_t entries)
     , mHeader(header) {
     mRingBuffer = new Entry[mSize];
     if (NULL == mRingBuffer)
-        ALOGE("Failed to allocate log ring with %u entries.", mSize);
+        ALOGE("Failed to allocate log ring with %zu entries.", mSize);
 }
 
 LogRing::~LogRing() {
@@ -150,7 +150,7 @@ void LogRing::dumpLog(int fd) {
 
         localtime_r(&mRingBuffer[ndx].first_ts.tv_sec, &t);
         strftime(timebuf, sizeof(timebuf), kTimeFmt, &t);
-        res = snprintf(buf, sizeof(buf), "[%2d] %s.%03ld :: %s%s\n", 
+        res = snprintf(buf, sizeof(buf), "[%2zu] %s.%03ld :: %s%s\n",
                        i, timebuf,
                        mRingBuffer[ndx].first_ts.tv_usec / 1000,
                        mRingBuffer[ndx].s.string(),

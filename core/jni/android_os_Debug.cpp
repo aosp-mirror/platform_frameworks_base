@@ -800,7 +800,7 @@ static void dumpNativeHeap(FILE* fp)
     fprintf(fp, "Total memory: %zu\n", totalMemory);
     fprintf(fp, "Allocation records: %zd\n", recordCount);
     if (backtraceSize != BACKTRACE_SIZE) {
-        fprintf(fp, "WARNING: mismatched backtrace sizes (%d vs. %d)\n",
+        fprintf(fp, "WARNING: mismatched backtrace sizes (%zu vs. %d)\n",
             backtraceSize, BACKTRACE_SIZE);
     }
     fprintf(fp, "\n");
@@ -823,7 +823,11 @@ static void dumpNativeHeap(FILE* fp)
             if (backtrace[bt] == 0) {
                 break;
             } else {
+#ifdef __LP64__
+                fprintf(fp, " %016x", backtrace[bt]);
+#else
                 fprintf(fp, " %08x", backtrace[bt]);
+#endif
             }
         }
         fprintf(fp, "\n");
