@@ -714,6 +714,7 @@ public final class InputMethodManager {
      * Reset all of the state associated with being bound to an input method.
      */
     void clearBindingLocked() {
+        if (DEBUG) Log.v(TAG, "Clearing binding!");
         clearConnectionLocked();
         setInputChannelLocked(null);
         mBindSequence = -1;

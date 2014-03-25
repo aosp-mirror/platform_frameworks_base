@@ -581,7 +581,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void sessionCreated(IInputMethodSession session) {
-            mParentIMMS.onSessionCreated(mMethod, session, mChannel);
+            long ident = Binder.clearCallingIdentity();
+            try {
+                mParentIMMS.onSessionCreated(mMethod, session, mChannel);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 
