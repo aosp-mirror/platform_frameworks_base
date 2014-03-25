@@ -8127,6 +8127,7 @@ package android.content.res {
     method public void applyStyle(int, boolean);
     method public void dump(int, java.lang.String, java.lang.String);
     method public android.graphics.drawable.Drawable getDrawable(int) throws android.content.res.Resources.NotFoundException;
+    method public android.content.res.Resources getResources();
     method public android.content.res.TypedArray obtainStyledAttributes(int[]);
     method public android.content.res.TypedArray obtainStyledAttributes(int, int[]) throws android.content.res.Resources.NotFoundException;
     method public android.content.res.TypedArray obtainStyledAttributes(android.util.AttributeSet, int[], int, int);
@@ -8157,6 +8158,7 @@ package android.content.res {
     method public java.lang.String getString(int);
     method public java.lang.CharSequence getText(int);
     method public java.lang.CharSequence[] getTextArray(int);
+    method public int getType(int);
     method public boolean getValue(int, android.util.TypedValue);
     method public boolean hasValue(int);
     method public int length();
@@ -10494,15 +10496,22 @@ package android.graphics.drawable {
 
   public abstract class Drawable {
     ctor public Drawable();
+    method public void applyTheme(android.content.res.Resources.Theme);
+    method public boolean canApplyTheme();
     method public void clearColorFilter();
     method public final void copyBounds(android.graphics.Rect);
     method public final android.graphics.Rect copyBounds();
     method public static android.graphics.drawable.Drawable createFromPath(java.lang.String);
     method public static android.graphics.drawable.Drawable createFromResourceStream(android.content.res.Resources, android.util.TypedValue, java.io.InputStream, java.lang.String);
     method public static android.graphics.drawable.Drawable createFromResourceStream(android.content.res.Resources, android.util.TypedValue, java.io.InputStream, java.lang.String, android.graphics.BitmapFactory.Options);
+    method public static android.graphics.drawable.Drawable createFromResourceStreamThemed(android.content.res.Resources, android.util.TypedValue, java.io.InputStream, java.lang.String, android.content.res.Resources.Theme);
+    method public static android.graphics.drawable.Drawable createFromResourceStreamThemed(android.content.res.Resources, android.util.TypedValue, java.io.InputStream, java.lang.String, android.graphics.BitmapFactory.Options, android.content.res.Resources.Theme);
     method public static android.graphics.drawable.Drawable createFromStream(java.io.InputStream, java.lang.String);
+    method public static android.graphics.drawable.Drawable createFromStreamThemed(java.io.InputStream, java.lang.String, android.content.res.Resources.Theme);
     method public static android.graphics.drawable.Drawable createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public static android.graphics.drawable.Drawable createFromXmlInner(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static android.graphics.drawable.Drawable createFromXmlInnerThemed(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet, android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static android.graphics.drawable.Drawable createFromXmlThemed(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public abstract void draw(android.graphics.Canvas);
     method public int getAlpha();
     method public final android.graphics.Rect getBounds();
@@ -10522,6 +10531,7 @@ package android.graphics.drawable {
     method public int[] getState();
     method public android.graphics.Region getTransparentRegion();
     method public void inflate(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public void inflate(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet, android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public void invalidateSelf();
     method public boolean isAutoMirrored();
     method public boolean isStateful();
@@ -10557,9 +10567,11 @@ package android.graphics.drawable {
 
   public static abstract class Drawable.ConstantState {
     ctor public Drawable.ConstantState();
+    method public boolean canApplyTheme();
     method public abstract int getChangingConfigurations();
     method public abstract android.graphics.drawable.Drawable newDrawable();
     method public android.graphics.drawable.Drawable newDrawable(android.content.res.Resources);
+    method public android.graphics.drawable.Drawable newDrawable(android.content.res.Resources, android.content.res.Resources.Theme);
   }
 
   public class DrawableContainer extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {

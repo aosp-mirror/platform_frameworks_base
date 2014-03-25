@@ -24,6 +24,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -697,6 +698,16 @@ public abstract class Drawable {
     }
 
     /**
+     * Applies the specified theme to this Drawable and its children.
+     */
+    public void applyTheme(@SuppressWarnings("unused") Theme t) {
+    }
+
+    public boolean canApplyTheme() {
+        return false;
+    }
+
+    /**
      * Return the opacity/transparency of this Drawable.  The returned value is
      * one of the abstract format constants in
      * {@link android.graphics.PixelFormat}:
@@ -900,9 +911,13 @@ public abstract class Drawable {
      * Create a drawable from an inputstream
      */
     public static Drawable createFromStream(InputStream is, String srcName) {
+        return createFromStreamThemed(is, srcName, null);
+    }
+
+    public static Drawable createFromStreamThemed(InputStream is, String srcName, Theme theme) {
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, srcName != null ? srcName : "Unknown drawable");
         try {
-            return createFromResourceStream(null, null, is, srcName, null);
+            return createFromResourceStreamThemed(null, null, is, srcName, theme);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
@@ -914,9 +929,14 @@ public abstract class Drawable {
      */
     public static Drawable createFromResourceStream(Resources res, TypedValue value,
             InputStream is, String srcName) {
+        return createFromResourceStreamThemed(res, value, is, srcName, null);
+    }
+
+    public static Drawable createFromResourceStreamThemed(Resources res, TypedValue value,
+            InputStream is, String srcName, Theme theme) {
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, srcName != null ? srcName : "Unknown drawable");
         try {
-            return createFromResourceStream(res, value, is, srcName, null);
+            return createFromResourceStreamThemed(res, value, is, srcName, null, theme);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
@@ -928,7 +948,11 @@ public abstract class Drawable {
      */
     public static Drawable createFromResourceStream(Resources res, TypedValue value,
             InputStream is, String srcName, BitmapFactory.Options opts) {
+        return createFromResourceStreamThemed(res, value, is, srcName, opts, null);
+    }
 
+    public static Drawable createFromResourceStreamThemed(Resources res, TypedValue value,
+            InputStream is, String srcName, BitmapFactory.Options opts, Theme theme) {
         if (is == null) {
             return null;
         }
@@ -976,6 +1000,16 @@ public abstract class Drawable {
      */
     public static Drawable createFromXml(Resources r, XmlPullParser parser)
             throws XmlPullParserException, IOException {
+        return createFromXmlThemed(r, parser, null);
+    }
+
+    /**
+     * Create a themed drawable from an XML document. For more information on
+     * how to create resources in XML, see
+     * <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.
+     */
+    public static Drawable createFromXmlThemed(Resources r, XmlPullParser parser, Theme theme)
+            throws XmlPullParserException, IOException {
         AttributeSet attrs = Xml.asAttributeSet(parser);
 
         int type;
@@ -988,7 +1022,7 @@ public abstract class Drawable {
             throw new XmlPullParserException("No start tag found");
         }
 
-        Drawable drawable = createFromXmlInner(r, parser, attrs);
+        Drawable drawable = createFromXmlInnerThemed(r, parser, attrs, theme);
 
         if (drawable == null) {
             throw new RuntimeException("Unknown initial tag: " + parser.getName());
@@ -1003,11 +1037,15 @@ public abstract class Drawable {
      * Returns null if the tag is not a valid drawable.
      */
     public static Drawable createFromXmlInner(Resources r, XmlPullParser parser, AttributeSet attrs)
-    throws XmlPullParserException, IOException {
-        Drawable drawable;
+            throws XmlPullParserException, IOException {
+        return createFromXmlInnerThemed(r, parser, attrs, null);
+    }
+
+    public static Drawable createFromXmlInnerThemed(Resources r, XmlPullParser parser,
+            AttributeSet attrs, Theme theme) throws XmlPullParserException, IOException {
+        final Drawable drawable;
 
         final String name = parser.getName();
-
         if (name.equals("selector")) {
             drawable = new StateListDrawable();
         } else if (name.equals("level-list")) {
@@ -1052,7 +1090,7 @@ public abstract class Drawable {
                     ": invalid drawable tag " + name);
         }
 
-        drawable.inflate(r, parser, attrs);
+        drawable.inflate(r, parser, attrs, theme);
         return drawable;
     }
 
@@ -1079,12 +1117,35 @@ public abstract class Drawable {
     }
 
     /**
-     * Inflate this Drawable from an XML resource.
+     * Inflate this Drawable from an XML resource. Does not apply a theme.
+     *
+     * @see #inflate(Resources, XmlPullParser, AttributeSet, Theme)
      */
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
             throws XmlPullParserException, IOException {
+        inflate(r, parser, attrs, null);
+    }
 
-        TypedArray a = r.obtainAttributes(attrs, com.android.internal.R.styleable.Drawable);
+    /**
+     * Inflate this Drawable from an XML resource optionally styled by a theme.
+     *
+     * @param r Resources used to resolve attribute values
+     * @param parser XML parser from which to inflate this Drawable
+     * @param attrs Base set of attribute values
+     * @param theme Theme to apply, may be null
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
+            throws XmlPullParserException, IOException {
+        final TypedArray a;
+        if (theme != null) {
+            a = theme.obtainStyledAttributes(
+                    attrs, com.android.internal.R.styleable.Drawable, 0, 0);
+        } else {
+            a = r.obtainAttributes(attrs, com.android.internal.R.styleable.Drawable);
+        }
+
         inflateWithAttributes(r, parser, a, com.android.internal.R.styleable.Drawable_visible);
         a.recycle();
     }
@@ -1095,10 +1156,8 @@ public abstract class Drawable {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    void inflateWithAttributes(Resources r, XmlPullParser parser,
-            TypedArray attrs, int visibleAttr)
+    void inflateWithAttributes(Resources r, XmlPullParser parser, TypedArray attrs, int visibleAttr)
             throws XmlPullParserException, IOException {
-
         mVisible = attrs.getBoolean(visibleAttr, mVisible);
     }
 
@@ -1125,6 +1184,7 @@ public abstract class Drawable {
          * instead to provide a resource.
          */
         public abstract Drawable newDrawable();
+
         /**
          * Create a new Drawable instance from its constant state.  This
          * must be implemented for drawables that change based on the target
@@ -1134,6 +1194,15 @@ public abstract class Drawable {
         public Drawable newDrawable(Resources res) {
             return newDrawable();
         }
+
+        /**
+         * Create a new Drawable instance from its constant state. This must be
+         * implemented for drawables that can have a theme applied.
+         */
+        public Drawable newDrawable(Resources res, Theme theme) {
+            return newDrawable();
+        }
+
         /**
          * Return a bit mask of configuration changes that will impact
          * this drawable (and thus require completely reloading it).
@@ -1145,6 +1214,13 @@ public abstract class Drawable {
          */
         public Bitmap getBitmap() {
             return null;
+        }
+
+        /**
+         * Return whether this constant state can have a theme applied.
+         */
+        public boolean canApplyTheme() {
+            return false;
         }
     }
 
@@ -1167,6 +1243,18 @@ public abstract class Drawable {
         }
 
         return new BitmapDrawable(res, bm);
+    }
+
+    /**
+     * Obtains styled attributes from the theme, if available, or unstyled
+     * resources if the theme is null.
+     */
+    static TypedArray obtainAttributes(
+            Resources res, Theme theme, AttributeSet set, int[] attrs) {
+        if (theme == null) {
+            return res.obtainAttributes(set, attrs);
+        }
+        return theme.obtainStyledAttributes(set, attrs, 0, 0);
     }
 
     /**

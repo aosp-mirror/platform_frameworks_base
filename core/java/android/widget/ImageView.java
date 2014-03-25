@@ -664,7 +664,7 @@ public class ImageView extends View {
                 InputStream stream = null;
                 try {
                     stream = mContext.getContentResolver().openInputStream(mUri);
-                    d = Drawable.createFromStream(stream, null);
+                    d = Drawable.createFromStreamThemed(stream, null, mContext.getTheme());
                 } catch (Exception e) {
                     Log.w("ImageView", "Unable to open content: " + mUri, e);
                 } finally {

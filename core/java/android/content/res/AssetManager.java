@@ -722,6 +722,9 @@ public final class AssetManager {
     /*package*/ native static final boolean applyStyle(long theme,
             int defStyleAttr, int defStyleRes, long xmlParser,
             int[] inAttrs, int[] outValues, int[] outIndices);
+    /*package*/ native static final boolean resolveAttrs(long theme,
+            int defStyleAttr, int defStyleRes, int[] inValues,
+            int[] inAttrs, int[] outValues, int[] outIndices);
     /*package*/ native final boolean retrieveAttributes(
             long xmlParser, int[] inAttrs, int[] outValues, int[] outIndices);
     /*package*/ native final int getArraySize(int resource);

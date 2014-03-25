@@ -23,6 +23,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.res.Resources.Theme;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 
@@ -236,7 +237,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
         
         TypedArray a = r.obtainAttributes(attrs,
@@ -292,7 +293,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
                             ": <item> tag requires a 'drawable' attribute or child tag" +
                             " defining a drawable");
                 }
-                dr = Drawable.createFromXmlInner(r, parser, attrs);
+                dr = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme);
             }
             
             mAnimationState.addFrame(dr, duration);

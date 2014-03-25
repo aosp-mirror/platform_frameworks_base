@@ -972,6 +972,200 @@ static void android_content_AssetManager_dumpTheme(JNIEnv* env, jobject clazz,
     theme->dumpToLog();
 }
 
+static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject clazz,
+                                                          jlong themeToken,
+                                                          jint defStyleAttr,
+                                                          jint defStyleRes,
+                                                          jintArray inValues,
+                                                          jintArray attrs,
+                                                          jintArray outValues,
+                                                          jintArray outIndices)
+{
+    if (themeToken == 0) {
+        jniThrowNullPointerException(env, "theme token");
+        return JNI_FALSE;
+    }
+    if (attrs == NULL) {
+        jniThrowNullPointerException(env, "attrs");
+        return JNI_FALSE;
+    }
+    if (outValues == NULL) {
+        jniThrowNullPointerException(env, "out values");
+        return JNI_FALSE;
+    }
+
+    DEBUG_STYLES(LOGI("APPLY STYLE: theme=0x%x defStyleAttr=0x%x defStyleRes=0x%x",
+        themeToken, defStyleAttr, defStyleRes));
+
+    ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeToken);
+    const ResTable& res = theme->getResTable();
+    ResTable_config config;
+    Res_value value;
+
+    const jsize NI = env->GetArrayLength(attrs);
+    const jsize NV = env->GetArrayLength(outValues);
+    if (NV < (NI*STYLE_NUM_ENTRIES)) {
+        jniThrowException(env, "java/lang/IndexOutOfBoundsException", "out values too small");
+        return JNI_FALSE;
+    }
+
+    jint* src = (jint*)env->GetPrimitiveArrayCritical(attrs, 0);
+    if (src == NULL) {
+        return JNI_FALSE;
+    }
+
+    jint* srcValues = (jint*)env->GetPrimitiveArrayCritical(inValues, 0);
+    const jsize NSV = srcValues == NULL ? 0 : env->GetArrayLength(inValues);
+
+    jint* baseDest = (jint*)env->GetPrimitiveArrayCritical(outValues, 0);
+    jint* dest = baseDest;
+    if (dest == NULL) {
+        env->ReleasePrimitiveArrayCritical(attrs, src, 0);
+        return JNI_FALSE;
+    }
+
+    jint* indices = NULL;
+    int indicesIdx = 0;
+    if (outIndices != NULL) {
+        if (env->GetArrayLength(outIndices) > NI) {
+            indices = (jint*)env->GetPrimitiveArrayCritical(outIndices, 0);
+        }
+    }
+
+    // Load default style from attribute, if specified...
+    uint32_t defStyleBagTypeSetFlags = 0;
+    if (defStyleAttr != 0) {
+        Res_value value;
+        if (theme->getAttribute(defStyleAttr, &value, &defStyleBagTypeSetFlags) >= 0) {
+            if (value.dataType == Res_value::TYPE_REFERENCE) {
+                defStyleRes = value.data;
+            }
+        }
+    }
+
+    // Now lock down the resource object and start pulling stuff from it.
+    res.lock();
+
+    // Retrieve the default style bag, if requested.
+    const ResTable::bag_entry* defStyleEnt = NULL;
+    uint32_t defStyleTypeSetFlags = 0;
+    ssize_t bagOff = defStyleRes != 0
+            ? res.getBagLocked(defStyleRes, &defStyleEnt, &defStyleTypeSetFlags) : -1;
+    defStyleTypeSetFlags |= defStyleBagTypeSetFlags;
+    const ResTable::bag_entry* endDefStyleEnt = defStyleEnt +
+        (bagOff >= 0 ? bagOff : 0);;
+
+    // Now iterate through all of the attributes that the client has requested,
+    // filling in each with whatever data we can find.
+    ssize_t block = 0;
+    uint32_t typeSetFlags;
+    for (jsize ii=0; ii<NI; ii++) {
+        const uint32_t curIdent = (uint32_t)src[ii];
+
+        DEBUG_STYLES(LOGI("RETRIEVING ATTR 0x%08x...", curIdent));
+
+        // Try to find a value for this attribute...  we prioritize values
+        // coming from, first XML attributes, then XML style, then default
+        // style, and finally the theme.
+        value.dataType = Res_value::TYPE_NULL;
+        value.data = 0;
+        typeSetFlags = 0;
+        config.density = 0;
+
+        // Retrieve the current input value if available.
+        if (NSV > 0 && srcValues[ii] != 0) {
+            block = -1;
+            value.dataType = Res_value::TYPE_ATTRIBUTE;
+            value.data = srcValues[ii];
+            DEBUG_STYLES(LOGI("-> From values: type=0x%x, data=0x%08x",
+                    value.dataType, value.data));
+        }
+
+        // Skip through the default style values until the end or the next possible match.
+        while (defStyleEnt < endDefStyleEnt && curIdent > defStyleEnt->map.name.ident) {
+            defStyleEnt++;
+        }
+        // Retrieve the current default style attribute if it matches, and step to next.
+        if (defStyleEnt < endDefStyleEnt && curIdent == defStyleEnt->map.name.ident) {
+            if (value.dataType == Res_value::TYPE_NULL) {
+                block = defStyleEnt->stringBlock;
+                typeSetFlags = defStyleTypeSetFlags;
+                value = defStyleEnt->map.value;
+                DEBUG_STYLES(LOGI("-> From def style: type=0x%x, data=0x%08x",
+                        value.dataType, value.data));
+            }
+            defStyleEnt++;
+        }
+
+        uint32_t resid = 0;
+        if (value.dataType != Res_value::TYPE_NULL) {
+            // Take care of resolving the found resource to its final value.
+            ssize_t newBlock = theme->resolveAttributeReference(&value, block,
+                    &resid, &typeSetFlags, &config);
+            if (newBlock >= 0) block = newBlock;
+            DEBUG_STYLES(LOGI("-> Resolved attr: type=0x%x, data=0x%08x",
+                    value.dataType, value.data));
+        } else {
+            // If we still don't have a value for this attribute, try to find
+            // it in the theme!
+            ssize_t newBlock = theme->getAttribute(curIdent, &value, &typeSetFlags);
+            if (newBlock >= 0) {
+                DEBUG_STYLES(LOGI("-> From theme: type=0x%x, data=0x%08x",
+                        value.dataType, value.data));
+                newBlock = res.resolveReference(&value, block, &resid,
+                        &typeSetFlags, &config);
+#if THROW_ON_BAD_ID
+                if (newBlock == BAD_INDEX) {
+                    jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                    return JNI_FALSE;
+                }
+#endif
+                if (newBlock >= 0) block = newBlock;
+                DEBUG_STYLES(LOGI("-> Resolved theme: type=0x%x, data=0x%08x",
+                        value.dataType, value.data));
+            }
+        }
+
+        // Deal with the special @null value -- it turns back to TYPE_NULL.
+        if (value.dataType == Res_value::TYPE_REFERENCE && value.data == 0) {
+            DEBUG_STYLES(LOGI("-> Setting to @null!"));
+            value.dataType = Res_value::TYPE_NULL;
+            block = -1;
+        }
+
+        DEBUG_STYLES(LOGI("Attribute 0x%08x: type=0x%x, data=0x%08x",
+                curIdent, value.dataType, value.data));
+
+        // Write the final value back to Java.
+        dest[STYLE_TYPE] = value.dataType;
+        dest[STYLE_DATA] = value.data;
+        dest[STYLE_ASSET_COOKIE] =
+            block != -1 ? reinterpret_cast<jint>(res.getTableCookie(block)) : (jint)-1;
+        dest[STYLE_RESOURCE_ID] = resid;
+        dest[STYLE_CHANGING_CONFIGURATIONS] = typeSetFlags;
+        dest[STYLE_DENSITY] = config.density;
+
+        if (indices != NULL && value.dataType != Res_value::TYPE_NULL) {
+            indicesIdx++;
+            indices[indicesIdx] = ii;
+        }
+
+        dest += STYLE_NUM_ENTRIES;
+    }
+
+    res.unlock();
+
+    if (indices != NULL) {
+        indices[0] = indicesIdx;
+        env->ReleasePrimitiveArrayCritical(outIndices, indices, 0);
+    }
+    env->ReleasePrimitiveArrayCritical(outValues, baseDest, 0);
+    env->ReleasePrimitiveArrayCritical(inValues, srcValues, 0);
+    env->ReleasePrimitiveArrayCritical(attrs, src, 0);
+
+    return JNI_TRUE;
+}
+
 static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject clazz,
                                                         jlong themeToken,
                                                         jint defStyleAttr,

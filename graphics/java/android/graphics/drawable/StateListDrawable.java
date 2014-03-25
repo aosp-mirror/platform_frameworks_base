@@ -24,6 +24,7 @@ import java.util.Arrays;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.res.Resources.Theme;
 import android.util.AttributeSet;
 import android.util.StateSet;
 
@@ -110,8 +111,7 @@ public class StateListDrawable extends DrawableContainer {
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser,
-            AttributeSet attrs)
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
 
         TypedArray a = r.obtainAttributes(attrs,
@@ -183,7 +183,7 @@ public class StateListDrawable extends DrawableContainer {
                                     + ": <item> tag requires a 'drawable' attribute or "
                                     + "child tag defining a drawable");
                 }
-                dr = Drawable.createFromXmlInner(r, parser, attrs);
+                dr = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme);
             }
 
             mStateListState.addStateSet(states, dr);

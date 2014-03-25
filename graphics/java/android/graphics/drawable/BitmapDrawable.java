@@ -18,6 +18,7 @@ package android.graphics.drawable;
 
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -36,6 +37,8 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.LayoutDirection;
 import android.view.Gravity;
+
+import com.android.internal.R;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -114,7 +117,7 @@ public class BitmapDrawable extends Drawable {
      */
     @Deprecated
     public BitmapDrawable(Bitmap bitmap) {
-        this(new BitmapState(bitmap), null);
+        this(new BitmapState(bitmap), null, null);
     }
 
     /**
@@ -122,7 +125,7 @@ public class BitmapDrawable extends Drawable {
      * the display metrics of the resources.
      */
     public BitmapDrawable(Resources res, Bitmap bitmap) {
-        this(new BitmapState(bitmap), res);
+        this(new BitmapState(bitmap), res, null);
         mBitmapState.mTargetDensity = mTargetDensity;
     }
 
@@ -133,7 +136,7 @@ public class BitmapDrawable extends Drawable {
      */
     @Deprecated
     public BitmapDrawable(String filepath) {
-        this(new BitmapState(BitmapFactory.decodeFile(filepath)), null);
+        this(new BitmapState(BitmapFactory.decodeFile(filepath)), null, null);
         if (mBitmap == null) {
             android.util.Log.w("BitmapDrawable", "BitmapDrawable cannot decode " + filepath);
         }
@@ -144,7 +147,7 @@ public class BitmapDrawable extends Drawable {
      */
     @SuppressWarnings({"UnusedParameters"})
     public BitmapDrawable(Resources res, String filepath) {
-        this(new BitmapState(BitmapFactory.decodeFile(filepath)), null);
+        this(new BitmapState(BitmapFactory.decodeFile(filepath)), null, null);
         mBitmapState.mTargetDensity = mTargetDensity;
         if (mBitmap == null) {
             android.util.Log.w("BitmapDrawable", "BitmapDrawable cannot decode " + filepath);
@@ -158,7 +161,7 @@ public class BitmapDrawable extends Drawable {
      */
     @Deprecated
     public BitmapDrawable(java.io.InputStream is) {
-        this(new BitmapState(BitmapFactory.decodeStream(is)), null);
+        this(new BitmapState(BitmapFactory.decodeStream(is)), null, null);
         if (mBitmap == null) {
             android.util.Log.w("BitmapDrawable", "BitmapDrawable cannot decode " + is);
         }
@@ -169,7 +172,7 @@ public class BitmapDrawable extends Drawable {
      */
     @SuppressWarnings({"UnusedParameters"})
     public BitmapDrawable(Resources res, java.io.InputStream is) {
-        this(new BitmapState(BitmapFactory.decodeStream(is)), null);
+        this(new BitmapState(BitmapFactory.decodeStream(is)), null, null);
         mBitmapState.mTargetDensity = mTargetDensity;
         if (mBitmap == null) {
             android.util.Log.w("BitmapDrawable", "BitmapDrawable cannot decode " + is);
@@ -633,6 +636,7 @@ public class BitmapDrawable extends Drawable {
     /**
      * @hide Candidate for future API inclusion
      */
+    @Override
     public void setXfermode(Xfermode xfermode) {
         mBitmapState.mPaint.setXfermode(xfermode);
         invalidateSelf();
@@ -676,64 +680,228 @@ public class BitmapDrawable extends Drawable {
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-        super.inflate(r, parser, attrs);
+        super.inflate(r, parser, attrs, theme);
 
+        final TypedArray a = obtainAttributes(
+                r, theme, attrs, R.styleable.BitmapDrawable);
+        inflateStateFromTypedArray(a);
+        a.recycle();
+    }
+
+    /**
+     * Initializes the constant state from the values in the typed array.
+     */
+    private void inflateStateFromTypedArray(TypedArray a) throws XmlPullParserException {
+        final Resources r = a.getResources();
         final BitmapState state = mBitmapState;
-        final TypedArray a = r.obtainAttributes(attrs, com.android.internal.R.styleable.BitmapDrawable);
 
-        final int id = a.getResourceId(com.android.internal.R.styleable.BitmapDrawable_src, 0);
-        if (id == 0) {
-            throw new XmlPullParserException(parser.getPositionDescription() +
-                    ": <bitmap> requires a valid src attribute");
+        // Extract the theme attributes, if any.
+        final int[] themeAttrs = a.extractThemeAttrs();
+        state.mThemeAttrs = themeAttrs;
+
+        if (themeAttrs == null || themeAttrs[R.styleable.BitmapDrawable_src] == 0) {
+            final int id = a.getResourceId(R.styleable.BitmapDrawable_src, 0);
+            if (id == 0) {
+                throw new XmlPullParserException(a.getPositionDescription() +
+                        ": <bitmap> requires a valid src attribute");
+            }
+
+            final Bitmap bitmap = BitmapFactory.decodeResource(r, id);
+            if (bitmap == null) {
+                throw new XmlPullParserException(a.getPositionDescription() +
+                        ": <bitmap> requires a valid src attribute");
+            }
+            state.mBitmap = bitmap;
+            setBitmap(bitmap);
         }
-        final Bitmap bitmap = BitmapFactory.decodeResource(r, id);
-        if (bitmap == null) {
-            throw new XmlPullParserException(parser.getPositionDescription() +
-                    ": <bitmap> requires a valid src attribute");
-        }
-        state.mBitmap = bitmap;
-        setBitmap(bitmap);
+
         setTargetDensity(r.getDisplayMetrics());
-        setMipMap(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_mipMap,
-                bitmap.hasMipMap()));
-        setAutoMirrored(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_autoMirrored,
-                false));
 
-        final int tintModeValue = a.getInt(
-                com.android.internal.R.styleable.BitmapDrawable_tintMode, -1);
-        state.mTintMode = Drawable.parseTintMode(tintModeValue, Mode.SRC_IN);
-        state.mTint = a.getColorStateList(com.android.internal.R.styleable.BitmapDrawable_tint);
-        if (state.mTint != null) {
-            final int color = state.mTint.getColorForState(getState(), 0);
-            mTintFilter = new PorterDuffColorFilter(color, mBitmapState.mTintMode);
+        if (themeAttrs == null || themeAttrs[R.styleable.BitmapDrawable_mipMap] == 0) {
+            final boolean defMipMap = state.mBitmap != null ? state.mBitmap.hasMipMap() : false;
+            final boolean mipMap = a.getBoolean(
+                    R.styleable.BitmapDrawable_mipMap, defMipMap);
+            setMipMap(mipMap);
         }
 
-        final Paint paint = state.mPaint;
-        paint.setAntiAlias(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_antialias,
-                paint.isAntiAlias()));
-        paint.setFilterBitmap(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_filter,
-                paint.isFilterBitmap()));
-        paint.setDither(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_dither,
-                paint.isDither()));
-        setGravity(a.getInt(com.android.internal.R.styleable.BitmapDrawable_gravity, Gravity.FILL));
-        int tileMode = a.getInt(com.android.internal.R.styleable.BitmapDrawable_tileMode, -1);
-        if (tileMode != -1) {
-            switch (tileMode) {
-                case 0:
-                    setTileModeXY(Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-                    break;
-                case 1:
-                    setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
-                    break;
-                case 2:
-                    setTileModeXY(Shader.TileMode.MIRROR, Shader.TileMode.MIRROR);
-                    break;
+        if (themeAttrs == null || themeAttrs[R.styleable.BitmapDrawable_autoMirrored] == 0) {
+            final boolean autoMirrored = a.getBoolean(
+                    R.styleable.BitmapDrawable_autoMirrored, false);
+            setAutoMirrored(autoMirrored);
+        }
+
+        if (themeAttrs == null || themeAttrs[R.styleable.BitmapDrawable_tintMode] == 0) {
+            final int tintModeValue = a.getInt(
+                    R.styleable.BitmapDrawable_tintMode, -1);
+            state.mTintMode = Drawable.parseTintMode(tintModeValue, Mode.SRC_IN);
+        }
+
+        if (themeAttrs == null || themeAttrs[R.styleable.BitmapDrawable_tint] == 0) {
+            state.mTint = a.getColorStateList(R.styleable.BitmapDrawable_tint);
+            if (state.mTint != null) {
+                final int color = state.mTint.getColorForState(getState(), 0);
+                mTintFilter = new PorterDuffColorFilter(color, mBitmapState.mTintMode);
             }
         }
 
-        a.recycle();
+        final Paint paint = mBitmapState.mPaint;
+
+        if (themeAttrs == null || themeAttrs[R.styleable.BitmapDrawable_antialias] == 0) {
+            final boolean antiAlias = a.getBoolean(
+                    R.styleable.BitmapDrawable_antialias, paint.isAntiAlias());
+            paint.setAntiAlias(antiAlias);
+        }
+
+        if (themeAttrs == null || themeAttrs[R.styleable.BitmapDrawable_filter] == 0) {
+            final boolean filter = a.getBoolean(
+                    R.styleable.BitmapDrawable_filter, paint.isFilterBitmap());
+            paint.setFilterBitmap(filter);
+        }
+
+        if (themeAttrs == null || themeAttrs[R.styleable.BitmapDrawable_dither] == 0) {
+            final boolean dither = a.getBoolean(
+                    R.styleable.BitmapDrawable_dither, paint.isDither());
+            paint.setDither(dither);
+        }
+
+        if (themeAttrs == null || themeAttrs[R.styleable.BitmapDrawable_gravity] == 0) {
+            final int gravity = a.getInt(
+                    R.styleable.BitmapDrawable_gravity, Gravity.FILL);
+            setGravity(gravity);
+        }
+
+        if (themeAttrs == null || themeAttrs[R.styleable.BitmapDrawable_tileMode] == 0) {
+            final int tileMode = a.getInt(
+                    R.styleable.BitmapDrawable_tileMode, -1);
+            setTileModeInternal(tileMode);
+        }
+    }
+
+    @Override
+    public void applyTheme(Theme t) {
+        super.applyTheme(t);
+
+        final BitmapState state = mBitmapState;
+        if (state == null) {
+            throw new RuntimeException("Can't apply theme to <bitmap> with no constant state");
+        }
+
+        final int[] themeAttrs = state.mThemeAttrs;
+        if (themeAttrs != null) {
+            final TypedArray a = t.resolveAttributes(themeAttrs, R.styleable.BitmapDrawable, 0, 0);
+            updateStateFromTypedArray(a);
+            a.recycle();
+        }
+    }
+
+    /**
+     * Updates the constant state from the values in the typed array.
+     */
+    private void updateStateFromTypedArray(TypedArray a) {
+        final Resources r = a.getResources();
+        final BitmapState state = mBitmapState;
+        final Paint paint = mBitmapState.mPaint;
+
+        if (a.hasValue(R.styleable.BitmapDrawable_antialias)) {
+            final boolean antiAlias = a.getBoolean(
+                    R.styleable.BitmapDrawable_antialias, paint.isAntiAlias());
+            paint.setAntiAlias(antiAlias);
+        }
+
+        if (a.hasValue(R.styleable.BitmapDrawable_filter)) {
+            final boolean filter = a.getBoolean(
+                    R.styleable.BitmapDrawable_filter, paint.isFilterBitmap());
+            paint.setFilterBitmap(filter);
+        }
+
+        if (a.hasValue(R.styleable.BitmapDrawable_dither)) {
+            final boolean dither = a.getBoolean(
+                    R.styleable.BitmapDrawable_dither, paint.isDither());
+            paint.setDither(dither);
+        }
+
+        if (a.hasValue(R.styleable.BitmapDrawable_gravity)) {
+            final int gravity = a.getInt(
+                    R.styleable.BitmapDrawable_gravity, Gravity.FILL);
+            setGravity(gravity);
+        }
+
+        if (a.hasValue(R.styleable.BitmapDrawable_tileMode)) {
+            final int tileMode = a.getInt(
+                    R.styleable.BitmapDrawable_tileMode, -1);
+            setTileModeInternal(tileMode);
+        }
+
+        if (a.hasValue(R.styleable.BitmapDrawable_src)) {
+            final int id = a.getResourceId(R.styleable.BitmapDrawable_src, 0);
+            if (id == 0) {
+                throw new RuntimeException(a.getPositionDescription() +
+                        ": <bitmap> requires a valid src attribute");
+            }
+
+            final Bitmap bitmap = BitmapFactory.decodeResource(r, id);
+            if (bitmap == null) {
+                throw new RuntimeException(a.getPositionDescription() +
+                        ": <bitmap> requires a valid src attribute");
+            }
+
+            setBitmap(bitmap);
+        }
+
+        setTargetDensity(r.getDisplayMetrics());
+
+        if (a.hasValue(R.styleable.BitmapDrawable_mipMap)) {
+            final boolean mipMap = a.getBoolean(
+                    R.styleable.BitmapDrawable_mipMap,
+                    state.mBitmap.hasMipMap());
+            setMipMap(mipMap);
+        }
+
+        if (a.hasValue(R.styleable.BitmapDrawable_autoMirrored)) {
+            final boolean autoMirrored = a.getBoolean(
+                    R.styleable.BitmapDrawable_autoMirrored, false);
+            setAutoMirrored(autoMirrored);
+        }
+
+        if (a.hasValue(R.styleable.BitmapDrawable_tintMode)) {
+            final int modeValue = a.getInt(
+                    R.styleable.BitmapDrawable_tintMode, -1);
+            state.mTintMode = Drawable.parseTintMode(modeValue, Mode.SRC_IN);
+        }
+
+        if (a.hasValue(R.styleable.BitmapDrawable_tint)) {
+            final ColorStateList tint = a.getColorStateList(
+                    R.styleable.BitmapDrawable_tint);
+            if (tint != null) {
+                state.mTint = tint;
+                final int color = tint.getColorForState(getState(), 0);
+                mTintFilter = new PorterDuffColorFilter(color, state.mTintMode);
+            }
+        }
+    }
+
+    private void setTileModeInternal(final int tileMode) {
+        switch (tileMode) {
+            case -1:
+                // Do nothing.
+                break;
+            case 0:
+                setTileModeXY(Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+                break;
+            case 1:
+                setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+                break;
+            case 2:
+                setTileModeXY(Shader.TileMode.MIRROR, Shader.TileMode.MIRROR);
+                break;
+        }
+    }
+
+    @Override
+    public boolean canApplyTheme() {
+        return mBitmapState != null && mBitmapState.mThemeAttrs != null;
     }
 
     @Override
@@ -766,6 +934,7 @@ public class BitmapDrawable extends Drawable {
         Bitmap mBitmap;
         ColorStateList mTint;
         Mode mTintMode = Mode.SRC_IN;
+        int[] mThemeAttrs;
         int mChangingConfigurations;
         int mGravity = Gravity.FILL;
         Paint mPaint = new Paint(DEFAULT_PAINT_FLAGS);
@@ -783,6 +952,7 @@ public class BitmapDrawable extends Drawable {
             mBitmap = bitmapState.mBitmap;
             mTint = bitmapState.mTint;
             mTintMode = bitmapState.mTintMode;
+            mThemeAttrs = bitmapState.mThemeAttrs;
             mChangingConfigurations = bitmapState.mChangingConfigurations;
             mGravity = bitmapState.mGravity;
             mTileModeX = bitmapState.mTileModeX;
@@ -794,18 +964,28 @@ public class BitmapDrawable extends Drawable {
         }
 
         @Override
+        public boolean canApplyTheme() {
+            return mThemeAttrs != null;
+        }
+
+        @Override
         public Bitmap getBitmap() {
             return mBitmap;
         }
 
         @Override
         public Drawable newDrawable() {
-            return new BitmapDrawable(this, null);
+            return new BitmapDrawable(this, null, null);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new BitmapDrawable(this, res);
+            return new BitmapDrawable(this, res, null);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res, Theme theme) {
+            return new BitmapDrawable(this, res, theme);
         }
 
         @Override
@@ -814,9 +994,21 @@ public class BitmapDrawable extends Drawable {
         }
     }
 
-    private BitmapDrawable(BitmapState state, Resources res) {
-        mBitmapState = state;
+    private BitmapDrawable(BitmapState state, Resources res, Theme theme) {
+        if (theme != null && state.canApplyTheme()) {
+            mBitmapState = new BitmapState(state);
+            applyTheme(theme);
+        } else {
+            mBitmapState = state;
+        }
 
+        initializeWithState(state, res);
+    }
+
+    /**
+     * Initializes local dynamic properties from state.
+     */
+    private void initializeWithState(BitmapState state, Resources res) {
         if (res != null) {
             mTargetDensity = res.getDisplayMetrics().densityDpi;
         } else {
@@ -828,6 +1020,6 @@ public class BitmapDrawable extends Drawable {
             mTintFilter = new PorterDuffColorFilter(color, state.mTintMode);
         }
 
-        setBitmap(state != null ? state.mBitmap : null);
+        setBitmap(state.mBitmap);
     }
 }

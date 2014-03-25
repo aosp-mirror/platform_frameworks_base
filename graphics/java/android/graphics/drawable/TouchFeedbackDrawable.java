@@ -18,6 +18,7 @@ package android.graphics.drawable;
 
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -78,20 +79,10 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
     /** The drawable to use as the mask. */
     private Drawable mMask;
 
-    /* package */TouchFeedbackDrawable() {
-        this(null, null);
+    TouchFeedbackDrawable() {
+        this(new TouchFeedbackState(null), null, null);
     }
 
-    TouchFeedbackDrawable(TouchFeedbackState state, Resources res) {
-        mState = new TouchFeedbackState(state);
-        
-        setConstantState(mState, res);
-
-        if (res != null) {
-            mDensity = res.getDisplayMetrics().density;
-        }
-    }
-    
     private void setConstantState(TouchFeedbackState wrapperState, Resources res) {
         super.setConstantState(wrapperState, res);
 
@@ -102,6 +93,10 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
             mMask = wrapperState.mMaskState.newDrawable(res);
         } else {
             mMask = wrapperState.mMaskState.newDrawable();
+        }
+
+        if (res != null) {
+            mDensity = res.getDisplayMetrics().density;
         }
     }
 
@@ -152,60 +147,31 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-        super.inflate(r, parser, attrs);
+        super.inflate(r, parser, attrs, theme);
 
-        final TypedArray a = r.obtainAttributes(attrs, R.styleable.TouchFeedbackDrawable);
-
-        mState.mTint = a.getColorStateList(R.styleable.TouchFeedbackDrawable_tint);
-        mState.mTintMode = Drawable.parseTintMode(
-                a.getInt(R.styleable.TouchFeedbackDrawable_tintMode, -1), Mode.SRC_ATOP);
-        mState.mPinned = a.getBoolean(R.styleable.TouchFeedbackDrawable_pinned, false);
-
-        if (mState.mTint == null) {
-            throw new XmlPullParserException(parser.getPositionDescription()
-                    + ": <touch-feedback> tag requires a 'tint' attribute");
-        }
-        
-        Drawable mask = a.getDrawable(R.styleable.TouchFeedbackDrawable_mask);
-        final int drawableRes = a.getResourceId(R.styleable.TouchFeedbackDrawable_drawable, 0);
+        final TypedArray a = obtainAttributes(
+                r, theme, attrs, R.styleable.TouchFeedbackDrawable);
+        inflateStateFromTypedArray(r, a);
         a.recycle();
+        
+        inflateChildElements(r, parser, attrs, theme);
 
-        final Drawable dr;
-        if (drawableRes != 0) {
-            dr = r.getDrawable(drawableRes);
-        } else {
-            int type;
-            while ((type = parser.next()) == XmlPullParser.TEXT) {
-                // Find the next non-text element.
-            }
-
-            if (type == XmlPullParser.START_TAG) {
-                dr = Drawable.createFromXmlInner(r, parser, attrs);
-            } else {
-                dr = null;
-            }
-        }
-
-        // If no mask is set, implicitly use the lower drawable.
-        if (mask == null) {
-            mask = dr;
-        }
-
-        // If neither a mask not a bottom layer was specified, assume we're
-        // projecting onto a parent surface.
-        mState.mProjected = mask == null && dr == null;
-
-        if (dr != null) {
-            setDrawable(dr, r);
-        } else {
-            // For now at least, we MUST have a wrapped drawable.
-            setDrawable(new ColorDrawable(Color.TRANSPARENT), r);
-        }
-
-        setMaskDrawable(mask, r);
         setTargetDensity(r.getDisplayMetrics());
+    }
+    
+    private void inflateChildElements(Resources r, XmlPullParser parser, AttributeSet attrs,
+            Theme theme) throws XmlPullParserException, IOException {
+        int type;
+        while ((type = parser.next()) == XmlPullParser.TEXT) {
+            // Find the next non-text element.
+        }
+
+        if (type == XmlPullParser.START_TAG) {
+            final Drawable dr = Drawable.createFromXmlInner(r, parser, attrs);
+            setDrawable(dr, r);
+        }
     }
 
     /**
@@ -228,6 +194,62 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
     }
 
     /**
+     * Initializes the constant state from the values in the typed array.
+     */
+    private void inflateStateFromTypedArray(Resources r, TypedArray a) {
+        final TouchFeedbackState state = mState;
+
+        // Extract the theme attributes, if any.
+        final int[] themeAttrs = a.extractThemeAttrs();
+        state.mThemeAttrs = themeAttrs;
+
+        if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_tint] == 0) {
+            mState.mTint = a.getColorStateList(R.styleable.TouchFeedbackDrawable_tint);
+
+            if (mState.mTint == null) {
+                throw new RuntimeException("<touch-feedback> tag requires a 'tint' attribute");
+            }
+        }
+
+        if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_tintMode] == 0) {
+            mState.mTintMode = Drawable.parseTintMode(
+                    a.getInt(R.styleable.TouchFeedbackDrawable_tintMode, -1), Mode.SRC_ATOP);
+        }
+
+        if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_pinned] == 0) {
+            mState.mPinned = a.getBoolean(R.styleable.TouchFeedbackDrawable_pinned, false);
+        }
+
+        Drawable mask = mMask;
+        if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_mask] == 0) {
+            mask = a.getDrawable(R.styleable.TouchFeedbackDrawable_mask);
+        }
+
+        Drawable dr = super.getDrawable();
+        if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_drawable] == 0) {
+            final int drawableRes = a.getResourceId(R.styleable.TouchFeedbackDrawable_drawable, 0);
+            if (drawableRes != 0) {
+                dr = r.getDrawable(drawableRes);
+            }
+        }
+
+        // If neither a mask not a bottom layer was specified, assume we're
+        // projecting onto a parent surface.
+        mState.mProjected = mask == null && dr == null;
+
+        if (dr != null) {
+            setDrawable(dr, r);
+        } else {
+            // For now at least, we MUST have a wrapped drawable.
+            setDrawable(new ColorDrawable(Color.TRANSPARENT), r);
+        }
+
+        if (mask != null) {
+            setMaskDrawable(mask, r);
+        }
+    }
+
+    /**
      * Set the density at which this drawable will be rendered.
      *
      * @param metrics The display metrics for this drawable.
@@ -237,6 +259,78 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
             mDensity = metrics.density;
             invalidateSelf();
         }
+    }
+
+    @Override
+    public void applyTheme(Theme t) {
+        super.applyTheme(t);
+
+        final TouchFeedbackState state = mState;
+        if (state == null) {
+            throw new RuntimeException(
+                    "Can't apply theme to <touch-feedback> with no constant state");
+        }
+
+        final int[] themeAttrs = state.mThemeAttrs;
+        if (themeAttrs != null) {
+            final TypedArray a = t.resolveAttributes(
+                    themeAttrs, R.styleable.TouchFeedbackDrawable, 0, 0);
+            updateStateFromTypedArray(a);
+            a.recycle();
+        }
+    }
+
+    /**
+     * Updates the constant state from the values in the typed array.
+     */
+    private void updateStateFromTypedArray(TypedArray a) {
+        final TouchFeedbackState state = mState;
+
+        if (a.hasValue(R.styleable.TouchFeedbackDrawable_tint)) {
+            state.mTint = a.getColorStateList(R.styleable.TouchFeedbackDrawable_tint);
+        }
+
+        if (a.hasValue(R.styleable.TouchFeedbackDrawable_tintMode)) {
+            mState.mTintMode = Drawable.parseTintMode(
+                    a.getInt(R.styleable.TouchFeedbackDrawable_tintMode, -1), Mode.SRC_ATOP);
+        }
+
+        if (a.hasValue(R.styleable.TouchFeedbackDrawable_pinned)) {
+            mState.mPinned = a.getBoolean(R.styleable.TouchFeedbackDrawable_pinned, false);
+        }
+
+        Drawable mask = mMask;
+        if (a.hasValue(R.styleable.TouchFeedbackDrawable_mask)) {
+            mask = a.getDrawable(R.styleable.TouchFeedbackDrawable_mask);
+        }
+
+        Drawable dr = super.getDrawable();
+        if (a.hasValue(R.styleable.TouchFeedbackDrawable_drawable)) {
+            final int drawableRes = a.getResourceId(R.styleable.TouchFeedbackDrawable_drawable, 0);
+            if (drawableRes != 0) {
+                dr = a.getResources().getDrawable(drawableRes);
+            }
+        }
+
+        // If neither a mask not a bottom layer was specified, assume we're
+        // projecting onto a parent surface.
+        mState.mProjected = mask == null && dr == null;
+
+        if (dr != null) {
+            setDrawable(dr, a.getResources());
+        } else {
+            // For now at least, we MUST have a wrapped drawable.
+            setDrawable(new ColorDrawable(Color.TRANSPARENT), a.getResources());
+        }
+
+        if (mask != null) {
+            setMaskDrawable(mask, a.getResources());
+        }
+    }
+
+    @Override
+    public boolean canApplyTheme() {
+        return mState != null && mState.mThemeAttrs != null;
     }
 
     /**
@@ -333,7 +427,7 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
 
             if (mAnimationRunnable == null) {
                 mAnimationRunnable = new Runnable() {
-                        @Override
+                    @Override
                     public void run() {
                         mAnimating = false;
                         scheduleAnimation();
@@ -357,7 +451,7 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
         }
 
         final ArrayList<Ripple> activeRipples = mActiveRipples;
-        final Drawable mask = mMask;
+        final Drawable mask = mMask == null && !mState.mProjected ? getDrawable() : null;
         final Rect bounds = mask == null ? null : mask.getBounds();
 
         // Draw ripples into a layer that merges using SRC_IN.
@@ -450,6 +544,7 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
     }
 
     static class TouchFeedbackState extends WrapperState {
+        int[] mThemeAttrs;
         ConstantState mMaskState;
         ColorStateList mTint;
         Mode mTintMode;
@@ -460,6 +555,7 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
             super(orig);
 
             if (orig != null) {
+                mThemeAttrs = orig.mThemeAttrs;
                 mTint = orig.mTint;
                 mTintMode = orig.mTintMode;
                 mMaskState = orig.mMaskState;
@@ -469,13 +565,34 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
         }
 
         @Override
+        public boolean canApplyTheme() {
+            return mThemeAttrs != null;
+        }
+
+        @Override
         public Drawable newDrawable() {
-            return new TouchFeedbackDrawable(this, null);
+            return new TouchFeedbackDrawable(this, null, null);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new TouchFeedbackDrawable(this, res);
+            return new TouchFeedbackDrawable(this, res, null);
         }
+
+        @Override
+        public Drawable newDrawable(Resources res, Theme theme) {
+            return new TouchFeedbackDrawable(this, res, theme);
+        }
+    }
+
+    private TouchFeedbackDrawable(TouchFeedbackState state, Resources res, Theme theme) {
+        if (theme != null && state.canApplyTheme()) {
+            mState = new TouchFeedbackState(state);
+            applyTheme(theme);
+        } else {
+            mState = state;
+        }
+
+        setConstantState(state, res);
     }
 }

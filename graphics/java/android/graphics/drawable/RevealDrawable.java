@@ -17,6 +17,7 @@
 package android.graphics.drawable;
 
 import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
@@ -88,11 +89,15 @@ public class RevealDrawable extends LayerDrawable {
      * @see #RevealDrawable(Drawable[])
      */
     RevealDrawable() {
-        this(new RevealState(null, null, null), (Resources) null);
+        this(new RevealState(null, null, null), (Resources) null, null);
     }
 
     private RevealDrawable(RevealState state, Resources res) {
-        super(state, res);
+        super(state, res, null);
+    }
+
+    private RevealDrawable(RevealState state, Resources res, Theme theme) {
+        super(state, res, theme);
     }
 
     private RevealDrawable(RevealState state, Drawable[] layers) {
@@ -100,9 +105,9 @@ public class RevealDrawable extends LayerDrawable {
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-        super.inflate(r, parser, attrs);
+        super.inflate(r, parser, attrs, theme);
 
         setTargetDensity(r.getDisplayMetrics());
         setPaddingMode(PADDING_MODE_STACK);
@@ -302,6 +307,11 @@ public class RevealDrawable extends LayerDrawable {
         @Override
         public Drawable newDrawable(Resources res) {
             return new RevealDrawable(this, res);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res, Theme theme) {
+            return new RevealDrawable(this, res, theme);
         }
     }
 }

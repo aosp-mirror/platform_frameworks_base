@@ -20,6 +20,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pools.SynchronizedPool;
 import android.util.TypedValue;
 
 import com.android.internal.util.XmlUtils;
@@ -36,16 +37,40 @@ import java.util.Arrays;
  * the positions of the attributes given to obtainStyledAttributes.
  */
 public class TypedArray {
-    private final Resources mResources;
-    private final DisplayMetrics mMetrics;
-    private final AssetManager mAssets;
+    private static final SynchronizedPool<TypedArray> mPool = new SynchronizedPool<TypedArray>(5);
+
+    static TypedArray obtain(Resources res, int len) {
+        final TypedArray attrs = mPool.acquire();
+        if (attrs != null) {
+            attrs.mLength = len;
+            attrs.mResources = res;
+            attrs.mMetrics = res.getDisplayMetrics();
+            attrs.mAssets = res.getAssets();
+
+            final int fullLen = len * AssetManager.STYLE_NUM_ENTRIES;
+            if (attrs.mData.length >= fullLen) {
+                return attrs;
+            }
+
+            attrs.mData = new int[fullLen];
+            attrs.mIndices = new int[1 + len];
+            return attrs;
+        }
+
+        return new TypedArray(res,
+                new int[len*AssetManager.STYLE_NUM_ENTRIES],
+                new int[1+len], len);
+    }
+
+    private Resources mResources;
+    private DisplayMetrics mMetrics;
+    private AssetManager mAssets;
     /*package*/ XmlBlock.Parser mXml;
-    /*package*/ int[] mRsrcs;
+    /*package*/ Resources.Theme mTheme;
     /*package*/ int[] mData;
     /*package*/ int[] mIndices;
     /*package*/ int mLength;
     /*package*/ TypedValue mValue = new TypedValue();
-    /*package*/ Resources.Theme mTheme;
 
     /**
      * Return the number of values in this array.
@@ -580,6 +605,25 @@ public class TypedArray {
     }
 
     /**
+     * Retrieve the theme attribute resource identifier for the attribute at
+     * <var>index</var>.
+     *
+     * @param index Index of attribute to retrieve.
+     * @param defValue Value to return if the attribute is not defined or not a
+     *            resource.
+     * @return Theme attribute resource identifier, or defValue if not defined.
+     * @hide
+     */
+    public int getThemeAttributeId(int index, int defValue) {
+        index *= AssetManager.STYLE_NUM_ENTRIES;
+        final int[] data = mData;
+        if (data[index + AssetManager.STYLE_TYPE] == TypedValue.TYPE_ATTRIBUTE) {
+            return data[index + AssetManager.STYLE_DATA];
+        }
+        return defValue;
+    }
+
+    /**
      * Retrieve the Drawable for the attribute at <var>index</var>.  This
      * gets the resource ID of the selected attribute, and uses
      * {@link Resources#getDrawable Resources.getDrawable} of the owning
@@ -647,6 +691,38 @@ public class TypedArray {
     }
 
     /**
+     * Determines whether this TypedArray contains an attribute of the specified
+     * type.
+     *
+     * @param type Type of data, e.g. {@link TypedValue#TYPE_ATTRIBUTE}
+     * @return True if the TypedArray contains an attribute of the specified
+     *         type.
+     * @hide
+     */
+    public boolean hasType(int type) {
+        final int[] data = mData;
+        final int N = getIndexCount();
+        for (int i = 0; i < N; i++) {
+            final int index = getIndex(i) * AssetManager.STYLE_NUM_ENTRIES;
+            if (data[index + AssetManager.STYLE_TYPE] == type) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the type of attribute at the specified index.
+     *
+     * @param index Index of attribute whose type to retrieve.
+     * @return Attribute type.
+     */
+    public int getType(int index) {
+        index *= AssetManager.STYLE_NUM_ENTRIES;
+        return mData[index + AssetManager.STYLE_TYPE];
+    }
+
+    /**
      * Determines whether there is an attribute at <var>index</var>.
      * 
      * @param index Index of attribute to retrieve.
@@ -690,11 +766,46 @@ public class TypedArray {
      * Give back a previously retrieved array, for later re-use.
      */
     public void recycle() {
-        mResources.recycleCachedStyledAttributes(this);
+        mResources = null;
+        mMetrics = null;
+        mAssets = null;
 
+        // These may have been set by the client.
         mXml = null;
-        mRsrcs = null;
         mTheme = null;
+
+        synchronized (mPool) {
+            mPool.release(this);
+        }
+    }
+
+    /**
+     * Extracts theme attributes from a typed array for later resolution using
+     * {@link Theme#resolveAttributes(int[], int[], int, int)}.
+     *
+     * @param array An array to populate with theme attributes. If the array is
+     *            null or not large enough, a new array will be returned.
+     * @return an array of length {@link #getIndexCount()} populated with theme
+     *         attributes, or null if there are no theme attributes in the
+     *         typed array
+     * @hide
+     */
+    public int[] extractThemeAttrs() {
+        int[] attrs = null;
+
+        final int N = getIndexCount();
+        for (int i = 0; i < N; i++) {
+            final int index = getIndex(i);
+            final int attrId = getThemeAttributeId(index, 0);
+            if (attrId != 0) {
+                if (attrs == null) {
+                    attrs = new int[N];
+                }
+                attrs[i] = attrId;
+            }
+        }
+
+        return attrs;
     }
 
     private boolean getValueAt(int index, TypedValue outValue) {

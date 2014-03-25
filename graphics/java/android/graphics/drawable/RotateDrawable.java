@@ -24,6 +24,7 @@ import android.graphics.ColorFilter;
 import android.graphics.Rect;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.res.Resources.Theme;
 import android.util.TypedValue;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -358,7 +359,7 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
         final TypedArray a = r.obtainAttributes(attrs,
                 com.android.internal.R.styleable.RotateDrawable);
@@ -411,7 +412,7 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
                 continue;
             }
 
-            if ((drawable = Drawable.createFromXmlInner(r, parser, attrs)) == null) {
+            if ((drawable = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme)) == null) {
                 Log.w("drawable", "Bad element under <rotate>: "
                         + parser .getName());
             }

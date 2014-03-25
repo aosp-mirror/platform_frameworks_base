@@ -17,6 +17,7 @@
 package android.graphics.drawable;
 
 import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Insets;
@@ -456,6 +457,16 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
+    public void applyTheme(Theme theme) {
+        mDrawableContainerState.applyTheme(theme);
+    }
+
+    @Override
+    public boolean canApplyTheme() {
+        return mDrawableContainerState.canApplyTheme();
+    }
+
+    @Override
     public ConstantState getConstantState() {
         if (mDrawableContainerState.canConstantState()) {
             mDrawableContainerState.mChangingConfigurations = getChangingConfigurations();
@@ -482,6 +493,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     public abstract static class DrawableContainerState extends ConstantState {
         final DrawableContainer mOwner;
         final Resources mRes;
+
+        Theme mTheme;
 
         SparseArray<ConstantStateFuture> mDrawableFutures;
 
@@ -678,6 +691,41 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             }
 
             mLayoutDirection = layoutDirection;
+        }
+
+        final void applyTheme(Theme theme) {
+            // No need to call createAllFutures, since future drawables will
+            // apply the theme when they are prepared.
+            final int N = mNumChildren;
+            final Drawable[] drawables = mDrawables;
+            for (int i = 0; i < N; i++) {
+                if (drawables[i] != null) {
+                    drawables[i].applyTheme(theme);
+                }
+            }
+
+            mTheme = theme;
+        }
+
+        @Override
+        public boolean canApplyTheme() {
+            final int N = mNumChildren;
+            final Drawable[] drawables = mDrawables;
+            for (int i = 0; i < N; i++) {
+                final Drawable d = drawables[i]; 
+                if (d != null) {
+                    if (d.canApplyTheme()) {
+                        return true;
+                    }
+                } else {
+                    final ConstantStateFuture future = mDrawableFutures.get(i);
+                    if (future != null && future.canApplyTheme()) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         final void mutate() {
@@ -898,8 +946,14 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
              * @return a prepared Drawable
              */
             public Drawable get(DrawableContainerState state) {
-                final Drawable result = (state.mRes == null) ?
-                        mConstantState.newDrawable() : mConstantState.newDrawable(state.mRes);
+                final Drawable result;
+                if (state.mRes == null) {
+                    result = mConstantState.newDrawable();
+                } else if (state.mTheme == null) {
+                    result = mConstantState.newDrawable(state.mRes);
+                } else {
+                    result = mConstantState.newDrawable(state.mRes, state.mTheme);
+                }
                 result.setLayoutDirection(state.mLayoutDirection);
                 result.setCallback(state.mOwner);
 
@@ -908,6 +962,14 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 }
 
                 return result;
+            }
+
+            /**
+             * Whether the constant state wrapped by this future can apply a
+             * theme.
+             */
+            public boolean canApplyTheme() {
+                return mConstantState.canApplyTheme();
             }
         }
     }
