@@ -82,13 +82,13 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
           an XML file. (<a href="http://b.android.com/67084">Issue 67084</a>)</li>
       <li>Fixed a problem where the SDK Manager threw a <code>NullPointerException</code> after
           removing a virtual device that was created using the Android Wear
-          system image.</li>
+          system image. (<a href="http://b.android.com/67588">Issue 67588</a>)</li>
       <li>Fixed a problem where the layout preview for large screens in Eclipse showed the
           resources from the <code>drawable-*</code> directories instead of those from the
           <code>drawable-large-*</code> directories.</li>
       <li>Fixed a problem with Nexus 5 Android virtual devices created from the command line
           where the SD card file system was read-only.</li>
-      <li>Changed the URL for the Android Developer Tools Update Site from HTTPS to HTTP.</li>
+      <li>Changed the URL for the Android Developer Tools Update Site from HTTP to HTTPS.</li>
     </ul>
   </dd>
 </dl>
