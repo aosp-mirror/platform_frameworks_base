@@ -1164,6 +1164,7 @@ public final class CaptureResult extends CameraMetadata {
      * @see #FLASH_STATE_CHARGING
      * @see #FLASH_STATE_READY
      * @see #FLASH_STATE_FIRED
+     * @see #FLASH_STATE_PARTIAL
      */
     public static final Key<Integer> FLASH_STATE =
             new Key<Integer>("android.flash.state", int.class);
