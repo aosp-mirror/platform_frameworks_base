@@ -504,6 +504,13 @@ public class Notification implements Parcelable
     public static final String CATEGORY_SERVICE = "service";
 
     /**
+     * Notification category: a specific, timely recommendation for a single thing.
+     * For example, a news app might want to recommend a news story it believes the user will
+     * want to read next.
+     */
+    public static final String CATEGORY_RECOMMENDATION = "recommendation";
+
+    /**
      * Notification category: ongoing information about device or contextual status.
      */
     public static final String CATEGORY_STATUS = "status";
