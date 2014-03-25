@@ -63,10 +63,6 @@ public final class HdmiCecService extends SystemService {
 
     private static final String PERMISSION = "android.permission.HDMI_CEC";
 
-    // Service name under which it is registered to service manager.
-    // TODO: Move this to Context once HdmiCecManager is introduced.
-    private static final String HDMI_CEC_SERVICE = "hdmi_cec";
-
     public HdmiCecService(Context context) {
         super(context);
     }
@@ -76,7 +72,7 @@ public final class HdmiCecService extends SystemService {
     @Override
     public void onStart() {
         mNativePtr = nativeInit(this);
-        publishBinderService(HDMI_CEC_SERVICE, new BinderService());
+        publishBinderService(Context.HDMI_CEC_SERVICE, new BinderService());
     }
 
     /**
@@ -143,6 +139,7 @@ public final class HdmiCecService extends SystemService {
      * &lt;Set Osd Name&gt; in response.
      */
     private byte[] getOsdName(int type) {
+        // TODO: Consider getting the OSD name from device name instead.
         synchronized (mLock) {
             HdmiCecDevice device = mLogicalDevices.get(type);
             if (device != null) {
