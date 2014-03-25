@@ -21,6 +21,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.res.Resources.Theme;
 import android.graphics.*;
 import android.view.Gravity;
 import android.util.AttributeSet;
@@ -72,9 +73,9 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-        super.inflate(r, parser, attrs);
+        super.inflate(r, parser, attrs, theme);
 
         int type;
 
@@ -94,7 +95,7 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
-            dr = Drawable.createFromXmlInner(r, parser, attrs);
+            dr = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme);
         }
 
         if (dr == null) {
