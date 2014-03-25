@@ -21,6 +21,7 @@ import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
@@ -360,6 +361,7 @@ public class RecentsTaskLoader {
     /** Reload the set of recent tasks */
     SpaceNode reload(Context context, int preloadCount) {
         Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|reload]");
+        Resources res = context.getResources();
         ArrayList<Task> tasksToForceLoad = new ArrayList<Task>();
         TaskStack stack = new TaskStack(context);
         SpaceNode root = new SpaceNode(context);
@@ -415,31 +417,38 @@ public class RecentsTaskLoader {
                             "[RecentsTaskLoader|preloadTask]",
                             "i: " + i + " task: " + t.baseIntent.getComponent().getPackageName());
 
-                    Task task = new Task(t.persistentId, t.baseIntent, title);
+                    String label = (t.activityLabel == null ? title : t.activityLabel.toString());
+                    BitmapDrawable bd = null;
+                    if (t.activityIcon != null) {
+                        bd = new BitmapDrawable(res, t.activityIcon);
+                    }
+                    Task task = new Task(t.persistentId, t.baseIntent, label, bd);
 
                     // Load the icon (if possible and not the foremost task, from the cache)
-                    if (!isForemostTask) {
-                        task.icon = mIconCache.get(task.key);
-
-                        if (task.icon != null) {
-                            // Even though we get things from the cache, we should update them if
-                            // they've changed in the bg
-                            tasksToForceLoad.add(task);
+                    if (task.icon != null) {
+                        mIconCache.put(task.key, task.icon);
+                    } else {
+                        if (!isForemostTask) {
+                            task.icon = mIconCache.get(task.key);
+                            if (task.icon != null) {
+                                // Even though we get things from the cache, we should update them
+                                // if they've changed in the bg
+                                tasksToForceLoad.add(task);
+                            }
                         }
-                    }
-                    if (task.icon == null) {
-                        task.icon = info.loadIcon(pm);
-                        if (task.icon != null) {
-                            mIconCache.put(task.key, task.icon);
-                        } else {
-                            task.icon = mDefaultIcon;
+                        if (task.icon == null) {
+                            task.icon = info.loadIcon(pm);
+                            if (task.icon != null) {
+                                mIconCache.put(task.key, task.icon);
+                            } else {
+                                task.icon = mDefaultIcon;
+                            }
                         }
                     }
 
                     // Load the thumbnail (if possible and not the foremost task, from the cache)
                     if (!isForemostTask) {
                         task.thumbnail = mThumbnailCache.get(task.key);
-
                         if (task.thumbnail != null) {
                             // Even though we get things from the cache, we should update them if
                             // they've changed in the bg
@@ -468,7 +477,7 @@ public class RecentsTaskLoader {
                     for (int j = 0; j < Constants.Values.RecentsTaskLoader.TaskEntryMultiplier; j++) {
                         Console.log(Constants.DebugFlags.App.TaskDataLoader,
                                 "  [RecentsTaskLoader|task]", t.baseIntent.getComponent().getPackageName());
-                        stack.addTask(new Task(t.persistentId, t.baseIntent, title));
+                        stack.addTask(new Task(t.persistentId, t.baseIntent, title, null, null));
                     }
                 }
             }

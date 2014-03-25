@@ -26,6 +26,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -40,6 +41,7 @@ import com.android.systemui.recents.RecentsTaskLoader;
 import com.android.systemui.recents.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.R;
 
 import java.util.ArrayList;
 
@@ -77,6 +79,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     int mStackViewsAnimationDuration;
     boolean mStackViewsDirty = true;
     boolean mAwaitingFirstLayout = true;
+    LayoutInflater mInflater;
 
     public TaskStackView(Context context, TaskStack stack) {
         super(context);
@@ -85,6 +88,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mScroller = new OverScroller(context);
         mTouchHandler = new TaskStackViewTouchHandler(context, this);
         mViewPool = new ViewPool<TaskView, Task>(context, this);
+        mInflater = LayoutInflater.from(context);
     }
 
     /** Sets the callbacks */
@@ -580,7 +584,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     public TaskView createView(Context context) {
         Console.log(Constants.DebugFlags.ViewPool.PoolCallbacks, "[TaskStackView|createPoolView]");
-        return new TaskView(context);
+        return (TaskView) mInflater.inflate(R.layout.recents_task_view, this, false);
     }
 
     @Override

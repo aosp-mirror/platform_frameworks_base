@@ -229,4 +229,7 @@
 
     <!-- Default distance from each snap target that GlowPadView considers a "hit" -->
     <dimen name="glowpadview_inner_radius">15dip</dimen>
+
+    <!-- The size of the icon in the recents task view. -->
+    <dimen name="recents_task_view_icon_size">60dp</dimen>
 </resources>

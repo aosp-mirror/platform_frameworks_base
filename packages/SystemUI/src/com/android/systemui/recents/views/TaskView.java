@@ -16,64 +16,65 @@
 
 package com.android.systemui.recents.views;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
-import android.animation.TimeInterpolator;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Typeface;
-import android.view.Gravity;
+import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import com.android.systemui.recents.Console;
+import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.model.Task;
 
 
-/** The task thumbnail view */
-class TaskThumbnailView extends ImageView {
+/* A task view */
+public class TaskView extends FrameLayout implements View.OnClickListener, Task.TaskCallbacks {
+    /** The TaskView callbacks */
+    interface TaskViewCallbacks {
+        public void onTaskIconClicked(TaskView tv);
+        // public void onTaskViewReboundToTask(TaskView tv, Task t);
+    }
+
     Task mTask;
-    int mBarColor;
+    boolean mTaskDataLoaded;
+
+    TaskThumbnailView mThumbnailView;
+    TaskBarView mBarView;
+    TaskViewCallbacks mCb;
 
     Path mRoundedRectClipPath = new Path();
 
-    public TaskThumbnailView(Context context) {
-        super(context);
-        setScaleType(ScaleType.FIT_XY);
+
+    public TaskView(Context context) {
+        this(context, null);
     }
 
-    /** Binds the thumbnail view to the task */
-    void rebindToTask(Task t, boolean animate) {
-        mTask = t;
-        if (t.thumbnail != null) {
-            // Update the bar color
-            if (Constants.Values.TaskView.DrawColoredTaskBars) {
-                int[] colors = {0xFFCC0C39, 0xFFE6781E, 0xFFC8CF02, 0xFF1693A7};
-                mBarColor = colors[mTask.key.intent.getComponent().getPackageName().length() % colors.length];
-            }
+    public TaskView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
 
-            setImageBitmap(t.thumbnail);
-            if (animate) {
-                // XXX: Investigate how expensive it will be to create a second bitmap and crossfade
-            }
+    public TaskView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public TaskView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        setWillNotDraw(false);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        // Bind the views
+        mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
+        mBarView = (TaskBarView) findViewById(R.id.task_view_bar);
+        if (mTaskDataLoaded) {
+            onTaskDataLoaded(false);
         }
-    }
-
-    /** Unbinds the thumbnail view from the task */
-    void unbindFromTask() {
-        mTask = null;
-        setImageDrawable(null);
     }
 
     @Override
@@ -95,150 +96,6 @@ class TaskThumbnailView extends ImageView {
         }
 
         super.onDraw(canvas);
-
-        if (Constants.Values.TaskView.DrawColoredTaskBars) {
-            RecentsConfiguration config = RecentsConfiguration.getInstance();
-            int taskBarHeight = config.pxFromDp(Constants.Values.TaskView.TaskBarHeightDps);
-            // XXX: If we actually use this, this should be pulled out into a TextView that we
-            // inflate
-
-            // Draw the task bar
-            Rect r = new Rect();
-            Paint p = new Paint();
-            p.setAntiAlias(true);
-            p.setSubpixelText(true);
-            p.setColor(mBarColor);
-            p.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
-            canvas.drawRect(0, 0, getMeasuredWidth(), taskBarHeight, p);
-            p.setColor(0xFFffffff);
-            p.setTextSize(68);
-            p.getTextBounds("X", 0, 1, r);
-            int offset = (int) (taskBarHeight - r.height()) / 2;
-            canvas.drawText(mTask.title, offset, offset + r.height(), p);
-        }
-    }
-}
-
-/* The task icon view */
-class TaskIconView extends ImageView {
-    Task mTask;
-
-    Path mClipPath = new Path();
-    float mClipRadius;
-    Point mClipOrigin = new Point();
-    ObjectAnimator mCircularClipAnimator;
-
-    public TaskIconView(Context context) {
-        super(context);
-        mClipPath = new Path();
-        mClipRadius = 1f;
-    }
-
-    /** Binds the icon view to the task */
-    void rebindToTask(Task t, boolean animate) {
-        mTask = t;
-        if (t.icon != null) {
-            setImageDrawable(t.icon);
-            if (animate) {
-                // XXX: Investigate how expensive it will be to create a second bitmap and crossfade
-            }
-        }
-    }
-
-    /** Unbinds the icon view from the task */
-    void unbindFromTask() {
-        mTask = null;
-        setImageDrawable(null);
-    }
-
-    /** Sets the circular clip radius on the icon */
-    public void setCircularClipRadius(float r) {
-        Console.log(Constants.DebugFlags.UI.Clipping, "[TaskView|setCircularClip]", "" + r);
-        mClipRadius = r;
-        invalidate();
-    }
-
-    /** Gets the circular clip radius on the icon */
-    public float getCircularClipRadius() {
-        return mClipRadius;
-    }
-
-    /** Animates the circular clip radius on the icon */
-    void animateCircularClip(boolean brNotTl, float newRadius, int duration, int startDelay,
-                             TimeInterpolator interpolator,
-                             AnimatorListenerAdapter listener) {
-        if (mCircularClipAnimator != null) {
-            mCircularClipAnimator.cancel();
-            mCircularClipAnimator.removeAllListeners();
-        }
-        if (brNotTl) {
-            mClipOrigin.set(0, 0);
-        } else {
-            mClipOrigin.set(getMeasuredWidth(), getMeasuredHeight());
-        }
-        mCircularClipAnimator = ObjectAnimator.ofFloat(this, "circularClipRadius", newRadius);
-        mCircularClipAnimator.setStartDelay(startDelay);
-        mCircularClipAnimator.setDuration(duration);
-        mCircularClipAnimator.setInterpolator(interpolator);
-        if (listener != null) {
-            mCircularClipAnimator.addListener(listener);
-        }
-        mCircularClipAnimator.start();
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        int saveCount = canvas.save(Canvas.CLIP_SAVE_FLAG);
-        int width = getMeasuredWidth();
-        int height = getMeasuredHeight();
-        int maxSize = (int) Math.ceil(Math.sqrt(width * width + height * height));
-        mClipPath.reset();
-        mClipPath.addCircle(mClipOrigin.x, mClipOrigin.y, mClipRadius * maxSize, Path.Direction.CW);
-        canvas.clipPath(mClipPath);
-        super.onDraw(canvas);
-        canvas.restoreToCount(saveCount);
-    }
-}
-
-/* A task view */
-public class TaskView extends FrameLayout implements View.OnClickListener, Task.TaskCallbacks {
-    /** The TaskView callbacks */
-    interface TaskViewCallbacks {
-        public void onTaskIconClicked(TaskView tv);
-        // public void onTaskViewReboundToTask(TaskView tv, Task t);
-    }
-
-    Task mTask;
-    TaskThumbnailView mThumbnailView;
-    TaskIconView mIconView;
-    TaskViewCallbacks mCb;
-
-    public TaskView(Context context) {
-        super(context);
-        mThumbnailView = new TaskThumbnailView(context);
-        mIconView = new TaskIconView(context);
-        mIconView.setOnClickListener(this);
-        addView(mThumbnailView);
-        addView(mIconView);
-
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-        int barHeight = config.pxFromDp(Constants.Values.TaskView.TaskBarHeightDps);
-        int iconSize = config.pxFromDp(Constants.Values.TaskView.TaskIconSizeDps);
-        int offset = barHeight - (iconSize / 2);
-
-        // XXX: Lets keep the icon in the corner for the time being
-        offset = iconSize / 4;
-
-        /*
-        ((LayoutParams) mThumbnailView.getLayoutParams()).leftMargin = barHeight / 2;
-        ((LayoutParams) mThumbnailView.getLayoutParams()).rightMargin = barHeight / 2;
-        ((LayoutParams) mThumbnailView.getLayoutParams()).bottomMargin = barHeight;
-        */
-        ((LayoutParams) mIconView.getLayoutParams()).gravity = Gravity.END;
-        ((LayoutParams) mIconView.getLayoutParams()).width = iconSize;
-        ((LayoutParams) mIconView.getLayoutParams()).height = iconSize;
-        ((LayoutParams) mIconView.getLayoutParams()).topMargin = offset;
-        ((LayoutParams) mIconView.getLayoutParams()).rightMargin = offset;
     }
 
     /** Set callback */
@@ -284,54 +141,41 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
 
     /** Animates this task view as it enters recents */
     public void animateOnEnterRecents() {
-        if (Constants.Values.TaskView.AnimateFrontTaskIconOnEnterUseClip) {
-            mIconView.setCircularClipRadius(0f);
-            mIconView.animateCircularClip(true, 1f,
-                Constants.Values.TaskView.Animation.TaskIconOnEnterDuration,
-                300, new AccelerateInterpolator(), null);
-        } else {
-            RecentsConfiguration config = RecentsConfiguration.getInstance();
-            int translate = config.pxFromDp(10);
-            mIconView.setScaleX(1.25f);
-            mIconView.setScaleY(1.25f);
-            mIconView.setAlpha(0f);
-            mIconView.setTranslationX(translate / 2);
-            mIconView.setTranslationY(-translate);
-            mIconView.animate()
-                    .alpha(1f)
-                    .scaleX(1f)
-                    .scaleY(1f)
-                    .translationX(0)
-                    .translationY(0)
-                    .setStartDelay(235)
-                    .setDuration(Constants.Values.TaskView.Animation.TaskIconOnEnterDuration)
-                    .withLayer()
-                    .start();
-        }
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        int translate = config.pxFromDp(10);
+        mBarView.setScaleX(1.25f);
+        mBarView.setScaleY(1.25f);
+        mBarView.setAlpha(0f);
+        mBarView.setTranslationX(translate / 2);
+        mBarView.setTranslationY(-translate);
+        mBarView.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .translationX(0)
+                .translationY(0)
+                .setStartDelay(235)
+                .setDuration(Constants.Values.TaskView.Animation.TaskIconOnEnterDuration)
+                .withLayer()
+                .start();
     }
 
     /** Animates this task view as it exits recents */
     public void animateOnLeavingRecents(final Runnable r) {
-        if (Constants.Values.TaskView.AnimateFrontTaskIconOnLeavingUseClip) {
-            mIconView.animateCircularClip(false, 0f,
-                Constants.Values.TaskView.Animation.TaskIconOnLeavingDuration, 0,
-                new DecelerateInterpolator(),
-                new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        r.run();
-                    }
-                });
-        } else {
-            mIconView.animate()
-                .alpha(0f)
-                .setStartDelay(0)
-                .setDuration(Constants.Values.TaskView.Animation.TaskIconOnLeavingDuration)
-                .setInterpolator(new DecelerateInterpolator())
-                .withLayer()
-                .withEndAction(r)
-                .start();
-        }
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        int translate = config.pxFromDp(10);
+        mBarView.animate()
+            .alpha(0f)
+            .scaleX(1.1f)
+            .scaleY(1.1f)
+            .translationX(translate / 2)
+            .translationY(-translate)
+            .setStartDelay(0)
+            .setDuration(Constants.Values.TaskView.Animation.TaskIconOnLeavingDuration)
+            .setInterpolator(new DecelerateInterpolator())
+            .withLayer()
+            .withEndAction(r)
+            .start();
     }
 
     /** Returns the rect we want to clip (it may not be the full rect) */
@@ -370,17 +214,23 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
 
     @Override
     public void onTaskDataLoaded(boolean reloadingTaskData) {
-        // Bind each of the views to the new task data
-        mThumbnailView.rebindToTask(mTask, reloadingTaskData);
-        mIconView.rebindToTask(mTask, reloadingTaskData);
+        if (mThumbnailView != null && mBarView != null) {
+            // Bind each of the views to the new task data
+            mThumbnailView.rebindToTask(mTask, reloadingTaskData);
+            mBarView.rebindToTask(mTask, reloadingTaskData);
+        }
+        mTaskDataLoaded = true;
     }
 
     @Override
     public void onTaskDataUnloaded() {
-        // Unbind each of the views from the task data and remove the task callback
-        mTask.setCallbacks(null);
-        mThumbnailView.unbindFromTask();
-        mIconView.unbindFromTask();
+        if (mThumbnailView != null && mBarView != null) {
+            // Unbind each of the views from the task data and remove the task callback
+            mTask.setCallbacks(null);
+            mThumbnailView.unbindFromTask();
+            mBarView.unbindFromTask();
+        }
+        mTaskDataLoaded = false;
     }
 
     @Override
