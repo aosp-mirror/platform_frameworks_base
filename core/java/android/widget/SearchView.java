@@ -1171,8 +1171,8 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
                     || !mOnQueryChangeListener.onQueryTextSubmit(query.toString())) {
                 if (mSearchable != null) {
                     launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null, query.toString());
-                    setImeVisibility(false);
                 }
+                setImeVisibility(false);
                 dismissSuggestions();
             }
         }
