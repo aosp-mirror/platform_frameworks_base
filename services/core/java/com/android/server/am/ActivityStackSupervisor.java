@@ -1753,6 +1753,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             TaskRecord sourceTask = sourceRecord.task;
             targetStack = sourceTask.stack;
             targetStack.moveToFront();
+            mWindowManager.moveTaskToTop(sourceTask.taskId);
             if (!addingToTask &&
                     (launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
                 // In this case, we are adding the activity to an existing
@@ -1808,6 +1809,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             r.setTask(prev != null ? prev.task
                     : targetStack.createTaskRecord(getNextTaskId(), r.info, intent, true),
                     null, true);
+            mWindowManager.moveTaskToTop(r.task.taskId);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in new guessed " + r.task);
         }
