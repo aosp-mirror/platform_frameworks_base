@@ -21,10 +21,12 @@ import android.graphics.Rect;
 import android.graphics.ColorFilter;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.res.Resources.Theme;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.util.Log;
 import android.os.SystemClock;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -223,7 +225,7 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
 
         final TypedArray a = r.obtainAttributes(attrs, R.styleable.AnimatedRotateDrawable);
@@ -258,7 +260,7 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
                 continue;
             }
 
-            if ((drawable = Drawable.createFromXmlInner(r, parser, attrs)) == null) {
+            if ((drawable = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme)) == null) {
                 Log.w("drawable", "Bad element under <animated-rotate>: "
                         + parser .getName());
             }

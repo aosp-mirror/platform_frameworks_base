@@ -28,6 +28,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.shapes.Shape;
+import android.content.res.Resources.Theme;
 import android.util.AttributeSet;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -443,9 +444,9 @@ public class ShapeDrawable extends Drawable {
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-        super.inflate(r, parser, attrs);
+        super.inflate(r, parser, attrs, theme);
 
         TypedArray a = r.obtainAttributes(attrs, com.android.internal.R.styleable.ShapeDrawable);
 
