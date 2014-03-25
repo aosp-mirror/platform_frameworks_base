@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <SizeAdaptiveLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@android:color/background_dark"
+    android:background="@android:color/white"
     android:id="@+id/notification_adaptive_wrapper"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" />
