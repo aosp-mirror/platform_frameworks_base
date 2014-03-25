@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import android.view.View;
+
 /**
  * Defines an area of content.
  *

@@ -10817,7 +10817,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * bounds of the View, and clipToOutline will be ignored.
      *
      * @param outline The new outline of the view.
-     *         Must be {@link android.view.Outline#isValid() valid.}
+     *         Must be {@link android.graphics.Outline#isValid() valid.}
      *
      * @see #getClipToOutline()
      * @see #setClipToOutline(boolean)
@@ -10856,7 +10856,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Sets whether the outline of the View will be used for clipping.
      * <p>
-     * The current implementation of outline clipping uses Canvas#clipPath(),
+     * The current implementation of outline clipping uses
+     * {@link Canvas#clipPath(Path) path clipping},
      * and thus does not support anti-aliasing, and is expensive in terms of
      * graphics performance. Therefore, it is strongly recommended that this
      * property only be set temporarily, as in an animation. For the same
