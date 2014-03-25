@@ -1500,11 +1500,13 @@ public class TextToSpeech {
 
                     try {
                         mService.setCallback(getCallerIdentity(), mCallback);
-                        String[] defaultLanguage = mService.getClientDefaultLanguage();
 
-                        mParams.putString(Engine.KEY_PARAM_LANGUAGE, defaultLanguage[0]);
-                        mParams.putString(Engine.KEY_PARAM_COUNTRY, defaultLanguage[1]);
-                        mParams.putString(Engine.KEY_PARAM_VARIANT, defaultLanguage[2]);
+                        if (mParams.getString(Engine.KEY_PARAM_LANGUAGE) == null) {
+                            String[] defaultLanguage = mService.getClientDefaultLanguage();
+                            mParams.putString(Engine.KEY_PARAM_LANGUAGE, defaultLanguage[0]);
+                            mParams.putString(Engine.KEY_PARAM_COUNTRY, defaultLanguage[1]);
+                            mParams.putString(Engine.KEY_PARAM_VARIANT, defaultLanguage[2]);
+                        }
 
                         Log.i(TAG, "Set up connection to " + mName);
                         return SUCCESS;
