@@ -558,7 +558,10 @@ Gmail or Google account you use with Google Play Store.</p>
 The emulator should show the time and an icon that indicates no device is connected.</li>
 <li>Open a command line terminal, navigate to your Android SDK's <code>platform-tools/</code>
 directory, then execute:
-<pre style="margin-top:.5em">adb -d forward tcp:5601 tcp:5601</pre></li>
+<pre style="margin-top:.5em">adb -d forward tcp:5601 tcp:5601</pre>
+<p class="note"><strong>Note:</strong> You must execute this command each time you connect your
+device over USB.</p>
+</li>
 <li>Return to the Android Wear Preview app. It should now indicate that it is connected to
   the emulator. The Android Wear emulator should now show the 'g' orb icon, indicating
   that is is connected to your device.
