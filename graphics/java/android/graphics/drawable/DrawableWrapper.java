@@ -25,7 +25,7 @@ import android.graphics.Xfermode;
 /**
  * A Drawable that wraps another Drawable.
  */
-class DrawableWrapper extends Drawable implements Drawable.Callback {
+public class DrawableWrapper extends Drawable implements Drawable.Callback {
     private WrapperState mWrapperState;
 
     /** Local drawable backed by its own constant state. */
@@ -300,7 +300,7 @@ class DrawableWrapper extends Drawable implements Drawable.Callback {
         return mWrappedDrawable;
     }
 
-    static abstract class WrapperState extends ConstantState {
+    public static abstract class WrapperState extends ConstantState {
         ConstantState mWrappedConstantState;
 
         WrapperState(WrapperState orig) {

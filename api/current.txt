@@ -10614,6 +10614,30 @@ package android.graphics.drawable {
     method public final void setVariablePadding(boolean);
   }
 
+  public class DrawableWrapper extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
+    ctor public DrawableWrapper();
+    method public void draw(android.graphics.Canvas);
+    method public android.graphics.Rect getDirtyBounds();
+    method protected final android.graphics.drawable.Drawable getDrawable();
+    method public int getOpacity();
+    method public final int[] getState();
+    method public void invalidateDrawable(android.graphics.drawable.Drawable);
+    method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
+    method public void setAlpha(int);
+    method public final void setBounds(int, int, int, int);
+    method public final void setBounds(android.graphics.Rect);
+    method public void setColorFilter(android.graphics.ColorFilter);
+    method protected void setConstantState(android.graphics.drawable.DrawableWrapper.WrapperState, android.content.res.Resources);
+    method protected final void setDrawable(android.graphics.drawable.Drawable, android.content.res.Resources);
+    method public final boolean setState(int[]);
+    method public void setXfermode(android.graphics.Xfermode);
+    method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
+  }
+
+  public static abstract class DrawableWrapper.WrapperState extends android.graphics.drawable.Drawable.ConstantState {
+    method public int getChangingConfigurations();
+  }
+
   public class GradientDrawable extends android.graphics.drawable.Drawable {
     ctor public GradientDrawable();
     ctor public GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation, int[]);
@@ -10807,6 +10831,9 @@ package android.graphics.drawable {
   public class StateListDrawable extends android.graphics.drawable.DrawableContainer {
     ctor public StateListDrawable();
     method public void addState(int[], android.graphics.drawable.Drawable);
+  }
+
+  public class TouchFeedbackDrawable extends android.graphics.drawable.DrawableWrapper {
   }
 
   public class TransitionDrawable extends android.graphics.drawable.LayerDrawable implements android.graphics.drawable.Drawable.Callback {

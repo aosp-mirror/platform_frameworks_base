@@ -41,7 +41,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * @hide
+ * Documentation pending.
  */
 public class TouchFeedbackDrawable extends DrawableWrapper {
     private final Rect mTempRect = new Rect();
