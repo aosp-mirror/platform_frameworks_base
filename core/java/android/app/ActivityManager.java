@@ -510,10 +510,22 @@ public class ActivityManager {
         public int stackId;
 
         /**
-         * The id the of the user the task was running as.
+         * The id of the user the task was running as.
          * @hide
          */
         public int userId;
+
+        /**
+         * The label of the highest activity in the task stack to have set a label
+         * {@link Activity#setRecentsLabel}.
+         */
+        public CharSequence activityLabel;
+
+        /**
+         * The Bitmap icon of the highest activity in the task stack to set a Bitmap using
+         * {@link Activity#setRecentsIcon}.
+         */
+        public Bitmap activityIcon;
 
         public RecentTaskInfo() {
         }
@@ -536,6 +548,14 @@ public class ActivityManager {
             ComponentName.writeToParcel(origActivity, dest);
             TextUtils.writeToParcel(description, dest,
                     Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            TextUtils.writeToParcel(activityLabel, dest,
+                    Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            if (activityIcon == null) {
+                dest.writeInt(0);
+            } else {
+                dest.writeInt(1);
+                activityIcon.writeToParcel(dest, 0);
+            }
             dest.writeInt(stackId);
             dest.writeInt(userId);
         }
@@ -550,6 +570,8 @@ public class ActivityManager {
             }
             origActivity = ComponentName.readFromParcel(source);
             description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+            activityLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+            activityIcon = source.readInt() > 0 ? Bitmap.CREATOR.createFromParcel(source) : null;
             stackId = source.readInt();
             userId = source.readInt();
         }
@@ -1970,7 +1992,11 @@ public class ActivityManager {
      * @return dimensions of square icons in terms of pixels
      */
     public int getLauncherLargeIconSize() {
-        final Resources res = mContext.getResources();
+        return getLauncherLargeIconSizeInner(mContext);
+    }
+
+    static int getLauncherLargeIconSizeInner(Context context) {
+        final Resources res = context.getResources();
         final int size = res.getDimensionPixelSize(android.R.dimen.app_icon_size);
         final int sw = res.getConfiguration().smallestScreenWidthDp;
 

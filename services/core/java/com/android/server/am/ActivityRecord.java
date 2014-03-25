@@ -148,6 +148,9 @@ final class ActivityRecord {
     boolean mStartingWindowShown = false;
     ActivityContainer mInitialActivityContainer;
 
+    String recentsLabel;
+    Bitmap recentsIcon;
+
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
         pw.print(prefix); pw.print("packageName="); pw.print(packageName);

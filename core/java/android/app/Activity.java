@@ -4701,6 +4701,47 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Set a label to be used in the Recents task display. The activities of a task are traversed
+     * in order from the topmost activity to the bottommost. As soon as one activity returns a
+     * non-null Recents label the traversal is ended and that value will be used in
+     * {@link ActivityManager.RecentTaskInfo#activityLabel}
+     *
+     * @see ActivityManager#getRecentTasks
+     *
+     * @param recentsLabel The label to use in the RecentTaskInfo.
+     */
+    public void setRecentsLabel(CharSequence recentsLabel) {
+        try {
+            ActivityManagerNative.getDefault().setRecentsLabel(mToken, recentsLabel);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Set an icon to be used in the Recents task display. The activities of a task are traversed
+     * in order from the topmost activity to the bottommost. As soon as one activity returns a
+     * non-null Recents icon the traversal is ended and that value will be used in
+     * {@link ActivityManager.RecentTaskInfo#activityIcon}.
+     *
+     * @see ActivityManager#getRecentTasks
+     *
+     * @param recentsIcon The Bitmap to use in the RecentTaskInfo.
+     */
+    public void setRecentsIcon(Bitmap recentsIcon) {
+        final Bitmap scaledIcon;
+        if (recentsIcon != null) {
+            final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
+            scaledIcon = Bitmap.createScaledBitmap(recentsIcon, size, size, true);
+        } else {
+            scaledIcon = null;
+        }
+        try {
+            ActivityManagerNative.getDefault().setRecentsIcon(mToken, scaledIcon);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Sets the visibility of the progress bar in the title.
      * <p>
      * In order for the progress bar to be shown, the feature must be requested

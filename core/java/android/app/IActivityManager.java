@@ -436,6 +436,12 @@ public interface IActivityManager extends IInterface {
     /** @hide */
     public boolean isInLockTaskMode() throws RemoteException;
 
+    /** @hide */
+    public void setRecentsLabel(IBinder token, CharSequence recentsLabel) throws RemoteException;
+
+    /** @hide */
+    public void setRecentsIcon(IBinder token, Bitmap recentsBitmap) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -735,4 +741,6 @@ public interface IActivityManager extends IInterface {
     int START_LOCK_TASK_BY_TOKEN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+214;
     int STOP_LOCK_TASK_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+215;
     int IS_IN_LOCK_TASK_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+216;
+    int SET_RECENTS_LABEL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+217;
+    int SET_RECENTS_ICON_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+218;
 }

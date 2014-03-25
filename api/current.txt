@@ -3156,6 +3156,8 @@ package android.app {
     method public final void setProgressBarIndeterminate(boolean);
     method public final void setProgressBarIndeterminateVisibility(boolean);
     method public final void setProgressBarVisibility(boolean);
+    method public void setRecentsIcon(android.graphics.Bitmap);
+    method public void setRecentsLabel(java.lang.CharSequence);
     method public void setRequestedOrientation(int);
     method public final void setResult(int);
     method public final void setResult(int, android.content.Intent);
@@ -3276,6 +3278,8 @@ package android.app {
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public android.graphics.Bitmap activityIcon;
+    field public java.lang.CharSequence activityLabel;
     field public android.content.Intent baseIntent;
     field public java.lang.CharSequence description;
     field public int id;
