@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.media.AudioManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -207,7 +208,8 @@ public class SearchPanelView extends FrameLayout implements
                 Settings.System.HAPTIC_FEEDBACK_ENABLED, 1, UserHandle.USER_CURRENT) != 0) {
             Resources res = context.getResources();
             Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-            vibrator.vibrate(res.getInteger(R.integer.config_search_panel_view_vibration_duration));
+            vibrator.vibrate(res.getInteger(R.integer.config_search_panel_view_vibration_duration),
+                    AudioManager.STREAM_SYSTEM);
         }
     }
 

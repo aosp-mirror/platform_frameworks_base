@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -821,7 +822,7 @@ public class SlidingTab extends ViewGroup {
                 mVibrator = (android.os.Vibrator) getContext()
                         .getSystemService(Context.VIBRATOR_SERVICE);
             }
-            mVibrator.vibrate(duration);
+            mVibrator.vibrate(duration, AudioManager.STREAM_SYSTEM);
         }
     }
 

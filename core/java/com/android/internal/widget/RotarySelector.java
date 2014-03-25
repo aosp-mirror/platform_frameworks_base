@@ -24,6 +24,7 @@ import android.graphics.Paint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.media.AudioManager;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -34,7 +35,9 @@ import android.view.View;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 import android.view.animation.DecelerateInterpolator;
+
 import static android.view.animation.AnimationUtils.currentAnimationTimeMillis;
+
 import com.android.internal.R;
 
 
@@ -676,7 +679,7 @@ public class RotarySelector extends View {
                 mVibrator = (android.os.Vibrator) getContext()
                         .getSystemService(Context.VIBRATOR_SERVICE);
             }
-            mVibrator.vibrate(duration);
+            mVibrator.vibrate(duration, AudioManager.STREAM_SYSTEM);
         }
     }
 

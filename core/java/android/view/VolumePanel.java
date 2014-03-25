@@ -787,7 +787,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             return;
         }
 
-        mVibrator.vibrate(VIBRATE_DURATION);
+        mVibrator.vibrate(VIBRATE_DURATION, AudioManager.STREAM_SYSTEM);
     }
 
     protected void onRemoteVolumeChanged(int streamType, int flags) {
