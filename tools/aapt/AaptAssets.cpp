@@ -1798,6 +1798,11 @@ void* AaptFile::editData(size_t size)
     return buf;
 }
 
+void* AaptFile::editDataInRange(size_t offset, size_t size)
+{
+    return (void*)(((uint8_t*) editData(offset + size)) + offset);
+}
+
 void* AaptFile::editData(size_t* outSize)
 {
     if (outSize) {

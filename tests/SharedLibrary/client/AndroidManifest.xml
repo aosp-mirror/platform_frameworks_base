@@ -16,7 +16,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.google.android.test.lib_client">
-    <application android:label="@string/app_title">
+    <application android:label="@string/app_title" android:theme="@style/Theme">
         <uses-library android:name="android.test.runner" />
         <uses-library android:name="com.google.android.test.shared_library" />
         <activity android:name="ActivityMain">

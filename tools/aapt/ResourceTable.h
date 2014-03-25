@@ -224,6 +224,7 @@ public:
     status_t validateLocalizations(void);
 
     status_t flatten(Bundle*, const sp<AaptFile>& dest);
+    status_t flattenLibraryTable(const sp<AaptFile>& dest, const Vector<sp<Package> >& libs);
 
     void writePublicDefinitions(const String16& package, FILE* fp);
 
@@ -546,6 +547,7 @@ private:
     uint32_t mNextPackageId;
     bool mHaveAppPackage;
     bool mIsAppPackage;
+    bool mIsSharedLibrary;
     size_t mNumLocal;
     SourcePos mCurrentXmlPos;
     Bundle* mBundle;

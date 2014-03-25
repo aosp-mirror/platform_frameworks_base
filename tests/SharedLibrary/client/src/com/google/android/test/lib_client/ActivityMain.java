@@ -18,18 +18,33 @@ package com.google.android.test.lib_client;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.widget.TextView;
 import com.google.android.test.shared_library.SharedLibraryMain;
 
 public class ActivityMain extends Activity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
 
-        TextView content = new TextView(this);
-        content.setText("Library version: " + SharedLibraryMain.getVersion(this) + "!");
+        String[] expectedAnimals = new String[] {
+                "Racoon",
+                "Rhino",
+                "Elephant"
+        };
+
+        String[] animals = getResources().getStringArray(com.google.android.test.shared_library.R.array.animals);
+        if (animals == null || animals.length != expectedAnimals.length) {
+            throw new AssertionError("Animal list from shared library is null or wrong length.");
+        }
+
+        for (int i = 0; i < expectedAnimals.length; i++) {
+            if (!expectedAnimals[i].equals(animals[i])) {
+                throw new AssertionError("Expected '" + expectedAnimals[i]
+                        + "' at index " + i + " but got '" + animals[i]);
+            }
+        }
 
         SharedLibraryMain.ensureVersion(this, SharedLibraryMain.VERSION_BASE);
-        setContentView(content);
     }
 }

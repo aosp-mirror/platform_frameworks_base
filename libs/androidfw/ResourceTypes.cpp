@@ -42,6 +42,7 @@
 #define TABLE_SUPER_NOISY(x) //x
 #define LOAD_TABLE_NOISY(x) //x
 #define TABLE_THEME(x) //x
+#define LIB_NOISY(x) x
 
 namespace android {
 
@@ -65,6 +66,9 @@ namespace android {
 #define IDMAP_MAGIC         0x706d6469
 // size measured in sizeof(uint32_t)
 #define IDMAP_HEADER_SIZE (ResTable::IDMAP_HEADER_SIZE_BYTES / sizeof(uint32_t))
+
+#define APP_PACKAGE_ID      0x7f
+#define SYS_PACKAGE_ID      0x01
 
 // Standard C isspace() is only required to look at the low byte of its input, so
 // produces incorrect results for UTF-16 characters.  For safety's sake, assume that
@@ -113,7 +117,7 @@ static status_t validate_chunk(const ResChunk_header* chunk,
              name, size, headerSize);
         return BAD_TYPE;
     }
-    ALOGW("%s header size 0x%x is too small.",
+    ALOGW("%s header size 0x%04x is too small.",
          name, headerSize);
     return BAD_TYPE;
 }
@@ -264,7 +268,7 @@ static status_t idmapLookup(const uint32_t* map, size_t sizeBytes, uint32_t key,
     }
     const uint32_t index = typeOffset + 2 + entry - entryOffset;
     if (index > size) {
-        ALOGW("Resource ID map: entry index=%d exceeds size of map=%d\n", index, (int)size);
+        ALOGW("Resource ID map: entry index=%u exceeds size of map=%d\n", index, (int)size);
         *outValue = 0;
         return NO_ERROR;
     }
@@ -279,7 +283,7 @@ static status_t getIdmapPackageId(const uint32_t* map, size_t mapSize, uint32_t 
         return UNKNOWN_ERROR;
     }
     if (mapSize <= IDMAP_HEADER_SIZE + 1) {
-        ALOGW("corrupt idmap: map size %d too short\n", mapSize);
+        ALOGW("corrupt idmap: map size %d too short\n", (int)mapSize);
         return UNKNOWN_ERROR;
     }
     uint32_t typeCount = *(map + IDMAP_HEADER_SIZE);
@@ -288,7 +292,7 @@ static status_t getIdmapPackageId(const uint32_t* map, size_t mapSize, uint32_t 
         return UNKNOWN_ERROR;
     }
     if (IDMAP_HEADER_SIZE + 1 + typeCount > mapSize) {
-        ALOGW("corrupt idmap: number of types %d extends past idmap size %d\n", typeCount, mapSize);
+        ALOGW("corrupt idmap: number of types %u extends past idmap size %d\n", typeCount, (int)mapSize);
         return UNKNOWN_ERROR;
     }
     const uint32_t* p = map + IDMAP_HEADER_SIZE + 1;
@@ -304,7 +308,7 @@ static status_t getIdmapPackageId(const uint32_t* map, size_t mapSize, uint32_t 
     // determine package id from first entry of first type
     const uint32_t offset = *p + IDMAP_HEADER_SIZE + 2;
     if (offset > mapSize) {
-        ALOGW("corrupt idmap: entry offset %d points outside map size %d\n", offset, mapSize);
+        ALOGW("corrupt idmap: entry offset %u points outside map size %d\n", offset, (int)mapSize);
         return UNKNOWN_ERROR;
     }
     *outId = (map[offset] >> 24) & 0x000000ff;
@@ -340,6 +344,22 @@ ResStringPool::ResStringPool(const void* data, size_t size, bool copyData)
 ResStringPool::~ResStringPool()
 {
     uninit();
+}
+
+void ResStringPool::setToEmpty()
+{
+    uninit();
+
+    mOwnedData = calloc(1, sizeof(ResStringPool_header));
+    ResStringPool_header* header = (ResStringPool_header*) mOwnedData;
+    mSize = 0;
+    mEntries = NULL;
+    mStrings = NULL;
+    mStringPoolSize = 0;
+    mEntryStyles = NULL;
+    mStyles = NULL;
+    mStylePoolSize = 0;
+    mHeader = (const ResStringPool_header*) header;
 }
 
 status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
@@ -1111,7 +1131,14 @@ int32_t ResXMLParser::getAttributeDataType(size_t idx) const
                 (((const uint8_t*)tag)
                  + dtohs(tag->attributeStart)
                  + (dtohs(tag->attributeSize)*idx));
-            return attr->typedValue.dataType;
+            uint8_t type = attr->typedValue.dataType;
+            if (type != Res_value::TYPE_DYNAMIC_REFERENCE) {
+                return type;
+            }
+
+            // This is a dynamic reference. We adjust those references
+            // to regular references at this level, so lie to the caller.
+            return Res_value::TYPE_REFERENCE;
         }
     }
     return Res_value::TYPE_NULL;
@@ -1126,7 +1153,15 @@ int32_t ResXMLParser::getAttributeData(size_t idx) const
                 (((const uint8_t*)tag)
                  + dtohs(tag->attributeStart)
                  + (dtohs(tag->attributeSize)*idx));
-            return dtohl(attr->typedValue.data);
+            if (attr->typedValue.dataType != Res_value::TYPE_DYNAMIC_REFERENCE ||
+                    mTree.mDynamicRefTable == NULL) {
+                return dtohl(attr->typedValue.data);
+            }
+
+            uint32_t data = dtohl(attr->typedValue.data);
+            if (mTree.mDynamicRefTable->lookupResourceId(&data) == NO_ERROR) {
+                return data;
+            }
         }
     }
     return 0;
@@ -1142,6 +1177,10 @@ ssize_t ResXMLParser::getAttributeValue(size_t idx, Res_value* outValue) const
                  + dtohs(tag->attributeStart)
                  + (dtohs(tag->attributeSize)*idx));
             outValue->copyFrom_dtoh(attr->typedValue);
+            if (mTree.mDynamicRefTable != NULL &&
+                    mTree.mDynamicRefTable->lookupResourceValue(outValue) != NO_ERROR) {
+                return BAD_TYPE;
+            }
             return sizeof(Res_value);
         }
     }
@@ -1333,25 +1372,26 @@ void ResXMLParser::setPosition(const ResXMLParser::ResXMLPosition& pos)
     mCurExt = pos.curExt;
 }
 
-
 // --------------------------------------------------------------------
 
 static volatile int32_t gCount = 0;
 
-ResXMLTree::ResXMLTree()
+ResXMLTree::ResXMLTree(const DynamicRefTable* dynamicRefTable)
     : ResXMLParser(*this)
+    , mDynamicRefTable(dynamicRefTable)
     , mError(NO_INIT), mOwnedData(NULL)
 {
     //ALOGI("Creating ResXMLTree %p #%d\n", this, android_atomic_inc(&gCount)+1);
     restart();
 }
 
-ResXMLTree::ResXMLTree(const void* data, size_t size, bool copyData)
+ResXMLTree::ResXMLTree()
     : ResXMLParser(*this)
+    , mDynamicRefTable(NULL)
     , mError(NO_INIT), mOwnedData(NULL)
 {
     //ALOGI("Creating ResXMLTree %p #%d\n", this, android_atomic_inc(&gCount)+1);
-    setTo(data, size, copyData);
+    restart();
 }
 
 ResXMLTree::~ResXMLTree()
@@ -2737,7 +2777,14 @@ struct ResTable::Package
 struct ResTable::PackageGroup
 {
     PackageGroup(ResTable* _owner, const String16& _name, uint32_t _id)
-        : owner(_owner), name(_name), id(_id), typeCount(0), bags(NULL) { }
+        : owner(_owner)
+        , name(_name)
+        , id(_id)
+        , typeCount(0)
+        , bags(NULL)
+        , dynamicRefTable(static_cast<uint8_t>(_id))
+    { }
+
     ~PackageGroup() {
         clearBagCache();
         const size_t N = packages.size();
@@ -2790,6 +2837,13 @@ struct ResTable::PackageGroup
     // Computed attribute bags, first indexed by the type and second
     // by the entry in that type.
     bag_set***                      bags;
+
+    // The table mapping dynamic references to resolved references for
+    // this package group.
+    // TODO: We may be able to support dynamic references in overlays
+    // by having these tables in a per-package scope rather than
+    // per-package-group.
+    DynamicRefTable                 dynamicRefTable;
 };
 
 struct ResTable::bag_set
@@ -3077,7 +3131,7 @@ void ResTable::Theme::dumpToLog() const
 }
 
 ResTable::ResTable()
-    : mError(NO_INIT)
+    : mError(NO_INIT), mNextPackageId(2)
 {
     memset(&mParams, 0, sizeof(mParams));
     memset(mPackageMap, 0, sizeof(mPackageMap));
@@ -3085,11 +3139,11 @@ ResTable::ResTable()
 }
 
 ResTable::ResTable(const void* data, size_t size, const int32_t cookie, bool copyData)
-    : mError(NO_INIT)
+    : mError(NO_INIT), mNextPackageId(2)
 {
     memset(&mParams, 0, sizeof(mParams));
     memset(mPackageMap, 0, sizeof(mPackageMap));
-    addInternal(data, size, cookie, NULL /* asset */, copyData, NULL /* idMap */);
+    addInternal(data, size, cookie, copyData, NULL /* idMap */);
     LOG_FATAL_IF(mError != NO_ERROR, "Error parsing resource table");
     //ALOGI("Creating ResTable %p\n", this);
 }
@@ -3106,7 +3160,7 @@ inline ssize_t ResTable::getResourcePackageIndex(uint32_t resID) const
 }
 
 status_t ResTable::add(const void* data, size_t size) {
-    return addInternal(data, size, 0 /* cookie */, NULL /* asset */,
+    return addInternal(data, size, 0 /* cookie */,
             false /* copyData */, NULL /* idMap */);
 }
 
@@ -3118,7 +3172,7 @@ status_t ResTable::add(Asset* asset, const int32_t cookie, bool copyData, const 
         return UNKNOWN_ERROR;
     }
     size_t size = (size_t)asset->getLength();
-    return addInternal(data, size, cookie, asset, copyData,
+    return addInternal(data, size, cookie, copyData,
             reinterpret_cast<const Asset*>(idmap));
 }
 
@@ -3146,8 +3200,25 @@ status_t ResTable::add(ResTable* src)
     return mError;
 }
 
+status_t ResTable::addEmpty(const int32_t cookie) {
+    Header* header = new Header(this);
+    header->index = mHeaders.size();
+    header->cookie = cookie;
+    header->values.setToEmpty();
+    header->ownedData = calloc(1, sizeof(ResTable_header));
+
+    ResTable_header* resHeader = (ResTable_header*) header->ownedData;
+    resHeader->header.type = RES_TABLE_TYPE;
+    resHeader->header.headerSize = sizeof(ResTable_header);
+    resHeader->header.size = sizeof(ResTable_header);
+
+    header->header = (const ResTable_header*) resHeader;
+    mHeaders.add(header);
+    return NO_ERROR;
+}
+
 status_t ResTable::addInternal(const void* data, size_t size, const int32_t cookie,
-                       Asset* /*asset*/, bool copyData, const Asset* idmap)
+                       bool copyData, const Asset* idmap)
 {
     if (!data) return NO_ERROR;
     Header* header = new Header(this);
@@ -3186,8 +3257,6 @@ status_t ResTable::addInternal(const void* data, size_t size, const int32_t cook
     //ALOGI("Got size 0x%x, again size 0x%x, raw size 0x%x\n", header->size,
     //     dtohl(header->header->header.size), header->header->header.size);
     LOAD_TABLE_NOISY(ALOGV("Loading ResTable @%p:\n", header->header));
-    LOAD_TABLE_NOISY(printHexData(2, header->header, header->size < 256 ? header->size : 256,
-                                  16, 16, 0, false, printToLogFunc));
     if (dtohs(header->header->header.headerSize) > header->size
             || header->size > size) {
         ALOGW("Bad resource table: header size 0x%x or total size 0x%x is larger than data size 0x%x\n",
@@ -3474,9 +3543,6 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
             continue;
         }
 
-        TABLE_NOISY(aout << "Resource type data: "
-              << HexDump(type, dtohl(type->header.size)) << endl);
-
         if ((size_t)offset > (dtohl(type->header.size)-sizeof(Res_value))) {
             ALOGW("ResTable_item at %d is beyond type chunk data %d",
                  (int)offset, dtohl(type->header.size));
@@ -3516,6 +3582,18 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
         outValue->res0 = bestValue->res0;
         outValue->dataType = bestValue->dataType;
         outValue->data = dtohl(bestValue->data);
+
+        // The reference may be pointing to a resource in a shared library. These
+        // references have build-time generated package IDs. These ids may not match
+        // the actual package IDs of the corresponding packages in this ResTable.
+        // We need to fix the package ID based on a mapping.
+        status_t err = grp->dynamicRefTable.lookupResourceValue(outValue);
+        if (err != NO_ERROR) {
+            ALOGW("Failed to resolve referenced package: 0x%08x", outValue->data);
+            rc = BAD_VALUE;
+            goto out;
+        }
+
         if (outConfig != NULL) {
             *outConfig = bestItem;
         }
@@ -3545,8 +3623,8 @@ ssize_t ResTable::resolveReference(Res_value* value, ssize_t blockIndex,
         ResTable_config* outConfig) const
 {
     int count=0;
-    while (blockIndex >= 0 && value->dataType == value->TYPE_REFERENCE
-           && value->data != 0 && count < 20) {
+    while (blockIndex >= 0 && value->dataType == Res_value::TYPE_REFERENCE
+            && value->data != 0 && count < 20) {
         if (outLastRef) *outLastRef = value->data;
         uint32_t lastRef = value->data;
         uint32_t newFlags = 0;
@@ -3730,7 +3808,7 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
         const Type* typeClass;
         ALOGV("Getting entry pkg=%p, t=%d, e=%d\n", package, T, E);
         ssize_t offset = getEntry(package, T, E, &mParams, &type, &entry, &typeClass);
-        ALOGV("Resulting offset=%d\n", offset);
+        ALOGV("Resulting offset=%d\n", (int)offset);
         if (offset <= 0) {
             // No {entry, appropriate config} pair found in package. If this
             // package is an overlay package (ip != 0), this simply means the
@@ -3774,9 +3852,21 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
         TABLE_NOISY(printf("Creating new bag, entrySize=0x%08x, parent=0x%08x\n",
                            entrySize, parent));
         if (parent) {
+            uint32_t resolvedParent = parent;
+
+            // Bags encode a parent reference without using the standard
+            // Res_value structure. That means we must always try to
+            // resolve a parent reference in case it is actually a
+            // TYPE_DYNAMIC_REFERENCE.
+            status_t err = grp->dynamicRefTable.lookupResourceId(&resolvedParent);
+            if (err != NO_ERROR) {
+                ALOGE("Failed resolving bag parent id 0x%08x", parent);
+                return UNKNOWN_ERROR;
+            }
+
             const bag_entry* parentBag;
             uint32_t parentTypeSpecFlags = 0;
-            const ssize_t NP = getBagLocked(parent, &parentBag, &parentTypeSpecFlags);
+            const ssize_t NP = getBagLocked(resolvedParent, &parentBag, &parentTypeSpecFlags);
             const size_t NT = ((NP >= 0) ? NP : 0) + N;
             set = (bag_set*)malloc(sizeof(bag_set)+sizeof(bag_entry)*NT);
             if (set == NULL) {
@@ -3871,6 +3961,12 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
             cur->stringBlock = package->header->index;
             cur->map.name.ident = newName;
             cur->map.value.copyFrom_dtoh(map->value);
+            status_t err = grp->dynamicRefTable.lookupResourceValue(&cur->map.value);
+            if (err != NO_ERROR) {
+                ALOGE("Reference item(0x%08x) in bag could not be resolved.", cur->map.value.data);
+                return UNKNOWN_ERROR;
+            }
+
             TABLE_NOISY(printf("Setting entry #%d %p: block=%d, name=0x%08x, type=%d, data=0x%08x\n",
                          curEntry, cur, cur->stringBlock, cur->map.name.ident,
                          cur->map.value.dataType, cur->map.value.data));
@@ -4568,16 +4664,20 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
                         return false;
                     }
                 }
-                if (!accessor) {
-                    outValue->data = rid;
-                    return true;
+
+                if (accessor) {
+                    rid = Res_MAKEID(
+                        accessor->getRemappedPackage(Res_GETPACKAGE(rid)),
+                        Res_GETTYPE(rid), Res_GETENTRY(rid));
+                    TABLE_NOISY(printf("Incl %s:%s/%s: 0x%08x\n",
+                           String8(package).string(), String8(type).string(),
+                           String8(name).string(), rid));
                 }
-                rid = Res_MAKEID(
-                    accessor->getRemappedPackage(Res_GETPACKAGE(rid)),
-                    Res_GETTYPE(rid), Res_GETENTRY(rid));
-                TABLE_NOISY(printf("Incl %s:%s/%s: 0x%08x\n",
-                       String8(package).string(), String8(type).string(),
-                       String8(name).string(), rid));
+
+                uint32_t packageId = Res_GETPACKAGE(rid) + 1;
+                if (packageId != APP_PACKAGE_ID && packageId != SYS_PACKAGE_ID) {
+                    outValue->dataType = Res_value::TYPE_DYNAMIC_REFERENCE;
+                }
                 outValue->data = rid;
                 return true;
             }
@@ -4589,8 +4689,17 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
                     TABLE_NOISY(printf("Pckg %s:%s/%s: 0x%08x\n",
                            String8(package).string(), String8(type).string(),
                            String8(name).string(), rid));
-                    outValue->data = rid;
-                    return true;
+                    uint32_t packageId = Res_GETPACKAGE(rid) + 1;
+                    if (packageId == 0x00) {
+                        outValue->data = rid;
+                        outValue->dataType = Res_value::TYPE_DYNAMIC_REFERENCE;
+                        return true;
+                    } else if (packageId == APP_PACKAGE_ID || packageId == SYS_PACKAGE_ID) {
+                        // We accept packageId's generated as 0x01 in order to support
+                        // building the android system resources
+                        outValue->data = rid;
+                        return true;
+                    }
                 }
             }
         }
@@ -5122,15 +5231,15 @@ size_t ResTable::getBasePackageCount() const
     return mPackageGroups.size();
 }
 
-const char16_t* ResTable::getBasePackageName(size_t idx) const
+const String16 ResTable::getBasePackageName(size_t idx) const
 {
     if (mError != NO_ERROR) {
-        return 0;
+        return String16();
     }
     LOG_FATAL_IF(idx >= mPackageGroups.size(),
                  "Requested package index %d past package count %d",
                  (int)idx, (int)mPackageGroups.size());
-    return mPackageGroups[idx]->name.string();
+    return mPackageGroups[idx]->name;
 }
 
 uint32_t ResTable::getBasePackageId(size_t idx) const
@@ -5157,6 +5266,21 @@ const ResStringPool* ResTable::getTableStringBlock(size_t index) const
 int32_t ResTable::getTableCookie(size_t index) const
 {
     return mHeaders[index]->cookie;
+}
+
+const DynamicRefTable* ResTable::getDynamicRefTableForCookie(int32_t cookie) const
+{
+    const size_t N = mPackageGroups.size();
+    for (size_t i = 0; i < N; i++) {
+        const PackageGroup* pg = mPackageGroups[i];
+        size_t M = pg->packages.size();
+        for (size_t j = 0; j < M; j++) {
+            if (pg->packages[j]->header->cookie == cookie) {
+                return &pg->dynamicRefTable;
+            }
+        }
+    }
+    return NULL;
 }
 
 void ResTable::getConfigurations(Vector<ResTable_config>* configs) const
@@ -5300,10 +5424,9 @@ ssize_t ResTable::getEntry(
     }
 
     offset += dtohl(type->entriesStart);
-    TABLE_NOISY(aout << "Looking in resource table " << package->header->header
-          << ", typeOff="
-          << (void*)(((const char*)type)-((const char*)package->header->header))
-          << ", offset=" << (void*)offset << endl);
+    TABLE_NOISY(ALOGD("Looking in resource table %p, typeOff=%p, offset=%p",
+            package->header->header, (void*)(((const char*)type)-((const char*)package->header->header)),
+            (void*)offset));
 
     if (offset > (dtohl(type->header.size)-sizeof(ResTable_entry))) {
         ALOGW("ResTable_entry at 0x%x is beyond type chunk data 0x%x",
@@ -5377,6 +5500,11 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
         if (package == NULL) {
             return (mError=NO_MEMORY);
         }
+        
+        if (id == 0) {
+            // This is a library so assign an ID
+            id = mNextPackageId++;
+        }
 
         size_t idx = mPackageMap[id];
         if (idx == 0) {
@@ -5413,6 +5541,13 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
             group->basePackage = package;
 
             mPackageMap[id] = (uint8_t)idx;
+
+            // Find all packages that reference this package
+            size_t N = mPackageGroups.size();
+            for (size_t i = 0; i < N; i++) {
+                mPackageGroups[i]->dynamicRefTable.addMapping(
+                        group->name, static_cast<uint8_t>(group->id));
+            }
         } else {
             group = mPackageGroups.itemAt(idx-1);
             if (group == NULL) {
@@ -5457,7 +5592,7 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                                     (void*)(base-(const uint8_t*)chunk),
                                     dtohs(typeSpec->header.type),
                                     dtohs(typeSpec->header.headerSize),
-                                    (void*)typeSize));
+                                    (void*)typeSpecSize));
             // look for block overrun or int overflow when multiplying by 4
             if ((dtohl(typeSpec->entryCount) > (INT32_MAX/sizeof(uint32_t))
                     || dtohs(typeSpec->header.headerSize)+(sizeof(uint32_t)*dtohl(typeSpec->entryCount))
@@ -5543,6 +5678,21 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                 ALOGI("Adding config to type %d: %s\n",
                       type->id, thisConfig.toString().string()));
             t->configs.add(type);
+        } else if (ctype == RES_TABLE_LIBRARY_TYPE) {
+            if (group->dynamicRefTable.entries().size() == 0) {
+                status_t err = group->dynamicRefTable.load((const ResTable_lib_header*) chunk);
+                if (err != NO_ERROR) {
+                    return (mError=err);
+                }
+
+                // Fill in the reference table with the entries we already know about.
+                size_t N = mPackageGroups.size();
+                for (size_t i = 0; i < N; i++) {
+                    group->dynamicRefTable.addMapping(mPackageGroups[i]->name, mPackageGroups[i]->id);
+                }
+            } else {
+                ALOGW("Found multiple library tables, ignoring...");
+            }
         } else {
             status_t err = validate_chunk(chunk, sizeof(ResChunk_header),
                                           endPos, "ResTable_package:unknown");
@@ -5558,6 +5708,103 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
         group->typeCount = package->types.size();
     }
 
+    return NO_ERROR;
+}
+
+DynamicRefTable::DynamicRefTable(uint8_t packageId)
+    : mAssignedPackageId(packageId)
+{
+    memset(mLookupTable, 0, sizeof(mLookupTable));
+
+    // Reserved package ids
+    mLookupTable[APP_PACKAGE_ID] = APP_PACKAGE_ID;
+    mLookupTable[SYS_PACKAGE_ID] = SYS_PACKAGE_ID;
+}
+
+status_t DynamicRefTable::load(const ResTable_lib_header* const header)
+{
+    const uint32_t entryCount = dtohl(header->count);
+    const uint32_t sizeOfEntries = sizeof(ResTable_lib_entry) * entryCount;
+    const uint32_t expectedSize = dtohl(header->header.size) - dtohl(header->header.headerSize);
+    if (sizeOfEntries > expectedSize) {
+        ALOGE("ResTable_lib_header size %u is too small to fit %u entries (x %u).",
+                expectedSize, entryCount, (uint32_t)sizeof(ResTable_lib_entry));
+        return UNKNOWN_ERROR;
+    }
+
+    const ResTable_lib_entry* entry = (const ResTable_lib_entry*)(((uint8_t*) header) +
+            dtohl(header->header.headerSize));
+    for (uint32_t entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+        uint32_t packageId = dtohl(entry->packageId);
+        char16_t tmpName[sizeof(entry->packageName) / sizeof(char16_t)];
+        strcpy16_dtoh(tmpName, entry->packageName, sizeof(entry->packageName) / sizeof(char16_t));
+        LIB_NOISY(ALOGV("Found lib entry %s with id %d\n", String8(tmpName).string(),
+                dtohl(entry->packageId)));
+        if (packageId >= 256) {
+            ALOGE("Bad package id 0x%08x", packageId);
+            return UNKNOWN_ERROR;
+        }
+        mEntries.replaceValueFor(String16(tmpName), (uint8_t) packageId);
+        entry = entry + 1;
+    }
+    return NO_ERROR;
+}
+
+status_t DynamicRefTable::addMapping(const String16& packageName, uint8_t packageId)
+{
+    ssize_t index = mEntries.indexOfKey(packageName);
+    if (index < 0) {
+        return UNKNOWN_ERROR;
+    }
+    mLookupTable[mEntries.valueAt(index)] = packageId;
+    return NO_ERROR;
+}
+
+status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
+    uint32_t res = *resId;
+    size_t packageId = Res_GETPACKAGE(res) + 1;
+
+    if (packageId == APP_PACKAGE_ID) {
+        // No lookup needs to be done, app package IDs are absolute.
+        return NO_ERROR;
+    }
+
+    if (packageId == 0) {
+        // The package ID is 0x00. That means that a shared library is accessing
+        // its own local resource, so we fix up the resource with the calling
+        // package ID.
+        *resId |= ((uint32_t) mAssignedPackageId) << 24;
+        return NO_ERROR;
+    }
+
+    // Do a proper lookup.
+    uint8_t translatedId = mLookupTable[packageId];
+    if (translatedId == 0) {
+        ALOGV("DynamicRefTable(0x%02x): No mapping for build-time package ID 0x%02x.",
+                (uint8_t)mAssignedPackageId, (uint8_t)packageId);
+        for (size_t i = 0; i < 256; i++) {
+            if (mLookupTable[i] != 0) {
+                ALOGV("e[0x%02x] -> 0x%02x", (uint8_t)i, mLookupTable[i]);
+            }
+        }
+        return UNKNOWN_ERROR;
+    }
+
+    *resId = (res & 0x00ffffff) | (((uint32_t) translatedId) << 24);
+    return NO_ERROR;
+}
+
+status_t DynamicRefTable::lookupResourceValue(Res_value* value) const {
+    if (value->dataType != Res_value::TYPE_DYNAMIC_REFERENCE) {
+        return NO_ERROR;
+    }
+
+    status_t err = lookupResourceId(&value->data);
+    if (err != NO_ERROR) {
+        return err;
+    }
+
+    value->dataType = Res_value::TYPE_REFERENCE;
     return NO_ERROR;
 }
 
@@ -5701,7 +5948,7 @@ status_t ResTable::createIdmap(const ResTable& overlay,
             continue;
         }
         if (N == 1) { // vector expected to hold (offset) + (N > 0 entries)
-            ALOGW("idmap: type %d supposedly has entries, but no entries found\n", i);
+            ALOGW("idmap: type %u supposedly has entries, but no entries found\n", (uint32_t)i);
             return UNKNOWN_ERROR;
         }
         *data++ = htodl(N - 1); // do not count the offset (which is vector's first element)
@@ -5815,6 +6062,8 @@ void ResTable::print_value(const Package* pkg, const Res_value& value) const
         printf("(null)\n");
     } else if (value.dataType == Res_value::TYPE_REFERENCE) {
         printf("(reference) 0x%08x\n", value.data);
+    } else if (value.dataType == Res_value::TYPE_DYNAMIC_REFERENCE) {
+        printf("(dynamic reference) 0x%08x\n", value.data);
     } else if (value.dataType == Res_value::TYPE_ATTRIBUTE) {
         printf("(attribute) 0x%08x\n", value.data);
     } else if (value.dataType == Res_value::TYPE_STRING) {
@@ -5897,6 +6146,11 @@ void ResTable::print(bool inclValues) const
                         uint32_t resID = (0xff000000 & ((pkg->package->id)<<24))
                                     | (0x00ff0000 & ((typeIndex+1)<<16))
                                     | (0x0000ffff & (entryIndex));
+                        // Since we are creating resID without actually
+                        // iterating over them, we have no idea which is a
+                        // dynamic reference. We must check.
+                        pg->dynamicRefTable.lookupResourceId(&resID);
+
                         resource_name resName;
                         if (this->getResourceName(resID, true, &resName)) {
                             String8 type8;
@@ -5956,6 +6210,7 @@ void ResTable::print(bool inclValues) const
                         uint32_t resID = (0xff000000 & ((pkg->package->id)<<24))
                                     | (0x00ff0000 & ((typeIndex+1)<<16))
                                     | (0x0000ffff & (entryIndex));
+                        pg->dynamicRefTable.lookupResourceId(&resID);
                         resource_name resName;
                         if (this->getResourceName(resID, true, &resName)) {
                             String8 type8;
@@ -6034,8 +6289,14 @@ void ResTable::print(bool inclValues) const
                                 const uint8_t* baseMapPtr = (const uint8_t*)ent;
                                 size_t mapOffset = esize;
                                 const ResTable_map* mapPtr = (ResTable_map*)(baseMapPtr+mapOffset);
-                                printf("          Parent=0x%08x, Count=%d\n",
-                                    dtohl(bagPtr->parent.ident), N);
+                                const uint32_t parent = dtohl(bagPtr->parent.ident);
+                                uint32_t resolvedParent = parent;
+                                status_t err = pg->dynamicRefTable.lookupResourceId(&resolvedParent);
+                                if (err != NO_ERROR) {
+                                    resolvedParent = 0;
+                                }
+                                printf("          Parent=0x%08x(Resolved=0x%08x), Count=%d\n",
+                                        parent, resolvedParent, N);
                                 for (int i=0; i<N && mapOffset < (typeSize-sizeof(ResTable_map)); i++) {
                                     printf("          #%i (Key=0x%08x): ",
                                         i, dtohl(mapPtr->name.ident));

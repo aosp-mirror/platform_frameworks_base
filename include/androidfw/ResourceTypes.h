@@ -25,6 +25,7 @@
 #include <utils/Errors.h>
 #include <utils/String16.h>
 #include <utils/Vector.h>
+#include <utils/KeyedVector.h>
 
 #include <utils/threads.h>
 
@@ -216,7 +217,8 @@ enum {
     // Chunk types in RES_TABLE_TYPE
     RES_TABLE_PACKAGE_TYPE      = 0x0200,
     RES_TABLE_TYPE_TYPE         = 0x0201,
-    RES_TABLE_TYPE_SPEC_TYPE    = 0x0202
+    RES_TABLE_TYPE_SPEC_TYPE    = 0x0202,
+    RES_TABLE_LIBRARY_TYPE      = 0x0203
 };
 
 /**
@@ -268,6 +270,9 @@ struct Res_value
         // The 'data' holds a complex number encoding a fraction of a
         // container.
         TYPE_FRACTION = 0x06,
+        // The 'data' holds a dynamic ResTable_ref, which needs to be
+        // resolved before it can be used like a TYPE_REFERENCE.
+        TYPE_DYNAMIC_REFERENCE = 0x07,
 
         // Beginning of integer flavors...
         TYPE_FIRST_INT = 0x10,
@@ -457,6 +462,7 @@ public:
     ResStringPool(const void* data, size_t size, bool copyData=false);
     ~ResStringPool();
 
+    void setToEmpty();
     status_t setTo(const void* data, size_t size, bool copyData=false);
 
     status_t getError() const;
@@ -735,14 +741,16 @@ private:
     const void*                 mCurExt;
 };
 
+class DynamicRefTable;
+
 /**
  * Convenience class for accessing data in a ResXMLTree resource.
  */
 class ResXMLTree : public ResXMLParser
 {
 public:
+    ResXMLTree(const DynamicRefTable* dynamicRefTable);
     ResXMLTree();
-    ResXMLTree(const void* data, size_t size, bool copyData=false);
     ~ResXMLTree();
 
     status_t setTo(const void* data, size_t size, bool copyData=false);
@@ -755,6 +763,8 @@ private:
     friend class ResXMLParser;
 
     status_t validateNode(const ResXMLTree_node* node) const;
+
+    const DynamicRefTable* const mDynamicRefTable;
 
     status_t                    mError;
     void*                       mOwnedData;
@@ -1290,6 +1300,7 @@ struct ResTable_entry
 struct ResTable_map_entry : public ResTable_entry
 {
     // Resource identifier of the parent mapping, or 0 if there is none.
+    // This is always treated as a TYPE_DYNAMIC_REFERENCE.
     ResTable_ref parent;
     // Number of name/value pairs that follow for FLAG_COMPLEX.
     uint32_t count;
@@ -1385,6 +1396,68 @@ struct ResTable_map
 };
 
 /**
+ * A package-id to package name mapping for any shared libraries used
+ * in this resource table. The package-id's encoded in this resource
+ * table may be different than the id's assigned at runtime. We must
+ * be able to translate the package-id's based on the package name.
+ */
+struct ResTable_lib_header
+{
+    struct ResChunk_header header;
+
+    // The number of shared libraries linked in this resource table.
+    uint32_t count;
+};
+
+/**
+ * A shared library package-id to package name entry.
+ */
+struct ResTable_lib_entry
+{
+    // The package-id this shared library was assigned at build time.
+    // We use a uint32 to keep the structure aligned on a uint32 boundary.
+    uint32_t packageId;
+
+    // The package name of the shared library. \0 terminated.
+    char16_t packageName[128];
+};
+
+/**
+ * Holds the shared library ID table. Shared libraries are assigned package IDs at
+ * build time, but they may be loaded in a different order, so we need to maintain
+ * a mapping of build-time package ID to run-time assigned package ID.
+ *
+ * Dynamic references are not currently supported in overlays. Only the base package
+ * may have dynamic references.
+ */
+class DynamicRefTable
+{
+public:
+    DynamicRefTable(uint8_t packageId);
+
+    // Loads an unmapped reference table from the package.
+    status_t load(const ResTable_lib_header* const header);
+
+    // Creates a mapping from build-time package ID to run-time package ID for
+    // the given package.
+    status_t addMapping(const String16& packageName, uint8_t packageId);
+
+    // Performs the actual conversion of build-time resource ID to run-time
+    // resource ID.
+    inline status_t lookupResourceId(uint32_t* resId) const;
+    inline status_t lookupResourceValue(Res_value* value) const;
+
+    inline const KeyedVector<String16, uint8_t>& entries() const {
+        return mEntries;
+    }
+
+private:
+    const uint8_t                   mAssignedPackageId;
+    uint8_t                         mLookupTable[256];
+    KeyedVector<String16, uint8_t>  mEntries;
+};
+
+/**
  * Convenience class for accessing data in a ResTable resource.
  */
 class ResTable
@@ -1399,6 +1472,7 @@ public:
                  const void* idmap = NULL);
     status_t add(const void *data, size_t size);
     status_t add(ResTable* src);
+    status_t addEmpty(const int32_t cookie);
 
     status_t getError() const;
 
@@ -1634,7 +1708,7 @@ public:
                               bool append = false);
 
     size_t getBasePackageCount() const;
-    const char16_t* getBasePackageName(size_t idx) const;
+    const String16 getBasePackageName(size_t idx) const;
     uint32_t getBasePackageId(size_t idx) const;
 
     // Return the number of resource tables that the object contains.
@@ -1646,6 +1720,8 @@ public:
     const ResStringPool* getTableStringBlock(size_t index) const;
     // Return unique cookie identifier for the given resource table.
     int32_t getTableCookie(size_t index) const;
+
+    const DynamicRefTable* getDynamicRefTableForCookie(int32_t cookie) const;
 
     // Return the configurations (ResTable_config) that we know about
     void getConfigurations(Vector<ResTable_config>* configs) const;
@@ -1684,7 +1760,7 @@ private:
     struct bag_set;
 
     status_t addInternal(const void* data, size_t size, const int32_t cookie,
-                 Asset* asset, bool copyData, const Asset* idmap);
+                 bool copyData, const Asset* idmap);
 
     ssize_t getResourcePackageIndex(uint32_t resID) const;
     ssize_t getEntry(
@@ -1712,6 +1788,8 @@ private:
     // Mapping from resource package IDs to indices into the internal
     // package array.
     uint8_t                     mPackageMap[256];
+
+    uint8_t                     mNextPackageId;
 };
 
 }   // namespace android

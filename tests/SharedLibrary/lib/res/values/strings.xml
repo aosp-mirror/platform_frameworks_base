@@ -19,4 +19,13 @@
     <string name="upgrade_body"><xliff:g id="app">%1$s</xliff:g> requires a newer version
             of <xliff:g id="lib">%2$s</xliff:g> to run.</string>
     <string name="upgrade_button">Upgrade</string>
+    <string name="shared_string">Shared string!</string>
+
+    <string-array name="animals">
+        <item>@string/racoon</item>
+        <item>Rhino</item>
+        <item>Elephant</item>
+    </string-array>
+
+    <string name="racoon">Racoon</string>
 </resources>

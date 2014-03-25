@@ -73,6 +73,13 @@ static struct assetmanager_offsets_t
     jfieldID mObject;
 } gAssetManagerOffsets;
 
+static struct sparsearray_offsets_t
+{
+    jclass classObject;
+    jmethodID constructor;
+    jmethodID put;
+} gSparseArrayOffsets;
+
 jclass g_stringClass = NULL;
 
 // ----------------------------------------------------------------------------
@@ -905,6 +912,26 @@ static jstring android_content_AssetManager_getCookieName(JNIEnv* env, jobject c
     return str;
 }
 
+static jobject android_content_AssetManager_getAssignedPackageIdentifiers(JNIEnv* env, jobject clazz)
+{
+    AssetManager* am = assetManagerForJavaObject(env, clazz);
+    if (am == NULL) {
+        return 0;
+    }
+
+    const ResTable& res = am->getResources();
+
+    jobject sparseArray = env->NewObject(gSparseArrayOffsets.classObject,
+            gSparseArrayOffsets.constructor);
+    const size_t N = res.getBasePackageCount();
+    for (size_t i = 0; i < N; i++) {
+        const String16 name = res.getBasePackageName(i);
+        env->CallVoidMethod(sparseArray, gSparseArrayOffsets.put, (jint) res.getBasePackageId(i),
+                env->NewString(name, name.size()));
+    }
+    return sparseArray;
+}
+
 static jlong android_content_AssetManager_newTheme(JNIEnv* env, jobject clazz)
 {
     AssetManager* am = assetManagerForJavaObject(env, clazz);
@@ -1675,16 +1702,19 @@ static jlong android_content_AssetManager_openXmlAssetNative(JNIEnv* env, jobjec
         return 0;
     }
 
-    Asset* a = cookie
-        ? am->openNonAsset(static_cast<int32_t>(cookie), fileName8.c_str(), Asset::ACCESS_BUFFER)
-        : am->openNonAsset(fileName8.c_str(), Asset::ACCESS_BUFFER);
+    int32_t assetCookie = static_cast<int32_t>(cookie);
+    Asset* a = assetCookie
+        ? am->openNonAsset(assetCookie, fileName8.c_str(), Asset::ACCESS_BUFFER)
+        : am->openNonAsset(fileName8.c_str(), Asset::ACCESS_BUFFER, &assetCookie);
 
     if (a == NULL) {
         jniThrowException(env, "java/io/FileNotFoundException", fileName8.c_str());
         return 0;
     }
 
-    ResXMLTree* block = new ResXMLTree();
+    const DynamicRefTable* dynamicRefTable =
+            am->getResources().getDynamicRefTableForCookie(assetCookie);
+    ResXMLTree* block = new ResXMLTree(dynamicRefTable);
     status_t err = block->setTo(a->getBuffer(true), a->getLength(), true);
     a->close();
     delete a;
@@ -1972,6 +2002,8 @@ static JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_getNativeStringBlock },
     { "getCookieName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getCookieName },
+    { "getAssignedPackageIdentifiers","()Landroid/util/SparseArray;",
+        (void*) android_content_AssetManager_getAssignedPackageIdentifiers },
 
     // Themes.
     { "newTheme", "()J",
@@ -2067,6 +2099,16 @@ int register_android_content_AssetManager(JNIEnv* env)
     LOG_FATAL_IF(stringClass == NULL, "Unable to find class java/lang/String");
     g_stringClass = (jclass)env->NewGlobalRef(stringClass);
     LOG_FATAL_IF(g_stringClass == NULL, "Unable to create global reference for class java/lang/String");
+
+    jclass sparseArrayClass = env->FindClass("android/util/SparseArray");
+    LOG_FATAL_IF(sparseArrayClass == NULL, "Unable to find class android/util/SparseArray");
+    gSparseArrayOffsets.classObject = (jclass) env->NewGlobalRef(sparseArrayClass);
+    gSparseArrayOffsets.constructor =
+            env->GetMethodID(gSparseArrayOffsets.classObject, "<init>", "()V");
+    LOG_FATAL_IF(gSparseArrayOffsets.constructor == NULL, "Unable to find SparseArray.<init>()");
+    gSparseArrayOffsets.put =
+            env->GetMethodID(gSparseArrayOffsets.classObject, "put", "(ILjava/lang/Object;)V");
+    LOG_FATAL_IF(gSparseArrayOffsets.put == NULL, "Unable to find SparseArray.put(int, V)");
 
     return AndroidRuntime::registerNativeMethods(env,
             "android/content/res/AssetManager", gAssetManagerMethods, NELEM(gAssetManagerMethods));

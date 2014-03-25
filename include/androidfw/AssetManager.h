@@ -161,7 +161,7 @@ public:
      * path hierarchy, and will not be seen by "AssetDir" or included
      * in our filename cache.
      */
-    Asset* openNonAsset(const char* fileName, AccessMode mode);
+    Asset* openNonAsset(const char* fileName, AccessMode mode, int32_t* outCookie = NULL);
 
     /*
      * Explicit non-asset file.  The file explicitly named by the cookie (the

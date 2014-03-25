@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <style name="Theme" parent="com.google.android.test.shared_library:Theme">
+    </style>
+</resources>

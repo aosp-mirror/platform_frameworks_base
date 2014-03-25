@@ -375,7 +375,7 @@ final class XmlBlock {
                 boolean defaultValue) {
             int t = nativeGetAttributeDataType(mParseState, idx);
             // Note: don't attempt to convert any other types, because
-            // we want to count on appt doing the conversion for us.
+            // we want to count on aapt doing the conversion for us.
             if (t >= TypedValue.TYPE_FIRST_INT &&
                 t <= TypedValue.TYPE_LAST_INT) {
                 return nativeGetAttributeData(mParseState, idx) != 0;
@@ -385,7 +385,7 @@ final class XmlBlock {
         public int getAttributeResourceValue(int idx, int defaultValue) {
             int t = nativeGetAttributeDataType(mParseState, idx);
             // Note: don't attempt to convert any other types, because
-            // we want to count on appt doing the conversion for us.
+            // we want to count on aapt doing the conversion for us.
             if (t == TypedValue.TYPE_REFERENCE) {
                 return nativeGetAttributeData(mParseState, idx);
             }
@@ -394,7 +394,7 @@ final class XmlBlock {
         public int getAttributeIntValue(int idx, int defaultValue) {
             int t = nativeGetAttributeDataType(mParseState, idx);
             // Note: don't attempt to convert any other types, because
-            // we want to count on appt doing the conversion for us.
+            // we want to count on aapt doing the conversion for us.
             if (t >= TypedValue.TYPE_FIRST_INT &&
                 t <= TypedValue.TYPE_LAST_INT) {
                 return nativeGetAttributeData(mParseState, idx);
@@ -404,7 +404,7 @@ final class XmlBlock {
         public int getAttributeUnsignedIntValue(int idx, int defaultValue) {
             int t = nativeGetAttributeDataType(mParseState, idx);
             // Note: don't attempt to convert any other types, because
-            // we want to count on appt doing the conversion for us.
+            // we want to count on aapt doing the conversion for us.
             if (t >= TypedValue.TYPE_FIRST_INT &&
                 t <= TypedValue.TYPE_LAST_INT) {
                 return nativeGetAttributeData(mParseState, idx);
@@ -414,7 +414,7 @@ final class XmlBlock {
         public float getAttributeFloatValue(int idx, float defaultValue) {
             int t = nativeGetAttributeDataType(mParseState, idx);
             // Note: don't attempt to convert any other types, because
-            // we want to count on appt doing the conversion for us.
+            // we want to count on aapt doing the conversion for us.
             if (t == TypedValue.TYPE_FLOAT) {
                 return Float.intBitsToFloat(
                     nativeGetAttributeData(mParseState, idx));

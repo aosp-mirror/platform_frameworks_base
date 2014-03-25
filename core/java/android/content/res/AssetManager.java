@@ -18,6 +18,7 @@ package android.content.res;
 
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.TypedValue;
 
 import java.io.FileNotFoundException;
@@ -266,11 +267,9 @@ public final class AssetManager {
         }
     }
 
-    /*package*/ final CharSequence getPooledString(int block, int id) {
-        //System.out.println("Get pooled: block=" + block
-        //                   + ", id=#" + Integer.toHexString(id)
-        //                   + ", blocks=" + mStringBlocks);
-        return mStringBlocks[block-1].get(id);
+    /*package*/ final CharSequence getPooledStringForCookie(int cookie, int id) {
+        // Cookies map to string blocks starting at 1.
+        return mStringBlocks[cookie - 1].get(id);
     }
 
     /**
@@ -736,6 +735,11 @@ public final class AssetManager {
      * {@hide}
      */
     public native final String getCookieName(int cookie);
+
+    /**
+     * {@hide}
+     */
+    public native final SparseArray<String> getAssignedPackageIdentifiers();
 
     /**
      * {@hide}

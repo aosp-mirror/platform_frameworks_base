@@ -64,6 +64,7 @@ public:
           mProduct(NULL), mUseCrunchCache(false), mErrorOnFailedInsert(false),
           mErrorOnMissingConfigEntry(false), mOutputTextSymbols(NULL),
           mSingleCrunchInputFile(NULL), mSingleCrunchOutputFile(NULL),
+          mBuildSharedLibrary(false),
           mArgc(0), mArgv(NULL)
         {}
     ~Bundle(void) {}
@@ -188,6 +189,8 @@ public:
     void setSingleCrunchInputFile(const char* val) { mSingleCrunchInputFile = val; }
     const char* getSingleCrunchOutputFile() const { return mSingleCrunchOutputFile; }
     void setSingleCrunchOutputFile(const char* val) { mSingleCrunchOutputFile = val; }
+    bool getBuildSharedLibrary() const { return mBuildSharedLibrary; }
+    void setBuildSharedLibrary(bool val) { mBuildSharedLibrary = val; }
 
     /*
      * Set and get the file specification.
@@ -300,6 +303,7 @@ private:
     const char* mOutputTextSymbols;
     const char* mSingleCrunchInputFile;
     const char* mSingleCrunchOutputFile;
+    bool        mBuildSharedLibrary;
 
     /* file specification */
     int         mArgc;
