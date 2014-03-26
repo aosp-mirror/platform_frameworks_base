@@ -397,9 +397,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 return true; // yes, recycle the event
             }
             if (mSecurityPolicy.canDispatchAccessibilityEventLocked(event)) {
+                mSecurityPolicy.updateActiveWindowLocked(event.getWindowId(), event.getEventType());
                 mSecurityPolicy.updateEventSourceLocked(event);
-                mMainHandler.obtainMessage(MainHandler.MSG_UPDATE_ACTIVE_WINDOW,
-                        event.getWindowId(), event.getEventType()).sendToTarget();
                 notifyAccessibilityServicesDelayedLocked(event, false);
                 notifyAccessibilityServicesDelayedLocked(event, true);
             }
@@ -503,7 +502,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 mGlobalWindowTokens.put(windowId, windowToken.asBinder());
                 if (DEBUG) {
                     Slog.i(LOG_TAG, "Added global connection for pid:" + Binder.getCallingPid()
-                            + " with windowId: " + windowId);
+                            + " with windowId: " + windowId + " and  token: " + windowToken.asBinder());
                 }
             } else {
                 AccessibilityConnectionWrapper wrapper = new AccessibilityConnectionWrapper(
@@ -514,11 +513,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 userState.mWindowTokens.put(windowId, windowToken.asBinder());
                 if (DEBUG) {
                     Slog.i(LOG_TAG, "Added user connection for pid:" + Binder.getCallingPid()
-                            + " with windowId: " + windowId + " and userId:" + mCurrentUserId);
+                            + " with windowId: " + windowId + " and userId:" + mCurrentUserId
+                            + " and  token: " + windowToken.asBinder());
                 }
-            }
-            if (DEBUG) {
-                Slog.i(LOG_TAG, "Adding interaction connection to windowId: " + windowId);
             }
             return windowId;
         }
@@ -534,7 +531,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if (removedWindowId >= 0) {
                 if (DEBUG) {
                     Slog.i(LOG_TAG, "Removed global connection for pid:" + Binder.getCallingPid()
-                            + " with windowId: " + removedWindowId);
+                            + " with windowId: " + removedWindowId + " and token: " + window.asBinder());
                 }
                 return;
             }
@@ -548,7 +545,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     if (DEBUG) {
                         Slog.i(LOG_TAG, "Removed user connection for pid:" + Binder.getCallingPid()
                                 + " with windowId: " + removedWindowIdForUser + " and userId:"
-                                + mUserStates.keyAt(i));
+                                + mUserStates.keyAt(i) + " and token: " + window.asBinder());
                     }
                     return;
                 }
@@ -1622,7 +1619,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public static final int MSG_SEND_ACCESSIBILITY_EVENT_TO_INPUT_FILTER = 1;
         public static final int MSG_SEND_STATE_TO_CLIENTS = 2;
         public static final int MSG_SEND_CLEARED_STATE_TO_CLIENTS_FOR_USER = 3;
-        public static final int MSG_UPDATE_ACTIVE_WINDOW = 4;
         public static final int MSG_ANNOUNCE_NEW_USER_IF_NEEDED = 5;
         public static final int MSG_UPDATE_INPUT_FILTER = 6;
         public static final int MSG_SHOW_ENABLED_TOUCH_EXPLORATION_DIALOG = 7;
@@ -1667,12 +1663,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case MSG_SEND_CLEARED_STATE_TO_CLIENTS_FOR_USER: {
                     final int userId = msg.arg1;
                     sendStateToClientsForUser(0, userId);
-                } break;
-
-                case MSG_UPDATE_ACTIVE_WINDOW: {
-                    final int windowId = msg.arg1;
-                    final int eventType = msg.arg2;
-                    mSecurityPolicy.updateActiveWindow(windowId, eventType);
                 } break;
 
                 case MSG_ANNOUNCE_NEW_USER_IF_NEEDED: {
@@ -3168,7 +3158,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
         }
 
-        public void updateActiveWindow(int windowId, int eventType) {
+        public void updateActiveWindowLocked(int windowId, int eventType) {
             // The active window is either the window that has input focus or
             // the window that the user is currently touching. If the user is
             // touching a window that does not have input focus as soon as the
@@ -3185,17 +3175,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     // what the focused window is to update the active one.
                     // The active window also determined events from which
                     // windows are delivered.
-                    boolean focusedWindowActive = false;
                     synchronized (mLock) {
-                        if (mWindowsForAccessibilityCallback == null) {
-                            focusedWindowActive = true;
-                        }
-                    }
-                    if (focusedWindowActive) {
-                        if (windowId == getFocusedWindowId()) {
-                            synchronized (mLock) {
-                                mActiveWindowId = windowId;
-                            }
+                        if (mWindowsForAccessibilityCallback == null
+                                && windowId == getFocusedWindowId()) {
+                            mActiveWindowId = windowId;
                         }
                     }
                 } break;
@@ -3337,7 +3320,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         private int getFocusedWindowId() {
             IBinder token = mWindowManagerService.getFocusedWindowToken();
-            return findWindowIdLocked(token);
+            synchronized (mLock) {
+                return findWindowIdLocked(token);
+            }
         }
     }
 
