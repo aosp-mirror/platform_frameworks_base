@@ -472,6 +472,7 @@ public class Tethering extends BaseNetworkObserver {
         mTetheredNotification.tickerText = title;
         mTetheredNotification.visibility = Notification.VISIBILITY_PUBLIC;
         mTetheredNotification.setLatestEventInfo(mContext, title, message, pi);
+        mTetheredNotification.category = Notification.CATEGORY_STATUS;
 
         notificationManager.notifyAsUser(null, mTetheredNotification.icon,
                 mTetheredNotification, UserHandle.ALL);
