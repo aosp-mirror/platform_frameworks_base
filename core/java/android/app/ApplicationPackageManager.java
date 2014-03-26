@@ -29,7 +29,6 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
-import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
@@ -1074,7 +1073,7 @@ final class ApplicationPackageManager extends PackageManager {
     public void installPackage(Uri packageURI, IPackageInstallObserver observer, int flags,
                                String installerPackageName) {
         try {
-            mPM.installPackageEtc(packageURI, observer, null, flags, installerPackageName);
+            mPM.installPackage(packageURI, observer, flags, installerPackageName);
         } catch (RemoteException e) {
             // Should never happen!
         }
@@ -1085,8 +1084,8 @@ final class ApplicationPackageManager extends PackageManager {
             int flags, String installerPackageName, Uri verificationURI,
             ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
         try {
-            mPM.installPackageWithVerificationEtc(packageURI, observer, null, flags,
-                    installerPackageName, verificationURI, manifestDigest, encryptionParams);
+            mPM.installPackageWithVerification(packageURI, observer, flags, installerPackageName,
+                    verificationURI, manifestDigest, encryptionParams);
         } catch (RemoteException e) {
             // Should never happen!
         }
@@ -1097,46 +1096,8 @@ final class ApplicationPackageManager extends PackageManager {
             IPackageInstallObserver observer, int flags, String installerPackageName,
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
         try {
-            mPM.installPackageWithVerificationAndEncryptionEtc(packageURI, observer, null,
-                    flags, installerPackageName, verificationParams, encryptionParams);
-        } catch (RemoteException e) {
-            // Should never happen!
-        }
-    }
-
-    // Expanded observer-API versions
-    @Override
-    public void installPackage(Uri packageURI, PackageInstallObserver observer,
-            int flags, String installerPackageName) {
-        try {
-            mPM.installPackageEtc(packageURI, null, observer.mObserver,
-                    flags, installerPackageName);
-        } catch (RemoteException e) {
-            // Should never happen!
-        }
-    }
-
-    @Override
-    public void installPackageWithVerification(Uri packageURI,
-            PackageInstallObserver observer, int flags, String installerPackageName,
-            Uri verificationURI, ManifestDigest manifestDigest,
-            ContainerEncryptionParams encryptionParams) {
-        try {
-            mPM.installPackageWithVerificationEtc(packageURI, null, observer.mObserver, flags,
-                    installerPackageName, verificationURI, manifestDigest, encryptionParams);
-        } catch (RemoteException e) {
-            // Should never happen!
-        }
-    }
-
-    @Override
-    public void installPackageWithVerificationAndEncryption(Uri packageURI,
-            PackageInstallObserver observer, int flags, String installerPackageName,
-            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
-        try {
-            mPM.installPackageWithVerificationAndEncryptionEtc(packageURI, null,
-                    observer.mObserver, flags, installerPackageName, verificationParams,
-                    encryptionParams);
+            mPM.installPackageWithVerificationAndEncryption(packageURI, observer, flags,
+                    installerPackageName, verificationParams, encryptionParams);
         } catch (RemoteException e) {
             // Should never happen!
         }

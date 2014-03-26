@@ -25,7 +25,7 @@ import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageInstallObserver2;
+import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
@@ -39,7 +39,6 @@ import android.content.pm.VerificationParams;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.IUserManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -701,21 +700,14 @@ public final class Pm {
         ActivityManager.dumpPackageStateStatic(FileDescriptor.out, pkg);
     }
 
-    class PackageInstallObserver extends IPackageInstallObserver2.Stub {
+    class PackageInstallObserver extends IPackageInstallObserver.Stub {
         boolean finished;
         int result;
-        String extraPermission;
-        String extraPackage;
 
-        @Override
-        public void packageInstalled(String name, Bundle extras, int status) {
+        public void packageInstalled(String name, int status) {
             synchronized( this) {
                 finished = true;
                 result = status;
-                if (status == PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION) {
-                    extraPermission = extras.getString(PackageManager.EXTRA_EXISTING_PERMISSION);
-                    extraPackage = extras.getString(PackageManager.EXTRA_EXISTING_PACKAGE);
-                }
                 notifyAll();
             }
         }
@@ -725,8 +717,7 @@ public final class Pm {
      * Converts a failure code into a string by using reflection to find a matching constant
      * in PackageManager.
      */
-    private String installFailureToString(PackageInstallObserver obs) {
-        final int result = obs.result;
+    private String installFailureToString(int result) {
         Field[] fields = PackageManager.class.getFields();
         for (Field f: fields) {
             if (f.getType() == int.class) {
@@ -741,16 +732,7 @@ public final class Pm {
                         // get the int value and compare it to result.
                         try {
                             if (result == f.getInt(null)) {
-                                StringBuilder sb = new StringBuilder(64);
-                                sb.append(fieldName);
-                                if (obs.extraPermission != null) {
-                                    sb.append(" perm=");
-                                    sb.append(obs.extraPermission);
-                                }
-                                if (obs.extraPackage != null) {
-                                    sb.append(" pkg=" + obs.extraPackage);
-                                }
-                                return sb.toString();
+                                return fieldName;
                             }
                         } catch (IllegalAccessException e) {
                             // this shouldn't happen since we only look for public static fields.
@@ -974,7 +956,7 @@ public final class Pm {
             VerificationParams verificationParams = new VerificationParams(verificationURI,
                     originatingURI, referrerURI, VerificationParams.NO_UID, null);
 
-            mPm.installPackageWithVerificationAndEncryptionEtc(apkURI, null, obs, installFlags,
+            mPm.installPackageWithVerificationAndEncryption(apkURI, obs, installFlags,
                     installerPackageName, verificationParams, encryptionParams);
 
             synchronized (obs) {
@@ -988,7 +970,7 @@ public final class Pm {
                     System.out.println("Success");
                 } else {
                     System.err.println("Failure ["
-                            + installFailureToString(obs)
+                            + installFailureToString(obs.result)
                             + "]");
                 }
             }
