@@ -20,20 +20,20 @@ import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardServiceConstants;
 import com.android.internal.policy.IKeyguardShowCallback;
-import com.android.systemui.statusbar.CommandQueue;
+import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 
-import android.app.ActivityManagerNative;
 import android.app.Service;
-import android.app.StatusBarManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.ViewGroup;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
@@ -43,11 +43,12 @@ public class KeyguardService extends Service {
 
     public static final String ACTION_STATUS_BAR_BIND = "action.status_bar_bind";
 
-    private CommandQueue mCommandQueue;
-    private StatusBarManager mStatusBarManager;
+    private KeyguardViewMediator mKeyguardViewMediator;
 
     @Override
     public void onCreate() {
+        LockPatternUtils lockPatternUtils = new LockPatternUtils(this);
+        mKeyguardViewMediator = new KeyguardViewMediator(this, lockPatternUtils);
     }
 
     @Override
@@ -67,205 +68,158 @@ public class KeyguardService extends Service {
         }
     }
 
-    private final KeyguardStatusBarBinder mKeyguardStatusBarBinder =
-            new KeyguardStatusBarBinder() {
+    private final KeyguardStatusBarBinder mKeyguardStatusBarBinder = new KeyguardStatusBarBinder() {
 
         @Override
-        public void register(CommandQueue commandQueue) {
-            mCommandQueue = commandQueue;
-        }
-
-        @Override
-        public void dismissKeyguard() {
-            try {
-                mBinder.dismiss();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Could not dismiss keyguard", e);
-            }
+        public void registerStatusBar(PhoneStatusBar phoneStatusBar, ViewGroup container,
+                StatusBarWindowManager statusBarWindowManager) {
+            mKeyguardViewMediator.registerStatusBar(phoneStatusBar, container,
+                    statusBarWindowManager);
         }
     };
 
     private final IKeyguardService.Stub mBinder = new IKeyguardService.Stub() {
 
-        /** Whether the Keyguard is visible. */
-        private boolean mShowing;
-
-        /**
-         * Whether the Keyguard is hidden by a window with
-         * {@link android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED}. So mShowing might
-         * be true, but also mHidden. So in the end, the Keyguard would not be visible.
-         */
-        private boolean mHidden;
-        private boolean mShowingDream;
+        private boolean mIsOccluded;
 
         @Override
-        public synchronized boolean isShowing() {
-            return mShowing;
+        public boolean isShowing() {
+            return mKeyguardViewMediator.isShowing();
         }
 
         @Override
-        public synchronized boolean isSecure() {
-            return true;
+        public boolean isSecure() {
+            return mKeyguardViewMediator.isSecure();
         }
 
         @Override
-        public synchronized boolean isShowingAndNotHidden() {
-            return mShowing && !mHidden;
+        public boolean isShowingAndNotOccluded() {
+            return mKeyguardViewMediator.isShowingAndNotOccluded();
         }
 
         @Override
-        public synchronized boolean isInputRestricted() {
-            return false;
+        public boolean isInputRestricted() {
+            return mKeyguardViewMediator.isInputRestricted();
         }
 
         @Override
-        public synchronized void verifyUnlock(IKeyguardExitCallback callback) {
-        }
-
-        @Override
-        public synchronized void keyguardDone(boolean authenticated, boolean wakeup) {
+        public void verifyUnlock(IKeyguardExitCallback callback) {
             checkPermission();
-            mShowing = false;
-            adjustStatusBarLocked();
-            if (mCommandQueue != null) {
-                mCommandQueue.setKeyguardShown(false, null, true);
-            }
+            mKeyguardViewMediator.verifyUnlock(callback);
         }
 
         @Override
-        public synchronized int setHidden(boolean isHidden) {
+        public void keyguardDone(boolean authenticated, boolean wakeup) {
             checkPermission();
-            if (mHidden == isHidden) {
-                return IKeyguardServiceConstants.KEYGUARD_SERVICE_HIDE_RESULT_NONE;
-            }
-            mHidden = isHidden;
-            try {
-                ActivityManagerNative.getDefault().setLockScreenShown(mShowing && !mHidden
-                        || mShowingDream);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Could not update activity manager lock screen state", e);
-            }
-            adjustStatusBarLocked();
-            if (mCommandQueue != null) {
-                mCommandQueue.setKeyguardShown(!isHidden, null, false);
-            }
-            return isShowingAndNotHidden()
-                    ? IKeyguardServiceConstants.KEYGUARD_SERVICE_HIDE_RESULT_SET_FLAGS
-                    : IKeyguardServiceConstants.KEYGUARD_SERVICE_HIDE_RESULT_UNSET_FLAGS;
+            mKeyguardViewMediator.keyguardDone(authenticated, wakeup);
         }
 
         @Override
-        public synchronized void dismiss() {
+        public int setOccluded(boolean isOccluded) {
             checkPermission();
-            mShowing = false;
-            adjustStatusBarLocked();
-            if (mCommandQueue != null) {
-                mCommandQueue.setKeyguardShown(false, null, true);
-            }
-        }
-
-        @Override
-        public synchronized void onDreamingStarted() {
-            checkPermission();
-            mShowingDream = true;
-        }
-
-        @Override
-        public synchronized void onDreamingStopped() {
-            checkPermission();
-            mShowingDream = false;
-        }
-
-        @Override
-        public synchronized void onScreenTurnedOff(int reason) {
-            checkPermission();
-        }
-
-        @Override
-        public synchronized void onScreenTurnedOn(IKeyguardShowCallback callback) {
-            checkPermission();
-            mShowing = true;
-            adjustStatusBarLocked();
-            if (mCommandQueue != null) {
-                mCommandQueue.setKeyguardShown(isShowingAndNotHidden(), callback, true);
-            }
-        }
-
-        @Override
-        public synchronized void setKeyguardEnabled(boolean enabled) {
-            checkPermission();
-        }
-
-        @Override
-        public synchronized boolean isDismissable() {
-            return !isSecure();
-        }
-
-        @Override
-        public synchronized void onSystemReady() {
-            checkPermission();
-        }
-
-        @Override
-        public synchronized void doKeyguardTimeout(Bundle options) {
-            checkPermission();
-        }
-
-        @Override
-        public synchronized void setCurrentUser(int userId) {
-            checkPermission();
-        }
-
-        @Override
-        public synchronized void showAssistant() {
-            checkPermission();
-        }
-
-        @Override
-        public synchronized void dispatch(MotionEvent event) {
-            checkPermission();
-        }
-
-        @Override
-        public synchronized void launchCamera() {
-            checkPermission();
-        }
-
-        @Override
-        public synchronized void onBootCompleted() {
-            checkPermission();
-            onScreenTurnedOn(null);
-        }
-
-        private void adjustStatusBarLocked() {
-            if (mStatusBarManager == null) {
-                mStatusBarManager = (StatusBarManager) getSystemService(Context.STATUS_BAR_SERVICE);
-            }
-            if (mStatusBarManager == null) {
-                Log.w(TAG, "Could not get status bar manager");
-            } else {
-                // Disable aspects of the system/status/navigation bars that must not be re-enabled by
-                // windows that appear on top, ever
-                int flags = StatusBarManager.DISABLE_NONE;
-                if (isShowing()) {
-                    // Permanently disable components not available when keyguard is enabled
-                    // (like recents). Temporary enable/disable (e.g. the "back" button) are
-                    // done in KeyguardHostView.
-                    flags |= StatusBarManager.DISABLE_RECENT;
-                    if (isSecure()) {
-                        // showing secure lockscreen; disable ticker and switch private notifications
-                        // to show their public versions, if available.
-                        flags |= StatusBarManager.DISABLE_PRIVATE_NOTIFICATIONS;
-                    }
-                    if (false) {
-                        flags |= StatusBarManager.DISABLE_SEARCH;
-                    }
+            synchronized (this) {
+                int result;
+                if (isOccluded && mKeyguardViewMediator.isShowing()
+                        && !mIsOccluded) {
+                    result = IKeyguardServiceConstants
+                            .KEYGUARD_SERVICE_SET_OCCLUDED_RESULT_UNSET_FLAGS;
+                } else if (!isOccluded && mKeyguardViewMediator.isShowing()
+                        && mIsOccluded) {
+                    result = IKeyguardServiceConstants
+                            .KEYGUARD_SERVICE_SET_OCCLUDED_RESULT_SET_FLAGS;
+                } else {
+                    result = IKeyguardServiceConstants.KEYGUARD_SERVICE_SET_OCCLUDED_RESULT_NONE;
                 }
-                if (isShowingAndNotHidden()) {
-                    flags |= StatusBarManager.DISABLE_HOME;
+                if (mIsOccluded != isOccluded) {
+                    mKeyguardViewMediator.setOccluded(isOccluded);
+
+                    // Cache the value so we always have a fresh view in whether Keyguard is occluded.
+                    // If we would just call mKeyguardViewMediator.isOccluded(), this might be stale
+                    // because that value gets updated in another thread.
+                    mIsOccluded = isOccluded;
                 }
-                mStatusBarManager.disable(flags);
+                return result;
             }
+        }
+
+        @Override
+        public void dismiss() {
+            checkPermission();
+            mKeyguardViewMediator.dismiss();
+        }
+
+        @Override
+        public void onDreamingStarted() {
+            checkPermission();
+            mKeyguardViewMediator.onDreamingStarted();
+        }
+
+        @Override
+        public void onDreamingStopped() {
+            checkPermission();
+            mKeyguardViewMediator.onDreamingStopped();
+        }
+
+        @Override
+        public void onScreenTurnedOff(int reason) {
+            checkPermission();
+            mKeyguardViewMediator.onScreenTurnedOff(reason);
+        }
+
+        @Override
+        public void onScreenTurnedOn(IKeyguardShowCallback callback) {
+            checkPermission();
+            mKeyguardViewMediator.onScreenTurnedOn(callback);
+        }
+
+        @Override
+        public void setKeyguardEnabled(boolean enabled) {
+            checkPermission();
+            mKeyguardViewMediator.setKeyguardEnabled(enabled);
+        }
+
+        @Override
+        public boolean isDismissable() {
+            return mKeyguardViewMediator.isDismissable();
+        }
+
+        @Override
+        public void onSystemReady() {
+            checkPermission();
+            mKeyguardViewMediator.onSystemReady();
+        }
+
+        @Override
+        public void doKeyguardTimeout(Bundle options) {
+            checkPermission();
+            mKeyguardViewMediator.doKeyguardTimeout(options);
+        }
+
+        @Override
+        public void setCurrentUser(int userId) {
+            checkPermission();
+            mKeyguardViewMediator.setCurrentUser(userId);
+        }
+
+        @Override
+        public void showAssistant() {
+            checkPermission();
+        }
+
+        @Override
+        public void dispatch(MotionEvent event) {
+            checkPermission();
+        }
+
+        @Override
+        public void launchCamera() {
+            checkPermission();
+        }
+
+        @Override
+        public void onBootCompleted() {
+            checkPermission();
+            mKeyguardViewMediator.onBootCompleted();
         }
     };
 }

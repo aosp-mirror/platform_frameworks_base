@@ -60,7 +60,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
 
     private AudioManager mAudioManager;
     private TelephonyManager mTelephonyManager = null;
-    protected KeyguardViewMediator.ViewMediatorCallback mViewMediatorCallback;
+    protected ViewMediatorCallback mViewMediatorCallback;
     protected LockPatternUtils mLockPatternUtils;
     private OnDismissAction mDismissAction;
 
@@ -68,7 +68,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     // they will be handled here for specific media types such as music, otherwise
     // the audio service will bring up the volume dialog.
     private static final boolean KEYGUARD_MANAGES_VOLUME = true;
-    private static final boolean DEBUG = false;
+    public static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardViewBase";
 
     private KeyguardSecurityContainer mSecurityContainer;
@@ -231,7 +231,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     /**
      * Called when the screen turned off.
      */
-    protected void onScreenTurnedOff() {
+    public void onScreenTurnedOff() {
         if (DEBUG) Log.d(TAG, String.format("screen off, instance %s at %s",
                 Integer.toHexString(hashCode()), SystemClock.uptimeMillis()));
         // Once the screen turns off, we no longer consider this to be first boot and we want the
@@ -245,7 +245,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     /**
      * Called when the screen turned on.
      */
-    protected void onScreenTurnedOn() {
+    public void onScreenTurnedOn() {
         if (DEBUG) Log.d(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
         mSecurityContainer.showPrimarySecurityScreen(false);
         mSecurityContainer.onResume(KeyguardSecurityView.SCREEN_ON);
@@ -433,8 +433,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
         return false;
     }
 
-    public void setViewMediatorCallback(
-            KeyguardViewMediator.ViewMediatorCallback viewMediatorCallback) {
+    public void setViewMediatorCallback(ViewMediatorCallback viewMediatorCallback) {
         mViewMediatorCallback = viewMediatorCallback;
         // Update ViewMediator with the current input method requirements
         mViewMediatorCallback.setNeedsInput(mSecurityContainer.needsInput());
@@ -484,7 +483,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
         mActivityLauncher.launchCamera(getHandler(), null);
     }
 
-    protected void setLockPatternUtils(LockPatternUtils utils) {
+    public void setLockPatternUtils(LockPatternUtils utils) {
         mLockPatternUtils = utils;
         mSecurityContainer.setLockPatternUtils(utils);
     }

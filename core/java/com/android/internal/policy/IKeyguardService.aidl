@@ -25,22 +25,23 @@ import android.os.Bundle;
 interface IKeyguardService {
     boolean isShowing();
     boolean isSecure();
-    boolean isShowingAndNotHidden();
+    boolean isShowingAndNotOccluded();
     boolean isInputRestricted();
     boolean isDismissable();
     oneway void verifyUnlock(IKeyguardExitCallback callback);
     oneway void keyguardDone(boolean authenticated, boolean wakeup);
 
     /**
-     * Hides the Keyguard when a window dismisses the Keyguard with flag FLAG_SHOW_ON_LOCK_SCREEN.
+     * Sets the Keyguard as occluded when a window dismisses the Keyguard with flag
+     * FLAG_SHOW_ON_LOCK_SCREEN.
      *
-     * @param isHidden Whether the Keyguard should be hidden.
-     * @return See IKeyguardServiceConstants.KEYGUARD_SERVICE_HIDE_*. This is needed because
+     * @param isOccluded Whether the Keyguard is occluded by another window.
+     * @return See IKeyguardServiceConstants.KEYGUARD_SERVICE_SET_OCCLUDED_*. This is needed because
      *         PhoneWindowManager needs to set these flags immediately and can't wait for the
      *         Keyguard thread to pick it up. In the hidden case, PhoneWindowManager is solely
      *         responsible to make sure that the flags are unset.
      */
-    int setHidden(boolean isHidden);
+    int setOccluded(boolean isOccluded);
 
     oneway void dismiss();
     oneway void onDreamingStarted();

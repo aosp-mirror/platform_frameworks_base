@@ -38,7 +38,7 @@ import com.android.internal.widget.LockPatternUtils;
  */
 public class KeyguardSecurityViewFlipper extends ViewFlipper implements KeyguardSecurityView {
     private static final String TAG = "KeyguardSecurityViewFlipper";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
 
     private Rect mTempRect = new Rect();
 

@@ -38,11 +38,6 @@ public class KeyguardSimpleHostView extends KeyguardViewBase {
     }
 
     @Override
-    public void verifyUnlock() {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
     public void cleanUp() {
         // TODO Auto-generated method stub
     }

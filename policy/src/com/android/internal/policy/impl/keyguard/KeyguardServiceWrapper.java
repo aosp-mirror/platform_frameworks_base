@@ -58,9 +58,9 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         return false; // TODO cache state
     }
 
-    public boolean isShowingAndNotHidden() {
+    public boolean isShowingAndNotOccluded() {
         try {
-            return mService.isShowingAndNotHidden();
+            return mService.isShowingAndNotOccluded();
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }
@@ -101,12 +101,12 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
-    public int setHidden(boolean isHidden) {
+    public int setOccluded(boolean isOccluded) {
         try {
-            return mService.setHidden(isHidden);
+            return mService.setOccluded(isOccluded);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
-            return IKeyguardServiceConstants.KEYGUARD_SERVICE_HIDE_RESULT_NONE;
+            return IKeyguardServiceConstants.KEYGUARD_SERVICE_SET_OCCLUDED_RESULT_NONE;
         }
     }
 

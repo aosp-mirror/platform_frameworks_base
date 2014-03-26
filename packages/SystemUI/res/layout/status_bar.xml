@@ -27,7 +27,6 @@
     android:orientation="vertical"
     android:focusable="true"
     android:descendantFocusability="afterDescendants"
-    android:fitsSystemWindows="true"
     >
 
     <ImageView

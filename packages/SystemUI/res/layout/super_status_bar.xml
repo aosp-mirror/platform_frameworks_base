@@ -21,9 +21,10 @@
 <com.android.systemui.statusbar.phone.StatusBarWindowView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:focusable="true"
     android:descendantFocusability="afterDescendants"
-    android:fitsSystemWindows="true"
     android:background="@android:color/transparent"
     >
 
@@ -36,6 +37,7 @@
         android:id="@+id/panel_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginBottom="@*android:dimen/navigation_bar_height"
         >
         <include layout="@layout/status_bar_expanded"
             android:layout_width="match_parent"
@@ -48,9 +50,4 @@
             />
     </com.android.systemui.statusbar.phone.PanelHolder>
 
-    <FrameLayout android:id="@+id/keyguard"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone">
-    </FrameLayout>
 </com.android.systemui.statusbar.phone.StatusBarWindowView>

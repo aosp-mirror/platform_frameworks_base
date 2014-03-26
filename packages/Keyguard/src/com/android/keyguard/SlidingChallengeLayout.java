@@ -45,7 +45,7 @@ import android.widget.Scroller;
  */
 public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout {
     private static final String TAG = "SlidingChallengeLayout";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
 
     // The drag handle is measured in dp above & below the top edge of the
     // challenge view; these parameters change based on whether the challenge

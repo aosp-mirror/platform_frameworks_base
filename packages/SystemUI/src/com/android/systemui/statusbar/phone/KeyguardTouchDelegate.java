@@ -140,16 +140,16 @@ public class KeyguardTouchDelegate {
         return false;
     }
 
-    public boolean isShowingAndNotHidden() {
+    public boolean isShowingAndNotOccluded() {
         final IKeyguardService service = mService;
         if (service != null) {
             try {
-                return service.isShowingAndNotHidden();
+                return service.isShowingAndNotOccluded();
             } catch (RemoteException e) {
                 Slog.w(TAG , "Remote Exception", e);
             }
         } else {
-            Slog.w(TAG, "isShowingAndNotHidden(): NO SERVICE!");
+            Slog.w(TAG, "isShowingAndNotOccluded(): NO SERVICE!");
         }
         return false;
     }
