@@ -1105,6 +1105,7 @@ public class PackageParser {
                 if (!parseUsesPermission(pkg, res, parser, attrs, outError)) {
                     return null;
                 }
+
             } else if (tagName.equals("uses-configuration")) {
                 ConfigurationInfo cPref = new ConfigurationInfo();
                 sa = res.obtainAttributes(attrs,
