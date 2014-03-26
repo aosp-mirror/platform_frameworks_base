@@ -36,6 +36,8 @@
               Tips and Tricks</a></li>
           <li><a href="<?cs var:toroot ?>sdk/installing/studio-layout.html">
               Using the Layout Editor</a></li>
+          <li><a href="<?cs var:toroot ?>sdk/installing/studio-build.html">
+              Building your Project</a></li>
           </ul>
       </li>
       <li><a href="<?cs var:toroot ?>sdk/exploring.html">
