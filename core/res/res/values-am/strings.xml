@@ -982,7 +982,7 @@
     <string name="search_go" msgid="8298016669822141719">"ፍለጋ"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"ፍለጋ"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"ጥያቄ ፍለጋ"</string>
-    <string name="searchview_description_clear" msgid="1330281990951833033">"ጥያቄ አጥራ"</string>
+    <string name="searchview_description_clear" msgid="1330281990951833033">"ጥያቄ አጽዳ"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"ጥያቄ አስረክብ"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"የድምፅ ፍለጋ"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"በመንካት አስስ ይንቃ?"</string>
