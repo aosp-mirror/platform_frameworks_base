@@ -1054,8 +1054,6 @@ public abstract class Drawable {
             drawable = new LayerDrawable();
         } else if (name.equals("transition")) {
             drawable = new TransitionDrawable();
-        } else if (name.equals("reveal")) {
-            drawable = new RevealDrawable();
         } else if (name.equals("touch-feedback")) {
             drawable = new TouchFeedbackDrawable();
         } else if (name.equals("color")) {

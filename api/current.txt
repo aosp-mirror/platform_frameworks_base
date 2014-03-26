@@ -1519,6 +1519,7 @@ package android {
     field public static final int inputExtractEditText = 16908325; // 0x1020025
     field public static final int keyboardView = 16908326; // 0x1020026
     field public static final int list = 16908298; // 0x102000a
+    field public static final int mask = 16908335; // 0x102002f
     field public static final int message = 16908299; // 0x102000b
     field public static final int paste = 16908322; // 0x1020022
     field public static final int primary = 16908300; // 0x102000c
@@ -10757,10 +10758,6 @@ package android.graphics.drawable {
     method public void setPicture(android.graphics.Picture);
   }
 
-  public class RevealDrawable extends android.graphics.drawable.LayerDrawable {
-    ctor public RevealDrawable(android.graphics.drawable.Drawable[]);
-  }
-
   public class RotateDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
     ctor public RotateDrawable();
     method public void draw(android.graphics.Canvas);
@@ -10830,7 +10827,8 @@ package android.graphics.drawable {
     method public void addState(int[], android.graphics.drawable.Drawable);
   }
 
-  public class TouchFeedbackDrawable extends android.graphics.drawable.DrawableWrapper {
+  public class TouchFeedbackDrawable extends android.graphics.drawable.LayerDrawable {
+    method public android.graphics.Rect getDirtyBounds();
   }
 
   public class TransitionDrawable extends android.graphics.drawable.LayerDrawable implements android.graphics.drawable.Drawable.Callback {

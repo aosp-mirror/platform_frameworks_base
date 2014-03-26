@@ -16,6 +16,8 @@
 
 <touch-feedback xmlns:android="http://schemas.android.com/apk/res/android"
     android:tint="?attr/colorButtonPressed">
-    <nine-patch android:src="@drawable/btn_qntm_alpha"
-        android:tint="?attr/colorButtonNormal" />
+    <item>
+        <nine-patch android:src="@drawable/btn_qntm_alpha"
+            android:tint="?attr/colorButtonNormal" />
+    </item>
 </touch-feedback>
