@@ -71,7 +71,7 @@ announcement <a href="http://android-developers.blogspot.com/2014/03/google-play
 </li>
 <li><strong>Analytics</strong> - Google Analytics and Tag Manager are now part of Google Play services.
    <ul>
-      <li><a href="http://developers.google.com/analytics/devguides/collection/android/v3/" class="external-link">Getting Started with the Analytics API in Android</a></li>
+      <li><a href="http://developers.google.com/analytics/devguides/collection/android/v4/" class="external-link">Getting Started with the Analytics API in Android</a></li>
       <li><a href="/reference/com/google/android/gms/analytics/package-summary.html">Analytics API reference</a></li>
       <li><a href="http://developers.google.com/tag-manager/android/" class="external-link">Getting Started with the Tag Manager API in Android</a></li>
       <li><a href="/reference/com/google/android/gms/tagmanager/package-summary.html">Tag Manager API reference</a></li>
