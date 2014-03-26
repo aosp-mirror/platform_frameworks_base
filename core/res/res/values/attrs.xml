@@ -910,6 +910,16 @@
         <!-- Drawable for WebView find-on-page dialogue's "previous" button. @hide -->
         <attr name="findOnPagePreviousDrawable" format="reference" />
 
+        <!-- ============= -->
+        <!-- Color palette -->
+        <!-- ============= -->
+        <attr name="colorControlNormal" format="color" />
+        <attr name="colorControlActivated" format="color" />
+        <attr name="colorButtonNormal" format="color" />
+        <attr name="colorButtonPressed" format="color" />
+        <attr name="colorButtonNormalColored" format="color" />
+        <attr name="colorButtonPressedColored" format="color" />
+
     </declare-styleable>
 
     <!-- **************************************************************** -->

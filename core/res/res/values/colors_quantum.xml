@@ -148,13 +148,13 @@
 
     <!-- Text & foreground colors -->
 
-    <color name="primary_text_quantum_light">#ff000000</color>
-    <color name="secondary_text_quantum_light">#de000000</color>
-    <color name="tertiary_text_quantum_light">#8a000000</color>
+    <color name="primary_text_quantum_light">#de000000</color>
+    <color name="secondary_text_quantum_light">#8a000000</color>
+    <color name="tertiary_text_quantum_light">#4d000000</color>
 
-    <color name="primary_text_quantum_dark">#ffffffff</color>
-    <color name="secondary_text_quantum_dark">#deffffff</color>
-    <color name="tertiary_text_quantum_dark">#8affffff</color>
+    <color name="primary_text_quantum_dark">#deffffff</color>
+    <color name="secondary_text_quantum_dark">#8affffff</color>
+    <color name="tertiary_text_quantum_dark">#4dffffff</color>
 
     <!-- "Theme" colors to be replaced by attrs when available -->
     <color name="theme_color_100">@color/quantum_teal_100</color>

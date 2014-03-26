@@ -2115,6 +2115,12 @@
   <public type="attr" name="transitionGroup" />
   <public type="attr" name="requiredForProfile"/>
   <public type="attr" name="pinned" />
+  <public type="attr" name="colorControlNormal" />
+  <public type="attr" name="colorControlActivated" />
+  <public type="attr" name="colorButtonNormal" />
+  <public type="attr" name="colorButtonPressed" />
+  <public type="attr" name="colorButtonNormalColored" />
+  <public type="attr" name="colorButtonPressedColored" />
 
   <public type="dimen" name="recents_thumbnail_height" />
   <public type="dimen" name="recents_thumbnail_width" />
@@ -2147,13 +2153,9 @@
   <public type="style" name="TextAppearance.Quantum.Widget" />
   <public type="style" name="TextAppearance.Quantum.Widget.ActionBar.Menu" />
   <public type="style" name="TextAppearance.Quantum.Widget.ActionBar.Subtitle" />
-  <public type="style" name="TextAppearance.Quantum.Widget.ActionBar.Subtitle.Inverse" />
   <public type="style" name="TextAppearance.Quantum.Widget.ActionBar.Title" />
-  <public type="style" name="TextAppearance.Quantum.Widget.ActionBar.Title.Inverse" />
   <public type="style" name="TextAppearance.Quantum.Widget.ActionMode.Subtitle" />
-  <public type="style" name="TextAppearance.Quantum.Widget.ActionMode.Subtitle.Inverse" />
   <public type="style" name="TextAppearance.Quantum.Widget.ActionMode.Title" />
-  <public type="style" name="TextAppearance.Quantum.Widget.ActionMode.Title.Inverse" />
   <public type="style" name="TextAppearance.Quantum.Widget.Button" />
   <public type="style" name="TextAppearance.Quantum.Widget.DropDownHint" />
   <public type="style" name="TextAppearance.Quantum.Widget.DropDownItem" />
@@ -2215,6 +2217,8 @@
   <public type="style" name="Widget.Quantum.Button.Inset" />
   <public type="style" name="Widget.Quantum.Button.Small" />
   <public type="style" name="Widget.Quantum.Button.Toggle" />
+  <public type="style" name="Widget.Quantum.ButtonBar" />
+  <public type="style" name="Widget.Quantum.ButtonBar.AlertDialog" />
   <public type="style" name="Widget.Quantum.CalendarView" />
   <public type="style" name="Widget.Quantum.CheckedTextView" />
   <public type="style" name="Widget.Quantum.CompoundButton.CheckBox" />
@@ -2246,6 +2250,7 @@
   <public type="style" name="Widget.Quantum.RatingBar.Small" />
   <public type="style" name="Widget.Quantum.ScrollView" />
   <public type="style" name="Widget.Quantum.SeekBar" />
+  <public type="style" name="Widget.Quantum.SegmentedButton" />
   <public type="style" name="Widget.Quantum.Spinner" />
   <public type="style" name="Widget.Quantum.Tab" />
   <public type="style" name="Widget.Quantum.TabWidget" />
@@ -2257,17 +2262,12 @@
   <public type="style" name="Widget.Quantum.Light" />
   <public type="style" name="Widget.Quantum.Light.ActionBar" />
   <public type="style" name="Widget.Quantum.Light.ActionBar.Solid" />
-  <public type="style" name="Widget.Quantum.Light.ActionBar.Solid.Inverse" />
   <public type="style" name="Widget.Quantum.Light.ActionBar.TabBar" />
-  <public type="style" name="Widget.Quantum.Light.ActionBar.TabBar.Inverse" />
   <public type="style" name="Widget.Quantum.Light.ActionBar.TabText" />
-  <public type="style" name="Widget.Quantum.Light.ActionBar.TabText.Inverse" />
   <public type="style" name="Widget.Quantum.Light.ActionBar.TabView" />
-  <public type="style" name="Widget.Quantum.Light.ActionBar.TabView.Inverse" />
   <public type="style" name="Widget.Quantum.Light.ActionButton" />
   <public type="style" name="Widget.Quantum.Light.ActionButton.CloseMode" />
   <public type="style" name="Widget.Quantum.Light.ActionButton.Overflow" />
-  <public type="style" name="Widget.Quantum.Light.ActionMode.Inverse" />
   <public type="style" name="Widget.Quantum.Light.ActionMode" />
   <public type="style" name="Widget.Quantum.Light.AutoCompleteTextView" />
   <public type="style" name="Widget.Quantum.Light.Button" />
@@ -2275,6 +2275,8 @@
   <public type="style" name="Widget.Quantum.Light.Button.Inset" />
   <public type="style" name="Widget.Quantum.Light.Button.Small" />
   <public type="style" name="Widget.Quantum.Light.Button.Toggle" />
+  <public type="style" name="Widget.Quantum.Light.ButtonBar" />
+  <public type="style" name="Widget.Quantum.Light.ButtonBar.AlertDialog" />
   <public type="style" name="Widget.Quantum.Light.CalendarView" />
   <public type="style" name="Widget.Quantum.Light.CheckedTextView" />
   <public type="style" name="Widget.Quantum.Light.CompoundButton.CheckBox" />
@@ -2308,6 +2310,7 @@
   <public type="style" name="Widget.Quantum.Light.RatingBar.Small" />
   <public type="style" name="Widget.Quantum.Light.ScrollView" />
   <public type="style" name="Widget.Quantum.Light.SeekBar" />
+  <public type="style" name="Widget.Quantum.Light.SegmentedButton" />
   <public type="style" name="Widget.Quantum.Light.Spinner" />
   <public type="style" name="Widget.Quantum.Light.Tab" />
   <public type="style" name="Widget.Quantum.Light.TabWidget" />
@@ -2315,14 +2318,6 @@
   <public type="style" name="Widget.Quantum.Light.TextView.SpinnerItem" />
   <public type="style" name="Widget.Quantum.Light.WebTextView" />
   <public type="style" name="Widget.Quantum.Light.WebView" />
-
-  <public type="style" name="Quantum.ButtonBar.AlertDialog" />
-  <public type="style" name="Quantum.ButtonBar" />
-  <public type="style" name="Quantum.SegmentedButton" />
-
-  <public type="style" name="Quantum.Light.ButtonBar.AlertDialog" />
-  <public type="style" name="Quantum.Light.ButtonBar" />
-  <public type="style" name="Quantum.Light.SegmentedButton" />
 
   <public type="style" name="Widget.Quantum.Button.Paper" />
   <public type="style" name="Widget.Quantum.Button.Paper.Color" />
