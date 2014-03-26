@@ -32,6 +32,5 @@
         android:layout_gravity="center_horizontal|bottom"
         android:gravity="center"
         android:text="@string/quick_settings_user_label"
-        android:textcolor="#ffffffff"
         />
 </FrameLayout>

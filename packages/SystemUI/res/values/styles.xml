@@ -121,7 +121,7 @@
     </style>
 
     <style name="TextAppearance.QuickSettings.TileView.User" parent="@style/TextAppearance.QuickSettings.TileView">
-        <item name="android:background">#CC000000</item>
+        <item name="android:background">#CCffffff</item>
         <item name="android:padding">4dp</item>
         <item name="android:singleLine">true</item>
         <item name="android:fadingEdge">horizontal</item>
