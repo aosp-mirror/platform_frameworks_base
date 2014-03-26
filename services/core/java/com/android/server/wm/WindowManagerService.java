@@ -290,6 +290,8 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final String DENSITY_OVERRIDE = "ro.config.density_override";
     private static final String SIZE_OVERRIDE = "ro.config.size_override";
 
+    private static final String SCREEN_CIRCULAR = "ro.display.circular";
+
     private static final int MAX_SCREENSHOT_RETRIES = 3;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
@@ -419,6 +421,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final SurfaceSession mFxSession;
     Watermark mWatermark;
     StrictModeFlash mStrictModeFlash;
+    CircularDisplayMask mCircularDisplayMask;
     FocusedStackFrame mFocusedStackFrame;
 
     int mFocusedStackLayer;
@@ -816,6 +819,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
+        showCircularDisplayMaskIfNeeded();
     }
 
     public InputMonitor getInputMonitor() {
@@ -5547,6 +5551,37 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void showCircularDisplayMaskIfNeeded() {
+        if (SystemProperties.getBoolean(SCREEN_CIRCULAR, false)) {
+            mH.sendMessage(mH.obtainMessage(H.SHOW_DISPLAY_MASK));
+        }
+    }
+
+    public void showCircularMask() {
+        synchronized(mWindowMap) {
+
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                    ">>> OPEN TRANSACTION showDisplayMask");
+            SurfaceControl.openTransaction();
+            try {
+                // TODO(multi-display): support multiple displays
+                if (mCircularDisplayMask == null) {
+                    mCircularDisplayMask = new CircularDisplayMask(
+                            getDefaultDisplayContentLocked().getDisplay(),
+                            mFxSession,
+                            mPolicy.windowTypeToLayerLw(
+                                    WindowManager.LayoutParams.TYPE_POINTER)
+                                    * TYPE_LAYER_MULTIPLIER + 10);
+                }
+                mCircularDisplayMask.setVisibility(true);
+            } finally {
+                SurfaceControl.closeTransaction();
+                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                        "<<< CLOSE TRANSACTION showDisplayMask");
+            }
+        }
+    }
+
     // TODO: more accounting of which pid(s) turned it on, keep count,
     // only allow disables from pids which have count on, etc.
     @Override
@@ -7180,6 +7215,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int REMOVE_STARTING_TIMEOUT = 33;
 
+        public static final int SHOW_DISPLAY_MASK = 34;
+
         @Override
         public void handleMessage(Message msg) {
             if (DEBUG_WINDOW_TRACE) {
@@ -7578,6 +7615,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case SHOW_STRICT_MODE_VIOLATION: {
                     showStrictModeViolation(msg.arg1, msg.arg2);
+                    break;
+                }
+
+                case SHOW_DISPLAY_MASK: {
+                    showCircularMask();
                     break;
                 }
 
@@ -9051,6 +9093,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (mStrictModeFlash != null) {
                 mStrictModeFlash.positionSurface(defaultDw, defaultDh);
+            }
+            if (mCircularDisplayMask != null) {
+                mCircularDisplayMask.positionSurface(defaultDw, defaultDh);
             }
 
             boolean focusDisplayed = false;
