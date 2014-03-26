@@ -1548,14 +1548,16 @@ private:
 };
 
 /**
- * Not a canvas operation, used only by 3d / z ordering logic in DisplayList::iterate()
+ * Not a canvas operation, used only by 3d / z ordering logic in RenderNode::iterate()
  */
 class DrawShadowOp : public DrawOp {
 public:
-    DrawShadowOp(const mat4& transformXY, const mat4& transformZ, float alpha,
+    DrawShadowOp(const mat4& transformXY, const mat4& transformZ,
+            float casterAlpha, bool casterUnclipped,
             float fallbackWidth, float fallbackHeight,
             const SkPath* outline, const SkPath* revealClip)
-            : DrawOp(NULL), mTransformXY(transformXY), mTransformZ(transformZ), mAlpha(alpha),
+            : DrawOp(NULL), mTransformXY(transformXY), mTransformZ(transformZ),
+            mCasterAlpha(casterAlpha), mCasterUnclipped(casterUnclipped),
             mFallbackWidth(fallbackWidth), mFallbackHeight(fallbackHeight),
             mOutline(outline), mRevealClip(revealClip) {}
 
@@ -1572,7 +1574,8 @@ public:
             Op(casterPerimeter, *mRevealClip, kIntersect_PathOp, &casterPerimeter);
         }
 
-        return renderer.drawShadow(mTransformXY, mTransformZ, mAlpha, &casterPerimeter);
+        return renderer.drawShadow(mTransformXY, mTransformZ,
+                mCasterAlpha, mCasterUnclipped, &casterPerimeter);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1584,7 +1587,8 @@ public:
 private:
     const mat4 mTransformXY;
     const mat4 mTransformZ;
-    const float mAlpha;
+    const float mCasterAlpha;
+    const bool mCasterUnclipped;
     const float mFallbackWidth;
     const float mFallbackHeight;
 

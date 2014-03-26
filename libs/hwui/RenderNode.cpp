@@ -416,8 +416,17 @@ void RenderNode::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTransl
                     const SkPath* revealClipPath = revealClip.hasConvexClip()
                             ?  revealClip.getPath() : NULL; // only pass the reveal clip's path if it's convex
 
+                    /**
+                     * The drawing area of the caster is always the same as the its perimeter (which
+                     * the shadow system uses) *except* in the inverse clip case. Inform the shadow
+                     * system that the caster's drawing area (as opposed to its perimeter) has been
+                     * clipped, so that it knows the caster can't be opaque.
+                     */
+                    bool casterUnclipped = !revealClip.willClip() || revealClip.hasConvexClip();
+
                     DisplayListOp* shadowOp  = new (alloc) DrawShadowOp(
-                            shadowMatrixXY, shadowMatrixZ, caster->properties().getAlpha(),
+                            shadowMatrixXY, shadowMatrixZ,
+                            caster->properties().getAlpha(), casterUnclipped,
                             caster->properties().getWidth(), caster->properties().getHeight(),
                             outlinePath, revealClipPath);
                     handler(shadowOp, PROPERTY_SAVECOUNT, properties().getClipToBounds());
