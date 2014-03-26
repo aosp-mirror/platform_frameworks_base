@@ -22,8 +22,10 @@
 
 #include <SkCamera.h>
 #include <SkMatrix.h>
+#include <SkRegion.h>
 
 #include "Rect.h"
+#include "RevealClip.h"
 #include "Outline.h"
 
 #define TRANSLATION 0x0001
@@ -34,7 +36,6 @@
 
 class SkBitmap;
 class SkPaint;
-class SkRegion;
 
 namespace android {
 namespace uirenderer {
@@ -415,6 +416,10 @@ public:
         return mPrimitiveFields.mOutline;
     }
 
+    const RevealClip& getRevealClip() const {
+        return mPrimitiveFields.mRevealClip;
+    }
+
     bool getProjectBackwards() const {
         return mPrimitiveFields.mProjectBackwards;
     }
@@ -423,8 +428,27 @@ public:
 
     ANDROID_API void updateMatrix();
 
+    ANDROID_API void updateClipPath();
+
+    // signals that mComputedFields.mClipPath is up to date, and should be used for clipping
+    bool hasClippingPath() const {
+        return mPrimitiveFields.mOutline.willClip() || mPrimitiveFields.mRevealClip.willClip();
+    }
+
+    const SkPath* getClippingPath() const {
+        return hasClippingPath() ? mComputedFields.mClipPath : NULL;
+    }
+
+    SkRegion::Op getClippingPathOp() const {
+        return mComputedFields.mClipPathOp;
+    }
+
     Outline& mutableOutline() {
         return mPrimitiveFields.mOutline;
+    }
+
+    RevealClip& mutableRevealClip() {
+        return mPrimitiveFields.mRevealClip;
     }
 
 private:
@@ -442,6 +466,7 @@ private:
         PrimitiveFields();
 
         Outline mOutline;
+        RevealClip mRevealClip;
         bool mClipToBounds;
         bool mProjectBackwards;
         bool mProjectionReceiver;
@@ -483,6 +508,8 @@ private:
         Matrix4* mTransformMatrix;
         Sk3DView* mTransformCamera;
         SkMatrix* mTransformMatrix3D;
+        SkPath* mClipPath; // TODO: remove this, create new ops for efficient/special case clipping
+        SkRegion::Op mClipPathOp;
     } mComputedFields;
 };
 

@@ -115,23 +115,38 @@ static void android_view_RenderNode_setOutlineRoundRect(JNIEnv* env,
         jint right, jint bottom, jfloat radius) {
     RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
     displayList->mutateStagingProperties().mutableOutline().setRoundRect(left, top, right, bottom, radius);
+    displayList->mutateStagingProperties().updateClipPath();
 }
+
 static void android_view_RenderNode_setOutlineConvexPath(JNIEnv* env,
         jobject clazz, jlong displayListPtr, jlong outlinePathPtr) {
     RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
     SkPath* outlinePath = reinterpret_cast<SkPath*>(outlinePathPtr);
     displayList->mutateStagingProperties().mutableOutline().setConvexPath(outlinePath);
+    displayList->mutateStagingProperties().updateClipPath();
 }
+
 static void android_view_RenderNode_setOutlineEmpty(JNIEnv* env,
         jobject clazz, jlong displayListPtr) {
     RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
     displayList->mutateStagingProperties().mutableOutline().setEmpty();
+    displayList->mutateStagingProperties().updateClipPath();
 }
 
 static void android_view_RenderNode_setClipToOutline(JNIEnv* env,
         jobject clazz, jlong displayListPtr, jboolean clipToOutline) {
     RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
     displayList->mutateStagingProperties().mutableOutline().setShouldClip(clipToOutline);
+    displayList->mutateStagingProperties().updateClipPath();
+}
+
+static void android_view_RenderNode_setRevealClip(JNIEnv* env,
+        jobject clazz, jlong displayListPtr, jboolean shouldClip, jboolean inverseClip,
+        jfloat x, jfloat y, jfloat radius) {
+    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
+    displayList->mutateStagingProperties().mutableRevealClip().set(
+            shouldClip, inverseClip, x, y, radius);
+    displayList->mutateStagingProperties().updateClipPath();
 }
 
 static void android_view_RenderNode_setAlpha(JNIEnv* env,
@@ -396,6 +411,7 @@ static JNINativeMethod gMethods[] = {
     { "nSetOutlineConvexPath", "(JJ)V",  (void*) android_view_RenderNode_setOutlineConvexPath },
     { "nSetOutlineEmpty",      "(J)V",   (void*) android_view_RenderNode_setOutlineEmpty },
     { "nSetClipToOutline",     "(JZ)V",  (void*) android_view_RenderNode_setClipToOutline },
+    { "nSetRevealClip",        "(JZZFFF)V", (void*) android_view_RenderNode_setRevealClip },
 
     { "nSetAlpha",             "(JF)V",  (void*) android_view_RenderNode_setAlpha },
     { "nSetHasOverlappingRendering", "(JZ)V",

@@ -58,7 +58,6 @@ public:
         mShouldClip = clip;
     }
 
-
     bool willClip() const {
         // only round rect outlines can be used for clipping
         return mShouldClip && (mType == kOutlineType_RoundRect);
