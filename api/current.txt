@@ -4453,6 +4453,7 @@ package android.app {
     ctor public Notification.Builder(android.content.Context);
     method public android.app.Notification.Builder addAction(int, java.lang.CharSequence, android.app.PendingIntent);
     method public android.app.Notification.Builder addExtras(android.os.Bundle);
+    method public android.app.Notification.Builder addPerson(java.lang.String);
     method public android.app.Notification build();
     method public android.os.Bundle getExtras();
     method public deprecated android.app.Notification getNotification();

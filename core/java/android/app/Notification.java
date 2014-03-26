@@ -1311,6 +1311,7 @@ public class Notification implements Parcelable
         private Notification mPublicVersion = null;
         private boolean mQuantumTheme;
         private final LegacyNotificationUtil mLegacyNotificationUtil;
+        private ArrayList<String> mPeople;
 
         /**
          * Constructs a new Builder with the defaults:
@@ -1338,6 +1339,7 @@ public class Notification implements Parcelable
             mWhen = System.currentTimeMillis();
             mAudioStreamType = STREAM_DEFAULT;
             mPriority = PRIORITY_DEFAULT;
+            mPeople = new ArrayList<String>();
 
             // TODO: Decide on targetSdk from calling app whether to use quantum theme.
             mQuantumTheme = true;
@@ -1719,6 +1721,16 @@ public class Notification implements Parcelable
          */
         public Builder setCategory(String category) {
             mCategory = category;
+            return this;
+        }
+
+        /**
+         * Add a person that is relevant to this notification.
+         *
+         * @see Notification#EXTRA_PEOPLE
+         */
+        public Builder addPerson(String handle) {
+            mPeople.add(handle);
             return this;
         }
 
@@ -2148,6 +2160,9 @@ public class Notification implements Parcelable
             extras.putBoolean(EXTRA_SHOW_WHEN, mShowWhen);
             if (mLargeIcon != null) {
                 extras.putParcelable(EXTRA_LARGE_ICON, mLargeIcon);
+            }
+            if (!mPeople.isEmpty()) {
+                extras.putStringArray(EXTRA_PEOPLE, mPeople.toArray(new String[mPeople.size()]));
             }
         }
 
