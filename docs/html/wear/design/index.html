@@ -433,7 +433,8 @@ By providing a smart connection to the rest of the world while respecting the us
 
 <p>Actions appear to the right of your notification, allowing the user to act on your notification. Up to three actions are permitted. The most-used action should be placed first, so that it is a single swipe away from your content.</p>
 
-<p>Actions consist of an icon and a caption. Icons should be PNG files, white on transparent background, 64 × 64 DP. Captions should be verb-driven and short, and will be automatically truncated at one line.</p>
+<p>Actions consist of an icon and a caption. Icons should be PNG files, white on transparent background, 32 × 32 dp (with 8 dp padding), as specified in the <a href="/design/style/iconography.html#action-bar">Iconography</a> design guide
+for the action bar icons. Captions should be verb-driven and short, and will be automatically truncated at one line.</p>
 
 <p>Actions are optional. Many useful notifications will not need to include actions at all.</p>
 
@@ -452,7 +453,8 @@ Notifications for Android Wear</a>.</p>
 
 <p>Images appear behind cards in the stream, providing context and additional glanceability. Your image should support the core message of the notification; for example, a card about a sports team could include the team color and logo; a message from a contact should display that person's profile photo.</p>
 
-<p>Bear in mind that the card will partially cover the lower part of the image. Images should be at least 320 × 320 pixels at hdpi. Image backgrounds move when horizontally swiped, so landscape-oriented images work better on notifications that include pages or actions.</p>
+<p>Bear in mind that the card will partially cover the lower part of the image. Images should be sized as
+appropriate for the notification appearance on handsets, which is 64 x 64 dp. Image backgrounds move when horizontally swiped, so landscape-oriented images work better on notifications that include pages or actions.</p>
 
 <p>To add large images, use <code><a href="/reference/android/support/v4/app/NotificationCompat.Builder.html#setLargeIcon(android.graphics.Bitmap)">setLargeIcon()</a></code> with any notification, as
 shown in <a href="/wear/notifications/creating.html">Creating
