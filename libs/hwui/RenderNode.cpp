@@ -107,6 +107,23 @@ void RenderNode::updateProperties() {
     }
 }
 
+bool RenderNode::hasFunctors() {
+    if (!mDisplayListData) return false;
+
+    if (mDisplayListData->functorCount) {
+        return true;
+    }
+
+    for (size_t i = 0; i < mDisplayListData->children.size(); i++) {
+        RenderNode* childNode = mDisplayListData->children[i]->mDisplayList;
+        if (childNode->hasFunctors()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 /*
  * For property operations, we pass a savecount of 0, since the operations aren't part of the
  * displaylist, and thus don't have to compensate for the record-time/playback-time discrepancy in

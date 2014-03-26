@@ -61,6 +61,7 @@ RenderProxy::RenderProxy(bool translucent)
     SETUP_TASK(createContext);
     args->translucent = translucent;
     mContext = (CanvasContext*) postAndWait(task);
+    mDrawFrameTask.setContext(mContext);
 }
 
 RenderProxy::~RenderProxy() {
@@ -77,7 +78,10 @@ void RenderProxy::destroyContext() {
         SETUP_TASK(destroyContext);
         args->context = mContext;
         mContext = 0;
-        post(task);
+        mDrawFrameTask.setContext(0);
+        // This is also a fence as we need to be certain that there are no
+        // outstanding mDrawFrame tasks posted before it is destroyed
+        postAndWait(task);
     }
 }
 
@@ -117,41 +121,15 @@ void RenderProxy::setup(int width, int height) {
     post(task);
 }
 
-CREATE_BRIDGE3(setDisplayListData, CanvasContext* context, RenderNode* displayList,
-        DisplayListData* newData) {
-    args->context->setDisplayListData(args->displayList, args->newData);
-    return NULL;
-}
-
-void RenderProxy::setDisplayListData(RenderNode* displayList, DisplayListData* newData) {
-    SETUP_TASK(setDisplayListData);
-    args->context = mContext;
-    args->displayList = displayList;
-    args->newData = newData;
-    post(task);
-}
-
-CREATE_BRIDGE4(drawDisplayList, CanvasContext* context, RenderNode* displayList,
-        Rect dirty, const Vector<DeferredLayerUpdater*>* layerUpdates) {
-    Rect* dirty = &args->dirty;
-    if (dirty->bottom == -1 && dirty->left == -1 &&
-            dirty->top == -1 && dirty->right == -1) {
-        dirty = 0;
-    }
-    args->context->processLayerUpdates(args->layerUpdates);
-    args->context->drawDisplayList(args->displayList, dirty);
-    return NULL;
+void RenderProxy::setDisplayListData(RenderNode* renderNode, DisplayListData* newData) {
+    mDrawFrameTask.setDisplayListData(renderNode, newData);
 }
 
 void RenderProxy::drawDisplayList(RenderNode* displayList,
         int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom) {
-    SETUP_TASK(drawDisplayList);
-    args->context = mContext;
-    args->displayList = displayList;
-    args->dirty.set(dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
-    args->layerUpdates = &mLayers;
-    // TODO: Switch to post() once some form of thread safety strategy is in place
-    postAndWait(task);
+    mDrawFrameTask.setRenderNode(displayList);
+    mDrawFrameTask.setDirty(dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
+    mDrawFrameTask.drawFrame(&mRenderThread);
 }
 
 CREATE_BRIDGE1(destroyCanvas, CanvasContext* context) {
@@ -205,9 +183,7 @@ CREATE_BRIDGE2(createDisplayListLayer, int width, int height) {
     Layer* layer = LayerRenderer::createRenderLayer(args->width, args->height);
     if (!layer) return 0;
 
-    OpenGLRenderer* renderer = new LayerRenderer(layer);
-    renderer->initProperties();
-    return new DeferredLayerUpdater(layer, renderer);
+    return new DeferredLayerUpdater(layer);
 }
 
 DeferredLayerUpdater* RenderProxy::createDisplayListLayer(int width, int height) {
@@ -216,7 +192,7 @@ DeferredLayerUpdater* RenderProxy::createDisplayListLayer(int width, int height)
     args->height = height;
     void* retval = postAndWait(task);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(retval);
-    mLayers.push(layer);
+    mDrawFrameTask.addLayer(layer);
     return layer;
 }
 
@@ -230,7 +206,7 @@ DeferredLayerUpdater* RenderProxy::createTextureLayer() {
     SETUP_TASK(createTextureLayer);
     void* retval = postAndWait(task);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(retval);
-    mLayers.push(layer);
+    mDrawFrameTask.addLayer(layer);
     return layer;
 }
 
@@ -254,12 +230,7 @@ bool RenderProxy::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
 }
 
 void RenderProxy::destroyLayer(DeferredLayerUpdater* layer) {
-    for (size_t i = 0; i < mLayers.size(); i++) {
-        if (mLayers[i] == layer) {
-            mLayers.removeAt(i);
-            break;
-        }
-    }
+    mDrawFrameTask.removeLayer(layer);
     SETUP_TASK(destroyLayer);
     args->layer = layer->detachBackingLayer();
     post(task);
