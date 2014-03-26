@@ -21,7 +21,6 @@ import static libcore.io.OsConstants.*;
 import com.android.frameworks.coretests.R;
 import com.android.internal.content.PackageHelper;
 
-import android.app.PackageInstallObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,7 +31,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.IBinder;
@@ -119,12 +117,12 @@ public class PackageManagerTests extends AndroidTestCase {
         super.tearDown();
     }
 
-    private class TestInstallObserver extends PackageInstallObserver {
+    private class PackageInstallObserver extends IPackageInstallObserver.Stub {
         public int returnCode;
 
         private boolean doneFlag = false;
 
-        public void packageInstalled(String packageName, Bundle extras, int returnCode) {
+        public void packageInstalled(String packageName, int returnCode) {
             synchronized (this) {
                 this.returnCode = returnCode;
                 doneFlag = true;
@@ -205,7 +203,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     public void invokeInstallPackage(Uri packageURI, int flags, GenericReceiver receiver,
             boolean shouldSucceed) {
-        TestInstallObserver observer = new TestInstallObserver();
+        PackageInstallObserver observer = new PackageInstallObserver();
         mContext.registerReceiver(receiver, receiver.filter);
         try {
             // Wait on observer
@@ -263,7 +261,7 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     public void invokeInstallPackageFail(Uri packageURI, int flags, int expectedResult) {
-        TestInstallObserver observer = new TestInstallObserver();
+        PackageInstallObserver observer = new PackageInstallObserver();
         try {
             // Wait on observer
             synchronized (observer) {

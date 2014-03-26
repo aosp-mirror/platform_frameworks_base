@@ -25,7 +25,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageInstallObserver;
-import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageMoveObserver;
@@ -404,21 +403,6 @@ interface IPackageManager {
 
     void installPackageWithVerificationAndEncryption(in Uri packageURI,
             in IPackageInstallObserver observer, int flags, in String installerPackageName,
-            in VerificationParams verificationParams,
-            in ContainerEncryptionParams encryptionParams);
-
-    /** Expanded observer versions */
-    void installPackageEtc(in Uri packageURI, IPackageInstallObserver observer,
-            IPackageInstallObserver2 observer2, int flags, in String installerPackageName);
-
-    void installPackageWithVerificationEtc(in Uri packageURI,
-            in IPackageInstallObserver observer, IPackageInstallObserver2 observer2,
-            int flags, in String installerPackageName, in Uri verificationURI,
-            in ManifestDigest manifestDigest, in ContainerEncryptionParams encryptionParams);
-
-    void installPackageWithVerificationAndEncryptionEtc(in Uri packageURI,
-            in IPackageInstallObserver observer, in IPackageInstallObserver2 observer2,
-            int flags, in String installerPackageName,
             in VerificationParams verificationParams,
             in ContainerEncryptionParams encryptionParams);
 
