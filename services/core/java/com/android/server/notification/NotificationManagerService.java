@@ -2558,7 +2558,7 @@ public class NotificationManagerService extends SystemService {
                 exceptionPackages);
 
         // alarm restrictions
-        final boolean muteAlarms = mZenMode == Settings.Global.ZEN_MODE_FULL;
+        final boolean muteAlarms = false; // TODO until we save user config
         mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, AudioManager.STREAM_ALARM,
                 muteAlarms ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
                 exceptionPackages);
@@ -2595,10 +2595,8 @@ public class NotificationManagerService extends SystemService {
     }
 
     private boolean shouldIntercept(String pkg, Notification n) {
-        if (mZenMode == Settings.Global.ZEN_MODE_LIMITED) {
+        if (mZenMode != Settings.Global.ZEN_MODE_OFF) {
             return !isAlarm(pkg, n);
-        } else if (mZenMode == Settings.Global.ZEN_MODE_FULL) {
-            return true;
         }
         return false;
     }

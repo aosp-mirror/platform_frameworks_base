@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -42,6 +43,7 @@ import android.hardware.display.DisplayManager;
 import android.media.MediaRouter;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -56,11 +58,13 @@ import android.text.TextUtils.TruncateAt;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.WindowManager.LayoutParams;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -897,7 +901,16 @@ class QuickSettings {
         d.requestWindowFeature(Window.FEATURE_NO_TITLE);
         d.setCancelable(true);
         d.setCanceledOnTouchOutside(true);
-        final ZenModeView v = new ZenModeView(mContext);
+        final ZenModeView v = new ZenModeView(mContext) {
+            @Override
+            protected void onConfigurationChanged(Configuration newConfig) {
+                super.onConfigurationChanged(newConfig);
+                WindowManager.LayoutParams lp = d.getWindow().getAttributes();
+                lp.width = mContext.getResources()
+                        .getDimensionPixelSize(R.dimen.zen_mode_dialog_width);
+                d.getWindow().setAttributes(lp);
+            }
+        };
         v.setAdapter(new ZenModeViewAdapter(mContext) {
             @Override
             public void configure() {
@@ -914,6 +927,10 @@ class QuickSettings {
         d.setContentView(v);
         d.create();
         d.getWindow().setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
+        WindowManager.LayoutParams lp = d.getWindow().getAttributes();
+        lp.horizontalMargin = 0;
+        lp.width = mContext.getResources().getDimensionPixelSize(R.dimen.zen_mode_dialog_width);
+        d.getWindow().setAttributes(lp);
         d.show();
     }
 

@@ -39,8 +39,7 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
 
     private Callbacks mCallbacks;
     private int mExitIndex;
-    private int mMode;
-    private int mCommittedMode;
+    private boolean mMode;
 
     public ZenModeViewAdapter(Context context) {
         mContext = context;
@@ -51,27 +50,15 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
     }
 
     @Override
-    public int getMode() {
+    public boolean getMode() {
         return mMode;
     }
 
     @Override
-    public void setMode(int mode) {
+    public void setMode(boolean mode) {
         if (mode == mMode) return;
         mMode = mode;
-        dispatchChanged();
-    }
-
-    @Override
-    public int getCommittedMode() {
-        return mCommittedMode;
-    }
-
-    @Override
-    public void setCommittedMode(int mode) {
-        final int v = mode == MODE_LIMITED ? Settings.Global.ZEN_MODE_LIMITED
-                    : mode == MODE_FULL ? Settings.Global.ZEN_MODE_FULL
-                    : Settings.Global.ZEN_MODE_OFF;
+        final int v = mMode ? Settings.Global.ZEN_MODE_ON : Settings.Global.ZEN_MODE_OFF;
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -79,17 +66,13 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
                         Settings.Global.ZEN_MODE, v);
             }
         });
+        dispatchChanged();
     }
 
     @Override
     public void init() {
         if (mExitIndex != 0) {
             mExitIndex = 0;
-            dispatchChanged();
-        }
-        final int mode = mCommittedMode == MODE_FULL ? MODE_FULL : MODE_LIMITED;
-        if (mode != mMode) {
-            mMode = mode;
             dispatchChanged();
         }
     }
@@ -119,6 +102,11 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
     @Override
     public int getExitConditionCount() {
         return mExits.size();
+    }
+
+    @Override
+    public int getExitConditionIndex() {
+        return mExitIndex;
     }
 
     @Override
@@ -171,15 +159,13 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
         }
 
         private void loadSettings() {
-            mCommittedMode = getModeFromSetting();
+            mMode = getModeFromSetting();
         }
 
-        private int getModeFromSetting() {
+        private boolean getModeFromSetting() {
             final int v = Settings.Global.getInt(mResolver,
                     Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
-            if (v == Settings.Global.ZEN_MODE_LIMITED) return MODE_LIMITED;
-            if (v == Settings.Global.ZEN_MODE_FULL) return MODE_FULL;
-            return MODE_OFF;
+            return v != Settings.Global.ZEN_MODE_OFF;
         }
     }
 }
