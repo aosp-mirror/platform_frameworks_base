@@ -1325,7 +1325,7 @@ public class Tethering extends BaseNetworkObserver {
                 } else {
                     LinkProperties linkProperties = null;
                     try {
-                        linkProperties = mConnService.getLinkProperties(upType);
+                        linkProperties = mConnService.getLinkPropertiesForType(upType);
                     } catch (RemoteException e) { }
                     if (linkProperties != null) {
                         // Find the interface with the default IPv4 route. It may be the

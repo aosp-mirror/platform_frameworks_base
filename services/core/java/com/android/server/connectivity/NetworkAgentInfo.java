@@ -48,9 +48,8 @@ public class NetworkAgentInfo {
 
     // The list of NetworkRequests being satisfied by this Network.
     public final SparseArray<NetworkRequest> networkRequests = new SparseArray<NetworkRequest>();
+    public final ArrayList<NetworkRequest> networkLingered = new ArrayList<NetworkRequest>();
 
-    // The list of NetworkListens listening for changes on this Network.
-    public final ArrayList<NetworkRequest> networkListens = new ArrayList<NetworkRequest>();
     public final Messenger messenger;
     public final AsyncChannel asyncChannel;
 

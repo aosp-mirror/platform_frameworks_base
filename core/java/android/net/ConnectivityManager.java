@@ -13,26 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package android.net;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.INetworkActivityListener;
 import android.os.INetworkManagementService;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.ArrayMap;
+import android.util.Log;
 
 import java.net.InetAddress;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.HashMap;
+
+import com.android.internal.util.Protocol;
 
 /**
  * Class that answers queries about the state of network connectivity. It also
@@ -699,7 +708,25 @@ public class ConnectivityManager {
      */
     public LinkProperties getLinkProperties(int networkType) {
         try {
-            return mService.getLinkProperties(networkType);
+            return mService.getLinkPropertiesForType(networkType);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /** {@hide} */
+    public LinkProperties getLinkProperties(Network network) {
+        try {
+            return mService.getLinkProperties(network);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /** {@hide} */
+    public NetworkCapabilities getNetworkCapabilities(Network network) {
+        try {
+            return mService.getNetworkCapabilities(network);
         } catch (RemoteException e) {
             return null;
         }
@@ -1303,6 +1330,22 @@ public class ConnectivityManager {
     }
 
     /**
+     * Report a problem network to the framework.  This will cause the framework
+     * to evaluate the situation and try to fix any problems.  Note that false
+     * may be subsequently ignored.
+     *
+     * @param network The Network the application was attempting to use or null
+     *                to indicate the current default network.
+     * {@hide}
+     */
+    public void reportBadNetwork(Network network) {
+        try {
+            mService.reportBadNetwork(network);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Set a network-independent global http proxy.  This is not normally what you want
      * for typical HTTP proxies - they are general network dependent.  However if you're
      * doing something unusual like general internal filtering this may be useful.  On
@@ -1599,15 +1642,27 @@ public class ConnectivityManager {
         } catch (RemoteException e) { }
     }
 
-    /** Interface for NetworkRequest callbacks {@hide} */
+    /**
+     * Interface for NetworkRequest callbacks.  Used for notifications about network
+     * changes.
+     * @hide
+     */
     public static class NetworkCallbacks {
+        /** @hide */
         public static final int PRECHECK     = 1;
+        /** @hide */
         public static final int AVAILABLE    = 2;
+        /** @hide */
         public static final int LOSING       = 3;
+        /** @hide */
         public static final int LOST         = 4;
+        /** @hide */
         public static final int UNAVAIL      = 5;
+        /** @hide */
         public static final int CAP_CHANGED  = 6;
+        /** @hide */
         public static final int PROP_CHANGED = 7;
+        /** @hide */
         public static final int CANCELED     = 8;
 
         /**
@@ -1650,21 +1705,361 @@ public class ConnectivityManager {
          * Called when the network the framework connected to for this request
          * changes capabilities but still satisfies the stated need.
          */
-        public void onCapabilitiesChanged(NetworkRequest networkRequest, Network network,
+        public void onNetworkCapabilitiesChanged(NetworkRequest networkRequest, Network network,
                 NetworkCapabilities networkCapabilities) {}
 
         /**
          * Called when the network the framework connected to for this request
-         * changes properties.
+         * changes LinkProperties.
          */
-        public void onPropertiesChanged(NetworkRequest networkRequest, Network network,
+        public void onLinkPropertiesChanged(NetworkRequest networkRequest, Network network,
                 LinkProperties linkProperties) {}
 
         /**
-         * Called when a CancelRequest call concludes and the registered callbacks will
+         * Called when a releaseNetworkRequest call concludes and the registered callbacks will
          * no longer be used.
          */
-        public void onCanceled(NetworkRequest networkRequest) {}
+        public void onReleased(NetworkRequest networkRequest) {}
     }
 
+    private static final int BASE = Protocol.BASE_CONNECTIVITY_MANAGER;
+    /** @hide obj = pair(NetworkRequest, Network) */
+    public static final int CALLBACK_PRECHECK           = BASE + 1;
+    /** @hide obj = pair(NetworkRequest, Network) */
+    public static final int CALLBACK_AVAILABLE          = BASE + 2;
+    /** @hide obj = pair(NetworkRequest, Network), arg1 = ttl */
+    public static final int CALLBACK_LOSING             = BASE + 3;
+    /** @hide obj = pair(NetworkRequest, Network) */
+    public static final int CALLBACK_LOST               = BASE + 4;
+    /** @hide obj = NetworkRequest */
+    public static final int CALLBACK_UNAVAIL            = BASE + 5;
+    /** @hide obj = pair(NetworkRequest, Network) */
+    public static final int CALLBACK_CAP_CHANGED        = BASE + 6;
+    /** @hide obj = pair(NetworkRequest, Network) */
+    public static final int CALLBACK_IP_CHANGED         = BASE + 7;
+    /** @hide obj = NetworkRequest */
+    public static final int CALLBACK_RELEASED           = BASE + 8;
+    /** @hide */
+    public static final int CALLBACK_EXIT               = BASE + 9;
+
+    private static class CallbackHandler extends Handler {
+        private final HashMap<NetworkRequest, NetworkCallbacks>mCallbackMap;
+        private final AtomicInteger mRefCount;
+        private static final String TAG = "ConnectivityManager.CallbackHandler";
+        private final ConnectivityManager mCm;
+
+        CallbackHandler(Looper looper, HashMap<NetworkRequest, NetworkCallbacks>callbackMap,
+                AtomicInteger refCount, ConnectivityManager cm) {
+            super(looper);
+            mCallbackMap = callbackMap;
+            mRefCount = refCount;
+            mCm = cm;
+        }
+
+        @Override
+        public void handleMessage(Message message) {
+            Log.d(TAG, "CM callback handler got msg " + message.what);
+            switch (message.what) {
+                case CALLBACK_PRECHECK: {
+                    NetworkRequest request = getNetworkRequest(message);
+                    NetworkCallbacks callbacks = getCallbacks(request);
+                    if (callbacks != null) {
+                        callbacks.onPreCheck(request, getNetwork(message));
+                    } else {
+                        Log.e(TAG, "callback not found for PRECHECK message");
+                    }
+                    break;
+                }
+                case CALLBACK_AVAILABLE: {
+                    NetworkRequest request = getNetworkRequest(message);
+                    NetworkCallbacks callbacks = getCallbacks(request);
+                    if (callbacks != null) {
+                        callbacks.onAvailable(request, getNetwork(message));
+                    } else {
+                        Log.e(TAG, "callback not found for AVAILABLE message");
+                    }
+                    break;
+                }
+                case CALLBACK_LOSING: {
+                    NetworkRequest request = getNetworkRequest(message);
+                    NetworkCallbacks callbacks = getCallbacks(request);
+                    if (callbacks != null) {
+                        callbacks.onLosing(request, getNetwork(message), message.arg1);
+                    } else {
+                        Log.e(TAG, "callback not found for LOSING message");
+                    }
+                    break;
+                }
+                case CALLBACK_LOST: {
+                    NetworkRequest request = getNetworkRequest(message);
+                    NetworkCallbacks callbacks = getCallbacks(request);
+                    if (callbacks != null) {
+                        callbacks.onLost(request, getNetwork(message));
+                    } else {
+                        Log.e(TAG, "callback not found for LOST message");
+                    }
+                    break;
+                }
+                case CALLBACK_UNAVAIL: {
+                    NetworkRequest req = (NetworkRequest)message.obj;
+                    NetworkCallbacks callbacks = null;
+                    synchronized(mCallbackMap) {
+                        callbacks = mCallbackMap.get(req);
+                    }
+                    if (callbacks != null) {
+                        callbacks.onUnavailable(req);
+                    } else {
+                        Log.e(TAG, "callback not found for UNAVAIL message");
+                    }
+                    break;
+                }
+                case CALLBACK_CAP_CHANGED: {
+                    NetworkRequest request = getNetworkRequest(message);
+                    NetworkCallbacks callbacks = getCallbacks(request);
+                    if (callbacks != null) {
+                        Network network = getNetwork(message);
+                        NetworkCapabilities cap = mCm.getNetworkCapabilities(network);
+
+                        callbacks.onNetworkCapabilitiesChanged(request, network, cap);
+                    } else {
+                        Log.e(TAG, "callback not found for CHANGED message");
+                    }
+                    break;
+                }
+                case CALLBACK_IP_CHANGED: {
+                    NetworkRequest request = getNetworkRequest(message);
+                    NetworkCallbacks callbacks = getCallbacks(request);
+                    if (callbacks != null) {
+                        Network network = getNetwork(message);
+                        LinkProperties lp = mCm.getLinkProperties(network);
+
+                        callbacks.onLinkPropertiesChanged(request, network, lp);
+                    } else {
+                        Log.e(TAG, "callback not found for CHANGED message");
+                    }
+                    break;
+                }
+                case CALLBACK_RELEASED: {
+                    NetworkRequest req = (NetworkRequest)message.obj;
+                    NetworkCallbacks callbacks = null;
+                    synchronized(mCallbackMap) {
+                        callbacks = mCallbackMap.remove(req);
+                    }
+                    if (callbacks != null) {
+                        callbacks.onReleased(req);
+                    } else {
+                        Log.e(TAG, "callback not found for CANCELED message");
+                    }
+                    synchronized(mRefCount) {
+                        if (mRefCount.decrementAndGet() == 0) {
+                            getLooper().quit();
+                        }
+                    }
+                    break;
+                }
+                case CALLBACK_EXIT: {
+                    Log.d(TAG, "Listener quiting");
+                    getLooper().quit();
+                    break;
+                }
+            }
+        }
+
+        private NetworkRequest getNetworkRequest(Message msg) {
+            return (NetworkRequest)(msg.obj);
+        }
+        private NetworkCallbacks getCallbacks(NetworkRequest req) {
+            synchronized(mCallbackMap) {
+                return mCallbackMap.get(req);
+            }
+        }
+        private Network getNetwork(Message msg) {
+            return new Network(msg.arg2);
+        }
+        private NetworkCallbacks removeCallbacks(Message msg) {
+            NetworkRequest req = (NetworkRequest)msg.obj;
+            synchronized(mCallbackMap) {
+                return mCallbackMap.remove(req);
+            }
+        }
+    }
+
+    private void addCallbackListener() {
+        synchronized(sCallbackRefCount) {
+            if (sCallbackRefCount.incrementAndGet() == 1) {
+                // TODO - switch this over to a ManagerThread or expire it when done
+                HandlerThread callbackThread = new HandlerThread("ConnectivityManager");
+                callbackThread.start();
+                sCallbackHandler = new CallbackHandler(callbackThread.getLooper(),
+                        sNetworkCallbacks, sCallbackRefCount, this);
+            }
+        }
+    }
+
+    private void removeCallbackListener() {
+        synchronized(sCallbackRefCount) {
+            if (sCallbackRefCount.decrementAndGet() == 0) {
+                sCallbackHandler.obtainMessage(CALLBACK_EXIT).sendToTarget();
+                sCallbackHandler = null;
+            }
+        }
+    }
+
+    static final HashMap<NetworkRequest, NetworkCallbacks> sNetworkCallbacks =
+            new HashMap<NetworkRequest, NetworkCallbacks>();
+    static final AtomicInteger sCallbackRefCount = new AtomicInteger(0);
+    static CallbackHandler sCallbackHandler = null;
+
+    private final static int LISTEN  = 1;
+    private final static int REQUEST = 2;
+
+    private NetworkRequest somethingForNetwork(NetworkCapabilities need,
+            NetworkCallbacks networkCallbacks, int timeoutSec, int action) {
+        NetworkRequest networkRequest = null;
+        if (networkCallbacks == null) throw new IllegalArgumentException("null NetworkCallbacks");
+        if (need == null) throw new IllegalArgumentException("null NetworkCapabilities");
+        try {
+            addCallbackListener();
+            if (action == LISTEN) {
+                networkRequest = mService.listenForNetwork(need, new Messenger(sCallbackHandler),
+                        new Binder());
+            } else {
+                networkRequest = mService.requestNetwork(need, new Messenger(sCallbackHandler),
+                        timeoutSec, new Binder());
+            }
+            if (networkRequest != null) {
+                synchronized(sNetworkCallbacks) {
+                    sNetworkCallbacks.put(networkRequest, networkCallbacks);
+                }
+            }
+        } catch (RemoteException e) {}
+        if (networkRequest == null) removeCallbackListener();
+        return networkRequest;
+    }
+
+    /**
+     * Request a network to satisfy a set of {@link NetworkCapabilities}.
+     *
+     * This {@link NetworkRequest} will live until released via
+     * {@link releaseNetworkRequest} or the calling application exits.
+     * Status of the request can be follwed by listening to the various
+     * callbacks described in {@link NetworkCallbacks}.  The {@link Network}
+     * can be used by using the {@link bindSocketToNetwork},
+     * {@link bindApplicationToNetwork} and {@link getAddrInfoOnNetwork} functions.
+     *
+     * @param need {@link NetworkCapabilities} required by this request.
+     * @param networkCallbacks The callbacks to be utilized for this request.  Note
+     *                         the callbacks can be shared by multiple requests and
+     *                         the NetworkRequest token utilized to determine to which
+     *                         request the callback relates.
+     * @return A {@link NetworkRequest} object identifying the request.
+     * @hide
+     */
+    public NetworkRequest requestNetwork(NetworkCapabilities need,
+            NetworkCallbacks networkCallbacks) {
+        return somethingForNetwork(need, networkCallbacks, 0, REQUEST);
+    }
+
+    /**
+     * Request a network to satisfy a set of {@link NetworkCapabilities}, limited
+     * by a timeout.
+     *
+     * This function behaves identically, but if a suitable network is not found
+     * within the given time (in Seconds) the {@link NetworkCallbacks#unavailable}
+     * callback is called.  The request must still be released normally by
+     * calling {@link releaseNetworkRequest}.
+     * @param need {@link NetworkCapabilities} required by this request.
+     * @param networkCallbacks The callbacks to be utilized for this request.  Note
+     *                         the callbacks can be shared by multiple requests and
+     *                         the NetworkRequest token utilized to determine to which
+     *                         request the callback relates.
+     * @param timeoutSec The time in seconds to attempt looking for a suitable network
+     *                   before {@link NetworkCallbacks#unavailable} is called.
+     * @return A {@link NetworkRequest} object identifying the request.
+     * @hide
+     */
+    public NetworkRequest requestNetwork(NetworkCapabilities need,
+            NetworkCallbacks networkCallbacks, int timeoutSec) {
+        return somethingForNetwork(need, networkCallbacks, timeoutSec, REQUEST);
+    }
+
+    /**
+     * The maximum number of seconds the framework will look for a suitable network
+     * during a timeout-equiped call to {@link requestNetwork}.
+     * {@hide}
+     */
+    public final static int MAX_NETWORK_REQUEST_TIMEOUT_SEC = 100 * 60;
+
+    /**
+     * Request a network to satisfy a set of {@link NetworkCapabilities}.
+     *
+     * This function behavies identically, but instead of {@link NetworkCallbacks}
+     * a {@link PendingIntent} is used.  This means the request may outlive the
+     * calling application and get called back when a suitable network is found.
+     * <p>
+     * The operation is an Intent broadcast that goes to a broadcast receiver that
+     * you registered with {@link Context#registerReceiver} or through the
+     * &lt;receiver&gt; tag in an AndroidManifest.xml file
+     * <p>
+     * The operation Intent is delivered with two extras, a {@link Network} typed
+     * extra called {@link EXTRA_NETWORK_REQUEST_NETWORK} and a {@link NetworkCapabilities}
+     * typed extra called {@link EXTRA_NETWORK_REQUEST_NETWORK_CAPABILTIES} containing
+     * the original requests parameters.  It is important to create a new,
+     * {@link NetworkCallbacks} based request before completing the processing of the
+     * Intent to reserve the network or it will be released shortly after the Intent
+     * is processed.
+     * <p>
+     * If there is already an request for this Intent registered (with the equality of
+     * two Intents defined by {@link Intent#filterEquals}), then it will be removed and
+     * replace by this one, effectively releasing the previous {@link NetworkRequest}.
+     * <p>
+     * The request may be released normally by calling {@link releaseNetworkRequest}.
+     *
+     * @param need {@link NetworkCapabilties} required by this request.
+     * @param operation Action to perform when the network is available (corresponds
+     *                  to the {@link NetworkCallbacks#onAvailable} call.  Typically
+     *                  comes from {@link PendingIntent#getBroadcast}.
+     * @return A {@link NetworkRequest} object identifying the request.
+     * @hide
+     */
+    public NetworkRequest requestNetwork(NetworkCapabilities need, PendingIntent operation) {
+        try {
+            return mService.pendingRequestForNetwork(need, operation);
+        } catch (RemoteException e) {}
+        return null;
+    }
+
+    /**
+     * Registers to receive notifications about all networks which satisfy the given
+     * {@link NetworkCapabilities}.  The callbacks will continue to be called until
+     * either the application exits or the request is released using
+     * {@link releaseNetworkRequest}.
+     *
+     * @param need {@link NetworkCapabilities} required by this request.
+     * @param networkCallbacks The {@link NetworkCallbacks} to be called as suitable
+     *                         networks change state.
+     * @return A {@link NetworkRequest} object identifying the request.
+     * @hide
+     */
+    public NetworkRequest listenForNetwork(NetworkCapabilities need,
+            NetworkCallbacks networkCallbacks) {
+        return somethingForNetwork(need, networkCallbacks, 0, LISTEN);
+    }
+
+    /**
+     * Releases a {NetworkRequest} generated either through a {@link requestNetwork}
+     * or a {@link listenForNetwork} call.  The {@link NetworkCallbacks} given in the
+     * earlier call may continue receiving calls until the {@link NetworkCallbacks#onReleased}
+     * function is called, signifiying the end of the request.
+     *
+     * @param networkRequest The {@link NetworkRequest} generated by an earlier call to
+     *                       {@link requestNetwork} or {@link listenForNetwork}.
+     * @hide
+     */
+    public void releaseNetworkRequest(NetworkRequest networkRequest) {
+        if (networkRequest == null) throw new IllegalArgumentException("null NetworkRequest");
+        try {
+            mService.releaseNetworkRequest(networkRequest);
+        } catch (RemoteException e) {}
+    }
 }

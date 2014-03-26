@@ -16,11 +16,14 @@
 
 package android.net;
 
+import android.app.PendingIntent;
 import android.net.LinkQualityInfo;
 import android.net.LinkProperties;
+import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkQuotaInfo;
+import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.ProxyInfo;
 import android.os.IBinder;
@@ -52,7 +55,10 @@ interface IConnectivityManager
     boolean isNetworkSupported(int networkType);
 
     LinkProperties getActiveLinkProperties();
-    LinkProperties getLinkProperties(int networkType);
+    LinkProperties getLinkPropertiesForType(int networkType);
+    LinkProperties getLinkProperties(in Network network);
+
+    NetworkCapabilities getNetworkCapabilities(in Network network);
 
     NetworkState[] getAllNetworkState();
 
@@ -99,6 +105,8 @@ interface IConnectivityManager
     void requestNetworkTransitionWakelock(in String forWhom);
 
     void reportInetCondition(int networkType, int percentage);
+
+    void reportBadNetwork(in Network network);
 
     ProxyInfo getGlobalProxy();
 
@@ -147,5 +155,20 @@ interface IConnectivityManager
 
     void registerNetworkFactory(in Messenger messenger);
 
-    void registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp, in NetworkCapabilities nc, int score);
+    void registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
+            in NetworkCapabilities nc, int score);
+
+    NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities,
+            in Messenger messenger, int timeoutSec, in IBinder binder);
+
+    NetworkRequest pendingRequestForNetwork(in NetworkCapabilities networkCapabilities,
+            in PendingIntent operation);
+
+    NetworkRequest listenForNetwork(in NetworkCapabilities networkCapabilities,
+            in Messenger messenger, in IBinder binder);
+
+    void pendingListenForNetwork(in NetworkCapabilities networkCapabilities,
+            in PendingIntent operation);
+
+    void releaseNetworkRequest(in NetworkRequest networkRequest);
 }
