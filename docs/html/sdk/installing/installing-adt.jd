@@ -35,10 +35,10 @@ Software</strong>.</li>
     <li>In the Add Repository dialog that appears, enter "ADT Plugin" for the <em>Name</em> and the
 following URL for the <em>Location</em>:
       <pre>https://dl-ssl.google.com/android/eclipse/</pre>
+      <p class="note"><strong>Note:</strong> The Android Developer Tools update site requires
+      a secure connection. Make sure the update site URL you enter starts with HTTPS.</p>
     </li>
-    <li>Click <strong>OK</strong>.
-      <p>If you have trouble acquiring the plugin, try using "http" in the Location URL,
-instead of "https" (https is preferred for security reasons).</p></li>
+    <li>Click <strong>OK</strong>.</li>
     <li>In the Available Software dialog, select the checkbox next to Developer Tools and click
 <strong>Next</strong>.</li>
     <li>In the next window, you'll see a list of the tools to be downloaded. Click
@@ -139,23 +139,16 @@ Software</strong>, uncheck "Contact all update sites during install to find requ
 
 <h2 id="Troubleshooting">Troubleshooting ADT Installation</h2>
 
-<p> If you are having trouble downloading the ADT plugin after following the
-steps above, here are some suggestions: </p>
-
-<ul>
-  <li>If Eclipse can not find the remote update site containing the ADT plugin,
-try changing the remote site URL to use http, rather than https. That is, set
-the Location for the remote site to:
-<pre>http://dl-ssl.google.com/android/eclipse/</pre></li>
-<li>If you are behind a firewall (such as a corporate firewall), make sure that
+<p>If you are having trouble downloading the ADT plugin after following the
+steps above and you are behind a firewall (such as a corporate firewall), make sure that
 you have properly configured your proxy settings in Eclipse. In Eclipse,
 you can configure proxy information from the main Eclipse menu in
 <strong>Window</strong> (on Mac OS X, <strong>Eclipse</strong>) &gt;
 <strong>Preferences</strong> &gt; <strong>General</strong> &gt; <strong>Network
-Connections</strong>.</li>
-</ul>
+Connections</strong>.
+</p>
 
-<p> If you are still unable to use Eclipse to download the ADT plugin as a
+<p>If you are still unable to use Eclipse to download the ADT plugin as a
 remote update site, you can download the ADT zip file to your local machine and
 manually install it:</p>
 
