@@ -17,11 +17,12 @@
 #define LOG_TAG "MtpDatabaseJNI"
 #include "utils/Log.h"
 
-#include <stdio.h>
 #include <assert.h>
-#include <limits.h>
-#include <unistd.h>
 #include <fcntl.h>
+#include <inttypes.h>
+#include <limits.h>
+#include <stdio.h>
+#include <unistd.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
@@ -393,7 +394,7 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyValue(MtpObjectHandle handle,
         // release date is stored internally as just the year
         if (property == MTP_PROPERTY_ORIGINAL_RELEASE_DATE) {
             char    date[20];
-            snprintf(date, sizeof(date), "%04lld0101T000000", longValue);
+            snprintf(date, sizeof(date), "%04" PRId64 "0101T000000", longValue);
             packet.putString(date);
             goto out;
         }
@@ -657,7 +658,7 @@ MtpResponseCode MyMtpDatabase::setDevicePropertyValue(MtpDeviceProperty property
     return result;
 }
 
-MtpResponseCode MyMtpDatabase::resetDeviceProperty(MtpDeviceProperty property) {
+MtpResponseCode MyMtpDatabase::resetDeviceProperty(MtpDeviceProperty /*property*/) {
     return -1;
 }
 
@@ -1151,7 +1152,7 @@ android_mtp_MtpDatabase_finalize(JNIEnv *env, jobject thiz)
 }
 
 static jstring
-android_mtp_MtpPropertyGroup_format_date_time(JNIEnv *env, jobject thiz, jlong seconds)
+android_mtp_MtpPropertyGroup_format_date_time(JNIEnv *env, jobject /*thiz*/, jlong seconds)
 {
     char    date[20];
     formatDateTime(seconds, date, sizeof(date));
