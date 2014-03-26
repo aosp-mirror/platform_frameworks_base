@@ -158,7 +158,7 @@ class AppWidgetServiceImpl {
             final int N = instances.size();
             for (int i = 0; i < N; i++) {
                 Provider p = instances.get(i).provider;
-                if (p.info != null && pkg.equals(p.info.provider.getPackageName())) {
+                if (p != null && p.info != null && pkg.equals(p.info.provider.getPackageName())) {
                     return true;
                 }
             }
