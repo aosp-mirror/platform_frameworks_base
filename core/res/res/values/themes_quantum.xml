@@ -45,7 +45,7 @@ please see themes_device_defaults.xml.
         <item name="colorForeground">@color/bright_foreground_quantum_dark</item>
         <item name="colorForegroundInverse">@color/bright_foreground_quantum_light</item>
         <item name="colorBackground">@color/background_quantum_dark</item>
-        <item name="colorBackgroundCacheHint">@drawable/background_cache_hint_selector_quantum_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_quantum_dark</item>
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
@@ -81,7 +81,7 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceButton">@style/TextAppearance.Quantum.Widget.Button</item>
 
         <item name="editTextColor">?attr/textColorPrimary</item>
-        <item name="editTextBackground">@drawable/edit_text_quantum_dark</item>
+        <item name="editTextBackground">@drawable/edit_text_quantum</item>
 
         <item name="candidatesTextStyleSpans">@string/candidates_style</item>
 
@@ -100,9 +100,9 @@ please see themes_device_defaults.xml.
         <item name="switchStyle">@style/Widget.Quantum.CompoundButton.Switch</item>
         <item name="mediaRouteButtonStyle">@style/Widget.Quantum.MediaRouteButton</item>
 
-        <item name="selectableItemBackground">@drawable/item_background_quantum_dark</item>
+        <item name="selectableItemBackground">@drawable/item_background_quantum</item>
         <item name="borderlessButtonStyle">@style/Widget.Quantum.Button.Borderless</item>
-        <item name="homeAsUpIndicator">@drawable/ic_ab_back_quantum_dark</item>
+        <item name="homeAsUpIndicator">@drawable/ic_ab_back_quantum</item>
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
@@ -117,17 +117,17 @@ please see themes_device_defaults.xml.
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
-        <item name="listDivider">@drawable/list_divider_quantum_dark</item>
+        <item name="listDivider">@drawable/list_divider_quantum</item>
         <item name="listSeparatorTextViewStyle">@style/Widget.Quantum.TextView.ListSeparator</item>
 
-        <item name="listChoiceIndicatorSingle">@drawable/btn_radio_quantum_dark</item>
-        <item name="listChoiceIndicatorMultiple">@drawable/btn_check_quantum_dark</item>
+        <item name="listChoiceIndicatorSingle">@drawable/btn_radio_quantum</item>
+        <item name="listChoiceIndicatorMultiple">@drawable/btn_check_quantum</item>
 
         <item name="listChoiceBackgroundIndicator">@drawable/list_selector_holo_dark</item>
 
-        <item name="activatedBackgroundIndicator">@drawable/activated_background_quantum_dark</item>
+        <item name="activatedBackgroundIndicator">@drawable/activated_background_quantum</item>
 
-        <item name="listDividerAlertDialog">@drawable/list_divider_quantum_dark</item>
+        <item name="listDividerAlertDialog">@drawable/list_divider_quantum</item>
 
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
         <item name="expandableListPreferredChildPaddingLeft">?attr/expandableListPreferredItemPaddingLeft</item>
@@ -136,8 +136,8 @@ please see themes_device_defaults.xml.
         <item name="expandableListPreferredItemIndicatorRight">0dip</item>
         <item name="expandableListPreferredChildIndicatorLeft">?attr/expandableListPreferredItemIndicatorLeft</item>
         <item name="expandableListPreferredChildIndicatorRight">?attr/expandableListPreferredItemIndicatorRight</item>
-        <item name="findOnPageNextDrawable">@drawable/ic_find_next_quantum_dark</item>
-        <item name="findOnPagePreviousDrawable">@drawable/ic_find_previous_quantum_dark</item>
+        <item name="findOnPageNextDrawable">@drawable/ic_find_next_quantum</item>
+        <item name="findOnPagePreviousDrawable">@drawable/ic_find_previous_quantum</item>
 
         <!-- Gallery attributes -->
         <item name="galleryItemBackground">@drawable/gallery_item_background</item>
@@ -170,7 +170,7 @@ please see themes_device_defaults.xml.
         <item name="alertDialogTheme">@style/Theme.Quantum.Dialog.Alert</item>
         <item name="alertDialogStyle">@style/AlertDialog.Quantum</item>
         <item name="alertDialogCenterButtons">false</item>
-        <item name="alertDialogIcon">@drawable/ic_dialog_alert_quantum_dark</item>
+        <item name="alertDialogIcon">@drawable/ic_dialog_alert_quantum</item>
 
         <!-- Presentation attributes -->
         <item name="presentationTheme">@style/Theme.Quantum.Dialog.Presentation</item>
@@ -194,8 +194,8 @@ please see themes_device_defaults.xml.
         <item name="scrollbarFadeDuration">250</item>
         <item name="scrollbarDefaultDelayBeforeFade">300</item>
         <item name="scrollbarSize">10dip</item>
-        <item name="scrollbarThumbHorizontal">@drawable/scrollbar_handle_quantum_dark</item>
-        <item name="scrollbarThumbVertical">@drawable/scrollbar_handle_quantum_dark</item>
+        <item name="scrollbarThumbHorizontal">@drawable/scrollbar_handle_quantum</item>
+        <item name="scrollbarThumbVertical">@drawable/scrollbar_handle_quantum</item>
         <item name="scrollbarTrackHorizontal">@null</item>
         <item name="scrollbarTrackVertical">@null</item>
 
@@ -205,7 +205,7 @@ please see themes_device_defaults.xml.
         <item name="textSelectHandle">@drawable/text_select_handle_middle</item>
         <item name="textSelectHandleWindowStyle">@style/Widget.Quantum.TextSelectHandle</item>
         <item name="textSuggestionsWindowStyle">@style/Widget.Quantum.TextSuggestionsPopupWindow</item>
-        <item name="textCursorDrawable">@drawable/text_cursor_quantum_dark</item>
+        <item name="textCursorDrawable">@drawable/text_cursor_quantum</item>
 
         <!-- Widget styles -->
         <item name="absListViewStyle">@style/Widget.Quantum.AbsListView</item>
@@ -290,7 +290,7 @@ please see themes_device_defaults.xml.
         <item name="actionOverflowButtonStyle">@style/Widget.Quantum.ActionButton.Overflow</item>
         <item name="actionModeBackground">@color/theme_color_700</item>
         <item name="actionModeSplitBackground">@color/theme_color_700</item>
-        <item name="actionModeCloseDrawable">@drawable/ic_cab_done_quantum_dark</item>
+        <item name="actionModeCloseDrawable">@drawable/ic_cab_done_quantum</item>
         <item name="actionBarTabStyle">@style/Widget.Quantum.ActionBar.TabView</item>
         <item name="actionBarTabBarStyle">@style/Widget.Quantum.ActionBar.TabBar</item>
         <item name="actionBarTabTextStyle">@style/Widget.Quantum.ActionBar.TabText</item>
@@ -300,21 +300,21 @@ please see themes_device_defaults.xml.
         <item name="actionBarSize">@dimen/action_bar_default_height</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Quantum.PopupWindow.ActionMode</item>
         <item name="actionBarWidgetTheme">@null</item>
-        <item name="actionBarItemBackground">@drawable/item_background_borderless_quantum_dark</item>
+        <item name="actionBarItemBackground">@drawable/item_background_quantum</item>
 
-        <item name="actionModeCutDrawable">@drawable/ic_menu_cut_quantum_dark</item>
-        <item name="actionModeCopyDrawable">@drawable/ic_menu_copy_quantum_dark</item>
-        <item name="actionModePasteDrawable">@drawable/ic_menu_paste_quantum_dark</item>
-        <item name="actionModeSelectAllDrawable">@drawable/ic_menu_selectall_quantum_dark</item>
-        <item name="actionModeShareDrawable">@drawable/ic_menu_share_quantum_dark</item>
-        <item name="actionModeFindDrawable">@drawable/ic_menu_find_quantum_dark</item>
-        <item name="actionModeWebSearchDrawable">@drawable/ic_menu_search_quantum_dark</item>
+        <item name="actionModeCutDrawable">@drawable/ic_menu_cut_quantum</item>
+        <item name="actionModeCopyDrawable">@drawable/ic_menu_copy_quantum</item>
+        <item name="actionModePasteDrawable">@drawable/ic_menu_paste_quantum</item>
+        <item name="actionModeSelectAllDrawable">@drawable/ic_menu_selectall_quantum</item>
+        <item name="actionModeShareDrawable">@drawable/ic_menu_share_quantum</item>
+        <item name="actionModeFindDrawable">@drawable/ic_menu_find_quantum</item>
+        <item name="actionModeWebSearchDrawable">@drawable/ic_menu_search_quantum</item>
 
         <item name="dividerVertical">?attr/listDivider</item>
         <item name="dividerHorizontal">?attr/listDivider</item>
-        <item name="buttonBarStyle">@style/Quantum.ButtonBar</item>
+        <item name="buttonBarStyle">@style/Widget.Quantum.ButtonBar</item>
         <item name="buttonBarButtonStyle">?attr/borderlessButtonStyle</item>
-        <item name="segmentedButtonStyle">@style/Quantum.SegmentedButton</item>
+        <item name="segmentedButtonStyle">@style/Widget.Quantum.SegmentedButton</item>
 
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@drawable/search_dropdown_dark</item>
@@ -349,11 +349,20 @@ please see themes_device_defaults.xml.
         <item name="datePickerStyle">@style/Widget.Quantum.DatePicker</item>
 
         <!-- TODO: This belongs in a FastScroll style -->
-        <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_quantum_light</item>
+        <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_quantum</item>
         <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_dark</item>
         <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_holo_dark</item>
-        <item name="fastScrollTrackDrawable">@drawable/fastscroll_track_quantum_dark</item>
+        <item name="fastScrollTrackDrawable">@drawable/fastscroll_track_quantum</item>
         <item name="fastScrollOverlayPosition">atThumb</item>
+
+        <!-- Color palette -->
+        <item name="colorControlNormal">@color/control_normal_foreground_quantum_dark</item>
+        <item name="colorControlActivated">@color/control_activated_foreground_quantum_dark</item>
+        <item name="colorButtonNormal">@color/btn_default_normal_quantum_dark</item>
+        <item name="colorButtonPressed">@color/btn_default_pressed_quantum_dark</item>
+        <!-- TODO: Remove these attrs and move into button style. -->
+        <item name="colorButtonNormalColored">@color/theme_color_500</item>
+        <item name="colorButtonPressedColored">@color/theme_color_300</item>
     </style>
 
     <!-- Quantum Paper theme (light version). -->
@@ -361,7 +370,7 @@ please see themes_device_defaults.xml.
         <item name="colorForeground">@color/bright_foreground_quantum_light</item>
         <item name="colorForegroundInverse">@color/bright_foreground_quantum_dark</item>
         <item name="colorBackground">@color/background_quantum_light</item>
-        <item name="colorBackgroundCacheHint">@drawable/background_cache_hint_selector_quantum_light</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_quantum_light</item>
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
@@ -398,7 +407,7 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceButton">@style/TextAppearance.Quantum.Light.Widget.Button</item>
 
         <item name="editTextColor">?attr/textColorPrimary</item>
-        <item name="editTextBackground">@drawable/edit_text_quantum_light</item>
+        <item name="editTextBackground">@drawable/edit_text_quantum</item>
 
         <item name="candidatesTextStyleSpans">@string/candidates_style</item>
 
@@ -418,9 +427,9 @@ please see themes_device_defaults.xml.
         <item name="switchStyle">@style/Widget.Quantum.Light.CompoundButton.Switch</item>
         <item name="mediaRouteButtonStyle">@style/Widget.Quantum.Light.MediaRouteButton</item>
 
-        <item name="selectableItemBackground">@drawable/item_background_quantum_light</item>
+        <item name="selectableItemBackground">@drawable/item_background_quantum</item>
         <item name="borderlessButtonStyle">@style/Widget.Quantum.Light.Button.Borderless</item>
-        <item name="homeAsUpIndicator">@drawable/ic_ab_back_quantum_light</item>
+        <item name="homeAsUpIndicator">@drawable/ic_ab_back_quantum</item>
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
@@ -435,15 +444,15 @@ please see themes_device_defaults.xml.
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
-        <item name="listDivider">@drawable/list_divider_quantum_light</item>
+        <item name="listDivider">@drawable/list_divider_quantum</item>
         <item name="listSeparatorTextViewStyle">@style/Widget.Quantum.Light.TextView.ListSeparator</item>
 
-        <item name="listChoiceIndicatorSingle">@drawable/btn_radio_quantum_light</item>
-        <item name="listChoiceIndicatorMultiple">@drawable/btn_check_quantum_light</item>
+        <item name="listChoiceIndicatorSingle">@drawable/btn_radio_quantum</item>
+        <item name="listChoiceIndicatorMultiple">@drawable/btn_check_quantum</item>
 
         <item name="listChoiceBackgroundIndicator">@drawable/list_selector_holo_light</item>
 
-        <item name="activatedBackgroundIndicator">@drawable/activated_background_quantum_light</item>
+        <item name="activatedBackgroundIndicator">@drawable/activated_background_quantum</item>
 
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
         <item name="expandableListPreferredChildPaddingLeft">?attr/expandableListPreferredItemPaddingLeft</item>
@@ -453,9 +462,9 @@ please see themes_device_defaults.xml.
         <item name="expandableListPreferredChildIndicatorLeft">?attr/expandableListPreferredItemIndicatorLeft</item>
         <item name="expandableListPreferredChildIndicatorRight">?attr/expandableListPreferredItemIndicatorRight</item>
 
-        <item name="listDividerAlertDialog">@drawable/list_divider_quantum_light</item>
-        <item name="findOnPageNextDrawable">@drawable/ic_find_next_quantum_light</item>
-        <item name="findOnPagePreviousDrawable">@drawable/ic_find_previous_quantum_light</item>
+        <item name="listDividerAlertDialog">@drawable/list_divider_quantum</item>
+        <item name="findOnPageNextDrawable">@drawable/ic_find_next_quantum</item>
+        <item name="findOnPagePreviousDrawable">@drawable/ic_find_previous_quantum</item>
 
         <!-- Gallery attributes -->
         <item name="galleryItemBackground">@drawable/gallery_item_background</item>
@@ -487,7 +496,7 @@ please see themes_device_defaults.xml.
         <item name="alertDialogTheme">@style/Theme.Quantum.Light.Dialog.Alert</item>
         <item name="alertDialogStyle">@style/AlertDialog.Quantum.Light</item>
         <item name="alertDialogCenterButtons">false</item>
-        <item name="alertDialogIcon">@drawable/ic_dialog_alert_quantum_light</item>
+        <item name="alertDialogIcon">@drawable/ic_dialog_alert_quantum</item>
 
         <!-- Presentation attributes -->
         <item name="presentationTheme">@style/Theme.Quantum.Light.Dialog.Presentation</item>
@@ -511,8 +520,8 @@ please see themes_device_defaults.xml.
         <item name="scrollbarFadeDuration">250</item>
         <item name="scrollbarDefaultDelayBeforeFade">300</item>
         <item name="scrollbarSize">10dip</item>
-        <item name="scrollbarThumbHorizontal">@drawable/scrollbar_handle_quantum_light</item>
-        <item name="scrollbarThumbVertical">@drawable/scrollbar_handle_quantum_light</item>
+        <item name="scrollbarThumbHorizontal">@drawable/scrollbar_handle_quantum</item>
+        <item name="scrollbarThumbVertical">@drawable/scrollbar_handle_quantum</item>
         <item name="scrollbarTrackHorizontal">@null</item>
         <item name="scrollbarTrackVertical">@null</item>
 
@@ -522,7 +531,7 @@ please see themes_device_defaults.xml.
         <item name="textSelectHandle">@drawable/text_select_handle_middle</item>
         <item name="textSelectHandleWindowStyle">@style/Widget.Quantum.TextSelectHandle</item>
         <item name="textSuggestionsWindowStyle">@style/Widget.Quantum.Light.TextSuggestionsPopupWindow</item>
-        <item name="textCursorDrawable">@drawable/text_cursor_quantum_light</item>
+        <item name="textCursorDrawable">@drawable/text_cursor_quantum</item>
 
         <!-- Widget styles -->
         <item name="absListViewStyle">@style/Widget.Quantum.Light.AbsListView</item>
@@ -610,7 +619,7 @@ please see themes_device_defaults.xml.
         <item name="actionOverflowButtonStyle">@style/Widget.Quantum.Light.ActionButton.Overflow</item>
         <item name="actionModeBackground">@drawable/cab_background_top_holo_light</item>
         <item name="actionModeSplitBackground">@drawable/cab_background_bottom_holo_light</item>
-        <item name="actionModeCloseDrawable">@drawable/ic_cab_done_quantum_light</item>
+        <item name="actionModeCloseDrawable">@drawable/ic_cab_done_quantum</item>
         <item name="actionBarTabStyle">@style/Widget.Quantum.Light.ActionBar.TabView</item>
         <item name="actionBarTabBarStyle">@style/Widget.Quantum.Light.ActionBar.TabBar</item>
         <item name="actionBarTabTextStyle">@style/Widget.Quantum.Light.ActionBar.TabText</item>
@@ -620,21 +629,21 @@ please see themes_device_defaults.xml.
         <item name="actionBarSize">@dimen/action_bar_default_height</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Quantum.Light.PopupWindow.ActionMode</item>
         <item name="actionBarWidgetTheme">@null</item>
-        <item name="actionBarItemBackground">@drawable/item_background_borderless_quantum_light</item>
+        <item name="actionBarItemBackground">@drawable/item_background_quantum</item>
 
-        <item name="actionModeCutDrawable">@drawable/ic_menu_cut_quantum_light</item>
-        <item name="actionModeCopyDrawable">@drawable/ic_menu_copy_quantum_light</item>
-        <item name="actionModePasteDrawable">@drawable/ic_menu_paste_quantum_light</item>
-        <item name="actionModeSelectAllDrawable">@drawable/ic_menu_selectall_quantum_light</item>
-        <item name="actionModeShareDrawable">@drawable/ic_menu_share_quantum_light</item>
-        <item name="actionModeFindDrawable">@drawable/ic_menu_find_quantum_light</item>
-        <item name="actionModeWebSearchDrawable">@drawable/ic_menu_search_quantum_light</item>
+        <item name="actionModeCutDrawable">@drawable/ic_menu_cut_quantum</item>
+        <item name="actionModeCopyDrawable">@drawable/ic_menu_copy_quantum</item>
+        <item name="actionModePasteDrawable">@drawable/ic_menu_paste_quantum</item>
+        <item name="actionModeSelectAllDrawable">@drawable/ic_menu_selectall_quantum</item>
+        <item name="actionModeShareDrawable">@drawable/ic_menu_share_quantum</item>
+        <item name="actionModeFindDrawable">@drawable/ic_menu_find_quantum</item>
+        <item name="actionModeWebSearchDrawable">@drawable/ic_menu_search_quantum</item>
 
         <item name="dividerVertical">?attr/listDivider</item>
         <item name="dividerHorizontal">?attr/listDivider</item>
-        <item name="buttonBarStyle">@style/Quantum.Light.ButtonBar</item>
+        <item name="buttonBarStyle">@style/Widget.Quantum.Light.ButtonBar</item>
         <item name="buttonBarButtonStyle">?attr/borderlessButtonStyle</item>
-        <item name="segmentedButtonStyle">@style/Quantum.Light.SegmentedButton</item>
+        <item name="segmentedButtonStyle">@style/Widget.Quantum.Light.SegmentedButton</item>
 
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@drawable/search_dropdown_light</item>
@@ -665,11 +674,20 @@ please see themes_device_defaults.xml.
         <!-- DatePicker style -->
         <item name="datePickerStyle">@style/Widget.Quantum.Light.DatePicker</item>
 
-        <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_quantum_light</item>
+        <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_quantum</item>
         <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_light</item>
         <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_holo_light</item>
-        <item name="fastScrollTrackDrawable">@drawable/fastscroll_track_quantum_light</item>
+        <item name="fastScrollTrackDrawable">@drawable/fastscroll_track_quantum</item>
         <item name="fastScrollOverlayPosition">atThumb</item>
+
+        <!-- Color palette -->
+        <item name="colorControlNormal">@color/control_normal_foreground_quantum_light</item>
+        <item name="colorControlActivated">@color/control_activated_foreground_quantum_light</item>
+        <item name="colorButtonNormal">@color/btn_default_normal_quantum_light</item>
+        <item name="colorButtonPressed">@color/btn_default_pressed_quantum_light</item>
+        <!-- TODO: Remove these attrs and move into button style. -->
+        <item name="colorButtonNormalColored">@color/theme_color_500</item>
+        <item name="colorButtonPressedColored">@color/theme_color_700</item>
     </style>
 
     <!-- Variant of the quantum (light) theme that has a solid (opaque) action bar
@@ -841,7 +859,7 @@ please see themes_device_defaults.xml.
 
         <item name="colorBackgroundCacheHint">@null</item>
 
-        <item name="buttonBarStyle">@style/Quantum.ButtonBar.AlertDialog</item>
+        <item name="buttonBarStyle">@style/Widget.Quantum.ButtonBar.AlertDialog</item>
         <item name="borderlessButtonStyle">@style/Widget.Quantum.Button.Borderless.Small</item>
 
         <item name="textAppearance">@style/TextAppearance.Quantum</item>
@@ -963,7 +981,7 @@ please see themes_device_defaults.xml.
 
         <item name="colorBackgroundCacheHint">@null</item>
 
-        <item name="buttonBarStyle">@style/Quantum.Light.ButtonBar.AlertDialog</item>
+        <item name="buttonBarStyle">@style/Widget.Quantum.Light.ButtonBar.AlertDialog</item>
         <item name="borderlessButtonStyle">@style/Widget.Quantum.Light.Button.Borderless.Small</item>
 
         <item name="textAppearance">@style/TextAppearance.Quantum.Light</item>

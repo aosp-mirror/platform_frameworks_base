@@ -927,7 +927,7 @@ please see themes_device_defaults.xml.
         <item name="colorForeground">@android:color/bright_foreground_holo_dark</item>
         <item name="colorForegroundInverse">@android:color/bright_foreground_inverse_holo_dark</item>
         <item name="colorBackground">@android:color/background_holo_dark</item>
-        <item name="colorBackgroundCacheHint">@android:drawable/background_cache_hint_selector_holo_dark</item>
+        <item name="colorBackgroundCacheHint">@android:color/background_cache_hint_selector_holo_dark</item>
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
@@ -1256,7 +1256,7 @@ please see themes_device_defaults.xml.
         <item name="colorForeground">@android:color/bright_foreground_holo_light</item>
         <item name="colorForegroundInverse">@android:color/bright_foreground_inverse_holo_light</item>
         <item name="colorBackground">@android:color/background_holo_light</item>
-        <item name="colorBackgroundCacheHint">@android:drawable/background_cache_hint_selector_holo_light</item>
+        <item name="colorBackgroundCacheHint">@android:color/background_cache_hint_selector_holo_light</item>
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
