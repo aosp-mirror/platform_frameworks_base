@@ -40,4 +40,7 @@
 
     <!-- The fixed height of each tile -->
     <dimen name="quick_settings_cell_height">100dp</dimen>
+
+    <!-- Width of the zen mode interstitial dialog. -->
+    <dimen name="zen_mode_dialog_width">384dp</dimen>
 </resources>

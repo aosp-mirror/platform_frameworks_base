@@ -352,13 +352,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         super.setZenMode(mode);
         if (mModeIcon == null) return;
         if (!isDeviceProvisioned()) return;
-        final boolean limited = mode == Settings.Global.ZEN_MODE_LIMITED;
-        final boolean full = mode == Settings.Global.ZEN_MODE_FULL;
-        mModeIcon.setVisibility(full || limited ? View.VISIBLE : View.GONE);
-        final int icon = limited ? R.drawable.stat_sys_zen_limited : R.drawable.stat_sys_zen_full;
-        if (full || limited) {
-            mModeIcon.setImageResource(icon);
-        }
+        mModeIcon.setVisibility(mode != Settings.Global.ZEN_MODE_OFF ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -481,6 +475,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mMoreIcon = mStatusBarView.findViewById(R.id.moreIcon);
         mNotificationIcons.setOverflowIndicator(mMoreIcon);
         mModeIcon = (ImageView)mStatusBarView.findViewById(R.id.modeIcon);
+        mModeIcon.setImageResource(R.drawable.stat_sys_zen_limited);
         mStatusBarContents = (LinearLayout)mStatusBarView.findViewById(R.id.status_bar_contents);
         mTickerView = mStatusBarView.findViewById(R.id.ticker);
 

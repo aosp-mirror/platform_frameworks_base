@@ -232,4 +232,7 @@
 
     <!-- The size of the icon in the recents task view. -->
     <dimen name="recents_task_view_icon_size">60dp</dimen>
+
+    <!-- Width of the zen mode interstitial dialog.  Defaults to MATCH_PARENT. -->
+    <dimen name="zen_mode_dialog_width">-1px</dimen>
 </resources>

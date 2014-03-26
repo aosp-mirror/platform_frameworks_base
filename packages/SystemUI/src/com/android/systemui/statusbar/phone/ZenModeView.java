@@ -21,10 +21,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Paint;
-import android.graphics.Path;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.Typeface;
 import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.PathShape;
+import android.graphics.drawable.shapes.OvalShape;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
@@ -36,13 +36,13 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,28 +53,30 @@ public class ZenModeView extends RelativeLayout {
     private static final String TAG = ZenModeView.class.getSimpleName();
     private static final boolean DEBUG = false;
 
+    public static final String MODE_LABEL = "Limited interruptions";
+    public static final int BACKGROUND = 0xff282828;
+
     private static final Typeface CONDENSED =
             Typeface.create("sans-serif-condensed", Typeface.NORMAL);
     private static final int GRAY = 0xff999999; //TextAppearance.StatusBar.Expanded.Network
-    private static final int BACKGROUND = 0xff282828;
-    private static final long DURATION = new ValueAnimator().getDuration();
-    private static final long BOUNCE_DURATION = DURATION / 3;
-    private static final float BOUNCE_SCALE = 0.8f;
-    private static final float SETTINGS_ALPHA = 0.6f;
+    private static final int DARK_GRAY = 0xff333333;
 
-    private static final String FULL_TEXT =
-            "You won't hear any calls, alarms or timers.";
+    private static final long DURATION = new ValueAnimator().getDuration();
+    private static final long PAGER_DURATION = DURATION / 2;
+    private static final float BOUNCE_SCALE = 0.8f;
+    private static final long CLOSE_DELAY = 600;
 
     private final Context mContext;
     private final Paint mPathPaint;
     private final ImageView mSettingsButton;
-    private final ModeSpinner mModeSpinner;
-    private final TextView mActionButton;
+    private final TextView mModeText;
+    private final Switch mModeSwitch;
     private final View mDivider;
     private final UntilPager mUntilPager;
-    private final AlarmWarning mAlarmWarning;
+    private final ProgressDots mProgressDots;
 
     private Adapter mAdapter;
+    private boolean mInit;
 
     public ZenModeView(Context context) {
         this(context, null);
@@ -105,37 +107,45 @@ public class ZenModeView extends RelativeLayout {
         mSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mAdapter != null && mAdapter.getMode() == Adapter.MODE_LIMITED) {
+                if (mAdapter != null) {
                     mAdapter.configure();
                 }
                 bounce(mSettingsButton, null);
             }
         });
 
-        mModeSpinner = new ModeSpinner(mContext);
-        mModeSpinner.setId(android.R.id.title);
+        mModeText = new TextView(mContext);
+        mModeText.setText(MODE_LABEL);
+        mModeText.setId(android.R.id.title);
+        mModeText.setTextColor(GRAY);
+        mModeText.setTypeface(CONDENSED);
+        mModeText.setAllCaps(true);
+        mModeText.setGravity(Gravity.CENTER);
+        mModeText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mModeText.getTextSize() * 1.1f);
         lp = new LayoutParams(LayoutParams.WRAP_CONTENT, topRowSize);
         lp.topMargin = p;
         lp.addRule(CENTER_HORIZONTAL);
-        addView(mModeSpinner, lp);
+        addView(mModeText, lp);
 
-        mActionButton = new TextView(mContext);
-        mActionButton.setTextColor(GRAY);
-        mActionButton.setTypeface(CONDENSED);
-        mActionButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, mActionButton.getTextSize() * 1.2f);
-        mActionButton.setAllCaps(true);
-        mActionButton.setGravity(Gravity.CENTER);
-        mActionButton.setPadding(p, 0, p * 2, 0);
+        mModeSwitch = new Switch(mContext);
+        mModeSwitch.setSwitchPadding(0);
+        mModeSwitch.setSwitchTypeface(CONDENSED);
         lp = new LayoutParams(LayoutParams.WRAP_CONTENT, topRowSize);
         lp.topMargin = p;
         lp.addRule(ALIGN_PARENT_RIGHT);
-        lp.addRule(ALIGN_BASELINE, mModeSpinner.getId());
-        addView(mActionButton, lp);
-        mActionButton.setOnClickListener(new View.OnClickListener() {
+        lp.addRule(ALIGN_BASELINE, mModeText.getId());
+        addView(mModeSwitch, lp);
+        mModeSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
-                bounce(v, null);
-                beginOrEnd();
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mAdapter.setMode(isChecked);
+                if (!mInit) return;
+                postDelayed(new Runnable(){
+                    @Override
+                    public void run() {
+                        mAdapter.close();
+                    }
+                }, CLOSE_DELAY);
             }
         });
 
@@ -143,35 +153,24 @@ public class ZenModeView extends RelativeLayout {
         mDivider.setId(android.R.id.empty);
         mDivider.setBackgroundColor(GRAY);
         lp = new LayoutParams(LayoutParams.MATCH_PARENT, 2);
-        lp.addRule(BELOW, mModeSpinner.getId());
+        lp.addRule(BELOW, mModeText.getId());
         lp.topMargin = p;
-        lp.bottomMargin = p;
+        lp.bottomMargin = p * 2;
         addView(mDivider, lp);
 
         mUntilPager = new UntilPager(mContext, mPathPaint, iconSize * 3 / 4);
         mUntilPager.setId(android.R.id.tabhost);
-        lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        lp.leftMargin = lp.rightMargin = iconSize / 2;
+        lp.addRule(CENTER_HORIZONTAL);
         lp.addRule(BELOW, mDivider.getId());
         addView(mUntilPager, lp);
 
-        mAlarmWarning = new AlarmWarning(mContext);
+        mProgressDots = new ProgressDots(mContext, iconSize / 5);
         lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         lp.addRule(CENTER_HORIZONTAL);
         lp.addRule(BELOW, mUntilPager.getId());
-        lp.bottomMargin = p;
-        addView(mAlarmWarning, lp);
-    }
-
-    private void beginOrEnd() {
-        if (mAdapter == null) return;
-        if (mAdapter.getMode() == mAdapter.getCommittedMode()) {
-            // end
-            mAdapter.setCommittedMode(Adapter.MODE_OFF);
-        } else {
-            // begin
-            mAdapter.setCommittedMode(mAdapter.getMode());
-        }
-        mAdapter.close();
+        addView(mProgressDots, lp);
     }
 
     public void setAdapter(Adapter adapter) {
@@ -191,53 +190,13 @@ public class ZenModeView extends RelativeLayout {
     }
 
     private void updateState(boolean animate) {
-        mModeSpinner.updateState();
         mUntilPager.updateState();
-        mAlarmWarning.updateState(animate);
-        final float settingsAlpha = isFull() ? 0 : SETTINGS_ALPHA;
-        if (settingsAlpha != mSettingsButton.getAlpha()) {
-            if (animate) {
-                mSettingsButton.animate().alpha(settingsAlpha).start();
-            } else {
-                mSettingsButton.setAlpha(settingsAlpha);
-            }
-        }
-        final boolean committed = mAdapter != null
-                && mAdapter.getMode() == mAdapter.getCommittedMode();
-        mActionButton.setText(committed ? "End" : "Begin");
-    }
-
-    private boolean isFull() {
-        return mAdapter != null && mAdapter.getMode() == Adapter.MODE_FULL;
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (DEBUG) log("onMeasure %s %s",
-                MeasureSpec.toString(widthMeasureSpec), MeasureSpec.toString(heightMeasureSpec));
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if (!isFull()) {
-            final LayoutParams lp = (LayoutParams) mModeSpinner.getLayoutParams();
-            final int mh = vh(mModeSpinner) + vh(mDivider) + vh(mUntilPager) + lp.topMargin;
-            setMeasuredDimension(getMeasuredWidth(), mh);
-        }
-    }
-
-    private int vh(View v) {
-        LayoutParams lp = (LayoutParams) v.getLayoutParams();
-        return v.getMeasuredHeight() + lp.topMargin + lp.bottomMargin;
+        mModeSwitch.setChecked(mAdapter.getMode());
+        mInit = true;
     }
 
     private static void log(String msg, Object... args) {
         Log.d(TAG, args == null || args.length == 0 ? msg : String.format(msg, args));
-    }
-
-    private static ShapeDrawable sd(Path p, int size, Paint pt) {
-        final ShapeDrawable sd = new ShapeDrawable(new PathShape(p, size, size));
-        sd.getPaint().set(pt);
-        sd.setIntrinsicHeight(size);
-        sd.setIntrinsicWidth(size);
-        return sd;
     }
 
     private static void bounce(final View v, final Runnable midBounce) {
@@ -257,118 +216,23 @@ public class ZenModeView extends RelativeLayout {
             }).start();
     }
 
-    public static String modeToString(int mode) {
-        if (mode == Adapter.MODE_OFF) return "MODE_OFF";
-        if (mode == Adapter.MODE_LIMITED) return "MODE_LIMITED";
-        if (mode == Adapter.MODE_FULL) return "MODE_FULL";
-        throw new IllegalArgumentException("Invalid mode: " + mode);
-    }
+    private final class UntilView extends FrameLayout {
+        private static final boolean SUPPORT_LINKS = false;
 
-    public static String modeToLabel(int mode) {
-        if (mode == Adapter.MODE_LIMITED) return "Limited interruptions";
-        if (mode == Adapter.MODE_FULL) return "Zero interruptions";
-        throw new UnsupportedOperationException("Unsupported mode: " + mode);
-    }
-
-    private final class UntilPager extends RelativeLayout {
-        private final ImageView mPrev;
-        private final ImageView mNext;
-        private final TextView mText1;
-        private final TextView mText2;
-
-        private TextView mText;
-
-        public UntilPager(Context context, Paint pathPaint, int iconSize) {
+        private final TextView mText;
+        public UntilView(Context context) {
             super(context);
-            mText1 = new TextView(mContext);
-            mText1.setTextSize(TypedValue.COMPLEX_UNIT_PX, mText1.getTextSize() * 1.2f);
-            mText1.setTypeface(CONDENSED);
-            mText1.setTextColor(GRAY);
-            mText1.setGravity(Gravity.CENTER);
-            LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, iconSize);
-            addView(mText1, lp);
-            mText = mText1;
-
-            mText2 = new TextView(mContext);
-            mText2.setTextSize(TypedValue.COMPLEX_UNIT_PX, mText1.getTextSize());
-            mText2.setTypeface(CONDENSED);
-            mText2.setTextColor(GRAY);
-            mText2.setAlpha(0);
-            mText2.setGravity(Gravity.CENTER);
-            addView(mText2, lp);
-
-            lp = new LayoutParams(iconSize, iconSize);
-            final View v = new View(mContext);
-            v.setBackgroundColor(BACKGROUND);
-            addView(v, lp);
-            mPrev = new ImageView(mContext);
-            mPrev.setId(android.R.id.button1);
-            mPrev.setImageDrawable(sd(prevPath(iconSize), iconSize, pathPaint));
-            addView(mPrev, lp);
-            mPrev.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onNav(v, -1);
-                }
-            });
-
-            lp = new LayoutParams(iconSize, iconSize);
-            lp.addRule(ALIGN_PARENT_RIGHT);
-            final View v2 = new View(mContext);
-            v2.setBackgroundColor(BACKGROUND);
-            addView(v2, lp);
-            mNext = new ImageView(mContext);
-            mNext.setId(android.R.id.button2);
-            mNext.setImageDrawable(sd(nextPath(iconSize), iconSize, pathPaint));
-            addView(mNext, lp);
-            mNext.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onNav(v, 1);
-                }
-            });
-
-            updateState();
+            mText = new TextView(mContext);
+            mText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mText.getTextSize() * 1.2f);
+            mText.setTypeface(CONDENSED);
+            mText.setTextColor(GRAY);
+            mText.setGravity(Gravity.CENTER);
+            addView(mText);
         }
 
-        private void onNav(View v, int d) {
-            bounce(v, null);
-            if (mAdapter == null) {
-                return;
-            }
-            if (mAdapter.getExitConditionCount() == 1) {
-                horBounce(d);
-                return;
-            }
-            final int w = getWidth();
-            final float s = Math.signum(d);
-            final TextView current = mText;
-            final TextView other = mText == mText1 ? mText2 : mText1;
-            final ExitCondition ec = mAdapter.getExitCondition(d);
-            setText(other, ec);
-            other.setTranslationX(-s * w);
-            other.animate().translationX(0).alpha(1).setDuration(DURATION).start();
-            current.animate().translationX(s * w).alpha(0).setDuration(DURATION).start();
-            mText = other;
-            mAdapter.select(ec);
-        }
-
-        private void horBounce(int d) {
-            final int w = getWidth();
-            mText.animate()
-                    .setDuration(BOUNCE_DURATION)
-                    .translationX(Math.signum(d) * w / 20)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            mText.animate().translationX(0).setListener(null).start();
-                        }
-                    }).start();
-        }
-
-        private void setText(final TextView textView, final ExitCondition ec) {
+        public void setExitCondition(final ExitCondition ec) {
             SpannableStringBuilder ss = new SpannableStringBuilder(ec.summary);
-            if (ec.action != null) {
+            if (SUPPORT_LINKS && ec.action != null) {
                 ss.setSpan(new CustomLinkSpan() {
                     @Override
                     public void onClick() {
@@ -376,38 +240,122 @@ public class ZenModeView extends RelativeLayout {
                         Toast.makeText(mContext, ec.action, Toast.LENGTH_SHORT).show();
                     }
                 }, 0, ss.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                textView.setMovementMethod(LinkMovementMethod.getInstance());
+                mText.setMovementMethod(LinkMovementMethod.getInstance());
             } else {
-                textView.setMovementMethod(null);
+                mText.setMovementMethod(null);
             }
-            textView.setText(ss);
+            mText.setText(ss);
+        }
+    }
+
+    private final class ProgressDots extends LinearLayout {
+        private final int mDotSize;
+        public ProgressDots(Context context, int dotSize) {
+            super(context);
+            setOrientation(HORIZONTAL);
+            mDotSize = dotSize;
+        }
+
+        private void updateState(int current, int count) {
+            while (getChildCount() < count) {
+                View dot = new View(mContext);
+                OvalShape s = new OvalShape();
+                ShapeDrawable sd = new ShapeDrawable(s);
+
+                dot.setBackground(sd);
+                LayoutParams lp = new LayoutParams(mDotSize, mDotSize);
+                lp.leftMargin = lp.rightMargin = mDotSize / 2;
+                lp.topMargin = lp.bottomMargin = mDotSize * 2 / 3;
+                addView(dot, lp);
+            }
+            while (getChildCount() > count) {
+                removeViewAt(getChildCount() - 1);
+            }
+            final int N = getChildCount();
+            for (int i = 0; i < N; i++) {
+                final int color = current == i ? GRAY : DARK_GRAY;
+                ((ShapeDrawable)getChildAt(i).getBackground()).setColorFilter(color, Mode.ADD);
+            }
+        }
+    }
+
+    private final class UntilPager extends RelativeLayout {
+        private final UntilView[] mViews;
+        private int mCurrent;
+        private float mDownX;
+
+        public UntilPager(Context context, Paint pathPaint, int iconSize) {
+            super(context);
+            mViews = new UntilView[3];
+            for (int i = 0; i < mViews.length; i++) {
+                UntilView v = new UntilView(mContext);
+                LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, iconSize);
+                addView(v, lp);
+                mViews[i] = v;
+            }
+            updateState();
+            addOnLayoutChangeListener(new OnLayoutChangeListener() {
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right,
+                        int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                    if (left != oldLeft || right != oldRight) {
+                        updateState();
+                    }
+                }
+            });
+            setBackgroundColor(DARK_GRAY);
         }
 
         private void updateState() {
             if (mAdapter == null) {
                 return;
             }
-            setText(mText, mAdapter.getExitCondition(0));
+            UntilView current = mViews[mCurrent];
+            current.setExitCondition(mAdapter.getExitCondition(0));
+            UntilView next = mViews[mCurrent + 1 % 3];
+            next.setExitCondition(mAdapter.getExitCondition(1));
+            UntilView prev = mViews[mCurrent + 2 % 3];
+            prev.setExitCondition(mAdapter.getExitCondition(-1));
+            position(0, false);
+            mProgressDots.updateState(mAdapter.getExitConditionIndex(),
+                    mAdapter.getExitConditionCount());
         }
 
-        private Path prevPath(int size) {
-            final int hp = size * 3 / 8;
-            final int vp = size / 4;
-            final Path p = new Path();
-            p.moveTo(size - hp, vp);
-            p.lineTo(hp, size / 2);
-            p.lineTo(size - hp, size - vp);
-            return p;
+        private void position(float dx, boolean animate) {
+            int w = getWidth();
+            UntilView current = mViews[mCurrent];
+            UntilView next = mViews[mCurrent + 1 % 3];
+            UntilView prev = mViews[mCurrent + 2 % 3];
+            if (animate) {
+                current.animate().setDuration(PAGER_DURATION).translationX(dx).start();
+                next.animate().setDuration(PAGER_DURATION).translationX(w + dx).start();
+                prev.animate().setDuration(PAGER_DURATION).translationX(-w + dx).start();
+            } else {
+                current.setTranslationX(dx);
+                next.setTranslationX(w + dx);
+                prev.setTranslationX(-w + dx);
+            }
         }
 
-        private Path nextPath(int size) {
-            final int hp = size * 3 / 8;
-            final int vp = size / 4;
-            Path p = new Path();
-            p.moveTo(hp, vp);
-            p.lineTo(size - hp, size / 2);
-            p.lineTo(hp, size - vp);
-            return p;
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            log("onTouchEvent " + MotionEvent.actionToString(event.getAction()));
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                mDownX = event.getX();
+            } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                float dx = event.getX() - mDownX;
+                position(dx, false);
+            } else if (event.getAction() == MotionEvent.ACTION_UP
+                    || event.getAction() == MotionEvent.ACTION_CANCEL) {
+                float dx = event.getX() - mDownX;
+                int d = Math.abs(dx) < getWidth() / 3 ? 0 : Math.signum(dx) > 0 ? -1 : 1;
+                if (d != 0 && mAdapter.getExitConditionCount() > 1) {
+                    mAdapter.select(mAdapter.getExitCondition(d));
+                } else {
+                    position(0, true);
+                }
+            }
+            return true;
         }
     }
 
@@ -432,21 +380,16 @@ public class ZenModeView extends RelativeLayout {
     }
 
     public interface Adapter {
-        public static final int MODE_OFF = 0;
-        public static final int MODE_LIMITED = 1;
-        public static final int MODE_FULL = 2;
-
         void configure();
         void close();
-        int getMode();
-        void setMode(int mode);
-        int getCommittedMode();
-        void setCommittedMode(int mode);
+        boolean getMode();
+        void setMode(boolean mode);
         void select(ExitCondition ec);
         void init();
         void setCallbacks(Callbacks callbacks);
         ExitCondition getExitCondition(int d);
         int getExitConditionCount();
+        int getExitConditionIndex();
 
         public static class ExitCondition {
             public String summary;
@@ -457,112 +400,6 @@ public class ZenModeView extends RelativeLayout {
 
         public interface Callbacks {
             void onChanged();
-        }
-    }
-
-    private final class ModeSpinner extends Spinner {
-        public ModeSpinner(final Context context) {
-            super(context);
-            setBackgroundResource(R.drawable.spinner_default_holo_dark_am_no_underline);
-            final ArrayAdapter<Integer> adapter = new ArrayAdapter<Integer>(mContext, 0) {
-                @Override
-                public View getView(int position, View convertView,  ViewGroup parent) {
-                    if (DEBUG) log("getView %s parent=%s", position, parent);
-                    return getDropDownView(position, convertView, parent);
-                }
-
-                @Override
-                public View getDropDownView(final int position, View convertView, ViewGroup parent) {
-                    if (DEBUG) log("getDropDownView %s cv=%s parent=%s",
-                            position, convertView, parent);
-                    final TextView tv = convertView != null ? (TextView) convertView
-                            : new TextView(context);
-                    final int mode = getItem(position);
-                    tv.setText(modeToLabel(mode));
-                    final boolean inDropdown = parent instanceof ListView;
-                    if (convertView == null) {
-                        if (DEBUG) log(" setting up view");
-                        tv.setTextColor(GRAY);
-                        tv.setTypeface(CONDENSED);
-                        tv.setAllCaps(true);
-                        tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, tv.getTextSize() * 1.2f);
-                        final int p = (int) tv.getTextSize() / 2;
-                        if (inDropdown) {
-                            tv.setPadding(p, p, 0, p);
-                        } else {
-                            tv.setGravity(Gravity.CENTER_HORIZONTAL);
-                            tv.setPadding(p, 0, 0, 0);
-                        }
-                    }
-                    tv.setOnTouchListener(new OnTouchListener(){
-                        @Override
-                        public boolean onTouch(View v, MotionEvent event) {
-                            if (DEBUG) log("onTouch %s %s inDropdown=%s", tv.getText(),
-                                    MotionEvent.actionToString(event.getAction()), inDropdown);
-                            if (inDropdown && mAdapter != null) {
-                                mAdapter.setMode(mode);
-                            }
-                            return false;
-                        }
-                    });
-                    return tv;
-                }
-            };
-            adapter.add(Adapter.MODE_LIMITED);
-            adapter.add(Adapter.MODE_FULL);
-            setAdapter(adapter);
-        }
-
-        public void updateState() {
-            int mode = mAdapter != null ? mAdapter.getMode() : Adapter.MODE_LIMITED;
-            if (mode == Adapter.MODE_OFF) {
-                mode = Adapter.MODE_LIMITED;
-            }
-            if (DEBUG) log("setSelectedMode " + mode);
-            for (int i = 0; i < getAdapter().getCount(); i++) {
-                if (getAdapter().getItem(i).equals(mode)) {
-                    if (DEBUG) log("  setting selection = " + i);
-                    setSelection(i, true);
-                    onDetachedFromWindow();
-                }
-            }
-        }
-    }
-
-    private final class AlarmWarning extends LinearLayout {
-        public AlarmWarning(Context context) {
-            super(context);
-            setOrientation(HORIZONTAL);
-
-            final TextView tv = new TextView(mContext);
-            tv.setTextColor(GRAY);
-            tv.setGravity(Gravity.TOP);
-            tv.setTypeface(CONDENSED);
-            tv.setText(FULL_TEXT);
-            addView(tv);
-
-            final ImageView icon = new ImageView(mContext);
-            icon.setAlpha(.75f);
-            int size = (int)tv.getTextSize();
-            icon.setImageResource(android.R.drawable.ic_dialog_alert);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(size, size);
-            final int p = size / 4;
-            lp.bottomMargin = lp.topMargin = lp.rightMargin = lp.leftMargin = p;
-            addView(icon, 0, lp);
-            setPadding(p, 0, p, p);
-        }
-
-        public void updateState(boolean animate) {
-            final float alpha = isFull() ? 1 : 0;
-            if (alpha == getAlpha()) {
-                return;
-            }
-            if (animate) {
-                animate().alpha(alpha).start();
-            } else {
-                setAlpha(alpha);
-                requestLayout();
-            }
         }
     }
 }
