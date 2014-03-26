@@ -313,20 +313,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * Check to see if vold already has the password.
-     * Note that this also clears vold's copy of the password.
-     * @return Whether the vold password matches or not.
-     */
-    public boolean checkVoldPassword() {
-        final int userId = getCurrentOrCallingUserId();
-        try {
-            return getLockSettings().checkVoldPassword(userId);
-        } catch (RemoteException re) {
-            return false;
-        }
-    }
-
-    /**
      * Check to see if a password matches any of the passwords stored in the
      * password history.
      *
