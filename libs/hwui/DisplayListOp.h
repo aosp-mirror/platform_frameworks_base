@@ -21,6 +21,8 @@
     #define LOG_TAG "OpenGLRenderer"
 #endif
 
+#include <SkPath.h>
+#include <SkPathOps.h>
 #include <SkXfermode.h>
 
 #include <private/hwui/DrawGlInfo.h>
@@ -1550,20 +1552,27 @@ private:
  */
 class DrawShadowOp : public DrawOp {
 public:
-    DrawShadowOp(const mat4& transformXY, const mat4& transformZ, float alpha, const SkPath* outline,
-            float fallbackWidth, float fallbackHeight)
-            : DrawOp(NULL), mTransformXY(transformXY), mTransformZ(transformZ),
-            mAlpha(alpha), mOutline(outline),
-            mFallbackWidth(fallbackWidth), mFallbackHeight(fallbackHeight) {}
+    DrawShadowOp(const mat4& transformXY, const mat4& transformZ, float alpha,
+            float fallbackWidth, float fallbackHeight,
+            const SkPath* outline, const SkPath* revealClip)
+            : DrawOp(NULL), mTransformXY(transformXY), mTransformZ(transformZ), mAlpha(alpha),
+            mFallbackWidth(fallbackWidth), mFallbackHeight(fallbackHeight),
+            mOutline(outline), mRevealClip(revealClip) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        if (mOutline->isEmpty()) {
-            SkPath fakeOutline;
-            fakeOutline.addRect(0, 0, mFallbackWidth, mFallbackHeight);
-            return renderer.drawShadow(mTransformXY, mTransformZ, mAlpha, &fakeOutline);
+        SkPath casterPerimeter;
+        if (!mOutline || mOutline->isEmpty()) {
+            casterPerimeter.addRect(0, 0, mFallbackWidth, mFallbackHeight);
+        } else {
+            casterPerimeter = *mOutline;
         }
 
-        return renderer.drawShadow(mTransformXY, mTransformZ, mAlpha, mOutline);
+        if (mRevealClip) {
+            // intersect the outline with the convex reveal clip
+            Op(casterPerimeter, *mRevealClip, kIntersect_PathOp, &casterPerimeter);
+        }
+
+        return renderer.drawShadow(mTransformXY, mTransformZ, mAlpha, &casterPerimeter);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1576,9 +1585,12 @@ private:
     const mat4 mTransformXY;
     const mat4 mTransformZ;
     const float mAlpha;
-    const SkPath* mOutline;
     const float mFallbackWidth;
     const float mFallbackHeight;
+
+    // these point at convex SkPaths owned by RenderProperties, or null
+    const SkPath* mOutline;
+    const SkPath* mRevealClip;
 };
 
 class DrawLayerOp : public DrawOp {

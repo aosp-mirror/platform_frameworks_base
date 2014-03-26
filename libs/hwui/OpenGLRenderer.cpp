@@ -1919,6 +1919,7 @@ status_t OpenGLRenderer::drawDisplayList(RenderNode* displayList, Rect& dirty,
     // will be performed by the display list itself
     if (displayList && displayList->isRenderable()) {
         // compute 3d ordering
+        displayList->updateProperties();
         displayList->computeOrdering();
         if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
             status = startFrame();
@@ -3202,7 +3203,7 @@ static void mapPointFakeZ(Vector3& point, const mat4& transformXY, const mat4& t
 }
 
 status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& casterTransformZ,
-        float casterAlpha, const SkPath* casterOutline) {
+        float casterAlpha, const SkPath* casterPerimeter) {
     if (currentSnapshot()->isIgnored()) return DrawGlInfo::kStatusDone;
 
     // TODO: use quickRejectWithScissor. For now, always force enable scissor.
@@ -3214,7 +3215,7 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& c
     // tessellate caster outline into a 2d polygon
     Vector<Vertex> casterVertices2d;
     const float casterRefinementThresholdSquared = 20.0f; // TODO: experiment with this value
-    PathTessellator::approximatePathOutlineVertices(*casterOutline,
+    PathTessellator::approximatePathOutlineVertices(*casterPerimeter,
             casterRefinementThresholdSquared, casterVertices2d);
 
     if (casterVertices2d.size() == 0) {
@@ -3256,7 +3257,7 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& c
     // We only have ortho projection, so we can just ignore the Z in caster for
     // simple rejection calculation.
     Rect localClip = mSnapshot->getLocalClip();
-    Rect casterBounds(casterOutline->getBounds());
+    Rect casterBounds(casterPerimeter->getBounds());
     casterTransformXY.mapRect(casterBounds);
 
     bool isCasterOpaque = (casterAlpha == 1.0f);
