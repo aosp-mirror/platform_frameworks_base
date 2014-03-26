@@ -69,6 +69,7 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
+import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
@@ -340,7 +341,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // Lock for state used when installing and doing other long running
     // operations.  Methods that must be called with this lock held have
-    // the prefix "LI".
+    // the suffix "LI".
     final Object mInstallLock = new Object();
 
     // These are the directories in the 3rd party applications installed dir
@@ -916,6 +917,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 Slog.i(TAG, "Observer no longer exists.");
                             }
                         }
+                        if (args.observer2 != null) {
+                            try {
+                                Bundle extras = extrasForInstallResult(res);
+                                args.observer2.packageInstalled(res.name, extras, res.returnCode);
+                            } catch (RemoteException e) {
+                                Slog.i(TAG, "Observer no longer exists.");
+                            }
+                        }
                     } else {
                         Slog.e(TAG, "Bogus post-install token " + msg.arg1);
                     }
@@ -1042,6 +1051,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
         }
+    }
+
+    Bundle extrasForInstallResult(PackageInstalledInfo res) {
+        Bundle extras = null;
+        switch (res.returnCode) {
+            case PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION: {
+                extras = new Bundle();
+                extras.putString(PackageManager.EXTRA_EXISTING_PERMISSION, res.origPermission);
+                extras.putString(PackageManager.EXTRA_EXISTING_PACKAGE, res.origPackage);
+                break;
+            }
+        }
+        return extras;
     }
 
     void scheduleWriteSettingsLocked() {
@@ -6772,18 +6794,24 @@ public class PackageManagerService extends IPackageManager.Stub {
         private final boolean mIsPrivileged;
     }
 
+    /*
+     * The old-style observer methods all just trampoline to the newer signature with
+     * expanded install observer API.  The older API continues to work but does not
+     * supply the additional details of the Observer2 API.
+     */
+
     /* Called when a downloaded package installation has been confirmed by the user */
     public void installPackage(
             final Uri packageURI, final IPackageInstallObserver observer, final int flags) {
-        installPackage(packageURI, observer, flags, null);
+        installPackageEtc(packageURI, observer, null, flags, null);
     }
 
     /* Called when a downloaded package installation has been confirmed by the user */
     public void installPackage(
             final Uri packageURI, final IPackageInstallObserver observer, final int flags,
             final String installerPackageName) {
-        installPackageWithVerification(packageURI, observer, flags, installerPackageName, null,
-                null, null);
+        installPackageWithVerificationEtc(packageURI, observer, null, flags,
+                installerPackageName, null, null, null);
     }
 
     @Override
@@ -6792,20 +6820,67 @@ public class PackageManagerService extends IPackageManager.Stub {
             ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
         VerificationParams verificationParams = new VerificationParams(verificationURI, null, null,
                 VerificationParams.NO_UID, manifestDigest);
-        installPackageWithVerificationAndEncryption(packageURI, observer, flags,
+        installPackageWithVerificationAndEncryptionEtc(packageURI, observer, null, flags,
                 installerPackageName, verificationParams, encryptionParams);
     }
 
     public void installPackageWithVerificationAndEncryption(Uri packageURI,
             IPackageInstallObserver observer, int flags, String installerPackageName,
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
+        installPackageWithVerificationAndEncryptionEtc(packageURI, observer, null, flags,
+                installerPackageName, verificationParams, encryptionParams);
+    }
+
+    /*
+     * And here are the "live" versions that take both observer arguments
+     */
+    public void installPackageEtc(
+            final Uri packageURI, final IPackageInstallObserver observer,
+            IPackageInstallObserver2 observer2, final int flags) {
+        installPackageEtc(packageURI, observer, observer2, flags, null);
+    }
+
+    public void installPackageEtc(
+            final Uri packageURI, final IPackageInstallObserver observer,
+            final IPackageInstallObserver2 observer2, final int flags,
+            final String installerPackageName) {
+        installPackageWithVerificationEtc(packageURI, observer, observer2, flags,
+                installerPackageName, null, null, null);
+    }
+
+    @Override
+    public void installPackageWithVerificationEtc(Uri packageURI, IPackageInstallObserver observer,
+            IPackageInstallObserver2 observer2,
+            int flags, String installerPackageName, Uri verificationURI,
+            ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
+        VerificationParams verificationParams = new VerificationParams(verificationURI, null, null,
+                VerificationParams.NO_UID, manifestDigest);
+        installPackageWithVerificationAndEncryptionEtc(packageURI, observer, observer2, flags,
+                installerPackageName, verificationParams, encryptionParams);
+    }
+
+    /*
+     * All of the installPackage...*() methods redirect to this one for the master implementation
+     */
+    public void installPackageWithVerificationAndEncryptionEtc(Uri packageURI,
+            IPackageInstallObserver observer, IPackageInstallObserver2 observer2,
+            int flags, String installerPackageName,
+            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
+        if (observer == null && observer2 == null) {
+            throw new IllegalArgumentException("No install observer supplied");
+        }
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES,
                 null);
 
         final int uid = Binder.getCallingUid();
         if (isUserRestricted(UserHandle.getUserId(uid), UserManager.DISALLOW_INSTALL_APPS)) {
             try {
-                observer.packageInstalled("", PackageManager.INSTALL_FAILED_USER_RESTRICTED);
+                if (observer != null) {
+                    observer.packageInstalled("", PackageManager.INSTALL_FAILED_USER_RESTRICTED);
+                }
+                if (observer2 != null) {
+                    observer2.packageInstalled("", null, PackageManager.INSTALL_FAILED_USER_RESTRICTED);
+                }
             } catch (RemoteException re) {
             }
             return;
@@ -6832,8 +6907,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         verificationParams.setInstallerUid(uid);
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
-        msg.obj = new InstallParams(packageURI, observer, filteredFlags, installerPackageName,
-                verificationParams, encryptionParams, user);
+        msg.obj = new InstallParams(packageURI, observer, observer2, filteredFlags,
+                installerPackageName, verificationParams, encryptionParams, user);
         mHandler.sendMessage(msg);
     }
 
@@ -7522,6 +7597,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     class InstallParams extends HandlerParams {
         final IPackageInstallObserver observer;
+        final IPackageInstallObserver2 observer2;
         int flags;
 
         private final Uri mPackageURI;
@@ -7533,13 +7609,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         final ContainerEncryptionParams encryptionParams;
 
         InstallParams(Uri packageURI,
-                IPackageInstallObserver observer, int flags,
-                String installerPackageName, VerificationParams verificationParams,
+                IPackageInstallObserver observer, IPackageInstallObserver2 observer2,
+                int flags, String installerPackageName, VerificationParams verificationParams,
                 ContainerEncryptionParams encryptionParams, UserHandle user) {
             super(user);
             this.mPackageURI = packageURI;
             this.flags = flags;
             this.observer = observer;
+            this.observer2 = observer2;
             this.installerPackageName = installerPackageName;
             this.verificationParams = verificationParams;
             this.encryptionParams = encryptionParams;
@@ -8109,6 +8186,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     static abstract class InstallArgs {
         final IPackageInstallObserver observer;
+        final IPackageInstallObserver2 observer2;
         // Always refers to PackageManager flags only
         final int flags;
         final Uri packageURI;
@@ -8116,12 +8194,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         final ManifestDigest manifestDigest;
         final UserHandle user;
 
-        InstallArgs(Uri packageURI, IPackageInstallObserver observer, int flags,
-                String installerPackageName, ManifestDigest manifestDigest,
+        InstallArgs(Uri packageURI,
+                IPackageInstallObserver observer, IPackageInstallObserver2 observer2,
+                int flags, String installerPackageName, ManifestDigest manifestDigest,
                 UserHandle user) {
             this.packageURI = packageURI;
             this.flags = flags;
             this.observer = observer;
+            this.observer2 = observer2;
             this.installerPackageName = installerPackageName;
             this.manifestDigest = manifestDigest;
             this.user = user;
@@ -8178,13 +8258,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean created = false;
 
         FileInstallArgs(InstallParams params) {
-            super(params.getPackageUri(), params.observer, params.flags,
+            super(params.getPackageUri(), params.observer, params.observer2, params.flags,
                     params.installerPackageName, params.getManifestDigest(),
                     params.getUser());
         }
 
         FileInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath) {
-            super(null, null, 0, null, null, null);
+            super(null, null, null, 0, null, null, null);
             File codeFile = new File(fullCodePath);
             installDir = codeFile.getParentFile();
             codeFileName = fullCodePath;
@@ -8193,7 +8273,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         FileInstallArgs(Uri packageURI, String pkgName, String dataDir) {
-            super(packageURI, null, 0, null, null, null);
+            super(packageURI, null, null, 0, null, null, null);
             installDir = isFwdLocked() ? mDrmAppPrivateInstallDir : mAppInstallDir;
             String apkName = getNextCodePath(null, pkgName, ".apk");
             codeFileName = new File(installDir, apkName + ".apk").getPath();
@@ -8514,14 +8594,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         String libraryPath;
 
         AsecInstallArgs(InstallParams params) {
-            super(params.getPackageUri(), params.observer, params.flags,
+            super(params.getPackageUri(), params.observer, params.observer2, params.flags,
                     params.installerPackageName, params.getManifestDigest(),
                     params.getUser());
         }
 
         AsecInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath,
                 boolean isExternal, boolean isForwardLocked) {
-            super(null, null, (isExternal ? PackageManager.INSTALL_EXTERNAL : 0)
+            super(null, null, null, (isExternal ? PackageManager.INSTALL_EXTERNAL : 0)
                     | (isForwardLocked ? PackageManager.INSTALL_FORWARD_LOCK : 0),
                     null, null, null);
             // Extract cid from fullCodePath
@@ -8533,7 +8613,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         AsecInstallArgs(String cid, boolean isForwardLocked) {
-            super(null, null, (isAsecExternal(cid) ? PackageManager.INSTALL_EXTERNAL : 0)
+            super(null, null, null, (isAsecExternal(cid) ? PackageManager.INSTALL_EXTERNAL : 0)
                     | (isForwardLocked ? PackageManager.INSTALL_FORWARD_LOCK : 0),
                     null, null, null);
             this.cid = cid;
@@ -8541,7 +8621,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         AsecInstallArgs(Uri packageURI, String cid, boolean isExternal, boolean isForwardLocked) {
-            super(packageURI, null, (isExternal ? PackageManager.INSTALL_EXTERNAL : 0)
+            super(packageURI, null, null, (isExternal ? PackageManager.INSTALL_EXTERNAL : 0)
                     | (isForwardLocked ? PackageManager.INSTALL_FORWARD_LOCK : 0),
                     null, null, null);
             this.cid = cid;
@@ -8875,6 +8955,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         PackageParser.Package pkg;
         int returnCode;
         PackageRemovedInfo removedInfo;
+
+        // In some error cases we want to convey more info back to the observer
+        String origPackage;
+        String origPermission;
     }
 
     /*
@@ -9299,6 +9383,22 @@ public class PackageManagerService extends IPackageManager.Stub {
         String oldCodePath = null;
         boolean systemApp = false;
         synchronized (mPackages) {
+            // Check whether the newly-scanned package wants to define an already-defined perm
+            int N = pkg.permissions.size();
+            for (int i = 0; i < N; i++) {
+                PackageParser.Permission perm = pkg.permissions.get(i);
+                BasePermission bp = mSettings.mPermissions.get(perm.info.name);
+                if (bp != null) {
+                    Slog.w(TAG, "Package " + pkg.packageName
+                            + " attempting to redeclare permission " + perm.info.name
+                            + " already owned by " + bp.sourcePackage);
+                    res.returnCode = PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
+                    res.origPermission = perm.info.name;
+                    res.origPackage = bp.sourcePackage;
+                    return;
+                }
+            }
+
             // Check if installing already existing package
             if ((pFlags&PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
                 String oldName = mSettings.mRenamedPackages.get(pkgName);
