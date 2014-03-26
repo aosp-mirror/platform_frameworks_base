@@ -51,4 +51,7 @@
     <!-- How far to slide the panel out when you touch it -->
     <!-- On tablets this is just the close_handle_height -->
     <dimen name="peek_height">@dimen/close_handle_height</dimen>
+
+    <!-- Width of the zen mode interstitial dialog. -->
+    <dimen name="zen_mode_dialog_width">384dp</dimen>
 </resources>

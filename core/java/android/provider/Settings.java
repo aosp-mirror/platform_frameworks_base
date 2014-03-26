@@ -6106,21 +6106,18 @@ public final class Settings {
                 "lock_screen_show_notifications";
 
         /**
-         * Defines global zen mode.  One of ZEN_MODE_OFF, ZEN_MODE_LIMITED, ZEN_MODE_FULL.
+         * Defines global zen mode.  ZEN_MODE_OFF or ZEN_MODE_ON.
          *
          * @hide
          */
         public static final String ZEN_MODE = "zen_mode";
 
         /** @hide */ public static final int ZEN_MODE_OFF = 0;
-        /** @hide */ public static final int ZEN_MODE_LIMITED = 1;
-        /** @hide */ public static final int ZEN_MODE_FULL = 2;
+        /** @hide */ public static final int ZEN_MODE_ON = 1;
 
         /** @hide */ public static String zenModeToString(int mode) {
             if (mode == ZEN_MODE_OFF) return "ZEN_MODE_OFF";
-            if (mode == ZEN_MODE_LIMITED) return "ZEN_MODE_LIMITED";
-            if (mode == ZEN_MODE_FULL) return "ZEN_MODE_FULL";
-            throw new IllegalArgumentException("Invalid zen mode: " + mode);
+            return "ZEN_MODE_ON";
         }
 
         /**
