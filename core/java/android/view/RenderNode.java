@@ -361,6 +361,14 @@ public class RenderNode {
     }
 
     /**
+     * Controls the RenderNode's circular reveal clip.
+     */
+    public void setRevealClip(boolean shouldClip, boolean inverseClip,
+            float x, float y, float radius) {
+        nSetRevealClip(mNativeDisplayList, shouldClip, inverseClip, x, y, radius);
+    }
+
+    /**
      * Set the static matrix on the display list. The specified matrix is combined with other
      * transforms (such as {@link #setScaleX(float)}, {@link #setRotation(float)}, etc.)
      *
@@ -856,6 +864,8 @@ public class RenderNode {
     private static native void nSetOutlineConvexPath(long displayList, long nativePath);
     private static native void nSetOutlineEmpty(long displayList);
     private static native void nSetClipToOutline(long displayList, boolean clipToOutline);
+    private static native void nSetRevealClip(long displayList,
+            boolean shouldClip, boolean inverseClip, float x, float y, float radius);
     private static native void nSetAlpha(long displayList, float alpha);
     private static native void nSetHasOverlappingRendering(long displayList,
             boolean hasOverlappingRendering);
