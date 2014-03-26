@@ -33,7 +33,7 @@ import java.io.PrintWriter;
  * instance is managed by android.media.MediaFocusControl, from its addition to the player stack
  * stack to its release.
  */
-class MediaController implements DeathRecipient {
+class PlayerRecord implements DeathRecipient {
 
     // on purpose not using this classe's name, as it will only be used from MediaFocusControl
     private static final String TAG = "MediaFocusControl";
@@ -213,7 +213,7 @@ class MediaController implements DeathRecipient {
     }
 
     /** precondition: mediaIntent != null */
-    protected MediaController(PendingIntent mediaIntent, ComponentName eventReceiver, IBinder token)
+    protected PlayerRecord(PendingIntent mediaIntent, ComponentName eventReceiver, IBinder token)
     {
         mMediaIntent = mediaIntent;
         mReceiverComponent = eventReceiver;
