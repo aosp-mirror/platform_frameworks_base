@@ -176,12 +176,7 @@ class MediaController implements DeathRecipient {
             try {
                 mToken.linkToDeath(this, 0);
             } catch (RemoteException e) {
-                //FIXME do not access the event handler directly
-                mController.mEventHandler.post(new Runnable() {
-                    @Override public void run() {
-                        mController.unregisterMediaButtonIntent(mMediaIntent);
-                    }
-                });
+                mController.unregisterMediaButtonIntentAsync(mMediaIntent);
             }
         }
     }
@@ -209,7 +204,7 @@ class MediaController implements DeathRecipient {
 
     @Override
     public void binderDied() {
-        mController.unregisterMediaButtonIntent(mMediaIntent);
+        mController.unregisterMediaButtonIntentAsync(mMediaIntent);
     }
 
     @Override

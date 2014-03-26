@@ -73,8 +73,7 @@ public class MediaFocusControl implements OnFinished {
     private boolean mIsRinging = false;
 
     private final PowerManager.WakeLock mMediaEventWakeLock;
-    //FIXME should be private
-    protected final MediaEventHandler mEventHandler;
+    private final MediaEventHandler mEventHandler;
     private final Context mContext;
     private final ContentResolver mContentResolver;
     private final VolumeController mVolumeController;
@@ -330,6 +329,7 @@ public class MediaFocusControl implements OnFinished {
     private static final int MSG_RCC_UPDATE_METADATA = 9;
     private static final int MSG_RCDISPLAY_INIT_INFO = 10;
     private static final int MSG_REEVALUATE_RCD = 11;
+    private static final int MSG_UNREGISTER_MEDIABUTTONINTENT = 12;
 
     // sendMsg() flags
     /** If the msg is already queued, replace it with this one. */
@@ -351,8 +351,7 @@ public class MediaFocusControl implements OnFinished {
         handler.sendMessageDelayed(handler.obtainMessage(msg, arg1, arg2, obj), delay);
     }
 
-    //FIXME should be private
-    protected class MediaEventHandler extends Handler {
+    private class MediaEventHandler extends Handler {
         MediaEventHandler(Looper looper) {
             super(looper);
         }
@@ -415,6 +414,10 @@ public class MediaFocusControl implements OnFinished {
 
                 case MSG_REEVALUATE_RCD:
                     onReevaluateRemoteControlDisplays();
+                    break;
+
+                case MSG_UNREGISTER_MEDIABUTTONINTENT:
+                    unregisterMediaButtonIntent( (PendingIntent) msg.obj );
                     break;
             }
         }
@@ -1056,6 +1059,7 @@ public class MediaFocusControl implements OnFinished {
      * Inner class to monitor remote control client deaths, and remove the client for the
      * remote control stack if necessary.
      */
+    //FIXME should move to MediaController
     protected class RcClientDeathHandler implements IBinder.DeathRecipient {
         //FIXME should be private
         final protected IBinder mCb; // To be notified of client's death
@@ -1080,6 +1084,7 @@ public class MediaFocusControl implements OnFinished {
         }
     }
 
+    //FIXME should move to MediaController
     protected class RemotePlaybackState {
         int mRccId;
         int mVolume;
@@ -1696,6 +1701,12 @@ public class MediaFocusControl implements OnFinished {
                 }
             }
         }
+    }
+
+    protected void unregisterMediaButtonIntentAsync(final PendingIntent mediaIntent) {
+        mEventHandler.sendMessage(
+                mEventHandler.obtainMessage(MSG_UNREGISTER_MEDIABUTTONINTENT, 0, 0,
+                        mediaIntent));
     }
 
     /**
