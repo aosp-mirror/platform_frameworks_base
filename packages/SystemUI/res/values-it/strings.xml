@@ -188,8 +188,8 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1553131290066230775">"Bloccato in verticale"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="7216265671276086593">"Bloccato in orizzontale"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Metodo di immissione"</string>
-    <string name="quick_settings_location_label" msgid="5011327048748762257">"Geolocalizzazione"</string>
-    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Posizione non attiva"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"Geolocalizz."</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Geolocalizz. non attiva"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Dispositivo multimediale"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Solo chiamate di emergenza"</string>
