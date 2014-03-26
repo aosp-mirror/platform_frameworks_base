@@ -793,10 +793,9 @@ public class TypedArray {
     public int[] extractThemeAttrs() {
         int[] attrs = null;
 
-        final int N = getIndexCount();
+        final int N = length();
         for (int i = 0; i < N; i++) {
-            final int index = getIndex(i);
-            final int attrId = getThemeAttributeId(index, 0);
+            final int attrId = getThemeAttributeId(i, 0);
             if (attrId != 0) {
                 if (attrs == null) {
                     attrs = new int[N];
