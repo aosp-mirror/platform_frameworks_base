@@ -5718,7 +5718,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public int getAccessibilityWindowId() {
-        return mAttachInfo != null ? mAttachInfo.mAccessibilityWindowId : NO_ID;
+        return mAttachInfo != null ? mAttachInfo.mAccessibilityWindowId
+                : AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
     }
 
     /**
@@ -19742,7 +19743,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         /**
          * The id of the window for accessibility purposes.
          */
-        int mAccessibilityWindowId = View.NO_ID;
+        int mAccessibilityWindowId = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
 
         /**
          * Flags related to accessibility processing.
