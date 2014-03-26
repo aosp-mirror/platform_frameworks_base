@@ -1477,6 +1477,7 @@ final class Settings {
                     // FROM NATIVE CODE. AT THE MOMENT, LOOK AT THE FOLLOWING SOURCES:
                     //   system/core/run-as/run-as.c
                     //   system/core/sdcard/sdcard.c
+                    //   external/libselinux/src/android.c:package_info_init()
                     //
                     sb.setLength(0);
                     sb.append(ai.packageName);
