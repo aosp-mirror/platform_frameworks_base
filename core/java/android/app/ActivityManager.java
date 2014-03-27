@@ -516,14 +516,14 @@ public class ActivityManager {
         public int userId;
 
         /**
-         * The label of the highest activity in the task stack to have set a label
-         * {@link Activity#setRecentsLabel}.
+         * The label of the highest activity in the task stack to have set a label using
+         * {@link Activity#setActivityLabelAndIcon(CharSequence, android.graphics.Bitmap)}.
          */
         public CharSequence activityLabel;
 
         /**
          * The Bitmap icon of the highest activity in the task stack to set a Bitmap using
-         * {@link Activity#setRecentsIcon}.
+         * {@link Activity#setActivityLabelAndIcon(CharSequence, android.graphics.Bitmap)}.
          */
         public Bitmap activityIcon;
 
@@ -563,11 +563,7 @@ public class ActivityManager {
         public void readFromParcel(Parcel source) {
             id = source.readInt();
             persistentId = source.readInt();
-            if (source.readInt() != 0) {
-                baseIntent = Intent.CREATOR.createFromParcel(source);
-            } else {
-                baseIntent = null;
-            }
+            baseIntent = source.readInt() > 0 ? Intent.CREATOR.createFromParcel(source) : null;
             origActivity = ComponentName.readFromParcel(source);
             description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
             activityLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);

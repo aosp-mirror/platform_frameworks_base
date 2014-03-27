@@ -6895,18 +6895,27 @@ public final class ActivityManagerService extends ActivityManagerNative
                     rti.stackId = tr.stack.mStackId;
                     rti.userId = tr.userId;
 
+                    // Traverse upwards looking for any break between main task activities and
+                    // utility activities.
                     final ArrayList<ActivityRecord> activities = tr.mActivities;
-                    int numSet = 0;
-                    for (int activityNdx = activities.size() - 1; activityNdx >= 0 && numSet < 2;
-                            --activityNdx) {
+                    int activityNdx;
+                    final int numActivities = activities.size();
+                    for (activityNdx = Math.min(numActivities, 1); activityNdx < numActivities;
+                            ++activityNdx) {
                         final ActivityRecord r = activities.get(activityNdx);
-                        if (rti.activityLabel == null && r.recentsLabel != null) {
-                            rti.activityLabel = r.recentsLabel;
-                            ++numSet;
+                        if (r.intent != null &&
+                                (r.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
+                                        != 0) {
+                            break;
                         }
-                        if (rti.activityIcon == null && r.recentsIcon != null) {
-                            rti.activityIcon = r.recentsIcon;
-                            ++numSet;
+                    }
+                    // Traverse downwards starting below break looking for set label and icon.
+                    for (--activityNdx; activityNdx >= 0; --activityNdx) {
+                        final ActivityRecord r = activities.get(activityNdx);
+                        if (r.activityLabel != null || r.activityIcon != null) {
+                            rti.activityLabel = r.activityLabel;
+                            rti.activityIcon = r.activityIcon;
+                            break;
                         }
                     }
 
@@ -6975,21 +6984,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void setRecentsLabel(IBinder token, CharSequence recentsLabel) {
+    public void setActivityLabelAndIcon(IBinder token, CharSequence activityLabel,
+            Bitmap activityIcon) {
         synchronized (this) {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r != null) {
-                r.recentsLabel = recentsLabel.toString();
-            }
-        }
-    }
-
-    @Override
-    public void setRecentsIcon(IBinder token, Bitmap recentsIcon) {
-        synchronized (this) {
-            ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            if (r != null) {
-                r.recentsIcon = recentsIcon;
+                r.activityLabel = activityLabel.toString();
+                r.activityIcon = activityIcon;
             }
         }
     }
