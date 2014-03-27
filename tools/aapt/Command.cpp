@@ -1840,6 +1840,25 @@ int doCrunch(Bundle* bundle)
     return NO_ERROR;
 }
 
+/*
+ * Do PNG Crunching on a single flag
+ *  -i points to a single png file
+ *  -o points to a single png output file
+ */
+int doSingleCrunch(Bundle* bundle)
+{
+    fprintf(stdout, "Crunching single PNG file: %s\n", bundle->getSingleCrunchInputFile());
+    fprintf(stdout, "\tOutput file: %s\n", bundle->getSingleCrunchOutputFile());
+
+    String8 input(bundle->getSingleCrunchInputFile());
+    String8 output(bundle->getSingleCrunchOutputFile());
+    if (preProcessImageToCache(bundle, input, output) != NO_ERROR) {
+        // we can't return the status_t as it gets truncate to the lower 8 bits.
+        return 42;
+    }
+    return NO_ERROR;
+}
+
 char CONSOLE_DATA[2925] = {
     32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
     32, 32, 32, 32, 32, 32, 32, 95, 46, 32, 32, 32, 32, 32, 32, 32, 32, 32,
