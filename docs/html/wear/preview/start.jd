@@ -1,0 +1,254 @@
+page.title=Get Started with the Developer Preview
+
+@jd:body
+
+
+<div class="cols">
+
+  <div class="col-5">
+<p>The Android Wear Developer Preview includes tools and APIs that allow you to
+enhance your app notifications
+to provide an optimized user experience on Android wearables.</p>
+
+<p>With the Android Wear Developer Preview, you can:</p>
+
+<ul>
+  <li>Run the Android Wear platform in the Android emulator.</li>
+  <li>Connect your Android device to the emulator and view notifications from the
+device as cards on Android Wear.</li>
+  <li>Try new APIs in the preview support library that enhance your app's notifications
+with features such as voice replies and notification pages.</li>
+</ul>
+
+<p>To get access to the Developer Preview tools,
+click the sign up button on the right, then follow the setup instructions below.</p>
+  </div>
+
+  <div class="col-7">
+<img src="/wear/images/laptop-bridge.png" width="400" height="222" alt="" />
+
+<a href="/wear/preview/signup.html" class="button" style="
+    width: 370px;
+    margin: 10px 0 20px;
+    font-weight: bold;
+    font-size: 16px;
+">Sign Up for the Developer Preview</a>
+
+<p>Signing up provides you access to:</p>
+<ul>
+<li>New notification APIs in the preview support library.</li>
+<li>Sample apps using the new notification APIs.</li>
+<li>The <em>Android Wear Preview</em> app for your mobile device, which connects
+your device to the Android Wear emulator.</li>
+</ul>
+
+  </div>
+</div>
+
+
+<p class="caution"><strong>Caution:</strong>
+The current Android Wear Developer Preview is intended for <b>development and testing purposes only</b>, not for production apps. Google may change this Developer Preview significantly prior to the official release of the Android Wear SDK. You may not publicly distribute or ship any application using this Developer Preview, as this Developer Preview will no longer be supported after the official SDK is released (which will cause applications based only on the Developer Preview to break).</p>
+
+
+
+
+<h2 id="Prereq">Prerequisites</h2>
+
+<p>Before you begin the setup, you must:</p>
+
+<ol>
+  <li><a href="{@docRoot}sdk/index.html"><b>Install the Android SDK</b></a>.
+  <p>The Android SDK includes all the developer tools required to build
+apps for Android (optional IDEs are also available for download).</p></li>
+  <li><a href="{@docRoot}wear/preview/signup.html"><b>Sign up for the Android Wear Developer Preview</b></a>.
+  <p>You must sign up with a Gmail or other Google account in order to download the
+preview support library and receive access to the
+<em>Android Wear Preview</em> beta app on Google Play Store.</p></li>
+</ol>
+
+<p class="note"><strong>Note:</strong>
+If you're using the ADT plugin for Eclipse, you must update to version 22.6.1 or higher.
+If you're using Android Studio, you must update to version 0.5.1 or higher</p>
+
+
+
+<h2 id="Install">1. Install the Android Wear System Image</h2>
+
+
+<ol>
+  <li>Launch <a href="{@docRoot}tools/help/sdk-manager.html"
+    >Android SDK Manager</a>.
+  <ul>
+    <li>From Eclipse, select <b>Window > Android SDK Manager</b>.</li>
+    <li>From Android Studio, select <b>Tools > Android > SDK Manager</b>.</li>
+  </ul>
+  </li>
+  <li>Below Tools, verify that you have Android SDK Tools revision 22.6 or higher.
+    <p>If your version of Android SDK Tools is lower than 22.6, you must update:</p>
+    <ol>
+      <li>Select <strong>Android SDK Tools</strong>.</li>
+      <li>Click <strong>Install package</strong>.</li>
+      <li>Accept the license and click <strong>Install</strong>.</li>
+      <li>When the installation completes, restart Android SDK Manager.</li>
+    </ol>
+  </li>
+
+  <li>Below Android 4.4.2, select <strong>Android Wear ARM EABI v7a System Image</strong>.
+<p class="note"><strong>Note:</strong> Android Wear is designed to support multiple processor architectures.
+</p></li>
+  <li>Below Extras, ensure that you have the latest version of the
+<a href="{@docRoot}tools/support-library/index.html">Android Support Library</a>.
+    If an update is available, select <strong>Android Support Library</strong>. If you're using Android Studio, also select <strong>Android Support Repository</strong>.</li>
+  <li>Click <strong>Install packages</strong>.</li>
+  <li>Accept the license and click <strong>Install</strong>.</li>
+</ol>
+
+
+
+<h2 id="SetupEmulator">2. Set Up the Android Wear Emulator</h2>
+
+<ol>
+<li>Launch the <a href="{@docRoot}tools/help/avd-manager.html"
+  >Android Virtual Device Manager</a>.
+<ul>
+<li>From Eclipse, select <b>Window > Android Virtual Device Manager</b>.</li>
+<li>From Android Studio, select <b>Tools > Android > AVD Manager</b>.</li>
+</ul>
+</li>
+<li>Click <strong>New</strong>.</li>
+<li>For the AVD Name, enter "AndroidWearSquare" or "AndroidWearRound", depending on whether
+you want to create an emulator with a square or round display.</li>
+<li>For the Device, select <strong>Android Wear Square</strong> or
+	<strong>Android Wear Round</strong>.</li>
+<li>For the Target, select <strong>Android 4.4.2 - API Level 19</strong> (or higher).</li>
+<li>For the CPU/ABI, select <strong>Android Wear ARM (armeabi-v7a)</strong>.
+<p class="note"><strong>Note:</strong> Android Wear is designed to support multiple processor architectures.
+</p></li>
+<li>For the Skin, select <strong>AndroidWearSquare</strong> or
+<strong>AndroidWearRound</strong>.</li>
+<li>Leave all other options set to their defaults and click <strong>OK</strong>.
+  <p>Although real Android wearables do not provide a keyboard as an input method,
+    you should keep <strong>Hardware keyboard present</strong> selected so you can
+    provide text input on screens where users will instead provide voice input.</p>
+</li>
+<!--
+<li>Click <strong>Device Definitions</strong>.</li>
+<li>Select <strong>Android WearSquare</strong> then click <strong>Create AVD</strong>.</li>
+<li>Click <strong>OK</strong>.</li>
+-->
+<li>In the list of AVDs, select the one you just created and click
+ <strong>Start</strong>. In the following window, click <strong>Launch</strong>.</li>
+</ol>
+
+<p>The Android Wear emulator now starts. To begin testing your app's notifications,
+you must now pair the emulator to your development device
+that has the <em>Android Wear Preview</em> app installed.</p>
+
+<p class="note"><strong>Tip:</strong> To improve the emulator startup time, edit your AVD
+and enable <strong>Snapshot</strong> under Emulator Options. When you start the emulator,
+select <strong>Save to snapshot</strong> then click <strong>Launch</strong>. Once the emulator
+is running, close it to save a snapshot of the system.
+Start the AVD again, but select <strong>Launch from snapshot</strong> and
+deselect <strong>Save to snapshot</strong>.</p>
+
+<p class="caution"><strong>Caution:</strong> Do not install apps on the Android Wear emulator.
+The system does not support traditional Android apps and the result of running such apps is
+unpredictable.</p>
+
+
+
+<h2 id="SetupApp">3. Set Up the Android Wear Preview App</h2>
+
+<p>To view your app's notifications on the Android Wear emulator, you must have the
+<em>Android Wear Preview</em> app installed on your Android device (a phone or tablet).</p>
+
+<p>To receive the Android Wear Preview app, you must <a
+href="{@docRoot}wear/preview/signup.html">sign up for the Developer Preview</a> using the same
+Gmail or Google account you use with Google Play Store.</p>
+</p>
+
+<p class="note"><strong>Note:</strong> The <em>Android Wear Preview</em> app is compatible with
+    Android 4.3 and higher and is not available for the Android emulator.</p>
+
+<p>After you've signed up for the Developer Preview,
+  you'll receive a confirmation email that includes a link to opt-in to the
+  <em>Android Wear Preview</em> app beta program. Once you opt-in, it may take up to 24 hours for the
+  app to become available in Google Play Store.</p>
+
+<p>After you install the <em>Android Wear Preview</em> app, you can set up
+  your device to communicate with the Android Wear emulator:</p>
+
+<ol>
+<li>Open the <em>Android Wear Preview</em> app. You should see a notice that the app is currently
+  not enabled as a notification listener. Tap the message to open the system settings,
+  then select Android Wear Preview to grant it notification access.</li>
+<li>Connect your device to your development machine over USB. Be sure that no other
+ Android devices are connected to the machine.</li>
+<li>Ensure that the Android Wear emulator (created in the previous section) is running.
+The emulator should show the time and an icon that indicates no device is connected.</li>
+<li>Open a command line terminal, navigate to your Android SDK's <code>platform-tools/</code>
+directory, then execute:
+<pre style="margin-top:.5em">adb -d forward tcp:5601 tcp:5601</pre>
+<p class="note"><strong>Note:</strong> You must execute this command each time you connect your
+device over USB.</p>
+</li>
+<li>Return to the Android Wear Preview app. It should now indicate that it is connected to
+  the emulator. The Android Wear emulator should now show the 'g' orb icon, indicating
+  that is is connected to your device.
+</ol>
+
+<p>Now, notifications from your device also appear in the Android Wear emulator.</p>
+
+
+
+
+<h2 id="AddLibrary">4. Add the Support Library to Your Project</h2>
+
+<p>The Android Wear preview support library includes several APIs that allow you to
+optimize your app's notifications for the Android Wear user experience.</p>
+
+<p>To receive the preview support library, you must <a
+href="{@docRoot}wear/preview/signup.html">sign up for the Developer Preview</a>. The
+confirmation email you receive after you sign up includes a link to download a ZIP file,
+which contains the preview support library and some sample apps.</p>
+
+<p>After you download and unzip the package, add the preview support library
+sto your Android project:</p>
+
+<p><b>If you're using Eclipse:</b></p>
+    <ol>
+      <li>In your Android app project, create a <code>libs/</code> directory in your project root
+    (the same location as the <code>AndroidManifest.xml</code> file).</li>
+      <li>Copy the v4 support library JAR file from your Android SDK directory (e.g.,
+        <code>&lt;sdk&gt;/extras/android/support/v4/android-support-v4.jar</code>) into your
+        project <code>libs/</code> directory.
+      <li>Also save the <code>wearable-preview-support.jar</code> file in the <code>libs/</code> directory.
+      <li>Right click each JAR file and select <strong>Build Path &gt; Add to Build Path</strong>.</li>
+    </ol>
+
+ <p><b>If you're using Android Studio:</b></p>
+    <ol>
+     <li>In your Android app project, create a <code>libs/</code> directory in your project root
+    (the same location as the <code>AndroidManifest.xml</code> file).</li>
+      <li>Save the <code>wearable-preview-support.jar</code> file in the <code>libs/</code> directory.
+      <li>Open the <code>build.gradle</code> file in your app module.</li>
+      <li>Add a dependency rule for both the v4 support library and the Android Wear
+      preview support library:
+<pre>
+dependencies {
+    compile "com.android.support:support-v4:18.0.+"
+    compile files('../libs/wearable-preview-support.jar')
+}
+</pre>
+      </li>
+      <li>Click <strong>Sync Project with Gradle Files</strong> in the toolbar.</li>
+    </ol>
+
+<p>To start optimizing your notifications for Android Wear,
+  read <a href="{@docRoot}wear/notifications/creating.html"
+  >Creating Notifications for Android Wear</a>.</p>
+
+
+
+</body>
+</html>
