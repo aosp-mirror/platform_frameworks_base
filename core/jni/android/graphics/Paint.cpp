@@ -422,16 +422,16 @@ public:
         SkPaint::FontMetrics metrics;
 
         GraphicsJNI::getNativePaint(env, paint)->getFontMetrics(&metrics);
-        int ascent = SkScalarRound(metrics.fAscent);
-        int descent = SkScalarRound(metrics.fDescent);
-        int leading = SkScalarRound(metrics.fLeading);
+        int ascent = SkScalarRoundToInt(metrics.fAscent);
+        int descent = SkScalarRoundToInt(metrics.fDescent);
+        int leading = SkScalarRoundToInt(metrics.fLeading);
 
         if (metricsObj) {
             SkASSERT(env->IsInstanceOf(metricsObj, gFontMetricsInt_class));
-            env->SetIntField(metricsObj, gFontMetricsInt_fieldID.top, SkScalarFloor(metrics.fTop));
+            env->SetIntField(metricsObj, gFontMetricsInt_fieldID.top, SkScalarFloorToInt(metrics.fTop));
             env->SetIntField(metricsObj, gFontMetricsInt_fieldID.ascent, ascent);
             env->SetIntField(metricsObj, gFontMetricsInt_fieldID.descent, descent);
-            env->SetIntField(metricsObj, gFontMetricsInt_fieldID.bottom, SkScalarCeil(metrics.fBottom));
+            env->SetIntField(metricsObj, gFontMetricsInt_fieldID.bottom, SkScalarCeilToInt(metrics.fBottom));
             env->SetIntField(metricsObj, gFontMetricsInt_fieldID.leading, leading);
         }
         return descent - ascent + leading;

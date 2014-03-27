@@ -680,9 +680,6 @@ public:
             indices [ptCount * sizeof(uint16_t)]
         */
         ssize_t storageSize = ptCount * sizeof(SkPoint); // texs[]
-#ifdef SK_SCALAR_IS_FIXED
-        storageSize += ptCount * sizeof(SkPoint);  // storage for verts
-#endif
         storageSize += indexCount * sizeof(uint16_t);  // indices[]
 
         SkAutoMalloc storage(storageSize);
@@ -693,16 +690,7 @@ public:
         verts = (SkPoint*)(vertA.ptr() + vertIndex);
         indices = (uint16_t*)(texs + ptCount);
 #else
-        verts = texs + ptCount;
-        indices = (uint16_t*)(verts + ptCount);
-        // convert floats to fixed
-        {
-            const float* src = vertA.ptr() + vertIndex;
-            for (int i = 0; i < ptCount; i++) {
-                verts[i].set(SkFloatToFixed(src[0]), SkFloatToFixed(src[1]));
-                src += 2;
-            }
-        }
+        SkASSERT(false);
 #endif
 
         // cons up texture coordinates and indices
@@ -804,25 +792,7 @@ public:
             texs = (SkPoint*)(texA.ptr() + texIndex);
         }
 #else
-        int count = ptCount;    // for verts
-        if (jtexs != NULL) {
-            count += ptCount;   // += for texs
-        }
-        SkAutoMalloc storage(count * sizeof(SkPoint));
-        verts = (SkPoint*)storage.get();
-        const float* src = vertA.ptr() + vertIndex;
-        for (int i = 0; i < ptCount; i++) {
-            verts[i].set(SkFloatToFixed(src[0]), SkFloatToFixed(src[1]));
-            src += 2;
-        }
-        if (jtexs != NULL) {
-            texs = verts + ptCount;
-            src = texA.ptr() + texIndex;
-            for (int i = 0; i < ptCount; i++) {
-                texs[i].set(SkFloatToFixed(src[0]), SkFloatToFixed(src[1]));
-                src += 2;
-            }
-        }
+        SkASSERT(false);
 #endif
 
         const SkColor* colors = NULL;

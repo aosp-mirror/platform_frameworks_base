@@ -6,6 +6,7 @@
 
 #include "SkCanvas.h"
 #include "SkDevice.h"
+#include "SkMath.h"
 #include "SkPicture.h"
 #include "SkRegion.h"
 #include <android_runtime/AndroidRuntime.h>
@@ -564,21 +565,20 @@ void AndroidPixelRef::globalUnref() {
 
 jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
                                              SkColorTable* ctable) {
-    Sk64 size64 = bitmap->getSize64();
-    if (size64.isNeg() || !size64.is32()) {
-        jniThrowException(env, "java/lang/IllegalArgumentException",
-                          "bitmap size exceeds 32bits");
+    const SkImageInfo& info = bitmap->info();
+    if (info.fColorType == kUnknown_SkColorType) {
+        doThrowIAE(env, "unknown bitmap configuration");
         return NULL;
     }
 
-    SkImageInfo bitmapInfo;
-    if (!bitmap->asImageInfo(&bitmapInfo)) {
-        jniThrowException(env, "java/lang/IllegalArgumentException",
-                "unknown bitmap configuration");
+    const int64_t size64 = info.getSafeSize64(bitmap->rowBytes());
+    if (!sk_64_isS32(size64)) {
+        doThrowIAE(env, "bitmap size exceeds 32bits");
         return NULL;
     }
+    const size_t size = sk_64_asS32(size64);
+    SkASSERT(size == info.getSafeSize(bitmap->rowBytes()));
 
-    size_t size = size64.get32();
     jbyteArray arrayObj = (jbyteArray) env->CallObjectMethod(gVMRuntime,
                                                              gVMRuntime_newNonMovableArray,
                                                              gByte_class, size);
@@ -591,7 +591,7 @@ jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
         return NULL;
     }
     SkASSERT(addr);
-    SkPixelRef* pr = new AndroidPixelRef(env, bitmapInfo, (void*) addr,
+    SkPixelRef* pr = new AndroidPixelRef(env, info, (void*) addr,
             bitmap->rowBytes(), arrayObj, ctable);
     bitmap->setPixelRef(pr)->unref();
     // since we're already allocated, we lockPixels right away

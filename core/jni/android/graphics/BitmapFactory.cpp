@@ -7,6 +7,7 @@
 #include "SkImageDecoder.h"
 #include "SkImageRef_ashmem.h"
 #include "SkImageRef_GlobalPool.h"
+#include "SkMath.h"
 #include "SkPixelRef.h"
 #include "SkStream.h"
 #include "SkTemplates.h"
@@ -146,15 +147,15 @@ static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStreamRewindable* stream,
     return pr;
 }
 
-static SkBitmap::Config configForScaledOutput(SkBitmap::Config config) {
-    switch (config) {
-        case SkBitmap::kNo_Config:
-        case SkBitmap::kIndex8_Config:
-            return SkBitmap::kARGB_8888_Config;
+static SkColorType colorTypeForScaledOutput(SkColorType colorType) {
+    switch (colorType) {
+        case kUnknown_SkColorType:
+        case kIndex_8_SkColorType:
+            return kPMColor_SkColorType;
         default:
             break;
     }
-    return config;
+    return colorType;
 }
 
 class ScaleCheckingAllocator : public SkBitmap::HeapAllocator {
@@ -165,8 +166,8 @@ public:
 
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
         // accounts for scale in final allocation, using eventual size and config
-        const int bytesPerPixel = SkBitmap::ComputeBytesPerPixel(
-                configForScaledOutput(bitmap->config()));
+        const int bytesPerPixel = SkColorTypeBytesPerPixel(
+                colorTypeForScaledOutput(bitmap->colorType()));
         const int requestedSize = bytesPerPixel *
                 int(bitmap->width() * mScale + 0.5f) *
                 int(bitmap->height() * mScale + 0.5f);
@@ -194,21 +195,28 @@ public:
     }
 
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
-        if (!bitmap->getSize64().is32() || bitmap->getSize() > mSize) {
-            ALOGW("bitmap marked for reuse (%d bytes) can't fit new bitmap (%d bytes)",
-                    mSize, bitmap->getSize());
+        const SkImageInfo& info = bitmap->info();
+        if (info.fColorType == kUnknown_SkColorType) {
+            ALOGW("unable to reuse a bitmap as the target has an unknown bitmap configuration");
             return false;
         }
 
-        SkImageInfo bitmapInfo;
-        if (!bitmap->asImageInfo(&bitmapInfo)) {
-            ALOGW("unable to reuse a bitmap as the target has an unknown bitmap configuration");
+        const int64_t size64 = info.getSafeSize64(bitmap->rowBytes());
+        if (!sk_64_isS32(size64)) {
+            ALOGW("bitmap is too large");
+            return false;
+        }
+
+        const size_t size = sk_64_asS32(size64);
+        if (size > mSize) {
+            ALOGW("bitmap marked for reuse (%d bytes) can't fit new bitmap (%d bytes)",
+                    mSize, size);
             return false;
         }
 
         // Create a new pixelref with the new ctable that wraps the previous pixelref
         SkPixelRef* pr = new AndroidPixelRef(*static_cast<AndroidPixelRef*>(mPixelRef),
-                bitmapInfo, bitmap->rowBytes(), ctable);
+                info, bitmap->rowBytes(), ctable);
 
         bitmap->setPixelRef(pr)->unref();
         // since we're already allocated, we lockPixels right away
@@ -416,12 +424,12 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         const float sy = scaledHeight / float(decodingBitmap.height());
 
         // TODO: avoid copying when scaled size equals decodingBitmap size
-        SkBitmap::Config config = configForScaledOutput(decodingBitmap.config());
+        SkColorType colorType = colorTypeForScaledOutput(decodingBitmap.colorType());
         // FIXME: If the alphaType is kUnpremul and the image has alpha, the
         // colors may not be correct, since Skia does not yet support drawing
         // to/from unpremultiplied bitmaps.
-        outputBitmap->setConfig(config, scaledWidth, scaledHeight, 0,
-                                decodingBitmap.alphaType());
+        outputBitmap->setConfig(SkImageInfo::Make(scaledWidth, scaledHeight,
+                colorType, decodingBitmap.alphaType()));
         if (!outputBitmap->allocPixels(outputAllocator, NULL)) {
             return nullObjectReturn("allocation failed for scaled bitmap");
         }
