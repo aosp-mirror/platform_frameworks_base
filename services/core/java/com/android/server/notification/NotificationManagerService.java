@@ -763,7 +763,7 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private NotificationListenerInfo checkListenerToken(INotificationListener listener) {
+    private NotificationListenerInfo checkListenerTokenLocked(INotificationListener listener) {
         checkNullListener(listener);
         final IBinder token = listener.asBinder();
         final int N = mListeners.size();
@@ -927,7 +927,9 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onClearAll(int callingUid, int callingPid, int userId) {
-            cancelAll(callingUid, callingPid, userId, REASON_DELEGATE_CANCEL_ALL, null);
+            synchronized (mNotificationList) {
+                cancelAllLocked(callingUid, callingPid, userId, REASON_DELEGATE_CANCEL_ALL, null);
+            }
         }
 
         @Override
@@ -1553,13 +1555,15 @@ public class NotificationManagerService extends SystemService {
          */
         @Override
         public void cancelAllNotificationsFromListener(INotificationListener token) {
-            NotificationListenerInfo info = checkListenerToken(token);
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             long identity = Binder.clearCallingIdentity();
             try {
-                cancelAll(callingUid, callingPid, info.userid,
-                        REASON_LISTENER_CANCEL_ALL, info);
+                synchronized (mNotificationList) {
+                    NotificationListenerInfo info = checkListenerTokenLocked(token);
+                    cancelAllLocked(callingUid, callingPid, info.userid,
+                            REASON_LISTENER_CANCEL_ALL, info);
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1575,15 +1579,17 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void cancelNotificationFromListener(INotificationListener token, String pkg,
                 String tag, int id) {
-            NotificationListenerInfo info = checkListenerToken(token);
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             long identity = Binder.clearCallingIdentity();
             try {
-                cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
-                        Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE,
-                        true,
-                        info.userid, REASON_LISTENER_CANCEL, info);
+                synchronized (mNotificationList) {
+                    NotificationListenerInfo info = checkListenerTokenLocked(token);
+                    cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
+                            Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE,
+                            true,
+                            info.userid, REASON_LISTENER_CANCEL, info);
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1599,11 +1605,9 @@ public class NotificationManagerService extends SystemService {
         @Override
         public StatusBarNotification[] getActiveNotificationsFromListener(
                 INotificationListener token) {
-            NotificationListenerInfo info = checkListenerToken(token);
-
-            StatusBarNotification[] result = new StatusBarNotification[0];
-            ArrayList<StatusBarNotification> list = new ArrayList<StatusBarNotification>();
             synchronized (mNotificationList) {
+                NotificationListenerInfo info = checkListenerTokenLocked(token);
+                ArrayList<StatusBarNotification> list = new ArrayList<StatusBarNotification>();
                 final int N = mNotificationList.size();
                 for (int i=0; i<N; i++) {
                     StatusBarNotification sbn = mNotificationList.get(i).sbn;
@@ -1611,8 +1615,8 @@ public class NotificationManagerService extends SystemService {
                         list.add(sbn);
                     }
                 }
+                return list.toArray(new StatusBarNotification[list.size()]);
             }
-            return list.toArray(result);
         }
 
         @Override
@@ -2446,29 +2450,26 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    void cancelAll(int callingUid, int callingPid, int userId, int reason,
+    void cancelAllLocked(int callingUid, int callingPid, int userId, int reason,
             NotificationListenerInfo listener) {
         EventLogTags.writeNotificationCancelAll(callingUid, callingPid,
                 null, userId, 0, 0, reason,
                 listener == null ? null : listener.component.toShortString());
-        synchronized (mNotificationList) {
-            final int N = mNotificationList.size();
-            for (int i=N-1; i>=0; i--) {
-                NotificationRecord r = mNotificationList.get(i);
+        final int N = mNotificationList.size();
+        for (int i=N-1; i>=0; i--) {
+            NotificationRecord r = mNotificationList.get(i);
 
-                if (!notificationMatchesUserIdOrRelated(r, userId)) {
-                    continue;
-                }
-
-                if ((r.getFlags() & (Notification.FLAG_ONGOING_EVENT
-                                | Notification.FLAG_NO_CLEAR)) == 0) {
-                    mNotificationList.remove(i);
-                    cancelNotificationLocked(r, true);
-                }
+            if (!notificationMatchesUserIdOrRelated(r, userId)) {
+                continue;
             }
 
-            updateLightsLocked();
+            if ((r.getFlags() & (Notification.FLAG_ONGOING_EVENT
+                            | Notification.FLAG_NO_CLEAR)) == 0) {
+                mNotificationList.remove(i);
+                cancelNotificationLocked(r, true);
+            }
         }
+        updateLightsLocked();
     }
 
     // lock on mNotificationList
