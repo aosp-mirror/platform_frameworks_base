@@ -109,7 +109,6 @@ private:
     bool mUpdateTexImage;
 
     Layer* mLayer;
-    OpenGLRenderer* mRenderer;
     Caches& mCaches;
 
     void doUpdateTexImage();
