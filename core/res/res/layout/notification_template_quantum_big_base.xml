@@ -156,7 +156,7 @@
             android:layout_height="1dp"
             android:id="@+id/action_divider"
             android:visibility="gone"
-            android:background="@drawable/list_divider_quantum_light" />
+            android:background="@drawable/list_divider_holo_light" />
         <include
             layout="@layout/notification_quantum_action_list"
             android:layout_width="match_parent"
