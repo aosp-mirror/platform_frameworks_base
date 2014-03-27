@@ -80,7 +80,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -199,7 +198,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     // expanded notifications
     NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
-    ScrollView mScrollView;
+    View mNotificationScroller;
     View mExpandedContents;
     int mNotificationPanelGravity;
     int mNotificationPanelMarginBottomPx, mNotificationPanelMarginPx;
@@ -483,15 +482,24 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mStatusBarContents = (LinearLayout)mStatusBarView.findViewById(R.id.status_bar_contents);
         mTickerView = mStatusBarView.findViewById(R.id.ticker);
 
-        NotificationRowLayout rowLayout
-                = (NotificationRowLayout) mStatusBarWindow.findViewById(R.id.latestItems);
+        View legacyScrollView = mStatusBarWindow.findViewById(R.id.scroll);
         NotificationStackScrollLayout notificationStack
                 = (NotificationStackScrollLayout) mStatusBarWindow
                 .findViewById(R.id.notification_stack_scroller);
         if (ENABLE_NOTIFICATION_STACK) {
             notificationStack.setLongPressListener(getNotificationLongClicker());
             mPile = notificationStack;
+            legacyScrollView.setVisibility(View.GONE);
+
+            // The scrollview and the notification container are unified now!
+            // TODO: remove mNotificationScroller entirely once we fully switch to the new Layout
+            mNotificationScroller = notificationStack;
         } else {
+            mNotificationScroller = legacyScrollView;
+            // less drawing during pulldowns
+            mNotificationScroller.setVerticalScrollBarEnabled(false);
+            NotificationRowLayout rowLayout
+                    = (NotificationRowLayout) mStatusBarWindow.findViewById(R.id.latestItems);
             rowLayout.setLayoutTransitionsEnabled(false);
             rowLayout.setLongPressListener(getNotificationLongClicker());
             mPile = rowLayout;
@@ -549,10 +557,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
         }
 
-        mScrollView = (ScrollView)mStatusBarWindow.findViewById(R.id.scroll);
-        mScrollView.setVerticalScrollBarEnabled(false); // less drawing during pulldowns
         if (!mNotificationPanelIsFullScreenWidth) {
-            mScrollView.setSystemUiVisibility(
+            mNotificationPanel.setSystemUiVisibility(
                     View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS |
                     View.STATUS_BAR_DISABLE_CLOCK);
         }
@@ -615,7 +621,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
 
             // set up the dynamic hide/show of the label
-            if(!ENABLE_NOTIFICATION_STACK)
+            if (!ENABLE_NOTIFICATION_STACK)
                 ((NotificationRowLayout) mPile).setOnSizeChangedListener(new OnSizeChangedListener() {
                 @Override
                 public void onSizeChanged(View view, int w, int h, int oldw, int oldh) {
@@ -1167,19 +1173,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     protected void updateCarrierLabelVisibility(boolean force) {
+        // TODO: Handle this for the notification stack scroller as well
         if (!mShowCarrierInPanel) return;
         // The idea here is to only show the carrier label when there is enough room to see it,
         // i.e. when there aren't enough notifications to fill the panel.
         if (SPEW) {
             Log.d(TAG, String.format("pileh=%d scrollh=%d carrierh=%d",
-                    mPile.getHeight(), mScrollView.getHeight(), mCarrierLabelHeight));
+                    mPile.getHeight(), mNotificationScroller.getHeight(), mCarrierLabelHeight));
         }
 
         final boolean emergencyCallsShownElsewhere = mEmergencyCallLabel != null;
         final boolean makeVisible =
             !(emergencyCallsShownElsewhere && mNetworkController.isEmergencyOnly())
             && mPile.getHeight() < (mNotificationPanel.getHeight() - mCarrierLabelHeight - mNotificationHeaderHeight)
-            && mScrollView.getVisibility() == View.VISIBLE;
+            && mNotificationScroller.getVisibility() == View.VISIBLE;
 
         if (force || mCarrierLabelVisible != makeVisible) {
             mCarrierLabelVisible = makeVisible;
@@ -1222,7 +1229,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (mHasFlipSettings
                 && mFlipSettingsView != null
                 && mFlipSettingsView.getVisibility() == View.VISIBLE
-                && mScrollView.getVisibility() != View.VISIBLE) {
+                && mNotificationScroller.getVisibility() != View.VISIBLE) {
             // the flip settings panel is unequivocally showing; we should not be shown
             mClearButton.setVisibility(View.INVISIBLE);
         } else if (mClearButton.isShown()) {
@@ -1593,7 +1600,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         mNotificationPanel.expand();
-        if (mHasFlipSettings && mScrollView.getVisibility() != View.VISIBLE) {
+        if (mHasFlipSettings && mNotificationScroller.getVisibility() != View.VISIBLE) {
             flipToNotifications();
         }
 
@@ -1607,11 +1614,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (mNotificationButtonAnim != null) mNotificationButtonAnim.cancel();
         if (mClearButtonAnim != null) mClearButtonAnim.cancel();
 
-        mScrollView.setVisibility(View.VISIBLE);
+        mNotificationScroller.setVisibility(View.VISIBLE);
         mScrollViewAnim = start(
             startDelay(FLIP_DURATION_OUT,
                 interpolator(mDecelerateInterpolator,
-                    ObjectAnimator.ofFloat(mScrollView, View.SCALE_X, 0f, 1f)
+                    ObjectAnimator.ofFloat(mNotificationScroller, View.SCALE_X, 0f, 1f)
                         .setDuration(FLIP_DURATION_IN)
                     )));
         mFlipSettingsViewAnim = start(
@@ -1669,8 +1676,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mFlipSettingsView.setScaleX(1f);
         mFlipSettingsView.setVisibility(View.VISIBLE);
         mSettingsButton.setVisibility(View.GONE);
-        mScrollView.setVisibility(View.GONE);
-        mScrollView.setScaleX(0f);
+        mNotificationScroller.setVisibility(View.GONE);
+        mNotificationScroller.setScaleX(0f);
         mNotificationButton.setVisibility(View.VISIBLE);
         mNotificationButton.setAlpha(1f);
         mClearButton.setVisibility(View.GONE);
@@ -1697,15 +1704,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mScrollViewAnim = start(
             setVisibilityWhenDone(
                 interpolator(mAccelerateInterpolator,
-                        ObjectAnimator.ofFloat(mScrollView, View.SCALE_X, 1f, 0f)
+                        ObjectAnimator.ofFloat(mNotificationScroller, View.SCALE_X, 1f, 0f)
                         )
                     .setDuration(FLIP_DURATION_OUT),
-                mScrollView, View.INVISIBLE));
+                    mNotificationScroller, View.INVISIBLE));
         mSettingsButtonAnim = start(
             setVisibilityWhenDone(
                 ObjectAnimator.ofFloat(mSettingsButton, View.ALPHA, 0f)
                     .setDuration(FLIP_DURATION),
-                    mScrollView, View.INVISIBLE));
+                    mNotificationScroller, View.INVISIBLE));
         mNotificationButton.setVisibility(View.VISIBLE);
         mNotificationButtonAnim = start(
             ObjectAnimator.ofFloat(mNotificationButton, View.ALPHA, 1f)
@@ -1759,8 +1766,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             if (mNotificationButtonAnim != null) mNotificationButtonAnim.cancel();
             if (mClearButtonAnim != null) mClearButtonAnim.cancel();
 
-            mScrollView.setScaleX(1f);
-            mScrollView.setVisibility(View.VISIBLE);
+            mNotificationScroller.setScaleX(1f);
+            mNotificationScroller.setVisibility(View.VISIBLE);
             mSettingsButton.setAlpha(1f);
             mSettingsButton.setVisibility(View.VISIBLE);
             mNotificationPanel.setVisibility(View.GONE);
@@ -2225,8 +2232,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             pw.println("  mDisplayMetrics=" + mDisplayMetrics);
             pw.println("  mPile: " + viewInfo(mPile));
             pw.println("  mTickerView: " + viewInfo(mTickerView));
-            pw.println("  mScrollView: " + viewInfo(mScrollView)
-                    + " scroll " + mScrollView.getScrollX() + "," + mScrollView.getScrollY());
+            pw.println("  mNotificationScroller: " + viewInfo(mNotificationScroller)
+                    + " scroll " + mNotificationScroller.getScrollX()
+                    + "," + mNotificationScroller.getScrollY());
         }
 
         pw.print("  mInteractingWindows="); pw.println(mInteractingWindows);
@@ -2420,17 +2428,38 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
+            // TODO: Handle this better with notification stack scroller
             synchronized (mNotificationData) {
+                mPostCollapseCleanup = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (DEBUG) {
+                            Log.v(TAG, "running post-collapse cleanup");
+                        }
+                        try {
+                            if (!ENABLE_NOTIFICATION_STACK) {
+                                ((NotificationRowLayout) mPile).setViewRemoval(true);
+                            }
+                            mBarService.onClearAllNotifications(mCurrentUserId);
+                        } catch (Exception ex) { }
+                    }
+                };
+
+                if(ENABLE_NOTIFICATION_STACK) {
+                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
+                    return;
+                }
+
                 // animate-swipe all dismissable notifications, then animate the shade closed
                 int numChildren = mPile.getChildCount();
 
-                int scrollTop = mScrollView.getScrollY();
-                int scrollBottom = scrollTop + mScrollView.getHeight();
+                int scrollTop = mNotificationScroller.getScrollY();
+                int scrollBottom = scrollTop + mNotificationScroller.getHeight();
                 final ArrayList<View> snapshot = new ArrayList<View>(numChildren);
                 for (int i=0; i<numChildren; i++) {
                     final View child = mPile.getChildAt(i);
-                    if (((SwipeHelper.Callback) mPile).canChildBeDismissed(child) && child.getBottom() > scrollTop &&
-                            child.getTop() < scrollBottom) {
+                    if (((SwipeHelper.Callback) mPile).canChildBeDismissed(child)
+                            && child.getBottom() > scrollTop && child.getTop() < scrollBottom) {
                         snapshot.add(child);
                     }
                 }
@@ -2454,21 +2483,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                             // redrawing when collapsing the shade.
                             ((NotificationRowLayout) mPile).setViewRemoval(false);
                         }
-
-                        mPostCollapseCleanup = new Runnable() {
-                            @Override
-                            public void run() {
-                                if (DEBUG) {
-                                    Log.v(TAG, "running post-collapse cleanup");
-                                }
-                                try {
-                                    if (!ENABLE_NOTIFICATION_STACK) {
-                                        ((NotificationRowLayout) mPile).setViewRemoval(true);
-                                    }
-                                    mBarService.onClearAllNotifications(mCurrentUserId);
-                                } catch (Exception ex) { }
-                            }
-                        };
 
                         View sampleView = snapshot.get(0);
                         int width = sampleView.getWidth();
