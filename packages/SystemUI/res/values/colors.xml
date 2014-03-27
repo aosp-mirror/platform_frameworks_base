@@ -39,8 +39,6 @@
     <color name="status_bar_clock_color">#FFFFFFFF</color>
     <drawable name="notification_item_background_color">#ff111111</drawable>
     <drawable name="notification_item_background_color_pressed">#ff454545</drawable>
-    <color name="notification_icon_legacy_bg_color">#ff4285F4</color>
-    <color name="notification_action_legacy_color_filter">#ff555555</color>
 
     <!-- Tint color for inactive Quick Settings icons. -->
     <color name="ic_qs_off">#ff404040</color>

@@ -29,14 +29,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
-import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -52,14 +47,10 @@ import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.TextUtils;
-import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
@@ -70,7 +61,6 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -80,8 +70,8 @@ import android.widget.TextView;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
+import com.android.internal.util.LegacyNotificationUtil;
 import com.android.internal.widget.SizeAdaptiveLayout;
-import com.android.systemui.ImageUtils;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SearchPanelView;
@@ -91,7 +81,6 @@ import com.android.systemui.statusbar.policy.NotificationRowLayout;
 
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.Stack;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks {
@@ -157,8 +146,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     // public mode, private notifications, etc
     private boolean mLockscreenPublicMode = false;
     private final SparseBooleanArray mUsersAllowingPrivateNotifications = new SparseBooleanArray();
-    private Context mLightThemeContext;
-    private ImageUtils mImageUtils = new ImageUtils();
+    private LegacyNotificationUtil mLegacyNotificationUtil = LegacyNotificationUtil.getInstance();
 
     private UserManager mUserManager;
 
@@ -296,8 +284,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 true,
                 mLockscreenSettingsObserver,
                 UserHandle.USER_ALL);
-        mLightThemeContext = new RemoteViewsThemeContextWrapper(mContext,
-                android.R.style.Theme_Holo_Light);
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -456,158 +442,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 content.setBackgroundResource(com.android.internal.R.drawable.notification_bg);
             }
         }
-    }
-
-    private void processLegacyHoloNotification(StatusBarNotification sbn, View content) {
-
-        // TODO: Also skip processing if it is a holo-style notification.
-        // If the notification is custom, we can't process it.
-        if (!sbn.getNotification().extras.getBoolean(Notification.EXTRA_BUILDER_REMOTE_VIEWS)) {
-            return;
-        }
-
-        processLegacyHoloLargeIcon(content);
-        processLegacyHoloActions(content);
-        processLegacyNotificationIcon(content);
-        processLegacyTextViews(content);
-    }
-
-    /**
-     * @return the context to be used for the inflation of the specified {@code sbn}; this is
-     *      dependent whether the notification is quantum-style or holo-style
-     */
-    private Context getInflationContext(StatusBarNotification sbn) {
-
-        // TODO: Adjust this logic when we change the theme of the status bar windows.
-        if (sbn.getNotification().extras.getBoolean(Notification.EXTRA_BUILDER_REMOTE_VIEWS)) {
-            return mLightThemeContext;
-        } else {
-            return mContext;
-        }
-    }
-
-    private void processLegacyNotificationIcon(View content) {
-        View v = content.findViewById(com.android.internal.R.id.right_icon);
-        if (v != null & v instanceof ImageView) {
-            ImageView iv = (ImageView) v;
-            Drawable d = iv.getDrawable();
-            if (isMonochrome(d)) {
-                d.mutate();
-                d.setColorFilter(mLightThemeContext.getResources().getColor(
-                        R.color.notification_action_legacy_color_filter), PorterDuff.Mode.MULTIPLY);
-            }
-        }
-    }
-
-    private void processLegacyHoloLargeIcon(View content) {
-        View v = content.findViewById(com.android.internal.R.id.icon);
-        if (v != null & v instanceof ImageView) {
-            ImageView iv = (ImageView) v;
-            if (isMonochrome(iv.getDrawable())) {
-                iv.setBackground(mLightThemeContext.getResources().getDrawable(
-                        R.drawable.notification_icon_legacy_bg_inset));
-            }
-        }
-    }
-
-    private boolean isMonochrome(Drawable d) {
-        if (d == null) {
-            return false;
-        } else if (d instanceof BitmapDrawable) {
-            BitmapDrawable bd = (BitmapDrawable) d;
-            return bd.getBitmap() != null && mImageUtils.isGrayscale(bd.getBitmap());
-        } else if (d instanceof AnimationDrawable) {
-            AnimationDrawable ad = (AnimationDrawable) d;
-            int count = ad.getNumberOfFrames();
-            return count > 0 && isMonochrome(ad.getFrame(0));
-        } else {
-            return false;
-        }
-    }
-
-    private void processLegacyHoloActions(View content) {
-        View v = content.findViewById(com.android.internal.R.id.actions);
-        if (v != null & v instanceof ViewGroup) {
-            ViewGroup vg = (ViewGroup) v;
-            int childCount = vg.getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                View child = vg.getChildAt(i);
-                if (child instanceof Button) {
-                    Button button = (Button) child;
-                    Drawable[] compoundDrawables = button.getCompoundDrawablesRelative();
-                    if (isMonochrome(compoundDrawables[0])) {
-                        Drawable d = compoundDrawables[0];
-                        d.mutate();
-                        d.setColorFilter(mLightThemeContext.getResources().getColor(
-                                R.color.notification_action_legacy_color_filter),
-                                PorterDuff.Mode.MULTIPLY);
-                    }
-                }
-            }
-        }
-    }
-
-    private void processLegacyTextViews(View content) {
-        Stack<View> viewStack = new Stack<View>();
-        viewStack.push(content);
-        while(!viewStack.isEmpty()) {
-            View current = viewStack.pop();
-            if(current instanceof ViewGroup){
-                ViewGroup currentGroup = (ViewGroup) current;
-                int numChildren = currentGroup.getChildCount();
-                for(int i=0;i<numChildren;i++){
-                    viewStack.push(currentGroup.getChildAt(i));
-                }
-            }
-            if (current instanceof TextView) {
-                processLegacyTextView((TextView) current);
-            }
-        }
-    }
-
-    private void processLegacyTextView(TextView textView) {
-        if (textView.getText() instanceof Spanned) {
-            Spanned ss = (Spanned) textView.getText();
-            Object[] spans = ss.getSpans(0, ss.length(), Object.class);
-            SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
-            for (Object span : spans) {
-                Object resultSpan = span;
-                if (span instanceof TextAppearanceSpan) {
-                    resultSpan = processTextAppearanceSpan((TextAppearanceSpan) span);
-                }
-                builder.setSpan(resultSpan, ss.getSpanStart(span), ss.getSpanEnd(span),
-                        ss.getSpanFlags(span));
-            }
-            textView.setText(builder);
-        }
-    }
-
-    private TextAppearanceSpan processTextAppearanceSpan(TextAppearanceSpan span) {
-        ColorStateList colorStateList = span.getTextColor();
-        if (colorStateList != null) {
-            int[] colors = colorStateList.getColors();
-            boolean changed = false;
-            for (int i = 0; i < colors.length; i++) {
-                if (mImageUtils.isGrayscale(colors[i])) {
-                    colors[i] = processColor(colors[i]);
-                    changed = true;
-                }
-            }
-            if (changed) {
-                return new TextAppearanceSpan(
-                        span.getFamily(), span.getTextStyle(), span.getTextSize(),
-                        new ColorStateList(colorStateList.getStates(), colors),
-                        span.getLinkTextColor());
-            }
-        }
-        return span;
-    }
-
-    private int processColor(int color) {
-        return Color.argb(Color.alpha(color),
-                255 - Color.red(color),
-                255 - Color.green(color),
-                255 - Color.blue(color));
     }
 
     private void startApplicationDetailsActivity(String packageName) {
@@ -947,10 +781,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         View contentViewLocal = null;
         View bigContentViewLocal = null;
         try {
-            contentViewLocal = contentView.apply(getInflationContext(sbn), expanded,
+            contentViewLocal = contentView.apply(mContext, expanded,
                     mOnClickHandler);
             if (bigContentView != null) {
-                bigContentViewLocal = bigContentView.apply(getInflationContext(sbn), expanded,
+                bigContentViewLocal = bigContentView.apply(mContext, expanded,
                         mOnClickHandler);
             }
         }
@@ -983,8 +817,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         View publicViewLocal = null;
         if (publicNotification != null) {
             try {
-                publicViewLocal = publicNotification.contentView.apply(getInflationContext(sbn),
-                        expandedPublic, mOnClickHandler);
+                publicViewLocal = publicNotification.contentView.apply(mContext, expandedPublic,
+                        mOnClickHandler);
 
                 if (publicViewLocal != null) {
                     publicViewLocal.setIsRootNamespace(true);
@@ -1005,7 +839,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (publicViewLocal == null) {
             // Add a basic notification template
             publicViewLocal = LayoutInflater.from(mContext).inflate(
-                    com.android.internal.R.layout.notification_template_base, expandedPublic, true);
+                    com.android.internal.R.layout.notification_template_quantum_base,
+                    expandedPublic, true);
 
             final TextView title = (TextView) publicViewLocal.findViewById(com.android.internal.R.id.title);
             try {
@@ -1024,7 +859,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                     entry.notification.getNotification().number,
                     entry.notification.getNotification().tickerText);
 
-            icon.setImageDrawable(StatusBarIconView.getIcon(mContext, ic));
+            Drawable iconDrawable = StatusBarIconView.getIcon(mContext, ic);
+            icon.setImageDrawable(iconDrawable);
+            if (mLegacyNotificationUtil.isGrayscale(iconDrawable)) {
+                icon.setBackgroundResource(
+                        com.android.internal.R.drawable.notification_icon_legacy_bg_inset);
+            }
 
             final TextView text = (TextView) publicViewLocal.findViewById(com.android.internal.R.id.text);
             text.setText("Unlock your device to see this notification.");
@@ -1035,13 +875,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         row.setDrawingCacheEnabled(true);
 
         applyLegacyRowBackground(sbn, content);
-        processLegacyHoloNotification(sbn, contentViewLocal);
-        if (bigContentViewLocal != null) {
-            processLegacyHoloNotification(sbn, bigContentViewLocal);
-        }
-        if (publicViewLocal != null) {
-            processLegacyHoloNotification(sbn, publicViewLocal);
-        }
 
         if (MULTIUSER_DEBUG) {
             TextView debug = (TextView) row.findViewById(R.id.debug_info);
@@ -1458,17 +1291,13 @@ public abstract class BaseStatusBar extends SystemUI implements
                 : null;
 
         // Reapply the RemoteViews
-        contentView.reapply(getInflationContext(notification), entry.expanded, mOnClickHandler);
-        processLegacyHoloNotification(notification, entry.expanded);
+        contentView.reapply(mContext, entry.expanded, mOnClickHandler);
         if (bigContentView != null && entry.getBigContentView() != null) {
-            bigContentView.reapply(getInflationContext(notification), entry.getBigContentView(),
+            bigContentView.reapply(mContext, entry.getBigContentView(),
                     mOnClickHandler);
-            processLegacyHoloNotification(notification, entry.getBigContentView());
         }
         if (publicContentView != null && entry.getPublicContentView() != null) {
-            publicContentView.reapply(getInflationContext(notification),
-                    entry.getPublicContentView(), mOnClickHandler);
-            processLegacyHoloNotification(notification, entry.getPublicContentView());
+            publicContentView.reapply(mContext, entry.getPublicContentView(), mOnClickHandler);
         }
         // update the contentIntent
         final PendingIntent contentIntent = notification.getNotification().contentIntent;
@@ -1538,36 +1367,5 @@ public abstract class BaseStatusBar extends SystemUI implements
             mWindowManager.removeViewImmediate(mSearchPanelView);
         }
         mContext.unregisterReceiver(mBroadcastReceiver);
-    }
-
-    /**
-     * A custom context theme wrapper that applies a platform theme to a created package context.
-     * This is useful if you want to inflate {@link RemoteViews} with a custom theme (normally, the
-     * theme used there is the default platform theme).
-     */
-    private static class RemoteViewsThemeContextWrapper extends ContextThemeWrapper {
-
-        private int mThemeRes;
-
-        private RemoteViewsThemeContextWrapper(Context base, int themeres) {
-            super(base, themeres);
-            mThemeRes = themeres;
-        }
-
-        @Override
-        public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
-                throws NameNotFoundException {
-            Context c = super.createPackageContextAsUser(packageName, flags, user);
-            c.setTheme(mThemeRes);
-            return c;
-        }
-
-        @Override
-        public Context createPackageContext(String packageName, int flags)
-                throws NameNotFoundException {
-            Context c = super.createPackageContext(packageName, flags);
-            c.setTheme(mThemeRes);
-            return c;
-        }
     }
 }

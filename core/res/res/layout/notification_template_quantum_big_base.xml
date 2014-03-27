@@ -148,7 +148,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:visibility="gone"
-                style="?android:attr/progressBarStyleHorizontal"
+                style="@style/Widget.Quantum.Light.ProgressBar.Horizontal"
                 />
         </LinearLayout>
         <ImageView
@@ -156,7 +156,7 @@
             android:layout_height="1dp"
             android:id="@+id/action_divider"
             android:visibility="gone"
-            android:background="?android:attr/dividerHorizontal" />
+            android:background="@drawable/list_divider_quantum_light" />
         <include
             layout="@layout/notification_quantum_action_list"
             android:layout_width="match_parent"
