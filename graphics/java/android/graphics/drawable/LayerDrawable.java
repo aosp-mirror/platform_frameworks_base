@@ -839,7 +839,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     /**
      * Ensures the child padding caches are large enough.
      */
-    private void ensurePadding() {
+    void ensurePadding() {
         final int N = mLayerState.mNum;
         if (mPaddingL != null && mPaddingL.length >= N) {
             return;
