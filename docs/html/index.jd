@@ -1,5 +1,5 @@
 fullpage=true
-page.viewport-width=970
+page.viewport_width=970
 no_footer_links=true
 carousel=true
 excludeFromSuggestions=true
