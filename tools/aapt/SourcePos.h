@@ -17,8 +17,9 @@ public:
     SourcePos();
     ~SourcePos();
 
-    int error(const char* fmt, ...) const;
-    int warning(const char* fmt, ...) const;
+    void error(const char* fmt, ...) const;
+    void warning(const char* fmt, ...) const;
+    void printf(const char* fmt, ...) const;
 
     static bool hasErrors();
     static void printErrors(FILE* to);

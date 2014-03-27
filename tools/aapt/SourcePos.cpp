@@ -10,17 +10,20 @@ using namespace std;
 // =============================================================================
 struct ErrorPos
 {
+    enum Level {
+        NOTE,
+        WARNING,
+        ERROR
+    };
+
     String8 file;
     int line;
     String8 error;
-    bool fatal;
+    Level level;
 
     ErrorPos();
     ErrorPos(const ErrorPos& that);
-    ErrorPos(const String8& file, int line, const String8& error, bool fatal);
-    ~ErrorPos();
-    bool operator<(const ErrorPos& rhs) const;
-    bool operator==(const ErrorPos& rhs) const;
+    ErrorPos(const String8& file, int line, const String8& error, Level level);
     ErrorPos& operator=(const ErrorPos& rhs);
 
     void print(FILE* to) const;
@@ -29,7 +32,7 @@ struct ErrorPos
 static vector<ErrorPos> g_errors;
 
 ErrorPos::ErrorPos()
-    :line(-1), fatal(false)
+    :line(-1), level(NOTE)
 {
 }
 
@@ -37,41 +40,16 @@ ErrorPos::ErrorPos(const ErrorPos& that)
     :file(that.file),
      line(that.line),
      error(that.error),
-     fatal(that.fatal)
+     level(that.level)
 {
 }
 
-ErrorPos::ErrorPos(const String8& f, int l, const String8& e, bool fat)
+ErrorPos::ErrorPos(const String8& f, int l, const String8& e, Level lev)
     :file(f),
      line(l),
      error(e),
-     fatal(fat)
+     level(lev)
 {
-}
-
-ErrorPos::~ErrorPos()
-{
-}
-
-bool
-ErrorPos::operator<(const ErrorPos& rhs) const
-{
-    if (this->file < rhs.file) return true;
-    if (this->file == rhs.file) {
-        if (this->line < rhs.line) return true;
-        if (this->line == rhs.line) {
-            if (this->error < rhs.error) return true;
-        }
-    }
-    return false;
-}
-
-bool
-ErrorPos::operator==(const ErrorPos& rhs) const
-{
-    return this->file == rhs.file
-            && this->line == rhs.line
-            && this->error == rhs.error;
 }
 
 ErrorPos&
@@ -80,18 +58,34 @@ ErrorPos::operator=(const ErrorPos& rhs)
     this->file = rhs.file;
     this->line = rhs.line;
     this->error = rhs.error;
+    this->level = rhs.level;
     return *this;
 }
 
 void
 ErrorPos::print(FILE* to) const
 {
-    const char* type = fatal ? "error:" : "warning:";
+    const char* type = "";
+    switch (level) {
+    case NOTE:
+        type = "note: ";
+        break;
+    case WARNING:
+        type = "warning: ";
+        break;
+    case ERROR:
+        type = "error: ";
+        break;
+    }
     
-    if (this->line >= 0) {
-        fprintf(to, "%s:%d: %s %s\n", this->file.string(), this->line, type, this->error.string());
+    if (!this->file.isEmpty()) {
+        if (this->line >= 0) {
+            fprintf(to, "%s:%d: %s%s\n", this->file.string(), this->line, type, this->error.string());
+        } else {
+            fprintf(to, "%s: %s%s\n", this->file.string(), type, this->error.string());
+        }
     } else {
-        fprintf(to, "%s: %s %s\n", this->file.string(), type, this->error.string());
+        fprintf(to, "%s%s\n", type, this->error.string());
     }
 }
 
@@ -116,40 +110,34 @@ SourcePos::~SourcePos()
 {
 }
 
-int
+void
 SourcePos::error(const char* fmt, ...) const
 {
-    int retval=0;
-    char buf[1024];
     va_list ap;
     va_start(ap, fmt);
-    retval = vsnprintf(buf, sizeof(buf), fmt, ap);
+    String8 msg = String8::formatV(fmt, ap);
     va_end(ap);
-    char* p = buf + retval - 1;
-    while (p > buf && *p == '\n') {
-        *p = '\0';
-        p--;
-    }
-    g_errors.push_back(ErrorPos(this->file, this->line, String8(buf), true));
-    return retval;
+    g_errors.push_back(ErrorPos(this->file, this->line, msg, ErrorPos::ERROR));
 }
 
-int
+void
 SourcePos::warning(const char* fmt, ...) const
 {
-    int retval=0;
-    char buf[1024];
     va_list ap;
     va_start(ap, fmt);
-    retval = vsnprintf(buf, sizeof(buf), fmt, ap);
+    String8 msg = String8::formatV(fmt, ap);
     va_end(ap);
-    char* p = buf + retval - 1;
-    while (p > buf && *p == '\n') {
-        *p = '\0';
-        p--;
-    }
-    ErrorPos(this->file, this->line, String8(buf), false).print(stderr);
-    return retval;
+    ErrorPos(this->file, this->line, msg, ErrorPos::WARNING).print(stderr);
+}
+
+void
+SourcePos::printf(const char* fmt, ...) const
+{
+    va_list ap;
+    va_start(ap, fmt);
+    String8 msg = String8::formatV(fmt, ap);
+    va_end(ap);
+    ErrorPos(this->file, this->line, msg, ErrorPos::NOTE).print(stderr);
 }
 
 bool
