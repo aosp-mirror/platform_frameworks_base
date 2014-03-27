@@ -1,0 +1,72 @@
+page.title=Stacking Notifications
+
+@jd:body
+
+<img src="{@docRoot}wear/images/11_bundles_B.png" height="200" width="169" style="float:right;margin:0 0 20px 40px" />
+<img src="{@docRoot}wear/images/11_bundles_A.png" height="200" width="169" style="float:right;margin:0 0 20px 40px" />
+
+<p>When creating notifications for a handheld device, you should always aggregate similar
+notifications into a single summary notification. For example, if your app creates notifications
+for received messages, you should not show more than one notification
+on a handheld device&mdash;when more than one is message is received, use a single notification
+to provide a summary such as "2 new messages."</p>
+
+<p>However, a summary notification is less useful on an Android wearable because users
+are not able to read details from each message on the wearable (they must open your app on the
+handheld to view more information). So for the wearable device, you should
+group all the notifications together in a stack. The stack of notifications appears as a single
+card, which users can expand to view the details from each notification separately. The new
+<a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#setGroup(java.lang.String, int)">
+<code>setGroup()</code></a> method makes this possible while allowing you to still provide
+only one summary notification on the handheld device.</p>
+
+<p>For details about designing notification stacks, see the
+<a href="{@docRoot}wear/design/index.html#NotificationStacks">Design Principles of Android
+Wear</a>.</p>
+
+
+<h2 id="AddGroup">Add Each Notification to a Group</h2>
+
+<p>To create a stack, call <a
+href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#setGroup(java.lang.String, int)">
+<code>setGroup()</code></a> for each notification you want in the stack, passing the same
+group key. For example:</p>
+
+<pre style="clear:right">
+final static String GROUP_KEY_EMAILS = "group_key_emails";
+
+NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext)
+         .setContentTitle("New mail from " + sender)
+         .setContentText(subject)
+         .setSmallIcon(R.drawable.new_mail);
+
+Notification notif = new WearableNotifications.Builder(builder)
+         .setGroup(GROUP_KEY_EMAILS)
+         .build();
+</pre>
+
+<p>By default, notifications appear in the order in which you added them, with the most recent
+  notification visible at the top.  You can define a specific position in the group
+  by passing an order position as the second parameter for <a
+href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#setGroup(java.lang.String, int)">
+<code>setGroup()</code></a>.</p>
+
+
+<h2 id="AddSummary">Add a Summary Notification</h2>
+
+<p>It's important that you still provide a summary notification that appears on handheld devices.
+So in addition to adding each unique notification to the same stack group, also add a summary
+notification, but set its order position to be <a
+href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.html#GROUP_ORDER_SUMMARY"><code>GROUP_ORDER_SUMMARY</code></a>.</p>
+
+<pre>
+Notification summaryNotification = new WearableNotifications.Builder(builder)
+         .setGroup(GROUP_KEY_EMAILS, WearableNotifications.GROUP_ORDER_SUMMARY)
+         .build();
+</pre>
+
+<p>This notification will not appear in your stack of notifications on the wearable, but
+appears as the only notification on the handheld device.
+
+</body>
+</html>
