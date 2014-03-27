@@ -39,7 +39,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * Documentation pending.
@@ -98,7 +97,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     protected boolean onStateChange(int[] stateSet) {
         super.onStateChange(stateSet);
 
-        if (mRipplePaint != null) {
+        if (mRipplePaint != null && mState.mTint != null) {
             final ColorStateList stateList = mState.mTint;
             final int newColor = stateList.getColorForState(stateSet, 0);
             final int oldColor = mRipplePaint.getColor();
@@ -122,7 +121,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
     @Override
     public boolean isStateful() {
-        return super.isStateful() || mState.mTint.isStateful();
+        return super.isStateful() || mState.mTint != null && mState.mTint.isStateful();
     }
 
     @Override
@@ -150,10 +149,6 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
         if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_tint] == 0) {
             mState.mTint = a.getColorStateList(R.styleable.TouchFeedbackDrawable_tint);
-
-            if (mState.mTint == null) {
-                throw new RuntimeException("<touch-feedback> tag requires a 'tint' attribute");
-            }
         }
 
         if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_tintMode] == 0) {
@@ -400,9 +395,11 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         if (mRipplePaint == null) {
             mRipplePaint = new Paint();
             mRipplePaint.setAntiAlias(true);
-            
-            final int color = mState.mTint.getColorForState(getState(), Color.TRANSPARENT);
-            mRipplePaint.setColor(color);
+
+            if (mState.mTint != null) {
+                final int color = mState.mTint.getColorForState(getState(), Color.TRANSPARENT);
+                mRipplePaint.setColor(color);
+            }
         }
         return mRipplePaint;
     }
