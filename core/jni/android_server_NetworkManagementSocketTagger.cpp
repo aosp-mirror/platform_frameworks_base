@@ -47,8 +47,8 @@ static jint QTagUid_tagSocketFd(JNIEnv* env, jclass,
   return (jint)res;
 }
 
-static int QTagUid_untagSocketFd(JNIEnv* env, jclass,
-                                 jobject fileDescriptor) {
+static jint QTagUid_untagSocketFd(JNIEnv* env, jclass,
+                                  jobject fileDescriptor) {
   int userFd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
   if (env->ExceptionOccurred() != NULL) {
