@@ -732,7 +732,7 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private NotificationListenerInfo checkListenerToken(INotificationListener listener) {
+    private NotificationListenerInfo checkListenerTokenLocked(INotificationListener listener) {
         checkNullListener(listener);
         final IBinder token = listener.asBinder();
         final int N = mListeners.size();
@@ -898,7 +898,10 @@ public class NotificationManagerService extends SystemService {
         public void onClearAll() {
             // XXX to be totally correct, the caller should tell us which user
             // this is for.
-            cancelAll(ActivityManager.getCurrentUser());
+            int currentUser = ActivityManager.getCurrentUser();
+            synchronized (mNotificationList) {
+                cancelAllLocked(currentUser);
+            }
         }
 
         @Override
@@ -1502,10 +1505,12 @@ public class NotificationManagerService extends SystemService {
          */
         @Override
         public void cancelAllNotificationsFromListener(INotificationListener token) {
-            NotificationListenerInfo info = checkListenerToken(token);
             long identity = Binder.clearCallingIdentity();
             try {
-                cancelAll(info.userid);
+                synchronized (mNotificationList) {
+                    NotificationListenerInfo info = checkListenerTokenLocked(token);
+                    cancelAllLocked(info.userid);
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1521,9 +1526,12 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void cancelNotificationFromListener(INotificationListener token, String pkg,
                 String tag, int id) {
-            NotificationListenerInfo info = checkListenerToken(token);
             long identity = Binder.clearCallingIdentity();
             try {
+                NotificationListenerInfo info;
+                synchronized (mNotificationList) {
+                    info = checkListenerTokenLocked(token);
+                }
                 cancelNotification(pkg, tag, id, 0,
                         Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE,
                         true,
@@ -1543,11 +1551,10 @@ public class NotificationManagerService extends SystemService {
         @Override
         public StatusBarNotification[] getActiveNotificationsFromListener(
                 INotificationListener token) {
-            NotificationListenerInfo info = checkListenerToken(token);
-
             StatusBarNotification[] result = new StatusBarNotification[0];
             ArrayList<StatusBarNotification> list = new ArrayList<StatusBarNotification>();
             synchronized (mNotificationList) {
+                NotificationListenerInfo info = checkListenerTokenLocked(token);
                 final int N = mNotificationList.size();
                 for (int i=0; i<N; i++) {
                     StatusBarNotification sbn = mNotificationList.get(i).sbn;
@@ -2369,25 +2376,23 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    void cancelAll(int userId) {
-        synchronized (mNotificationList) {
-            final int N = mNotificationList.size();
-            for (int i=N-1; i>=0; i--) {
-                NotificationRecord r = mNotificationList.get(i);
+    void cancelAllLocked(int userId) {
+        final int N = mNotificationList.size();
+        for (int i=N-1; i>=0; i--) {
+            NotificationRecord r = mNotificationList.get(i);
 
-                if (!notificationMatchesUserId(r, userId)) {
-                    continue;
-                }
-
-                if ((r.getFlags() & (Notification.FLAG_ONGOING_EVENT
-                                | Notification.FLAG_NO_CLEAR)) == 0) {
-                    mNotificationList.remove(i);
-                    cancelNotificationLocked(r, true);
-                }
+            if (!notificationMatchesUserId(r, userId)) {
+                continue;
             }
 
-            updateLightsLocked();
+            if ((r.getFlags() & (Notification.FLAG_ONGOING_EVENT
+                            | Notification.FLAG_NO_CLEAR)) == 0) {
+                mNotificationList.remove(i);
+                cancelNotificationLocked(r, true);
+            }
         }
+
+        updateLightsLocked();
     }
 
     // lock on mNotificationList
