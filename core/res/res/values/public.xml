@@ -2352,4 +2352,17 @@
 
   <public type="style" name="Widget.Quantum.Light.Button.Paper" />
   <public type="style" name="Widget.Quantum.Light.Button.Paper.Color" />
+
+  <public type="style" name="TextAppearance.Quantum.Display4" />
+  <public type="style" name="TextAppearance.Quantum.Display3" />
+  <public type="style" name="TextAppearance.Quantum.Display2" />
+  <public type="style" name="TextAppearance.Quantum.Display1" />
+  <public type="style" name="TextAppearance.Quantum.Headline" />
+  <public type="style" name="TextAppearance.Quantum.Title" />
+  <public type="style" name="TextAppearance.Quantum.Subhead" />
+  <public type="style" name="TextAppearance.Quantum.Body2" />
+  <public type="style" name="TextAppearance.Quantum.Body1" />
+  <public type="style" name="TextAppearance.Quantum.Caption" />
+  <public type="style" name="TextAppearance.Quantum.Menu" />
+  <public type="style" name="TextAppearance.Quantum.Button" />
 </resources>
