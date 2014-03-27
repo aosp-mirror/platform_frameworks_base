@@ -24,6 +24,7 @@ import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.widget.FrameLayout;
 import android.widget.ScrollView;
@@ -31,7 +32,6 @@ import android.widget.ScrollView;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
-import com.android.systemui.statusbar.policy.NotificationRowLayout;
 
 
 public class StatusBarWindowView extends FrameLayout
@@ -40,7 +40,7 @@ public class StatusBarWindowView extends FrameLayout
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
 
     private ExpandHelper mExpandHelper;
-    private NotificationRowLayout latestItems;
+    private ViewGroup latestItems;
     private NotificationPanelView mNotificationPanel;
     private ScrollView mScrollView;
 
@@ -55,12 +55,18 @@ public class StatusBarWindowView extends FrameLayout
     @Override
     protected void onAttachedToWindow () {
         super.onAttachedToWindow();
-        latestItems = (NotificationRowLayout) findViewById(R.id.latestItems);
+
+        if (BaseStatusBar.ENABLE_NOTIFICATION_STACK) {
+            latestItems = (ViewGroup) findViewById(R.id.notification_stack_scroller);
+        } else {
+            latestItems = (ViewGroup) findViewById(R.id.latestItems);
+        }
         mScrollView = (ScrollView) findViewById(R.id.scroll);
         mNotificationPanel = (NotificationPanelView) findViewById(R.id.notification_panel);
         int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
         int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
-        mExpandHelper = new ExpandHelper(getContext(), latestItems, minHeight, maxHeight);
+        mExpandHelper = new ExpandHelper(getContext(), (ExpandHelper.Callback) latestItems,
+                minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
         mExpandHelper.setScrollView(mScrollView);
 

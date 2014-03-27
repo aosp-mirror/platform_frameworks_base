@@ -366,4 +366,7 @@
     <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
     <dimen name="immersive_mode_cling_width">-1px</dimen>
 
+    <!-- radius of the corners of the quantum rounded rect background -->
+    <dimen name="notification_quantum_rounded_rect_radius">2dp</dimen>
+
 </resources>
