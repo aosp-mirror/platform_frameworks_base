@@ -365,7 +365,9 @@ static void android_server_AlarmManagerService_set(JNIEnv*, jobject, jlong nativ
     int result = impl->set(type, &ts);
     if (result < 0)
     {
-        ALOGE("Unable to set alarm to %lld.%09lld: %s\n", seconds, nanoseconds, strerror(errno));
+        ALOGE("Unable to set alarm to %lld.%09lld: %s\n",
+              static_cast<long long>(seconds),
+              static_cast<long long>(nanoseconds), strerror(errno));
     }
 }
 
