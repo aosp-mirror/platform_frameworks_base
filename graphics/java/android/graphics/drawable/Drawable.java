@@ -1062,6 +1062,8 @@ public abstract class Drawable {
             drawable = new ColorDrawable();
         } else if (name.equals("shape")) {
             drawable = new GradientDrawable();
+        } else if (name.equals("vector")) {
+            drawable = new VectorDrawable();
         } else if (name.equals("scale")) {
             drawable = new ScaleDrawable();
         } else if (name.equals("clip")) {
