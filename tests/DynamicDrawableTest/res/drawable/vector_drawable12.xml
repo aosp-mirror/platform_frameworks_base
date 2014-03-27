@@ -1,0 +1,90 @@
+<!-- Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <size
+            android:width="64dp"
+            android:height="64dp"/>
+
+
+    <viewport android:viewportWidth="600"
+          android:viewportHeight="600"/>
+
+    <group>
+        <path
+                android:name="pie1"
+                android:pathData="M300,70 a230,230 0 1,0 1,0 z"
+                android:stroke="#FF00FF00"
+                android:strokeWidth="70"
+                android:trimPathStart="0"
+                android:trimPathEnd=".75"
+                android:trimPathOffset="0"/>
+
+        <path
+                android:name="v"
+                android:pathData="M300,70 l 0,-70 70,70 -70,70z"
+                android:fill="#FF00FF00"
+                android:pivotX="300"
+                android:pivotY="300"
+                android:rotation="0"
+                />
+    </group>
+
+    <group>
+        <path
+                android:name="v"
+                android:pathData="M300,70 l 0,-70 70,70 -70,70z"
+                android:pivotX="300"
+                android:pivotY="300"
+                android:rotation="360"/>
+        <path
+                android:name="pie2"
+                android:pathData="M300,70 a230,230 0 1,0 1,0 z"
+                android:stroke="#FF00FF00"
+                android:strokeWidth="70"
+                android:rotation="360"
+                android:pivotX="300"
+                android:pivotY="300"
+                android:trimPathStart="0"
+                android:trimPathEnd=".5"
+                android:trimPathOffset="0"
+                android:strokeLineCap="round"
+                />
+    </group>
+
+    <animation android:sequence="pie1,pie2"
+               android:durations="2000"
+               android:startOffset="500"
+               android:repeatCount="-1"
+               android:repeatStyle="forward"
+               android:animate="easeInOut"
+            />
+    <animation android:sequence="v,v"
+               android:durations="2000"
+               android:startOffset="500"
+               android:repeatCount="-1"
+               android:repeatStyle="forward"
+               android:animate="easeInOut"
+            />
+    <animation android:sequence="pie1,pie2"
+               android:durations="2800"
+               android:startOffset="500"
+               android:limitTo="trimPathEnd"
+               android:repeatCount="-1"
+               android:repeatStyle="reverse"
+               android:animate="easeInOut"
+            />
+
+</vector>

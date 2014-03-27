@@ -1,0 +1,73 @@
+<!--
+ Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:trigger="state_checked" >
+
+    <size
+        android:height="64dp"
+        android:width="64dp" />
+
+    <viewport
+        android:viewportHeight="480"
+        android:viewportWidth="480" />
+
+    <group>
+        <path
+            android:name="check"
+            android:pathData="m20,200l100,90l180,-180l-35,-35l-145,145l-60,-60l-40,40z"
+            android:fill="#ffff00ff"
+            android:stroke="#FF00FF00"
+            android:strokeWidth="5" />
+    </group>
+    <group>
+        <path
+            android:name="box1"
+            android:pathData="m127,171l37,38l33,-31l-37,-40l-1,3l-2,0l-30,30z"
+            android:fill="#ffffffff"
+            android:stroke="#FF00FF00"
+            android:strokeWidth="5" />
+    </group>
+    <group>
+        <path
+            android:name="box2"
+            android:pathData="m127,171l37,38l33,-31l-37,-40l-1,3l-2,0l-30,30z"
+            android:fill="#ff000000"
+            android:rotation="46.757"
+            android:pivotX="162"
+            android:pivotY="173.5"
+            android:stroke="#FF00FF00"
+            android:strokeWidth="5" />
+    </group>
+    <group>
+        <path
+            android:name="box3"
+            android:pathData="m187,147l-1,55l-49,-1l2,-53l48,0z"
+            android:stroke="#FF000000"
+            android:strokeWidth="4" />
+    </group>
+    <group>
+        <path
+            android:name="box4"
+            android:pathData="m248,74l0,164l-177,0l1,-165l173,-1l3,2z"
+            android:stroke="#FF000000"
+            android:strokeWidth="30" />
+    </group>
+
+    <animation
+        android:durations="300,100,0,300"
+        android:sequence="check,box1,box2,box3,box4" />
+
+</vector>

@@ -4541,6 +4541,145 @@
     </declare-styleable>
 
     <!-- ========================== -->
+    <!--   Vector drawable class   -->
+    <!-- ========================== -->
+    <eat-comment />
+
+    <!-- Drawable used to draw Vector Drawables. -->
+    <declare-styleable name="VectorDrawable">
+           <!-- What event triggers the animation -->
+        <attr name="trigger" format="enum">
+            <enum name="state_pressed" value="1" />
+            <enum name="state_focused" value="2" />
+            <enum name="state_hovered" value="3" />
+            <enum name="state_selected" value="4" />
+            <enum name="state_checkable" value="5" />
+            <enum name="state_checked" value="6" />
+            <enum name="state_enabled" value="7" />
+            <enum name="state_activated" value="8" />
+            <enum name="state_window_focused" value="9" />
+        </attr>
+    </declare-styleable>
+
+    <!-- Define the virtual size of the drawing surface paths will draw to. -->
+    <declare-styleable name="VectorDrawableViewport">
+        <!-- The width of the canvas the drawing is on. -->
+        <attr name="viewportWidth" format="float"/>
+        <!-- The height of the canvas the drawing is on. -->
+        <attr name="viewportHeight" format="float"/>
+    </declare-styleable>
+
+    <!-- Define the size of the drawable -->
+    <declare-styleable name="VectorDrawableSize">
+        <!-- Width of the Vector Drawable. -->
+        <attr name="width" />
+        <!-- Height of the Vector Drawable. -->
+        <attr name="height" />
+    </declare-styleable>
+
+    <!-- Define the animations of drawable -->
+    <declare-styleable name="VectorDrawableAnimation">
+        <!-- Configures this animation sequence between the named paths  -->
+        <attr name="sequence" format="string"/>
+        <!-- Limits an animation to only interpolate the selected variable  -->
+        <attr name="limitTo" format="enum">
+            <enum name="unlimited" value="0"/>
+            <enum name="path" value="1"/>
+            <enum name="rotation" value="2"/>
+            <enum name="trimPathStart" value="3"/>
+            <enum name="trimPathEnd" value="4"/>
+            <enum name="trimPathOffset" value="5"/>
+        </attr>
+        <!-- Number of times to loop this aspect of the animation -->
+        <attr name="repeatCount"/>
+        <!-- A list of times in milliseconds to transision from on path to another.
+         List must contain one less than the number of named paths
+         e.g. given sequence="A,B,C,D" durations="100,0,100" implies 100ms for the
+         "A" to "B" transision instantanious switch to "C" and 100ms for "C" to "D". -->
+        <attr name="durations" format="string" />
+        <!-- The delay before stating this aspect of the animation in milli seconds -->
+        <attr name="startDelay" />
+        <!-- when repeating how does it repeat back and forth or a to b -->
+        <attr name="repeatStyle" format="enum">
+            <enum name="forward"  value="0"/>
+            <enum name="reverse"  value="1"/>[]
+        </attr>
+        <!-- how does the animation progress from start to finish -->
+        <attr name="animate" format="enum">
+            <enum name="linear"  value="0"/>
+            <enum name="easeIn"  value="1"/>
+            <enum name="easeOut"  value="2"/>
+            <enum name="easeInOut"  value="3"/>
+        </attr>
+    </declare-styleable>
+
+    <!-- Defines the path used in Vector Drawables. -->
+    <declare-styleable name="VectorDrawablePath">
+        <!-- The Name of this path -->
+        <attr name="name" />
+        <!-- The width a path stroke -->
+        <attr name="strokeWidth" format="float" />
+        <!-- The opacity of a path stroke -->
+        <attr name="strokeOpacity" format="float" />
+        <!-- The amount to rotate the path stroke -->
+        <attr name="rotation" />
+        <!-- The X coordinate of the center of rotation of a path -->
+        <attr name="pivotX" />
+        <!-- The Y coordinate of the center of rotation of a path -->
+        <attr name="pivotY" />
+        <!-- The color to stroke the path if not defined implies no stroke-->
+        <attr name="stroke" format="color" />
+        <!-- The color to fill the path if not defined implies no fill-->
+        <attr name="fill" format="color" />
+        <!-- The level of opacity of the filled area of the path -->
+        <attr name="fillOpacity" format="float" />
+        <!-- The specification of the operations that define the path  -->
+        <attr name="pathData" format="string" />
+        <!-- The fraction of the path to trim from the start from 0 to 1 -->
+        <attr name="trimPathStart" format="float" />
+        <!-- The fraction of the path to trim from the end from 0 to 1  -->
+        <attr name="trimPathEnd" format="float" />
+        <!-- Shift trim region (allows visible region to include the start and end) from 0 to 1  -->
+        <attr name="trimPathOffset" format="float" />
+        <!-- Path will set the current clip path -->
+        <attr name="clipToPath" format="boolean" />
+        <!-- sets the linecap for a stroked path -->
+        <attr name="strokeLineCap" format="enum">
+            <enum name="butt" value="0"/>
+            <enum name="round" value="1"/>
+            <enum name="square" value="2"/>
+        </attr>
+        <!-- sets the lineJoin for a stroked path -->
+        <attr name="strokeLineJoin" format="enum">
+            <enum name="miter" value="0"/>
+            <enum name="round" value="1"/>
+            <enum name="bevel" value="2"/>
+        </attr>
+        <!-- sets the Miter limit for a stroked path -->
+        <attr name="strokeMiterLimit" format="float"/>
+        <!-- sets a condition to be met to draw path -->
+        <attr name="state_pressed" />
+        <!-- sets a condition to be met to draw path -->
+        <attr name="state_focused" />
+        <!-- sets a condition to be met to draw path -->
+        <attr name="state_selected" />
+        <!-- sets a condition to be met to draw path -->
+        <attr name="state_window_focused" />
+        <!-- sets a condition to be met to draw path -->
+        <attr name="state_enabled" />
+        <!-- sets a condition to be met to draw path -->
+        <attr name="state_activated" />
+        <!-- sets a condition to be met to draw path -->
+        <attr name="state_accelerated" />
+        <!-- sets a condition to be met to draw path -->
+        <attr name="state_hovered" />
+        <!-- sets a condition to be met to draw path -->
+        <attr name="state_checked" />
+        <!-- sets a condition to be met to draw path -->
+        <attr name="state_checkable" />
+    </declare-styleable>
+
+    <!-- ========================== -->
     <!-- Animation class attributes -->
     <!-- ========================== -->
     <eat-comment />
