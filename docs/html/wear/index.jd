@@ -1,5 +1,5 @@
 page.title=Android Wear
-page.viewport-width=970
+page.viewport_width=970
 fullpage=true
 no_footer_links=true
 page.customHeadTag=<link rel="stylesheet" type="text/css" href="/wear/css/wear.css">
