@@ -233,6 +233,21 @@
     <!-- The size of the icon in the recents task view. -->
     <dimen name="recents_task_view_icon_size">60dp</dimen>
 
+    <!-- Space below the notification stack -->
+    <dimen name="notification_stack_margin_bottom">0dp</dimen>
+
+    <!-- Space reserved for the cards behind the top card in the top stack -->
+    <dimen name="top_stack_peek_amount">24dp</dimen>
+
+    <!-- Space reserved for the cards behind the top card in the bottom stack -->
+    <dimen name="bottom_stack_peek_amount">18dp</dimen>
+
+    <!-- The side padding of the notifications-->
+    <dimen name="notification_side_padding">8dp</dimen>
+
+    <!-- Z distance between notifications if they are in the stack -->
+    <dimen name="z_distance_between_notifications">2dp</dimen>
+
     <!-- Width of the zen mode interstitial dialog.  Defaults to MATCH_PARENT. -->
     <dimen name="zen_mode_dialog_width">-1px</dimen>
 </resources>

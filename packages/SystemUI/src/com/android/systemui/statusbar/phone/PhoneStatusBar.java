@@ -87,6 +87,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
+import com.android.systemui.SwipeHelper;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -94,6 +95,7 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
+
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.DateView;
@@ -103,6 +105,8 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.policy.OnSizeChangedListener;
 import com.android.systemui.statusbar.policy.RotationLockController;
+
+import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -479,10 +483,24 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mStatusBarContents = (LinearLayout)mStatusBarView.findViewById(R.id.status_bar_contents);
         mTickerView = mStatusBarView.findViewById(R.id.ticker);
 
-        mPile = (NotificationRowLayout)mStatusBarWindow.findViewById(R.id.latestItems);
-        mPile.setLayoutTransitionsEnabled(false);
-        mPile.setLongPressListener(getNotificationLongClicker());
+        NotificationRowLayout rowLayout
+                = (NotificationRowLayout) mStatusBarWindow.findViewById(R.id.latestItems);
+        NotificationStackScrollLayout notificationStack
+                = (NotificationStackScrollLayout) mStatusBarWindow
+                .findViewById(R.id.notification_stack_scroller);
+        if (ENABLE_NOTIFICATION_STACK) {
+            notificationStack.setLongPressListener(getNotificationLongClicker());
+            mPile = notificationStack;
+        } else {
+            rowLayout.setLayoutTransitionsEnabled(false);
+            rowLayout.setLongPressListener(getNotificationLongClicker());
+            mPile = rowLayout;
+            notificationStack.setVisibility(View.GONE);
+        }
+
         mExpandedContents = mPile; // was: expanded.findViewById(R.id.notificationLinearLayout);
+
+
 
         mNotificationPanelHeader = mStatusBarWindow.findViewById(R.id.header);
 
@@ -597,7 +615,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
 
             // set up the dynamic hide/show of the label
-            mPile.setOnSizeChangedListener(new OnSizeChangedListener() {
+            if(!ENABLE_NOTIFICATION_STACK)
+                ((NotificationRowLayout) mPile).setOnSizeChangedListener(new OnSizeChangedListener() {
                 @Override
                 public void onSizeChanged(View view, int w, int h, int oldw, int oldh) {
                     updateCarrierLabelVisibility(false);
@@ -1457,7 +1476,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         mExpandedVisible = true;
-        mPile.setLayoutTransitionsEnabled(true);
+        if(!ENABLE_NOTIFICATION_STACK) {
+            ((NotificationRowLayout) mPile).setLayoutTransitionsEnabled(true);
+        }
         if (mNavigationBarView != null)
             mNavigationBarView.setSlippery(true);
 
@@ -1749,7 +1770,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         mExpandedVisible = false;
-        mPile.setLayoutTransitionsEnabled(false);
+        if(!ENABLE_NOTIFICATION_STACK) {
+            ((NotificationRowLayout) mPile).setLayoutTransitionsEnabled(false);
+        }
         if (mNavigationBarView != null)
             mNavigationBarView.setSlippery(false);
         visibilityChanged(false);
@@ -2406,7 +2429,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 final ArrayList<View> snapshot = new ArrayList<View>(numChildren);
                 for (int i=0; i<numChildren; i++) {
                     final View child = mPile.getChildAt(i);
-                    if (mPile.canChildBeDismissed(child) && child.getBottom() > scrollTop &&
+                    if (((SwipeHelper.Callback) mPile).canChildBeDismissed(child) && child.getBottom() > scrollTop &&
                             child.getTop() < scrollBottom) {
                         snapshot.add(child);
                     }
@@ -2424,10 +2447,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                         int currentDelay = 140;
                         int totalDelay = 0;
 
-                        // Set the shade-animating state to avoid doing other work during
-                        // all of these animations. In particular, avoid layout and
-                        // redrawing when collapsing the shade.
-                        mPile.setViewRemoval(false);
+
+                        if(!ENABLE_NOTIFICATION_STACK) {
+                            // Set the shade-animating state to avoid doing other work during
+                            // all of these animations. In particular, avoid layout and
+                            // redrawing when collapsing the shade.
+                            ((NotificationRowLayout) mPile).setViewRemoval(false);
+                        }
 
                         mPostCollapseCleanup = new Runnable() {
                             @Override
@@ -2436,7 +2462,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                                     Log.v(TAG, "running post-collapse cleanup");
                                 }
                                 try {
-                                    mPile.setViewRemoval(true);
+                                    if (!ENABLE_NOTIFICATION_STACK) {
+                                        ((NotificationRowLayout) mPile).setViewRemoval(true);
+                                    }
                                     mBarService.onClearAllNotifications(mCurrentUserId);
                                 } catch (Exception ex) { }
                             }
@@ -2450,7 +2478,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                             mHandler.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mPile.dismissRowAnimated(_v, velocity);
+                                    if (!ENABLE_NOTIFICATION_STACK) {
+                                        ((NotificationRowLayout) mPile).dismissRowAnimated(
+                                                _v, velocity);
+                                    } else {
+                                        ((NotificationStackScrollLayout) mPile).dismissRowAnimated(
+                                                _v, velocity);
+                                    }
                                 }
                             }, totalDelay);
                             currentDelay = Math.max(50, currentDelay - ROW_DELAY_DECREMENT);
