@@ -206,7 +206,7 @@
             android:layout_height="1dip"
             android:id="@+id/action_divider"
             android:visibility="gone"
-            android:background="@drawable/list_divider_quantum_light" />
+            android:background="@drawable/list_divider_holo_light" />
         <include
             layout="@layout/notification_quantum_action_list"
             android:layout_width="match_parent"
@@ -218,7 +218,7 @@
             android:layout_height="1dip"
             android:id="@+id/overflow_divider"
             android:visibility="visible"
-            android:background="@drawable/list_divider_quantum_light" />
+            android:background="@drawable/list_divider_holo_light" />
         <LinearLayout
             android:id="@+id/line3"
             android:layout_width="match_parent"
