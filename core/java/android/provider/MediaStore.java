@@ -173,6 +173,10 @@ public final class MediaStore {
      */
     public static final String EXTRA_MEDIA_GENRE = "android.intent.extra.genre";
     /**
+     * The name of the Intent-extra used to define the playlist.
+     */
+    public static final String EXTRA_MEDIA_PLAYLIST = "android.intent.extra.playlist";
+    /**
      * The name of the Intent-extra used to define the radio channel.
      */
     public static final String EXTRA_MEDIA_RADIO_CHANNEL = "android.intent.extra.radio_channel";
