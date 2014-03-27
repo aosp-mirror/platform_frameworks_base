@@ -1751,7 +1751,8 @@ class AppWidgetServiceImpl {
                 for (int i = 0; i < N; i++) {
                     AppWidgetId id = mAppWidgetIds.get(i);
                     if (backupTarget.equals(id.host.packageName)
-                            || backupTarget.equals(id.provider.info.provider.getPackageName())) {
+                            || (id.provider != null && backupTarget.equals(
+                                    id.provider.info.provider.getPackageName()))) {
                         serializeAppWidgetId(out, id);
                     }
                 }
