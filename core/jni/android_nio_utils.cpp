@@ -37,7 +37,7 @@ void* android::nio_getPointer(JNIEnv *_env, jobject buffer, jarray *array) {
                                          gNioJNI.getBasePointerID, buffer);
     if (pointer != 0L) {
         *array = NULL;
-        return (void *) (jint) pointer;
+        return reinterpret_cast<void *>(pointer);
     }
 
     *array = (jarray) _env->CallStaticObjectMethod(gNioJNI.nioAccessClass,

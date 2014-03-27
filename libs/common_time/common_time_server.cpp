@@ -590,7 +590,7 @@ static void hexDumpToString(const uint8_t* src, size_t src_len,
     for (i = 0; (i < src_len) && (offset < dst_len); ++i) {
         int res;
         if (0 == (i % 16)) {
-            res = snprintf(dst + offset, dst_len - offset, "\n%04x :", i);
+            res = snprintf(dst + offset, dst_len - offset, "\n%04zx :", i);
             if (res < 0)
                 break;
             offset += res;
