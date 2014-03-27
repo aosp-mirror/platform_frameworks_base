@@ -1,0 +1,173 @@
+page.title=Design Principles of Android Wear
+
+@jd:body
+
+<style>
+h3 {
+ padding:30px 0 10px;
+}
+</style>
+<p>
+Android wearables provide just the right information at just the right time, allowing you to be connected to the virtual world and present in the real world.</p>
+
+<img src="{@docRoot}wear/images/05_images.png" height="200" width="169" style="float:right;clear:right;margin:0 0 60px 60px" />
+
+<p>Here you’ll find some guidelines for designing great user experiences on the Android Wear
+platform. Designing for Android Wear is substantially different than designing for phones or
+tablets, so we’ll start by describing how your content can work in tandem with the overall
+Android Wear vision. To better understand the user experience on Android Wear, also be sure
+to read the <a href="{@docRoot}wear/design/user-interface.html">UI Overview</a>.</p>
+
+
+<img src="{@docRoot}wear/images/02_notifications.png" height="200" width="169" style="float:right;clear:right;margin:0 0 20px 60px" />
+
+
+
+<p>Android Wear experiences are:</p>
+
+<ul>
+  <li><strong>Contextually aware and smart.</strong> These devices bring a new level of awareness to computing. Rather than requiring attention and input from users, Android wearables are aware of their situation and state, and helpfully display the right information at the right time. <em>Timely, relevant, specific</em>.</li>
+
+  <li><strong>Glanceable.</strong> Wearable devices are used all throughout the day, even when they sit in our peripheral vision. Effective apps provide the maximum payload of information with a minimum of fuss, optimized to provide tiny snippets of relevant information throughout the day. <em>Short, sharp, immediate.</em></li>
+
+  <li><strong>Zero/low interaction.</strong> Staying true to the strengths afforded by a smaller form factor, Android Wear focuses on simple interactions, only requiring input by the user when absolutely necessary. Most inputs are based around touch swipes or voice, and inputs requiring fine-grained motor skills are avoided. <em>Gestural, simple, fast.</em></li>
+
+  <li><strong>Helpful.</strong> Android Wear is like a great personal assistant: it knows you and your preferences, it only interrupts you when absolutely necessary, and it’s always on hand to provide a ready answer. <em>Efficient, respectful, responsive.</em></li>
+</ul>
+
+
+<p>
+By providing a smart connection to the rest of the world while respecting the user’s attention, Android Wear feels personal and global, simple and smart, unobtrusive and ever-ready. Notifications that respect these principles will feel most at home in the overall Android Wear experience.
+</p>
+
+
+
+<h2 id="Notifications" style="clear:both">Notification UI Patterns</h2>
+
+<p>Android notifications appear as cards in the main stream and form the core of the Android Wear experience. Many of the main <a href="http://developer.android.com/design/patterns/notifications.html">Android Design guidelines for notifications</a> apply in Android Wear. Be respectful of users' attention and aware of how unnecessary interruptions will reflect on your application’s reputation.</p>
+
+<p>Omit needless text from your notifications. Design for glanceability, not reading. Use words and phrases, not sentences. Show, don't tell: where possible use simple icons, glyphs, and visualizations to convey your message.</p>
+<img src="{@docRoot}wear/images/circle_message2.png" height="200" style="float:right;clear:right;margin:0 0 20px 60px" />
+
+<p>In some cases, particularly with messaging applications, cards will contain dynamic content which may not fit on a single screen. In these cases the content will be automatically truncated to fit on the card and the user may tap to expand, so the full message should be provided.</p>
+
+<p>Notification priority should reflect the urgency of your notification, with only time-sensitive notifications carrying a high priority. Active notifications – that is, those that cause the device to vibrate – should only be used in cases that need the user's urgent attention or action (e.g. a time-based reminder, a message from a friend). Non-urgent notifications (e.g. a transit times card, daily pedometer count, social network updates) should be silently added to the card stream.</p>
+
+
+
+
+<h3 id="NotifictionActions" style="clear:both">Actions</h3>
+
+<img src="{@docRoot}wear/images/circle_message2_reply.png" height="200" style="float:right;clear:right;margin:0 0 20px 40px" />
+
+<p>Actions appear to the right of your notification, allowing the user to act on your notification. Up to three actions are permitted. The most-used action should be placed first, so that it is a single swipe away from your content.</p>
+
+<p>Actions consist of an icon and a caption. Icons should be PNG files, white on transparent
+background, 32 × 32 dp (with 8 dp padding), as specified in the <a
+href="/design/style/iconography.html#action-bar">Iconography</a> design guide for action bar
+icons. Captions should be verb-driven and short, and will be automatically truncated at one line.
+</p>
+
+<p>Actions are optional. Many useful notifications will not need to include actions at all.</p>
+
+<p>For developer details about action buttons, see <a href="{@docRoot}wear/notifications/creating.html">Creating
+Notifications for Android Wear</a>.</p>
+
+
+
+
+
+
+<h3 id="Images" style="clear:both">Images</h3>
+
+<img src="{@docRoot}wear/images/circle_badge_B.png" height="200" style="float:right;clear:right;margin:0 0 20px 40px" />
+
+
+<p>Images appear behind cards in the stream, providing context and additional glanceability. Your image should support the core message of the notification; for example, a card about a sports team could include the team color and logo; a message from a contact should display that person's profile photo.</p>
+
+<p>Bear in mind that the card will partially cover the lower part of the image. Images should
+be sized as appropriate for the notification appearance on handsets, which is 64 x 64 dp. Image backgrounds move when horizontally swiped, so landscape-oriented images work better on notifications that include pages or actions.</p>
+
+<p>To add large images, use {@link android.support.v4.app.NotificationCompat.Builder#setLargeIcon
+setLargeIcon()} with any notification, as
+shown in <a href="{@docRoot}wear/notifications/creating.html">Creating
+Notifications for Android Wear</a>.</p>
+
+
+
+
+
+<h3 id="AppIcons" style="clear:both">Application Icons</h3>
+
+<img src="{@docRoot}wear/images/07_appicons.png" height="200" style="float:right;margin:0 0 20px 60px" />
+
+<p>Your application’s launcher icon will be automatically placed on the card, identifying your notification. Do not use the notification title or background image to identify or brand your application. Instead, allow your icon to identify itself and focus on delivering a clear, succinct message in the card and image. You can choose not to display this icon using
+ <a href="/reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#setHintHideIcon(boolean)"><code>setHintHideIcon()</code></a>.
+</p>
+
+
+
+
+
+
+
+<h3 id="NotificationPages" style="clear:both">Pages</h3>
+
+<p>Pages are additional cards that can appear to the right of your main card in the stream. If your core message is longer than a short snippet, do not sacrifice glanceability by packing a lot of information into your primary notification. Instead, use pages to provide additional content.</p>
+
+<img src="{@docRoot}wear/images/08_pages.png" height="200" style="float:left;margin:0 0 20px 0px" />
+<img src="{@docRoot}wear/images/09_pages.png" height="200" style="float:left;margin:0 0 20px 60px" />
+<img src="{@docRoot}wear/images/10_pages.png" height="200" style="float:left;margin:0 0 20px 60px" />
+
+<p style="clear:left">Pages appear immediately to the right of the main notification card. They are typically used to provide additional details or alternate views of the main card’s content. For example:</p>
+<ul>
+  <li>A current weather card might provide an additional page showing a three-day forecast.</li>
+  <li>A next train departure card might provide an additional page showing subsequent departures times.</li>
+  <li>A daily step count card might provide an additional page showing the same measurement in calories and distance.</li>
+</ul>
+
+<p>There is no imposed limit on the number of pages you may add. However, notifications that provide actions should show no more than three pages to ensure that the actions remain easily accessible.</p>
+
+<p>Pages are optional. Many useful notifications will not need to include pages at all.</p>
+
+<p>For developer details about pages, see
+described in <a href="{@docRoot}wear/notifications/pages.html">Adding
+Pages to a Notification</a>.</p>
+
+
+
+
+
+<h3 id="NotificationStacks" style="clear:both">Notification Stacks</h3>
+
+<img src="{@docRoot}wear/images/11_bundles_B.png" height="200" style="float:right;margin:0 0 20px 60px" />
+<img src="{@docRoot}wear/images/11_bundles_A.png" height="200" style="float:right;margin:0 0 20px 60px" />
+
+<p>Stacks may be used to collect multiple notifications from the same application into a single stack of cards. Whereas pages are used to provide additional detail on a single notification, stacks are used to collect multiple sibling notifications together. A stack may be expanded by the user to access each individual card contained within.</p>
+
+<p>Stacks are a way of adding multiple useful notifications without overwhelming the user’s stream. If your application may produce multiple concurrent notifications, consider combining them into a stack.</p>
+
+<p>Each notification within a stack can contain separate pages and separate actions that are relevant to that specific notification. The user can access these actions after expanding that notification's card within the stack.</p>
+
+<p>For developer details about stacks, see
+described in <a href="{@docRoot}wear/notifications/stacks.html">Stacking
+Notifications</a>.</p>
+
+
+
+
+
+
+<h3 id="VoiceReplies" style="clear:both">Voice Replies</h3>
+
+
+<img src="{@docRoot}wear/images/circle_voice_B.png" height="200" style="float:right;margin:0 0 20px 40px" />
+<img src="{@docRoot}wear/images/circle_voice_A.png" height="200" style="float:right;margin:0 0 20px 40px" />
+
+<p>Voice replies are primarily used by messaging applications to provide a hands-free way of dictating a short message. You can also provide a up to five suggested replies or “canned responses” that are useful in a wide range of cases. These canned responses can be tapped by the user, allowing for a fast method of sending simple replies in cases where speaking may not be desirable.</p>
+
+<p>You should attempt to cover a range of simple, neutral replies in your choices. Longer voice replies may be automatically truncated in the Voice reply UI.</p>
+
+<p>For developer details about enabling voice replies, see
+described in <a href="{@docRoot}wear/notifications/remote-input.html">Receiving Voice Input from
+a Notification</a>.</p>
