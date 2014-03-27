@@ -1,4 +1,5 @@
 fullpage=true
+page.viewport-width=970
 no_footer_links=true
 carousel=true
 excludeFromSuggestions=true
@@ -20,7 +21,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 
                 <li class="item carousel-home">
                   <div class="content-left col-10" style="width:580px;">
-                    <a href="{@docRoot}design/patterns/new.html">
+                    <a href="{@docRoot}wear/index.html">
                       <img src="{@docRoot}images/home/aw_dac.png" style="margin-top:50px" >
                     </a>
                   </div>
