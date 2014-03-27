@@ -14,29 +14,10 @@ LOCAL_SHARED_LIBRARIES := \
 	libandroid_runtime
 
 LOCAL_MODULE:= app_process
-LOCAL_32_BIT_ONLY := true
+LOCAL_MULTILIB := both
+LOCAL_MODULE_STEM_32 := app_process
+LOCAL_MODULE_STEM_64 := app_process64
 include $(BUILD_EXECUTABLE)
-
-ifeq ($(TARGET_IS_64_BIT),true)
-
-# 64-bit app_process64
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES:= \
-	app_main.cpp
-
-LOCAL_SHARED_LIBRARIES := \
-	libcutils \
-	libutils \
-	liblog \
-	libbinder \
-	libandroid_runtime
-
-LOCAL_MODULE:= app_process64
-LOCAL_NO_2ND_ARCH := true
-include $(BUILD_EXECUTABLE)
-
-endif # TARGET_IS_64_BIT
 
 # Build a variant of app_process binary linked with ASan runtime.
 # ARM-only at the moment.
