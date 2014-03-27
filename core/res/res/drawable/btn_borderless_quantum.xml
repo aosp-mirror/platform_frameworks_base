@@ -15,5 +15,7 @@
 -->
 
 <touch-feedback xmlns:android="http://schemas.android.com/apk/res/android"
-    android:tint="?attr/colorButtonPressed"
-    android:mask="@drawable/btn_qntm_alpha" />
+    android:tint="?attr/colorButtonPressed">
+    <item android:id="@id/mask"
+        android:drawable="@drawable/btn_qntm_alpha" />
+</touch-feedback>

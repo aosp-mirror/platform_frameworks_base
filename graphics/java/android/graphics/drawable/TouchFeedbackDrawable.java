@@ -25,6 +25,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff.Mode;
+import android.graphics.drawable.Ripple.RippleAnimator;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.SystemClock;
@@ -43,7 +44,13 @@ import java.util.ArrayList;
 /**
  * Documentation pending.
  */
-public class TouchFeedbackDrawable extends DrawableWrapper {
+public class TouchFeedbackDrawable extends LayerDrawable {
+    private static final PorterDuffXfermode DST_ATOP = new PorterDuffXfermode(Mode.DST_ATOP);
+    private static final PorterDuffXfermode DST_IN = new PorterDuffXfermode(Mode.DST_IN);
+
+    /** The maximum number of ripples supported. */
+    private static final int MAX_RIPPLES = 10;
+
     private final Rect mTempRect = new Rect();
     private final Rect mPaddingRect = new Rect();
 
@@ -58,8 +65,9 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
     /** Lazily-created map of touch hotspot IDs to ripples. */
     private SparseArray<Ripple> mTouchedRipples;
 
-    /** Lazily-created list of actively animating ripples. */
-    private ArrayList<Ripple> mActiveRipples;
+    /** Lazily-created array of actively animating ripples. */
+    private Ripple[] mActiveRipples;
+    private int mActiveRipplesCount = 0;
 
     /** Lazily-created runnable for scheduling invalidation. */
     private Runnable mAnimationRunnable;
@@ -76,43 +84,14 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
     /** Whether the animation runnable has been posted. */
     private boolean mAnimating;
 
-    /** The drawable to use as the mask. */
-    private Drawable mMask;
-
     TouchFeedbackDrawable() {
-        this(new TouchFeedbackState(null), null, null);
-    }
-
-    private void setConstantState(TouchFeedbackState wrapperState, Resources res) {
-        super.setConstantState(wrapperState, res);
-
-        // Load a new mask drawable from the constant state.
-        if (wrapperState == null || wrapperState.mMaskState == null) {
-            mMask = null;
-        } else if (res != null) {
-            mMask = wrapperState.mMaskState.newDrawable(res);
-        } else {
-            mMask = wrapperState.mMaskState.newDrawable();
-        }
-
-        if (res != null) {
-            mDensity = res.getDisplayMetrics().density;
-        }
+        this(new TouchFeedbackState(null, null, null), null, null);
     }
 
     @Override
     public int getOpacity() {
-        return mActiveRipples != null && !mActiveRipples.isEmpty() ?
-                PixelFormat.TRANSLUCENT : PixelFormat.TRANSPARENT;
-    }
-
-    @Override
-    protected void onBoundsChange(Rect bounds) {
-        super.onBoundsChange(bounds);
-
-        if (mMask != null) {
-            mMask.setBounds(bounds);
-        }
+        // Worst-case scenario.
+        return PixelFormat.TRANSLUCENT;
     }
 
     @Override
@@ -138,7 +117,7 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
      */
     @Override
     public boolean isProjected() {
-        return mState.mProjected;
+        return getNumberOfLayers() == 0;
     }
 
     @Override
@@ -149,59 +128,25 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
     @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-        super.inflate(r, parser, attrs, theme);
-
         final TypedArray a = obtainAttributes(
                 r, theme, attrs, R.styleable.TouchFeedbackDrawable);
-        inflateStateFromTypedArray(r, a);
+        inflateStateFromTypedArray(a);
         a.recycle();
-        
-        inflateChildElements(r, parser, attrs, theme);
+
+        super.inflate(r, parser, attrs, theme);
 
         setTargetDensity(r.getDisplayMetrics());
-    }
-    
-    private void inflateChildElements(Resources r, XmlPullParser parser, AttributeSet attrs,
-            Theme theme) throws XmlPullParserException, IOException {
-        int type;
-        while ((type = parser.next()) == XmlPullParser.TEXT) {
-            // Find the next non-text element.
-        }
-
-        if (type == XmlPullParser.START_TAG) {
-            final Drawable dr = Drawable.createFromXmlInner(r, parser, attrs);
-            setDrawable(dr, r);
-        }
-    }
-
-    /**
-     * Sets the wrapped drawable and update the constant state.
-     *
-     * @param drawable
-     * @param res
-     */
-    void setMaskDrawable(Drawable drawable, Resources res) {
-        mMask = drawable;
-
-        if (drawable != null) {
-            // Nobody cares if the mask has a callback.
-            drawable.setCallback(null);
-
-            mState.mMaskState = drawable.getConstantState();
-        } else {
-            mState.mMaskState = null;
-        }
     }
 
     /**
      * Initializes the constant state from the values in the typed array.
      */
-    private void inflateStateFromTypedArray(Resources r, TypedArray a) {
+    private void inflateStateFromTypedArray(TypedArray a) {
         final TouchFeedbackState state = mState;
 
         // Extract the theme attributes, if any.
         final int[] themeAttrs = a.extractThemeAttrs();
-        state.mThemeAttrs = themeAttrs;
+        state.mTouchThemeAttrs = themeAttrs;
 
         if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_tint] == 0) {
             mState.mTint = a.getColorStateList(R.styleable.TouchFeedbackDrawable_tint);
@@ -218,34 +163,6 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
 
         if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_pinned] == 0) {
             mState.mPinned = a.getBoolean(R.styleable.TouchFeedbackDrawable_pinned, false);
-        }
-
-        Drawable mask = mMask;
-        if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_mask] == 0) {
-            mask = a.getDrawable(R.styleable.TouchFeedbackDrawable_mask);
-        }
-
-        Drawable dr = super.getDrawable();
-        if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_drawable] == 0) {
-            final int drawableRes = a.getResourceId(R.styleable.TouchFeedbackDrawable_drawable, 0);
-            if (drawableRes != 0) {
-                dr = r.getDrawable(drawableRes);
-            }
-        }
-
-        // If neither a mask not a bottom layer was specified, assume we're
-        // projecting onto a parent surface.
-        mState.mProjected = mask == null && dr == null;
-
-        if (dr != null) {
-            setDrawable(dr, r);
-        } else {
-            // For now at least, we MUST have a wrapped drawable.
-            setDrawable(new ColorDrawable(Color.TRANSPARENT), r);
-        }
-
-        if (mask != null) {
-            setMaskDrawable(mask, r);
         }
     }
 
@@ -271,7 +188,7 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
                     "Can't apply theme to <touch-feedback> with no constant state");
         }
 
-        final int[] themeAttrs = state.mThemeAttrs;
+        final int[] themeAttrs = state.mTouchThemeAttrs;
         if (themeAttrs != null) {
             final TypedArray a = t.resolveAttributes(
                     themeAttrs, R.styleable.TouchFeedbackDrawable, 0, 0);
@@ -298,39 +215,11 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
         if (a.hasValue(R.styleable.TouchFeedbackDrawable_pinned)) {
             mState.mPinned = a.getBoolean(R.styleable.TouchFeedbackDrawable_pinned, false);
         }
-
-        Drawable mask = mMask;
-        if (a.hasValue(R.styleable.TouchFeedbackDrawable_mask)) {
-            mask = a.getDrawable(R.styleable.TouchFeedbackDrawable_mask);
-        }
-
-        Drawable dr = super.getDrawable();
-        if (a.hasValue(R.styleable.TouchFeedbackDrawable_drawable)) {
-            final int drawableRes = a.getResourceId(R.styleable.TouchFeedbackDrawable_drawable, 0);
-            if (drawableRes != 0) {
-                dr = a.getResources().getDrawable(drawableRes);
-            }
-        }
-
-        // If neither a mask not a bottom layer was specified, assume we're
-        // projecting onto a parent surface.
-        mState.mProjected = mask == null && dr == null;
-
-        if (dr != null) {
-            setDrawable(dr, a.getResources());
-        } else {
-            // For now at least, we MUST have a wrapped drawable.
-            setDrawable(new ColorDrawable(Color.TRANSPARENT), a.getResources());
-        }
-
-        if (mask != null) {
-            setMaskDrawable(mask, a.getResources());
-        }
     }
 
     @Override
     public boolean canApplyTheme() {
-        return mState != null && mState.mThemeAttrs != null;
+        return super.canApplyTheme() || mState != null && mState.mTouchThemeAttrs != null;
     }
 
     /**
@@ -351,7 +240,7 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
     public void setHotspot(int id, float x, float y) {
         if (mTouchedRipples == null) {
             mTouchedRipples = new SparseArray<Ripple>();
-            mActiveRipples = new ArrayList<Ripple>();
+            mActiveRipples = new Ripple[MAX_RIPPLES];
         }
 
         final Ripple ripple = mTouchedRipples.get(id);
@@ -366,9 +255,9 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
             }
 
             final Ripple newRipple = new Ripple(bounds, padding, x, y, mDensity);
-            newRipple.enter();
+            newRipple.animate().enter();
 
-            mActiveRipples.add(newRipple);
+            mActiveRipples[mActiveRipplesCount++] = newRipple;
             mTouchedRipples.put(id, newRipple);
         } else if (!mState.mPinned) {
             ripple.move(x, y);
@@ -388,7 +277,7 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
 
         final Ripple ripple = mTouchedRipples.get(id);
         if (ripple != null) {
-            ripple.exit();
+            ripple.animate().exit();
 
             mTouchedRipples.remove(id);
             scheduleAnimation();
@@ -406,8 +295,7 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
 
         final int n = mTouchedRipples.size();
         for (int i = 0; i < n; i++) {
-            final Ripple ripple = mTouchedRipples.valueAt(i);
-            ripple.exit();
+            mTouchedRipples.valueAt(i).animate().exit();
         }
 
         if (n > 0) {
@@ -420,7 +308,7 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
      * Schedules the next animation, if necessary.
      */
     private void scheduleAnimation() {
-        if (mActiveRipples == null || mActiveRipples.isEmpty()) {
+        if (mActiveRipplesCount == 0) {
             mAnimating = false;
         } else if (!mAnimating) {
             mAnimating = true;
@@ -442,53 +330,68 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
 
     @Override
     public void draw(Canvas canvas) {
-        // The lower layer always draws normally.
-        super.draw(canvas);
+        final boolean projected = getNumberOfLayers() == 0;
+        final Ripple[] activeRipples = mActiveRipples;
+        final int ripplesCount = mActiveRipplesCount;
+        final Rect bounds = getBounds();
 
-        if (mActiveRipples == null || mActiveRipples.size() == 0) {
-            // No ripples to draw.
-            return;
-        }
-
-        final ArrayList<Ripple> activeRipples = mActiveRipples;
-        final Drawable mask = mMask == null && !mState.mProjected ? getDrawable() : null;
-        final Rect bounds = mask == null ? null : mask.getBounds();
-
-        // Draw ripples into a layer that merges using SRC_IN.
-        boolean hasRipples = false;
+        // Draw ripples.
+        boolean drewRipples = false;
         int rippleRestoreCount = -1;
-        int n = activeRipples.size();
-        for (int i = 0; i < n; i++) {
-            final Ripple ripple = activeRipples.get(i);
-            if (!ripple.active()) {
-                // TODO: Mark and sweep is more efficient.
-                activeRipples.remove(i);
-                i--;
-                n--;
+        int activeRipplesCount = 0;
+        for (int i = 0; i < ripplesCount; i++) {
+            final Ripple ripple = activeRipples[i];
+            final RippleAnimator animator = ripple.animate();
+            animator.update();
+            if (!animator.isRunning()) {
+                activeRipples[i] = null;
             } else {
-                // If we're masking the ripple layer, make sure we have a layer first.
-                if (mask != null && rippleRestoreCount < 0) {
+                // If we're masking the ripple layer, make sure we have a layer
+                // first. This will merge SRC_OVER (directly) onto the canvas.
+                if (!projected && rippleRestoreCount < 0) {
                     rippleRestoreCount = canvas.saveLayer(bounds.left, bounds.top,
-                            bounds.right, bounds.bottom, getMaskingPaint(SRC_ATOP), 0);
+                            bounds.right, bounds.bottom, null, 0);
                     canvas.clipRect(bounds);
                 }
 
-                hasRipples |= ripple.draw(canvas, getRipplePaint());
+                drewRipples |= ripple.draw(canvas, getRipplePaint());
+
+                activeRipples[activeRipplesCount] = activeRipples[i];
+                activeRipplesCount++;
+            }
+        }
+        mActiveRipplesCount = activeRipplesCount;
+
+        // TODO: Use the masking layer first, if there is one.
+
+        // If we have ripples and content, we need a masking layer. This will
+        // merge DST_ATOP onto (effectively under) the ripple layer.
+        if (drewRipples && !projected && rippleRestoreCount >= 0) {
+            canvas.saveLayer(bounds.left, bounds.top,
+                    bounds.right, bounds.bottom, getMaskingPaint(DST_ATOP), 0);
+        }
+
+        Drawable mask = null;
+        final ChildDrawable[] array = mLayerState.mChildren;
+        final int N = mLayerState.mNum;
+        for (int i = 0; i < N; i++) {
+            if (array[i].mId != R.id.mask) {
+                array[i].mDrawable.draw(canvas);
+            } else {
+                mask = array[i].mDrawable;
             }
         }
 
         // If we have ripples, mask them.
-        if (mask != null && hasRipples) {
+        if (mask != null && drewRipples) {
+            // TODO: This will also mask the lower layer, which is bad.
             canvas.saveLayer(bounds.left, bounds.top, bounds.right,
                     bounds.bottom, getMaskingPaint(DST_IN), 0);
             mask.draw(canvas);
         }
 
-        // Composite the layers if needed:
-        // 1. Mask     DST_IN
-        // 2. Ripples  SRC_ATOP
-        // 3. Lower    n/a
-        if (rippleRestoreCount > 0) {
+        // Composite the layers if needed.
+        if (rippleRestoreCount >= 0) {
             canvas.restoreToCount(rippleRestoreCount);
         }
     }
@@ -503,9 +406,6 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
         }
         return mRipplePaint;
     }
-    
-    private static final PorterDuffXfermode SRC_ATOP = new PorterDuffXfermode(Mode.SRC_ATOP);
-    private static final PorterDuffXfermode DST_IN = new PorterDuffXfermode(Mode.DST_IN);
 
     private Paint getMaskingPaint(PorterDuffXfermode mode) {
         if (mMaskingPaint == null) {
@@ -521,15 +421,12 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
         final Rect drawingBounds = mDrawingBounds;
         dirtyBounds.set(drawingBounds);
         drawingBounds.setEmpty();
-
         final Rect rippleBounds = mTempRect;
-        final ArrayList<Ripple> activeRipples = mActiveRipples;
-        if (activeRipples != null) {
-            final int N = activeRipples.size();
-            for (int i = 0; i < N; i++) {
-                activeRipples.get(i).getBounds(rippleBounds);
-                drawingBounds.union(rippleBounds);
-            }
+        final Ripple[] activeRipples = mActiveRipples;
+        final int N = mActiveRipplesCount;
+        for (int i = 0; i < N; i++) {
+            activeRipples[i].getBounds(rippleBounds);
+            drawingBounds.union(rippleBounds);
         }
 
         dirtyBounds.union(drawingBounds);
@@ -539,34 +436,30 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
 
     @Override
     public ConstantState getConstantState() {
-        // TODO: Can we just rely on super.getConstantState()?
         return mState;
     }
 
-    static class TouchFeedbackState extends WrapperState {
-        int[] mThemeAttrs;
-        ConstantState mMaskState;
+    static class TouchFeedbackState extends LayerState {
+        int[] mTouchThemeAttrs;
         ColorStateList mTint;
         Mode mTintMode;
         boolean mPinned;
-        boolean mProjected;
 
-        public TouchFeedbackState(TouchFeedbackState orig) {
-            super(orig);
+        public TouchFeedbackState(
+                TouchFeedbackState orig, TouchFeedbackDrawable owner, Resources res) {
+            super(orig, owner, res);
 
             if (orig != null) {
-                mThemeAttrs = orig.mThemeAttrs;
+                mTouchThemeAttrs = orig.mTouchThemeAttrs;
                 mTint = orig.mTint;
                 mTintMode = orig.mTintMode;
-                mMaskState = orig.mMaskState;
                 mPinned = orig.mPinned;
-                mProjected = orig.mProjected;
             }
         }
 
         @Override
         public boolean canApplyTheme() {
-            return mThemeAttrs != null;
+            return mTouchThemeAttrs != null || super.canApplyTheme();
         }
 
         @Override
@@ -586,13 +479,33 @@ public class TouchFeedbackDrawable extends DrawableWrapper {
     }
 
     private TouchFeedbackDrawable(TouchFeedbackState state, Resources res, Theme theme) {
-        if (theme != null && state.canApplyTheme()) {
-            mState = new TouchFeedbackState(state);
-            applyTheme(theme);
+        boolean needsTheme = false;
+
+        final TouchFeedbackState ns;
+        if (theme != null && state != null && state.canApplyTheme()) {
+            ns = new TouchFeedbackState(state, this, res);
+            needsTheme = true;
+        } else if (state == null) {
+            ns = new TouchFeedbackState(null, this, res);
         } else {
-            mState = state;
+            ns = state;
         }
 
-        setConstantState(state, res);
+        if (res != null) {
+            mDensity = res.getDisplayMetrics().density;
+        }
+
+        mState = ns;
+        mLayerState = ns;
+
+        if (ns.mNum > 0) {
+            ensurePadding();
+        }
+
+        if (needsTheme) {
+            applyTheme(theme);
+        }
+
+        setPaddingMode(PADDING_MODE_STACK);
     }
 }

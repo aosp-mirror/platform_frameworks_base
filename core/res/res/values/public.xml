@@ -2145,6 +2145,7 @@
   <public type="dimen" name="recents_thumbnail_width" />
 
   <public type="id" name="shared_element_name" />
+  <public type="id" name="mask" />
 
   <public type="style" name="Widget.Holo.FragmentBreadCrumbs" />
   <public type="style" name="Widget.Holo.Light.FragmentBreadCrumbs" />
