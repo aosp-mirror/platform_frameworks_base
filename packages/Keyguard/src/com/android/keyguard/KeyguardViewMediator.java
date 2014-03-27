@@ -979,13 +979,6 @@ public class KeyguardViewMediator {
             return;
         }
 
-        if (mLockPatternUtils.checkVoldPassword()) {
-            if (DEBUG) Log.d(TAG, "Not showing lock screen since just decrypted");
-            // Without this, settings is not enabled until the lock screen first appears
-            hideLocked();
-            return;
-        }
-
         if (DEBUG) Log.d(TAG, "doKeyguard: showing the lock screen");
         showLocked(options);
     }
