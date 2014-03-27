@@ -22,6 +22,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -74,13 +76,16 @@ public class CertificateChainValidator {
     private CertificateChainValidator() {
         try {
             TrustManagerFactory tmf = TrustManagerFactory.getInstance("X.509");
+            tmf.init((KeyStore) null);
             for (TrustManager tm : tmf.getTrustManagers()) {
                 if (tm instanceof X509ExtendedTrustManager) {
                     mTrustManager = (X509ExtendedTrustManager) tm;
                 }
             }
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("X.509 TrustManager factory must be available", e);
+            throw new RuntimeException("X.509 TrustManagerFactory must be available", e);
+        } catch (KeyStoreException e) {
+            throw new RuntimeException("X.509 TrustManagerFactory cannot be initialized", e);
         }
 
         if (mTrustManager == null) {
@@ -166,8 +171,12 @@ public class CertificateChainValidator {
         TrustManagerFactory tmf;
         try {
             tmf = TrustManagerFactory.getInstance("X.509");
+            tmf.init((KeyStore) null);
         } catch (NoSuchAlgorithmException e) {
             Slog.w(TAG, "Couldn't find default X.509 TrustManagerFactory");
+            return;
+        } catch (KeyStoreException e) {
+            Slog.w(TAG, "Couldn't initialize default X.509 TrustManagerFactory", e);
             return;
         }
 
