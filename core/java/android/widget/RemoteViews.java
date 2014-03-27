@@ -1516,6 +1516,75 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Helper action to set a color filter on a compound drawable on a TextView. Supports relative
+     * (s/t/e/b) or cardinal (l/t/r/b) arrangement.
+     */
+    private class TextViewDrawableColorFilterAction extends Action {
+        public TextViewDrawableColorFilterAction(int viewId, boolean isRelative, int index,
+                int color, PorterDuff.Mode mode) {
+            this.viewId = viewId;
+            this.isRelative = isRelative;
+            this.index = index;
+            this.color = color;
+            this.mode = mode;
+        }
+
+        public TextViewDrawableColorFilterAction(Parcel parcel) {
+            viewId = parcel.readInt();
+            isRelative = (parcel.readInt() != 0);
+            index = parcel.readInt();
+            color = parcel.readInt();
+            mode = readPorterDuffMode(parcel);
+        }
+
+        private PorterDuff.Mode readPorterDuffMode(Parcel parcel) {
+            int mode = parcel.readInt();
+            if (mode >= 0 && mode < PorterDuff.Mode.values().length) {
+                return PorterDuff.Mode.values()[mode];
+            } else {
+                return PorterDuff.Mode.CLEAR;
+            }
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            dest.writeInt(isRelative ? 1 : 0);
+            dest.writeInt(index);
+            dest.writeInt(color);
+            dest.writeInt(mode.ordinal());
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
+            final TextView target = (TextView) root.findViewById(viewId);
+            if (target == null) return;
+            Drawable[] drawables = isRelative
+                    ? target.getCompoundDrawablesRelative()
+                    : target.getCompoundDrawables();
+            if (index < 0 || index >= 4) {
+                throw new IllegalStateException("index must be in range [0, 3].");
+            }
+            Drawable d = drawables[index];
+            if (d != null) {
+                d.mutate();
+                d.setColorFilter(color, mode);
+            }
+        }
+
+        public String getActionName() {
+            return "TextViewDrawableColorFilterAction";
+        }
+
+        final boolean isRelative;
+        final int index;
+        final int color;
+        final PorterDuff.Mode mode;
+
+        public final static int TAG = 17;
+    }
+
+    /**
      * Simple class used to keep track of memory usage in a RemoteViews.
      *
      */
@@ -1685,6 +1754,9 @@ public class RemoteViews implements Parcelable, Filter {
                         break;
                     case SetRemoteViewsAdapterList.TAG:
                         mActions.add(new SetRemoteViewsAdapterList(parcel));
+                        break;
+                    case TextViewDrawableColorFilterAction.TAG:
+                        mActions.add(new TextViewDrawableColorFilterAction(parcel));
                         break;
                     default:
                         throw new ActionException("Tag " + tag + " not found");
@@ -1918,6 +1990,28 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setTextViewCompoundDrawablesRelative(int viewId, int start, int top, int end, int bottom) {
         addAction(new TextViewDrawableAction(viewId, true, start, top, end, bottom));
+    }
+
+    /**
+     * Equivalent to applying a color filter on one of the drawables in
+     * {@link android.widget.TextView#getCompoundDrawablesRelative()}.
+     *
+     * @param viewId The id of the view whose text should change.
+     * @param index  The index of the drawable in the array of
+     *               {@link android.widget.TextView#getCompoundDrawablesRelative()} to set the color
+     *               filter on. Must be in [0, 3].
+     * @param color  The color of the color filter. See
+     *               {@link Drawable#setColorFilter(int, android.graphics.PorterDuff.Mode)}.
+     * @param mode   The mode of the color filter. See
+     *               {@link Drawable#setColorFilter(int, android.graphics.PorterDuff.Mode)}.
+     * @hide
+     */
+    public void setTextViewCompoundDrawablesRelativeColorFilter(int viewId,
+            int index, int color, PorterDuff.Mode mode) {
+        if (index < 0 || index >= 4) {
+            throw new IllegalArgumentException("index must be in range [0, 3].");
+        }
+        addAction(new TextViewDrawableColorFilterAction(viewId, true, index, color, mode));
     }
 
     /**
