@@ -176,9 +176,15 @@ class WindowStateAnimator {
         mAnimator = service.mAnimator;
         mPolicy = service.mPolicy;
         mContext = service.mContext;
-        final DisplayInfo displayInfo = win.getDisplayContent().getDisplayInfo();
-        mAnimDw = displayInfo.appWidth;
-        mAnimDh = displayInfo.appHeight;
+        final DisplayContent displayContent = win.getDisplayContent();
+        if (displayContent != null) {
+            final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+            mAnimDw = displayInfo.appWidth;
+            mAnimDh = displayInfo.appHeight;
+        } else {
+            Slog.w(TAG, "WindowStateAnimator ctor: Display has been removed");
+            // This is checked on return and dealt with.
+        }
 
         mWin = win;
         mAttachedWinAnimator = win.mAttachedWindow == null
