@@ -392,8 +392,6 @@ void CanvasContext::drawDisplayList(RenderNode* displayList, Rect* dirty) {
     LOG_ALWAYS_FATAL_IF(!mCanvas || mEglSurface == EGL_NO_SURFACE,
             "drawDisplayList called on a context with no canvas or surface!");
 
-    displayList->updateProperties();
-
     EGLint width, height;
     mGlobalContext->beginFrame(mEglSurface, &width, &height);
     if (width != mCanvas->getViewportWidth() || height != mCanvas->getViewportHeight()) {

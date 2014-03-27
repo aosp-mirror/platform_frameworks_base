@@ -139,6 +139,9 @@ public:
 
     ANDROID_API void updateProperties();
 
+    // Returns true if this RenderNode or any of its children have functors
+    bool hasFunctors();
+
 private:
     typedef key_value_pair_t<float, DrawDisplayListOp*> ZDrawDisplayListOpPair;
 

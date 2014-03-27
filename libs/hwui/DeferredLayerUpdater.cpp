@@ -29,7 +29,6 @@ DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer, OpenGLRenderer* rendere
         , mNeedsGLContextAttach(false)
         , mUpdateTexImage(false)
         , mLayer(layer)
-        , mRenderer(renderer)
         , mCaches(Caches::getInstance()) {
     mWidth = mLayer->layer.getWidth();
     mHeight = mLayer->layer.getHeight();
@@ -45,7 +44,6 @@ DeferredLayerUpdater::~DeferredLayerUpdater() {
     if (mLayer) {
         mCaches.resourceCache.decrementRefcount(mLayer);
     }
-    delete mRenderer;
 }
 
 void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
@@ -76,7 +74,7 @@ bool DeferredLayerUpdater::apply() {
         }
         mLayer->setBlend(mBlend);
         mDisplayList->updateProperties();
-        mLayer->updateDeferred(mRenderer, mDisplayList,
+        mLayer->updateDeferred(mDisplayList,
                 mDirtyRect.left, mDirtyRect.top, mDirtyRect.right, mDirtyRect.bottom);
         mDirtyRect.setEmpty();
         mDisplayList = 0;

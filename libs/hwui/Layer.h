@@ -84,9 +84,9 @@ public:
         regionRect.translate(layer.left, layer.top);
     }
 
-    void updateDeferred(OpenGLRenderer* renderer, RenderNode* displayList,
+    void updateDeferred(RenderNode* displayList,
             int left, int top, int right, int bottom) {
-        this->renderer = renderer;
+        requireRenderer();
         this->displayList = displayList;
         const Rect r(left, top, right, bottom);
         dirtyRect.unionWith(r);
@@ -300,6 +300,8 @@ public:
     bool hasDrawnSinceUpdate;
 
 private:
+    void requireRenderer();
+
     Caches& caches;
 
     /**
