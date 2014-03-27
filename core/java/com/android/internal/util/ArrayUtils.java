@@ -16,11 +16,10 @@
 
 package com.android.internal.util;
 
-import java.lang.reflect.Array;
+import dalvik.system.VMRuntime;
+import libcore.util.EmptyArray;
 
-// XXX these should be changed to reflect the actual memory allocator we use.
-// it looks like right now objects want to be powers of 2 minus 8
-// and the array size eats another 4 bytes
+import java.lang.reflect.Array;
 
 /**
  * ArrayUtils contains some methods that you can call to find out
@@ -28,46 +27,42 @@ import java.lang.reflect.Array;
  */
 public class ArrayUtils
 {
-    private static Object[] EMPTY = new Object[0];
     private static final int CACHE_SIZE = 73;
     private static Object[] sCache = new Object[CACHE_SIZE];
 
     private ArrayUtils() { /* cannot be instantiated */ }
 
-    public static int idealByteArraySize(int need) {
-        for (int i = 4; i < 32; i++)
-            if (need <= (1 << i) - 12)
-                return (1 << i) - 12;
-
-        return need;
+    public static byte[] newUnpaddedByteArray(int minLen) {
+        return (byte[])VMRuntime.getRuntime().newUnpaddedArray(byte.class, minLen);
     }
 
-    public static int idealBooleanArraySize(int need) {
-        return idealByteArraySize(need);
+    public static char[] newUnpaddedCharArray(int minLen) {
+        return (char[])VMRuntime.getRuntime().newUnpaddedArray(char.class, minLen);
     }
 
-    public static int idealShortArraySize(int need) {
-        return idealByteArraySize(need * 2) / 2;
+    public static int[] newUnpaddedIntArray(int minLen) {
+        return (int[])VMRuntime.getRuntime().newUnpaddedArray(int.class, minLen);
     }
 
-    public static int idealCharArraySize(int need) {
-        return idealByteArraySize(need * 2) / 2;
+    public static boolean[] newUnpaddedBooleanArray(int minLen) {
+        return (boolean[])VMRuntime.getRuntime().newUnpaddedArray(boolean.class, minLen);
     }
 
-    public static int idealIntArraySize(int need) {
-        return idealByteArraySize(need * 4) / 4;
+    public static long[] newUnpaddedLongArray(int minLen) {
+        return (long[])VMRuntime.getRuntime().newUnpaddedArray(long.class, minLen);
     }
 
-    public static int idealFloatArraySize(int need) {
-        return idealByteArraySize(need * 4) / 4;
+    public static float[] newUnpaddedFloatArray(int minLen) {
+        return (float[])VMRuntime.getRuntime().newUnpaddedArray(float.class, minLen);
     }
 
-    public static int idealObjectArraySize(int need) {
-        return idealByteArraySize(need * 4) / 4;
+    public static Object[] newUnpaddedObjectArray(int minLen) {
+        return (Object[])VMRuntime.getRuntime().newUnpaddedArray(Object.class, minLen);
     }
 
-    public static int idealLongArraySize(int need) {
-        return idealByteArraySize(need * 8) / 8;
+    @SuppressWarnings("unchecked")
+    public static <T> T[] newUnpaddedArray(Class<T> clazz, int minLen) {
+        return (T[])VMRuntime.getRuntime().newUnpaddedArray(clazz, minLen);
     }
 
     /**
@@ -102,9 +97,10 @@ public class ArrayUtils
      * it will return the same empty array every time to avoid reallocation,
      * although this is not guaranteed.
      */
+    @SuppressWarnings("unchecked")
     public static <T> T[] emptyArray(Class<T> kind) {
         if (kind == Object.class) {
-            return (T[]) EMPTY;
+            return (T[]) EmptyArray.OBJECT;
         }
 
         int bucket = ((System.identityHashCode(kind) / 8) & 0x7FFFFFFF) % CACHE_SIZE;

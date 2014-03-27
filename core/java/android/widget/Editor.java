@@ -25,6 +25,7 @@ import android.text.InputFilter;
 import android.text.SpannableString;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.widget.EditableInputConnection;
 
 import android.R;
@@ -1341,7 +1342,7 @@ public class Editor {
 
         if (layout instanceof DynamicLayout) {
             if (mTextDisplayLists == null) {
-                mTextDisplayLists = new TextDisplayList[ArrayUtils.idealObjectArraySize(0)];
+                mTextDisplayLists = ArrayUtils.emptyArray(TextDisplayList.class);
             }
 
             DynamicLayout dynamicLayout = (DynamicLayout) layout;
@@ -1441,10 +1442,7 @@ public class Editor {
         }
 
         // No available index found, the pool has to grow
-        int newSize = ArrayUtils.idealIntArraySize(length + 1);
-        TextDisplayList[] displayLists = new TextDisplayList[newSize];
-        System.arraycopy(mTextDisplayLists, 0, displayLists, 0, length);
-        mTextDisplayLists = displayLists;
+        mTextDisplayLists = GrowingArrayUtils.append(mTextDisplayLists, length, null);
         return length;
     }
 

@@ -16,6 +16,8 @@
 
 package android.util;
 
+import libcore.util.EmptyArray;
+
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
@@ -222,8 +224,8 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      * will grow once items are added to it.
      */
     public ArraySet() {
-        mHashes = ContainerHelpers.EMPTY_INTS;
-        mArray = ContainerHelpers.EMPTY_OBJECTS;
+        mHashes = EmptyArray.INT;
+        mArray = EmptyArray.OBJECT;
         mSize = 0;
     }
 
@@ -232,8 +234,8 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      */
     public ArraySet(int capacity) {
         if (capacity == 0) {
-            mHashes = ContainerHelpers.EMPTY_INTS;
-            mArray = ContainerHelpers.EMPTY_OBJECTS;
+            mHashes = EmptyArray.INT;
+            mArray = EmptyArray.OBJECT;
         } else {
             allocArrays(capacity);
         }
@@ -258,8 +260,8 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
     public void clear() {
         if (mSize != 0) {
             freeArrays(mHashes, mArray, mSize);
-            mHashes = ContainerHelpers.EMPTY_INTS;
-            mArray = ContainerHelpers.EMPTY_OBJECTS;
+            mHashes = EmptyArray.INT;
+            mArray = EmptyArray.OBJECT;
             mSize = 0;
         }
     }
@@ -413,8 +415,8 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
             // Now empty.
             if (DEBUG) Log.d(TAG, "remove: shrink from " + mHashes.length + " to 0");
             freeArrays(mHashes, mArray, mSize);
-            mHashes = ContainerHelpers.EMPTY_INTS;
-            mArray = ContainerHelpers.EMPTY_OBJECTS;
+            mHashes = EmptyArray.INT;
+            mArray = EmptyArray.OBJECT;
             mSize = 0;
         } else {
             if (mHashes.length > (BASE_SIZE*2) && mSize < mHashes.length/3) {

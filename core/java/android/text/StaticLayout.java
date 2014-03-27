@@ -26,6 +26,7 @@ import android.text.style.TabStopSpan;
 import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
 
 /**
  * StaticLayout is a Layout for text that will not be edited after it
@@ -130,9 +131,8 @@ public class StaticLayout extends Layout {
             mEllipsizedWidth = outerwidth;
         }
 
-        mLines = new int[ArrayUtils.idealIntArraySize(2 * mColumns)];
-        mLineDirections = new Directions[
-                             ArrayUtils.idealIntArraySize(2 * mColumns)];
+        mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2 * mColumns);
+        mLines = new int[mLineDirections.length];
         mMaximumVisibleLineCount = maxLines;
 
         mMeasured = MeasuredText.obtain();
@@ -149,8 +149,8 @@ public class StaticLayout extends Layout {
         super(text, null, 0, null, 0, 0);
 
         mColumns = COLUMNS_ELLIPSIZE;
-        mLines = new int[ArrayUtils.idealIntArraySize(2 * mColumns)];
-        mLineDirections = new Directions[ArrayUtils.idealIntArraySize(2 * mColumns)];
+        mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2 * mColumns);
+        mLines = new int[mLineDirections.length];
         // FIXME This is never recycled
         mMeasured = MeasuredText.obtain();
     }
@@ -215,8 +215,7 @@ public class StaticLayout extends Layout {
                 if (chooseHt.length != 0) {
                     if (chooseHtv == null ||
                         chooseHtv.length < chooseHt.length) {
-                        chooseHtv = new int[ArrayUtils.idealIntArraySize(
-                                            chooseHt.length)];
+                        chooseHtv = ArrayUtils.newUnpaddedIntArray(chooseHt.length);
                     }
 
                     for (int i = 0; i < chooseHt.length; i++) {
@@ -599,16 +598,16 @@ public class StaticLayout extends Layout {
         int[] lines = mLines;
 
         if (want >= lines.length) {
-            int nlen = ArrayUtils.idealIntArraySize(want + 1);
-            int[] grow = new int[nlen];
-            System.arraycopy(lines, 0, grow, 0, lines.length);
-            mLines = grow;
-            lines = grow;
-
-            Directions[] grow2 = new Directions[nlen];
+            Directions[] grow2 = ArrayUtils.newUnpaddedArray(
+                    Directions.class, GrowingArrayUtils.growSize(want));
             System.arraycopy(mLineDirections, 0, grow2, 0,
                              mLineDirections.length);
             mLineDirections = grow2;
+
+            int[] grow = new int[grow2.length];
+            System.arraycopy(lines, 0, grow, 0, lines.length);
+            mLines = grow;
+            lines = grow;
         }
 
         if (chooseHt != null) {

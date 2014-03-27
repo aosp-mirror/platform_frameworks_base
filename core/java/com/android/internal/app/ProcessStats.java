@@ -29,8 +29,11 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.webkit.WebViewFactory;
-import com.android.internal.util.ArrayUtils;
+
+import com.android.internal.util.GrowingArrayUtils;
+
 import dalvik.system.VMRuntime;
+import libcore.util.EmptyArray;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -1621,21 +1624,10 @@ public final class ProcessStats implements Parcelable {
     }
 
     int addLongData(int index, int type, int num) {
-        int tableLen = mAddLongTable != null ? mAddLongTable.length : 0;
-        if (mAddLongTableSize >= tableLen) {
-            int newSize = ArrayUtils.idealIntArraySize(tableLen + 1);
-            int[] newTable = new int[newSize];
-            if (tableLen > 0) {
-                System.arraycopy(mAddLongTable, 0, newTable, 0, tableLen);
-            }
-            mAddLongTable = newTable;
-        }
-        if (mAddLongTableSize > 0 && mAddLongTableSize - index != 0) {
-            System.arraycopy(mAddLongTable, index, mAddLongTable, index + 1,
-                    mAddLongTableSize - index);
-        }
         int off = allocLongData(num);
-        mAddLongTable[index] = type | off;
+        mAddLongTable = GrowingArrayUtils.insert(
+                mAddLongTable != null ? mAddLongTable : EmptyArray.INT,
+                mAddLongTableSize, index, type | off);
         mAddLongTableSize++;
         return off;
     }
