@@ -92,8 +92,12 @@ public:
     ANDROID_API void setData(DisplayListData* newData);
 
     void computeOrdering();
-    void defer(DeferStateStruct& deferStruct, const int level);
-    void replay(ReplayStateStruct& replayStruct, const int level);
+
+    void deferNodeTree(DeferStateStruct& deferStruct);
+    void deferNodeInParent(DeferStateStruct& deferStruct, const int level);
+
+    void replayNodeTree(ReplayStateStruct& replayStruct);
+    void replayNodeInParent(ReplayStateStruct& replayStruct, const int level);
 
     ANDROID_API void output(uint32_t level = 1);
 
@@ -164,19 +168,26 @@ private:
             const mat4* transformFromProjectionSurface);
 
     template <class T>
-    inline void setViewProperties(OpenGLRenderer& renderer, T& handler, const int level);
+    inline void setViewProperties(OpenGLRenderer& renderer, T& handler);
 
     void buildZSortedChildList(Vector<ZDrawDisplayListOpPair>& zTranslatedNodes);
 
+    template<class T>
+    inline void issueDrawShadowOperation(const Matrix4& transformFromParent, T& handler);
+
     template <class T>
-    inline void iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
+    inline void issueOperationsOf3dChildren(const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
             ChildrenSelectMode mode, OpenGLRenderer& renderer, T& handler);
 
     template <class T>
-    inline void iterateProjectedChildren(OpenGLRenderer& renderer, T& handler, const int level);
+    inline void issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T& handler);
 
+    /**
+     * Issue the RenderNode's operations into a handler, recursing for subtrees through
+     * DrawDisplayListOp's defer() or replay() methods
+     */
     template <class T>
-    inline void iterate(OpenGLRenderer& renderer, T& handler, const int level);
+    inline void issueOperations(OpenGLRenderer& renderer, T& handler);
 
     class TextContainer {
     public:
