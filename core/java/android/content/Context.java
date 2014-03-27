@@ -2595,6 +2595,14 @@ public abstract class Context {
     public static final String CONSUMER_IR_SERVICE = "consumer_ir";
 
     /**
+     * {@link android.app.trust.TrustManager} for managing trust agents.
+     * @see #getSystemService
+     * @see android.app.trust.TrustManager
+     * @hide
+     */
+    public static final String TRUST_SERVICE = "trust";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

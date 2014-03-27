@@ -19,11 +19,14 @@ package com.android.internal.widget;
 import android.Manifest;
 import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
+import android.app.trust.TrustManager;
 import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -46,6 +49,8 @@ import com.google.android.collect.Lists;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -145,6 +150,8 @@ public class LockPatternUtils {
     private static final String LOCK_SCREEN_OWNER_INFO_ENABLED =
             Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED;
 
+    private static final String ENABLED_TRUST_AGENTS = "lockscreen.enabledtrustagents";
+
     private final Context mContext;
     private final ContentResolver mContentResolver;
     private DevicePolicyManager mDevicePolicyManager;
@@ -165,6 +172,15 @@ public class LockPatternUtils {
             }
         }
         return mDevicePolicyManager;
+    }
+
+    private TrustManager getTrustManager() {
+        TrustManager trust = (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
+        if (trust == null) {
+            Log.e(TAG, "Can't get TrustManagerService: is it running?",
+                    new IllegalStateException("Stack trace:"));
+        }
+        return trust;
     }
 
     /**
@@ -242,10 +258,14 @@ public class LockPatternUtils {
      */
     public void reportFailedPasswordAttempt() {
         getDevicePolicyManager().reportFailedPasswordAttempt(getCurrentOrCallingUserId());
+        getTrustManager().reportUnlockAttempt(false /* authenticated */,
+                getCurrentOrCallingUserId());
     }
 
     public void reportSuccessfulPasswordAttempt() {
         getDevicePolicyManager().reportSuccessfulPasswordAttempt(getCurrentOrCallingUserId());
+        getTrustManager().reportUnlockAttempt(true /* authenticated */,
+                getCurrentOrCallingUserId());
     }
 
     public void setCurrentUser(int userId) {
@@ -496,11 +516,12 @@ public class LockPatternUtils {
      */
     public void saveLockPattern(List<LockPatternView.Cell> pattern, boolean isFallback) {
         try {
-            getLockSettings().setLockPattern(patternToString(pattern), getCurrentOrCallingUserId());
+            int userId = getCurrentOrCallingUserId();
+            getLockSettings().setLockPattern(patternToString(pattern), userId);
             DevicePolicyManager dpm = getDevicePolicyManager();
             if (pattern != null) {
 
-                int userHandle = getCurrentOrCallingUserId();
+                int userHandle = userId;
                 if (userHandle == UserHandle.USER_OWNER) {
                     String stringPattern = patternToString(pattern);
                     updateEncryptionPassword(StorageManager.CRYPT_TYPE_PATTERN, stringPattern);
@@ -511,18 +532,18 @@ public class LockPatternUtils {
                     deleteGallery();
                     setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
                     dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING,
-                            pattern.size(), 0, 0, 0, 0, 0, 0, getCurrentOrCallingUserId());
+                            pattern.size(), 0, 0, 0, 0, 0, 0, userId);
                 } else {
                     setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK);
                     setLong(PASSWORD_TYPE_ALTERNATE_KEY,
                             DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
                     finishBiometricWeak();
                     dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK,
-                            0, 0, 0, 0, 0, 0, 0, getCurrentOrCallingUserId());
+                            0, 0, 0, 0, 0, 0, 0, userId);
                 }
             } else {
                 dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0,
-                        0, 0, 0, 0, 0, getCurrentOrCallingUserId());
+                        0, 0, 0, 0, 0, userId);
             }
         } catch (RemoteException re) {
             Log.e(TAG, "Couldn't save lock pattern " + re);
@@ -1374,4 +1395,38 @@ public class LockPatternUtils {
         setBoolean(LOCKSCREEN_WIDGETS_ENABLED, enabled, userId);
     }
 
+    public void setEnabledTrustAgents(Collection<ComponentName> activeTrustAgents) {
+        setEnabledTrustAgents(activeTrustAgents, getCurrentOrCallingUserId());
+    }
+
+    public List<ComponentName> getEnabledTrustAgents() {
+        return getEnabledTrustAgents(getCurrentOrCallingUserId());
+    }
+
+    public void setEnabledTrustAgents(Collection<ComponentName> activeTrustAgents, int userId) {
+        StringBuilder sb = new StringBuilder();
+        for (ComponentName cn : activeTrustAgents) {
+            if (sb.length() > 0) {
+                sb.append(',');
+            }
+            sb.append(cn.flattenToShortString());
+        }
+        setString(ENABLED_TRUST_AGENTS, sb.toString(), userId);
+        getTrustManager().reportEnabledTrustAgentsChanged(getCurrentOrCallingUserId());
+    }
+
+    public List<ComponentName> getEnabledTrustAgents(int userId) {
+        String serialized = getString(ENABLED_TRUST_AGENTS, userId);
+        if (TextUtils.isEmpty(serialized)) {
+            return null;
+        }
+        String[] split = serialized.split(",");
+        ArrayList<ComponentName> activeTrustAgents = new ArrayList<ComponentName>(split.length);
+        for (String s : split) {
+            if (!TextUtils.isEmpty(s)) {
+                activeTrustAgents.add(ComponentName.unflattenFromString(s));
+            }
+        }
+        return activeTrustAgents;
+    }
 }

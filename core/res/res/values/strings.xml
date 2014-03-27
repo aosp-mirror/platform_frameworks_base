@@ -3651,6 +3651,11 @@
     <!-- Description of an application permission that lets it control keyguard. -->
     <string name="permdesc_control_keyguard">Allows an application to control keguard.</string>
 
+    <!-- Title of an application permission that lets it listen to trust state changes. -->
+    <string name="permlab_trust_listener">Listen to trust state changes.</string>
+    <!-- Description of an application permission that lets it listen to trust state changes. -->
+    <string name="permdesc_trust_listener">Allows an application to listen for changes in trust state.</string>
+
     <!-- Title of an application permission that lets it bind to a trust agent service. -->
     <string name="permlab_bind_trust_agent_service">Bind to a trust agent service</string>
     <!-- Description of an application permission that lets it bind to a trust agent service. -->

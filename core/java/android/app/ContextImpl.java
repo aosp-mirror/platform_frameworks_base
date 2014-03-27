@@ -119,6 +119,7 @@ import android.view.textservice.TextServicesManager;
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.trust.TrustManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
@@ -619,6 +620,12 @@ class ContextImpl extends Context {
         registerService(MEDIA_SESSION_SERVICE, new ServiceFetcher() {
             public Object createService(ContextImpl ctx) {
                 return new MediaSessionManager(ctx);
+            }
+        });
+        registerService(TRUST_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(TRUST_SERVICE);
+                return new TrustManager(b);
             }
         });
     }
