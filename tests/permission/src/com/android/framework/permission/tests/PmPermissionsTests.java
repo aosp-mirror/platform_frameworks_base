@@ -16,7 +16,7 @@
 
 package com.android.framework.permission.tests;
 
-import junit.framework.TestCase;
+import android.app.PackageInstallObserver;
 import android.content.pm.PackageManager;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -68,10 +68,14 @@ public class PmPermissionsTests extends AndroidTestCase {
      * This test verifies that PackageManger.installPackage enforces permission
      * android.permission.INSTALL_PACKAGES
      */
+    private class TestInstallObserver extends PackageInstallObserver {
+    }
+
     @SmallTest
     public void testInstallPackage() {
+        TestInstallObserver observer = new TestInstallObserver();
         try {
-            mPm.installPackage(null, null, 0, null);
+            mPm.installPackage(null, observer, 0, null);
             fail("PackageManager.installPackage" +
                     "did not throw SecurityException as expected");
         } catch (SecurityException e) {
