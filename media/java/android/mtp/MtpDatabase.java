@@ -202,12 +202,17 @@ public class MtpDatabase {
     public void setServer(MtpServer server) {
         mServer = server;
 
+        // always unregister before registering
+        try {
+            mContext.unregisterReceiver(mBatteryReceiver);
+        } catch (IllegalArgumentException e) {
+            // wasn't previously registered, ignore
+        }
+
         // register for battery notifications when we are connected
         if (server != null) {
             mContext.registerReceiver(mBatteryReceiver,
                     new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        } else {
-            mContext.unregisterReceiver(mBatteryReceiver);
         }
     }
 
