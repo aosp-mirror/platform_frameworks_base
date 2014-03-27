@@ -19,7 +19,6 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
         omx_jpeg_decoder.cpp \
         jpeg_decoder_bench.cpp \
-        SkOmxPixelRef.cpp \
         StreamSource.cpp
 
 LOCAL_SHARED_LIBRARIES := \
