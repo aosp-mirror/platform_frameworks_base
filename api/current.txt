@@ -22257,6 +22257,7 @@ package android.provider {
     field public static final java.lang.String EXTRA_MEDIA_ARTIST = "android.intent.extra.artist";
     field public static final java.lang.String EXTRA_MEDIA_FOCUS = "android.intent.extra.focus";
     field public static final java.lang.String EXTRA_MEDIA_GENRE = "android.intent.extra.genre";
+    field public static final java.lang.String EXTRA_MEDIA_PLAYLIST = "android.intent.extra.playlist";
     field public static final java.lang.String EXTRA_MEDIA_RADIO_CHANNEL = "android.intent.extra.radio_channel";
     field public static final java.lang.String EXTRA_MEDIA_TITLE = "android.intent.extra.title";
     field public static final java.lang.String EXTRA_OUTPUT = "output";
