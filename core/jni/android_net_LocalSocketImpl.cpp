@@ -111,7 +111,7 @@ socket_bind_local (JNIEnv *env, jobject object, jobject fileDescriptor,
 
 /* private native void listen_native(int fd, int backlog) throws IOException; */
 static void
-socket_listen (JNIEnv *env, jobject object, jobject fileDescriptor, int backlog)
+socket_listen (JNIEnv *env, jobject object, jobject fileDescriptor, jint backlog)
 {
     int ret;
     int fd;
@@ -231,7 +231,7 @@ java_opt_to_real(int optID, int* opt, int* level)
 }
 
 static jint
-socket_getOption(JNIEnv *env, jobject object, jobject fileDescriptor, int optID)
+socket_getOption(JNIEnv *env, jobject object, jobject fileDescriptor, jint optID)
 {
     int ret, value;
     int opt, level;
@@ -279,7 +279,7 @@ socket_getOption(JNIEnv *env, jobject object, jobject fileDescriptor, int optID)
 }
 
 static void socket_setOption(
-        JNIEnv *env, jobject object, jobject fileDescriptor, int optID,
+        JNIEnv *env, jobject object, jobject fileDescriptor, jint optID,
         jint boolValue, jint intValue) {
     int ret;
     int optname;

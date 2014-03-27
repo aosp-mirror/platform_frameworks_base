@@ -51,7 +51,8 @@ static int directionality_map[U_CHAR_DIRECTION_COUNT] = {
 
 namespace android {
 
-static void getDirectionalities(JNIEnv* env, jobject obj, jcharArray srcArray, jbyteArray destArray, int count)
+static void getDirectionalities(JNIEnv* env, jobject obj, jcharArray srcArray,
+                                jbyteArray destArray, jint count)
 {
     ScopedCharArrayRO src(env, srcArray);
     if (src.get() == NULL) {
@@ -102,7 +103,7 @@ static jint getEastAsianWidth(JNIEnv* env, jobject obj, jchar input)
 }
 
 static void getEastAsianWidths(JNIEnv* env, jobject obj, jcharArray srcArray,
-                               int start, int count, jbyteArray destArray)
+                               jint start, jint count, jbyteArray destArray)
 {
     ScopedCharArrayRO src(env, srcArray);
     if (src.get() == NULL) {
@@ -144,20 +145,20 @@ static void getEastAsianWidths(JNIEnv* env, jobject obj, jcharArray srcArray,
     }
 }
 
-static jboolean mirror(JNIEnv* env, jobject obj, jcharArray charArray, int start, int count)
+static jboolean mirror(JNIEnv* env, jobject obj, jcharArray charArray, jint start, jint count)
 {
     ScopedCharArrayRW data(env, charArray);
     if (data.get() == NULL) {
-        return false;
+        return JNI_FALSE;
     }
 
     if (start < 0 || start > start + count
             || env->GetArrayLength(charArray) < start + count) {
         jniThrowException(env, "java/lang/ArrayIndexOutOfBoundsException", NULL);
-        return false;
+        return JNI_FALSE;
     }
 
-    bool ret = false;
+    jboolean ret = JNI_FALSE;
     for (int i = start; i < start + count; i++) {
         // XXX this thinks it knows that surrogates are never mirrored
 
@@ -166,7 +167,7 @@ static jboolean mirror(JNIEnv* env, jobject obj, jcharArray charArray, int start
 
         if (c1 != c2) {
             data[i] = c2;
-            ret = true;
+            ret = JNI_TRUE;
         }
     }
     return ret;

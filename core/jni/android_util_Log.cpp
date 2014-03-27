@@ -85,7 +85,7 @@ static jboolean android_util_Log_isLoggable(JNIEnv* env, jobject clazz, jstring 
     jboolean result = false;
     if ((strlen(chars)+sizeof(LOG_NAMESPACE)) > PROPERTY_KEY_MAX) {
         char buf2[200];
-        snprintf(buf2, sizeof(buf2), "Log tag \"%s\" exceeds limit of %d characters\n",
+        snprintf(buf2, sizeof(buf2), "Log tag \"%s\" exceeds limit of %zu characters\n",
                 chars, PROPERTY_KEY_MAX - sizeof(LOG_NAMESPACE));
 
         jniThrowException(env, "java/lang/IllegalArgumentException", buf2);

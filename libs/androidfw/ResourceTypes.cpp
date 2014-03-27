@@ -6251,12 +6251,12 @@ void ResTable::print(bool inclValues) const
 
                         uintptr_t esize = dtohs(ent->size);
                         if ((esize&0x3) != 0) {
-                            printf("NON-INTEGER ResTable_entry SIZE: 0x%x\n", esize);
+                            printf("NON-INTEGER ResTable_entry SIZE: %p\n", (void *)esize);
                             continue;
                         }
                         if ((thisOffset+esize) > typeSize) {
-                            printf("ResTable_entry OUT OF BOUNDS: 0x%x+0x%x+0x%x (size is 0x%x)\n",
-                                   entriesStart, thisOffset, esize, typeSize);
+                            printf("ResTable_entry OUT OF BOUNDS: 0x%x+0x%x+%p (size is 0x%x)\n",
+                                   entriesStart, thisOffset, (void *)esize, typeSize);
                             continue;
                         }
 
