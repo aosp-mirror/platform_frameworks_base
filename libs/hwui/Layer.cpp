@@ -58,6 +58,7 @@ Layer::~Layer() {
 
     delete[] mesh;
     delete deferredList;
+    delete renderer;
 }
 
 uint32_t Layer::computeIdealWidth(uint32_t layerWidth) {
@@ -66,6 +67,13 @@ uint32_t Layer::computeIdealWidth(uint32_t layerWidth) {
 
 uint32_t Layer::computeIdealHeight(uint32_t layerHeight) {
     return uint32_t(ceilf(layerHeight / float(LAYER_SIZE)) * LAYER_SIZE);
+}
+
+void Layer::requireRenderer() {
+    if (!renderer) {
+        renderer = new LayerRenderer(this);
+        renderer->initProperties();
+    }
 }
 
 bool Layer::resize(const uint32_t width, const uint32_t height) {
@@ -207,7 +215,6 @@ void Layer::defer() {
 }
 
 void Layer::cancelDefer() {
-    renderer = NULL;
     displayList = NULL;
     deferredUpdateScheduled = false;
     if (deferredList) {
@@ -226,7 +233,6 @@ void Layer::flush() {
         deferredList->flush(*renderer, dirtyRect);
 
         renderer->finish();
-        renderer = NULL;
 
         dirtyRect.setEmpty();
         displayList = NULL;
@@ -241,7 +247,6 @@ void Layer::render() {
     renderer->drawDisplayList(displayList, dirtyRect, RenderNode::kReplayFlag_ClipChildren);
 
     renderer->finish();
-    renderer = NULL;
 
     dirtyRect.setEmpty();
 

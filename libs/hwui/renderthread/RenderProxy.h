@@ -28,6 +28,8 @@
 #include <utils/StrongPointer.h>
 #include <utils/Vector.h>
 
+#include "DrawFrameTask.h"
+
 namespace android {
 namespace uirenderer {
 
@@ -60,7 +62,7 @@ public:
     ANDROID_API bool initialize(EGLNativeWindowType window);
     ANDROID_API void updateSurface(EGLNativeWindowType window);
     ANDROID_API void setup(int width, int height);
-    ANDROID_API void setDisplayListData(RenderNode* displayList, DisplayListData* newData);
+    ANDROID_API void setDisplayListData(RenderNode* renderNode, DisplayListData* newData);
     ANDROID_API void drawDisplayList(RenderNode* displayList,
             int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
     ANDROID_API void destroyCanvas();
@@ -79,10 +81,10 @@ private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;
 
+    DrawFrameTask mDrawFrameTask;
+
     Mutex mSyncMutex;
     Condition mSyncCondition;
-
-    Vector<DeferredLayerUpdater*> mLayers;
 
     void destroyContext();
 
