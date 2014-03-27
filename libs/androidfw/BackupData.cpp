@@ -78,7 +78,7 @@ BackupDataWriter::write_padding_for(int n)
     paddingSize = padding_extra(n);
     if (paddingSize > 0) {
         uint32_t padding = 0xbcbcbcbc;
-        if (DEBUG) ALOGI("writing %d padding bytes for %d", paddingSize, n);
+        if (DEBUG) ALOGI("writing %zd padding bytes for %d", paddingSize, n);
         amt = write(m_fd, &padding, paddingSize);
         if (amt != paddingSize) {
             m_status = errno;
@@ -112,7 +112,7 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
         k = key;
     }
     if (DEBUG) {
-        ALOGD("Writing header: prefix='%s' key='%s' dataSize=%d", m_keyPrefix.string(),
+        ALOGD("Writing header: prefix='%s' key='%s' dataSize=%zu", m_keyPrefix.string(),
                 key.string(), dataSize);
     }
 
@@ -125,7 +125,7 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
     header.keyLen = tolel(keyLen);
     header.dataSize = tolel(dataSize);
 
-    if (DEBUG) ALOGI("writing entity header, %d bytes", sizeof(entity_header_v1));
+    if (DEBUG) ALOGI("writing entity header, %zu bytes", sizeof(entity_header_v1));
     amt = write(m_fd, &header, sizeof(entity_header_v1));
     if (amt != sizeof(entity_header_v1)) {
         m_status = errno;
@@ -133,7 +133,7 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
     }
     m_pos += amt;
 
-    if (DEBUG) ALOGI("writing entity header key, %d bytes", keyLen+1);
+    if (DEBUG) ALOGI("writing entity header key, %zd bytes", keyLen+1);
     amt = write(m_fd, k.string(), keyLen+1);
     if (amt != keyLen+1) {
         m_status = errno;

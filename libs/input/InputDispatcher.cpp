@@ -147,7 +147,7 @@ static bool validateMotionEvent(int32_t action, size_t pointerCount,
         return false;
     }
     if (pointerCount < 1 || pointerCount > MAX_POINTERS) {
-        ALOGE("Motion event has invalid pointer count %d; value must be between 1 and %d.",
+        ALOGE("Motion event has invalid pointer count %zu; value must be between 1 and %d.",
                 pointerCount, MAX_POINTERS);
         return false;
     }
@@ -3131,14 +3131,14 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
         dump.appendFormat(INDENT "TouchStatesByDisplay:\n");
         for (size_t i = 0; i < mTouchStatesByDisplay.size(); i++) {
             const TouchState& state = mTouchStatesByDisplay.valueAt(i);
-            dump.appendFormat(INDENT2 "%d: down=%s, split=%s, deviceId=%d, source=0x%08x\n",
+            dump.appendFormat(INDENT2 "%zu: down=%s, split=%s, deviceId=%d, source=0x%08x\n",
                     state.displayId, toString(state.down), toString(state.split),
                     state.deviceId, state.source);
             if (!state.windows.isEmpty()) {
                 dump.append(INDENT3 "Windows:\n");
                 for (size_t i = 0; i < state.windows.size(); i++) {
                     const TouchedWindow& touchedWindow = state.windows[i];
-                    dump.appendFormat(INDENT4 "%d: name='%s', pointerIds=0x%0x, targetFlags=0x%x\n",
+                    dump.appendFormat(INDENT4 "%zu: name='%s', pointerIds=0x%0x, targetFlags=0x%x\n",
                             i, touchedWindow.windowHandle->getName().string(),
                             touchedWindow.pointerIds.value,
                             touchedWindow.targetFlags);
@@ -3157,7 +3157,7 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
             const sp<InputWindowHandle>& windowHandle = mWindowHandles.itemAt(i);
             const InputWindowInfo* windowInfo = windowHandle->getInfo();
 
-            dump.appendFormat(INDENT2 "%d: name='%s', displayId=%d, "
+            dump.appendFormat(INDENT2 "%zu: name='%s', displayId=%d, "
                     "paused=%s, hasFocus=%s, hasWallpaper=%s, "
                     "visible=%s, canReceiveKeys=%s, flags=0x%08x, type=0x%08x, layer=%d, "
                     "frame=[%d,%d][%d,%d], scale=%f, "
@@ -3187,7 +3187,7 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
         dump.append(INDENT "MonitoringChannels:\n");
         for (size_t i = 0; i < mMonitoringChannels.size(); i++) {
             const sp<InputChannel>& channel = mMonitoringChannels[i];
-            dump.appendFormat(INDENT2 "%d: '%s'\n", i, channel->getName().string());
+            dump.appendFormat(INDENT2 "%zu: '%s'\n", i, channel->getName().string());
         }
     } else {
         dump.append(INDENT "MonitoringChannels: <none>\n");
@@ -3236,7 +3236,7 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
         dump.append(INDENT "Connections:\n");
         for (size_t i = 0; i < mConnectionsByFd.size(); i++) {
             const sp<Connection>& connection = mConnectionsByFd.valueAt(i);
-            dump.appendFormat(INDENT2 "%d: channelName='%s', windowName='%s', "
+            dump.appendFormat(INDENT2 "%zu: channelName='%s', windowName='%s', "
                     "status=%s, monitor=%s, inputPublisherBlocked=%s\n",
                     i, connection->getInputChannelName(), connection->getWindowName(),
                     connection->getStatusLabel(), toString(connection->monitor),

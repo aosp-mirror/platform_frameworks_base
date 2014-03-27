@@ -1992,7 +1992,7 @@ void KeyboardInputMapper::dump(String8& dump) {
     dumpParameters(dump);
     dump.appendFormat(INDENT3 "KeyboardType: %d\n", mKeyboardType);
     dump.appendFormat(INDENT3 "Orientation: %d\n", mOrientation);
-    dump.appendFormat(INDENT3 "KeyDowns: %d keys currently down\n", mKeyDowns.size());
+    dump.appendFormat(INDENT3 "KeyDowns: %zu keys currently down\n", mKeyDowns.size());
     dump.appendFormat(INDENT3 "MetaState: 0x%0x\n", mMetaState);
     dump.appendFormat(INDENT3 "DownTime: %lld\n", mDownTime);
 }
@@ -3389,7 +3389,7 @@ void TouchInputMapper::dumpVirtualKeys(String8& dump) {
 
         for (size_t i = 0; i < mVirtualKeys.size(); i++) {
             const VirtualKey& virtualKey = mVirtualKeys.itemAt(i);
-            dump.appendFormat(INDENT4 "%d: scanCode=%d, keyCode=%d, "
+            dump.appendFormat(INDENT4 "%zu: scanCode=%d, keyCode=%d, "
                     "hitLeft=%d, hitRight=%d, hitTop=%d, hitBottom=%d\n",
                     i, virtualKey.scanCode, virtualKey.keyCode,
                     virtualKey.hitLeft, virtualKey.hitRight,
@@ -6132,8 +6132,8 @@ void MultiTouchInputMapper::configureRawPointerAxes() {
             && mRawPointerAxes.slot.minValue == 0 && mRawPointerAxes.slot.maxValue > 0) {
         size_t slotCount = mRawPointerAxes.slot.maxValue + 1;
         if (slotCount > MAX_SLOTS) {
-            ALOGW("MultiTouch Device %s reported %d slots but the framework "
-                    "only supports a maximum of %d slots at this time.",
+            ALOGW("MultiTouch Device %s reported %zu slots but the framework "
+                    "only supports a maximum of %zu slots at this time.",
                     getDeviceName().string(), slotCount, MAX_SLOTS);
             slotCount = MAX_SLOTS;
         }
@@ -6305,7 +6305,7 @@ void JoystickInputMapper::configure(nsecs_t when,
         // If there are too many axes, start dropping them.
         // Prefer to keep explicitly mapped axes.
         if (mAxes.size() > PointerCoords::MAX_AXES) {
-            ALOGI("Joystick '%s' has %d axes but the framework only supports a maximum of %d.",
+            ALOGI("Joystick '%s' has %zu axes but the framework only supports a maximum of %d.",
                     getDeviceName().string(), mAxes.size(), PointerCoords::MAX_AXES);
             pruneAxes(true);
             pruneAxes(false);
