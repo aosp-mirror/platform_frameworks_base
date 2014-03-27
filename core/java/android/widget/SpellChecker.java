@@ -35,6 +35,7 @@ import android.view.textservice.TextInfo;
 import android.view.textservice.TextServicesManager;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
 
 import java.text.BreakIterator;
 import java.util.Locale;
@@ -105,9 +106,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
         mTextView = textView;
 
         // Arbitrary: these arrays will automatically double their sizes on demand
-        final int size = ArrayUtils.idealObjectArraySize(1);
-        mIds = new int[size];
-        mSpellCheckSpans = new SpellCheckSpan[size];
+        final int size = 1;
+        mIds = ArrayUtils.newUnpaddedIntArray(size);
+        mSpellCheckSpans = new SpellCheckSpan[mIds.length];
 
         setLocale(mTextView.getSpellCheckerLocale());
 
@@ -184,17 +185,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
             if (mIds[i] < 0) return i;
         }
 
-        if (mLength == mSpellCheckSpans.length) {
-            final int newSize = mLength * 2;
-            int[] newIds = new int[newSize];
-            SpellCheckSpan[] newSpellCheckSpans = new SpellCheckSpan[newSize];
-            System.arraycopy(mIds, 0, newIds, 0, mLength);
-            System.arraycopy(mSpellCheckSpans, 0, newSpellCheckSpans, 0, mLength);
-            mIds = newIds;
-            mSpellCheckSpans = newSpellCheckSpans;
-        }
-
-        mSpellCheckSpans[mLength] = new SpellCheckSpan();
+        mIds = GrowingArrayUtils.append(mIds, mLength, 0);
+        mSpellCheckSpans = GrowingArrayUtils.append(
+                mSpellCheckSpans, mLength, new SpellCheckSpan());
         mLength++;
         return mLength - 1;
     }

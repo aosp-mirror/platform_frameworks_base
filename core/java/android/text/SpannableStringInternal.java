@@ -17,6 +17,9 @@
 package android.text;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
+
+import libcore.util.EmptyArray;
 
 import java.lang.reflect.Array;
 
@@ -29,9 +32,8 @@ import java.lang.reflect.Array;
         else
             mText = source.toString().substring(start, end);
 
-        int initial = ArrayUtils.idealIntArraySize(0);
-        mSpans = new Object[initial];
-        mSpanData = new int[initial * 3];
+        mSpans = EmptyArray.OBJECT;
+        mSpanData = EmptyArray.INT;
 
         if (source instanceof Spanned) {
             Spanned sp = (Spanned) source;
@@ -115,9 +117,9 @@ import java.lang.reflect.Array;
         }
 
         if (mSpanCount + 1 >= mSpans.length) {
-            int newsize = ArrayUtils.idealIntArraySize(mSpanCount + 1);
-            Object[] newtags = new Object[newsize];
-            int[] newdata = new int[newsize * 3];
+            Object[] newtags = ArrayUtils.newUnpaddedObjectArray(
+                    GrowingArrayUtils.growSize(mSpanCount));
+            int[] newdata = new int[newtags.length * 3];
 
             System.arraycopy(mSpans, 0, newtags, 0, mSpanCount);
             System.arraycopy(mSpanData, 0, newdata, 0, mSpanCount * 3);

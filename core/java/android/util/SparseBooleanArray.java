@@ -17,6 +17,9 @@
 package android.util;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
+
+import libcore.util.EmptyArray;
 
 /**
  * SparseBooleanArrays map integers to booleans.
@@ -57,12 +60,11 @@ public class SparseBooleanArray implements Cloneable {
      */
     public SparseBooleanArray(int initialCapacity) {
         if (initialCapacity == 0) {
-            mKeys = ContainerHelpers.EMPTY_INTS;
-            mValues = ContainerHelpers.EMPTY_BOOLEANS;
+            mKeys = EmptyArray.INT;
+            mValues = EmptyArray.BOOLEAN;
         } else {
-            initialCapacity = ArrayUtils.idealIntArraySize(initialCapacity);
-            mKeys = new int[initialCapacity];
-            mValues = new boolean[initialCapacity];
+            mKeys = ArrayUtils.newUnpaddedIntArray(initialCapacity);
+            mValues = new boolean[mKeys.length];
         }
         mSize = 0;
     }
@@ -135,28 +137,8 @@ public class SparseBooleanArray implements Cloneable {
         } else {
             i = ~i;
 
-            if (mSize >= mKeys.length) {
-                int n = ArrayUtils.idealIntArraySize(mSize + 1);
-
-                int[] nkeys = new int[n];
-                boolean[] nvalues = new boolean[n];
-
-                // Log.e("SparseBooleanArray", "grow " + mKeys.length + " to " + n);
-                System.arraycopy(mKeys, 0, nkeys, 0, mKeys.length);
-                System.arraycopy(mValues, 0, nvalues, 0, mValues.length);
-
-                mKeys = nkeys;
-                mValues = nvalues;
-            }
-
-            if (mSize - i != 0) {
-                // Log.e("SparseBooleanArray", "move " + (mSize - i));
-                System.arraycopy(mKeys, i, mKeys, i + 1, mSize - i);
-                System.arraycopy(mValues, i, mValues, i + 1, mSize - i);
-            }
-
-            mKeys[i] = key;
-            mValues[i] = value;
+            mKeys = GrowingArrayUtils.insert(mKeys, mSize, i, key);
+            mValues = GrowingArrayUtils.insert(mValues, mSize, i, value);
             mSize++;
         }
     }
@@ -245,24 +227,9 @@ public class SparseBooleanArray implements Cloneable {
             return;
         }
 
-        int pos = mSize;
-        if (pos >= mKeys.length) {
-            int n = ArrayUtils.idealIntArraySize(pos + 1);
-
-            int[] nkeys = new int[n];
-            boolean[] nvalues = new boolean[n];
-
-            // Log.e("SparseBooleanArray", "grow " + mKeys.length + " to " + n);
-            System.arraycopy(mKeys, 0, nkeys, 0, mKeys.length);
-            System.arraycopy(mValues, 0, nvalues, 0, mValues.length);
-
-            mKeys = nkeys;
-            mValues = nvalues;
-        }
-
-        mKeys[pos] = key;
-        mValues[pos] = value;
-        mSize = pos + 1;
+        mKeys = GrowingArrayUtils.append(mKeys, mSize, key);
+        mValues = GrowingArrayUtils.append(mValues, mSize, value);
+        mSize++;
     }
 
     /**
