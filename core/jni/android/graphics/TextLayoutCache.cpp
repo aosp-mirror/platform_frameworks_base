@@ -70,7 +70,7 @@ void TextLayoutCache::operator()(TextLayoutCacheKey& text, sp<TextLayoutValue>& 
     size_t totalSizeToDelete = text.getSize() + desc->getSize();
     mSize -= totalSizeToDelete;
     if (mDebugEnabled) {
-        ALOGD("Cache value %p deleted, size = %d", desc.get(), totalSizeToDelete);
+        ALOGD("Cache value %p deleted, size = %zu", desc.get(), totalSizeToDelete);
     }
 }
 
@@ -130,7 +130,7 @@ sp<TextLayoutValue> TextLayoutCache::getValue(const SkPaint* paint,
                     bool removedOne = mCache.removeOldest();
                     LOG_ALWAYS_FATAL_IF(!removedOne, "The cache is non-empty but we "
                             "failed to remove the oldest entry.  "
-                            "mSize = %u, size = %u, mMaxSize = %u, mCache.size() = %u",
+                            "mSize = %u, size = %zu, mMaxSize = %u, mCache.size() = %zu",
                             mSize, size, mMaxSize, mCache.size());
                 }
             }
@@ -149,7 +149,7 @@ sp<TextLayoutValue> TextLayoutCache::getValue(const SkPaint* paint,
                 nsecs_t totalTime = systemTime(SYSTEM_TIME_MONOTONIC) - startTime;
                 ALOGD("CACHE MISS: Added entry %p "
                         "with start = %d, count = %d, contextCount = %d, "
-                        "entry size %d bytes, remaining space %d bytes"
+                        "entry size %zu bytes, remaining space %d bytes"
                         " - Compute time %0.6f ms - Put time %0.6f ms - Text = '%s'",
                         value.get(), start, count, contextCount, size, mMaxSize - mSize,
                         value->getElapsedTime() * 0.000001f,
@@ -160,7 +160,7 @@ sp<TextLayoutValue> TextLayoutCache::getValue(const SkPaint* paint,
             if (mDebugEnabled) {
                 ALOGD("CACHE MISS: Calculated but not storing entry because it is too big "
                         "with start = %d, count = %d, contextCount = %d, "
-                        "entry size %d bytes, remaining space %d bytes"
+                        "entry size %zu bytes, remaining space %d bytes"
                         " - Compute time %0.6f ms - Text = '%s'",
                         start, count, contextCount, size, mMaxSize - mSize,
                         value->getElapsedTime() * 0.000001f,
@@ -205,7 +205,7 @@ void TextLayoutCache::dumpCacheStats() {
     ALOGD("------------------------------------------------");
     ALOGD("pid       : %d", getpid());
     ALOGD("running   : %.0f seconds", timeRunningInSec);
-    ALOGD("entries   : %d", cacheSize);
+    ALOGD("entries   : %zu", cacheSize);
     ALOGD("max size  : %d bytes", mMaxSize);
     ALOGD("used      : %d bytes according to mSize", mSize);
     ALOGD("remaining : %d bytes or %2.2f percent", mMaxSize - mSize, remainingPercent);

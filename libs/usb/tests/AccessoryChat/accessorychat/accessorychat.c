@@ -32,7 +32,7 @@
 struct usb_device *sDevice = NULL;
 
 static void* read_thread(void* arg) {
-    int endpoint = (int)arg;
+    int endpoint = (int)(uintptr_t)arg;
     int ret = 0;
 
     while (sDevice && ret >= 0) {
@@ -52,7 +52,7 @@ static void* read_thread(void* arg) {
 }
 
 static void* write_thread(void* arg) {
-    int endpoint = (int)arg;
+    int endpoint = (int)(uintptr_t)arg;
     int ret = 0;
 
     while (ret >= 0) {
@@ -136,11 +136,11 @@ static int usb_device_added(const char *devname, void* client_data) {
             }
 
             if ((ep1->bEndpointAddress & USB_ENDPOINT_DIR_MASK) == USB_DIR_IN) {
-                pthread_create(&th, NULL, read_thread, (void *)ep1->bEndpointAddress);
-                pthread_create(&th, NULL, write_thread, (void *)ep2->bEndpointAddress);
+                pthread_create(&th, NULL, read_thread, (void *)(uintptr_t)ep1->bEndpointAddress);
+                pthread_create(&th, NULL, write_thread, (void *)(uintptr_t)ep2->bEndpointAddress);
             } else {
-                pthread_create(&th, NULL, read_thread, (void *)ep2->bEndpointAddress);
-                pthread_create(&th, NULL, write_thread, (void *)ep1->bEndpointAddress);
+                pthread_create(&th, NULL, read_thread, (void *)(uintptr_t)ep2->bEndpointAddress);
+                pthread_create(&th, NULL, write_thread, (void *)(uintptr_t)ep1->bEndpointAddress);
             }
         } else {
             printf("Found possible android device - attempting to switch to accessory mode\n");
