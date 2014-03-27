@@ -34,7 +34,6 @@
 #include <SkMallocPixelRef.h>
 
 #include "omx_jpeg_decoder.h"
-#include "SkOmxPixelRef.h"
 #include "StreamSource.h"
 
 using namespace android;
@@ -158,10 +157,6 @@ bool OmxJpegImageDecoder::decodeSource(sp<MediaSource> decoder,
     printf("Duration in decoder->read(): %.1f (msecs). \n",
                 duration / 1E3 );
 
-    /* Mark the code for now, since we attend to copy buffer to SkBitmap.
-    // Install pixelRef to Bitmap.
-    installPixelRef(buffer, decoder, bm);*/
-
     // Copy pixels from buffer to bm.
     // May need to check buffer->rawBytes() == bm->rawBytes().
     CHECK_EQ(buffer->size(), bm->getSize());
@@ -170,17 +165,6 @@ bool OmxJpegImageDecoder::decodeSource(sp<MediaSource> decoder,
     decoder->stop();
 
     return true;
-}
-
-void OmxJpegImageDecoder::installPixelRef(MediaBuffer *buffer, sp<MediaSource> decoder,
-        SkBitmap* bm) {
-
-    // set bm's pixelref based on the data in buffer.
-    SkAutoLockPixels alp(*bm);
-    SkPixelRef* pr = new SkOmxPixelRef(NULL, buffer, decoder);
-    bm->setPixelRef(pr)->unref();
-    bm->lockPixels();
-    return;
 }
 
 void OmxJpegImageDecoder::configBitmapSize(SkBitmap* bm, SkBitmap::Config pref,
