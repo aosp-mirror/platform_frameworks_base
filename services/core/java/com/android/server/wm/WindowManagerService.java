@@ -920,6 +920,10 @@ public class WindowManagerService extends IWindowManager.Stub
         final IWindow client = win.mClient;
         final WindowToken token = win.mToken;
         final DisplayContent displayContent = win.getDisplayContent();
+        if (displayContent == null) {
+            // It doesn't matter this display is going away.
+            return 0;
+        }
 
         final WindowList windows = win.getWindowList();
         final int N = windows.size();
@@ -1097,6 +1101,9 @@ public class WindowManagerService extends IWindowManager.Stub
     private void addAttachedWindowToListLocked(final WindowState win, boolean addToToken) {
         final WindowToken token = win.mToken;
         final DisplayContent displayContent = win.getDisplayContent();
+        if (displayContent == null) {
+            return;
+        }
         final WindowState attached = win.mAttachedWindow;
 
         WindowList tokenWindowList = getTokenWindowsOnDisplay(token, displayContent);
@@ -2254,6 +2261,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 return WindowManagerGlobal.ADD_APP_EXITING;
             }
 
+            if (win.getDisplayContent() == null) {
+                Slog.w(TAG, "Adding window to Display that has been removed.");
+                return WindowManagerGlobal.ADD_INVALID_DISPLAY;
+            }
+
             mPolicy.adjustWindowParamsLw(win.mAttrs);
             win.setShowToOwnerOnlyLocked(mPolicy.checkShowToOwnerOnly(attrs));
 
@@ -2743,7 +2755,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        final DisplayInfo displayInfo = window.getDisplayContent().getDisplayInfo();
+        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final RectF dispRect = new RectF(0, 0,
                 displayInfo.logicalWidth, displayInfo.logicalHeight);
         matrix.mapRect(dispRect);
