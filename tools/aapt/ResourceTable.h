@@ -220,7 +220,7 @@ public:
 
     status_t assignResourceIds();
     status_t addSymbols(const sp<AaptSymbols>& outSymbols = NULL);
-    void addLocalization(const String16& name, const String8& locale);
+    void addLocalization(const String16& name, const String8& locale, const SourcePos& src);
     status_t validateLocalizations(void);
 
     status_t flatten(Bundle*, const sp<AaptFile>& dest);
@@ -551,7 +551,7 @@ private:
     Bundle* mBundle;
     
     // key = string resource name, value = set of locales in which that name is defined
-    map<String16, set<String8> > mLocalizations;
+    map<String16, map<String8, SourcePos> > mLocalizations;
 };
 
 #endif
