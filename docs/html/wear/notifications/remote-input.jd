@@ -119,7 +119,7 @@ RemoteInput remoteInput = new RemoteInput.Builder(EXTRA_VOICE_REPLY)
 // Create wearable notification and add remote input
 Notification replyNotification =
         new WearableNotifications.Builder(replyNotificationBuilder)
-        .addRemoteInputForContentIntent(replyAction)
+        .addRemoteInputForContentIntent(remoteInput)
         .build();
 </pre>
 
