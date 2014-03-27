@@ -1321,7 +1321,7 @@ public class TextUtils {
         }
 
         if (buf == null || buf.length < len)
-            buf = new char[ArrayUtils.idealCharArraySize(len)];
+            buf = ArrayUtils.newUnpaddedCharArray(len);
 
         return buf;
     }

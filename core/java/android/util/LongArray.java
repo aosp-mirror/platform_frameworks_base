@@ -17,6 +17,7 @@
 package android.util;
 
 import com.android.internal.util.ArrayUtils;
+import libcore.util.EmptyArray;
 
 /**
  * Implements a growing array of long primitives.
@@ -41,10 +42,9 @@ public class LongArray implements Cloneable {
      */
     public LongArray(int initialCapacity) {
         if (initialCapacity == 0) {
-            mValues = ContainerHelpers.EMPTY_LONGS;
+            mValues = EmptyArray.LONG;
         } else {
-            initialCapacity = ArrayUtils.idealLongArraySize(initialCapacity);
-            mValues = new long[initialCapacity];
+            mValues = ArrayUtils.newUnpaddedLongArray(initialCapacity);
         }
         mSize = 0;
     }
@@ -97,7 +97,7 @@ public class LongArray implements Cloneable {
             final int targetCap = currentSize + (currentSize < (MIN_CAPACITY_INCREMENT / 2) ?
                     MIN_CAPACITY_INCREMENT : currentSize >> 1);
             final int newCapacity = targetCap > minCapacity ? targetCap : minCapacity;
-            final long[] newValues = new long[ArrayUtils.idealLongArraySize(newCapacity)];
+            final long[] newValues = ArrayUtils.newUnpaddedLongArray(newCapacity);
             System.arraycopy(mValues, 0, newValues, 0, currentSize);
             mValues = newValues;
         }

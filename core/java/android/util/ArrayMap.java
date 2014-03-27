@@ -16,6 +16,8 @@
 
 package android.util;
 
+import libcore.util.EmptyArray;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -234,8 +236,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * will grow once items are added to it.
      */
     public ArrayMap() {
-        mHashes = ContainerHelpers.EMPTY_INTS;
-        mArray = ContainerHelpers.EMPTY_OBJECTS;
+        mHashes = EmptyArray.INT;
+        mArray = EmptyArray.OBJECT;
         mSize = 0;
     }
 
@@ -244,8 +246,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     public ArrayMap(int capacity) {
         if (capacity == 0) {
-            mHashes = ContainerHelpers.EMPTY_INTS;
-            mArray = ContainerHelpers.EMPTY_OBJECTS;
+            mHashes = EmptyArray.INT;
+            mArray = EmptyArray.OBJECT;
         } else {
             allocArrays(capacity);
         }
@@ -253,8 +255,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     }
 
     private ArrayMap(boolean immutable) {
-        mHashes = EMPTY_IMMUTABLE_INTS;
-        mArray = ContainerHelpers.EMPTY_OBJECTS;
+        mHashes = EmptyArray.INT;
+        mArray = EmptyArray.OBJECT;
         mSize = 0;
     }
 
@@ -275,8 +277,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     public void clear() {
         if (mSize > 0) {
             freeArrays(mHashes, mArray, mSize);
-            mHashes = ContainerHelpers.EMPTY_INTS;
-            mArray = ContainerHelpers.EMPTY_OBJECTS;
+            mHashes = EmptyArray.INT;
+            mArray = EmptyArray.OBJECT;
             mSize = 0;
         }
     }
@@ -540,8 +542,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             // Now empty.
             if (DEBUG) Log.d(TAG, "remove: shrink from " + mHashes.length + " to 0");
             freeArrays(mHashes, mArray, mSize);
-            mHashes = ContainerHelpers.EMPTY_INTS;
-            mArray = ContainerHelpers.EMPTY_OBJECTS;
+            mHashes = EmptyArray.INT;
+            mArray = EmptyArray.OBJECT;
             mSize = 0;
         } else {
             if (mHashes.length > (BASE_SIZE*2) && mSize < mHashes.length/3) {

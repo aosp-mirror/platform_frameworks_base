@@ -17,10 +17,6 @@
 package android.util;
 
 class ContainerHelpers {
-    static final boolean[] EMPTY_BOOLEANS = new boolean[0];
-    static final int[] EMPTY_INTS = new int[0];
-    static final long[] EMPTY_LONGS = new long[0];
-    static final Object[] EMPTY_OBJECTS = new Object[0];
 
     // This is Arrays.binarySearch(), but doesn't do any argument validation.
     static int binarySearch(int[] array, int size, int value) {

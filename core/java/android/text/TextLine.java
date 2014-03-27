@@ -153,7 +153,7 @@ class TextLine {
 
         if (mCharsValid) {
             if (mChars == null || mChars.length < mLen) {
-                mChars = new char[ArrayUtils.idealCharArraySize(mLen)];
+                mChars = ArrayUtils.newUnpaddedCharArray(mLen);
             }
             TextUtils.getChars(text, start, limit, mChars, 0);
             if (hasReplacement) {

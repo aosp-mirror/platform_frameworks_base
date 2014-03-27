@@ -19,6 +19,7 @@ package android.content.res;
 import android.graphics.Color;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -181,10 +182,9 @@ public class ColorStateList implements Parcelable {
         final int innerDepth = parser.getDepth()+1;
         int depth;
 
-        int listAllocated = 20;
+        int[][] stateSpecList = ArrayUtils.newUnpaddedArray(int[].class, 20);
+        int[] colorList = new int[stateSpecList.length];
         int listSize = 0;
-        int[] colorList = new int[listAllocated];
-        int[][] stateSpecList = new int[listAllocated][];
 
         while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
                && ((depth=parser.getDepth()) >= innerDepth
@@ -248,21 +248,8 @@ public class ColorStateList implements Parcelable {
                 mDefaultColor = color;
             }
 
-            if (listSize + 1 >= listAllocated) {
-                listAllocated = ArrayUtils.idealIntArraySize(listSize + 1);
-
-                int[] ncolor = new int[listAllocated];
-                System.arraycopy(colorList, 0, ncolor, 0, listSize);
-
-                int[][] nstate = new int[listAllocated][];
-                System.arraycopy(stateSpecList, 0, nstate, 0, listSize);
-
-                colorList = ncolor;
-                stateSpecList = nstate;
-            }
-
-            colorList[listSize] = color;
-            stateSpecList[listSize] = stateSpec;
+            colorList = GrowingArrayUtils.append(colorList, listSize, color);
+            stateSpecList = GrowingArrayUtils.append(stateSpecList, listSize, stateSpec);
             listSize++;
         }
 

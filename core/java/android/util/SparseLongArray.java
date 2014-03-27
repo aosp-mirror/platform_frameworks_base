@@ -17,6 +17,9 @@
 package android.util;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
+
+import libcore.util.EmptyArray;
 
 /**
  * SparseLongArrays map integers to longs.  Unlike a normal array of longs,
@@ -60,12 +63,11 @@ public class SparseLongArray implements Cloneable {
      */
     public SparseLongArray(int initialCapacity) {
         if (initialCapacity == 0) {
-            mKeys = ContainerHelpers.EMPTY_INTS;
-            mValues = ContainerHelpers.EMPTY_LONGS;
+            mKeys = EmptyArray.INT;
+            mValues = EmptyArray.LONG;
         } else {
-            initialCapacity = ArrayUtils.idealLongArraySize(initialCapacity);
-            mKeys = new int[initialCapacity];
-            mValues = new long[initialCapacity];
+            mValues = ArrayUtils.newUnpaddedLongArray(initialCapacity);
+            mKeys = new int[mValues.length];
         }
         mSize = 0;
     }
@@ -138,17 +140,8 @@ public class SparseLongArray implements Cloneable {
         } else {
             i = ~i;
 
-            if (mSize >= mKeys.length) {
-                growKeyAndValueArrays(mSize + 1);
-            }
-
-            if (mSize - i != 0) {
-                System.arraycopy(mKeys, i, mKeys, i + 1, mSize - i);
-                System.arraycopy(mValues, i, mValues, i + 1, mSize - i);
-            }
-
-            mKeys[i] = key;
-            mValues[i] = value;
+            mKeys = GrowingArrayUtils.insert(mKeys, mSize, i, key);
+            mValues = GrowingArrayUtils.insert(mValues, mSize, i, value);
             mSize++;
         }
     }
@@ -232,27 +225,9 @@ public class SparseLongArray implements Cloneable {
             return;
         }
 
-        int pos = mSize;
-        if (pos >= mKeys.length) {
-            growKeyAndValueArrays(pos + 1);
-        }
-
-        mKeys[pos] = key;
-        mValues[pos] = value;
-        mSize = pos + 1;
-    }
-
-    private void growKeyAndValueArrays(int minNeededSize) {
-        int n = ArrayUtils.idealLongArraySize(minNeededSize);
-
-        int[] nkeys = new int[n];
-        long[] nvalues = new long[n];
-
-        System.arraycopy(mKeys, 0, nkeys, 0, mKeys.length);
-        System.arraycopy(mValues, 0, nvalues, 0, mValues.length);
-
-        mKeys = nkeys;
-        mValues = nvalues;
+        mKeys = GrowingArrayUtils.append(mKeys, mSize, key);
+        mValues = GrowingArrayUtils.append(mValues, mSize, value);
+        mSize++;
     }
 
     /**
