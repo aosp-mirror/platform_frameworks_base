@@ -23,7 +23,7 @@
     android:visibility="gone"
     android:layout_marginBottom="8dp"
     android:showDividers="middle"
-    android:divider="?android:attr/listDivider"
+    android:divider="@drawable/list_divider_quantum_light"
     android:dividerPadding="12dp"
     >
     <!-- actions will be added here -->

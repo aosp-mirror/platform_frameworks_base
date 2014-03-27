@@ -16,7 +16,7 @@
   -->
 
 <Button xmlns:android="http://schemas.android.com/apk/res/android"
-    style="?android:attr/borderlessButtonStyle" 
+    style="@android:style/Widget.Quantum.Light.Button.Borderless.Small"
     android:id="@+id/action0"
     android:layout_width="0dp"
     android:layout_height="48dp"

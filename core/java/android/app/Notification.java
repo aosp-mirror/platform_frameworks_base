@@ -17,12 +17,14 @@
 package android.app;
 
 import com.android.internal.R;
+import com.android.internal.util.LegacyNotificationUtil;
 
 import android.annotation.IntDef;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.BadParcelableException;
@@ -651,13 +653,6 @@ public class Notification implements Parcelable
      * @hide
      */
     public static final String EXTRA_AS_HEADS_UP = "headsup";
-
-    /**
-     * Extra added from {@link Notification.Builder} to indicate that the remote views were inflated
-     * from the builder, as opposed to being created directly from the application.
-     * @hide
-     */
-    public static final String EXTRA_BUILDER_REMOTE_VIEWS = "android.builderRemoteViews";
 
     /**
      * Allow certain system-generated notifications to appear before the device is provisioned.
@@ -1315,6 +1310,7 @@ public class Notification implements Parcelable
         private int mVisibility = VISIBILITY_PRIVATE;
         private Notification mPublicVersion = null;
         private boolean mQuantumTheme;
+        private final LegacyNotificationUtil mLegacyNotificationUtil;
 
         /**
          * Constructs a new Builder with the defaults:
@@ -1345,6 +1341,10 @@ public class Notification implements Parcelable
 
             // TODO: Decide on targetSdk from calling app whether to use quantum theme.
             mQuantumTheme = true;
+
+            // TODO: Decide on targetSdk from calling app whether to instantiate the processor at
+            // all.
+            mLegacyNotificationUtil = LegacyNotificationUtil.getInstance();
         }
 
         /**
@@ -1846,42 +1846,50 @@ public class Notification implements Parcelable
             boolean showLine3 = false;
             boolean showLine2 = false;
             int smallIconImageViewId = R.id.icon;
-            if (mLargeIcon != null) {
-                contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
-                smallIconImageViewId = R.id.right_icon;
-            }
             if (!mQuantumTheme && mPriority < PRIORITY_LOW) {
                 contentView.setInt(R.id.icon,
                         "setBackgroundResource", R.drawable.notification_template_icon_low_bg);
                 contentView.setInt(R.id.status_bar_latest_event_content,
                         "setBackgroundResource", R.drawable.notification_bg_low);
             }
+            if (mLargeIcon != null) {
+                contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
+                processLegacyLargeIcon(mLargeIcon, contentView);
+                smallIconImageViewId = R.id.right_icon;
+            }
             if (mSmallIcon != 0) {
                 contentView.setImageViewResource(smallIconImageViewId, mSmallIcon);
                 contentView.setViewVisibility(smallIconImageViewId, View.VISIBLE);
+                if (mLargeIcon != null) {
+                    processLegacySmallIcon(mSmallIcon, smallIconImageViewId, contentView);
+                } else {
+                    processLegacyLargeIcon(mSmallIcon, contentView);
+                }
+
             } else {
                 contentView.setViewVisibility(smallIconImageViewId, View.GONE);
             }
             if (mContentTitle != null) {
-                contentView.setTextViewText(R.id.title, mContentTitle);
+                contentView.setTextViewText(R.id.title, processLegacyText(mContentTitle));
             }
             if (mContentText != null) {
-                contentView.setTextViewText(R.id.text, mContentText);
+                contentView.setTextViewText(R.id.text, processLegacyText(mContentText));
                 showLine3 = true;
             }
             if (mContentInfo != null) {
-                contentView.setTextViewText(R.id.info, mContentInfo);
+                contentView.setTextViewText(R.id.info, processLegacyText(mContentInfo));
                 contentView.setViewVisibility(R.id.info, View.VISIBLE);
                 showLine3 = true;
             } else if (mNumber > 0) {
                 final int tooBig = mContext.getResources().getInteger(
                         R.integer.status_bar_notification_info_maxnum);
                 if (mNumber > tooBig) {
-                    contentView.setTextViewText(R.id.info, mContext.getResources().getString(
-                                R.string.status_bar_notification_info_overflow));
+                    contentView.setTextViewText(R.id.info, processLegacyText(
+                            mContext.getResources().getString(
+                                    R.string.status_bar_notification_info_overflow)));
                 } else {
                     NumberFormat f = NumberFormat.getIntegerInstance();
-                    contentView.setTextViewText(R.id.info, f.format(mNumber));
+                    contentView.setTextViewText(R.id.info, processLegacyText(f.format(mNumber)));
                 }
                 contentView.setViewVisibility(R.id.info, View.VISIBLE);
                 showLine3 = true;
@@ -1891,9 +1899,9 @@ public class Notification implements Parcelable
 
             // Need to show three lines?
             if (mSubText != null) {
-                contentView.setTextViewText(R.id.text, mSubText);
+                contentView.setTextViewText(R.id.text, processLegacyText(mSubText));
                 if (mContentText != null) {
-                    contentView.setTextViewText(R.id.text2, mContentText);
+                    contentView.setTextViewText(R.id.text2, processLegacyText(mContentText));
                     contentView.setViewVisibility(R.id.text2, View.VISIBLE);
                     showLine2 = true;
                 } else {
@@ -2001,12 +2009,75 @@ public class Notification implements Parcelable
                     tombstone ? getActionTombstoneLayoutResource()
                               : getActionLayoutResource());
             button.setTextViewCompoundDrawablesRelative(R.id.action0, action.icon, 0, 0, 0);
-            button.setTextViewText(R.id.action0, action.title);
+            button.setTextViewText(R.id.action0, processLegacyText(action.title));
             if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
             }
             button.setContentDescription(R.id.action0, action.title);
+            processLegacyAction(action, button);
             return button;
+        }
+
+        /**
+         * @return Whether we are currently building a notification from a legacy (an app that
+         *         doesn't create quantum notifications by itself) app.
+         */
+        private boolean isLegacy() {
+            return mLegacyNotificationUtil != null;
+        }
+
+        private void processLegacyAction(Action action, RemoteViews button) {
+            if (isLegacy()) {
+                if (mLegacyNotificationUtil.isGrayscale(mContext, action.icon)) {
+                    button.setTextViewCompoundDrawablesRelativeColorFilter(R.id.action0, 0,
+                            mContext.getResources().getColor(
+                                    R.color.notification_action_legacy_color_filter),
+                            PorterDuff.Mode.MULTIPLY);
+                }
+            }
+        }
+
+        private CharSequence processLegacyText(CharSequence charSequence) {
+            if (isLegacy()) {
+                return mLegacyNotificationUtil.invertCharSequenceColors(charSequence);
+            } else {
+                return charSequence;
+            }
+        }
+
+        private void processLegacyLargeIcon(int largeIconId, RemoteViews contentView) {
+            if (isLegacy()) {
+                processLegacyLargeIcon(
+                        mLegacyNotificationUtil.isGrayscale(mContext, largeIconId),
+                        contentView);
+            }
+        }
+
+        private void processLegacyLargeIcon(Bitmap largeIcon, RemoteViews contentView) {
+            if (isLegacy()) {
+                processLegacyLargeIcon(
+                        mLegacyNotificationUtil.isGrayscale(largeIcon),
+                        contentView);
+            }
+        }
+
+        private void processLegacyLargeIcon(boolean isGrayscale, RemoteViews contentView) {
+            if (isLegacy() && isGrayscale) {
+                contentView.setInt(R.id.icon, "setBackgroundResource",
+                        R.drawable.notification_icon_legacy_bg_inset);
+            }
+        }
+
+        private void processLegacySmallIcon(int smallIconDrawableId, int smallIconImageViewId,
+                RemoteViews contentView) {
+            if (isLegacy()) {
+                if (mLegacyNotificationUtil.isGrayscale(mContext, smallIconDrawableId)) {
+                    contentView.setDrawableParameters(smallIconImageViewId, false, -1,
+                            mContext.getResources().getColor(
+                                    R.color.notification_action_legacy_color_filter),
+                            PorterDuff.Mode.MULTIPLY, -1);
+                }
+            }
         }
 
         /**
@@ -2075,7 +2146,6 @@ public class Notification implements Parcelable
             extras.putBoolean(EXTRA_PROGRESS_INDETERMINATE, mProgressIndeterminate);
             extras.putBoolean(EXTRA_SHOW_CHRONOMETER, mUseChronometer);
             extras.putBoolean(EXTRA_SHOW_WHEN, mShowWhen);
-            extras.putBoolean(EXTRA_BUILDER_REMOTE_VIEWS, mContentView == null);
             if (mLargeIcon != null) {
                 extras.putParcelable(EXTRA_LARGE_ICON, mLargeIcon);
             }
@@ -2226,7 +2296,7 @@ public class Notification implements Parcelable
                     mSummaryTextSet ? mSummaryText
                                     : mBuilder.mSubText;
             if (overflowText != null) {
-                contentView.setTextViewText(R.id.text, overflowText);
+                contentView.setTextViewText(R.id.text, mBuilder.processLegacyText(overflowText));
                 contentView.setViewVisibility(R.id.overflow_divider, View.VISIBLE);
                 contentView.setViewVisibility(R.id.line3, View.VISIBLE);
             } else {
@@ -2437,7 +2507,7 @@ public class Notification implements Parcelable
                 contentView.setViewPadding(R.id.line1, 0, 0, 0, 0);
             }
 
-            contentView.setTextViewText(R.id.big_text, mBigText);
+            contentView.setTextViewText(R.id.big_text, mBuilder.processLegacyText(mBigText));
             contentView.setViewVisibility(R.id.big_text, View.VISIBLE);
             contentView.setViewVisibility(R.id.text2, View.GONE);
 
@@ -2542,7 +2612,7 @@ public class Notification implements Parcelable
                 CharSequence str = mTexts.get(i);
                 if (str != null && !str.equals("")) {
                     contentView.setViewVisibility(rowIds[i], View.VISIBLE);
-                    contentView.setTextViewText(rowIds[i], str);
+                    contentView.setTextViewText(rowIds[i], mBuilder.processLegacyText(str));
                 }
                 i++;
             }
