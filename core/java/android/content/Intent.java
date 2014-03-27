@@ -2173,6 +2173,11 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast Action: Wired Headset plugged in or unplugged.
      *
+     * You <em>cannot</em> receive this through components declared
+     * in manifests, only by explicitly registering for it with
+     * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     * Context.registerReceiver()}.
+     *
      * <p>The intent will have the following extra values:
      * <ul>
      *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
