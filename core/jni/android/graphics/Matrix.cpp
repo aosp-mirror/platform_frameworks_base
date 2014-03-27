@@ -272,18 +272,11 @@ public:
         float* dst = autoDst.ptr() + dstIndex;
         bool result;
 
-#ifdef SK_SCALAR_IS_FIXED        
-        SkPoint srcPt[4], dstPt[4];
-        for (int i = 0; i < ptCount; i++) {
-            int x = i << 1;
-            int y = x + 1;
-            srcPt[i].set(SkFloatToScalar(src[x]), SkFloatToScalar(src[y]));
-            dstPt[i].set(SkFloatToScalar(dst[x]), SkFloatToScalar(dst[y]));
-        }
-        result = matrix->setPolyToPoly(srcPt, dstPt, ptCount);
-#else
+#ifdef SK_SCALAR_IS_FLOAT
         result = matrix->setPolyToPoly((const SkPoint*)src, (const SkPoint*)dst,
                                      ptCount);
+#else
+        SkASSERT(false);
 #endif
         return result ? JNI_TRUE : JNI_FALSE;
     }
@@ -304,36 +297,15 @@ public:
         AutoJavaFloatArray autoDst(env, dst, dstIndex + (ptCount << 1), kRW_JNIAccess);
         float* srcArray = autoSrc.ptr() + srcIndex;
         float* dstArray = autoDst.ptr() + dstIndex;
-        
-#ifdef SK_SCALAR_IS_FIXED        
-        // we allocate twice the count, 1 set for src, 1 for dst
-        SkAutoSTMalloc<32, SkPoint> storage(ptCount * 2);
-        SkPoint* pts = storage.get();
-        SkPoint* srcPt = pts;
-        SkPoint* dstPt = pts + ptCount;
-        
-        int i;
-        for (i = 0; i < ptCount; i++) {
-            srcPt[i].set(SkFloatToScalar(srcArray[i << 1]),
-                         SkFloatToScalar(srcArray[(i << 1) + 1]));
-        }
-        
-        if (isPts)
-            matrix->mapPoints(dstPt, srcPt, ptCount);
-        else
-            matrix->mapVectors(dstPt, srcPt, ptCount);
-        
-        for (i = 0; i < ptCount; i++) {
-            dstArray[i << 1]  = SkScalarToFloat(dstPt[i].fX);
-            dstArray[(i << 1) + 1]  = SkScalarToFloat(dstPt[i].fY);
-        }
-#else
+#ifdef SK_SCALAR_IS_FLOAT
         if (isPts)
             matrix->mapPoints((SkPoint*)dstArray, (const SkPoint*)srcArray,
                               ptCount);
         else
             matrix->mapVectors((SkVector*)dstArray, (const SkVector*)srcArray,
                                ptCount);
+#else
+        SkASSERT(false);
 #endif
     }
 
@@ -356,18 +328,12 @@ public:
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         AutoJavaFloatArray autoValues(env, values, 9, kRW_JNIAccess);
         float* dst = autoValues.ptr();
-
-#ifdef SK_SCALAR_IS_FIXED
-        for (int i = 0; i < 6; i++) {
-            dst[i] = SkFixedToFloat(matrix->get(i));
-        }
-        for (int j = 6; j < 9; j++) {
-            dst[j] = SkFractToFloat(matrix->get(j));
-        }
-#else
+#ifdef SK_SCALAR_IS_FLOAT
         for (int i = 0; i < 9; i++) {
             dst[i] = matrix->get(i);
         }
+#else
+        SkASSERT(false);
 #endif
     }
 
@@ -376,17 +342,12 @@ public:
         AutoJavaFloatArray autoValues(env, values, 9, kRO_JNIAccess);
         const float* src = autoValues.ptr();
 
-#ifdef SK_SCALAR_IS_FIXED
-        for (int i = 0; i < 6; i++) {
-            matrix->set(i, SkFloatToFixed(src[i]));
-        }
-        for (int j = 6; j < 9; j++) {
-            matrix->set(j, SkFloatToFract(src[j]));
-        }
-#else
+#ifdef SK_SCALAR_IS_FLOAT
         for (int i = 0; i < 9; i++) {
             matrix->set(i, src[i]);
         }
+#else
+        SkASSERT(false);
 #endif
     }
 

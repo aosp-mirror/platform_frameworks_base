@@ -58,36 +58,11 @@ static struct {
     jfieldID secure;
 } gPhysicalDisplayInfoClassInfo;
 
-
-class ScreenshotPixelRef : public SkPixelRef {
-public:
-    ScreenshotPixelRef(const SkImageInfo& info, ScreenshotClient* screenshot) :
-      SkPixelRef(info),
-      mScreenshot(screenshot) {
-        setImmutable();
-    }
-
-    virtual ~ScreenshotPixelRef() {
-        delete mScreenshot;
-    }
-
-protected:
-    // overrides from SkPixelRef
-    virtual void* onLockPixels(SkColorTable** ct) {
-        *ct = NULL;
-        return (void*)mScreenshot->getPixels();
-    }
-
-    virtual void onUnlockPixels() {
-    }
-
-    SK_DECLARE_UNFLATTENABLE_OBJECT()
-private:
-    ScreenshotClient* mScreenshot;
-
-    typedef SkPixelRef INHERITED;
-};
-
+// Implements SkMallocPixelRef::ReleaseProc, to delete the screenshot on unref.
+void DeleteScreenshot(void* addr, void* context) {
+    SkASSERT(addr == ((ScreenshotClient*) context)->getPixels());
+    delete ((ScreenshotClient*) context);
+}
 
 // ----------------------------------------------------------------------------
 
@@ -167,20 +142,19 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz, jobject display
         }
     }
 
-    // takes ownership of ScreenshotClient
-    ScreenshotPixelRef* pixels = new ScreenshotPixelRef(screenshotInfo, screenshot);
     const ssize_t rowBytes =
             screenshot->getStride() * android::bytesPerPixel(screenshot->getFormat());
 
     SkBitmap* bitmap = new SkBitmap();
     bitmap->setConfig(screenshotInfo, (size_t)rowBytes);
     if (screenshotInfo.fWidth > 0 && screenshotInfo.fHeight > 0) {
+        // takes ownership of ScreenshotClient
+        SkMallocPixelRef* pixels = SkMallocPixelRef::NewWithProc(screenshotInfo,
+                (size_t) rowBytes, NULL, (void*) screenshot->getPixels(), &DeleteScreenshot,
+                (void*) screenshot);
+        pixels->setImmutable();
         bitmap->setPixelRef(pixels)->unref();
         bitmap->lockPixels();
-    } else {
-        // be safe with an empty bitmap.
-        delete pixels;
-        bitmap->setPixels(NULL);
     }
 
     return GraphicsJNI::createBitmap(env, bitmap,

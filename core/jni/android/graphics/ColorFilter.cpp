@@ -50,14 +50,10 @@ public:
         AutoJavaFloatArray autoArray(env, jarray, 20);
         const float* src = autoArray.ptr();
 
-#ifdef SK_SCALAR_IS_FIXED
-        SkFixed array[20];
-        for (int i = 0; i < 20; i++) {
-            array[i] = SkFloatToScalar(src[i]);
-        }
-        return reinterpret_cast<jlong>(new SkColorMatrixFilter(array));
-#else
+#ifdef SK_SCALAR_IS_FLOAT
         return reinterpret_cast<jlong>(new SkColorMatrixFilter(src));
+#else
+        SkASSERT(false);
 #endif
     }
 };
