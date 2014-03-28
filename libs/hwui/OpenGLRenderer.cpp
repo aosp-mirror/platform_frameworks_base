@@ -3203,7 +3203,7 @@ static void mapPointFakeZ(Vector3& point, const mat4& transformXY, const mat4& t
 }
 
 status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& casterTransformZ,
-        float casterAlpha, const SkPath* casterPerimeter) {
+        float casterAlpha, bool casterUnclipped, const SkPath* casterPerimeter) {
     if (currentSnapshot()->isIgnored()) return DrawGlInfo::kStatusDone;
 
     // TODO: use quickRejectWithScissor. For now, always force enable scissor.
@@ -3260,7 +3260,7 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& c
     Rect casterBounds(casterPerimeter->getBounds());
     casterTransformXY.mapRect(casterBounds);
 
-    bool isCasterOpaque = (casterAlpha == 1.0f);
+    bool isCasterOpaque = (casterAlpha == 1.0f) && casterUnclipped;
     // draw caster's shadows
     if (mCaches.propertyAmbientShadowStrength > 0) {
         paint.setARGB(casterAlpha * mCaches.propertyAmbientShadowStrength, 0, 0, 0);
