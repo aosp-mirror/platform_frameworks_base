@@ -570,7 +570,7 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Stop BLE advertising.
+     * Stop BLE advertising. The callback has to be the same one used for start advertising.
      *
      * @param callback - {@link AdvertiseCallback}
      * @return true if BLE advertising stops, false otherwise.
