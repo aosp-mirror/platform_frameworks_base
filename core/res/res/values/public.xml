@@ -2365,4 +2365,6 @@
   <public type="style" name="TextAppearance.Quantum.Caption" />
   <public type="style" name="TextAppearance.Quantum.Menu" />
   <public type="style" name="TextAppearance.Quantum.Button" />
+
+  <public type="style" name="Widget.Holo.Light.Button.Borderless" />
 </resources>

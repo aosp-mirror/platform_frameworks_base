@@ -2186,6 +2186,7 @@ package android {
     field public static final int Widget_Holo_Light_ActionMode_Inverse = 16974119; // 0x1030127
     field public static final int Widget_Holo_Light_AutoCompleteTextView = 16974011; // 0x10300bb
     field public static final int Widget_Holo_Light_Button = 16974006; // 0x10300b6
+    field public static final int Widget_Holo_Light_Button_Borderless = 16974538; // 0x10302ca
     field public static final int Widget_Holo_Light_Button_Borderless_Small = 16974107; // 0x103011b
     field public static final int Widget_Holo_Light_Button_Inset = 16974008; // 0x10300b8
     field public static final int Widget_Holo_Light_Button_Small = 16974007; // 0x10300b7
