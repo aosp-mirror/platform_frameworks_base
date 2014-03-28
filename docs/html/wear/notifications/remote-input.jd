@@ -138,7 +138,7 @@ and starts the voice input UI when users select it on Android Wear.</p>
 <p>If the "Reply" action is not your notification's primary action and you want to enable
 voice input for a secondary action, add the
   <a href="{@docRoot}reference/android/preview/support/wearable/notifications/RemoteInput.html"><code>RemoteInput</code></a> to a new action button defined by an
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/Action.html">
+  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">
 <code>Action</code></a> object.</p>
 
 <p>You should instantiate the
