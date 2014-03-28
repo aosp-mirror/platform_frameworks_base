@@ -1499,13 +1499,13 @@ public:
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
             bool useQuickReject) {
         if (mDisplayList && mDisplayList->isRenderable() && !mSkipInOrderDraw) {
-            mDisplayList->defer(deferStruct, level + 1);
+            mDisplayList->deferNodeInParent(deferStruct, level + 1);
         }
     }
     virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level,
             bool useQuickReject) {
         if (mDisplayList && mDisplayList->isRenderable() && !mSkipInOrderDraw) {
-            mDisplayList->replay(replayStruct, level + 1);
+            mDisplayList->replayNodeInParent(replayStruct, level + 1);
         }
     }
 

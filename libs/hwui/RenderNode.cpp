@@ -132,10 +132,9 @@ bool RenderNode::hasFunctors() {
 #define PROPERTY_SAVECOUNT 0
 
 template <class T>
-void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler,
-        const int level) {
+void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
 #if DEBUG_DISPLAY_LIST
-    properties().debugOutputProperties(level);
+    properties().debugOutputProperties(handler.level() + 1);
 #endif
     if (properties().getLeft() != 0 || properties().getTop() != 0) {
         renderer.translate(properties().getLeft(), properties().getTop());
@@ -302,7 +301,6 @@ void RenderNode::computeOrderingImpl(
             child->computeOrderingImpl(childOp, projectionChildren, projectionTransform);
         }
     }
-
 }
 
 class DeferOperationHandler {
@@ -313,15 +311,25 @@ public:
         operation->defer(mDeferStruct, saveCount, mLevel, clipToBounds);
     }
     inline LinearAllocator& allocator() { return *(mDeferStruct.mAllocator); }
+    inline void startMark(const char* name) {} // do nothing
+    inline void endMark() {}
+    inline int level() { return mLevel; }
+    inline int replayFlags() { return mDeferStruct.mReplayFlags; }
 
 private:
     DeferStateStruct& mDeferStruct;
     const int mLevel;
 };
 
-void RenderNode::defer(DeferStateStruct& deferStruct, const int level) {
+void RenderNode::deferNodeTree(DeferStateStruct& deferStruct) {
+    DeferOperationHandler handler(deferStruct, 0);
+    if (properties().getTranslationZ() > 0.0f) issueDrawShadowOperation(Matrix4::identity(), handler);
+    issueOperations<DeferOperationHandler>(deferStruct.mRenderer, handler);
+}
+
+void RenderNode::deferNodeInParent(DeferStateStruct& deferStruct, const int level) {
     DeferOperationHandler handler(deferStruct, level);
-    iterate<DeferOperationHandler>(deferStruct.mRenderer, handler, level);
+    issueOperations<DeferOperationHandler>(deferStruct.mRenderer, handler);
 }
 
 class ReplayOperationHandler {
@@ -335,21 +343,31 @@ public:
         operation->replay(mReplayStruct, saveCount, mLevel, clipToBounds);
     }
     inline LinearAllocator& allocator() { return *(mReplayStruct.mAllocator); }
+    inline void startMark(const char* name) {
+        mReplayStruct.mRenderer.startMark(name);
+    }
+    inline void endMark() {
+        mReplayStruct.mRenderer.endMark();
+        DISPLAY_LIST_LOGD("%*sDone (%p, %s), returning %d", level * 2, "", this, mName.string(),
+                mReplayStruct.mDrawGlStatus);
+    }
+    inline int level() { return mLevel; }
+    inline int replayFlags() { return mReplayStruct.mReplayFlags; }
 
 private:
     ReplayStateStruct& mReplayStruct;
     const int mLevel;
 };
 
-void RenderNode::replay(ReplayStateStruct& replayStruct, const int level) {
+void RenderNode::replayNodeTree(ReplayStateStruct& replayStruct) {
+    ReplayOperationHandler handler(replayStruct, 0);
+    if (properties().getTranslationZ() > 0.0f) issueDrawShadowOperation(Matrix4::identity(), handler);
+    issueOperations<ReplayOperationHandler>(replayStruct.mRenderer, handler);
+}
+
+void RenderNode::replayNodeInParent(ReplayStateStruct& replayStruct, const int level) {
     ReplayOperationHandler handler(replayStruct, level);
-
-    replayStruct.mRenderer.startMark(mName.string());
-    iterate<ReplayOperationHandler>(replayStruct.mRenderer, handler, level);
-    replayStruct.mRenderer.endMark();
-
-    DISPLAY_LIST_LOGD("%*sDone (%p, %s), returning %d", level * 2, "", this, mName.string(),
-            replayStruct.mDrawGlStatus);
+    issueOperations<ReplayOperationHandler>(replayStruct.mRenderer, handler);
 }
 
 void RenderNode::buildZSortedChildList(Vector<ZDrawDisplayListOpPair>& zTranslatedNodes) {
@@ -373,10 +391,42 @@ void RenderNode::buildZSortedChildList(Vector<ZDrawDisplayListOpPair>& zTranslat
     std::stable_sort(zTranslatedNodes.begin(), zTranslatedNodes.end());
 }
 
+template <class T>
+void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T& handler) {
+    if (properties().getAlpha() <= 0.0f) return;
+
+    mat4 shadowMatrixXY(transformFromParent);
+    applyViewPropertyTransforms(shadowMatrixXY);
+
+    // Z matrix needs actual 3d transformation, so mapped z values will be correct
+    mat4 shadowMatrixZ(transformFromParent);
+    applyViewPropertyTransforms(shadowMatrixZ, true);
+
+    const SkPath* outlinePath = properties().getOutline().getPath();
+    const RevealClip& revealClip = properties().getRevealClip();
+    const SkPath* revealClipPath = revealClip.hasConvexClip()
+            ?  revealClip.getPath() : NULL; // only pass the reveal clip's path if it's convex
+
+    /**
+     * The drawing area of the caster is always the same as the its perimeter (which
+     * the shadow system uses) *except* in the inverse clip case. Inform the shadow
+     * system that the caster's drawing area (as opposed to its perimeter) has been
+     * clipped, so that it knows the caster can't be opaque.
+     */
+    bool casterUnclipped = !revealClip.willClip() || revealClip.hasConvexClip();
+
+    DisplayListOp* shadowOp  = new (handler.allocator()) DrawShadowOp(
+            shadowMatrixXY, shadowMatrixZ,
+            properties().getAlpha(), casterUnclipped,
+            properties().getWidth(), properties().getHeight(),
+            outlinePath, revealClipPath);
+    handler(shadowOp, PROPERTY_SAVECOUNT, properties().getClipToBounds());
+}
+
 #define SHADOW_DELTA 0.1f
 
 template <class T>
-void RenderNode::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
+void RenderNode::issueOperationsOf3dChildren(const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
         ChildrenSelectMode mode, OpenGLRenderer& renderer, T& handler) {
     const int size = zTranslatedNodes.size();
     if (size == 0
@@ -385,12 +435,6 @@ void RenderNode::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTransl
         // no 3d children to draw
         return;
     }
-
-    int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
-    LinearAllocator& alloc = handler.allocator();
-    ClipRectOp* clipOp = new (alloc) ClipRectOp(0, 0, properties().getWidth(), properties().getHeight(),
-            SkRegion::kIntersect_Op); // clip to 3d root bounds
-    handler(clipOp, PROPERTY_SAVECOUNT, properties().getClipToBounds());
 
     /**
      * Draw shadows and (potential) casters mostly in order, but allow the shadows of casters
@@ -419,35 +463,7 @@ void RenderNode::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTransl
             // attempt to render the shadow if the caster about to be drawn is its caster,
             // OR if its caster's Z value is similar to the previous potential caster
             if (shadowIndex == drawIndex || casterZ - lastCasterZ < SHADOW_DELTA) {
-
-                if (caster->properties().getAlpha() > 0.0f) {
-                    mat4 shadowMatrixXY(casterOp->mTransformFromParent);
-                    caster->applyViewPropertyTransforms(shadowMatrixXY);
-
-                    // Z matrix needs actual 3d transformation, so mapped z values will be correct
-                    mat4 shadowMatrixZ(casterOp->mTransformFromParent);
-                    caster->applyViewPropertyTransforms(shadowMatrixZ, true);
-
-                    const SkPath* outlinePath = caster->properties().getOutline().getPath();
-                    const RevealClip& revealClip = caster->properties().getRevealClip();
-                    const SkPath* revealClipPath = revealClip.hasConvexClip()
-                            ?  revealClip.getPath() : NULL; // only pass the reveal clip's path if it's convex
-
-                    /**
-                     * The drawing area of the caster is always the same as the its perimeter (which
-                     * the shadow system uses) *except* in the inverse clip case. Inform the shadow
-                     * system that the caster's drawing area (as opposed to its perimeter) has been
-                     * clipped, so that it knows the caster can't be opaque.
-                     */
-                    bool casterUnclipped = !revealClip.willClip() || revealClip.hasConvexClip();
-
-                    DisplayListOp* shadowOp  = new (alloc) DrawShadowOp(
-                            shadowMatrixXY, shadowMatrixZ,
-                            caster->properties().getAlpha(), casterUnclipped,
-                            caster->properties().getWidth(), caster->properties().getHeight(),
-                            outlinePath, revealClipPath);
-                    handler(shadowOp, PROPERTY_SAVECOUNT, properties().getClipToBounds());
-                }
+                caster->issueDrawShadowOperation(casterOp->mTransformFromParent, handler);
 
                 lastCasterZ = casterZ; // must do this even if current caster not casting a shadow
                 shadowIndex++;
@@ -470,17 +486,10 @@ void RenderNode::iterate3dChildren(const Vector<ZDrawDisplayListOpPair>& zTransl
         renderer.restoreToCount(restoreTo);
         drawIndex++;
     }
-    handler(new (alloc) RestoreToCountOp(rootRestoreTo), PROPERTY_SAVECOUNT, properties().getClipToBounds());
 }
 
 template <class T>
-void RenderNode::iterateProjectedChildren(OpenGLRenderer& renderer, T& handler, const int level) {
-    int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
-    LinearAllocator& alloc = handler.allocator();
-    ClipRectOp* clipOp = new (alloc) ClipRectOp(0, 0, properties().getWidth(), properties().getHeight(),
-            SkRegion::kReplace_Op); // clip to projection surface root bounds
-    handler(clipOp, PROPERTY_SAVECOUNT, properties().getClipToBounds());
-
+void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T& handler) {
     for (size_t i = 0; i < mProjectedNodes.size(); i++) {
         DrawDisplayListOp* childOp = mProjectedNodes[i];
 
@@ -492,7 +501,6 @@ void RenderNode::iterateProjectedChildren(OpenGLRenderer& renderer, T& handler, 
         childOp->mSkipInOrderDraw = true;
         renderer.restoreToCount(restoreTo);
     }
-    handler(new (alloc) RestoreToCountOp(rootRestoreTo), PROPERTY_SAVECOUNT, properties().getClipToBounds());
 }
 
 /**
@@ -505,7 +513,8 @@ void RenderNode::iterateProjectedChildren(OpenGLRenderer& renderer, T& handler, 
  * defer vs replay logic, per operation
  */
 template <class T>
-void RenderNode::iterate(OpenGLRenderer& renderer, T& handler, const int level) {
+void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
+    const int level = handler.level();
     if (CC_UNLIKELY(mDestroyed)) { // temporary debug logging
         ALOGW("Error: %s is drawing after destruction", mName.string());
         CRASH();
@@ -514,6 +523,8 @@ void RenderNode::iterate(OpenGLRenderer& renderer, T& handler, const int level) 
         DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, mName.string());
         return;
     }
+
+    handler.startMark(mName.string());
 
 #if DEBUG_DISPLAY_LIST
     Rect* clipRect = renderer.getClipRect();
@@ -530,7 +541,7 @@ void RenderNode::iterate(OpenGLRenderer& renderer, T& handler, const int level) 
     DISPLAY_LIST_LOGD("%*sSave %d %d", (level + 1) * 2, "",
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag, restoreTo);
 
-    setViewProperties<T>(renderer, handler, level + 1);
+    setViewProperties<T>(renderer, handler);
 
     bool quickRejected = properties().getClipToBounds()
             && renderer.quickRejectConservative(0, 0, properties().getWidth(), properties().getHeight());
@@ -539,7 +550,7 @@ void RenderNode::iterate(OpenGLRenderer& renderer, T& handler, const int level) 
         buildZSortedChildList(zTranslatedNodes);
 
         // for 3d root, draw children with negative z values
-        iterate3dChildren(zTranslatedNodes, kNegativeZChildren, renderer, handler);
+        issueOperationsOf3dChildren(zTranslatedNodes, kNegativeZChildren, renderer, handler);
 
         DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
         const int saveCountOffset = renderer.getSaveCount() - 1;
@@ -550,23 +561,24 @@ void RenderNode::iterate(OpenGLRenderer& renderer, T& handler, const int level) 
 #if DEBUG_DISPLAY_LIST
             op->output(level + 1);
 #endif
-
             logBuffer.writeCommand(level, op->name());
             handler(op, saveCountOffset, properties().getClipToBounds());
 
             if (CC_UNLIKELY(i == projectionReceiveIndex && mProjectedNodes.size() > 0)) {
-                iterateProjectedChildren(renderer, handler, level);
+                issueOperationsOfProjectedChildren(renderer, handler);
             }
         }
 
         // for 3d root, draw children with positive z values
-        iterate3dChildren(zTranslatedNodes, kPositiveZChildren, renderer, handler);
+        issueOperationsOf3dChildren(zTranslatedNodes, kPositiveZChildren, renderer, handler);
     }
 
     DISPLAY_LIST_LOGD("%*sRestoreToCount %d", (level + 1) * 2, "", restoreTo);
     handler(new (alloc) RestoreToCountOp(restoreTo),
             PROPERTY_SAVECOUNT, properties().getClipToBounds());
     renderer.setOverrideLayerAlpha(1.0f);
+
+    handler.endMark();
 }
 
 } /* namespace uirenderer */
