@@ -21,6 +21,7 @@ import android.service.notification.StatusBarNotification;
 /** @hide */
 oneway interface INotificationListener
 {
+    void onListenerConnected(in String[] notificationKeys);
     void onNotificationPosted(in StatusBarNotification notification);
     void onNotificationRemoved(in StatusBarNotification notification);
 }
