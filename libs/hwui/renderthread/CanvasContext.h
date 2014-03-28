@@ -82,7 +82,6 @@ private:
 
     friend class InvokeFunctorsTask;
     void invokeFunctors();
-    void handleFunctorStatus(int status, const Rect& redrawClip);
     void removeFunctorsTask();
     void queueFunctorsTask(int delayMs = FUNCTOR_PROCESS_DELAY);
 

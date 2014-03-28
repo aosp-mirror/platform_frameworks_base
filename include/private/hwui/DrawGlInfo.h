@@ -65,14 +65,6 @@ struct DrawGlInfo {
     enum Status {
         // The functor is done
         kStatusDone = 0x0,
-        // The functor is requesting a redraw (the clip rect
-        // used by the redraw is specified by DrawGlInfo.)
-        // The rest of the UI might redraw too.
-        kStatusDraw = 0x1,
-        // The functor needs to be invoked again but will
-        // not redraw. Only the functor is invoked again
-        // (unless another functor requests a redraw.)
-        kStatusInvoke = 0x2,
         // DisplayList actually issued GL drawing commands.
         // This is used to signal the HardwareRenderer that the
         // buffers should be flipped - otherwise, there were no
