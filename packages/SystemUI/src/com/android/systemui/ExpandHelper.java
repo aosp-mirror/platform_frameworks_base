@@ -108,7 +108,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
     private int mGravity;
 
-    private View mScrollView;
+    private ScrollAdapter mScrollAdapter;
 
     private OnScaleGestureListener mScaleGestureListener
             = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -301,8 +301,8 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         mGravity = gravity;
     }
 
-    public void setScrollView(View scrollView) {
-        mScrollView = scrollView;
+    public void setScrollAdapter(ScrollAdapter adapter) {
+        mScrollAdapter = adapter;
     }
 
     private float calculateGlow(float target, float actual) {
@@ -384,7 +384,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                 }
                 return true;
             }
-            if (mScrollView != null && mScrollView.getScrollY() > 0) {
+            if (mScrollAdapter != null && !mScrollAdapter.isScrolledToTop()) {
                 return false;
             }
             // Now look for other gestures
@@ -407,7 +407,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             }
 
             case MotionEvent.ACTION_DOWN:
-                mWatchingForPull = isInside(mScrollView, x, y);
+                mWatchingForPull = isInside(mScrollAdapter.getHostView(), x, y);
                 mLastMotionY = y;
                 break;
 
@@ -607,6 +607,20 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                     mContext.getSystemService(Context.VIBRATOR_SERVICE);
         }
         mVibrator.vibrate(duration, AudioManager.STREAM_SYSTEM);
+    }
+
+    public interface ScrollAdapter {
+
+        /**
+         * @return Whether the view returned by {@link #getHostView()} is scrolled to the top
+         * and can therefore be expanded by a single finger drag
+         */
+        public boolean isScrolledToTop();
+
+        /**
+         * @return The view in which the scrolling is performed
+         */
+        public View getHostView();
     }
 }
 
