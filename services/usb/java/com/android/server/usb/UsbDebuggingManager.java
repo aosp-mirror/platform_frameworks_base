@@ -17,8 +17,10 @@
 package com.android.server.usb;
 
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.os.Handler;
@@ -244,15 +246,18 @@ public class UsbDebuggingManager implements Runnable {
     }
 
     private void showConfirmationDialog(String key, String fingerprints) {
-        Intent dialogIntent = new Intent();
+        Intent intent = new Intent();
 
-        dialogIntent.setClassName("com.android.systemui",
-                "com.android.systemui.usb.UsbDebuggingActivity");
-        dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        dialogIntent.putExtra("key", key);
-        dialogIntent.putExtra("fingerprints", fingerprints);
+        ComponentName componentName = ComponentName.unflattenFromString(
+                Resources.getSystem().getString(
+                        com.android.internal.R.string.config_customAdbPublicKeyActivity));
+        intent.setClassName(componentName.getPackageName(),
+                componentName.getClassName());
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("key", key);
+        intent.putExtra("fingerprints", fingerprints);
         try {
-            mContext.startActivity(dialogIntent);
+            mContext.startActivity(intent);
         } catch (ActivityNotFoundException e) {
             Slog.e(TAG, "unable to start UsbDebuggingActivity");
         }
