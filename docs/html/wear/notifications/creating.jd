@@ -37,7 +37,7 @@ the official Android Wear SDK that is coming later.</p>
 <h2 id="Import">Import the Necessary Classes</h2>
 
 <p>To begin development, you must first complete the instructions in the <a
-href="{@docRoot}wear/preview/start">Get Started with the Developer Preview</a> document.
+href="{@docRoot}wear/preview/start.html">Get Started with the Developer Preview</a> document.
 As mentioned in that document, your app must include
 both the <a href="http://developer.android.com/tools/support-library/features.html#v4">v4 support
 library</a> and the Developer Preview support library. So to get started,
@@ -252,7 +252,7 @@ features from <a href="{@docRoot}reference/android/preview/support/wearable/noti
 will not work.</p>
 
 <p>To continue enhancing your notifications for wearables using
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder"
+  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html"
   ><code>WearableNotifications.Builder</code></a> and other APIs in the
   preview support library, see the following developer guides:</p>
 
