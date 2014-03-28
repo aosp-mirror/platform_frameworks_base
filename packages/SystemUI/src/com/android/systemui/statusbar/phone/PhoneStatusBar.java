@@ -1483,7 +1483,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         mExpandedVisible = true;
-        if(!ENABLE_NOTIFICATION_STACK) {
+        if (!ENABLE_NOTIFICATION_STACK) {
             ((NotificationRowLayout) mPile).setLayoutTransitionsEnabled(true);
         }
         if (mNavigationBarView != null)
@@ -1777,7 +1777,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         mExpandedVisible = false;
-        if(!ENABLE_NOTIFICATION_STACK) {
+        if (!ENABLE_NOTIFICATION_STACK) {
             ((NotificationRowLayout) mPile).setLayoutTransitionsEnabled(false);
         }
         if (mNavigationBarView != null)
@@ -2477,7 +2477,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                         int totalDelay = 0;
 
 
-                        if(!ENABLE_NOTIFICATION_STACK) {
+                        if (!ENABLE_NOTIFICATION_STACK) {
                             // Set the shade-animating state to avoid doing other work during
                             // all of these animations. In particular, avoid layout and
                             // redrawing when collapsing the shade.

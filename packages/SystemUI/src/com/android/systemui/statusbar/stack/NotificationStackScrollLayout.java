@@ -42,7 +42,7 @@ import com.android.systemui.statusbar.ExpandableNotificationRow;
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
  */
 public class NotificationStackScrollLayout extends ViewGroup
-        implements SwipeHelper.Callback, ExpandHelper.Callback {
+        implements SwipeHelper.Callback, ExpandHelper.Callback, ExpandHelper.ScrollAdapter {
 
     private static final String TAG = "NotificationStackScrollLayout";
     private static final boolean DEBUG = false;
@@ -812,5 +812,15 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (!hasWindowFocus) {
             mSwipeHelper.removeLongPressCallback();
         }
+    }
+
+    @Override
+    public boolean isScrolledToTop() {
+        return mOwnScrollY == 0;
+    }
+
+    @Override
+    public View getHostView() {
+        return this;
     }
 }
