@@ -591,6 +591,7 @@ public abstract class LayoutInflater {
             Object[] args = mConstructorArgs;
             args[1] = attrs;
 
+            constructor.setAccessible(true);
             final View view = constructor.newInstance(args);
             if (view instanceof ViewStub) {
                 // always use ourselves when inflating ViewStub later
