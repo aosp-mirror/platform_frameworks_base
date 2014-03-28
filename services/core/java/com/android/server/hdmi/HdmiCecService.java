@@ -366,7 +366,8 @@ public final class HdmiCecService extends SystemService {
             if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                     != PackageManager.PERMISSION_GRANTED) {
                 pw.println("Permission denial: can't dump HdmiCecService from pid="
-                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
+                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                        + " without permission " + android.Manifest.permission.DUMP);
                 return;
             }
             final long ident = Binder.clearCallingIdentity();
