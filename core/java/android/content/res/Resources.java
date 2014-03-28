@@ -114,7 +114,6 @@ public class Resources {
     private boolean mPreloading;
 
     private TypedArray mCachedStyledAttributes = null;
-    private RuntimeException mLastRetrievedAttrs = null;
 
     private int mLastCachedXmlBlockIndex = -1;
     private final int[] mCachedXmlBlockIds = { 0, 0, 0, 0 };
@@ -1253,12 +1252,9 @@ public class Resources {
         public void applyStyle(int resid, boolean force) {
             AssetManager.applyThemeStyle(mTheme, resid, force);
 
-            if (!mHasStyle) {
-                mHasStyle = true;
-                mThemeResId = resid;
-            } else if (resid != mThemeResId) {
-                mThemeResId = 0;
-            }
+            // TODO: In very rare cases, we may end up with a hybrid theme
+            // that can't map to a single theme ID.
+            mThemeResId = resid;
         }
 
         /**
@@ -1273,7 +1269,6 @@ public class Resources {
         public void setTo(Theme other) {
             AssetManager.copyTheme(mTheme, other.mTheme);
 
-            mHasStyle = other.mHasStyle;
             mThemeResId = other.mThemeResId;
         }
 
@@ -1562,10 +1557,6 @@ public class Resources {
             mAssets.releaseTheme(mTheme);
         }
 
-        /*package*/ boolean canCacheDrawables() {
-            return mHasStyle && mThemeResId != 0;
-        }
-
         /*package*/ Theme() {
             mAssets = Resources.this.mAssets;
             mTheme = mAssets.createTheme();
@@ -1575,12 +1566,8 @@ public class Resources {
         private final AssetManager mAssets;
         private final long mTheme;
 
-        /**
-         * Resource identifier for the theme. If multiple styles have been
-         * applied to this theme, this value will be 0 (invalid).
-         */
+        /** Resource identifier for the theme. */
         private int mThemeResId = 0;
-        private boolean mHasStyle = false;
     }
 
     /**
@@ -2260,11 +2247,6 @@ public class Resources {
             return;
         }
 
-        // Abort if the drawable is themed, but the theme cannot be cached.
-        if (dr.canApplyTheme() && theme != null && !theme.canCacheDrawables()) {
-            return;
-        }
-
         if (mPreloading) {
             // Preloaded drawables never have a theme, but may be themeable.
             final int changingConfigs = cs.getChangingConfigurations();
@@ -2289,11 +2271,7 @@ public class Resources {
         } else {
             synchronized (mAccessLock) {
                 final LongSparseArray<WeakReference<ConstantState>> themedCache;
-                if (!dr.canApplyTheme()) {
-                    themedCache = caches.getUnthemed(true);
-                } else {
-                    themedCache = caches.getOrCreate(theme == null ? 0 : theme.mThemeResId);
-                }
+                themedCache = caches.getOrCreate(theme == null ? 0 : theme.mThemeResId);
                 themedCache.put(key, new WeakReference<ConstantState>(cs));
             }
         }
@@ -2354,21 +2332,6 @@ public class Resources {
 
     private Drawable getCachedDrawable(ThemedCaches<ConstantState> caches, long key, Theme theme) {
         synchronized (mAccessLock) {
-            // First, check for a matching unthemed drawable.
-            final LongSparseArray<WeakReference<ConstantState>> unthemed = caches.getUnthemed(false);
-            if (unthemed != null) {
-                final Drawable unthemedDrawable = getCachedDrawableLocked(unthemed, key);
-                if (unthemedDrawable != null) {
-                    return unthemedDrawable;
-                }
-            }
-
-            final boolean themeCannotCache = theme != null && !theme.canCacheDrawables();
-            if (themeCannotCache) {
-                return null;
-            }
-
-            // Next, check for a matching themed drawable.
             final int themeKey = theme != null ? theme.mThemeResId : 0;
             final LongSparseArray<WeakReference<ConstantState>> themedCache = caches.get(themeKey);
             if (themedCache != null) {
@@ -2606,18 +2569,6 @@ public class Resources {
     }
 
     static class ThemedCaches<T> extends SparseArray<LongSparseArray<WeakReference<T>>> {
-        private LongSparseArray<WeakReference<T>> mUnthemed = null;
-
-        /**
-         * Returns the cache of drawables with no themeable attributes.
-         */
-        public LongSparseArray<WeakReference<T>> getUnthemed(boolean autoCreate) {
-            if (mUnthemed == null && autoCreate) {
-                mUnthemed = new LongSparseArray<WeakReference<T>>(1);
-            }
-            return mUnthemed;
-        }
-
         /**
          * Returns the cache of drawables styled for the specified theme.
          * <p>
