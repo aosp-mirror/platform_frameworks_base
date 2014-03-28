@@ -52,7 +52,7 @@ import java.util.Queue;
  */
 final class AccessibilityInteractionController {
 
-    private static final boolean ENFORCE_NODE_TREE_CONSISTENT = Build.IS_DEBUGGABLE;
+    private static final boolean ENFORCE_NODE_TREE_CONSISTENT = false;
 
     private final ArrayList<AccessibilityNodeInfo> mTempAccessibilityNodeInfoList =
         new ArrayList<AccessibilityNodeInfo>();
