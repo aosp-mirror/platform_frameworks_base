@@ -19,8 +19,8 @@
 
 #include <utils/Log.h>
 #include <binder/IPCThreadState.h>
-#include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
+#include <cutils/process_name.h>
 #include <cutils/sched_policy.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
@@ -402,7 +402,9 @@ void android_os_Process_setArgV0(JNIEnv* env, jobject clazz, jstring name)
     }
 
     if (name8.size() > 0) {
-        ProcessState::self()->setArgV0(name8.string());
+        const char* procName = name8.string();
+        set_process_name(procName);
+        AndroidRuntime::getRuntime()->setArgv0(procName);
     }
 }
 
