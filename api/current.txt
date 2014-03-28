@@ -6490,6 +6490,7 @@ package android.content {
     field public static final java.lang.String USER_SERVICE = "user";
     field public static final java.lang.String VIBRATOR_SERVICE = "vibrator";
     field public static final java.lang.String WALLPAPER_SERVICE = "wallpaper";
+    field public static final java.lang.String WIFI_HOTSPOT_SERVICE = "wifihotspot";
     field public static final java.lang.String WIFI_P2P_SERVICE = "wifip2p";
     field public static final java.lang.String WIFI_SERVICE = "wifi";
     field public static final java.lang.String WINDOW_SERVICE = "window";
@@ -16196,6 +16197,19 @@ package android.net.wifi {
     field public static final int PBC = 0; // 0x0
     field public java.lang.String pin;
     field public int setup;
+  }
+
+}
+
+package android.net.wifi.hotspot {
+
+  public abstract interface IWifiHotspotManager implements android.os.IInterface {
+    method public abstract void test() throws android.os.RemoteException;
+  }
+
+  public class WifiHotspotManager {
+    ctor public WifiHotspotManager(android.content.Context, android.net.wifi.hotspot.IWifiHotspotManager);
+    method public void test();
   }
 
 }
