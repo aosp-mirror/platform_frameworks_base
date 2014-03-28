@@ -1093,8 +1093,8 @@ public final class CameraCharacteristics extends CameraMetadata {
      *
      * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
      */
-    public static final Key<Byte> SENSOR_AVAILABLE_TEST_PATTERN_MODES =
-            new Key<Byte>("android.sensor.availableTestPatternModes", byte.class);
+    public static final Key<int[]> SENSOR_AVAILABLE_TEST_PATTERN_MODES =
+            new Key<int[]>("android.sensor.availableTestPatternModes", int[].class);
 
     /**
      * <p>Which face detection modes are available,
