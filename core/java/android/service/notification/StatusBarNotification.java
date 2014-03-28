@@ -29,6 +29,7 @@ public class StatusBarNotification implements Parcelable {
     private final String pkg;
     private final int id;
     private final String tag;
+    private final String key;
 
     private final int uid;
     private final String basePkg;
@@ -70,6 +71,7 @@ public class StatusBarNotification implements Parcelable {
         this.notification.setUser(user);
 
         this.postTime = postTime;
+        this.key = key();
     }
 
     public StatusBarNotification(Parcel in) {
@@ -88,6 +90,11 @@ public class StatusBarNotification implements Parcelable {
         this.user = UserHandle.readFromParcel(in);
         this.notification.setUser(this.user);
         this.postTime = in.readLong();
+        this.key = key();
+    }
+
+    private String key() {
+        return pkg + '|' + basePkg + '|' + id + '|' + tag + '|' + uid;
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -148,9 +155,9 @@ public class StatusBarNotification implements Parcelable {
     @Override
     public String toString() {
         return String.format(
-                "StatusBarNotification(pkg=%s user=%s id=%d tag=%s score=%d: %s)",
+                "StatusBarNotification(pkg=%s user=%s id=%d tag=%s score=%d key=%s: %s)",
                 this.pkg, this.user, this.id, this.tag,
-                this.score, this.notification);
+                this.score, this.key, this.notification);
     }
 
     /** Convenience method to check the notification's flags for
@@ -229,5 +236,12 @@ public class StatusBarNotification implements Parcelable {
     /** @hide */
     public int getScore() {
         return score;
+    }
+
+    /**
+     * A unique instance key for this notification record.
+     */
+    public String getKey() {
+        return key;
     }
 }
