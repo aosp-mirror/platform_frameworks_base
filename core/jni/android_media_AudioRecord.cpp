@@ -220,7 +220,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     lpCallbackData->audioRecord_ref = env->NewGlobalRef(weak_this);
     lpCallbackData->busy = false;
 
-    lpRecorder->set((audio_source_t) source,
+    const status_t status = lpRecorder->set((audio_source_t) source,
         sampleRateInHertz,
         format,        // word length, PCM
         channelMask,
@@ -231,7 +231,6 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         true,          // threadCanCallJava
         sessionId);
 
-    const status_t status = lpRecorder->initCheck();
     if (status != NO_ERROR) {
         ALOGE("Error creating AudioRecord instance: initialization check failed with status %d.",
                 status);
