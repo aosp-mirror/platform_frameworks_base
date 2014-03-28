@@ -888,17 +888,22 @@ static jint android_media_AudioTrack_get_min_buff_size(JNIEnv *env,  jobject thi
 }
 
 // ----------------------------------------------------------------------------
-static void
+static jint
 android_media_AudioTrack_setAuxEffectSendLevel(JNIEnv *env, jobject thiz, jfloat level )
 {
     sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
     if (lpTrack == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for setAuxEffectSendLevel()");
-        return;
+        return -1;
     }
 
-    lpTrack->setAuxEffectSendLevel(level);
+    status_t status = lpTrack->setAuxEffectSendLevel(level);
+    if (status != NO_ERROR) {
+        ALOGE("AudioTrack::setAuxEffectSendLevel() for level %g failed with status %d",
+                level, status);
+    }
+    return (jint) status;
 }
 
 // ----------------------------------------------------------------------------
@@ -954,7 +959,7 @@ static JNINativeMethod gMethods[] = {
     {"native_get_min_buff_size",
                              "(III)I",   (void *)android_media_AudioTrack_get_min_buff_size},
     {"native_setAuxEffectSendLevel",
-                             "(F)V",     (void *)android_media_AudioTrack_setAuxEffectSendLevel},
+                             "(F)I",     (void *)android_media_AudioTrack_setAuxEffectSendLevel},
     {"native_attachAuxEffect",
                              "(I)I",     (void *)android_media_AudioTrack_attachAuxEffect},
 };
