@@ -24,18 +24,9 @@
     android:id="@+id/notification_panel"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:background="@drawable/notification_panel_bg"
     android:paddingTop="@dimen/notification_panel_padding_top"
     android:layout_marginStart="@dimen/notification_panel_margin_left"
     >
-
-    <View
-        android:id="@+id/handle"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/close_handle_height"
-        android:background="@drawable/status_bar_close"
-        android:visibility="invisible"
-        />
 
     <include
         layout="@layout/carrier_label"
@@ -69,6 +60,7 @@
             />
 
         <FrameLayout
+            android:id="@+id/notification_container_parent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             >
@@ -77,21 +69,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 />
-    
-            <ScrollView
-                android:id="@+id/scroll"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fadingEdge="none"
-                android:overScrollMode="ifContentScrolls"
-                >
-                <com.android.systemui.statusbar.policy.NotificationRowLayout
-                    android:id="@+id/latestItems"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    systemui:rowHeight="@dimen/notification_row_min_height"
-                    />
-            </ScrollView>
 
             <com.android.systemui.statusbar.stack.NotificationStackScrollLayout
                     android:id="@+id/notification_stack_scroller"

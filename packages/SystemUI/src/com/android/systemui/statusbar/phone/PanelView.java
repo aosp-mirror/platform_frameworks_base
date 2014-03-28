@@ -25,6 +25,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
@@ -69,7 +70,7 @@ public class PanelView extends FrameLayout {
 
     private View mHandleView;
     private float mPeekHeight;
-    private float mTouchOffset;
+    private float mInitialOffsetOnTouch;
     private float mExpandedFraction = 0;
     private float mExpandedHeight = 0;
     private boolean mJustPeeked;
@@ -77,6 +78,7 @@ public class PanelView extends FrameLayout {
     private boolean mRubberbanding;
     private boolean mTracking;
     private int mTrackingPointer;
+    private int mTouchSlop;
 
     private TimeAnimator mTimeAnimator;
     private ObjectAnimator mPeekAnimator;
@@ -198,7 +200,6 @@ public class PanelView extends FrameLayout {
         }
     }
 
-    private int[] mAbsPos = new int[2];
     PanelBar mBar;
 
     private final TimeListener mAnimationCallback = new TimeListener() {
@@ -220,7 +221,7 @@ public class PanelView extends FrameLayout {
     };
 
     private float mVel, mAccel;
-    private int mFullHeight = 0;
+    protected int mMaxPanelHeight = 0;
     private String mViewName;
     protected float mInitialTouchY;
     protected float mFinalTouchY;
@@ -253,13 +254,13 @@ public class PanelView extends FrameLayout {
             mTimeAnimator.start();
 
             mRubberbanding = mRubberbandingEnabled // is it enabled at all?
-                    && mExpandedHeight > getFullHeight() // are we past the end?
+                    && mExpandedHeight > getMaxPanelHeight() // are we past the end?
                     && mVel >= -mFlingGestureMinDistPx; // was this not possibly a "close" gesture?
             if (mRubberbanding) {
                 mClosing = true;
             } else if (mVel == 0) {
                 // if the panel is less than halfway open, close it
-                mClosing = (mFinalTouchY / getFullHeight()) < 0.5f;
+                mClosing = (mFinalTouchY / getMaxPanelHeight()) < 0.5f;
             } else {
                 mClosing = mExpandedHeight > 0 && mVel < 0;
             }
@@ -268,7 +269,7 @@ public class PanelView extends FrameLayout {
             if (DEBUG) logf("tick: v=%.2fpx/s dt=%.4fs", mVel, dt);
             if (DEBUG) logf("tick: before: h=%d", (int) mExpandedHeight);
 
-            final float fh = getFullHeight();
+            final float fh = getMaxPanelHeight();
             boolean braking = false;
             if (BRAKES) {
                 if (mClosing) {
@@ -351,6 +352,9 @@ public class PanelView extends FrameLayout {
         mPeekHeight = res.getDimension(R.dimen.peek_height)
             + getPaddingBottom() // our window might have a dropshadow
             - (mHandleView == null ? 0 : mHandleView.getPaddingTop()); // the handle might have a topshadow
+
+        final ViewConfiguration configuration = ViewConfiguration.get(getContext());
+        mTouchSlop = configuration.getScaledTouchSlop();
     }
 
     private void trackMovement(MotionEvent event) {
@@ -363,10 +367,221 @@ public class PanelView extends FrameLayout {
         event.offsetLocation(-deltaX, -deltaY);
     }
 
-    // Pass all touches along to the handle, allowing the user to drag the panel closed from its interior
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        return mHandleView.dispatchTouchEvent(event);
+
+        /*
+         * We capture touch events here and update the expand height here in case according to
+         * the users fingers. This also handles multi-touch.
+         *
+         * If the user just clicks shortly, we give him a quick peek of the shade.
+         *
+         * Flinging is also enabled in order to open or close the shade.
+         */
+
+        int pointerIndex = event.findPointerIndex(mTrackingPointer);
+        if (pointerIndex < 0) {
+            pointerIndex = 0;
+            mTrackingPointer = event.getPointerId(pointerIndex);
+        }
+        final float y = event.getY(pointerIndex);
+
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                mTracking = true;
+                if (mHandleView != null) {
+                    mHandleView.setPressed(true);
+                    postInvalidate(); // catch the press state change
+                }
+
+                mInitialTouchY = y;
+                initVelocityTracker();
+                trackMovement(event);
+                mTimeAnimator.cancel(); // end any outstanding animations
+                mBar.onTrackingStarted(PanelView.this);
+                mInitialOffsetOnTouch = mExpandedHeight;
+                if (mExpandedHeight == 0) {
+                    mJustPeeked = true;
+                    runPeekAnimation();
+                }
+                break;
+
+            case MotionEvent.ACTION_POINTER_UP:
+                final int upPointer = event.getPointerId(event.getActionIndex());
+                if (mTrackingPointer == upPointer) {
+                    // gesture is ongoing, find a new pointer to track
+                    final int newIndex = event.getPointerId(0) != upPointer ? 0 : 1;
+                    final float newY = event.getY(newIndex);
+                    mTrackingPointer = event.getPointerId(newIndex);
+                    mInitialOffsetOnTouch = mExpandedHeight;
+                    mInitialTouchY = newY;
+                }
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                final float h = y - mInitialTouchY + mInitialOffsetOnTouch;
+                if (h > mPeekHeight) {
+                    if (mPeekAnimator != null && mPeekAnimator.isStarted()) {
+                        mPeekAnimator.cancel();
+                    }
+                    mJustPeeked = false;
+                }
+                if (!mJustPeeked) {
+                    setExpandedHeightInternal(h);
+                    mBar.panelExpansionChanged(PanelView.this, mExpandedFraction);
+                }
+
+                trackMovement(event);
+                break;
+
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                mFinalTouchY = y;
+                mTracking = false;
+                mTrackingPointer = -1;
+                if (mHandleView != null) {
+                    mHandleView.setPressed(false);
+                    postInvalidate(); // catch the press state change
+                }
+                mBar.onTrackingStopped(PanelView.this);
+                trackMovement(event);
+
+                float vel = getCurrentVelocity();
+                fling(vel, true);
+
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
+                break;
+        }
+        return true;
+    }
+
+    private float getCurrentVelocity() {
+        float vel = 0;
+        float yVel = 0, xVel = 0;
+        boolean negative = false;
+
+        // the velocitytracker might be null if we got a bad input stream
+        if (mVelocityTracker == null) {
+            return 0;
+        }
+
+        mVelocityTracker.computeCurrentVelocity(1000);
+
+        yVel = mVelocityTracker.getYVelocity();
+        negative = yVel < 0;
+
+        xVel = mVelocityTracker.getXVelocity();
+        if (xVel < 0) {
+            xVel = -xVel;
+        }
+        if (xVel > mFlingGestureMaxXVelocityPx) {
+            xVel = mFlingGestureMaxXVelocityPx; // limit how much we care about the x axis
+        }
+
+        vel = (float) Math.hypot(yVel, xVel);
+        if (vel > mFlingGestureMaxOutputVelocityPx) {
+            vel = mFlingGestureMaxOutputVelocityPx;
+        }
+
+        // if you've barely moved your finger, we treat the velocity as 0
+        // preventing spurious flings due to touch screen jitter
+        final float deltaY = Math.abs(mFinalTouchY - mInitialTouchY);
+        if (deltaY < mFlingGestureMinDistPx
+                || vel < mFlingExpandMinVelocityPx
+                ) {
+            vel = 0;
+        }
+
+        if (negative) {
+            vel = -vel;
+        }
+
+        if (DEBUG) {
+            logf("gesture: dy=%f vel=(%f,%f) vlinear=%f",
+                    deltaY,
+                    xVel, yVel,
+                    vel);
+        }
+        return vel;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+
+        /*
+         * If the user drags anywhere inside the panel we intercept it if he moves his finger
+         * upwards. This allows closing the shade from anywhere inside the panel.
+         *
+         * We only do this if the current content is scrolled to the bottom,
+         * i.e isScrolledToBottom() is true and therefore there is no conflicting scrolling gesture
+         * possible.
+         */
+        int pointerIndex = event.findPointerIndex(mTrackingPointer);
+        if (pointerIndex < 0) {
+            pointerIndex = 0;
+            mTrackingPointer = event.getPointerId(pointerIndex);
+        }
+        final float y = event.getY(pointerIndex);
+        boolean scrolledToBottom = isScrolledToBottom();
+
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                mTracking = true;
+                if (mHandleView != null) {
+                    mHandleView.setPressed(true);
+                    // catch the press state change
+                    postInvalidate();
+                }
+                mInitialTouchY = y;
+                initVelocityTracker();
+                trackMovement(event);
+                mTimeAnimator.cancel(); // end any outstanding animations
+                if (mExpandedHeight == 0 || y > getContentHeight()) {
+                    return true;
+                }
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                final int upPointer = event.getPointerId(event.getActionIndex());
+                if (mTrackingPointer == upPointer) {
+                    // gesture is ongoing, find a new pointer to track
+                    final int newIndex = event.getPointerId(0) != upPointer ? 0 : 1;
+                    mTrackingPointer = event.getPointerId(newIndex);
+                    final float newY = event.getY(newIndex);
+                    mInitialTouchY = newY;
+                }
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                final float h = y - mInitialTouchY;
+                trackMovement(event);
+                if (scrolledToBottom) {
+                    if (h < -mTouchSlop) {
+                        mInitialOffsetOnTouch = mExpandedHeight;
+                        mInitialTouchY = y;
+                        return true;
+                    }
+                }
+                break;
+        }
+        return false;
+    }
+
+    private void initVelocityTracker() {
+        if (mVelocityTracker != null) {
+            mVelocityTracker.recycle();
+        }
+        mVelocityTracker = FlingTracker.obtain();
+    }
+
+    protected boolean isScrolledToBottom() {
+        return false;
+    }
+
+    protected float getContentHeight() {
+        return mExpandedHeight;
     }
 
     @Override
@@ -375,134 +590,6 @@ public class PanelView extends FrameLayout {
         mHandleView = findViewById(R.id.handle);
 
         loadDimens();
-
-        if (DEBUG) logf("handle view: " + mHandleView);
-        if (mHandleView != null) {
-            mHandleView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    int pointerIndex = event.findPointerIndex(mTrackingPointer);
-                    if (pointerIndex < 0) {
-                        pointerIndex = 0;
-                        mTrackingPointer = event.getPointerId(pointerIndex);
-                    }
-                    final float y = event.getY(pointerIndex);
-                    final float rawDelta = event.getRawY() - event.getY();
-                    final float rawY = y + rawDelta;
-                    if (DEBUG) logf("handle.onTouch: a=%s p=[%d,%d] y=%.1f rawY=%.1f off=%.1f",
-                            MotionEvent.actionToString(event.getAction()),
-                            mTrackingPointer, pointerIndex,
-                            y, rawY, mTouchOffset);
-                    PanelView.this.getLocationOnScreen(mAbsPos);
-
-                    switch (event.getActionMasked()) {
-                        case MotionEvent.ACTION_DOWN:
-                            mTracking = true;
-                            mHandleView.setPressed(true);
-                            postInvalidate(); // catch the press state change
-                            mInitialTouchY = y;
-                            mVelocityTracker = FlingTracker.obtain();
-                            trackMovement(event);
-                            mTimeAnimator.cancel(); // end any outstanding animations
-                            mBar.onTrackingStarted(PanelView.this);
-                            mTouchOffset = (rawY - mAbsPos[1]) - mExpandedHeight;
-                            if (mExpandedHeight == 0) {
-                                mJustPeeked = true;
-                                runPeekAnimation();
-                            }
-                            break;
-
-                        case MotionEvent.ACTION_POINTER_UP:
-                            final int upPointer = event.getPointerId(event.getActionIndex());
-                            if (mTrackingPointer == upPointer) {
-                                // gesture is ongoing, find a new pointer to track
-                                final int newIndex = event.getPointerId(0) != upPointer ? 0 : 1;
-                                final float newY = event.getY(newIndex);
-                                final float newRawY = newY + rawDelta;
-                                mTrackingPointer = event.getPointerId(newIndex);
-                                mTouchOffset = (newRawY - mAbsPos[1]) - mExpandedHeight;
-                                mInitialTouchY = newY;
-                            }
-                            break;
-
-                        case MotionEvent.ACTION_MOVE:
-                            final float h = rawY - mAbsPos[1] - mTouchOffset;
-                            if (h > mPeekHeight) {
-                                if (mPeekAnimator != null && mPeekAnimator.isStarted()) {
-                                    mPeekAnimator.cancel();
-                                }
-                                mJustPeeked = false;
-                            }
-                            if (!mJustPeeked) {
-                                PanelView.this.setExpandedHeightInternal(h);
-                                mBar.panelExpansionChanged(PanelView.this, mExpandedFraction);
-                            }
-
-                            trackMovement(event);
-                            break;
-
-                        case MotionEvent.ACTION_UP:
-                        case MotionEvent.ACTION_CANCEL:
-                            mFinalTouchY = y;
-                            mTracking = false;
-                            mTrackingPointer = -1;
-                            mHandleView.setPressed(false);
-                            postInvalidate(); // catch the press state change
-                            mBar.onTrackingStopped(PanelView.this);
-                            trackMovement(event);
-
-                            float vel = 0, yVel = 0, xVel = 0;
-                            boolean negative = false;
-
-                            if (mVelocityTracker != null) {
-                                // the velocitytracker might be null if we got a bad input stream
-                                mVelocityTracker.computeCurrentVelocity(1000);
-
-                                yVel = mVelocityTracker.getYVelocity();
-                                negative = yVel < 0;
-
-                                xVel = mVelocityTracker.getXVelocity();
-                                if (xVel < 0) {
-                                    xVel = -xVel;
-                                }
-                                if (xVel > mFlingGestureMaxXVelocityPx) {
-                                    xVel = mFlingGestureMaxXVelocityPx; // limit how much we care about the x axis
-                                }
-
-                                vel = (float)Math.hypot(yVel, xVel);
-                                if (vel > mFlingGestureMaxOutputVelocityPx) {
-                                    vel = mFlingGestureMaxOutputVelocityPx;
-                                }
-
-                                mVelocityTracker.recycle();
-                                mVelocityTracker = null;
-                            }
-
-                            // if you've barely moved your finger, we treat the velocity as 0
-                            // preventing spurious flings due to touch screen jitter
-                            final float deltaY = Math.abs(mFinalTouchY - mInitialTouchY);
-                            if (deltaY < mFlingGestureMinDistPx
-                                    || vel < mFlingExpandMinVelocityPx
-                                    ) {
-                                vel = 0;
-                            }
-
-                            if (negative) {
-                                vel = -vel;
-                            }
-
-                            if (DEBUG) logf("gesture: dy=%f vel=(%f,%f) vlinear=%f",
-                                    deltaY,
-                                    xVel, yVel,
-                                    vel);
-
-                            fling(vel, true);
-
-                            break;
-                    }
-                    return true;
-                }});
-        }
     }
 
     public void fling(float vel, boolean always) {
@@ -543,17 +630,16 @@ public class PanelView extends FrameLayout {
 
         // Did one of our children change size?
         int newHeight = getMeasuredHeight();
-        if (newHeight != mFullHeight) {
-            mFullHeight = newHeight;
-            // If the user isn't actively poking us, let's rubberband to the content
-            if (!mTracking && !mRubberbanding && !mTimeAnimator.isStarted()
-                    && mExpandedHeight > 0 && mExpandedHeight != mFullHeight) {
-                mExpandedHeight = mFullHeight;
-            }
+        if (newHeight != mMaxPanelHeight) {
+            mMaxPanelHeight = newHeight;
         }
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                    (int) mExpandedHeight, MeasureSpec.AT_MOST); // MeasureSpec.getMode(heightMeasureSpec));
+                    getDesiredMeasureHeight(), MeasureSpec.AT_MOST);
         setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    protected int getDesiredMeasureHeight() {
+        return (int) mExpandedHeight;
     }
 
 
@@ -569,8 +655,20 @@ public class PanelView extends FrameLayout {
 
     @Override
     protected void onLayout (boolean changed, int left, int top, int right, int bottom) {
-        if (DEBUG) logf("onLayout: changed=%s, bottom=%d eh=%d fh=%d", changed?"T":"f", bottom, (int)mExpandedHeight, mFullHeight);
+        if (DEBUG) logf("onLayout: changed=%s, bottom=%d eh=%d fh=%d", changed?"T":"f", bottom,
+                (int)mExpandedHeight, mMaxPanelHeight);
         super.onLayout(changed, left, top, right, bottom);
+        requestPanelHeightUpdate();
+    }
+
+    protected void requestPanelHeightUpdate() {
+        float currentMaxPanelHeight = getMaxPanelHeight();
+
+        // If the user isn't actively poking us, let's update the height
+        if (!mTracking && !mRubberbanding && !mTimeAnimator.isStarted()
+                && mExpandedHeight > 0 && currentMaxPanelHeight != mExpandedHeight) {
+            setExpandedHeightInternal(currentMaxPanelHeight);
+        }
     }
 
     public void setExpandedHeightInternal(float h) {
@@ -583,7 +681,7 @@ public class PanelView extends FrameLayout {
             h = 0;
         }
 
-        float fh = getFullHeight();
+        float fh = getMaxPanelHeight();
         if (fh == 0) {
             // Hmm, full height hasn't been computed yet
         }
@@ -593,9 +691,13 @@ public class PanelView extends FrameLayout {
 
         mExpandedHeight = h;
 
-        if (DEBUG) logf("setExpansion: height=%.1f fh=%.1f tracking=%s rubber=%s", h, fh, mTracking?"T":"f", mRubberbanding?"T":"f");
+        if (DEBUG) {
+            logf("setExpansion: height=%.1f fh=%.1f tracking=%s rubber=%s", h, fh,
+                    mTracking ? "T" : "f", mRubberbanding ? "T" : "f");
+        }
 
-        requestLayout();
+        onHeightUpdated(mExpandedHeight);
+
 //        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
 //        lp.height = (int) mExpandedHeight;
 //        setLayoutParams(lp);
@@ -603,13 +705,23 @@ public class PanelView extends FrameLayout {
         mExpandedFraction = Math.min(1f, (fh == 0) ? 0 : h / fh);
     }
 
-    private float getFullHeight() {
-        if (mFullHeight <= 0) {
-            if (DEBUG) logf("Forcing measure() since fullHeight=" + mFullHeight);
+    protected void onHeightUpdated(float expandedHeight) {
+        requestLayout();
+    }
+
+    /**
+     * This returns the maximum height of the panel. Children should override this if their
+     * desired height is not the full height.
+     *
+     * @return the default implementation simply returns the maximum height.
+     */
+    protected int getMaxPanelHeight() {
+        if (mMaxPanelHeight <= 0) {
+            if (DEBUG) logf("Forcing measure() since mMaxPanelHeight=" + mMaxPanelHeight);
             measure(MeasureSpec.makeMeasureSpec(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, MeasureSpec.EXACTLY));
         }
-        return mFullHeight;
+        return mMaxPanelHeight;
     }
 
     public void setExpandedFraction(float frac) {
@@ -621,7 +733,7 @@ public class PanelView extends FrameLayout {
             }
             frac = 0;
         }
-        setExpandedHeight(getFullHeight() * frac);
+        setExpandedHeight(getMaxPanelHeight() * frac);
     }
 
     public float getExpandedHeight() {
@@ -633,7 +745,7 @@ public class PanelView extends FrameLayout {
     }
 
     public boolean isFullyExpanded() {
-        return mExpandedHeight >= getFullHeight();
+        return mExpandedHeight >= getMaxPanelHeight();
     }
 
     public boolean isFullyCollapsed() {
@@ -681,12 +793,12 @@ public class PanelView extends FrameLayout {
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(String.format("[PanelView(%s): expandedHeight=%f fullHeight=%f closing=%s"
+        pw.println(String.format("[PanelView(%s): expandedHeight=%f maxPanelHeight=%f closing=%s"
                 + " tracking=%s rubberbanding=%s justPeeked=%s peekAnim=%s%s timeAnim=%s%s"
                 + "]",
                 this.getClass().getSimpleName(),
                 getExpandedHeight(),
-                getFullHeight(),
+                getMaxPanelHeight(),
                 mClosing?"T":"f",
                 mTracking?"T":"f",
                 mRubberbanding?"T":"f",
