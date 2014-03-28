@@ -24317,8 +24317,12 @@ package android.service.notification {
     ctor public NotificationListenerService();
     method public final void cancelAllNotifications();
     method public final void cancelNotification(java.lang.String, java.lang.String, int);
+    method public final void cancelNotifications(java.lang.String[]);
+    method public java.lang.String[] getActiveNotificationKeys();
     method public android.service.notification.StatusBarNotification[] getActiveNotifications();
+    method public android.service.notification.StatusBarNotification[] getActiveNotifications(java.lang.String[]);
     method public android.os.IBinder onBind(android.content.Intent);
+    method public void onListenerConnected(java.lang.String[]);
     method public abstract void onNotificationPosted(android.service.notification.StatusBarNotification);
     method public abstract void onNotificationRemoved(android.service.notification.StatusBarNotification);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.notification.NotificationListenerService";
@@ -24330,6 +24334,7 @@ package android.service.notification {
     method public android.service.notification.StatusBarNotification clone();
     method public int describeContents();
     method public int getId();
+    method public java.lang.String getKey();
     method public android.app.Notification getNotification();
     method public java.lang.String getPackageName();
     method public long getPostTime();
