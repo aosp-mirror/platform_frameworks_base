@@ -170,7 +170,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int mActivePasswordNonLetter = 0;
         int mFailedPasswordAttempts = 0;
 
-        int mUserHandle;;
+        int mUserHandle;
         int mPasswordOwner = -1;
         long mLastMaximumTimeToLock = -1;
 
@@ -722,6 +722,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int callingUid = Binder.getCallingUid();
         final int userHandle = UserHandle.getUserId(callingUid);
         final DevicePolicyData policy = getUserData(userHandle);
+
+        List<ActiveAdmin> candidates = new ArrayList<ActiveAdmin>();
+
+        // Build a list of admins for this uid matching the given ComponentName
         if (who != null) {
             ActiveAdmin admin = policy.mAdminMap.get(who);
             if (admin == null) {
@@ -731,22 +735,43 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new SecurityException("Admin " + who + " is not owned by uid "
                         + Binder.getCallingUid());
             }
-            if (!admin.info.usesPolicy(reqPolicy)) {
-                throw new SecurityException("Admin " + admin.info.getComponent()
-                        + " did not specify uses-policy for: "
-                        + admin.info.getTagForPolicy(reqPolicy));
-            }
-            return admin;
+            candidates.add(admin);
         } else {
-            final int N = policy.mAdminList.size();
-            for (int i=0; i<N; i++) {
-                ActiveAdmin admin = policy.mAdminList.get(i);
-                if (admin.getUid() == callingUid && admin.info.usesPolicy(reqPolicy)) {
+            for (ActiveAdmin admin : policy.mAdminList) {
+                if (admin.getUid() == callingUid) {
+                    candidates.add(admin);
+                }
+            }
+        }
+
+        // Try to find an admin which can use reqPolicy
+        for (ActiveAdmin admin : candidates) {
+            boolean ownsDevice = isDeviceOwner(admin.info.getPackageName());
+            boolean ownsProfile = (getProfileOwner(userHandle) != null
+                    && getProfileOwner(userHandle).equals(admin.info.getPackageName()));
+
+            if (reqPolicy == DeviceAdminInfo.USES_POLICY_DEVICE_OWNER) {
+                if (ownsDevice) {
+                    return admin;
+                }
+            } else if (reqPolicy == DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) {
+                if (ownsDevice || ownsProfile) {
+                    return admin;
+                }
+            } else {
+                if (admin.info.usesPolicy(reqPolicy)) {
                     return admin;
                 }
             }
+        }
+
+        if (who != null) {
+            throw new SecurityException("Admin " + candidates.get(0).info.getComponent()
+                    + " did not specify uses-policy for: "
+                    + candidates.get(0).info.getTagForPolicy(reqPolicy));
+        } else {
             throw new SecurityException("No active admin owned by uid "
-                    + Binder.getCallingUid() + " for policy #" + reqPolicy);
+                    + Binder.getCallingUid() + " for policy:" + reqPolicy);
         }
     }
 
@@ -2966,64 +2991,41 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private boolean isProfileOwner(String packageName, int userId) {
-        String profileOwnerPackage = getProfileOwner(userId);
-        // TODO: make public and connect with isProfileOwnerApp in DPM
-        return profileOwnerPackage != null && profileOwnerPackage.equals(packageName);
-    }
-
-    public void addPersistentPreferredActivity(ComponentName admin, IntentFilter filter,
+    public void addPersistentPreferredActivity(ComponentName who, IntentFilter filter,
             ComponentName activity) {
-        int callingUserId = UserHandle.getCallingUserId();
-        Slog.d(LOG_TAG,"called by user " + callingUserId);
         synchronized (this) {
-            ActiveAdmin aa = getActiveAdminUncheckedLocked(admin, callingUserId);
-            if (aa == null) {
-                throw new SecurityException("No active admin " + admin);
-            } else {
-                if (isProfileOwner(admin.getPackageName(), callingUserId)
-                        || isDeviceOwner(admin.getPackageName())) {
-                    IPackageManager pm = AppGlobals.getPackageManager();
-                    long id = Binder.clearCallingIdentity();
-                    try {
-                        pm.addPersistentPreferredActivity(filter, activity, callingUserId);
-                    } catch (RemoteException re) {
-                        // Shouldn't happen
-                    } finally {
-                        restoreCallingIdentity(id);
-                    }
-                } else {
-                    throw new SecurityException("Admin " + admin +
-                            "is not device owner or profile owner" );
-                }
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            IPackageManager pm = AppGlobals.getPackageManager();
+            long id = Binder.clearCallingIdentity();
+            try {
+                pm.addPersistentPreferredActivity(filter, activity, UserHandle.getCallingUserId());
+            } catch (RemoteException re) {
+                // Shouldn't happen
+            } finally {
+                restoreCallingIdentity(id);
             }
         }
     }
 
-    public void clearPackagePersistentPreferredActivities(ComponentName admin,
-            String packageName) {
-        int callingUserId = UserHandle.getCallingUserId();
-        Slog.d(LOG_TAG,"called by user " + callingUserId);
+    public void clearPackagePersistentPreferredActivities(ComponentName who, String packageName) {
         synchronized (this) {
-            ActiveAdmin aa = getActiveAdminUncheckedLocked(admin, callingUserId);
-            if (aa == null) {
-                throw new SecurityException("No active admin " + admin);
-            } else {
-                if (isProfileOwner(admin.getPackageName(), callingUserId)
-                        || isDeviceOwner(admin.getPackageName())) {
-                    IPackageManager pm = AppGlobals.getPackageManager();
-                    long id = Binder.clearCallingIdentity();
-                    try{
-                        pm.clearPackagePersistentPreferredActivities(packageName, callingUserId);
-                    } catch (RemoteException re) {
-                        // Shouldn't happen
-                    } finally {
-                        restoreCallingIdentity(id);
-                    }
-                } else {
-                    throw new SecurityException("Admin " + admin +
-                            "is not device owner or profile owner" );
-                }
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            IPackageManager pm = AppGlobals.getPackageManager();
+            long id = Binder.clearCallingIdentity();
+            try {
+                pm.clearPackagePersistentPreferredActivities(packageName, UserHandle.getCallingUserId());
+            } catch (RemoteException re) {
+                // Shouldn't happen
+            } finally {
+                restoreCallingIdentity(id);
             }
         }
     }
