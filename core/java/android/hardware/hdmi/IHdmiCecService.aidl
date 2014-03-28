@@ -29,7 +29,6 @@ import android.os.IBinder;
 interface IHdmiCecService {
     IBinder allocateLogicalDevice(int type, IHdmiCecListener listener);
     void removeServiceListener(IBinder b, IHdmiCecListener listener);
-    void setOsdName(IBinder b, String name);
     void sendActiveSource(IBinder b);
     void sendInactiveSource(IBinder b);
     void sendImageViewOn(IBinder b);
