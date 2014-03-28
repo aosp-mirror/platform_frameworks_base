@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.animation.RevealAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -10810,6 +10812,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns a ValueAnimator which can be used to run a reveal animation,
+     * clipping the content of the view to a circle.
+     *
+     * TODO: Make this a public API.
+     * @hide
+     */
+    public final ValueAnimator createRevealAnimator(int x, int y,
+            float startRadius, float endRadius, boolean inverseClip) {
+        return RevealAnimator.ofRevealCircle(this, x, y, startRadius, endRadius, inverseClip);
+    }
+
+    /**
      * Sets the outline of the view, which defines the shape of the shadow it
      * casts, and can used for clipping.
      * <p>
@@ -10891,6 +10905,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             float x, float y, float radius) {
         if (mDisplayList != null) {
             mDisplayList.setRevealClip(shouldClip, inverseClip, x, y, radius);
+            // TODO: Handle this invalidate in a better way, or purely in native.
+            invalidate();
         }
     }
 
