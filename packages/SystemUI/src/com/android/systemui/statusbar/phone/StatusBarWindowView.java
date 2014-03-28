@@ -27,11 +27,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.widget.FrameLayout;
-import android.widget.ScrollView;
 
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 
 public class StatusBarWindowView extends FrameLayout
@@ -42,7 +42,7 @@ public class StatusBarWindowView extends FrameLayout
     private ExpandHelper mExpandHelper;
     private ViewGroup latestItems;
     private NotificationPanelView mNotificationPanel;
-    private ScrollView mScrollView;
+    private View mNotificationScroller;
 
     PhoneStatusBar mService;
 
@@ -56,19 +56,37 @@ public class StatusBarWindowView extends FrameLayout
     protected void onAttachedToWindow () {
         super.onAttachedToWindow();
 
+        ExpandHelper.ScrollAdapter scrollAdapter;
         if (BaseStatusBar.ENABLE_NOTIFICATION_STACK) {
-            latestItems = (ViewGroup) findViewById(R.id.notification_stack_scroller);
+            NotificationStackScrollLayout stackScrollLayout =
+                    (NotificationStackScrollLayout) findViewById(R.id.notification_stack_scroller);
+
+            // ScrollView and notification container are unified in a single view now.
+            latestItems = stackScrollLayout;
+            scrollAdapter = stackScrollLayout;
+            mNotificationScroller = stackScrollLayout;
         } else {
             latestItems = (ViewGroup) findViewById(R.id.latestItems);
+            mNotificationScroller = findViewById(R.id.scroll);
+            scrollAdapter = new ExpandHelper.ScrollAdapter() {
+                @Override
+                public boolean isScrolledToTop() {
+                    return mNotificationScroller.getScrollY() == 0;
+                }
+
+                @Override
+                public View getHostView() {
+                    return mNotificationScroller;
+                }
+            };
         }
-        mScrollView = (ScrollView) findViewById(R.id.scroll);
         mNotificationPanel = (NotificationPanelView) findViewById(R.id.notification_panel);
         int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
         int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
         mExpandHelper = new ExpandHelper(getContext(), (ExpandHelper.Callback) latestItems,
                 minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
-        mExpandHelper.setScrollView(mScrollView);
+        mExpandHelper.setScrollAdapter(scrollAdapter);
 
         // We really need to be able to animate while window animations are going on
         // so that activities may be started asynchronously from panel animations
@@ -94,7 +112,8 @@ public class StatusBarWindowView extends FrameLayout
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         boolean intercept = false;
-        if (mNotificationPanel.isFullyExpanded() && mScrollView.getVisibility() == View.VISIBLE) {
+        if (mNotificationPanel.isFullyExpanded()
+                && mNotificationScroller.getVisibility() == View.VISIBLE) {
             intercept = mExpandHelper.onInterceptTouchEvent(ev);
         }
         if (!intercept) {
