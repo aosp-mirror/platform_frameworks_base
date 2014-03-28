@@ -2079,11 +2079,14 @@ public final class BluetoothAdapter {
         public void onMultiAdvertiseCallback(int status) {
             // no op
         }
-        /**
-         * Callback reporting LE ATT MTU.
-         * @hide
-         */
+
+        @Override
         public void onConfigureMTU(String address, int mtu, int status) {
+            // no op
+        }
+
+        @Override
+        public void onConnectionCongested(String address, boolean congested) {
             // no op
         }
     }

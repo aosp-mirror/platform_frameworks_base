@@ -265,6 +265,42 @@ public final class BluetoothGattServer implements BluetoothProfile {
                     Log.w(TAG, "Unhandled exception in callback", ex);
                 }
             }
+
+            /**
+             * A notification/indication has been sent.
+             * @hide
+             */
+            public void onNotificationSent(String address, int status) {
+                if (DBG) Log.d(TAG, "onNotificationSent() - "
+                    + "device=" + address + ", status=" + status);
+
+                BluetoothDevice device = mAdapter.getRemoteDevice(address);
+                if (device == null) return;
+
+                try {
+                    mCallback.onNotificationSent(device, status);
+                } catch (Exception ex) {
+                    Log.w(TAG, "Unhandled exception: " + ex);
+                }
+            }
+
+            /**
+             * Callback indicating the remote device connection is congested.
+             * @hide
+             */
+            public void onConnectionCongested(String address, boolean congested) {
+                if (DBG) Log.d(TAG, "onConnectionCongested() - Device=" + address
+                        + " congested=" + congested);
+
+                BluetoothDevice device = mAdapter.getRemoteDevice(address);
+                if (device == null) return;
+
+                try {
+                    mCallback.onConnectionCongested(device, congested);
+                } catch (Exception ex) {
+                    Log.w(TAG, "Unhandled exception in callback", ex);
+                }
+            }
         };
 
     /**

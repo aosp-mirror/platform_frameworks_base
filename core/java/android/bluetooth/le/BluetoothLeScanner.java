@@ -358,6 +358,11 @@ public final class BluetoothLeScanner {
         public void onConfigureMTU(String address, int mtu, int status) {
             // no op
         }
+
+        @Override
+        public void onConnectionCongested(String address, boolean congested) {
+            // no op
+        }
     }
 
     private void postCallbackError(final ScanCallback callback, final int errorCode) {
