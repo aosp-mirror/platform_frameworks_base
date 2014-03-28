@@ -9018,10 +9018,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return True if the event was handled, false otherwise.
      */
     public boolean onTouchEvent(MotionEvent event) {
+        final float x = event.getX();
+        final float y = event.getY();
         final int viewFlags = mViewFlags;
 
         if ((viewFlags & ENABLED_MASK) == DISABLED) {
             if (event.getAction() == MotionEvent.ACTION_UP && (mPrivateFlags & PFLAG_PRESSED) != 0) {
+                clearHotspot(R.attr.state_pressed);
                 setPressed(false);
             }
             // A disabled view that is clickable still consumes the touch
@@ -9054,6 +9057,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             // showed it as pressed.  Make it show the pressed
                             // state now (before scheduling the click) to ensure
                             // the user sees it.
+                            setHotspot(R.attr.state_pressed, x, y);
                             setPressed(true);
                        }
 
@@ -9086,6 +9090,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             // If the post failed, unpress right now
                             mUnsetPressedState.run();
                         }
+
                         removeTapCallback();
                     }
                     break;
@@ -9107,23 +9112,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         if (mPendingCheckForTap == null) {
                             mPendingCheckForTap = new CheckForTap();
                         }
+                        mPendingCheckForTap.x = event.getX();
+                        mPendingCheckForTap.y = event.getY();
                         postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
                     } else {
                         // Not inside a scrolling container, so show the feedback right away
+                        setHotspot(R.attr.state_pressed, x, y);
                         setPressed(true);
                         checkForLongClick(0);
                     }
                     break;
 
                 case MotionEvent.ACTION_CANCEL:
+                    clearHotspot(R.attr.state_pressed);
                     setPressed(false);
                     removeTapCallback();
                     removeLongPressCallback();
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    final int x = (int) event.getX();
-                    final int y = (int) event.getY();
+                    setHotspot(R.attr.state_pressed, x, y);
 
                     // Be lenient about moving outside of buttons
                     if (!pointInView(x, y, mTouchSlop)) {
@@ -9139,46 +9147,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
             }
 
-            if (mBackground != null && mBackground.supportsHotspots()) {
-                manageTouchHotspot(event);
-            }
-
             return true;
         }
 
         return false;
     }
 
-    private void manageTouchHotspot(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_POINTER_DOWN: {
-                final int index = event.getActionIndex();
-                setPointerHotspot(event, index);
-            } break;
-            case MotionEvent.ACTION_MOVE: {
-                final int count = event.getPointerCount();
-                for (int index = 0; index < count; index++) {
-                    setPointerHotspot(event, index);
-                }
-            } break;
-            case MotionEvent.ACTION_POINTER_UP: {
-                final int actionIndex = event.getActionIndex();
-                final int pointerId = event.getPointerId(actionIndex);
-                mBackground.removeHotspot(pointerId);
-            } break;
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
-                mBackground.clearHotspots();
-                break;
+    private void setHotspot(int id, float x, float y) {
+        final Drawable bg = mBackground;
+        if (bg != null && bg.supportsHotspots()) {
+            bg.setHotspot(id, x, y);
         }
     }
 
-    private void setPointerHotspot(MotionEvent event, int index) {
-        final int id = event.getPointerId(index);
-        final float x = event.getX(index);
-        final float y = event.getY(index);
-        mBackground.setHotspot(id, x, y);
+    private void clearHotspot(int id) {
+        final Drawable bg = mBackground;
+        if (bg != null && bg.supportsHotspots()) {
+            bg.removeHotspot(id);
+        }
     }
 
     /**
@@ -19109,10 +19095,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    class CheckForLongPress implements Runnable {
-
+    private final class CheckForLongPress implements Runnable {
         private int mOriginalWindowAttachCount;
 
+        @Override
         public void run() {
             if (isPressed() && (mParent != null)
                     && mOriginalWindowAttachCount == mWindowAttachCount) {
@@ -19128,14 +19114,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private final class CheckForTap implements Runnable {
+        public float x;
+        public float y;
+
+        @Override
         public void run() {
             mPrivateFlags &= ~PFLAG_PREPRESSED;
+            setHotspot(R.attr.state_pressed, x, y);
             setPressed(true);
             checkForLongClick(ViewConfiguration.getTapTimeout());
         }
     }
 
     private final class PerformClick implements Runnable {
+        @Override
         public void run() {
             performClick();
         }
@@ -19414,7 +19406,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private final class UnsetPressedState implements Runnable {
+        @Override
         public void run() {
+            clearHotspot(R.attr.state_pressed);
             setPressed(false);
         }
     }
