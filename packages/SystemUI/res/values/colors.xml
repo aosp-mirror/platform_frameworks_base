@@ -32,9 +32,12 @@
     <drawable name="heads_up_notification_bg_pressed">#ff33B5E5</drawable>
     <drawable name="notification_header_bg">#FF4D4D4D</drawable>
     <color name="notification_panel_scrim_color">#B0000000</color>
-    <color name="batterymeter_frame_color">#6620FF33</color><!-- 40% green -->
-    <color name="batterymeter_charge_color">#FFF09b15</color><!-- 100% orange -->
+    <color name="batterymeter_frame_color">#66FFFFFF</color><!-- 40% white -->
+    <color name="batterymeter_charge_color">#FFFFFFFF</color>
     <color name="batterymeter_bolt_color">#B2000000</color><!-- 70% black -->
+    <color name="batterymeterqs_frame_color">#FF4D4D4D</color><!-- grey -->
+    <color name="batterymeterqs_charge_color">#FFF09b15</color><!-- 100% orange -->
+    <color name="batterymeterqs_bolt_color">#FFFFFFFF</color><!-- 100% white -->
     <color name="status_bar_clock_color">#FFFFFFFF</color>
     <drawable name="trasparent_status_bar">#00000000</drawable><!-- 100% trasparent -->
 </resources>

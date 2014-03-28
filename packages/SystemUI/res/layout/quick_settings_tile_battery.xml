@@ -19,7 +19,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="top"
         android:orientation="vertical">
-    <com.android.systemui.BatteryMeterView
+    <com.android.systemui.BatteryMeterQsView
             android:id="@+id/image"
             android:layout_marginTop="@dimen/qs_tile_margin_above_icon"
             android:layout_marginBottom="@dimen/qs_tile_margin_below_icon"
