@@ -2548,6 +2548,14 @@
         android:description="@string/permdesc_control_keyguard" />
 
     <!-- Must be required by an {@link
+         android.service.trust.TrustAgentService},
+         to ensure that only the system can bind to it. -->
+    <permission android:name="android.permission.BIND_TRUST_AGENT_SERVICE"
+                android:protectionLevel="signature"
+                android:label="@string/permlab_bind_trust_agent_service"
+                android:description="@string/permdesc_bind_trust_agent_service" />
+
+    <!-- Must be required by an {@link
          android.service.notification.NotificationListenerService},
          to ensure that only the system can bind to it. -->
     <permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
