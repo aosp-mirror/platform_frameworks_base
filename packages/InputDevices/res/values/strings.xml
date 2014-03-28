@@ -98,4 +98,19 @@
 
     <!-- Ukrainian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_ukrainian">Ukrainian</string>
+
+    <!-- Arabic keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_arabic">Arabic</string>
+
+    <!-- Greek keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_greek">Greek</string>
+
+    <!-- Hebrew keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_hebrew">Hebrew</string>
+
+    <!-- Lithuanian keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_lithuanian">Lithuanian</string>
+
+    <!-- Spanish (Latin) keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_spanish_latin">Spanish (Latin)</string>
 </resources>
