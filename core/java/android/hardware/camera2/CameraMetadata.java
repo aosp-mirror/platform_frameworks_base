@@ -1002,8 +1002,11 @@ public abstract class CameraMetadata {
      * controls; the camera device will ignore those settings while
      * USE_SCENE_MODE is active (except for FACE_PRIORITY
      * scene mode). Other control entries are still active.
-     * This setting can only be used if availableSceneModes !=
-     * UNSUPPORTED</p>
+     * This setting can only be used if scene mode is supported
+     * (i.e. {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES android.control.availableSceneModes} contain some modes
+     * other than DISABLED).</p>
+     *
+     * @see CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES
      * @see CaptureRequest#CONTROL_MODE
      */
     public static final int CONTROL_MODE_USE_SCENE_MODE = 2;
