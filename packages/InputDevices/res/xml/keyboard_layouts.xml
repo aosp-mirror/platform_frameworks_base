@@ -123,4 +123,24 @@
     <keyboard-layout android:name="keyboard_layout_ukrainian"
             android:label="@string/keyboard_layout_ukrainian"
             android:keyboardLayout="@raw/keyboard_layout_ukrainian" />
+
+    <keyboard-layout android:name="keyboard_layout_arabic"
+            android:label="@string/keyboard_layout_arabic"
+            android:keyboardLayout="@raw/keyboard_layout_arabic" />
+
+    <keyboard-layout android:name="keyboard_layout_greek"
+            android:label="@string/keyboard_layout_greek"
+            android:keyboardLayout="@raw/keyboard_layout_greek" />
+
+    <keyboard-layout android:name="keyboard_layout_hebrew"
+            android:label="@string/keyboard_layout_hebrew"
+            android:keyboardLayout="@raw/keyboard_layout_hebrew" />
+
+    <keyboard-layout android:name="keyboard_layout_lithuanian"
+            android:label="@string/keyboard_layout_lithuanian"
+            android:keyboardLayout="@raw/keyboard_layout_lithuanian" />
+
+    <keyboard-layout android:name="keyboard_layout_spanish_latin"
+            android:label="@string/keyboard_layout_spanish_latin"
+            android:keyboardLayout="@raw/keyboard_layout_spanish_latin" />
 </keyboard-layouts>
