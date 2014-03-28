@@ -38,6 +38,8 @@
               Using the Layout Editor</a></li>
           <li><a href="<?cs var:toroot ?>sdk/installing/studio-build.html">
               Building Your Project with Gradle</a></li>
+          <li><a href="<?cs var:toroot ?>sdk/installing/studio-debug.html">
+              Debugging with Android Studio</a></li>
           </ul>
       </li>
       <li><a href="<?cs var:toroot ?>sdk/exploring.html">
