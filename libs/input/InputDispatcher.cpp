@@ -4105,16 +4105,37 @@ bool InputDispatcher::InputState::trackMotion(const MotionEntry* entry,
     case AMOTION_EVENT_ACTION_POINTER_UP:
     case AMOTION_EVENT_ACTION_POINTER_DOWN:
     case AMOTION_EVENT_ACTION_MOVE: {
+        if (entry->source & AINPUT_SOURCE_CLASS_NAVIGATION) {
+            // Trackballs can send MOVE events with a corresponding DOWN or UP. There's no need to
+            // generate cancellation events for these since they're based in relative rather than
+            // absolute units.
+            return true;
+        }
+
         ssize_t index = findMotionMemento(entry, false /*hovering*/);
+
+        if (entry->source & AINPUT_SOURCE_CLASS_JOYSTICK) {
+            // Joysticks can send MOVE events without a corresponding DOWN or UP. Since all
+            // joystick axes are normalized to [-1, 1] we can trust that 0 means it's neutral. Any
+            // other value and we need to track the motion so we can send cancellation events for
+            // anything generating fallback events (e.g. DPad keys for joystick movements).
+            if (index >= 0) {
+                if (entry->pointerCoords[0].isEmpty()) {
+                    mMotionMementos.removeAt(index);
+                } else {
+                    MotionMemento& memento = mMotionMementos.editItemAt(index);
+                    memento.setPointers(entry);
+                }
+            } else if (!entry->pointerCoords[0].isEmpty()) {
+                addMotionMemento(entry, flags, false /*hovering*/);
+            }
+
+            // Joysticks and trackballs can send MOVE events without corresponding DOWN or UP.
+            return true;
+        }
         if (index >= 0) {
             MotionMemento& memento = mMotionMementos.editItemAt(index);
             memento.setPointers(entry);
-            return true;
-        }
-        if (actionMasked == AMOTION_EVENT_ACTION_MOVE
-                && (entry->source & (AINPUT_SOURCE_CLASS_JOYSTICK
-                        | AINPUT_SOURCE_CLASS_NAVIGATION))) {
-            // Joysticks and trackballs can send MOVE events without corresponding DOWN or UP.
             return true;
         }
 #if DEBUG_OUTBOUND_EVENT_DETAILS

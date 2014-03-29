@@ -1228,7 +1228,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (KeyEvent.isConfirmKey(keyCode)) {
+        if (event.isConfirmKey()) {
             if (mReceivedInvokeKeyDown) {
                 if (mItemCount > 0) {
                     dispatchPress(mSelectedChild);
