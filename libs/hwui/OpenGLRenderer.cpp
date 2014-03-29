@@ -409,15 +409,6 @@ status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
         for (size_t i = 0; i < count; i++) {
             Functor* f = functors.itemAt(i);
             result |= (*f)(DrawGlInfo::kModeProcess, &info);
-
-            if (result & DrawGlInfo::kStatusDraw) {
-                Rect localDirty(info.dirtyLeft, info.dirtyTop, info.dirtyRight, info.dirtyBottom);
-                dirty.unionWith(localDirty);
-            }
-
-            if (result & DrawGlInfo::kStatusInvoke) {
-                mFunctors.add(f);
-            }
         }
         resume();
     }
@@ -461,19 +452,10 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     interrupt();
 
     // call functor immediately after GL state setup
-    status_t result = (*functor)(DrawGlInfo::kModeDraw, &info);
-
-    if (result != DrawGlInfo::kStatusDone) {
-        Rect localDirty(info.dirtyLeft, info.dirtyTop, info.dirtyRight, info.dirtyBottom);
-        dirty.unionWith(localDirty);
-
-        if (result & DrawGlInfo::kStatusInvoke) {
-            mFunctors.add(functor);
-        }
-    }
+    (*functor)(DrawGlInfo::kModeDraw, &info);
 
     resume();
-    return result | DrawGlInfo::kStatusDrew;
+    return DrawGlInfo::kStatusDrew;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
