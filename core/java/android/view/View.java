@@ -3551,10 +3551,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private Bitmap mUnscaledDrawingCache;
 
     /**
-     * Display list used for the View content.
+     * RenderNode holding View properties, potentially holding a DisplayList of View content.
      * <p>
      * When non-null and valid, this is expected to contain an up-to-date copy
-     * of the View content. It is cleared on temporary detach and reset on
+     * of the View content. Its DisplayList content is cleared on temporary detach and reset on
      * cleanup.
      */
     RenderNode mDisplayList;
@@ -9719,6 +9719,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    void ensureRenderNode() {
+        if (mDisplayList == null) {
+            mDisplayList = RenderNode.create(getClass().getName());
+        }
+    }
+
     /**
      * Recomputes the transform matrix if necessary.
      */
@@ -13689,10 +13695,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             mHardwareLayer.setLayerPaint(mLayerPaint);
             RenderNode displayList = mHardwareLayer.startRecording();
-            if (getDisplayList(displayList, true) != displayList) {
-                throw new IllegalStateException("getDisplayList() didn't return"
-                        + " the input displaylist for a hardware layer!");
-            }
+            getDisplayList(displayList, true);
             mHardwareLayer.endRecording(mLocalDirtyRect);
             mLocalDirtyRect.setEmpty();
         }
@@ -13833,29 +13836,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Otherwise, the same display list will be returned (after having been rendered into
      * along the way, depending on the invalidation state of the view).
      *
-     * @param displayList The previous version of this displayList, could be null.
+     * @param renderNode The previous version of this displayList, could be null.
      * @param isLayer Whether the requester of the display list is a layer. If so,
      * the view will avoid creating a layer inside the resulting display list.
      * @return A new or reused DisplayList object.
      */
-    private RenderNode getDisplayList(RenderNode displayList, boolean isLayer) {
+    private void getDisplayList(@NonNull RenderNode renderNode, boolean isLayer) {
         final HardwareRenderer renderer = getHardwareRenderer();
+        if (renderNode == null) {
+            throw new IllegalArgumentException("RenderNode must not be null");
+        }
         if (renderer == null || !canHaveDisplayList()) {
-            return null;
+            // can't populate RenderNode, don't try
+            return;
         }
 
-        if (((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0 ||
-                displayList == null || !displayList.isValid() ||
-                (!isLayer && mRecreateDisplayList))) {
+        if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0
+                || !renderNode.isValid()
+                || (!isLayer && mRecreateDisplayList)) {
             // Don't need to recreate the display list, just need to tell our
             // children to restore/recreate theirs
-            if (displayList != null && displayList.isValid() &&
-                    !isLayer && !mRecreateDisplayList) {
+            if (renderNode.isValid()
+                    && !isLayer
+                    && !mRecreateDisplayList) {
                 mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
                 mPrivateFlags &= ~PFLAG_DIRTY_MASK;
                 dispatchGetDisplayList();
 
-                return displayList;
+                return; // no work needed
             }
 
             if (!isLayer) {
@@ -13863,20 +13871,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // we copy in child display lists into ours in drawChild()
                 mRecreateDisplayList = true;
             }
-            if (displayList == null) {
-                displayList = RenderNode.create(getClass().getName());
-                // If we're creating a new display list, make sure our parent gets invalidated
-                // since they will need to recreate their display list to account for this
-                // new child display list.
-                invalidateParentCaches();
-            }
 
             boolean caching = false;
             int width = mRight - mLeft;
             int height = mBottom - mTop;
             int layerType = getLayerType();
 
-            final HardwareCanvas canvas = displayList.start(width, height);
+            final HardwareCanvas canvas = renderNode.start(width, height);
 
             try {
                 if (!isLayer && layerType != LAYER_TYPE_NONE) {
@@ -13919,12 +13920,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                 }
             } finally {
-                displayList.end(renderer, canvas);
-                displayList.setCaching(caching);
+                renderNode.end(renderer, canvas);
+                renderNode.setCaching(caching);
                 if (isLayer) {
-                    displayList.setLeftTopRightBottom(0, 0, width, height);
+                    renderNode.setLeftTopRightBottom(0, 0, width, height);
                 } else {
-                    setDisplayListProperties(displayList);
+                    setDisplayListProperties(renderNode);
                 }
 
                 if (renderer != getHardwareRenderer()) {
@@ -13939,8 +13940,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
         }
-
-        return displayList;
     }
 
     /**
@@ -13952,7 +13951,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public RenderNode getDisplayList() {
-        mDisplayList = getDisplayList(mDisplayList, false);
+        ensureRenderNode();
+        getDisplayList(mDisplayList, false);
         return mDisplayList;
     }
 
