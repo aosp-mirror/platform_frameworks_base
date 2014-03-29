@@ -1465,8 +1465,8 @@ public final class ViewRootImpl implements ViewParent,
                                     mWidth, mHeight);
                         }
                         mResizeBuffer.prepare(mWidth, mHeight, false);
-                        RenderNode layerDisplayList = mResizeBuffer.startRecording();
-                        HardwareCanvas layerCanvas = layerDisplayList.start(mWidth, mHeight);
+                        RenderNode layerRenderNode = mResizeBuffer.startRecording();
+                        HardwareCanvas layerCanvas = layerRenderNode.start(mWidth, mHeight);
                         final int restoreCount = layerCanvas.save();
 
                         int yoff;
@@ -1484,9 +1484,9 @@ public final class ViewRootImpl implements ViewParent,
                             mTranslator.translateCanvas(layerCanvas);
                         }
 
-                        RenderNode displayList = mView.mDisplayList;
-                        if (displayList != null && displayList.isValid()) {
-                            layerCanvas.drawDisplayList(displayList, null,
+                        RenderNode renderNode = mView.mRenderNode;
+                        if (renderNode != null && renderNode.isValid()) {
+                            layerCanvas.drawDisplayList(renderNode, null,
                                     RenderNode.FLAG_CLIP_CHILDREN);
                         } else {
                             mView.draw(layerCanvas);
@@ -1499,9 +1499,9 @@ public final class ViewRootImpl implements ViewParent,
                                 com.android.internal.R.integer.config_mediumAnimTime);
 
                         layerCanvas.restoreToCount(restoreCount);
-                        layerDisplayList.end(mAttachInfo.mHardwareRenderer, layerCanvas);
-                        layerDisplayList.setCaching(true);
-                        layerDisplayList.setLeftTopRightBottom(0, 0, mWidth, mHeight);
+                        layerRenderNode.end(mAttachInfo.mHardwareRenderer, layerCanvas);
+                        layerRenderNode.setCaching(true);
+                        layerRenderNode.setLeftTopRightBottom(0, 0, mWidth, mHeight);
                         mTempRect.set(0, 0, mWidth, mHeight);
                         mResizeBuffer.endRecording(mTempRect);
                         mAttachInfo.mHardwareRenderer.flushLayerUpdates();
@@ -2178,9 +2178,9 @@ public final class ViewRootImpl implements ViewParent,
      * @hide
      */
     void outputDisplayList(View view) {
-        RenderNode displayList = view.getDisplayList();
-        if (displayList != null) {
-            displayList.output();
+        RenderNode renderNode = view.getDisplayList();
+        if (renderNode != null) {
+            renderNode.output();
         }
     }
 
@@ -5218,10 +5218,10 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private static void getGfxInfo(View view, int[] info) {
-        RenderNode displayList = view.mDisplayList;
+        RenderNode renderNode = view.mRenderNode;
         info[0]++;
-        if (displayList != null) {
-            info[1] += 0; /* TODO: Memory used by display lists */
+        if (renderNode != null) {
+            info[1] += 0; /* TODO: Memory used by RenderNodes (properties + DisplayLists) */
         }
 
         if (view instanceof ViewGroup) {
