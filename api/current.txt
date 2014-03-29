@@ -26839,8 +26839,10 @@ package android.view {
     method public final boolean hasModifiers(int);
     method public final boolean hasNoModifiers();
     method public final boolean isAltPressed();
+    method public final boolean isCancelKey();
     method public final boolean isCanceled();
     method public final boolean isCapsLockOn();
+    method public final boolean isConfirmKey();
     method public final boolean isCtrlPressed();
     method public final boolean isFunctionPressed();
     method public static final boolean isGamepadButton(int);

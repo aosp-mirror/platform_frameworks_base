@@ -843,7 +843,7 @@ public class ListPopupWindow {
             // to select one of its items
             if (keyCode != KeyEvent.KEYCODE_SPACE
                     && (mDropDownList.getSelectedItemPosition() >= 0
-                            || !KeyEvent.isConfirmKey(keyCode))) {
+                            || !event.isConfirmKey())) {
                 int curIndex = mDropDownList.getSelectedItemPosition();
                 boolean consumed;
 
@@ -931,7 +931,7 @@ public class ListPopupWindow {
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (isShowing() && mDropDownList.getSelectedItemPosition() >= 0) {
             boolean consumed = mDropDownList.onKeyUp(keyCode, event);
-            if (consumed && KeyEvent.isConfirmKey(keyCode)) {
+            if (consumed && event.isConfirmKey()) {
                 // if the list accepts the key events and the key event was a click, the text view
                 // gets the selected item from the drop down as its content
                 dismiss();

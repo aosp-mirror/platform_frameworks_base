@@ -8186,7 +8186,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean result = false;
 
-        if (KeyEvent.isConfirmKey(keyCode)) {
+        if (event.isConfirmKey()) {
             if ((mViewFlags & ENABLED_MASK) == DISABLED) {
                 return true;
             }
@@ -8228,7 +8228,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param event   The KeyEvent object that defines the button action.
      */
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (KeyEvent.isConfirmKey(keyCode)) {
+        if (event.isConfirmKey()) {
             if ((mViewFlags & ENABLED_MASK) == DISABLED) {
                 return true;
             }
