@@ -1339,6 +1339,12 @@
          Example: com.google.android.myapp/.resolver.MyResolverActivity  -->
     <string name="config_customResolverActivity"></string>
 
+    <!-- Name of the activity that prompts the user to reject, accept, or whitelist
+         an adb host's public key, when an unwhitelisted host connects to the local adbd.
+         Can be customized for other product types -->
+    <string name="config_customAdbPublicKeyActivity"
+            >com.android.systemui/com.android.systemui.usb.UsbDebuggingActivity</string>
+
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts">;com.android.settings;</string>
 
@@ -1421,4 +1427,5 @@
          1 - The device DOES have a permanent menu key; ignore autodetection.
          2 - The device DOES NOT have a permanent menu key; ignore autodetection. -->
     <integer name="config_overrideHasPermanentMenuKey">0</integer>
+
 </resources>

@@ -1622,6 +1622,7 @@
   <java-symbol type="string" name="enable_explore_by_touch_warning_message" />
   <java-symbol type="bool" name="config_powerDecoupleAutoSuspendModeFromDisplay" />
   <java-symbol type="bool" name="config_powerDecoupleInteractiveModeFromDisplay" />
+  <java-symbol type="string" name="config_customAdbPublicKeyActivity" />
 
   <java-symbol type="layout" name="resolver_list" />
   <java-symbol type="id" name="resolver_list" />
