@@ -20,7 +20,9 @@
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="64dp"
-    internal:layout_minHeight="64dp"
+    android:layout_marginLeft="6dp"
+    android:layout_marginRight="6dp"
+	internal:layout_minHeight="64dp"
     internal:layout_maxHeight="64dp"
     >
     <ImageView android:id="@+id/icon"
