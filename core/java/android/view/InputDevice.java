@@ -579,6 +579,18 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
+     * Determines whether the input device supports the given source or sources.
+     *
+     * @param source The input source or sources to check against. This can be a generic device
+     * type such as {@link InputDevice#SOURCE_MOUSE}, a more generic device class, such as
+     * {@link InputDevice#SOURCE_CLASS_POINTER}, or a combination of sources bitwise ORed together.
+     * @return Whether the device can produce all of the given sources.
+     */
+    public boolean supportsSource(int source) {
+        return (mSources & source) == source;
+    }
+
+    /**
      * Gets the keyboard type.
      * @return The keyboard type.
      */
