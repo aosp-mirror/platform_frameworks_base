@@ -1203,7 +1203,7 @@ public class GLRenderer extends HardwareRenderer {
 
     private RenderNode buildDisplayList(View view, HardwareCanvas canvas) {
         if (mDrawDelta <= 0) {
-            return view.mDisplayList;
+            return view.mRenderNode;
         }
 
         view.mRecreateDisplayList = (view.mPrivateFlags & View.PFLAG_INVALIDATED)
@@ -1214,12 +1214,12 @@ public class GLRenderer extends HardwareRenderer {
         canvas.clearLayerUpdates();
 
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
-        RenderNode displayList = view.getDisplayList();
+        RenderNode renderNode = view.getDisplayList();
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
 
         endBuildDisplayListProfiling(buildDisplayListStartTime);
 
-        return displayList;
+        return renderNode;
     }
 
     private Rect beginFrame(HardwareCanvas canvas, Rect dirty, int surfaceState) {
