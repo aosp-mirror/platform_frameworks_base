@@ -28314,6 +28314,7 @@ package android.view {
     method public android.os.Vibrator getVibrator();
     method public boolean[] hasKeys(int...);
     method public boolean isVirtual();
+    method public boolean supportsSource(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int KEYBOARD_TYPE_ALPHABETIC = 2; // 0x2
