@@ -925,51 +925,51 @@ public class ViewPropertyAnimator {
      */
     private void setValue(int propertyConstant, float value) {
         final View.TransformationInfo info = mView.mTransformationInfo;
-        final RenderNode displayList = mView.mDisplayList;
+        final RenderNode renderNode = mView.mRenderNode;
         switch (propertyConstant) {
             case TRANSLATION_X:
                 info.mTranslationX = value;
-                if (displayList != null) displayList.setTranslationX(value);
+                if (renderNode != null) renderNode.setTranslationX(value);
                 break;
             case TRANSLATION_Y:
                 info.mTranslationY = value;
-                if (displayList != null) displayList.setTranslationY(value);
+                if (renderNode != null) renderNode.setTranslationY(value);
                 break;
             case TRANSLATION_Z:
                 info.mTranslationZ = value;
-                if (displayList != null) displayList.setTranslationZ(value);
+                if (renderNode != null) renderNode.setTranslationZ(value);
                 break;
             case ROTATION:
                 info.mRotation = value;
-                if (displayList != null) displayList.setRotation(value);
+                if (renderNode != null) renderNode.setRotation(value);
                 break;
             case ROTATION_X:
                 info.mRotationX = value;
-                if (displayList != null) displayList.setRotationX(value);
+                if (renderNode != null) renderNode.setRotationX(value);
                 break;
             case ROTATION_Y:
                 info.mRotationY = value;
-                if (displayList != null) displayList.setRotationY(value);
+                if (renderNode != null) renderNode.setRotationY(value);
                 break;
             case SCALE_X:
                 info.mScaleX = value;
-                if (displayList != null) displayList.setScaleX(value);
+                if (renderNode != null) renderNode.setScaleX(value);
                 break;
             case SCALE_Y:
                 info.mScaleY = value;
-                if (displayList != null) displayList.setScaleY(value);
+                if (renderNode != null) renderNode.setScaleY(value);
                 break;
             case X:
                 info.mTranslationX = value - mView.mLeft;
-                if (displayList != null) displayList.setTranslationX(value - mView.mLeft);
+                if (renderNode != null) renderNode.setTranslationX(value - mView.mLeft);
                 break;
             case Y:
                 info.mTranslationY = value - mView.mTop;
-                if (displayList != null) displayList.setTranslationY(value - mView.mTop);
+                if (renderNode != null) renderNode.setTranslationY(value - mView.mTop);
                 break;
             case ALPHA:
                 info.mAlpha = value;
-                if (displayList != null) displayList.setAlpha(value);
+                if (renderNode != null) renderNode.setAlpha(value);
                 break;
         }
     }
@@ -1093,7 +1093,7 @@ public class ViewPropertyAnimator {
                 // Shouldn't happen, but just to play it safe
                 return;
             }
-            boolean useDisplayListProperties = mView.mDisplayList != null;
+            boolean useRenderNodeProperties = mView.mRenderNode != null;
 
             // alpha requires slightly different treatment than the other (transform) properties.
             // The logic in setAlpha() is not simply setting mAlpha, plus the invalidation
@@ -1101,7 +1101,7 @@ public class ViewPropertyAnimator {
             // We track what kinds of properties are set, and how alpha is handled when it is
             // set, and perform the invalidation steps appropriately.
             boolean alphaHandled = false;
-            if (!useDisplayListProperties) {
+            if (!useRenderNodeProperties) {
                 mView.invalidateParentCaches();
             }
             float fraction = animation.getAnimatedFraction();
@@ -1124,7 +1124,7 @@ public class ViewPropertyAnimator {
             }
             if ((propertyMask & TRANSFORM_MASK) != 0) {
                 mView.mTransformationInfo.mMatrixDirty = true;
-                if (!useDisplayListProperties) {
+                if (!useRenderNodeProperties) {
                     mView.mPrivateFlags |= View.PFLAG_DRAWN; // force another invalidation
                 }
             }

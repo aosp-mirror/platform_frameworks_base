@@ -3557,7 +3557,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * of the View content. Its DisplayList content is cleared on temporary detach and reset on
      * cleanup.
      */
-    RenderNode mDisplayList;
+    RenderNode mRenderNode;
 
     /**
      * Set to true when the view is sending hover accessibility events because it
@@ -9734,8 +9734,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     void ensureRenderNode() {
-        if (mDisplayList == null) {
-            mDisplayList = RenderNode.create(getClass().getName());
+        if (mRenderNode == null) {
+            mRenderNode = RenderNode.create(getClass().getName());
         }
     }
 
@@ -9881,8 +9881,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         info.mMatrixDirty = true;
 
         invalidateViewProperty(false, false);
-        if (mDisplayList != null) {
-            mDisplayList.setCameraDistance(-Math.abs(distance) / dpi);
+        if (mRenderNode != null) {
+            mRenderNode.setCameraDistance(-Math.abs(distance) / dpi);
         }
         if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
             // View was rejected last time it was drawn by its parent; this may have changed
@@ -9927,8 +9927,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             info.mRotation = rotation;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (mDisplayList != null) {
-                mDisplayList.setRotation(rotation);
+            if (mRenderNode != null) {
+                mRenderNode.setRotation(rotation);
             }
             if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
                 // View was rejected last time it was drawn by its parent; this may have changed
@@ -9978,8 +9978,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             info.mRotationY = rotationY;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (mDisplayList != null) {
-                mDisplayList.setRotationY(rotationY);
+            if (mRenderNode != null) {
+                mRenderNode.setRotationY(rotationY);
             }
             if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
                 // View was rejected last time it was drawn by its parent; this may have changed
@@ -10029,8 +10029,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             info.mRotationX = rotationX;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (mDisplayList != null) {
-                mDisplayList.setRotationX(rotationX);
+            if (mRenderNode != null) {
+                mRenderNode.setRotationX(rotationX);
             }
             if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
                 // View was rejected last time it was drawn by its parent; this may have changed
@@ -10072,8 +10072,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             info.mScaleX = scaleX;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (mDisplayList != null) {
-                mDisplayList.setScaleX(scaleX);
+            if (mRenderNode != null) {
+                mRenderNode.setScaleX(scaleX);
             }
             if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
                 // View was rejected last time it was drawn by its parent; this may have changed
@@ -10115,8 +10115,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             info.mScaleY = scaleY;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (mDisplayList != null) {
-                mDisplayList.setScaleY(scaleY);
+            if (mRenderNode != null) {
+                mRenderNode.setScaleY(scaleY);
             }
             if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
                 // View was rejected last time it was drawn by its parent; this may have changed
@@ -10168,8 +10168,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             info.mPivotX = pivotX;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (mDisplayList != null) {
-                mDisplayList.setPivotX(pivotX);
+            if (mRenderNode != null) {
+                mRenderNode.setPivotX(pivotX);
             }
             if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
                 // View was rejected last time it was drawn by its parent; this may have changed
@@ -10220,8 +10220,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             info.mPivotY = pivotY;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (mDisplayList != null) {
-                mDisplayList.setPivotY(pivotY);
+            if (mRenderNode != null) {
+                mRenderNode.setPivotY(pivotY);
             }
             if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
                 // View was rejected last time it was drawn by its parent; this may have changed
@@ -10304,8 +10304,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             } else {
                 mPrivateFlags &= ~PFLAG_ALPHA_SET;
                 invalidateViewProperty(true, false);
-                if (mDisplayList != null) {
-                    mDisplayList.setAlpha(getFinalAlpha());
+                if (mRenderNode != null) {
+                    mRenderNode.setAlpha(getFinalAlpha());
                 }
             }
         }
@@ -10331,8 +10331,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 return true;
             } else {
                 mPrivateFlags &= ~PFLAG_ALPHA_SET;
-                if (mDisplayList != null) {
-                    mDisplayList.setAlpha(getFinalAlpha());
+                if (mRenderNode != null) {
+                    mRenderNode.setAlpha(getFinalAlpha());
                 }
             }
         }
@@ -10354,8 +10354,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mTransformationInfo.mTransitionAlpha = alpha;
             mPrivateFlags &= ~PFLAG_ALPHA_SET;
             invalidateViewProperty(true, false);
-            if (mDisplayList != null) {
-                mDisplayList.setAlpha(getFinalAlpha());
+            if (mRenderNode != null) {
+                mRenderNode.setAlpha(getFinalAlpha());
             }
         }
     }
@@ -10428,8 +10428,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int oldHeight = mBottom - mTop;
 
             mTop = top;
-            if (mDisplayList != null) {
-                mDisplayList.setTop(mTop);
+            if (mRenderNode != null) {
+                mRenderNode.setTop(mTop);
             }
 
             sizeChange(width, mBottom - mTop, width, oldHeight);
@@ -10501,8 +10501,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int oldHeight = mBottom - mTop;
 
             mBottom = bottom;
-            if (mDisplayList != null) {
-                mDisplayList.setBottom(mBottom);
+            if (mRenderNode != null) {
+                mRenderNode.setBottom(mBottom);
             }
 
             sizeChange(width, mBottom - mTop, width, oldHeight);
@@ -10568,8 +10568,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int height = mBottom - mTop;
 
             mLeft = left;
-            if (mDisplayList != null) {
-                mDisplayList.setLeft(left);
+            if (mRenderNode != null) {
+                mRenderNode.setLeft(left);
             }
 
             sizeChange(mRight - mLeft, height, oldWidth, height);
@@ -10632,8 +10632,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int height = mBottom - mTop;
 
             mRight = right;
-            if (mDisplayList != null) {
-                mDisplayList.setRight(mRight);
+            if (mRenderNode != null) {
+                mRenderNode.setRight(mRight);
             }
 
             sizeChange(mRight - mLeft, height, oldWidth, height);
@@ -10733,8 +10733,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             info.mTranslationX = translationX;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (mDisplayList != null) {
-                mDisplayList.setTranslationX(translationX);
+            if (mRenderNode != null) {
+                mRenderNode.setTranslationX(translationX);
             }
             if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
                 // View was rejected last time it was drawn by its parent; this may have changed
@@ -10774,8 +10774,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             info.mTranslationY = translationY;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (mDisplayList != null) {
-                mDisplayList.setTranslationY(translationY);
+            if (mRenderNode != null) {
+                mRenderNode.setTranslationY(translationY);
             }
             if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
                 // View was rejected last time it was drawn by its parent; this may have changed
@@ -10807,8 +10807,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             info.mTranslationZ = translationZ;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (mDisplayList != null) {
-                mDisplayList.setTranslationZ(translationZ);
+            if (mRenderNode != null) {
+                mRenderNode.setTranslationZ(translationZ);
             }
             if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
                 // View was rejected last time it was drawn by its parent; this may have changed
@@ -10859,8 +10859,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mOutline.set(outline);
         }
 
-        if (mDisplayList != null) {
-            mDisplayList.setOutline(mOutline);
+        if (mRenderNode != null) {
+            mRenderNode.setOutline(mOutline);
         }
     }
 
@@ -10896,8 +10896,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             } else {
                 mPrivateFlags3 &= ~PFLAG3_CLIP_TO_OUTLINE;
             }
-            if (mDisplayList != null) {
-                mDisplayList.setClipToOutline(clipToOutline);
+            if (mRenderNode != null) {
+                mRenderNode.setClipToOutline(clipToOutline);
             }
         }
     }
@@ -10909,8 +10909,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setRevealClip(boolean shouldClip, boolean inverseClip,
             float x, float y, float radius) {
-        if (mDisplayList != null) {
-            mDisplayList.setRevealClip(shouldClip, inverseClip, x, y, radius);
+        if (mRenderNode != null) {
+            mRenderNode.setRevealClip(shouldClip, inverseClip, x, y, radius);
             // TODO: Handle this invalidate in a better way, or purely in native.
             invalidate();
         }
@@ -11022,7 +11022,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final boolean matrixIsIdentity = mTransformationInfo == null
                     || mTransformationInfo.mMatrixIsIdentity;
             if (matrixIsIdentity) {
-                if (mDisplayList != null) {
+                if (mRenderNode != null) {
                     invalidateViewProperty(false, false);
                 } else {
                     final ViewParent p = mParent;
@@ -11050,8 +11050,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             mTop += offset;
             mBottom += offset;
-            if (mDisplayList != null) {
-                mDisplayList.offsetTopAndBottom(offset);
+            if (mRenderNode != null) {
+                mRenderNode.offsetTopAndBottom(offset);
                 invalidateViewProperty(false, false);
             } else {
                 if (!matrixIsIdentity) {
@@ -11073,7 +11073,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final boolean matrixIsIdentity = mTransformationInfo == null
                     || mTransformationInfo.mMatrixIsIdentity;
             if (matrixIsIdentity) {
-                if (mDisplayList != null) {
+                if (mRenderNode != null) {
                     invalidateViewProperty(false, false);
                 } else {
                     final ViewParent p = mParent;
@@ -11098,8 +11098,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             mLeft += offset;
             mRight += offset;
-            if (mDisplayList != null) {
-                mDisplayList.offsetLeftAndRight(offset);
+            if (mRenderNode != null) {
+                mRenderNode.offsetLeftAndRight(offset);
                 invalidateViewProperty(false, false);
             } else {
                 if (!matrixIsIdentity) {
@@ -11542,7 +11542,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * list properties are not being used in this view
      */
     void invalidateViewProperty(boolean invalidateParent, boolean forceRedraw) {
-        if (mDisplayList == null || (mPrivateFlags & PFLAG_DRAW_ANIMATION) == PFLAG_DRAW_ANIMATION) {
+        if (mRenderNode == null || (mPrivateFlags & PFLAG_DRAW_ANIMATION) == PFLAG_DRAW_ANIMATION) {
             if (invalidateParent) {
                 invalidateParentCaches();
             }
@@ -13709,7 +13709,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             mHardwareLayer.setLayerPaint(mLayerPaint);
             RenderNode displayList = mHardwareLayer.startRecording();
-            getDisplayList(displayList, true);
+            updateDisplayListIfDirty(displayList, true);
             mHardwareLayer.endRecording(mLocalDirtyRect);
             mLocalDirtyRect.setEmpty();
         }
@@ -13855,7 +13855,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * the view will avoid creating a layer inside the resulting display list.
      * @return A new or reused DisplayList object.
      */
-    private void getDisplayList(@NonNull RenderNode renderNode, boolean isLayer) {
+    private void updateDisplayListIfDirty(@NonNull RenderNode renderNode, boolean isLayer) {
         final HardwareRenderer renderer = getHardwareRenderer();
         if (renderNode == null) {
             throw new IllegalArgumentException("RenderNode must not be null");
@@ -13957,22 +13957,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * <p>Returns a display list that can be used to draw this view again
-     * without executing its draw method.</p>
+     * Returns a RenderNode with View draw content recorded, which can be
+     * used to draw this view again without executing its draw method.
      *
-     * @return A DisplayList ready to replay, or null if caching is not enabled.
+     * @return A RenderNode ready to replay, or null if caching is not enabled.
      *
      * @hide
      */
     public RenderNode getDisplayList() {
         ensureRenderNode();
-        getDisplayList(mDisplayList, false);
-        return mDisplayList;
+        updateDisplayListIfDirty(mRenderNode, false);
+        return mRenderNode;
     }
 
     private void resetDisplayList() {
-        if (mDisplayList != null && mDisplayList.isValid()) {
-            mDisplayList.destroyDisplayListData();
+        if (mRenderNode != null && mRenderNode.isValid()) {
+            mRenderNode.destroyDisplayListData();
         }
 
         if (mBackgroundDisplayList != null && mBackgroundDisplayList.isValid()) {
@@ -14670,9 +14670,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             transformToApply = parent.getChildTransformation();
         } else {
             if ((mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_TRANSFORM) ==
-                    PFLAG3_VIEW_IS_ANIMATING_TRANSFORM && mDisplayList != null) {
+                    PFLAG3_VIEW_IS_ANIMATING_TRANSFORM && mRenderNode != null) {
                 // No longer animating: clear out old animation matrix
-                mDisplayList.setAnimationMatrix(null);
+                mRenderNode.setAnimationMatrix(null);
                 mPrivateFlags3 &= ~PFLAG3_VIEW_IS_ANIMATING_TRANSFORM;
             }
             if (!useDisplayListProperties &&
@@ -15185,8 +15185,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if ((mPrivateFlags3 & PFLAG3_OUTLINE_DEFINED) == 0) {
                 // Outline not currently define, query from background
                 mOutline = background.getOutline();
-                if (mDisplayList != null) {
-                    mDisplayList.setOutline(mOutline);
+                if (mRenderNode != null) {
+                    mRenderNode.setOutline(mOutline);
                 }
             }
         }
@@ -15522,8 +15522,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mTop = top;
             mRight = right;
             mBottom = bottom;
-            if (mDisplayList != null) {
-                mDisplayList.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
+            if (mRenderNode != null) {
+                mRenderNode.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
             }
 
             mPrivateFlags |= PFLAG_HAS_BOUNDS;
