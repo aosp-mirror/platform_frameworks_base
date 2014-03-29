@@ -269,8 +269,8 @@ public class RenderNode {
     }
 
     /**
-     * Returns whether the display list is currently usable. If this returns false,
-     * the display list should be re-recorded prior to replaying it.
+     * Returns whether the RenderNode's display list content is currently usable.
+     * If this returns false, the display list should be re-recorded prior to replaying it.
      *
      * @return boolean true if the display list is able to be replayed, false otherwise.
      */
