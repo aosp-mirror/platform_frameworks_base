@@ -411,7 +411,6 @@ void CanvasContext::drawDisplayList(RenderNode* displayList, Rect* dirty) {
 
     Rect outBounds;
     status |= mCanvas->drawDisplayList(displayList, outBounds);
-    handleFunctorStatus(status, outBounds);
 
     // TODO: Draw debug info
     // TODO: Performance tracking
@@ -448,22 +447,7 @@ void CanvasContext::invokeFunctors() {
 
     makeCurrent();
     Rect dirty;
-    int status = mCanvas->invokeFunctors(dirty);
-    handleFunctorStatus(status, dirty);
-}
-
-void CanvasContext::handleFunctorStatus(int status, const Rect& redrawClip) {
-    if (status & DrawGlInfo::kStatusDraw) {
-        // TODO: Invalidate the redrawClip
-        // Do we need to post to ViewRootImpl like the current renderer?
-        // Can we just enqueue ourselves to re-invoke the same display list?
-        // Something else entirely? Does ChromiumView still want this in a
-        // RenderThread world?
-    }
-
-    if (status & DrawGlInfo::kStatusInvoke) {
-        queueFunctorsTask();
-    }
+    mCanvas->invokeFunctors(dirty);
 }
 
 void CanvasContext::removeFunctorsTask() {
