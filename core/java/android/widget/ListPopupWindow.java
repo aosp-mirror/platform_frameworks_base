@@ -24,6 +24,7 @@ import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.IntProperty;
@@ -1225,6 +1226,15 @@ public class ListPopupWindow {
                 forwarding = onTouchForwarded(event) || !onForwardingStopped();
             } else {
                 forwarding = onTouchObserved(event) && onForwardingStarted();
+
+                if (forwarding) {
+                    // Make sure we cancel any ongoing source event stream.
+                    final long now = SystemClock.uptimeMillis();
+                    final MotionEvent e = MotionEvent.obtain(now, now, MotionEvent.ACTION_CANCEL,
+                            0.0f, 0.0f, 0);
+                    mSrc.onTouchEvent(e);
+                    e.recycle();
+                }
             }
 
             mForwarding = forwarding;
