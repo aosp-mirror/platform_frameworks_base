@@ -23,7 +23,7 @@ import android.graphics.Rect;
 
 /**
  * Hardware accelerated canvas.
- * 
+ *
  * @hide
  */
 public abstract class HardwareCanvas extends Canvas {
@@ -40,7 +40,7 @@ public abstract class HardwareCanvas extends Canvas {
 
     /**
      * Invoked before any drawing operation is performed in this canvas.
-     * 
+     *
      * @param dirty The dirty rectangle to update, can be null.
      * @return {@link RenderNode#STATUS_DREW} if anything was drawn (such as a call to clear
      *         the canvas).
@@ -70,13 +70,11 @@ public abstract class HardwareCanvas extends Canvas {
      * Draws the specified display list onto this canvas.
      *
      * @param displayList The display list to replay.
-     * @param dirty The dirty region to redraw in the next pass, matters only
-     *        if this method returns {@link RenderNode#STATUS_DRAW}, can be null.
+     * @param dirty Ignored, can be null.
      * @param flags Optional flags about drawing, see {@link RenderNode} for
      *              the possible flags.
      *
-     * @return One of {@link RenderNode#STATUS_DONE}, {@link RenderNode#STATUS_DRAW}, or
-     *         {@link RenderNode#STATUS_INVOKE}, or'd with {@link RenderNode#STATUS_DREW}
+     * @return One of {@link RenderNode#STATUS_DONE} or {@link RenderNode#STATUS_DREW}
      *         if anything was drawn.
      *
      * @hide
@@ -101,9 +99,8 @@ public abstract class HardwareCanvas extends Canvas {
      * This function may return true if an invalidation is needed after the call.
      *
      * @param drawGLFunction A native function pointer
-     *                       
-     * @return One of {@link RenderNode#STATUS_DONE}, {@link RenderNode#STATUS_DRAW} or
-     *         {@link RenderNode#STATUS_INVOKE}
+     *
+     * @return {@link RenderNode#STATUS_DONE}
      *
      * @hide
      */
@@ -114,11 +111,10 @@ public abstract class HardwareCanvas extends Canvas {
 
     /**
      * Invoke all the functors who requested to be invoked during the previous frame.
-     * 
-     * @param dirty The region to redraw when the functors return {@link RenderNode#STATUS_DRAW}
-     *              
-     * @return One of {@link RenderNode#STATUS_DONE}, {@link RenderNode#STATUS_DRAW} or
-     *         {@link RenderNode#STATUS_INVOKE}
+     *
+     * @param dirty Ignored
+     *
+     * @return Ignored
      *
      * @hide
      */
@@ -154,7 +150,7 @@ public abstract class HardwareCanvas extends Canvas {
 
     /**
      * Indicates that the specified layer must be updated as soon as possible.
-     * 
+     *
      * @param layer The layer to update
      *
      * @see #clearLayerUpdates()
@@ -187,7 +183,7 @@ public abstract class HardwareCanvas extends Canvas {
 
     /**
      * Removes all enqueued layer updates.
-     * 
+     *
      * @see #pushLayerUpdate(HardwareLayer)
      *
      * @hide

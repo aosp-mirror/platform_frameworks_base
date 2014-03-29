@@ -1096,8 +1096,7 @@ public class GLRenderer extends HardwareRenderer {
             }
 
             if (checkRenderContext() != SURFACE_STATE_ERROR) {
-                int status = mCanvas.invokeFunctors(mRedrawClip);
-                handleFunctorStatus(attachInfo, status);
+                mCanvas.invokeFunctors(mRedrawClip);
             }
         }
     }
@@ -1301,7 +1300,6 @@ public class GLRenderer extends HardwareRenderer {
             mProfileData[mProfileCurrentFrame + 1] = total;
         }
 
-        handleFunctorStatus(attachInfo, status);
         return status;
     }
 
@@ -1334,26 +1332,6 @@ public class GLRenderer extends HardwareRenderer {
             if (dirty != null && (mFrameCount & 1) == 0) {
                 canvas.drawRect(dirty, mDebugPaint);
             }
-        }
-    }
-
-    private void handleFunctorStatus(View.AttachInfo attachInfo, int status) {
-        // If the draw flag is set, functors will be invoked while executing
-        // the tree of display lists
-        if ((status & RenderNode.STATUS_DRAW) != 0) {
-            if (mRedrawClip.isEmpty()) {
-                attachInfo.mViewRootImpl.invalidate();
-            } else {
-                attachInfo.mViewRootImpl.invalidateChildInParent(null, mRedrawClip);
-                mRedrawClip.setEmpty();
-            }
-        }
-
-        if ((status & RenderNode.STATUS_INVOKE) != 0 ||
-                attachInfo.mHandler.hasCallbacks(mFunctorsRunnable)) {
-            attachInfo.mHandler.removeCallbacks(mFunctorsRunnable);
-            mFunctorsRunnable.attachInfo = attachInfo;
-            attachInfo.mHandler.postDelayed(mFunctorsRunnable, FUNCTOR_PROCESS_DELAY);
         }
     }
 
