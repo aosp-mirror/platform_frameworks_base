@@ -1986,7 +1986,13 @@ public final class BluetoothAdapter {
         public void onAdvertiseStateChange(int advertiseState, int status) {
             Log.d(TAG, "on advertise call back, state: " + advertiseState + " status: " + status);
             if (advertiseState == STATE_ADVERTISE_STARTED) {
-                mAdvertiseCallback.onAdvertiseStart(status);
+                if (status == ADVERTISE_CALLBACK_SUCCESS) {
+                    mAdvertiseCallback.onAdvertiseStart(status);
+                } else {
+                    // If status is unsuccessful and advertise state is started, it means stop
+                    // advertising fails.
+                    mAdvertiseCallback.onAdvertiseStop(status);
+                }
             } else {
                 synchronized (this) {
                     if (status == ADVERTISE_CALLBACK_SUCCESS) {
@@ -2008,7 +2014,13 @@ public final class BluetoothAdapter {
                         }
                     }
                 }
-                mAdvertiseCallback.onAdvertiseStop(status);
+                if (status == ADVERTISE_CALLBACK_SUCCESS) {
+                    mAdvertiseCallback.onAdvertiseStop(status);
+                } else{
+                    // If status is unsuccesful and advertise state is stopped, it means start
+                    // advertising fails.
+                    mAdvertiseCallback.onAdvertiseStart(status);
+                }
             }
         }
     }
