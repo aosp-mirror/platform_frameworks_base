@@ -167,6 +167,22 @@ void RenderProxy::detachFunctor(Functor* functor) {
     post(task);
 }
 
+CREATE_BRIDGE2(invokeFunctor, CanvasContext* context, Functor* functor) {
+    args->context->invokeFunctor(args->functor);
+    return NULL;
+}
+
+void RenderProxy::invokeFunctor(Functor* functor, bool waitForCompletion) {
+    SETUP_TASK(invokeFunctor);
+    args->context = mContext;
+    args->functor = functor;
+    if (waitForCompletion) {
+        postAndWait(task);
+    } else {
+        post(task);
+    }
+}
+
 CREATE_BRIDGE2(runWithGlContext, CanvasContext* context, RenderTask* task) {
     args->context->runWithGlContext(args->task);
     return NULL;
