@@ -3173,8 +3173,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             setBooleanFlag(FLAG_CLIP_CHILDREN, clipChildren);
             for (int i = 0; i < mChildrenCount; ++i) {
                 View child = getChildAt(i);
-                if (child.mDisplayList != null) {
-                    child.mDisplayList.setClipToBounds(clipChildren);
+                if (child.mRenderNode != null) {
+                    child.mRenderNode.setClipToBounds(clipChildren);
                 }
             }
         }
@@ -4609,9 +4609,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final View v = children[i];
             v.mTop += offset;
             v.mBottom += offset;
-            if (v.mDisplayList != null) {
+            if (v.mRenderNode != null) {
                 invalidate = true;
-                v.mDisplayList.offsetTopAndBottom(offset);
+                v.mRenderNode.offsetTopAndBottom(offset);
             }
         }
 
