@@ -20,7 +20,7 @@
     <drawable name="notification_number_text_color">#ffffffff</drawable>
     <drawable name="ticker_background_color">#ff1d1d1d</drawable>
     <drawable name="system_bar_background">@color/system_bar_background_opaque</drawable>
-    <color name="system_bar_background_opaque">#00000000</color>
+    <color name="system_bar_background_opaque">#ff000000</color>
     <color name="system_bar_background_semi_transparent">#66000000</color> <!-- 40% black -->
     <color name="notification_panel_solid_background">#FFE4E4E4</color>
     <drawable name="status_bar_recents_app_thumbnail_background">#88000000</drawable>
