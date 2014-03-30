@@ -20,9 +20,10 @@ import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_NORMAL;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSIENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -1879,12 +1880,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
 
             // update status bar mode
-            final int sbMode = updateBarMode(oldVal, newVal, mStatusBarView.getBarTransitions(),
-                    View.STATUS_BAR_TRANSIENT, View.SYSTEM_UI_FLAG_TRANSPARENT_STATUS);
+            final int sbMode = computeBarMode(oldVal, newVal, mStatusBarView.getBarTransitions(),
+                    View.STATUS_BAR_TRANSIENT, View.STATUS_BAR_TRANSLUCENT);
 
             // update navigation bar mode
-            final int nbMode = updateBarMode(oldVal, newVal, mNavigationBarView.getBarTransitions(),
-                    View.NAVIGATION_BAR_TRANSIENT, View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION);
+            final int nbMode = mNavigationBarView == null ? -1 : computeBarMode(
+                    oldVal, newVal, mNavigationBarView.getBarTransitions(),
+                    View.NAVIGATION_BAR_TRANSIENT, View.NAVIGATION_BAR_TRANSLUCENT);
             boolean sbModeChanged = sbMode != -1;
             boolean nbModeChanged = nbMode != -1;
             boolean checkBarModes = false;
@@ -1910,7 +1912,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
             if (sbModeChanged || nbModeChanged) {
                 // update transient bar autohide
-                if (sbMode == MODE_TRANSIENT || nbMode == MODE_TRANSIENT) {
+                if (sbMode == MODE_SEMI_TRANSPARENT || nbMode == MODE_SEMI_TRANSPARENT) {
                     scheduleAutohide();
                 } else {
                     cancelAutohide();
@@ -1933,20 +1935,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     private int computeBarMode(int oldVis, int newVis, BarTransitions transitions,
-            int transientFlag, int transparentFlag) {
-        final int oldMode = barMode(oldVis, transientFlag, transparentFlag);
-        final int newMode = barMode(newVis, transientFlag, transparentFlag);
+            int transientFlag, int translucentFlag) {
+        final int oldMode = barMode(oldVis, transientFlag, translucentFlag);
+        final int newMode = barMode(newVis, transientFlag, translucentFlag);
         if (oldMode == newMode) {
             return -1; // no mode change
         }
-        transitions.transitionTo(newMode);
         return newMode;
     }
 
-    private int barMode(int vis, int transientFlag, int transparentFlag) {
-        return (vis & transientFlag) != 0 ? MODE_TRANSIENT
-                : (vis & transparentFlag) != 0 ? MODE_TRANSPARENT
-                : MODE_NORMAL;
+    private int barMode(int vis, int transientFlag, int translucentFlag) {
+        return (vis & transientFlag) != 0 ? MODE_SEMI_TRANSPARENT
+                : (vis & translucentFlag) != 0 ? MODE_TRANSLUCENT
+                : (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0 ? MODE_LIGHTS_OUT
+                : MODE_OPAQUE;
     }
 
     private void checkBarModes() {
@@ -2793,9 +2795,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
         if (command.equals(COMMAND_BARS)) {
             String mode = args.getString("mode");
-            int barMode = "normal".equals(mode) ? MODE_NORMAL :
-                    "transparent".equals(mode) ? MODE_TRANSPARENT :
-                    "transient".equals(mode) ? MODE_TRANSIENT :
+            int barMode = "opaque".equals(mode) ? MODE_OPAQUE :
+                    "translucent".equals(mode) ? MODE_TRANSLUCENT :
+                    "semi-transparent".equals(mode) ? MODE_SEMI_TRANSPARENT :
                     -1;
             if (barMode != -1) {
                 boolean animate = true;
