@@ -233,7 +233,7 @@
     <string name="permgrouplab_display" msgid="4279909676036402636">"Používateľské rozhranie iných aplikácií"</string>
     <string name="permgroupdesc_display" msgid="6051002031933013714">"Vplyv na používateľské rozhranie ďalších aplikácií."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Úložisko"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Prístup do ukl. priestoru USB."</string>
+    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Prístup do úložiska USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Prístup na kartu SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funkcie zjednodušenia ovládania"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funkcie, ktoré môže vyžadovať nápomocná technológia."</string>
@@ -347,7 +347,7 @@
     <string name="permdesc_backup" msgid="6912230525140589891">"Umožňuje aplikácii ovládať mechanizmus na zálohovanie a obnovu údajov systému. Bežné aplikácie toto nastavenie nepoužívajú."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"potvrdenie operácie úplnej zálohy alebo úplného obnovenia"</string>
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Umožňuje aplikácii spustiť používateľské rozhranie potvrdenia úplnej zálohy. Toto nastavenie by nemala používať žiadna aplikácia."</string>
-    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"zobrazenie neoprávnených okien"</string>
+    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"zobraziť neoprávnené okná"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Umožňuje aplikácii vytvárať okná, ktoré majú byť použité interným systémom používateľského rozhrania. Bežné aplikácie toto nastavenie nepoužívajú."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"vykresliť cez ďalšie aplikácie"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Umožňuje aplikáciu vykresľovanie nad inými aplikáciami alebo súčasťami používateľského rozhrania. Táto funkcia môže zasahovať do vášho používania rozhrania inej aplikácie alebo meniť zobrazovaný obsah v iných aplikáciách."</string>
@@ -474,9 +474,9 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Umožňuje aplikácii pristupovať k ďalším príkazom poskytovateľa informácií o polohe. Aplikácii to môže umožniť zasahovať do činnosti systému GPS alebo iných zdrojov informácií o polohe."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"Oprávnenie na inštaláciu poskytovateľa polohy"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Vytváranie simulovaných zdrojov polohy na testovanie alebo inštalácia nového poskytovateľa informácií o polohe. Aplikácii to umožní nahradiť polohu a stav, ktoré vracajú iné zdroje informácií o polohe, ako sú napríklad systém GPS alebo poskytovatelia informácií o polohe."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"presná poloha (pomocou GPS a siete)"</string>
+    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"zistiť presnú polohu (pomocou GPS a siete)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Umožňuje aplikácii získať vašu presnú polohu pomocou systému GPS (Global Positioning System) alebo zdrojov určenia polohy siete, napríklad mobilných veží a sietí Wi-Fi. Tieto služby určovania polohy musia byť na vašom zariadení zapnuté a dostupné, inak ich aplikácia nebude môcť využívať. Aplikácie môžu tieto služby využívať na určenie vašej polohy. Tieto služby môžu zvýšiť spotrebu batérie."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"približná poloha (pomocou siete)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"zistiť približnú polohu (pomocou siete)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Umožňuje aplikácii získať vašu približnú polohu. Táto poloha je odvodená zo služieb určovania polohy pomocou zdrojov určenia polohy siete, napríklad mobilných veží a sietí Wi-Fi. Tieto služby určovania polohy musia byť na vašom zariadení zapnuté a dostupné, inak ich aplikácia nebude môcť využívať. Aplikácie môžu tieto služby využívať na určenie vašej približnej polohy."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"prístup k službe SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Umožňuje aplikácii používať funkcie nízkej úrovne aplikácie SurfaceFlinger."</string>
@@ -498,13 +498,13 @@
     <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Umožňuje aplikácii zachytiť a presmerovať zabezpečený výstup videa."</string>
     <string name="permlab_mediaContentControl" msgid="8749790560720562511">"ovládanie reprodukcie médií a prístup k metadátam"</string>
     <string name="permdesc_mediaContentControl" msgid="1637478200272062">"Umožňuje aplikácii ovládať reprodukciu médií a pristupovať k informáciám o médiách (názov, autor...)."</string>
-    <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"zmeny vašich nastavení zvuku"</string>
+    <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"meniť nastavenia zvuku"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Umožňuje aplikácii upraviť globálne nastavenia zvuku, ako je hlasitosť, alebo určiť, z ktorého reproduktora bude zvuk vychádzať."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"záznam zvuku"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"nahrávať zvuk"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Umožňuje aplikácii zaznamenávať zvuk pomocou mikrofónu. Toto povolenie umožňuje aplikácii zaznamenávať zvuk kedykoľvek bez vášho potvrdenia."</string>
     <string name="permlab_sim_communication" msgid="1180265879464893029">"komunikácia s kartou SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Umožňuje aplikácii odosielať príkazy na kartu SIM. Toto je veľmi nebezpečné povolenie."</string>
-    <string name="permlab_camera" msgid="3616391919559751192">"snímanie fotografií a natáčanie videí"</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"fotiť a nakrúcať videá"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Umožňuje aplikácii fotografovať a nahrávať videá pomocou fotoaparátu. Toto povolenie umožňuje aplikácii používať fotoaparát kedykoľvek a bez vášho potvrdenia."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"Zakázať indikátor LED prenosu pri používaní fotoaparátu"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Umožňuje v predinštalovanej systémovej aplikácii zakázať indikátor LED používania fotoaparátu."</string>
@@ -534,7 +534,7 @@
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Umožňuje aplikácii premenovať interné úložisko."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"ovládať vibrovanie"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Umožňuje aplikácii ovládať vibrácie."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"ovládanie kontrolky"</string>
+    <string name="permlab_flashlight" msgid="2155920810121984215">"ovládať kontrolku"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Umožňuje aplikácii ovládať svetlo."</string>
     <string name="permlab_manageUsb" msgid="1113453430645402723">"spravovať predvoľby a povolenia zariadení USB"</string>
     <string name="permdesc_manageUsb" msgid="7776155430218239833">"Umožňuje aplikácii spravovať predvoľby a povolenia zariadení USB."</string>
@@ -575,7 +575,7 @@
     <string name="permlab_factoryTest" msgid="3715225492696416187">"spustenie v režime továrenského testu"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Umožňuje aplikácii spustenie v režime nízkoúrovňového testu výrobcu a povolí úplný prístup k hardvéru tabletu. K dispozícii iba vtedy, keď je tablet spustený v režime testovania výrobcu."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Umožňuje aplikácii spustenie v režime nízkoúrovňového testu výrobcu a povolí úplný prístup k hardvéru telefónu. K dispozícii iba vtedy, keď je telefón spustený v režime testovania výrobcu."</string>
-    <string name="permlab_setWallpaper" msgid="6627192333373465143">"nastavenie tapety"</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"nastaviť tapetu"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Umožňuje aplikácii nastaviť tapetu systému."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"upraviť veľkosť tapety"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Umožňuje aplikácii nastaviť tipy pre veľkosť tapety systému."</string>
@@ -610,7 +610,7 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Umožňuje aplikácii zmeniť stav sieťového pripojenia zdieľaného pomocou tetheringu."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"zmeniť nastavenie použitia údajov na pozadí"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Umožňuje aplikácii zmeniť nastavenie používania údajov na pozadí."</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"zobraziť pripojenia siete Wi-Fi"</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"zobraziť pripojenia Wi-Fi"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Umožňuje aplikácii zobraziť informácie o sieťach Wi-Fi. Napríklad o tom, či je sieť Wi-Fi povolená alebo názvy pripojených zariadení Wi-Fi."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"pripojiť a odpojiť od siete Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Umožňuje aplikácii pripojiť sa na prístupové body siete Wi-Fi, odpojiť sa od nich a meniť konfiguráciu zariadení pre siete Wi-Fi."</string>
@@ -631,19 +631,19 @@
     <string name="permlab_bluetooth" msgid="6127769336339276828">"párovať so zariadeniami Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Umožňuje aplikácii zobraziť informácie o konfigurácii Bluetooth na tablete. Taktiež jej umožňuje nadväzovať a akceptovať spojenia so spárovanými zariadeniami."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Umožňuje aplikácii zobraziť informácie o konfigurácii Bluetooth na telefóne. Taktiež jej umožňuje nadväzovať a akceptovať spojenia so spárovanými zariadeniami."</string>
-    <string name="permlab_nfc" msgid="4423351274757876953">"ovládať technológiu Near Field Communication"</string>
-    <string name="permdesc_nfc" msgid="7120611819401789907">"Umožňuje aplikácii komunikovať so značkami, kartami a čítačkami s podporou technológie Near Field Communication (NFC)."</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"ovládať technológiu NFC"</string>
+    <string name="permdesc_nfc" msgid="7120611819401789907">"Umožňuje aplikácii komunikovať so značkami, kartami a čítačkami s podporou technológie NFC."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"deaktivácia zámky obrazovky"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Umožňuje aplikácii zakázať uzamknutie klávesnice a akékoľvek súvisiace zabezpečenie heslom. Príkladom je zakázanie uzamknutia klávesnice pri prichádzajúcom telefonickom hovore a jeho opätovné povolenie po skončení hovoru."</string>
-    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čítanie nastavení synchronizácie"</string>
+    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čítať nastavenia synchronizácie"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Umožňuje aplikácii čítať nastavenia synchronizácie v účte. Môže napríklad určiť, či je s účtom synchronizovaná aplikácia Ľudia."</string>
-    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"prepínať nastavenie synchronizácie medzi hodnotou zapnuté a vypnuté"</string>
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"zapnúť alebo vypnúť synchronizáciu"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Umožňuje aplikácii upraviť nastavenia synchronizácie v účte. Pomocou tohto povolenia je možné napríklad povoliť synchronizáciu aplikácie Ľudia s účtom."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"čítanie štatistických údajov o synchronizácii"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Umožňuje aplikácii čítať štatistické informácie o synchronizácii v účte vrátane histórie uskutočnených synchronizácií a informácií o množstve synchronizovaných údajov."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čítanie zdrojov prihlásených na odber"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čítať odoberané informačné kanály"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Umožňuje aplikácii získať podrobnosti o aktuálne synchronizovaných informačných kanáloch."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"zápis odoberaných zdrojov"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"zapisovať odoberané informačné kanály"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Umožňuje aplikácii upraviť vaše aktuálne synchronizované informačné kanály. Škodlivé aplikácie môžu synchronizované informačné kanály zmeniť."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"čítať výrazy pridané do slovníka"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Umožňuje aplikácii čítať všetky slová, názvy a frázy, ktoré mohol používateľ uložiť do svojho slovníka."</string>
