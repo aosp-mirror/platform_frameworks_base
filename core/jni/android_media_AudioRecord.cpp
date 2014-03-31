@@ -312,7 +312,7 @@ static void android_media_AudioRecord_release(JNIEnv *env,  jobject thiz) {
     if (lpRecorder == NULL) {
         return;
     }
-    ALOGV("About to delete lpRecorder: %" PRIxPTR "\n", lpRecorder.get());
+    ALOGV("About to delete lpRecorder: %p", lpRecorder.get());
     lpRecorder->stop();
 
     audiorecord_callback_cookie *lpCookie = (audiorecord_callback_cookie *)env->GetLongField(
@@ -325,7 +325,7 @@ static void android_media_AudioRecord_release(JNIEnv *env,  jobject thiz) {
     // delete the callback information
     if (lpCookie) {
         Mutex::Autolock l(sLock);
-        ALOGV("deleting lpCookie: %" PRIxPTR "\n", lpCookie);
+        ALOGV("deleting lpCookie: %p", lpCookie);
         while (lpCookie->busy) {
             if (lpCookie->cond.waitRelative(sLock,
                                             milliseconds(CALLBACK_COND_WAIT_TIMEOUT_MS)) !=
