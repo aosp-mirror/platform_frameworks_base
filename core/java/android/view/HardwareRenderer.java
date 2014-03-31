@@ -182,7 +182,7 @@ public abstract class HardwareRenderer {
     public static boolean sSystemRendererDisabled = false;
 
     /** @hide */
-    public static boolean sUseRenderThread = false;
+    public static boolean sUseRenderThread = true;
 
     private boolean mEnabled;
     private boolean mRequested = true;
