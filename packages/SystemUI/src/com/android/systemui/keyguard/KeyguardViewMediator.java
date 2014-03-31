@@ -499,7 +499,9 @@ public class KeyguardViewMediator {
 
                 @Override
                 public int getSessionType() {
-                    return mLockPatternUtils.isSecure() ? Session.TYPE_KEYGUARD_SECURE
+                    return mLockPatternUtils.isSecure() && !mUpdateMonitor.getUserHasTrust(
+                            mLockPatternUtils.getCurrentUser())
+                            ? Session.TYPE_KEYGUARD_SECURE
                             : Session.TYPE_KEYGUARD_INSECURE;
                 }
             }, new File(mContext.getCacheDir(), "keyguard_analytics.bin"));

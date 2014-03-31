@@ -104,9 +104,10 @@ public abstract class KeyguardActivityLauncher {
 
         // Workaround to avoid camera release/acquisition race when resuming face unlock
         // after showing lockscreen camera (bug 11063890).
-        KeyguardUpdateMonitor.getInstance(getContext()).setAlternateUnlockEnabled(false);
+        KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(getContext());
+        updateMonitor.setAlternateUnlockEnabled(false);
 
-        if (lockPatternUtils.isSecure()) {
+        if (mustLaunchSecurely()) {
             // Launch the secure version of the camera
             if (wouldLaunchResolverActivity(SECURE_CAMERA_INTENT)) {
                 // TODO: Show disambiguation dialog instead.
@@ -121,6 +122,13 @@ public abstract class KeyguardActivityLauncher {
             // Launch the normal camera
             launchActivity(INSECURE_CAMERA_INTENT, false, false, null, null);
         }
+    }
+
+    private boolean mustLaunchSecurely() {
+        LockPatternUtils lockPatternUtils = getLockPatternUtils();
+        KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(getContext());
+        int currentUser = lockPatternUtils.getCurrentUser();
+        return lockPatternUtils.isSecure() && !updateMonitor.getUserHasTrust(currentUser);
     }
 
     public void launchWidgetPicker(int appWidgetId) {
@@ -177,9 +185,9 @@ public abstract class KeyguardActivityLauncher {
                 Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        boolean isSecure = lockPatternUtils.isSecure();
-        if (!isSecure || showsWhileLocked) {
-            if (!isSecure) {
+        boolean mustLaunchSecurely = mustLaunchSecurely();
+        if (!mustLaunchSecurely || showsWhileLocked) {
+            if (!mustLaunchSecurely) {
                 dismissKeyguardOnNextActivity();
             }
             try {
@@ -253,7 +261,7 @@ public abstract class KeyguardActivityLauncher {
     }
 
     private Intent getCameraIntent() {
-        return getLockPatternUtils().isSecure() ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
+        return mustLaunchSecurely() ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
     }
 
     private boolean wouldLaunchResolverActivity(Intent intent) {

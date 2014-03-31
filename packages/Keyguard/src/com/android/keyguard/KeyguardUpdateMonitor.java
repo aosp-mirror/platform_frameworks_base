@@ -20,6 +20,7 @@ import android.app.ActivityManagerNative;
 import android.app.IUserSwitchObserver;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
+import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -51,6 +52,8 @@ import com.android.internal.telephony.TelephonyIntents;
 
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.util.SparseBooleanArray;
+
 import com.google.android.collect.Lists;
 
 import java.lang.ref.WeakReference;
@@ -66,7 +69,7 @@ import java.util.ArrayList;
  * the device, and {@link #getFailedUnlockAttempts()}, {@link #reportFailedAttempt()}
  * and {@link #clearFailedUnlockAttempts()}.  Maybe we should rename this 'KeyguardContext'...
  */
-public class KeyguardUpdateMonitor {
+public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private static final String TAG = "KeyguardUpdateMonitor";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -204,6 +207,17 @@ public class KeyguardUpdateMonitor {
     };
 
     private AudioManager mAudioManager;
+
+    private SparseBooleanArray mUserHasTrust = new SparseBooleanArray();
+
+    @Override
+    public void onTrustChanged(boolean enabled, int userId) {
+        mUserHasTrust.put(userId, enabled);
+    }
+
+    public boolean getUserHasTrust(int userId) {
+        return mUserHasTrust.get(userId);
+    }
 
     static class DisplayClientState {
         public int clientGeneration;
@@ -581,6 +595,9 @@ public class KeyguardUpdateMonitor {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
+        TrustManager trustManager = (TrustManager) context.getSystemService(Context.TRUST_SERVICE);
+        trustManager.registerTrustListener(this);
     }
 
     private boolean isDeviceProvisionedInSettingsDb() {
