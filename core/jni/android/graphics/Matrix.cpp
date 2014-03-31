@@ -123,129 +123,129 @@ public:
         SkScalar ky_ = SkFloatToScalar(ky);
         obj->setSkew(kx_, ky_);
     }
-     static jboolean setConcat(JNIEnv* env, jobject clazz, jlong objHandle, jlong aHandle, jlong bHandle) {
+     static void setConcat(JNIEnv* env, jobject clazz, jlong objHandle, jlong aHandle, jlong bHandle) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkMatrix* a = reinterpret_cast<SkMatrix*>(aHandle);
         SkMatrix* b = reinterpret_cast<SkMatrix*>(bHandle);
-        return obj->setConcat(*a, *b) ? JNI_TRUE : JNI_FALSE;
+        obj->setConcat(*a, *b);
     }
 
-    static jboolean preTranslate(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
+    static void preTranslate(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkScalar dx_ = SkFloatToScalar(dx);
         SkScalar dy_ = SkFloatToScalar(dy);
-        return obj->preTranslate(dx_, dy_) ? JNI_TRUE : JNI_FALSE;
+        obj->preTranslate(dx_, dy_);
     }
 
-    static jboolean preScale__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sx, jfloat sy, jfloat px, jfloat py) {
+    static void preScale__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sx, jfloat sy, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkScalar sx_ = SkFloatToScalar(sx);
         SkScalar sy_ = SkFloatToScalar(sy);
         SkScalar px_ = SkFloatToScalar(px);
         SkScalar py_ = SkFloatToScalar(py);
-        return obj->preScale(sx_, sy_, px_, py_) ? JNI_TRUE : JNI_FALSE;
+        obj->preScale(sx_, sy_, px_, py_);
     }
 
-    static jboolean preScale__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sx, jfloat sy) {
+    static void preScale__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sx, jfloat sy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkScalar sx_ = SkFloatToScalar(sx);
         SkScalar sy_ = SkFloatToScalar(sy);
-        return obj->preScale(sx_, sy_) ? JNI_TRUE : JNI_FALSE;
+        obj->preScale(sx_, sy_);
     }
 
-    static jboolean preRotate__FFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat degrees, jfloat px, jfloat py) {
+    static void preRotate__FFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat degrees, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkScalar degrees_ = SkFloatToScalar(degrees);
         SkScalar px_ = SkFloatToScalar(px);
         SkScalar py_ = SkFloatToScalar(py);
-        return obj->preRotate(degrees_, px_, py_) ? JNI_TRUE : JNI_FALSE;
+        obj->preRotate(degrees_, px_, py_);
     }
 
-    static jboolean preRotate__F(JNIEnv* env, jobject clazz, jlong objHandle, jfloat degrees) {
+    static void preRotate__F(JNIEnv* env, jobject clazz, jlong objHandle, jfloat degrees) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkScalar degrees_ = SkFloatToScalar(degrees);
-        return obj->preRotate(degrees_) ? JNI_TRUE : JNI_FALSE;
+        obj->preRotate(degrees_);
     }
 
-    static jboolean preSkew__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat kx, jfloat ky, jfloat px, jfloat py) {
+    static void preSkew__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat kx, jfloat ky, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkScalar kx_ = SkFloatToScalar(kx);
         SkScalar ky_ = SkFloatToScalar(ky);
         SkScalar px_ = SkFloatToScalar(px);
         SkScalar py_ = SkFloatToScalar(py);
-        return obj->preSkew(kx_, ky_, px_, py_) ? JNI_TRUE : JNI_FALSE;
+        obj->preSkew(kx_, ky_, px_, py_);
     }
 
-    static jboolean preSkew__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat kx, jfloat ky) {
+    static void preSkew__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat kx, jfloat ky) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkScalar kx_ = SkFloatToScalar(kx);
         SkScalar ky_ = SkFloatToScalar(ky);
-        return obj->preSkew(kx_, ky_) ? JNI_TRUE : JNI_FALSE;
+        obj->preSkew(kx_, ky_);
     }
 
-    static jboolean preConcat(JNIEnv* env, jobject clazz, jlong objHandle, jlong otherHandle) {
+    static void preConcat(JNIEnv* env, jobject clazz, jlong objHandle, jlong otherHandle) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkMatrix* other = reinterpret_cast<SkMatrix*>(otherHandle);
-        return obj->preConcat(*other) ? JNI_TRUE : JNI_FALSE;
+        obj->preConcat(*other);
     }
 
-    static jboolean postTranslate(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
+    static void postTranslate(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkScalar dx_ = SkFloatToScalar(dx);
         SkScalar dy_ = SkFloatToScalar(dy);
-        return obj->postTranslate(dx_, dy_) ? JNI_TRUE : JNI_FALSE;
+        obj->postTranslate(dx_, dy_);
     }
 
-    static jboolean postScale__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sx, jfloat sy, jfloat px, jfloat py) {
+    static void postScale__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sx, jfloat sy, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkScalar sx_ = SkFloatToScalar(sx);
         SkScalar sy_ = SkFloatToScalar(sy);
         SkScalar px_ = SkFloatToScalar(px);
         SkScalar py_ = SkFloatToScalar(py);
-        return obj->postScale(sx_, sy_, px_, py_) ? JNI_TRUE : JNI_FALSE;
+        obj->postScale(sx_, sy_, px_, py_);
     }
 
-    static jboolean postScale__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sx, jfloat sy) {
+    static void postScale__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sx, jfloat sy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkScalar sx_ = SkFloatToScalar(sx);
         SkScalar sy_ = SkFloatToScalar(sy);
-        return obj->postScale(sx_, sy_) ? JNI_TRUE : JNI_FALSE;
+        obj->postScale(sx_, sy_);
     }
 
-    static jboolean postRotate__FFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat degrees, jfloat px, jfloat py) {
+    static void postRotate__FFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat degrees, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkScalar degrees_ = SkFloatToScalar(degrees);
         SkScalar px_ = SkFloatToScalar(px);
         SkScalar py_ = SkFloatToScalar(py);
-        return obj->postRotate(degrees_, px_, py_) ? JNI_TRUE : JNI_FALSE;
+        obj->postRotate(degrees_, px_, py_);
     }
 
-    static jboolean postRotate__F(JNIEnv* env, jobject clazz, jlong objHandle, jfloat degrees) {
+    static void postRotate__F(JNIEnv* env, jobject clazz, jlong objHandle, jfloat degrees) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkScalar degrees_ = SkFloatToScalar(degrees);
-        return obj->postRotate(degrees_) ? JNI_TRUE : JNI_FALSE;
+        obj->postRotate(degrees_);
     }
 
-    static jboolean postSkew__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat kx, jfloat ky, jfloat px, jfloat py) {
+    static void postSkew__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat kx, jfloat ky, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkScalar kx_ = SkFloatToScalar(kx);
         SkScalar ky_ = SkFloatToScalar(ky);
         SkScalar px_ = SkFloatToScalar(px);
         SkScalar py_ = SkFloatToScalar(py);
-        return obj->postSkew(kx_, ky_, px_, py_) ? JNI_TRUE : JNI_FALSE;
+        obj->postSkew(kx_, ky_, px_, py_);
     }
 
-    static jboolean postSkew__FF(JNIEnv* env, jobject clazz, jlong matrixHandle, jfloat kx, jfloat ky) {
+    static void postSkew__FF(JNIEnv* env, jobject clazz, jlong matrixHandle, jfloat kx, jfloat ky) {
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         SkScalar kx_ = SkFloatToScalar(kx);
         SkScalar ky_ = SkFloatToScalar(ky);
-        return matrix->postSkew(kx_, ky_) ? JNI_TRUE : JNI_FALSE;
+        matrix->postSkew(kx_, ky_);
     }
 
-    static jboolean postConcat(JNIEnv* env, jobject clazz, jlong matrixHandle, jlong otherHandle) {
+    static void postConcat(JNIEnv* env, jobject clazz, jlong matrixHandle, jlong otherHandle) {
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         SkMatrix* other = reinterpret_cast<SkMatrix*>(otherHandle);
-        return matrix->postConcat(*other) ? JNI_TRUE : JNI_FALSE;
+        matrix->postConcat(*other);
     }
 
     static jboolean setRectToRect(JNIEnv* env, jobject clazz, jlong matrixHandle, jobject src, jobject dst, jint stfHandle) {
@@ -374,23 +374,23 @@ static JNINativeMethod methods[] = {
     {"native_setSinCos","(JFF)V", (void*) SkMatrixGlue::setSinCos__FF},
     {"native_setSkew","(JFFFF)V", (void*) SkMatrixGlue::setSkew__FFFF},
     {"native_setSkew","(JFF)V", (void*) SkMatrixGlue::setSkew__FF},
-    {"native_setConcat","(JJJ)Z", (void*) SkMatrixGlue::setConcat},
-    {"native_preTranslate","(JFF)Z", (void*) SkMatrixGlue::preTranslate},
-    {"native_preScale","(JFFFF)Z", (void*) SkMatrixGlue::preScale__FFFF},
-    {"native_preScale","(JFF)Z", (void*) SkMatrixGlue::preScale__FF},
-    {"native_preRotate","(JFFF)Z", (void*) SkMatrixGlue::preRotate__FFF},
-    {"native_preRotate","(JF)Z", (void*) SkMatrixGlue::preRotate__F},
-    {"native_preSkew","(JFFFF)Z", (void*) SkMatrixGlue::preSkew__FFFF},
-    {"native_preSkew","(JFF)Z", (void*) SkMatrixGlue::preSkew__FF},
-    {"native_preConcat","(JJ)Z", (void*) SkMatrixGlue::preConcat},
-    {"native_postTranslate","(JFF)Z", (void*) SkMatrixGlue::postTranslate},
-    {"native_postScale","(JFFFF)Z", (void*) SkMatrixGlue::postScale__FFFF},
-    {"native_postScale","(JFF)Z", (void*) SkMatrixGlue::postScale__FF},
-    {"native_postRotate","(JFFF)Z", (void*) SkMatrixGlue::postRotate__FFF},
-    {"native_postRotate","(JF)Z", (void*) SkMatrixGlue::postRotate__F},
-    {"native_postSkew","(JFFFF)Z", (void*) SkMatrixGlue::postSkew__FFFF},
-    {"native_postSkew","(JFF)Z", (void*) SkMatrixGlue::postSkew__FF},
-    {"native_postConcat","(JJ)Z", (void*) SkMatrixGlue::postConcat},
+    {"native_setConcat","(JJJ)V", (void*) SkMatrixGlue::setConcat},
+    {"native_preTranslate","(JFF)V", (void*) SkMatrixGlue::preTranslate},
+    {"native_preScale","(JFFFF)V", (void*) SkMatrixGlue::preScale__FFFF},
+    {"native_preScale","(JFF)V", (void*) SkMatrixGlue::preScale__FF},
+    {"native_preRotate","(JFFF)V", (void*) SkMatrixGlue::preRotate__FFF},
+    {"native_preRotate","(JF)V", (void*) SkMatrixGlue::preRotate__F},
+    {"native_preSkew","(JFFFF)V", (void*) SkMatrixGlue::preSkew__FFFF},
+    {"native_preSkew","(JFF)V", (void*) SkMatrixGlue::preSkew__FF},
+    {"native_preConcat","(JJ)V", (void*) SkMatrixGlue::preConcat},
+    {"native_postTranslate","(JFF)V", (void*) SkMatrixGlue::postTranslate},
+    {"native_postScale","(JFFFF)V", (void*) SkMatrixGlue::postScale__FFFF},
+    {"native_postScale","(JFF)V", (void*) SkMatrixGlue::postScale__FF},
+    {"native_postRotate","(JFFF)V", (void*) SkMatrixGlue::postRotate__FFF},
+    {"native_postRotate","(JF)V", (void*) SkMatrixGlue::postRotate__F},
+    {"native_postSkew","(JFFFF)V", (void*) SkMatrixGlue::postSkew__FFFF},
+    {"native_postSkew","(JFF)V", (void*) SkMatrixGlue::postSkew__FF},
+    {"native_postConcat","(JJ)V", (void*) SkMatrixGlue::postConcat},
     {"native_setRectToRect","(JLandroid/graphics/RectF;Landroid/graphics/RectF;I)Z", (void*) SkMatrixGlue::setRectToRect},
     {"native_setPolyToPoly","(J[FI[FII)Z", (void*) SkMatrixGlue::setPolyToPoly},
     {"native_invert","(JJ)Z", (void*) SkMatrixGlue::invert},

@@ -175,8 +175,12 @@ static jmethodID    gOutputStream_flushMethodID;
 class SkJavaOutputStream : public SkWStream {
 public:
     SkJavaOutputStream(JNIEnv* env, jobject stream, jbyteArray storage)
-        : fEnv(env), fJavaOutputStream(stream), fJavaByteArray(storage) {
+        : fEnv(env), fJavaOutputStream(stream), fJavaByteArray(storage), fBytesWritten(0) {
         fCapacity = env->GetArrayLength(storage);
+    }
+
+    virtual size_t bytesWritten() const {
+        return fBytesWritten;
     }
 
     virtual bool write(const void* buffer, size_t size) {
@@ -213,6 +217,7 @@ public:
 
             buffer = (void*)((char*)buffer + requested);
             size -= requested;
+            fBytesWritten += requested;
         }
         return true;
     }
@@ -226,6 +231,7 @@ private:
     jobject     fJavaOutputStream;  // the caller owns this object
     jbyteArray  fJavaByteArray;     // the caller owns this object
     jint        fCapacity;
+    size_t      fBytesWritten;
 };
 
 SkWStream* CreateJavaOutputStreamAdaptor(JNIEnv* env, jobject stream,

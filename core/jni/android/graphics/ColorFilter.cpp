@@ -51,7 +51,7 @@ public:
         const float* src = autoArray.ptr();
 
 #ifdef SK_SCALAR_IS_FLOAT
-        return reinterpret_cast<jlong>(new SkColorMatrixFilter(src));
+        return reinterpret_cast<jlong>(SkColorMatrixFilter::Create(src));
 #else
         SkASSERT(false);
 #endif

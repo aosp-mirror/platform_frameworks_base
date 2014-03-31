@@ -352,13 +352,19 @@ public class Matrix {
     }
 
     /**
-     * Set the matrix to the concatenation of the two specified matrices,
-     * returning true if the the result can be represented. Either of the two
-     * matrices may also be the target matrix. this = a * b
+     * Set the matrix to the concatenation of the two specified matrices and
+     * return true.
+     *
+     * <p>Either of the two matrices may also be the target matrix, that is
+     * <code>matrixA.setConcat(matrixA, matrixB);</code> is valid.</p>
+     *
+     * <p class="note">In {@link android.os.Build.VERSION_CODES#GINGERBREAD_MR1} and below, this
+     * function returns true only if the result can be represented. In
+     * {@link android.os.Build.VERSION_CODES#HONEYCOMB} and above, it always returns true.</p>
      */
     public boolean setConcat(Matrix a, Matrix b) {
-        return native_setConcat(native_instance, a.native_instance,
-                                b.native_instance);
+        native_setConcat(native_instance, a.native_instance, b.native_instance);
+        return true;
     }
 
     /**
@@ -366,7 +372,8 @@ public class Matrix {
      * M' = M * T(dx, dy)
      */
     public boolean preTranslate(float dx, float dy) {
-        return native_preTranslate(native_instance, dx, dy);
+        native_preTranslate(native_instance, dx, dy);
+        return true;
     }
 
     /**
@@ -374,7 +381,8 @@ public class Matrix {
      * M' = M * S(sx, sy, px, py)
      */
     public boolean preScale(float sx, float sy, float px, float py) {
-        return native_preScale(native_instance, sx, sy, px, py);
+        native_preScale(native_instance, sx, sy, px, py);
+        return true;
     }
 
     /**
@@ -382,7 +390,8 @@ public class Matrix {
      * M' = M * S(sx, sy)
      */
     public boolean preScale(float sx, float sy) {
-        return native_preScale(native_instance, sx, sy);
+        native_preScale(native_instance, sx, sy);
+        return true;
     }
 
     /**
@@ -390,7 +399,8 @@ public class Matrix {
      * M' = M * R(degrees, px, py)
      */
     public boolean preRotate(float degrees, float px, float py) {
-        return native_preRotate(native_instance, degrees, px, py);
+        native_preRotate(native_instance, degrees, px, py);
+        return true;
     }
 
     /**
@@ -398,7 +408,8 @@ public class Matrix {
      * M' = M * R(degrees)
      */
     public boolean preRotate(float degrees) {
-        return native_preRotate(native_instance, degrees);
+        native_preRotate(native_instance, degrees);
+        return true;
     }
 
     /**
@@ -406,7 +417,8 @@ public class Matrix {
      * M' = M * K(kx, ky, px, py)
      */
     public boolean preSkew(float kx, float ky, float px, float py) {
-        return native_preSkew(native_instance, kx, ky, px, py);
+        native_preSkew(native_instance, kx, ky, px, py);
+        return true;
     }
 
     /**
@@ -414,7 +426,8 @@ public class Matrix {
      * M' = M * K(kx, ky)
      */
     public boolean preSkew(float kx, float ky) {
-        return native_preSkew(native_instance, kx, ky);
+        native_preSkew(native_instance, kx, ky);
+        return true;
     }
 
     /**
@@ -422,7 +435,8 @@ public class Matrix {
      * M' = M * other
      */
     public boolean preConcat(Matrix other) {
-        return native_preConcat(native_instance, other.native_instance);
+        native_preConcat(native_instance, other.native_instance);
+        return true;
     }
 
     /**
@@ -430,7 +444,8 @@ public class Matrix {
      * M' = T(dx, dy) * M
      */
     public boolean postTranslate(float dx, float dy) {
-        return native_postTranslate(native_instance, dx, dy);
+        native_postTranslate(native_instance, dx, dy);
+        return true;
     }
 
     /**
@@ -438,7 +453,8 @@ public class Matrix {
      * M' = S(sx, sy, px, py) * M
      */
     public boolean postScale(float sx, float sy, float px, float py) {
-        return native_postScale(native_instance, sx, sy, px, py);
+        native_postScale(native_instance, sx, sy, px, py);
+        return true;
     }
 
     /**
@@ -446,7 +462,8 @@ public class Matrix {
      * M' = S(sx, sy) * M
      */
     public boolean postScale(float sx, float sy) {
-        return native_postScale(native_instance, sx, sy);
+        native_postScale(native_instance, sx, sy);
+        return true;
     }
 
     /**
@@ -454,7 +471,8 @@ public class Matrix {
      * M' = R(degrees, px, py) * M
      */
     public boolean postRotate(float degrees, float px, float py) {
-        return native_postRotate(native_instance, degrees, px, py);
+        native_postRotate(native_instance, degrees, px, py);
+        return true;
     }
 
     /**
@@ -462,7 +480,8 @@ public class Matrix {
      * M' = R(degrees) * M
      */
     public boolean postRotate(float degrees) {
-        return native_postRotate(native_instance, degrees);
+        native_postRotate(native_instance, degrees);
+        return true;
     }
 
     /**
@@ -470,7 +489,8 @@ public class Matrix {
      * M' = K(kx, ky, px, py) * M
      */
     public boolean postSkew(float kx, float ky, float px, float py) {
-        return native_postSkew(native_instance, kx, ky, px, py);
+        native_postSkew(native_instance, kx, ky, px, py);
+        return true;
     }
 
     /**
@@ -478,7 +498,8 @@ public class Matrix {
      * M' = K(kx, ky) * M
      */
     public boolean postSkew(float kx, float ky) {
-        return native_postSkew(native_instance, kx, ky);
+        native_postSkew(native_instance, kx, ky);
+        return true;
     }
 
     /**
@@ -486,7 +507,8 @@ public class Matrix {
      * M' = other * M
      */
     public boolean postConcat(Matrix other) {
-        return native_postConcat(native_instance, other.native_instance);
+        native_postConcat(native_instance, other.native_instance);
+        return true;
     }
 
     /** Controlls how the src rect should align into the dst rect for
@@ -828,41 +850,41 @@ public class Matrix {
                                         float kx, float ky, float px, float py);
     private static native void native_setSkew(long native_object,
                                               float kx, float ky);
-    private static native boolean native_setConcat(long native_object,
-                                                   long native_a,
-                                                   long native_b);
-    private static native boolean native_preTranslate(long native_object,
-                                                      float dx, float dy);
-    private static native boolean native_preScale(long native_object,
-                                        float sx, float sy, float px, float py);
-    private static native boolean native_preScale(long native_object,
-                                                  float sx, float sy);
-    private static native boolean native_preRotate(long native_object,
-                                            float degrees, float px, float py);
-    private static native boolean native_preRotate(long native_object,
-                                                   float degrees);
-    private static native boolean native_preSkew(long native_object,
-                                        float kx, float ky, float px, float py);
-    private static native boolean native_preSkew(long native_object,
-                                                 float kx, float ky);
-    private static native boolean native_preConcat(long native_object,
-                                                   long native_other_matrix);
-    private static native boolean native_postTranslate(long native_object,
-                                                       float dx, float dy);
-    private static native boolean native_postScale(long native_object,
-                                        float sx, float sy, float px, float py);
-    private static native boolean native_postScale(long native_object,
-                                                   float sx, float sy);
-    private static native boolean native_postRotate(long native_object,
-                                            float degrees, float px, float py);
-    private static native boolean native_postRotate(long native_object,
-                                                    float degrees);
-    private static native boolean native_postSkew(long native_object,
-                                        float kx, float ky, float px, float py);
-    private static native boolean native_postSkew(long native_object,
-                                                  float kx, float ky);
-    private static native boolean native_postConcat(long native_object,
-                                                    long native_other_matrix);
+    private static native void native_setConcat(long native_object,
+                                                long native_a,
+                                                long native_b);
+    private static native void native_preTranslate(long native_object,
+                                                   float dx, float dy);
+    private static native void native_preScale(long native_object,
+                                               float sx, float sy, float px, float py);
+    private static native void native_preScale(long native_object,
+                                               float sx, float sy);
+    private static native void native_preRotate(long native_object,
+                                                float degrees, float px, float py);
+    private static native void native_preRotate(long native_object,
+                                                float degrees);
+    private static native void native_preSkew(long native_object,
+                                              float kx, float ky, float px, float py);
+    private static native void native_preSkew(long native_object,
+                                              float kx, float ky);
+    private static native void native_preConcat(long native_object,
+                                                long native_other_matrix);
+    private static native void native_postTranslate(long native_object,
+                                                    float dx, float dy);
+    private static native void native_postScale(long native_object,
+                                                float sx, float sy, float px, float py);
+    private static native void native_postScale(long native_object,
+                                                float sx, float sy);
+    private static native void native_postRotate(long native_object,
+                                                 float degrees, float px, float py);
+    private static native void native_postRotate(long native_object,
+                                                 float degrees);
+    private static native void native_postSkew(long native_object,
+                                               float kx, float ky, float px, float py);
+    private static native void native_postSkew(long native_object,
+                                               float kx, float ky);
+    private static native void native_postConcat(long native_object,
+                                                 long native_other_matrix);
     private static native boolean native_setRectToRect(long native_object,
                                                 RectF src, RectF dst, int stf);
     private static native boolean native_setPolyToPoly(long native_object,
