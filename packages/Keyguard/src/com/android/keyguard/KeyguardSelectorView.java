@@ -36,7 +36,6 @@ import com.android.internal.widget.multiwaveview.GlowPadView;
 import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
 
 public class KeyguardSelectorView extends LinearLayout implements KeyguardSecurityView {
-    private static final boolean DEBUG = KeyguardHostView.DEBUG;
     private static final String TAG = "SecuritySelectorView";
     private static final String ASSIST_ICON_METADATA_NAME =
         "com.android.systemui.action_assist_icon";

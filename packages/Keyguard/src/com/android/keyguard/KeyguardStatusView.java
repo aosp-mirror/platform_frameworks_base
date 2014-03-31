@@ -33,7 +33,7 @@ import com.android.internal.widget.LockPatternUtils;
 import java.util.Locale;
 
 public class KeyguardStatusView extends GridLayout {
-    private static final boolean DEBUG = KeyguardViewMediator.DEBUG;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardStatusView";
 
     private LockPatternUtils mLockPatternUtils;
@@ -50,22 +50,22 @@ public class KeyguardStatusView extends GridLayout {
         }
 
         @Override
-        void onKeyguardVisibilityChanged(boolean showing) {
+        public void onKeyguardVisibilityChanged(boolean showing) {
             if (showing) {
                 if (DEBUG) Slog.v(TAG, "refresh statusview showing:" + showing);
                 refresh();
             }
-        };
+        }
 
         @Override
         public void onScreenTurnedOn() {
             setEnableMarquee(true);
-        };
+        }
 
         @Override
         public void onScreenTurnedOff(int why) {
             setEnableMarquee(false);
-        };
+        }
     };
 
     public KeyguardStatusView(Context context) {

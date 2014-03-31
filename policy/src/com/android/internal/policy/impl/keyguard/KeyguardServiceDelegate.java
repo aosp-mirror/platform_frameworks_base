@@ -44,13 +44,13 @@ public class KeyguardServiceDelegate {
             // the event something checks before the service is actually started.
             // KeyguardService itself should default to this state until the real state is known.
             showing = true;
-            showingAndNotHidden = true;
+            showingAndNotOccluded = true;
             secure = true;
         }
         boolean showing;
-        boolean showingAndNotHidden;
+        boolean showingAndNotOccluded;
         boolean inputRestricted;
-        boolean hidden;
+        boolean occluded;
         boolean secure;
         boolean dreaming;
         boolean systemIsReady;
@@ -109,7 +109,7 @@ public class KeyguardServiceDelegate {
                 Context.BIND_AUTO_CREATE, UserHandle.OWNER)) {
             if (DEBUG) Log.v(TAG, "*** Keyguard: can't bind to " + KEYGUARD_CLASS);
             mKeyguardState.showing = false;
-            mKeyguardState.showingAndNotHidden = false;
+            mKeyguardState.showingAndNotOccluded = false;
             mKeyguardState.secure = false;
         } else {
             if (DEBUG) Log.v(TAG, "*** Keyguard started");
@@ -148,11 +148,11 @@ public class KeyguardServiceDelegate {
         return mKeyguardState.showing;
     }
 
-    public boolean isShowingAndNotHidden() {
+    public boolean isShowingAndNotOccluded() {
         if (mKeyguardService != null) {
-            mKeyguardState.showingAndNotHidden = mKeyguardService.isShowingAndNotHidden();
+            mKeyguardState.showingAndNotOccluded = mKeyguardService.isShowingAndNotOccluded();
         }
-        return mKeyguardState.showingAndNotHidden;
+        return mKeyguardState.showingAndNotOccluded;
     }
 
     public boolean isInputRestricted() {
@@ -174,12 +174,12 @@ public class KeyguardServiceDelegate {
         }
     }
 
-    public int setHidden(boolean isHidden) {
+    public int setOccluded(boolean isOccluded) {
         int result = 0;
         if (mKeyguardService != null) {
-            result = mKeyguardService.setHidden(isHidden);
+            result = mKeyguardService.setOccluded(isOccluded);
         }
-        mKeyguardState.hidden = isHidden;
+        mKeyguardState.occluded = isOccluded;
         return result;
     }
 

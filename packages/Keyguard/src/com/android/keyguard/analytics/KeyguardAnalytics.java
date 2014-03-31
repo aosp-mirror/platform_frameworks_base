@@ -80,7 +80,7 @@ public class KeyguardAnalytics implements SensorEventListener {
         public void onScreenOn();
         public void onScreenOff();
         public boolean onTouchEvent(MotionEvent ev, int width, int height);
-        public void onSetHidden(boolean hidden);
+        public void onSetOccluded(boolean hidden);
     }
 
     public interface SessionTypeAdapter {
@@ -256,11 +256,11 @@ public class KeyguardAnalytics implements SensorEventListener {
         }
 
         @Override
-        public void onSetHidden(boolean hidden) {
+        public void onSetOccluded(boolean hidden) {
             synchronized (KeyguardAnalytics.this) {
                 if (hidden != mHidden) {
                     if (DEBUG) {
-                        Log.d(TAG, "onSetHidden(" + hidden + ")");
+                        Log.d(TAG, "onSetOccluded(" + hidden + ")");
                     }
                     mHidden = hidden;
                     if (hidden) {

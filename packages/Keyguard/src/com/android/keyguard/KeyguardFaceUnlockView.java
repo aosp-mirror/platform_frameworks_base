@@ -36,7 +36,7 @@ import java.lang.Math;
 public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecurityView {
 
     private static final String TAG = "FULKeyguardFaceUnlockView";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private KeyguardSecurityCallback mKeyguardSecurityCallback;
     private LockPatternUtils mLockPatternUtils;
     private BiometricSensorUnlock mBiometricUnlock;

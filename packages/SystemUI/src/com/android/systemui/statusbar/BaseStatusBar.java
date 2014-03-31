@@ -22,11 +22,9 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -79,8 +77,6 @@ import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SearchPanelView;
 import com.android.systemui.SystemUI;
-import com.android.systemui.keyguard.KeyguardService;
-import com.android.systemui.keyguard.KeyguardStatusBarBinder;
 import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
 
 import java.util.ArrayList;
@@ -175,12 +171,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     private RecentsComponent mRecents;
 
     protected int mZenMode;
-
-    protected KeyguardStatusBarBinder mKeyguardService;
-
-    public IStatusBarService getStatusBarService() {
-        return mBarService;
-    }
 
     public boolean isDeviceProvisioned() {
         return mDeviceProvisioned;
@@ -320,7 +310,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         createAndAddWindows();
 
-        startKeyguardService();
         disable(switches[0]);
         setSystemUiVisibility(switches[1], 0xffffffff);
         topAppWindowChanged(switches[2] != 0);
@@ -369,25 +358,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
         updateRelatedUserCache();
-    }
-
-    private void startKeyguardService() {
-        Intent intent = new Intent(mContext, KeyguardService.class);
-        intent.setAction(KeyguardService.ACTION_STATUS_BAR_BIND);
-        if (!mContext.bindService(intent, new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                mKeyguardService = (KeyguardStatusBarBinder) service;
-                mKeyguardService.register(mCommandQueue);
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                mKeyguardService = null;
-            }
-        }, Context.BIND_AUTO_CREATE)) {
-            throw new RuntimeException("Couldn't bind status bar keyguard.");
-        }
     }
 
     public void userSwitched(int newUserId) {
@@ -1363,7 +1333,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         boolean interrupt = (isFullscreen || (isHighPriority && (isNoisy || hasTicker)))
                 && isAllowed
                 && mPowerManager.isScreenOn()
-                && !keyguard.isShowingAndNotHidden()
+                && !keyguard.isShowingAndNotOccluded()
                 && !keyguard.isInputRestricted();
         try {
             interrupt = interrupt && !mDreamManager.isDreaming();

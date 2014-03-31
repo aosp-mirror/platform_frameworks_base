@@ -69,7 +69,7 @@ import java.util.ArrayList;
 public class KeyguardUpdateMonitor {
 
     private static final String TAG = "KeyguardUpdateMonitor";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final boolean DEBUG_SIM_STATES = DEBUG || false;
     private static final int FAILED_BIOMETRIC_UNLOCK_ATTEMPTS_BEFORE_BACKUP = 3;
     private static final int LOW_BATTERY_THRESHOLD = 20;
@@ -662,7 +662,7 @@ public class KeyguardUpdateMonitor {
      * broadcast and hence not handle the event. This method is ultimately called by
      * PhoneWindowManager in this case.
      */
-    protected void dispatchBootCompleted() {
+    public void dispatchBootCompleted() {
         mHandler.sendEmptyMessage(MSG_BOOT_COMPLETED);
     }
 

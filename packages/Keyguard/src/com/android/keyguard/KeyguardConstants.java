@@ -14,20 +14,19 @@
  * limitations under the License
  */
 
-package com.android.systemui.keyguard;
-
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarWindowManager;
-
-import android.os.Binder;
-import android.view.ViewGroup;
+package com.android.keyguard;
 
 /**
- * Communication interface from status bar to {@link com.android.systemui.keyguard.KeyguardService}.
+ * Defines constants for the Keyguard.
  */
-public abstract class KeyguardStatusBarBinder extends Binder {
+public class KeyguardConstants {
 
-    public abstract void registerStatusBar(PhoneStatusBar phoneStatusBar, ViewGroup container,
-            StatusBarWindowManager statusBarWindowManager);
+    /**
+     * Turns on debugging information for the whole Keyguard. This is very verbose and should only
+     * be used temporarily for debugging.
+     */
+    public static final boolean DEBUG = false;
+
+    /** Timeout used for key presses. */
+    public static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
 }

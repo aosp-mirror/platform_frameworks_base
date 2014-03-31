@@ -94,15 +94,6 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void setKeyguardShown(boolean showKeyguard, IKeyguardShowCallback callback,
-            boolean updateKeyguardFlags) {
-    }
-
-    @Override
-    protected void createAndAddWindows() {
-    }
-
-    @Override
     protected WindowManager.LayoutParams getSearchLayoutParams(
             LayoutParams layoutParams) {
         return null;
@@ -148,6 +139,10 @@ public class TvStatusBar extends BaseStatusBar {
 
     @Override
     public void animateExpandSettingsPanel() {
+    }
+
+    @Override
+    protected void createAndAddWindows() {
     }
 
     @Override

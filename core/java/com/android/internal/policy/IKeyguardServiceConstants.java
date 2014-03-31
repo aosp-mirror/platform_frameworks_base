@@ -25,17 +25,17 @@ public class IKeyguardServiceConstants {
      * Constant for {@link com.android.internal.policy.IKeyguardService#setHidden(boolean)}:
      * Don't change the keyguard window flags.
      */
-    public static final int KEYGUARD_SERVICE_HIDE_RESULT_NONE = 0;
+    public static final int KEYGUARD_SERVICE_SET_OCCLUDED_RESULT_NONE = 0;
 
     /**
      * Constant for {@link com.android.internal.policy.IKeyguardService#setHidden(boolean)}:
      * Set the keyguard window flags to FLAG_SHOW_WALLPAPER and PRIVATE_FLAG_KEYGUARD.
      */
-    public static final int KEYGUARD_SERVICE_HIDE_RESULT_SET_FLAGS = 1;
+    public static final int KEYGUARD_SERVICE_SET_OCCLUDED_RESULT_SET_FLAGS = 1;
 
     /**
      * Constant for {@link com.android.internal.policy.IKeyguardService#setHidden(boolean)}:
      * Unset the keyguard window flags to FLAG_SHOW_WALLPAPER and PRIVATE_FLAG_KEYGUARD.
      */
-    public static final int KEYGUARD_SERVICE_HIDE_RESULT_UNSET_FLAGS = 2;
+    public static final int KEYGUARD_SERVICE_SET_OCCLUDED_RESULT_UNSET_FLAGS = 2;
 }
