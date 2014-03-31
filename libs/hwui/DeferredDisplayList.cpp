@@ -190,7 +190,7 @@ public:
 
         // Overlapping other operations is only allowed for text without shadow. For other ops,
         // multiDraw isn't guaranteed to overdraw correctly
-        if (!isTextBatch || state->mDrawModifiers.mHasShadow) {
+        if (!isTextBatch || op->hasTextShadow()) {
             if (intersects(state->mBounds)) return false;
         }
         const DeferredDisplayState* lhs = state;

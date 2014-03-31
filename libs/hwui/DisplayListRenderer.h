@@ -102,9 +102,6 @@ public:
     virtual void resetShader();
     virtual void setupShader(SkiaShader* shader);
 
-    virtual void resetShadow();
-    virtual void setupShadow(float radius, float dx, float dy, int color);
-
     virtual void resetPaintFilter();
     virtual void setupPaintFilter(int clearBits, int setBits);
 

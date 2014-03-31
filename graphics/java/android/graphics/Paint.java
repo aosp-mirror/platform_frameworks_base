@@ -55,27 +55,6 @@ public class Paint {
     /**
      * @hide
      */
-    public boolean hasShadow;
-    /**
-     * @hide
-     */
-    public float shadowDx;
-    /**
-     * @hide
-     */
-    public float shadowDy;
-    /**
-     * @hide
-     */
-    public float shadowRadius;
-    /**
-     * @hide
-     */
-    public int shadowColor;
-
-    /**
-     * @hide
-     */
     public  int         mBidiFlags = BIDI_DEFAULT_LTR;
     
     static final Style[] sStyleArray = {
@@ -492,12 +471,6 @@ public class Paint {
         mCompatScaling = 1;
         mInvCompatScaling = 1;
 
-        hasShadow = false;
-        shadowDx = 0;
-        shadowDy = 0;
-        shadowRadius = 0;
-        shadowColor = 0;
-
         mBidiFlags = BIDI_DEFAULT_LTR;
         setTextLocale(Locale.getDefault());
         setElegantTextHeight(false);
@@ -537,12 +510,6 @@ public class Paint {
         mHasCompatScaling = paint.mHasCompatScaling;
         mCompatScaling = paint.mCompatScaling;
         mInvCompatScaling = paint.mInvCompatScaling;
-
-        hasShadow = paint.hasShadow;
-        shadowDx = paint.shadowDx;
-        shadowDy = paint.shadowDy;
-        shadowRadius = paint.shadowRadius;
-        shadowColor = paint.shadowColor;
 
         mBidiFlags = paint.mBidiFlags;
         mLocale = paint.mLocale;
@@ -1135,22 +1102,24 @@ public class Paint {
      * layer is removed.
      */
     public void setShadowLayer(float radius, float dx, float dy, int color) {
-        hasShadow = radius > 0.0f;
-        shadowRadius = radius;
-        shadowDx = dx;
-        shadowDy = dy;
-        shadowColor = color;
-        nSetShadowLayer(radius, dx, dy, color);
+      native_setShadowLayer(mNativePaint, radius, dx, dy, color);
     }
-    
-    private native void nSetShadowLayer(float radius, float dx, float dy, int color);
 
     /**
      * Clear the shadow layer.
      */
     public void clearShadowLayer() {
-        hasShadow = false;
-        nSetShadowLayer(0, 0, 0, 0);
+        setShadowLayer(0, 0, 0, 0);
+    }
+
+    /**
+     * Checks if the paint has a shadow layer attached
+     *
+     * @return true if the paint has a shadow layer attached and false otherwise
+     * @hide
+     */
+    public boolean hasShadowLayer() {
+      return native_hasShadowLayer(mNativePaint);
     }
 
     /**
@@ -2295,4 +2264,8 @@ public class Paint {
     private static native void nativeGetCharArrayBounds(long nativePaint,
                                 char[] text, int index, int count, int bidiFlags, Rect bounds);
     private static native void finalizer(long nativePaint);
+
+    private static native void native_setShadowLayer(long native_object,
+            float radius, float dx, float dy, int color);
+    private static native boolean native_hasShadowLayer(long native_object);
 }

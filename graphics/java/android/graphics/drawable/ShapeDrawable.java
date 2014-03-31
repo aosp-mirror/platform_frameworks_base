@@ -237,7 +237,7 @@ public class ShapeDrawable extends Drawable {
         paint.setAlpha(modulateAlpha(prevAlpha, state.mAlpha));
 
         // only draw shape if it may affect output
-        if (paint.getAlpha() != 0 || paint.getXfermode() != null || paint.hasShadow) {
+        if (paint.getAlpha() != 0 || paint.getXfermode() != null || paint.hasShadowLayer()) {
             final boolean clearColorFilter;
             if (mTintFilter != null && paint.getColorFilter() == null) {
                 paint.setColorFilter(mTintFilter);

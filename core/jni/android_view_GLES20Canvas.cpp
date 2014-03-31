@@ -78,7 +78,6 @@ using namespace uirenderer;
     #define RENDERER_LOGD(...)
 #endif
 
-#define MODIFIER_SHADOW 1
 #define MODIFIER_SHADER 2
 
 // ----------------------------------------------------------------------------
@@ -632,7 +631,6 @@ static void android_view_GLES20Canvas_drawLines(JNIEnv* env, jobject clazz,
 static void android_view_GLES20Canvas_resetModifiers(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jint modifiers) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    if (modifiers & MODIFIER_SHADOW) renderer->resetShadow();
     if (modifiers & MODIFIER_SHADER) renderer->resetShader();
 }
 
@@ -643,12 +641,6 @@ static void android_view_GLES20Canvas_setupShader(JNIEnv* env, jobject clazz,
     renderer->setupShader(shader);
 }
 
-
-static void android_view_GLES20Canvas_setupShadow(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jfloat radius, jfloat dx, jfloat dy, jint color) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    renderer->setupShadow(radius, dx, dy, color);
-}
 
 // ----------------------------------------------------------------------------
 // Draw filters
@@ -1050,7 +1042,6 @@ static JNINativeMethod gMethods[] = {
 
     { "nResetModifiers",    "(JI)V",           (void*) android_view_GLES20Canvas_resetModifiers },
     { "nSetupShader",       "(JJ)V",           (void*) android_view_GLES20Canvas_setupShader },
-    { "nSetupShadow",       "(JFFFI)V",        (void*) android_view_GLES20Canvas_setupShadow },
 
     { "nSetupPaintFilter",  "(JII)V",          (void*) android_view_GLES20Canvas_setupPaintFilter },
     { "nResetPaintFilter",  "(J)V",            (void*) android_view_GLES20Canvas_resetPaintFilter },
