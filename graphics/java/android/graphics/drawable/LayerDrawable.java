@@ -80,8 +80,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     /**
-     * Create a new layer drawable with the specified list of layers and the specified
-     * constant state.
+     * Create a new layer drawable with the specified list of layers and the
+     * specified constant state.
      *
      * @param layers The list of layers to add to this drawable.
      * @param state The constant drawable state.
@@ -326,6 +326,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         childDrawable.mInsetR = right;
         childDrawable.mInsetB = bottom;
         st.mNum++;
+        st.invalidateCache();
 
         layer.setCallback(this);
     }
@@ -419,6 +420,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 }
 
                 childDrawable.mDrawable = drawable;
+                mLayerState.invalidateCache();
                 return true;
             }
         }
@@ -527,6 +529,25 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
+    private void computeStackedPadding(Rect padding) {
+        padding.left = 0;
+        padding.top = 0;
+        padding.right = 0;
+        padding.bottom = 0;
+
+        // Take the max padding.
+        final ChildDrawable[] array = mLayerState.mChildren;
+        final int N = mLayerState.mNum;
+        for (int i = 0; i < N; i++) {
+            refreshChildPadding(i, array[i]);
+
+            padding.left = Math.max(padding.left, mPaddingL[i]);
+            padding.top = Math.max(padding.top, mPaddingT[i]);
+            padding.right = Math.max(padding.right, mPaddingR[i]);
+            padding.bottom = Math.max(padding.bottom, mPaddingB[i]);
+        }
+    }
+
     /**
      * @hide
      */
@@ -579,25 +600,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
-    private void computeStackedPadding(Rect padding) {
-        padding.left = 0;
-        padding.top = 0;
-        padding.right = 0;
-        padding.bottom = 0;
-
-        // Take the max padding.
-        final ChildDrawable[] array = mLayerState.mChildren;
-        final int N = mLayerState.mNum;
-        for (int i = 0; i < N; i++) {
-            refreshChildPadding(i, array[i]);
-
-            padding.left = Math.max(padding.left, mPaddingL[i]);
-            padding.top = Math.max(padding.top, mPaddingT[i]);
-            padding.right = Math.max(padding.right, mPaddingR[i]);
-            padding.bottom = Math.max(padding.bottom, mPaddingB[i]);
-        }
-    }
-
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
         final boolean changed = super.setVisible(visible, restart);
@@ -632,7 +634,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     public int getAlpha() {
         final ChildDrawable[] array = mLayerState.mChildren;
         if (mLayerState.mNum > 0) {
-            // All layers should have the same alpha set on them - just return the first one
+            // All layers should have the same alpha set on them - just return
+            // the first one
             return array[0].mDrawable.getAlpha();
         } else {
             return super.getAlpha();
@@ -649,12 +652,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     /**
-     * Sets the opacity of this drawable directly, instead of collecting the states from
-     * the layers
+     * Sets the opacity of this drawable directly, instead of collecting the
+     * states from the layers
      *
-     * @param opacity The opacity to use, or {@link PixelFormat#UNKNOWN PixelFormat.UNKNOWN}
-     * for the default behavior
-     *
+     * @param opacity The opacity to use, or {@link PixelFormat#UNKNOWN
+     *            PixelFormat.UNKNOWN} for the default behavior
      * @see PixelFormat#UNKNOWN
      * @see PixelFormat#TRANSLUCENT
      * @see PixelFormat#TRANSPARENT
@@ -702,7 +704,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         final int N = mLayerState.mNum;
         for (int i = 0; i < N; i++) {
             final ChildDrawable r = array[i];
-            if (r.mDrawable.setState(state)) {
+            if (r.mDrawable.isStateful() && r.mDrawable.setState(state)) {
                 changed = true;
             }
 
@@ -890,7 +892,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         public int[] mThemeAttrs;
         public int mInsetL, mInsetT, mInsetR, mInsetB;
         public int mId;
-        
+
         ChildDrawable() {
             // Default empty constructor.
         }
@@ -920,14 +922,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         int mChangingConfigurations;
         int mChildrenChangingConfigurations;
 
-        private boolean mHaveOpacity = false;
+        private boolean mHaveOpacity;
         private int mOpacity;
 
-        private boolean mHaveStateful = false;
-        private boolean mStateful;
-
-        private boolean mCheckedConstantState;
-        private boolean mCanConstantState;
+        private boolean mHaveIsStateful;
+        private boolean mIsStateful;
 
         private boolean mAutoMirrored;
 
@@ -951,9 +950,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
                 mHaveOpacity = orig.mHaveOpacity;
                 mOpacity = orig.mOpacity;
-                mHaveStateful = orig.mHaveStateful;
-                mStateful = orig.mStateful;
-                mCheckedConstantState = mCanConstantState = true;
+                mHaveIsStateful = orig.mHaveIsStateful;
+                mIsStateful = orig.mIsStateful;
                 mAutoMirrored = orig.mAutoMirrored;
                 mPaddingMode = orig.mPaddingMode;
                 mThemeAttrs = orig.mThemeAttrs;
@@ -993,49 +991,54 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 return mOpacity;
             }
 
+            final ChildDrawable[] array = mChildren;
             final int N = mNum;
-            int op = N > 0 ? mChildren[0].mDrawable.getOpacity() : PixelFormat.TRANSPARENT;
+            int op = N > 0 ? array[0].mDrawable.getOpacity() : PixelFormat.TRANSPARENT;
             for (int i = 1; i < N; i++) {
-                op = Drawable.resolveOpacity(op, mChildren[i].mDrawable.getOpacity());
+                op = Drawable.resolveOpacity(op, array[i].mDrawable.getOpacity());
             }
+
             mOpacity = op;
             mHaveOpacity = true;
             return op;
         }
 
         public final boolean isStateful() {
-            if (mHaveStateful) {
-                return mStateful;
+            if (mHaveIsStateful) {
+                return mIsStateful;
             }
 
-            boolean stateful = false;
+            final ChildDrawable[] array = mChildren;
             final int N = mNum;
+            boolean isStateful = false;
             for (int i = 0; i < N; i++) {
-                if (mChildren[i].mDrawable.isStateful()) {
-                    stateful = true;
+                if (array[i].mDrawable.isStateful()) {
+                    isStateful = true;
                     break;
                 }
             }
 
-            mStateful = stateful;
-            mHaveStateful = true;
-            return stateful;
+            mIsStateful = isStateful;
+            mHaveIsStateful = true;
+            return isStateful;
         }
 
-        public boolean canConstantState() {
-            if (!mCheckedConstantState && mChildren != null) {
-                mCanConstantState = true;
-                final int N = mNum;
-                for (int i = 0; i < N; i++) {
-                    if (mChildren[i].mDrawable.getConstantState() == null) {
-                        mCanConstantState = false;
-                        break;
-                    }
+        public final boolean canConstantState() {
+            final ChildDrawable[] array = mChildren;
+            final int N = mNum;
+            for (int i = 0; i < N; i++) {
+                if (array[i].mDrawable.getConstantState() == null) {
+                    return false;
                 }
-                mCheckedConstantState = true;
             }
 
-            return mCanConstantState;
+            // Don't cache the result, this method is not called very often.
+            return true;
+        }
+
+        public void invalidateCache() {
+            mHaveOpacity = false;
+            mHaveIsStateful = false;
         }
     }
 }
