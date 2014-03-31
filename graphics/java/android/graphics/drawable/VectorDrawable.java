@@ -60,9 +60,11 @@ import java.util.HashSet;
  * The vector drawable has 6 elements:
  * <p/>
  * <dl>
- * <dt><code>&lt;vector></code></dt><dd>
- * The attribute <code>android:trigger</code> which defines a state change that
+ * <dt><code>&lt;vector></code></dt>
+ * <dd> * The attribute <code>android:trigger</code> defines a state change that
  * will drive the animation </dd>
+ * <dd> * The attribute <code>android:versionCode</code> defines the version of
+ * VectorDrawable </dd>
  * <dt><code>&lt;size></code></dt>
  * <dd>Used to defined the intrinsic Width Height size of the drawable using
  * <code>android:width</code> and <code>android:height</code> </dd>
@@ -494,6 +496,16 @@ public class VectorDrawable extends Drawable {
                 }  else if (SHAPE_VECTOR.equals(tagName)) {
                     TypedArray a = res.obtainAttributes(attrs, R.styleable.VectorDrawable);
                     animatedPath.setTrigger(a.getInteger(R.styleable.VectorDrawable_trigger, 0));
+
+                    // Parsing the version information.
+                    // Right now, we only support version "1".
+                    // If the xml didn't specify the version number, the default version is "1".
+                    int versionCode = a.getInt(R.styleable.VectorDrawable_versionCode, 1);
+                    if (versionCode != 1) {
+                        throw new IllegalArgumentException(
+                                "So far, VectorDrawable only support version 1");
+                    }
+
                     a.recycle();
                 }
             }

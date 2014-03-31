@@ -4555,6 +4555,7 @@
             <enum name="state_activated" value="8" />
             <enum name="state_window_focused" value="9" />
         </attr>
+        <attr name="versionCode" />
     </declare-styleable>
 
     <!-- Define the virtual size of the drawing surface paths will draw to. -->
