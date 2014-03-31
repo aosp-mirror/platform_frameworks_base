@@ -43,7 +43,8 @@
     <application android:label="@string/app_name"
         android:process="com.android.systemui"
         android:persistent="true"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:requiredForProfile="all">
 
     </application>
 </manifest>
