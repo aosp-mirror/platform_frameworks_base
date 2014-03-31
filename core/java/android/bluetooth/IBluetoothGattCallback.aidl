@@ -64,4 +64,5 @@ interface IBluetoothGattCallback {
                              in byte[] value);
     void onReadRemoteRssi(in String address, in int rssi, in int status);
     oneway void onAdvertiseStateChange(in int advertiseState, in int status);
+    void onConfigureMTU(in String address, in int mtu, in int status);
 }

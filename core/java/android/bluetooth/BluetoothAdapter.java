@@ -2023,5 +2023,13 @@ public final class BluetoothAdapter {
                 }
             }
         }
+
+        /**
+         * Callback reporting LE ATT MTU.
+         * @hide
+         */
+        public void onConfigureMTU(String address, int mtu, int status) {
+            // no op
+        }
     }
 }
