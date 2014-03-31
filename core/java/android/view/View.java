@@ -24,6 +24,7 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Camera;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Interpolator;
 import android.graphics.LinearGradient;
@@ -15341,6 +15342,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Regardless of whether we're setting a new background or not, we want
          * to clear the previous drawable.
          */
+
+        if(background instanceof ColorDrawable) {
+            int mColor = ((ColorDrawable) background).getColor();
+            if(mColor == Color.parseColor("#33b5e5")) {
+                if(mResources.mColor != 0)
+                    ((ColorDrawable) background).setColor(mResources.mColor);
+                else 
+                    ((ColorDrawable) background).setColor(Color.GRAY);
+            }
+        }
+
         if (mBackground != null) {
             mBackground.setCallback(null);
             unscheduleDrawable(mBackground);

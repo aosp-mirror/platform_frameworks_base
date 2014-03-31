@@ -177,44 +177,7 @@ public class BarTransitions {
 
         @Override
         public void draw(Canvas canvas) {
-            int targetGradientAlpha = 0, targetColor = 0;
-            if (mMode == MODE_TRANSLUCENT) {
-                targetGradientAlpha = 0xff;
-            } else if (mMode == MODE_SEMI_TRANSPARENT) {
-                targetColor = mSemiTransparent;
-            } else {
-                targetColor = mOpaque;
-            }
-            if (!mAnimating) {
-                mColor = targetColor;
-                mGradientAlpha = targetGradientAlpha;
-            } else {
-                final long now = SystemClock.elapsedRealtime();
-                if (now >= mEndTime) {
-                    mAnimating = false;
-                    mColor = targetColor;
-                    mGradientAlpha = targetGradientAlpha;
-                } else {
-                    final float t = (now - mStartTime) / (float)(mEndTime - mStartTime);
-                    final float v = Math.max(0, Math.min(mInterpolator.getInterpolation(t), 1));
-                    mGradientAlpha = (int)(v * targetGradientAlpha + mGradientAlphaStart * (1 - v));
-                    mColor = Color.argb(
-                          (int)(v * Color.alpha(targetColor) + Color.alpha(mColorStart) * (1 - v)),
-                          (int)(v * Color.red(targetColor) + Color.red(mColorStart) * (1 - v)),
-                          (int)(v * Color.green(targetColor) + Color.green(mColorStart) * (1 - v)),
-                          (int)(v * Color.blue(targetColor) + Color.blue(mColorStart) * (1 - v)));
-                }
-            }
-            if (mGradientAlpha > 0) {
-                mGradient.setAlpha(mGradientAlpha);
-                mGradient.draw(canvas);
-            }
-            if (Color.alpha(mColor) > 0) {
-                canvas.drawColor(mColor);
-            }
-            if (mAnimating) {
-                invalidateSelf();  // keep going
-            }
+            canvas.drawColor(Color.TRANSPARENT);
         }
     }
 }

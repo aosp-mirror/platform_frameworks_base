@@ -21,8 +21,12 @@ import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.Context;
+import static android.content.res.HoloResources.isHoloRes;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.graphics.Movie;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable.ConstantState;
@@ -30,6 +34,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Trace;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -122,6 +127,10 @@ public class Resources {
 
     private CompatibilityInfo mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
     private WeakReference<IBinder> mToken;
+    public int mColor = 0;
+    public String mPackageName;
+    public static final String ChameleonKey = "Chameleon/%s";
+    private boolean isSystem;
 
     static {
         sPreloadedDrawables = new LongSparseArray[2];
@@ -215,6 +224,7 @@ public class Resources {
             if (ret == null) {
                 ret = new Resources();
                 mSystem = ret;
+                ret.isSystem = true;
             }
 
             return ret;
@@ -2048,7 +2058,7 @@ public class Resources {
         Drawable dr = getCachedDrawable(isColorDrawable ? mColorDrawableCache : mDrawableCache, key);
 
         if (dr != null) {
-            return dr;
+            return paintDrawable(dr, value);
         }
         Drawable.ConstantState cs;
         if (isColorDrawable) {
@@ -2166,7 +2176,46 @@ public class Resources {
             }
         }
 
+        return paintDrawable(dr, value);
+    }
+
+    private Drawable paintDrawable(Drawable dr, TypedValue value) {
+        if (value.string == null) {
+            return dr;
+        }
+        if (mColor != 0) {
+            String resId = value.string.toString();
+            if (isHoloRes(resId))
+                dr.setColorFilter(mColor, PorterDuff.Mode.SRC_IN);
+        }
+        return hookDrawable(dr, value);
+    }
+
+    private Drawable hookDrawable(Drawable dr, TypedValue value) {
+        try {
+            if (HoloResources.compare(value.string.toString(), "global_top_background_angora.9.png"))
+                return new ColorDrawable(Color.parseColor("#40599e"));
+            else
+                return dr;
+        } catch (NullPointerException e) {};
         return dr;
+    }
+
+    private static String colortoString(int color) {
+        return String.format("%02x%02x%02x", Color.red(color), Color.green(color), Color.blue(color));
+    }
+
+    public static int getHighLightColor(Context mContext) {
+        int mColor = getChameleonColor(mContext);
+        if (mColor != 0)
+            return Integer.parseInt("66" + colortoString(mColor), 16);
+        else
+            return 0;
+    }
+
+    public static int getChameleonColor(Context mContext) {
+        String packagename = mContext.getPackageName().trim();
+        return Settings.System.getInt(mContext.getContentResolver(),String.format(ChameleonKey, packagename), 0);
     }
 
     private Drawable getCachedDrawable(

@@ -2673,6 +2673,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public void setHighlightColor(int color) {
+        int loadedColor = Resources.getHighLightColor(getContext());
+        if(loadedColor != 0)
+            color = loadedColor;
         if (mHighlightColor != color) {
             mHighlightColor = color;
             invalidate();
