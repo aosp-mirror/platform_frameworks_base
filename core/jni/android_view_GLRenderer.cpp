@@ -26,6 +26,8 @@
 
 #include <utils/Timers.h>
 
+#include <private/hwui/DrawGlInfo.h>
+
 #include <Caches.h>
 #include <Extensions.h>
 #include <LayerRenderer.h>
@@ -155,6 +157,14 @@ static void android_view_GLRenderer_updateRenderNodeProperties(JNIEnv* env, jobj
     renderNode->updateProperties();
 }
 
+static void android_view_GLRenderer_invokeFunctor(JNIEnv* env, jobject clazz,
+        jlong functorPtr, jboolean hasContext) {
+    using namespace android::uirenderer;
+    Functor* functor = reinterpret_cast<Functor*>(functorPtr);
+    DrawGlInfo::Mode mode = hasContext ? DrawGlInfo::kModeProcess : DrawGlInfo::kModeProcessNoContext;
+    (*functor)(mode, NULL);
+}
+
 #endif // USE_OPENGL_RENDERER
 
 // ----------------------------------------------------------------------------
@@ -187,6 +197,7 @@ static JNINativeMethod gMethods[] = {
     { "nDestroyLayer",         "(J)V",  (void*) android_view_GLRenderer_destroyLayer },
     { "nSetDisplayListData",  "(JJ)V", (void*) android_view_GLRenderer_setDisplayListData },
     { "nUpdateRenderNodeProperties", "(J)V", (void*) android_view_GLRenderer_updateRenderNodeProperties },
+    { "nInvokeFunctor",        "(JZ)V", (void*) android_view_GLRenderer_invokeFunctor },
 #endif
 
     { "setupShadersDiskCache", "(Ljava/lang/String;)V",
