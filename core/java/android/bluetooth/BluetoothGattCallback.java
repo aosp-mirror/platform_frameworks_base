@@ -138,4 +138,19 @@ public abstract class BluetoothGattCallback {
      */
     public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
     }
+
+    /**
+     * Callback indicating the MTU for a given device connection has changed.
+     *
+     * This callback is triggered in response to the
+     * {@link BluetoothGatt#configureMTU} function, or in response to a connection
+     * event.
+     *
+     * @param gatt GATT client invoked {@link BluetoothGatt#configureMTU}
+     * @param mtu The new MTU size
+     * @param status {@link BluetoothGatt#GATT_SUCCESS} if the MTU has been changed successfully
+     * @hide
+     */
+    public void onConfigureMTU(BluetoothGatt gatt, int mtu, int status) {
+    }
 }
