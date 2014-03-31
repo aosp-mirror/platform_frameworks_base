@@ -56,7 +56,7 @@ public class AudioFormat {
     /** Default audio channel mask */
     public static final int CHANNEL_OUT_DEFAULT = 1;
 
-    // Channel mask definitions below are translated to the native values defined in
+    // Output channel mask definitions below are translated to the native values defined in
     //  in /system/core/include/system/audio.h in the JNI code of AudioTrack
     public static final int CHANNEL_OUT_FRONT_LEFT = 0x4;
     public static final int CHANNEL_OUT_FRONT_RIGHT = 0x8;
@@ -94,17 +94,21 @@ public class AudioFormat {
             CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_BACK_CENTER);
     public static final int CHANNEL_OUT_5POINT1 = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
             CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_LOW_FREQUENCY | CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT);
+    // different from AUDIO_CHANNEL_OUT_7POINT1
     public static final int CHANNEL_OUT_7POINT1 = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
             CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_LOW_FREQUENCY | CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT |
             CHANNEL_OUT_FRONT_LEFT_OF_CENTER | CHANNEL_OUT_FRONT_RIGHT_OF_CENTER);
     /** @hide */
+    // matches AUDIO_CHANNEL_OUT_7POINT1
     public static final int CHANNEL_OUT_7POINT1_SURROUND = (
             CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_FRONT_RIGHT |
             CHANNEL_OUT_SIDE_LEFT | CHANNEL_OUT_SIDE_RIGHT |
             CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT |
             CHANNEL_OUT_LOW_FREQUENCY);
+    // CHANNEL_OUT_ALL is not yet defined; if added then it should match AUDIO_CHANNEL_OUT_ALL
 
     public static final int CHANNEL_IN_DEFAULT = 1;
+    // These directly match native
     public static final int CHANNEL_IN_LEFT = 0x4;
     public static final int CHANNEL_IN_RIGHT = 0x8;
     public static final int CHANNEL_IN_FRONT = 0x10;
@@ -121,5 +125,8 @@ public class AudioFormat {
     public static final int CHANNEL_IN_VOICE_DNLINK = 0x8000;
     public static final int CHANNEL_IN_MONO = CHANNEL_IN_FRONT;
     public static final int CHANNEL_IN_STEREO = (CHANNEL_IN_LEFT | CHANNEL_IN_RIGHT);
+    /** @hide */
+    public static final int CHANNEL_IN_FRONT_BACK = CHANNEL_IN_FRONT | CHANNEL_IN_BACK;
+    // CHANNEL_IN_ALL is not yet defined; if added then it should match AUDIO_CHANNEL_IN_ALL
 
 }
