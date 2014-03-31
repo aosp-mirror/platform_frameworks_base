@@ -3651,6 +3651,11 @@
     <!-- Description of an application permission that lets it control keyguard. -->
     <string name="permdesc_control_keyguard">Allows an application to control keguard.</string>
 
+    <!-- Title of an application permission that lets it bind to a trust agent service. -->
+    <string name="permlab_bind_trust_agent_service">Bind to a trust agent service</string>
+    <!-- Description of an application permission that lets it bind to a trust agent service. -->
+    <string name="permdesc_bind_trust_agent_service">Allows an application to bind to a trust agent service.</string>
+
     <!-- Title of an application permission that lets it interact with recovery. -->
     <string name="permlab_recovery">Interact with update and recovery system</string>
     <!-- Description of an application permission that lets it control keyguard. -->

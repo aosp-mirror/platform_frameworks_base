@@ -28,6 +28,7 @@ package android {
     field public static final java.lang.String BIND_PRINT_SERVICE = "android.permission.BIND_PRINT_SERVICE";
     field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
     field public static final java.lang.String BIND_TEXT_SERVICE = "android.permission.BIND_TEXT_SERVICE";
+    field public static final java.lang.String BIND_TRUST_AGENT_SERVICE = "android.permission.BIND_TRUST_AGENT_SERVICE";
     field public static final java.lang.String BIND_VPN_SERVICE = "android.permission.BIND_VPN_SERVICE";
     field public static final java.lang.String BIND_WALLPAPER = "android.permission.BIND_WALLPAPER";
     field public static final java.lang.String BLUETOOTH = "android.permission.BLUETOOTH";
@@ -24383,6 +24384,20 @@ package android.service.textservice {
     method public android.view.textservice.SentenceSuggestionsInfo[] onGetSentenceSuggestionsMultiple(android.view.textservice.TextInfo[], int);
     method public abstract android.view.textservice.SuggestionsInfo onGetSuggestions(android.view.textservice.TextInfo, int);
     method public android.view.textservice.SuggestionsInfo[] onGetSuggestionsMultiple(android.view.textservice.TextInfo[], int, boolean);
+  }
+
+}
+
+package android.service.trust {
+
+  public class TrustAgentService extends android.app.Service {
+    ctor public TrustAgentService();
+    method protected final void enableTrust(java.lang.String, long, boolean);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method protected void onUnlockAttempt(boolean);
+    method protected final void revokeTrust();
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.trust.TrustAgentService";
+    field public static final java.lang.String TRUST_AGENT_META_DATA = "android.service.trust.trustagent";
   }
 
 }

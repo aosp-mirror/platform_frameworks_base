@@ -190,6 +190,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/dreams/IDozeHardware.aidl \
 	core/java/android/service/dreams/IDreamManager.aidl \
 	core/java/android/service/dreams/IDreamService.aidl \
+	core/java/android/service/trust/ITrustAgentService.aidl \
+	core/java/android/service/trust/ITrustAgentServiceCallback.aidl \
 	core/java/android/service/wallpaper/IWallpaperConnection.aidl \
 	core/java/android/service/wallpaper/IWallpaperEngine.aidl \
 	core/java/android/service/wallpaper/IWallpaperService.aidl \
