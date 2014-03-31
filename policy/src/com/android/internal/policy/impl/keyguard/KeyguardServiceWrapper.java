@@ -22,6 +22,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 import android.view.MotionEvent;
 
+import com.android.internal.policy.IKeyguardServiceConstants;
 import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
@@ -105,7 +106,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
             return mService.setHidden(isHidden);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
-            return 0;
+            return IKeyguardServiceConstants.KEYGUARD_SERVICE_HIDE_RESULT_NONE;
         }
     }
 

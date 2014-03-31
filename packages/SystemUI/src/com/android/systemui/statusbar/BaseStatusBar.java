@@ -383,7 +383,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-
+                mKeyguardService = null;
             }
         }, Context.BIND_AUTO_CREATE)) {
             throw new RuntimeException("Couldn't bind status bar keyguard.");

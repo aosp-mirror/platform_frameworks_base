@@ -32,8 +32,7 @@ interface IKeyguardService {
     oneway void keyguardDone(boolean authenticated, boolean wakeup);
 
     /**
-     * Hides the Keyguard when a window comes on top of the Keyguard with flag
-     * FLAG_SHOW_ON_LOCK_SCREEN.
+     * Hides the Keyguard when a window dismisses the Keyguard with flag FLAG_SHOW_ON_LOCK_SCREEN.
      *
      * @param isHidden Whether the Keyguard should be hidden.
      * @return See IKeyguardServiceConstants.KEYGUARD_SERVICE_HIDE_*. This is needed because
