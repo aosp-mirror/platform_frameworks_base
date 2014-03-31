@@ -462,4 +462,8 @@ public class IWindowManagerImpl implements IWindowManager {
         // TODO Auto-generated method stub
         return false;
     }
+
+    @Override
+    public void enableScreenIfNeeded() throws RemoteException {
+    }
 }

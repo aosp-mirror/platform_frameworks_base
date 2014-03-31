@@ -1007,6 +1007,14 @@ public interface WindowManagerPolicy {
     public void dismissKeyguardLw();
 
     /**
+     * Ask the policy whether the Keyguard has drawn. If the Keyguard is disabled, this method
+     * returns true as soon as we know that Keyguard is disabled.
+     *
+     * @return true if the keyguard has drawn.
+     */
+    public boolean isKeyguardDrawnLw();
+
+    /**
      * Given an orientation constant, returns the appropriate surface rotation,
      * taking into account sensors, docking mode, rotation lock, and other factors.
      *

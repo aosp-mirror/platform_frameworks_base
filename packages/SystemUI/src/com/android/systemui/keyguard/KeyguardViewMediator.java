@@ -60,6 +60,7 @@ import com.android.keyguard.MultiUserAvatarCache;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.keyguard.analytics.KeyguardAnalytics;
 import com.android.keyguard.analytics.Session;
+import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowManager;
@@ -111,7 +112,7 @@ import static com.android.keyguard.analytics.KeyguardAnalytics.SessionTypeAdapte
  * directly to the keyguard UI is posted to a {@link android.os.Handler} to ensure it is taken on the UI
  * thread of the keyguard.
  */
-public class KeyguardViewMediator {
+public class KeyguardViewMediator extends SystemUI {
     private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
     final static boolean DEBUG = false;
     private static final boolean ENABLE_ANALYTICS = Build.IS_DEBUGGABLE;
@@ -181,7 +182,6 @@ public class KeyguardViewMediator {
     /** The stream type that the lock sounds are tied to. */
     private int mMasterStreamType;
 
-    private Context mContext;
     private AlarmManager mAlarmManager;
     private AudioManager mAudioManager;
     private StatusBarManager mStatusBarManager;
@@ -211,7 +211,7 @@ public class KeyguardViewMediator {
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
-    private final KeyguardAnalytics mKeyguardAnalytics;
+    private KeyguardAnalytics mKeyguardAnalytics;
 
     // these are protected by synchronized (this)
 
@@ -284,7 +284,7 @@ public class KeyguardViewMediator {
     /**
      * The volume applied to the lock/unlock sounds.
      */
-    private final float mLockSoundVolume;
+    private float mLockSoundVolume;
 
     /**
      * For managing external displays
@@ -460,42 +460,34 @@ public class KeyguardViewMediator {
         mPM.userActivity(SystemClock.uptimeMillis(), false);
     }
 
-    /**
-     * Construct a KeyguardViewMediator
-     * @param context
-     * @param lockPatternUtils optional mock interface for LockPatternUtils
-     */
-    public KeyguardViewMediator(Context context, LockPatternUtils lockPatternUtils) {
-        mContext = context;
-        mPM = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+    private void setup() {
+        mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mShowKeyguardWakeLock = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "show keyguard");
         mShowKeyguardWakeLock.setReferenceCounted(false);
 
         mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(DELAYED_KEYGUARD_ACTION));
 
-        mKeyguardDisplayManager = new KeyguardDisplayManager(context);
+        mKeyguardDisplayManager = new KeyguardDisplayManager(mContext);
 
-        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
-        mUpdateMonitor = KeyguardUpdateMonitor.getInstance(context);
+        mUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
 
-        mLockPatternUtils = lockPatternUtils != null
-                ? lockPatternUtils : new LockPatternUtils(mContext);
+        mLockPatternUtils = new LockPatternUtils(mContext);
         mLockPatternUtils.setCurrentUser(UserHandle.USER_OWNER);
 
         // Assume keyguard is showing (unless it's disabled) until we know for sure...
         mShowing = (mUpdateMonitor.isDeviceProvisioned() || mLockPatternUtils.isSecure())
                 && !mLockPatternUtils.isLockScreenDisabled();
 
-        mStatusBarKeyguardViewManager = new StatusBarKeyguardViewManager(mContext, mViewMediatorCallback,
-                lockPatternUtils);
-        WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+        mStatusBarKeyguardViewManager = new StatusBarKeyguardViewManager(mContext,
+                mViewMediatorCallback, mLockPatternUtils);
         final ContentResolver cr = mContext.getContentResolver();
 
         if (ENABLE_ANALYTICS && !LockPatternUtils.isSafeModeEnabled() &&
                 Settings.Secure.getInt(cr, KEYGUARD_ANALYTICS_SETTING, 0) == 1) {
-            mKeyguardAnalytics = new KeyguardAnalytics(context, new SessionTypeAdapter() {
+            mKeyguardAnalytics = new KeyguardAnalytics(mContext, new SessionTypeAdapter() {
 
                 @Override
                 public int getSessionType() {
@@ -526,9 +518,15 @@ public class KeyguardViewMediator {
         if (soundPath == null || mUnlockSoundId == 0) {
             Log.w(TAG, "failed to load unlock sound from " + soundPath);
         }
-        int lockSoundDefaultAttenuation = context.getResources().getInteger(
+        int lockSoundDefaultAttenuation = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lockSoundVolumeDb);
         mLockSoundVolume = (float)Math.pow(10, (float)lockSoundDefaultAttenuation/20);
+    }
+
+    @Override
+    public void start() {
+        setup();
+        putComponent(KeyguardViewMediator.class, this);
     }
 
     /**

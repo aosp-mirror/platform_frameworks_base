@@ -177,6 +177,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     private WindowState mKeyguardScrim;
     private boolean mKeyguardHidden;
+    private boolean mKeyguardDrawn;
 
     /* Table of Application Launch keys.  Maps from key codes to intent categories.
      *
@@ -4355,21 +4356,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void waitForKeyguard(final ScreenOnListener screenOnListener) {
         if (mKeyguardDelegate != null) {
-            if (screenOnListener != null) {
-                mKeyguardDelegate.onScreenTurnedOn(new KeyguardServiceDelegate.ShowListener() {
-                    @Override
-                    public void onShown(IBinder windowToken) {
-                        waitForKeyguardWindowDrawn(windowToken, screenOnListener);
-                    }
-                });
-                return;
-            } else {
-                mKeyguardDelegate.onScreenTurnedOn(null);
-            }
+            mKeyguardDelegate.onScreenTurnedOn(new KeyguardServiceDelegate.ShowListener() {
+                @Override
+                public void onShown(IBinder windowToken) {
+                    waitForKeyguardWindowDrawn(windowToken, screenOnListener);
+                }
+            });
         } else {
             Slog.i(TAG, "No keyguard interface!");
+            finishScreenTurningOn(screenOnListener);
         }
-        finishScreenTurningOn(screenOnListener);
     }
 
     private void waitForKeyguardWindowDrawn(IBinder windowToken,
@@ -4382,6 +4378,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     public void sendResult(Bundle data) {
                         Slog.i(TAG, "Lock screen displayed!");
                         finishScreenTurningOn(screenOnListener);
+                        setKeyguardDrawn();
                     }
                 })) {
                     return;
@@ -4395,6 +4392,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         Slog.i(TAG, "No lock screen! windowToken=" + windowToken);
         finishScreenTurningOn(screenOnListener);
+        setKeyguardDrawn();
     }
 
     private void finishScreenTurningOn(ScreenOnListener screenOnListener) {
@@ -4472,6 +4470,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             });
+        }
+    }
+
+    private void setKeyguardDrawn() {
+        synchronized (mLock) {
+            mKeyguardDrawn = true;
+        }
+        try {
+            mWindowManager.enableScreenIfNeeded();
+        } catch (RemoteException unhandled) {
+        }
+    }
+
+    @Override
+    public boolean isKeyguardDrawnLw() {
+        synchronized (mLock) {
+            return mKeyguardDrawn;
         }
     }
 
@@ -4758,6 +4773,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         synchronized (mLock) {
             mSystemBooted = true;
         }
+        waitForKeyguard(null);
     }
 
     ProgressDialog mBootMsgDialog = null;

@@ -5285,6 +5285,13 @@ public class WindowManagerService extends IWindowManager.Stub
         performEnableScreen();
     }
 
+    @Override
+    public void enableScreenIfNeeded() {
+        synchronized (mWindowMap) {
+            enableScreenIfNeededLocked();
+        }
+    }
+
     void enableScreenIfNeededLocked() {
         if (DEBUG_BOOT) {
             RuntimeException here = new RuntimeException("here");
@@ -5349,18 +5356,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int N = windows.size();
                 for (int i=0; i<N; i++) {
                     WindowState w = windows.get(i);
-                    if ((w.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
-                        // Only if there is a keyguard attached to the window manager
-                        // will we consider ourselves as having a keyguard.  If it
-                        // isn't attached, we don't know if it wants to be shown or
-                        // hidden.  If it is attached, we will say we have a keyguard
-                        // if the window doesn't want to be visible, because in that
-                        // case it explicitly doesn't want to be shown so we should
-                        // not delay turning the screen on for it.
-                        boolean vis = w.mViewVisibility == View.VISIBLE
-                                && w.mPolicyVisibility;
-                        haveKeyguard = !vis;
-                    }
                     if (w.isVisibleLw() && !w.mObscured && !w.isDrawnLw()) {
                         return;
                     }
@@ -5371,8 +5366,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             haveApp = true;
                         } else if (w.mAttrs.type == TYPE_WALLPAPER) {
                             haveWallpaper = true;
-                        } else if ((w.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
-                            haveKeyguard = true;
+                        } else if (w.mAttrs.type == TYPE_STATUS_BAR) {
+                            haveKeyguard = mPolicy.isKeyguardDrawnLw();
                         }
                     }
                 }
