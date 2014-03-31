@@ -56,7 +56,8 @@ public class X509TrustManagerExtensions {
         if (tm instanceof TrustManagerImpl) {
             mDelegate = (TrustManagerImpl) tm;
         } else {
-            throw new IllegalArgumentException("tm is not a supported type of X509TrustManager");
+            throw new IllegalArgumentException("tm is an instance of " + tm.getClass().getName() +
+                    " which is not a supported type of X509TrustManager");
         }
     }
 
