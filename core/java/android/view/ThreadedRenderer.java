@@ -186,6 +186,11 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
+    public void invokeFunctor(long functor, boolean waitForCompletion) {
+        nInvokeFunctor(mNativeProxy, functor, waitForCompletion);
+    }
+
+    @Override
     HardwareLayer createDisplayListLayer(int width, int height) {
         long layer = nCreateDisplayListLayer(mNativeProxy, width, height);
         return HardwareLayer.adoptDisplayListLayer(this, layer);
@@ -266,6 +271,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private static native void nAttachFunctor(long nativeProxy, long functor);
     private static native void nDetachFunctor(long nativeProxy, long functor);
+    private static native void nInvokeFunctor(long nativeProxy, long functor, boolean waitForCompletion);
 
     private static native long nCreateDisplayListLayer(long nativeProxy, int width, int height);
     private static native long nCreateTextureLayer(long nativeProxy);

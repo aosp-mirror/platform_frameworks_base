@@ -555,6 +555,32 @@ public class GLRenderer extends HardwareRenderer {
     }
 
     @Override
+    public void invokeFunctor(long functor, boolean waitForCompletion) {
+        boolean needsContext = !isEnabled() || checkRenderContext() == SURFACE_STATE_ERROR;
+        boolean hasContext = !needsContext;
+
+        if (needsContext) {
+            GLRendererEglContext managedContext =
+                    (GLRendererEglContext) sEglContextStorage.get();
+            if (managedContext != null) {
+                usePbufferSurface(managedContext.getContext());
+                hasContext = true;
+            }
+        }
+
+        try {
+            nInvokeFunctor(functor, hasContext);
+        } finally {
+            if (needsContext) {
+                sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE,
+                        EGL_NO_SURFACE, EGL_NO_CONTEXT);
+            }
+        }
+    }
+
+    private static native void nInvokeFunctor(long functor, boolean hasContext);
+
+    @Override
     void destroyHardwareResources(final View view) {
         if (view != null) {
             safelyRun(new Runnable() {
