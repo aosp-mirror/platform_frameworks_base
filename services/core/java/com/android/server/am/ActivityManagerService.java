@@ -945,6 +945,11 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     boolean mDidDexOpt;
 
+    /**
+     * Set if the systemServer made a call to enterSafeMode.
+     */
+    boolean mSafeMode;
+
     String mDebugApp = null;
     boolean mWaitForDebugger = false;
     boolean mDebugTransient = false;
@@ -2737,7 +2742,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Run the app in safe mode if its manifest requests so or the
             // system is booted in safe mode.
             if ((app.info.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0 ||
-                Zygote.systemInSafeMode == true) {
+                mSafeMode == true) {
                 debugFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
             }
             if ("1".equals(SystemProperties.get("debug.checkjni"))) {
@@ -8963,6 +8968,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 } catch (RemoteException e) {
                 }
             }
+
+            mSafeMode = true;
         }
     }
 
