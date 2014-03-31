@@ -22,7 +22,7 @@
      is the portrait layout.  -->
 <com.android.keyguard.KeyguardPatternView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
+    xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_pattern_view"
     android:orientation="vertical"
     android:layout_width="match_parent"

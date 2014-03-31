@@ -29,8 +29,8 @@ import com.android.internal.widget.LockPatternUtils;
  */
 public class KeyguardServiceDelegate {
     // TODO: propagate changes to these to {@link KeyguardTouchDelegate}
-    public static final String KEYGUARD_PACKAGE = "com.android.keyguard";
-    public static final String KEYGUARD_CLASS = "com.android.keyguard.KeyguardService";
+    public static final String KEYGUARD_PACKAGE = "com.android.systemui";
+    public static final String KEYGUARD_CLASS = "com.android.systemui.keyguard.KeyguardService";
 
     private static final String TAG = "KeyguardServiceDelegate";
     private static final boolean DEBUG = true;
@@ -174,11 +174,13 @@ public class KeyguardServiceDelegate {
         }
     }
 
-    public void setHidden(boolean isHidden) {
+    public int setHidden(boolean isHidden) {
+        int result = 0;
         if (mKeyguardService != null) {
-            mKeyguardService.setHidden(isHidden);
+            result = mKeyguardService.setHidden(isHidden);
         }
         mKeyguardState.hidden = isHidden;
+        return result;
     }
 
     public void dismiss() {

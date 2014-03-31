@@ -31,7 +31,6 @@
         android:layout_height="@*android:dimen/status_bar_height"
         />
 
-
     <com.android.systemui.statusbar.phone.PanelHolder
         android:id="@+id/panel_holder"
         android:layout_width="match_parent"
@@ -49,4 +48,10 @@
             android:layout_gravity="end|top"
             />
     </com.android.systemui.statusbar.phone.PanelHolder>
+
+    <FrameLayout android:id="@+id/keyguard"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+    </FrameLayout>
 </com.android.systemui.statusbar.phone.StatusBarWindowView>

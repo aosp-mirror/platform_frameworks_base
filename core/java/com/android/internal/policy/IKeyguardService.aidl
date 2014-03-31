@@ -30,7 +30,19 @@ interface IKeyguardService {
     boolean isDismissable();
     oneway void verifyUnlock(IKeyguardExitCallback callback);
     oneway void keyguardDone(boolean authenticated, boolean wakeup);
-    oneway void setHidden(boolean isHidden);
+
+    /**
+     * Hides the Keyguard when a window comes on top of the Keyguard with flag
+     * FLAG_SHOW_ON_LOCK_SCREEN.
+     *
+     * @param isHidden Whether the Keyguard should be hidden.
+     * @return See IKeyguardServiceConstants.KEYGUARD_SERVICE_HIDE_*. This is needed because
+     *         PhoneWindowManager needs to set these flags immediately and can't wait for the
+     *         Keyguard thread to pick it up. In the hidden case, PhoneWindowManager is solely
+     *         responsible to make sure that the flags are unset.
+     */
+    int setHidden(boolean isHidden);
+
     oneway void dismiss();
     oneway void onDreamingStarted();
     oneway void onDreamingStopped();

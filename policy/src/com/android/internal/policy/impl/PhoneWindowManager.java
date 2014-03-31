@@ -96,6 +96,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import com.android.internal.R;
+import com.android.internal.policy.IKeyguardService;
+import com.android.internal.policy.IKeyguardServiceConstants;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.keyguard.KeyguardServiceDelegate;
 import com.android.internal.statusbar.IStatusBarService;
@@ -174,6 +176,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Keyguard stuff
      */
     private WindowState mKeyguardScrim;
+    private boolean mKeyguardHidden;
 
     /* Table of Application Launch keys.  Maps from key codes to intent categories.
      *
@@ -248,7 +251,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int[] mNavigationBarHeightForRotation = new int[4];
     int[] mNavigationBarWidthForRotation = new int[4];
 
-    WindowState mKeyguard = null;
     KeyguardServiceDelegate mKeyguardDelegate;
     GlobalActions mGlobalActions;
     volatile boolean mPowerKeyHandled; // accessed from input reader and handler thread
@@ -1311,7 +1313,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_BOOT_PROGRESS:
             case TYPE_DISPLAY_OVERLAY:
             case TYPE_HIDDEN_NAV_CONSUMER:
-            case TYPE_KEYGUARD:
             case TYPE_KEYGUARD_SCRIM:
             case TYPE_KEYGUARD_DIALOG:
             case TYPE_MAGNIFICATION_OVERLAY:
@@ -1347,6 +1348,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 attrs.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
                 attrs.flags &= ~WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+                break;
+            case TYPE_STATUS_BAR:
+
+                // If the Keyguard is in a hidden state (occluded by another window), we force to
+                // remove the wallpaper and keyguard flag so that any change in-flight after setting
+                // the keyguard as occluded wouldn't set these flags again.
+                // See {@link #processKeyguardSetHiddenResultLw}.
+                if (mKeyguardHidden) {
+                    attrs.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+                    attrs.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+                }
                 break;
         }
     }
@@ -1434,54 +1446,50 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         case TYPE_KEYGUARD_SCRIM:
             // the safety window that shows behind keyguard while keyguard is starting
             return 12;
-        case TYPE_KEYGUARD:
-            // the keyguard; nothing on top of these can take focus, since they are
-            // responsible for power management when displayed.
-            return 13;
-        case TYPE_KEYGUARD_DIALOG:
-            return 14;
         case TYPE_STATUS_BAR_SUB_PANEL:
-            return 15;
+            return 13;
         case TYPE_STATUS_BAR:
-            return 16;
+            return 14;
         case TYPE_STATUS_BAR_PANEL:
-            return 17;
+            return 15;
+        case TYPE_KEYGUARD_DIALOG:
+            return 16;
         case TYPE_VOLUME_OVERLAY:
             // the on-screen volume indicator and controller shown when the user
             // changes the device volume
-            return 18;
+            return 17;
         case TYPE_SYSTEM_OVERLAY:
             // the on-screen volume indicator and controller shown when the user
             // changes the device volume
-            return 19;
+            return 18;
         case TYPE_NAVIGATION_BAR:
             // the navigation bar, if available, shows atop most things
-            return 20;
+            return 19;
         case TYPE_NAVIGATION_BAR_PANEL:
             // some panels (e.g. search) need to show on top of the navigation bar
-            return 21;
+            return 20;
         case TYPE_SYSTEM_ERROR:
             // system-level error dialogs
-            return 22;
+            return 21;
         case TYPE_MAGNIFICATION_OVERLAY:
             // used to highlight the magnified portion of a display
-            return 23;
+            return 22;
         case TYPE_DISPLAY_OVERLAY:
             // used to simulate secondary display devices
-            return 24;
+            return 23;
         case TYPE_DRAG:
             // the drag layer: input for drag-and-drop is associated with this window,
             // which sits above all other focusable windows
-            return 25;
+            return 24;
         case TYPE_SECURE_SYSTEM_OVERLAY:
-            return 26;
+            return 25;
         case TYPE_BOOT_PROGRESS:
-            return 27;
+            return 26;
         case TYPE_POINTER:
             // the (mouse) pointer layer
-            return 28;
+            return 27;
         case TYPE_HIDDEN_NAV_CONSUMER:
-            return 29;
+            return 28;
         }
         Log.e(TAG, "Unknown window type: " + type);
         return 2;
@@ -1551,7 +1559,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public boolean doesForceHide(WindowState win, WindowManager.LayoutParams attrs) {
-        return attrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD;
+        return (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0;
     }
 
     @Override
@@ -1562,7 +1570,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_WALLPAPER:
             case TYPE_DREAM:
             case TYPE_UNIVERSE_BACKGROUND:
-            case TYPE_KEYGUARD:
             case TYPE_KEYGUARD_SCRIM:
                 return false;
             default:
@@ -1761,12 +1768,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         android.Manifest.permission.STATUS_BAR_SERVICE,
                         "PhoneWindowManager");
                 break;
-            case TYPE_KEYGUARD:
-                if (mKeyguard != null) {
-                    return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
-                }
-                mKeyguard = win;
-                break;
             case TYPE_KEYGUARD_SCRIM:
                 if (mKeyguardScrim != null) {
                     return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
@@ -1783,9 +1784,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mStatusBar == win) {
             mStatusBar = null;
             mStatusBarController.setWindow(null);
-        } else if (mKeyguard == win) {
-            Log.v(TAG, "Removing keyguard window (Did it crash?)");
-            mKeyguard = null;
             mKeyguardDelegate.showScrim();
         } else if (mKeyguardScrim == win) {
             Log.v(TAG, "Removing keyguard scrim");
@@ -1804,12 +1802,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (PRINT_ANIM) Log.i(TAG, "selectAnimation in " + win
               + ": transit=" + transit);
         if (win == mStatusBar) {
+            boolean isKeyguard = (win.getAttrs().privateFlags & PRIVATE_FLAG_KEYGUARD) != 0;
             if (transit == TRANSIT_EXIT
                     || transit == TRANSIT_HIDE) {
-                return R.anim.dock_top_exit;
+                return isKeyguard ? -1 : R.anim.dock_top_exit;
             } else if (transit == TRANSIT_ENTER
                     || transit == TRANSIT_SHOW) {
-                return R.anim.dock_top_enter;
+                return isKeyguard ? -1 : R.anim.dock_top_enter;
             }
         } else if (win == mNavigationBar) {
             // This can be on either the bottom or the right.
@@ -2030,9 +2029,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             WindowManager.LayoutParams attrs = win != null ? win.getAttrs() : null;
             if (attrs != null) {
                 final int type = attrs.type;
-                if (type == WindowManager.LayoutParams.TYPE_KEYGUARD
-                        || type == WindowManager.LayoutParams.TYPE_KEYGUARD_SCRIM
-                        || type == WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG) {
+                if (type == WindowManager.LayoutParams.TYPE_KEYGUARD_SCRIM
+                        || type == WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG
+                        || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                     // the "app" is keyguard, so give it the key
                     return 0;
                 }
@@ -3083,9 +3082,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 + mOverscanScreenHeight;
                     } else if (canHideNavigationBar()
                             && (sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
-                            && (attrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD || (
-                                attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
-                             && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW))) {
+                            && attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
+                            && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
                         // Asking for layout as if the nav bar is hidden, lets the
                         // application extend into the unrestricted overscan screen area.  We
                         // only do this for application windows to ensure no window that
@@ -3395,13 +3393,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mTopFullscreenOpaqueWindowState == null &&
                 win.isVisibleOrBehindKeyguardLw() && !win.isGoneForLayoutLw()) {
             if ((fl & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
-                if (attrs.type == TYPE_KEYGUARD) {
+                if ((attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                     mForceStatusBarFromKeyguard = true;
                 } else {
                     mForceStatusBar = true;
                 }
             }
-            if (attrs.type == TYPE_KEYGUARD) {
+            if ((attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                 mShowingLockscreen = true;
             }
             boolean appWindow = attrs.type >= FIRST_APPLICATION_WINDOW
@@ -3531,57 +3529,54 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Hide the key guard if a visible window explicitly specifies that it wants to be
         // displayed when the screen is locked.
-        if (mKeyguard != null) {
-            if (localLOGV) Slog.v(TAG, "finishPostLayoutPolicyLw: mHideKeyguard="
-                    + mHideLockScreen);
-            if (mDismissKeyguard != DISMISS_KEYGUARD_NONE && !isKeyguardSecure()) {
-                if (mKeyguard.hideLw(true)) {
-                    changes |= FINISH_LAYOUT_REDO_LAYOUT
-                            | FINISH_LAYOUT_REDO_CONFIG
-                            | FINISH_LAYOUT_REDO_WALLPAPER;
-                }
-                if (mKeyguardDelegate.isShowing()) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mKeyguardDelegate.keyguardDone(false, false);
-                        }
-                    });
-                }
-            } else if (mHideLockScreen) {
-                if (mKeyguard.hideLw(true)) {
-                    changes |= FINISH_LAYOUT_REDO_LAYOUT
-                            | FINISH_LAYOUT_REDO_CONFIG
-                            | FINISH_LAYOUT_REDO_WALLPAPER;
-                }
-                if (!mShowingDream) {
-                    mKeyguardDelegate.setHidden(true);
-                }
-            } else if (mDismissKeyguard != DISMISS_KEYGUARD_NONE) {
-                // This is the case of keyguard isSecure() and not mHideLockScreen.
-                if (mDismissKeyguard == DISMISS_KEYGUARD_START) {
-                    // Only launch the next keyguard unlock window once per window.
-                    if (mKeyguard.showLw(true)) {
-                        changes |= FINISH_LAYOUT_REDO_LAYOUT
-                                | FINISH_LAYOUT_REDO_CONFIG
-                                | FINISH_LAYOUT_REDO_WALLPAPER;
+        if (localLOGV) Slog.v(TAG, "finishPostLayoutPolicyLw: mHideKeyguard="
+                + mHideLockScreen);
+        if (mDismissKeyguard != DISMISS_KEYGUARD_NONE && !isKeyguardSecure()) {
+            mKeyguardHidden = true;
+            if (processKeyguardSetHiddenResultLw(mKeyguardDelegate.setHidden(true))) {
+                changes |= FINISH_LAYOUT_REDO_LAYOUT
+                        | FINISH_LAYOUT_REDO_CONFIG
+                        | FINISH_LAYOUT_REDO_WALLPAPER;
+            }
+            if (mKeyguardDelegate.isShowing()) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mKeyguardDelegate.keyguardDone(false, false);
                     }
-                    mKeyguardDelegate.setHidden(false);
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mKeyguardDelegate.dismiss();
-                        }
-                    });
-                }
-            } else {
-                mWinDismissingKeyguard = null;
-                if (mKeyguard.showLw(true)) {
+                });
+            }
+        } else if (mHideLockScreen) {
+            mKeyguardHidden = true;
+            if (processKeyguardSetHiddenResultLw(mKeyguardDelegate.setHidden(true))) {
+                changes |= FINISH_LAYOUT_REDO_LAYOUT
+                        | FINISH_LAYOUT_REDO_CONFIG
+                        | FINISH_LAYOUT_REDO_WALLPAPER;
+            }
+        } else if (mDismissKeyguard != DISMISS_KEYGUARD_NONE) {
+            // This is the case of keyguard isSecure() and not mHideLockScreen.
+            if (mDismissKeyguard == DISMISS_KEYGUARD_START) {
+                // Only launch the next keyguard unlock window once per window.
+                mKeyguardHidden = false;
+                if (processKeyguardSetHiddenResultLw(mKeyguardDelegate.setHidden(false))) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
                 }
-                mKeyguardDelegate.setHidden(false);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mKeyguardDelegate.dismiss();
+                    }
+                });
+            }
+        } else {
+            mWinDismissingKeyguard = null;
+            mKeyguardHidden = false;
+            if (processKeyguardSetHiddenResultLw(mKeyguardDelegate.setHidden(false))) {
+                changes |= FINISH_LAYOUT_REDO_LAYOUT
+                        | FINISH_LAYOUT_REDO_CONFIG
+                        | FINISH_LAYOUT_REDO_WALLPAPER;
             }
         }
 
@@ -3596,9 +3591,38 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return changes;
     }
 
+    /**
+     * Processes the result code of {@link IKeyguardService#setHidden}. This is needed because we
+     * immediately need to put the wallpaper directly behind the Keyguard when a window with flag
+     * {@link android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED} gets dismissed. If we
+     * would wait for Keyguard to change the flags, that would be running asynchronously and thus be
+     * too late so the user might see the window behind.
+     *
+     * @param setHiddenResult The result code from {@link IKeyguardService#setHidden}.
+     * @return Whether the flags have changed and we have to redo the layout.
+     */
+    private boolean processKeyguardSetHiddenResultLw(int setHiddenResult) {
+        if (setHiddenResult == IKeyguardServiceConstants.KEYGUARD_SERVICE_HIDE_RESULT_SET_FLAGS) {
+            mStatusBar.getAttrs().privateFlags |= PRIVATE_FLAG_KEYGUARD;
+            mStatusBar.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
+            return true;
+        } else if (setHiddenResult
+                == IKeyguardServiceConstants.KEYGUARD_SERVICE_HIDE_RESULT_UNSET_FLAGS) {
+            mStatusBar.getAttrs().privateFlags &= ~PRIVATE_FLAG_KEYGUARD;
+            mStatusBar.getAttrs().flags &= ~FLAG_SHOW_WALLPAPER;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean isStatusBarKeyguard() {
+        return mStatusBar != null
+                && (mStatusBar.getAttrs().privateFlags & PRIVATE_FLAG_KEYGUARD) != 0;
+    }
+
     public boolean allowAppAnimationsLw() {
-        if (mKeyguard != null && mKeyguard.isVisibleLw() && !mKeyguard.isAnimatingLw()
-                || mShowingDream) {
+        if (isStatusBarKeyguard() || mShowingDream) {
             // If keyguard or dreams is currently visible, no reason to animate behind it.
             return false;
         }
@@ -5118,7 +5142,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (win == null) {
             return 0;
         }
-        if (win.getAttrs().type == TYPE_KEYGUARD && mHideLockScreen == true) {
+        if ((win.getAttrs().privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 && mHideLockScreen == true) {
             // We are updating at a point where the keyguard has gotten
             // focus, but we were last in a state where the top window is
             // hiding it.  This is probably because the keyguard as been
@@ -5164,8 +5188,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private int updateSystemBarsLw(WindowState win, int oldVis, int vis) {
         // apply translucent bar vis flags
-        WindowState transWin = mKeyguard != null && mKeyguard.isVisibleLw() && !mHideLockScreen
-                ? mKeyguard
+        WindowState transWin = isStatusBarKeyguard() && !mHideLockScreen
+                ? mStatusBar
                 : mTopFullscreenOpaqueWindowState;
         vis = mStatusBarController.applyTranslucentFlagLw(transWin, vis, oldVis);
         vis = mNavigationBarController.applyTranslucentFlagLw(transWin, vis, oldVis);
@@ -5423,14 +5447,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mStatusBar != null) {
             pw.print(prefix); pw.print("mStatusBar=");
                     pw.println(mStatusBar);
+            pw.print(prefix); pw.print("isStatusBarKeyguard=");
+                    pw.print(isStatusBarKeyguard());
         }
         if (mNavigationBar != null) {
             pw.print(prefix); pw.print("mNavigationBar=");
                     pw.println(mNavigationBar);
-        }
-        if (mKeyguard != null) {
-            pw.print(prefix); pw.print("mKeyguard=");
-                    pw.println(mKeyguard);
         }
         if (mFocusedWindow != null) {
             pw.print(prefix); pw.print("mFocusedWindow=");
