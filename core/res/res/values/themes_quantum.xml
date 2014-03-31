@@ -476,7 +476,7 @@ please see themes_device_defaults.xml.
         <item name="windowFullscreen">false</item>
         <item name="windowOverscan">false</item>
         <item name="windowIsFloating">false</item>
-        <item name="windowContentOverlay">@drawable/ab_solid_shadow_qntm</item>
+        <item name="windowContentOverlay">@drawable/ab_solid_shadow_quantum</item>
         <item name="windowShowWallpaper">false</item>
         <item name="windowTitleStyle">@style/WindowTitle.Quantum</item>
         <item name="windowTitleSize">25dip</item>

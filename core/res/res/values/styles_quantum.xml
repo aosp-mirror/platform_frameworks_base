@@ -677,7 +677,7 @@ please see styles_device_defaults.xml.
         <item name="showDividers">middle</item>
         <item name="dividerPadding">8dip</item>
         <item name="measureWithLargestChild">true</item>
-        <item name="tabLayout">@layout/tab_indicator_holo</item>
+        <item name="tabLayout">@layout/tab_indicator_quantum</item>
     </style>
 
     <style name="Widget.Quantum.Tab" parent="Widget.Quantum.ActionBar.TabView">
@@ -731,7 +731,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.ActionButton.CloseMode">
-        <item name="background">@drawable/btn_cab_done_holo_dark</item>
+        <item name="background">@drawable/btn_cab_done_quantum</item>
     </style>
 
     <style name="Widget.Quantum.ActionButton.Overflow">
@@ -768,8 +768,8 @@ please see styles_device_defaults.xml.
         <item name="titleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Title</item>
         <item name="subtitleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Subtitle</item>
         <item name="background">@drawable/ab_transparent_quantum</item>
-        <item name="backgroundStacked">@drawable/ab_stacked_transparent_dark_holo</item>
-        <item name="backgroundSplit">@drawable/ab_bottom_transparent_dark_holo</item>
+        <item name="backgroundStacked">@drawable/ab_stacked_transparent_quantum</item>
+        <item name="backgroundSplit">@drawable/ab_bottom_transparent_quantum</item>
         <item name="divider">?attr/dividerVertical</item>
         <item name="progressBarStyle">@style/Widget.Quantum.ProgressBar.Horizontal</item>
         <item name="indeterminateProgressStyle">@style/Widget.Quantum.ProgressBar</item>
@@ -780,9 +780,9 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.ActionBar.Solid">
         <item name="titleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Title</item>
         <item name="subtitleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Subtitle</item>
-        <item name="background">@drawable/ab_solid_dark_holo</item>
-        <item name="backgroundStacked">@drawable/ab_stacked_solid_dark_holo</item>
-        <item name="backgroundSplit">@drawable/ab_bottom_solid_dark_holo</item>
+        <item name="background">@drawable/ab_solid_quantum</item>
+        <item name="backgroundStacked">@drawable/ab_stacked_solid_quantum</item>
+        <item name="backgroundSplit">@drawable/ab_bottom_solid_quantum</item>
         <item name="divider">?attr/dividerVertical</item>
         <item name="progressBarStyle">@style/Widget.Quantum.ProgressBar.Horizontal</item>
         <item name="indeterminateProgressStyle">@style/Widget.Quantum.ProgressBar</item>
@@ -809,7 +809,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.MediaRouteButton">
         <item name="background">?attr/selectableItemBackground</item>
-        <item name="externalRouteEnabledDrawable">@drawable/ic_media_route_holo_dark</item>
+        <item name="externalRouteEnabledDrawable">@drawable/ic_media_route_quantum</item>
         <item name="minWidth">56dp</item>
         <item name="minHeight">48dp</item>
         <item name="focusable">true</item>
@@ -896,7 +896,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.DatePicker" parent="Widget.Quantum.DatePicker"/>
 
     <style name="Widget.Quantum.Light.ActivityChooserView" parent="Widget.Quantum.ActivityChooserView">
-        <item name="background">@drawable/ab_share_pack_holo_light</item>
+        <item name="background">@drawable/ab_share_pack_quantum</item>
     </style>
 
     <style name="Widget.Quantum.Light.ImageWell" parent="Widget.Quantum.ImageWell"/>
@@ -991,15 +991,15 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.Light.ActionButton.CloseMode">
-        <item name="background">@drawable/btn_cab_done_holo_light</item>
+        <item name="background">@drawable/btn_cab_done_quantum</item>
     </style>
 
     <style name="Widget.Quantum.Light.ActionBar" parent="Widget.Quantum.ActionBar">
         <item name="titleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Title</item>
         <item name="subtitleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Subtitle</item>
         <item name="background">@drawable/ab_transparent_quantum</item>
-        <item name="backgroundStacked">@drawable/ab_stacked_transparent_light_holo</item>
-        <item name="backgroundSplit">@drawable/ab_bottom_transparent_light_holo</item>
+        <item name="backgroundStacked">@drawable/ab_stacked_transparent_quantum</item>
+        <item name="backgroundSplit">@drawable/ab_bottom_transparent_quantum</item>
         <item name="homeAsUpIndicator">@drawable/ic_ab_back_quantum</item>
         <item name="progressBarStyle">@style/Widget.Quantum.Light.ProgressBar.Horizontal</item>
         <item name="indeterminateProgressStyle">@style/Widget.Quantum.Light.ProgressBar</item>
@@ -1008,9 +1008,9 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.ActionBar.Solid">
         <item name="titleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Title</item>
         <item name="subtitleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Subtitle</item>
-        <item name="background">@drawable/ab_solid_light_holo</item>
-        <item name="backgroundStacked">@drawable/ab_stacked_solid_light_holo</item>
-        <item name="backgroundSplit">@drawable/ab_bottom_solid_light_holo</item>
+        <item name="background">@drawable/ab_solid_quantum</item>
+        <item name="backgroundStacked">@drawable/ab_stacked_solid_quantum</item>
+        <item name="backgroundSplit">@drawable/ab_bottom_solid_quantum</item>
         <item name="divider">?attr/dividerVertical</item>
         <item name="progressBarStyle">@style/Widget.Quantum.Light.ProgressBar.Horizontal</item>
         <item name="indeterminateProgressStyle">@style/Widget.Quantum.Light.ProgressBar</item>
@@ -1025,7 +1025,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.FastScroll" parent="Widget.Quantum.FastScroll"/>
 
     <style name="Widget.Quantum.Light.MediaRouteButton" parent="Widget.Quantum.MediaRouteButton">
-        <item name="externalRouteEnabledDrawable">@drawable/ic_media_route_holo_light</item>
+        <item name="externalRouteEnabledDrawable">@drawable/ic_media_route_quantum</item>
     </style>
 
     <!-- Animation Styles -->
