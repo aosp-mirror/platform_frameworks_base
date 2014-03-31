@@ -29,6 +29,7 @@ import android.view.ViewTreeObserver;
 
 import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardHostView;
 import com.android.keyguard.KeyguardSimpleHostView;
 import com.android.keyguard.R;
 import com.android.keyguard.ViewMediatorCallback;
@@ -49,7 +50,7 @@ public class StatusBarKeyguardViewManager {
     private ViewMediatorCallback mViewMediatorCallback;
     private PhoneStatusBar mPhoneStatusBar;
 
-    private KeyguardSimpleHostView mKeyguardView;
+    private KeyguardHostView mKeyguardView;
     private ViewGroup mRoot;
     private ViewGroup mContainer;
     private StatusBarWindowManager mStatusBarWindowManager;
@@ -102,7 +103,7 @@ public class StatusBarKeyguardViewManager {
     private void inflateView() {
         removeView();
         mRoot = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.keyguard_bouncer, null);
-        mKeyguardView = (KeyguardSimpleHostView) mRoot.findViewById(R.id.keyguard_host_view);
+        mKeyguardView = (KeyguardHostView) mRoot.findViewById(R.id.keyguard_host_view);
         mKeyguardView.setLockPatternUtils(mLockPatternUtils);
         mKeyguardView.setViewMediatorCallback(mViewMediatorCallback);
         mContainer.addView(mRoot, mContainer.getChildCount());
