@@ -1689,7 +1689,7 @@ public class AudioService extends IAudioService.Stub {
     private static final String ASSET_FILE_VERSION = "1.0";
     private static final String GROUP_TOUCH_SOUNDS = "touch_sounds";
 
-    private static final int SOUND_EFECTS_LOAD_TIMEOUT_MS = 5000;
+    private static final int SOUND_EFFECTS_LOAD_TIMEOUT_MS = 5000;
 
     class LoadSoundEffectReply {
         public int mStatus = 1;
@@ -1801,7 +1801,7 @@ public class AudioService extends IAudioService.Stub {
             sendMsg(mAudioHandler, MSG_LOAD_SOUND_EFFECTS, SENDMSG_QUEUE, 0, 0, reply, 0);
             while ((reply.mStatus == 1) && (attempts-- > 0)) {
                 try {
-                    reply.wait(SOUND_EFECTS_LOAD_TIMEOUT_MS);
+                    reply.wait(SOUND_EFFECTS_LOAD_TIMEOUT_MS);
                 } catch (InterruptedException e) {
                     Log.w(TAG, "loadSoundEffects Interrupted while waiting sound pool loaded.");
                 }
@@ -3289,7 +3289,7 @@ public class AudioService extends IAudioService.Stub {
                 while ((mSoundPoolCallBack == null) && (attempts-- > 0)) {
                     try {
                         // Wait for mSoundPoolCallBack to be set by the other thread
-                        mSoundEffectsLock.wait(SOUND_EFECTS_LOAD_TIMEOUT_MS);
+                        mSoundEffectsLock.wait(SOUND_EFFECTS_LOAD_TIMEOUT_MS);
                     } catch (InterruptedException e) {
                         Log.w(TAG, "Interrupted while waiting sound pool listener thread.");
                     }
@@ -3353,7 +3353,7 @@ public class AudioService extends IAudioService.Stub {
                     status = 1;
                     while ((status == 1) && (attempts-- > 0)) {
                         try {
-                            mSoundEffectsLock.wait(SOUND_EFECTS_LOAD_TIMEOUT_MS);
+                            mSoundEffectsLock.wait(SOUND_EFFECTS_LOAD_TIMEOUT_MS);
                             status = mSoundPoolCallBack.status();
                         } catch (InterruptedException e) {
                             Log.w(TAG, "Interrupted while waiting sound pool callback.");
