@@ -2768,7 +2768,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Run the app in safe mode if its manifest requests so or the
             // system is booted in safe mode.
             if ((app.info.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0 ||
-                Zygote.systemInSafeMode == true) {
+                SystemServer.inSafeMode == true) {
                 debugFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
             }
             if ("1".equals(SystemProperties.get("debug.checkjni"))) {
