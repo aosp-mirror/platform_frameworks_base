@@ -37,6 +37,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import libcore.util.EmptyArray;
+
 /**
  * Provides a service for sending and processing HDMI-CEC messages, and providing
  * the information on HDMI settings in general.
@@ -62,6 +64,8 @@ public final class HdmiCecService extends SystemService {
     private long mNativePtr;
 
     private static final String PERMISSION = "android.permission.HDMI_CEC";
+
+    private static final byte[] EMPTY_PARAM = EmptyArray.BYTE;
 
     public HdmiCecService(Context context) {
         super(context);
@@ -285,7 +289,13 @@ public final class HdmiCecService extends SystemService {
             synchronized (mLock) {
                 HdmiCecDevice device = getLogicalDeviceLocked(b);
                 device.setIsActiveSource(true);
-                nativeSendActiveSource(mNativePtr, device.getType());
+                int physicalAddress = nativeGetPhysicalAddress(mNativePtr);
+                byte[] param = new byte[] {
+                    (byte) ((physicalAddress >> 8) & 0xff),
+                    (byte) (physicalAddress & 0xff)
+                };
+                nativeSendMessage(mNativePtr, device.getType(), HdmiCec.ADDR_BROADCAST,
+                        HdmiCec.MESSAGE_ACTIVE_SOURCE, param);
             }
         }
 
@@ -295,7 +305,8 @@ public final class HdmiCecService extends SystemService {
             synchronized (mLock) {
                 HdmiCecDevice device = getLogicalDeviceLocked(b);
                 device.setIsActiveSource(false);
-                nativeSendInactiveSource(mNativePtr, device.getType());
+                nativeSendMessage(mNativePtr, device.getType(), HdmiCec.ADDR_BROADCAST,
+                        HdmiCec.MESSAGE_INACTIVE_SOURCE, EMPTY_PARAM);
             }
         }
 
@@ -304,7 +315,8 @@ public final class HdmiCecService extends SystemService {
             enforceAccessPermission();
             synchronized (mLock) {
                 HdmiCecDevice device = getLogicalDeviceLocked(b);
-                nativeSendImageViewOn(mNativePtr, device.getType());
+                nativeSendMessage(mNativePtr, device.getType(), HdmiCec.ADDR_TV,
+                        HdmiCec.MESSAGE_IMAGE_VIEW_ON, EMPTY_PARAM);
             }
         }
 
@@ -313,7 +325,8 @@ public final class HdmiCecService extends SystemService {
             enforceAccessPermission();
             synchronized (mLock) {
                 HdmiCecDevice device = getLogicalDeviceLocked(b);
-                nativeSendTextViewOn(mNativePtr, device.getType());
+                nativeSendMessage(mNativePtr, device.getType(), HdmiCec.ADDR_TV,
+                        HdmiCec.MESSAGE_TEXT_VIEW_ON, EMPTY_PARAM);
             }
         }
 
@@ -322,7 +335,8 @@ public final class HdmiCecService extends SystemService {
             enforceAccessPermission();
             synchronized (mLock) {
                 HdmiCecDevice device = getLogicalDeviceLocked(b);
-                nativeSendGiveDevicePowerStatus(mNativePtr, device.getType(), address);
+                nativeSendMessage(mNativePtr, device.getType(), address,
+                        HdmiCec.MESSAGE_GIVE_DEVICE_POWER_STATUS, EMPTY_PARAM);
             }
         }
 
@@ -383,10 +397,5 @@ public final class HdmiCecService extends SystemService {
     private static native void nativeRemoveLogicalAddress(long handler, int deviceType);
     private static native void nativeSendMessage(long handler, int deviceType, int destination,
             int opcode, byte[] params);
-    private static native void nativeSendActiveSource(long handler, int deviceType);
-    private static native void nativeSendInactiveSource(long handler, int deviceType);
-    private static native void nativeSendImageViewOn(long handler, int deviceType);
-    private static native void nativeSendTextViewOn(long handler, int deviceType);
-    private static native void nativeSendGiveDevicePowerStatus(long handler, int deviceType,
-            int address);
+    private static native int nativeGetPhysicalAddress(long handler);
 }
