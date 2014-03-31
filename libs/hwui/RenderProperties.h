@@ -258,20 +258,20 @@ public:
         return mPrimitiveFields.mPivotY;
     }
 
+    bool isPivotExplicitlySet() const {
+        return mPrimitiveFields.mPivotExplicitlySet;
+    }
+
     void setCameraDistance(float distance) {
-        if (distance != mCameraDistance) {
-            mCameraDistance = distance;
+        if (distance != getCameraDistance()) {
             mPrimitiveFields.mMatrixDirty = true;
-            if (!mComputedFields.mTransformCamera) {
-                mComputedFields.mTransformCamera = new Sk3DView();
-                mComputedFields.mTransformMatrix3D = new SkMatrix();
-            }
-            mComputedFields.mTransformCamera->setCameraLocation(0, 0, distance);
+            mComputedFields.mTransformCamera.setCameraLocation(0, 0, distance);
         }
     }
 
     float getCameraDistance() const {
-        return mCameraDistance;
+        // TODO: update getCameraLocationZ() to be const
+        return const_cast<Sk3DView*>(&mComputedFields.mTransformCamera)->getCameraLocationZ();
     }
 
     void setLeft(int left) {
@@ -396,7 +396,7 @@ public:
         return mPrimitiveFields.mMatrixFlags;
     }
 
-    const Matrix4* getTransformMatrix() const {
+    const SkMatrix* getTransformMatrix() const {
         return mComputedFields.mTransformMatrix;
     }
 
@@ -481,13 +481,11 @@ private:
         int mPrevWidth, mPrevHeight;
         bool mPivotExplicitlySet;
         bool mMatrixDirty;
-        bool mMatrixIsIdentity;
         uint32_t mMatrixFlags;
         bool mCaching;
     } mPrimitiveFields;
 
     // mCameraDistance isn't in mPrimitiveFields as it has a complex setter
-    float mCameraDistance;
     SkMatrix* mStaticMatrix;
     SkMatrix* mAnimationMatrix;
 
@@ -502,11 +500,12 @@ private:
          * Stores the total transformation of the DisplayList based upon its scalar
          * translate/rotate/scale properties.
          *
-         * In the common translation-only case, the matrix isn't allocated and the mTranslation
-         * properties are used directly.
+         * In the common translation-only case, the matrix isn't necessarily allocated,
+         * and the mTranslation properties are used directly.
          */
-        Matrix4* mTransformMatrix;
-        Sk3DView* mTransformCamera;
+        SkMatrix* mTransformMatrix;
+
+        Sk3DView mTransformCamera;
         SkMatrix* mTransformMatrix3D;
         SkPath* mClipPath; // TODO: remove this, create new ops for efficient/special case clipping
         SkRegion::Op mClipPathOp;

@@ -45,28 +45,24 @@ RenderProperties::PrimitiveFields::PrimitiveFields()
         , mPrevWidth(-1), mPrevHeight(-1)
         , mPivotExplicitlySet(false)
         , mMatrixDirty(false)
-        , mMatrixIsIdentity(true)
         , mMatrixFlags(0)
         , mCaching(false) {
 }
 
 RenderProperties::ComputedFields::ComputedFields()
         : mTransformMatrix(NULL)
-        , mTransformCamera(NULL)
         , mTransformMatrix3D(NULL)
         , mClipPath(NULL) {
 }
 
 RenderProperties::ComputedFields::~ComputedFields() {
     delete mTransformMatrix;
-    delete mTransformCamera;
     delete mTransformMatrix3D;
     delete mClipPath;
 }
 
 RenderProperties::RenderProperties()
-        : mCameraDistance(0)
-        , mStaticMatrix(NULL)
+        : mStaticMatrix(NULL)
         , mAnimationMatrix(NULL) {
 }
 
@@ -82,9 +78,12 @@ RenderProperties& RenderProperties::operator=(const RenderProperties& other) {
         setAnimationMatrix(other.getAnimationMatrix());
         setCameraDistance(other.getCameraDistance());
 
-        // Update the computed fields
-        updateMatrix();
+        // Update the computed clip path
         updateClipPath();
+
+        // Force recalculation of the matrix, since other's dirty bit may be clear
+        mPrimitiveFields.mMatrixDirty = true;
+        updateMatrix();
     }
     return *this;
 }
@@ -106,8 +105,8 @@ void RenderProperties::debugOutputProperties(const int level) const {
             ALOGD("%*sTranslate %.2f, %.2f, %.2f",
                     level * 2, "", mPrimitiveFields.mTranslationX, mPrimitiveFields.mTranslationY, mPrimitiveFields.mTranslationZ);
         } else {
-            ALOGD("%*sConcatMatrix %p: " MATRIX_4_STRING,
-                    level * 2, "", mComputedFields.mTransformMatrix, MATRIX_4_ARGS(mComputedFields.mTransformMatrix));
+            ALOGD("%*sConcatMatrix %p: " SK_MATRIX_STRING,
+                    level * 2, "", mComputedFields.mTransformMatrix, SK_MATRIX_ARGS(mComputedFields.mTransformMatrix));
         }
     }
 
@@ -141,7 +140,7 @@ void RenderProperties::updateMatrix() {
         if (mPrimitiveFields.mMatrixFlags && mPrimitiveFields.mMatrixFlags != TRANSLATION) {
             if (!mComputedFields.mTransformMatrix) {
                 // only allocate a mPrimitiveFields.matrix if we have a complex transform
-                mComputedFields.mTransformMatrix = new Matrix4();
+                mComputedFields.mTransformMatrix = new SkMatrix();
             }
             if (!mPrimitiveFields.mPivotExplicitlySet) {
                 if (mPrimitiveFields.mWidth != mPrimitiveFields.mPrevWidth || mPrimitiveFields.mHeight != mPrimitiveFields.mPrevHeight) {
@@ -153,33 +152,31 @@ void RenderProperties::updateMatrix() {
             }
 
             if ((mPrimitiveFields.mMatrixFlags & ROTATION_3D) == 0) {
-                mComputedFields.mTransformMatrix->loadTranslate(
-                        mPrimitiveFields.mPivotX + mPrimitiveFields.mTranslationX,
-                        mPrimitiveFields.mPivotY + mPrimitiveFields.mTranslationY,
-                        0);
-                mComputedFields.mTransformMatrix->rotate(mPrimitiveFields.mRotation, 0, 0, 1);
-                mComputedFields.mTransformMatrix->scale(mPrimitiveFields.mScaleX, mPrimitiveFields.mScaleY, 1);
-                mComputedFields.mTransformMatrix->translate(-mPrimitiveFields.mPivotX, -mPrimitiveFields.mPivotY);
+                mComputedFields.mTransformMatrix->setTranslate(
+                        mPrimitiveFields.mTranslationX, mPrimitiveFields.mTranslationY);
+                mComputedFields.mTransformMatrix->preRotate(mPrimitiveFields.mRotation,
+                        mPrimitiveFields.mPivotX, mPrimitiveFields.mPivotY);
+                mComputedFields.mTransformMatrix->preScale(
+                        mPrimitiveFields.mScaleX, mPrimitiveFields.mScaleY,
+                        mPrimitiveFields.mPivotX, mPrimitiveFields.mPivotY);
             } else {
-                if (!mComputedFields.mTransformCamera) {
-                    mComputedFields.mTransformCamera = new Sk3DView();
+                if (!mComputedFields.mTransformMatrix3D) {
                     mComputedFields.mTransformMatrix3D = new SkMatrix();
                 }
-                SkMatrix transformMatrix;
-                transformMatrix.reset();
-                mComputedFields.mTransformCamera->save();
-                transformMatrix.preScale(mPrimitiveFields.mScaleX, mPrimitiveFields.mScaleY, mPrimitiveFields.mPivotX, mPrimitiveFields.mPivotY);
-                mComputedFields.mTransformCamera->rotateX(mPrimitiveFields.mRotationX);
-                mComputedFields.mTransformCamera->rotateY(mPrimitiveFields.mRotationY);
-                mComputedFields.mTransformCamera->rotateZ(-mPrimitiveFields.mRotation);
-                mComputedFields.mTransformCamera->getMatrix(mComputedFields.mTransformMatrix3D);
+                mComputedFields.mTransformMatrix->reset();
+                mComputedFields.mTransformCamera.save();
+                mComputedFields.mTransformMatrix->preScale(
+                        mPrimitiveFields.mScaleX, mPrimitiveFields.mScaleY,
+                        mPrimitiveFields.mPivotX, mPrimitiveFields.mPivotY);
+                mComputedFields.mTransformCamera.rotateX(mPrimitiveFields.mRotationX);
+                mComputedFields.mTransformCamera.rotateY(mPrimitiveFields.mRotationY);
+                mComputedFields.mTransformCamera.rotateZ(-mPrimitiveFields.mRotation);
+                mComputedFields.mTransformCamera.getMatrix(mComputedFields.mTransformMatrix3D);
                 mComputedFields.mTransformMatrix3D->preTranslate(-mPrimitiveFields.mPivotX, -mPrimitiveFields.mPivotY);
                 mComputedFields.mTransformMatrix3D->postTranslate(mPrimitiveFields.mPivotX + mPrimitiveFields.mTranslationX,
                         mPrimitiveFields.mPivotY + mPrimitiveFields.mTranslationY);
-                transformMatrix.postConcat(*mComputedFields.mTransformMatrix3D);
-                mComputedFields.mTransformCamera->restore();
-
-                mComputedFields.mTransformMatrix->load(transformMatrix);
+                mComputedFields.mTransformMatrix->postConcat(*mComputedFields.mTransformMatrix3D);
+                mComputedFields.mTransformCamera.restore();
             }
         }
         mPrimitiveFields.mMatrixDirty = false;

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.graphics.Matrix;
 import android.graphics.Outline;
 
@@ -196,18 +197,20 @@ public class RenderNode {
     }
 
     /**
-     * Starts recording the display list. All operations performed on the
-     * returned canvas are recorded and stored in this display list.
+     * Starts recording a display list for the render node. All
+     * operations performed on the returned canvas are recorded and
+     * stored in this display list.
      *
-     * Calling this method will mark the display list invalid until
-     * {@link #end()} is called. Only valid display lists can be replayed.
+     * Calling this method will mark the render node invalid until
+     * {@link #end(HardwareRenderer, HardwareCanvas)} is called.
+     * Only valid render nodes can be replayed.
      *
-     * @param width The width of the display list's viewport
-     * @param height The height of the display list's viewport
+     * @param width The width of the recording viewport
+     * @param height The height of the recording viewport
      *
      * @return A canvas to record drawing operations.
      *
-     * @see #end()
+     * @see #end(HardwareRenderer, HardwareCanvas)
      * @see #isValid()
      */
     public HardwareCanvas start(int width, int height) {
@@ -284,7 +287,23 @@ public class RenderNode {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // DisplayList Property Setters
+    // Matrix manipulation
+    ///////////////////////////////////////////////////////////////////////////
+
+    public boolean hasIdentityMatrix() {
+        return nHasIdentityMatrix(mNativeDisplayList);
+    }
+
+    public void getMatrix(@NonNull Matrix outMatrix) {
+        nGetTransformMatrix(mNativeDisplayList, outMatrix.native_instance);
+    }
+
+    public void getInverseMatrix(@NonNull Matrix outMatrix) {
+        nGetInverseTransformMatrix(mNativeDisplayList, outMatrix.native_instance);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // RenderProperty Setters
     ///////////////////////////////////////////////////////////////////////////
 
     /**
@@ -301,7 +320,7 @@ public class RenderNode {
     }
 
     /**
-     * Set whether the display list should clip itself to its bounds. This property is controlled by
+     * Set whether the Render node should clip itself to its bounds. This property is controlled by
      * the view's parent.
      *
      * @param clipToBounds true if the display list should clip to its bounds
@@ -312,9 +331,7 @@ public class RenderNode {
 
     /**
      * Sets whether the display list should be drawn immediately after the
-     * closest ancestor display list where isolateZVolume is true. If the
-     * display list itself satisfies this constraint, changing this attribute
-     * has no effect on drawing order.
+     * closest ancestor display list containing a projection receiver.
      *
      * @param shouldProject true if the display list should be projected onto a
      *            containing volume.
@@ -373,9 +390,6 @@ public class RenderNode {
      * transforms (such as {@link #setScaleX(float)}, {@link #setRotation(float)}, etc.)
      *
      * @param matrix A transform matrix to apply to this display list
-     *
-     * @see #getMatrix(android.graphics.Matrix)
-     * @see #getMatrix()
      */
     public void setStaticMatrix(Matrix matrix) {
         nSetStaticMatrix(mNativeDisplayList, matrix.native_instance);
@@ -613,28 +627,6 @@ public class RenderNode {
     }
 
     /**
-     * Sets all of the transform-related values of the display list
-     *
-     * @param alpha The alpha value of the display list
-     * @param translationX The translationX value of the display list
-     * @param translationY The translationY value of the display list
-     * @param rotation The rotation value of the display list
-     * @param rotationX The rotationX value of the display list
-     * @param rotationY The rotationY value of the display list
-     * @param scaleX The scaleX value of the display list
-     * @param scaleY The scaleY value of the display list
-     *
-     * @hide
-     */
-    public void setTransformationInfo(float alpha,
-            float translationX, float translationY, float translationZ,
-            float rotation, float rotationX, float rotationY, float scaleX, float scaleY) {
-        nSetTransformationInfo(mNativeDisplayList, alpha,
-                translationX, translationY, translationZ,
-                rotation, rotationX, rotationY, scaleX, scaleY);
-    }
-
-    /**
      * Sets the pivot value for the display list on the X axis
      *
      * @param pivotX The pivot value of the display list on the X axis, in pixels
@@ -674,6 +666,10 @@ public class RenderNode {
      */
     public float getPivotY() {
         return nGetPivotY(mNativeDisplayList);
+    }
+
+    public boolean isPivotExplicitlySet() {
+        return nIsPivotExplicitlySet(mNativeDisplayList);
     }
 
     /**
@@ -842,6 +838,12 @@ public class RenderNode {
     private static native void nDestroyDisplayList(long displayList);
     private static native void nSetDisplayListName(long displayList, String name);
 
+    // Matrix
+
+    private static native void nGetTransformMatrix(long displayList, long nativeMatrix);
+    private static native void nGetInverseTransformMatrix(long displayList, long nativeMatrix);
+    private static native boolean nHasIdentityMatrix(long displayList);
+
     // Properties
 
     private static native void nOffsetTopAndBottom(long displayList, float offset);
@@ -877,9 +879,6 @@ public class RenderNode {
     private static native void nSetRotationY(long displayList, float rotationY);
     private static native void nSetScaleX(long displayList, float scaleX);
     private static native void nSetScaleY(long displayList, float scaleY);
-    private static native void nSetTransformationInfo(long displayList, float alpha,
-            float translationX, float translationY, float translationZ,
-            float rotation, float rotationX, float rotationY, float scaleX, float scaleY);
     private static native void nSetStaticMatrix(long displayList, long nativeMatrix);
     private static native void nSetAnimationMatrix(long displayList, long animationMatrix);
 
@@ -898,6 +897,7 @@ public class RenderNode {
     private static native float nGetRotation(long displayList);
     private static native float nGetRotationX(long displayList);
     private static native float nGetRotationY(long displayList);
+    private static native boolean nIsPivotExplicitlySet(long displayList);
     private static native float nGetPivotX(long displayList);
     private static native float nGetPivotY(long displayList);
     private static native void nOutput(long displayList);

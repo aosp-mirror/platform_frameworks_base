@@ -4449,7 +4449,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @hide
      */
-    public void invalidateChildFast(View child, final Rect dirty) {
+    public void damageChild(View child, final Rect dirty) {
         ViewParent parent = this;
 
         final AttachInfo attachInfo = mAttachInfo;
@@ -4472,7 +4472,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         parentVG.invalidate();
                         parent = null;
                     } else {
-                        parent = parentVG.invalidateChildInParentFast(left, top, dirty);
+                        parent = parentVG.damageChildInParent(left, top, dirty);
                         left = parentVG.mLeft;
                         top = parentVG.mTop;
                     }
@@ -4494,9 +4494,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @hide
      */
-    protected ViewParent invalidateChildInParentFast(int left, int top, final Rect dirty) {
-        if ((mPrivateFlags & PFLAG_DRAWN) == PFLAG_DRAWN ||
-                (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID) {
+    protected ViewParent damageChildInParent(int left, int top, final Rect dirty) {
+        if ((mPrivateFlags & PFLAG_DRAWN) != 0
+                || (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) != 0) {
             dirty.offset(left - mScrollX, top - mScrollY);
             if ((mGroupFlags & FLAG_CLIP_CHILDREN) == 0) {
                 dirty.union(0, 0, mRight - mLeft, mBottom - mTop);

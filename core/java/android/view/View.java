@@ -1792,12 +1792,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static final int PFLAG_HOVERED             = 0x10000000;
 
     /**
-     * Indicates that pivotX or pivotY were explicitly set and we should not assume the center
-     * for transform operations
-     *
-     * @hide
+     * no longer needed, should be reused
      */
-    private static final int PFLAG_PIVOT_EXPLICITLY_SET = 0x20000000;
+    private static final int PFLAG_DOES_NOTHING_REUSE_PLEASE = 0x20000000;
 
     /** {@hide} */
     static final int PFLAG_ACTIVATED                   = 0x40000000;
@@ -2930,121 +2927,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static class TransformationInfo {
         /**
          * The transform matrix for the View. This transform is calculated internally
-         * based on the rotation, scaleX, and scaleY properties. The identity matrix
-         * is used by default. Do *not* use this variable directly; instead call
-         * getMatrix(), which will automatically recalculate the matrix if necessary
-         * to get the correct matrix based on the latest rotation and scale properties.
+         * based on the translation, rotation, and scale properties.
+         *
+         * Do *not* use this variable directly; instead call getMatrix(), which will
+         * load the value from the View's RenderNode.
          */
         private final Matrix mMatrix = new Matrix();
 
         /**
-         * The transform matrix for the View. This transform is calculated internally
-         * based on the rotation, scaleX, and scaleY properties. The identity matrix
-         * is used by default. Do *not* use this variable directly; instead call
-         * getInverseMatrix(), which will automatically recalculate the matrix if necessary
-         * to get the correct matrix based on the latest rotation and scale properties.
+         * The inverse transform matrix for the View. This transform is calculated
+         * internally based on the translation, rotation, and scale properties.
+         *
+         * Do *not* use this variable directly; instead call getInverseMatrix(),
+         * which will load the value from the View's RenderNode.
          */
         private Matrix mInverseMatrix;
-
-        /**
-         * An internal variable that tracks whether we need to recalculate the
-         * transform matrix, based on whether the rotation or scaleX/Y properties
-         * have changed since the matrix was last calculated.
-         */
-        boolean mMatrixDirty = false;
-
-        /**
-         * An internal variable that tracks whether we need to recalculate the
-         * transform matrix, based on whether the rotation or scaleX/Y properties
-         * have changed since the matrix was last calculated.
-         */
-        private boolean mInverseMatrixDirty = true;
-
-        /**
-         * A variable that tracks whether we need to recalculate the
-         * transform matrix, based on whether the rotation or scaleX/Y properties
-         * have changed since the matrix was last calculated. This variable
-         * is only valid after a call to updateMatrix() or to a function that
-         * calls it such as getMatrix(), hasIdentityMatrix() and getInverseMatrix().
-         */
-        private boolean mMatrixIsIdentity = true;
-
-        /**
-         * The Camera object is used to compute a 3D matrix when rotationX or rotationY are set.
-         */
-        private Camera mCamera = null;
-
-        /**
-         * This matrix is used when computing the matrix for 3D rotations.
-         */
-        private Matrix matrix3D = null;
-
-        /**
-         * These prev values are used to recalculate a centered pivot point when necessary. The
-         * pivot point is only used in matrix operations (when rotation, scale, or translation are
-         * set), so thes values are only used then as well.
-         */
-        private int mPrevWidth = -1;
-        private int mPrevHeight = -1;
-
-        /**
-         * The degrees rotation around the vertical axis through the pivot point.
-         */
-        @ViewDebug.ExportedProperty
-        float mRotationY = 0f;
-
-        /**
-         * The degrees rotation around the horizontal axis through the pivot point.
-         */
-        @ViewDebug.ExportedProperty
-        float mRotationX = 0f;
-
-        /**
-         * The degrees rotation around the pivot point.
-         */
-        @ViewDebug.ExportedProperty
-        float mRotation = 0f;
-
-        /**
-         * The amount of translation of the object away from its left property (post-layout).
-         */
-        @ViewDebug.ExportedProperty
-        float mTranslationX = 0f;
-
-        /**
-         * The amount of translation of the object away from its top property (post-layout).
-         */
-        @ViewDebug.ExportedProperty
-        float mTranslationY = 0f;
-
-        @ViewDebug.ExportedProperty
-        float mTranslationZ = 0f;
-
-        /**
-         * The amount of scale in the x direction around the pivot point. A
-         * value of 1 means no scaling is applied.
-         */
-        @ViewDebug.ExportedProperty
-        float mScaleX = 1f;
-
-        /**
-         * The amount of scale in the y direction around the pivot point. A
-         * value of 1 means no scaling is applied.
-         */
-        @ViewDebug.ExportedProperty
-        float mScaleY = 1f;
-
-        /**
-         * The x location of the point around which the view is rotated and scaled.
-         */
-        @ViewDebug.ExportedProperty
-        float mPivotX = 0f;
-
-        /**
-         * The y location of the point around which the view is rotated and scaled.
-         */
-        @ViewDebug.ExportedProperty
-        float mPivotY = 0f;
 
         /**
          * The opacity of the View. This is a value from 0 to 1, where 0 means
@@ -3557,7 +3454,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * of the View content. Its DisplayList content is cleared on temporary detach and reset on
      * cleanup.
      */
-    RenderNode mRenderNode;
+    final RenderNode mRenderNode;
 
     /**
      * Set to true when the view is sending hover accessibility events because it
@@ -3608,6 +3505,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         setOverScrollMode(OVER_SCROLL_IF_CONTENT_SCROLLS);
         mUserPaddingStart = UNDEFINED_PADDING;
         mUserPaddingEnd = UNDEFINED_PADDING;
+        mRenderNode = RenderNode.create(getClass().getName());
 
         if (!sCompatibilityDone && context != null) {
             final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
@@ -4172,6 +4070,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     View() {
         mResources = null;
+        mRenderNode = RenderNode.create(getClass().getName());
     }
 
     public String toString() {
@@ -9682,21 +9581,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The current transform matrix for the view
      */
     public Matrix getMatrix() {
-        if (mTransformationInfo != null) {
-            updateMatrix();
-            return mTransformationInfo.mMatrix;
-        }
-        return Matrix.IDENTITY_MATRIX;
-    }
-
-    /**
-     * Utility function to determine if the value is far enough away from zero to be
-     * considered non-zero.
-     * @param value A floating point value to check for zero-ness
-     * @return whether the passed-in value is far enough away from zero to be considered non-zero
-     */
-    private static boolean nonzero(float value) {
-        return (value < -NONZERO_EPSILON || value > NONZERO_EPSILON);
+        ensureTransformationInfo();
+        final Matrix matrix = mTransformationInfo.mMatrix;
+        mRenderNode.getMatrix(matrix);
+        return matrix;
     }
 
     /**
@@ -9706,69 +9594,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return True if the transform matrix is the identity matrix, false otherwise.
      */
     final boolean hasIdentityMatrix() {
-        if (mTransformationInfo != null) {
-            updateMatrix();
-            return mTransformationInfo.mMatrixIsIdentity;
-        }
-        return true;
+        return mRenderNode.hasIdentityMatrix();
     }
 
     void ensureTransformationInfo() {
         if (mTransformationInfo == null) {
             mTransformationInfo = new TransformationInfo();
-        }
-    }
-
-    void ensureRenderNode() {
-        if (mRenderNode == null) {
-            mRenderNode = RenderNode.create(getClass().getName());
-        }
-    }
-
-    /**
-     * Recomputes the transform matrix if necessary.
-     */
-    private void updateMatrix() {
-        final TransformationInfo info = mTransformationInfo;
-        if (info == null) {
-            return;
-        }
-        if (info.mMatrixDirty) {
-            // transform-related properties have changed since the last time someone
-            // asked for the matrix; recalculate it with the current values
-
-            // Figure out if we need to update the pivot point
-            if ((mPrivateFlags & PFLAG_PIVOT_EXPLICITLY_SET) == 0) {
-                if ((mRight - mLeft) != info.mPrevWidth || (mBottom - mTop) != info.mPrevHeight) {
-                    info.mPrevWidth = mRight - mLeft;
-                    info.mPrevHeight = mBottom - mTop;
-                    info.mPivotX = info.mPrevWidth / 2f;
-                    info.mPivotY = info.mPrevHeight / 2f;
-                }
-            }
-            info.mMatrix.reset();
-            if (!nonzero(info.mRotationX) && !nonzero(info.mRotationY)) {
-                info.mMatrix.setTranslate(info.mTranslationX, info.mTranslationY);
-                info.mMatrix.preRotate(info.mRotation, info.mPivotX, info.mPivotY);
-                info.mMatrix.preScale(info.mScaleX, info.mScaleY, info.mPivotX, info.mPivotY);
-            } else {
-                if (info.mCamera == null) {
-                    info.mCamera = new Camera();
-                    info.matrix3D = new Matrix();
-                }
-                info.mCamera.save();
-                info.mMatrix.preScale(info.mScaleX, info.mScaleY, info.mPivotX, info.mPivotY);
-                info.mCamera.rotate(info.mRotationX, info.mRotationY, -info.mRotation);
-                info.mCamera.getMatrix(info.matrix3D);
-                info.matrix3D.preTranslate(-info.mPivotX, -info.mPivotY);
-                info.matrix3D.postTranslate(info.mPivotX + info.mTranslationX,
-                        info.mPivotY + info.mTranslationY);
-                info.mMatrix.postConcat(info.matrix3D);
-                info.mCamera.restore();
-            }
-            info.mMatrixDirty = false;
-            info.mMatrixIsIdentity = info.mMatrix.isIdentity();
-            info.mInverseMatrixDirty = true;
         }
     }
 
@@ -9780,19 +9611,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The inverse of the current matrix of this view.
      */
     final Matrix getInverseMatrix() {
-        final TransformationInfo info = mTransformationInfo;
-        if (info != null) {
-            updateMatrix();
-            if (info.mInverseMatrixDirty) {
-                if (info.mInverseMatrix == null) {
-                    info.mInverseMatrix = new Matrix();
-                }
-                info.mMatrix.invert(info.mInverseMatrix);
-                info.mInverseMatrixDirty = false;
-            }
-            return info.mInverseMatrix;
+        ensureTransformationInfo();
+        if (mTransformationInfo.mInverseMatrix == null) {
+            mTransformationInfo.mInverseMatrix = new Matrix();
         }
-        return Matrix.IDENTITY_MATRIX;
+        final Matrix matrix = mTransformationInfo.mInverseMatrix;
+        mRenderNode.getInverseMatrix(matrix);
+        return matrix;
     }
 
     /**
@@ -9803,14 +9628,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The distance along the Z axis.
      */
     public float getCameraDistance() {
-        ensureTransformationInfo();
         final float dpi = mResources.getDisplayMetrics().densityDpi;
-        final TransformationInfo info = mTransformationInfo;
-        if (info.mCamera == null) {
-            info.mCamera = new Camera();
-            info.matrix3D = new Matrix();
-        }
-        return -(info.mCamera.getLocationZ() * dpi);
+        return -(mRenderNode.getCameraDistance() * dpi);
     }
 
     /**
@@ -9853,27 +9672,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setRotationY(float)
      */
     public void setCameraDistance(float distance) {
-        invalidateViewProperty(true, false);
-
-        ensureTransformationInfo();
         final float dpi = mResources.getDisplayMetrics().densityDpi;
-        final TransformationInfo info = mTransformationInfo;
-        if (info.mCamera == null) {
-            info.mCamera = new Camera();
-            info.matrix3D = new Matrix();
-        }
 
-        info.mCamera.setLocation(0.0f, 0.0f, -Math.abs(distance) / dpi);
-        info.mMatrixDirty = true;
-
+        invalidateViewProperty(true, false);
+        mRenderNode.setCameraDistance(-Math.abs(distance) / dpi);
         invalidateViewProperty(false, false);
-        if (mRenderNode != null) {
-            mRenderNode.setCameraDistance(-Math.abs(distance) / dpi);
-        }
-        if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
-            // View was rejected last time it was drawn by its parent; this may have changed
-            invalidateParentIfNeeded();
-        }
+
+        invalidateParentIfNeededAndWasQuickRejected();
     }
 
     /**
@@ -9887,7 +9692,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getRotation() {
-        return mTransformationInfo != null ? mTransformationInfo.mRotation : 0;
+        return mRenderNode.getRotation();
     }
 
     /**
@@ -9905,21 +9710,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_rotation
      */
     public void setRotation(float rotation) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        if (info.mRotation != rotation) {
+        if (rotation != getRotation()) {
             // Double-invalidation is necessary to capture view's old and new areas
             invalidateViewProperty(true, false);
-            info.mRotation = rotation;
-            info.mMatrixDirty = true;
+            mRenderNode.setRotation(rotation);
             invalidateViewProperty(false, true);
-            if (mRenderNode != null) {
-                mRenderNode.setRotation(rotation);
-            }
-            if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
-                // View was rejected last time it was drawn by its parent; this may have changed
-                invalidateParentIfNeeded();
-            }
+
+            invalidateParentIfNeededAndWasQuickRejected();
         }
     }
 
@@ -9934,7 +9731,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getRotationY() {
-        return mTransformationInfo != null ? mTransformationInfo.mRotationY : 0;
+        return mRenderNode.getRotationY();
     }
 
     /**
@@ -9957,20 +9754,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_rotationY
      */
     public void setRotationY(float rotationY) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        if (info.mRotationY != rotationY) {
+        if (rotationY != getRotationY()) {
             invalidateViewProperty(true, false);
-            info.mRotationY = rotationY;
-            info.mMatrixDirty = true;
+            mRenderNode.setRotationY(rotationY);
             invalidateViewProperty(false, true);
-            if (mRenderNode != null) {
-                mRenderNode.setRotationY(rotationY);
-            }
-            if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
-                // View was rejected last time it was drawn by its parent; this may have changed
-                invalidateParentIfNeeded();
-            }
+
+            invalidateParentIfNeededAndWasQuickRejected();
         }
     }
 
@@ -9985,7 +9774,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getRotationX() {
-        return mTransformationInfo != null ? mTransformationInfo.mRotationX : 0;
+        return mRenderNode.getRotationX();
     }
 
     /**
@@ -10008,20 +9797,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_rotationX
      */
     public void setRotationX(float rotationX) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        if (info.mRotationX != rotationX) {
+        if (rotationX != getRotationX()) {
             invalidateViewProperty(true, false);
-            info.mRotationX = rotationX;
-            info.mMatrixDirty = true;
+            mRenderNode.setRotationX(rotationX);
             invalidateViewProperty(false, true);
-            if (mRenderNode != null) {
-                mRenderNode.setRotationX(rotationX);
-            }
-            if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
-                // View was rejected last time it was drawn by its parent; this may have changed
-                invalidateParentIfNeeded();
-            }
+
+            invalidateParentIfNeededAndWasQuickRejected();
         }
     }
 
@@ -10037,7 +9818,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getScaleX() {
-        return mTransformationInfo != null ? mTransformationInfo.mScaleX : 1;
+        return mRenderNode.getScaleX();
     }
 
     /**
@@ -10051,20 +9832,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_scaleX
      */
     public void setScaleX(float scaleX) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        if (info.mScaleX != scaleX) {
+        if (scaleX != getScaleX()) {
             invalidateViewProperty(true, false);
-            info.mScaleX = scaleX;
-            info.mMatrixDirty = true;
+            mRenderNode.setScaleX(scaleX);
             invalidateViewProperty(false, true);
-            if (mRenderNode != null) {
-                mRenderNode.setScaleX(scaleX);
-            }
-            if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
-                // View was rejected last time it was drawn by its parent; this may have changed
-                invalidateParentIfNeeded();
-            }
+
+            invalidateParentIfNeededAndWasQuickRejected();
         }
     }
 
@@ -10080,7 +9853,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getScaleY() {
-        return mTransformationInfo != null ? mTransformationInfo.mScaleY : 1;
+        return mRenderNode.getScaleY();
     }
 
     /**
@@ -10094,20 +9867,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_scaleY
      */
     public void setScaleY(float scaleY) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        if (info.mScaleY != scaleY) {
+        if (scaleY != getScaleY()) {
             invalidateViewProperty(true, false);
-            info.mScaleY = scaleY;
-            info.mMatrixDirty = true;
+            mRenderNode.setScaleY(scaleY);
             invalidateViewProperty(false, true);
-            if (mRenderNode != null) {
-                mRenderNode.setScaleY(scaleY);
-            }
-            if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
-                // View was rejected last time it was drawn by its parent; this may have changed
-                invalidateParentIfNeeded();
-            }
+
+            invalidateParentIfNeededAndWasQuickRejected();
         }
     }
 
@@ -10125,7 +9890,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getPivotX() {
-        return mTransformationInfo != null ? mTransformationInfo.mPivotX : 0;
+        return mRenderNode.getPivotX();
     }
 
     /**
@@ -10144,23 +9909,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_transformPivotX
      */
     public void setPivotX(float pivotX) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        boolean pivotSet = (mPrivateFlags & PFLAG_PIVOT_EXPLICITLY_SET) ==
-                PFLAG_PIVOT_EXPLICITLY_SET;
-        if (info.mPivotX != pivotX || !pivotSet) {
-            mPrivateFlags |= PFLAG_PIVOT_EXPLICITLY_SET;
+        if (mRenderNode.isPivotExplicitlySet() || pivotX != getPivotX()) {
             invalidateViewProperty(true, false);
-            info.mPivotX = pivotX;
-            info.mMatrixDirty = true;
+            mRenderNode.setPivotX(pivotX);
             invalidateViewProperty(false, true);
-            if (mRenderNode != null) {
-                mRenderNode.setPivotX(pivotX);
-            }
-            if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
-                // View was rejected last time it was drawn by its parent; this may have changed
-                invalidateParentIfNeeded();
-            }
+
+            invalidateParentIfNeededAndWasQuickRejected();
         }
     }
 
@@ -10178,7 +9932,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getPivotY() {
-        return mTransformationInfo != null ? mTransformationInfo.mPivotY : 0;
+        return mRenderNode.getPivotY();
     }
 
     /**
@@ -10196,23 +9950,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_transformPivotY
      */
     public void setPivotY(float pivotY) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        boolean pivotSet = (mPrivateFlags & PFLAG_PIVOT_EXPLICITLY_SET) ==
-                PFLAG_PIVOT_EXPLICITLY_SET;
-        if (info.mPivotY != pivotY || !pivotSet) {
-            mPrivateFlags |= PFLAG_PIVOT_EXPLICITLY_SET;
+        if (mRenderNode.isPivotExplicitlySet() || pivotY != getPivotY()) {
             invalidateViewProperty(true, false);
-            info.mPivotY = pivotY;
-            info.mMatrixDirty = true;
+            mRenderNode.setPivotY(pivotY);
             invalidateViewProperty(false, true);
-            if (mRenderNode != null) {
-                mRenderNode.setPivotY(pivotY);
-            }
-            if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
-                // View was rejected last time it was drawn by its parent; this may have changed
-                invalidateParentIfNeeded();
-            }
+
+            invalidateParentIfNeededAndWasQuickRejected();
         }
     }
 
@@ -10290,9 +10033,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             } else {
                 mPrivateFlags &= ~PFLAG_ALPHA_SET;
                 invalidateViewProperty(true, false);
-                if (mRenderNode != null) {
-                    mRenderNode.setAlpha(getFinalAlpha());
-                }
+                mRenderNode.setAlpha(getFinalAlpha());
             }
         }
     }
@@ -10317,9 +10058,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 return true;
             } else {
                 mPrivateFlags &= ~PFLAG_ALPHA_SET;
-                if (mRenderNode != null) {
-                    mRenderNode.setAlpha(getFinalAlpha());
-                }
+                mRenderNode.setAlpha(getFinalAlpha());
             }
         }
         return false;
@@ -10340,9 +10079,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mTransformationInfo.mTransitionAlpha = alpha;
             mPrivateFlags &= ~PFLAG_ALPHA_SET;
             invalidateViewProperty(true, false);
-            if (mRenderNode != null) {
-                mRenderNode.setAlpha(getFinalAlpha());
-            }
+            mRenderNode.setAlpha(getFinalAlpha());
         }
     }
 
@@ -10389,9 +10126,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public final void setTop(int top) {
         if (top != mTop) {
-            updateMatrix();
-            final boolean matrixIsIdentity = mTransformationInfo == null
-                    || mTransformationInfo.mMatrixIsIdentity;
+            final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
                     int minTop;
@@ -10414,17 +10149,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int oldHeight = mBottom - mTop;
 
             mTop = top;
-            if (mRenderNode != null) {
-                mRenderNode.setTop(mTop);
-            }
+            mRenderNode.setTop(mTop);
 
             sizeChange(width, mBottom - mTop, width, oldHeight);
 
             if (!matrixIsIdentity) {
-                if ((mPrivateFlags & PFLAG_PIVOT_EXPLICITLY_SET) == 0) {
-                    // A change in dimension means an auto-centered pivot point changes, too
-                    mTransformationInfo.mMatrixDirty = true;
-                }
                 mPrivateFlags |= PFLAG_DRAWN; // force another invalidation with the new orientation
                 invalidate(true);
             }
@@ -10465,9 +10194,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public final void setBottom(int bottom) {
         if (bottom != mBottom) {
-            updateMatrix();
-            final boolean matrixIsIdentity = mTransformationInfo == null
-                    || mTransformationInfo.mMatrixIsIdentity;
+            final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
                     int maxBottom;
@@ -10487,17 +10214,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int oldHeight = mBottom - mTop;
 
             mBottom = bottom;
-            if (mRenderNode != null) {
-                mRenderNode.setBottom(mBottom);
-            }
+            mRenderNode.setBottom(mBottom);
 
             sizeChange(width, mBottom - mTop, width, oldHeight);
 
             if (!matrixIsIdentity) {
-                if ((mPrivateFlags & PFLAG_PIVOT_EXPLICITLY_SET) == 0) {
-                    // A change in dimension means an auto-centered pivot point changes, too
-                    mTransformationInfo.mMatrixDirty = true;
-                }
                 mPrivateFlags |= PFLAG_DRAWN; // force another invalidation with the new orientation
                 invalidate(true);
             }
@@ -10529,9 +10250,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public final void setLeft(int left) {
         if (left != mLeft) {
-            updateMatrix();
-            final boolean matrixIsIdentity = mTransformationInfo == null
-                    || mTransformationInfo.mMatrixIsIdentity;
+            final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
                     int minLeft;
@@ -10554,17 +10273,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int height = mBottom - mTop;
 
             mLeft = left;
-            if (mRenderNode != null) {
-                mRenderNode.setLeft(left);
-            }
+            mRenderNode.setLeft(left);
 
             sizeChange(mRight - mLeft, height, oldWidth, height);
 
             if (!matrixIsIdentity) {
-                if ((mPrivateFlags & PFLAG_PIVOT_EXPLICITLY_SET) == 0) {
-                    // A change in dimension means an auto-centered pivot point changes, too
-                    mTransformationInfo.mMatrixDirty = true;
-                }
                 mPrivateFlags |= PFLAG_DRAWN; // force another invalidation with the new orientation
                 invalidate(true);
             }
@@ -10596,9 +10309,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public final void setRight(int right) {
         if (right != mRight) {
-            updateMatrix();
-            final boolean matrixIsIdentity = mTransformationInfo == null
-                    || mTransformationInfo.mMatrixIsIdentity;
+            final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
                     int maxRight;
@@ -10618,17 +10329,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int height = mBottom - mTop;
 
             mRight = right;
-            if (mRenderNode != null) {
-                mRenderNode.setRight(mRight);
-            }
+            mRenderNode.setRight(mRight);
 
             sizeChange(mRight - mLeft, height, oldWidth, height);
 
             if (!matrixIsIdentity) {
-                if ((mPrivateFlags & PFLAG_PIVOT_EXPLICITLY_SET) == 0) {
-                    // A change in dimension means an auto-centered pivot point changes, too
-                    mTransformationInfo.mMatrixDirty = true;
-                }
                 mPrivateFlags |= PFLAG_DRAWN; // force another invalidation with the new orientation
                 invalidate(true);
             }
@@ -10650,7 +10355,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getX() {
-        return mLeft + (mTransformationInfo != null ? mTransformationInfo.mTranslationX : 0);
+        return mLeft + getTranslationX();
     }
 
     /**
@@ -10673,7 +10378,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getY() {
-        return mTop + (mTransformationInfo != null ? mTransformationInfo.mTranslationY : 0);
+        return mTop + getTranslationY();
     }
 
     /**
@@ -10697,7 +10402,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getTranslationX() {
-        return mTransformationInfo != null ? mTransformationInfo.mTranslationX : 0;
+        return mRenderNode.getTranslationX();
     }
 
     /**
@@ -10711,21 +10416,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_translationX
      */
     public void setTranslationX(float translationX) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        if (info.mTranslationX != translationX) {
-            // Double-invalidation is necessary to capture view's old and new areas
+        if (translationX != getTranslationX()) {
             invalidateViewProperty(true, false);
-            info.mTranslationX = translationX;
-            info.mMatrixDirty = true;
+            mRenderNode.setTranslationX(translationX);
             invalidateViewProperty(false, true);
-            if (mRenderNode != null) {
-                mRenderNode.setTranslationX(translationX);
-            }
-            if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
-                // View was rejected last time it was drawn by its parent; this may have changed
-                invalidateParentIfNeeded();
-            }
+
+            invalidateParentIfNeededAndWasQuickRejected();
         }
     }
 
@@ -10739,7 +10435,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getTranslationY() {
-        return mTransformationInfo != null ? mTransformationInfo.mTranslationY : 0;
+        return mRenderNode.getTranslationY();
     }
 
     /**
@@ -10753,20 +10449,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_translationY
      */
     public void setTranslationY(float translationY) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        if (info.mTranslationY != translationY) {
+        if (translationY != getTranslationY()) {
             invalidateViewProperty(true, false);
-            info.mTranslationY = translationY;
-            info.mMatrixDirty = true;
+            mRenderNode.setTranslationY(translationY);
             invalidateViewProperty(false, true);
-            if (mRenderNode != null) {
-                mRenderNode.setTranslationY(translationY);
-            }
-            if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
-                // View was rejected last time it was drawn by its parent; this may have changed
-                invalidateParentIfNeeded();
-            }
+
+            invalidateParentIfNeededAndWasQuickRejected();
         }
     }
 
@@ -10777,7 +10465,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getTranslationZ() {
-        return mTransformationInfo != null ? mTransformationInfo.mTranslationZ : 0;
+        return mRenderNode.getTranslationZ();
     }
 
     /**
@@ -10786,20 +10474,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_translationZ
      */
     public void setTranslationZ(float translationZ) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        if (info.mTranslationZ != translationZ) {
+        if (translationZ != getTranslationZ()) {
             invalidateViewProperty(true, false);
-            info.mTranslationZ = translationZ;
-            info.mMatrixDirty = true;
+            mRenderNode.setTranslationZ(translationZ);
             invalidateViewProperty(false, true);
-            if (mRenderNode != null) {
-                mRenderNode.setTranslationZ(translationZ);
-            }
-            if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
-                // View was rejected last time it was drawn by its parent; this may have changed
-                invalidateParentIfNeeded();
-            }
+
+            invalidateParentIfNeededAndWasQuickRejected();
         }
     }
 
@@ -10869,10 +10549,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             mOutline.set(outline);
         }
-
-        if (mRenderNode != null) {
-            mRenderNode.setOutline(mOutline);
-        }
+        mRenderNode.setOutline(mOutline);
     }
 
     /**
@@ -10907,9 +10584,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             } else {
                 mPrivateFlags3 &= ~PFLAG3_CLIP_TO_OUTLINE;
             }
-            if (mRenderNode != null) {
-                mRenderNode.setClipToOutline(clipToOutline);
-            }
+            mRenderNode.setClipToOutline(clipToOutline);
         }
     }
 
@@ -10920,11 +10595,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setRevealClip(boolean shouldClip, boolean inverseClip,
             float x, float y, float radius) {
-        if (mRenderNode != null) {
-            mRenderNode.setRevealClip(shouldClip, inverseClip, x, y, radius);
-            // TODO: Handle this invalidate in a better way, or purely in native.
-            invalidate();
-        }
+        mRenderNode.setRevealClip(shouldClip, inverseClip, x, y, radius);
+        // TODO: Handle this invalidate in a better way, or purely in native.
+        invalidate();
     }
 
     /**
@@ -10933,14 +10606,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param outRect The hit rectangle of the view.
      */
     public void getHitRect(Rect outRect) {
-        updateMatrix();
-        final TransformationInfo info = mTransformationInfo;
-        if (info == null || info.mMatrixIsIdentity || mAttachInfo == null) {
+        if (hasIdentityMatrix() || mAttachInfo == null) {
             outRect.set(mLeft, mTop, mRight, mBottom);
         } else {
             final RectF tmpRect = mAttachInfo.mTmpTransformRect;
             tmpRect.set(0, 0, getWidth(), getHeight());
-            info.mMatrix.mapRect(tmpRect);
+            getMatrix().mapRect(tmpRect); // TODO: mRenderNode.mapRect(tmpRect)
             outRect.set((int) tmpRect.left + mLeft, (int) tmpRect.top + mTop,
                     (int) tmpRect.right + mLeft, (int) tmpRect.bottom + mTop);
         }
@@ -11029,11 +10700,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void offsetTopAndBottom(int offset) {
         if (offset != 0) {
-            updateMatrix();
-            final boolean matrixIsIdentity = mTransformationInfo == null
-                    || mTransformationInfo.mMatrixIsIdentity;
+            final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
-                if (mRenderNode != null) {
+                if (isHardwareAccelerated()) {
                     invalidateViewProperty(false, false);
                 } else {
                     final ViewParent p = mParent;
@@ -11061,8 +10730,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             mTop += offset;
             mBottom += offset;
-            if (mRenderNode != null) {
-                mRenderNode.offsetTopAndBottom(offset);
+            mRenderNode.offsetTopAndBottom(offset);
+            if (isHardwareAccelerated()) {
                 invalidateViewProperty(false, false);
             } else {
                 if (!matrixIsIdentity) {
@@ -11080,11 +10749,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void offsetLeftAndRight(int offset) {
         if (offset != 0) {
-            updateMatrix();
-            final boolean matrixIsIdentity = mTransformationInfo == null
-                    || mTransformationInfo.mMatrixIsIdentity;
+            final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
-                if (mRenderNode != null) {
+                if (isHardwareAccelerated()) {
                     invalidateViewProperty(false, false);
                 } else {
                     final ViewParent p = mParent;
@@ -11109,8 +10776,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             mLeft += offset;
             mRight += offset;
-            if (mRenderNode != null) {
-                mRenderNode.offsetLeftAndRight(offset);
+            mRenderNode.offsetLeftAndRight(offset);
+            if (isHardwareAccelerated()) {
                 invalidateViewProperty(false, false);
             } else {
                 if (!matrixIsIdentity) {
@@ -11490,7 +11157,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             // Damage the entire IsolatedZVolume recieving this view's shadow.
-            if (getTranslationZ() != 0) {
+            if (isHardwareAccelerated() && getTranslationZ() != 0) {
                 damageShadowReceiver();
             }
         }
@@ -11553,7 +11220,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * list properties are not being used in this view
      */
     void invalidateViewProperty(boolean invalidateParent, boolean forceRedraw) {
-        if (mRenderNode == null || (mPrivateFlags & PFLAG_DRAW_ANIMATION) == PFLAG_DRAW_ANIMATION) {
+        if (!isHardwareAccelerated()
+                || !mRenderNode.isValid()
+                || (mPrivateFlags & PFLAG_DRAW_ANIMATION) != 0) {
             if (invalidateParent) {
                 invalidateParentCaches();
             }
@@ -11564,7 +11233,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             damageInParent();
         }
-        if (invalidateParent && getTranslationZ() != 0) {
+        if (isHardwareAccelerated() && invalidateParent && getTranslationZ() != 0) {
             damageShadowReceiver();
         }
     }
@@ -11581,7 +11250,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final Rect r = ai.mTmpInvalRect;
             r.set(0, 0, mRight - mLeft, mBottom - mTop);
             if (mParent instanceof ViewGroup) {
-                ((ViewGroup) mParent).invalidateChildFast(this, r);
+                ((ViewGroup) mParent).damageChild(this, r);
             } else {
                 mParent.invalidateChild(this, r);
             }
@@ -11630,6 +11299,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected void invalidateParentIfNeeded() {
         if (isHardwareAccelerated() && mParent instanceof View) {
             ((View) mParent).invalidate(true);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    protected void invalidateParentIfNeededAndWasQuickRejected() {
+        if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) != 0) {
+            // View was rejected last time it was drawn by its parent; this may have changed
+            invalidateParentIfNeeded();
         }
     }
 
@@ -13976,13 +13655,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public RenderNode getDisplayList() {
-        ensureRenderNode();
         updateDisplayListIfDirty(mRenderNode, false);
         return mRenderNode;
     }
 
     private void resetDisplayList() {
-        if (mRenderNode != null && mRenderNode.isValid()) {
+        if (mRenderNode.isValid()) {
             mRenderNode.destroyDisplayListData();
         }
 
@@ -14577,21 +14255,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * This method is called by getDisplayList() when a display list is created or re-rendered.
-     * It sets or resets the current value of all properties on that display list (resetting is
-     * necessary when a display list is being re-created, because we need to make sure that
-     * previously-set transform values
+     * This method is called by getDisplayList() when a display list is recorded for a View.
+     * It pushes any properties to the RenderNode that aren't managed by the RenderNode.
      */
-    void setDisplayListProperties(RenderNode displayList) {
-        if (displayList != null) {
-            displayList.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
-            displayList.setHasOverlappingRendering(hasOverlappingRendering());
+    void setDisplayListProperties(RenderNode renderNode) {
+        if (renderNode != null) {
+            renderNode.setHasOverlappingRendering(hasOverlappingRendering());
             if (mParent instanceof ViewGroup) {
-                displayList.setClipToBounds(
+                renderNode.setClipToBounds(
                         (((ViewGroup) mParent).mGroupFlags & ViewGroup.FLAG_CLIP_CHILDREN) != 0);
             }
-            displayList.setOutline(mOutline);
-            displayList.setClipToOutline(getClipToOutline());
             float alpha = 1;
             if (mParent instanceof ViewGroup && (((ViewGroup) mParent).mGroupFlags &
                     ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
@@ -14604,7 +14277,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             alpha = t.getAlpha();
                         }
                         if ((transformType & Transformation.TYPE_MATRIX) != 0) {
-                            displayList.setStaticMatrix(t.getMatrix());
+                            renderNode.setStaticMatrix(t.getMatrix());
                         }
                     }
                 }
@@ -14617,23 +14290,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         alpha = 1;
                     }
                 }
-                displayList.setTransformationInfo(alpha,
-                        mTransformationInfo.mTranslationX, mTransformationInfo.mTranslationY,
-                        mTransformationInfo.mTranslationZ,
-                        mTransformationInfo.mRotation, mTransformationInfo.mRotationX,
-                        mTransformationInfo.mRotationY, mTransformationInfo.mScaleX,
-                        mTransformationInfo.mScaleY);
-                if (mTransformationInfo.mCamera == null) {
-                    mTransformationInfo.mCamera = new Camera();
-                    mTransformationInfo.matrix3D = new Matrix();
-                }
-                displayList.setCameraDistance(mTransformationInfo.mCamera.getLocationZ());
-                if ((mPrivateFlags & PFLAG_PIVOT_EXPLICITLY_SET) == PFLAG_PIVOT_EXPLICITLY_SET) {
-                    displayList.setPivotX(getPivotX());
-                    displayList.setPivotY(getPivotY());
-                }
+                renderNode.setAlpha(alpha);
             } else if (alpha < 1) {
-                displayList.setAlpha(alpha);
+                renderNode.setAlpha(alpha);
             }
         }
     }
@@ -14680,8 +14339,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             transformToApply = parent.getChildTransformation();
         } else {
-            if ((mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_TRANSFORM) ==
-                    PFLAG3_VIEW_IS_ANIMATING_TRANSFORM && mRenderNode != null) {
+            if ((mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_TRANSFORM) != 0) {
                 // No longer animating: clear out old animation matrix
                 mRenderNode.setAnimationMatrix(null);
                 mPrivateFlags3 &= ~PFLAG3_VIEW_IS_ANIMATING_TRANSFORM;
@@ -15196,9 +14854,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if ((mPrivateFlags3 & PFLAG3_OUTLINE_DEFINED) == 0) {
                 // Outline not currently define, query from background
                 mOutline = background.getOutline();
-                if (mRenderNode != null) {
-                    mRenderNode.setOutline(mOutline);
-                }
+                mRenderNode.setOutline(mOutline);
             }
         }
 
@@ -15533,20 +15189,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mTop = top;
             mRight = right;
             mBottom = bottom;
-            if (mRenderNode != null) {
-                mRenderNode.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
-            }
+            mRenderNode.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
 
             mPrivateFlags |= PFLAG_HAS_BOUNDS;
 
 
             if (sizeChanged) {
-                if ((mPrivateFlags & PFLAG_PIVOT_EXPLICITLY_SET) == 0) {
-                    // A change in dimension means an auto-centered pivot point changes, too
-                    if (mTransformationInfo != null) {
-                        mTransformationInfo.mMatrixDirty = true;
-                    }
-                }
                 sizeChange(newWidth, newHeight, oldWidth, oldHeight);
             }
 

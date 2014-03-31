@@ -928,48 +928,38 @@ public class ViewPropertyAnimator {
         final RenderNode renderNode = mView.mRenderNode;
         switch (propertyConstant) {
             case TRANSLATION_X:
-                info.mTranslationX = value;
-                if (renderNode != null) renderNode.setTranslationX(value);
+                renderNode.setTranslationX(value);
                 break;
             case TRANSLATION_Y:
-                info.mTranslationY = value;
-                if (renderNode != null) renderNode.setTranslationY(value);
+                renderNode.setTranslationY(value);
                 break;
             case TRANSLATION_Z:
-                info.mTranslationZ = value;
-                if (renderNode != null) renderNode.setTranslationZ(value);
+                renderNode.setTranslationZ(value);
                 break;
             case ROTATION:
-                info.mRotation = value;
-                if (renderNode != null) renderNode.setRotation(value);
+                renderNode.setRotation(value);
                 break;
             case ROTATION_X:
-                info.mRotationX = value;
-                if (renderNode != null) renderNode.setRotationX(value);
+                renderNode.setRotationX(value);
                 break;
             case ROTATION_Y:
-                info.mRotationY = value;
-                if (renderNode != null) renderNode.setRotationY(value);
+                renderNode.setRotationY(value);
                 break;
             case SCALE_X:
-                info.mScaleX = value;
-                if (renderNode != null) renderNode.setScaleX(value);
+                renderNode.setScaleX(value);
                 break;
             case SCALE_Y:
-                info.mScaleY = value;
-                if (renderNode != null) renderNode.setScaleY(value);
+                renderNode.setScaleY(value);
                 break;
             case X:
-                info.mTranslationX = value - mView.mLeft;
-                if (renderNode != null) renderNode.setTranslationX(value - mView.mLeft);
+                renderNode.setTranslationX(value - mView.mLeft);
                 break;
             case Y:
-                info.mTranslationY = value - mView.mTop;
-                if (renderNode != null) renderNode.setTranslationY(value - mView.mTop);
+                renderNode.setTranslationY(value - mView.mTop);
                 break;
             case ALPHA:
                 info.mAlpha = value;
-                if (renderNode != null) renderNode.setAlpha(value);
+                renderNode.setAlpha(value);
                 break;
         }
     }
@@ -981,30 +971,30 @@ public class ViewPropertyAnimator {
      * @return float The value of the named property
      */
     private float getValue(int propertyConstant) {
-        final View.TransformationInfo info = mView.mTransformationInfo;
+        final RenderNode node = mView.mRenderNode;
         switch (propertyConstant) {
             case TRANSLATION_X:
-                return info.mTranslationX;
+                return node.getTranslationX();
             case TRANSLATION_Y:
-                return info.mTranslationY;
+                return node.getTranslationY();
             case TRANSLATION_Z:
-                return info.mTranslationZ;
+                return node.getTranslationZ();
             case ROTATION:
-                return info.mRotation;
+                return node.getRotation();
             case ROTATION_X:
-                return info.mRotationX;
+                return node.getRotationX();
             case ROTATION_Y:
-                return info.mRotationY;
+                return node.getRotationY();
             case SCALE_X:
-                return info.mScaleX;
+                return node.getScaleX();
             case SCALE_Y:
-                return info.mScaleY;
+                return node.getScaleY();
             case X:
-                return mView.mLeft + info.mTranslationX;
+                return mView.mLeft + node.getTranslationX();
             case Y:
-                return mView.mTop + info.mTranslationY;
+                return mView.mTop + node.getTranslationY();
             case ALPHA:
-                return info.mAlpha;
+                return mView.mTransformationInfo.mAlpha;
         }
         return 0;
     }
@@ -1123,7 +1113,6 @@ public class ViewPropertyAnimator {
                 }
             }
             if ((propertyMask & TRANSFORM_MASK) != 0) {
-                mView.mTransformationInfo.mMatrixDirty = true;
                 if (!useRenderNodeProperties) {
                     mView.mPrivateFlags |= View.PFLAG_DRAWN; // force another invalidation
                 }
