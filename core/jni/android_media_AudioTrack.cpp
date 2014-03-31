@@ -203,12 +203,17 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     uint32_t afSampleRate;
     size_t afFrameCount;
 
-    if (AudioSystem::getOutputFrameCount(&afFrameCount, (audio_stream_type_t) streamType) != NO_ERROR) {
-        ALOGE("Error creating AudioTrack: Could not get AudioSystem frame count.");
+    status_t status = AudioSystem::getOutputFrameCount(&afFrameCount,
+            (audio_stream_type_t) streamType);
+    if (status != NO_ERROR) {
+        ALOGE("Error %d creating AudioTrack: Could not get AudioSystem frame count "
+              "for stream type %d.", status, streamType);
         return (jint) AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
     }
-    if (AudioSystem::getOutputSamplingRate(&afSampleRate, (audio_stream_type_t) streamType) != NO_ERROR) {
-        ALOGE("Error creating AudioTrack: Could not get AudioSystem sampling rate.");
+    status = AudioSystem::getOutputSamplingRate(&afSampleRate, (audio_stream_type_t) streamType);
+    if (status != NO_ERROR) {
+        ALOGE("Error %d creating AudioTrack: Could not get AudioSystem sampling rate "
+              "for stream type %d.", status, streamType);
         return (jint) AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
     }
 
@@ -237,7 +242,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         atStreamType = (audio_stream_type_t) streamType;
         break;
     default:
-        ALOGE("Error creating AudioTrack: unknown stream type.");
+        ALOGE("Error creating AudioTrack: unknown stream type %d.", streamType);
         return (jint) AUDIOTRACK_ERROR_SETUP_INVALIDSTREAMTYPE;
     }
 
@@ -245,8 +250,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     // This function was called from Java, so we compare the format against the Java constants
     audio_format_t format = audioFormatToNative(audioFormat);
     if (format == AUDIO_FORMAT_INVALID) {
-
-        ALOGE("Error creating AudioTrack: unsupported audio format.");
+        ALOGE("Error creating AudioTrack: unsupported audio format %d.", audioFormat);
         return (jint) AUDIOTRACK_ERROR_SETUP_INVALIDFORMAT;
     }
 
@@ -853,9 +857,10 @@ static jint android_media_AudioTrack_get_output_sample_rate(JNIEnv *env,  jobjec
         break;
     }
 
-    if (AudioSystem::getOutputSamplingRate(&afSamplingRate, nativeStreamType) != NO_ERROR) {
-        ALOGE("AudioSystem::getOutputSamplingRate() for stream type %d failed in AudioTrack JNI",
-            nativeStreamType);
+    status_t status = AudioSystem::getOutputSamplingRate(&afSamplingRate, nativeStreamType);
+    if (status != NO_ERROR) {
+        ALOGE("Error %d in AudioSystem::getOutputSamplingRate() for stream type %d "
+              "in AudioTrack JNI", status, nativeStreamType);
         return DEFAULT_OUTPUT_SAMPLE_RATE;
     } else {
         return afSamplingRate;
