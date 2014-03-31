@@ -87,7 +87,7 @@ class JavaDataSourceBridge : public DataSource {
         jbyteArray byteArrayObj = env->NewByteArray(size);
         env->DeleteLocalRef(env->GetObjectClass(mDataSource));
         env->DeleteLocalRef(env->GetObjectClass(byteArrayObj));
-        ssize_t numread = env->CallIntMethod(mDataSource, mReadMethod, offset, byteArrayObj, size);
+        ssize_t numread = env->CallIntMethod(mDataSource, mReadMethod, offset, byteArrayObj, (jint)size);
         env->GetByteArrayRegion(byteArrayObj, 0, size, (jbyte*) buffer);
         env->DeleteLocalRef(byteArrayObj);
         if (env->ExceptionCheck()) {
@@ -632,7 +632,7 @@ static jboolean android_media_MediaExtractor_getSampleCryptoInfo(
     env->CallVoidMethod(
             cryptoInfoObj,
             gFields.cryptoInfoSetID,
-            numSubSamples,
+            (jint)numSubSamples,
             numBytesOfPlainDataObj,
             numBytesOfEncryptedDataObj,
             keyObj,
