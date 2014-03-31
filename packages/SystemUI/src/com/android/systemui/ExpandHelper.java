@@ -407,7 +407,8 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             }
 
             case MotionEvent.ACTION_DOWN:
-                mWatchingForPull = isInside(mScrollAdapter.getHostView(), x, y);
+                mWatchingForPull = mScrollAdapter != null &&
+                        isInside(mScrollAdapter.getHostView(), x, y);
                 mLastMotionY = y;
                 break;
 
