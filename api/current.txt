@@ -29350,6 +29350,7 @@ package android.view {
     method protected int computeVerticalScrollRange();
     method public android.view.accessibility.AccessibilityNodeInfo createAccessibilityNodeInfo();
     method public void createContextMenu(android.view.ContextMenu);
+    method public final android.animation.ValueAnimator createRevealAnimator(int, int, float, float);
     method public void destroyDrawingCache();
     method public android.view.WindowInsets dispatchApplyWindowInsets(android.view.WindowInsets);
     method public void dispatchConfigurationChanged(android.content.res.Configuration);
