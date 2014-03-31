@@ -63,24 +63,21 @@ public:
     void initialize();
 
     // initialize individual logical device.
-    int initLogicalDevice(int type);
-    void releaseLogicalDevice(int type);
+    cec_logical_address_t initLogicalDevice(cec_device_type_t type);
+    void releaseLogicalDevice(cec_device_type_t type);
 
-    cec_logical_address_t getLogicalAddress(int deviceType);
+    cec_logical_address_t getLogicalAddress(cec_device_type_t deviceType);
+    uint16_t getPhysicalAddress();
     int getDeviceType(cec_logical_address_t addr);
     void queueMessage(const MessageEntry& message);
     void queueOutgoingMessage(const cec_message_t& message);
     void sendReportPhysicalAddress();
     void sendActiveSource(cec_logical_address_t srcAddr);
-    void sendInactiveSource(cec_logical_address_t srcAddr);
-    void sendImageViewOn(cec_logical_address_t srcAddr);
-    void sendTextViewOn(cec_logical_address_t srcAddr);
-    void sendGiveDevicePowerStatus(cec_logical_address_t srcAddr, cec_logical_address_t dstAddr);
     void sendFeatureAbort(cec_logical_address_t srcAddr, cec_logical_address_t dstAddr,
             int opcode, int reason);
     void sendCecVersion(cec_logical_address_t srcAddr, cec_logical_address_t dstAddr,
             int version);
-    void sendDeviceVendorID(cec_logical_address_t srcAddr, cec_logical_address_t dstAddr);
+    void sendDeviceVendorId(cec_logical_address_t srcAddr, cec_logical_address_t dstAddr);
     void sendGiveDeviceVendorID(cec_logical_address_t srcAddr, cec_logical_address_t dstAddr);
     void sendSetOsdName(cec_logical_address_t srcAddr, cec_logical_address_t dstAddr,
             const char* name, size_t len);
@@ -104,6 +101,7 @@ private:
     static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
 
     void updatePhysicalAddress();
+    void updateLogicalAddress();
     void dispatchMessage(const MessageEntry& message);
     void processIncomingMessage(const cec_message_t& msg);
 
@@ -147,7 +145,7 @@ private:
     };
 
     // device type -> logical address mapping
-    std::map<int, cec_logical_address_t> mLogicalDevices;
+    std::map<cec_device_type_t, cec_logical_address_t> mLogicalDevices;
 
     hdmi_cec_device_t* mDevice;
     jobject mCallbacksObj;
@@ -173,6 +171,10 @@ void HdmiCecHandler::initialize() {
     updatePhysicalAddress();
 }
 
+uint16_t HdmiCecHandler::getPhysicalAddress() {
+    return mPhysicalAddress;
+}
+
 void HdmiCecHandler::updatePhysicalAddress() {
     uint16_t addr;
     if (!mDevice->get_physical_address(mDevice, &addr)) {
@@ -182,7 +184,17 @@ void HdmiCecHandler::updatePhysicalAddress() {
     }
 }
 
-int HdmiCecHandler::initLogicalDevice(int type) {
+void HdmiCecHandler::updateLogicalAddress() {
+    std::map<cec_device_type_t, cec_logical_address_t>::iterator it = mLogicalDevices.begin();
+    for (; it != mLogicalDevices.end(); ++it) {
+        cec_logical_address_t addr;
+        if (!mDevice->get_logical_address(mDevice, it->first, &addr)) {
+            it->second = addr;
+        }
+    }
+}
+
+cec_logical_address_t HdmiCecHandler::initLogicalDevice(cec_device_type_t type) {
     cec_logical_address_t addr;
     int res = mDevice->allocate_logical_address(mDevice, type, &addr);
 
@@ -190,21 +202,21 @@ int HdmiCecHandler::initLogicalDevice(int type) {
         ALOGE("Logical Address Allocation failed: %d", res);
     } else {
         ALOGV("Logical Address Allocation success: %d", addr);
-        mLogicalDevices.insert(std::pair<int, cec_logical_address_t>(type, addr));
+        mLogicalDevices.insert(std::pair<cec_device_type_t, cec_logical_address_t>(type, addr));
     }
     return addr;
 }
 
-void HdmiCecHandler::releaseLogicalDevice(int type) {
-    std::map<int, cec_logical_address_t>::iterator it = mLogicalDevices.find(type);
+void HdmiCecHandler::releaseLogicalDevice(cec_device_type_t type) {
+    std::map<cec_device_type_t, cec_logical_address_t>::iterator it = mLogicalDevices.find(type);
     if (it != mLogicalDevices.end()) {
         mLogicalDevices.erase(it);
     }
     // TODO: remove the address monitored in HAL as well.
 }
 
-cec_logical_address_t HdmiCecHandler::getLogicalAddress(int mDevicetype) {
-    std::map<int, cec_logical_address_t>::iterator it = mLogicalDevices.find(mDevicetype);
+cec_logical_address_t HdmiCecHandler::getLogicalAddress(cec_device_type_t type) {
+    std::map<cec_device_type_t, cec_logical_address_t>::iterator it = mLogicalDevices.find(type);
     if (it != mLogicalDevices.end()) {
         return it->second;
     }
@@ -212,7 +224,7 @@ cec_logical_address_t HdmiCecHandler::getLogicalAddress(int mDevicetype) {
 }
 
 int HdmiCecHandler::getDeviceType(cec_logical_address_t addr) {
-    std::map<int, cec_logical_address_t>::iterator it = mLogicalDevices.begin();
+    std::map<cec_device_type_t, cec_logical_address_t>::iterator it = mLogicalDevices.begin();
     for (; it != mLogicalDevices.end(); ++it) {
         if (it->second == addr) {
             return it->first;
@@ -245,14 +257,15 @@ void HdmiCecHandler::sendReportPhysicalAddress() {
     }
 
     // Report physical address for each logical one hosted in it.
-    std::map<int, cec_logical_address_t>::iterator it = mLogicalDevices.begin();
+    std::map<cec_device_type_t, cec_logical_address_t>::iterator it = mLogicalDevices.begin();
     while (it != mLogicalDevices.end()) {
         cec_message_t msg;
         msg.initiator = it->second;  // logical address
         msg.destination = CEC_ADDR_BROADCAST;
         msg.length = 4;
         msg.body[0] = CEC_MESSAGE_REPORT_PHYSICAL_ADDRESS;
-        std::memcpy(msg.body + 1, &mPhysicalAddress, 2);
+        msg.body[1] = (mPhysicalAddress >> 8) & 0xff;
+        msg.body[2] = mPhysicalAddress & 0xff;
         msg.body[3] = it->first;  // device type
         queueOutgoingMessage(msg);
         ++it;
@@ -269,47 +282,8 @@ void HdmiCecHandler::sendActiveSource(cec_logical_address_t srcAddr) {
     msg.destination = CEC_ADDR_BROADCAST;
     msg.length = 3;
     msg.body[0] = CEC_MESSAGE_ACTIVE_SOURCE;
-    std::memcpy(msg.body + 1, &mPhysicalAddress, 2);
-    queueOutgoingMessage(msg);
-}
-
-void HdmiCecHandler::sendInactiveSource(cec_logical_address_t srcAddr) {
-    cec_message_t msg;
-    msg.initiator = srcAddr;
-    msg.destination = CEC_ADDR_TV;
-    msg.length = 3;
-    msg.body[0] = CEC_MESSAGE_INACTIVE_SOURCE;
-    if (mPhysicalAddress != INVALID_PHYSICAL_ADDRESS) {
-        std::memcpy(msg.body + 1, &mPhysicalAddress, 2);
-        queueOutgoingMessage(msg);
-    }
-}
-
-void HdmiCecHandler::sendImageViewOn(cec_logical_address_t srcAddr) {
-    cec_message_t msg;
-    msg.initiator = srcAddr;
-    msg.destination = CEC_ADDR_TV;
-    msg.length = 1;
-    msg.body[0] = CEC_MESSAGE_IMAGE_VIEW_ON;
-    queueOutgoingMessage(msg);
-}
-
-void HdmiCecHandler::sendTextViewOn(cec_logical_address_t srcAddr) {
-    cec_message_t msg;
-    msg.initiator = srcAddr;
-    msg.destination = CEC_ADDR_TV;
-    msg.length = 1;
-    msg.body[0] = CEC_MESSAGE_TEXT_VIEW_ON;
-    queueOutgoingMessage(msg);
-}
-
-void HdmiCecHandler::sendGiveDevicePowerStatus(cec_logical_address_t srcAddr,
-        cec_logical_address_t dstAddr) {
-    cec_message_t msg;
-    msg.initiator = srcAddr;
-    msg.destination = dstAddr;
-    msg.length = 1;
-    msg.body[0] = CEC_MESSAGE_GIVE_DEVICE_POWER_STATUS;
+    msg.body[1] = (mPhysicalAddress >> 8) & 0xff;
+    msg.body[2] = mPhysicalAddress & 0xff;
     queueOutgoingMessage(msg);
 }
 
@@ -346,7 +320,7 @@ void HdmiCecHandler::sendGiveDeviceVendorID(cec_logical_address_t srcAddr,
     queueOutgoingMessage(msg);
 }
 
-void HdmiCecHandler::sendDeviceVendorID(cec_logical_address_t srcAddr,
+void HdmiCecHandler::sendDeviceVendorId(cec_logical_address_t srcAddr,
         cec_logical_address_t dstAddr) {
     cec_message_t msg;
     msg.initiator = srcAddr;
@@ -355,7 +329,9 @@ void HdmiCecHandler::sendDeviceVendorID(cec_logical_address_t srcAddr,
     msg.body[0] = CEC_MESSAGE_DEVICE_VENDOR_ID;
     uint32_t vendor_id;
     mDevice->get_vendor_id(mDevice, &vendor_id);
-    std::memcpy(msg.body + 1, &vendor_id, 3);
+    msg.body[1] = (vendor_id >> 16) & 0xff;
+    msg.body[2] = (vendor_id >> 8) & 0xff;
+    msg.body[3] = vendor_id & 0xff;
     queueOutgoingMessage(msg);
 }
 
@@ -437,9 +413,8 @@ void HdmiCecHandler::dispatchMessage(const MessageEntry& entry) {
         mMessageQueue.pop_front();
         bool connected = entry.second.hotplug.connected;
         if (connected) {
-            // TODO: Update logical addresses as well, since they also could have
-            // changed while the cable was disconnected.
             updatePhysicalAddress();
+            updateLogicalAddress();
         }
         propagateHotplug(connected);
     }
@@ -460,6 +435,9 @@ void HdmiCecHandler::processIncomingMessage(const cec_message_t& msg) {
         handleGetCECVersion(msg);
     } else if (opcode == CEC_MESSAGE_GET_MENU_LANGUAGE) {
         handleGetMenuLanguage(msg);
+    } else if (opcode == CEC_MESSAGE_ABORT) {
+        // Compliance testing requires that abort message be responded with feature abort.
+        sendFeatureAbort(msg.destination, msg.initiator, msg.body[0], ABORT_REFUSED);
     } else {
         if (precheckMessage(msg)) {
             propagateMessage(msg);
@@ -480,8 +458,7 @@ bool HdmiCecHandler::precheckMessage(const cec_message_t& msg) {
             (opcode == CEC_MESSAGE_ACTIVE_SOURCE ||
              opcode == CEC_MESSAGE_SET_STREAM_PATH ||
              opcode == CEC_MESSAGE_INACTIVE_SOURCE)) {
-        uint16_t senderAddr;
-        std::memcpy(&senderAddr, &msg.body[1], 2);
+        uint16_t senderAddr = (msg.body[1] << 8) + msg.body[2];
         if (senderAddr == mPhysicalAddress) {
             return false;
         }
@@ -521,7 +498,7 @@ void HdmiCecHandler::handleRequestActiveSource() {
     jint activeDeviceType = env->CallIntMethod(mCallbacksObj,
             gHdmiCecServiceClassInfo.getActiveSource);
     if (activeDeviceType != INACTIVE_DEVICE_TYPE) {
-        sendActiveSource(getLogicalAddress(activeDeviceType));
+        sendActiveSource(getLogicalAddress(static_cast<cec_device_type_t>(activeDeviceType)));
     }
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
@@ -542,7 +519,7 @@ void HdmiCecHandler::handleGetOsdName(const cec_message_t& msg) {
 }
 
 void HdmiCecHandler::handleGiveDeviceVendorID(const cec_message_t& msg) {
-    sendDeviceVendorID(msg.destination, msg.initiator);
+    sendDeviceVendorId(msg.destination, msg.initiator);
 }
 
 void HdmiCecHandler::handleGetCECVersion(const cec_message_t& msg) {
@@ -596,64 +573,34 @@ static jlong nativeInit(JNIEnv* env, jclass clazz, jobject callbacksObj) {
 static void nativeSendMessage(JNIEnv* env, jclass clazz, jlong handlerPtr, jint deviceType,
         jint dstAddr, jint opcode, jbyteArray params) {
     HdmiCecHandler *handler = reinterpret_cast<HdmiCecHandler *>(handlerPtr);
-    cec_logical_address_t srcAddr = handler->getLogicalAddress(deviceType);
+    cec_logical_address_t srcAddr = handler->getLogicalAddress(
+            static_cast<cec_device_type_t>(deviceType));
     jsize len = env->GetArrayLength(params);
     ScopedByteArrayRO paramsPtr(env, params);
     cec_message_t message;
     message.initiator = srcAddr;
     message.destination = static_cast<cec_logical_address_t>(dstAddr);
-    message.length = len + 1;
+    message.length = min(len + 1, CEC_MESSAGE_BODY_MAX_LENGTH);
     message.body[0] = opcode;
-    std::memcpy(message.body + 1, paramsPtr.get(), len);
+    std::memcpy(message.body + 1, paramsPtr.get(), message.length - 1);
     handler->sendCecMessage(message);
 }
 
-static int nativeAllocateLogicalAddress(JNIEnv* env, jclass clazz, jlong handlerPtr,
+static jint nativeAllocateLogicalAddress(JNIEnv* env, jclass clazz, jlong handlerPtr,
         jint deviceType) {
     HdmiCecHandler *handler = reinterpret_cast<HdmiCecHandler *>(handlerPtr);
-    return handler->initLogicalDevice(deviceType);
+    return handler->initLogicalDevice(static_cast<cec_device_type_t>(deviceType));
 }
 
 static void nativeRemoveLogicalAddress(JNIEnv* env, jclass clazz, jlong handlerPtr,
        jint deviceType) {
     HdmiCecHandler *handler = reinterpret_cast<HdmiCecHandler *>(handlerPtr);
-    return handler->releaseLogicalDevice(deviceType);
+    return handler->releaseLogicalDevice(static_cast<cec_device_type_t>(deviceType));
 }
 
-static void nativeSendActiveSource(JNIEnv* env, jclass clazz, jlong handlerPtr,
-        jint deviceType) {
+static jint nativeGetPhysicalAddress(JNIEnv* env, jclass clazz, jlong handlerPtr) {
     HdmiCecHandler *handler = reinterpret_cast<HdmiCecHandler *>(handlerPtr);
-    cec_logical_address_t srcAddr = handler->getLogicalAddress(deviceType);
-    handler->sendActiveSource(srcAddr);
-}
-
-static void nativeSendInactiveSource(JNIEnv* env, jclass clazz, jlong handlerPtr,
-        jint deviceType) {
-    HdmiCecHandler *handler = reinterpret_cast<HdmiCecHandler *>(handlerPtr);
-    cec_logical_address_t srcAddr = handler->getLogicalAddress(deviceType);
-    handler->sendInactiveSource(srcAddr);
-}
-
-static void nativeSendImageViewOn(JNIEnv* env, jclass clazz, jlong handlerPtr,
-        jint deviceType) {
-    HdmiCecHandler *handler = reinterpret_cast<HdmiCecHandler *>(handlerPtr);
-    cec_logical_address_t srcAddr = handler->getLogicalAddress(deviceType);
-    handler->sendImageViewOn(srcAddr);
-}
-
-static void nativeSendTextViewOn(JNIEnv* env, jclass clazz, jlong handlerPtr,
-        jint deviceType) {
-    HdmiCecHandler *handler = reinterpret_cast<HdmiCecHandler *>(handlerPtr);
-    cec_logical_address_t srcAddr = handler->getLogicalAddress(deviceType);
-    handler->sendTextViewOn(srcAddr);
-}
-
-static void nativeSendGiveDevicePowerStatus(JNIEnv* env, jclass clazz, jlong handlerPtr,
-        jint deviceType, jint destination) {
-    HdmiCecHandler *handler = reinterpret_cast<HdmiCecHandler *>(handlerPtr);
-    cec_logical_address_t srcAddr = handler->getLogicalAddress(deviceType);
-    cec_logical_address_t dstAddr = static_cast<cec_logical_address_t>(destination);
-    handler->sendGiveDevicePowerStatus(srcAddr, dstAddr);
+    return handler->getPhysicalAddress();
 }
 
 static JNINativeMethod sMethods[] = {
@@ -666,16 +613,8 @@ static JNINativeMethod sMethods[] = {
             (void *)nativeAllocateLogicalAddress },
     { "nativeRemoveLogicalAddress", "(JI)V",
             (void *)nativeRemoveLogicalAddress },
-    { "nativeSendActiveSource", "(JI)V",
-            (void *)nativeSendActiveSource },
-    { "nativeSendInactiveSource", "(JI)V",
-            (void *)nativeSendInactiveSource },
-    { "nativeSendImageViewOn", "(JI)V",
-            (void *)nativeSendImageViewOn },
-    { "nativeSendTextViewOn", "(JI)V",
-            (void *)nativeSendTextViewOn },
-    { "nativeSendGiveDevicePowerStatus", "(JII)V",
-            (void *)nativeSendGiveDevicePowerStatus }
+    { "nativeGetPhysicalAddress", "(J)I",
+            (void *)nativeGetPhysicalAddress },
 };
 
 #define CLASS_PATH "com/android/server/hdmi/HdmiCecService"
