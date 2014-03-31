@@ -295,6 +295,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                     drawable.setCallback(this);
                 }
                 layers[i].mDrawable = drawable;
+                mLayerState.mHaveStateful = false;
                 return true;
             }
         }
