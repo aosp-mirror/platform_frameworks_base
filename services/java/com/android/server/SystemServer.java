@@ -76,6 +76,7 @@ import com.android.server.power.ShutdownThread;
 import com.android.server.search.SearchManagerService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
+import com.android.server.trust.TrustManagerService;
 import com.android.server.twilight.TwilightService;
 import com.android.server.usb.UsbService;
 import com.android.server.wallpaper.WallpaperManagerService;
@@ -912,6 +913,13 @@ public final class SystemServer {
                     ServiceManager.addService(Context.MEDIA_ROUTER_SERVICE, mediaRouter);
                 } catch (Throwable e) {
                     reportWtf("starting MediaRouterService", e);
+                }
+
+                try {
+                    Slog.i(TAG, "Trust Manager");
+                    mSystemServiceManager.startService(TrustManagerService.class);
+                } catch (Throwable e) {
+                    Slog.e(TAG, "Failure starting TrustManagerService", e);
                 }
             }
         }
