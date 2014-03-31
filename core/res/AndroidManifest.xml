@@ -2547,6 +2547,13 @@
         android:label="@string/permlab_control_keyguard"
         android:description="@string/permdesc_control_keyguard" />
 
+    <!-- Allows an application to listen to trust changes.  Only allowed for system processes.
+        @hide -->
+    <permission android:name="android.permission.TRUST_LISTENER"
+                android:protectionLevel="signature"
+                android:label="@string/permlab_trust_listener"
+                android:description="@string/permdesc_trust_listener" />
+
     <!-- Must be required by an {@link
          android.service.trust.TrustAgentService},
          to ensure that only the system can bind to it. -->
