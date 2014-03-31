@@ -912,8 +912,6 @@ public final class SystemServer {
         final boolean safeMode = wm.detectSafeMode();
         if (safeMode) {
             mActivityManagerService.enterSafeMode();
-            // Post the safe mode state in the Zygote class
-            Zygote.systemInSafeMode = true;
             // Disable the JIT for the system_server process
             VMRuntime.getRuntime().disableJitCompilation();
         } else {
