@@ -397,7 +397,14 @@ public final class Installer {
         return execute(builder.toString());
     }
 
-    public boolean restoreconData() {
-        return (execute("restorecondata") == 0);
+    public boolean restoreconData(String pkgName, String seinfo, int uid) {
+        StringBuilder builder = new StringBuilder("restorecondata");
+        builder.append(' ');
+        builder.append(pkgName);
+        builder.append(' ');
+        builder.append(seinfo != null ? seinfo : "!");
+        builder.append(' ');
+        builder.append(uid);
+        return (execute(builder.toString()) == 0);
     }
 }
