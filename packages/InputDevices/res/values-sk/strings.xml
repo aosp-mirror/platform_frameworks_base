@@ -34,4 +34,14 @@
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"slovinské"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"turecké"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"ukrajinské"</string>
+    <!-- no translation found for keyboard_layout_arabic (5671970465174968712) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_greek (7289253560162386040) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_hebrew (7241473985890173812) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_lithuanian (6943110873053106534) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_spanish_latin (5690539836069535697) -->
+    <skip />
 </resources>
