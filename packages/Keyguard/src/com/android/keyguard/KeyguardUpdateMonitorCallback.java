@@ -178,4 +178,5 @@ class KeyguardUpdateMonitorCallback {
      * Called when the NFC Service has found a tag that is registered for NFC unlock.
      */
     public void onNfcUnlock() { }
+
 }
