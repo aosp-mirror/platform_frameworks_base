@@ -304,7 +304,6 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     lpJniStorage->mCallbackData.busy = false;
 
     // initialize the native AudioTrack object
-    status_t status;
     switch (memoryMode) {
     case MODE_STREAM:
 
