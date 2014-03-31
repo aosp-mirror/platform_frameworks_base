@@ -304,10 +304,11 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     lpJniStorage->mCallbackData.busy = false;
 
     // initialize the native AudioTrack object
+    status_t status;
     switch (memoryMode) {
     case MODE_STREAM:
 
-        lpTrack->set(
+        status = lpTrack->set(
             atStreamType,// stream type
             sampleRateInHertz,
             format,// word length, PCM
@@ -329,7 +330,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
             goto native_init_failure;
         }
 
-        lpTrack->set(
+        status = lpTrack->set(
             atStreamType,// stream type
             sampleRateInHertz,
             format,// word length, PCM
@@ -348,8 +349,8 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         goto native_init_failure;
     }
 
-    if (lpTrack->initCheck() != NO_ERROR) {
-        ALOGE("Error initializing AudioTrack");
+    if (status != NO_ERROR) {
+        ALOGE("Error %d initializing AudioTrack", status);
         goto native_init_failure;
     }
 
