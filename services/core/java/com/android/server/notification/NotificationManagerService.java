@@ -78,6 +78,7 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.notification.NotificationScorer;
 import com.android.server.EventLogTags;
+import com.android.server.notification.NotificationUsageStats.SingleNotificationStats;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.SystemService;
 import com.android.server.lights.Light;
@@ -204,6 +205,8 @@ public class NotificationManagerService extends SystemService {
     private static final String ATTR_NAME = "name";
 
     final ArrayList<NotificationScorer> mScorers = new ArrayList<NotificationScorer>();
+
+    private final NotificationUsageStats mUsageStats = new NotificationUsageStats();
 
     private int mZenMode;
     // temporary, until we update apps to provide metadata
@@ -791,6 +794,7 @@ public class NotificationManagerService extends SystemService {
     public static final class NotificationRecord
     {
         final StatusBarNotification sbn;
+        final SingleNotificationStats stats = new SingleNotificationStats();
         IBinder statusBarKey;
 
         NotificationRecord(StatusBarNotification sbn)
@@ -861,6 +865,7 @@ public class NotificationManagerService extends SystemService {
                 }
                 pw.println(prefix + "  }");
             }
+            pw.println(prefix + "  stats=" + stats.toString());
         }
 
         @Override
@@ -1758,6 +1763,9 @@ public class NotificationManagerService extends SystemService {
                 }
             }
 
+            pw.println("\n  Usage Stats:");
+            mUsageStats.dump(pw, "    ");
+
         }
     }
 
@@ -1905,9 +1913,11 @@ public class NotificationManagerService extends SystemService {
                     int index = indexOfNotificationLocked(pkg, tag, id, userId);
                     if (index < 0) {
                         mNotificationList.add(r);
+                        mUsageStats.registerPostedByApp(r);
                     } else {
                         old = mNotificationList.remove(index);
                         mNotificationList.add(index, r);
+                        mUsageStats.registerUpdatedByApp(r);
                         // Make sure we don't lose the foreground service state.
                         if (old != null) {
                             notification.flags |=
@@ -2300,7 +2310,7 @@ public class NotificationManagerService extends SystemService {
         manager.sendAccessibilityEvent(event);
     }
 
-    private void cancelNotificationLocked(NotificationRecord r, boolean sendDelete) {
+    private void cancelNotificationLocked(NotificationRecord r, boolean sendDelete, int reason) {
         // tell the app
         if (sendDelete) {
             if (r.getNotification().deleteIntent != null) {
@@ -2359,6 +2369,26 @@ public class NotificationManagerService extends SystemService {
             mLedNotification = null;
         }
 
+        // Record usage stats
+        switch (reason) {
+            case REASON_DELEGATE_CANCEL:
+            case REASON_DELEGATE_CANCEL_ALL:
+            case REASON_LISTENER_CANCEL:
+            case REASON_LISTENER_CANCEL_ALL:
+                mUsageStats.registerDismissedByUser(r);
+                break;
+            case REASON_NOMAN_CANCEL:
+            case REASON_NOMAN_CANCEL_ALL:
+                mUsageStats.registerRemovedByApp(r);
+                break;
+            case REASON_DELEGATE_CLICK:
+                mUsageStats.registerCancelDueToClick(r);
+                break;
+            default:
+                mUsageStats.registerCancelUnknown(r);
+                break;
+        }
+
         // Save it for users of getHistoricalNotifications()
         mArchive.record(r.sbn);
     }
@@ -2387,6 +2417,12 @@ public class NotificationManagerService extends SystemService {
                     if (index >= 0) {
                         NotificationRecord r = mNotificationList.get(index);
 
+                        // Ideally we'd do this in the caller of this method. However, that would
+                        // require the caller to also find the notification.
+                        if (reason == REASON_DELEGATE_CLICK) {
+                            mUsageStats.registerClickedByUser(r);
+                        }
+
                         if ((r.getNotification().flags & mustHaveFlags) != mustHaveFlags) {
                             return;
                         }
@@ -2397,7 +2433,7 @@ public class NotificationManagerService extends SystemService {
                         mNotificationList.remove(index);
                         mNotificationsByKey.remove(r.sbn.getKey());
 
-                        cancelNotificationLocked(r, sendDelete);
+                        cancelNotificationLocked(r, sendDelete, reason);
                         updateLightsLocked();
                     }
                 }
@@ -2469,7 +2505,7 @@ public class NotificationManagerService extends SystemService {
                 }
                 mNotificationList.remove(i);
                 mNotificationsByKey.remove(r.sbn.getKey());
-                cancelNotificationLocked(r, false);
+                cancelNotificationLocked(r, false, reason);
             }
             if (canceledSomething) {
                 updateLightsLocked();
@@ -2521,6 +2557,7 @@ public class NotificationManagerService extends SystemService {
         EventLogTags.writeNotificationCancelAll(callingUid, callingPid,
                 null, userId, 0, 0, reason,
                 listener == null ? null : listener.component.toShortString());
+
         final int N = mNotificationList.size();
         for (int i=N-1; i>=0; i--) {
             NotificationRecord r = mNotificationList.get(i);
@@ -2532,7 +2569,7 @@ public class NotificationManagerService extends SystemService {
                             | Notification.FLAG_NO_CLEAR)) == 0) {
                 mNotificationList.remove(i);
                 mNotificationsByKey.remove(r.sbn.getKey());
-                cancelNotificationLocked(r, true);
+                cancelNotificationLocked(r, true, reason);
             }
         }
         updateLightsLocked();
