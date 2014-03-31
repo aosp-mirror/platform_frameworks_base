@@ -82,6 +82,8 @@ public:
     // Returns true on success, false on failure
     void initialize();
 
+    bool hasContext();
+
     void usePBufferSurface();
     EGLSurface createSurface(EGLNativeWindowType window);
     void destroySurface(EGLSurface surface);
@@ -138,7 +140,7 @@ GlobalContext::GlobalContext()
 }
 
 void GlobalContext::initialize() {
-    if (mEglDisplay != EGL_NO_DISPLAY) return;
+    if (hasContext()) return;
 
     mEglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY,
@@ -155,6 +157,10 @@ void GlobalContext::initialize() {
     usePBufferSurface();
     Caches::getInstance().init();
     initAtlas();
+}
+
+bool GlobalContext::hasContext() {
+    return mEglDisplay != EGL_NO_DISPLAY;
 }
 
 void GlobalContext::loadConfig() {
@@ -438,6 +444,15 @@ void CanvasContext::detachFunctor(Functor* functor) {
     if (!mCanvas) return;
 
     mCanvas->detachFunctor(functor);
+}
+
+void CanvasContext::invokeFunctor(Functor* functor) {
+    DrawGlInfo::Mode mode = DrawGlInfo::kModeProcessNoContext;
+    if (mGlobalContext->hasContext()) {
+        requireGlContext();
+        mode = DrawGlInfo::kModeProcess;
+    }
+    (*functor)(mode, NULL);
 }
 
 void CanvasContext::invokeFunctors() {

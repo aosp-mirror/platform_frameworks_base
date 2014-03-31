@@ -72,6 +72,7 @@ public:
 
     void attachFunctor(Functor* functor);
     void detachFunctor(Functor* functor);
+    void invokeFunctor(Functor* functor);
 
     void runWithGlContext(RenderTask* task);
 

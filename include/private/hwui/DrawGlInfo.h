@@ -55,7 +55,10 @@ struct DrawGlInfo {
         kModeDraw,
         // Indicates the the functor is called only to perform
         // processing and that no draw should be attempted
-        kModeProcess
+        kModeProcess,
+        // Same as kModeProcess, however there is no GL context because it was
+        // lost or destroyed
+        kModeProcessNoContext
     };
 
     /**

@@ -438,6 +438,17 @@ public abstract class HardwareRenderer {
     abstract void attachFunctor(View.AttachInfo attachInfo, long functor);
 
     /**
+     * Schedules the functor for execution in either kModeProcess or
+     * kModeProcessNoContext, depending on whether or not there is an EGLContext.
+     *
+     * @param functor The native functor to invoke
+     * @param waitForCompletion If true, this will not return until the functor
+     *                          has invoked. If false, the functor may be invoked
+     *                          asynchronously.
+     */
+    public abstract void invokeFunctor(long functor, boolean waitForCompletion);
+
+    /**
      * Initializes the hardware renderer for the specified surface and setup the
      * renderer for drawing, if needed. This is invoked when the ViewAncestor has
      * potentially lost the hardware renderer. The hardware renderer should be
