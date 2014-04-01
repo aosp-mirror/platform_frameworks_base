@@ -700,7 +700,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     // Just post MCS_BOUND message to trigger processing
                                     // of next pending install.
                                     if (DEBUG_SD_INSTALL) Log.i(TAG,
-                                            "Posting MCS_BOUND for next woek");
+                                            "Posting MCS_BOUND for next work");
                                     mHandler.sendEmptyMessage(MCS_BOUND);
                                 }
                             }
@@ -7533,32 +7533,34 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mSuccess = getPackageSizeInfoLI(mStats.packageName, mStats.userHandle, mStats);
             }
 
-            final boolean mounted;
-            if (Environment.isExternalStorageEmulated()) {
-                mounted = true;
-            } else {
-                final String status = Environment.getExternalStorageState();
-                mounted = (Environment.MEDIA_MOUNTED.equals(status)
-                        || Environment.MEDIA_MOUNTED_READ_ONLY.equals(status));
-            }
+            if (mSuccess) {
+                final boolean mounted;
+                if (Environment.isExternalStorageEmulated()) {
+                    mounted = true;
+                } else {
+                    final String status = Environment.getExternalStorageState();
+                    mounted = (Environment.MEDIA_MOUNTED.equals(status)
+                            || Environment.MEDIA_MOUNTED_READ_ONLY.equals(status));
+                }
 
-            if (mounted) {
-                final UserEnvironment userEnv = new UserEnvironment(mStats.userHandle);
+                if (mounted) {
+                    final UserEnvironment userEnv = new UserEnvironment(mStats.userHandle);
 
-                mStats.externalCacheSize = calculateDirectorySize(mContainerService,
-                        userEnv.buildExternalStorageAppCacheDirs(mStats.packageName));
+                    mStats.externalCacheSize = calculateDirectorySize(mContainerService,
+                            userEnv.buildExternalStorageAppCacheDirs(mStats.packageName));
 
-                mStats.externalDataSize = calculateDirectorySize(mContainerService,
-                        userEnv.buildExternalStorageAppDataDirs(mStats.packageName));
+                    mStats.externalDataSize = calculateDirectorySize(mContainerService,
+                            userEnv.buildExternalStorageAppDataDirs(mStats.packageName));
 
-                // Always subtract cache size, since it's a subdirectory
-                mStats.externalDataSize -= mStats.externalCacheSize;
+                    // Always subtract cache size, since it's a subdirectory
+                    mStats.externalDataSize -= mStats.externalCacheSize;
 
-                mStats.externalMediaSize = calculateDirectorySize(mContainerService,
-                        userEnv.buildExternalStorageAppMediaDirs(mStats.packageName));
+                    mStats.externalMediaSize = calculateDirectorySize(mContainerService,
+                            userEnv.buildExternalStorageAppMediaDirs(mStats.packageName));
 
-                mStats.externalObbSize = calculateDirectorySize(mContainerService,
-                        userEnv.buildExternalStorageAppObbDirs(mStats.packageName));
+                    mStats.externalObbSize = calculateDirectorySize(mContainerService,
+                            userEnv.buildExternalStorageAppObbDirs(mStats.packageName));
+                }
             }
         }
 
@@ -10271,6 +10273,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             final IPackageStatsObserver observer) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.GET_PACKAGE_SIZE, null);
+        if (packageName == null) {
+            throw new IllegalArgumentException("Attempt to get size of null packageName");
+        }
 
         PackageStats stats = new PackageStats(packageName, userHandle);
 
