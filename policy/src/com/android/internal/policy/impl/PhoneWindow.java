@@ -125,6 +125,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     TypedValue mFixedWidthMinor;
     TypedValue mFixedHeightMajor;
     TypedValue mFixedHeightMinor;
+    TypedValue mOutsetBottom;
 
     // This is the top-level view of the window, containing the window decor.
     private DecorView mDecor;
@@ -2289,12 +2290,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     } else {
                         h = 0;
                     }
-
                     if (h > 0) {
                         final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
                         heightMeasureSpec = MeasureSpec.makeMeasureSpec(
                                 Math.min(h, heightSize), EXACTLY);
                     }
+                }
+            }
+
+            if (mOutsetBottom != null) {
+                int mode = MeasureSpec.getMode(heightMeasureSpec);
+                if (mode != MeasureSpec.UNSPECIFIED) {
+                    int outset = (int) mOutsetBottom.getDimension(metrics);
+                    int height = MeasureSpec.getSize(heightMeasureSpec);
+                    heightMeasureSpec = MeasureSpec.makeMeasureSpec(height + outset, mode);
                 }
             }
 
@@ -2903,6 +2912,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (mFixedHeightMinor == null) mFixedHeightMinor = new TypedValue();
             a.getValue(com.android.internal.R.styleable.Window_windowFixedHeightMinor,
                     mFixedHeightMinor);
+        }
+        if (a.hasValue(com.android.internal.R.styleable.Window_windowOutsetBottom)) {
+            if (mOutsetBottom == null) mOutsetBottom = new TypedValue();
+            a.getValue(com.android.internal.R.styleable.Window_windowOutsetBottom, mOutsetBottom);
         }
 
         final Context context = getContext();
