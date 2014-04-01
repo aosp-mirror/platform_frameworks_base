@@ -248,6 +248,6 @@
     <!-- Z distance between notifications if they are in the stack -->
     <dimen name="z_distance_between_notifications">2dp</dimen>
 
-    <!-- Width of the zen mode interstitial dialog.  Defaults to MATCH_PARENT. -->
-    <dimen name="zen_mode_dialog_width">-1px</dimen>
+    <!-- Width of the zen mode interstitial dialog. -->
+    <dimen name="zen_mode_dialog_width">320dp</dimen>
 </resources>
