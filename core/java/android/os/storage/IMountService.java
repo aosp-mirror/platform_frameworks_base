@@ -694,6 +694,36 @@ public interface IMountService extends IInterface {
                 return _result;
             }
 
+            public String getPassword() throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                String _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_getPassword, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readString();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+
+            public void clearPassword() throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                String _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_clearPassword, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
             public StorageVolume[] getVolumeList() throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
@@ -846,7 +876,11 @@ public interface IMountService extends IInterface {
 
         static final int TRANSACTION_mkdirs = IBinder.FIRST_CALL_TRANSACTION + 34;
 
-        static final int TRANSACTION_getPasswordType = IBinder.FIRST_CALL_TRANSACTION + 36;
+        static final int TRANSACTION_getPasswordType = IBinder.FIRST_CALL_TRANSACTION + 35;
+
+        static final int TRANSACTION_getPassword = IBinder.FIRST_CALL_TRANSACTION + 36;
+
+        static final int TRANSACTION_clearPassword = IBinder.FIRST_CALL_TRANSACTION + 37;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -1208,6 +1242,19 @@ public interface IMountService extends IInterface {
                     reply.writeInt(result);
                     return true;
                 }
+                case TRANSACTION_getPassword: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String result = getPassword();
+                    reply.writeNoException();
+                    reply.writeString(result);
+                    return true;
+                }
+                case TRANSACTION_clearPassword: {
+                    data.enforceInterface(DESCRIPTOR);
+                    clearPassword();
+                    reply.writeNoException();
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -1446,4 +1493,15 @@ public interface IMountService extends IInterface {
      * @return PasswordType
      */
     public int getPasswordType() throws RemoteException;
+
+    /**
+     * Get password from vold
+     * @return password or empty string
+     */
+    public String getPassword() throws RemoteException;
+
+    /**
+     * Securely clear password from vold
+     */
+    public void clearPassword() throws RemoteException;
 }
