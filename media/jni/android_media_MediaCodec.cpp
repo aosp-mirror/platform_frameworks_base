@@ -27,6 +27,8 @@
 #include "jni.h"
 #include "JNIHelp.h"
 
+#include <cutils/compiler.h>
+
 #include <gui/Surface.h>
 
 #include <media/ICrypto.h>
@@ -738,6 +740,10 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
     } else if (numBytesOfClearDataObj != NULL
             && env->GetArrayLength(numBytesOfClearDataObj) < numSubSamples) {
         err = -ERANGE;
+    // subSamples array may silently overflow if number of samples are too large.  Use
+    // INT32_MAX as maximum allocation size may be less than SIZE_MAX on some platforms
+    } else if ( CC_UNLIKELY(numSubSamples >= INT32_MAX / sizeof(*subSamples)) ) {
+        err = -EINVAL;
     } else {
         jboolean isCopy;
 
