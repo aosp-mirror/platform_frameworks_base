@@ -140,7 +140,9 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
     private int submitCameraRequest(CaptureRequest request, boolean streaming) throws Exception {
         int requestId = mCameraUser.submitRequest(request, streaming);
-        assertTrue("Request IDs should be non-negative", requestId >= 0);
+        assertTrue(
+                "Request IDs should be non-negative (expected: >= 0, actual: " + requestId + ")",
+                requestId >= 0);
         return requestId;
     }
 
