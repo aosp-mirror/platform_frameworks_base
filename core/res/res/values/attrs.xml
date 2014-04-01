@@ -6138,6 +6138,8 @@
         <!-- Aspect to use when drawing LockPatternView. Choices are "square"(default), "lock_width"
              or "lock_height" -->
         <attr name="aspect" format="string" />
+        <!-- Color to use when drawing LockPatternView paths. -->
+        <attr name="pathColor" format="color|reference" />
     </declare-styleable>
 
     <!-- Use <code>recognition-service</code> as the root tag of the XML resource that
