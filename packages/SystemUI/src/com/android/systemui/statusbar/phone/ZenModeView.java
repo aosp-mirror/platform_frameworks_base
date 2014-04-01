@@ -16,11 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Typeface;
 import android.graphics.drawable.ShapeDrawable;
@@ -39,14 +36,12 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.ZenModeView.Adapter.ExitCondition;
 
 public class ZenModeView extends RelativeLayout {
@@ -63,20 +58,21 @@ public class ZenModeView extends RelativeLayout {
 
     private static final long DURATION = new ValueAnimator().getDuration();
     private static final long PAGER_DURATION = DURATION / 2;
-    private static final float BOUNCE_SCALE = 0.8f;
     private static final long CLOSE_DELAY = 600;
+    private static final long AUTO_ACTIVATE_DELAY = 100;
 
     private final Context mContext;
-    private final Paint mPathPaint;
-    private final ImageView mSettingsButton;
     private final TextView mModeText;
     private final Switch mModeSwitch;
     private final View mDivider;
     private final UntilPager mUntilPager;
     private final ProgressDots mProgressDots;
+    private final View mDivider2;
+    private final TextView mSettingsButton;
 
     private Adapter mAdapter;
     private boolean mInit;
+    private boolean mAutoActivate;
 
     public ZenModeView(Context context) {
         this(context, null);
@@ -90,29 +86,9 @@ public class ZenModeView extends RelativeLayout {
         final int iconSize = mContext.getResources()
                 .getDimensionPixelSize(com.android.internal.R.dimen.notification_large_icon_width);
         final int topRowSize = iconSize * 2 / 3;
-        final int p = topRowSize / 7;
+        final int p = topRowSize / 3;
 
-        mPathPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPathPaint.setStyle(Paint.Style.STROKE);
-        mPathPaint.setColor(GRAY);
-        mPathPaint.setStrokeWidth(p / 2);
-
-        mSettingsButton = new ImageView(mContext);
-        mSettingsButton.setPadding(p, p, p, p);
-        mSettingsButton.setImageResource(R.drawable.ic_notify_settings_normal);
-        LayoutParams lp = new LayoutParams(topRowSize, topRowSize);
-        lp.topMargin = p;
-        lp.leftMargin = p;
-        addView(mSettingsButton, lp);
-        mSettingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mAdapter != null) {
-                    mAdapter.configure();
-                }
-                bounce(mSettingsButton, null);
-            }
-        });
+        LayoutParams lp = null;
 
         mModeText = new TextView(mContext);
         mModeText.setText(MODE_LABEL);
@@ -120,11 +96,10 @@ public class ZenModeView extends RelativeLayout {
         mModeText.setTextColor(GRAY);
         mModeText.setTypeface(CONDENSED);
         mModeText.setAllCaps(true);
-        mModeText.setGravity(Gravity.CENTER);
-        mModeText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mModeText.getTextSize() * 1.1f);
+        mModeText.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+        mModeText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mModeText.getTextSize() * 1.5f);
         lp = new LayoutParams(LayoutParams.WRAP_CONTENT, topRowSize);
-        lp.topMargin = p;
-        lp.addRule(CENTER_HORIZONTAL);
+        lp.leftMargin = p;
         addView(mModeText, lp);
 
         mModeSwitch = new Switch(mContext);
@@ -132,6 +107,7 @@ public class ZenModeView extends RelativeLayout {
         mModeSwitch.setSwitchTypeface(CONDENSED);
         lp = new LayoutParams(LayoutParams.WRAP_CONTENT, topRowSize);
         lp.topMargin = p;
+        lp.rightMargin = p;
         lp.addRule(ALIGN_PARENT_RIGHT);
         lp.addRule(ALIGN_BASELINE, mModeText.getId());
         addView(mModeSwitch, lp);
@@ -154,11 +130,10 @@ public class ZenModeView extends RelativeLayout {
         mDivider.setBackgroundColor(GRAY);
         lp = new LayoutParams(LayoutParams.MATCH_PARENT, 2);
         lp.addRule(BELOW, mModeText.getId());
-        lp.topMargin = p;
-        lp.bottomMargin = p * 2;
+        lp.bottomMargin = p;
         addView(mDivider, lp);
 
-        mUntilPager = new UntilPager(mContext, mPathPaint, iconSize * 3 / 4);
+        mUntilPager = new UntilPager(mContext, iconSize * 3 / 4);
         mUntilPager.setId(android.R.id.tabhost);
         lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         lp.leftMargin = lp.rightMargin = iconSize / 2;
@@ -167,10 +142,41 @@ public class ZenModeView extends RelativeLayout {
         addView(mUntilPager, lp);
 
         mProgressDots = new ProgressDots(mContext, iconSize / 5);
+        mProgressDots.setId(android.R.id.progress);
         lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         lp.addRule(CENTER_HORIZONTAL);
         lp.addRule(BELOW, mUntilPager.getId());
         addView(mProgressDots, lp);
+
+        mDivider2 = new View(mContext);
+        mDivider2.setId(android.R.id.widget_frame);
+        mDivider2.setBackgroundColor(GRAY);
+        lp = new LayoutParams(LayoutParams.MATCH_PARENT, 2);
+        lp.addRule(BELOW, mProgressDots.getId());
+        addView(mDivider2, lp);
+
+        mSettingsButton = new TextView(mContext);
+        mSettingsButton.setTypeface(CONDENSED);
+        mSettingsButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, mSettingsButton.getTextSize() * 1.3f);
+        mSettingsButton.setPadding(p, p, p, p);
+        mSettingsButton.setText("More settings...");
+        lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        lp.addRule(BELOW, mDivider2.getId());
+        addView(mSettingsButton, lp);
+        mSettingsButton.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mSettingsButton.setBackgroundColor(DARK_GRAY);
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    mSettingsButton.setBackground(null);
+                    if (mAdapter != null) {
+                        mAdapter.configure();
+                    }
+                }
+                return true;
+            }
+        });
     }
 
     public void setAdapter(Adapter adapter) {
@@ -189,6 +195,27 @@ public class ZenModeView extends RelativeLayout {
         updateState(false);
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (mAutoActivate) {
+            mAutoActivate = false;
+            postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (!mModeSwitch.isChecked()) {
+                        mInit = false;
+                        mModeSwitch.setChecked(true);
+                    }
+                }
+            }, AUTO_ACTIVATE_DELAY);
+        }
+    }
+
+    public void setAutoActivate(boolean value) {
+        mAutoActivate = value;
+    }
+
     private void updateState(boolean animate) {
         mUntilPager.updateState();
         mModeSwitch.setChecked(mAdapter.getMode());
@@ -199,23 +226,6 @@ public class ZenModeView extends RelativeLayout {
         Log.d(TAG, args == null || args.length == 0 ? msg : String.format(msg, args));
     }
 
-    private static void bounce(final View v, final Runnable midBounce) {
-        v.animate().scaleX(BOUNCE_SCALE).scaleY(BOUNCE_SCALE).setDuration(DURATION / 3)
-            .setListener(new AnimatorListenerAdapter() {
-                private boolean mFired;
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    if (!mFired) {
-                        mFired = true;
-                        if (midBounce != null) {
-                            midBounce.run();
-                        }
-                        v.animate().scaleX(1).scaleY(1).setListener(null).start();
-                    }
-                }
-            }).start();
-    }
-
     private final class UntilView extends FrameLayout {
         private static final boolean SUPPORT_LINKS = false;
 
@@ -223,7 +233,7 @@ public class ZenModeView extends RelativeLayout {
         public UntilView(Context context) {
             super(context);
             mText = new TextView(mContext);
-            mText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mText.getTextSize() * 1.2f);
+            mText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mText.getTextSize() * 1.3f);
             mText.setTypeface(CONDENSED);
             mText.setTextColor(GRAY);
             mText.setGravity(Gravity.CENTER);
@@ -284,7 +294,7 @@ public class ZenModeView extends RelativeLayout {
         private int mCurrent;
         private float mDownX;
 
-        public UntilPager(Context context, Paint pathPaint, int iconSize) {
+        public UntilPager(Context context, int iconSize) {
             super(context);
             mViews = new UntilView[3];
             for (int i = 0; i < mViews.length; i++) {
