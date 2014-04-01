@@ -34,17 +34,17 @@ public class BatchedScanSettings implements Parcelable {
     /** Used to indicate no preference for an int value */
     public final static int UNSPECIFIED = Integer.MAX_VALUE;
 
-    // TODO - make MIN/mAX dynamic and gservices adjustable.
+    // TODO - make MIN/mAX as standard for wifi batch capability requirement.
     public final static int MIN_SCANS_PER_BATCH = 2;
-    public final static int MAX_SCANS_PER_BATCH = 255;
+    public final static int MAX_SCANS_PER_BATCH = 20;
     public final static int DEFAULT_SCANS_PER_BATCH = MAX_SCANS_PER_BATCH;
 
     public final static int MIN_AP_PER_SCAN = 2;
-    public final static int MAX_AP_PER_SCAN = 255;
+    public final static int MAX_AP_PER_SCAN = 16;
     public final static int DEFAULT_AP_PER_SCAN = 16;
 
-    public final static int MIN_INTERVAL_SEC = 0;
-    public final static int MAX_INTERVAL_SEC = 3600;
+    public final static int MIN_INTERVAL_SEC = 10;
+    public final static int MAX_INTERVAL_SEC = 500;
     public final static int DEFAULT_INTERVAL_SEC = 30;
 
     public final static int MIN_AP_FOR_DISTANCE = 0;
