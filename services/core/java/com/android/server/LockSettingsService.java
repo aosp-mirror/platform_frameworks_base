@@ -30,7 +30,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.storage.IMountService;
+import android.os.ServiceManager;
+import android.os.storage.StorageManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -79,6 +83,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private final Context mContext;
     private LockPatternUtils mLockPatternUtils;
+    private boolean mFirstCallToVold;
 
     public LockSettingsService(Context context) {
         mContext = context;
@@ -86,6 +91,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mOpenHelper = new DatabaseHelper(mContext);
 
         mLockPatternUtils = new LockPatternUtils(context);
+        mFirstCallToVold = true;
     }
 
     public void systemReady() {
@@ -347,6 +353,51 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
+        public boolean checkVoldPassword(int userId) throws RemoteException {
+        if (!mFirstCallToVold) {
+            return false;
+        }
+        mFirstCallToVold = false;
+
+        checkPasswordReadPermission(userId);
+
+        // There's no guarantee that this will safely connect, but if it fails
+        // we will simply show the lock screen when we shouldn't, so relatively
+        // benign. There is an outside chance something nasty would happen if
+        // this service restarted before vold stales out the password in this
+        // case. The nastiness is limited to not showing the lock screen when
+        // we should, within the first minute of decrypting the phone if this
+        // service can't connect to vold, it restarts, and then the new instance
+        // does successfully connect.
+        final IMountService service = getMountService();
+        String password = service.getPassword();
+        service.clearPassword();
+        if (password == null) {
+            return false;
+        }
+
+        try {
+            if (mLockPatternUtils.isLockPatternEnabled()) {
+                if (checkPattern(password, userId)) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+        }
+
+        try {
+            if (mLockPatternUtils.isLockPasswordEnabled()) {
+                if (checkPassword(password, userId)) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+        }
+
+        return false;
+    }
+
+    @Override
     public void removeUser(int userId) {
         checkWritePermission(userId);
 
@@ -524,4 +575,12 @@ public class LockSettingsService extends ILockSettings.Stub {
         Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
         Secure.LOCK_SCREEN_OWNER_INFO
     };
+
+    private IMountService getMountService() {
+        final IBinder service = ServiceManager.getService("mount");
+        if (service != null) {
+            return IMountService.Stub.asInterface(service);
+        }
+        return null;
+    }
 }
