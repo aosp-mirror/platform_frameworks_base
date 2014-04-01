@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,11 +20,14 @@ import java.lang.ref.WeakReference;
 import java.util.UUID;
 import java.util.HashMap;
 import java.util.List;
+import android.os.Binder;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.util.Log;
+import android.content.Context;
 
 /**
  * MediaDrm can be used to obtain keys for decrypting protected media streams, in
@@ -99,6 +102,20 @@ public final class MediaDrm {
     private OnEventListener mOnEventListener;
 
     private long mNativeContext;
+
+    /**
+     * Specify no certificate type
+     *
+     * @hide - not part of the public API at this time
+     */
+    public static final int CERTIFICATE_TYPE_NONE = 0;
+
+    /**
+     * Specify X.509 certificate type
+     *
+     * @hide - not part of the public API at this time
+     */
+    public static final int CERTIFICATE_TYPE_X509 = 1;
 
     /**
      * Query if the given scheme identified by its UUID is supported on
@@ -316,6 +333,9 @@ public final class MediaDrm {
      * Contains the opaque data an app uses to request keys from a license server
      */
     public final static class KeyRequest {
+        private byte[] mData;
+        private String mDefaultUrl;
+
         KeyRequest() {}
 
         /**
@@ -329,9 +349,6 @@ public final class MediaDrm {
          * server URL from other sources.
          */
         public String getDefaultUrl() { return mDefaultUrl; }
-
-        private byte[] mData;
-        private String mDefaultUrl;
     };
 
     /**
@@ -456,7 +473,12 @@ public final class MediaDrm {
      * is returned in ProvisionRequest.data. The recommended URL to deliver the provision
      * request to is returned in ProvisionRequest.defaultUrl.
      */
-    public native ProvisionRequest getProvisionRequest();
+    public ProvisionRequest getProvisionRequest() {
+        return getProvisionRequestNative(CERTIFICATE_TYPE_NONE, "");
+    }
+
+    private native ProvisionRequest getProvisionRequestNative(int certType,
+                                                              String certAuthority);
 
     /**
      * After a provision response is received by the app, it is provided to the DRM
@@ -468,7 +490,12 @@ public final class MediaDrm {
      * @throws DeniedByServerException if the response indicates that the
      * server rejected the request
      */
-    public native void provideProvisionResponse(byte[] response)
+    public void provideProvisionResponse(byte[] response)
+        throws DeniedByServerException {
+        provideProvisionResponseNative(response);
+    }
+
+    private native Certificate provideProvisionResponseNative(byte[] response)
         throws DeniedByServerException;
 
     /**
@@ -681,6 +708,120 @@ public final class MediaDrm {
                                           String macAlgorithm)
     {
         return new CryptoSession(this, sessionId, cipherAlgorithm, macAlgorithm);
+    }
+
+    /**
+     * Contains the opaque data an app uses to request a certificate from a provisioning
+     * server
+     *
+     * @hide - not part of the public API at this time
+     */
+    public final static class CertificateRequest {
+        private byte[] mData;
+        private String mDefaultUrl;
+
+        CertificateRequest(byte[] data, String defaultUrl) {
+            mData = data;
+            mDefaultUrl = defaultUrl;
+        }
+
+        /**
+         * Get the opaque message data
+         */
+        public byte[] getData() { return mData; }
+
+        /**
+         * Get the default URL to use when sending the certificate request
+         * message to a server, if known. The app may prefer to use a different
+         * certificate server URL obtained from other sources.
+         */
+        public String getDefaultUrl() { return mDefaultUrl; }
+    }
+
+    /**
+     * Generate a certificate request, specifying the certificate type
+     * and authority. The response received should be passed to
+     * provideCertificateResponse.
+     *
+     * @param certType Specifies the certificate type.
+     *
+     * @param certAuthority is passed to the certificate server to specify
+     * the chain of authority.
+     *
+     * @hide - not part of the public API at this time
+     */
+    public CertificateRequest getCertificateRequest(int certType,
+                                                    String certAuthority)
+    {
+        ProvisionRequest provisionRequest = getProvisionRequestNative(certType, certAuthority);
+        return new CertificateRequest(provisionRequest.getData(),
+                                      provisionRequest.getDefaultUrl());
+    }
+
+    /**
+     * Contains the wrapped private key and public certificate data associated
+     * with a certificate.
+     *
+     * @hide - not part of the public API at this time
+     */
+    public final static class Certificate {
+        Certificate() {}
+
+        /**
+         * Get the wrapped private key data
+         */
+        public byte[] getWrappedPrivateKey() { return mWrappedKey; }
+
+        /**
+         * Get the PEM-encoded certificate chain
+         */
+        public byte[] getContent() { return mCertificateData; }
+
+        private byte[] mWrappedKey;
+        private byte[] mCertificateData;
+    }
+
+
+    /**
+     * Process a response from the certificate server.  The response
+     * is obtained from an HTTP Post to the url provided by getCertificateRequest.
+     * <p>
+     * The public X509 certificate chain and wrapped private key are returned
+     * in the returned Certificate objec.  The certificate chain is in PEM format.
+     * The wrapped private key should be stored in application private
+     * storage, and used when invoking the signRSA method.
+     *
+     * @param response the opaque certificate response byte array to provide to the
+     * DRM engine plugin.
+     *
+     * @throws DeniedByServerException if the response indicates that the
+     * server rejected the request
+     *
+     * @hide - not part of the public API at this time
+     */
+    public Certificate provideCertificateResponse(byte[] response)
+        throws DeniedByServerException {
+        return provideProvisionResponseNative(response);
+    }
+
+    private static final native byte[] signRSANative(MediaDrm drm, byte[] sessionId,
+                                                     String algorithm, byte[] wrappedKey,
+                                                     byte[] message);
+
+    /**
+     * Sign data using an RSA key
+     *
+     * @param context the app context
+     * @param sessionId a sessionId obtained from openSession on the MediaDrm object
+     * @param algorithm the signing algorithm to use, e.g. "PKCS1-BlockType1"
+     * @param wrappedKey - the wrapped (encrypted) RSA private key obtained
+     * from provideCertificateResponse
+     * @param message the data for which a signature is to be computed
+     *
+     * @hide - not part of the public API at this time
+     */
+    public byte[] signRSA(Context context, byte[] sessionId, String algorithm, byte[] wrappedKey, byte[] message) {
+        return signRSANative(this, sessionId, algorithm, wrappedKey, message);
     }
 
     @Override
