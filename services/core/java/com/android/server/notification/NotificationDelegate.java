@@ -31,4 +31,6 @@ public interface NotificationDelegate {
     void onPanelRevealed();
     void onPanelHidden();
     boolean allowDisable(int what, IBinder token, String pkg);
+    void onNotificationVisibilityChanged(
+            String[] newlyVisibleKeys, String[] noLongerVisibleKeys);
 }

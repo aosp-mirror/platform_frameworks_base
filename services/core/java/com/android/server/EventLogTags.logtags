@@ -63,6 +63,8 @@ option java_package com.android.server
 27500 notification_panel_revealed
 # when the notification panel is hidden
 27501 notification_panel_hidden
+# when notifications are newly displayed on screen, or disappear from screen
+27510 notification_visibility_changed (newlyVisibleKeys|3),(noLongerVisibleKeys|3)
 
 # ---------------------------
 # Watchdog.java
