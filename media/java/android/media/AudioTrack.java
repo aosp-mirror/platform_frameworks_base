@@ -1321,7 +1321,7 @@ public class AudioTrack
      *
      * @param level send level scalar
      * @return error code or success, see {@link #SUCCESS},
-     *    {@link #ERROR_INVALID_OPERATION}
+     *    {@link #ERROR_INVALID_OPERATION}, {@link #ERROR}
      */
     public int setAuxEffectSendLevel(float level) {
         if (isRestricted()) {
@@ -1337,8 +1337,8 @@ public class AudioTrack
         if (level > getMaxVolume()) {
             level = getMaxVolume();
         }
-        native_setAuxEffectSendLevel(level);
-        return SUCCESS;
+        int err = native_setAuxEffectSendLevel(level);
+        return err == 0 ? SUCCESS : ERROR;
     }
 
     //---------------------------------------------------------
@@ -1508,7 +1508,7 @@ public class AudioTrack
             int sampleRateInHz, int channelConfig, int audioFormat);
 
     private native final int native_attachAuxEffect(int effectId);
-    private native final void native_setAuxEffectSendLevel(float level);
+    private native final int native_setAuxEffectSendLevel(float level);
 
     //---------------------------------------------------------
     // Utility methods
