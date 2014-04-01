@@ -630,8 +630,8 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.RatingBar" parent="Widget.RatingBar">
-        <item name="progressDrawable">@drawable/ratingbar_full_holo_dark</item>
-        <item name="indeterminateDrawable">@drawable/ratingbar_full_holo_dark</item>
+        <item name="progressDrawable">@drawable/ratingbar_full_quantum</item>
+        <item name="indeterminateDrawable">@drawable/ratingbar_full_quantum</item>
     </style>
 
     <style name="Widget.Quantum.RatingBar.Indicator" parent="Widget.RatingBar.Indicator">
@@ -919,10 +919,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.ProgressBar.Large.Inverse" parent="Widget.Quantum.ProgressBar.Large.Inverse"/>
     <style name="Widget.Quantum.Light.SeekBar" parent="Widget.Quantum.SeekBar"/>
 
-    <style name="Widget.Quantum.Light.RatingBar" parent="Widget.RatingBar">
-        <item name="progressDrawable">@drawable/ratingbar_full_holo_light</item>
-        <item name="indeterminateDrawable">@drawable/ratingbar_full_holo_light</item>
-    </style>
+    <style name="Widget.Quantum.Light.RatingBar" parent="Widget.Quantum.RatingBar" />
 
     <style name="Widget.Quantum.Light.RatingBar.Indicator" parent="Widget.RatingBar.Indicator">
         <item name="progressDrawable">@drawable/ratingbar_holo_light</item>
@@ -1047,13 +1044,13 @@ please see styles_device_defaults.xml.
         <item name="bottomBright">?attr/colorBackground</item>
         <item name="bottomMedium">?attr/colorBackground</item>
         <item name="centerMedium">?attr/colorBackground</item>
-        <item name="layout">@layout/alert_dialog_holo</item>
-        <item name="listLayout">@layout/select_dialog_holo</item>
-        <item name="progressLayout">@layout/progress_dialog_holo</item>
-        <item name="horizontalProgressLayout">@layout/alert_dialog_progress_holo</item>
-        <item name="listItemLayout">@layout/select_dialog_item_holo</item>
-        <item name="multiChoiceItemLayout">@layout/select_dialog_multichoice_holo</item>
-        <item name="singleChoiceItemLayout">@layout/select_dialog_singlechoice_holo</item>
+        <item name="layout">@layout/alert_dialog_quantum</item>
+        <item name="listLayout">@layout/select_dialog_quantum</item>
+        <item name="progressLayout">@layout/progress_dialog_quantum</item>
+        <item name="horizontalProgressLayout">@layout/alert_dialog_progress_quantum</item>
+        <item name="listItemLayout">@layout/select_dialog_item_quantum</item>
+        <item name="multiChoiceItemLayout">@layout/select_dialog_multichoice_quantum</item>
+        <item name="singleChoiceItemLayout">@layout/select_dialog_singlechoice_quantum</item>
     </style>
 
     <style name="AlertDialog.Quantum.Light"/>
