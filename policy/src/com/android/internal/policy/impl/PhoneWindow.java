@@ -3001,6 +3001,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         if (a.getBoolean(com.android.internal.R.styleable.Window_windowContentTransitions, false)) {
             requestFeature(FEATURE_CONTENT_TRANSITIONS);
+        }
         if (a.hasValue(com.android.internal.R.styleable.Window_windowOutsetBottom)) {
             if (mOutsetBottom == null) mOutsetBottom = new TypedValue();
             a.getValue(com.android.internal.R.styleable.Window_windowOutsetBottom, mOutsetBottom);
