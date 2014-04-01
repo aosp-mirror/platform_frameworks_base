@@ -20,9 +20,6 @@ import android.graphics.Rect;
 
 /* Common code */
 public class Utilities {
-    public static final Rect tmpRect = new Rect();
-    public static final Rect tmpRect2 = new Rect();
-
     /** Scales a rect about its centroid */
     public static void scaleRectAboutCenter(Rect r, float scale) {
         if (scale != 1.0f) {
