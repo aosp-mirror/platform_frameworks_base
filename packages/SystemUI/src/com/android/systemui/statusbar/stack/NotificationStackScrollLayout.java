@@ -22,6 +22,7 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Paint;
+
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -37,6 +38,7 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
 
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
@@ -86,7 +88,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     /**
      * The current State this Layout is in
      */
-    private StackScrollState mCurrentStackScrollState;
+    private final StackScrollState mCurrentStackScrollState = new StackScrollState(this);
+
+    private OnChildLocationsChangedListener mListener;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -153,7 +157,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         // currently the padding is in the elements themself
         mPaddingBetweenElements = 0;
         mStackScrollAlgorithm = new StackScrollAlgorithm(context);
-        mCurrentStackScrollState = null;
     }
 
     @Override
@@ -188,6 +191,24 @@ public class NotificationStackScrollLayout extends ViewGroup
         updateContentHeight();
     }
 
+    public void setChildLocationsChangedListener(OnChildLocationsChangedListener listener) {
+        mListener = listener;
+    }
+
+    /**
+     * Returns the location the given child is currently rendered at.
+     *
+     * @param child the child to get the location for
+     * @return one of {@link ViewState}'s <code>LOCATION_*</code> constants
+     */
+    public int getChildLocation(View child) {
+        ViewState childViewState = mCurrentStackScrollState.getViewStateForView(child);
+        if (childViewState == null) {
+            return ViewState.LOCATION_UNKNOWN;
+        }
+        return childViewState.location;
+    }
+
     private void setMaxLayoutHeight(int maxLayoutHeight) {
         mMaxLayoutHeight = maxLayoutHeight;
         updateAlgorithmHeight();
@@ -203,13 +224,13 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     private void updateChildren() {
         if (!isCurrentlyAnimating()) {
-            if (mCurrentStackScrollState == null) {
-                mCurrentStackScrollState = new StackScrollState(this);
-            }
             mCurrentStackScrollState.setScrollY(mOwnScrollY);
             mStackScrollAlgorithm.getStackScrollState(mCurrentStackScrollState);
             mCurrentStackScrollState.apply();
             mOwnScrollY = mCurrentStackScrollState.getScrollY();
+            if (mListener != null) {
+                mListener.onChildLocationsChanged(this);
+            }
         } else {
             // TODO: handle animation
         }
@@ -822,5 +843,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     public View getHostView() {
         return this;
+    }
+
+    /**
+     * A listener that is notified when some child locations might have changed.
+     */
+    public interface OnChildLocationsChangedListener {
+        public void onChildLocationsChanged(NotificationStackScrollLayout stackScrollLayout);
     }
 }

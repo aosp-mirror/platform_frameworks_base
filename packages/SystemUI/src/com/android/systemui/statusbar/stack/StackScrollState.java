@@ -45,7 +45,7 @@ public class StackScrollState {
 
     public StackScrollState(ViewGroup hostView) {
         mHostView = hostView;
-        mStateMap = new HashMap<View, ViewState>(mHostView.getChildCount());
+        mStateMap = new HashMap<View, ViewState>();
     }
 
     public ViewGroup getHostView() {
@@ -144,10 +144,28 @@ public class StackScrollState {
     }
 
 
-    public class ViewState {
+    public static class ViewState {
+
+        // These are flags such that we can create masks for filtering.
+
+        public static final int LOCATION_UNKNOWN = 0x00;
+        public static final int LOCATION_FIRST_CARD = 0x01;
+        public static final int LOCATION_TOP_STACK_HIDDEN = 0x02;
+        public static final int LOCATION_TOP_STACK_PEEKING = 0x04;
+        public static final int LOCATION_MAIN_AREA = 0x08;
+        public static final int LOCATION_BOTTOM_STACK_PEEKING = 0x10;
+        public static final int LOCATION_BOTTOM_STACK_HIDDEN = 0x20;
+
         float alpha;
         float yTranslation;
         float zTranslation;
         int height;
+
+        /**
+         * The location this view is currently rendered at.
+         *
+         * <p>See <code>LOCATION_</code> flags.</p>
+         */
+        int location;
     }
 }
