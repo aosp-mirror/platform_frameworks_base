@@ -73,7 +73,8 @@ public class SearchIndexablesContract {
     public static final String[] INDEXABLES_RAW_COLUMNS = new String[] {
             RawData.COLUMN_RANK,
             RawData.COLUMN_TITLE,
-            RawData.COLUMN_SUMMARY,
+            RawData.COLUMN_SUMMARY_ON,
+            RawData.COLUMN_SUMMARY_OFF,
             RawData.COLUMN_KEYWORDS,
             RawData.COLUMN_SCREEN_TITLE,
             RawData.COLUMN_CLASS_NAME,
@@ -123,9 +124,14 @@ public class SearchIndexablesContract {
         public static final String COLUMN_TITLE = "title";
 
         /**
-         * Summary's raw data.
+         * Summary's raw data when the data is "ON".
          */
-        public static final String COLUMN_SUMMARY = "summary";
+        public static final String COLUMN_SUMMARY_ON = "summaryOn";
+
+        /**
+         * Summary's raw data when the data is "OFF".
+         */
+        public static final String COLUMN_SUMMARY_OFF = "summaryOff";
 
         /**
          * Keywords' raw data.
