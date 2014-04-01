@@ -20,7 +20,6 @@ import com.android.server.notification.NotificationManagerService.NotificationRe
 
 import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
-import android.util.Log;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -250,21 +249,28 @@ public class NotificationUsageStats {
      */
     public static class Aggregate {
         long numSamples;
-        long sum;
-        long avg;
+        double avg;
+        double sum2;
+        double var;
 
         public void addSample(long sample) {
+            // Welford's "Method for Calculating Corrected Sums of Squares"
+            // http://www.jstor.org/stable/1266577?seq=2
             numSamples++;
-            sum += sample;
-            avg = sum / numSamples;
+            final double n = numSamples;
+            final double delta = sample - avg;
+            avg += (1.0 / n) * delta;
+            sum2 += ((n - 1) / n) * delta * delta;
+            final double divisor = numSamples == 1 ? 1.0 : n - 1.0;
+            var = sum2 / divisor;
         }
 
         @Override
         public String toString() {
             return "Aggregate{" +
                     "numSamples=" + numSamples +
-                    ", sum=" + sum +
                     ", avg=" + avg +
+                    ", var=" + var +
                     '}';
         }
     }
