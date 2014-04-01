@@ -3416,8 +3416,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             final boolean showWhenLocked = (attrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
+            final boolean dismissKeyguard = (attrs.flags & FLAG_DISMISS_KEYGUARD) != 0;
             if (appWindow) {
-                if (showWhenLocked) {
+                if (showWhenLocked || (dismissKeyguard && !isKeyguardSecure())) {
                     mAppsToBeHidden.remove(win.getAppToken());
                 } else {
                     mAppsToBeHidden.add(win.getAppToken());
@@ -3434,10 +3435,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mHideLockScreen = true;
                             mForceStatusBarFromKeyguard = false;
                         }
-                        if ((attrs.flags & FLAG_DISMISS_KEYGUARD) != 0
-                                && mDismissKeyguard == DISMISS_KEYGUARD_NONE) {
-                            if (DEBUG_LAYOUT) Slog.v(TAG,
-                                    "Setting mDismissKeyguard true by win " + win);
+                        if (dismissKeyguard && mDismissKeyguard == DISMISS_KEYGUARD_NONE) {
+                            if (DEBUG_LAYOUT) Slog.v(TAG, "Setting mDismissKeyguard true by win " + win);
                             mDismissKeyguard = mWinDismissingKeyguard == win ?
                                     DISMISS_KEYGUARD_CONTINUE : DISMISS_KEYGUARD_START;
                             mWinDismissingKeyguard = win;
