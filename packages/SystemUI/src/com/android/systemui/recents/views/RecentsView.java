@@ -211,17 +211,18 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 View sourceView = tv;
                 int offsetX = 0;
                 int offsetY = 0;
+                int stackScroll = stackView.getStackScroll();
                 if (tv == null) {
                     // If there is no actual task view, then use the stack view as the source view
                     // and then offset to the expected transform rect, but bound this to just
                     // outside the display rect (to ensure we don't animate from too far away)
                     RecentsConfiguration config = RecentsConfiguration.getInstance();
                     sourceView = stackView;
-                    transform = stackView.getStackTransform(stack.indexOfTask(task));
+                    transform = stackView.getStackTransform(stack.indexOfTask(task), stackScroll);
                     offsetX = transform.rect.left;
                     offsetY = Math.min(transform.rect.top, config.displayRect.height());
                 } else {
-                    transform = stackView.getStackTransform(stack.indexOfTask(task));
+                    transform = stackView.getStackTransform(stack.indexOfTask(task), stackScroll);
                 }
 
                 // Compute the thumbnail to scale up from
@@ -255,7 +256,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     }
                 } else {
                     // Launch the activity with the desired animation
-                    Intent i = new Intent(task.key.intent);
+                    Intent i = new Intent(task.key.baseIntent);
                     i.setFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
                             | Intent.FLAG_ACTIVITY_TASK_ON_HOME
                             | Intent.FLAG_ACTIVITY_NEW_TASK);

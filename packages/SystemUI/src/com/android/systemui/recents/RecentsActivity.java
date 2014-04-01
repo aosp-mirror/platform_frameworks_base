@@ -54,8 +54,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     finish();
                 }
             } else if (action.equals(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
-                // Dismiss recents and launch the first task if possible
-                dismissRecentsIfVisible();
+                // Try and unfilter and filtered stacks
+                if (!mRecentsView.unfilterFilteredStacks()) {
+                    // If there are no filtered stacks, dismiss recents and launch the first task
+                    dismissRecentsIfVisible();
+                }
             }
         }
     };
