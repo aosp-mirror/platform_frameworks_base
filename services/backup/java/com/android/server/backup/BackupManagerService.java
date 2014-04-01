@@ -2035,6 +2035,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         BackupState mCurrentState;
 
         // carried information about the current in-flight operation
+        IBackupAgent mAgentBinder;
         PackageInfo mCurrentPackage;
         File mSavedStateName;
         File mBackupDataName;
@@ -2097,6 +2098,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 addBackupTrace(b.toString());
             }
 
+            mAgentBinder = null;
             mStatus = BackupConstants.TRANSPORT_OK;
 
             // Sanity check: if the queue is empty we have no work to do.
@@ -2228,6 +2230,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                             IApplicationThread.BACKUP_MODE_INCREMENTAL);
                     addBackupTrace("agent bound; a? = " + (agent != null));
                     if (agent != null) {
+                        mAgentBinder = agent;
                         mStatus = invokeAgentForBackup(request.packageName, agent, mTransport);
                         // at this point we'll either get a completion callback from the
                         // agent, or a timeout message on the main handler.  either way, we're
@@ -2253,6 +2256,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 // That means we need to direct to the next state ourselves.
                 if (mStatus != BackupConstants.TRANSPORT_OK) {
                     BackupState nextState = BackupState.RUNNING_QUEUE;
+                    mAgentBinder = null;
 
                     // An agent-level failure means we reenqueue this one agent for
                     // a later retry, but otherwise proceed normally.
@@ -2274,6 +2278,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
                     executeNextState(nextState);
                 } else {
+                    // success case
                     addBackupTrace("expecting completion/timeout callback");
                 }
             }
@@ -2402,14 +2407,52 @@ public class BackupManagerService extends IBackupManager.Stub {
             return BackupConstants.TRANSPORT_OK;
         }
 
+        public void failAgent(IBackupAgent agent, String message) {
+            try {
+                agent.fail(message);
+            } catch (Exception e) {
+                Slog.w(TAG, "Error conveying failure to " + mCurrentPackage.packageName);
+            }
+        }
+
         @Override
         public void operationComplete() {
-            // Okay, the agent successfully reported back to us.  The next thing we do is
-            // push the app widget state for the app, if any.
+            // Okay, the agent successfully reported back to us!
             final String pkgName = mCurrentPackage.packageName;
             final long filepos = mBackupDataName.length();
             FileDescriptor fd = mBackupData.getFileDescriptor();
             try {
+                // If it's a 3rd party app, see whether they wrote any protected keys
+                // and complain mightily if they are attempting shenanigans.
+                if (mCurrentPackage.applicationInfo != null &&
+                        (mCurrentPackage.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
+                    ParcelFileDescriptor readFd = ParcelFileDescriptor.open(mBackupDataName,
+                            ParcelFileDescriptor.MODE_READ_ONLY);
+                    BackupDataInput in = new BackupDataInput(readFd.getFileDescriptor());
+                    try {
+                        while (in.readNextHeader()) {
+                            final String key = in.getKey();
+                            if (key != null && key.charAt(0) >= 0xff00) {
+                                // Not okay: crash them and bail.
+                                failAgent(mAgentBinder, "Illegal backup key: " + key);
+                                addBackupTrace("illegal key " + key + " from " + pkgName);
+                                EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, pkgName,
+                                        "bad key");
+                                mBackupHandler.removeMessages(MSG_TIMEOUT);
+                                agentErrorCleanup();
+                                // agentErrorCleanup() implicitly executes next state properly
+                                return;
+                            }
+                            in.skipEntityData();
+                        }
+                    } finally {
+                        if (readFd != null) {
+                            readFd.close();
+                        }
+                    }
+                }
+
+                // Piggyback the widget state payload, if any
                 BackupDataOutput out = new BackupDataOutput(fd);
                 byte[] widgetState = AppWidgetBackupBridge.getWidgetState(pkgName,
                         UserHandle.USER_OWNER);
@@ -2434,8 +2477,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 }
             }
 
-            // Spin the data off to the
-            // transport and proceed with the next stage.
+            // Spin the data off to the transport and proceed with the next stage.
             if (MORE_DEBUG) Slog.v(TAG, "operationComplete(): sending data to transport for "
                     + pkgName);
             mBackupHandler.removeMessages(MSG_TIMEOUT);

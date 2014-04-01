@@ -85,11 +85,6 @@ public class BackupDataOutput {
      * @throws IOException if the write failed
      */
     public int writeEntityHeader(String key, int dataSize) throws IOException {
-        if (key != null && key.charAt(0) >= 0xff00) {
-            if (Process.myUid() != Process.SYSTEM_UID) {
-                throw new IllegalArgumentException("Invalid key " + key);
-            }
-        }
         int result = writeEntityHeader_native(mBackupWriter, key, dataSize);
         if (result >= 0) {
             return result;
