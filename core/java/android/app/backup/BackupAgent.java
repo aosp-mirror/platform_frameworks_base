@@ -128,6 +128,13 @@ public abstract class BackupAgent extends ContextWrapper {
 
     Handler mHandler = null;
 
+    Handler getHandler() {
+        if (mHandler == null) {
+            mHandler = new Handler(Looper.getMainLooper());
+        }
+        return mHandler;
+    }
+
     class SharedPrefsSynchronizer implements Runnable {
         public final CountDownLatch mLatch = new CountDownLatch(1);
 
@@ -140,12 +147,9 @@ public abstract class BackupAgent extends ContextWrapper {
 
     // Syncing shared preferences deferred writes needs to happen on the main looper thread
     private void waitForSharedPrefs() {
-        if (mHandler == null) {
-            mHandler = new Handler(Looper.getMainLooper());
-        }
-
+        Handler h = getHandler();
         final SharedPrefsSynchronizer s = new SharedPrefsSynchronizer();
-        mHandler.postAtFrontOfQueue(s);
+        h.postAtFrontOfQueue(s);
         try {
             s.mLatch.await();
         } catch (InterruptedException e) { /* ignored */ }
@@ -679,6 +683,24 @@ public abstract class BackupAgent extends ContextWrapper {
                     // we'll time out anyway, so we're safe
                 }
             }
+        }
+
+        @Override
+        public void fail(String message) {
+            getHandler().post(new FailRunnable(message));
+        }
+    }
+
+    static class FailRunnable implements Runnable {
+        private String mMessage;
+
+        FailRunnable(String message) {
+            mMessage = message;
+        }
+
+        @Override
+        public void run() {
+            throw new IllegalStateException(mMessage);
         }
     }
 }
