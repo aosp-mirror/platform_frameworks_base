@@ -174,7 +174,6 @@ public class ActionBarImpl extends ActionBar {
     }
 
     private void init(View decor) {
-        mContext = decor.getContext();
         mOverlayLayout = (ActionBarOverlayLayout) decor.findViewById(
                 com.android.internal.R.id.action_bar_overlay_layout);
         if (mOverlayLayout != null) {
@@ -193,6 +192,7 @@ public class ActionBarImpl extends ActionBar {
                     "with a compatible window decor layout");
         }
 
+        mContext = mActionView.getContext();
         mActionView.setContextView(mContextView);
         mContextDisplayMode = mActionView.isSplitActionBar() ?
                 CONTEXT_DISPLAY_SPLIT : CONTEXT_DISPLAY_NORMAL;

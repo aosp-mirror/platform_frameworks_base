@@ -4,7 +4,7 @@
     <application android:label="VpnDialogs"
             android:allowBackup="false" >
         <activity android:name=".ConfirmDialog"
-                android:theme="@*android:style/Theme.Holo.Dialog.Alert">
+                android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -12,7 +12,7 @@
         </activity>
 
         <activity android:name=".ManageDialog"
-                android:theme="@*android:style/Theme.Holo.Dialog.Alert"
+                android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
                 android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

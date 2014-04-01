@@ -29,11 +29,11 @@
 
     <!-- Normally just a redirection, but this is used to make ourselves a
          dialog on large tablets -->
-    <style name="Theme" parent="@android:style/Theme.Holo.Light">
+    <style name="Theme" parent="@android:style/Theme.DeviceDefault.Light">
         <item name="android:actionOverflowButtonStyle">@style/DarkerOverflow</item>
     </style>
     
-    <style name="DarkerOverflow" parent="@android:style/Widget.Holo.Light.ActionButton.Overflow">
+    <style name="DarkerOverflow" parent="@android:style/Widget.DeviceDefault.Light.ActionButton.Overflow">
         <item name="android:src">@drawable/ic_menu_overflow</item>
     </style>
 
