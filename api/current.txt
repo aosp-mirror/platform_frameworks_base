@@ -24848,6 +24848,20 @@ package android.telecomm {
     field public final int supportedRouteMask;
   }
 
+  public class CallCapabilities {
+    ctor public CallCapabilities();
+    field public static final int ADD_CALL = 16; // 0x10
+    field public static final int ALL = 511; // 0x1ff
+    field public static final int CONNECTION_HANDOFF = 256; // 0x100
+    field public static final int GENERIC_CONFERENCE = 128; // 0x80
+    field public static final int HOLD = 1; // 0x1
+    field public static final int MERGE_CALLS = 4; // 0x4
+    field public static final int MUTE = 64; // 0x40
+    field public static final int RESPOND_VIA_TEXT = 32; // 0x20
+    field public static final int SUPPORT_HOLD = 2; // 0x2
+    field public static final int SWAP_CALLS = 8; // 0x8
+  }
+
   public final class CallInfo implements android.os.Parcelable {
     ctor public CallInfo(java.lang.String, android.telecomm.CallState, android.net.Uri);
     method public int describeContents();
@@ -24858,6 +24872,15 @@ package android.telecomm {
     method public android.telecomm.CallState getState();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class CallNumberPresentation extends java.lang.Enum {
+    method public static android.telecomm.CallNumberPresentation valueOf(java.lang.String);
+    method public static final android.telecomm.CallNumberPresentation[] values();
+    enum_constant public static final android.telecomm.CallNumberPresentation ALLOWED;
+    enum_constant public static final android.telecomm.CallNumberPresentation PAYPHONE;
+    enum_constant public static final android.telecomm.CallNumberPresentation RESTRICTED;
+    enum_constant public static final android.telecomm.CallNumberPresentation UNKNOWN;
   }
 
   public abstract class CallService extends android.app.Service {
