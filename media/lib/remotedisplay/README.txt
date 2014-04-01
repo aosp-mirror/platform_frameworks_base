@@ -25,4 +25,3 @@ with the framework in a new API.  That API isn't ready yet so this
 library is a compromise to make new capabilities available to the system
 without exposing the full surface area of the support library media
 route provider protocol.
-
