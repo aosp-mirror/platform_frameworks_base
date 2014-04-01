@@ -335,7 +335,9 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 mRepeatingRequestId = REQUEST_ID_NONE;
 
                 // Queue for deletion after in-flight requests finish
-                mRepeatingRequestIdDeletedList.add(requestId);
+                if (mCaptureListenerMap.get(requestId) != null) {
+                    mRepeatingRequestIdDeletedList.add(requestId);
+                }
 
                 try {
                     mRemoteDevice.cancelRequest(requestId);
@@ -367,8 +369,6 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             }
 
             mRepeatingRequestId = REQUEST_ID_NONE;
-            mRepeatingRequestIdDeletedList.clear();
-            mCaptureListenerMap.clear();
         }
     }
 
