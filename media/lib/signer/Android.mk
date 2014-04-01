@@ -15,24 +15,23 @@
 #
 LOCAL_PATH := $(call my-dir)
 
-# the library
+# the mediadrm signer library
 # ============================================================
 include $(CLEAR_VARS)
 
-LOCAL_MODULE:= com.android.media.remotedisplay
+LOCAL_MODULE:= com.android.mediadrm.signer
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
-            $(call all-subdir-java-files) \
-            $(call all-aidl-files-under, java)
+            $(call all-java-files-under, java)
 
-include $(BUILD_JAVA_LIBRARY)
+include $(BUILD_STATIC_JAVA_LIBRARY)
 
 
-# ====  com.android.media.remotedisplay.xml lib def  ========================
+# ====  com.android.mediadrm.signer.xml lib def  ========================
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := com.android.media.remotedisplay.xml
+LOCAL_MODULE := com.android.mediadrm.signer.xml
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_MODULE_CLASS := ETC
