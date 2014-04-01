@@ -52,9 +52,9 @@ public final class BridgeTypedArray extends TypedArray {
     private final BridgeContext mContext;
     private final boolean mPlatformFile;
 
-    private ResourceValue[] mResourceData;
-    private String[] mNames;
-    private boolean[] mIsFramework;
+    private final ResourceValue[] mResourceData;
+    private final String[] mNames;
+    private final boolean[] mIsFramework;
 
     public BridgeTypedArray(BridgeResources resources, BridgeContext context, int len,
             boolean platformFile) {
@@ -81,8 +81,8 @@ public final class BridgeTypedArray extends TypedArray {
     }
 
     /**
-     * Seals the array after all calls to {@link #bridgeSetValue(int, String, ResourceValue)} have
-     * been done.
+     * Seals the array after all calls to
+     * {@link #bridgeSetValue(int, String, boolean, ResourceValue)} have been done.
      * <p/>This allows to compute the list of non default values, permitting
      * {@link #getIndexCount()} to return the proper value.
      */
@@ -252,7 +252,7 @@ public final class BridgeTypedArray extends TypedArray {
             for (String keyword : keywords) {
                 Integer i = map.get(keyword.trim());
                 if (i != null) {
-                    result |= i.intValue();
+                    result |= i;
                 } else {
                     Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
                             String.format(
@@ -731,7 +731,7 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         // not a direct id valid reference? resolve it
-        Integer idValue = null;
+        Integer idValue;
 
         if (resValue.isFramework()) {
             idValue = Bridge.getResourceId(resValue.getResourceType(),
@@ -742,7 +742,7 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         if (idValue != null) {
-            return idValue.intValue();
+            return idValue;
         }
 
         Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_RESOLVE,
@@ -750,6 +750,12 @@ public final class BridgeTypedArray extends TypedArray {
                     "Unable to resolve id \"%1$s\" for attribute \"%2$s\"", value, mNames[index]),
                     resValue);
 
+        return defValue;
+    }
+
+    @Override
+    public int getThemeAttributeId(int index, int defValue) {
+        // TODO: Get the right Theme Attribute ID to enable caching of the drawables.
         return defValue;
     }
 
@@ -854,6 +860,7 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public boolean hasValue(int index) {
+        //noinspection SimplifiableIfStatement
         if (index < 0 || index >= mResourceData.length) {
             return false;
         }
