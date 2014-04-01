@@ -39,9 +39,11 @@ class FilteredTaskList {
     TaskFilter mFilter;
 
     /** Sets the task filter, saving the current touch state */
-    void setFilter(TaskFilter filter) {
+    boolean setFilter(TaskFilter filter) {
+        ArrayList<Task> prevFilteredTasks = new ArrayList<Task>(mFilteredTasks);
         mFilter = filter;
         updateFilteredTasks();
+        return !prevFilteredTasks.equals(mFilteredTasks);
     }
 
     /** Removes the task filter and returns the previous touch state */
@@ -126,9 +128,9 @@ public class TaskStack {
         /* Notifies when a task has been removed from the stack */
         public void onStackTaskRemoved(TaskStack stack, Task t);
         /** Notifies when the stack was filtered */
-        public void onStackFiltered(TaskStack stack);
+        public void onStackFiltered(TaskStack newStack, ArrayList<Task> curStack, Task t);
         /** Notifies when the stack was un-filtered */
-        public void onStackUnfiltered(TaskStack stack);
+        public void onStackUnfiltered(TaskStack newStack, ArrayList<Task> curStack);
     }
 
     Context mContext;
@@ -201,29 +203,30 @@ public class TaskStack {
     }
 
     /** Filters the stack into tasks similar to the one specified */
-    public void filterTasks(Task t) {
+    public void filterTasks(final Task t) {
+        ArrayList<Task> oldStack = new ArrayList<Task>(mTaskList.getTasks());
+
         // Set the task list filter
-        // XXX: This is a dummy filter that currently just accepts every other task.
-        mTaskList.setFilter(new TaskFilter() {
+        boolean filtered = mTaskList.setFilter(new TaskFilter() {
             @Override
-            public boolean acceptTask(Task t, int i) {
-                if (i % 2 == 0) {
-                    return true;
-                }
-                return false;
+            public boolean acceptTask(Task at, int i) {
+                return t.key.baseIntent.getComponent().getPackageName().equals(
+                        at.key.baseIntent.getComponent().getPackageName());
             }
         });
-        if (mCb != null) {
-            mCb.onStackFiltered(this);
+        if (filtered && mCb != null) {
+            mCb.onStackFiltered(this, oldStack, t);
         }
     }
 
     /** Unfilters the current stack */
     public void unfilterTasks() {
+        ArrayList<Task> oldStack = new ArrayList<Task>(mTaskList.getTasks());
+
         // Unset the filter, then update the virtual scroll
         mTaskList.removeFilter();
         if (mCb != null) {
-            mCb.onStackUnfiltered(this);
+            mCb.onStackUnfiltered(this, oldStack);
         }
     }
 

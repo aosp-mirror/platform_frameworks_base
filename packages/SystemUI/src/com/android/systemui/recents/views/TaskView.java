@@ -16,6 +16,9 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Path;
@@ -72,6 +75,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
         // Bind the views
         mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
         mBarView = (TaskBarView) findViewById(R.id.task_view_bar);
+        mBarView.mActivityIcon.setOnClickListener(this);
         if (mTaskDataLoaded) {
             onTaskDataLoaded(false);
         }
@@ -90,12 +94,16 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void dispatchDraw(Canvas canvas) {
+        int restoreCount = 0;
         if (Constants.Values.TaskView.UseRoundedCorners) {
+            restoreCount = canvas.save();
             canvas.clipPath(mRoundedRectClipPath);
         }
-
-        super.onDraw(canvas);
+        super.dispatchDraw(canvas);
+        if (Constants.Values.TaskView.UseRoundedCorners) {
+            canvas.restoreToCount(restoreCount);
+        }
     }
 
     /** Set callback */
@@ -109,25 +117,41 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
     }
 
     /** Synchronizes this view's properties with the task's transform */
-    void updateViewPropertiesFromTask(TaskViewTransform animateFromTransform,
-                                      TaskViewTransform transform, int duration) {
+    void updateViewPropertiesToTaskTransform(TaskViewTransform animateFromTransform,
+                                             TaskViewTransform toTransform, int duration) {
         if (duration > 0) {
             if (animateFromTransform != null) {
                 setTranslationY(animateFromTransform.translationY);
                 setScaleX(animateFromTransform.scale);
                 setScaleY(animateFromTransform.scale);
+                setAlpha(animateFromTransform.alpha);
             }
-            animate().translationY(transform.translationY)
-                    .scaleX(transform.scale)
-                    .scaleY(transform.scale)
+            animate().translationY(toTransform.translationY)
+                    .scaleX(toTransform.scale)
+                    .scaleY(toTransform.scale)
+                    .alpha(toTransform.alpha)
                     .setDuration(duration)
                     .setInterpolator(new AccelerateDecelerateInterpolator())
+                    .withLayer()
                     .start();
         } else {
-            setTranslationY(transform.translationY);
-            setScaleX(transform.scale);
-            setScaleY(transform.scale);
+            setTranslationY(toTransform.translationY);
+            setScaleX(toTransform.scale);
+            setScaleY(toTransform.scale);
+            setAlpha(toTransform.alpha);
         }
+    }
+
+    /** Returns an animator to animate this task to the specified transform */
+    Animator getAnimatorToTaskTransform(TaskViewTransform toTransform) {
+        AnimatorSet anims = new AnimatorSet();
+        anims.playTogether(
+                ObjectAnimator.ofFloat(this, "translationY", toTransform.translationY),
+                ObjectAnimator.ofFloat(this, "scaleX", toTransform.scale),
+                ObjectAnimator.ofFloat(this, "scaleY", toTransform.scale),
+                ObjectAnimator.ofFloat(this, "alpha", toTransform.alpha)
+        );
+        return anims;
     }
 
     /** Resets this view's properties */
@@ -137,6 +161,17 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
         setScaleX(1f);
         setScaleY(1f);
         setAlpha(1f);
+    }
+
+    void prepareTaskTransformForFilterTaskHidden(TaskViewTransform toTransform) {
+        // Fade the view out and slide it away
+        toTransform.alpha = 0f;
+        toTransform.translationY += 200;
+    }
+
+    void prepareTaskTransformForFilterTaskVisible(TaskViewTransform fromTransform) {
+        // Fade the view in
+        fromTransform.alpha = 0f;
     }
 
     /** Animates this task view as it enters recents */
