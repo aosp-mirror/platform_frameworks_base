@@ -277,7 +277,15 @@ please see styles_device_defaults.xml.
         <item name="textSize">@dimen/action_bar_title_text_size_quantum</item>
     </style>
 
+    <style name="TextAppearance.Quantum.Widget.ActionMode.Title.Inverse" parent="TextAppearance.Quantum.Medium.Inverse">
+        <item name="textSize">@dimen/action_bar_title_text_size_quantum</item>
+    </style>
+
     <style name="TextAppearance.Quantum.Widget.ActionMode.Subtitle" parent="TextAppearance.Quantum.Small">
+        <item name="textSize">@dimen/action_bar_subtitle_text_size_quantum</item>
+    </style>
+
+    <style name="TextAppearance.Quantum.Widget.ActionMode.Subtitle.Inverse" parent="TextAppearance.Quantum.Small.Inverse">
         <item name="textSize">@dimen/action_bar_subtitle_text_size_quantum</item>
     </style>
 
@@ -287,11 +295,26 @@ please see styles_device_defaults.xml.
         <item name="textSize">@dimen/action_bar_title_text_size_quantum</item>
     </style>
 
+    <style name="TextAppearance.Quantum.Widget.ActionBar.Title.Inverse" parent="TextAppearance.Quantum.Medium.Inverse">
+        <item name="textSize">@dimen/action_bar_title_text_size_quantum</item>
+    </style>
+
     <style name="TextAppearance.Quantum.Widget.ActionBar.Subtitle" parent="TextAppearance.Quantum.Small">
         <item name="textSize">@dimen/action_bar_subtitle_text_size_quantum</item>
     </style>
 
+    <style name="TextAppearance.Quantum.Widget.ActionBar.Subtitle.Inverse" parent="TextAppearance.Quantum.Small.Inverse">
+        <item name="textSize">@dimen/action_bar_subtitle_text_size_quantum</item>
+    </style>
+
     <style name="TextAppearance.Quantum.Widget.ActionBar.Menu" parent="TextAppearance.Quantum.Small">
+        <item name="fontFamily">@string/font_family_menu_quantum</item>
+        <item name="textSize">@dimen/text_size_menu_quantum</item>>
+        <item name="textColor">?attr/actionMenuTextColor</item>
+        <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
+    </style>
+
+    <style name="TextAppearance.Quantum.Widget.ActionBar.Menu.Inverse" parent="TextAppearance.Quantum.Small.Inverse">
         <item name="fontFamily">@string/font_family_menu_quantum</item>
         <item name="textSize">@dimen/text_size_menu_quantum</item>>
         <item name="textColor">?attr/actionMenuTextColor</item>
