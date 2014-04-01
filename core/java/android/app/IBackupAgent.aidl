@@ -124,4 +124,12 @@ oneway interface IBackupAgent {
             int type, String domain, String path, long mode, long mtime,
             int token, IBackupManager callbackBinder);
 
+    /**
+     * Out of band: instruct the agent to crash within the client process.  This is used
+     * when the backup infrastructure detects a semantic error post-hoc and needs to
+     * pass the problem back to the app.
+     *
+     * @param message The message to be passed to the agent's application in an exception.
+     */
+    void fail(String message);
 }
