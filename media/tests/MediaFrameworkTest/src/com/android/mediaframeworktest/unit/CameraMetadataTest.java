@@ -309,7 +309,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                 });
 
         // rational (n) -- in particular rational x 9
-        checkKeyGetAndSetArray("android.sensor.calibrationTransform1", Rational[].class,
+        checkKeyGetAndSetArray("android.sensor.calibrationTransform", Rational[].class,
                 new Rational[] {
                         new Rational(1, 2), new Rational(3, 4), new Rational(5, 6),
                         new Rational(7, 8), new Rational(9, 10), new Rational(10, 11),
