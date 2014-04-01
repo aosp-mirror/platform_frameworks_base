@@ -89,8 +89,11 @@ oneway interface ICallServiceAdapter {
      * Sets a call's state to disconnected.
      *
      * @param callId The unique ID of the call whose state is changing to disconnected.
+     * @param disconnectCause The reason for the disconnection, any of
+     *         {@link android.telephony.DisconnectCause}.
+     * @param disconnectMessage The call-service-provided message about the disconnect cause.
      */
-    void setDisconnected(String callId);
+    void setDisconnected(String callId, int disconnectCause, String disconnectMessage);
 
     /**
      * Sets a call's state to be on hold.

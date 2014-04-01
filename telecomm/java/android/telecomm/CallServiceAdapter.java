@@ -133,10 +133,13 @@ public final class CallServiceAdapter {
      * Sets a call's state to disconnected.
      *
      * @param callId The unique ID of the call whose state is changing to disconnected.
+     * @param disconnectCause The reason for the disconnection, any of
+     *         {@link android.telephony.DisconnectCause}.
+     * @param disconnectMessage Optional call-service-provided message about the disconnect.
      */
-    public void setDisconnected(String callId) {
+    public void setDisconnected(String callId, int disconnectCause, String disconnectMessage) {
         try {
-            mAdapter.setDisconnected(callId);
+            mAdapter.setDisconnected(callId, disconnectCause, disconnectMessage);
         } catch (RemoteException e) {
         }
     }

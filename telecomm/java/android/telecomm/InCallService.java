@@ -58,7 +58,7 @@ public abstract class InCallService extends Service {
                     setActive((String) msg.obj);
                     break;
                 case MSG_SET_DISCONNECTED:
-                    setDisconnected((String) msg.obj);
+                    setDisconnected((String) msg.obj, msg.arg1);
                     break;
                 case MSG_SET_HOLD:
                     setOnHold((String) msg.obj);
@@ -93,8 +93,8 @@ public abstract class InCallService extends Service {
 
         /** {@inheritDoc} */
         @Override
-        public void setDisconnected(String callId) {
-            mHandler.obtainMessage(MSG_SET_DISCONNECTED, callId).sendToTarget();
+        public void setDisconnected(String callId, int disconnectCause) {
+            mHandler.obtainMessage(MSG_SET_DISCONNECTED, disconnectCause, 0, callId).sendToTarget();
         }
 
         /** {@inheritDoc} */
@@ -149,12 +149,12 @@ public abstract class InCallService extends Service {
     /**
      * Indicates to the in-call app that a call has been moved to the
      * {@link CallState#DISCONNECTED} and the user should be notified.
-     * TODO(santoscordon): Needs disconnect-cause either as a numberical constant, string or both
-     * depending on what is ultimately needed to support all scenarios.
      *
      * @param callId The identifier of the call that was disconnected.
+     * @param disconnectCause The reason for the disconnection, any of
+     *         {@link android.telephony.DisconnectCause}.
      */
-    protected abstract void setDisconnected(String callId);
+    protected abstract void setDisconnected(String callId, int disconnectCause);
 
     /**
      * Indicates to the in-call app that a call has been moved to the

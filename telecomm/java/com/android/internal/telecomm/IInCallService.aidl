@@ -61,12 +61,12 @@ oneway interface IInCallService {
     /**
      * Indicates to the in-call app that a call has been moved to the
      * {@link android.telecomm.CallState#DISCONNECTED} and the user should be notified.
-     * TODO(santoscordon): Needs disconnect-cause either as a numberical constant, string or both
-     * depending on what is ultimately needed to support all scenarios.
      *
      * @param callId The identifier of the call that was disconnected.
+     * @param disconnectCause The reason for the disconnection, any of
+     *         {@link android.telephony.DisconnectCause}.
      */
-    void setDisconnected(String callId);
+    void setDisconnected(String callId, int disconnectCause);
 
     /**
      * Indicates to the in-call app that a call has been moved to the
