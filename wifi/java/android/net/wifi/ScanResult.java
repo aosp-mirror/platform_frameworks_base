@@ -56,6 +56,13 @@ public class ScanResult implements Parcelable {
     public long timestamp;
 
     /**
+     * Timestamp representing date when this result was last seen, in milliseconds from 1970
+     * {@hide}
+     */
+    public long seen;
+
+
+    /**
      * The approximate distance to the AP in centimeter, if available.  Else
      * {@link UNSPECIFIED}.
      * {@hide}
@@ -114,6 +121,7 @@ public class ScanResult implements Parcelable {
             timestamp = source.timestamp;
             distanceCm = source.distanceCm;
             distanceSdCm = source.distanceSdCm;
+            seen = source.seen;
         }
     }
 

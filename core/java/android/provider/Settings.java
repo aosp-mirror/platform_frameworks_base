@@ -2838,6 +2838,8 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SAVED_STATE);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED);
+            MOVED_TO_GLOBAL.add(Settings.Global.WIFI_ENHANCED_AUTO_JOIN);
+            MOVED_TO_GLOBAL.add(Settings.Global.WIFI_NETWORK_SHOW_RSSI);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_WATCHDOG_ON);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON);
@@ -5469,7 +5471,21 @@ public final class Settings {
        public static final String WIFI_SUPPLICANT_SCAN_INTERVAL_MS =
                "wifi_supplicant_scan_interval_ms";
 
-       /**
+        /**
+         * whether frameworks handles wifi auto-join
+         * @hide
+         */
+       public static final String WIFI_ENHANCED_AUTO_JOIN =
+                "wifi_enhanced_auto_join";
+
+        /**
+         * whether settings show RSSI
+         * @hide
+         */
+        public static final String WIFI_NETWORK_SHOW_RSSI =
+                "wifi_network_show_rssi";
+
+        /**
         * The interval in milliseconds to scan at supplicant when p2p is connected
         * @hide
         */
