@@ -40,8 +40,7 @@ public class ScanResult implements Parcelable {
      */
     public String capabilities;
     /**
-     * The detected signal level in dBm. At least those are the units used by
-     * the TI driver.
+     * The detected signal level in dBm.
      */
     public int level;
     /**
