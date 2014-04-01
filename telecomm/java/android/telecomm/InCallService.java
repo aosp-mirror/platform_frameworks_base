@@ -201,7 +201,7 @@ public abstract class InCallService extends Service {
     /**
      * Indicates to the in-call app that the specified call is currently connected to another party
      * and a communication channel is open between them. Normal transitions are to
-     * {@link #setDisconnected(String)} when the call is complete.
+     * {@link #setDisconnected(String,int)} when the call is complete.
      *
      * @param callId The identifier of the call changing state.
      */
@@ -211,7 +211,7 @@ public abstract class InCallService extends Service {
      * Indicates to the in-call app that the specified call is outgoing and in the dialing state.
      * Normal transition are to {@link #setActive(String)} if the call was answered,
      * {@link #setPostDial(String,String)} if the dialed number includes a post-dial DTMF string, or
-     * {@link #setDisconnected(String)} if the call was disconnected immediately.
+     * {@link #setDisconnected(String,int)} if the call was disconnected immediately.
      *
      * @param callId The identifier of the call changing state.
      */
@@ -221,8 +221,8 @@ public abstract class InCallService extends Service {
      * Indicates to the in-call app that the specified call is incoming and the user still has the
      * option of answering, rejecting, or doing nothing with the call. This state is usually
      * associated with some type of audible ringtone. Normal transitions are to
-     * {@link #setActive(String)} if the call is answered, or {@link #setDisconnected(String)} if
-     * the call is not answered or is otherwise disconnected for some reason.
+     * {@link #setActive(String)} if the call is answered, or {@link #setDisconnected(String,int)}
+     * if the call is not answered or is otherwise disconnected for some reason.
      *
      * @param callId The identifier of the call changing state.
      */
@@ -258,7 +258,7 @@ public abstract class InCallService extends Service {
      * where Telecomm is now sending some dual-tone multi-frequency signaling (DTMF) tones appended
      * to the dialed number. Normal transitions are to {@link #setPostDialWait(String,String)} when
      * the post-dial string requires user confirmation to proceed, {@link #setActive(String)} when
-     * the post-dial tones are completed, or {@link #setDisconnected(String)} if the call is
+     * the post-dial tones are completed, or {@link #setDisconnected(String,int)} if the call is
      * disconnected.
      *
      * @param callId The identifier of the call changing state.

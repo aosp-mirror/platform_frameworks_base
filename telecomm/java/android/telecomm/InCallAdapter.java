@@ -165,15 +165,15 @@ public final class InCallAdapter {
      * A post-dial DTMF string is a string of digits entered after a phone number, when dialed,
      * that are immediately sent as DTMF tones to the recipient as soon as the connection is made.
      * While these tones are playing, Telecomm will notify the {@link InCallService} that the call
-     * is in the {@link InCallService#setPostDial(String)} state.
+     * is in the {@link InCallService#setPostDial(String,String)} state.
      *
-     * If the DTMF string contains a {@link #DTMF_CHARACTER_PAUSE} symbol, Telecomm will temporarily
-     * pause playing the tones for a pre-defined period of time.
+     * If the DTMF string contains a {@link TelecommConstants#DTMF_CHARACTER_PAUSE} symbol, Telecomm
+     * will temporarily pause playing the tones for a pre-defined period of time.
      *
-     * If the DTMF string contains a {@link #DTMF_CHARACTER_WAIT} symbol, Telecomm will pause
-     * playing the tones and notify the {@link InCallService} that the call is in the
-     * {@link InCallService#setPostDialWait(String)} state. When the user decides to continue the
-     * postdial sequence, the {@link InCallService} should invoke the
+     * If the DTMF string contains a {@link TelecommConstants#DTMF_CHARACTER_WAIT} symbol, Telecomm
+     * will pause playing the tones and notify the {@link InCallService} that the call is in the
+     * {@link InCallService#setPostDialWait(String,String)} state. When the user decides to continue
+     * the postdial sequence, the {@link InCallService} should invoke the
      * {@link #postDialContinue(String)} method.
      *
      * @param callId The unique ID of the call for which postdial string playing should continue.
