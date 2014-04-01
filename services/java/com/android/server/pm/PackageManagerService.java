@@ -2005,6 +2005,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pkg.applicationInfo.dataDir =
                         getDataPathForPackage(packageName, 0).getPath();
                 pkg.applicationInfo.nativeLibraryDir = ps.nativeLibraryPathString;
+                pkg.applicationInfo.requiredCpuAbi = ps.requiredCpuAbiString;
             }
             return generatePackageInfo(pkg, flags, userId);
         }
@@ -3823,6 +3824,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         codePath = pkg.mScanPath;
         // Set application objects path explicitly.
         setApplicationInfoPaths(pkg, codePath, resPath);
+        // Applications can run with the primary Cpu Abi unless otherwise is specified
+        pkg.applicationInfo.requiredCpuAbi = null;
         // Note that we invoke the following method only if we are about to unpack an application
         PackageParser.Package scannedPkg = scanPackageLI(pkg, parseFlags, scanMode
                 | SCAN_UPDATE_SIGNATURE, currentTime, user);
@@ -4395,6 +4398,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // the PkgSetting exists already and doesn't have to be created.
             pkgSetting = mSettings.getPackageLPw(pkg, origPackage, realName, suid, destCodeFile,
                     destResourceFile, pkg.applicationInfo.nativeLibraryDir,
+                    pkg.applicationInfo.requiredCpuAbi,
                     pkg.applicationInfo.flags, user, false);
             if (pkgSetting == null) {
                 Slog.w(TAG, "Creating application package " + pkg.packageName + " failed");
@@ -4705,6 +4709,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 Slog.e(TAG, "Unable to copy native libraries");
                                 mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
                                 return null;
+                            }
+
+                            // We've successfully copied native libraries across, so we make a
+                            // note of what ABI we're using
+                            if (copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
+                                pkg.applicationInfo.requiredCpuAbi = Build.SUPPORTED_ABIS[copyRet];
+                            } else {
+                                pkg.applicationInfo.requiredCpuAbi = null;
                             }
                         } catch (IOException e) {
                             Slog.e(TAG, "Unable to copy native libraries", e);
