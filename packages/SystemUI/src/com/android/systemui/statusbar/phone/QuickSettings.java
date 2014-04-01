@@ -911,6 +911,7 @@ class QuickSettings {
                 d.getWindow().setAttributes(lp);
             }
         };
+        v.setAutoActivate(true);
         v.setAdapter(new ZenModeViewAdapter(mContext) {
             @Override
             public void configure() {
@@ -928,7 +929,6 @@ class QuickSettings {
         d.create();
         d.getWindow().setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
         WindowManager.LayoutParams lp = d.getWindow().getAttributes();
-        lp.horizontalMargin = 0;
         lp.width = mContext.getResources().getDimensionPixelSize(R.dimen.zen_mode_dialog_width);
         d.getWindow().setAttributes(lp);
         d.show();
