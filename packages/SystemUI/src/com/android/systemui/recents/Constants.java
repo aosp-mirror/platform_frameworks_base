@@ -26,7 +26,7 @@ public class Constants {
         public static final boolean Verbose = false;
 
         public static class App {
-            public static final boolean EnableTaskFiltering = false;
+            public static final boolean EnableTaskFiltering = true;
             public static final boolean EnableTaskStackClipping = false;
             public static final boolean EnableToggleNewRecentsActivity = false;
             // This disables the bitmap and icon caches to
@@ -81,6 +81,10 @@ public class Constants {
             public static class Animation {
                 public static final int TaskRemovedReshuffleDuration = 200;
                 public static final int SnapScrollBackDuration = 650;
+                public static final int FilteredCurrentViewsDuration = 150;
+                public static final int FilteredNewViewsDuration = 200;
+                public static final int UnfilteredCurrentViewsDuration = 150;
+                public static final int UnfilteredNewViewsDuration = 200;
             }
 
             public static final int TaskStackOverscrollRange = 150;
@@ -107,7 +111,7 @@ public class Constants {
             public static final boolean AnimateFrontTaskIconOnEnterRecents = true;
             public static final boolean AnimateFrontTaskIconOnLeavingRecents = true;
 
-            public static final boolean UseRoundedCorners = true;
+            public static final boolean UseRoundedCorners = false;
             public static final float RoundedCornerRadiusDps = 3;
         }
     }

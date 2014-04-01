@@ -190,7 +190,7 @@ class TaskResourceLoader implements Runnable {
                         // Load the icon
                         if (loadIcon == null || forceLoadTask) {
                             PackageManager pm = mContext.getPackageManager();
-                            ActivityInfo info = pm.getActivityInfo(t.key.intent.getComponent(),
+                            ActivityInfo info = pm.getActivityInfo(t.key.baseIntent.getComponent(),
                                     PackageManager.GET_META_DATA);
                             Drawable icon = info.loadIcon(pm);
                             if (!mCancelled) {
@@ -218,7 +218,7 @@ class TaskResourceLoader implements Runnable {
                                 } else {
                                     Console.logError(mContext,
                                             "Failed to load task top thumbnail for: " +
-                                                    t.key.intent.getComponent().getPackageName());
+                                                    t.key.baseIntent.getComponent().getPackageName());
                                 }
                             }
                         }

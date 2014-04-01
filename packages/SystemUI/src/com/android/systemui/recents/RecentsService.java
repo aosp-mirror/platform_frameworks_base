@@ -66,7 +66,7 @@ class SystemUIMessageHandler extends Handler {
                 // in a bottom inset
                 tsv.computeRects(windowRect.width(), windowRect.height() - systemInsets.top, 0);
                 tsv.boundScroll();
-                TaskViewTransform transform = tsv.getStackTransform(0);
+                TaskViewTransform transform = tsv.getStackTransform(0, tsv.getStackScroll());
                 Rect taskRect = new Rect(transform.rect);
 
                 data.putParcelable("taskRect", taskRect);

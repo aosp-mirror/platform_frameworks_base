@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
-        android:background="#88000000">
+        android:background="#e6444444">
         <ImageView
             android:id="@+id/activity_icon"
             android:layout_width="@dimen/recents_task_view_icon_size"

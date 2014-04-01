@@ -37,11 +37,11 @@ public class Task {
     /* The Task Key represents the unique primary key for the task */
     public static class TaskKey {
         public final int id;
-        public final Intent intent;
+        public final Intent baseIntent;
 
         public TaskKey(int id, Intent intent) {
             this.id = id;
-            this.intent = intent;
+            this.baseIntent = intent;
         }
 
         @Override
@@ -56,7 +56,7 @@ public class Task {
 
         @Override
         public String toString() {
-            return "Task.Key: " + id + ", " + intent.getComponent().getPackageName();
+            return "Task.Key: " + id + ", " + baseIntent.getComponent().getPackageName();
         }
     }
 
@@ -120,6 +120,6 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task: " + key.intent.getComponent().getPackageName() + " [" + super.toString() + "]";
+        return "Task: " + key.baseIntent.getComponent().getPackageName() + " [" + super.toString() + "]";
     }
 }

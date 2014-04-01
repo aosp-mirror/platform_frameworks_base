@@ -23,13 +23,27 @@ import android.graphics.Rect;
 public class TaskViewTransform {
     public int translationY = 0;
     public float scale = 1f;
-    public boolean visible = true;
+    public float alpha = 1f;
+    public boolean visible = false;
     public Rect rect = new Rect();
     float t;
 
+    public TaskViewTransform() {
+        // Do nothing
+    }
+
+    public TaskViewTransform(TaskViewTransform o) {
+        translationY = o.translationY;
+        scale = o.scale;
+        alpha = o.alpha;
+        visible = o.visible;
+        rect.set(o.rect);
+        t = o.t;
+    }
+
     @Override
     public String toString() {
-        return "TaskViewTransform y: " + translationY + " scale: " + scale +
+        return "TaskViewTransform y: " + translationY + " scale: " + scale + " alpha: " + alpha +
                 " visible: " + visible + " rect: " + rect;
     }
 }
