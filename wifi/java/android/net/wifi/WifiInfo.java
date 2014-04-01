@@ -157,9 +157,8 @@ public class WifiInfo implements Parcelable {
 
     /**
      * Returns the received signal strength indicator of the current 802.11
-     * network.
-     * <p><strong>This is not normalized, but should be!</strong></p>
-     * @return the RSSI, in the range ??? to ???
+     * network, in dBm.
+     * @return the RSSI, in the range -110 to 10
      */
     public int getRssi() {
         return mRssi;
