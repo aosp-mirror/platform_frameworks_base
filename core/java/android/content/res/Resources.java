@@ -135,17 +135,31 @@ public class Resources {
         sPreloadedDrawables[1] = new LongSparseArray<ConstantState>();
     }
 
-    /** @hide */
+    /**
+     * Returns the most appropriate default theme for the specified target SDK version.
+     * <ul>
+     * <li>Below API 11: Gingerbread
+     * <li>APIs 11 thru 14: Holo
+     * <li>APIs 14 thru XX: Device default dark
+     * <li>API XX and above: Device default light with dark action bar
+     * </ul>
+     *
+     * @param curTheme The current theme, or 0 if not specified.
+     * @param targetSdkVersion The target SDK version.
+     * @return A theme resource identifier
+     * @hide
+     */
     public static int selectDefaultTheme(int curTheme, int targetSdkVersion) {
         return selectSystemTheme(curTheme, targetSdkVersion,
                 com.android.internal.R.style.Theme,
                 com.android.internal.R.style.Theme_Holo,
-                com.android.internal.R.style.Theme_DeviceDefault);
+                com.android.internal.R.style.Theme_DeviceDefault,
+                com.android.internal.R.style.Theme_DeviceDefault_Light_DarkActionBar);
     }
-    
+
     /** @hide */
-    public static int selectSystemTheme(int curTheme, int targetSdkVersion,
-            int orig, int holo, int deviceDefault) {
+    public static int selectSystemTheme(int curTheme, int targetSdkVersion, int orig, int holo,
+            int dark, int deviceDefault) {
         if (curTheme != 0) {
             return curTheme;
         }
@@ -155,9 +169,12 @@ public class Resources {
         if (targetSdkVersion < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             return holo;
         }
+        if (targetSdkVersion < Build.VERSION_CODES.CUR_DEVELOPMENT) {
+            return dark;
+        }
         return deviceDefault;
     }
-    
+
     /**
      * This exception is thrown by the resource APIs when a requested resource
      * can not be found.

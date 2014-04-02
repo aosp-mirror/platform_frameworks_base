@@ -15,11 +15,11 @@
 -->
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <style name="Theme" parent="@android:style/Theme.Holo.Light">
+    <style name="Theme" parent="@android:style/Theme.DeviceDefault.Light">
         <item name="android:actionOverflowButtonStyle">@style/DarkerOverflow</item>
         <item name="android:windowBackground">@*android:drawable/dialog_full_holo_light</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowAnimationStyle">@*android:style/Animation.Holo.Dialog</item>
+        <item name="android:windowAnimationStyle">@*android:style/Animation.DeviceDefault.Dialog</item>
     </style>
 </resources>

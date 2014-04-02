@@ -166,7 +166,7 @@
         <activity android:name=".usb.UsbConfirmActivity"
             android:exported="true"
             android:permission="android.permission.MANAGE_USB"
-            android:theme="@*android:style/Theme.Holo.Dialog.Alert"
+            android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
         </activity>
@@ -175,7 +175,7 @@
         <activity android:name=".usb.UsbPermissionActivity"
             android:exported="true"
             android:permission="android.permission.MANAGE_USB"
-            android:theme="@*android:style/Theme.Holo.Dialog.Alert"
+            android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
         </activity>
@@ -184,7 +184,7 @@
         <activity android:name=".usb.UsbResolverActivity"
             android:exported="true"
             android:permission="android.permission.MANAGE_USB"
-            android:theme="@*android:style/Theme.Holo.Dialog.Alert"
+            android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
         </activity>
@@ -193,7 +193,7 @@
         <activity android:name=".usb.UsbAccessoryUriActivity"
             android:exported="true"
             android:permission="android.permission.MANAGE_USB"
-            android:theme="@*android:style/Theme.Holo.Dialog.Alert"
+            android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
         </activity>
@@ -201,7 +201,7 @@
         <!-- started from UsbDebuggingManager -->
         <activity android:name=".usb.UsbDebuggingActivity"
             android:permission="android.permission.MANAGE_USB"
-            android:theme="@*android:style/Theme.Holo.Dialog.Alert"
+            android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
         </activity>
@@ -211,7 +211,7 @@
             android:name=".net.NetworkOverLimitActivity"
             android:exported="true"
             android:permission="android.permission.MANAGE_NETWORK_POLICY"
-            android:theme="@android:style/Theme.Holo.Panel"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Panel"
             android:finishOnCloseSystemDialogs="true"
             android:launchMode="singleTop"
             android:taskAffinity="com.android.systemui.net"
