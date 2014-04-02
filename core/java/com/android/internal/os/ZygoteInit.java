@@ -32,7 +32,6 @@ import android.util.EventLog;
 import android.util.Log;
 
 import dalvik.system.VMRuntime;
-import dalvik.system.Zygote;
 
 import libcore.io.IoUtils;
 import libcore.io.Libcore;
