@@ -10,9 +10,9 @@ previous.link=building-ui.html
 
 
 <!-- This is the training bar -->
-<div id="tb-wrapper"> 
-<div id="tb"> 
- 
+<div id="tb-wrapper">
+<div id="tb">
+
 <h2>This lesson teaches you to</h2>
 
 <ol>
@@ -30,10 +30,10 @@ previous.link=building-ui.html
   <li><a href="{@docRoot}sdk/installing/index.html">Installing the
 SDK</a></li>
 </ul>
- 
- 
-</div> 
-</div> 
+
+
+</div>
+</div>
 
 
 
@@ -151,7 +151,7 @@ intent.putExtra(EXTRA_MESSAGE, message);
 </pre>
 
 <p class="note"><strong>Note:</strong>
-You now need an import statement for <code>android.widget.EditText</code>. 
+You now need an import statement for <code>android.widget.EditText</code>.
 You'll define the <code>EXTRA_MESSAGE</code> constant in a moment.</p>
 
 <p>An {@link android.content.Intent} can carry a collection of various data types as key-value
@@ -212,7 +212,7 @@ work.</p>
 <p>To create a new activity using Eclipse:</p>
 
 <ol>
-  <li>Click <strong>New</strong> <img src="{@docRoot}images/tools/eclipse-new.png" 
+  <li>Click <strong>New</strong> <img src="{@docRoot}images/tools/eclipse-new.png"
   style="vertical-align:baseline;margin:0" /> in the toolbar.</li>
   <li>In the window that appears, open the <strong>Android</strong> folder
   and select <strong>Android Activity</strong>. Click <strong>Next</strong>.</li>
@@ -247,14 +247,18 @@ you won't need it for this app so you can remove it.</li>
   <li>There's also an implementation of {@link android.app.Activity#onOptionsItemSelected
   onOptionsItemSelected()} which handles the behavior for the action bar's <em>Up</em> behavior.
   Keep this one the way it is.</li>
-  <li>There's also a <code>PlaceholderFragment</code> class that extends 
+  <li>There's also a <code>PlaceholderFragment</code> class that extends
 {@link android.app.Fragment}. You will not need this class in the final version of this
 activity.</li>
 </ul>
 
-<p>Fragments decompose application functionality and UI into reusable modules. For more 
-information on fragments, see the <a href="{@docRoot}guide/components/fragments.html">Fragments 
+<p>Fragments decompose application functionality and UI into reusable modules. For more
+information on fragments, see the <a href="{@docRoot}guide/components/fragments.html">Fragments
 API Guide</a>. The final version of this activity does not use fragments.</p>
+
+<p class="note"><strong>Note:</strong> Your activity may look different if you did not use
+the latest version of the ADT plugin. Make sure you install the latest version of the
+<a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT plugin</a> to complete this tutorial.</p>
 
 <p>The {@code DisplayMessageActivity} class should now look like this:</p>
 
