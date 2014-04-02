@@ -81,7 +81,6 @@ public class StatusBarWindowManager {
         mLp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         mLp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         mLp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
-        mLp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
         mLp.setTitle("StatusBar");
         mLp.packageName = mContext.getPackageName();
         mStatusBarView = statusBarView;
@@ -137,12 +136,21 @@ public class StatusBarWindowManager {
         }
     }
 
+    private void applyInputFeatures(State state) {
+        if (state.isKeyguardShowingAndNotOccluded()) {
+            mLp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
+        } else {
+            mLp.inputFeatures &= ~WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
+        }
+    }
+
     private void apply(State state) {
         applyKeyguardFlags(state);
         applyFocusableFlag(state);
         adjustScreenOrientation(state);
         applyHeight(state);
         applyUserActivityTimeout(state);
+        applyInputFeatures(state);
         mWindowManager.updateViewLayout(mStatusBarView, mLp);
     }
 

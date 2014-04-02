@@ -90,7 +90,8 @@ public class StatusBarWindowView extends FrameLayout
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         boolean intercept = false;
         if (mNotificationPanel.isFullyExpanded()
-                && mStackScrollLayout.getVisibility() == View.VISIBLE) {
+                && mStackScrollLayout.getVisibility() == View.VISIBLE
+                && !mService.isOnKeyguard()) {
             intercept = mExpandHelper.onInterceptTouchEvent(ev);
         }
         if (!intercept) {

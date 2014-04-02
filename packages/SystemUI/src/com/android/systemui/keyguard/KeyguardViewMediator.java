@@ -1224,10 +1224,6 @@ public class KeyguardViewMediator extends SystemUI {
             updateActivityLockScreenState();
             adjustStatusBarLocked();
             userActivity();
-            try {
-                ActivityManagerNative.getDefault().closeSystemDialogs("lock");
-            } catch (RemoteException e) {
-            }
 
             // Do this at the end to not slow down display of the keyguard.
             playSounds(true);
@@ -1360,9 +1356,14 @@ public class KeyguardViewMediator extends SystemUI {
         mUpdateMonitor.dispatchBootCompleted();
     }
 
-    public void registerStatusBar(PhoneStatusBar phoneStatusBar, ViewGroup container,
-            StatusBarWindowManager statusBarWindowManager) {
+    public StatusBarKeyguardViewManager registerStatusBar(PhoneStatusBar phoneStatusBar,
+            ViewGroup container, StatusBarWindowManager statusBarWindowManager) {
         mStatusBarKeyguardViewManager.registerStatusBar(phoneStatusBar, container,
                 statusBarWindowManager);
+        return mStatusBarKeyguardViewManager;
+    }
+
+    public ViewMediatorCallback getViewMediatorCallback() {
+        return mViewMediatorCallback;
     }
 }

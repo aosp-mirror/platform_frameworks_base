@@ -20,10 +20,11 @@
 
     <View android:id="@+id/bouncer_background"
         android:background="#aa000000"
+        android:clickable="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <include layout="@layout/keyguard_host_view"
+    <include layout="@layout/keyguard_simple_host_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </FrameLayout>
