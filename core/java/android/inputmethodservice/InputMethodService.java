@@ -647,6 +647,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 getApplicationInfo().targetSdkVersion,
                 android.R.style.Theme_InputMethod,
                 android.R.style.Theme_Holo_InputMethod,
+                android.R.style.Theme_DeviceDefault_InputMethod,
                 android.R.style.Theme_DeviceDefault_InputMethod);
         super.setTheme(mTheme);
         super.onCreate();

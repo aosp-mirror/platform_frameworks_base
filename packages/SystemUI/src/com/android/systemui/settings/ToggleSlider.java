@@ -83,22 +83,7 @@ public class ToggleSlider extends RelativeLayout
     }
 
     public void onCheckedChanged(CompoundButton toggle, boolean checked) {
-        Drawable thumb;
-        Drawable slider;
-        final Resources res = getContext().getResources();
-        if (checked) {
-            thumb = res.getDrawable(
-                    com.android.internal.R.drawable.scrubber_control_disabled_holo);
-            slider = res.getDrawable(
-                    R.drawable.status_bar_settings_slider_disabled);
-        } else {
-            thumb = res.getDrawable(
-                    com.android.internal.R.drawable.scrubber_control_selector_holo);
-            slider = res.getDrawable(
-                    com.android.internal.R.drawable.scrubber_progress_horizontal_holo_dark);
-        }
-        mSlider.setThumb(thumb);
-        mSlider.setProgressDrawable(slider);
+        mSlider.setEnabled(checked);
 
         if (mListener != null) {
             mListener.onChanged(this, mTracking, checked, mSlider.getProgress());
