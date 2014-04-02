@@ -108,7 +108,7 @@ public:
      * Returns the current clip in local coordinates. The clip rect is
      * transformed by the inverse transform matrix.
      */
-    const Rect& getLocalClip();
+    ANDROID_API const Rect& getLocalClip();
 
     /**
      * Resets the clip to the specified rect.
