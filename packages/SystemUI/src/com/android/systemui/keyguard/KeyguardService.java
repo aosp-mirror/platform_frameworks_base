@@ -16,15 +16,6 @@
 
 package com.android.systemui.keyguard;
 
-import com.android.internal.policy.IKeyguardExitCallback;
-import com.android.internal.policy.IKeyguardService;
-import com.android.internal.policy.IKeyguardServiceConstants;
-import com.android.internal.policy.IKeyguardShowCallback;
-import com.android.internal.widget.LockPatternUtils;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarWindowManager;
-
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -33,7 +24,12 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.ViewGroup;
+
+import com.android.internal.policy.IKeyguardExitCallback;
+import com.android.internal.policy.IKeyguardService;
+import com.android.internal.policy.IKeyguardServiceConstants;
+import com.android.internal.policy.IKeyguardShowCallback;
+import com.android.systemui.SystemUIApplication;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
@@ -41,23 +37,17 @@ public class KeyguardService extends Service {
     static final String TAG = "KeyguardService";
     static final String PERMISSION = android.Manifest.permission.CONTROL_KEYGUARD;
 
-    public static final String ACTION_STATUS_BAR_BIND = "action.status_bar_bind";
-
     private KeyguardViewMediator mKeyguardViewMediator;
 
     @Override
     public void onCreate() {
-        LockPatternUtils lockPatternUtils = new LockPatternUtils(this);
-        mKeyguardViewMediator = new KeyguardViewMediator(this, lockPatternUtils);
+        mKeyguardViewMediator =
+                ((SystemUIApplication) getApplication()).getComponent(KeyguardViewMediator.class);
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        if (ACTION_STATUS_BAR_BIND.equals(intent.getAction())) {
-            return mKeyguardStatusBarBinder;
-        } else {
-            return mBinder;
-        }
+        return mBinder;
     }
 
     void checkPermission() {
@@ -67,16 +57,6 @@ public class KeyguardService extends Service {
                     + ", must have permission " + PERMISSION);
         }
     }
-
-    private final KeyguardStatusBarBinder mKeyguardStatusBarBinder = new KeyguardStatusBarBinder() {
-
-        @Override
-        public void registerStatusBar(PhoneStatusBar phoneStatusBar, ViewGroup container,
-                StatusBarWindowManager statusBarWindowManager) {
-            mKeyguardViewMediator.registerStatusBar(phoneStatusBar, container,
-                    statusBarWindowManager);
-        }
-    };
 
     private final IKeyguardService.Stub mBinder = new IKeyguardService.Stub() {
 

@@ -56,7 +56,6 @@ public class StatusBarKeyguardViewManager {
     private StatusBarWindowManager mStatusBarWindowManager;
 
     private boolean mScreenOn = false;
-    private boolean mShowOnRegister;
 
     public StatusBarKeyguardViewManager(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils) {
@@ -71,13 +70,6 @@ public class StatusBarKeyguardViewManager {
         mPhoneStatusBar = phoneStatusBar;
         mContainer = container;
         mStatusBarWindowManager = statusBarWindowManager;
-        if (mShowOnRegister) {
-            mShowOnRegister = false;
-            show(null);
-            if (mScreenOn) {
-                onScreenTurnedOn(null);
-            }
-        }
     }
 
     /**
@@ -85,13 +77,9 @@ public class StatusBarKeyguardViewManager {
      * lazily.
      */
     public void show(Bundle options) {
-        if (mStatusBarWindowManager != null) {
-            ensureView();
-            mStatusBarWindowManager.setKeyguardShowing(true);
-            mKeyguardView.requestFocus();
-        } else {
-            mShowOnRegister = true;
-        }
+        ensureView();
+        mStatusBarWindowManager.setKeyguardShowing(true);
+        mKeyguardView.requestFocus();
     }
 
     private void ensureView() {
@@ -168,9 +156,7 @@ public class StatusBarKeyguardViewManager {
     }
 
     public void setNeedsInput(boolean needsInput) {
-        if (mStatusBarWindowManager != null) {
-            mStatusBarWindowManager.setKeyguardNeedsInput(needsInput);
-        }
+        mStatusBarWindowManager.setKeyguardNeedsInput(needsInput);
     }
 
     public void updateUserActivityTimeout() {
@@ -190,24 +176,19 @@ public class StatusBarKeyguardViewManager {
     }
 
     public void setOccluded(boolean occluded) {
-        if (mStatusBarWindowManager != null) {
-            mStatusBarWindowManager.setKeyguardOccluded(occluded);
-        }
+        mStatusBarWindowManager.setKeyguardOccluded(occluded);
     }
 
     /**
      * Hides the keyguard view
      */
     public void hide() {
-        if (mPhoneStatusBar != null) {
-            mStatusBarWindowManager.setKeyguardShowing(false);
-            if (mKeyguardView != null) {
-                mKeyguardView.cleanUp();
-                mViewMediatorCallback.keyguardGone();
-            }
-            removeView();
+        mStatusBarWindowManager.setKeyguardShowing(false);
+        if (mKeyguardView != null) {
+            mKeyguardView.cleanUp();
+            mViewMediatorCallback.keyguardGone();
         }
-        mShowOnRegister = false;
+        removeView();
     }
 
     /**

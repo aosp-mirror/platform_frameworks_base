@@ -16,14 +16,15 @@
 
 package com.android.systemui.statusbar.phone;
 
+
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -35,11 +36,9 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -67,7 +66,6 @@ import android.util.EventLog;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -75,28 +73,23 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.keyguard.KeyguardHostView;
-import com.android.keyguard.KeyguardSimpleHostView;
 import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
-import com.android.systemui.keyguard.KeyguardService;
-import com.android.systemui.keyguard.KeyguardStatusBarBinder;
+import com.android.systemui.SystemUIApplication;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -104,7 +97,6 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
-
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.DateView;
@@ -114,7 +106,6 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.policy.OnSizeChangedListener;
 import com.android.systemui.statusbar.policy.RotationLockController;
-
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.io.FileDescriptor;
@@ -279,7 +270,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
-    protected KeyguardStatusBarBinder mKeyguardService;
     // XXX: gesture research
     private final GestureRecorder mGestureRec = DEBUG_GESTURES
         ? new GestureRecorder("/sdcard/statusbar_gestures.dat")
@@ -713,26 +703,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     private void startKeyguard() {
-
-        // Create the connection to KeyguardService.
-        Intent intent = new Intent(mContext, KeyguardService.class);
-        intent.setAction(KeyguardService.ACTION_STATUS_BAR_BIND);
-        if (!mContext.bindService(intent, new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                mKeyguardService = (KeyguardStatusBarBinder) service;
-                mKeyguardService.registerStatusBar(PhoneStatusBar.this, mStatusBarWindow,
-                        mStatusBarWindowManager);
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                if (DEBUG) Log.v(TAG, "Keyguard disconnected.");
-                mKeyguardService = null;
-            }
-        }, Context.BIND_AUTO_CREATE)) {
-            throw new RuntimeException("Couldn't bind status bar keyguard.");
-        }
+        getComponent(KeyguardViewMediator.class).registerStatusBar(
+                this, mStatusBarWindow, mStatusBarWindowManager);
     }
 
     @Override

@@ -233,4 +233,9 @@ interface IWindowManager
      * Device is in safe mode.
      */
     boolean isSafeModeEnabled();
+
+    /**
+     * Enables the screen if all conditions are met.
+     */
+    void enableScreenIfNeeded();
 }
