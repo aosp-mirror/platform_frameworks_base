@@ -570,7 +570,7 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     FIND_CLASS(clazz, "android/media/MediaDrm$Certificate");
     GET_FIELD_ID(gFields.certificate.wrappedPrivateKey, clazz, "mWrappedKey", "[B");
     GET_FIELD_ID(gFields.certificate.certificateData, clazz, "mCertificateData", "[B");
-    gFields.certificateClassId = reinterpret_cast<jclass>(env->NewGlobalRef(clazz));
+    gFields.certificateClassId = static_cast<jclass>(env->NewGlobalRef(clazz));
 
     FIND_CLASS(clazz, "java/util/ArrayList");
     GET_METHOD_ID(gFields.arraylist.init, clazz, "<init>", "()V");
@@ -595,13 +595,13 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     GET_METHOD_ID(gFields.entry.getValue, clazz, "getValue", "()Ljava/lang/Object;");
 
     FIND_CLASS(clazz, "java/util/HashMap");
-    gFields.hashmapClassId = reinterpret_cast<jclass>(env->NewGlobalRef(clazz));
+    gFields.hashmapClassId = static_cast<jclass>(env->NewGlobalRef(clazz));
 
     FIND_CLASS(clazz, "java/lang/String");
-    gFields.stringClassId = reinterpret_cast<jclass>(env->NewGlobalRef(clazz));
+    gFields.stringClassId = static_cast<jclass>(env->NewGlobalRef(clazz));
 
     FIND_CLASS(clazz, "java/util/ArrayList");
-    gFields.arraylistClassId = reinterpret_cast<jclass>(env->NewGlobalRef(clazz));
+    gFields.arraylistClassId = static_cast<jclass>(env->NewGlobalRef(clazz));
 }
 
 static void android_media_MediaDrm_native_setup(
