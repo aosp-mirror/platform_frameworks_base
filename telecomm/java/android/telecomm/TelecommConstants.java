@@ -70,10 +70,18 @@ public final class TelecommConstants {
             "android.intent.extra.INCOMING_CALL_EXTRAS";
 
     /**
-     * Optional extra for {@link TelephonyManager#ACTION_PHONE_STATE_CHANGED} containing the unique
-     * ID of the call.
+     * Optional extra for {@link TelephonyManager#ACTION_PHONE_STATE_CHANGED} containing the
+     * disconnect code.
      */
-    public static final String EXTRA_CALL_ID = "android.telecomm.extra.CALL_ID";
+    public static final String EXTRA_CALL_DISCONNECT_CAUSE =
+            "android.telecomm.extra.CALL_DISCONNECT_CAUSE";
+
+    /**
+     * Optional extra for {@link TelephonyManager#ACTION_PHONE_STATE_CHANGED} containing the
+     * disconnect message.
+     */
+    public static final String EXTRA_CALL_DISCONNECT_MESSAGE =
+            "android.telecomm.extra.CALL_DISCONNECT_MESSAGE";
 
     /**
      * The dual tone multi-frequency signaling character sent to indicate the dialing system should
