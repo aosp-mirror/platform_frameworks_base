@@ -678,13 +678,13 @@ public final class ViewRootImpl implements ViewParent,
         mAttachInfo.mHardwareAccelerationRequested = false;
 
         // Don't enable hardware acceleration when the application is in compatibility mode
-        if (false && mTranslator != null) return;
+        if (mTranslator != null) return;
 
         // Try to enable hardware acceleration if requested
         final boolean hardwareAccelerated =
                 (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
 
-        if (true || hardwareAccelerated) {
+        if (hardwareAccelerated) {
             if (!HardwareRenderer.isAvailable()) {
                 return;
             }
