@@ -118,7 +118,8 @@ public class EmergencyButton extends Button {
             } else {
                 // True if we need to show a secure screen (pin/pattern/SIM pin/SIM puk);
                 // hides emergency button on "Slide" screen if device is not secure.
-                enabled = mLockPatternUtils.isSecure();
+                enabled = mLockPatternUtils.isSecure() ||
+                        mContext.getResources().getBoolean(R.bool.config_showEmergencyButton);
             }
         }
         mLockPatternUtils.updateEmergencyCallButtonState(this, enabled, false);
