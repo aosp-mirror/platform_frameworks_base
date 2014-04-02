@@ -98,7 +98,8 @@ public abstract class CallServiceSelector extends Service {
 
     /**
      * Given a list of {@link CallServiceDescriptor}s, order them into a prioritized list and return
-     * them through {@link CallServiceSelectorAdapter#select}.
+     * them through
+     * {@link CallServiceSelectorAdapter#setSelectedCallServices(String,List)}.
      *
      * @param callInfo The call being placed using the {@link CallService}s.
      * @param descriptors The descriptors of the available {@link CallService}s with which to place
