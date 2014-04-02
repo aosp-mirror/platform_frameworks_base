@@ -89,6 +89,9 @@
                     android:id="@+id/latestItems"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:paddingTop="4dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
                     systemui:rowHeight="@dimen/notification_row_min_height"
                     />
             </ScrollView>
