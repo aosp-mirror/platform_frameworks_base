@@ -75,7 +75,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
         // Bind the views
         mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
         mBarView = (TaskBarView) findViewById(R.id.task_view_bar);
-        mBarView.mActivityIcon.setOnClickListener(this);
+        mBarView.mApplicationIcon.setOnClickListener(this);
         if (mTaskDataLoaded) {
             onTaskDataLoaded(false);
         }
