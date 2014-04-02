@@ -504,7 +504,7 @@ public class InputMethodUtils {
 
         private String mEnabledInputMethodsStrCache;
         private int mCurrentUserId;
-        private int[] mRelatedUserIds = new int[0];
+        private int[] mCurrentProfileIds = new int[0];
 
         private static void buildEnabledInputMethodsSettingString(
                 StringBuilder builder, Pair<String, ArrayList<String>> pair) {
@@ -537,17 +537,16 @@ public class InputMethodUtils {
             mCurrentUserId = userId;
         }
 
-        public void setRelatedUserIds(int[] relatedUserIds) {
+        public void setCurrentProfileIds(int[] currentProfileIds) {
             synchronized (this) {
-                mRelatedUserIds = relatedUserIds;
+                mCurrentProfileIds = currentProfileIds;
             }
         }
 
-        public boolean isRelatedToOrCurrentUser(int userId) {
+        public boolean isCurrentProfile(int userId) {
             synchronized (this) {
-                if (userId == mCurrentUserId) return true;
-                for (int i = 0; i < mRelatedUserIds.length; i++) {
-                    if (userId == mRelatedUserIds[i]) return true;
+                for (int i = 0; i < mCurrentProfileIds.length; i++) {
+                    if (userId == mCurrentProfileIds[i]) return true;
                 }
                 return false;
             }

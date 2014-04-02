@@ -445,7 +445,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return;
             } else if (Intent.ACTION_USER_ADDED.equals(action)
                     || Intent.ACTION_USER_REMOVED.equals(action)) {
-                updateRelatedUserIds();
+                updateCurrentProfileIds();
                 return;
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
@@ -689,7 +689,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // mSettings should be created before buildInputMethodListLocked
         mSettings = new InputMethodSettings(
                 mRes, context.getContentResolver(), mMethodMap, mMethodList, userId);
-        updateRelatedUserIds();
+        updateCurrentProfileIds();
         mFileManager = new InputMethodFileManager(mMethodMap, userId);
         mSwitchingController = new InputMethodSubtypeSwitchingController(mSettings);
         mSwitchingController.resetCircularListLocked(context);
@@ -805,7 +805,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private void switchUserLocked(int newUserId) {
         mSettings.setCurrentUserId(newUserId);
-        updateRelatedUserIds();
+        updateCurrentProfileIds();
         // InputMethodFileManager should be reset when the user is changed
         mFileManager = new InputMethodFileManager(mMethodMap, newUserId);
         final String defaultImiId = mSettings.getSelectedInputMethod();
@@ -826,14 +826,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    void updateRelatedUserIds() {
-        List<UserInfo> relatedUsers =
-                UserManager.get(mContext).getRelatedUsers(mSettings.getCurrentUserId());
-        int[] relatedUserIds = new int[relatedUsers.size()]; // relatedUsers will not be null
-        for (int i = 0; i < relatedUserIds.length; i++) {
-            relatedUserIds[i] = relatedUsers.get(i).id;
+    void updateCurrentProfileIds() {
+        List<UserInfo> profiles =
+                UserManager.get(mContext).getProfiles(mSettings.getCurrentUserId());
+        int[] currentProfileIds = new int[profiles.size()]; // profiles will not be null
+        for (int i = 0; i < currentProfileIds.length; i++) {
+            currentProfileIds[i] = profiles.get(i).id;
         }
-        mSettings.setRelatedUserIds(relatedUserIds);
+        mSettings.setCurrentProfileIds(currentProfileIds);
     }
 
     @Override
@@ -931,7 +931,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + mSettings.getCurrentUserId() + ", calling pid = " + Binder.getCallingPid()
                     + InputMethodUtils.getApiCallStack());
         }
-        if (uid == Process.SYSTEM_UID || mSettings.isRelatedToOrCurrentUser(userId)) {
+        if (uid == Process.SYSTEM_UID || mSettings.isCurrentProfile(userId)) {
             return true;
         }
 

@@ -341,18 +341,17 @@ final class ActivityStack {
     }
 
     /**
-     * Checks whether the userid is either the current user or a related user.
+     * Checks whether the userid is a profile of the current user.
      */
-    private boolean isRelatedToOrCurrentUserLocked(int userId) {
-        if (mCurrentUser == userId) return true;
-        for (int i = 0; i < mService.mRelatedUserIds.length; i++) {
-            if (mService.mRelatedUserIds[i] == userId) return true;
+    private boolean isCurrentProfileLocked(int userId) {
+        for (int i = 0; i < mService.mCurrentProfileIds.length; i++) {
+            if (mService.mCurrentProfileIds[i] == userId) return true;
         }
         return false;
     }
 
     boolean okToShowLocked(ActivityRecord r) {
-        return isRelatedToOrCurrentUserLocked(r.userId)
+        return isCurrentProfileLocked(r.userId)
                 || (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0;
     }
 
@@ -571,7 +570,7 @@ final class ActivityStack {
 
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             TaskRecord task = mTaskHistory.get(taskNdx);
-            if (!isRelatedToOrCurrentUserLocked(task.userId)) {
+            if (!isCurrentProfileLocked(task.userId)) {
                 return null;
             }
             final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -602,7 +601,7 @@ final class ActivityStack {
         int index = mTaskHistory.size();
         for (int i = 0; i < index; ) {
             TaskRecord task = mTaskHistory.get(i);
-            if (isRelatedToOrCurrentUserLocked(task.userId)) {
+            if (isCurrentProfileLocked(task.userId)) {
                 if (DEBUG_TASKS) Slog.d(TAG, "switchUserLocked: stack=" + getStackId() +
                         " moving " + task + " to top");
                 mTaskHistory.remove(i);
@@ -1766,10 +1765,10 @@ final class ActivityStack {
         mTaskHistory.remove(task);
         // Now put task at top.
         int stackNdx = mTaskHistory.size();
-        if (!isRelatedToOrCurrentUserLocked(task.userId)) {
+        if (!isCurrentProfileLocked(task.userId)) {
             // Put non-current user tasks below current user tasks.
             while (--stackNdx >= 0) {
-                if (!isRelatedToOrCurrentUserLocked(mTaskHistory.get(stackNdx).userId)) {
+                if (!isCurrentProfileLocked(mTaskHistory.get(stackNdx).userId)) {
                     break;
                 }
             }
