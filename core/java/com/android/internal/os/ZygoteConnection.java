@@ -24,7 +24,6 @@ import android.os.SystemProperties;
 import android.util.Log;
 
 import dalvik.system.PathClassLoader;
-import dalvik.system.Zygote;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -807,7 +806,7 @@ class ZygoteConnection {
     /**
      * Applies invoke-with system properties to the zygote arguments.
      *
-     * @param parsedArgs non-null; zygote args
+     * @param args non-null; zygote args
      */
     public static void applyInvokeWithSystemProperty(Arguments args) {
         if (args.invokeWith == null && args.niceName != null) {
