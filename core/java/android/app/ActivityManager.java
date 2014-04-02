@@ -605,11 +605,11 @@ public class ActivityManager {
     public static final int RECENT_IGNORE_UNAVAILABLE = 0x0002;
 
     /**
-     * Provides a list that also contains recent tasks for user
-     * and related users.
+     * Provides a list that contains recent tasks for all
+     * profiles of a user.
      * @hide
      */
-    public static final int RECENT_INCLUDE_RELATED = 0x0004;
+    public static final int RECENT_INCLUDE_PROFILES = 0x0004;
 
     /**
      * Return a list of the tasks that the user has recently launched, with

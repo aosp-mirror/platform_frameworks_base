@@ -410,20 +410,29 @@ public class UserManager {
     }
 
     /**
-     * Creates a user with the specified name and options.
+     * Renamed, just present to avoid multi project commit.
+     * TODO delete.
+     * @hide
+     */
+    public UserInfo createRelatedUser(String name, int flags, int relatedUserId) {
+        return createProfileForUser(name, flags, relatedUserId);
+    }
+
+    /**
+     * Creates a user with the specified name and options as a profile of another user.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
      * @param name the user's name
      * @param flags flags that identify the type of user and other properties.
      * @see UserInfo
-     * @param relatedUserId new user will be related to this user id.
+     * @param userHandle new user will be a profile of this use.
      *
      * @return the UserInfo object for the created user, or null if the user could not be created.
      * @hide
      */
-    public UserInfo createRelatedUser(String name, int flags, int relatedUserId) {
+    public UserInfo createProfileForUser(String name, int flags, int userHandle) {
         try {
-            return mService.createRelatedUser(name, flags, relatedUserId);
+            return mService.createProfileForUser(name, flags, userHandle);
         } catch (RemoteException re) {
             Log.w(TAG, "Could not create a user", re);
             return null;
@@ -454,15 +463,26 @@ public class UserManager {
     }
 
     /**
-     * Returns information for all users related to userId
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
-     * @param userHandle users related to this user id will be returned.
-     * @return the list of related users.
+     * Renaming, left to avoid multi project commit.
+     * TODO Delete.
      * @hide
      */
     public List<UserInfo> getRelatedUsers(int userHandle) {
+        return getProfiles(userHandle);
+    }
+
+    /**
+     * Returns list of the profiles of userHandle including
+     * userHandle itself.
+     * 
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * @param userHandle profiles of this user will be returned.
+     * @return the list of profiles.
+     * @hide
+     */
+    public List<UserInfo> getProfiles(int userHandle) {
         try {
-            return mService.getRelatedUsers(userHandle);
+            return mService.getProfiles(userHandle);
         } catch (RemoteException re) {
             Log.w(TAG, "Could not get user list", re);
             return null;
