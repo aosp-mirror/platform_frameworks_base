@@ -1110,8 +1110,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             Entry ent = mNotificationData.get(N-i-1);
             if (!(provisioned || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
 
-            // TODO How do we want to badge notifcations from related users.
-            if (!notificationIsForCurrentOrRelatedUser(ent.notification)) continue;
+            // TODO How do we want to badge notifcations from profiles.
+            if (!notificationIsForCurrentProfiles(ent.notification)) continue;
 
             final int vis = ent.notification.getNotification().visibility;
             if (vis != Notification.VISIBILITY_SECRET) {
@@ -1170,7 +1170,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             Entry ent = mNotificationData.get(N-i-1);
             if (!((provisioned && ent.notification.getScore() >= HIDE_ICONS_BELOW_SCORE)
                     || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
-            if (!notificationIsForCurrentOrRelatedUser(ent.notification)) continue;
+            if (!notificationIsForCurrentProfiles(ent.notification)) continue;
             if (isLockscreenPublicMode()
                     && ent.notification.getNotification().visibility
                             == Notification.VISIBILITY_SECRET
@@ -2165,7 +2165,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (!isDeviceProvisioned()) return;
 
         // not for you
-        if (!notificationIsForCurrentOrRelatedUser(n)) return;
+        if (!notificationIsForCurrentProfiles(n)) return;
 
         // Show the ticker if one is requested. Also don't do this
         // until status bar window is attached to the window manager,

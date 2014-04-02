@@ -304,14 +304,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Current user when multi-user is enabled. Don't show windows of
-     * non-current user. Also see mRelatedUserIds.
+     * non-current user. Also see mCurrentProfileIds.
      */
     int mCurrentUserId;
     /**
-     * Users related to the current user. These are also allowed to show windows
+     * Users that are profiles of the current user. These are also allowed to show windows
      * on the current user.
      */
-    int[] mRelatedUserIds = new int[0];
+    int[] mCurrentProfileIds = new int[0];
 
     final Context mContext;
 
@@ -5231,16 +5231,16 @@ public class WindowManagerService extends IWindowManager.Stub
         ShutdownThread.rebootSafeMode(mContext, confirm);
     }
 
-    public void updateRelatedUserIds(final int[] relatedUserIds) {
+    public void setCurrentProfileIds(final int[] currentProfileIds) {
         synchronized (mWindowMap) {
-            mRelatedUserIds = relatedUserIds;
+            mCurrentProfileIds = currentProfileIds;
         }
     }
 
-    public void setCurrentUser(final int newUserId, final int[] relatedUserIds) {
+    public void setCurrentUser(final int newUserId, final int[] currentProfileIds) {
         synchronized (mWindowMap) {
             mCurrentUserId = newUserId;
-            mRelatedUserIds = relatedUserIds;
+            mCurrentProfileIds = currentProfileIds;
             mAppTransition.setCurrentUser(newUserId);
             mPolicy.setCurrentUserLw(newUserId);
 
@@ -5256,10 +5256,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /* Called by WindowState */
-    boolean isRelatedToOrCurrentUserLocked(int userId) {
-        if (userId == mCurrentUserId) return true;
-        for (int i = 0; i < mRelatedUserIds.length; i++) {
-            if (mRelatedUserIds[i] == userId) return true;
+    boolean isCurrentProfileLocked(int userId) {
+        for (int i = 0; i < mCurrentProfileIds.length; i++) {
+            if (mCurrentProfileIds[i] == userId) return true;
         }
         return false;
     }

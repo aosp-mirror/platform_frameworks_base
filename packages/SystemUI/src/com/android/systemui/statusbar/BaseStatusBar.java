@@ -134,7 +134,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected PopupMenu mNotificationBlamePopup;
 
     protected int mCurrentUserId = 0;
-    final protected SparseArray<UserInfo> mRelatedUsers = new SparseArray<UserInfo>();
+    final protected SparseArray<UserInfo> mCurrentProfiles = new SparseArray<UserInfo>();
 
     protected int mLayoutDirection = -1; // invalid
     private Locale mLocale;
@@ -240,21 +240,21 @@ public abstract class BaseStatusBar extends SystemUI implements
             String action = intent.getAction();
             if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                updateRelatedUserCache();
+                updateCurrentProfilesCache();
                 if (true) Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
                 userSwitched(mCurrentUserId);
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
-                updateRelatedUserCache();
+                updateCurrentProfilesCache();
             }
         }
     };
 
-    private void updateRelatedUserCache() {
-        synchronized (mRelatedUsers) {
-            mRelatedUsers.clear();
+    private void updateCurrentProfilesCache() {
+        synchronized (mCurrentProfiles) {
+            mCurrentProfiles.clear();
             if (mUserManager != null) {
-                for (UserInfo related : mUserManager.getRelatedUsers(mCurrentUserId)) {
-                    mRelatedUsers.put(related.id, related);
+                for (UserInfo user : mUserManager.getProfiles(mCurrentUserId)) {
+                    mCurrentProfiles.put(user.id, user);
                 }
             }
         }
@@ -357,24 +357,23 @@ public abstract class BaseStatusBar extends SystemUI implements
         filter.addAction(Intent.ACTION_USER_ADDED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
-        updateRelatedUserCache();
+        updateCurrentProfilesCache();
     }
 
     public void userSwitched(int newUserId) {
         // should be overridden
     }
 
-    public boolean notificationIsForCurrentOrRelatedUser(StatusBarNotification n) {
+    public boolean notificationIsForCurrentProfiles(StatusBarNotification n) {
         final int thisUserId = mCurrentUserId;
         final int notificationUserId = n.getUserId();
         if (DEBUG && MULTIUSER_DEBUG) {
             Log.v(TAG, String.format("%s: current userid: %d, notification userid: %d",
                     n, thisUserId, notificationUserId));
         }
-        synchronized (mRelatedUsers) {
+        synchronized (mCurrentProfiles) {
             return notificationUserId == UserHandle.USER_ALL
-                    || thisUserId == notificationUserId
-                    || mRelatedUsers.get(notificationUserId) != null;
+                    || mCurrentProfiles.get(notificationUserId) != null;
         }
     }
 
@@ -1254,7 +1253,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         updateNotificationVetoButton(oldEntry.row, notification);
 
         // Is this for you?
-        boolean isForCurrentUser = notificationIsForCurrentOrRelatedUser(notification);
+        boolean isForCurrentUser = notificationIsForCurrentProfiles(notification);
         if (DEBUG) Log.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
 
         // Restart the ticker if it's still running

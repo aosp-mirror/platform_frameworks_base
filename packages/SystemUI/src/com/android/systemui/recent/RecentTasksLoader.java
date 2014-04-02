@@ -368,7 +368,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
         final ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
 
         final List<ActivityManager.RecentTaskInfo> recentTasks = am.getRecentTasksForUser(1,
-                ActivityManager.RECENT_IGNORE_UNAVAILABLE | ActivityManager.RECENT_INCLUDE_RELATED,
+                ActivityManager.RECENT_IGNORE_UNAVAILABLE | ActivityManager.RECENT_INCLUDE_PROFILES,
                 UserHandle.CURRENT.getIdentifier());
         TaskDescription item = null;
         if (recentTasks.size() > 0) {
@@ -441,7 +441,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
 
                 final List<ActivityManager.RecentTaskInfo> recentTasks =
                         am.getRecentTasks(MAX_TASKS, ActivityManager.RECENT_IGNORE_UNAVAILABLE
-                        | ActivityManager.RECENT_INCLUDE_RELATED);
+                        | ActivityManager.RECENT_INCLUDE_PROFILES);
                 int numTasks = recentTasks.size();
                 ActivityInfo homeInfo = new Intent(Intent.ACTION_MAIN)
                         .addCategory(Intent.CATEGORY_HOME).resolveActivityInfo(pm, 0);

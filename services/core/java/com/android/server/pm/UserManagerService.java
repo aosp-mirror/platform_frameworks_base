@@ -92,7 +92,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_NEXT_SERIAL_NO = "nextSerialNumber";
     private static final String ATTR_PARTIAL = "partial";
     private static final String ATTR_USER_VERSION = "version";
-    private static final String ATTR_RELATED_GROUP_ID = "relatedGroupId";
+    private static final String ATTR_PROFILE_GROUP_ID = "profileGroupId";
     private static final String TAG_USERS = "users";
     private static final String TAG_USER = "user";
     private static final String TAG_RESTRICTIONS = "restrictions";
@@ -257,26 +257,26 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public List<UserInfo> getRelatedUsers(int userId) {
+    public List<UserInfo> getProfiles(int userId) {
         checkManageUsersPermission("query users");
         synchronized (mPackagesLock) {
             UserInfo user = getUserInfoLocked(userId);
             ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
             for (int i = 0; i < mUsers.size(); i++) {
-                UserInfo ui = mUsers.valueAt(i);
-                if (!areRelatedUsers(user, ui)) {
+                UserInfo profile = mUsers.valueAt(i);
+                if (!isProfileOf(user, profile)) {
                     continue;
                 }
-                users.add(ui);
+                users.add(profile);
             }
             return users;
         }
     }
 
-    private boolean areRelatedUsers(UserInfo user1, UserInfo user2) {
-        return user1.relatedGroupId != UserInfo.NO_RELATED_GROUP_ID &&
-                user1.relatedGroupId == user2.relatedGroupId &&
-                user1.id != user2.id;
+    private boolean isProfileOf(UserInfo user, UserInfo profile) {
+        return user.id == profile.id ||
+                (user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
+                && user.profileGroupId == profile.profileGroupId);
     }
 
     @Override
@@ -684,9 +684,9 @@ public class UserManagerService extends IUserManager.Stub {
             if (userInfo.partial) {
                 serializer.attribute(null, ATTR_PARTIAL, "true");
             }
-            if (userInfo.relatedGroupId != UserInfo.NO_RELATED_GROUP_ID) {
-                serializer.attribute(null, ATTR_RELATED_GROUP_ID,
-                        Integer.toString(userInfo.relatedGroupId));
+            if (userInfo.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID) {
+                serializer.attribute(null, ATTR_PROFILE_GROUP_ID,
+                        Integer.toString(userInfo.profileGroupId));
             }
 
             serializer.startTag(null, TAG_NAME);
@@ -771,7 +771,7 @@ public class UserManagerService extends IUserManager.Stub {
         long salt = 0L;
         String pinHash = null;
         int failedAttempts = 0;
-        int relatedGroupId = UserInfo.NO_RELATED_GROUP_ID;
+        int profileGroupId = UserInfo.NO_PROFILE_GROUP_ID;
         long lastAttemptTime = 0L;
         boolean partial = false;
         Bundle restrictions = new Bundle();
@@ -809,8 +809,14 @@ public class UserManagerService extends IUserManager.Stub {
                 pinHash = parser.getAttributeValue(null, ATTR_PIN_HASH);
                 failedAttempts = readIntAttribute(parser, ATTR_FAILED_ATTEMPTS, 0);
                 lastAttemptTime = readLongAttribute(parser, ATTR_LAST_RETRY_MS, 0L);
-                relatedGroupId = readIntAttribute(parser, ATTR_RELATED_GROUP_ID,
-                        UserInfo.NO_RELATED_GROUP_ID);
+                profileGroupId = readIntAttribute(parser, ATTR_PROFILE_GROUP_ID,
+                        UserInfo.NO_PROFILE_GROUP_ID);
+                if (profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
+                    // This attribute was added and renamed during development of L.
+                    // TODO Remove upgrade path by 1st May 2014
+                    profileGroupId = readIntAttribute(parser, "relatedGroupId",
+                            UserInfo.NO_PROFILE_GROUP_ID);
+                }
                 String valueString = parser.getAttributeValue(null, ATTR_PARTIAL);
                 if ("true".equals(valueString)) {
                     partial = true;
@@ -849,7 +855,7 @@ public class UserManagerService extends IUserManager.Stub {
             userInfo.creationTime = creationTime;
             userInfo.lastLoggedInTime = lastLoggedInTime;
             userInfo.partial = partial;
-            userInfo.relatedGroupId = relatedGroupId;
+            userInfo.profileGroupId = profileGroupId;
             mUserRestrictions.append(id, restrictions);
             if (salt != 0L) {
                 RestrictionsPinState pinState = mRestrictionsPinStates.get(id);
@@ -964,25 +970,25 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private int getNextRelatedGroupIdLocked() {
-        int maxGroupId = UserInfo.NO_RELATED_GROUP_ID;
+    private int getNextProfileGroupIdLocked() {
+        int maxGroupId = UserInfo.NO_PROFILE_GROUP_ID;
         for (int i = 0; i < mUsers.size(); i++) {
             UserInfo ui = mUsers.valueAt(i);
-            if (maxGroupId < ui.relatedGroupId) {
-                maxGroupId = ui.relatedGroupId;
+            if (maxGroupId < ui.profileGroupId) {
+                maxGroupId = ui.profileGroupId;
             }
         }
         return maxGroupId + 1;
     }
 
     @Override
-    public UserInfo createRelatedUser(String name, int flags, int relatedUserId) {
+    public UserInfo createProfileForUser(String name, int flags, int userId) {
         checkManageUsersPermission("Only the system can create users");
-        if (relatedUserId != UserHandle.USER_OWNER) {
-            Slog.w(LOG_TAG, "Only user owner can have related users");
+        if (userId != UserHandle.USER_OWNER) {
+            Slog.w(LOG_TAG, "Only user owner can have profiles");
             return null;
         }
-        return createUserInternal(name, flags, relatedUserId);
+        return createUserInternal(name, flags, userId);
     }
 
     @Override
@@ -991,16 +997,16 @@ public class UserManagerService extends IUserManager.Stub {
         return createUserInternal(name, flags, UserHandle.USER_NULL);
     }
 
-    private UserInfo createUserInternal(String name, int flags, int relatedUserId) {
+    private UserInfo createUserInternal(String name, int flags, int profileId) {
         final long ident = Binder.clearCallingIdentity();
         UserInfo userInfo = null;
         try {
             synchronized (mInstallLock) {
                 synchronized (mPackagesLock) {
-                    UserInfo relatedUser = null;
-                    if (relatedUserId != UserHandle.USER_NULL) {
-                        relatedUser = getUserInfoLocked(relatedUserId);
-                        if (relatedUser == null) return null;
+                    UserInfo profile = null;
+                    if (profileId != UserHandle.USER_NULL) {
+                        profile = getUserInfoLocked(profileId);
+                        if (profile == null) return null;
                     }
                     if (isUserLimitReachedLocked()) return null;
                     int userId = getNextAvailableIdLocked();
@@ -1013,12 +1019,12 @@ public class UserManagerService extends IUserManager.Stub {
                     Environment.getUserSystemDirectory(userInfo.id).mkdirs();
                     mUsers.put(userId, userInfo);
                     writeUserListLocked();
-                    if (relatedUser != null) {
-                        if (relatedUser.relatedGroupId == UserInfo.NO_RELATED_GROUP_ID) {
-                            relatedUser.relatedGroupId = getNextRelatedGroupIdLocked();
+                    if (profile != null) {
+                        if (profile.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
+                            profile.profileGroupId = getNextProfileGroupIdLocked();
+                            writeUserLocked(profile);
                         }
-                        userInfo.relatedGroupId = relatedUser.relatedGroupId;
-                        writeUserLocked(relatedUser);
+                        userInfo.profileGroupId = profile.profileGroupId;
                     }
                     writeUserLocked(userInfo);
                     mPm.createNewUserLILPw(userId, userPath);

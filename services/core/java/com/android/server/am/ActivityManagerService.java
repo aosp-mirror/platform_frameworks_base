@@ -1019,7 +1019,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     final ActivityThread mSystemThread;
 
     int mCurrentUserId = 0;
-    int[] mRelatedUserIds = new int[0]; // Accessed by ActivityStack
+    int[] mCurrentProfileIds = new int[0]; // Accessed by ActivityStack
     private UserManagerService mUserManager;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
@@ -1078,7 +1078,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int IMMERSIVE_MODE_LOCK_MSG = 37;
     static final int PERSIST_URI_GRANTS_MSG = 38;
     static final int REQUEST_ALL_PSS_MSG = 39;
-    static final int START_RELATED_USERS_MSG = 40;
+    static final int START_PROFILES_MSG = 40;
     static final int UPDATE_TIME = 41;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
@@ -1693,9 +1693,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
                 break;
             }
-            case START_RELATED_USERS_MSG: {
+            case START_PROFILES_MSG: {
                 synchronized (ActivityManagerService.this) {
-                    startRelatedUsersLocked();
+                    startProfilesLocked();
                 }
                 break;
             }
@@ -5208,7 +5208,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 userId);
                     }
                 }
-                scheduleStartRelatedUsersLocked();
+                scheduleStartProfilesLocked();
             }
         }
     }
@@ -6863,8 +6863,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                             maxNum < N ? maxNum : N);
 
             final Set<Integer> includedUsers;
-            if ((flags & ActivityManager.RECENT_INCLUDE_RELATED) != 0) {
-                includedUsers = getRelatedUsersLocked(userId);
+            if ((flags & ActivityManager.RECENT_INCLUDE_PROFILES) != 0) {
+                includedUsers = getProfileIdsLocked(userId);
             } else {
                 includedUsers = new HashSet<Integer>();
             }
@@ -16317,19 +16317,19 @@ public final class ActivityManagerService extends ActivityManagerNative
      * user switch happens or when a new related user is started in the
      * background.
      */
-    private void updateRelatedUserIdsLocked() {
-        final List<UserInfo> relatedUsers = getUserManagerLocked().getRelatedUsers(mCurrentUserId);
-        int[] relatedUserIds = new int[relatedUsers.size()]; // relatedUsers will not be null
-        for (int i = 0; i < relatedUserIds.length; i++) {
-            relatedUserIds[i] = relatedUsers.get(i).id;
+    private void updateCurrentProfileIdsLocked() {
+        final List<UserInfo> profiles = getUserManagerLocked().getProfiles(mCurrentUserId);
+        int[] currentProfileIds = new int[profiles.size()]; // profiles will not be null
+        for (int i = 0; i < currentProfileIds.length; i++) {
+            currentProfileIds[i] = profiles.get(i).id;
         }
-        mRelatedUserIds = relatedUserIds;
+        mCurrentProfileIds = currentProfileIds;
     }
 
-    private Set getRelatedUsersLocked(int userId) {
+    private Set getProfileIdsLocked(int userId) {
         Set userIds = new HashSet<Integer>();
-        final List<UserInfo> relatedUsers = getUserManagerLocked().getRelatedUsers(userId);
-        for (UserInfo user : relatedUsers) {
+        final List<UserInfo> profiles = getUserManagerLocked().getProfiles(userId);
+        for (UserInfo user : profiles) {
             userIds.add(Integer.valueOf(user.id));
         }
         return userIds;
@@ -16390,15 +16390,15 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 if (foreground) {
                     mCurrentUserId = userId;
-                    updateRelatedUserIdsLocked();
-                    mWindowManager.setCurrentUser(userId, mRelatedUserIds);
+                    updateCurrentProfileIdsLocked();
+                    mWindowManager.setCurrentUser(userId, mCurrentProfileIds);
                     // Once the internal notion of the active user has switched, we lock the device
                     // with the option to show the user switcher on the keyguard.
                     mWindowManager.lockNow(null);
                 } else {
                     final Integer currentUserIdInt = Integer.valueOf(mCurrentUserId);
-                    updateRelatedUserIdsLocked();
-                    mWindowManager.updateRelatedUserIds(mRelatedUserIds);
+                    updateCurrentProfileIdsLocked();
+                    mWindowManager.setCurrentProfileIds(mCurrentProfileIds);
                     mUserLru.remove(currentUserIdInt);
                     mUserLru.add(currentUserIdInt);
                 }
@@ -16618,20 +16618,21 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    void scheduleStartRelatedUsersLocked() {
-        if (!mHandler.hasMessages(START_RELATED_USERS_MSG)) {
-            mHandler.sendMessageDelayed(mHandler.obtainMessage(START_RELATED_USERS_MSG),
+    void scheduleStartProfilesLocked() {
+        if (!mHandler.hasMessages(START_PROFILES_MSG)) {
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(START_PROFILES_MSG),
                     DateUtils.SECOND_IN_MILLIS);
         }
     }
 
-    void startRelatedUsersLocked() {
-        if (DEBUG_MU) Slog.i(TAG_MU, "startRelatedUsersLocked");
-        List<UserInfo> relatedUsers = getUserManagerLocked().getRelatedUsers(mCurrentUserId);
-        List<UserInfo> toStart = new ArrayList<UserInfo>(relatedUsers.size());
-        for (UserInfo relatedUser : relatedUsers) {
-            if ((relatedUser.flags & UserInfo.FLAG_INITIALIZED) == UserInfo.FLAG_INITIALIZED) {
-                toStart.add(relatedUser);
+    void startProfilesLocked() {
+        if (DEBUG_MU) Slog.i(TAG_MU, "startProfilesLocked");
+        List<UserInfo> profiles = getUserManagerLocked().getProfiles(mCurrentUserId);
+        List<UserInfo> toStart = new ArrayList<UserInfo>(profiles.size());
+        for (UserInfo user : profiles) {
+            if ((user.flags & UserInfo.FLAG_INITIALIZED) == UserInfo.FLAG_INITIALIZED
+                    && user.id != mCurrentUserId) {
+                toStart.add(user);
             }
         }
         final int n = toStart.size();
@@ -16640,7 +16641,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             startUserInBackground(toStart.get(i).id);
         }
         if (i < n) {
-            Slog.w(TAG_MU, "More related users than MAX_RUNNING_USERS");
+            Slog.w(TAG_MU, "More profiles than MAX_RUNNING_USERS");
         }
     }
 
@@ -16659,7 +16660,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         true, false, MY_PID, Process.SYSTEM_UID, userId);
             }
 
-            startRelatedUsersLocked();
+            startProfilesLocked();
 
             int num = mUserLru.size();
             int i = 0;
