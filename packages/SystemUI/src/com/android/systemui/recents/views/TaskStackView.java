@@ -22,7 +22,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -40,6 +39,7 @@ import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsTaskLoader;
+import com.android.systemui.recents.SystemServicesProxy;
 import com.android.systemui.recents.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
@@ -234,7 +234,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         // When we are picking up a new view from the view pool, prepare it for any
                         // following animation by putting it in a reasonable place
                         if (mStackViewsAnimationDuration > 0 && i != 0) {
-                            int fromIndex = (transform.t < 0) ? (i - 1) : (i + 1);
+                            int fromIndex = (transform.t < 0) ? (visibleRange[0] - 1) :
+                                    (visibleRange[1] + 1);
                             tv.updateViewPropertiesToTaskTransform(null,
                                     getStackTransform(fromIndex, stackScroll), 0);
                         }
@@ -1268,12 +1269,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         loader.deleteTaskData(task);
 
         // Remove the task from activity manager
-        final ActivityManager am = (ActivityManager)
-                activity.getSystemService(Context.ACTIVITY_SERVICE);
-        if (am != null) {
-            am.removeTask(tv.getTask().key.id,
-                    ActivityManager.REMOVE_TASK_KILL_PROCESS);
-        }
+        RecentsTaskLoader.getInstance().getSystemServicesProxy().removeTask(tv.getTask().key.id);
 
         // If there are no remaining tasks, then either unfilter the current stack, or just close
         // the activity if there are no filtered stacks
