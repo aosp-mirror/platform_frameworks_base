@@ -177,6 +177,7 @@ extern int register_android_content_res_Configuration(JNIEnv* env);
 extern int register_android_animation_PropertyValuesHolder(JNIEnv *env);
 extern int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env);
 extern int register_com_android_internal_net_NetworkStatsFactory(JNIEnv *env);
+extern int register_com_android_internal_os_Zygote(JNIEnv *env);
 
 static AndroidRuntime* gCurRuntime = NULL;
 
@@ -1241,6 +1242,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_net_wifi_WifiNative),
     REG_JNI(register_android_os_MemoryFile),
     REG_JNI(register_com_android_internal_os_ZygoteInit),
+    REG_JNI(register_com_android_internal_os_Zygote),
     REG_JNI(register_android_hardware_Camera),
     REG_JNI(register_android_hardware_camera2_CameraMetadata),
     REG_JNI(register_android_hardware_SensorManager),

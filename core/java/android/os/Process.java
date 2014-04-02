@@ -16,10 +16,11 @@
 
 package android.os;
 
-import android.net.LocalSocketAddress;
 import android.net.LocalSocket;
+import android.net.LocalSocketAddress;
 import android.util.Log;
-import dalvik.system.Zygote;
+
+import com.android.internal.os.Zygote;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
