@@ -289,9 +289,8 @@ LOCAL_SRC_FILES += \
 	telecomm/java/com/android/internal/telecomm/ICallServiceAdapter.aidl \
 	telecomm/java/com/android/internal/telecomm/ICallServiceLookupResponse.aidl \
 	telecomm/java/com/android/internal/telecomm/ICallServiceProvider.aidl \
-	telecomm/java/com/android/internal/telecomm/ICallServiceSelectionResponse.aidl \
 	telecomm/java/com/android/internal/telecomm/ICallServiceSelector.aidl \
-	telecomm/java/com/android/internal/telecomm/ICallSwitchabilityResponse.aidl \
+	telecomm/java/com/android/internal/telecomm/ICallServiceSelectorAdapter.aidl \
 	telecomm/java/com/android/internal/telecomm/IInCallAdapter.aidl \
 	telecomm/java/com/android/internal/telecomm/IInCallService.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl \

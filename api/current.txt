@@ -24945,17 +24945,14 @@ package android.telecomm {
 
   public abstract class CallServiceSelector extends android.app.Service {
     ctor protected CallServiceSelector();
-    method protected abstract void isSwitchable(android.telecomm.CallInfo, android.telecomm.CallServiceSelector.CallSwitchabilityResponse);
     method public final android.os.IBinder onBind(android.content.Intent);
-    method protected abstract void select(android.telecomm.CallInfo, java.util.List<android.telecomm.CallServiceDescriptor>, android.telecomm.CallServiceSelector.CallServiceSelectionResponse);
+    method protected abstract void select(android.telecomm.CallInfo, java.util.List<android.telecomm.CallServiceDescriptor>);
+    method protected abstract void setCallServiceSelectorAdapter(android.telecomm.CallServiceSelectorAdapter);
   }
 
-  public static abstract interface CallServiceSelector.CallServiceSelectionResponse {
-    method public abstract void setSelectedCallServices(java.util.List<android.telecomm.CallServiceDescriptor>);
-  }
-
-  public static abstract interface CallServiceSelector.CallSwitchabilityResponse {
-    method public abstract void setSwitchable(boolean);
+  public final class CallServiceSelectorAdapter {
+    method public void setHandoffInfo(java.lang.String, android.net.Uri, android.os.Bundle);
+    method public void setSelectedCallServices(java.lang.String, java.util.List<android.telecomm.CallServiceDescriptor>);
   }
 
   public final class CallState extends java.lang.Enum {

@@ -16,23 +16,24 @@
 
 package com.android.internal.telecomm;
 
-import android.os.IBinder;
+import android.net.Uri;
+import android.os.Bundle;
+import android.telecomm.CallInfo;
 import android.telecomm.CallServiceDescriptor;
+
 import java.util.List;
 
 /**
- * Used by {@link ICallServiceSelector} to return the preferred list of {@link ICallService}
- * implementations with which to connect the corresponding outgoing call.
- * {@hide}
+ * Internal remote interface for call service selector adapter.
+ *
+ * @see android.telecomm.CallServiceSelectorAdapter
+ *
+ * @hide
  */
-oneway interface ICallServiceSelectionResponse {
-    /**
-     * Records the sorted set of call services that are preferred by the corresponding
-     * call-service selector.
-     *
-     * @param selectedCallServiceDescriptors The prioritized list of preferred call-service
-     *        descriptors to use for completing the call.
-     */
-    void setSelectedCallServiceDescriptors(
+oneway interface ICallServiceSelectorAdapter {
+    void setSelectedCallServices(
+            String callId,
             in List<CallServiceDescriptor> selectedCallServiceDescriptors);
+
+    void setHandoffInfo(String callId, in Uri handle, in Bundle extras);
 }

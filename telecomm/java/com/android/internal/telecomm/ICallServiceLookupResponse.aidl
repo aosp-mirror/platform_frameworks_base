@@ -21,16 +21,12 @@ import android.telecomm.CallServiceDescriptor;
 import java.util.List;
 
 /**
- * Used by {@link ICallServiceProvider} to return a list of {@link CallServiceDescriptor}s.
- * {@hide}
+ * Internal remote interface for call service lookup response.
+ *
+ * @see android.telecomm.CallServiceLookupResponse
+ *
+ * @hide
  */
 oneway interface ICallServiceLookupResponse {
-    /**
-     * Passes the sorted list of preferred {@link CallServiceDescriptor}s back to Telecomm.  Used
-     * in the context of attempting to place a pending outgoing call.
-     *
-     * @param callServiceDescriptors The set of call-service descriptors from
-     * {@link ICallServiceProvider}.
-     */
     void setCallServiceDescriptors(in List<CallServiceDescriptor> callServiceDescriptors);
 }
