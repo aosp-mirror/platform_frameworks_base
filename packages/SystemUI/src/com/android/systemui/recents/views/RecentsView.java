@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents.views;
 
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -30,6 +29,7 @@ import android.widget.FrameLayout;
 import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsTaskLoader;
 import com.android.systemui.recents.model.SpaceNode;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
@@ -246,14 +246,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
                 if (task.isActive) {
                     // Bring an active task to the foreground
-                    ActivityManager am = (ActivityManager)
-                            stackView.getContext().getSystemService(Context.ACTIVITY_SERVICE);
-                    if (opts != null) {
-                        am.moveTaskToFront(task.key.id, ActivityManager.MOVE_TASK_WITH_HOME,
-                                opts.toBundle());
-                    } else {
-                        am.moveTaskToFront(task.key.id, ActivityManager.MOVE_TASK_WITH_HOME);
-                    }
+                    RecentsTaskLoader.getInstance().getSystemServicesProxy()
+                            .moveTaskToFront(task.key.id, opts);
                 } else {
                     // Launch the activity with the desired animation
                     Intent i = new Intent(task.key.baseIntent);
