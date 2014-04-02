@@ -73,7 +73,7 @@
             </intent-filter>
 
         </activity>
-        
+
         <activity
             android:name="VectorCheckbox"
             android:label="On a Checkbox" >
