@@ -152,10 +152,10 @@ class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implement
         final int headerBackgroundColor = a.getColor(
                 R.styleable.TimePicker_headerBackgroundColor, 0);
 
-        a.recycle();
-
         final int layoutResourceId = a.getResourceId(
                 R.styleable.TimePicker_internalLayout, R.layout.time_picker_holo);
+
+        a.recycle();
 
         final LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
