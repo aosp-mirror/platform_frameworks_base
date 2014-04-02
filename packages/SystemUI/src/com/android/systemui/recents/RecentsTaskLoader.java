@@ -20,7 +20,6 @@ import android.app.ActivityManager;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -109,6 +108,7 @@ class TaskResourceLoader implements Runnable {
     Handler mLoadThreadHandler;
     Handler mMainThreadHandler;
 
+    SystemServicesProxy mSystemServicesProxy;
     TaskResourceLoadQueue mLoadQueue;
     DrawableLruCache mIconCache;
     BitmapLruCache mThumbnailCache;
@@ -135,6 +135,7 @@ class TaskResourceLoader implements Runnable {
         Console.log(Constants.DebugFlags.App.TaskDataLoader, "[TaskResourceLoader|start]");
         mContext = context;
         mCancelled = false;
+        mSystemServicesProxy = new SystemServicesProxy(context);
         // Notify the load thread to start loading
         synchronized(mLoadThread) {
             mLoadThread.notifyAll();
@@ -146,6 +147,7 @@ class TaskResourceLoader implements Runnable {
         Console.log(Constants.DebugFlags.App.TaskDataLoader, "[TaskResourceLoader|stop]");
         // Mark as cancelled for the thread to pick up
         mCancelled = true;
+        mSystemServicesProxy = null;
         // If we are waiting for the load queue for more tasks, then we can just reset the
         // Context now, since nothing is using it
         if (mWaitingOnLoadQueue) {
@@ -175,66 +177,60 @@ class TaskResourceLoader implements Runnable {
                     }
                 }
             } else {
+                SystemServicesProxy ssp = mSystemServicesProxy;
+
                 // Load the next item from the queue
                 Pair<Task, Boolean> nextTaskData = mLoadQueue.nextTask();
                 final Task t = nextTaskData.first;
                 final boolean forceLoadTask = nextTaskData.second;
                 if (t != null) {
-                    try {
-                        Drawable loadIcon = mIconCache.get(t.key);
-                        Bitmap loadThumbnail = mThumbnailCache.get(t.key);
-                        Console.log(Constants.DebugFlags.App.TaskDataLoader,
-                                "  [TaskResourceLoader|load]",
-                                t + " icon: " + loadIcon + " thumbnail: " + loadThumbnail +
-                                        " forceLoad: " + forceLoadTask);
-                        // Load the icon
-                        if (loadIcon == null || forceLoadTask) {
-                            PackageManager pm = mContext.getPackageManager();
-                            ActivityInfo info = pm.getActivityInfo(t.key.baseIntent.getComponent(),
-                                    PackageManager.GET_META_DATA);
-                            Drawable icon = info.loadIcon(pm);
-                            if (!mCancelled) {
-                                if (icon != null) {
-                                    Console.log(Constants.DebugFlags.App.TaskDataLoader,
-                                            "    [TaskResourceLoader|loadIcon]",
-                                            icon);
-                                    loadIcon = icon;
-                                    mIconCache.put(t.key, icon);
-                                }
-                            }
-                        }
-                        // Load the thumbnail
-                        if (loadThumbnail == null || forceLoadTask) {
-                            ActivityManager am = (ActivityManager)
-                                    mContext.getSystemService(Context.ACTIVITY_SERVICE);
-                            Bitmap thumbnail = am.getTaskTopThumbnail(t.key.id);
-                            if (!mCancelled) {
-                                if (thumbnail != null) {
-                                    Console.log(Constants.DebugFlags.App.TaskDataLoader,
-                                            "    [TaskResourceLoader|loadThumbnail]",
-                                            thumbnail);
-                                    loadThumbnail = thumbnail;
-                                    mThumbnailCache.put(t.key, thumbnail);
-                                } else {
-                                    Console.logError(mContext,
-                                            "Failed to load task top thumbnail for: " +
-                                                    t.key.baseIntent.getComponent().getPackageName());
-                                }
-                            }
-                        }
+                    Drawable loadIcon = mIconCache.get(t.key);
+                    Bitmap loadThumbnail = mThumbnailCache.get(t.key);
+                    Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                            "  [TaskResourceLoader|load]",
+                            t + " icon: " + loadIcon + " thumbnail: " + loadThumbnail +
+                                    " forceLoad: " + forceLoadTask);
+                    // Load the icon
+                    if (loadIcon == null || forceLoadTask) {
+                        ActivityInfo info = ssp.getActivityInfo(t.key.baseIntent.getComponent());
+                        Drawable icon = ssp.getActivityIcon(info);
                         if (!mCancelled) {
-                            // Notify that the task data has changed
-                            final Drawable newIcon = loadIcon;
-                            final Bitmap newThumbnail = loadThumbnail;
-                            mMainThreadHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    t.notifyTaskDataLoaded(newThumbnail, newIcon, forceLoadTask);
-                                }
-                            });
+                            if (icon != null) {
+                                Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                                        "    [TaskResourceLoader|loadIcon]",
+                                        icon);
+                                loadIcon = icon;
+                                mIconCache.put(t.key, icon);
+                            }
                         }
-                    } catch (PackageManager.NameNotFoundException ne) {
-                        ne.printStackTrace();
+                    }
+                    // Load the thumbnail
+                    if (loadThumbnail == null || forceLoadTask) {
+                        Bitmap thumbnail = ssp.getTaskThumbnail(t.key.id);
+                        if (!mCancelled) {
+                            if (thumbnail != null) {
+                                Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                                        "    [TaskResourceLoader|loadThumbnail]",
+                                        thumbnail);
+                                loadThumbnail = thumbnail;
+                                mThumbnailCache.put(t.key, thumbnail);
+                            } else {
+                                Console.logError(mContext,
+                                        "Failed to load task top thumbnail for: " +
+                                                t.key.baseIntent.getComponent().getPackageName());
+                            }
+                        }
+                    }
+                    if (!mCancelled) {
+                        // Notify that the task data has changed
+                        final Drawable newIcon = loadIcon;
+                        final Bitmap newThumbnail = loadThumbnail;
+                        mMainThreadHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                t.notifyTaskDataLoaded(newThumbnail, newIcon, forceLoadTask);
+                            }
+                        });
                     }
                 }
 
@@ -296,6 +292,7 @@ class BitmapLruCache extends LruCache<Task.TaskKey, Bitmap> {
 public class RecentsTaskLoader {
     static RecentsTaskLoader sInstance;
 
+    SystemServicesProxy mSystemServicesProxy;
     DrawableLruCache mIconCache;
     BitmapLruCache mThumbnailCache;
     TaskResourceLoadQueue mLoadQueue;
@@ -324,7 +321,8 @@ public class RecentsTaskLoader {
                 "[RecentsTaskLoader|init]", "thumbnailCache: " + thumbnailCacheSize +
                 " iconCache: " + iconCacheSize);
 
-        // Initialize the cache and loaders
+        // Initialize the proxy, cache and loaders
+        mSystemServicesProxy = new SystemServicesProxy(context);
         mLoadQueue = new TaskResourceLoadQueue();
         mIconCache = new DrawableLruCache(iconCacheSize);
         mThumbnailCache = new BitmapLruCache(thumbnailCacheSize);
@@ -358,6 +356,11 @@ public class RecentsTaskLoader {
         return sInstance;
     }
 
+    /** Returns the system services proxy */
+    public SystemServicesProxy getSystemServicesProxy() {
+        return mSystemServicesProxy;
+    }
+
     /** Reload the set of recent tasks */
     SpaceNode reload(Context context, int preloadCount) {
         Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|reload]");
@@ -367,141 +370,129 @@ public class RecentsTaskLoader {
         SpaceNode root = new SpaceNode(context);
         root.setStack(stack);
 
-        try {
-            long t1 = System.currentTimeMillis();
+        long t1 = System.currentTimeMillis();
 
-            PackageManager pm = context.getPackageManager();
-            ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        // Get the recent tasks
+        SystemServicesProxy ssp = mSystemServicesProxy;
+        List<ActivityManager.RecentTaskInfo> tasks =
+                ssp.getRecentTasks(25, UserHandle.CURRENT.getIdentifier());
+        Collections.reverse(tasks);
+        Console.log(Constants.DebugFlags.App.TimeSystemCalls,
+                "[RecentsTaskLoader|getRecentTasks]",
+                "" + (System.currentTimeMillis() - t1) + "ms");
+        Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                "[RecentsTaskLoader|tasks]", "" + tasks.size());
 
-            // Get the recent tasks
-            List<ActivityManager.RecentTaskInfo> tasks = am.getRecentTasksForUser(25,
-                    ActivityManager.RECENT_IGNORE_UNAVAILABLE |
-                    ActivityManager.RECENT_INCLUDE_PROFILES, UserHandle.CURRENT.getIdentifier());
-            Collections.reverse(tasks);
-            Console.log(Constants.DebugFlags.App.TimeSystemCalls,
-                    "[RecentsTaskLoader|getRecentTasks]",
-                    "" + (System.currentTimeMillis() - t1) + "ms");
-            Console.log(Constants.DebugFlags.App.TaskDataLoader,
-                    "[RecentsTaskLoader|tasks]", "" + tasks.size());
+        // Remove home/recents tasks
+        Iterator<ActivityManager.RecentTaskInfo> iter = tasks.iterator();
+        while (iter.hasNext()) {
+            ActivityManager.RecentTaskInfo t = iter.next();
 
-            // Remove home/recents tasks
-            Iterator<ActivityManager.RecentTaskInfo> iter = tasks.iterator();
-            while (iter.hasNext()) {
-                ActivityManager.RecentTaskInfo t = iter.next();
-
-                // Skip tasks in the home stack
-                if (am.isInHomeStack(t.persistentId)) {
-                    iter.remove();
-                    continue;
-                }
-                // Skip tasks from this Recents package
-                if (t.baseIntent.getComponent().getPackageName().equals(context.getPackageName())) {
-                    iter.remove();
-                    continue;
-                }
+            // Skip tasks in the home stack
+            if (ssp.isInHomeStack(t.persistentId)) {
+                iter.remove();
+                continue;
             }
+            // Skip tasks from this Recents package
+            if (t.baseIntent.getComponent().getPackageName().equals(context.getPackageName())) {
+                iter.remove();
+                continue;
+            }
+        }
 
-            // Add each task to the task stack
-            t1 = System.currentTimeMillis();
-            int taskCount = tasks.size();
-            for (int i = 0; i < taskCount; i++) {
-                ActivityManager.RecentTaskInfo t = tasks.get(i);
-                ActivityInfo info = pm.getActivityInfo(t.baseIntent.getComponent(),
-                        PackageManager.GET_META_DATA);
-                String title = info.loadLabel(pm).toString();
-                boolean isForemostTask = (i == (taskCount - 1));
+        // Add each task to the task stack
+        t1 = System.currentTimeMillis();
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            ActivityManager.RecentTaskInfo t = tasks.get(i);
+            ActivityInfo info = ssp.getActivityInfo(t.baseIntent.getComponent());
+            String title = ssp.getActivityLabel(info);
+            boolean isForemostTask = (i == (taskCount - 1));
 
-                // Preload the specified number of apps
-                if (i >= (taskCount - preloadCount)) {
-                    Console.log(Constants.DebugFlags.App.TaskDataLoader,
-                            "[RecentsTaskLoader|preloadTask]",
-                            "i: " + i + " task: " + t.baseIntent.getComponent().getPackageName());
+            // Preload the specified number of apps
+            if (i >= (taskCount - preloadCount)) {
+                Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                        "[RecentsTaskLoader|preloadTask]",
+                        "i: " + i + " task: " + t.baseIntent.getComponent().getPackageName());
 
-                    String label = (t.activityLabel == null ? title : t.activityLabel.toString());
-                    BitmapDrawable bd = null;
-                    if (t.activityIcon != null) {
-                        bd = new BitmapDrawable(res, t.activityIcon);
-                    }
-                    Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, label, bd);
+                String label = (t.activityLabel == null ? title : t.activityLabel.toString());
+                BitmapDrawable bd = null;
+                if (t.activityIcon != null) {
+                    bd = new BitmapDrawable(res, t.activityIcon);
+                }
+                Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, label, bd);
 
-                    // Load the icon (if possible and not the foremost task, from the cache)
-                    if (task.icon != null) {
-                        mIconCache.put(task.key, task.icon);
-                    } else {
-                        if (!isForemostTask) {
-                            task.icon = mIconCache.get(task.key);
-                            if (task.icon != null) {
-                                // Even though we get things from the cache, we should update them
-                                // if they've changed in the bg
-                                tasksToForceLoad.add(task);
-                            }
-                        }
-                        if (task.icon == null) {
-                            task.icon = info.loadIcon(pm);
-                            if (task.icon != null) {
-                                mIconCache.put(task.key, task.icon);
-                            } else {
-                                task.icon = mDefaultIcon;
-                            }
-                        }
-                    }
-
-                    // Load the thumbnail (if possible and not the foremost task, from the cache)
+                // Load the icon (if possible and not the foremost task, from the cache)
+                if (task.icon != null) {
+                    mIconCache.put(task.key, task.icon);
+                } else {
                     if (!isForemostTask) {
-                        task.thumbnail = mThumbnailCache.get(task.key);
-                        if (task.thumbnail != null) {
-                            // Even though we get things from the cache, we should update them if
-                            // they've changed in the bg
+                        task.icon = mIconCache.get(task.key);
+                        if (task.icon != null) {
+                            // Even though we get things from the cache, we should update them
+                            // if they've changed in the bg
                             tasksToForceLoad.add(task);
                         }
                     }
-                    if (task.thumbnail == null) {
-                        Console.log(Constants.DebugFlags.App.TaskDataLoader,
-                                "[RecentsTaskLoader|loadingTaskThumbnail]");
-                        task.thumbnail = am.getTaskTopThumbnail(t.id);
-                        if (task.thumbnail != null) {
-                            mThumbnailCache.put(task.key, task.thumbnail);
+                    if (task.icon == null) {
+                        task.icon = ssp.getActivityIcon(info);
+                        if (task.icon != null) {
+                            mIconCache.put(task.key, task.icon);
                         } else {
-                            task.thumbnail = mDefaultThumbnail;
+                            task.icon = mDefaultIcon;
                         }
                     }
+                }
 
-                    // Create as many tasks a we want to multiply by
-                    for (int j = 0; j < Constants.Values.RecentsTaskLoader.TaskEntryMultiplier; j++) {
-                        Console.log(Constants.DebugFlags.App.TaskDataLoader,
-                                "  [RecentsTaskLoader|task]", t.baseIntent.getComponent().getPackageName());
-                        stack.addTask(task);
-                    }
-                } else {
-                    // Create as many tasks a we want to multiply by
-                    for (int j = 0; j < Constants.Values.RecentsTaskLoader.TaskEntryMultiplier; j++) {
-                        Console.log(Constants.DebugFlags.App.TaskDataLoader,
-                                "  [RecentsTaskLoader|task]", t.baseIntent.getComponent().getPackageName());
-                        stack.addTask(new Task(t.persistentId, (t.id > -1), t.baseIntent, title,
-                                null, null));
+                // Load the thumbnail (if possible and not the foremost task, from the cache)
+                if (!isForemostTask) {
+                    task.thumbnail = mThumbnailCache.get(task.key);
+                    if (task.thumbnail != null) {
+                        // Even though we get things from the cache, we should update them if
+                        // they've changed in the bg
+                        tasksToForceLoad.add(task);
                     }
                 }
-            }
-            Console.log(Constants.DebugFlags.App.TimeSystemCalls,
-                    "[RecentsTaskLoader|getAllTaskTopThumbnail]",
-                    "" + (System.currentTimeMillis() - t1) + "ms");
-
-            /*
-            // Get all the stacks
-            t1 = System.currentTimeMillis();
-            List<ActivityManager.StackInfo> stackInfos = ams.getAllStackInfos();
-            Console.log(Constants.DebugFlags.App.TimeSystemCalls, "[RecentsTaskLoader|getAllStackInfos]", "" + (System.currentTimeMillis() - t1) + "ms");
-            Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|stacks]", "" + tasks.size());
-            for (ActivityManager.StackInfo s : stackInfos) {
-                Console.log(Constants.DebugFlags.App.TaskDataLoader, "  [RecentsTaskLoader|stack]", s.toString());
-                if (stacks.containsKey(s.stackId)) {
-                    stacks.get(s.stackId).setRect(s.bounds);
+                if (task.thumbnail == null) {
+                    Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                            "[RecentsTaskLoader|loadingTaskThumbnail]");
+                    task.thumbnail = ssp.getTaskThumbnail(task.key.id);
+                    if (task.thumbnail != null) {
+                        mThumbnailCache.put(task.key, task.thumbnail);
+                    } else {
+                        task.thumbnail = mDefaultThumbnail;
+                    }
                 }
+
+                // Add the task to the stack
+                Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                    "  [RecentsTaskLoader|task]", t.baseIntent.getComponent().getPackageName());
+                stack.addTask(task);
+            } else {
+                // Add the task to the stack
+                Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                    "  [RecentsTaskLoader|task]", t.baseIntent.getComponent().getPackageName());
+                stack.addTask(new Task(t.persistentId, (t.id > -1), t.baseIntent, title,
+                        null, null));
             }
-            */
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+        Console.log(Constants.DebugFlags.App.TimeSystemCalls,
+                "[RecentsTaskLoader|getAllTaskTopThumbnail]",
+                "" + (System.currentTimeMillis() - t1) + "ms");
+
+        /*
+        // Get all the stacks
+        t1 = System.currentTimeMillis();
+        List<ActivityManager.StackInfo> stackInfos = ams.getAllStackInfos();
+        Console.log(Constants.DebugFlags.App.TimeSystemCalls, "[RecentsTaskLoader|getAllStackInfos]", "" + (System.currentTimeMillis() - t1) + "ms");
+        Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|stacks]", "" + tasks.size());
+        for (ActivityManager.StackInfo s : stackInfos) {
+            Console.log(Constants.DebugFlags.App.TaskDataLoader, "  [RecentsTaskLoader|stack]", s.toString());
+            if (stacks.containsKey(s.stackId)) {
+                stacks.get(s.stackId).setRect(s.bounds);
+            }
+        }
+        */
 
         // Start the task loader
         mLoader.start(context);

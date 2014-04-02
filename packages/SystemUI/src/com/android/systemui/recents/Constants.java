@@ -31,6 +31,12 @@ public class Constants {
             public static final boolean EnableToggleNewRecentsActivity = false;
             // This disables the bitmap and icon caches to
             public static final boolean DisableBackgroundCache = false;
+            // For debugging, this enables us to create mock recents tasks
+            public static final boolean EnableSystemServicesProxy = false;
+            // For debugging, this defines the number of mock recents packages to create
+            public static final int SystemServicesProxyMockPackageCount = 12;
+            // For debugging, this defines the number of mock recents tasks to create
+            public static final int SystemServicesProxyMockTaskCount = 75;
 
             // Timing certain paths
             public static final String TimeRecentsStartupKey = "startup";
@@ -73,8 +79,6 @@ public class Constants {
         public static class RecentsTaskLoader {
             // XXX: This should be calculated on the first load
             public static final int PreloadFirstTasksCount = 5;
-            // For debugging, this allows us to multiply the number of cards for each task
-            public static final int TaskEntryMultiplier = 1;
         }
 
         public static class TaskStackView {
