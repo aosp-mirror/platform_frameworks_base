@@ -86,6 +86,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
@@ -311,7 +312,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Users that are profiles of the current user. These are also allowed to show windows
      * on the current user.
      */
-    int[] mCurrentProfileIds = new int[0];
+    int[] mCurrentProfileIds = new int[] {UserHandle.USER_OWNER};
 
     final Context mContext;
 
@@ -5257,6 +5258,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /* Called by WindowState */
     boolean isCurrentProfileLocked(int userId) {
+        if (userId == mCurrentUserId) return true;
         for (int i = 0; i < mCurrentProfileIds.length; i++) {
             if (mCurrentProfileIds[i] == userId) return true;
         }

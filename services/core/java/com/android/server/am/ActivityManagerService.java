@@ -1019,7 +1019,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     final ActivityThread mSystemThread;
 
     int mCurrentUserId = 0;
-    int[] mCurrentProfileIds = new int[0]; // Accessed by ActivityStack
+    int[] mCurrentProfileIds = new int[] {UserHandle.USER_OWNER}; // Accessed by ActivityStack
     private UserManagerService mUserManager;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
