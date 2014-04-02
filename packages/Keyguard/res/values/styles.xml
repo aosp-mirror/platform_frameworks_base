@@ -68,7 +68,7 @@
         <item name="android:textSize">@dimen/widget_big_font_size</item>
     </style>
 
-    <style name="Widget.TransportControl.SeekBar" parent="@android:style/Widget.Holo.SeekBar">
+    <style name="Widget.TransportControl.SeekBar" parent="@android:style/Widget.DeviceDefault.Light.SeekBar">
         <item name="android:indeterminateOnly">false</item>
         <item name="android:progressDrawable">@drawable/scrubber_progress_horizontal_holo_light</item>
         <item name="android:indeterminateDrawable">@drawable/scrubber_progress_horizontal_holo_light</item>
