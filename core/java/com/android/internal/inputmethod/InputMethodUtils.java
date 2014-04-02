@@ -545,6 +545,7 @@ public class InputMethodUtils {
 
         public boolean isCurrentProfile(int userId) {
             synchronized (this) {
+                if (userId == mCurrentUserId) return true;
                 for (int i = 0; i < mCurrentProfileIds.length; i++) {
                     if (userId == mCurrentProfileIds[i]) return true;
                 }

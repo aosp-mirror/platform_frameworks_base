@@ -344,6 +344,7 @@ final class ActivityStack {
      * Checks whether the userid is a profile of the current user.
      */
     private boolean isCurrentProfileLocked(int userId) {
+        if (userId == mCurrentUser) return true;
         for (int i = 0; i < mService.mCurrentProfileIds.length; i++) {
             if (mService.mCurrentProfileIds[i] == userId) return true;
         }
