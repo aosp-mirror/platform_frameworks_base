@@ -154,7 +154,7 @@ please see themes_device_defaults.xml.
         <item name="windowTitleStyle">@style/WindowTitle.Quantum</item>
         <item name="windowTitleSize">25dip</item>
         <item name="windowTitleBackgroundStyle">@style/WindowTitleBackground.Quantum</item>
-        <item name="windowContentTransitions">true</item>
+        <item name="windowContentTransitions">false</item>
         <item name="windowAnimationStyle">@style/Animation.Quantum.Activity</item>
         <item name="windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
         <item name="windowActionBar">true</item>
