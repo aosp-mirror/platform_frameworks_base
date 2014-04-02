@@ -192,7 +192,7 @@
     <!-- A really bright Holo shade of gray -->
     <color name="holo_gray_bright">#33CCCCCC</color>
 
-    <drawable name="notification_template_icon_bg">#00000000</drawable>
+    <drawable name="notification_template_icon_bg">#ffCCCCCC</drawable>
     <drawable name="notification_template_icon_low_bg">#0cffffff</drawable>
 
     <!-- Keyguard colors -->
