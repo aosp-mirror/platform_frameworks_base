@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:trigger="state_checked" >
+    android:trigger="state_checked" android:versionCode="1" >
 
     <size
         android:height="64dp"
