@@ -10,9 +10,9 @@ next.link=running-app.html
 
 
 <!-- This is the training bar -->
-<div id="tb-wrapper"> 
-<div id="tb"> 
- 
+<div id="tb-wrapper">
+<div id="tb">
+
 <h2>This lesson teaches you to</h2>
 
 <ol>
@@ -27,10 +27,10 @@ next.link=running-app.html
 SDK</a></li>
   <li><a href="{@docRoot}tools/projects/index.html">Managing Projects</a></li>
 </ul>
- 
- 
-</div> 
-</div> 
+
+
+</div>
+</div>
 
 <p>An Android project contains all the files that comprise the source code for your Android
 app. The Android SDK tools make it easy to start a new Android project with a set of
@@ -42,7 +42,7 @@ SDK tools from a command line.</p>
 
 <p class="note"><strong>Note:</strong> You should already have the Android SDK installed, and if
 you're using Eclipse, you should also have the <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT
-plugin</a> installed (version 21.0.0 or higher). If you don't have these, follow the guide to <a
+plugin</a> installed (version 22.6.2 or higher). If you don't have these, follow the guide to <a
 href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a> before you start this
 lesson.</p>
 
@@ -50,7 +50,7 @@ lesson.</p>
 <h2 id="Eclipse">Create a Project with Eclipse</h2>
 
 <ol>
-  <li>Click <strong>New</strong> <img src="{@docRoot}images/tools/eclipse-new.png" 
+  <li>Click <strong>New</strong> <img src="{@docRoot}images/tools/eclipse-new.png"
   style="vertical-align:baseline;margin:0" /> in the toolbar.</li>
   <li>In the window that appears, open the <strong>Android</strong> folder,
   select <strong>Android Application Project</strong>, and click <strong>Next</strong>.</li>
@@ -116,11 +116,11 @@ devices.</li>
   <li>Now you can select an activity template from which to begin building your app.
     <p>For this project, select <strong>BlankActivity</strong> and click <strong>Next</strong>.</p>
   </li>
-  <li>Leave all the details for the activity in their default state and click 
+  <li>Leave all the details for the activity in their default state and click
     <strong>Finish</strong>.</li>
 </ol>
 
-<p>Your Android project is now a basic "Hello World" app that contains some default files. 
+<p>Your Android project is now a basic "Hello World" app that contains some default files.
 To run the app, continue to the <a href="running-app.html">next lesson</a>.</p>
 
 
@@ -155,7 +155,7 @@ and replace
 projects.</p></li>
 </ol>
 
-<p>Your Android project is now a basic "Hello World" app that contains some default files. 
+<p>Your Android project is now a basic "Hello World" app that contains some default files.
 To run the app, continue to the <a href="running-app.html">next lesson</a>.</p>
 
 <p class="note"><strong>Tip:</strong> Add the <code>platform-tools/</code> as well as the
