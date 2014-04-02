@@ -23,35 +23,26 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
 import com.android.systemui.R;
-import com.android.systemui.RecentsComponent;
-import com.android.systemui.SystemUI;
 
 import java.util.List;
 
@@ -113,6 +104,7 @@ public class AlternateRecentsComponent {
     final static String sRecentsService = "com.android.systemui.recents.RecentsService";
 
     Context mContext;
+    SystemServicesProxy mSystemServicesProxy;
 
     // Recents service binding
     Messenger mService = null;
@@ -127,6 +119,7 @@ public class AlternateRecentsComponent {
 
     public AlternateRecentsComponent(Context context) {
         mContext = context;
+        mSystemServicesProxy = new SystemServicesProxy(context);
         mMessenger = new Messenger(new RecentsMessageHandler());
     }
 
@@ -219,17 +212,16 @@ public class AlternateRecentsComponent {
 
     /** Loads the first task thumbnail */
     Bitmap loadFirstTaskThumbnail() {
-        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RecentTaskInfo> tasks = am.getRecentTasksForUser(1,
-                ActivityManager.RECENT_IGNORE_UNAVAILABLE | ActivityManager.RECENT_INCLUDE_PROFILES,
+        SystemServicesProxy ssp = mSystemServicesProxy;
+        List<ActivityManager.RecentTaskInfo> tasks = ssp.getRecentTasks(1,
                 UserHandle.CURRENT.getIdentifier());
         for (ActivityManager.RecentTaskInfo t : tasks) {
             // Skip tasks in the home stack
-            if (am.isInHomeStack(t.persistentId)) {
+            if (ssp.isInHomeStack(t.persistentId)) {
                 return null;
             }
 
-            Bitmap thumbnail = am.getTaskTopThumbnail(t.persistentId);
+            Bitmap thumbnail = ssp.getTaskThumbnail(t.persistentId);
             return thumbnail;
         }
         return null;
@@ -237,13 +229,12 @@ public class AlternateRecentsComponent {
 
     /** Returns whether there is a first task */
     boolean hasFirstTask() {
-        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RecentTaskInfo> tasks = am.getRecentTasksForUser(1,
-                ActivityManager.RECENT_IGNORE_UNAVAILABLE | ActivityManager.RECENT_INCLUDE_PROFILES,
+        SystemServicesProxy ssp = mSystemServicesProxy;
+        List<ActivityManager.RecentTaskInfo> tasks = ssp.getRecentTasks(1,
                 UserHandle.CURRENT.getIdentifier());
         for (ActivityManager.RecentTaskInfo t : tasks) {
             // Skip tasks in the home stack
-            if (am.isInHomeStack(t.persistentId)) {
+            if (ssp.isInHomeStack(t.persistentId)) {
                 continue;
             }
 
@@ -294,8 +285,8 @@ public class AlternateRecentsComponent {
 
         // If Recents is the front most activity, then we should just communicate with it directly
         // to launch the first task or dismiss itself
-        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
+        SystemServicesProxy ssp = mSystemServicesProxy;
+        List<ActivityManager.RunningTaskInfo> tasks = ssp.getRunningTasks(1);
         if (!tasks.isEmpty()) {
             ComponentName topActivity = tasks.get(0).topActivity;
 

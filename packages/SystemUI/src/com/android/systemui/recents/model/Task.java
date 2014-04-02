@@ -19,7 +19,6 @@ package com.android.systemui.recents.model;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import com.android.systemui.recents.Constants;
 
 
 /**
@@ -106,14 +105,7 @@ public class Task {
 
     @Override
     public boolean equals(Object o) {
-        // If we have multiple task entries for the same task, then we do the simple object
-        // equality check
-        if (Constants.Values.RecentsTaskLoader.TaskEntryMultiplier > 1) {
-            return super.equals(o);
-        }
-
-        // Otherwise, check that the id and intent match (the other fields can be asynchronously
-        // loaded and is unsuitable to testing the identity of this Task)
+        // Check that the id matches
         Task t = (Task) o;
         return key.equals(t.key);
     }
