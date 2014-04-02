@@ -1319,6 +1319,14 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Permite que o aplicativo acesse o armazenamento seguro do bloqueio de teclado."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Controlar a exibição e ocultação do bloqueio de tela"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Permite que o aplicativo controle o bloqueio de teclado."</string>
+    <!-- no translation found for permlab_trust_listener (1765718054003704476) -->
+    <skip />
+    <!-- no translation found for permdesc_trust_listener (8233895334214716864) -->
+    <skip />
+    <!-- no translation found for permlab_bind_trust_agent_service (8242093169457695334) -->
+    <skip />
+    <!-- no translation found for permdesc_bind_trust_agent_service (7041930026024507515) -->
+    <skip />
     <string name="permlab_recovery" msgid="3157024487744125846">"Interagir com o sistema de atualizações e recuperação"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Permite que um aplicativo interaja com o sistema de recuperação e as atualizações do sistema."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toque duas vezes para controlar o zoom"</string>
