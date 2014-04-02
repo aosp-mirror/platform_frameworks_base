@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.stack;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import com.android.systemui.R;
@@ -27,6 +28,8 @@ import com.android.systemui.R;
  * .stack.StackScrollState}
  */
 public class StackScrollAlgorithm {
+
+    private static final String LOG_TAG = "StackScrollAlgorithm";
 
     private static final int MAX_ITEMS_IN_BOTTOM_STACK = 3;
     private static final int MAX_ITEMS_IN_TOP_STACK = 3;
@@ -130,6 +133,7 @@ public class StackScrollAlgorithm {
             View child = hostView.getChildAt(i);
             StackScrollState.ViewState childViewState = resultState.getViewStateForView(child);
             childViewState.yTranslation = currentYPosition;
+            childViewState.location = StackScrollState.ViewState.LOCATION_UNKNOWN;
             int childHeight = child.getHeight();
             // The y position after this element
             float nextYPosition = currentYPosition + childHeight + mPaddingBetweenElements;
@@ -143,12 +147,12 @@ public class StackScrollAlgorithm {
                 nextYPosition = updateStateForTopStackChild(algorithmState,
                         numberOfElementsCompletelyIn,
                         i, childViewState);
-
             } else if (i == algorithmState.lastTopStackIndex) {
                 // Case 2:
                 // First element of regular scrollview comes next, so the position is just the
                 // scrolling position
                 nextYPosition = scrollOffset;
+                childViewState.location = StackScrollState.ViewState.LOCATION_TOP_STACK_PEEKING;
             } else if (nextYPosition >= transitioningPositionStart) {
                 if (currentYPosition >= transitioningPositionStart) {
                     // Case 3:
@@ -156,8 +160,6 @@ public class StackScrollAlgorithm {
                     // bottom of the screen so we are fully in the bottom stack
                     nextYPosition = updateStateForChildFullyInBottomStack(algorithmState,
                             transitioningPositionStart, childViewState, childHeight);
-
-
                 } else {
                     // Case 4:
                     // According to the regular scroll view we are currently translating out of /
@@ -167,6 +169,16 @@ public class StackScrollAlgorithm {
                             currentYPosition, childViewState,
                             childHeight, nextYPosition);
                 }
+            } else {
+                childViewState.location = StackScrollState.ViewState.LOCATION_MAIN_AREA;
+            }
+            // The first card is always rendered.
+            if (i == 0) {
+                childViewState.alpha = 1.0f;
+                childViewState.location = StackScrollState.ViewState.LOCATION_FIRST_CARD;
+            }
+            if (childViewState.location == StackScrollState.ViewState.LOCATION_UNKNOWN) {
+                Log.wtf(LOG_TAG, "Failed to assign location for child " + i);
             }
             currentYPosition = nextYPosition;
             yPositionInScrollView = yPositionInScrollViewAfterElement;
@@ -192,6 +204,8 @@ public class StackScrollAlgorithm {
         if (childHeight != (int) newSize) {
             childViewState.height = (int) newSize;
         }
+        childViewState.location = StackScrollState.ViewState.LOCATION_MAIN_AREA;
+
         return nextYPosition;
     }
 
@@ -206,6 +220,7 @@ public class StackScrollAlgorithm {
             nextYPosition = transitioningPositionStart
                     + mBottomStackIndentationFunctor.getValue(
                             algorithmState.itemsInBottomStack);
+            childViewState.location = StackScrollState.ViewState.LOCATION_BOTTOM_STACK_PEEKING;
         } else {
             // we are fully inside the stack
             if (algorithmState.itemsInBottomStack > MAX_ITEMS_IN_BOTTOM_STACK + 2) {
@@ -214,6 +229,7 @@ public class StackScrollAlgorithm {
                     > MAX_ITEMS_IN_BOTTOM_STACK + 1) {
                 childViewState.alpha = 1.0f - algorithmState.partialInBottom;
             }
+            childViewState.location = StackScrollState.ViewState.LOCATION_BOTTOM_STACK_HIDDEN;
             nextYPosition = transitioningPositionStart + mBottomStackPeekSize;
         }
         // TODO: only temporarily collapse
@@ -237,14 +253,16 @@ public class StackScrollAlgorithm {
             nextYPosition = mCollapsedSize + mPaddingBetweenElements -
                     mTopStackIndentationFunctor.getValue(
                             algorithmState.itemsInTopStack - i - 1);
-            if (paddedIndex == 0 && i != 0) {
+            if (paddedIndex == 0) {
                 childViewState.alpha = 1.0f - algorithmState.partialInTop;
+                childViewState.location = StackScrollState.ViewState.LOCATION_TOP_STACK_HIDDEN;
+            } else {
+                childViewState.location = StackScrollState.ViewState.LOCATION_TOP_STACK_PEEKING;
             }
         } else {
-            // We are hidden behind the top card and faded out, so we can hide ourselfs
-            if (i != 0) {
-                childViewState.alpha = 0.0f;
-            }
+            // We are hidden behind the top card and faded out, so we can hide ourselves.
+            childViewState.alpha = 0.0f;
+            childViewState.location = StackScrollState.ViewState.LOCATION_TOP_STACK_HIDDEN;
         }
         return nextYPosition;
     }
