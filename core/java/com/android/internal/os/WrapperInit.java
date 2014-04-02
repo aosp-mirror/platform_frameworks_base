@@ -26,8 +26,6 @@ import java.io.IOException;
 
 import libcore.io.IoUtils;
 
-import dalvik.system.Zygote;
-
 /**
  * Startup class for the wrapper process.
  * @hide
@@ -94,7 +92,7 @@ public class WrapperInit {
      * @param niceName The nice name for the application, or null if none.
      * @param targetSdkVersion The target SDK version for the app.
      * @param pipeFd The pipe to which the application's pid should be written, or null if none.
-     * @param args Arguments for {@link RuntimeInit.main}.
+     * @param args Arguments for {@link RuntimeInit#main}.
      */
     public static void execApplication(String invokeWith, String niceName,
             int targetSdkVersion, FileDescriptor pipeFd, String[] args) {
