@@ -219,8 +219,8 @@ public class NotificationManagerService extends SystemService {
             ));
     private static final String EXTRA_INTERCEPT = "android.intercept";
 
-    // Users related to the current user.
-    final protected SparseArray<UserInfo> mRelatedUsers = new SparseArray<UserInfo>();
+    // Profiles of the current user.
+    final protected SparseArray<UserInfo> mCurrentProfiles = new SparseArray<UserInfo>();
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
@@ -1120,9 +1120,9 @@ public class NotificationManagerService extends SystemService {
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
                 // reload per-user settings
                 mSettingsObserver.update(null);
-                updateRelatedUserCache(context);
+                updateCurrentProfilesCache(context);
             } else if (action.equals(Intent.ACTION_USER_ADDED)) {
-                updateRelatedUserCache(context);
+                updateCurrentProfilesCache(context);
             }
         }
     };
@@ -2458,12 +2458,12 @@ public class NotificationManagerService extends SystemService {
     /**
      * Determine whether the userId applies to the notification in question, either because
      * they match exactly, or one of them is USER_ALL (which is treated as a wildcard) or
-     * because it matches a related user.
+     * because it matches one of the users profiles.
      */
-    private boolean notificationMatchesUserIdOrRelated(NotificationRecord r, int userId) {
-        synchronized (mRelatedUsers) {
+    private boolean notificationMatchesCurrentProfiles(NotificationRecord r, int userId) {
+        synchronized (mCurrentProfiles) {
             return notificationMatchesUserId(r, userId)
-                    || mRelatedUsers.get(r.getUserId()) != null;
+                    || mCurrentProfiles.get(r.getUserId()) != null;
         }
     }
 
@@ -2561,7 +2561,7 @@ public class NotificationManagerService extends SystemService {
         final int N = mNotificationList.size();
         for (int i=N-1; i>=0; i--) {
             NotificationRecord r = mNotificationList.get(i);
-            if (!notificationMatchesUserIdOrRelated(r, userId)) {
+            if (!notificationMatchesCurrentProfiles(r, userId)) {
                 continue;
             }
 
@@ -2676,15 +2676,15 @@ public class NotificationManagerService extends SystemService {
                 exceptionPackages);
     }
 
-    private void updateRelatedUserCache(Context context) {
+    private void updateCurrentProfilesCache(Context context) {
         UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         int currentUserId = ActivityManager.getCurrentUser();
         if (userManager != null) {
-            List<UserInfo> relatedUsers = userManager.getRelatedUsers(currentUserId);
-            synchronized (mRelatedUsers) {
-                mRelatedUsers.clear();
-                for (UserInfo related : relatedUsers) {
-                    mRelatedUsers.put(related.id, related);
+            List<UserInfo> profiles = userManager.getProfiles(currentUserId);
+            synchronized (mCurrentProfiles) {
+                mCurrentProfiles.clear();
+                for (UserInfo user : profiles) {
+                    mCurrentProfiles.put(user.id, user);
                 }
             }
         }

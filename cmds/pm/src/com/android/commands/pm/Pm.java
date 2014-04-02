@@ -1033,18 +1033,18 @@ public final class Pm {
 
     public void runCreateUser() {
         String name;
-        int relatedUserId = -1;
+        int userId = -1;
         int flags = 0;
         String opt;
         while ((opt = nextOption()) != null) {
-            if ("--relatedTo".equals(opt)) {
+            if ("--profileOf".equals(opt)) {
                 String optionData = nextOptionData();
                 if (optionData == null || !isNumber(optionData)) {
                     System.err.println("Error: no USER_ID specified");
                     showUsage();
                     return;
                 } else {
-                    relatedUserId = Integer.parseInt(optionData);
+                    userId = Integer.parseInt(optionData);
                 }
             } else if ("--managed".equals(opt)) {
                 flags |= UserInfo.FLAG_MANAGED_PROFILE;
@@ -1062,14 +1062,14 @@ public final class Pm {
         name = arg;
         try {
             UserInfo info = null;
-            if (relatedUserId < 0) {
+            if (userId < 0) {
                 info = mUm.createUser(name, flags);
             } else {
                 if (Process.myUid() != 0) {
                     System.err.println("Error: not running as root.");
                     return;
                 }
-                info = mUm.createRelatedUser(name, flags, relatedUserId);
+                info = mUm.createProfileForUser(name, flags, userId);
             }
             if (info != null) {
                 System.out.println("Success: created user id " + info.id);

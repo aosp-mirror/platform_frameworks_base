@@ -376,7 +376,7 @@ public class RecentsTaskLoader {
             // Get the recent tasks
             List<ActivityManager.RecentTaskInfo> tasks = am.getRecentTasksForUser(25,
                     ActivityManager.RECENT_IGNORE_UNAVAILABLE |
-                    ActivityManager.RECENT_INCLUDE_RELATED, UserHandle.CURRENT.getIdentifier());
+                    ActivityManager.RECENT_INCLUDE_PROFILES, UserHandle.CURRENT.getIdentifier());
             Collections.reverse(tasks);
             Console.log(Constants.DebugFlags.App.TimeSystemCalls,
                     "[RecentsTaskLoader|getRecentTasks]",
