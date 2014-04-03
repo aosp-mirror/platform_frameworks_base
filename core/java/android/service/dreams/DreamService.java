@@ -153,11 +153,11 @@ public class DreamService extends Service implements Window.Callback {
     private final Handler mHandler = new Handler();
     private IBinder mWindowToken;
     private Window mWindow;
-    private WindowManager mWindowManager;
-    private boolean mInteractive = false;
+    private boolean mInteractive;
     private boolean mLowProfile = true;
-    private boolean mFullscreen = false;
+    private boolean mFullscreen;
     private boolean mScreenBright = true;
+    private boolean mStarted;
     private boolean mFinished;
     private boolean mCanDoze;
     private boolean mDozing;
@@ -340,7 +340,7 @@ public class DreamService extends Service implements Window.Callback {
      * @return The current window manager, or null if the dream is not started.
      */
     public WindowManager getWindowManager() {
-        return mWindowManager;
+        return mWindow != null ? mWindow.getWindowManager() : null;
     }
 
     /**
@@ -623,7 +623,7 @@ public class DreamService extends Service implements Window.Callback {
      * @hide experimental
      */
     public DozeHardware getDozeHardware() {
-        if (mCanDoze && mDozeHardware == null) {
+        if (mCanDoze && mDozeHardware == null && mWindowToken != null) {
             try {
                 IDozeHardware hardware = mSandman.getDozeHardware(mWindowToken);
                 if (hardware != null) {
@@ -701,24 +701,25 @@ public class DreamService extends Service implements Window.Callback {
      * Must run on mHandler.
      */
     private final void detach() {
-        if (mWindow == null) {
-            // already detached!
-            return;
+        if (mStarted) {
+            if (mDebug) Slog.v(TAG, "detach(): Calling onDreamingStopped()");
+            mStarted = false;
+            onDreamingStopped();
         }
 
-        if (mDebug) Slog.v(TAG, "detach(): Calling onDreamingStopped()");
-        onDreamingStopped();
+        if (mWindow != null) {
+            // force our window to be removed synchronously
+            if (mDebug) Slog.v(TAG, "detach(): Removing window from window manager");
+            mWindow.getWindowManager().removeViewImmediate(mWindow.getDecorView());
+            mWindow = null;
+        }
 
-        if (mDebug) Slog.v(TAG, "detach(): Removing window from window manager");
-
-        // force our window to be removed synchronously
-        mWindowManager.removeViewImmediate(mWindow.getDecorView());
-        // the following will print a log message if it finds any other leaked windows
-        WindowManagerGlobal.getInstance().closeAll(mWindowToken,
-                this.getClass().getName(), "Dream");
-
-        mWindow = null;
-        mWindowToken = null;
+        if (mWindowToken != null) {
+            // the following will print a log message if it finds any other leaked windows
+            WindowManagerGlobal.getInstance().closeAll(mWindowToken,
+                    this.getClass().getName(), "Dream");
+            mWindowToken = null;
+        }
     }
 
     /**
@@ -746,12 +747,13 @@ public class DreamService extends Service implements Window.Callback {
         if (mDebug) Slog.v(TAG, "Attached on thread " + Thread.currentThread().getId());
 
         mWindowToken = windowToken;
+        mCanDoze = canDoze;
+
         mWindow = PolicyManager.makeNewWindow(this);
         mWindow.setCallback(this);
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
         mWindow.setBackgroundDrawable(new ColorDrawable(0xFF000000));
         mWindow.setFormat(PixelFormat.OPAQUE);
-        mCanDoze = canDoze;
 
         if (mDebug) Slog.v(TAG, String.format("Attaching window token: %s to window of type %s",
                 windowToken, WindowManager.LayoutParams.TYPE_DREAM));
@@ -769,26 +771,28 @@ public class DreamService extends Service implements Window.Callback {
                     | (mScreenBright ? WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON : 0)
                     );
         mWindow.setAttributes(lp);
-
-        if (mDebug) Slog.v(TAG, "Created and attached window: " + mWindow);
-
         mWindow.setWindowManager(null, windowToken, "dream", true);
-        mWindowManager = mWindow.getWindowManager();
 
-        if (mDebug) Slog.v(TAG, "Window added on thread " + Thread.currentThread().getId());
         applySystemUiVisibilityFlags(
                 (mLowProfile ? View.SYSTEM_UI_FLAG_LOW_PROFILE : 0),
                 View.SYSTEM_UI_FLAG_LOW_PROFILE);
-        getWindowManager().addView(mWindow.getDecorView(), mWindow.getAttributes());
+
+        try {
+            getWindowManager().addView(mWindow.getDecorView(), mWindow.getAttributes());
+        } catch (WindowManager.BadTokenException ex) {
+            // This can happen because the dream manager service will remove the token
+            // immediately without necessarily waiting for the dream to start.
+            // We should receive a finish message soon.
+            Slog.i(TAG, "attach() called after window token already removed, dream will "
+                    + "finish soon");
+            mWindow = null;
+            return;
+        }
 
         // start it up
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (mDebug) Slog.v(TAG, "Calling onDreamingStarted()");
-                onDreamingStarted();
-            }
-        });
+        if (mDebug) Slog.v(TAG, "Calling onDreamingStarted()");
+        mStarted = true;
+        onDreamingStarted();
     }
 
     private void safelyFinish() {
@@ -831,7 +835,7 @@ public class DreamService extends Service implements Window.Callback {
             WindowManager.LayoutParams lp = mWindow.getAttributes();
             lp.flags = applyFlags(lp.flags, flags, mask);
             mWindow.setAttributes(lp);
-            mWindowManager.updateViewLayout(mWindow.getDecorView(), lp);
+            mWindow.getWindowManager().updateViewLayout(mWindow.getDecorView(), lp);
         }
     }
 
