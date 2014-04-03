@@ -71,6 +71,7 @@ import android.widget.TextView;
 
 import com.android.internal.app.MediaRouteDialogPresenter;
 import com.android.systemui.R;
+import com.android.systemui.settings.UserSwitcherHostView;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.ActivityState;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.BluetoothState;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.RSSIState;
@@ -310,30 +311,28 @@ class QuickSettings {
         collapsePanels();
     }
 
-    private void addUserTiles(ViewGroup parent, LayoutInflater inflater) {
+    private void addUserTiles(final ViewGroup parent, final LayoutInflater inflater) {
         QuickSettingsTileView userTile = (QuickSettingsTileView)
                 inflater.inflate(R.layout.quick_settings_tile, parent, false);
         userTile.setContent(R.layout.quick_settings_tile_user, inflater);
         userTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                collapsePanels();
                 final UserManager um = UserManager.get(mContext);
                 if (um.isUserSwitcherEnabled()) {
-                    // Since keyguard and systemui were merged into the same process to save
-                    // memory, they share the same Looper and graphics context.  As a result,
-                    // there's no way to allow concurrent animation while keyguard inflates.
-                    // The workaround is to add a slight delay to allow the animation to finish.
-                    mHandler.postDelayed(new Runnable() {
+                    final ViewGroup switcherParent = getService().getQuickSettingsOverlayParent();
+                    final UserSwitcherHostView switcher = (UserSwitcherHostView) inflater.inflate(
+                            R.layout.user_switcher_host, switcherParent, false);
+                    switcher.setFinishRunnable(new Runnable() {
+                        @Override
                         public void run() {
-                            try {
-                                WindowManagerGlobal.getWindowManagerService().lockNow(null);
-                            } catch (RemoteException e) {
-                                Log.e(TAG, "Couldn't show user switcher", e);
-                            }
+                            switcherParent.removeView(switcher);
                         }
-                    }, 400); // TODO: ideally this would be tied to the collapse of the panel
+                    });
+                    switcher.refreshUsers();
+                    switcherParent.addView(switcher);
                 } else {
+                    collapsePanels();
                     Intent intent = ContactsContract.QuickContact.composeQuickContactsIntent(
                             mContext, v, ContactsContract.Profile.CONTENT_URI,
                             ContactsContract.QuickContact.MODE_LARGE, null);
