@@ -4701,42 +4701,33 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Set a label to be used in the Recents task display. The activities of a task are traversed
-     * in order from the topmost activity to the bottommost. As soon as one activity returns a
-     * non-null Recents label the traversal is ended and that value will be used in
-     * {@link ActivityManager.RecentTaskInfo#activityLabel}
+     * Set a label and icon to be used in the Recents task display. When {@link
+     * ActivityManager#getRecentTasks} is called, the activities of each task are
+     * traversed in order from the topmost activity to the bottommost. As soon as one activity is
+     * found with either a non-null label or a non-null icon set by this call the traversal is
+     * ended. For each task those values will be returned in {@link
+     * ActivityManager.RecentTaskInfo#activityLabel} and {@link
+     * ActivityManager.RecentTaskInfo#activityIcon}. The {link Intent} for the activity that set
+     * activityLabel and activityIcon will be returned in {@link
+     * ActivityManager.RecentTaskInfo#activityIntent}
      *
      * @see ActivityManager#getRecentTasks
+     * @see ActivityManager.RecentTaskInfo
      *
-     * @param recentsLabel The label to use in the RecentTaskInfo.
+     * @param activityLabel The label to use in the RecentTaskInfo.
+     * @param activityIcon The Bitmap to use in the RecentTaskInfo.
      */
-    public void setRecentsLabel(CharSequence recentsLabel) {
-        try {
-            ActivityManagerNative.getDefault().setRecentsLabel(mToken, recentsLabel);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * Set an icon to be used in the Recents task display. The activities of a task are traversed
-     * in order from the topmost activity to the bottommost. As soon as one activity returns a
-     * non-null Recents icon the traversal is ended and that value will be used in
-     * {@link ActivityManager.RecentTaskInfo#activityIcon}.
-     *
-     * @see ActivityManager#getRecentTasks
-     *
-     * @param recentsIcon The Bitmap to use in the RecentTaskInfo.
-     */
-    public void setRecentsIcon(Bitmap recentsIcon) {
+    public void setActivityLabelAndIcon(CharSequence activityLabel, Bitmap activityIcon) {
         final Bitmap scaledIcon;
-        if (recentsIcon != null) {
+        if (activityIcon != null) {
             final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
-            scaledIcon = Bitmap.createScaledBitmap(recentsIcon, size, size, true);
+            scaledIcon = Bitmap.createScaledBitmap(activityIcon, size, size, true);
         } else {
             scaledIcon = null;
         }
         try {
-            ActivityManagerNative.getDefault().setRecentsIcon(mToken, scaledIcon);
+            ActivityManagerNative.getDefault().setActivityLabelAndIcon(mToken, activityLabel,
+                    scaledIcon);
         } catch (RemoteException e) {
         }
     }
