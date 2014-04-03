@@ -28,21 +28,29 @@
         android:layout_gravity="top|center_horizontal"
         android:background="#e6444444">
         <ImageView
-            android:id="@+id/activity_icon"
-            android:layout_width="@dimen/recents_task_view_icon_size"
-            android:layout_height="@dimen/recents_task_view_icon_size"
-            android:layout_gravity="top|left"
+            android:id="@+id/application_icon"
+            android:layout_width="@dimen/recents_task_view_application_icon_size"
+            android:layout_height="@dimen/recents_task_view_application_icon_size"
+            android:layout_gravity="center_vertical|left"
             android:padding="8dp" />
         <TextView
             android:id="@+id/activity_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|left"
-            android:layout_marginLeft="@dimen/recents_task_view_icon_size"
+            android:layout_marginLeft="@dimen/recents_task_view_application_icon_size"
+            android:layout_marginRight="@dimen/recents_task_view_activity_icon_size"
             android:textSize="24sp"
             android:textColor="#ffffffff"
             android:text="@string/recents_empty_message"
             android:fontFamily="sans-serif-thin" />
+        <ImageView
+            android:id="@+id/activity_icon"
+            android:layout_width="@dimen/recents_task_view_activity_icon_size"
+            android:layout_height="@dimen/recents_task_view_activity_icon_size"
+            android:layout_gravity="center_vertical|right"
+            android:padding="12dp"
+            android:visibility="invisible" />
     </com.android.systemui.recents.views.TaskBarView>
 </com.android.systemui.recents.views.TaskView>
 

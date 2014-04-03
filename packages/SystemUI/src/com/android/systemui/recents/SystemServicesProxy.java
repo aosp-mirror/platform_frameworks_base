@@ -30,6 +30,7 @@ import android.graphics.drawable.Drawable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -76,8 +77,11 @@ public class SystemServicesProxy {
                 rti.id = rti.persistentId = i;
                 rti.baseIntent = new Intent();
                 rti.baseIntent.setComponent(cn);
-                rti.description = rti.activityLabel = "Recent Task";
-                rti.activityIcon = Bitmap.createBitmap(mDummyIcon);
+                rti.description = rti.activityLabel =
+                        Long.toString(Math.abs(new Random().nextLong()), 36);
+                if (i % 2 == 0) {
+                    rti.activityIcon = Bitmap.createBitmap(mDummyIcon);
+                }
                 tasks.add(rti);
             }
             return tasks;

@@ -110,17 +110,18 @@ class TaskResourceLoader implements Runnable {
 
     SystemServicesProxy mSystemServicesProxy;
     TaskResourceLoadQueue mLoadQueue;
-    DrawableLruCache mIconCache;
+    DrawableLruCache mApplicationIconCache;
     BitmapLruCache mThumbnailCache;
 
     boolean mCancelled;
     boolean mWaitingOnLoadQueue;
 
     /** Constructor, creates a new loading thread that loads task resources in the background */
-    public TaskResourceLoader(TaskResourceLoadQueue loadQueue, DrawableLruCache iconCache,
+    public TaskResourceLoader(TaskResourceLoadQueue loadQueue,
+                              DrawableLruCache applicationIconCache,
                               BitmapLruCache thumbnailCache) {
         mLoadQueue = loadQueue;
-        mIconCache = iconCache;
+        mApplicationIconCache = applicationIconCache;
         mThumbnailCache = thumbnailCache;
         mMainThreadHandler = new Handler();
         mLoadThread = new HandlerThread("Recents-TaskResourceLoader");
@@ -184,13 +185,13 @@ class TaskResourceLoader implements Runnable {
                 final Task t = nextTaskData.first;
                 final boolean forceLoadTask = nextTaskData.second;
                 if (t != null) {
-                    Drawable loadIcon = mIconCache.get(t.key);
+                    Drawable loadIcon = mApplicationIconCache.get(t.key);
                     Bitmap loadThumbnail = mThumbnailCache.get(t.key);
                     Console.log(Constants.DebugFlags.App.TaskDataLoader,
                             "  [TaskResourceLoader|load]",
                             t + " icon: " + loadIcon + " thumbnail: " + loadThumbnail +
                                     " forceLoad: " + forceLoadTask);
-                    // Load the icon
+                    // Load the application icon
                     if (loadIcon == null || forceLoadTask) {
                         ActivityInfo info = ssp.getActivityInfo(t.key.baseIntent.getComponent());
                         Drawable icon = ssp.getActivityIcon(info);
@@ -200,7 +201,7 @@ class TaskResourceLoader implements Runnable {
                                         "    [TaskResourceLoader|loadIcon]",
                                         icon);
                                 loadIcon = icon;
-                                mIconCache.put(t.key, icon);
+                                mApplicationIconCache.put(t.key, icon);
                             }
                         }
                     }
@@ -293,7 +294,7 @@ public class RecentsTaskLoader {
     static RecentsTaskLoader sInstance;
 
     SystemServicesProxy mSystemServicesProxy;
-    DrawableLruCache mIconCache;
+    DrawableLruCache mApplicationIconCache;
     BitmapLruCache mThumbnailCache;
     TaskResourceLoadQueue mLoadQueue;
     TaskResourceLoader mLoader;
@@ -301,7 +302,7 @@ public class RecentsTaskLoader {
     int mMaxThumbnailCacheSize;
     int mMaxIconCacheSize;
 
-    BitmapDrawable mDefaultIcon;
+    BitmapDrawable mDefaultApplicationIcon;
     Bitmap mDefaultThumbnail;
 
     /** Private Constructor */
@@ -324,9 +325,9 @@ public class RecentsTaskLoader {
         // Initialize the proxy, cache and loaders
         mSystemServicesProxy = new SystemServicesProxy(context);
         mLoadQueue = new TaskResourceLoadQueue();
-        mIconCache = new DrawableLruCache(iconCacheSize);
+        mApplicationIconCache = new DrawableLruCache(iconCacheSize);
         mThumbnailCache = new BitmapLruCache(thumbnailCacheSize);
-        mLoader = new TaskResourceLoader(mLoadQueue, mIconCache, mThumbnailCache);
+        mLoader = new TaskResourceLoader(mLoadQueue, mApplicationIconCache, mThumbnailCache);
 
         // Create the default assets
         Bitmap icon = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
@@ -337,10 +338,10 @@ public class RecentsTaskLoader {
         c.setBitmap(mDefaultThumbnail);
         c.drawColor(0x00000000);
         c.setBitmap(null);
-        mDefaultIcon = new BitmapDrawable(context.getResources(), icon);
+        mDefaultApplicationIcon = new BitmapDrawable(context.getResources(), icon);
         Console.log(Constants.DebugFlags.App.TaskDataLoader,
                 "[RecentsTaskLoader|defaultBitmaps]",
-                "icon: " + mDefaultIcon + " thumbnail: " + mDefaultThumbnail, Console.AnsiRed);
+                "icon: " + mDefaultApplicationIcon + " thumbnail: " + mDefaultThumbnail, Console.AnsiRed);
     }
 
     /** Initializes the recents task loader */
@@ -406,8 +407,14 @@ public class RecentsTaskLoader {
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = tasks.get(i);
             ActivityInfo info = ssp.getActivityInfo(t.baseIntent.getComponent());
-            String title = ssp.getActivityLabel(info);
+            String activityLabel = (t.activityLabel == null ? ssp.getActivityLabel(info) :
+                    t.activityLabel.toString());
+            Bitmap activityIcon = t.activityIcon;
             boolean isForemostTask = (i == (taskCount - 1));
+
+            // Create a new task
+            Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, activityLabel,
+                    activityIcon);
 
             // Preload the specified number of apps
             if (i >= (taskCount - preloadCount)) {
@@ -415,32 +422,21 @@ public class RecentsTaskLoader {
                         "[RecentsTaskLoader|preloadTask]",
                         "i: " + i + " task: " + t.baseIntent.getComponent().getPackageName());
 
-                String label = (t.activityLabel == null ? title : t.activityLabel.toString());
-                BitmapDrawable bd = null;
-                if (t.activityIcon != null) {
-                    bd = new BitmapDrawable(res, t.activityIcon);
-                }
-                Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, label, bd);
-
                 // Load the icon (if possible and not the foremost task, from the cache)
-                if (task.icon != null) {
-                    mIconCache.put(task.key, task.icon);
-                } else {
-                    if (!isForemostTask) {
-                        task.icon = mIconCache.get(task.key);
-                        if (task.icon != null) {
-                            // Even though we get things from the cache, we should update them
-                            // if they've changed in the bg
-                            tasksToForceLoad.add(task);
-                        }
+                if (!isForemostTask) {
+                    task.applicationIcon = mApplicationIconCache.get(task.key);
+                    if (task.applicationIcon != null) {
+                        // Even though we get things from the cache, we should update them
+                        // if they've changed in the bg
+                        tasksToForceLoad.add(task);
                     }
-                    if (task.icon == null) {
-                        task.icon = ssp.getActivityIcon(info);
-                        if (task.icon != null) {
-                            mIconCache.put(task.key, task.icon);
-                        } else {
-                            task.icon = mDefaultIcon;
-                        }
+                }
+                if (task.applicationIcon == null) {
+                    task.applicationIcon = ssp.getActivityIcon(info);
+                    if (task.applicationIcon != null) {
+                        mApplicationIconCache.put(task.key, task.applicationIcon);
+                    } else {
+                        task.applicationIcon = mDefaultApplicationIcon;
                     }
                 }
 
@@ -463,18 +459,12 @@ public class RecentsTaskLoader {
                         task.thumbnail = mDefaultThumbnail;
                     }
                 }
-
-                // Add the task to the stack
-                Console.log(Constants.DebugFlags.App.TaskDataLoader,
-                    "  [RecentsTaskLoader|task]", t.baseIntent.getComponent().getPackageName());
-                stack.addTask(task);
-            } else {
-                // Add the task to the stack
-                Console.log(Constants.DebugFlags.App.TaskDataLoader,
-                    "  [RecentsTaskLoader|task]", t.baseIntent.getComponent().getPackageName());
-                stack.addTask(new Task(t.persistentId, (t.id > -1), t.baseIntent, title,
-                        null, null));
             }
+
+            // Add the task to the stack
+            Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                "  [RecentsTaskLoader|task]", t.baseIntent.getComponent().getPackageName());
+            stack.addTask(task);
         }
         Console.log(Constants.DebugFlags.App.TimeSystemCalls,
                 "[RecentsTaskLoader|getAllTaskTopThumbnail]",
@@ -507,16 +497,16 @@ public class RecentsTaskLoader {
 
     /** Acquires the task resource data from the pool. */
     public void loadTaskData(Task t) {
-        Drawable icon = mIconCache.get(t.key);
+        Drawable applicationIcon = mApplicationIconCache.get(t.key);
         Bitmap thumbnail = mThumbnailCache.get(t.key);
 
         Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|loadTask]",
-                t + " icon: " + icon + " thumbnail: " + thumbnail +
+                t + " applicationIcon: " + applicationIcon + " thumbnail: " + thumbnail +
                         " thumbnailCacheSize: " + mThumbnailCache.size());
 
         boolean requiresLoad = false;
-        if (icon == null) {
-            icon = mDefaultIcon;
+        if (applicationIcon == null) {
+            applicationIcon = mDefaultApplicationIcon;
             requiresLoad = true;
         }
         if (thumbnail == null) {
@@ -526,7 +516,7 @@ public class RecentsTaskLoader {
         if (requiresLoad) {
             mLoadQueue.addTask(t, false);
         }
-        t.notifyTaskDataLoaded(thumbnail, icon, false);
+        t.notifyTaskDataLoaded(thumbnail, applicationIcon, false);
     }
 
     /** Releases the task resource data back into the pool. */
@@ -536,7 +526,7 @@ public class RecentsTaskLoader {
                 " thumbnailCacheSize: " + mThumbnailCache.size());
 
         mLoadQueue.removeTask(t);
-        t.notifyTaskDataUnloaded(mDefaultThumbnail, mDefaultIcon);
+        t.notifyTaskDataUnloaded(mDefaultThumbnail, mDefaultApplicationIcon);
     }
 
     /** Completely removes the resource data from the pool. */
@@ -546,8 +536,8 @@ public class RecentsTaskLoader {
 
         mLoadQueue.removeTask(t);
         mThumbnailCache.remove(t.key);
-        mIconCache.remove(t.key);
-        t.notifyTaskDataUnloaded(mDefaultThumbnail, mDefaultIcon);
+        mApplicationIconCache.remove(t.key);
+        t.notifyTaskDataUnloaded(mDefaultThumbnail, mDefaultApplicationIcon);
     }
 
     /** Stops the task loader and clears all pending tasks */
@@ -570,19 +560,19 @@ public class RecentsTaskLoader {
             case ComponentCallbacks2.TRIM_MEMORY_BACKGROUND:
                 // We are leaving recents, so trim the data a bit
                 mThumbnailCache.trimToSize(mMaxThumbnailCacheSize / 2);
-                mIconCache.trimToSize(mMaxIconCacheSize / 2);
+                mApplicationIconCache.trimToSize(mMaxIconCacheSize / 2);
                 break;
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW:
             case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
                 // We are going to be low on memory
                 mThumbnailCache.trimToSize(mMaxThumbnailCacheSize / 4);
-                mIconCache.trimToSize(mMaxIconCacheSize / 4);
+                mApplicationIconCache.trimToSize(mMaxIconCacheSize / 4);
                 break;
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
             case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
                 // We are low on memory, so release everything
                 mThumbnailCache.evictAll();
-                mIconCache.evictAll();
+                mApplicationIconCache.evictAll();
                 break;
             default:
                 break;
