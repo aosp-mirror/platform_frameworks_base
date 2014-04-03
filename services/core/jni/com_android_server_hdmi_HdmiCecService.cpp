@@ -20,7 +20,7 @@
 
 #include "ScopedPrimitiveArray.h"
 
-#include <cstring>
+#include <string>
 #include <deque>
 #include <map>
 
@@ -34,7 +34,6 @@ static struct {
     jmethodID handleMessage;
     jmethodID handleHotplug;
     jmethodID getActiveSource;
-    jmethodID getOsdName;
     jmethodID getLanguage;
 } gHdmiCecServiceClassInfo;
 
@@ -84,6 +83,7 @@ public:
     void sendSetMenuLanguage(cec_logical_address_t srcAddr, cec_logical_address_t dstAddr);
 
     void sendCecMessage(const cec_message_t& message);
+    void setOsdName(const char* name, size_t len);
 
 private:
     enum {
@@ -156,6 +156,7 @@ private:
 
     std::deque<MessageEntry> mMessageQueue;
     uint16_t mPhysicalAddress;
+    std::string mOsdName;
 };
 
 
@@ -373,6 +374,10 @@ void HdmiCecHandler::sendCecMessage(const cec_message_t& message) {
     mDevice->send_message(mDevice, &message);
 }
 
+void HdmiCecHandler::setOsdName(const char* name, size_t len) {
+    mOsdName.assign(name, min(len, CEC_MESSAGE_BODY_MAX_LENGTH - 1));
+}
+
 // static
 void HdmiCecHandler::onReceived(const hdmi_event_t* event, void* arg) {
     HdmiCecHandler* handler = static_cast<HdmiCecHandler*>(arg);
@@ -504,18 +509,9 @@ void HdmiCecHandler::handleRequestActiveSource() {
 }
 
 void HdmiCecHandler::handleGetOsdName(const cec_message_t& msg) {
-    cec_logical_address_t addr = msg.destination;
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
-    jbyteArray res = (jbyteArray) env->CallObjectMethod(mCallbacksObj,
-            gHdmiCecServiceClassInfo.getOsdName,
-            getDeviceType(addr));
-    jbyte *name = env->GetByteArrayElements(res, NULL);
-    if (name != NULL) {
-        sendSetOsdName(addr, msg.initiator, reinterpret_cast<const char *>(name),
-                env->GetArrayLength(res));
-        env->ReleaseByteArrayElements(res, name, JNI_ABORT);
+    if (!mOsdName.empty()) {
+        sendSetOsdName(msg.destination, msg.initiator, mOsdName.c_str(), mOsdName.length());
     }
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
 void HdmiCecHandler::handleGiveDeviceVendorID(const cec_message_t& msg) {
@@ -562,8 +558,6 @@ static jlong nativeInit(JNIEnv* env, jclass clazz, jobject callbacksObj) {
             "handleHotplug", "(Z)V");
     GET_METHOD_ID(gHdmiCecServiceClassInfo.getActiveSource, clazz,
             "getActiveSource", "()I");
-    GET_METHOD_ID(gHdmiCecServiceClassInfo.getOsdName, clazz,
-            "getOsdName", "(I)[B");
     GET_METHOD_ID(gHdmiCecServiceClassInfo.getLanguage, clazz,
             "getLanguage", "(I)Ljava/lang/String;");
 
@@ -603,6 +597,15 @@ static jint nativeGetPhysicalAddress(JNIEnv* env, jclass clazz, jlong handlerPtr
     return handler->getPhysicalAddress();
 }
 
+static void nativeSetOsdName(JNIEnv* env, jclass clazz, jlong handlerPtr, jbyteArray name) {
+    HdmiCecHandler *handler = reinterpret_cast<HdmiCecHandler *>(handlerPtr);
+    jsize len = env->GetArrayLength(name);
+    if (len > 0) {
+        ScopedByteArrayRO namePtr(env, name);
+        handler->setOsdName(reinterpret_cast<const char *>(namePtr.get()), len);
+    }
+}
+
 static JNINativeMethod sMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit", "(Lcom/android/server/hdmi/HdmiCecService;)J",
@@ -615,6 +618,8 @@ static JNINativeMethod sMethods[] = {
             (void *)nativeRemoveLogicalAddress },
     { "nativeGetPhysicalAddress", "(J)I",
             (void *)nativeGetPhysicalAddress },
+    { "nativeSetOsdName", "(J[B)V",
+            (void *)nativeSetOsdName },
 };
 
 #define CLASS_PATH "com/android/server/hdmi/HdmiCecService"
