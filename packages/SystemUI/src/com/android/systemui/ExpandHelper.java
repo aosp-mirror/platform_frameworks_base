@@ -34,6 +34,8 @@ import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
+import com.android.systemui.statusbar.policy.ScrollAdapter;
+
 public class ExpandHelper implements Gefingerpoken, OnClickListener {
     public interface Callback {
         View getChildAtRawPosition(float x, float y);
@@ -608,20 +610,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                     mContext.getSystemService(Context.VIBRATOR_SERVICE);
         }
         mVibrator.vibrate(duration, AudioManager.STREAM_SYSTEM);
-    }
-
-    public interface ScrollAdapter {
-
-        /**
-         * @return Whether the view returned by {@link #getHostView()} is scrolled to the top
-         * and can therefore be expanded by a single finger drag
-         */
-        public boolean isScrolledToTop();
-
-        /**
-         * @return The view in which the scrolling is performed
-         */
-        public View getHostView();
     }
 }
 
