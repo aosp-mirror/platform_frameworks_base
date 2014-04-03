@@ -9201,7 +9201,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         
         // Successfully disabled the old package. Now proceed with re-installation
-        mLastScanError = PackageManager.INSTALL_SUCCEEDED;
+        res.returnCode = mLastScanError = PackageManager.INSTALL_SUCCEEDED;
         pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
         newPackage = scanPackageLI(pkg, parseFlags, scanMode, 0, user);
         if (newPackage == null) {
