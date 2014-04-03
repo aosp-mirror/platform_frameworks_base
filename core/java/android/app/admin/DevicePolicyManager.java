@@ -1816,6 +1816,27 @@ public class DevicePolicyManager {
 
     /**
      * @hide
+     * @param userId the userId of a managed profile profile.
+     *
+     * @return whether or not the managed profile is enabled.
+     * @throws IllegalArgumentException if the userId is invalid.
+     */
+    public boolean isProfileEnabled(int userId) throws IllegalArgumentException {
+        if (mService != null) {
+            try {
+                return mService.isProfileEnabled(userId);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to get status for owner profile.");
+                throw new IllegalArgumentException(
+                        "Failed to get status for owner profile.", re);
+            }
+        }
+        return true;
+    }
+
+
+    /**
+     * @hide
      * @return the human readable name of the organisation associated with this DPM or null if
      *         one is not set.
      * @throws IllegalArgumentException if the userId is invalid.

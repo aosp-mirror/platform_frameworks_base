@@ -466,6 +466,8 @@ public class UserManager {
     /**
      * Returns list of the profiles of userHandle including
      * userHandle itself.
+     * Note that it this returns both enabled and not enabled profiles. See
+     * {@link #getUserProfiles()} if you need only the enabled ones.
      *
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @param userHandle profiles of this user will be returned.
@@ -474,7 +476,7 @@ public class UserManager {
      */
     public List<UserInfo> getProfiles(int userHandle) {
         try {
-            return mService.getProfiles(userHandle);
+            return mService.getProfiles(userHandle, false /* enabledOnly */);
         } catch (RemoteException re) {
             Log.w(TAG, "Could not get user list", re);
             return null;
@@ -488,7 +490,13 @@ public class UserManager {
      */
     public List<UserHandle> getUserProfiles() {
         ArrayList<UserHandle> profiles = new ArrayList<UserHandle>();
-        List<UserInfo> users = getProfiles(UserHandle.myUserId());
+        List<UserInfo> users = new ArrayList<UserInfo>();
+        try {
+            users = mService.getProfiles(UserHandle.myUserId(), true /* enabledOnly */);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get user list", re);
+            return null;
+        }
         for (UserInfo info : users) {
             UserHandle userHandle = new UserHandle(info.id);
             profiles.add(userHandle);
