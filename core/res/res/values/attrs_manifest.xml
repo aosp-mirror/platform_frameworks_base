@@ -866,6 +866,18 @@
     <!-- The name of the logical parent of the activity as it appears in the manifest. -->
     <attr name="parentActivityName" format="string" />
 
+    <!-- Define an activity that will persist across reboots. If such an activity is in the
+         Recents list when the device is shut off it will appear in the Recents list when
+         the device is next powered on. To be persisted all activities in the task from the
+         root activity up to the last activity before a <em>break</em> must be declared with
+         the persistable attribute. A <em>break</em> is the first activity after the root
+         started with Intent.FLAG_CLEAR_TASK_WHEN_RESET.
+
+         <p>Activities that are declared with the persistable attribute will be provided with a
+         forced-persistable Bundle in onCreate() and onSavedInstanceState(), and must only
+         be passed a persistable Bundle in their Intent.extras. -->
+    <attr name="persistable" format="boolean" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1528,6 +1540,7 @@
         <!-- @hide This broacast receiver will only receive broadcasts for the
              primary user.  Can only be used with receivers. -->
         <attr name="primaryUserOnly" format="boolean" />
+        <attr name="persistable" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new

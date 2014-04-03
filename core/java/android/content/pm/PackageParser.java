@@ -57,7 +57,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.jar.JarEntry;
 import java.util.jar.StrictJarFile;
 import java.util.zip.ZipEntry;
 
@@ -2446,6 +2445,11 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestActivity_immersive,
                 false)) {
             a.info.flags |= ActivityInfo.FLAG_IMMERSIVE;
+        }
+
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestActivity_persistable, false)) {
+            a.info.flags |= ActivityInfo.FLAG_PERSISTABLE;
         }
 
         if (!receiver) {
