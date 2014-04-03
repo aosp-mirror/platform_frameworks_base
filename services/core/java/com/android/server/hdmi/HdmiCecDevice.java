@@ -27,8 +27,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * CecDevice class represents a CEC logical device characterized
- * by its device type. A physical device can contain the functions of
+ * HdmiCecDevice class represents a CEC logical device characterized
+ * by its device type. It is a superclass of those serving concrete device type.
+ * Currently we're interested in playback(one of sources), display(sink) device type
+ * only. The support for the other types like recorder, audio system will come later.
+ *
+ * <p>A physical device can contain the functions of
  * more than one logical device, in which case it should create
  * as many logical devices as necessary.
  *
@@ -41,7 +45,7 @@ import java.util.List;
  *
  * <p>Declared as package-private, accessed by HdmiCecService only.
  */
-final class HdmiCecDevice {
+abstract class HdmiCecDevice {
     private static final String TAG = "HdmiCecDevice";
 
     private final int mType;
@@ -49,23 +53,50 @@ final class HdmiCecDevice {
     // List of listeners to the message/event coming to the device.
     private final List<IHdmiCecListener> mListeners = new ArrayList<IHdmiCecListener>();
     private final Binder mBinder = new Binder();
+    private final HdmiCecService mService;
 
     private String mName;
     private boolean mIsActiveSource;
 
     /**
+     * Factory method that creates HdmiCecDevice instance to the device type.
+     */
+    public static HdmiCecDevice create(HdmiCecService service, int type) {
+        if (type == HdmiCec.DEVICE_PLAYBACK) {
+            return new HdmiCecDevicePlayback(service, type);
+        } else if (type == HdmiCec.DEVICE_TV) {
+            return new HdmiCecDeviceTv(service, type);
+        }
+        return null;
+    }
+
+    /**
      * Constructor.
      */
-    public HdmiCecDevice(int type) {
+    public HdmiCecDevice(HdmiCecService service, int type) {
+        mService = service;
         mType = type;
         mIsActiveSource = false;
     }
+
+    /**
+     * Called right after the class is instantiated. This method can be used to
+     * implement any initialization tasks for the instance.
+     */
+    abstract public void initialize();
 
     /**
      * Return the binder token that identifies this instance.
      */
     public Binder getToken() {
         return mBinder;
+    }
+
+    /**
+     * Return the service instance.
+     */
+    public HdmiCecService getService() {
+        return mService;
     }
 
     /**
@@ -128,6 +159,7 @@ final class HdmiCecDevice {
         if (opcode == HdmiCec.MESSAGE_ACTIVE_SOURCE) {
             mIsActiveSource = false;
         }
+
         if (mListeners.size() == 0) {
             return;
         }
@@ -166,5 +198,14 @@ final class HdmiCecDevice {
      */
     public void setIsActiveSource(boolean state) {
         mIsActiveSource = state;
+    }
+
+    /**
+     * Check if the connected sink device is in powered-on state. The default implementation
+     * simply returns false. Should be overriden by subclass to report the correct state.
+     */
+    public boolean isSinkDeviceOn() {
+        Log.w(TAG, "Not valid for the device type: " + mType);
+        return false;
     }
 }

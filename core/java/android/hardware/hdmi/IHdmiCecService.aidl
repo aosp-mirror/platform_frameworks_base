@@ -34,7 +34,7 @@ interface IHdmiCecService {
     void sendInactiveSource(IBinder b);
     void sendImageViewOn(IBinder b);
     void sendTextViewOn(IBinder b);
-    void sendGiveDevicePowerStatus(IBinder b, int address);
+    boolean isTvOn(IBinder b);
     void sendMessage(IBinder b, in HdmiCecMessage message);
 }
 
