@@ -41,6 +41,7 @@ public class KeyguardService extends Service {
 
     @Override
     public void onCreate() {
+        ((SystemUIApplication) getApplication()).startServicesIfNeeded();
         mKeyguardViewMediator =
                 ((SystemUIApplication) getApplication()).getComponent(KeyguardViewMediator.class);
     }
