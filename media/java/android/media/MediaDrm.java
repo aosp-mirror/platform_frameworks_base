@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,6 @@ import android.os.Message;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Log;
-import android.content.Context;
 
 /**
  * MediaDrm can be used to obtain keys for decrypting protected media streams, in
@@ -100,6 +99,8 @@ public final class MediaDrm {
 
     private final static String TAG = "MediaDrm";
 
+    private static final String PERMISSION = android.Manifest.permission.ACCESS_DRM_CERTIFICATES;
+
     private EventHandler mEventHandler;
     private OnEventListener mOnEventListener;
 
@@ -154,7 +155,7 @@ public final class MediaDrm {
     }
 
     private static final native boolean isCryptoSchemeSupportedNative(byte[] uuid,
-                                                                      String mimeType);
+            String mimeType);
 
     /**
      * Instantiate a MediaDrm object
@@ -178,7 +179,7 @@ public final class MediaDrm {
          * It's easier to create it here than in C++.
          */
         native_setup(new WeakReference<MediaDrm>(this),
-                     getByteArrayFromUUID(uuid));
+                getByteArrayFromUUID(uuid));
     }
 
     /**
@@ -287,7 +288,7 @@ public final class MediaDrm {
      * the cookie passed to native_setup().)
      */
     private static void postEventFromNative(Object mediadrm_ref,
-                                            int eventType, int extra, Object obj)
+            int eventType, int extra, Object obj)
     {
         MediaDrm md = (MediaDrm)((WeakReference)mediadrm_ref).get();
         if (md == null) {
@@ -387,9 +388,8 @@ public final class MediaDrm {
      * problem with the certifcate
      */
     public native KeyRequest getKeyRequest(byte[] scope, byte[] init,
-                                           String mimeType, int keyType,
-                                           HashMap<String, String> optionalParameters)
-        throws NotProvisionedException;
+            String mimeType, int keyType, HashMap<String, String> optionalParameters)
+            throws NotProvisionedException;
 
 
     /**
@@ -413,7 +413,7 @@ public final class MediaDrm {
      * @throws ResourceBusyException if required resources are in use
      */
     public native byte[] provideKeyResponse(byte[] scope, byte[] response)
-        throws NotProvisionedException, DeniedByServerException;
+            throws NotProvisionedException, DeniedByServerException;
 
 
     /**
@@ -480,7 +480,7 @@ public final class MediaDrm {
     }
 
     private native ProvisionRequest getProvisionRequestNative(int certType,
-                                                              String certAuthority);
+            String certAuthority);
 
     /**
      * After a provision response is received by the app, it is provided to the DRM
@@ -493,12 +493,12 @@ public final class MediaDrm {
      * server rejected the request
      */
     public void provideProvisionResponse(byte[] response)
-        throws DeniedByServerException {
+            throws DeniedByServerException {
         provideProvisionResponseNative(response);
     }
 
     private native Certificate provideProvisionResponseNative(byte[] response)
-        throws DeniedByServerException;
+            throws DeniedByServerException;
 
     /**
      * A means of enforcing limits on the number of concurrent streams per subscriber
@@ -585,23 +585,22 @@ public final class MediaDrm {
 
 
     private static final native void setCipherAlgorithmNative(MediaDrm drm, byte[] sessionId,
-                                                              String algorithm);
+            String algorithm);
 
     private static final native void setMacAlgorithmNative(MediaDrm drm, byte[] sessionId,
-                                                           String algorithm);
+            String algorithm);
 
     private static final native byte[] encryptNative(MediaDrm drm, byte[] sessionId,
-                                                     byte[] keyId, byte[] input, byte[] iv);
+            byte[] keyId, byte[] input, byte[] iv);
 
     private static final native byte[] decryptNative(MediaDrm drm, byte[] sessionId,
-                                                     byte[] keyId, byte[] input, byte[] iv);
+            byte[] keyId, byte[] input, byte[] iv);
 
     private static final native byte[] signNative(MediaDrm drm, byte[] sessionId,
-                                                  byte[] keyId, byte[] message);
+            byte[] keyId, byte[] message);
 
     private static final native boolean verifyNative(MediaDrm drm, byte[] sessionId,
-                                                     byte[] keyId, byte[] message,
-                                                     byte[] signature);
+            byte[] keyId, byte[] message, byte[] signature);
 
     /**
      * In addition to supporting decryption of DASH Common Encrypted Media, the
@@ -631,7 +630,7 @@ public final class MediaDrm {
         private byte[] mSessionId;
 
         CryptoSession(MediaDrm drm, byte[] sessionId,
-                      String cipherAlgorithm, String macAlgorithm)
+                String cipherAlgorithm, String macAlgorithm)
         {
             mSessionId = sessionId;
             mDrm = drm;
@@ -706,8 +705,7 @@ public final class MediaDrm {
      * "algorithms".
      */
     public CryptoSession getCryptoSession(byte[] sessionId,
-                                          String cipherAlgorithm,
-                                          String macAlgorithm)
+            String cipherAlgorithm, String macAlgorithm)
     {
         return new CryptoSession(this, sessionId, cipherAlgorithm, macAlgorithm);
     }
@@ -753,11 +751,11 @@ public final class MediaDrm {
      * @hide - not part of the public API at this time
      */
     public CertificateRequest getCertificateRequest(int certType,
-                                                    String certAuthority)
+            String certAuthority)
     {
         ProvisionRequest provisionRequest = getProvisionRequestNative(certType, certAuthority);
         return new CertificateRequest(provisionRequest.getData(),
-                                      provisionRequest.getDefaultUrl());
+                provisionRequest.getDefaultUrl());
     }
 
     /**
@@ -802,18 +800,16 @@ public final class MediaDrm {
      * @hide - not part of the public API at this time
      */
     public Certificate provideCertificateResponse(byte[] response)
-        throws DeniedByServerException {
+            throws DeniedByServerException {
         return provideProvisionResponseNative(response);
     }
 
     private static final native byte[] signRSANative(MediaDrm drm, byte[] sessionId,
-                                                     String algorithm, byte[] wrappedKey,
-                                                     byte[] message);
+            String algorithm, byte[] wrappedKey, byte[] message);
 
     /**
      * Sign data using an RSA key
      *
-     * @param context the app context
      * @param sessionId a sessionId obtained from openSession on the MediaDrm object
      * @param algorithm the signing algorithm to use, e.g. "PKCS1-BlockType1"
      * @param wrappedKey - the wrapped (encrypted) RSA private key obtained
@@ -822,7 +818,8 @@ public final class MediaDrm {
      *
      * @hide - not part of the public API at this time
      */
-    public byte[] signRSA(Context context, byte[] sessionId, String algorithm, byte[] wrappedKey, byte[] message) {
+    public byte[] signRSA(byte[] sessionId, String algorithm,
+            byte[] wrappedKey, byte[] message) {
         return signRSANative(this, sessionId, algorithm, wrappedKey, message);
     }
 

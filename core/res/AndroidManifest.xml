@@ -2527,6 +2527,13 @@
         android:description="@string/permdesc_accessNetworkConditions"
         android:protectionLevel="signature|system" />
 
+    <!-- Allows an application to provision and access DRM certificates
+         @hide This is not a third-party API (intended for system apps). -->
+    <permission android:name="android.permission.ACCESS_DRM_CERTIFICATES"
+        android:label="@string/permlab_accessDrmCertificates"
+        android:description="@string/permdesc_accessDrmCertificates"
+        android:protectionLevel="signature|system" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>
