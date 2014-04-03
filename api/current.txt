@@ -865,6 +865,7 @@ package android {
     field public static final int permissionFlags = 16843719; // 0x10103c7
     field public static final int permissionGroup = 16842762; // 0x101000a
     field public static final int permissionGroupFlags = 16843717; // 0x10103c5
+    field public static final int persistable = 16843832; // 0x1010438
     field public static final int persistent = 16842765; // 0x101000d
     field public static final int persistentDrawingCache = 16842990; // 0x10100ee
     field public static final deprecated int phoneNumber = 16843111; // 0x1010167

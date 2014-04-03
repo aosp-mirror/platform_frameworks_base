@@ -189,6 +189,13 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int FLAG_IMMERSIVE = 0x0800;
     /**
+     * Bit in {@link #flags} indicating that this activity is to be persisted across
+     * reboots for display in the Recents list.
+     * {@link android.R.attr#persistable}
+     * @hide
+     */
+    public static final int FLAG_PERSISTABLE = 0x1000;
+    /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the primary user.  Only works with broadcast receivers.  Set from the
      * {@link android.R.attr#primaryUserOnly} attribute.
