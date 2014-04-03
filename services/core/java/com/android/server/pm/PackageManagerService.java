@@ -9214,9 +9214,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final PackageSetting newPkgSetting = (PackageSetting)newPackage.mExtras;
                 newPkgSetting.firstInstallTime = oldPkgSetting.firstInstallTime;
                 newPkgSetting.lastUpdateTime = System.currentTimeMillis();
+
+                // is the update attempting to change shared user? that isn't going to work...
+                if (oldPkgSetting.sharedUser != newPkgSetting.sharedUser) {
+                    Slog.w(TAG, "Forbidding shared user change from " + oldPkgSetting.sharedUser
+                            + " to " + newPkgSetting.sharedUser);
+                    res.returnCode = PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
+                    updatedSettings = true;
+                }
             }
-            updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res);
-            updatedSettings = true;
+
+            if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res);
+                updatedSettings = true;
+            }
         }
 
         if (res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
