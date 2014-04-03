@@ -228,9 +228,10 @@ int register_com_android_internal_os_RuntimeInit(JNIEnv* env)
 
 /*static*/ JavaVM* AndroidRuntime::mJavaVM = NULL;
 
-
-AndroidRuntime::AndroidRuntime() :
-        mExitWithoutCleanup(false)
+AndroidRuntime::AndroidRuntime(char* argBlockStart, const size_t argBlockLength) :
+        mExitWithoutCleanup(false),
+        mArgBlockStart(argBlockStart),
+        mArgBlockLength(argBlockLength)
 {
     SkGraphics::Init();
     // this sets our preference for 16bit images during decode
@@ -263,6 +264,10 @@ AndroidRuntime::~AndroidRuntime()
     const char* className, const JNINativeMethod* gMethods, int numMethods)
 {
     return jniRegisterNativeMethods(env, className, gMethods, numMethods);
+}
+
+void AndroidRuntime::setArgv0(const char* argv0) {
+    strlcpy(mArgBlockStart, argv0, mArgBlockLength);
 }
 
 status_t AndroidRuntime::callMain(const char* className,

@@ -34,7 +34,7 @@ namespace android {
 class AndroidRuntime
 {
 public:
-    AndroidRuntime();
+    AndroidRuntime(char* argBlockStart, size_t argBlockSize);
     virtual ~AndroidRuntime();
 
     enum StartMode {
@@ -43,6 +43,8 @@ public:
         Application,
         Tool,
     };
+
+    void setArgv0(const char* argv0);
 
     /**
      * Register a set of methods in the specified class.
@@ -120,6 +122,8 @@ private:
 
     Vector<JavaVMOption> mOptions;
     bool mExitWithoutCleanup;
+    char* const mArgBlockStart;
+    const size_t mArgBlockLength;
 
     /* JNI JavaVM pointer */
     static JavaVM* mJavaVM;
