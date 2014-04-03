@@ -4847,10 +4847,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             final float x = r.exactCenterX();
             final float y = r.exactCenterY();
-            mBackground.setHotspot(Drawable.HOTSPOT_FOCUS, x, y);
+            mBackground.setHotspot(R.attr.state_focused, x, y);
 
             if (!focused) {
-                mBackground.removeHotspot(Drawable.HOTSPOT_FOCUS);
+                mBackground.removeHotspot(R.attr.state_focused);
             }
         }
     }
@@ -9092,6 +9092,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         }
 
                         removeTapCallback();
+                    } else {
+                        clearHotspot(R.attr.state_pressed);
                     }
                     break;
 
@@ -9204,6 +9206,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private void removeUnsetPressCallback() {
         if ((mPrivateFlags & PFLAG_PRESSED) != 0 && mUnsetPressedState != null) {
+            clearHotspot(R.attr.state_pressed);
             setPressed(false);
             removeCallbacks(mUnsetPressedState);
         }

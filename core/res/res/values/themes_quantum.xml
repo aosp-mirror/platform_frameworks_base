@@ -162,9 +162,9 @@ please see themes_device_defaults.xml.
 
         <!-- Dialog attributes -->
         <item name="dialogTheme">@style/Theme.Quantum.Dialog</item>
-        <item name="dialogTitleIconsDecorLayout">@layout/dialog_title_icons_holo</item>
-        <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title_holo</item>
-        <item name="dialogTitleDecorLayout">@layout/dialog_title_holo</item>
+        <item name="dialogTitleIconsDecorLayout">@layout/dialog_title_icons_quantum</item>
+        <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title_quantum</item>
+        <item name="dialogTitleDecorLayout">@layout/dialog_title_quantum</item>
 
         <!-- AlertDialog attributes -->
         <item name="alertDialogTheme">@style/Theme.Quantum.Dialog.Alert</item>
@@ -488,9 +488,9 @@ please see themes_device_defaults.xml.
 
         <!-- Dialog attributes -->
         <item name="dialogTheme">@style/Theme.Quantum.Light.Dialog</item>
-        <item name="dialogTitleIconsDecorLayout">@layout/dialog_title_icons_holo</item>
-        <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title_holo</item>
-        <item name="dialogTitleDecorLayout">@layout/dialog_title_holo</item>
+        <item name="dialogTitleIconsDecorLayout">@layout/dialog_title_icons_quantum</item>
+        <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title_quantum</item>
+        <item name="dialogTitleDecorLayout">@layout/dialog_title_quantum</item>
 
         <!-- AlertDialog attributes -->
         <item name="alertDialogTheme">@style/Theme.Quantum.Light.Dialog.Alert</item>
