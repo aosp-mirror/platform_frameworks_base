@@ -71,6 +71,7 @@ final class UiModeManagerService extends SystemService {
     private boolean mCarModeKeepsScreenOn;
     private boolean mDeskModeKeepsScreenOn;
     private boolean mTelevision;
+    private boolean mWatch;
     private boolean mComputedNightMode;
 
     int mCurUiMode = 0;
@@ -176,6 +177,7 @@ final class UiModeManagerService extends SystemService {
                 PackageManager.FEATURE_TELEVISION) ||
             context.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_LEANBACK);
+        mWatch = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
 
         mNightMode = Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.UI_NIGHT_MODE, UiModeManager.MODE_NIGHT_AUTO);
@@ -339,8 +341,12 @@ final class UiModeManagerService extends SystemService {
     }
 
     private void updateConfigurationLocked() {
-        int uiMode = mTelevision ? Configuration.UI_MODE_TYPE_TELEVISION : mDefaultUiModeType;
-        if (mCarModeEnabled) {
+        int uiMode = mDefaultUiModeType;
+        if (mTelevision) {
+            uiMode = Configuration.UI_MODE_TYPE_TELEVISION;
+        } else if (mWatch) {
+            uiMode = Configuration.UI_MODE_TYPE_WATCH;
+        } else if (mCarModeEnabled) {
             uiMode = Configuration.UI_MODE_TYPE_CAR;
         } else if (isDeskDockState(mDockState)) {
             uiMode = Configuration.UI_MODE_TYPE_DESK;
