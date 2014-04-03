@@ -30,8 +30,9 @@ void app_usage()
 class AppRuntime : public AndroidRuntime
 {
 public:
-    AppRuntime()
-        : mParentDir(NULL)
+    AppRuntime(char* argBlockStart, const size_t argBlockLength)
+        : AndroidRuntime(argBlockStart, argBlockLength)
+        , mParentDir(NULL)
         , mClassName(NULL)
         , mClass(NULL)
         , mArgC(0)
@@ -125,29 +126,30 @@ public:
 
 using namespace android;
 
-/*
- * sets argv0 to as much of newArgv0 as will fit
- */
-static void setArgv0(const char *argv0, const char *newArgv0)
-{
-    strlcpy(const_cast<char *>(argv0), newArgv0, strlen(argv0));
+static size_t computeArgBlockSize(int argc, char* const argv[]) {
+    // TODO: This assumes that all arguments are allocated in
+    // contiguous memory. There isn't any documented guarantee
+    // that this is the case, but this is how the kernel does it
+    // (see fs/exec.c).
+    //
+    // Also note that this is a constant for "normal" android apps.
+    // Since they're forked from zygote, the size of their command line
+    // is the size of the zygote command line.
+    //
+    // We change the process name of the process by over-writing
+    // the start of the argument block (argv[0]) with the new name of
+    // the process, so we'd mysteriously start getting truncated process
+    // names if the zygote command line decreases in size.
+    uintptr_t start = reinterpret_cast<uintptr_t>(argv[0]);
+    uintptr_t end = reinterpret_cast<uintptr_t>(argv[argc - 1]);
+    end += strlen(argv[argc - 1]);
+
+    return (end - start);
 }
 
 int main(int argc, char* const argv[])
 {
-    // These are global variables in ProcessState.cpp
-    mArgC = argc;
-    mArgV = argv;
-
-    mArgLen = 0;
-    for (int i=0; i<argc; i++) {
-        mArgLen += strlen(argv[i]) + 1;
-    }
-    mArgLen--;
-
-    AppRuntime runtime;
-    const char* argv0 = argv[0];
-
+    AppRuntime runtime(argv[0], computeArgBlockSize(argc, argv));
     // Process command line arguments
     // ignore argv[0]
     argc--;
@@ -184,7 +186,7 @@ int main(int argc, char* const argv[])
     }
 
     if (niceName && *niceName) {
-        setArgv0(argv0, niceName);
+        runtime.setArgv0(niceName);
         set_process_name(niceName);
     }
 
