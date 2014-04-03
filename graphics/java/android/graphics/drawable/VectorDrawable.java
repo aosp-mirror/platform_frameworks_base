@@ -61,9 +61,9 @@ import java.util.HashSet;
  * <p/>
  * <dl>
  * <dt><code>&lt;vector></code></dt>
- * <dd> * The attribute <code>android:trigger</code> defines a state change that
+ * <dd>The attribute <code>android:trigger</code> defines a state change that
  * will drive the animation </dd>
- * <dd> * The attribute <code>android:versionCode</code> defines the version of
+ * <dd>The attribute <code>android:versionCode</code> defines the version of
  * VectorDrawable </dd>
  * <dt><code>&lt;size></code></dt>
  * <dd>Used to defined the intrinsic Width Height size of the drawable using

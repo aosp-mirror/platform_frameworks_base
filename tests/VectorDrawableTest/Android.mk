@@ -19,7 +19,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
-LOCAL_PACKAGE_NAME := DynamicDrawableTest
+LOCAL_PACKAGE_NAME := VectorDrawableTest
 
 LOCAL_MODULE_TAGS := tests
 
