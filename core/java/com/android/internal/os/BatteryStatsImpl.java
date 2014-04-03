@@ -574,6 +574,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mUptime = in.readLong();
             mPastUptime = in.readLong();
             mUptimeStart = in.readLong();
+            mRealtime = in.readLong();
             mPastRealtime = in.readLong();
             mRealtimeStart = in.readLong();
             mUnpluggedUptime = in.readLong();
@@ -586,6 +587,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             out.writeLong(mUptime);
             out.writeLong(runningUptime);
             out.writeLong(mUptimeStart);
+            out.writeLong(mRealtime);
             out.writeLong(runningRealtime);
             out.writeLong(mRealtimeStart);
             out.writeLong(mUnpluggedUptime);
