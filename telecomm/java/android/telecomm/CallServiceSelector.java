@@ -52,7 +52,8 @@ public abstract class CallServiceSelector extends Service {
                 case MSG_SET_CALL_SERVICE_SELECTOR_ADAPTER:
                     CallServiceSelectorAdapter adapter = new CallServiceSelectorAdapter(
                             (ICallServiceSelectorAdapter) msg.obj);
-                    setCallServiceSelectorAdapter(adapter);
+                    mAdapter = adapter;
+                    onAdapterAttached(adapter);
                     break;
                 case MSG_SELECT:
                     SomeArgs args = (SomeArgs) msg.obj;
@@ -95,6 +96,8 @@ public abstract class CallServiceSelector extends Service {
 
     private final CallServiceSelectorBinder mBinder;
 
+    private CallServiceSelectorAdapter mAdapter = null;
+
     protected CallServiceSelector() {
         mBinder = new CallServiceSelectorBinder();
     }
@@ -112,11 +115,20 @@ public abstract class CallServiceSelector extends Service {
     }
 
     /**
-     * Sets an adapter that allows the selector to communicate with Telecomm.
-     *
-     * @param adapter Adapter object for communicating with Telecomm.
+     * @return The attached {@link CallServiceSelectorAdapter} if attached, or null otherwise.
      */
-    protected abstract void setCallServiceSelectorAdapter(CallServiceSelectorAdapter adapter);
+    protected final CallServiceSelectorAdapter getAdapter() {
+        return mAdapter;
+    }
+
+    /**
+     * Lifecycle callback which is called when this {@link CallServiceSelector} has been attached
+     * to a {@link CallServiceSelectorAdapter}, indicating {@link #getAdapter()} is now safe to use.
+     *
+     * @param adapter The adapter now attached to this call service selector.
+     */
+    protected void onAdapterAttached(CallServiceSelectorAdapter adapter) {
+    }
 
     /**
      * Given a list of {@link CallServiceDescriptor}s, order them into a prioritized list and return

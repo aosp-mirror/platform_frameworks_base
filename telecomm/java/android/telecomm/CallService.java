@@ -70,7 +70,8 @@ public abstract class CallService extends Service {
                 case MSG_SET_CALL_SERVICE_ADAPTER:
                     CallServiceAdapter adapter =
                             new CallServiceAdapter((ICallServiceAdapter) msg.obj);
-                    setCallServiceAdapter(adapter);
+                    mAdapter = adapter;
+                    onAdapterAttached(adapter);
                     break;
                 case MSG_IS_COMPATIBLE_WITH:
                     isCompatibleWith((CallInfo) msg.obj);
@@ -218,6 +219,8 @@ public abstract class CallService extends Service {
      */
     private final CallServiceBinder mBinder = new CallServiceBinder();
 
+    private CallServiceAdapter mAdapter = null;
+
     /** {@inheritDoc} */
     @Override
     public final IBinder onBind(Intent intent) {
@@ -232,12 +235,20 @@ public abstract class CallService extends Service {
     }
 
     /**
-     * Sets an implementation of CallServiceAdapter for adding new calls and communicating state
-     * changes of existing calls.
-     *
-     * @param callServiceAdapter Adapter object for communicating call to CallsManager
+     * @return The attached {@link CallServiceAdapter} if the service is bound, null otherwise.
      */
-    public abstract void setCallServiceAdapter(CallServiceAdapter callServiceAdapter);
+    protected final CallServiceAdapter getAdapter() {
+        return mAdapter;
+    }
+
+    /**
+     * Lifecycle callback which is called when this {@link CallService} has been attached to a
+     * {@link CallServiceAdapter}, indicating {@link #getAdapter()} is now safe to use.
+     *
+     * @param adapter The adapter now attached to this call service.
+     */
+    protected void onAdapterAttached(CallServiceAdapter adapter) {
+    }
 
     /**
      * Determines if the CallService can place the specified call. Response is sent via
