@@ -3262,6 +3262,7 @@ package android.app {
     method public void reportFullyDrawn();
     method public final boolean requestWindowFeature(int);
     method public final void runOnUiThread(java.lang.Runnable);
+    method public void setActivityLabelAndIcon(java.lang.CharSequence, android.graphics.Bitmap);
     method public void setContentTransitionManager(android.transition.TransitionManager);
     method public void setContentView(int);
     method public void setContentView(android.view.View);
@@ -3278,8 +3279,6 @@ package android.app {
     method public final void setProgressBarIndeterminate(boolean);
     method public final void setProgressBarIndeterminateVisibility(boolean);
     method public final void setProgressBarVisibility(boolean);
-    method public void setRecentsIcon(android.graphics.Bitmap);
-    method public void setRecentsLabel(java.lang.CharSequence);
     method public void setRequestedOrientation(int);
     method public final void setResult(int);
     method public final void setResult(int, android.content.Intent);

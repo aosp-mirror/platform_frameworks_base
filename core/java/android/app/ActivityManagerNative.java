@@ -2129,21 +2129,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case SET_RECENTS_LABEL_TRANSACTION: {
+        case SET_ACTIVITY_LABEL_ICON_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
-            CharSequence recentsLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(data);
-            setRecentsLabel(token, recentsLabel);
-            reply.writeNoException();
-            return true;
-        }
-
-        case SET_RECENTS_ICON_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            IBinder token = data.readStrongBinder();
-            Bitmap recentsIcon = data.readInt() != 0
+            CharSequence activityLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(data);
+            Bitmap activityIcon = data.readInt() > 0
                     ? Bitmap.CREATOR.createFromParcel(data) : null;
-            setRecentsIcon(token, recentsIcon);
+            setActivityLabelAndIcon(token, activityLabel, activityIcon);
             reply.writeNoException();
             return true;
         }
@@ -4918,32 +4910,22 @@ class ActivityManagerProxy implements IActivityManager
         return isInLockTaskMode;
     }
 
-    public void setRecentsLabel(IBinder token, CharSequence recentsLabel) throws RemoteException
+    @Override
+    public void setActivityLabelAndIcon(IBinder token, CharSequence activityLabel,
+            Bitmap activityIcon) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
-        TextUtils.writeToParcel(recentsLabel, data, 0);
-        mRemote.transact(SET_RECENTS_LABEL_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
-    }
-
-    public void setRecentsIcon(IBinder token, Bitmap recentsBitmap) throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeStrongBinder(token);
-        if (recentsBitmap != null) {
+        TextUtils.writeToParcel(activityLabel, data, 0);
+        if (activityIcon != null) {
             data.writeInt(1);
-            recentsBitmap.writeToParcel(data, 0);
+            activityIcon.writeToParcel(data, 0);
         } else {
             data.writeInt(0);
         }
-        mRemote.transact(SET_RECENTS_ICON_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
+        mRemote.transact(SET_ACTIVITY_LABEL_ICON_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
         reply.readException();
         data.recycle();
         reply.recycle();
