@@ -343,7 +343,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private Boolean mScreenOn;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private boolean mOnKeyguard;
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
 
     private final Runnable mAutohide = new Runnable() {
@@ -2797,6 +2796,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mNotificationPanelHeader.setVisibility(View.GONE);
         mStackScroller.setAlpha(0.8f);
         mStackScroller.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        updateExpansionStates();
     }
 
     public void hideKeyguard() {
@@ -2806,6 +2806,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mNotificationPanelHeader.setVisibility(View.VISIBLE);
         mStackScroller.setAlpha(1f);
         mStackScroller.setLayerType(View.LAYER_TYPE_NONE, null);
+        updateExpansionStates();
     }
 
     public void userActivity() {
