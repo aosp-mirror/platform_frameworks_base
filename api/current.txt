@@ -12087,11 +12087,16 @@ package android.hardware.hdmi {
     field public static final int MESSAGE_VENDOR_COMMAND_WITH_ID = 160; // 0xa0
     field public static final int MESSAGE_VENDOR_REMOTE_BUTTON_DOWN = 138; // 0x8a
     field public static final int MESSAGE_VENDOR_REMOTE_BUTTON_UP = 139; // 0x8b
+    field public static final int POWER_STATUS_ON = 0; // 0x0
+    field public static final int POWER_STATUS_STANDBY = 1; // 0x1
+    field public static final int POWER_STATUS_UNKNOWN = -1; // 0xffffffff
+    field public static final int POWER_TRANSIENT_TO_ON = 2; // 0x2
+    field public static final int POWER_TRANSIENT_TO_STANDBY = 3; // 0x3
   }
 
   public final class HdmiCecClient {
+    method public boolean isTvOn();
     method public void sendActiveSource();
-    method public void sendGiveDevicePowerStatus(int);
     method public void sendImageViewOn();
     method public void sendInactiveSource();
     method public void sendTextViewOn();
