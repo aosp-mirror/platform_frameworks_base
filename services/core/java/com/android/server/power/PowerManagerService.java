@@ -2541,6 +2541,9 @@ public final class PowerManagerService extends com.android.server.SystemService
         @Override // Binder call
         public void acquireWakeLockWithUid(IBinder lock, int flags, String tag,
                 String packageName, int uid) {
+            if (uid < 0) {
+                uid = Binder.getCallingUid();
+            }
             acquireWakeLock(lock, flags, tag, packageName, new WorkSource(uid), null);
         }
 
