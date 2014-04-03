@@ -17,21 +17,12 @@
 package com.android.systemui.recents.views;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.systemui.R;
-import com.android.systemui.recents.Constants;
-import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.model.Task;
 
 
@@ -39,6 +30,7 @@ import com.android.systemui.recents.model.Task;
 class TaskBarView extends FrameLayout {
     Task mTask;
 
+    ImageView mApplicationIcon;
     ImageView mActivityIcon;
     TextView mActivityDescription;
 
@@ -61,6 +53,7 @@ class TaskBarView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         // Initialize the icon and description views
+        mApplicationIcon = (ImageView) findViewById(R.id.application_icon);
         mActivityIcon = (ImageView) findViewById(R.id.activity_icon);
         mActivityDescription = (TextView) findViewById(R.id.activity_description);
     }
@@ -68,9 +61,13 @@ class TaskBarView extends FrameLayout {
     /** Binds the bar view to the task */
     void rebindToTask(Task t, boolean animate) {
         mTask = t;
-        if (t.icon != null) {
-            mActivityIcon.setImageDrawable(t.icon);
-            mActivityDescription.setText(t.title);
+        if (t.applicationIcon != null) {
+            mApplicationIcon.setImageDrawable(t.applicationIcon);
+            mActivityDescription.setText(t.activityLabel);
+            if (t.activityIcon != null) {
+                mActivityIcon.setImageBitmap(t.activityIcon);
+                mActivityIcon.setVisibility(View.VISIBLE);
+            }
             if (animate) {
                 // XXX: Investigate how expensive it will be to create a second bitmap and crossfade
             }
@@ -80,7 +77,9 @@ class TaskBarView extends FrameLayout {
     /** Unbinds the bar view from the task */
     void unbindFromTask() {
         mTask = null;
-        mActivityIcon.setImageDrawable(null);
+        mApplicationIcon.setImageDrawable(null);
+        mActivityIcon.setImageBitmap(null);
+        mActivityIcon.setVisibility(View.INVISIBLE);
         mActivityDescription.setText("");
     }
 }
