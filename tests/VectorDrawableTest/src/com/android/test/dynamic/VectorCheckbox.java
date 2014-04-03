@@ -19,10 +19,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.GridLayout;
 
 @SuppressWarnings({"UnusedDeclaration"})
-public class VectorDrawable01 extends Activity implements View.OnClickListener {
+public class VectorCheckbox extends Activity {
     private static final String LOGCAT = "VectorDrawable1";
     int[] icon = {
             R.drawable.vector_drawable01,
@@ -56,34 +57,12 @@ public class VectorDrawable01 extends Activity implements View.OnClickListener {
         final Button []bArray = new Button[icon.length];
 
         for (int i = 0; i < icon.length; i++) {
-            Button button = new Button(this);
-            bArray[i] = button;
-            button.setWidth(200);
-            button.setWidth(200);
-            button.setBackgroundResource(icon[i]);
-            container.addView(button);
-            button.setOnClickListener(this);
+            CheckBox checkBox = new CheckBox(this);
+            bArray[i] = checkBox;
+            checkBox.setWidth(200);
+            checkBox.setButtonDrawable(icon[i]);
+            container.addView(checkBox);
         }
-        Button b = new Button(this);
-        b.setText("Run All");
-        b.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v) {
-                for (int i = 0; i < bArray.length; i++) {
-                    VectorDrawable d = (VectorDrawable)  bArray[i].getBackground();
-                    d.start();
-                }
-            }});
-        container.addView(b);
         setContentView(container);
-
     }
-
-    @Override
-    public void onClick(View v) {
-        VectorDrawable d = (VectorDrawable) v.getBackground();
-        d.start();
-    }
-
 }
