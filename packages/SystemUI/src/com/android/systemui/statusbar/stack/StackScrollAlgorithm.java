@@ -86,7 +86,7 @@ public class StackScrollAlgorithm {
         // First we reset the view states to their default values.
         resultState.resetViewStates();
 
-        // The first element is always in there so it's initialized with 1.0f.
+        // The first element is always in there so it's initialized with 1.0f;
         algorithmState.itemsInTopStack = 1.0f;
         algorithmState.partialInTop = 0.0f;
         algorithmState.lastTopStackIndex = 0;
@@ -102,7 +102,7 @@ public class StackScrollAlgorithm {
         // Phase 3:
         updateZValuesForState(resultState, algorithmState);
 
-        // Write the algorithm state to the result.
+        // write the algorithm state to the result
         resultState.setScrollY(algorithmState.scrollY);
     }
 
@@ -151,7 +151,7 @@ public class StackScrollAlgorithm {
                 // Case 2:
                 // First element of regular scrollview comes next, so the position is just the
                 // scrolling position
-                nextYPosition = scrollOffset;
+                nextYPosition = Math.min(scrollOffset, transitioningPositionStart);
                 childViewState.location = StackScrollState.ViewState.LOCATION_TOP_STACK_PEEKING;
             } else if (nextYPosition >= transitioningPositionStart) {
                 if (currentYPosition >= transitioningPositionStart) {
@@ -180,6 +180,7 @@ public class StackScrollAlgorithm {
             if (childViewState.location == StackScrollState.ViewState.LOCATION_UNKNOWN) {
                 Log.wtf(LOG_TAG, "Failed to assign location for child " + i);
             }
+            nextYPosition = Math.max(0, nextYPosition);
             currentYPosition = nextYPosition;
             yPositionInScrollView = yPositionInScrollViewAfterElement;
         }
@@ -253,6 +254,8 @@ public class StackScrollAlgorithm {
             nextYPosition = mCollapsedSize + mPaddingBetweenElements -
                     mTopStackIndentationFunctor.getValue(
                             algorithmState.itemsInTopStack - i - 1);
+            nextYPosition = Math.min(nextYPosition, mLayoutHeight - mCollapsedSize
+                    - mBottomStackPeekSize);
             if (paddedIndex == 0) {
                 childViewState.alpha = 1.0f - algorithmState.partialInTop;
                 childViewState.location = StackScrollState.ViewState.LOCATION_TOP_STACK_HIDDEN;
