@@ -55,7 +55,6 @@ abstract class HdmiCecDevice {
     private final Binder mBinder = new Binder();
     private final HdmiCecService mService;
 
-    private String mName;
     private boolean mIsActiveSource;
 
     /**
@@ -104,24 +103,6 @@ abstract class HdmiCecDevice {
      */
     public int getType() {
         return mType;
-    }
-
-    /**
-     * Set the name of the device. The name will be transferred via the message
-     * &lt;Set OSD Name&gt; to other HDMI-CEC devices connected through HDMI
-     * cables and shown on TV screen to identify the devicie.
-     *
-     * @param name name of the device
-     */
-    public void setName(String name) {
-        mName = name;
-    }
-
-    /**
-     * Return the name of this device.
-     */
-    public String getName() {
-        return mName;
     }
 
     /**
