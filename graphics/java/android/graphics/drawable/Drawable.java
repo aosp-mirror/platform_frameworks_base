@@ -121,20 +121,6 @@ import java.util.Arrays;
  * document.</p></div>
  */
 public abstract class Drawable {
-    /**
-     * Hotspot identifier mask for tracking touch points.
-     *
-     * @hide until hotspot APIs are finalized
-     */
-    public static final int HOTSPOT_TOUCH_MASK = 0xFF;
-
-    /**
-     * Hotspot identifier for tracking keyboard focus.
-     *
-     * @hide until hotspot APIs are finalized
-     */
-    public static final int HOTSPOT_FOCUS = 0x100;
-
     private static final Rect ZERO_BOUNDS_RECT = new Rect();
 
     private int[] mStateSet = StateSet.WILD_CARD;
