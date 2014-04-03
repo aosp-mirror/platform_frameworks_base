@@ -60,23 +60,19 @@ public class Task {
     }
 
     public TaskKey key;
-    public String title;
-    public Drawable icon;
+    public Drawable applicationIcon;
+    public String activityLabel;
+    public Bitmap activityIcon;
     public Bitmap thumbnail;
     public boolean isActive;
 
     TaskCallbacks mCb;
 
-    public Task(int id, boolean isActive, Intent intent, String activityTitle, Drawable icon) {
-        this(id, isActive, intent, activityTitle, icon, null);
-    }
-
-    public Task(int id, boolean isActive, Intent intent, String activityTitle, Drawable icon,
-                Bitmap thumbnail) {
+    public Task(int id, boolean isActive, Intent intent, String activityTitle,
+                Bitmap activityIcon) {
         this.key = new TaskKey(id, intent);
-        this.title = activityTitle;
-        this.icon = icon;
-        this.thumbnail = thumbnail;
+        this.activityLabel = activityTitle;
+        this.activityIcon = activityIcon;
         this.isActive = isActive;
     }
 
@@ -86,8 +82,9 @@ public class Task {
     }
 
     /** Notifies the callback listeners that this task has been loaded */
-    public void notifyTaskDataLoaded(Bitmap thumbnail, Drawable icon, boolean reloadingTaskData) {
-        this.icon = icon;
+    public void notifyTaskDataLoaded(Bitmap thumbnail, Drawable applicationIcon,
+                                     boolean reloadingTaskData) {
+        this.applicationIcon = applicationIcon;
         this.thumbnail = thumbnail;
         if (mCb != null) {
             mCb.onTaskDataLoaded(reloadingTaskData);
@@ -95,8 +92,8 @@ public class Task {
     }
 
     /** Notifies the callback listeners that this task has been unloaded */
-    public void notifyTaskDataUnloaded(Bitmap defaultThumbnail, Drawable defaultIcon) {
-        icon = defaultIcon;
+    public void notifyTaskDataUnloaded(Bitmap defaultThumbnail, Drawable defaultApplicationIcon) {
+        applicationIcon = defaultApplicationIcon;
         thumbnail = defaultThumbnail;
         if (mCb != null) {
             mCb.onTaskDataUnloaded();
