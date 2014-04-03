@@ -394,6 +394,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Button" parent="Widget.Button">
         <item name="background">@drawable/btn_default_quantum</item>
         <item name="textAppearance">?attr/textAppearanceButton</item>
+        <item name="textColor">?attr/textColorPrimary</item>
         <item name="minHeight">48dip</item>
         <item name="minWidth">96dip</item>
     </style>
@@ -443,22 +444,12 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.ButtonBar">
-        <item name="paddingTop">0dip</item>
-        <item name="paddingStart">0dip</item>
-        <item name="paddingEnd">0dip</item>
-        <item name="paddingBottom">0dip</item>
-        <item name="divider">?attr/dividerVertical</item>
-        <item name="showDividers">middle</item>
-        <item name="dividerPadding">12dip</item>
         <item name="background">@null</item>
     </style>
 
     <style name="Widget.Quantum.ButtonBar.AlertDialog">
         <item name="background">@null</item>
-        <item name="dividerPadding">0dp</item>
     </style>
-
-    <style name="Widget.Quantum.ButtonBar.Button"/>
 
     <style name="Widget.Quantum.SegmentedButton" parent="SegmentedButton">
         <item name="background">@drawable/btn_group_holo_dark</item>
@@ -740,7 +731,7 @@ please see styles_device_defaults.xml.
         <item name="contentDescription">@string/action_menu_overflow_description</item>
     </style>
 
-    <style name="Widget.Quantum.ActionButton.TextButton" parent="Widget.Quantum.ButtonBar.Button"/>
+    <style name="Widget.Quantum.ActionButton.TextButton" parent="Widget.Quantum.ButtonBar"/>
 
     <style name="Widget.Quantum.ActionBar.TabView" parent="Widget.ActionBar.TabView">
         <item name="background">@drawable/tab_indicator_quantum</item>
@@ -1063,8 +1054,7 @@ please see styles_device_defaults.xml.
     <style name="WindowTitle.Quantum">
         <item name="singleLine">true</item>
         <item name="textAppearance">@style/TextAppearance.Quantum.WindowTitle</item>
-        <item name="shadowColor">#BB000000</item>
-        <item name="shadowRadius">2.75</item>
+        <item name="shadowRadius">0</item>
     </style>
 
     <style name="DialogWindowTitle.Quantum">
