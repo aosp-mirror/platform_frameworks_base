@@ -69,7 +69,7 @@ static void android_view_RenderNode_destroyDisplayList(JNIEnv* env,
 }
 
 // ----------------------------------------------------------------------------
-// RenderProperties
+// RenderProperties - setters
 // ----------------------------------------------------------------------------
 
 static void android_view_RenderNode_setCaching(JNIEnv* env,
@@ -209,22 +209,6 @@ static void android_view_RenderNode_setScaleY(JNIEnv* env,
     displayList->mutateStagingProperties().setScaleY(sy);
 }
 
-static void android_view_RenderNode_setTransformationInfo(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, float alpha,
-        float translationX, float translationY, float translationZ,
-        float rotation, float rotationX, float rotationY, float scaleX, float scaleY) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setAlpha(alpha);
-    displayList->mutateStagingProperties().setTranslationX(translationX);
-    displayList->mutateStagingProperties().setTranslationY(translationY);
-    displayList->mutateStagingProperties().setTranslationZ(translationZ);
-    displayList->mutateStagingProperties().setRotation(rotation);
-    displayList->mutateStagingProperties().setRotationX(rotationX);
-    displayList->mutateStagingProperties().setRotationY(rotationY);
-    displayList->mutateStagingProperties().setScaleX(scaleX);
-    displayList->mutateStagingProperties().setScaleY(scaleY);
-}
-
 static void android_view_RenderNode_setPivotX(JNIEnv* env,
         jobject clazz, jlong displayListPtr, float px) {
     RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
@@ -285,6 +269,10 @@ static void android_view_RenderNode_offsetTopAndBottom(JNIEnv* env,
     RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
     displayList->mutateStagingProperties().offsetTopBottom(offset);
 }
+
+// ----------------------------------------------------------------------------
+// RenderProperties - getters
+// ----------------------------------------------------------------------------
 
 static jboolean android_view_RenderNode_hasOverlappingRendering(JNIEnv* env,
         jobject clazz, jlong displayListPtr) {
@@ -352,6 +340,12 @@ static jfloat android_view_RenderNode_getTranslationY(JNIEnv* env,
     return displayList->stagingProperties().getTranslationY();
 }
 
+static jfloat android_view_RenderNode_getTranslationZ(JNIEnv* env,
+        jobject clazz, jlong displayListPtr) {
+    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
+    return displayList->stagingProperties().getTranslationZ();
+}
+
 static jfloat android_view_RenderNode_getRotation(JNIEnv* env,
         jobject clazz, jlong displayListPtr) {
     RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
@@ -368,6 +362,53 @@ static jfloat android_view_RenderNode_getRotationY(JNIEnv* env,
         jobject clazz, jlong displayListPtr) {
     RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
     return displayList->stagingProperties().getRotationY();
+}
+
+static jboolean android_view_RenderNode_isPivotExplicitlySet(JNIEnv* env,
+        jobject clazz, jlong displayListPtr) {
+    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
+    return displayList->stagingProperties().isPivotExplicitlySet();
+}
+
+static jboolean android_view_RenderNode_hasIdentityMatrix(JNIEnv* env,
+        jobject clazz, jlong displayListPtr) {
+    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
+    return displayList->stagingProperties().getMatrixFlags() == 0;
+}
+
+// ----------------------------------------------------------------------------
+// RenderProperties - computed getters
+// ----------------------------------------------------------------------------
+
+static void android_view_RenderNode_getTransformMatrix(JNIEnv* env,
+        jobject clazz, jlong displayListPtr, jlong outMatrixPtr) {
+    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
+    SkMatrix* outMatrix = reinterpret_cast<SkMatrix*>(outMatrixPtr);
+
+    displayList->mutateStagingProperties().updateMatrix();
+    const SkMatrix* transformMatrix = displayList->stagingProperties().getTransformMatrix();
+
+    if (displayList->stagingProperties().getMatrixFlags() == TRANSLATION) {
+        outMatrix->setTranslate(displayList->stagingProperties().getTranslationX(),
+                displayList->stagingProperties().getTranslationY());
+    } else if (transformMatrix) {
+        *outMatrix = *transformMatrix;
+    } else {
+        outMatrix->setIdentity();
+    }
+}
+
+static void android_view_RenderNode_getInverseTransformMatrix(JNIEnv* env,
+        jobject clazz, jlong displayListPtr, jlong outMatrixPtr) {
+    // load transform matrix
+    android_view_RenderNode_getTransformMatrix(env, clazz, displayListPtr, outMatrixPtr);
+    SkMatrix* outMatrix = reinterpret_cast<SkMatrix*>(outMatrixPtr);
+
+    // return it inverted
+    if (!outMatrix->invert(outMatrix)) {
+        // failed to load inverse, pass back identity
+        outMatrix->setIdentity();
+    }
 }
 
 static jfloat android_view_RenderNode_getPivotX(JNIEnv* env,
@@ -424,8 +465,6 @@ static JNINativeMethod gMethods[] = {
     { "nSetRotationY",         "(JF)V",  (void*) android_view_RenderNode_setRotationY },
     { "nSetScaleX",            "(JF)V",  (void*) android_view_RenderNode_setScaleX },
     { "nSetScaleY",            "(JF)V",  (void*) android_view_RenderNode_setScaleY },
-    { "nSetTransformationInfo","(JFFFFFFFFF)V",
-            (void*) android_view_RenderNode_setTransformationInfo },
     { "nSetPivotX",            "(JF)V",  (void*) android_view_RenderNode_setPivotX },
     { "nSetPivotY",            "(JF)V",  (void*) android_view_RenderNode_setPivotY },
     { "nSetCameraDistance",    "(JF)V",  (void*) android_view_RenderNode_setCameraDistance },
@@ -448,11 +487,18 @@ static JNINativeMethod gMethods[] = {
     { "nGetScaleY",               "(J)F",  (void*) android_view_RenderNode_getScaleY },
     { "nGetTranslationX",         "(J)F",  (void*) android_view_RenderNode_getTranslationX },
     { "nGetTranslationY",         "(J)F",  (void*) android_view_RenderNode_getTranslationY },
+    { "nGetTranslationZ",         "(J)F",  (void*) android_view_RenderNode_getTranslationZ },
     { "nGetRotation",             "(J)F",  (void*) android_view_RenderNode_getRotation },
     { "nGetRotationX",            "(J)F",  (void*) android_view_RenderNode_getRotationX },
     { "nGetRotationY",            "(J)F",  (void*) android_view_RenderNode_getRotationY },
-    { "nGetPivotX",               "(J)F",  (void*) android_view_RenderNode_getPivotX },
-    { "nGetPivotY",               "(J)F",  (void*) android_view_RenderNode_getPivotY },
+    { "nIsPivotExplicitlySet",    "(J)Z",  (void*) android_view_RenderNode_isPivotExplicitlySet },
+    { "nHasIdentityMatrix",       "(J)Z",  (void*) android_view_RenderNode_hasIdentityMatrix },
+
+    { "nGetTransformMatrix",       "(JJ)V", (void*) android_view_RenderNode_getTransformMatrix },
+    { "nGetInverseTransformMatrix","(JJ)V", (void*) android_view_RenderNode_getInverseTransformMatrix },
+
+    { "nGetPivotX",                "(J)F",  (void*) android_view_RenderNode_getPivotX },
+    { "nGetPivotY",                "(J)F",  (void*) android_view_RenderNode_getPivotY },
 #endif
 };
 
