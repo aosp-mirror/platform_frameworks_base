@@ -52,6 +52,7 @@ import android.os.storage.IMountServiceListener;
 import android.os.storage.IMountShutdownObserver;
 import android.os.storage.IObbActionListener;
 import android.os.storage.OnObbStateChangeListener;
+import android.os.storage.StorageManager;
 import android.os.storage.StorageResultCode;
 import android.os.storage.StorageVolume;
 import android.text.TextUtils;
@@ -2144,8 +2145,8 @@ class MountService extends IMountService.Stub
         }
     }
 
-    public int encryptStorage(String password) {
-        if (TextUtils.isEmpty(password)) {
+    public int encryptStorage(int type, String password) {
+        if (TextUtils.isEmpty(password) && type != StorageManager.CRYPT_TYPE_DEFAULT) {
             throw new IllegalArgumentException("password cannot be empty");
         }
 
@@ -2159,7 +2160,7 @@ class MountService extends IMountService.Stub
         }
 
         try {
-            mConnector.execute("cryptfs", "enablecrypto", "inplace",
+            mConnector.execute("cryptfs", "enablecrypto", "inplace", CRYPTO_TYPES[type],
                                new SensitiveArg(toHex(password)));
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
