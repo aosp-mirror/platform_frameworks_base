@@ -17,45 +17,51 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.EventLog;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.GestureRecorder;
+import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 public class NotificationPanelView extends PanelView {
     public static final boolean DEBUG_GESTURES = true;
 
-    Drawable mHandleBar;
-    int mHandleBarHeight;
-    View mHandleView;
-    int mFingers;
     PhoneStatusBar mStatusBar;
-    boolean mOkToFlip;
+    private NotificationStackScrollLayout mNotificationStackScroller;
+    private int[] mTempLocation = new int[2];
+    private int[] mTempChildLocation = new int[2];
+    private View mNotificationParent;
+
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
     public void setStatusBar(PhoneStatusBar bar) {
+        if (mStatusBar != null) {
+            mStatusBar.setOnFlipRunnable(null);
+        }
         mStatusBar = bar;
+        if (bar != null) {
+            mStatusBar.setOnFlipRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    requestPanelHeightUpdate();
+                }
+            });
+        }
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        Resources resources = getContext().getResources();
-        mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
-        mHandleBarHeight = resources.getDimensionPixelSize(R.dimen.close_handle_height);
-        mHandleView = findViewById(R.id.handle);
+        mNotificationStackScroller = (NotificationStackScrollLayout)
+                findViewById(R.id.notification_stack_scroller);
+        mNotificationParent = findViewById(R.id.notification_container_parent);
     }
 
     @Override
@@ -80,61 +86,86 @@ public class NotificationPanelView extends PanelView {
         return super.dispatchPopulateAccessibilityEvent(event);
     }
 
-    // We draw the handle ourselves so that it's always glued to the bottom of the window.
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        if (changed) {
-            final int pl = getPaddingLeft();
-            final int pr = getPaddingRight();
-            mHandleBar.setBounds(pl, 0, getWidth() - pr, (int) mHandleBarHeight);
-        }
-    }
-
-    @Override
-    public void draw(Canvas canvas) {
-        super.draw(canvas);
-        final int off = (int) (getHeight() - mHandleBarHeight - getPaddingBottom());
-        canvas.translate(0, off);
-        mHandleBar.setState(mHandleView.getDrawableState());
-        mHandleBar.draw(canvas);
-        canvas.translate(0, -off);
+    /**
+     * Gets the relative position of a view on the screen in regard to this view.
+     *
+     * @param requestedView the view we want to find the relative position for
+     * @return
+     */
+    private int getRelativeTop(View requestedView) {
+        getLocationOnScreen(mTempLocation);
+        requestedView.getLocationOnScreen(mTempChildLocation);
+        return mTempChildLocation[1] - mTempLocation[1];
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (DEBUG_GESTURES) {
-            if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
-                EventLog.writeEvent(EventLogTags.SYSUI_NOTIFICATIONPANEL_TOUCH,
-                       event.getActionMasked(), (int) event.getX(), (int) event.getY());
-            }
+        // TODO: Handle doublefinger swipe to notifications again. Look at history for a reference
+        // implementation.
+        return super.onTouchEvent(event);
+    }
+
+    @Override
+    protected boolean isScrolledToBottom() {
+        if (!isInSettings()) {
+            return mNotificationStackScroller.isScrolledToBottom();
         }
-        if (PhoneStatusBar.SETTINGS_DRAG_SHORTCUT && mStatusBar.mHasFlipSettings) {
-            switch (event.getActionMasked()) {
-                case MotionEvent.ACTION_DOWN:
-                    mOkToFlip = getExpandedHeight() == 0;
-                    break;
-                case MotionEvent.ACTION_POINTER_DOWN:
-                    if (mOkToFlip) {
-                        float miny = event.getY(0);
-                        float maxy = miny;
-                        for (int i=1; i<event.getPointerCount(); i++) {
-                            final float y = event.getY(i);
-                            if (y < miny) miny = y;
-                            if (y > maxy) maxy = y;
-                        }
-                        if (maxy - miny < mHandleBarHeight) {
-                            if (getMeasuredHeight() < mHandleBarHeight) {
-                                mStatusBar.switchToSettings();
-                            } else {
-                                mStatusBar.flipToSettings();
-                            }
-                            mOkToFlip = false;
-                        }
-                    }
-                    break;
-            }
+        return super.isScrolledToBottom();
+    }
+
+    @Override
+    protected int getMaxPanelHeight() {
+        if (!isInSettings()) {
+            int maxPanelHeight = super.getMaxPanelHeight();
+            int emptyBottomMargin = mNotificationStackScroller.getEmptyBottomMargin();
+            return maxPanelHeight - emptyBottomMargin;
         }
-        return mHandleView.dispatchTouchEvent(event);
+        return super.getMaxPanelHeight();
+    }
+
+    private boolean isInSettings() {
+        return mStatusBar != null && mStatusBar.isFlippedToSettings();
+    }
+
+    @Override
+    protected void onHeightUpdated(float expandedHeight) {
+        updateNotificationStackHeight(expandedHeight);
+    }
+
+    /**
+     * Update the height of the {@link #mNotificationStackScroller} to the new expanded height.
+     * This is much more efficient than doing it over the layout pass.
+     *
+     * @param expandedHeight the new expanded height
+     */
+    private void updateNotificationStackHeight(float expandedHeight) {
+        float childOffset = getRelativeTop(mNotificationStackScroller)
+                - mNotificationParent.getTranslationY();
+        int newStackHeight = (int) (expandedHeight - childOffset);
+        int itemHeight = mNotificationStackScroller.getItemHeight();
+        int bottomStackPeekSize = mNotificationStackScroller.getBottomStackPeekSize();
+        int minStackHeight = itemHeight + bottomStackPeekSize;
+        if (newStackHeight >= minStackHeight) {
+            mNotificationParent.setTranslationY(0);
+            mNotificationStackScroller.setCurrentStackHeight(newStackHeight);
+        } else {
+
+            // We did not reach the position yet where we actually start growing,
+            // so we translate the stack upwards.
+            int translationY = (newStackHeight - minStackHeight);
+            // A slight parallax effect is introduced in order for the stack to catch up with
+            // the top card.
+            float partiallyThere = (float) newStackHeight / minStackHeight;
+            partiallyThere = Math.max(0, partiallyThere);
+            translationY += (1 - partiallyThere) * bottomStackPeekSize;
+            mNotificationParent.setTranslationY(translationY);
+            mNotificationStackScroller.setCurrentStackHeight(
+                    (int) (expandedHeight - (childOffset + translationY)));
+        }
+    }
+
+    @Override
+    protected int getDesiredMeasureHeight() {
+        return mMaxPanelHeight;
     }
 }

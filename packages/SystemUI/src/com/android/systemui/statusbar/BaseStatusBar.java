@@ -41,7 +41,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -78,6 +77,7 @@ import com.android.systemui.RecentsComponent;
 import com.android.systemui.SearchPanelView;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
+import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -98,8 +98,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_HIDE_HEADS_UP = 1027;
     protected static final int MSG_ESCALATE_HEADS_UP = 1028;
 
-    public static final boolean ENABLE_NOTIFICATION_STACK = SystemProperties
-            .getBoolean("persist.notifications.use_stack", false);
     protected static final boolean ENABLE_HEADS_UP = true;
     // scores above this threshold should be displayed in heads up mode.
     protected static final int INTERRUPTION_THRESHOLD = 10;
@@ -120,7 +118,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     // all notifications
     protected NotificationData mNotificationData = new NotificationData();
-    protected ViewGroup mPile;
+    protected NotificationStackScrollLayout mStackScroller;
 
     protected NotificationData.Entry mInterruptingNotificationEntry;
     protected long mInterruptingNotificationTime;
@@ -1033,7 +1031,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         // Construct the expanded view.
         NotificationData.Entry entry = new NotificationData.Entry(key, notification, iconView);
-        if (!inflateViews(entry, mPile)) {
+        if (!inflateViews(entry, mStackScroller)) {
             handleNotificationError(key, notification, "Couldn't expand RemoteViews for: "
                     + notification);
             return null;

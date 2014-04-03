@@ -39,12 +39,13 @@ import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
+import com.android.systemui.statusbar.policy.ScrollAdapter;
 
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
  */
 public class NotificationStackScrollLayout extends ViewGroup
-        implements SwipeHelper.Callback, ExpandHelper.Callback, ExpandHelper.ScrollAdapter {
+        implements SwipeHelper.Callback, ExpandHelper.Callback, ScrollAdapter {
 
     private static final String TAG = "NotificationStackScrollLayout";
     private static final boolean DEBUG = false;
@@ -55,7 +56,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private static final int INVALID_POINTER = -1;
 
     private SwipeHelper mSwipeHelper;
-    private boolean mAllowScrolling = true;
+    private boolean mSwipingInProgress = true;
     private int mCurrentStackHeight = Integer.MAX_VALUE;
     private int mOwnScrollY;
     private int mMaxLayoutHeight;
@@ -89,7 +90,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * The current State this Layout is in
      */
     private final StackScrollState mCurrentStackScrollState = new StackScrollState(this);
-
+    
     private OnChildLocationsChangedListener mListener;
 
     public NotificationStackScrollLayout(Context context) {
@@ -279,13 +280,21 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     /**
-     * Get the current height of the view. This is at most the size of the view given by a the
+     * Get the current height of the view. This is at most the msize of the view given by a the
      * layout but it can also be made smaller by setting {@link #mCurrentStackHeight}
      *
      * @return either the layout height or the externally defined height, whichever is smaller
      */
     private float getLayoutHeight() {
         return Math.min(mMaxLayoutHeight, mCurrentStackHeight);
+    }
+
+    public int getItemHeight() {
+        return mCollapsedSize;
+    }
+
+    public int getBottomStackPeekSize() {
+        return mBottomStackPeekSize;
     }
 
     public void setLongPressListener(View.OnLongClickListener listener) {
@@ -298,15 +307,15 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (veto != null && veto.getVisibility() != View.GONE) {
             veto.performClick();
         }
-        allowScrolling(true);
+        setSwipingInProgress(false);
     }
 
     public void onBeginDrag(View v) {
-        allowScrolling(false);
+        setSwipingInProgress(true);
     }
 
     public void onDragCancelled(View v) {
-        allowScrolling(true);
+        setSwipingInProgress(false);
     }
 
     public View getChildAtPosition(MotionEvent ev) {
@@ -365,8 +374,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         return (veto != null && veto.getVisibility() != View.GONE);
     }
 
-    private void allowScrolling(boolean allow) {
-        mAllowScrolling = allow;
+    private void setSwipingInProgress(boolean isSwiped) {
+        mSwipingInProgress = isSwiped;
+        if(isSwiped) {
+            requestDisallowInterceptTouchEvent(true);
+        }
     }
 
     @Override
@@ -386,7 +398,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         boolean scrollerWantsIt = false;
-        if (mAllowScrolling) {
+        if (!mSwipingInProgress) {
             scrollerWantsIt = onScrollTouch(ev);
         }
         boolean horizontalSwipeWantsIt = false;
@@ -409,12 +421,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
                 boolean isBeingDragged = !mScroller.isFinished();
                 setIsBeingDragged(isBeingDragged);
-                if (isBeingDragged) {
-                    final ViewParent parent = getParent();
-                    if (parent != null) {
-                        parent.requestDisallowInterceptTouchEvent(true);
-                    }
-                }
 
                 /*
                  * If being flinged and user touches, stop the fling. isFinished
@@ -439,10 +445,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                 final int y = (int) ev.getY(activePointerIndex);
                 int deltaY = mLastMotionY - y;
                 if (!mIsBeingDragged && Math.abs(deltaY) > mTouchSlop) {
-                    final ViewParent parent = getParent();
-                    if (parent != null) {
-                        parent.requestDisallowInterceptTouchEvent(true);
-                    }
                     setIsBeingDragged(true);
                     if (deltaY > 0) {
                         deltaY -= mTouchSlop;
@@ -642,7 +644,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (getChildCount() > 0) {
             int contentHeight = getContentHeight();
             scrollRange = Math.max(0,
-                    contentHeight - mMaxLayoutHeight + mCollapsedSize);
+                    contentHeight - mMaxLayoutHeight + mBottomStackPeekSize);
         }
         return scrollRange;
     }
@@ -697,7 +699,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         boolean scrollWantsIt = false;
-        if (mAllowScrolling) {
+        if (!mSwipingInProgress) {
             scrollWantsIt = onInterceptTouchEventScroll(ev);
         }
         boolean swipeWantsIt = false;
@@ -763,10 +765,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                     mLastMotionY = y;
                     initVelocityTrackerIfNotExists();
                     mVelocityTracker.addMovement(ev);
-                    final ViewParent parent = getParent();
-                    if (parent != null) {
-                        parent.requestDisallowInterceptTouchEvent(true);
-                    }
                 }
                 break;
             }
@@ -823,6 +821,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void setIsBeingDragged(boolean isDragged) {
         mIsBeingDragged = isDragged;
         if (isDragged) {
+            requestDisallowInterceptTouchEvent(true);
             mSwipeHelper.removeLongPressCallback();
         }
     }
@@ -841,8 +840,17 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     @Override
+    public boolean isScrolledToBottom() {
+        return mOwnScrollY >= getScrollRange();
+    }
+
+    @Override
     public View getHostView() {
         return this;
+    }
+
+    public int getEmptyBottomMargin() {
+        return Math.max(getHeight() - mContentHeight, 0);
     }
 
     /**
