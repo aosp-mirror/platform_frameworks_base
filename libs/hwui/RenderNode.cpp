@@ -61,8 +61,12 @@ RenderNode::~RenderNode() {
 
 void RenderNode::destroyDisplayListDeferred(RenderNode* displayList) {
     if (displayList) {
-        DISPLAY_LIST_LOGD("Deferring display list destruction");
-        Caches::getInstance().deleteDisplayListDeferred(displayList);
+        if (Caches::hasInstance()) {
+            DISPLAY_LIST_LOGD("Deferring display list destruction");
+            Caches::getInstance().deleteDisplayListDeferred(displayList);
+        } else {
+            delete displayList;
+        }
     }
 }
 
