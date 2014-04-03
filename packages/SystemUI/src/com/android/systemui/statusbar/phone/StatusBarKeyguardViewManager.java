@@ -155,11 +155,7 @@ public class StatusBarKeyguardViewManager {
      */
     public void dismiss() {
         if (mScreenOn) {
-            if (mLockPatternUtils.isSecure()) {
-                showBouncer();
-            } else {
-                mViewMediatorCallback.keyguardDone(false);
-            }
+            showBouncer();
         }
     }
 
