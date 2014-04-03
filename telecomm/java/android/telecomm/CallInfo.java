@@ -17,6 +17,7 @@
 package android.telecomm;
 
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -51,6 +52,15 @@ public final class CallInfo implements Parcelable {
      */
     private final GatewayInfo mGatewayInfo;
 
+    /**
+     * Additional information that can be persisted. For example, extra handoff information can
+     * attached to a call using {@link CallServiceSelectorAdapter#setHandoffInfo(String,Uri,Bundle).
+     */
+    private final Bundle mExtras;
+
+    /** The descriptor for the call service currently routing this call. */
+    private final CallServiceDescriptor mCurrentCallServiceDescriptor;
+
     // There are 4 timestamps that are important to a call:
     // 1) Created timestamp - The time at which the user explicitly chose to make the call.
     // 2) Connected timestamp - The time at which a call service confirms that it has connected
@@ -64,7 +74,7 @@ public final class CallInfo implements Parcelable {
     // 4) Disconnected timestamp - The time at which the call was disconnected.
 
     public CallInfo(String id, CallState state, Uri handle) {
-        this(id, state, handle, null);
+        this(id, state, handle, null, Bundle.EMPTY, null);
     }
 
     /**
@@ -74,14 +84,25 @@ public final class CallInfo implements Parcelable {
      * @param state The state of the call.
      * @param handle The handle to the other party in this call.
      * @param gatewayInfo Gateway information pertaining to this call.
+     * @param extras Additional information that can be persisted.
+     * @param currentCallServiceDescriptor The descriptor for the call service currently routing
+     *         this call.
      *
      * @hide
      */
-    public CallInfo(String id, CallState state, Uri handle, GatewayInfo gatewayInfo) {
+    public CallInfo(
+            String id,
+            CallState state,
+            Uri handle,
+            GatewayInfo gatewayInfo,
+            Bundle extras,
+            CallServiceDescriptor currentCallServiceDescriptor) {
         mId = id;
         mState = state;
         mHandle = handle;
         mGatewayInfo = gatewayInfo;
+        mExtras = extras;
+        mCurrentCallServiceDescriptor = currentCallServiceDescriptor;
     }
 
     public String getId() {
@@ -112,6 +133,14 @@ public final class CallInfo implements Parcelable {
         return mGatewayInfo;
     }
 
+    public Bundle getExtras() {
+        return mExtras;
+    }
+
+    public CallServiceDescriptor getCurrentCallServiceDescriptor() {
+        return mCurrentCallServiceDescriptor;
+    }
+
     //
     // Parceling related code below here.
     //
@@ -127,13 +156,17 @@ public final class CallInfo implements Parcelable {
             String id = source.readString();
             CallState state = CallState.valueOf(source.readString());
             Uri handle = Uri.CREATOR.createFromParcel(source);
+
             boolean gatewayInfoPresent = source.readByte() != 0;
             GatewayInfo gatewayInfo = null;
             if (gatewayInfoPresent) {
                 gatewayInfo = GatewayInfo.CREATOR.createFromParcel(source);
             }
 
-            return new CallInfo(id, state, handle, gatewayInfo);
+            ClassLoader classLoader = CallInfo.class.getClassLoader();
+            Bundle extras = source.readParcelable(classLoader);
+            CallServiceDescriptor descriptor = source.readParcelable(classLoader);
+            return new CallInfo(id, state, handle, gatewayInfo, extras, descriptor);
         }
 
         @Override
@@ -158,11 +191,15 @@ public final class CallInfo implements Parcelable {
         destination.writeString(mId);
         destination.writeString(mState.name());
         mHandle.writeToParcel(destination, 0);
+
         if (mGatewayInfo != null) {
             destination.writeByte((byte) 1);
             mGatewayInfo.writeToParcel(destination, 0);
         } else {
             destination.writeByte((byte) 0);
         }
+
+        destination.writeParcelable(mExtras, 0);
+        destination.writeParcelable(mCurrentCallServiceDescriptor, 0);
     }
 }

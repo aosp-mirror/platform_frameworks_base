@@ -28,6 +28,9 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.telecomm.ICallServiceSelector;
 import com.android.internal.telecomm.ICallServiceSelectorAdapter;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -38,6 +41,8 @@ import java.util.List;
 public abstract class CallServiceSelector extends Service {
     private static final int MSG_SET_CALL_SERVICE_SELECTOR_ADAPTER = 0;
     private static final int MSG_SELECT = 1;
+
+    private final HashMap<String, CallInfo> mCalls = new HashMap<String, CallInfo>();
 
     /** Handler to move client-bound method calls to the main thread. */
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -76,6 +81,16 @@ public abstract class CallServiceSelector extends Service {
             args.arg2 = descriptors;
             mHandler.obtainMessage(MSG_SELECT, args).sendToTarget();
         }
+
+        @Override
+        public void onCallUpdated(CallInfo callInfo) {
+            mCalls.put(callInfo.getId(), callInfo);
+        }
+
+        @Override
+        public void onCallRemoved(String callId) {
+            mCalls.remove(callId);
+        }
     }
 
     private final CallServiceSelectorBinder mBinder;
@@ -87,6 +102,13 @@ public abstract class CallServiceSelector extends Service {
     @Override
     public final IBinder onBind(Intent intent) {
         return mBinder;
+    }
+
+    /**
+     * Returns a list of all calls managed by this selector.
+     */
+    protected final Collection<CallInfo> getCalls() {
+        return Collections.unmodifiableCollection(mCalls.values());
     }
 
     /**
