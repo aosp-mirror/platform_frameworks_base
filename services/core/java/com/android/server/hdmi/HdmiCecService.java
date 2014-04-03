@@ -30,14 +30,13 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.server.SystemService;
+import libcore.util.EmptyArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Locale;
-
-import libcore.util.EmptyArray;
 
 /**
  * Provides a service for sending and processing HDMI-CEC messages, and providing
@@ -65,7 +64,7 @@ public final class HdmiCecService extends SystemService {
 
     private static final String PERMISSION = "android.permission.HDMI_CEC";
 
-    private static final byte[] EMPTY_PARAM = EmptyArray.BYTE;
+    static final byte[] EMPTY_PARAM = EmptyArray.BYTE;
 
     public HdmiCecService(Context context) {
         super(context);
@@ -76,7 +75,9 @@ public final class HdmiCecService extends SystemService {
     @Override
     public void onStart() {
         mNativePtr = nativeInit(this);
-        publishBinderService(Context.HDMI_CEC_SERVICE, new BinderService());
+        if (mNativePtr != 0) {
+            publishBinderService(Context.HDMI_CEC_SERVICE, new BinderService());
+        }
     }
 
     /**
@@ -88,7 +89,6 @@ public final class HdmiCecService extends SystemService {
         //       but better be handled in service by turning off the screen
         //       or putting the device into suspend mode. List up such messages
         //       and handle them here.
-        int type = HdmiCec.getTypeFromAddress(dstAddress);
         synchronized (mLock) {
             if (dstAddress == HdmiCec.ADDR_BROADCAST) {
                 for (int i = 0; i < mLogicalDevices.size(); ++i) {
@@ -96,6 +96,7 @@ public final class HdmiCecService extends SystemService {
                             params);
                 }
             } else {
+                int type = HdmiCec.getTypeFromAddress(dstAddress);
                 HdmiCecDevice device = mLogicalDevices.get(type);
                 if (device == null) {
                     Log.w(TAG, "logical device not found. type: " + type);
@@ -205,6 +206,11 @@ public final class HdmiCecService extends SystemService {
         throw new IllegalArgumentException("Device not found");
     }
 
+    // package-private. Used by HdmiCecDevice and its subclasses only.
+    void sendMessage(int type, int address, int opcode, byte[] params) {
+        nativeSendMessage(mNativePtr, type, address, opcode, params);
+    }
+
     private final class ListenerRecord implements IBinder.DeathRecipient {
         private final IHdmiCecListener mListener;
         private final int mType;
@@ -248,8 +254,13 @@ public final class HdmiCecService extends SystemService {
                         Log.e(TAG, "Logical address was not allocated");
                         return null;
                     } else {
-                        device = new HdmiCecDevice(type);
+                        device = HdmiCecDevice.create(HdmiCecService.this, type);
+                        if (device == null) {
+                            Log.e(TAG, "Device type not supported yet.");
+                            return null;
+                        }
                         device.setName(HdmiCec.getDefaultDeviceName(address));
+                        device.initialize();
                         mLogicalDevices.put(type, device);
                     }
                 }
@@ -331,12 +342,11 @@ public final class HdmiCecService extends SystemService {
         }
 
         @Override
-        public void sendGiveDevicePowerStatus(IBinder b, int address) {
+        public boolean isTvOn(IBinder b) {
             enforceAccessPermission();
             synchronized (mLock) {
                 HdmiCecDevice device = getLogicalDeviceLocked(b);
-                nativeSendMessage(mNativePtr, device.getType(), address,
-                        HdmiCec.MESSAGE_GIVE_DEVICE_POWER_STATUS, EMPTY_PARAM);
+                return device.isSinkDeviceOn();
             }
         }
 
