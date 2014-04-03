@@ -5147,12 +5147,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final int width = mRight - mLeft;
                 final int padding = getCompoundPaddingLeft() + getCompoundPaddingRight();
                 final float dx = mLayout.getLineRight(0) - (width - padding);
-                canvas.translate(isLayoutRtl ? -dx : +dx, 0.0f);
+                canvas.translate(layout.getParagraphDirection(0) * dx, 0.0f);
             }
 
             if (mMarquee != null && mMarquee.isRunning()) {
                 final float dx = -mMarquee.getScroll();
-                canvas.translate(isLayoutRtl ? -dx : +dx, 0.0f);
+                canvas.translate(layout.getParagraphDirection(0) * dx, 0.0f);
             }
         }
 
@@ -5166,8 +5166,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (mMarquee != null && mMarquee.shouldDrawGhost()) {
-            final int dx = (int) mMarquee.getGhostOffset();
-            canvas.translate(isLayoutRtl ? -dx : dx, 0.0f);
+            final float dx = mMarquee.getGhostOffset();
+            canvas.translate(layout.getParagraphDirection(0) * dx, 0.0f);
             layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
         }
 
