@@ -23,6 +23,7 @@ import android.hardware.hdmi.HdmiCecMessage;
 import android.hardware.hdmi.IHdmiCecListener;
 import android.hardware.hdmi.IHdmiCecService;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -76,6 +77,9 @@ public final class HdmiCecService extends SystemService {
     public void onStart() {
         mNativePtr = nativeInit(this);
         if (mNativePtr != 0) {
+            // TODO: Consider using a dedicated, configurable identifier for OSD name, maybe from
+            //       Settings. It should be ASCII only, not a very long one (limited to 15 chars).
+            setOsdNameLocked(Build.MODEL);
             publishBinderService(Context.HDMI_CEC_SERVICE, new BinderService());
         }
     }
@@ -139,22 +143,6 @@ public final class HdmiCecService extends SystemService {
     }
 
     /**
-     * Called by native when a request for the device OSD name was received.
-     * The native part uses the return value to generate the message
-     * &lt;Set Osd Name&gt; in response.
-     */
-    private byte[] getOsdName(int type) {
-        // TODO: Consider getting the OSD name from device name instead.
-        synchronized (mLock) {
-            HdmiCecDevice device = mLogicalDevices.get(type);
-            if (device != null) {
-                return device.getName().getBytes(Charset.forName("US-ASCII"));
-            }
-        }
-        return null;
-    }
-
-    /**
      * Called by native when a request for the menu language of the device was
      * received. The native part uses the return value to generate the message
      * &lt;Set Menu Language&gt; in response. The language should be of
@@ -175,8 +163,7 @@ public final class HdmiCecService extends SystemService {
         synchronized (mLock) {
             for (int i = 0; i < mLogicalDevices.size(); ++i) {
                 HdmiCecDevice device = mLogicalDevices.valueAt(i);
-                pw.println("Device: name=" + device.getName() +
-                           ", type=" + device.getType() +
+                pw.println("Device: type=" + device.getType() +
                            ", active=" + device.isActiveSource());
             }
         }
@@ -209,6 +196,10 @@ public final class HdmiCecService extends SystemService {
     // package-private. Used by HdmiCecDevice and its subclasses only.
     void sendMessage(int type, int address, int opcode, byte[] params) {
         nativeSendMessage(mNativePtr, type, address, opcode, params);
+    }
+
+    private void setOsdNameLocked(String name) {
+        nativeSetOsdName(mNativePtr, name.getBytes(Charset.forName("US-ASCII")));
     }
 
     private final class ListenerRecord implements IBinder.DeathRecipient {
@@ -259,7 +250,6 @@ public final class HdmiCecService extends SystemService {
                             Log.e(TAG, "Device type not supported yet.");
                             return null;
                         }
-                        device.setName(HdmiCec.getDefaultDeviceName(address));
                         device.initialize();
                         mLogicalDevices.put(type, device);
                     }
@@ -279,18 +269,6 @@ public final class HdmiCecService extends SystemService {
                 mListenerRecords.add(record);
                 device.addListener(listener);
                 return device.getToken();
-            }
-        }
-
-        @Override
-        public void setOsdName(IBinder b, String name) {
-            enforceAccessPermission();
-            if (TextUtils.isEmpty(name)) {
-                throw new IllegalArgumentException("name must not be null");
-            }
-            synchronized (mLock) {
-                HdmiCecDevice device = getLogicalDeviceLocked(b);
-                device.setName(name);
             }
         }
 
@@ -408,4 +386,5 @@ public final class HdmiCecService extends SystemService {
     private static native void nativeSendMessage(long handler, int deviceType, int destination,
             int opcode, byte[] params);
     private static native int nativeGetPhysicalAddress(long handler);
+    private static native void nativeSetOsdName(long handler, byte[] name);
 }
