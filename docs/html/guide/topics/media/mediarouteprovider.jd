@@ -1,0 +1,453 @@
+page.title=Media Route Provider
+page.tags="mediarouteprovider","mediacontrolintent"
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#overview">Overview</a>
+        <ol>
+          <li><a href="#dist">Distribution of route providers</a></li>
+          <li><a href="#playback-types">Types of playback</a></li>
+          <li><a href="#mr-packages">Media router packages</a></li>
+        </ol>
+      </li>
+      <li><a href="#provider-service">Creating a Provider Service</a></li>
+      <li><a href="#route-caps">Specifying Route Capabilities</a>
+        <ol>
+          <li><a href="#route-cat">Route categories</a></li>
+          <li><a href="#media-types">Media types and protocols</a></li>
+          <li><a href="#playback-ctrls">Playback controls</a></li>
+          <li><a href="#mrpd">MediaRouteProviderDescriptor</a></li>
+        </ol>
+      </li>
+      <li><a href="#ctrl-routes">Controlling Routes</a></li>
+    </ol>
+    <h2>Key Classes</h2>
+    <ol>
+      <li>{@link android.support.v7.media.MediaRouteProvider}</li>
+      <li>{@link android.support.v7.media.MediaRouteProviderDescriptor}</li>
+      <li>{@link android.support.v7.media.MediaRouteProvider.RouteController RouteController}</li>
+    </ol>
+    <h2>Related Samples</h2>
+    <ol>
+      <li><a href="{@docRoot}samples/MediaRouter/index.html">MediaRouter</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>Users want to play media content from their Android devices bigger, brighter, and louder on
+  connected playback devices such as televisions, stereos,
+  and home theater equipment. As a manufacturer of these devices, allowing Android users to
+  instantly show a picture, play a song, or share a video for friends and family using your product
+  can make it much more compelling and engaging.</p>
+
+<p>The Android media router framework allows manufacturers to enable playback on their devices
+  through a standardized interface called a {@link android.support.v7.media.MediaRouteProvider}.
+  A route provider defines a common interface for playing media on a receiver device, making it
+  possible to play media on your equipment from any Android application that supports media
+  routes.</p>
+
+<p>This guide discusses how to create a media route provider for a receiver device and make it
+  available to other media playback applications that run on Android.</p>
+
+<h2 id="overview">Overview</h2>
+
+<p>The Android media router framework enables media app developers and media playback device
+  manufacturers to connect through a common API and common user interface. App developers that
+  implement a {@link android.support.v7.media.MediaRouter} interface can then connect to the
+  framework and play content to devices that participate in the media router framework. Media
+  playback device manufacturers can participate in the framework by publishing a {@link
+  android.support.v7.media.MediaRouteProvider} that allows other applications to connect to and
+  play media on the receiver devices. Figure 1 illustrates how an app connects to a receiving
+  device through the media router framework.</p>
+
+<img src="{@docRoot}images/mediarouter/media-route-provider-framework.png" alt="" id="figure1"/>
+<p class="img-caption">
+  <strong>Figure 1.</strong> Overview of how media route provider classes provide communication
+  from a media app to a receiver device.
+</p>
+
+<p>When you build a media route provider for your receiver device, the provider serves the
+following purposes:</p>
+
+<ul>
+  <li>Describe and publish the capabilities of the receiver device so other apps can discover it
+    and use its playback features.</li>
+  <li>Wrap the programming interface of the receiver device and its communication
+    transport mechanisms to make the device compatible with the media router framework.</li>
+</ul>
+
+
+<h3 id="dist">Distribution of route providers</h3>
+
+<p>A media route provider is distributed as part of an Android app. Your route provider can be
+  made available to other apps by extending
+  {@link android.support.v7.media.MediaRouteProviderService} or wrapping your implementation of
+  {@link android.support.v7.media.MediaRouteProvider} with your own service and declaring an intent
+  filter for the media route provider. These steps allow other apps to discover and make use of
+  your media route.</p>
+
+<p>
+  <strong>Note:</strong> The app containing the media route provider can also include a
+  <a href="{@docRoot}guide/topics/media/mediarouter.html">MediaRouter</a> interface to the
+  route provider, but this is not required.
+</p>
+
+
+<h3 id="playback-types">Types of playback</h3>
+
+<p>There are two main types of playback supported by the media router framework. A media route
+  provider can support one or both types of playback, depending on the capabilities of your playback
+  equipment and the functionality you want to support:</p>
+
+<ul>
+  <li><strong>Remote Playback</strong> — This approach uses the receiver device to handle the
+    content data retrieval, decoding, and playback, while an Android device in the user's hand is
+    used as a remote control. This approach is used by Android apps that support
+    <a href="https://developers.google.com/cast/">Google Cast</a>.</li>
+  <li><strong>Secondary Output</strong> — With this approach, the Android media application
+    retrieves, renders and streams video or music directly to the receiver device. This approach is
+    used to support Wireless Display output on Android.</li>
+</ul>
+
+
+<h3 id="mr-packages">Media router packages</h3>
+
+<p>
+  The media router APIs are provided as part of the Android Support Library version 18 and higher,
+  in the <a href="{@docRoot}tools/support-library/features.html#v7-mediarouter">v7-mediarouter</a>
+  support library. You should use the classes in the
+  {@link android.support.v7.media} package for media route provider functions.
+  These APIs are compatible with devices running Android 2.1 (API level 7) and higher.
+</p>
+
+<p class="caution">
+  <strong>Caution:</strong> There is another set of media router APIs provided in the
+  {@link android.media} class package that have been superseded by the
+  <a href="{@docRoot}tools/support-library/features.html#v7-mediarouter">v7-mediarouter</a>
+  support library. You <em>should not</em> use the {@link android.media} classes for
+  implementing media route provider functions.
+</p>
+
+<p>In order to use the {@link android.support.v7.media} media router classes, you
+  must add the <a href="{@docRoot}tools/support-library/features.html#v7-mediarouter"
+  >v7-mediarouter support library package</a> to your app development project. For more
+  information on adding support libraries to your app development project, see
+  <a href="{@docRoot}tools/support-library/setup.html">Support Library Setup</a>.
+</p>
+
+
+<h2 id="provider-service">Creating a Provider Service</h2>
+
+<p>The media router framework must be able to discover and connect to your media route provider
+  to allow other applications to use your route. In order to do this, the media router framework
+  looks for apps that declare a media route provider intent action. When another app wants to
+  connect to your provider, the framework must be able to invoke and connect to it, so your provider
+  must be encapsulated in a {@link android.app.Service}.</p>
+
+<p>The following example code shows the declaration of a media route provider service and the
+  intent filter in a manifest, which allows it to be discovered and used by the media router
+  framework:</p>
+
+<pre>
+&lt;service android:name=".provider.SampleMediaRouteProviderService"
+    android:label="&#64;string/sample_media_route_provider_service"
+    android:process=":mrp"&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.media.MediaRouteProviderService" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/service&gt;
+</pre>
+
+<p>This manifest example declares a service that wraps the actual media route provider classes.
+  The Android media router framework provides the
+  {@link android.support.v7.media.MediaRouteProviderService} class for use as a service wrapper for
+  media route providers. The following example code demonstrates how to use this wrapper
+  class:</p>
+
+<pre>
+public class SampleMediaRouteProviderService extends MediaRouteProviderService {
+
+    &#64;Override
+    public MediaRouteProvider onCreateMediaRouteProvider() {
+        return new SampleMediaRouteProvider(this);
+    }
+}
+</pre>
+
+
+<h2 id="route-caps">Specifying Route Capabilities</h2>
+
+<p>Apps connecting to the media router framework can discover your media route through your
+  app's manifest declarations, but they also need to know the capabilities of the media routes you
+  are providing. Media routes can be of different types and have different features, and other apps
+  need to be able to discover these details to determine if they are compatible with your route.</p>
+
+<p>The media router framework allows you to define and publish the capabilities of your media
+  route through {@link android.content.IntentFilter} objects, {@link
+  android.support.v7.media.MediaRouteDescriptor} objects and a {@link
+  android.support.v7.media.MediaRouteProviderDescriptor}. This section explains how to use these
+  classes to publish the details of your media route for other apps.</p>
+
+
+<h3 id="route-cat">Route categories</h3>
+
+<p>As part of the programmatic description of your media route provider, you must specify
+  whether your provider supports remote playback, secondary output, or both. These are the route
+  categories provided by the media router framework:</p>
+
+<ul>
+  <li>{@link android.support.v7.media.MediaControlIntent#CATEGORY_LIVE_AUDIO CATEGORY_LIVE_AUDIO}
+    &mdash; Output of audio to a secondary output device, such as a wireless-enabled music system.
+    </li>
+  <li>{@link android.support.v7.media.MediaControlIntent#CATEGORY_LIVE_VIDEO CATEGORY_LIVE_VIDEO}
+    &mdash; Output of video to a secondary output device, such as Wireless Display devices.</li>
+  <li>{@link android.support.v7.media.MediaControlIntent#CATEGORY_REMOTE_PLAYBACK
+    CATEGORY_REMOTE_PLAYBACK} &mdash; Play video or audio on a separate device which handles media
+    retrieval, decoding, and playback, such as
+    <a href="https://www.google.com/url?q=http://www.google.com/chromecast">Chromecast</a> devices.
+    </li>
+</ul>
+
+<p>In order to include these settings in a description of your media route, you insert them into
+  an {@link android.content.IntentFilter} object, which you later add to a
+  {@link android.support.v7.media.MediaRouteDescriptor} object:</p>
+
+<pre>
+public final class SampleMediaRouteProvider extends MediaRouteProvider {
+    private static final ArrayList&lt;IntentFilter&gt; CONTROL_FILTERS_BASIC;
+    static {
+        IntentFilter videoPlayback = new IntentFilter();
+        <strong>videoPlayback.addCategory(MediaControlIntent.CATEGORY_REMOTE_PLAYBACK);</strong>
+        CONTROL_FILTERS_BASIC = new ArrayList&lt;IntentFilter&gt;();
+        CONTROL_FILTERS_BASIC.add(videoPlayback);
+    }
+}
+
+</pre>
+
+<p>If you specify the {@link android.support.v7.media.MediaControlIntent#CATEGORY_REMOTE_PLAYBACK
+  CATEGORY_REMOTE_PLAYBACK} intent, you must also define what media types and
+  playback controls are supported by your media route provider. The next section describes how to
+  specify these settings for your device.</p>
+
+
+<h3 id="media-types">Media types and protocols</h3>
+
+<p>A media route provider for a remote playback device must specify the media types and transfer
+  protocols it supports. You specify these settings using the {@link android.content.IntentFilter}
+  class and the {@link android.content.IntentFilter#addDataScheme addDataScheme()} and
+  {@link android.content.IntentFilter#addDataType addDataType()} methods of that object. The
+  following code snippet demonstrates how to define an intent filter for supporting remote video
+  playback using http, https, and Real Time Streaming Protocol (RTSP):</p>
+
+<pre>
+public final class SampleMediaRouteProvider extends MediaRouteProvider {
+
+    private static final ArrayList&lt;IntentFilter&gt; CONTROL_FILTERS_BASIC;
+
+    static {
+        IntentFilter videoPlayback = new IntentFilter();
+        videoPlayback.addCategory(MediaControlIntent.CATEGORY_REMOTE_PLAYBACK);
+        videoPlayback.addAction(MediaControlIntent.ACTION_PLAY);
+        videoPlayback.addDataScheme("http");
+        videoPlayback.addDataScheme("https");
+        videoPlayback.addDataScheme("rtsp");
+        addDataTypeUnchecked(videoPlayback, "video/*");
+        CONTROL_FILTERS_BASIC = new ArrayList&lt;IntentFilter&gt;();
+        CONTROL_FILTERS_BASIC.add(videoPlayback);
+    }
+    ...
+
+    private static void addDataTypeUnchecked(IntentFilter filter, String type) {
+        try {
+            filter.addDataType(type);
+        } catch (MalformedMimeTypeException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+}
+
+</pre>
+
+
+<h3 id="playback-ctrls">Playback controls</h3>
+
+<p>A media route provider that offers remote playback must specify the types of media controls
+  it supports. These are the general types of control that media routes can provide:</p>
+
+<ul>
+  <li><strong>Playback controls</strong>, such as play, pause, rewind, and fast-forward.</li>
+  <li><strong>Queuing features</strong>, which allow the sending app to add and remove items
+    from a playlist which is maintained by the receiver device.</li>
+  <li><strong>Session features</strong>, which prevent sending apps from interfering with each
+    other by having the receiver device provide a session id to the requesting app and then checking
+    that id with each subsequent playback control request.</li>
+</ul>
+
+<p>The following code example demonstrates how to construct an intent filter for supporting
+  basic media route playback controls:</p>
+
+<pre>
+public final class SampleMediaRouteProvider extends MediaRouteProvider {
+    private static final ArrayList&lt;IntentFilter&gt; CONTROL_FILTERS_BASIC;
+    static {
+        ...
+        IntentFilter playControls = new IntentFilter();
+        playControls.addCategory(MediaControlIntent.CATEGORY_REMOTE_PLAYBACK);
+        playControls.addAction(MediaControlIntent.ACTION_SEEK);
+        playControls.addAction(MediaControlIntent.ACTION_GET_STATUS);
+        playControls.addAction(MediaControlIntent.ACTION_PAUSE);
+        playControls.addAction(MediaControlIntent.ACTION_RESUME);
+        playControls.addAction(MediaControlIntent.ACTION_STOP);
+        CONTROL_FILTERS_BASIC = new ArrayList&lt;IntentFilter&gt;();
+        CONTROL_FILTERS_BASIC.add(videoPlayback);
+        CONTROL_FILTERS_BASIC.add(playControls);
+    }
+    ...
+}
+</pre>
+
+<p>For more information about the available playback control intents, see the
+  {@link android.support.v7.media.MediaControlIntent} class.</p>
+
+
+<h3 id="mrpd">MediaRouteProviderDescriptor</h3>
+
+<p>After defining the capabilities of your media route using {@link
+  android.content.IntentFilter} objects, you can then create a descriptor object for publishing to
+  the Android media router framework. This descriptor object contains the specifics of your media
+  route's capabilities so that other applications can determine how to interact with your media
+  route.</p>
+
+<p>The following example code demonstrates how to add the previously created intent filters to a
+  {@link android.support.v7.media.MediaRouteProviderDescriptor} and set the descriptor for use by
+  the media router framework:</p>
+
+<pre>
+public SampleMediaRouteProvider(Context context) {
+    super(context);
+    publishRoutes();
+}
+
+private void publishRoutes() {
+    Resources r = getContext().getResources();
+    // Create a route descriptor using previously created IntentFilters
+    MediaRouteDescriptor routeDescriptor = new MediaRouteDescriptor.Builder(
+            VARIABLE_VOLUME_BASIC_ROUTE_ID,
+            r.getString(R.string.variable_volume_basic_route_name))
+            .setDescription(r.getString(R.string.sample_route_description))
+            .addControlFilters(CONTROL_FILTERS_BASIC)
+            .setPlaybackStream(AudioManager.STREAM_MUSIC)
+            .setPlaybackType(MediaRouter.RouteInfo.PLAYBACK_TYPE_REMOTE)
+            .setVolumeHandling(MediaRouter.RouteInfo.PLAYBACK_VOLUME_VARIABLE)
+            .setVolumeMax(VOLUME_MAX)
+            .setVolume(mVolume)
+            .build();
+    // Add the route descriptor to the provider descriptor
+    MediaRouteProviderDescriptor providerDescriptor =
+            new MediaRouteProviderDescriptor.Builder()
+            .addRoute(routeDescriptor)
+            .build();
+
+    // Publish the descriptor to the framework
+    setDescriptor(providerDescriptor);
+}
+</pre>
+
+<p>For more information on the available descriptor settings, see the reference documentation
+  for {@link android.support.v7.media.MediaRouteDescriptor} and {@link
+  android.support.v7.media.MediaRouteProviderDescriptor}.</p>
+
+
+<h2 id="ctrl-routes">Controlling Routes</h2>
+
+<p>When an application connects to your media route provider, the provider receives playback
+  commands through the media router framework sent to your route by other apps. To handle these
+  requests, you must provide an implementation of a {@link
+  android.support.v7.media.MediaRouteProvider.RouteController} class, which processes the commands
+  and handles the actual communication to your receiver device.</p>
+
+<p>The media router framework calls the {@link
+  android.support.v7.media.MediaRouteProvider#onCreateRouteController onCreateRouteController()}
+  method of your route provider to obtain an instance of this class and then routes requests to it.
+  These are the key methods of the {@link
+  android.support.v7.media.MediaRouteProvider.RouteController} class, which you must implement for
+  your media route provider:</p>
+
+<ul>
+  <li>{@link android.support.v7.media.MediaRouteProvider.RouteController#onSelect onSelect()}
+    &mdash; Called when an application selects your route for playback. You use this method to do
+    any preparation work that may be required before media playback begins.</li>
+  <li>{@link android.support.v7.media.MediaRouteProvider.RouteController#onControlRequest
+    onControlRequest()} &mdash; Sends specific playback commands to the receiving device.</li>
+  <li>{@link android.support.v7.media.MediaRouteProvider.RouteController#onSetVolume
+    onSetVolume()} &mdash; Sends a request to the receiving device to set the playback volume to a
+    specific value.</li>
+  <li>{@link android.support.v7.media.MediaRouteProvider.RouteController#onUpdateVolume
+    onUpdateVolume()} &mdash; Sends a request to the receiving device to modify the playback
+    volume by a specified amount.</li>
+  <li>{@link android.support.v7.media.MediaRouteProvider.RouteController#onUnselect
+    onUnselect()} &mdash; Called when an application unselects a route.</li>
+  <li>{@link android.support.v7.media.MediaRouteProvider.RouteController#onRelease onRelease()}
+    &mdash; Called when the route is no longer needed by the framework, allowing it to free its
+    resources.</li>
+</ul>
+
+<p>All playback control requests, except for volume changes, are directed to the {@link
+  android.support.v7.media.MediaRouteProvider.RouteController#onControlRequest onControlRequest()}
+  method. Your implementation of this method must parse the control requests and respond to them
+  appropriately. Here is an example implementation of this method which processes commands for a
+  remote playback media route:</p>
+
+<pre>
+private final class SampleRouteController extends
+        MediaRouteProvider.RouteController {
+    ...
+
+    &#64;Override
+    public boolean onControlRequest(Intent intent, ControlRequestCallback callback) {
+
+        String action = intent.getAction();
+
+        if (intent.hasCategory(MediaControlIntent.CATEGORY_REMOTE_PLAYBACK)) {
+            boolean success = false;
+            if (action.equals(MediaControlIntent.ACTION_PLAY)) {
+                success = handlePlay(intent, callback);
+            } else if (action.equals(MediaControlIntent.ACTION_ENQUEUE)) {
+                success = handleEnqueue(intent, callback);
+            } else if (action.equals(MediaControlIntent.ACTION_REMOVE)) {
+                success = handleRemove(intent, callback);
+            } else if (action.equals(MediaControlIntent.ACTION_SEEK)) {
+                success = handleSeek(intent, callback);
+            } else if (action.equals(MediaControlIntent.ACTION_GET_STATUS)) {
+                success = handleGetStatus(intent, callback);
+            } else if (action.equals(MediaControlIntent.ACTION_PAUSE)) {
+                success = handlePause(intent, callback);
+            } else if (action.equals(MediaControlIntent.ACTION_RESUME)) {
+                success = handleResume(intent, callback);
+            } else if (action.equals(MediaControlIntent.ACTION_STOP)) {
+                success = handleStop(intent, callback);
+            } else if (action.equals(MediaControlIntent.ACTION_START_SESSION)) {
+                success = handleStartSession(intent, callback);
+            } else if (action.equals(MediaControlIntent.ACTION_GET_SESSION_STATUS)) {
+                success = handleGetSessionStatus(intent, callback);
+            } else if (action.equals(MediaControlIntent.ACTION_END_SESSION)) {
+                success = handleEndSession(intent, callback);
+            }
+
+            Log.d(TAG, mSessionManager.toString());
+            return success;
+        }
+        return false;
+    }
+    ...
+}
+</pre>
+
+<p>It is important to understand that the {@link
+  android.support.v7.media.MediaRouteProvider.RouteController} class is intended to act as a wrapper
+  for the API to your media playback equipment. The implementation of the methods in this class is
+  entirely dependent on the programmatic interface provided by your receiving device.</p>
