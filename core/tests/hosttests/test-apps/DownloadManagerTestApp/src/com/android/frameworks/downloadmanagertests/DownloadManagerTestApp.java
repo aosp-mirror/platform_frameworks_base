@@ -40,6 +40,9 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
 
     protected static final String DOWNLOAD_FILENAME = "External93mb.apk";
     protected static final long DOWNLOAD_FILESIZE = 95251708;
+    // Wait until download manager actually start downloading something
+    // Will wait for 1 MB to be downloaded.
+    private static final long EXPECTED_PROGRESS = 1024 * 1024;
 
     private static final String FILE_CONCURRENT_DOWNLOAD_FILE_PREFIX = "file";
     private static final String FILE_CONCURRENT_DOWNLOAD_FILE_EXTENSION = ".bin";
@@ -284,7 +287,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             dlRequest = mDownloadManager.enqueue(request);
             waitForDownloadToStart(dlRequest);
             // make sure we're starting to download some data...
-            waitToReceiveData(dlRequest);
+            waitToReceiveData(dlRequest, EXPECTED_PROGRESS);
 
             // download disable
             setWiFiStateOn(false);
@@ -292,27 +295,29 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             // download disable
             Log.i(LOG_TAG, "Turning on airplane mode...");
             setAirplaneModeOn(true);
-            Thread.sleep(30 * 1000);  // wait 30 secs
+            Thread.sleep(5 * 1000);  // wait 5 secs
 
             // download disable
             setWiFiStateOn(true);
-            Thread.sleep(30 * 1000);  // wait 30 secs
+            Thread.sleep(5 * 1000);  // wait 5 secs
+            waitToReceiveData(dlRequest, EXPECTED_PROGRESS);
 
             // download enable
             Log.i(LOG_TAG, "Turning off airplane mode...");
             setAirplaneModeOn(false);
             Thread.sleep(5 * 1000);  // wait 5 seconds
+            waitToReceiveData(dlRequest, EXPECTED_PROGRESS);
 
             // download disable
             Log.i(LOG_TAG, "Turning off WiFi...");
             setWiFiStateOn(false);
-            Thread.sleep(30 * 1000);  // wait 30 secs
+            Thread.sleep(5 * 1000);  // wait 5 secs
 
             // finally, turn WiFi back on and finish up the download
             Log.i(LOG_TAG, "Turning on WiFi...");
             setWiFiStateOn(true);
-            Log.i(LOG_TAG, "Waiting up to 3 minutes for download to complete...");
-            assertTrue(waitForDownload(dlRequest, 3 * 60 * 1000));
+            Log.i(LOG_TAG, "Waiting up to 10 minutes for download to complete...");
+            assertTrue(waitForDownload(dlRequest, 10 * 60 * 1000));
             ParcelFileDescriptor pfd = mDownloadManager.openDownloadedFile(dlRequest);
             verifyFileSize(pfd, filesize);
         } finally {
@@ -358,7 +363,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             dlRequest = mDownloadManager.enqueue(request);
             waitForDownloadToStart(dlRequest);
             // are we making any progress?
-            waitToReceiveData(dlRequest);
+            waitToReceiveData(dlRequest, EXPECTED_PROGRESS);
 
             // download disable
             Log.i(LOG_TAG, "Turning off WiFi...");
@@ -368,7 +373,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             // enable download...
             Log.i(LOG_TAG, "Turning on WiFi again...");
             setWiFiStateOn(true);
-            waitToReceiveData(dlRequest);
+            waitToReceiveData(dlRequest, EXPECTED_PROGRESS);
 
             // download disable
             Log.i(LOG_TAG, "Turning off WiFi...");
@@ -379,8 +384,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             Log.i(LOG_TAG, "Turning on WiFi again...");
             setWiFiStateOn(true);
 
-            Log.i(LOG_TAG, "Waiting up to 3 minutes for download to complete...");
-            assertTrue(waitForDownload(dlRequest, 3 * 60 * 1000));
+            Log.i(LOG_TAG, "Waiting up to 10 minutes for download to complete...");
+            assertTrue(waitForDownload(dlRequest, 10 * 60 * 1000));
             ParcelFileDescriptor pfd = mDownloadManager.openDownloadedFile(dlRequest);
             verifyFileSize(pfd, filesize);
         } finally {
@@ -428,7 +433,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             dlRequest = mDownloadManager.enqueue(request);
             waitForDownloadToStart(dlRequest);
             // are we making any progress?
-            waitToReceiveData(dlRequest);
+            waitToReceiveData(dlRequest, EXPECTED_PROGRESS);
 
             // download disable
             Log.i(LOG_TAG, "Turning on Airplane mode...");
@@ -439,7 +444,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             Log.i(LOG_TAG, "Turning off Airplane mode...");
             setAirplaneModeOn(false);
             // make sure we're starting to download some data...
-            waitToReceiveData(dlRequest);
+            waitToReceiveData(dlRequest, EXPECTED_PROGRESS);
 
             // reenable the connection to start up the download again
             Log.i(LOG_TAG, "Turning on Airplane mode again...");
@@ -450,8 +455,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             Log.i(LOG_TAG, "Turning off Airplane mode again...");
             setAirplaneModeOn(false);
 
-            Log.i(LOG_TAG, "Waiting up to 3 minutes for donwload to complete...");
-            assertTrue(waitForDownload(dlRequest, 180 * 1000));  // wait up to 3 mins before timeout
+            Log.i(LOG_TAG, "Waiting up to 10 minutes for donwload to complete...");
+            assertTrue(waitForDownload(dlRequest, 10 * 60 * 1000)); // wait up to 10 mins
             ParcelFileDescriptor pfd = mDownloadManager.openDownloadedFile(dlRequest);
             verifyFileSize(pfd, filesize);
         } finally {
