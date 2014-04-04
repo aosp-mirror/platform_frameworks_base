@@ -16,7 +16,6 @@
 
 package com.android.mediadrm.signer;
 
-import android.content.Context;
 import android.media.MediaDrm;
 import android.media.DeniedByServerException;
 
@@ -37,7 +36,7 @@ public final class MediaDrmSigner {
      * server
      */
     public final static class CertificateRequest {
-        private MediaDrm.CertificateRequest mCertRequest;
+        private final MediaDrm.CertificateRequest mCertRequest;
 
         CertificateRequest(MediaDrm.CertificateRequest certRequest) {
             mCertRequest = certRequest;
@@ -65,7 +64,7 @@ public final class MediaDrmSigner {
      * with a certificate.
      */
     public final static class Certificate {
-        private MediaDrm.Certificate mCertificate;
+        private final MediaDrm.Certificate mCertificate;
 
         Certificate(MediaDrm.Certificate certificate) {
             mCertificate = certificate;
@@ -97,7 +96,7 @@ public final class MediaDrmSigner {
      * the chain of authority.
      */
     public static CertificateRequest getCertificateRequest(MediaDrm drm, int certType,
-                                                           String certAuthority) {
+            String certAuthority) {
         return new CertificateRequest(drm.getCertificateRequest(certType, certAuthority));
     }
 
@@ -117,14 +116,13 @@ public final class MediaDrmSigner {
      * server rejected the request
      */
     public static Certificate provideCertificateResponse(MediaDrm drm, byte[] response)
-        throws DeniedByServerException {
+            throws DeniedByServerException {
         return new Certificate(drm.provideCertificateResponse(response));
     }
 
     /**
      * Sign data using an RSA key
      *
-     * @param context the App context
      * @param drm the MediaDrm object
      * @param sessionId a sessionId obtained from openSession on the MediaDrm object
      * @param algorithm the signing algorithm to use, e.g. "PKCS1-BlockType1"
@@ -132,8 +130,8 @@ public final class MediaDrmSigner {
      * from provideCertificateResponse
      * @param message the data for which a signature is to be computed
      */
-    public static byte[] signRSA(Context context, MediaDrm drm, byte[] sessionId,
-                                 String algorithm, byte[] wrappedKey, byte[] message) {
-        return drm.signRSA(context, sessionId, algorithm, wrappedKey, message);
+    public static byte[] signRSA(MediaDrm drm, byte[] sessionId,
+            String algorithm, byte[] wrappedKey, byte[] message) {
+        return drm.signRSA(sessionId, algorithm, wrappedKey, message);
     }
 }
