@@ -150,7 +150,7 @@ static void loadSystemIconAsSprite(JNIEnv* env, jobject contextObj, int32_t styl
     status_t status = android_view_PointerIcon_loadSystemIcon(env,
             contextObj, style, &pointerIcon);
     if (!status) {
-        pointerIcon.bitmap.copyTo(&outSpriteIcon->bitmap, SkBitmap::kARGB_8888_Config);
+        pointerIcon.bitmap.copyTo(&outSpriteIcon->bitmap, kNative_8888_SkColorType);
         outSpriteIcon->hotSpotX = pointerIcon.hotSpotX;
         outSpriteIcon->hotSpotY = pointerIcon.hotSpotY;
     }
