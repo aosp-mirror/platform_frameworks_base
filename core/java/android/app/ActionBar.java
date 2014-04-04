@@ -73,6 +73,11 @@ public abstract class ActionBar {
      * and title text with an optional subtitle. Clicking any of these elements
      * will dispatch onOptionsItemSelected to the host Activity with
      * a MenuItem with item ID android.R.id.home.
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public static final int NAVIGATION_MODE_STANDARD = 0;
     
@@ -80,12 +85,22 @@ public abstract class ActionBar {
      * List navigation mode. Instead of static title text this mode
      * presents a list menu for navigation within the activity.
      * e.g. this might be presented to the user as a dropdown list.
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public static final int NAVIGATION_MODE_LIST = 1;
     
     /**
      * Tab navigation mode. Instead of static title text this mode
      * presents a series of tabs for navigation within the activity.
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public static final int NAVIGATION_MODE_TABS = 2;
 
@@ -288,6 +303,11 @@ public abstract class ActionBar {
      *                within the dropdown navigation menu.
      * @param callback An OnNavigationListener that will receive events when the user
      *                 selects a navigation item.
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract void setListNavigationCallbacks(SpinnerAdapter adapter,
             OnNavigationListener callback);
@@ -296,6 +316,11 @@ public abstract class ActionBar {
      * Set the selected navigation item in list or tabbed navigation modes.
      *
      * @param position Position of the item to select.
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract void setSelectedNavigationItem(int position);
 
@@ -303,6 +328,11 @@ public abstract class ActionBar {
      * Get the position of the selected navigation item in list or tabbed navigation modes.
      *
      * @return Position of the selected item.
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract int getSelectedNavigationIndex();
 
@@ -310,6 +340,11 @@ public abstract class ActionBar {
      * Get the number of navigation items present in the current navigation mode.
      *
      * @return Number of navigation items.
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract int getNavigationItemCount();
 
@@ -507,6 +542,11 @@ public abstract class ActionBar {
      * </ul>
      *
      * @return The current navigation mode.
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     @NavigationMode
     public abstract int getNavigationMode();
@@ -518,6 +558,11 @@ public abstract class ActionBar {
      * @see #NAVIGATION_MODE_STANDARD
      * @see #NAVIGATION_MODE_LIST
      * @see #NAVIGATION_MODE_TABS
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract void setNavigationMode(@NavigationMode int mode);
 
@@ -539,6 +584,11 @@ public abstract class ActionBar {
      * @return A new Tab
      *
      * @see #addTab(Tab)
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract Tab newTab();
 
@@ -547,6 +597,11 @@ public abstract class ActionBar {
      * If this is the first tab to be added it will become the selected tab.
      *
      * @param tab Tab to add
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract void addTab(Tab tab);
 
@@ -555,6 +610,11 @@ public abstract class ActionBar {
      *
      * @param tab Tab to add
      * @param setSelected True if the added tab should become the selected tab.
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract void addTab(Tab tab, boolean setSelected);
 
@@ -565,6 +625,11 @@ public abstract class ActionBar {
      *
      * @param tab The tab to add
      * @param position The new position of the tab
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract void addTab(Tab tab, int position);
 
@@ -575,6 +640,11 @@ public abstract class ActionBar {
      * @param tab The tab to add
      * @param position The new position of the tab
      * @param setSelected True if the added tab should become the selected tab.
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract void addTab(Tab tab, int position, boolean setSelected);
 
@@ -583,6 +653,11 @@ public abstract class ActionBar {
      * and another tab will be selected if present.
      *
      * @param tab The tab to remove
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract void removeTab(Tab tab);
 
@@ -591,11 +666,21 @@ public abstract class ActionBar {
      * and another tab will be selected if present.
      *
      * @param position Position of the tab to remove
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract void removeTabAt(int position);
 
     /**
      * Remove all tabs from the action bar and deselect the current tab.
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract void removeAllTabs();
 
@@ -605,6 +690,11 @@ public abstract class ActionBar {
      * <p>Note: If you want to select by index, use {@link #setSelectedNavigationItem(int)}.</p>
      *
      * @param tab Tab to select
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract void selectTab(Tab tab);
 
@@ -613,6 +703,11 @@ public abstract class ActionBar {
      * one tab present.
      *
      * @return The currently selected tab or null
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract Tab getSelectedTab();
 
@@ -621,12 +716,22 @@ public abstract class ActionBar {
      *
      * @param index Index value in the range 0-get
      * @return
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract Tab getTabAt(int index);
 
     /**
      * Returns the number of tabs currently registered with the action bar.
      * @return Tab count
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public abstract int getTabCount();
 
@@ -801,6 +906,11 @@ public abstract class ActionBar {
 
     /**
      * Listener interface for ActionBar navigation events.
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public interface OnNavigationListener {
         /**
@@ -833,6 +943,11 @@ public abstract class ActionBar {
      * A tab in the action bar.
      *
      * <p>Tabs manage the hiding and showing of {@link Fragment}s.
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public static abstract class Tab {
         /**
@@ -984,6 +1099,11 @@ public abstract class ActionBar {
 
     /**
      * Callback interface invoked when a tab is focused, unfocused, added, or removed.
+     *
+     * @deprecated Action bar navigation modes are deprecated and not supported by inline
+     * toolbar action bars. Consider using other
+     * <a href="http://developer.android.com/design/patterns/navigation.html">common
+     * navigation patterns</a> instead.
      */
     public interface TabListener {
         /**
