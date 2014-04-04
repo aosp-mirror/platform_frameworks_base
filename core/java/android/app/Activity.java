@@ -4707,9 +4707,7 @@ public class Activity extends ContextThemeWrapper
      * found with either a non-null label or a non-null icon set by this call the traversal is
      * ended. For each task those values will be returned in {@link
      * ActivityManager.RecentTaskInfo#activityLabel} and {@link
-     * ActivityManager.RecentTaskInfo#activityIcon}. The {link Intent} for the activity that set
-     * activityLabel and activityIcon will be returned in {@link
-     * ActivityManager.RecentTaskInfo#activityIntent}
+     * ActivityManager.RecentTaskInfo#activityIcon}.
      *
      * @see ActivityManager#getRecentTasks
      * @see ActivityManager.RecentTaskInfo
