@@ -29,8 +29,8 @@ public class Utilities {
     }
     public static int calculateTranslationAnimationDuration(int distancePx, int minDuration) {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
-        return Math.max(minDuration,
-            (int) (Math.abs(distancePx) / config.animationDpsMovementPerSecond) * 1000 /* ms/s */);
+        return Math.max(minDuration, (int) (1000f /* ms/s */ *
+                (Math.abs(distancePx) / config.animationPxMovementPerSecond)));
     }
 
     /** Scales a rect about its centroid */

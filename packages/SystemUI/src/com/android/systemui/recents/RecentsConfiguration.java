@@ -34,7 +34,7 @@ public class RecentsConfiguration {
     public Rect systemInsets = new Rect();
     public Rect displayRect = new Rect();
 
-    public float animationDpsMovementPerSecond;
+    public float animationPxMovementPerSecond;
 
     public int filteringCurrentViewsMinAnimDuration;
     public int filteringNewViewsMinAnimDuration;
@@ -63,7 +63,7 @@ public class RecentsConfiguration {
         mDisplayMetrics = dm;
 
         displayRect.set(0, 0, dm.widthPixels, dm.heightPixels);
-        animationDpsMovementPerSecond =
+        animationPxMovementPerSecond =
                 res.getDimensionPixelSize(R.dimen.recents_animation_movement_in_dps_per_second);
         filteringCurrentViewsMinAnimDuration =
                 res.getInteger(R.integer.recents_filter_animate_current_views_min_duration);
