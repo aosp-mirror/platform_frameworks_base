@@ -17,6 +17,8 @@
 package libcore.icu;
 
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
+import com.ibm.icu.text.DateTimePatternGenerator;
+import com.ibm.icu.util.ULocale;
 
 import java.util.Locale;
 
@@ -45,7 +47,8 @@ public class ICU_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static String getBestDateTimePattern(String skeleton, String localeName) {
-        return "";            // TODO: check what the right value should be.
+        return DateTimePatternGenerator.getInstance(new ULocale(localeName))
+                .getBestPattern(skeleton);
     }
 
     @LayoutlibDelegate
