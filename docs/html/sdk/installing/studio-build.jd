@@ -23,6 +23,7 @@ page.title=Building Your Project with Gradle
             <li><a href="#addLibModule">Add a library module</a></li>
             <li><a href="#buildProject">Build the project</a></li>
             <li><a href="#buildCmd">Build from the command line</a></li>
+            <li><a href="#buildRelease">Build a release version</a></li>
         </ol>
     </li>
     <li><a href="#configBuild">Configure the Build</a>
@@ -463,6 +464,24 @@ $ ./gradlew tasks
 </pre>
 
 
+<h3 id="buildRelease">Build a release version</h3>
+
+<p>You can build the release version of your application from the command line or using Android
+Studio. To build it from the command line, invoke the <code>assembleRelease</code> build task using
+the Gradle wrapper script (<code>gradlew assembleRelease</code>). To build it from Android
+Studio:</p>
+
+<ol>
+    <li>Click <strong>Gradle</strong> on the right side of the IDE window.</li>
+    <li>On the <em>All tasks</em> section of the sidebar that appears, expand
+        <strong>BuildSystemExample</strong>.</li>
+    <li>Expand <strong>:app</strong> and double-click <strong>assembleRelease</strong>.</li>
+</ol>
+
+<p>You can use this procedure to invoke any build task from Android Studio.</p>
+
+
+
 <h2 id="configBuild">Configure the Build</h2>
 
 <p>This section uses the <code>BuildSystemExample</code> project from the previous section and
@@ -642,20 +661,6 @@ android {
 settings from the Android SDK installation. Android Studio adds the module-specific rules file
 <code>proguard-rules.txt</code> at the root of the module, where you can add custom ProGuard
 rules.</p>
-
-<p>You can build the release version of your application from the command line or using Android
-Studio. To build it from the command line, invoke the <code>assembleRelease</code> build task using
-the Gradle wrapper script (<code>gradlew assembleRelease</code>). To build it from Android
-Studio:</p>
-
-<ol>
-    <li>Click <strong>Gradle</strong> on the right side of the IDE window.</li>
-    <li>On the <em>All tasks</em> section of the sidebar that appears, expand
-        <strong>BuildSystemExample</strong>.</li>
-    <li>Expand <strong>:app</strong> and double-click <strong>assembleRelease</strong>.</li>
-</ol>
-
-<p>You can use this procedure to invoke any build task from Android Studio.</p>
 
 <h3 id="configureSigning">Configure signing settings</h3>
 
