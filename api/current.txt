@@ -8158,6 +8158,7 @@ package android.content.res {
     field public static final int UI_MODE_TYPE_NORMAL = 1; // 0x1
     field public static final int UI_MODE_TYPE_TELEVISION = 4; // 0x4
     field public static final int UI_MODE_TYPE_UNDEFINED = 0; // 0x0
+    field public static final int UI_MODE_TYPE_WATCH = 6; // 0x6
     field public int densityDpi;
     field public float fontScale;
     field public int hardKeyboardHidden;
