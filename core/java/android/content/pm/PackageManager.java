@@ -1316,6 +1316,13 @@ public abstract class PackageManager {
     public static final String FEATURE_BACKUP = "android.software.backup";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports managed profiles for enterprise users.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_MANAGEDPROFILES = "android.software.managedprofiles";
+
+    /**
      * Action to external storage service to clean out removed apps.
      * @hide
      */
@@ -2490,7 +2497,7 @@ public abstract class PackageManager {
     /**
      * Return the generic icon for an activity that is used when no specific
      * icon is defined.
-     * 
+     *
      * @return Drawable Image of the icon.
      */
     public abstract Drawable getDefaultActivityIcon();
