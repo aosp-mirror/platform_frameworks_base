@@ -1224,6 +1224,13 @@ public abstract class ActionBar {
 
         public LayoutParams(@NonNull Context c, AttributeSet attrs) {
             super(c, attrs);
+
+            TypedArray a = c.obtainStyledAttributes(attrs,
+                    com.android.internal.R.styleable.ActionBar_LayoutParams);
+            gravity = a.getInt(
+                    com.android.internal.R.styleable.ActionBar_LayoutParams_layout_gravity,
+                    Gravity.NO_GRAVITY);
+            a.recycle();
         }
 
         public LayoutParams(int width, int height) {

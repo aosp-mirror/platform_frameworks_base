@@ -6462,4 +6462,8 @@
         <attr name="layout_gravity" />
     </declare-styleable>
 
+    <declare-styleable name="ActionBar_LayoutParams">
+        <attr name="layout_gravity" />
+    </declare-styleable>
+
 </resources>
