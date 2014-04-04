@@ -573,6 +573,9 @@ public abstract class Context {
      * Open a private file associated with this Context's application package
      * for writing.  Creates the file if it doesn't already exist.
      *
+     * <p>No permissions are required to invoke this method, since it uses internal
+     * storage.
+     *
      * @param name The name of the file to open; can not contain path
      *             separators.
      * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
@@ -629,6 +632,9 @@ public abstract class Context {
     /**
      * Returns the absolute path to the directory on the filesystem where
      * files created with {@link #openFileOutput} are stored.
+     *
+     * <p>No permissions are required to read or write to the returned path, since this
+     * path is internal storage.
      *
      * @return The path of the directory holding application files.
      *
