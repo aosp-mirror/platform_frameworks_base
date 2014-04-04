@@ -4690,7 +4690,11 @@ public class BackupManagerService extends IBackupManager.Stub {
 
     // ----- Restore handling -----
 
-    private boolean signaturesMatch(Signature[] storedSigs, PackageInfo target) {
+    static boolean signaturesMatch(Signature[] storedSigs, PackageInfo target) {
+        if (target == null) {
+            return false;
+        }
+
         // If the target resides on the system partition, we allow it to restore
         // data from the like-named package in a restore set even if the signatures
         // do not match.  (Unlike general applications, those flashed to the system
