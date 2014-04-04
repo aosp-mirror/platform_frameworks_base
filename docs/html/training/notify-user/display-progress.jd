@@ -80,6 +80,7 @@ previous.link=expanded.html
     setProgress(0, 0, false)}. For example:
 </p>
 <pre>
+int id = 1;
 ...
 mNotifyManager =
         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -100,7 +101,7 @@ new Thread(
                     // state
                     mBuilder.setProgress(100, incr, false);
                     // Displays the progress bar for the first time.
-                    mNotifyManager.notify(0, mBuilder.build());
+                    mNotifyManager.notify(id, mBuilder.build());
                         // Sleeps the thread, simulating an operation
                         // that takes time
                         try {
@@ -114,7 +115,7 @@ new Thread(
             mBuilder.setContentText("Download complete")
             // Removes the progress bar
                     .setProgress(0,0,false);
-            mNotifyManager.notify(ID, mBuilder.build());
+            mNotifyManager.notify(id, mBuilder.build());
         }
     }
 // Starts the thread by calling the run() method in its Runnable
@@ -157,7 +158,7 @@ new Thread(
 // percentage, and "determinate" state
 mBuilder.setProgress(100, incr, false);
 // Issues the notification
-mNotifyManager.notify(0, mBuilder.build());
+mNotifyManager.notify(id, mBuilder.build());
 </pre>
 <p>
     Replace the lines you've found with the following lines. Notice that the third parameter
@@ -169,7 +170,7 @@ mNotifyManager.notify(0, mBuilder.build());
  // Sets an activity indicator for an operation of indeterminate length
 mBuilder.setProgress(0, 0, true);
 // Issues the notification
-mNotifyManager.notify(0, mBuilder.build());
+mNotifyManager.notify(id, mBuilder.build());
 </pre>
 <p>
     The resulting indicator is shown in figure 2:
