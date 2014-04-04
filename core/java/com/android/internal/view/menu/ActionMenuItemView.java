@@ -282,11 +282,6 @@ public class ActionMenuItemView extends TextView
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST) {
-            // Fill all available height.
-            heightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                    MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.EXACTLY);
-        }
         final boolean textVisible = hasText();
         if (textVisible && mSavedPaddingLeft >= 0) {
             super.setPadding(mSavedPaddingLeft, getPaddingTop(),

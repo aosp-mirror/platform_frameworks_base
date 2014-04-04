@@ -1075,6 +1075,7 @@ package android {
     field public static final int strokeOpacity = 16843812; // 0x1010424
     field public static final int strokeWidth = 16843813; // 0x1010425
     field public static final int subtitle = 16843473; // 0x10102d1
+    field public static final int subtitleTextAppearance = 16843834; // 0x101043a
     field public static final int subtitleTextStyle = 16843513; // 0x10102f9
     field public static final int subtypeExtraValue = 16843674; // 0x101039a
     field public static final int subtypeId = 16843713; // 0x10103c1
@@ -1190,6 +1191,7 @@ package android {
     field public static final int tintMode = 16843798; // 0x1010416
     field public static final int title = 16843233; // 0x10101e1
     field public static final int titleCondensed = 16843234; // 0x10101e2
+    field public static final int titleTextAppearance = 16843833; // 0x1010439
     field public static final int titleTextStyle = 16843512; // 0x10102f8
     field public static final int toAlpha = 16843211; // 0x10101cb
     field public static final int toDegrees = 16843188; // 0x10101b4
@@ -3088,6 +3090,7 @@ package android.app {
     ctor public ActionBar.LayoutParams(int);
     ctor public ActionBar.LayoutParams(android.app.ActionBar.LayoutParams);
     ctor public ActionBar.LayoutParams(android.view.ViewGroup.LayoutParams);
+    ctor public ActionBar.LayoutParams(android.view.ViewGroup.MarginLayoutParams);
     field public int gravity;
   }
 
@@ -3263,6 +3266,7 @@ package android.app {
     method public void reportFullyDrawn();
     method public final boolean requestWindowFeature(int);
     method public final void runOnUiThread(java.lang.Runnable);
+    method public void setActionBar(android.widget.Toolbar);
     method public void setActivityLabelAndIcon(java.lang.CharSequence, android.graphics.Bitmap);
     method public void setContentTransitionManager(android.transition.TransitionManager);
     method public void setContentView(int);
@@ -32790,6 +32794,7 @@ package android.widget {
     method public android.view.Menu getMenu();
     method public void onConfigurationChanged(android.content.res.Configuration);
     method public void onDetachedFromWindow();
+    method public void setOnMenuItemClickListener(android.widget.ActionMenuView.OnMenuItemClickListener);
   }
 
   public static class ActionMenuView.LayoutParams extends android.widget.LinearLayout.LayoutParams {
@@ -32797,6 +32802,10 @@ package android.widget {
     ctor public ActionMenuView.LayoutParams(android.view.ViewGroup.LayoutParams);
     ctor public ActionMenuView.LayoutParams(android.widget.ActionMenuView.LayoutParams);
     ctor public ActionMenuView.LayoutParams(int, int);
+  }
+
+  public static abstract interface ActionMenuView.OnMenuItemClickListener {
+    method public abstract boolean onMenuItemClick(android.view.MenuItem);
   }
 
   public abstract interface Adapter {
@@ -34950,6 +34959,50 @@ package android.widget {
     method public java.lang.CharSequence getTextOn();
     method public void setTextOff(java.lang.CharSequence);
     method public void setTextOn(java.lang.CharSequence);
+  }
+
+  public class Toolbar extends android.view.ViewGroup {
+    ctor public Toolbar(android.content.Context);
+    ctor public Toolbar(android.content.Context, android.util.AttributeSet);
+    ctor public Toolbar(android.content.Context, android.util.AttributeSet, int);
+    ctor public Toolbar(android.content.Context, android.util.AttributeSet, int, int);
+    method public android.graphics.drawable.Drawable getLogo();
+    method public java.lang.CharSequence getLogoDescription();
+    method public android.view.Menu getMenu();
+    method public android.graphics.drawable.Drawable getNavigationIcon();
+    method public java.lang.CharSequence getSubtitle();
+    method public java.lang.CharSequence getTitle();
+    method public void inflateMenu(int);
+    method protected void onLayout(boolean, int, int, int, int);
+    method public void setLogo(int);
+    method public void setLogo(android.graphics.drawable.Drawable);
+    method public void setLogoDescription(int);
+    method public void setLogoDescription(java.lang.CharSequence);
+    method public void setNavigationDescription(int);
+    method public void setNavigationDescription(java.lang.CharSequence);
+    method public void setNavigationIcon(int);
+    method public void setNavigationIcon(android.graphics.drawable.Drawable);
+    method public void setNavigationOnClickListener(android.view.View.OnClickListener);
+    method public void setOnMenuItemClickListener(android.widget.Toolbar.OnMenuItemClickListener);
+    method public void setSubtitle(int);
+    method public void setSubtitle(java.lang.CharSequence);
+    method public void setTitle(int);
+    method public void setTitle(java.lang.CharSequence);
+  }
+
+  public static class Toolbar.LayoutParams extends android.view.ViewGroup.MarginLayoutParams {
+    ctor public Toolbar.LayoutParams(android.content.Context, android.util.AttributeSet);
+    ctor public Toolbar.LayoutParams(int, int);
+    ctor public Toolbar.LayoutParams(int, int, int);
+    ctor public Toolbar.LayoutParams(int);
+    ctor public Toolbar.LayoutParams(android.widget.Toolbar.LayoutParams);
+    ctor public Toolbar.LayoutParams(android.view.ViewGroup.MarginLayoutParams);
+    ctor public Toolbar.LayoutParams(android.view.ViewGroup.LayoutParams);
+    field public int gravity;
+  }
+
+  public static abstract interface Toolbar.OnMenuItemClickListener {
+    method public abstract boolean onMenuItemClick(android.view.MenuItem);
   }
 
   public deprecated class TwoLineListItem extends android.widget.RelativeLayout {

@@ -20,9 +20,11 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewDebug;
@@ -30,31 +32,57 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.Window;
 import android.widget.SpinnerAdapter;
+import android.widget.Toolbar;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
 
 /**
- * A window feature at the top of the activity that may display the activity title, navigation
- * modes, and other interactive items.
+ * A primary toolbar within the activity that may display the activity title, application-level
+ * navigation affordances, and other interactive items.
+ *
  * <p>Beginning with Android 3.0 (API level 11), the action bar appears at the top of an
  * activity's window when the activity uses the system's {@link
  * android.R.style#Theme_Holo Holo} theme (or one of its descendant themes), which is the default.
  * You may otherwise add the action bar by calling {@link
  * android.view.Window#requestFeature requestFeature(FEATURE_ACTION_BAR)} or by declaring it in a
  * custom theme with the {@link android.R.styleable#Theme_windowActionBar windowActionBar} property.
- * <p>By default, the action bar shows the application icon on
+ * </p>
+ *
+ * <p>Beginning with Android L (API level 21), the action bar may be represented by any
+ * Toolbar widget within the application layout. The application may signal to the Activity
+ * which Toolbar should be treated as the Activity's action bar. Activities that use this
+ * feature should use one of the supplied <code>.NoActionBar</code> themes, set the
+ * {@link android.R.styleable#Theme_windowActionBar windowActionBar} attribute to <code>false</code>
+ * or otherwise not request the window feature.</p>
+ *
+ * <p>By adjusting the window features requested by the theme and the layouts used for
+ * an Activity's content view, an app can use the standard system action bar on older platform
+ * releases and the newer inline toolbars on newer platform releases. The <code>ActionBar</code>
+ * object obtained from the Activity can be used to control either configuration transparently.</p>
+ *
+ * <p>When using the Holo themes the action bar shows the application icon on
  * the left, followed by the activity title. If your activity has an options menu, you can make
  * select items accessible directly from the action bar as "action items". You can also
  * modify various characteristics of the action bar or remove it completely.</p>
+ *
+ * <p>When using the Quantum themes (default in API 21 or newer) the navigation button
+ * (formerly "Home") takes over the space previously occupied by the application icon.
+ * Apps wishing to express a stronger branding should use their brand colors heavily
+ * in the action bar and other application chrome or use a {@link #setLogo(int) logo}
+ * in place of their standard title text.</p>
+ *
  * <p>From your activity, you can retrieve an instance of {@link ActionBar} by calling {@link
  * android.app.Activity#getActionBar getActionBar()}.</p>
+ *
  * <p>In some cases, the action bar may be overlayed by another bar that enables contextual actions,
  * using an {@link android.view.ActionMode}. For example, when the user selects one or more items in
  * your activity, you can enable an action mode that offers actions specific to the selected
  * items, with a UI that temporarily replaces the action bar. Although the UI may occupy the
  * same space, the {@link android.view.ActionMode} APIs are distinct and independent from those for
- * {@link ActionBar}.
+ * {@link ActionBar}.</p>
+ *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For information about how to use the action bar, including how to add action items, navigation
@@ -904,6 +932,31 @@ public abstract class ActionBar {
      */
     public void setHomeActionContentDescription(int resId) { }
 
+    /** @hide */
+    public void setDefaultDisplayHomeAsUpEnabled(boolean enabled) {
+    }
+
+    /** @hide */
+    public void setShowHideAnimationEnabled(boolean enabled) {
+    }
+
+    /** @hide */
+    public void onConfigurationChanged(Configuration config) {
+    }
+
+    /** @hide */
+    public void dispatchMenuVisibilityChanged(boolean visible) {
+    }
+
+    /** @hide */
+    public void captureSharedElements(Map<String, View> sharedElements) {
+    }
+
+    /** @hide */
+    public ActionMode startActionMode(ActionMode.Callback callback) {
+        return null;
+    }
+
     /**
      * Listener interface for ActionBar navigation events.
      *
@@ -1145,49 +1198,40 @@ public abstract class ActionBar {
      *
      * @attr ref android.R.styleable#ActionBar_LayoutParams_layout_gravity
      */
-    public static class LayoutParams extends MarginLayoutParams {
+    public static class LayoutParams extends ViewGroup.MarginLayoutParams {
         /**
          * Gravity for the view associated with these LayoutParams.
          *
          * @see android.view.Gravity
          */
         @ViewDebug.ExportedProperty(category = "layout", mapping = {
-            @ViewDebug.IntToString(from =  -1,                       to = "NONE"),
-            @ViewDebug.IntToString(from = Gravity.NO_GRAVITY,        to = "NONE"),
-            @ViewDebug.IntToString(from = Gravity.TOP,               to = "TOP"),
-            @ViewDebug.IntToString(from = Gravity.BOTTOM,            to = "BOTTOM"),
-            @ViewDebug.IntToString(from = Gravity.LEFT,              to = "LEFT"),
-            @ViewDebug.IntToString(from = Gravity.RIGHT,             to = "RIGHT"),
-            @ViewDebug.IntToString(from = Gravity.START,             to = "START"),
-            @ViewDebug.IntToString(from = Gravity.END,               to = "END"),
-            @ViewDebug.IntToString(from = Gravity.CENTER_VERTICAL,   to = "CENTER_VERTICAL"),
-            @ViewDebug.IntToString(from = Gravity.FILL_VERTICAL,     to = "FILL_VERTICAL"),
-            @ViewDebug.IntToString(from = Gravity.CENTER_HORIZONTAL, to = "CENTER_HORIZONTAL"),
-            @ViewDebug.IntToString(from = Gravity.FILL_HORIZONTAL,   to = "FILL_HORIZONTAL"),
-            @ViewDebug.IntToString(from = Gravity.CENTER,            to = "CENTER"),
-            @ViewDebug.IntToString(from = Gravity.FILL,              to = "FILL")
+                @ViewDebug.IntToString(from =  -1,                       to = "NONE"),
+                @ViewDebug.IntToString(from = Gravity.NO_GRAVITY,        to = "NONE"),
+                @ViewDebug.IntToString(from = Gravity.TOP,               to = "TOP"),
+                @ViewDebug.IntToString(from = Gravity.BOTTOM,            to = "BOTTOM"),
+                @ViewDebug.IntToString(from = Gravity.LEFT,              to = "LEFT"),
+                @ViewDebug.IntToString(from = Gravity.RIGHT,             to = "RIGHT"),
+                @ViewDebug.IntToString(from = Gravity.START,             to = "START"),
+                @ViewDebug.IntToString(from = Gravity.END,               to = "END"),
+                @ViewDebug.IntToString(from = Gravity.CENTER_VERTICAL,   to = "CENTER_VERTICAL"),
+                @ViewDebug.IntToString(from = Gravity.FILL_VERTICAL,     to = "FILL_VERTICAL"),
+                @ViewDebug.IntToString(from = Gravity.CENTER_HORIZONTAL, to = "CENTER_HORIZONTAL"),
+                @ViewDebug.IntToString(from = Gravity.FILL_HORIZONTAL,   to = "FILL_HORIZONTAL"),
+                @ViewDebug.IntToString(from = Gravity.CENTER,            to = "CENTER"),
+                @ViewDebug.IntToString(from = Gravity.FILL,              to = "FILL")
         })
         public int gravity = Gravity.NO_GRAVITY;
 
         public LayoutParams(@NonNull Context c, AttributeSet attrs) {
             super(c, attrs);
-
-            TypedArray a = c.obtainStyledAttributes(attrs,
-                    com.android.internal.R.styleable.ActionBar_LayoutParams);
-            gravity = a.getInt(
-                    com.android.internal.R.styleable.ActionBar_LayoutParams_layout_gravity,
-                    Gravity.NO_GRAVITY);
-            a.recycle();
         }
 
         public LayoutParams(int width, int height) {
             super(width, height);
-            this.gravity = Gravity.CENTER_VERTICAL | Gravity.START;
         }
 
         public LayoutParams(int width, int height, int gravity) {
             super(width, height);
-            this.gravity = gravity;
         }
 
         public LayoutParams(int gravity) {
@@ -1196,11 +1240,13 @@ public abstract class ActionBar {
 
         public LayoutParams(LayoutParams source) {
             super(source);
-
-            this.gravity = source.gravity;
         }
 
         public LayoutParams(ViewGroup.LayoutParams source) {
+            super(source);
+        }
+
+        public LayoutParams(MarginLayoutParams source) {
             super(source);
         }
     }

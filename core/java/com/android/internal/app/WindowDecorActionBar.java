@@ -60,14 +60,14 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * ActionBarImpl is the ActionBar implementation used
- * by devices of all screen sizes. If it detects a compatible decor,
- * it will split contextual modes across both the ActionBarView at
- * the top of the screen and a horizontal LinearLayout at the bottom
- * which is normally hidden.
+ * WindowDecorActionBar is the ActionBar implementation used
+ * by devices of all screen sizes as part of the window decor layout.
+ * If it detects a compatible decor, it will split contextual modes
+ * across both the ActionBarView at the top of the screen and
+ * a horizontal LinearLayout at the bottom which is normally hidden.
  */
-public class ActionBarImpl extends ActionBar {
-    private static final String TAG = "ActionBarImpl";
+public class WindowDecorActionBar extends ActionBar {
+    private static final String TAG = "WindowDecorActionBar";
 
     private Context mContext;
     private Context mThemedContext;
@@ -104,9 +104,6 @@ public class ActionBarImpl extends ActionBar {
 
     private int mContextDisplayMode;
     private boolean mHasEmbeddedTabs;
-
-    final Handler mHandler = new Handler();
-    Runnable mTabSelector;
 
     private int mCurWindowVisibility = View.VISIBLE;
 
@@ -157,7 +154,7 @@ public class ActionBarImpl extends ActionBar {
         }
     };
 
-    public ActionBarImpl(Activity activity) {
+    public WindowDecorActionBar(Activity activity) {
         mActivity = activity;
         Window window = activity.getWindow();
         View decor = window.getDecorView();
@@ -168,7 +165,7 @@ public class ActionBarImpl extends ActionBar {
         }
     }
 
-    public ActionBarImpl(Dialog dialog) {
+    public WindowDecorActionBar(Dialog dialog) {
         mDialog = dialog;
         init(dialog.getWindow().getDecorView());
     }

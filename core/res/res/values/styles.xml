@@ -1208,6 +1208,13 @@ please see styles_device_defaults.xml.
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Widget.ActionMode.Subtitle</item>
     </style>
 
+    <style name="Widget.Toolbar">
+        <item name="android:titleTextAppearance">@android:style/TextAppearance.Widget.Toolbar.Title</item>
+        <item name="android:subtitleTextAppearance">@android:style/TextAppearance.Widget.Toolbar.Subtitle</item>
+        <item name="android:minHeight">?android:attr/actionBarSize</item>
+        <item name="android:titleMargins">4dp</item>
+    </style>
+
     <style name="TextAppearance.Widget.ActionBar.Title"
            parent="@android:style/TextAppearance.Medium">
     </style>
@@ -1223,6 +1230,14 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.Widget.ActionMode.Subtitle"
            parent="@android:style/TextAppearance.Small">
         <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="TextAppearance.Widget.Toolbar.Title"
+           parent="@android:style/TextAppearance.Widget.ActionBar.Title">
+    </style>
+
+    <style name="TextAppearance.Widget.Toolbar.Subtitle"
+           parent="@android:style/TextAppearance.Widget.ActionBar.Subtitle">
     </style>
 
     <style name="Widget.ActionButton">
