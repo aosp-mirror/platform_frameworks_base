@@ -95,6 +95,7 @@ next.link=managing.html
         {@link android.app.Activity}. For example:
 </p>
 <pre>
+int id = 1;
 ...
 Intent resultIntent = new Intent(this, ResultActivity.class);
 TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
