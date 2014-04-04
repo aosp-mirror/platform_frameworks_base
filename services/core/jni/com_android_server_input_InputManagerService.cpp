@@ -1297,7 +1297,7 @@ static void nativeVibrate(JNIEnv* env,
 
     size_t patternSize = env->GetArrayLength(patternObj);
     if (patternSize > MAX_VIBRATE_PATTERN_SIZE) {
-        ALOGI("Skipped requested vibration because the pattern size is %d "
+        ALOGI("Skipped requested vibration because the pattern size is %zu "
                 "which is more than the maximum supported size of %d.",
                 patternSize, MAX_VIBRATE_PATTERN_SIZE);
         return; // limit to reasonable size
