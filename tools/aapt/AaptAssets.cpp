@@ -1117,6 +1117,11 @@ bool AaptGroupEntry::getUiModeTypeName(const char* name,
               (out->uiMode&~ResTable_config::MASK_UI_MODE_TYPE)
               | ResTable_config::UI_MODE_TYPE_APPLIANCE;
         return true;
+    } else if (strcmp(name, "watch") == 0) {
+      if (out) out->uiMode =
+              (out->uiMode&~ResTable_config::MASK_UI_MODE_TYPE)
+              | ResTable_config::UI_MODE_TYPE_WATCH;
+        return true;
     }
 
     return false;
