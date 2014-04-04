@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -35,11 +37,14 @@ public class SignalClusterView
 
     static final boolean DEBUG = false;
     static final String TAG = "SignalClusterView";
+    static final PorterDuffColorFilter PROBLEM_FILTER
+            = new PorterDuffColorFilter(0xffab653b, PorterDuff.Mode.SRC_ATOP);
 
     NetworkController mNC;
 
     private boolean mWifiVisible = false;
     private int mWifiStrengthId = 0;
+    private boolean mInetProblem;
     private boolean mMobileVisible = false;
     private int mMobileStrengthId = 0, mMobileTypeId = 0;
     private boolean mIsAirplaneMode = false;
@@ -96,19 +101,22 @@ public class SignalClusterView
     }
 
     @Override
-    public void setWifiIndicators(boolean visible, int strengthIcon, String contentDescription) {
+    public void setWifiIndicators(boolean visible, int strengthIcon, boolean problem,
+            String contentDescription) {
         mWifiVisible = visible;
         mWifiStrengthId = strengthIcon;
+        mInetProblem = problem;
         mWifiDescription = contentDescription;
 
         apply();
     }
 
     @Override
-    public void setMobileDataIndicators(boolean visible, int strengthIcon,
+    public void setMobileDataIndicators(boolean visible, int strengthIcon, boolean problem,
             int typeIcon, String contentDescription, String typeContentDescription) {
         mMobileVisible = visible;
         mMobileStrengthId = strengthIcon;
+        mInetProblem = problem;
         mMobileTypeId = typeIcon;
         mMobileDescription = contentDescription;
         mMobileTypeDescription = typeContentDescription;
@@ -158,13 +166,17 @@ public class SignalClusterView
         apply();
     }
 
+    private void applyInetProblem(ImageView iv) {
+        iv.setColorFilter(mInetProblem ? PROBLEM_FILTER : null);
+    }
+
     // Run after each indicator change.
     private void apply() {
         if (mWifiGroup == null) return;
 
         if (mWifiVisible) {
             mWifi.setImageResource(mWifiStrengthId);
-
+            applyInetProblem(mWifi);
             mWifiGroup.setContentDescription(mWifiDescription);
             mWifiGroup.setVisibility(View.VISIBLE);
         } else {
@@ -179,7 +191,7 @@ public class SignalClusterView
         if (mMobileVisible && !mIsAirplaneMode) {
             mMobile.setImageResource(mMobileStrengthId);
             mMobileType.setImageResource(mMobileTypeId);
-
+            applyInetProblem(mMobile);
             mMobileGroup.setContentDescription(mMobileTypeDescription + " " + mMobileDescription);
             mMobileGroup.setVisibility(View.VISIBLE);
         } else {
