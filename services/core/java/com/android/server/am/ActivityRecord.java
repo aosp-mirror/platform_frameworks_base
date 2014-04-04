@@ -215,14 +215,7 @@ final class ActivityRecord {
             pw.print(prefix); pw.print("pendingOptions="); pw.println(pendingOptions);
         }
         if (uriPermissions != null) {
-            if (uriPermissions.readUriPermissions != null) {
-                pw.print(prefix); pw.print("readUriPermissions=");
-                        pw.println(uriPermissions.readUriPermissions);
-            }
-            if (uriPermissions.writeUriPermissions != null) {
-                pw.print(prefix); pw.print("writeUriPermissions=");
-                        pw.println(uriPermissions.writeUriPermissions);
-            }
+            uriPermissions.dump(pw, prefix);
         }
         pw.print(prefix); pw.print("launchFailed="); pw.print(launchFailed);
                 pw.print(" launchCount="); pw.print(launchCount);

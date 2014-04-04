@@ -2791,9 +2791,13 @@ public abstract class Context {
      * @param uri The Uri you would like to grant access to.
      * @param modeFlags The desired access modes.  Any combination of
      * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION
-     * Intent.FLAG_GRANT_READ_URI_PERMISSION} or
+     * Intent.FLAG_GRANT_READ_URI_PERMISSION},
      * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION
-     * Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
+     * Intent.FLAG_GRANT_WRITE_URI_PERMISSION},
+     * {@link Intent#FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+     * Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION}, or
+     * {@link Intent#FLAG_GRANT_PREFIX_URI_PERMISSION
+     * Intent.FLAG_GRANT_PREFIX_URI_PERMISSION}.
      *
      * @see #revokeUriPermission
      */
@@ -2806,7 +2810,8 @@ public abstract class Context {
      * Uri will match all previously granted Uris that are the same or a
      * sub-path of the given Uri.  That is, revoking "content://foo/target" will
      * revoke both "content://foo/target" and "content://foo/target/sub", but not
-     * "content://foo".
+     * "content://foo".  It will not remove any prefix grants that exist at a
+     * higher level.
      *
      * @param uri The Uri you would like to revoke access to.
      * @param modeFlags The desired access modes.  Any combination of
@@ -2817,7 +2822,7 @@ public abstract class Context {
      *
      * @see #grantUriPermission
      */
-    public abstract void revokeUriPermission(Uri uri, @Intent.GrantUriMode int modeFlags);
+    public abstract void revokeUriPermission(Uri uri, @Intent.AccessUriMode int modeFlags);
 
     /**
      * Determine whether a particular process and user ID has been granted
@@ -2841,7 +2846,7 @@ public abstract class Context {
      * @see #checkCallingUriPermission
      */
     public abstract int checkUriPermission(Uri uri, int pid, int uid,
-            @Intent.GrantUriMode int modeFlags);
+            @Intent.AccessUriMode int modeFlags);
 
     /**
      * Determine whether the calling process and user ID has been
@@ -2864,7 +2869,7 @@ public abstract class Context {
      *
      * @see #checkUriPermission(Uri, int, int, int)
      */
-    public abstract int checkCallingUriPermission(Uri uri, @Intent.GrantUriMode int modeFlags);
+    public abstract int checkCallingUriPermission(Uri uri, @Intent.AccessUriMode int modeFlags);
 
     /**
      * Determine whether the calling process of an IPC <em>or you</em> has been granted
@@ -2884,7 +2889,7 @@ public abstract class Context {
      * @see #checkCallingUriPermission
      */
     public abstract int checkCallingOrSelfUriPermission(Uri uri,
-            @Intent.GrantUriMode int modeFlags);
+            @Intent.AccessUriMode int modeFlags);
 
     /**
      * Check both a Uri and normal permission.  This allows you to perform
@@ -2910,7 +2915,7 @@ public abstract class Context {
      */
     public abstract int checkUriPermission(@Nullable Uri uri, @Nullable String readPermission,
             @Nullable String writePermission, int pid, int uid,
-            @Intent.GrantUriMode int modeFlags);
+            @Intent.AccessUriMode int modeFlags);
 
     /**
      * If a particular process and user ID has not been granted
@@ -2932,7 +2937,7 @@ public abstract class Context {
      * @see #checkUriPermission(Uri, int, int, int)
      */
     public abstract void enforceUriPermission(
-            Uri uri, int pid, int uid, @Intent.GrantUriMode int modeFlags, String message);
+            Uri uri, int pid, int uid, @Intent.AccessUriMode int modeFlags, String message);
 
     /**
      * If the calling process and user ID has not been granted
@@ -2954,7 +2959,7 @@ public abstract class Context {
      * @see #checkCallingUriPermission(Uri, int)
      */
     public abstract void enforceCallingUriPermission(
-            Uri uri, @Intent.GrantUriMode int modeFlags, String message);
+            Uri uri, @Intent.AccessUriMode int modeFlags, String message);
 
     /**
      * If the calling process of an IPC <em>or you</em> has not been
@@ -2973,7 +2978,7 @@ public abstract class Context {
      * @see #checkCallingOrSelfUriPermission(Uri, int)
      */
     public abstract void enforceCallingOrSelfUriPermission(
-            Uri uri, @Intent.GrantUriMode int modeFlags, String message);
+            Uri uri, @Intent.AccessUriMode int modeFlags, String message);
 
     /**
      * Enforce both a Uri and normal permission.  This allows you to perform
@@ -2998,7 +3003,7 @@ public abstract class Context {
      */
     public abstract void enforceUriPermission(
             @Nullable Uri uri, @Nullable String readPermission,
-            @Nullable String writePermission, int pid, int uid, @Intent.GrantUriMode int modeFlags,
+            @Nullable String writePermission, int pid, int uid, @Intent.AccessUriMode int modeFlags,
             @Nullable String message);
 
     /** @hide */

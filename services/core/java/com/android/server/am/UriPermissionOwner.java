@@ -20,8 +20,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.ArraySet;
 
-import java.util.HashSet;
+import com.google.android.collect.Sets;
+
+import java.io.PrintWriter;
 import java.util.Iterator;
 
 final class UriPermissionOwner {
@@ -30,8 +33,8 @@ final class UriPermissionOwner {
 
     Binder externalToken;
 
-    HashSet<UriPermission> readUriPermissions; // special access to reading uris.
-    HashSet<UriPermission> writeUriPermissions; // special access to writing uris.
+    private ArraySet<UriPermission> mReadPerms;
+    private ArraySet<UriPermission> mWritePerms;
 
     class ExternalToken extends Binder {
         UriPermissionOwner getOwner() {
@@ -39,9 +42,9 @@ final class UriPermissionOwner {
         }
     }
 
-    UriPermissionOwner(ActivityManagerService _service, Object _owner) {
-        service = _service;
-        owner = _owner;
+    UriPermissionOwner(ActivityManagerService service, Object owner) {
+        this.service = service;
+        this.owner = owner;
     }
 
     Binder getExternalTokenLocked() {
@@ -64,82 +67,76 @@ final class UriPermissionOwner {
     }
 
     void removeUriPermissionsLocked(int mode) {
-        if ((mode&Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0
-                && readUriPermissions != null) {
-            for (UriPermission perm : readUriPermissions) {
-                perm.removeReadOwner(this);
-                service.removeUriPermissionIfNeededLocked(perm);
-            }
-            readUriPermissions = null;
-        }
-        if ((mode&Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0
-                && writeUriPermissions != null) {
-            for (UriPermission perm : writeUriPermissions) {
-                perm.removeWriteOwner(this);
-                service.removeUriPermissionIfNeededLocked(perm);
-            }
-            writeUriPermissions = null;
-        }
+        removeUriPermissionLocked(null, mode);
     }
 
     void removeUriPermissionLocked(Uri uri, int mode) {
-        if ((mode&Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0
-                && readUriPermissions != null) {
-            Iterator<UriPermission> it = readUriPermissions.iterator();
+        if ((mode & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0
+                && mReadPerms != null) {
+            Iterator<UriPermission> it = mReadPerms.iterator();
             while (it.hasNext()) {
                 UriPermission perm = it.next();
-                if (uri.equals(perm.uri)) {
+                if (uri == null || uri.equals(perm.uri)) {
                     perm.removeReadOwner(this);
                     service.removeUriPermissionIfNeededLocked(perm);
                     it.remove();
                 }
             }
-            if (readUriPermissions.size() == 0) {
-                readUriPermissions = null;
+            if (mReadPerms.isEmpty()) {
+                mReadPerms = null;
             }
         }
-        if ((mode&Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0
-                && writeUriPermissions != null) {
-            Iterator<UriPermission> it = writeUriPermissions.iterator();
+        if ((mode & Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0
+                && mWritePerms != null) {
+            Iterator<UriPermission> it = mWritePerms.iterator();
             while (it.hasNext()) {
                 UriPermission perm = it.next();
-                if (uri.equals(perm.uri)) {
+                if (uri == null || uri.equals(perm.uri)) {
                     perm.removeWriteOwner(this);
                     service.removeUriPermissionIfNeededLocked(perm);
                     it.remove();
                 }
             }
-            if (writeUriPermissions.size() == 0) {
-                writeUriPermissions = null;
+            if (mWritePerms.isEmpty()) {
+                mWritePerms = null;
             }
         }
     }
 
     public void addReadPermission(UriPermission perm) {
-        if (readUriPermissions == null) {
-            readUriPermissions = new HashSet<UriPermission>();
+        if (mReadPerms == null) {
+            mReadPerms = Sets.newArraySet();
         }
-        readUriPermissions.add(perm);
+        mReadPerms.add(perm);
     }
 
     public void addWritePermission(UriPermission perm) {
-        if (writeUriPermissions == null) {
-            writeUriPermissions = new HashSet<UriPermission>();
+        if (mWritePerms == null) {
+            mWritePerms = Sets.newArraySet();
         }
-        writeUriPermissions.add(perm);
+        mWritePerms.add(perm);
     }
 
     public void removeReadPermission(UriPermission perm) {
-        readUriPermissions.remove(perm);
-        if (readUriPermissions.size() == 0) {
-            readUriPermissions = null;
+        mReadPerms.remove(perm);
+        if (mReadPerms.isEmpty()) {
+            mReadPerms = null;
         }
     }
 
     public void removeWritePermission(UriPermission perm) {
-        writeUriPermissions.remove(perm);
-        if (writeUriPermissions.size() == 0) {
-            writeUriPermissions = null;
+        mWritePerms.remove(perm);
+        if (mWritePerms.isEmpty()) {
+            mWritePerms = null;
+        }
+    }
+
+    public void dump(PrintWriter pw, String prefix) {
+        if (mReadPerms != null) {
+            pw.print(prefix); pw.print("readUriPermissions="); pw.println(mReadPerms);
+        }
+        if (mWritePerms != null) {
+            pw.print(prefix); pw.print("writeUriPermissions="); pw.println(mWritePerms);
         }
     }
 

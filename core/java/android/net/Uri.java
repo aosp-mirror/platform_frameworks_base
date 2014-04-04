@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StrictMode;
 import android.util.Log;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -32,8 +33,10 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.RandomAccess;
 import java.util.Set;
+
 import libcore.net.UriCodec;
 
 /**
@@ -2337,5 +2340,30 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         if ("file".equals(getScheme())) {
             StrictMode.onFileUriExposed(location);
         }
+    }
+
+    /**
+     * Test if this is a path prefix match against the given Uri. Verifies that
+     * scheme, authority, and atomic path segments match.
+     *
+     * @hide
+     */
+    public boolean isPathPrefixMatch(Uri prefix) {
+        if (!Objects.equals(getScheme(), prefix.getScheme())) return false;
+        if (!Objects.equals(getAuthority(), prefix.getAuthority())) return false;
+
+        List<String> seg = getPathSegments();
+        List<String> prefixSeg = prefix.getPathSegments();
+
+        final int prefixSize = prefixSeg.size();
+        if (seg.size() < prefixSize) return false;
+
+        for (int i = 0; i < prefixSize; i++) {
+            if (!Objects.equals(seg.get(i), prefixSeg.get(i))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
