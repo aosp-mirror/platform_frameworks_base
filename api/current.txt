@@ -23310,6 +23310,67 @@ package android.provider {
     field public static final java.lang.String TYPE = "type";
   }
 
+  public final class TvContract {
+    method public static final android.net.Uri buildChannelUri(long);
+    method public static final android.net.Uri buildProgramUri(long);
+    field public static final java.lang.String AUTHORITY = "com.android.tv";
+  }
+
+  public static abstract interface TvContract.BaseTvColumns implements android.provider.BaseColumns {
+    field public static final java.lang.String PACKAGE_NAME = "package_name";
+  }
+
+  public static final class TvContract.Channels implements android.provider.TvContract.BaseTvColumns {
+    field public static final java.lang.String BROWSABLE = "browsable";
+    field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.com.android.tv.channels";
+    field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.com.android.tv.channels";
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DATA = "data";
+    field public static final java.lang.String DESCRIPTION = "description";
+    field public static final java.lang.String DISPLAY_NAME = "display_name";
+    field public static final java.lang.String DISPLAY_NUMBER = "display_number";
+    field public static final java.lang.String SERVICE_NAME = "service_name";
+    field public static final java.lang.String TRANSPORT_STREAM_ID = "transport_stream_id";
+    field public static final java.lang.String TYPE = "type";
+    field public static final int TYPE_1SEG = 263168; // 0x40400
+    field public static final int TYPE_ATSC = 196608; // 0x30000
+    field public static final int TYPE_ATSC_2_0 = 196609; // 0x30001
+    field public static final int TYPE_ATSC_M_H = 196864; // 0x30100
+    field public static final int TYPE_CMMB = 327936; // 0x50100
+    field public static final int TYPE_DTMB = 327680; // 0x50000
+    field public static final int TYPE_DVB_C = 131584; // 0x20200
+    field public static final int TYPE_DVB_C2 = 131585; // 0x20201
+    field public static final int TYPE_DVB_H = 131840; // 0x20300
+    field public static final int TYPE_DVB_S = 131328; // 0x20100
+    field public static final int TYPE_DVB_S2 = 131329; // 0x20101
+    field public static final int TYPE_DVB_SH = 132096; // 0x20400
+    field public static final int TYPE_DVB_T = 131072; // 0x20000
+    field public static final int TYPE_DVB_T2 = 131073; // 0x20001
+    field public static final int TYPE_ISDB_C = 262912; // 0x40300
+    field public static final int TYPE_ISDB_S = 262656; // 0x40200
+    field public static final int TYPE_ISDB_T = 262144; // 0x40000
+    field public static final int TYPE_ISDB_TB = 262400; // 0x40100
+    field public static final int TYPE_OTHER = 0; // 0x0
+    field public static final int TYPE_PASSTHROUGH = 65536; // 0x10000
+    field public static final int TYPE_S_DMB = 393472; // 0x60100
+    field public static final int TYPE_T_DMB = 393216; // 0x60000
+    field public static final java.lang.String VERSION_NUMBER = "version_number";
+  }
+
+  public static final class TvContract.Programs implements android.provider.TvContract.BaseTvColumns {
+    field public static final java.lang.String CHANNEL_ID = "channel_id";
+    field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.com.android.tv.programs";
+    field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.com.android.tv.programs";
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DATA = "data";
+    field public static final java.lang.String DESCRIPTION = "description";
+    field public static final java.lang.String END_TIME_UTC_MILLIS = "end_time_utc_millis";
+    field public static final java.lang.String LONG_DESCRIPTION = "long_description";
+    field public static final java.lang.String START_TIME_UTC_MILLIS = "start_time_utc_millis";
+    field public static final java.lang.String TITLE = "title";
+    field public static final java.lang.String VERSION_NUMBER = "version_number";
+  }
+
   public class UserDictionary {
     ctor public UserDictionary();
     field public static final java.lang.String AUTHORITY = "user_dictionary";
