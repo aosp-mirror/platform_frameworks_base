@@ -466,15 +466,16 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      * bytes downloaded so far.
      *
      * @param id DownloadManager download id that needs to be checked.
+     * @param bytesToReceive how many bytes do we need to wait to receive.
      * @throws Exception if timed out while waiting for the file to grow in size.
      */
-    protected void waitToReceiveData(long id) throws Exception {
+    protected void waitToReceiveData(long id, long bytesToReceive) throws Exception {
         int currentWaitTime = 0;
-        long originalSize = getBytesDownloaded(id);
+        long expectedSize = getBytesDownloaded(id) + bytesToReceive;
         long currentSize = 0;
-        while ((currentSize = getBytesDownloaded(id)) <= originalSize) {
-            Log.i(LOG_TAG, String.format("orig: %d, cur: %d. Waiting for file to be written to...",
-                    originalSize, currentSize));
+        while ((currentSize = getBytesDownloaded(id)) <= expectedSize) {
+            Log.i(LOG_TAG, String.format("expect: %d, cur: %d. Waiting for file to be written to...",
+                    expectedSize, currentSize));
             currentWaitTime = timeoutWait(currentWaitTime, WAIT_FOR_DOWNLOAD_POLL_TIME,
                     MAX_WAIT_FOR_DOWNLOAD_TIME, "Timed out waiting for file to be written to.");
         }
