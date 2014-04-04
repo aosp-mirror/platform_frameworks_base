@@ -257,9 +257,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     try {
                         if (opts != null) {
                             getContext().startActivityAsUser(i, opts.toBundle(),
-                                    UserHandle.CURRENT);
+                                    new UserHandle(task.userId));
                         } else {
-                            getContext().startActivityAsUser(i, UserHandle.CURRENT);
+                            getContext().startActivityAsUser(i, new UserHandle(task.userId));
                         }
                     } catch (ActivityNotFoundException anfe) {
                         Console.logError(getContext(), "Could not start Activity");

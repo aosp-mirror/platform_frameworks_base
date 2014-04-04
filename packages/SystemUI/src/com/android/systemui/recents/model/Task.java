@@ -65,15 +65,17 @@ public class Task {
     public Bitmap activityIcon;
     public Bitmap thumbnail;
     public boolean isActive;
+    public int userId;
 
     TaskCallbacks mCb;
 
     public Task(int id, boolean isActive, Intent intent, String activityTitle,
-                Bitmap activityIcon) {
+                Bitmap activityIcon, int userId) {
         this.key = new TaskKey(id, intent);
         this.activityLabel = activityTitle;
         this.activityIcon = activityIcon;
         this.isActive = isActive;
+        this.userId = userId;
     }
 
     /** Set the callbacks */
