@@ -128,5 +128,7 @@ interface IWifiManager
     boolean isBatchedScanSupported();
 
     void pollBatchedScan();
+
+    String getWpsNfcConfigurationToken(int netId);
 }
 
