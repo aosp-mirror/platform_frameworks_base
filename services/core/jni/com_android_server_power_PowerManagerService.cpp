@@ -190,8 +190,14 @@ static void nativeSetAutoSuspend(JNIEnv *env, jclass clazz, jboolean enable) {
 }
 
 static void nativeSendPowerHint(JNIEnv *env, jclass clazz, jint hintId, jint data) {
+    int data_param = data;
+
     if (gPowerModule && gPowerModule->powerHint) {
-        gPowerModule->powerHint(gPowerModule, (power_hint_t)hintId, (void *)data);
+        if(data)
+            gPowerModule->powerHint(gPowerModule, (power_hint_t)hintId, &data_param);
+        else {
+            gPowerModule->powerHint(gPowerModule, (power_hint_t)hintId, NULL);
+        }
     }
 }
 
