@@ -20,6 +20,19 @@ import android.graphics.Rect;
 
 /* Common code */
 public class Utilities {
+    /**
+     * Calculates a consistent animation duration (ms) for all animations depending on the movement
+     * of the object being animated.
+     */
+    public static int calculateTranslationAnimationDuration(int distancePx) {
+        return calculateTranslationAnimationDuration(distancePx, 100);
+    }
+    public static int calculateTranslationAnimationDuration(int distancePx, int minDuration) {
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        return Math.max(minDuration,
+            (int) (Math.abs(distancePx) / config.animationDpsMovementPerSecond) * 1000 /* ms/s */);
+    }
+
     /** Scales a rect about its centroid */
     public static void scaleRectAboutCenter(Rect r, float scale) {
         if (scale != 1.0f) {
