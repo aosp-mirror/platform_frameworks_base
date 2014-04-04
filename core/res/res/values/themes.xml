@@ -352,6 +352,8 @@ please see themes_device_defaults.xml.
         <item name="actionBarDivider">?android:attr/dividerVertical</item>
         <item name="actionBarItemBackground">?android:attr/selectableItemBackground</item>
 
+        <item name="toolbarStyle">@android:style/Widget.Toolbar</item>
+
         <item name="dividerVertical">@drawable/divider_vertical_dark</item>
         <item name="dividerHorizontal">@drawable/divider_vertical_dark</item>
         <item name="buttonBarStyle">@android:style/ButtonBar</item>

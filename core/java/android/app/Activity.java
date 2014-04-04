@@ -23,7 +23,9 @@ import android.transition.TransitionManager;
 import android.util.ArrayMap;
 import android.util.Pair;
 import android.util.SuperNotCalledException;
-import com.android.internal.app.ActionBarImpl;
+import android.widget.Toolbar;
+import com.android.internal.app.WindowDecorActionBar;
+import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.policy.PolicyManager;
 
 import android.annotation.IntDef;
@@ -723,7 +725,7 @@ public class Activity extends ContextThemeWrapper
     /*package*/ boolean mWindowAdded = false;
     /*package*/ boolean mVisibleFromServer = false;
     /*package*/ boolean mVisibleFromClient = true;
-    /*package*/ ActionBarImpl mActionBar = null;
+    /*package*/ ActionBar mActionBar = null;
     private boolean mEnableDefaultActionBarUp;
 
     private CharSequence mTitle;
@@ -1906,15 +1908,39 @@ public class Activity extends ContextThemeWrapper
      */
     @Nullable
     public ActionBar getActionBar() {
-        initActionBar();
+        initWindowDecorActionBar();
         return mActionBar;
+    }
+
+    /**
+     * Set a {@link android.widget.Toolbar Toolbar} to act as the {@link ActionBar} for this
+     * Activity window.
+     *
+     * <p>When set to a non-null value the {@link #getActionBar()} method will return
+     * an {@link ActionBar} object that can be used to control the given toolbar as if it were
+     * a traditional window decor action bar. The toolbar's menu will be populated with the
+     * Activity's options menu and the navigation button will be wired through the standard
+     * {@link android.R.id#home home} menu select action.</p>
+     *
+     * <p>In order to use a Toolbar within the Activity's window content the application
+     * must not request the window feature {@link Window#FEATURE_ACTION_BAR FEATURE_ACTION_BAR}.</p>
+     *
+     * @param actionBar Toolbar to set as the Activity's action bar
+     */
+    public void setActionBar(@Nullable Toolbar actionBar) {
+        if (getActionBar() instanceof WindowDecorActionBar) {
+            throw new IllegalStateException("This Activity already has an action bar supplied " +
+                    "by the window decor. Do not request Window.FEATURE_ACTION_BAR and set " +
+                    "android:windowActionBar to false in your theme to use a Toolbar instead.");
+        }
+        mActionBar = new ToolbarActionBar(actionBar);
     }
     
     /**
      * Creates a new ActionBar, locates the inflated ActionBarView,
      * initializes the ActionBar with the view, and sets mActionBar.
      */
-    private void initActionBar() {
+    private void initWindowDecorActionBar() {
         Window window = getWindow();
 
         // Initializing the window decor can change window feature flags.
@@ -1925,7 +1951,7 @@ public class Activity extends ContextThemeWrapper
             return;
         }
 
-        mActionBar = new ActionBarImpl(this);
+        mActionBar = new WindowDecorActionBar(this);
         mActionBar.setDefaultDisplayHomeAsUpEnabled(mEnableDefaultActionBarUp);
 
         mWindow.setDefaultIcon(mActivityInfo.getIconResource());
@@ -1943,7 +1969,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void setContentView(int layoutResID) {
         getWindow().setContentView(layoutResID);
-        initActionBar();
+        initWindowDecorActionBar();
     }
 
     /**
@@ -1963,7 +1989,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void setContentView(View view) {
         getWindow().setContentView(view);
-        initActionBar();
+        initWindowDecorActionBar();
     }
 
     /**
@@ -1979,7 +2005,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         getWindow().setContentView(view, params);
-        initActionBar();
+        initWindowDecorActionBar();
     }
 
     /**
@@ -1991,7 +2017,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void addContentView(View view, ViewGroup.LayoutParams params) {
         getWindow().addContentView(view, params);
-        initActionBar();
+        initWindowDecorActionBar();
     }
 
     /**
@@ -2636,7 +2662,7 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean onMenuOpened(int featureId, Menu menu) {
         if (featureId == Window.FEATURE_ACTION_BAR) {
-            initActionBar();
+            initWindowDecorActionBar();
             if (mActionBar != null) {
                 mActionBar.dispatchMenuVisibilityChanged(true);
             } else {
@@ -2717,7 +2743,7 @@ public class Activity extends ContextThemeWrapper
                 break;
 
             case Window.FEATURE_ACTION_BAR:
-                initActionBar();
+                initWindowDecorActionBar();
                 mActionBar.dispatchMenuVisibilityChanged(false);
                 break;
         }
@@ -3417,7 +3443,7 @@ public class Activity extends ContextThemeWrapper
     public MenuInflater getMenuInflater() {
         // Make sure that action views can get an appropriate theme.
         if (mMenuInflater == null) {
-            initActionBar();
+            initWindowDecorActionBar();
             if (mActionBar != null) {
                 mMenuInflater = new MenuInflater(mActionBar.getThemedContext(), this);
             } else {
@@ -5139,7 +5165,7 @@ public class Activity extends ContextThemeWrapper
     @Nullable
     @Override
     public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
-        initActionBar();
+        initWindowDecorActionBar();
         if (mActionBar != null) {
             return mActionBar.startActionMode(callback);
         }

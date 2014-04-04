@@ -43,6 +43,7 @@ public class ActionBarContainer extends FrameLayout {
     private Drawable mSplitBackground;
     private boolean mIsSplit;
     private boolean mIsStacked;
+    private int mHeight;
 
     public ActionBarContainer(Context context) {
         this(context, null);
@@ -59,6 +60,7 @@ public class ActionBarContainer extends FrameLayout {
         mBackground = a.getDrawable(com.android.internal.R.styleable.ActionBar_background);
         mStackedBackground = a.getDrawable(
                 com.android.internal.R.styleable.ActionBar_backgroundStacked);
+        mHeight = a.getDimensionPixelSize(com.android.internal.R.styleable.ActionBar_height, -1);
 
         if (getId() == com.android.internal.R.id.split_action_bar) {
             mIsSplit = true;
@@ -251,6 +253,11 @@ public class ActionBarContainer extends FrameLayout {
 
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (mActionBarView == null &&
+                MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST && mHeight >= 0) {
+            heightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                    Math.min(mHeight, MeasureSpec.getSize(heightMeasureSpec)), MeasureSpec.AT_MOST);
+        }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         if (mActionBarView == null) return;
