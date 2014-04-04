@@ -65,6 +65,9 @@ public:
     virtual void clipRect(const SkRect& rect, SkRegion::Op op, bool antialias) {
         m_dstCanvas->clipRect(rect, op, antialias);
     }
+    virtual void clipRRect(const SkRRect& rrect, SkRegion::Op op, bool antialias) {
+        m_dstCanvas->clipRRect(rrect, op, antialias);
+    }
     virtual void clipPath(const SkPath& path, SkRegion::Op op, bool antialias) {
         m_dstCanvas->clipPath(path, op, antialias);
     }
@@ -72,6 +75,12 @@ public:
 private:
     SkCanvas* m_dstCanvas;
 };
+
+// Returns true if the SkCanvas's clip is non-empty.
+static jboolean hasNonEmptyClip(const SkCanvas& canvas) {
+    bool emptyClip = canvas.isClipEmpty();
+    return emptyClip ? JNI_FALSE : JNI_TRUE;
+}
 
 class SkCanvasGlue {
 public:
@@ -281,8 +290,8 @@ public:
         r.set(SkFloatToScalar(left), SkFloatToScalar(top),
               SkFloatToScalar(right), SkFloatToScalar(bottom));
         SkCanvas* c = GraphicsJNI::getNativeCanvas(env, jcanvas);
-        bool result = c->clipRect(r);
-        return result ? JNI_TRUE : JNI_FALSE;
+        c->clipRect(r);
+        return hasNonEmptyClip(*c);
     }
 
     static jboolean clipRect_IIII(JNIEnv* env, jobject jcanvas, jint left,
@@ -291,8 +300,9 @@ public:
         SkRect  r;
         r.set(SkIntToScalar(left), SkIntToScalar(top),
               SkIntToScalar(right), SkIntToScalar(bottom));
-        bool result = GraphicsJNI::getNativeCanvas(env, jcanvas)->clipRect(r);
-        return result ? JNI_TRUE : JNI_FALSE;
+        SkCanvas* c = GraphicsJNI::getNativeCanvas(env, jcanvas);
+        c->clipRect(r);
+        return hasNonEmptyClip(*c);
     }
 
     static jboolean clipRect_RectF(JNIEnv* env, jobject jcanvas, jobject rectf) {
@@ -300,8 +310,8 @@ public:
         NPE_CHECK_RETURN_ZERO(env, rectf);
         SkCanvas* c = GraphicsJNI::getNativeCanvas(env, jcanvas);
         SkRect tmp;
-        bool result = c->clipRect(*GraphicsJNI::jrectf_to_rect(env, rectf, &tmp));
-        return result ? JNI_TRUE : JNI_FALSE;
+        c->clipRect(*GraphicsJNI::jrectf_to_rect(env, rectf, &tmp));
+        return hasNonEmptyClip(*c);
     }
 
     static jboolean clipRect_Rect(JNIEnv* env, jobject jcanvas, jobject rect) {
@@ -309,8 +319,8 @@ public:
         NPE_CHECK_RETURN_ZERO(env, rect);
         SkCanvas* c = GraphicsJNI::getNativeCanvas(env, jcanvas);
         SkRect tmp;
-        bool result = c->clipRect(*GraphicsJNI::jrect_to_rect(env, rect, &tmp));
-        return result ? JNI_TRUE : JNI_FALSE;
+        c->clipRect(*GraphicsJNI::jrect_to_rect(env, rect, &tmp));
+        return hasNonEmptyClip(*c);
 
     }
 
@@ -321,25 +331,24 @@ public:
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
         rect.set(SkFloatToScalar(left), SkFloatToScalar(top),
                  SkFloatToScalar(right), SkFloatToScalar(bottom));
-        bool result = canvas->clipRect(rect, static_cast<SkRegion::Op>(op));
-        return result ? JNI_TRUE : JNI_FALSE;
-
+        canvas->clipRect(rect, static_cast<SkRegion::Op>(op));
+        return hasNonEmptyClip(*canvas);
     }
 
     static jboolean clipPath(JNIEnv* env, jobject, jlong canvasHandle,
                              jlong pathHandle, jint op) {
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
-        bool result = canvas->clipPath(*reinterpret_cast<SkPath*>(pathHandle),
-                                       static_cast<SkRegion::Op>(op));
-        return result ? JNI_TRUE : JNI_FALSE;
+        canvas->clipPath(*reinterpret_cast<SkPath*>(pathHandle),
+                static_cast<SkRegion::Op>(op));
+        return hasNonEmptyClip(*canvas);
     }
 
     static jboolean clipRegion(JNIEnv* env, jobject, jlong canvasHandle,
                                jlong deviceRgnHandle, jint op) {
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
         SkRegion* deviceRgn = reinterpret_cast<SkRegion*>(deviceRgnHandle);
-        bool result = canvas->clipRegion(*deviceRgn, static_cast<SkRegion::Op>(op));
-        return result ? JNI_TRUE : JNI_FALSE;
+        canvas->clipRegion(*deviceRgn, static_cast<SkRegion::Op>(op));
+        return hasNonEmptyClip(*canvas);
     }
 
     static void setDrawFilter(JNIEnv* env, jobject, jlong canvasHandle,
@@ -353,7 +362,8 @@ public:
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
         SkRect rect_;
         GraphicsJNI::jrectf_to_rect(env, rect, &rect_);
-        return canvas->quickReject(rect_);
+        bool result = canvas->quickReject(rect_);
+        return result ? JNI_TRUE : JNI_FALSE;
     }
 
     static jboolean quickReject__Path(JNIEnv* env, jobject, jlong canvasHandle,

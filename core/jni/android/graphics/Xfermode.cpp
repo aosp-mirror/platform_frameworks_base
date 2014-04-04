@@ -36,12 +36,12 @@ public:
                                 jint tolerance, jint modeHandle)
     {
         SkAvoidXfermode::Mode mode = static_cast<SkAvoidXfermode::Mode>(modeHandle);
-        return reinterpret_cast<jlong>(new SkAvoidXfermode(opColor, tolerance, mode));
+        return reinterpret_cast<jlong>(SkAvoidXfermode::Create(opColor, tolerance, mode));
     }
 
     static jlong pixelxor_create(JNIEnv* env, jobject, jint opColor)
     {
-        return reinterpret_cast<jlong>(new SkPixelXorXfermode(opColor));
+        return reinterpret_cast<jlong>(SkPixelXorXfermode::Create(opColor));
     }
 };
 

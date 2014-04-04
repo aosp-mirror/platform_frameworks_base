@@ -62,7 +62,7 @@ public:
     bool decodeRegion(SkBitmap* bitmap, const SkIRect& rect,
                       SkBitmap::Config pref, int sampleSize) {
         fDecoder->setSampleSize(sampleSize);
-        return fDecoder->decodeRegion(bitmap, rect, pref);
+        return fDecoder->decodeSubset(bitmap, rect, pref);
     }
 
     SkImageDecoder* getDecoder() const { return fDecoder; }
