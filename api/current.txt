@@ -3017,30 +3017,30 @@ package android.app {
   public abstract class ActionBar {
     ctor public ActionBar();
     method public abstract void addOnMenuVisibilityListener(android.app.ActionBar.OnMenuVisibilityListener);
-    method public abstract void addTab(android.app.ActionBar.Tab);
-    method public abstract void addTab(android.app.ActionBar.Tab, boolean);
-    method public abstract void addTab(android.app.ActionBar.Tab, int);
-    method public abstract void addTab(android.app.ActionBar.Tab, int, boolean);
+    method public abstract deprecated void addTab(android.app.ActionBar.Tab);
+    method public abstract deprecated void addTab(android.app.ActionBar.Tab, boolean);
+    method public abstract deprecated void addTab(android.app.ActionBar.Tab, int);
+    method public abstract deprecated void addTab(android.app.ActionBar.Tab, int, boolean);
     method public abstract android.view.View getCustomView();
     method public abstract int getDisplayOptions();
     method public abstract int getHeight();
-    method public abstract int getNavigationItemCount();
-    method public abstract int getNavigationMode();
-    method public abstract int getSelectedNavigationIndex();
-    method public abstract android.app.ActionBar.Tab getSelectedTab();
+    method public abstract deprecated int getNavigationItemCount();
+    method public abstract deprecated int getNavigationMode();
+    method public abstract deprecated int getSelectedNavigationIndex();
+    method public abstract deprecated android.app.ActionBar.Tab getSelectedTab();
     method public abstract java.lang.CharSequence getSubtitle();
-    method public abstract android.app.ActionBar.Tab getTabAt(int);
-    method public abstract int getTabCount();
+    method public abstract deprecated android.app.ActionBar.Tab getTabAt(int);
+    method public abstract deprecated int getTabCount();
     method public android.content.Context getThemedContext();
     method public abstract java.lang.CharSequence getTitle();
     method public abstract void hide();
     method public abstract boolean isShowing();
-    method public abstract android.app.ActionBar.Tab newTab();
-    method public abstract void removeAllTabs();
+    method public abstract deprecated android.app.ActionBar.Tab newTab();
+    method public abstract deprecated void removeAllTabs();
     method public abstract void removeOnMenuVisibilityListener(android.app.ActionBar.OnMenuVisibilityListener);
-    method public abstract void removeTab(android.app.ActionBar.Tab);
-    method public abstract void removeTabAt(int);
-    method public abstract void selectTab(android.app.ActionBar.Tab);
+    method public abstract deprecated void removeTab(android.app.ActionBar.Tab);
+    method public abstract deprecated void removeTabAt(int);
+    method public abstract deprecated void selectTab(android.app.ActionBar.Tab);
     method public abstract void setBackgroundDrawable(android.graphics.drawable.Drawable);
     method public abstract void setCustomView(android.view.View);
     method public abstract void setCustomView(android.view.View, android.app.ActionBar.LayoutParams);
@@ -3059,11 +3059,11 @@ package android.app {
     method public void setHomeButtonEnabled(boolean);
     method public abstract void setIcon(int);
     method public abstract void setIcon(android.graphics.drawable.Drawable);
-    method public abstract void setListNavigationCallbacks(android.widget.SpinnerAdapter, android.app.ActionBar.OnNavigationListener);
+    method public abstract deprecated void setListNavigationCallbacks(android.widget.SpinnerAdapter, android.app.ActionBar.OnNavigationListener);
     method public abstract void setLogo(int);
     method public abstract void setLogo(android.graphics.drawable.Drawable);
-    method public abstract void setNavigationMode(int);
-    method public abstract void setSelectedNavigationItem(int);
+    method public abstract deprecated void setNavigationMode(int);
+    method public abstract deprecated void setSelectedNavigationItem(int);
     method public void setSplitBackgroundDrawable(android.graphics.drawable.Drawable);
     method public void setStackedBackgroundDrawable(android.graphics.drawable.Drawable);
     method public abstract void setSubtitle(java.lang.CharSequence);
@@ -3076,9 +3076,9 @@ package android.app {
     field public static final int DISPLAY_SHOW_HOME = 2; // 0x2
     field public static final int DISPLAY_SHOW_TITLE = 8; // 0x8
     field public static final int DISPLAY_USE_LOGO = 1; // 0x1
-    field public static final int NAVIGATION_MODE_LIST = 1; // 0x1
-    field public static final int NAVIGATION_MODE_STANDARD = 0; // 0x0
-    field public static final int NAVIGATION_MODE_TABS = 2; // 0x2
+    field public static final deprecated int NAVIGATION_MODE_LIST = 1; // 0x1
+    field public static final deprecated int NAVIGATION_MODE_STANDARD = 0; // 0x0
+    field public static final deprecated int NAVIGATION_MODE_TABS = 2; // 0x2
   }
 
   public static class ActionBar.LayoutParams extends android.view.ViewGroup.MarginLayoutParams {
@@ -3095,11 +3095,11 @@ package android.app {
     method public abstract void onMenuVisibilityChanged(boolean);
   }
 
-  public static abstract interface ActionBar.OnNavigationListener {
+  public static abstract deprecated interface ActionBar.OnNavigationListener {
     method public abstract boolean onNavigationItemSelected(int, long);
   }
 
-  public static abstract class ActionBar.Tab {
+  public static abstract deprecated class ActionBar.Tab {
     ctor public ActionBar.Tab();
     method public abstract java.lang.CharSequence getContentDescription();
     method public abstract android.view.View getCustomView();
@@ -3121,7 +3121,7 @@ package android.app {
     field public static final int INVALID_POSITION = -1; // 0xffffffff
   }
 
-  public static abstract interface ActionBar.TabListener {
+  public static abstract deprecated interface ActionBar.TabListener {
     method public abstract void onTabReselected(android.app.ActionBar.Tab, android.app.FragmentTransaction);
     method public abstract void onTabSelected(android.app.ActionBar.Tab, android.app.FragmentTransaction);
     method public abstract void onTabUnselected(android.app.ActionBar.Tab, android.app.FragmentTransaction);
