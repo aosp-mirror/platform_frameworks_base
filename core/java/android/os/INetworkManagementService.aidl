@@ -465,4 +465,19 @@ interface INetworkManagementService
      * remove a network
      */
     void removeNetwork(int netId);
+
+    void addDnsServersForNetId(int netId, in String[] servers, in String domains);
+    void removeDnsServersForNetId(int netId, in String[] servers, in String domains);
+
+    void addRouteForNetId(in RouteInfo routeInfo);
+    void removeRouteForNetId(in RouteInfo routeInfo);
+
+    void addLegacyRouteForNetId(in RouteInfo routeInfo, int uid);
+    void removeLegacyRouteForNetId(in RouteInfo routeInfo, int uid);
+
+    void setDefaultNetId(int netId, boolean resetOldSockets);
+    void clearDefaultNetId();
+
+    void setPermission(boolean internal, boolean changeNetState, in int[] uids);
+    void clearPermission(in int[] uids);
 }

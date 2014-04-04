@@ -2030,6 +2030,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         pw.print("Firewall enabled: "); pw.println(mFirewallEnabled);
     }
 
+    @Override
     public void createNetwork(int netId, String iface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
@@ -2040,11 +2041,174 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
+    @Override
     public void removeNetwork(int netId) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         try {
             mConnector.execute("network", "destroy", netId);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void addDnsServersForNetId(int netId, String[] servers, String domains) {
+        modifyDnsServersForNetId(netId, servers, domains, ADD);
+    }
+
+    @Override
+    public void removeDnsServersForNetId(int netId, String[] servers,
+            String domains) {
+        modifyDnsServersForNetId(netId, servers, domains, REMOVE);
+    }
+
+    private void modifyDnsServersForNetId(int netId, String[] servers,
+            String domains, String action) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        final Command cmd = new Command("network", "dns", action, netId, servers.length);
+        for(int i=0; i<servers.length; i++) {
+            cmd.appendArg(servers[i]);
+        }
+        cmd.appendArg((domains == null ? "" : domains));
+
+        try {
+            mConnector.execute(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void addRouteForNetId(RouteInfo routeInfo) {
+        modifyRouteForNetId(routeInfo, ADD);
+    }
+
+    @Override
+    public void removeRouteForNetId(RouteInfo routeInfo) {
+        modifyRouteForNetId(routeInfo, REMOVE);
+    }
+
+    private void modifyRouteForNetId(RouteInfo routeInfo, String action) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        final Command cmd = new Command("network", "route", action);
+
+        // create quadlet: dest-ip-addr prefixlength gateway-ip-addr iface
+        final LinkAddress la = routeInfo.getDestination();
+        cmd.appendArg(la.getAddress().getHostAddress());
+        cmd.appendArg(la.getNetworkPrefixLength());
+
+        if (routeInfo.getGateway() == null) {
+            if (la.getAddress() instanceof Inet4Address) {
+                cmd.appendArg("0.0.0.0");
+            } else {
+                cmd.appendArg("::0");
+            }
+        } else {
+            cmd.appendArg(routeInfo.getGateway().getHostAddress());
+        }
+
+        cmd.appendArg(routeInfo.getInterface());
+
+        try {
+            mConnector.execute(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void addLegacyRouteForNetId(RouteInfo routeInfo, int uid) {
+        modifyLegacyRouteForNetId(routeInfo, uid, ADD);
+    }
+
+    @Override
+    public void removeLegacyRouteForNetId(RouteInfo routeInfo, int uid) {
+        modifyLegacyRouteForNetId(routeInfo, uid, REMOVE);
+    }
+
+    private void modifyLegacyRouteForNetId(RouteInfo routeInfo, int uid, String action) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        final Command cmd = new Command("network", "legacy", uid, "route", action);
+
+        // create quadlet: dest-ip-addr prefixlength gateway-ip-addr iface
+        final LinkAddress la = routeInfo.getDestination();
+        cmd.appendArg(la.getAddress().getHostAddress());
+        cmd.appendArg(la.getNetworkPrefixLength());
+
+        if (routeInfo.getGateway() == null) {
+            if (la.getAddress() instanceof Inet4Address) {
+                cmd.appendArg("0.0.0.0");
+            } else {
+                cmd.appendArg("::0");
+            }
+        } else {
+            cmd.appendArg(routeInfo.getGateway().getHostAddress());
+        }
+
+        cmd.appendArg(routeInfo.getInterface());
+
+        try {
+            mConnector.execute(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void setDefaultNetId(int netId, boolean resetOldSockets) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        try {
+            mConnector.execute("network", "default", "set", netId, resetOldSockets);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void clearDefaultNetId() {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        try {
+            mConnector.execute("network", "default", "clear");
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void setPermission(boolean internal, boolean changeNetState, int[] uids) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        final Command cmd = new Command("network", "permission", "set");
+        if (internal) cmd.appendArg("CI");
+        if (changeNetState) cmd.appendArg("CNS");
+        for (int i=0; i<uids.length; i++) {
+            cmd.appendArg(uids[i]);
+        }
+
+        try {
+            mConnector.execute(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void clearPermission(int[] uids) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        final Command cmd = new Command("network", "permission", "clear");
+        for (int i=0; i<uids.length; i++) {
+            cmd.appendArg(uids[i]);
+        }
+
+        try {
+            mConnector.execute(cmd);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
