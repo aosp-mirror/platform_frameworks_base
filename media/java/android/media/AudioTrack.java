@@ -77,10 +77,14 @@ public class AudioTrack
     //---------------------------------------------------------
     // Constants
     //--------------------
-    /** Minimum value for a channel volume */
-    private static final float VOLUME_MIN = 0.0f;
-    /** Maximum value for a channel volume */
-    private static final float VOLUME_MAX = 1.0f;
+    /** Minimum value for a linear gain or auxiliary effect level.
+     *  This value must be exactly equal to 0.0f; do not change it.
+     */
+    private static final float GAIN_MIN = 0.0f;
+    /** Maximum value for a linear gain or auxiliary effect level.
+     *  This value must be greater than or equal to 1.0f.
+     */
+    private static final float GAIN_MAX = 1.0f;
 
     /** Minimum value for sample rate */
     private static final int SAMPLE_RATE_HZ_MIN = 4000;
@@ -548,21 +552,25 @@ public class AudioTrack
     // Getters
     //--------------------
     /**
-     * Returns the minimum valid volume value. Volume values set under this one will
-     * be clamped at this value.
-     * @return the minimum volume expressed as a linear attenuation.
+     * Returns the minimum gain value, which is the constant 0.0.
+     * Gain values less than 0.0 will be clamped to 0.0.
+     * <p>The word "volume" in the API name is historical; this is actually a linear gain.
+     * @return the minimum value, which is the constant 0.0.
      */
     static public float getMinVolume() {
-        return VOLUME_MIN;
+        return GAIN_MIN;
     }
 
     /**
-     * Returns the maximum valid volume value. Volume values set above this one will
-     * be clamped at this value.
-     * @return the maximum volume expressed as a linear attenuation.
+     * Returns the maximum gain value, which is greater than or equal to 1.0.
+     * Gain values greater than the maximum will be clamped to the maximum.
+     * <p>The word "volume" in the API name is historical; this is actually a gain.
+     * expressed as a linear multiplier on sample values, where a maximum value of 1.0
+     * corresponds to a gain of 0 dB (sample values left unmodified).
+     * @return the maximum value, which is greater than or equal to 1.0.
      */
     static public float getMaxVolume() {
-        return VOLUME_MAX;
+        return GAIN_MAX;
     }
 
     /**
@@ -845,17 +853,35 @@ public class AudioTrack
     }
 
 
+    private static float clampGainOrLevel(float gainOrLevel) {
+        if (Float.isNaN(gainOrLevel)) {
+            throw new IllegalArgumentException();
+        }
+        if (gainOrLevel < GAIN_MIN) {
+            gainOrLevel = GAIN_MIN;
+        } else if (gainOrLevel > GAIN_MAX) {
+            gainOrLevel = GAIN_MAX;
+        }
+        return gainOrLevel;
+    }
+
 
      /**
-     * Sets the specified left/right output volume values on the AudioTrack. Values are clamped
-     * to the ({@link #getMinVolume()}, {@link #getMaxVolume()}) interval if outside this range.
-     * @param leftVolume output attenuation for the left channel. A value of 0.0f is silence,
-     *      a value of 1.0f is no attenuation.
-     * @param rightVolume output attenuation for the right channel
+     * Sets the specified left and right output gain values on the AudioTrack.
+     * <p>Gain values are clamped to the closed interval [0.0, max] where
+     * max is the value of {@link #getMaxVolume}.
+     * A value of 0.0 results in zero gain (silence), and
+     * a value of 1.0 means unity gain (signal unchanged).
+     * The default value is 1.0 meaning unity gain.
+     * <p>The word "volume" in the API name is historical; this is actually a linear gain.
+     * @param leftGain output gain for the left channel.
+     * @param rightGain output gain for the right channel
      * @return error code or success, see {@link #SUCCESS},
      *    {@link #ERROR_INVALID_OPERATION}
+     * @deprecated Applications should use {@link #setVolume} instead, as it
+     * more gracefully scales down to mono, and up to multi-channel content beyond stereo.
      */
-    public int setStereoVolume(float leftVolume, float rightVolume) {
+    public int setStereoVolume(float leftGain, float rightGain) {
         if (isRestricted()) {
             return SUCCESS;
         }
@@ -863,36 +889,31 @@ public class AudioTrack
             return ERROR_INVALID_OPERATION;
         }
 
-        // clamp the volumes
-        if (leftVolume < getMinVolume()) {
-            leftVolume = getMinVolume();
-        }
-        if (leftVolume > getMaxVolume()) {
-            leftVolume = getMaxVolume();
-        }
-        if (rightVolume < getMinVolume()) {
-            rightVolume = getMinVolume();
-        }
-        if (rightVolume > getMaxVolume()) {
-            rightVolume = getMaxVolume();
-        }
+        leftGain = clampGainOrLevel(leftGain);
+        rightGain = clampGainOrLevel(rightGain);
 
-        native_setVolume(leftVolume, rightVolume);
+        native_setVolume(leftGain, rightGain);
 
         return SUCCESS;
     }
 
 
     /**
-     * Sets the specified output volume values on all channels of this track.  The value is clamped
-     * to the ({@link #getMinVolume()}, {@link #getMaxVolume()}) interval if outside this range.
-     * @param volume output attenuation for all channels. A value of 0.0f is silence,
-     *      a value of 1.0f is no attenuation.
+     * Sets the specified output gain value on all channels of this track.
+     * <p>Gain values are clamped to the closed interval [0.0, max] where
+     * max is the value of {@link #getMaxVolume}.
+     * A value of 0.0 results in zero gain (silence), and
+     * a value of 1.0 means unity gain (signal unchanged).
+     * The default value is 1.0 meaning unity gain.
+     * <p>This API is preferred over {@link #setStereoVolume}, as it
+     * more gracefully scales down to mono, and up to multi-channel content beyond stereo.
+     * <p>The word "volume" in the API name is historical; this is actually a linear gain.
+     * @param gain output gain for all channels.
      * @return error code or success, see {@link #SUCCESS},
      *    {@link #ERROR_INVALID_OPERATION}
      */
-    public int setVolume(float volume) {
-        return setStereoVolume(volume, volume);
+    public int setVolume(float gain) {
+        return setStereoVolume(gain, gain);
     }
 
 
@@ -1309,17 +1330,19 @@ public class AudioTrack
 
     /**
      * Sets the send level of the audio track to the attached auxiliary effect
-     * {@link #attachAuxEffect(int)}.  The level value range is 0.0f to 1.0f.
-     * Values are clamped to the (0.0f, 1.0f) interval if outside this range.
+     * {@link #attachAuxEffect(int)}.  Effect levels
+     * are clamped to the closed interval [0.0, max] where
+     * max is the value of {@link #getMaxVolume}.
+     * A value of 0.0 results in no effect, and a value of 1.0 is full send.
      * <p>By default the send level is 0.0f, so even if an effect is attached to the player
      * this method must be called for the effect to be applied.
-     * <p>Note that the passed level value is a raw scalar. UI controls should be scaled
-     * logarithmically: the gain applied by audio framework ranges from -72dB to 0dB,
+     * <p>Note that the passed level value is a linear scalar. UI controls should be scaled
+     * logarithmically: the gain applied by audio framework ranges from -72dB to at least 0dB,
      * so an appropriate conversion from linear UI input x to level is:
      * x == 0 -&gt; level = 0
      * 0 &lt; x &lt;= R -&gt; level = 10^(72*(x-R)/20/R)
      *
-     * @param level send level scalar
+     * @param level linear send level
      * @return error code or success, see {@link #SUCCESS},
      *    {@link #ERROR_INVALID_OPERATION}, {@link #ERROR}
      */
@@ -1330,13 +1353,7 @@ public class AudioTrack
         if (mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
-        // clamp the level
-        if (level < getMinVolume()) {
-            level = getMinVolume();
-        }
-        if (level > getMaxVolume()) {
-            level = getMaxVolume();
-        }
+        level = clampGainOrLevel(level);
         int err = native_setAuxEffectSendLevel(level);
         return err == 0 ? SUCCESS : ERROR;
     }
