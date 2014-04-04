@@ -406,6 +406,7 @@ public final class PowerManagerService extends com.android.server.SystemService
     private static native void nativeReleaseSuspendBlocker(String name);
     private static native void nativeSetInteractive(boolean enable);
     private static native void nativeSetAutoSuspend(boolean enable);
+    private static native void nativeSendPowerHint(int hintId, int data);
 
     public PowerManagerService(Context context) {
         super(context);
@@ -2545,6 +2546,12 @@ public final class PowerManagerService extends com.android.server.SystemService
                 uid = Binder.getCallingUid();
             }
             acquireWakeLock(lock, flags, tag, packageName, new WorkSource(uid), null);
+        }
+
+        @Override // Binder call
+        public void powerHint(int hintId, int data) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+            nativeSendPowerHint(hintId, data);
         }
 
         @Override // Binder call

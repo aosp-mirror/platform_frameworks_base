@@ -189,6 +189,12 @@ static void nativeSetAutoSuspend(JNIEnv *env, jclass clazz, jboolean enable) {
     }
 }
 
+static void nativeSendPowerHint(JNIEnv *env, jclass clazz, jint hintId, jint data) {
+    if (gPowerModule && gPowerModule->powerHint) {
+        gPowerModule->powerHint(gPowerModule, (power_hint_t)hintId, (void *)data);
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gPowerManagerServiceMethods[] = {
@@ -205,6 +211,8 @@ static JNINativeMethod gPowerManagerServiceMethods[] = {
             (void*) nativeSetInteractive },
     { "nativeSetAutoSuspend", "(Z)V",
             (void*) nativeSetAutoSuspend },
+    { "nativeSendPowerHint", "(II)V",
+            (void*) nativeSendPowerHint },
 };
 
 #define FIND_CLASS(var, className) \
