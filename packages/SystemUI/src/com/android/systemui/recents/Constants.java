@@ -34,7 +34,7 @@ public class Constants {
             // For debugging, this enables us to create mock recents tasks
             public static final boolean EnableSystemServicesProxy = false;
             // For debugging, this defines the number of mock recents packages to create
-            public static final int SystemServicesProxyMockPackageCount = 12;
+            public static final int SystemServicesProxyMockPackageCount = 3;
             // For debugging, this defines the number of mock recents tasks to create
             public static final int SystemServicesProxyMockTaskCount = 75;
 
@@ -82,16 +82,8 @@ public class Constants {
         }
 
         public static class TaskStackView {
-            public static class Animation {
-                public static final int TaskRemovedReshuffleDuration = 200;
-                public static final int SnapScrollBackDuration = 650;
-                public static final int FilteredCurrentViewsDuration = 150;
-                public static final int FilteredNewViewsDuration = 200;
-                public static final int UnfilteredCurrentViewsDuration = 150;
-                public static final int UnfilteredNewViewsDuration = 200;
-            }
-
             public static final int TaskStackOverscrollRange = 150;
+            public static final int FilterStartDelay = 25;
 
             // The padding will be applied to the smallest dimension, and then applied to all sides
             public static final float StackPaddingPct = 0.15f;
@@ -106,12 +98,6 @@ public class Constants {
         }
 
         public static class TaskView {
-            public static class Animation {
-                public static final int TaskDataUpdatedFadeDuration = 250;
-                public static final int TaskIconOnEnterDuration = 175;
-                public static final int TaskIconOnLeavingDuration = 75;
-            }
-
             public static final boolean AnimateFrontTaskIconOnEnterRecents = true;
             public static final boolean AnimateFrontTaskIconOnLeavingRecents = true;
 

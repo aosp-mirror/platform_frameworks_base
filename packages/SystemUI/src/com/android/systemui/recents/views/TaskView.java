@@ -20,19 +20,23 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
+import com.android.systemui.recents.BakedBezierInterpolator;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.Utilities;
 import com.android.systemui.recents.model.Task;
+
+import java.util.Random;
 
 
 /* A task view */
@@ -131,7 +135,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
                     .scaleY(toTransform.scale)
                     .alpha(toTransform.alpha)
                     .setDuration(duration)
-                    .setInterpolator(new AccelerateDecelerateInterpolator())
+                    .setInterpolator(BakedBezierInterpolator.INSTANCE)
                     .withLayer()
                     .start();
         } else {
@@ -190,7 +194,8 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
                 .translationX(0)
                 .translationY(0)
                 .setStartDelay(235)
-                .setDuration(Constants.Values.TaskView.Animation.TaskIconOnEnterDuration)
+                .setInterpolator(BakedBezierInterpolator.INSTANCE)
+                .setDuration(Utilities.calculateTranslationAnimationDuration(translate))
                 .withLayer()
                 .start();
     }
@@ -206,8 +211,8 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
             .translationX(translate / 2)
             .translationY(-translate)
             .setStartDelay(0)
-            .setDuration(Constants.Values.TaskView.Animation.TaskIconOnLeavingDuration)
-            .setInterpolator(new DecelerateInterpolator())
+            .setInterpolator(BakedBezierInterpolator.INSTANCE)
+            .setDuration(Utilities.calculateTranslationAnimationDuration(translate))
             .withLayer()
             .withEndAction(r)
             .start();
