@@ -467,6 +467,7 @@
              1  UI_MODE_TYPE_NORMAL
              4  UI_MODE_TYPE_TELEVISION
              5  UI_MODE_TYPE_APPLIANCE
+             6  UI_MODE_TYPE_WATCH
          Any other values will have surprising consequences. -->
     <integer name="config_defaultUiModeType">1</integer>
 
