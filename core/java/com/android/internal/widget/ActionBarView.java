@@ -430,7 +430,7 @@ public class ActionBarView extends AbsActionBarView {
             mActionMenuPresenter.setItemLimit(Integer.MAX_VALUE);
             // Span the whole width
             layoutParams.width = LayoutParams.MATCH_PARENT;
-            layoutParams.height = mContentHeight;
+            layoutParams.height = LayoutParams.WRAP_CONTENT;
             configPresenters(builder);
             menuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
             if (mSplitView != null) {

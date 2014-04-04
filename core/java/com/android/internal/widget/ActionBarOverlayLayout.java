@@ -21,7 +21,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
-import com.android.internal.app.ActionBarImpl;
+import com.android.internal.app.WindowDecorActionBar;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -38,7 +38,7 @@ public class ActionBarOverlayLayout extends ViewGroup {
     private static final String TAG = "ActionBarOverlayLayout";
 
     private int mActionBarHeight;
-    private ActionBarImpl mActionBar;
+    private WindowDecorActionBar mActionBar;
     private int mWindowVisibility = View.VISIBLE;
 
     // The main UI elements that we handle the layout of.
@@ -88,7 +88,7 @@ public class ActionBarOverlayLayout extends ViewGroup {
                 Build.VERSION_CODES.KITKAT;
     }
 
-    public void setActionBar(ActionBarImpl impl) {
+    public void setActionBar(WindowDecorActionBar impl) {
         mActionBar = impl;
         if (getWindowToken() != null) {
             // This is being initialized after being added to a window;
