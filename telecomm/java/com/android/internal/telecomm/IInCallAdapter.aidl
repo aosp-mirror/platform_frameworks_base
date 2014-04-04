@@ -45,4 +45,6 @@ oneway interface IInCallAdapter {
     void stopDtmfTone(String callId);
 
     void postDialContinue(String callId);
+
+    void handoffCall(String callId);
 }

@@ -48,4 +48,6 @@ oneway interface IInCallService {
     void setPostDial(String callId, String remaining);
 
     void setPostDialWait(String callId, String remaining);
+
+    void setHandoffEnabled(String callId, boolean isHandoffEnabled);
 }

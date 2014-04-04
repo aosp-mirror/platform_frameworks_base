@@ -46,6 +46,7 @@ public abstract class InCallService extends Service {
     private static final int MSG_SET_RINGING = 8;
     private static final int MSG_SET_POST_DIAL = 9;
     private static final int MSG_SET_POST_DIAL_WAIT = 10;
+    private static final int MSG_SET_HANDOFF_ENABLED = 11;
 
     /** Default Handler used to consolidate binder method calls onto a single thread. */
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -98,6 +99,10 @@ public abstract class InCallService extends Service {
                     break;
                 case MSG_ON_AUDIO_STATE_CHANGED:
                     onAudioStateChanged((CallAudioState) msg.obj);
+                    break;
+                case MSG_SET_HANDOFF_ENABLED:
+                    setHandoffEnabled((String) msg.obj, msg.arg1 == 1 ? true : false);
+                    break;
                 default:
                     break;
             }
@@ -166,6 +171,12 @@ public abstract class InCallService extends Service {
             args.arg1 = callId;
             args.arg2 = remaining;
             mHandler.obtainMessage(MSG_SET_POST_DIAL_WAIT, args).sendToTarget();
+        }
+
+        @Override
+        public void setHandoffEnabled(String callId, boolean isHandoffEnabled) {
+            mHandler.obtainMessage(MSG_SET_HANDOFF_ENABLED, isHandoffEnabled ? 1 : 0, 0,
+                    callId).sendToTarget();
         }
     }
 
@@ -277,4 +288,12 @@ public abstract class InCallService extends Service {
      * @param remaining The remaining postdial string to be dialed.
      */
     protected abstract void setPostDialWait(String callId, String remaining);
+
+    /**
+     * Called when the call's handoff state has changed.
+     *
+     * @param callId The identifier of the call whose handoff state was changed.
+     * @param isHandoffEnabled True if handoff is enabled.
+     */
+    protected abstract void setHandoffEnabled(String callId, boolean isHandoffEnabled);
 }

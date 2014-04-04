@@ -35,4 +35,8 @@ oneway interface ICallServiceSelector {
     void setCallServiceSelectorAdapter(in ICallServiceSelectorAdapter adapter);
 
     void select(in CallInfo callInfo, in List<CallServiceDescriptor> callServiceDescriptors);
+
+    void onCallUpdated(in CallInfo callInfo);
+
+    void onCallRemoved(String callId);
 }

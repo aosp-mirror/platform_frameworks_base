@@ -184,4 +184,16 @@ public final class InCallAdapter {
         } catch (RemoteException e) {
         }
     }
+
+    /**
+     * Instructs Telecomm to handoff the call to another call service.
+     *
+     * @param callId The identifier of the call to handoff.
+     */
+    public void handoffCall(String callId) {
+        try {
+            mAdapter.handoffCall(callId);
+        } catch (RemoteException e) {
+        }
+    }
 }
