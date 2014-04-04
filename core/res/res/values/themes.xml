@@ -1811,18 +1811,20 @@ please see themes_device_defaults.xml.
         <item name="android:windowCloseOnTouchOutside">false</item>
     </style>
 
-    <!-- Holo theme for alert dialog windows, which is used by the
-         {@link android.app.AlertDialog} class.  This is basically a dialog
-         but sets the background to empty so it can do two-tone backgrounds.
-         For applications targeting Honeycomb or newer, this is the default
-         AlertDialog theme. -->
-    <style name="Theme.Holo.Dialog.Alert">
+    <style name="Theme.Holo.Dialog.BaseAlert">
         <item name="windowBackground">@android:color/transparent</item>
         <item name="windowTitleStyle">@android:style/DialogWindowTitle.Holo</item>
         <item name="windowContentOverlay">@null</item>
         <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
         <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
     </style>
+
+    <!-- Holo theme for alert dialog windows, which is used by the
+         {@link android.app.AlertDialog} class.  This is basically a dialog
+         but sets the background to empty so it can do two-tone backgrounds.
+         For applications targeting Honeycomb or newer, this is the default
+         AlertDialog theme. -->
+    <style name="Theme.Holo.Dialog.Alert" parent="Theme.Holo.Dialog.BaseAlert"/>
 
     <!-- Holo theme for the TimePicker dialog windows, which is used by the
          {@link android.app.TimePickerDialog} class. -->
@@ -1934,18 +1936,20 @@ please see themes_device_defaults.xml.
             parent="@android:style/Theme.Holo.Light.NoActionBar">
     </style>
 
-    <!-- Holo light theme for alert dialog windows, which is used by the
-         {@link android.app.AlertDialog} class.  This is basically a dialog
-         but sets the background to empty so it can do two-tone backgrounds.
-         For applications targeting Honeycomb or newer, this is the default
-         AlertDialog theme. -->
-    <style name="Theme.Holo.Light.Dialog.Alert">
+    <style name="Theme.Holo.Light.Dialog.BaseAlert">
         <item name="windowBackground">@android:color/transparent</item>
         <item name="windowTitleStyle">@android:style/DialogWindowTitle.Holo.Light</item>
         <item name="windowContentOverlay">@null</item>
         <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
         <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
     </style>
+
+    <!-- Holo light theme for alert dialog windows, which is used by the
+         {@link android.app.AlertDialog} class.  This is basically a dialog
+         but sets the background to empty so it can do two-tone backgrounds.
+         For applications targeting Honeycomb or newer, this is the default
+         AlertDialog theme. -->
+    <style name="Theme.Holo.Light.Dialog.Alert" parent="Theme.Holo.Light.Dialog.BaseAlert"/>
 
     <!-- Holo Light theme for the TimePicker dialog windows, which is used by the
          {@link android.app.TimePickerDialog} class. -->

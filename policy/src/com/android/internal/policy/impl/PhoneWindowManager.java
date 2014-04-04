@@ -4777,9 +4777,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHandler.post(new Runnable() {
             @Override public void run() {
                 if (mBootMsgDialog == null) {
-                    int theme =  mContext.getPackageManager().hasSystemFeature(
-                            PackageManager.FEATURE_WATCH) ?
-                            com.android.internal.R.style.Theme_Micro_Dialog_Alert : 0;
+                    int theme;
+                    if (mContext.getPackageManager().hasSystemFeature(
+                            PackageManager.FEATURE_WATCH)) {
+                        theme = com.android.internal.R.style.Theme_Micro_Dialog_Alert;
+                    } else if (mContext.getPackageManager().hasSystemFeature(
+                            PackageManager.FEATURE_TELEVISION)) {
+                        theme = com.android.internal.R.style.Theme_Leanback_Dialog_Alert;
+                    } else {
+                        theme = 0;
+                    }
 
                     mBootMsgDialog = new ProgressDialog(mContext, theme) {
                         // This dialog will consume all events coming in to

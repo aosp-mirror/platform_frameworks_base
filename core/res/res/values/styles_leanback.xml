@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <style name="DialogWindowTitle.Leanback" parent="DialogWindowTitle.Holo">
+        <item name="android:textAppearance">@style/TextAppearance.Leanback.DialogWindowTitle</item>
+    </style>
+
+    <style name="TextAppearance.Leanback.DialogWindowTitle" parent="TextAppearance.Holo.DialogWindowTitle">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textColor">?attr/textColorPrimary</item>
+    </style>
+
+    <style name="Leanback.ButtonBar" parent="Holo.ButtonBar">
+        <item name="showDividers">none</item>
+    </style>
+
+    <style name="AlertDialog.Leanback" parent="AlertDialog.Holo">
+        <item name="layout">@android:layout/alert_dialog_leanback</item>
+        <item name="buttonPanelSideLayout">@android:layout/alert_dialog_leanback_button_panel_right</item>
+        <item name="progressLayout">@android:layout/progress_dialog_leanback</item>
+        <item name="fullDark">@android:color/background_dark</item>
+        <item name="topDark">@android:color/background_dark</item>
+        <item name="centerDark">@android:color/background_dark</item>
+        <item name="bottomDark">@android:color/background_dark</item>
+        <item name="fullBright">@android:color/background_dark</item>
+        <item name="topBright">@android:color/background_dark</item>
+        <item name="centerBright">@android:color/background_dark</item>
+        <item name="bottomBright">@android:color/background_dark</item>
+        <item name="bottomMedium">@android:color/background_dark</item>
+        <item name="centerMedium">@android:color/background_dark</item>
+    </style>
+
+    <style name="AlertDialog.Leanback.Light">
+        <item name="fullDark">@android:color/leanback_light_gray</item>
+        <item name="topDark">@android:color/leanback_light_gray</item>
+        <item name="centerDark">@android:color/leanback_light_gray</item>
+        <item name="bottomDark">@android:color/leanback_light_gray</item>
+        <item name="fullBright">@android:color/leanback_light_gray</item>
+        <item name="topBright">@android:color/leanback_light_gray</item>
+        <item name="centerBright">@android:color/leanback_light_gray</item>
+        <item name="bottomBright">@android:color/leanback_light_gray</item>
+        <item name="bottomMedium">@android:color/leanback_light_gray</item>
+        <item name="centerMedium">@android:color/leanback_light_gray</item>
+    </style>
+
+</resources>

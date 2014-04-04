@@ -123,11 +123,14 @@ public class AlertController {
     private int mCheckedItem = -1;
 
     private int mAlertDialogLayout;
+    private int mButtonPanelSideLayout;
     private int mListLayout;
     private int mMultiChoiceItemLayout;
     private int mSingleChoiceItemLayout;
     private int mListItemLayout;
 
+    private int mButtonPanelLayoutHint = AlertDialog.LAYOUT_HINT_NONE;
+    
     private Handler mHandler;
 
     private final View.OnClickListener mButtonHandler = new View.OnClickListener() {
@@ -199,6 +202,9 @@ public class AlertController {
 
         mAlertDialogLayout = a.getResourceId(com.android.internal.R.styleable.AlertDialog_layout,
                 com.android.internal.R.layout.alert_dialog);
+        mButtonPanelSideLayout = a.getResourceId(
+                com.android.internal.R.styleable.AlertDialog_buttonPanelSideLayout, 0);
+
         mListLayout = a.getResourceId(
                 com.android.internal.R.styleable.AlertDialog_listLayout,
                 com.android.internal.R.layout.select_dialog);
@@ -240,9 +246,21 @@ public class AlertController {
     public void installContent() {
         /* We use a custom title so never request a window title */
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
-        mWindow.setContentView(mAlertDialogLayout);
+        int contentView = selectContentView();
+        mWindow.setContentView(contentView);
         setupView();
         setupDecor();
+    }
+
+    private int selectContentView() {
+        if (mButtonPanelSideLayout == 0) {
+            return mAlertDialogLayout;
+        }
+        if (mButtonPanelLayoutHint == AlertDialog.LAYOUT_HINT_SIDE) {
+            return mButtonPanelSideLayout;
+        }
+        // TODO: use layout hint side for long messages/lists
+        return mAlertDialogLayout;
     }
     
     public void setTitle(CharSequence title) {
@@ -296,6 +314,13 @@ public class AlertController {
         mViewSpacingTop = viewSpacingTop;
         mViewSpacingRight = viewSpacingRight;
         mViewSpacingBottom = viewSpacingBottom;
+    }
+
+    /**
+     * Sets a hint for the best button panel layout.
+     */
+    public void setButtonPanelLayoutHint(int layoutHint) {
+        mButtonPanelLayoutHint = layoutHint;
     }
 
     /**
