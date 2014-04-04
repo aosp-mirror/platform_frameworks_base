@@ -158,6 +158,7 @@ class MountService extends IMountService.Stub
         public static final int VolumeListResult               = 110;
         public static final int AsecListResult                 = 111;
         public static final int StorageUsersListResult         = 112;
+        public static final int CryptfsGetfieldResult          = 113;
 
         /*
          * 200 series - Requestion action has been successfully completed.
@@ -2246,6 +2247,49 @@ class MountService extends IMountService.Stub
             }
 
             throw new IllegalStateException("unexpected return from cryptfs");
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    /**
+     * Set a field in the crypto header.
+     * @param field field to set
+     * @param contents contents to set in field
+     */
+    @Override
+    public void setField(String field, String contents) throws RemoteException {
+
+        waitForReady();
+
+        final NativeDaemonEvent event;
+        try {
+            event = mConnector.execute("cryptfs", "setfield", field, contents);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    /**
+     * Gets a field from the crypto header.
+     * @param field field to get
+     * @return contents of field
+     */
+    @Override
+    public String getField(String field) throws RemoteException {
+
+        waitForReady();
+
+        final NativeDaemonEvent event;
+        try {
+            final String[] contents = NativeDaemonEvent.filterMessageList(
+                    mConnector.executeForList("cryptfs", "getfield", field),
+                    VoldResponseCode.CryptfsGetfieldResult);
+            String result = new String();
+            for (String content : contents) {
+                result += content;
+            }
+            return result;
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }

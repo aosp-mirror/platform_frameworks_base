@@ -564,12 +564,37 @@ public class LockPatternUtils {
         }
     }
 
+    private void updateCryptoUserInfo() {
+        int userId = getCurrentOrCallingUserId();
+        if (userId != UserHandle.USER_OWNER) {
+            return;
+        }
+
+        final String ownerInfo = isOwnerInfoEnabled() ? getOwnerInfo(userId) : "";
+
+        IBinder service = ServiceManager.getService("mount");
+        if (service == null) {
+            Log.e(TAG, "Could not find the mount service to update the user info");
+            return;
+        }
+
+        IMountService mountService = IMountService.Stub.asInterface(service);
+        try {
+            Log.d(TAG, "Setting owner info");
+            mountService.setField("OwnerInfo", ownerInfo);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error changing user info", e);
+        }
+    }
+
     public void setOwnerInfo(String info, int userId) {
         setString(LOCK_SCREEN_OWNER_INFO, info, userId);
+        updateCryptoUserInfo();
     }
 
     public void setOwnerInfoEnabled(boolean enabled) {
         setBoolean(LOCK_SCREEN_OWNER_INFO_ENABLED, enabled);
+        updateCryptoUserInfo();
     }
 
     public String getOwnerInfo(int userId) {

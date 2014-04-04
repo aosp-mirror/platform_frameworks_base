@@ -713,15 +713,46 @@ public interface IMountService extends IInterface {
             public void clearPassword() throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
-                String _result;
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
-                    mRemote.transact(Stub.TRANSACTION_clearPassword, _data, _reply, 0);
+                    mRemote.transact(Stub.TRANSACTION_clearPassword, _data, _reply, IBinder.FLAG_ONEWAY);
                     _reply.readException();
                 } finally {
                     _reply.recycle();
                     _data.recycle();
                 }
+            }
+
+            public void setField(String field, String data) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(field);
+                    _data.writeString(data);
+                    mRemote.transact(Stub.TRANSACTION_setField, _data, _reply, IBinder.FLAG_ONEWAY);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            public String getField(String field) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                String _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(field);
+                    mRemote.transact(Stub.TRANSACTION_getField, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readString();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
             }
 
             public StorageVolume[] getVolumeList() throws RemoteException {
@@ -881,6 +912,10 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_getPassword = IBinder.FIRST_CALL_TRANSACTION + 36;
 
         static final int TRANSACTION_clearPassword = IBinder.FIRST_CALL_TRANSACTION + 37;
+
+        static final int TRANSACTION_setField = IBinder.FIRST_CALL_TRANSACTION + 38;
+
+        static final int TRANSACTION_getField = IBinder.FIRST_CALL_TRANSACTION + 39;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -1255,6 +1290,22 @@ public interface IMountService extends IInterface {
                     reply.writeNoException();
                     return true;
                 }
+                case TRANSACTION_setField: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String field = data.readString();
+                    String contents = data.readString();
+                    setField(field, contents);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_getField: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String field = data.readString();
+                    String contents = getField(field);
+                    reply.writeNoException();
+                    reply.writeString(contents);
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -1504,4 +1555,18 @@ public interface IMountService extends IInterface {
      * Securely clear password from vold
      */
     public void clearPassword() throws RemoteException;
+
+    /**
+     * Set a field in the crypto header.
+     * @param field field to set
+     * @param contents contents to set in field
+     */
+    public void setField(String field, String contents) throws RemoteException;
+
+    /**
+     * Gets a field from the crypto header.
+     * @param field field to get
+     * @return contents of field
+     */
+    public String getField(String field) throws RemoteException;
 }
