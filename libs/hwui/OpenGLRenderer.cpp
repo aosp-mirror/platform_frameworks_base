@@ -537,7 +537,7 @@ void OpenGLRenderer::countOverdraw() {
 
 bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
     if (layer->deferredUpdateScheduled && layer->renderer &&
-            layer->displayList && layer->displayList->isRenderable()) {
+            layer->displayList.get() && layer->displayList->isRenderable()) {
         ATRACE_CALL();
 
         Rect& dirty = layer->dirtyRect;
