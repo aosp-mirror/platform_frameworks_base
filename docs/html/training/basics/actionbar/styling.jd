@@ -144,13 +144,13 @@ background like this:</p>
 &lt;resources>
     &lt;!-- the theme applied to the application or activity -->
     &lt;style name="CustomActionBarTheme"
-           parent="&#64;style/Theme.Holo.Light.DarkActionBar">
+           parent="&#64;android:style/Theme.Holo.Light.DarkActionBar">
         &lt;item name="android:actionBarStyle">&#64;style/MyActionBar&lt;/item>
     &lt;/style>
 
     &lt;!-- ActionBar styles -->
     &lt;style name="MyActionBar"
-           parent="&#64;style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+           parent="&#64;android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
         &lt;item name="android:background">&#64;drawable/actionbar_background&lt;/item>
     &lt;/style>
 &lt;/resources>
