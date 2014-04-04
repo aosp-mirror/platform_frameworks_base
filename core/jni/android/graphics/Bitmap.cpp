@@ -329,7 +329,7 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
     SkBitmap            result;
     JavaPixelAllocator  allocator(env);
 
-    if (!src->copyTo(&result, dstConfig, &allocator)) {
+    if (!src->copyTo(&result, SkBitmapConfigToColorType(dstConfig), &allocator)) {
         return NULL;
     }
     return GraphicsJNI::createBitmap(env, new SkBitmap(result), allocator.getStorageObj(),

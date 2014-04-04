@@ -45,7 +45,7 @@ public:
 
     static jlong createTable(JNIEnv* env, jobject, jbyteArray jtable) {
         AutoJavaByteArray autoTable(env, jtable, 256);
-        SkMaskFilter* filter = new SkTableMaskFilter((const uint8_t*)autoTable.ptr());
+        SkMaskFilter* filter = SkTableMaskFilter::Create((const uint8_t*)autoTable.ptr());
         return reinterpret_cast<jlong>(filter);
     }
 
