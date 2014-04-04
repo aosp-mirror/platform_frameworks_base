@@ -55,7 +55,8 @@ public abstract class InCallService extends Service {
             switch (msg.what) {
                 case MSG_SET_IN_CALL_ADAPTER:
                     InCallAdapter adapter = new InCallAdapter((IInCallAdapter) msg.obj);
-                    setInCallAdapter(adapter);
+                    mAdapter = adapter;
+                    onAdapterAttached(adapter);
                     break;
                 case MSG_ADD_CALL:
                     addCall((CallInfo) msg.obj);
@@ -182,6 +183,8 @@ public abstract class InCallService extends Service {
 
     private final InCallServiceBinder mBinder;
 
+    private InCallAdapter mAdapter;
+
     protected InCallService() {
         mBinder = new InCallServiceBinder();
     }
@@ -192,13 +195,20 @@ public abstract class InCallService extends Service {
     }
 
     /**
-     * Provides the in-call app an adapter object through which to send call-commands such as
-     * answering and rejecting incoming calls, disconnecting active calls, and putting calls in
-     * special states (mute, hold, etc).
-     *
-     * @param inCallAdapter Adapter through which an in-call app can send call-commands to Telecomm.
+     * @return The attached {@link CallServiceSelectorAdapter} if attached, or null otherwise.
      */
-    protected abstract void setInCallAdapter(InCallAdapter inCallAdapter);
+    protected final InCallAdapter getAdapter() {
+        return mAdapter;
+    }
+
+    /**
+     * Lifecycle callback which is called when this {@link InCallService} has been attached
+     * to a {@link InCallAdapter}, indicating {@link #getAdapter()} is now safe to use.
+     *
+     * @param adapter The adapter now attached to this in-call service.
+     */
+    protected void onAdapterAttached(InCallAdapter adapter) {
+    }
 
     /**
      * Indicates to the in-call app that a new call has been created and an appropriate

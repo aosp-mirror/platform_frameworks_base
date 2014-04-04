@@ -24901,14 +24901,15 @@ package android.telecomm {
     method public abstract void answer(java.lang.String);
     method public abstract void call(android.telecomm.CallInfo);
     method public abstract void disconnect(java.lang.String);
+    method protected final android.telecomm.CallServiceAdapter getAdapter();
     method public final android.os.IBinder getBinder();
     method public abstract void hold(java.lang.String);
     method public abstract void isCompatibleWith(android.telecomm.CallInfo);
+    method protected void onAdapterAttached(android.telecomm.CallServiceAdapter);
     method public abstract void onAudioStateChanged(java.lang.String, android.telecomm.CallAudioState);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void playDtmfTone(java.lang.String, char);
     method public abstract void reject(java.lang.String);
-    method public abstract void setCallServiceAdapter(android.telecomm.CallServiceAdapter);
     method public abstract void setIncomingCallId(java.lang.String, android.os.Bundle);
     method public abstract void stopDtmfTone(java.lang.String);
     method public abstract void unhold(java.lang.String);
@@ -24957,10 +24958,11 @@ package android.telecomm {
 
   public abstract class CallServiceSelector extends android.app.Service {
     ctor protected CallServiceSelector();
+    method protected final android.telecomm.CallServiceSelectorAdapter getAdapter();
     method protected final java.util.Collection<android.telecomm.CallInfo> getCalls();
+    method protected void onAdapterAttached(android.telecomm.CallServiceSelectorAdapter);
     method public final android.os.IBinder onBind(android.content.Intent);
     method protected abstract void select(android.telecomm.CallInfo, java.util.List<android.telecomm.CallServiceDescriptor>);
-    method protected abstract void setCallServiceSelectorAdapter(android.telecomm.CallServiceSelectorAdapter);
   }
 
   public final class CallServiceSelectorAdapter {
@@ -25007,13 +25009,14 @@ package android.telecomm {
   public abstract class InCallService extends android.app.Service {
     ctor protected InCallService();
     method protected abstract void addCall(android.telecomm.CallInfo);
+    method protected final android.telecomm.InCallAdapter getAdapter();
+    method protected void onAdapterAttached(android.telecomm.InCallAdapter);
     method protected abstract void onAudioStateChanged(android.telecomm.CallAudioState);
     method public final android.os.IBinder onBind(android.content.Intent);
     method protected abstract void setActive(java.lang.String);
     method protected abstract void setDialing(java.lang.String);
     method protected abstract void setDisconnected(java.lang.String, int);
     method protected abstract void setHandoffEnabled(java.lang.String, boolean);
-    method protected abstract void setInCallAdapter(android.telecomm.InCallAdapter);
     method protected abstract void setOnHold(java.lang.String);
     method protected abstract void setPostDial(java.lang.String, java.lang.String);
     method protected abstract void setPostDialWait(java.lang.String, java.lang.String);
