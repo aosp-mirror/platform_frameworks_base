@@ -51,9 +51,9 @@ public class SystemServicesProxy {
 
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
             // Create a dummy icon
-            mDummyIcon = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8);
+            mDummyIcon = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
             Canvas c = new Canvas(mDummyIcon);
-            c.drawColor(0xFFFF0000);
+            c.drawColor(0xFF999999);
             c.setBitmap(null);
         }
     }
@@ -77,7 +77,7 @@ public class SystemServicesProxy {
                 rti.id = rti.persistentId = i;
                 rti.baseIntent = new Intent();
                 rti.baseIntent.setComponent(cn);
-                rti.description = rti.activityLabel =
+                rti.description = rti.activityLabel = "" + i + " - " +
                         Long.toString(Math.abs(new Random().nextLong()), 36);
                 if (i % 2 == 0) {
                     rti.activityIcon = Bitmap.createBitmap(mDummyIcon);
@@ -118,7 +118,7 @@ public class SystemServicesProxy {
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
             Bitmap thumbnail = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
             Canvas c = new Canvas(thumbnail);
-            c.drawColor(0xFF00ff00);
+            c.drawColor(0xff333333);
             c.setBitmap(null);
             return thumbnail;
         }
@@ -178,7 +178,7 @@ public class SystemServicesProxy {
 
         // If we are mocking, then return a mock label
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
-            return new ColorDrawable(0xFFff0000);
+            return new ColorDrawable(0xFF666666);
         }
 
         return info.loadIcon(mPm);

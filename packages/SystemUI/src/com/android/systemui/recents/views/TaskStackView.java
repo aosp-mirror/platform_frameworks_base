@@ -35,11 +35,11 @@ import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.OverScroller;
 import com.android.systemui.R;
+import com.android.systemui.recents.BakedBezierInterpolator;
 import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsTaskLoader;
-import com.android.systemui.recents.SystemServicesProxy;
 import com.android.systemui.recents.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
@@ -75,6 +75,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     int mStashedScroll;
     OverScroller mScroller;
     ObjectAnimator mScrollAnimator;
+
+    // Filtering
+    AnimatorSet mFilterChildrenAnimator;
 
     // Optimizations
     int mHwLayersRefCount;
@@ -180,7 +183,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     private ArrayList<TaskViewTransform> getStackTransforms(ArrayList<Task> tasks,
                                                             int stackScroll,
-                                                            int[] visibleRangeOut) {
+                                                            int[] visibleRangeOut,
+                                                            boolean boundTranslationsToRect) {
         // XXX: Optimization: Use binary search to find the visible range
 
         ArrayList<TaskViewTransform> taskTransforms = new ArrayList<TaskViewTransform>();
@@ -195,6 +199,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     firstVisibleIndex = i;
                 }
                 lastVisibleIndex = i;
+            }
+
+            if (boundTranslationsToRect) {
+                transform.translationY = Math.min(transform.translationY, mRect.bottom);
             }
         }
         if (visibleRangeOut != null) {
@@ -219,7 +227,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             int stackScroll = getStackScroll();
             ArrayList<Task> tasks = mStack.getTasks();
             ArrayList<TaskViewTransform> taskTransforms = getStackTransforms(tasks, stackScroll,
-                    visibleRange);
+                    visibleRange, false);
 
             // Update the visible state of all the tasks
             int taskCount = tasks.size();
@@ -286,7 +294,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /** Animates the stack scroll into bounds */
-    ObjectAnimator animateBoundScroll(int duration) {
+    ObjectAnimator animateBoundScroll() {
         int curScroll = getStackScroll();
         int newScroll = Math.max(mMinScroll, Math.min(mMaxScroll, curScroll));
         if (newScroll != curScroll) {
@@ -298,16 +306,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             abortBoundScrollAnimation();
 
             // Start a new scroll animation
-            animateScroll(curScroll, newScroll, duration);
+            animateScroll(curScroll, newScroll);
             mScrollAnimator.start();
         }
         return mScrollAnimator;
     }
 
     /** Animates the stack scroll */
-    void animateScroll(int curScroll, int newScroll, int duration) {
+    void animateScroll(int curScroll, int newScroll) {
         mScrollAnimator = ObjectAnimator.ofInt(this, "stackScroll", curScroll, newScroll);
-        mScrollAnimator.setDuration(duration);
+        mScrollAnimator.setDuration(Utilities.calculateTranslationAnimationDuration(newScroll -
+                curScroll, 250));
+        mScrollAnimator.setInterpolator(BakedBezierInterpolator.INSTANCE);
         mScrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -625,7 +635,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         updateMinMaxScroll(true);
-        requestSynchronizeStackViewsWithModel(Constants.Values.TaskStackView.Animation.TaskRemovedReshuffleDuration);
+        int movement = (int) (Constants.Values.TaskStackView.StackOverlapPct * mTaskRect.height());
+        requestSynchronizeStackViewsWithModel(Utilities.calculateTranslationAnimationDuration(movement));
     }
 
     @Override
@@ -635,20 +646,22 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // (filtered) stack
         // XXX: Use HW Layers
 
-        // Stash the scroll for us to restore to when we unfilter
+        // Stash the scroll and filtered task for us to restore to when we unfilter
         mStashedScroll = getStackScroll();
 
         // Compute the transforms of the items in the current stack
         final ArrayList<TaskViewTransform> curTaskTransforms =
-                getStackTransforms(curStack, mStashedScroll, null);
+                getStackTransforms(curStack, mStashedScroll, null, true);
 
-        // Bound the new stack scroll
+        // Scroll the item to the top of the stack (sans-peek) rect so that we can see it better
         updateMinMaxScroll(false);
+        float overlapHeight = Constants.Values.TaskStackView.StackOverlapPct * mTaskRect.height();
+        setStackScrollRaw((int) (newStack.indexOfTask(filteredTask) * overlapHeight));
         boundScrollRaw();
 
-        // Compute the transforms of the items in the new stack
+        // Compute the transforms of the items in the new stack after setting the new scroll
         final ArrayList<TaskViewTransform> taskTransforms =
-                getStackTransforms(mStack.getTasks(), getStackScroll(), null);
+                getStackTransforms(mStack.getTasks(), getStackScroll(), null, true);
 
         // Animate all of the existing views on screen either out of view (if they are not visible
         // in the new stack) or to their final positions in the new stack
@@ -656,13 +669,16 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         final ArrayList<Task> tasks = mStack.getTasks();
         ArrayList<Animator> childViewAnims = new ArrayList<Animator>();
         int childCount = getChildCount();
+        int movement = 0;
         for (int i = 0; i < childCount; i++) {
             TaskView tv = (TaskView) getChildAt(i);
             Task task = tv.getTask();
             TaskViewTransform toTransform;
             int taskIndex = tasks.indexOf(task);
-            if ((taskIndex < 0) || !taskTransforms.get(taskIndex).visible) {
-                // Compose a new transform that animates the task view out of view
+
+            boolean willBeInvisible = (taskIndex < 0) || !taskTransforms.get(taskIndex).visible;
+            if (willBeInvisible) {
+                // Compose a new transform that fades and slides the task out of view
                 TaskViewTransform fromTransform = curTaskTransforms.get(curStack.indexOf(task));
                 toTransform = new TaskViewTransform(fromTransform);
                 tv.updateViewPropertiesToTaskTransform(null, fromTransform, 0);
@@ -671,23 +687,49 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 childrenToReturnToPool.add(tv);
             } else {
                 toTransform = taskTransforms.get(taskIndex);
+
+                // Use the movement of the visible views to calculate the duration of the animation
+                movement = Math.max(movement,
+                        Math.abs(toTransform.translationY - (int) tv.getTranslationY()));
             }
             childViewAnims.add(tv.getAnimatorToTaskTransform(toTransform));
         }
 
-        AnimatorSet childViewAnimSet = new AnimatorSet();
-        childViewAnimSet.setDuration(
-                Constants.Values.TaskStackView.Animation.FilteredCurrentViewsDuration);
-        childViewAnimSet.addListener(new AnimatorListenerAdapter() {
+        // Cancel the previous animation
+        if (mFilterChildrenAnimator != null) {
+            mFilterChildrenAnimator.cancel();
+            mFilterChildrenAnimator.removeAllListeners();
+        }
+
+        // Create a new animation for the existing children
+        final RecentsConfiguration config = RecentsConfiguration.getInstance();
+        mFilterChildrenAnimator = new AnimatorSet();
+        mFilterChildrenAnimator.setDuration(
+                Utilities.calculateTranslationAnimationDuration(movement,
+                        config.filteringCurrentViewsMinAnimDuration));
+        mFilterChildrenAnimator.setInterpolator(BakedBezierInterpolator.INSTANCE);
+        mFilterChildrenAnimator.addListener(new AnimatorListenerAdapter() {
+            boolean isCancelled;
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                isCancelled = true;
+            }
+
             @Override
             public void onAnimationEnd(Animator animation) {
+                if (isCancelled) return;
+
                 // Return all the removed children to the view pool
                 for (TaskView tv : childrenToReturnToPool) {
                     mViewPool.returnViewToPool(tv);
                 }
 
                 // For views that are not already visible, animate them in
+                ArrayList<Animator> newViewsAnims = new ArrayList<Animator>();
                 int taskCount = tasks.size();
+                int movement = 0;
+                int offset = 0;
                 for (int i = 0; i < taskCount; i++) {
                     Task task = tasks.get(i);
                     TaskViewTransform toTransform = taskTransforms.get(i);
@@ -697,20 +739,38 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         TaskView tv = getChildViewForTask(task);
                         if (tv == null) {
                             tv = mViewPool.pickUpViewFromPool(task, task);
+                            // Compose a new transform that fades and slides the new task in
+                            fromTransform = new TaskViewTransform(toTransform);
+                            tv.prepareTaskTransformForFilterTaskHidden(fromTransform);
+                            tv.updateViewPropertiesToTaskTransform(null, fromTransform, 0);
 
-                            // Animate from the current position to the new position
-                            tv.prepareTaskTransformForFilterTaskVisible(fromTransform);
-                            tv.updateViewPropertiesToTaskTransform(fromTransform,
-                                    toTransform,
-                                    Constants.Values.TaskStackView.Animation.FilteredNewViewsDuration);
+                            Animator anim = tv.getAnimatorToTaskTransform(toTransform);
+                            anim.setStartDelay(offset *
+                                    Constants.Values.TaskStackView.FilterStartDelay);
+                            newViewsAnims.add(anim);
+
+                            // Use the movement of the newly visible views to calculate the duration
+                            // of the animation
+                            movement = Math.max(movement, Math.abs(toTransform.translationY -
+                                    fromTransform.translationY));
+                            offset++;
                         }
                     }
+
+                    // Animate the new views in
+                    mFilterChildrenAnimator = new AnimatorSet();
+                    mFilterChildrenAnimator.setDuration(
+                            Utilities.calculateTranslationAnimationDuration(movement,
+                                    config.filteringNewViewsMinAnimDuration));
+                    mFilterChildrenAnimator.setInterpolator(BakedBezierInterpolator.INSTANCE);
+                    mFilterChildrenAnimator.playTogether(newViewsAnims);
+                    mFilterChildrenAnimator.start();
                 }
                 invalidate();
             }
         });
-        childViewAnimSet.playTogether(childViewAnims);
-        childViewAnimSet.start();
+        mFilterChildrenAnimator.playTogether(childViewAnims);
+        mFilterChildrenAnimator.start();
     }
 
     @Override
@@ -718,16 +778,16 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Compute the transforms of the items in the current stack
         final int curScroll = getStackScroll();
         final ArrayList<TaskViewTransform> curTaskTransforms =
-                getStackTransforms(curStack, curScroll, null);
+                getStackTransforms(curStack, curScroll, null, true);
 
         // Restore the stashed scroll
         updateMinMaxScroll(false);
         setStackScrollRaw(mStashedScroll);
         boundScrollRaw();
 
-        // Compute the transforms of the items in the new stack
+        // Compute the transforms of the items in the new stack after restoring the stashed scroll
         final ArrayList<TaskViewTransform> taskTransforms =
-                getStackTransforms(mStack.getTasks(), getStackScroll(), null);
+                getStackTransforms(mStack.getTasks(), getStackScroll(), null, true);
 
         // Animate all of the existing views out of view (if they are not in the visible range in
         // the new stack) or to their final positions in the new stack
@@ -735,29 +795,55 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         final ArrayList<Task> tasks = mStack.getTasks();
         ArrayList<Animator> childViewAnims = new ArrayList<Animator>();
         int childCount = getChildCount();
+        int movement = 0;
         for (int i = 0; i < childCount; i++) {
             TaskView tv = (TaskView) getChildAt(i);
             Task task = tv.getTask();
             int taskIndex = tasks.indexOf(task);
-            TaskViewTransform transform;
+            TaskViewTransform toTransform;
 
             // If the view is no longer visible, then we should just animate it out
-            if (taskIndex < 0 || !taskTransforms.get(taskIndex).visible) {
-                transform = new TaskViewTransform(curTaskTransforms.get(curStack.indexOf(task)));
-                tv.prepareTaskTransformForFilterTaskVisible(transform);
+            boolean willBeInvisible = taskIndex < 0 || !taskTransforms.get(taskIndex).visible;
+            if (willBeInvisible) {
+                toTransform = new TaskViewTransform(taskTransforms.get(taskIndex));
+                tv.prepareTaskTransformForFilterTaskVisible(toTransform);
                 childrenToRemove.add(tv);
             } else {
-                transform = taskTransforms.get(taskIndex);
+                toTransform = taskTransforms.get(taskIndex);
+                // Use the movement of the visible views to calculate the duration of the animation
+                movement = Math.max(movement, Math.abs(toTransform.translationY -
+                        (int) tv.getTranslationY()));
             }
-            childViewAnims.add(tv.getAnimatorToTaskTransform(transform));
+
+            Animator anim = tv.getAnimatorToTaskTransform(toTransform);
+            childViewAnims.add(anim);
         }
 
-        AnimatorSet childViewAnimSet = new AnimatorSet();
-        childViewAnimSet.setDuration(
-                Constants.Values.TaskStackView.Animation.UnfilteredCurrentViewsDuration);
-        childViewAnimSet.addListener(new AnimatorListenerAdapter() {
+        // Cancel the previous animation
+        if (mFilterChildrenAnimator != null) {
+            mFilterChildrenAnimator.cancel();
+            mFilterChildrenAnimator.removeAllListeners();
+        }
+
+        // Create a new animation for the existing children
+        final RecentsConfiguration config = RecentsConfiguration.getInstance();
+        mFilterChildrenAnimator = new AnimatorSet();
+        mFilterChildrenAnimator.setDuration(
+                Utilities.calculateTranslationAnimationDuration(movement,
+                        config.filteringCurrentViewsMinAnimDuration));
+        mFilterChildrenAnimator.setInterpolator(BakedBezierInterpolator.INSTANCE);
+        mFilterChildrenAnimator.addListener(new AnimatorListenerAdapter() {
+            boolean isCancelled;
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                isCancelled = true;
+            }
+
             @Override
             public void onAnimationEnd(Animator animation) {
+                if (isCancelled) return;
+
                 // Return all the removed children to the view pool
                 for (TaskView tv : childrenToRemove) {
                     mViewPool.returnViewToPool(tv);
@@ -768,8 +854,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
                 // For views that are not already visible, animate them in
                 ArrayList<Animator> newViewAnims = new ArrayList<Animator>();
-                AnimatorSet newViewAnimSet = new AnimatorSet();
                 int taskCount = tasks.size();
+                int movement = 0;
                 int offset = 0;
                 for (int i = 0; i < taskCount; i++) {
                     Task task = tasks.get(i);
@@ -780,34 +866,46 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                             // For views that are not already visible, animate them in
                             tv = mViewPool.pickUpViewFromPool(task, task);
 
-                            // Animate in this new view
+                            // Compose a new transform to fade and slide the new task in
                             TaskViewTransform fromTransform = new TaskViewTransform(toTransform);
                             tv.prepareTaskTransformForFilterTaskHidden(fromTransform);
                             tv.updateViewPropertiesToTaskTransform(null, fromTransform, 0);
-                            newViewAnims.add(tv.getAnimatorToTaskTransform(toTransform));
+
+                            Animator anim = tv.getAnimatorToTaskTransform(toTransform);
+                            anim.setStartDelay(offset *
+                                    Constants.Values.TaskStackView.FilterStartDelay);
+                            newViewAnims.add(anim);
+                            // Use the movement of the newly visible views to calculate the duration
+                            // of the animation
+                            movement = Math.max(movement,
+                                    Math.abs(toTransform.translationY - fromTransform.translationY));
                             offset++;
                         }
                     }
                 }
 
                 // Run the animation
-                newViewAnimSet.setDuration(
-                        Constants.Values.TaskStackView.Animation.UnfilteredNewViewsDuration);
-                newViewAnimSet.playTogether(newViewAnims);
-                newViewAnimSet.addListener(new AnimatorListenerAdapter() {
+                mFilterChildrenAnimator = new AnimatorSet();
+                mFilterChildrenAnimator.setDuration(
+                        Utilities.calculateTranslationAnimationDuration(movement,
+                                config.filteringNewViewsMinAnimDuration));
+                mFilterChildrenAnimator.playTogether(newViewAnims);
+                mFilterChildrenAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         // Decrement the hw layers ref count
                         decHwLayersRefCount("unfilteredNewViews");
                     }
                 });
-                newViewAnimSet.start();
-
+                mFilterChildrenAnimator.start();
                 invalidate();
             }
         });
-        childViewAnimSet.playTogether(childViewAnims);
-        childViewAnimSet.start();
+        mFilterChildrenAnimator.playTogether(childViewAnims);
+        mFilterChildrenAnimator.start();
+
+        // Clear the saved vars
+        mStashedScroll = 0;
     }
 
     /**** ViewPoolConsumer Implementation ****/
@@ -1056,7 +1154,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
                 // Animate the scroll back if we've cancelled
-                mSv.animateBoundScroll(Constants.Values.TaskStackView.Animation.SnapScrollBackDuration);
+                mSv.animateBoundScroll();
                 // Disable HW layers
                 if (mIsScrolling) {
                     mSv.decHwLayersRefCount("stackScroll");
@@ -1186,7 +1284,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 } else if (mSv.isScrollOutOfBounds()) {
                     // Animate the scroll back into bounds
                     // XXX: Make this animation a function of the velocity OR distance
-                    mSv.animateBoundScroll(Constants.Values.TaskStackView.Animation.SnapScrollBackDuration);
+                    mSv.animateBoundScroll();
                 }
 
                 if (mIsScrolling) {
@@ -1220,7 +1318,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 if (mSv.isScrollOutOfBounds()) {
                     // Animate the scroll back into bounds
                     // XXX: Make this animation a function of the velocity OR distance
-                    mSv.animateBoundScroll(Constants.Values.TaskStackView.Animation.SnapScrollBackDuration);
+                    mSv.animateBoundScroll();
                 }
                 mActivePointerId = INACTIVE_POINTER_ID;
                 mIsScrolling = false;

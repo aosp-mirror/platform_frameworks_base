@@ -236,6 +236,10 @@
     <!-- The size of the activity icon in the recents task view. -->
     <dimen name="recents_task_view_activity_icon_size">60dp</dimen>
 
+    <!-- Used to calculate the translation animation duration, the expected amount of movement 
+         in dps over one second of time. -->
+    <dimen name="recents_animation_movement_in_dps_per_second">800dp</dimen>
+
     <!-- Space below the notification stack -->
     <dimen name="notification_stack_margin_bottom">0dp</dimen>
 

@@ -17,11 +17,11 @@
 package com.android.systemui.recents;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import com.android.systemui.R;
 
 
 /** A static Recents configuration for the current context
@@ -33,6 +33,11 @@ public class RecentsConfiguration {
 
     public Rect systemInsets = new Rect();
     public Rect displayRect = new Rect();
+
+    public float animationDpsMovementPerSecond;
+
+    public int filteringCurrentViewsMinAnimDuration;
+    public int filteringNewViewsMinAnimDuration;
 
     /** Private constructor */
     private RecentsConfiguration() {}
@@ -58,6 +63,12 @@ public class RecentsConfiguration {
         mDisplayMetrics = dm;
 
         displayRect.set(0, 0, dm.widthPixels, dm.heightPixels);
+        animationDpsMovementPerSecond =
+                res.getDimensionPixelSize(R.dimen.recents_animation_movement_in_dps_per_second);
+        filteringCurrentViewsMinAnimDuration =
+                res.getInteger(R.integer.recents_filter_animate_current_views_min_duration);
+        filteringNewViewsMinAnimDuration =
+                res.getInteger(R.integer.recents_filter_animate_new_views_min_duration);
     }
 
     public void updateSystemInsets(Rect insets) {
