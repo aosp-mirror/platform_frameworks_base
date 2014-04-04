@@ -228,10 +228,10 @@ SkRect* GraphicsJNI::jrectf_to_rect(JNIEnv* env, jobject obj, SkRect* r)
 {
     SkASSERT(env->IsInstanceOf(obj, gRectF_class));
 
-    r->set(SkFloatToScalar(env->GetFloatField(obj, gRectF_leftFieldID)),
-           SkFloatToScalar(env->GetFloatField(obj, gRectF_topFieldID)),
-           SkFloatToScalar(env->GetFloatField(obj, gRectF_rightFieldID)),
-           SkFloatToScalar(env->GetFloatField(obj, gRectF_bottomFieldID)));
+    r->set(env->GetFloatField(obj, gRectF_leftFieldID),
+           env->GetFloatField(obj, gRectF_topFieldID),
+           env->GetFloatField(obj, gRectF_rightFieldID),
+           env->GetFloatField(obj, gRectF_bottomFieldID));
     return r;
 }
 
@@ -277,8 +277,8 @@ SkPoint* GraphicsJNI::jpointf_to_point(JNIEnv* env, jobject obj, SkPoint* point)
 {
     SkASSERT(env->IsInstanceOf(obj, gPointF_class));
 
-    point->set(SkFloatToScalar(env->GetIntField(obj, gPointF_xFieldID)),
-               SkFloatToScalar(env->GetIntField(obj, gPointF_yFieldID)));
+    point->set(env->GetIntField(obj, gPointF_xFieldID),
+               env->GetIntField(obj, gPointF_yFieldID));
     return point;
 }
 

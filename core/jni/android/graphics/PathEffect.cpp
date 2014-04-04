@@ -35,15 +35,13 @@ public:
     static jlong Dash_constructor(JNIEnv* env, jobject,
                                       jfloatArray intervalArray, jfloat phase) {
         AutoJavaFloatArray autoInterval(env, intervalArray);
-        int     count = autoInterval.length() & ~1;  // even number
-        float*  values = autoInterval.ptr();
-
-        SkAutoSTMalloc<32, SkScalar>    storage(count);
-        SkScalar*                       intervals = storage.get();
-        for (int i = 0; i < count; i++) {
-            intervals[i] = SkFloatToScalar(values[i]);
-        }
-        SkPathEffect* effect = SkDashPathEffect::Create(intervals, count, SkFloatToScalar(phase));
+        int         count = autoInterval.length() & ~1;  // even number
+#ifdef SK_SCALAR_IS_FLOAT
+        SkScalar*   intervals = autoInterval.ptr();
+#else
+        #error Need to convert float array to SkScalar array before calling the following function.
+#endif
+        SkPathEffect* effect = SkDashPathEffect::Create(intervals, count, phase);
         return reinterpret_cast<jlong>(effect);
     }
 
@@ -51,20 +49,19 @@ public:
                   jlong shapeHandle, jfloat advance, jfloat phase, jint style) {
         const SkPath* shape = reinterpret_cast<SkPath*>(shapeHandle);
         SkASSERT(shape != NULL);
-        SkPathEffect* effect = SkPath1DPathEffect::Create(*shape, SkFloatToScalar(advance),
-                     SkFloatToScalar(phase), (SkPath1DPathEffect::Style)style);
+        SkPathEffect* effect = SkPath1DPathEffect::Create(*shape, advance, phase,
+                (SkPath1DPathEffect::Style)style);
         return reinterpret_cast<jlong>(effect);
     }
 
     static jlong Corner_constructor(JNIEnv* env, jobject, jfloat radius){
-        SkPathEffect* effect = SkCornerPathEffect::Create(SkFloatToScalar(radius));
+        SkPathEffect* effect = SkCornerPathEffect::Create(radius);
         return reinterpret_cast<jlong>(effect);
     }
 
     static jlong Discrete_constructor(JNIEnv* env, jobject,
                                       jfloat length, jfloat deviation) {
-        SkPathEffect* effect = SkDiscretePathEffect::Create(SkFloatToScalar(length),
-                                        SkFloatToScalar(deviation));
+        SkPathEffect* effect = SkDiscretePathEffect::Create(length, deviation);
         return reinterpret_cast<jlong>(effect);
     }
 

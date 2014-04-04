@@ -65,63 +65,39 @@ public:
     }
      static void setTranslate(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar dx_ = SkFloatToScalar(dx);
-        SkScalar dy_ = SkFloatToScalar(dy);
-        obj->setTranslate(dx_, dy_);
+        obj->setTranslate(dx, dy);
     }
      static void setScale__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sx, jfloat sy, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar sx_ = SkFloatToScalar(sx);
-        SkScalar sy_ = SkFloatToScalar(sy);
-        SkScalar px_ = SkFloatToScalar(px);
-        SkScalar py_ = SkFloatToScalar(py);
-        obj->setScale(sx_, sy_, px_, py_);
+        obj->setScale(sx, sy, px, py);
     }
      static void setScale__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sx, jfloat sy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar sx_ = SkFloatToScalar(sx);
-        SkScalar sy_ = SkFloatToScalar(sy);
-        obj->setScale(sx_, sy_);
+        obj->setScale(sx, sy);
     }
      static void setRotate__FFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat degrees, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar degrees_ = SkFloatToScalar(degrees);
-        SkScalar px_ = SkFloatToScalar(px);
-        SkScalar py_ = SkFloatToScalar(py);
-        obj->setRotate(degrees_, px_, py_);
+        obj->setRotate(degrees, px, py);
     }
      static void setRotate__F(JNIEnv* env, jobject clazz, jlong objHandle, jfloat degrees) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar degrees_ = SkFloatToScalar(degrees);
-        obj->setRotate(degrees_);
+        obj->setRotate(degrees);
     }
      static void setSinCos__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sinValue, jfloat cosValue, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar sinValue_ = SkFloatToScalar(sinValue);
-        SkScalar cosValue_ = SkFloatToScalar(cosValue);
-        SkScalar px_ = SkFloatToScalar(px);
-        SkScalar py_ = SkFloatToScalar(py);
-        obj->setSinCos(sinValue_, cosValue_, px_, py_);
+        obj->setSinCos(sinValue, cosValue, px, py);
     }
      static void setSinCos__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sinValue, jfloat cosValue) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar sinValue_ = SkFloatToScalar(sinValue);
-        SkScalar cosValue_ = SkFloatToScalar(cosValue);
-        obj->setSinCos(sinValue_, cosValue_);
+        obj->setSinCos(sinValue, cosValue);
     }
      static void setSkew__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat kx, jfloat ky, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar kx_ = SkFloatToScalar(kx);
-        SkScalar ky_ = SkFloatToScalar(ky);
-        SkScalar px_ = SkFloatToScalar(px);
-        SkScalar py_ = SkFloatToScalar(py);
-        obj->setSkew(kx_, ky_, px_, py_);
+        obj->setSkew(kx, ky, px, py);
     }
      static void setSkew__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat kx, jfloat ky) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar kx_ = SkFloatToScalar(kx);
-        SkScalar ky_ = SkFloatToScalar(ky);
-        obj->setSkew(kx_, ky_);
+        obj->setSkew(kx, ky);
     }
      static void setConcat(JNIEnv* env, jobject clazz, jlong objHandle, jlong aHandle, jlong bHandle) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
@@ -132,55 +108,37 @@ public:
 
     static void preTranslate(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar dx_ = SkFloatToScalar(dx);
-        SkScalar dy_ = SkFloatToScalar(dy);
-        obj->preTranslate(dx_, dy_);
+        obj->preTranslate(dx, dy);
     }
 
     static void preScale__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sx, jfloat sy, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar sx_ = SkFloatToScalar(sx);
-        SkScalar sy_ = SkFloatToScalar(sy);
-        SkScalar px_ = SkFloatToScalar(px);
-        SkScalar py_ = SkFloatToScalar(py);
-        obj->preScale(sx_, sy_, px_, py_);
+        obj->preScale(sx, sy, px, py);
     }
 
     static void preScale__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sx, jfloat sy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar sx_ = SkFloatToScalar(sx);
-        SkScalar sy_ = SkFloatToScalar(sy);
-        obj->preScale(sx_, sy_);
+        obj->preScale(sx, sy);
     }
 
     static void preRotate__FFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat degrees, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar degrees_ = SkFloatToScalar(degrees);
-        SkScalar px_ = SkFloatToScalar(px);
-        SkScalar py_ = SkFloatToScalar(py);
-        obj->preRotate(degrees_, px_, py_);
+        obj->preRotate(degrees, px, py);
     }
 
     static void preRotate__F(JNIEnv* env, jobject clazz, jlong objHandle, jfloat degrees) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar degrees_ = SkFloatToScalar(degrees);
-        obj->preRotate(degrees_);
+        obj->preRotate(degrees);
     }
 
     static void preSkew__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat kx, jfloat ky, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar kx_ = SkFloatToScalar(kx);
-        SkScalar ky_ = SkFloatToScalar(ky);
-        SkScalar px_ = SkFloatToScalar(px);
-        SkScalar py_ = SkFloatToScalar(py);
-        obj->preSkew(kx_, ky_, px_, py_);
+        obj->preSkew(kx, ky, px, py);
     }
 
     static void preSkew__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat kx, jfloat ky) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar kx_ = SkFloatToScalar(kx);
-        SkScalar ky_ = SkFloatToScalar(ky);
-        obj->preSkew(kx_, ky_);
+        obj->preSkew(kx, ky);
     }
 
     static void preConcat(JNIEnv* env, jobject clazz, jlong objHandle, jlong otherHandle) {
@@ -191,55 +149,37 @@ public:
 
     static void postTranslate(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar dx_ = SkFloatToScalar(dx);
-        SkScalar dy_ = SkFloatToScalar(dy);
-        obj->postTranslate(dx_, dy_);
+        obj->postTranslate(dx, dy);
     }
 
     static void postScale__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sx, jfloat sy, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar sx_ = SkFloatToScalar(sx);
-        SkScalar sy_ = SkFloatToScalar(sy);
-        SkScalar px_ = SkFloatToScalar(px);
-        SkScalar py_ = SkFloatToScalar(py);
-        obj->postScale(sx_, sy_, px_, py_);
+        obj->postScale(sx, sy, px, py);
     }
 
     static void postScale__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat sx, jfloat sy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar sx_ = SkFloatToScalar(sx);
-        SkScalar sy_ = SkFloatToScalar(sy);
-        obj->postScale(sx_, sy_);
+        obj->postScale(sx, sy);
     }
 
     static void postRotate__FFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat degrees, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar degrees_ = SkFloatToScalar(degrees);
-        SkScalar px_ = SkFloatToScalar(px);
-        SkScalar py_ = SkFloatToScalar(py);
-        obj->postRotate(degrees_, px_, py_);
+        obj->postRotate(degrees, px, py);
     }
 
     static void postRotate__F(JNIEnv* env, jobject clazz, jlong objHandle, jfloat degrees) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar degrees_ = SkFloatToScalar(degrees);
-        obj->postRotate(degrees_);
+        obj->postRotate(degrees);
     }
 
     static void postSkew__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat kx, jfloat ky, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
-        SkScalar kx_ = SkFloatToScalar(kx);
-        SkScalar ky_ = SkFloatToScalar(ky);
-        SkScalar px_ = SkFloatToScalar(px);
-        SkScalar py_ = SkFloatToScalar(py);
-        obj->postSkew(kx_, ky_, px_, py_);
+        obj->postSkew(kx, ky, px, py);
     }
 
     static void postSkew__FF(JNIEnv* env, jobject clazz, jlong matrixHandle, jfloat kx, jfloat ky) {
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
-        SkScalar kx_ = SkFloatToScalar(kx);
-        SkScalar ky_ = SkFloatToScalar(ky);
-        matrix->postSkew(kx_, ky_);
+        matrix->postSkew(kx, ky);
     }
 
     static void postConcat(JNIEnv* env, jobject clazz, jlong matrixHandle, jlong otherHandle) {
@@ -321,7 +261,7 @@ public:
     static jfloat mapRadius(JNIEnv* env, jobject clazz, jlong matrixHandle, jfloat radius) {
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         float result;
-        result = SkScalarToFloat(matrix->mapRadius(SkFloatToScalar(radius)));
+        result = SkScalarToFloat(matrix->mapRadius(radius));
         return static_cast<jfloat>(result);
     }
     static void getValues(JNIEnv* env, jobject clazz, jlong matrixHandle, jfloatArray values) {
