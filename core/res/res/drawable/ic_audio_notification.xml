@@ -18,6 +18,6 @@
 -->
 
 <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-        android:src="@drawable/ic_audio_notification_am"
-        android:autoMirrored="true">
-</bitmap>
+    android:src="@drawable/ic_audio_notification_am_alpha"
+    android:autoMirrored="true"
+    android:tint="?attr/colorControlNormal" />

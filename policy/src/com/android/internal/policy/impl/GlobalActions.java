@@ -268,7 +268,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         if (Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0 && isCurrentUserOwner()) {
             mItems.add(
-                new SinglePressAction(com.android.internal.R.drawable.stat_sys_adb,
+                new SinglePressAction(com.android.internal.R.drawable.ic_lock_bugreport,
                         R.string.global_action_bug_report) {
 
                     public void onPress() {

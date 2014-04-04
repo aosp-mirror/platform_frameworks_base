@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2011 The Android Open Source Project
+<!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ enabled.
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:minHeight="@android:dimen/alert_dialog_title_height"
         android:paddingStart="16dip"
-        android:paddingEnd="16dip">
+        android:paddingEnd="16dip"
+        android:paddingTop="16dip">
         <ImageView android:id="@+id/left_icon"
             android:layout_width="32dip"
             android:layout_height="32dip"
@@ -47,11 +47,6 @@ enabled.
             android:scaleType="fitCenter"
             android:layout_marginStart="8dip" />
     </LinearLayout>
-
-    <View android:id="@+id/titleDivider"
-            android:layout_width="match_parent"
-            android:layout_height="1dip"
-            android:background="@android:color/holo_blue_light" />
 
     <FrameLayout
         android:layout_width="match_parent" android:layout_height="wrap_content"

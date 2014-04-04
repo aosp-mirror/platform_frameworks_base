@@ -18,7 +18,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/parentPanel"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
@@ -35,9 +35,10 @@
             android:paddingEnd="16dip"
             android:paddingTop="16dip">
             <ImageView android:id="@+id/icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingEnd="8dip"
+                android:layout_width="32dip"
+                android:layout_height="32dip"
+                android:layout_marginEnd="8dip"
+                android:scaleType="fitCenter"
                 android:src="@null" />
             <TextView android:id="@+id/alertTitle"
                 style="?android:attr/windowTitleStyle"
