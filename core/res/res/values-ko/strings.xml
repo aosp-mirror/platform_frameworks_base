@@ -1319,6 +1319,10 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"애플리케이션에서 키가드 보안 저장소에 액세스하도록 허용합니다."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"키가드 표시 및 숨기기 설정"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"애플리케이션에서 키가드를 제어하도록 허용합니다."</string>
+    <string name="permlab_trust_listener" msgid="1765718054003704476">"Trust 상태 변경사항 수신"</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"애플리케이션이 Trust 상태에서의 변경사항을 수신할 수 있도록 허용합니다."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Trust Agent 서비스에 연결"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"애플리케이션이 Trust Agent 서비스에 바인딩할 수 있도록 허용합니다."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"업데이트 및 복구 시스템과 상호작용"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"애플리케이션이 복구 시스템 및 시스템 업데이트와 상호작용할 수 있도록 허용합니다."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"확대/축소하려면 두 번 터치하세요."</string>

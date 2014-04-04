@@ -1319,6 +1319,10 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Nagbibigay-daan sa isang application na i-access ang secure na storage ng keyguard."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Kontrolin ang pagpapakita at pagtago sa keyguard"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Pinapayagan ang isang application na kontrolin ang keyguard."</string>
+    <string name="permlab_trust_listener" msgid="1765718054003704476">"Makinig sa mga pagbabago sa estado ng trust."</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Pinapayagan ang isang application na makinig para sa mga pagbabago sa estado ng trust."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Sumailalim sa isang serbisyo ng trust agent"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Pinapayagan ang isang application na sumailalim sa isang serbisyo ng trust agent."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Makipag-ugnay sa system ng pag-update at pagbawi"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Binibigyang-daan ang isang application na makipag-ugnay sa system ng pagbawi at mga pag-update ng system."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Pindutin nang dalawang beses para sa pagkontrol ng zoom"</string>

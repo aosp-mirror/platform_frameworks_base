@@ -1319,6 +1319,10 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Programai leidžiama pasiekti „KeyGuard“ saugyklą."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Valdyti „KeyGuard“ rodymą ir slėpimą"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Programai leidžiama valdyti „KeyGuard“."</string>
+    <string name="permlab_trust_listener" msgid="1765718054003704476">"Atsižvelgti į patikimos būsenos pakeitimus."</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Programai leidžiama atsižvelgti į patikimos būsenos pakeitimus."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Susisaistyti su patikimos priemonės paslauga"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Programai leidžiama susisaistyti su patikimos priemonės paslauga."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Sąveikauti su naujiniu ir atkūrimo sistema"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Programai leidžiama sąveikauti su atkūrimo sistema ir sistemos naujiniais."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Dukart palieskite, kad valdytumėte mastelio keitimą"</string>

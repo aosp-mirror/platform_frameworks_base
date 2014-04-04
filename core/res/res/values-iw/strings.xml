@@ -1319,6 +1319,10 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"מאפשר לאפליקציה לגשת לאחסון המוגן באמצעות מפתח."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"שלוט בהצגה והסתרה של מגן המקלדת"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"מאפשר לאפליקציה לשלוט במגן המקלדת."</string>
+    <string name="permlab_trust_listener" msgid="1765718054003704476">"חיפוש שינויים במצב אמון."</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"מאפשר לאפליקציה לחפש שינויים במצב אמון."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"איגוד אל שירות סוכן אמון"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"מאפשר לאפליקציה לאגוד אל שירות סוכן אמון."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"אינטראקציה עם מערכת שחזור ועדכונים"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"מאפשרת לאפליקציה ליצור אינטראקציה עם מערכת השחזור ועדכוני מערכת."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"גע פעמיים לבקרת מרחק מתצוגה"</string>

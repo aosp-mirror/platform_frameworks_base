@@ -1319,6 +1319,10 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Omogućuje aplikaciji pristupanje zaključanoj sigurnoj pohrani."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Upravljanje prikazivanjem i skrivanjem zaključavanja tipkovnice"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Omogućuje aplikaciji upravljanje zaključavanjem tipkovnice."</string>
+    <string name="permlab_trust_listener" msgid="1765718054003704476">"Prati promjene pouzdanog stanja."</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Omogućuje aplikaciji praćenje promjena pouzdanog stanja."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Povezivanje s uslugom pouzdanog predstavnika"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Omogućuje aplikaciji povezivanje s uslugom pouzdanog predstavnika."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interakcija s ažuriranjem i sustavom za oporavak"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Omogućuje aplikaciji interakciju sa sustavom za oporavak i ažuriranjima sustava."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Dodirnite dvaput za upravljanje zumiranjem"</string>
