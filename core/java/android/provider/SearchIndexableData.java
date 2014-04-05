@@ -52,6 +52,12 @@ public abstract class SearchIndexableData {
     public int rank;
 
     /**
+     * The key for the data. This is application specific. Should be unique per data as the data
+     * should be able to be retrieved by the key.
+     */
+    public String key;
+
+    /**
      * The class name associated with the data. Generally this is a Fragment class name for
      * referring where the data is coming from and for launching the associated Fragment for
      * displaying the data. This is used only when the data is provided "locally".
