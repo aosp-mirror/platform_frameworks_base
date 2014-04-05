@@ -6267,10 +6267,18 @@
     </declare-styleable>
 
     <!-- Use <code>recognition-service</code> as the root tag of the XML resource that
-         describes a {@link android.speech.RecognitionService}, which is reference from
+         describes a {@link android.speech.RecognitionService}, which is referenced from
          its {@link android.speech.RecognitionService#SERVICE_META_DATA} meta-data entry.
          Described here are the attributes that can be included in that tag. -->
     <declare-styleable name="RecognitionService">
+        <attr name="settingsActivity" />
+    </declare-styleable>
+
+    <!-- Use <code>voice-interaction-service</code> as the root tag of the XML resource that
+         describes a {@link android.service.voice.VoiceInteractionService}, which is referenced from
+         its {@link android.service.voice.VoiceInteractionService#SERVICE_META_DATA} meta-data entry.
+         Described here are the attributes that can be included in that tag. -->
+    <declare-styleable name="VoiceInteractionService">
         <attr name="settingsActivity" />
     </declare-styleable>
 

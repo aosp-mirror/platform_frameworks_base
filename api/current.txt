@@ -31,6 +31,7 @@ package android {
     field public static final java.lang.String BIND_TEXT_SERVICE = "android.permission.BIND_TEXT_SERVICE";
     field public static final java.lang.String BIND_TRUST_AGENT_SERVICE = "android.permission.BIND_TRUST_AGENT_SERVICE";
     field public static final java.lang.String BIND_TV_INPUT = "android.permission.BIND_TV_INPUT";
+    field public static final java.lang.String BIND_VOICE_INTERACTION = "android.permission.BIND_VOICE_INTERACTION";
     field public static final java.lang.String BIND_VPN_SERVICE = "android.permission.BIND_VPN_SERVICE";
     field public static final java.lang.String BIND_WALLPAPER = "android.permission.BIND_WALLPAPER";
     field public static final java.lang.String BLUETOOTH = "android.permission.BLUETOOTH";
@@ -3202,6 +3203,7 @@ package android.app {
     method public int getTaskId();
     method public final java.lang.CharSequence getTitle();
     method public final int getTitleColor();
+    method public android.app.VoiceInteractor getVoiceInteractor();
     method public final int getVolumeControlStream();
     method public android.view.Window getWindow();
     method public android.view.WindowManager getWindowManager();
@@ -3213,6 +3215,7 @@ package android.app {
     method public boolean isFinishing();
     method public boolean isImmersive();
     method public boolean isTaskRoot();
+    method public boolean isVoiceInteraction();
     method public final deprecated android.database.Cursor managedQuery(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String);
     method public boolean moveTaskToBack(boolean);
     method public boolean navigateUpTo(android.content.Intent);
@@ -4836,6 +4839,23 @@ package android.app {
     field public static final int MODE_NIGHT_AUTO = 0; // 0x0
     field public static final int MODE_NIGHT_NO = 1; // 0x1
     field public static final int MODE_NIGHT_YES = 2; // 0x2
+  }
+
+  public class VoiceInteractor {
+    method public android.app.VoiceInteractor.Request startCommand(android.app.VoiceInteractor.Callback, java.lang.String, android.os.Bundle);
+    method public android.app.VoiceInteractor.Request startConfirmation(android.app.VoiceInteractor.Callback, java.lang.String, android.os.Bundle);
+    method public boolean[] supportsCommands(java.lang.String[]);
+  }
+
+  public static class VoiceInteractor.Callback {
+    ctor public VoiceInteractor.Callback();
+    method public void onCancel(android.app.VoiceInteractor.Request);
+    method public void onCommandResult(android.app.VoiceInteractor.Request, android.os.Bundle);
+    method public void onConfirmationResult(android.app.VoiceInteractor.Request, boolean, android.os.Bundle);
+  }
+
+  public static class VoiceInteractor.Request {
+    method public void cancel();
   }
 
   public final class WallpaperInfo implements android.os.Parcelable {
@@ -6997,6 +7017,7 @@ package android.content {
     field public static final java.lang.String CATEGORY_TAB = "android.intent.category.TAB";
     field public static final java.lang.String CATEGORY_TEST = "android.intent.category.TEST";
     field public static final java.lang.String CATEGORY_UNIT_TEST = "android.intent.category.UNIT_TEST";
+    field public static final java.lang.String CATEGORY_VOICE = "android.intent.category.VOICE";
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final java.lang.String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
     field public static final java.lang.String EXTRA_ALLOW_MULTIPLE = "android.intent.extra.ALLOW_MULTIPLE";
@@ -24862,6 +24883,36 @@ package android.service.trust {
     method protected final void revokeTrust();
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.trust.TrustAgentService";
     field public static final java.lang.String TRUST_AGENT_META_DATA = "android.service.trust.trustagent";
+  }
+
+}
+
+package android.service.voice {
+
+  public class VoiceInteractionService extends android.app.Service {
+    ctor public VoiceInteractionService();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public void startVoiceActivity(android.content.Intent, android.service.voice.VoiceInteractionSession);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.voice.VoiceInteractionService";
+    field public static final java.lang.String SERVICE_META_DATA = "android.voice_interaction";
+  }
+
+  public abstract class VoiceInteractionSession {
+    ctor public VoiceInteractionSession(android.content.Context);
+    ctor public VoiceInteractionSession(android.content.Context, android.os.Handler);
+    method public abstract void onCancel(android.service.voice.VoiceInteractionSession.Request);
+    method public abstract void onCommand(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.String, android.os.Bundle);
+    method public abstract void onConfirm(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.String, android.os.Bundle);
+    method public abstract boolean[] onGetSupportedCommands(android.service.voice.VoiceInteractionSession.Caller, java.lang.String[]);
+  }
+
+  public static class VoiceInteractionSession.Caller {
+  }
+
+  public static class VoiceInteractionSession.Request {
+    method public void sendCancelResult();
+    method public void sendCommandResult(android.os.Bundle);
+    method public void sendConfirmResult(boolean, android.os.Bundle);
   }
 
 }

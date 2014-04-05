@@ -2442,6 +2442,14 @@ public abstract class Context {
     public static final String APPWIDGET_SERVICE = "appwidget";
 
     /**
+     * Official published name of the (internal) voice interaction manager service.
+     *
+     * @hide
+     * @see #getSystemService
+     */
+    public static final String VOICE_INTERACTION_MANAGER_SERVICE = "voiceinteraction";
+
+    /**
      * Use with {@link #getSystemService} to retrieve an
      * {@link android.app.backup.IBackupManager IBackupManager} for communicating
      * with the backup mechanism.

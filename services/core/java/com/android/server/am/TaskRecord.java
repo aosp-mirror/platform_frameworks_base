@@ -28,7 +28,9 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.UserHandle;
+import android.service.voice.IVoiceInteractionSession;
 import android.util.Slog;
+import com.android.internal.app.IVoiceInteractor;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -36,6 +38,8 @@ import java.util.ArrayList;
 final class TaskRecord extends ThumbnailHolder {
     final int taskId;       // Unique identifier for this task.
     final String affinity;  // The affinity name for this task, or null.
+    final IVoiceInteractionSession voiceSession;    // Voice interaction session driving task
+    final IVoiceInteractor voiceInteractor;         // Associated interactor to provide to app
     Intent intent;          // The original intent that started the task.
     Intent affinityIntent;  // Intent of affinity-moved activity that started this task.
     ComponentName origActivity; // The non-alias activity component of the intent.
@@ -64,9 +68,12 @@ final class TaskRecord extends ThumbnailHolder {
      * Display.DEFAULT_DISPLAY. */
     boolean mOnTopOfHome = false;
 
-    TaskRecord(int _taskId, ActivityInfo info, Intent _intent) {
+    TaskRecord(int _taskId, ActivityInfo info, Intent _intent,
+            IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
         taskId = _taskId;
         affinity = info.taskAffinity;
+        voiceSession = _voiceSession;
+        voiceInteractor = _voiceInteractor;
         setIntent(_intent, info);
     }
 
@@ -472,6 +479,12 @@ final class TaskRecord extends ThumbnailHolder {
         }
         if (affinity != null) {
             pw.print(prefix); pw.print("affinity="); pw.println(affinity);
+        }
+        if (voiceSession != null || voiceInteractor != null) {
+            pw.print(prefix); pw.print("VOICE: session=0x");
+            pw.print(Integer.toHexString(System.identityHashCode(voiceSession)));
+            pw.print(" interactor=0x");
+            pw.println(Integer.toHexString(System.identityHashCode(voiceInteractor)));
         }
         if (intent != null) {
             StringBuilder sb = new StringBuilder(128);

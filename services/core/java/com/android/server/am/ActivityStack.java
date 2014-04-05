@@ -38,6 +38,8 @@ import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 import static com.android.server.am.ActivityStackSupervisor.ActivityContainer.CONTAINER_STATE_HAS_SURFACE;
 
+import android.service.voice.IVoiceInteractionSession;
+import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
@@ -501,6 +503,11 @@ final class ActivityStack {
         if (DEBUG_TASKS) Slog.d(TAG, "Looking for task of " + target + " in " + this);
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
+            if (task.voiceSession != null) {
+                // We never match voice sessions; those always run independently.
+                if (DEBUG_TASKS) Slog.d(TAG, "Skipping " + task + ": voice session");
+                continue;
+            }
             if (task.userId != userId) {
                 // Looking for a different task.
                 if (DEBUG_TASKS) Slog.d(TAG, "Skipping " + task + ": different user");
@@ -1503,7 +1510,7 @@ final class ActivityStack {
         // If the most recent activity was noHistory but was only stopped rather
         // than stopped+finished because the device went to sleep, we need to make
         // sure to finish it as we're making a new activity topmost.
-        if (mService.mSleeping && mLastNoHistoryActivity != null &&
+        if (mService.isSleeping() && mLastNoHistoryActivity != null &&
                 !mLastNoHistoryActivity.finishing) {
             if (DEBUG_STATES) Slog.d(TAG, "no-history finish of " + mLastNoHistoryActivity +
                     " on new resume");
@@ -2034,7 +2041,7 @@ final class ActivityStack {
                             + " out to bottom task " + bottom.task);
                 } else {
                     targetTask = createTaskRecord(mStackSupervisor.getNextTaskId(), target.info,
-                            null, false);
+                            null, null, null, false);
                     newThumbHolder = targetTask;
                     targetTask.affinityIntent = target.intent;
                     if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
@@ -2331,7 +2338,7 @@ final class ActivityStack {
         if ((r.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
                 || (r.info.flags&ActivityInfo.FLAG_NO_HISTORY) != 0) {
             if (!r.finishing) {
-                if (!mService.mSleeping) {
+                if (!mService.isSleeping()) {
                     if (DEBUG_STATES) {
                         Slog.d(TAG, "no-history finish of " + r);
                     }
@@ -2710,7 +2717,7 @@ final class ActivityStack {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
                             destIntent.getComponent(), 0, srec.userId);
                     int res = mStackSupervisor.startActivityLocked(srec.app.thread, destIntent,
-                            null, aInfo, parent.appToken, null,
+                            null, aInfo, null, null, parent.appToken, null,
                             0, -1, parent.launchedFromUid, parent.launchedFromPackage,
                             0, null, true, null, null);
                     foundParentInTask = res == ActivityManager.START_SUCCESS;
@@ -2739,9 +2746,7 @@ final class ActivityStack {
         if (mPausingActivity == r) {
             mPausingActivity = null;
         }
-        if (mService.mFocusedActivity == r) {
-            mService.mFocusedActivity = null;
-        }
+        mService.clearFocusedActivity(r);
 
         r.configDestroy = false;
         r.frozenBeforeDestroy = false;
@@ -3723,6 +3728,11 @@ final class ActivityStack {
             mTaskHistory.get(taskNdx + 1).mOnTopOfHome = true;
         }
         mTaskHistory.remove(task);
+        if (task.voiceInteractor != null) {
+            // This task was a voice interaction, so it should not remain on the
+            // recent tasks list.
+            mService.mRecentTasks.remove(task);
+        }
 
         if (mTaskHistory.isEmpty()) {
             if (DEBUG_STACK) Slog.i(TAG, "removeTask: moving to back stack=" + this);
@@ -3736,8 +3746,10 @@ final class ActivityStack {
         }
     }
 
-    TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent, boolean toTop) {
-        TaskRecord task = new TaskRecord(taskId, info, intent);
+    TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent,
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+            boolean toTop) {
+        TaskRecord task = new TaskRecord(taskId, info, intent, voiceSession, voiceInteractor);
         addTask(task, toTop);
         return task;
     }

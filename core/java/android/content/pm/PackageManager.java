@@ -1235,13 +1235,23 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_LIVE_WALLPAPER = "android.software.live_wallpaper";
-
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports app widgets.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_APP_WIDGETS = "android.software.app_widgets";
+
+    /**
+     * @hide
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports
+     * {@link android.service.voice.VoiceInteractionService} and
+     * {@link android.app.VoiceInteractor}.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_VOICE_RECOGNIZERS = "android.software.voice_recognizers";
+
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and

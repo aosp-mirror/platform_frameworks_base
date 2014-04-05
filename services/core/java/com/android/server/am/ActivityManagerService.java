@@ -28,17 +28,20 @@ import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
+import android.Manifest;
 import android.app.AppOpsManager;
 import android.app.IActivityContainer;
 import android.app.IActivityContainerCallback;
 import android.appwidget.AppWidgetManager;
 import android.graphics.Rect;
 import android.os.BatteryStats;
+import android.service.voice.IVoiceInteractionSession;
 import android.util.ArrayMap;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BackgroundThread;
@@ -56,6 +59,7 @@ import com.android.server.IntentResolver;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
+import com.android.server.SystemServiceManager;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.firewall.IntentFirewall;
@@ -333,6 +337,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     // How many bytes to write into the dropbox log before truncating
     static final int DROPBOX_MAX_SIZE = 256 * 1024;
 
+    /** All system services */
+    SystemServiceManager mSystemServiceManager;
+
     /** Run all ActivityStacks through this */
     ActivityStackSupervisor mStackSupervisor;
 
@@ -399,7 +406,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     /**
      * List of intents that were used to start the most recent tasks.
      */
-    private final ArrayList<TaskRecord> mRecentTasks = new ArrayList<TaskRecord>();
+    final ArrayList<TaskRecord> mRecentTasks = new ArrayList<TaskRecord>();
 
     public class PendingAssistExtras extends Binder implements Runnable {
         public final ActivityRecord activity;
@@ -879,17 +886,23 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Set while we are wanting to sleep, to prevent any
      * activities from being started/resumed.
      */
-    boolean mSleeping = false;
+    private boolean mSleeping = false;
+
+    /**
+     * Set while we are running a voice interaction.  This overrides
+     * sleeping while it is active.
+     */
+    private boolean mRunningVoice = false;
 
     /**
      * State of external calls telling us if the device is asleep.
      */
-    boolean mWentToSleep = false;
+    private boolean mWentToSleep = false;
 
     /**
      * State of external call telling us if the lock screen is shown.
      */
-    boolean mLockScreenShown = false;
+    private boolean mLockScreenShown = false;
 
     /**
      * Set if we are shutting down the system, similar to sleeping.
@@ -1117,6 +1130,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int REQUEST_ALL_PSS_MSG = 39;
     static final int START_PROFILES_MSG = 40;
     static final int UPDATE_TIME = 41;
+    static final int SYSTEM_USER_START_MSG = 42;
+    static final int SYSTEM_USER_CURRENT_MSG = 43;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1696,15 +1711,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                 break;
             }
             case REPORT_USER_SWITCH_MSG: {
-                dispatchUserSwitch((UserStartedState)msg.obj, msg.arg1, msg.arg2);
+                dispatchUserSwitch((UserStartedState) msg.obj, msg.arg1, msg.arg2);
                 break;
             }
             case CONTINUE_USER_SWITCH_MSG: {
-                continueUserSwitch((UserStartedState)msg.obj, msg.arg1, msg.arg2);
+                continueUserSwitch((UserStartedState) msg.obj, msg.arg1, msg.arg2);
                 break;
             }
             case USER_SWITCH_TIMEOUT_MSG: {
-                timeoutUserSwitch((UserStartedState)msg.obj, msg.arg1, msg.arg2);
+                timeoutUserSwitch((UserStartedState) msg.obj, msg.arg1, msg.arg2);
                 break;
             }
             case IMMERSIVE_MODE_LOCK_MSG: {
@@ -1749,6 +1764,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                 }
+                break;
+            }
+            case SYSTEM_USER_START_MSG: {
+                mSystemServiceManager.startUser(msg.arg1);
+                break;
+            }
+            case SYSTEM_USER_CURRENT_MSG: {
+                mSystemServiceManager.switchUser(msg.arg1);
                 break;
             }
             }
@@ -2059,6 +2082,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         Watchdog.getInstance().addThread(mHandler);
     }
 
+    public void setSystemServiceManager(SystemServiceManager mgr) {
+        mSystemServiceManager = mgr;
+    }
+
     private void start() {
         mProcessCpuThread.start();
 
@@ -2254,11 +2281,22 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (mFocusedActivity != r) {
             if (DEBUG_FOCUS) Slog.d(TAG, "setFocusedActivityLocked: r=" + r);
             mFocusedActivity = r;
+            if (r.task != null && r.task.voiceInteractor != null) {
+                startRunningVoiceLocked();
+            } else {
+                finishRunningVoiceLocked();
+            }
             mStackSupervisor.setFocusedStack(r);
             if (r != null) {
                 mWindowManager.setFocusedApp(r.appToken, true);
             }
             applyUpdateLockStateLocked(r);
+        }
+    }
+
+    final void clearFocusedActivity(ActivityRecord r) {
+        if (mFocusedActivity == r) {
+            mFocusedActivity = null;
         }
     }
 
@@ -2990,7 +3028,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     intent.setComponent(new ComponentName(
                             ri.activityInfo.packageName, ri.activityInfo.name));
                     mStackSupervisor.startActivityLocked(null, intent, null, ri.activityInfo,
-                            null, null, 0, 0, 0, null, 0, null, false, null, null);
+                            null, null, null, null, 0, 0, 0, null, 0, null, false, null, null);
                 }
             }
         }
@@ -3121,7 +3159,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         for (int i=0; i<N; i++) {
             PendingActivityLaunch pal = mPendingActivityLaunches.get(i);
-            mStackSupervisor.startActivityUncheckedLocked(pal.r, pal.sourceRecord, pal.startFlags,
+            mStackSupervisor.startActivityUncheckedLocked(pal.r, pal.sourceRecord, null, null, pal.startFlags,
                     doResume && i == (N-1), null);
         }
         mPendingActivityLaunches.clear();
@@ -3147,7 +3185,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 false, true, "startActivity", null);
         // TODO: Switch to user app stacks here.
         return mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
-                resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
+                null, null, resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
                 null, null, options, userId, null);
     }
 
@@ -3162,7 +3200,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         WaitResult res = new WaitResult();
         // TODO: Switch to user app stacks here.
         mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
-                resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
+                null, null, resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
                 res, null, options, UserHandle.getCallingUserId(), null);
         return res;
     }
@@ -3177,7 +3215,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 false, true, "startActivityWithConfig", null);
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent,
-                resolvedType, resultTo, resultWho, requestCode, startFlags,
+                resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
                 null, null, null, config, options, userId, null);
         return ret;
     }
@@ -3212,6 +3250,31 @@ public final class ActivityManagerService extends ActivityManagerNative
         int ret = pir.sendInner(0, fillInIntent, resolvedType, null, null,
                 resultTo, resultWho, requestCode, flagsMask, flagsValues, options, null);
         return ret;
+    }
+
+    @Override
+    public int startVoiceActivity(String callingPackage, int callingPid, int callingUid,
+            Intent intent, String resolvedType, IVoiceInteractionSession session,
+            IVoiceInteractor interactor, int startFlags, String profileFile,
+            ParcelFileDescriptor profileFd, Bundle options, int userId) {
+        if (checkCallingPermission(Manifest.permission.BIND_VOICE_INTERACTION)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: startVoiceActivity() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + android.Manifest.permission.BIND_VOICE_INTERACTION;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        if (session == null || interactor == null) {
+            throw new NullPointerException("null session or interactor");
+        }
+        userId = handleIncomingUser(callingPid, callingUid, userId,
+                false, true, "startVoiceActivity", null);
+        // TODO: Switch to user app stacks here.
+        return mStackSupervisor.startActivityMayWait(null, callingUid, callingPackage, intent,
+                resolvedType, session, interactor, null, null, 0, startFlags,
+                profileFile, profileFd, null, null, options, userId, null);
     }
 
     @Override
@@ -3307,7 +3370,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             final long origId = Binder.clearCallingIdentity();
             int res = mStackSupervisor.startActivityLocked(r.app.thread, intent,
-                    r.resolvedType, aInfo, resultTo != null ? resultTo.appToken : null,
+                    r.resolvedType, aInfo, null, null, resultTo != null ? resultTo.appToken : null,
                     resultWho, requestCode, -1, r.launchedFromUid, r.launchedFromPackage, 0,
                     options, false, null, null);
             Binder.restoreCallingIdentity(origId);
@@ -3330,7 +3393,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivityMayWait(null, uid, callingPackage, intent, resolvedType,
-                resultTo, resultWho, requestCode, startFlags,
+                null, null, resultTo, resultWho, requestCode, startFlags,
                 null, null, null, null, options, userId, container);
         return ret;
     }
@@ -3364,6 +3427,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         int N = mRecentTasks.size();
         // Quick case: check if the top-most recent task is the same.
         if (N > 0 && mRecentTasks.get(0) == task) {
+            return;
+        }
+        // Another quick case: never add voice sessions.
+        if (task.voiceSession != null) {
             return;
         }
         // Remove any existing entries that are the same kind of task.
@@ -8509,11 +8576,27 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mSleeping || mShuttingDown;
     }
 
+    public boolean isSleeping() {
+        return mSleeping;
+    }
+
     void goingToSleep() {
         synchronized(this) {
             mWentToSleep = true;
             updateEventDispatchingLocked();
+            goToSleepIfNeededLocked();
+        }
+    }
 
+    void finishRunningVoiceLocked() {
+        if (mRunningVoice) {
+            mRunningVoice = false;
+            goToSleepIfNeededLocked();
+        }
+    }
+
+    void goToSleepIfNeededLocked() {
+        if (mWentToSleep && !mRunningVoice) {
             if (!mSleeping) {
                 mSleeping = true;
                 mStackSupervisor.goingToSleepLocked();
@@ -8576,7 +8659,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void comeOutOfSleepIfNeededLocked() {
-        if (!mWentToSleep && !mLockScreenShown) {
+        if ((!mWentToSleep && !mLockScreenShown) || mRunningVoice) {
             if (mSleeping) {
                 mSleeping = false;
                 mStackSupervisor.comeOutOfSleepIfNeededLocked();
@@ -8588,6 +8671,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             mWentToSleep = false;
             updateEventDispatchingLocked();
+            comeOutOfSleepIfNeededLocked();
+        }
+    }
+
+    void startRunningVoiceLocked() {
+        if (!mRunningVoice) {
+            mRunningVoice = true;
             comeOutOfSleepIfNeededLocked();
         }
     }
@@ -9298,7 +9388,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     proc.notCachedSinceIdle = true;
                     proc.initialIdlePss = 0;
                     proc.nextPssTime = ProcessList.computeNextPssTime(proc.curProcState, true,
-                            mSleeping, now);
+                            isSleeping(), now);
                 }
             }
 
@@ -9597,6 +9687,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (goingCallback != null) goingCallback.run();
         
+        mSystemServiceManager.startUser(mCurrentUserId);
+
         synchronized (this) {
             if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
                 try {
@@ -9653,6 +9745,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }, 0, null, null,
                         android.Manifest.permission.INTERACT_ACROSS_USERS, AppOpsManager.OP_NONE,
                         true, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
+            } catch (Throwable t) {
+                Slog.wtf(TAG, "Failed sending first user broadcasts", t);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -11152,8 +11246,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("  mSleeping=" + mSleeping + " mWentToSleep=" + mWentToSleep
                         + " mLockScreenShown " + mLockScreenShown);
             }
-            if (mShuttingDown) {
-                pw.println("  mShuttingDown=" + mShuttingDown);
+            if (mShuttingDown || mRunningVoice) {
+                pw.print("  mShuttingDown=" + mShuttingDown + " mRunningVoice=" + mRunningVoice);
             }
         }
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
@@ -15273,7 +15367,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (memLowered || now > (app.lastStateTime+ProcessList.PSS_ALL_INTERVAL)) {
                 app.pssProcState = app.setProcState;
                 app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, true,
-                        mSleeping, now);
+                        isSleeping(), now);
                 mPendingPssProcesses.add(app);
             }
         }
@@ -15310,7 +15404,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         return !processingBroadcasts
-                && (mSleeping || mStackSupervisor.allResumedActivitiesIdle());
+                && (isSleeping() || mStackSupervisor.allResumedActivitiesIdle());
     }
     
     /**
@@ -15585,7 +15679,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 app.setProcState)) {
             app.lastStateTime = now;
             app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, true,
-                    mSleeping, now);
+                    isSleeping(), now);
             if (DEBUG_PSS) Slog.d(TAG, "Process state change from "
                     + ProcessList.makeProcStateString(app.setProcState) + " to "
                     + ProcessList.makeProcStateString(app.curProcState) + " next pss in "
@@ -15595,7 +15689,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     && now > (app.lastStateTime+ProcessList.PSS_MIN_TIME_FROM_STATE_CHANGE))) {
                 requestPssLocked(app, app.setProcState);
                 app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, false,
-                        mSleeping, now);
+                        isSleeping(), now);
             } else if (false && DEBUG_PSS) {
                 Slog.d(TAG, "Not requesting PSS of " + app + ": next=" + (app.nextPssTime-now));
             }
@@ -15932,7 +16026,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mLruProcesses.size();
-        boolean allChanged = mProcessStats.setMemFactorLocked(memFactor, !mSleeping, now);
+        boolean allChanged = mProcessStats.setMemFactorLocked(memFactor, !isSleeping(), now);
         final int trackerMemFactor = mProcessStats.getMemFactorLocked();
         if (memFactor != ProcessStats.ADJ_MEM_FACTOR_NORMAL) {
             if (mLowRamStartTime == 0) {
@@ -16475,7 +16569,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     needStart = true;
                 }
 
+                if (uss.mState == UserStartedState.STATE_BOOTING) {
+                    // Booting up a new user, need to tell system services about it.
+                    // Note that this is on the same handler as scheduling of broadcasts,
+                    // which is important because it needs to go first.
+                    mHandler.sendMessage(mHandler.obtainMessage(SYSTEM_USER_START_MSG, userId));
+                }
+
                 if (foreground) {
+                    mHandler.sendMessage(mHandler.obtainMessage(SYSTEM_USER_CURRENT_MSG, userId));
                     mHandler.removeMessages(REPORT_USER_SWITCH_MSG);
                     mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
                     mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_MSG,
@@ -16830,6 +16932,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             }
                             uss.mState = UserStartedState.STATE_SHUTDOWN;
                         }
+                        mSystemServiceManager.stopUser(userId);
                         broadcastIntentLocked(null, null, shutdownIntent,
                                 null, shutdownReceiver, 0, null, null, null, AppOpsManager.OP_NONE,
                                 true, false, MY_PID, Process.SYSTEM_UID, userId);
@@ -16879,7 +16982,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        mStackSupervisor.removeUserLocked(userId);
+        if (stopped) {
+            mSystemServiceManager.cleanupUser(userId);
+            synchronized (this) {
+                mStackSupervisor.removeUserLocked(userId);
+            }
+        }
     }
 
     @Override

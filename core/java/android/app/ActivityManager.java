@@ -76,6 +76,13 @@ public class ActivityManager {
     public static final String META_HOME_ALTERNATE = "android.app.home.alternate";
 
     /**
+     * Result for IActivityManager.startActivity: trying to start an activity under voice
+     * control when that activity does not support the VOICE category.
+     * @hide
+     */
+    public static final int START_NOT_VOICE_COMPATIBLE = -7;
+
+    /**
      * Result for IActivityManager.startActivity: an error where the
      * start had to be canceled.
      * @hide
