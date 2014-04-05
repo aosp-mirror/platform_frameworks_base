@@ -153,23 +153,3 @@ int ASensor_getMinDelay(ASensor const* sensor)
 {
     return static_cast<Sensor const*>(sensor)->getMinDelay();
 }
-
-int ASensor_getFifoMaxEventCount(ASensor const* sensor)
-{
-    return static_cast<Sensor const*>(sensor)->getFifoMaxEventCount();
-}
-
-int ASensor_getFifoReservedEventCount(ASensor const* sensor)
-{
-    return static_cast<Sensor const*>(sensor)->getFifoReservedEventCount();
-}
-
-const char* ASensor_getStringType(ASensor const* sensor)
-{
-    return static_cast<Sensor const*>(sensor)->getStringType().string();
-}
-
-const char* ASensor_getRequiredPermission(ASensor const* sensor)
-{
-    return static_cast<Sensor const*>(sensor)->getRequiredPermission().string();
-}
