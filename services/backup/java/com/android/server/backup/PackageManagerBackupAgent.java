@@ -19,15 +19,19 @@ package com.android.server.backup;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
+import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -41,6 +45,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import java.util.Objects;
 
 /**
  * We back up the signatures of each package so that during a system restore,
@@ -58,6 +64,9 @@ public class PackageManagerBackupAgent extends BackupAgent {
     // is stored using the package name as a key)
     private static final String GLOBAL_METADATA_KEY = "@meta@";
 
+    // key under which we store the identity of the user's chosen default home app
+    private static final String DEFAULT_HOME_KEY = "@home@";
+
     private List<PackageInfo> mAllPackages;
     private PackageManager mPackageManager;
     // version & signature info of each app in a restore set
@@ -68,7 +77,15 @@ public class PackageManagerBackupAgent extends BackupAgent {
     private final HashSet<String> mExisting = new HashSet<String>();
     private int mStoredSdkVersion;
     private String mStoredIncrementalVersion;
+    private ComponentName mStoredHomeComponent;
+    private long mStoredHomeVersion;
+    private Signature[] mStoredHomeSigs;
+
     private boolean mHasMetadata;
+    private ComponentName mRestoredHome;
+    private long mRestoredHomeVersion;
+    private String mRestoredHomeInstaller;
+    private Signature[] mRestoredHomeSignatures;
 
     public class Metadata {
         public int versionCode;
@@ -136,7 +153,50 @@ public class PackageManagerBackupAgent extends BackupAgent {
             mExisting.clear();
         }
 
+        long homeVersion = 0;
+        Signature[] homeSigs = null;
+        PackageInfo homeInfo = null;
+        String homeInstaller = null;
+        ComponentName home = getPreferredHomeComponent();
+        if (home != null) {
+            try {
+                homeInfo = mPackageManager.getPackageInfo(home.getPackageName(),
+                        PackageManager.GET_SIGNATURES);
+                homeInstaller = mPackageManager.getInstallerPackageName(home.getPackageName());
+                homeVersion = homeInfo.versionCode;
+                homeSigs = homeInfo.signatures;
+            } catch (NameNotFoundException e) {
+                Slog.w(TAG, "Can't access preferred home info");
+                // proceed as though there were no preferred home set
+                home = null;
+            }
+        }
+
         try {
+            // We need to push a new preferred-home-app record if:
+            //    1. the version of the home app has changed since our last backup;
+            //    2. the home app [or absence] we now use differs from the prior state,
+            // OR 3. it looks like we use the same home app + version as before, but
+            //       the signatures don't match so we treat them as different apps.
+            final boolean needHomeBackup = (homeVersion != mStoredHomeVersion)
+                    || Objects.equals(home, mStoredHomeComponent)
+                    || (home != null
+                        && !BackupManagerService.signaturesMatch(mStoredHomeSigs, homeInfo));
+            if (needHomeBackup) {
+                if (DEBUG) {
+                    Slog.i(TAG, "Home preference changed; backing up new state " + home);
+                }
+                if (home != null) {
+                    outputBufferStream.writeUTF(home.flattenToString());
+                    outputBufferStream.writeLong(homeVersion);
+                    outputBufferStream.writeUTF(homeInstaller);
+                    writeSignatureArray(outputBufferStream, homeSigs);
+                    writeEntity(data, DEFAULT_HOME_KEY, outputBuffer.toByteArray());
+                } else {
+                    data.writeEntityHeader(DEFAULT_HOME_KEY, -1);
+                }
+            }
+
             /*
              * Global metadata:
              *
@@ -146,6 +206,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
              * String incremental -- the incremental release name of the OS stored in
              *                       the backup set.
              */
+            outputBuffer.reset();
             if (!mExisting.contains(GLOBAL_METADATA_KEY)) {
                 if (DEBUG) Slog.v(TAG, "Storing global metadata key");
                 outputBufferStream.writeInt(Build.VERSION.SDK_INT);
@@ -238,7 +299,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
         }
 
         // Finally, write the new state blob -- just the list of all apps we handled
-        writeStateFile(mAllPackages, newState);
+        writeStateFile(mAllPackages, home, homeVersion, homeSigs, newState);
     }
     
     private static void writeEntity(BackupDataOutput data, String key, byte[] bytes)
@@ -286,6 +347,19 @@ public class PackageManagerBackupAgent extends BackupAgent {
                             + " (" + mStoredIncrementalVersion + " vs "
                             + Build.VERSION.INCREMENTAL + ")");
                 }
+            } else if (key.equals(DEFAULT_HOME_KEY)) {
+                String cn = inputBufferStream.readUTF();
+                mRestoredHome = ComponentName.unflattenFromString(cn);
+                mRestoredHomeVersion = inputBufferStream.readLong();
+                mRestoredHomeInstaller = inputBufferStream.readUTF();
+                mRestoredHomeSignatures = readSignatureArray(inputBufferStream);
+                if (DEBUG) {
+                    Slog.i(TAG, "   read preferred home app " + mRestoredHome
+                            + " version=" + mRestoredHomeVersion
+                            + " installer=" + mRestoredHomeVersion
+                            + " sig=" + mRestoredHomeVersion);
+                }
+
             } else {
                 // it's a file metadata record
                 int versionCode = inputBufferStream.readInt();
@@ -365,18 +439,34 @@ public class PackageManagerBackupAgent extends BackupAgent {
         mStateVersions.clear();
         mStoredSdkVersion = 0;
         mStoredIncrementalVersion = null;
+        mStoredHomeComponent = null;
+        mStoredHomeVersion = 0;
+        mStoredHomeSigs = null;
 
         // The state file is just the list of app names we have stored signatures for
         // with the exception of the metadata block, to which is also appended the
         // version numbers corresponding with the last time we wrote this PM block.
         // If they mismatch the current system, we'll re-store the metadata key.
         FileInputStream instream = new FileInputStream(stateFile.getFileDescriptor());
-        DataInputStream in = new DataInputStream(instream);
+        BufferedInputStream inbuffer = new BufferedInputStream(instream);
+        DataInputStream in = new DataInputStream(inbuffer);
 
-        int bufSize = 256;
-        byte[] buf = new byte[bufSize];
         try {
             String pkg = in.readUTF();
+
+            // First comes the preferred home app data, if any, headed by the DEFAULT_HOME_KEY tag
+            if (pkg.equals(DEFAULT_HOME_KEY)) {
+                // flattened component name, version, signature of the home app
+                mStoredHomeComponent = ComponentName.unflattenFromString(in.readUTF());
+                mStoredHomeVersion = in.readLong();
+                mStoredHomeSigs = readSignatureArray(in);
+
+                pkg = in.readUTF(); // set up for the next block of state
+            } else {
+                // else no preferred home app on the ancestral device - fall through to the rest
+            }
+
+            // After (possible) home app data comes the global metadata block
             if (pkg.equals(GLOBAL_METADATA_KEY)) {
                 mStoredSdkVersion = in.readInt();
                 mStoredIncrementalVersion = in.readUTF();
@@ -386,7 +476,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 return;
             }
 
-            // The global metadata was first; now read all the apps
+            // The global metadata was last; now read all the apps
             while (true) {
                 pkg = in.readUTF();
                 int versionCode = in.readInt();
@@ -401,13 +491,28 @@ public class PackageManagerBackupAgent extends BackupAgent {
         }
     }
 
-    // Util: write out our new backup state file
-    private void writeStateFile(List<PackageInfo> pkgs, ParcelFileDescriptor stateFile) {
-        FileOutputStream outstream = new FileOutputStream(stateFile.getFileDescriptor());
-        DataOutputStream out = new DataOutputStream(outstream);
+    private ComponentName getPreferredHomeComponent() {
+        return mPackageManager.getHomeActivities(new ArrayList<ResolveInfo>());
+    }
 
+    // Util: write out our new backup state file
+    private void writeStateFile(List<PackageInfo> pkgs, ComponentName preferredHome,
+            long homeVersion, Signature[] homeSignatures, ParcelFileDescriptor stateFile) {
+        FileOutputStream outstream = new FileOutputStream(stateFile.getFileDescriptor());
+        BufferedOutputStream outbuf = new BufferedOutputStream(outstream);
+        DataOutputStream out = new DataOutputStream(outbuf);
+
+        // by the time we get here we know we've done all our backing up
         try {
-            // by the time we get here we know we've stored the global metadata record
+            // If we remembered a preferred home app, record that
+            if (preferredHome != null) {
+                out.writeUTF(DEFAULT_HOME_KEY);
+                out.writeUTF(preferredHome.flattenToString());
+                out.writeLong(homeVersion);
+                writeSignatureArray(out, homeSignatures);
+            }
+
+            // Conclude with the metadata block
             out.writeUTF(GLOBAL_METADATA_KEY);
             out.writeInt(Build.VERSION.SDK_INT);
             out.writeUTF(Build.VERSION.INCREMENTAL);
@@ -417,9 +522,10 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 out.writeUTF(pkg.packageName);
                 out.writeInt(pkg.versionCode);
             }
+
+            out.flush();
         } catch (IOException e) {
             Slog.e(TAG, "Unable to write package manager state file!");
-            return;
         }
     }
 }
