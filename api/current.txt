@@ -19254,11 +19254,12 @@ package android.os {
     field public static final int L = 10000; // 0x2710
   }
 
-  public final class Bundle implements java.lang.Cloneable android.os.Parcelable {
+  public final class Bundle extends android.os.CommonBundle {
     ctor public Bundle();
     ctor public Bundle(java.lang.ClassLoader);
     ctor public Bundle(int);
     ctor public Bundle(android.os.Bundle);
+    ctor public Bundle(android.os.PersistableBundle);
     method public void clear();
     method public java.lang.Object clone();
     method public boolean containsKey(java.lang.String);
@@ -19296,6 +19297,7 @@ package android.os {
     method public T getParcelable(java.lang.String);
     method public android.os.Parcelable[] getParcelableArray(java.lang.String);
     method public java.util.ArrayList<T> getParcelableArrayList(java.lang.String);
+    method public android.os.PersistableBundle getPersistableBundle(java.lang.String);
     method public java.io.Serializable getSerializable(java.lang.String);
     method public short getShort(java.lang.String);
     method public short getShort(java.lang.String, short);
@@ -19309,6 +19311,7 @@ package android.os {
     method public boolean isEmpty();
     method public java.util.Set<java.lang.String> keySet();
     method public void putAll(android.os.Bundle);
+    method public void putAll(android.os.PersistableBundle);
     method public void putBinder(java.lang.String, android.os.IBinder);
     method public void putBoolean(java.lang.String, boolean);
     method public void putBooleanArray(java.lang.String, boolean[]);
@@ -19332,6 +19335,7 @@ package android.os {
     method public void putParcelable(java.lang.String, android.os.Parcelable);
     method public void putParcelableArray(java.lang.String, android.os.Parcelable[]);
     method public void putParcelableArrayList(java.lang.String, java.util.ArrayList<? extends android.os.Parcelable>);
+    method public void putPersistableBundle(java.lang.String, android.os.PersistableBundle);
     method public void putSerializable(java.lang.String, java.io.Serializable);
     method public void putShort(java.lang.String, short);
     method public void putShortArray(java.lang.String, short[]);
@@ -19358,6 +19362,9 @@ package android.os {
 
   public static abstract interface CancellationSignal.OnCancelListener {
     method public abstract void onCancel();
+  }
+
+   abstract class CommonBundle implements java.lang.Cloneable android.os.Parcelable {
   }
 
   public class ConditionVariable {
@@ -19786,6 +19793,8 @@ package android.os {
     method public final void readMap(java.util.Map, java.lang.ClassLoader);
     method public final T readParcelable(java.lang.ClassLoader);
     method public final android.os.Parcelable[] readParcelableArray(java.lang.ClassLoader);
+    method public final android.os.PersistableBundle readPersistableBundle();
+    method public final android.os.PersistableBundle readPersistableBundle(java.lang.ClassLoader);
     method public final java.io.Serializable readSerializable();
     method public final android.util.SparseArray readSparseArray(java.lang.ClassLoader);
     method public final android.util.SparseBooleanArray readSparseBooleanArray();
@@ -19826,6 +19835,7 @@ package android.os {
     method public final void writeNoException();
     method public final void writeParcelable(android.os.Parcelable, int);
     method public final void writeParcelableArray(T[], int);
+    method public final void writePersistableBundle(android.os.PersistableBundle);
     method public final void writeSerializable(java.io.Serializable);
     method public final void writeSparseArray(android.util.SparseArray<java.lang.Object>);
     method public final void writeSparseBooleanArray(android.util.SparseBooleanArray);
@@ -19934,6 +19944,51 @@ package android.os {
     field public static final int PATTERN_LITERAL = 0; // 0x0
     field public static final int PATTERN_PREFIX = 1; // 0x1
     field public static final int PATTERN_SIMPLE_GLOB = 2; // 0x2
+  }
+
+  public final class PersistableBundle extends android.os.CommonBundle {
+    ctor public PersistableBundle();
+    ctor public PersistableBundle(java.lang.ClassLoader);
+    ctor public PersistableBundle(int);
+    ctor public PersistableBundle(android.os.PersistableBundle);
+    method public void clear();
+    method public java.lang.Object clone();
+    method public boolean containsKey(java.lang.String);
+    method public int describeContents();
+    method public java.lang.Object get(java.lang.String);
+    method public java.lang.ClassLoader getClassLoader();
+    method public double getDouble(java.lang.String);
+    method public double getDouble(java.lang.String, double);
+    method public double[] getDoubleArray(java.lang.String);
+    method public int getInt(java.lang.String);
+    method public int getInt(java.lang.String, int);
+    method public int[] getIntArray(java.lang.String);
+    method public long getLong(java.lang.String);
+    method public long getLong(java.lang.String, long);
+    method public long[] getLongArray(java.lang.String);
+    method public android.os.PersistableBundle getPersistableBundle(java.lang.String);
+    method public java.lang.String getString(java.lang.String);
+    method public java.lang.String getString(java.lang.String, java.lang.String);
+    method public java.lang.String[] getStringArray(java.lang.String);
+    method public boolean isEmpty();
+    method public java.util.Set<java.lang.String> keySet();
+    method public void putAll(android.os.PersistableBundle);
+    method public void putDouble(java.lang.String, double);
+    method public void putDoubleArray(java.lang.String, double[]);
+    method public void putInt(java.lang.String, int);
+    method public void putIntArray(java.lang.String, int[]);
+    method public void putLong(java.lang.String, long);
+    method public void putLongArray(java.lang.String, long[]);
+    method public void putPersistableBundle(java.lang.String, android.os.PersistableBundle);
+    method public void putString(java.lang.String, java.lang.String);
+    method public void putStringArray(java.lang.String, java.lang.String[]);
+    method public void readFromParcel(android.os.Parcel);
+    method public void remove(java.lang.String);
+    method public void setClassLoader(java.lang.ClassLoader);
+    method public int size();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.PersistableBundle EMPTY;
   }
 
   public final class PowerManager {
