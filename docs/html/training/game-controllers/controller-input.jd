@@ -236,26 +236,33 @@ buttons.</p>
   </tr>
   <tr>
     <td>Start game in main menu, or pause/unpause during game</td>
-    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_START BUTTON_START}</td>
+    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_START BUTTON_START}<sup>*</sup></td>
   </tr>
   <tr>
     <td>Display menu</td>
-    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_SELECT BUTTON_SELECT} and
-{@link android.view.KeyEvent#KEYCODE_MENU}</td>
+    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_SELECT BUTTON_SELECT}<sup>*</sup>
+      and {@link android.view.KeyEvent#KEYCODE_MENU}<sup>*</sup></td>
   </tr>
   <tr>
     <td>Same as Android <em>Back</em></td>
-    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_B BUTTON_B}<sup>*</sup> and
-{@link android.view.KeyEvent#KEYCODE_BACK KEYCODE_BACK}</td>
+    <td>{@link android.view.KeyEvent#KEYCODE_BACK KEYCODE_BACK}</td>
+  </tr>
+  <tr>
+    <td>Navigate back to a previous item in a menu</td>
+    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_B BUTTON_B}<sup>**</sup></td>
   </tr>
   <tr>
     <td>Confirm selection, or perform primary game action</td>
-    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_A BUTTON_A}<sup>*</sup> and
+    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_A BUTTON_A}<sup>**</sup> and
 {@link android.view.KeyEvent#KEYCODE_DPAD_CENTER DPAD_CENTER}</td>
   </tr>
 </table>
 <p>
-<em>* This could be the opposite button (A/B), depending on the locale that
+<em>* Your game should not rely on the presence of the Start, Select, or Menu
+  buttons.</em>
+</p>
+<p>
+<em>** This could be the opposite button (A/B), depending on the locale that
 you are supporting.</em>
 </p>
 
