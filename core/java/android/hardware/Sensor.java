@@ -38,25 +38,11 @@ public final class Sensor {
     public static final int TYPE_ACCELEROMETER = 1;
 
     /**
-     * A constant string describing an accelerometer sensor type.
-     *
-     * @see #TYPE_ACCELEROMETER
-     */
-    public static final String STRING_TYPE_ACCELEROMETER = "android.sensor.accelerometer";
-
-    /**
      * A constant describing a magnetic field sensor type.
      * <p>See {@link android.hardware.SensorEvent#values SensorEvent.values}
      * for more details.
      */
     public static final int TYPE_MAGNETIC_FIELD = 2;
-
-    /**
-     * A constant string describing a magnetic field sensor type.
-     *
-     * @see #TYPE_MAGNETIC_FIELD
-     */
-    public static final String STRING_TYPE_MAGNETIC_FIELD = "android.sensor.magnetic_field";
 
     /**
      * A constant describing an orientation sensor type.
@@ -69,28 +55,10 @@ public final class Sensor {
     @Deprecated
     public static final int TYPE_ORIENTATION = 3;
 
-    /**
-     * A constant string describing an orientation sensor type.
-     *
-     * @see #TYPE_ORIENTATION
-     * @deprecated use {@link android.hardware.SensorManager#getOrientation
-     *             SensorManager.getOrientation()} instead.
-     */
-    @Deprecated
-    public static final String STRING_TYPE_ORIENTATION = "android.sensor.orientation";
-
-    /**
-     * A constant describing a gyroscope sensor type.
+    /** A constant describing a gyroscope sensor type.
      * <p>See {@link android.hardware.SensorEvent#values SensorEvent.values}
      * for more details. */
     public static final int TYPE_GYROSCOPE = 4;
-
-    /**
-     * A constant string describing a gyroscope sensor type.
-     *
-     * @see #TYPE_GYROSCOPE
-     */
-    public static final String STRING_TYPE_GYROSCOPE = "android.sensor.gyroscope";
 
     /**
      * A constant describing a light sensor type.
@@ -99,26 +67,10 @@ public final class Sensor {
      */
     public static final int TYPE_LIGHT = 5;
 
-    /**
-     * A constant string describing a light sensor type.
-     *
-     * @see #TYPE_LIGHT
-     */
-    public static final String STRING_TYPE_LIGHT = "android.sensor.light";
-
-    /**
-     * A constant describing a pressure sensor type.
+    /** A constant describing a pressure sensor type.
      * <p>See {@link android.hardware.SensorEvent#values SensorEvent.values}
-     * for more details.
-     */
+     * for more details. */
     public static final int TYPE_PRESSURE = 6;
-
-    /**
-     * A constant string describing a pressure sensor type.
-     *
-     * @see #TYPE_PRESSURE
-     */
-    public static final String STRING_TYPE_PRESSURE = "android.sensor.pressure";
 
     /**
      * A constant describing a temperature sensor type
@@ -131,29 +83,11 @@ public final class Sensor {
     public static final int TYPE_TEMPERATURE = 7;
 
     /**
-     * A constant string describing a temperature sensor type
-     *
-     * @see #TYPE_TEMPERATURE
-     * @deprecated use
-     *             {@link android.hardware.Sensor#STRING_TYPE_AMBIENT_TEMPERATURE
-     *             Sensor.STRING_TYPE_AMBIENT_TEMPERATURE} instead.
-     */
-    @Deprecated
-    public static final String STRING_TYPE_TEMPERATURE = "android.sensor.temperature";
-
-    /**
      * A constant describing a proximity sensor type.
      * <p>See {@link android.hardware.SensorEvent#values SensorEvent.values}
      * for more details.
      */
     public static final int TYPE_PROXIMITY = 8;
-
-    /**
-     * A constant string describing a proximity sensor type.
-     *
-     * @see #TYPE_PROXIMITY
-     */
-    public static final String STRING_TYPE_PROXIMITY = "android.sensor.proximity";
 
     /**
      * A constant describing a gravity sensor type.
@@ -163,26 +97,11 @@ public final class Sensor {
     public static final int TYPE_GRAVITY = 9;
 
     /**
-     * A constant string describing a gravity sensor type.
-     *
-     * @see #TYPE_GRAVITY
-     */
-    public static final String STRING_TYPE_GRAVITY = "android.sensor.gravity";
-
-    /**
      * A constant describing a linear acceleration sensor type.
      * <p>See {@link android.hardware.SensorEvent#values SensorEvent.values}
      * for more details.
      */
     public static final int TYPE_LINEAR_ACCELERATION = 10;
-
-    /**
-     * A constant string describing a linear acceleration sensor type.
-     *
-     * @see #TYPE_LINEAR_ACCELERATION
-     */
-    public static final String STRING_TYPE_LINEAR_ACCELERATION =
-        "android.sensor.linear_acceleration";
 
     /**
      * A constant describing a rotation vector sensor type.
@@ -192,40 +111,16 @@ public final class Sensor {
     public static final int TYPE_ROTATION_VECTOR = 11;
 
     /**
-     * A constant string describing a rotation vector sensor type.
-     *
-     * @see #TYPE_ROTATION_VECTOR
-     */
-    public static final String STRING_TYPE_ROTATION_VECTOR = "android.sensor.rotation_vector";
-
-    /**
      * A constant describing a relative humidity sensor type.
      * <p>See {@link android.hardware.SensorEvent#values SensorEvent.values}
      * for more details.
      */
     public static final int TYPE_RELATIVE_HUMIDITY = 12;
 
-    /**
-     * A constant string describing a relative humidity sensor type
-     *
-     * @see #TYPE_RELATIVE_HUMIDITY
-     */
-    public static final String STRING_TYPE_RELATIVE_HUMIDITY = "android.sensor.relative_humidity";
-
-    /**
-     * A constant describing an ambient temperature sensor type.
+    /** A constant describing an ambient temperature sensor type.
      * <p>See {@link android.hardware.SensorEvent#values SensorEvent.values}
-     * for more details.
-     */
+     * for more details. */
     public static final int TYPE_AMBIENT_TEMPERATURE = 13;
-
-    /**
-     * A constant string describing an ambient temperature sensor type.
-     *
-     * @see #TYPE_AMBIENT_TEMPERATURE
-     */
-    public static final String STRING_TYPE_AMBIENT_TEMPERATURE =
-        "android.sensor.ambient_temperature";
 
     /**
      * A constant describing an uncalibrated magnetic field sensor type.
@@ -244,13 +139,6 @@ public final class Sensor {
      * details.
      */
     public static final int TYPE_MAGNETIC_FIELD_UNCALIBRATED = 14;
-    /**
-     * A constant string describing an uncalibrated magnetic field sensor type.
-     *
-     * @see #TYPE_MAGNETIC_FIELD_UNCALIBRATED
-     */
-    public static final String STRING_TYPE_MAGNETIC_FIELD_UNCALIBRATED =
-        "android.sensor.magnetic_field_uncalibrated";
 
     /**
      * A constant describing an uncalibrated rotation vector sensor type.
@@ -268,15 +156,8 @@ public final class Sensor {
      * <p>See {@link android.hardware.SensorEvent#values SensorEvent.values} for more
      * details.
      */
-    public static final int TYPE_GAME_ROTATION_VECTOR = 15;
 
-    /**
-     * A constant string describing an uncalibrated rotation vector sensor type.
-     *
-     * @see #TYPE_GAME_ROTATION_VECTOR
-     */
-    public static final String STRING_TYPE_GAME_ROTATION_VECTOR =
-        "android.sensor.game_rotation_vector";
+    public static final int TYPE_GAME_ROTATION_VECTOR = 15;
 
     /**
      * A constant describing an uncalibrated gyroscope sensor type.
@@ -293,14 +174,6 @@ public final class Sensor {
     public static final int TYPE_GYROSCOPE_UNCALIBRATED = 16;
 
     /**
-     * A constant string describing an uncalibrated gyroscope sensor type.
-     *
-     * @see #TYPE_GYROSCOPE_UNCALIBRATED
-     */
-    public static final String STRING_TYPE_GYROSCOPE_UNCALIBRATED =
-        "android.sensor.gyroscope_uncalibrated";
-
-    /**
      * A constant describing a significant motion trigger sensor.
      * <p>
      * It triggers when an event occurs and then automatically disables
@@ -313,14 +186,6 @@ public final class Sensor {
     public static final int TYPE_SIGNIFICANT_MOTION = 17;
 
     /**
-     * A constant string describing a significant motion trigger sensor.
-     *
-     * @see #TYPE_SIGNIFICANT_MOTION
-     */
-    public static final String STRING_TYPE_SIGNIFICANT_MOTION =
-        "android.sensor.significant_motion";
-
-    /**
      * A constant describing a step detector sensor.
      * <p>
      * A sensor of this type triggers an event each time a step is taken by the user. The only
@@ -331,13 +196,6 @@ public final class Sensor {
      * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
      */
     public static final int TYPE_STEP_DETECTOR = 18;
-
-    /**
-     * A constant string describing a step detector sensor.
-     *
-     * @see #TYPE_STEP_DETECTOR
-     */
-    public static final String STRING_TYPE_STEP_DETECTOR = "android.sensor.step_detector";
 
     /**
      * A constant describing a step counter sensor.
@@ -353,14 +211,7 @@ public final class Sensor {
     public static final int TYPE_STEP_COUNTER = 19;
 
     /**
-     * A constant string describing a step counter sensor.
-     *
-     * @see #TYPE_STEP_COUNTER
-     */
-    public static final String STRING_TYPE_STEP_COUNTER = "android.sensor.step_counter";
-
-    /**
-     * A constant describing a geo-magnetic rotation vector.
+     * A constant describing the geo-magnetic rotation vector.
      * <p>
      * Similar to {@link #TYPE_ROTATION_VECTOR}, but using a magnetometer instead of using a
      * gyroscope. This sensor uses lower power than the other rotation vectors, because it doesn't
@@ -369,32 +220,6 @@ public final class Sensor {
      * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
      */
     public static final int TYPE_GEOMAGNETIC_ROTATION_VECTOR = 20;
-
-    /**
-     * A constant string describing a geo-magnetic rotation vector.
-     *
-     * @see #TYPE_GEOMAGNETIC_ROTATION_VECTOR
-     */
-    public static final String STRING_TYPE_GEOMAGNETIC_ROTATION_VECTOR =
-        "android.sensor.geomagnetic_rotation_vector";
-
-    /**
-     * A constant describing a heart rate monitor.
-     * <p>
-     * A sensor that measures the heart rate in beats per minute.
-     * <p>
-     * value[0] represents the beats per minute when the measurement was taken.
-     * value[0] is 0 if the heart rate monitor could not measure the rate or the
-     * rate is 0 beat per minute.
-     */
-    public static final int TYPE_HEART_RATE = 21;
-
-    /**
-     * A constant string describing a heart rate monitor.
-     *
-     * @see #TYPE_HEART_RATE
-     */
-    public static final String STRING_TYPE_HEART_RATE = "android.sensor.heart_rate";
 
     /**
      * A constant describing all sensor types.
@@ -440,8 +265,7 @@ public final class Sensor {
             // added post 4.3
             REPORTING_MODE_ON_CHANGE,  1, // SENSOR_TYPE_STEP_DETECTOR
             REPORTING_MODE_ON_CHANGE,  1, // SENSOR_TYPE_STEP_COUNTER
-            REPORTING_MODE_CONTINUOUS, 5, // SENSOR_TYPE_GEOMAGNETIC_ROTATION_VECTOR
-            REPORTING_MODE_ON_CHANGE, 1  // SENSOR_TYPE_HEART_RATE_MONITOR
+            REPORTING_MODE_CONTINUOUS, 5  // SENSOR_TYPE_GEOMAGNETIC_ROTATION_VECTOR
     };
 
     static int getReportingMode(Sensor sensor) {
@@ -497,8 +321,6 @@ public final class Sensor {
     private int     mMinDelay;
     private int     mFifoReservedEventCount;
     private int     mFifoMaxEventCount;
-    private String  mStringType;
-    private String  mRequiredPermission;
 
     Sensor() {
     }
@@ -577,20 +399,6 @@ public final class Sensor {
      */
     public int getFifoMaxEventCount() {
         return mFifoMaxEventCount;
-    }
-
-    /**
-     * @return The type of this sensor as a string.
-     */
-    public String getStringType() {
-        return mStringType;
-    }
-
-    /**
-     * @return The permission required to access this sensor. If empty, no permission is required.
-     */
-    public String getRequiredPermission() {
-        return mRequiredPermission;
     }
 
     /** @hide */
