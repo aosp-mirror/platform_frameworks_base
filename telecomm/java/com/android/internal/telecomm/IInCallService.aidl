@@ -17,7 +17,7 @@
 package com.android.internal.telecomm;
 
 import android.telecomm.CallAudioState;
-import android.telecomm.CallInfo;
+import android.telecomm.InCallCall;
 
 import com.android.internal.telecomm.IInCallAdapter;
 
@@ -31,23 +31,13 @@ import com.android.internal.telecomm.IInCallAdapter;
 oneway interface IInCallService {
     void setInCallAdapter(in IInCallAdapter inCallAdapter);
 
-    void addCall(in CallInfo callInfo);
+    void addCall(in InCallCall call);
 
-    void setActive(String callId);
-
-    void setDisconnected(String callId, int disconnectCause);
-
-    void setDialing(in String callId);
-
-    void setOnHold(String callId);
-
-    void onAudioStateChanged(in CallAudioState audioState);
-
-    void setRinging(String callId);
+    void updateCall(in InCallCall call);
 
     void setPostDial(String callId, String remaining);
 
     void setPostDialWait(String callId, String remaining);
 
-    void setHandoffEnabled(String callId, boolean isHandoffEnabled);
+    void onAudioStateChanged(in CallAudioState audioState);
 }

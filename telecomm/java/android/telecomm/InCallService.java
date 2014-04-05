@@ -38,15 +38,10 @@ import com.android.internal.telecomm.IInCallService;
 public abstract class InCallService extends Service {
     private static final int MSG_SET_IN_CALL_ADAPTER = 1;
     private static final int MSG_ADD_CALL = 2;
-    private static final int MSG_SET_ACTIVE = 3;
-    private static final int MSG_SET_DISCONNECTED = 4;
-    private static final int MSG_SET_HOLD = 5;
+    private static final int MSG_UPDATE_CALL = 3;
+    private static final int MSG_SET_POST_DIAL = 4;
+    private static final int MSG_SET_POST_DIAL_WAIT = 5;
     private static final int MSG_ON_AUDIO_STATE_CHANGED = 6;
-    private static final int MSG_SET_DIALING = 7;
-    private static final int MSG_SET_RINGING = 8;
-    private static final int MSG_SET_POST_DIAL = 9;
-    private static final int MSG_SET_POST_DIAL_WAIT = 10;
-    private static final int MSG_SET_HANDOFF_ENABLED = 11;
 
     /** Default Handler used to consolidate binder method calls onto a single thread. */
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -54,21 +49,14 @@ public abstract class InCallService extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SET_IN_CALL_ADAPTER:
-                    InCallAdapter adapter = new InCallAdapter((IInCallAdapter) msg.obj);
-                    mAdapter = adapter;
-                    onAdapterAttached(adapter);
+                    mAdapter = new InCallAdapter((IInCallAdapter) msg.obj);
+                    onAdapterAttached(mAdapter);
                     break;
                 case MSG_ADD_CALL:
-                    addCall((CallInfo) msg.obj);
+                    addCall((InCallCall) msg.obj);
                     break;
-                case MSG_SET_ACTIVE:
-                    setActive((String) msg.obj);
-                    break;
-                case MSG_SET_DIALING:
-                    setDialing((String) msg.obj);
-                    break;
-                case MSG_SET_RINGING:
-                    setRinging((String) msg.obj);
+                case MSG_UPDATE_CALL:
+                    updateCall((InCallCall) msg.obj);
                     break;
                 case MSG_SET_POST_DIAL: {
                     SomeArgs args = (SomeArgs) msg.obj;
@@ -92,17 +80,8 @@ public abstract class InCallService extends Service {
                     }
                     break;
                 }
-                case MSG_SET_DISCONNECTED:
-                    setDisconnected((String) msg.obj, msg.arg1);
-                    break;
-                case MSG_SET_HOLD:
-                    setOnHold((String) msg.obj);
-                    break;
                 case MSG_ON_AUDIO_STATE_CHANGED:
                     onAudioStateChanged((CallAudioState) msg.obj);
-                    break;
-                case MSG_SET_HANDOFF_ENABLED:
-                    setHandoffEnabled((String) msg.obj, msg.arg1 == 1 ? true : false);
                     break;
                 default:
                     break;
@@ -120,42 +99,14 @@ public abstract class InCallService extends Service {
 
         /** {@inheritDoc} */
         @Override
-        public void addCall(CallInfo callInfo) {
-            mHandler.obtainMessage(MSG_ADD_CALL, callInfo).sendToTarget();
+        public void addCall(InCallCall call) {
+            mHandler.obtainMessage(MSG_ADD_CALL, call).sendToTarget();
         }
 
         /** {@inheritDoc} */
         @Override
-        public void setActive(String callId) {
-            mHandler.obtainMessage(MSG_SET_ACTIVE, callId).sendToTarget();
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public void setDisconnected(String callId, int disconnectCause) {
-            mHandler.obtainMessage(MSG_SET_DISCONNECTED, disconnectCause, 0, callId).sendToTarget();
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public void setOnHold(String callId) {
-            mHandler.obtainMessage(MSG_SET_HOLD, callId).sendToTarget();
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public void onAudioStateChanged(CallAudioState audioState) {
-            mHandler.obtainMessage(MSG_ON_AUDIO_STATE_CHANGED, audioState).sendToTarget();
-        }
-
-        @Override
-        public void setDialing(String callId) {
-            mHandler.obtainMessage(MSG_SET_DIALING, callId).sendToTarget();
-        }
-
-        @Override
-        public void setRinging(String callId) {
-            mHandler.obtainMessage(MSG_SET_RINGING, callId).sendToTarget();
+        public void updateCall(InCallCall call) {
+            mHandler.obtainMessage(MSG_UPDATE_CALL, call).sendToTarget();
         }
 
         @Override
@@ -174,10 +125,10 @@ public abstract class InCallService extends Service {
             mHandler.obtainMessage(MSG_SET_POST_DIAL_WAIT, args).sendToTarget();
         }
 
+        /** {@inheritDoc} */
         @Override
-        public void setHandoffEnabled(String callId, boolean isHandoffEnabled) {
-            mHandler.obtainMessage(MSG_SET_HANDOFF_ENABLED, isHandoffEnabled ? 1 : 0, 0,
-                    callId).sendToTarget();
+        public void onAudioStateChanged(CallAudioState audioState) {
+            mHandler.obtainMessage(MSG_ON_AUDIO_STATE_CHANGED, audioState).sendToTarget();
         }
     }
 
@@ -212,75 +163,25 @@ public abstract class InCallService extends Service {
 
     /**
      * Indicates to the in-call app that a new call has been created and an appropriate
-     * user-interface should be built and shown to notify the user. Information about the call
-     * including its current state is passed in through the callInfo object.
+     * user-interface should be built and shown to notify the user.
      *
-     * @param callInfo Information about the new call.
+     * @param call Information about the new call.
      */
-     protected abstract void addCall(CallInfo callInfo);
+     protected abstract void addCall(InCallCall call);
 
     /**
-     * Indicates to the in-call app that the specified call is currently connected to another party
-     * and a communication channel is open between them. Normal transitions are to
-     * {@link #setDisconnected(String,int)} when the call is complete.
+     * Call when information about a call has changed.
      *
-     * @param callId The identifier of the call changing state.
+     * @param call Information about the new call.
      */
-    protected abstract void setActive(String callId);
-
-    /**
-     * Indicates to the in-call app that the specified call is outgoing and in the dialing state.
-     * Normal transition are to {@link #setActive(String)} if the call was answered,
-     * {@link #setPostDial(String,String)} if the dialed number includes a post-dial DTMF string, or
-     * {@link #setDisconnected(String,int)} if the call was disconnected immediately.
-     *
-     * @param callId The identifier of the call changing state.
-     */
-    protected abstract void setDialing(String callId);
-
-    /**
-     * Indicates to the in-call app that the specified call is incoming and the user still has the
-     * option of answering, rejecting, or doing nothing with the call. This state is usually
-     * associated with some type of audible ringtone. Normal transitions are to
-     * {@link #setActive(String)} if the call is answered, or {@link #setDisconnected(String,int)}
-     * if the call is not answered or is otherwise disconnected for some reason.
-     *
-     * @param callId The identifier of the call changing state.
-     */
-    protected abstract void setRinging(String callId);
-
-    /**
-     * Indicates to the in-call app that a call has been moved to the
-     * {@link CallState#DISCONNECTED} and the user should be notified.
-     *
-     * @param callId The identifier of the call that was disconnected.
-     * @param disconnectCause The reason for the disconnection, any of
-     *         {@link android.telephony.DisconnectCause}.
-     */
-    protected abstract void setDisconnected(String callId, int disconnectCause);
-
-    /**
-     * Indicates to the in-call app that a call has been moved to the
-     * {@link android.telecomm.CallState#ON_HOLD} state and the user should be notified.
-     *
-     * @param callId The identifier of the call that was put on hold.
-     */
-    protected abstract void setOnHold(String callId);
-
-    /**
-     * Called when the audio state changes.
-     *
-     * @param audioState The new {@link CallAudioState}.
-     */
-    protected abstract void onAudioStateChanged(CallAudioState audioState);
+     protected abstract void updateCall(InCallCall call);
 
     /**
      * Indicates to the in-call app that the specified call is active but in a "post-dial" state
      * where Telecomm is now sending some dual-tone multi-frequency signaling (DTMF) tones appended
      * to the dialed number. Normal transitions are to {@link #setPostDialWait(String,String)} when
      * the post-dial string requires user confirmation to proceed, {@link #setActive(String)} when
-     * the post-dial tones are completed, or {@link #setDisconnected(String,int)} if the call is
-     * disconnected.
+     * the post-dial tones are completed.
      *
      * @param callId The identifier of the call changing state.
      * @param remaining The remaining postdial string to be dialed.
@@ -300,10 +201,9 @@ public abstract class InCallService extends Service {
     protected abstract void setPostDialWait(String callId, String remaining);
 
     /**
-     * Called when the call's handoff state has changed.
+     * Called when the audio state changes.
      *
-     * @param callId The identifier of the call whose handoff state was changed.
-     * @param isHandoffEnabled True if handoff is enabled.
+     * @param audioState The new {@link CallAudioState}.
      */
-    protected abstract void setHandoffEnabled(String callId, boolean isHandoffEnabled);
+    protected abstract void onAudioStateChanged(CallAudioState audioState);
 }

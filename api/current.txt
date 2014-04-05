@@ -25011,21 +25011,31 @@ package android.telecomm {
     method public void unholdCall(java.lang.String);
   }
 
+  public final class InCallCall implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCapabilities();
+    method public long getConnectTimeMillis();
+    method public android.telecomm.CallServiceDescriptor getCurrentCallServiceDescriptor();
+    method public int getDisconnectCause();
+    method public android.telecomm.GatewayInfo getGatewayInfo();
+    method public android.net.Uri getHandle();
+    method public android.telecomm.CallServiceDescriptor getHandoffCallServiceDescriptor();
+    method public java.lang.String getId();
+    method public android.telecomm.CallState getState();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
   public abstract class InCallService extends android.app.Service {
     ctor protected InCallService();
-    method protected abstract void addCall(android.telecomm.CallInfo);
+    method protected abstract void addCall(android.telecomm.InCallCall);
     method protected final android.telecomm.InCallAdapter getAdapter();
     method protected void onAdapterAttached(android.telecomm.InCallAdapter);
     method protected abstract void onAudioStateChanged(android.telecomm.CallAudioState);
     method public final android.os.IBinder onBind(android.content.Intent);
-    method protected abstract void setActive(java.lang.String);
-    method protected abstract void setDialing(java.lang.String);
-    method protected abstract void setDisconnected(java.lang.String, int);
-    method protected abstract void setHandoffEnabled(java.lang.String, boolean);
-    method protected abstract void setOnHold(java.lang.String);
     method protected abstract void setPostDial(java.lang.String, java.lang.String);
     method protected abstract void setPostDialWait(java.lang.String, java.lang.String);
-    method protected abstract void setRinging(java.lang.String);
+    method protected abstract void updateCall(android.telecomm.InCallCall);
   }
 
   public final class TelecommConstants {
