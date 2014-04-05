@@ -51,6 +51,11 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
+    public void powerHint(int hintId, int data) {
+        // pass for now.
+    }
+
+    @Override
     public void crash(String arg0) throws RemoteException {
         // pass for now.
     }
