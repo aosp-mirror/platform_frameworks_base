@@ -6927,6 +6927,7 @@ package android.content {
     field public static final java.lang.String ACTION_PASTE = "android.intent.action.PASTE";
     field public static final java.lang.String ACTION_PICK = "android.intent.action.PICK";
     field public static final java.lang.String ACTION_PICK_ACTIVITY = "android.intent.action.PICK_ACTIVITY";
+    field public static final java.lang.String ACTION_PICK_DIRECTORY = "android.intent.action.PICK_DIRECTORY";
     field public static final java.lang.String ACTION_POWER_CONNECTED = "android.intent.action.ACTION_POWER_CONNECTED";
     field public static final java.lang.String ACTION_POWER_DISCONNECTED = "android.intent.action.ACTION_POWER_DISCONNECTED";
     field public static final java.lang.String ACTION_POWER_USAGE_SUMMARY = "android.intent.action.POWER_USAGE_SUMMARY";
@@ -22480,16 +22481,21 @@ package android.provider {
 
   public final class DocumentsContract {
     method public static android.net.Uri buildChildDocumentsUri(java.lang.String, java.lang.String);
+    method public static android.net.Uri buildChildDocumentsViaUri(android.net.Uri, java.lang.String);
     method public static android.net.Uri buildDocumentUri(java.lang.String, java.lang.String);
+    method public static android.net.Uri buildDocumentViaUri(android.net.Uri, java.lang.String);
     method public static android.net.Uri buildRecentDocumentsUri(java.lang.String, java.lang.String);
     method public static android.net.Uri buildRootUri(java.lang.String, java.lang.String);
     method public static android.net.Uri buildRootsUri(java.lang.String);
     method public static android.net.Uri buildSearchDocumentsUri(java.lang.String, java.lang.String, java.lang.String);
+    method public static android.net.Uri buildViaUri(java.lang.String, java.lang.String);
+    method public static android.net.Uri createDocument(android.content.ContentResolver, android.net.Uri, java.lang.String, java.lang.String);
     method public static boolean deleteDocument(android.content.ContentResolver, android.net.Uri);
     method public static java.lang.String getDocumentId(android.net.Uri);
     method public static android.graphics.Bitmap getDocumentThumbnail(android.content.ContentResolver, android.net.Uri, android.graphics.Point, android.os.CancellationSignal);
     method public static java.lang.String getRootId(android.net.Uri);
     method public static java.lang.String getSearchDocumentsQuery(android.net.Uri);
+    method public static java.lang.String getViaDocumentId(android.net.Uri);
     method public static boolean isDocumentUri(android.content.Context, android.net.Uri);
     field public static final java.lang.String EXTRA_ERROR = "error";
     field public static final java.lang.String EXTRA_INFO = "info";
@@ -22526,6 +22532,7 @@ package android.provider {
     field public static final java.lang.String COLUMN_TITLE = "title";
     field public static final int FLAG_LOCAL_ONLY = 2; // 0x2
     field public static final int FLAG_SUPPORTS_CREATE = 1; // 0x1
+    field public static final int FLAG_SUPPORTS_DIR_SELECTION = 16; // 0x10
     field public static final int FLAG_SUPPORTS_RECENTS = 4; // 0x4
     field public static final int FLAG_SUPPORTS_SEARCH = 8; // 0x8
   }
@@ -22538,6 +22545,9 @@ package android.provider {
     method public java.lang.String getDocumentType(java.lang.String) throws java.io.FileNotFoundException;
     method public final java.lang.String getType(android.net.Uri);
     method public final android.net.Uri insert(android.net.Uri, android.content.ContentValues);
+    method public boolean isChildDocument(java.lang.String, java.lang.String);
+    method public final android.content.res.AssetFileDescriptor openAssetFile(android.net.Uri, java.lang.String) throws java.io.FileNotFoundException;
+    method public final android.content.res.AssetFileDescriptor openAssetFile(android.net.Uri, java.lang.String, android.os.CancellationSignal) throws java.io.FileNotFoundException;
     method public abstract android.os.ParcelFileDescriptor openDocument(java.lang.String, java.lang.String, android.os.CancellationSignal) throws java.io.FileNotFoundException;
     method public android.content.res.AssetFileDescriptor openDocumentThumbnail(java.lang.String, android.graphics.Point, android.os.CancellationSignal) throws java.io.FileNotFoundException;
     method public final android.os.ParcelFileDescriptor openFile(android.net.Uri, java.lang.String) throws java.io.FileNotFoundException;
@@ -22550,6 +22560,7 @@ package android.provider {
     method public android.database.Cursor queryRecentDocuments(java.lang.String, java.lang.String[]) throws java.io.FileNotFoundException;
     method public abstract android.database.Cursor queryRoots(java.lang.String[]) throws java.io.FileNotFoundException;
     method public android.database.Cursor querySearchDocuments(java.lang.String, java.lang.String, java.lang.String[]) throws java.io.FileNotFoundException;
+    method public final void revokeDocumentPermission(java.lang.String);
     method public final int update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[]);
   }
 

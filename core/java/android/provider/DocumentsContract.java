@@ -57,6 +57,10 @@ import java.util.List;
  * <p>
  * To create a document provider, extend {@link DocumentsProvider}, which
  * provides a foundational implementation of this contract.
+ * <p>
+ * All client apps must hold a valid URI permission grant to access documents,
+ * typically issued when a user makes a selection through
+ * {@link Intent#ACTION_OPEN_DOCUMENT} or {@link Intent#ACTION_CREATE_DOCUMENT}.
  *
  * @see DocumentsProvider
  */
@@ -69,6 +73,8 @@ public final class DocumentsContract {
     // content://com.example/root/sdcard/search/?query=pony
     // content://com.example/document/12/
     // content://com.example/document/12/children/
+    // content://com.example/via/12/document/24/
+    // content://com.example/via/12/document/24/children/
 
     private DocumentsContract() {
     }
@@ -425,6 +431,14 @@ public final class DocumentsContract {
         public static final int FLAG_SUPPORTS_SEARCH = 1 << 3;
 
         /**
+         * Flag indicating that this root supports directory selection.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsProvider#isChildDocument(String, String)
+         */
+        public static final int FLAG_SUPPORTS_DIR_SELECTION = 1 << 4;
+
+        /**
          * Flag indicating that this root is currently empty. This may be used
          * to hide the root when opening documents, but the root will still be
          * shown when creating documents and {@link #FLAG_SUPPORTS_CREATE} is
@@ -484,12 +498,15 @@ public final class DocumentsContract {
 
     /** {@hide} */
     public static final String EXTRA_THUMBNAIL_SIZE = "thumbnail_size";
+    /** {@hide} */
+    public static final String EXTRA_URI = "uri";
 
     private static final String PATH_ROOT = "root";
     private static final String PATH_RECENT = "recent";
     private static final String PATH_DOCUMENT = "document";
     private static final String PATH_CHILDREN = "children";
     private static final String PATH_SEARCH = "search";
+    private static final String PATH_VIA = "via";
 
     private static final String PARAM_QUERY = "query";
     private static final String PARAM_MANAGE = "manage";
@@ -532,6 +549,17 @@ public final class DocumentsContract {
     }
 
     /**
+     * Build URI representing access to descendant documents of the given
+     * {@link Document#COLUMN_DOCUMENT_ID}.
+     *
+     * @see #getViaDocumentId(Uri)
+     */
+    public static Uri buildViaUri(String authority, String documentId) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
+                .appendPath(PATH_VIA).appendPath(documentId).build();
+    }
+
+    /**
      * Build URI representing the given {@link Document#COLUMN_DOCUMENT_ID} in a
      * document provider. When queried, a provider will return a single row with
      * columns defined by {@link Document}.
@@ -542,6 +570,41 @@ public final class DocumentsContract {
     public static Uri buildDocumentUri(String authority, String documentId) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority).appendPath(PATH_DOCUMENT).appendPath(documentId).build();
+    }
+
+    /**
+     * Build URI representing the given {@link Document#COLUMN_DOCUMENT_ID} in a
+     * document provider. Instead of directly accessing the target document,
+     * gain access via another document. The target document must be a
+     * descendant (child, grandchild, etc) of the via document.
+     * <p>
+     * This is typically used to access documents under a user-selected
+     * directory, since it doesn't require the user to separately confirm each
+     * new document access.
+     *
+     * @param viaUri a related document (directory) that the caller is
+     *            leveraging to gain access to the target document. The target
+     *            document must be a descendant of this directory.
+     * @param documentId the target document, which the caller may not have
+     *            direct access to.
+     * @see Intent#ACTION_PICK_DIRECTORY
+     * @see DocumentsProvider#isChildDocument(String, String)
+     * @see #buildDocumentUri(String, String)
+     */
+    public static Uri buildDocumentViaUri(Uri viaUri, String documentId) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(viaUri.getAuthority()).appendPath(PATH_VIA)
+                .appendPath(getViaDocumentId(viaUri)).appendPath(PATH_DOCUMENT)
+                .appendPath(documentId).build();
+    }
+
+    /** {@hide} */
+    public static Uri buildDocumentMaybeViaUri(Uri baseUri, String documentId) {
+        if (isViaUri(baseUri)) {
+            return buildDocumentViaUri(baseUri, documentId);
+        } else {
+            return buildDocumentUri(baseUri.getAuthority(), documentId);
+        }
     }
 
     /**
@@ -559,6 +622,32 @@ public final class DocumentsContract {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
                 .appendPath(PATH_DOCUMENT).appendPath(parentDocumentId).appendPath(PATH_CHILDREN)
                 .build();
+    }
+
+    /**
+     * Build URI representing the children of the given directory in a document
+     * provider. Instead of directly accessing the target document, gain access
+     * via another document. The target document must be a descendant (child,
+     * grandchild, etc) of the via document.
+     * <p>
+     * This is typically used to access documents under a user-selected
+     * directory, since it doesn't require the user to separately confirm each
+     * new document access.
+     *
+     * @param viaUri a related document (directory) that the caller is
+     *            leveraging to gain access to the target document. The target
+     *            document must be a descendant of this directory.
+     * @param parentDocumentId the target document, which the caller may not
+     *            have direct access to.
+     * @see Intent#ACTION_PICK_DIRECTORY
+     * @see DocumentsProvider#isChildDocument(String, String)
+     * @see #buildChildDocumentsUri(String, String)
+     */
+    public static Uri buildChildDocumentsViaUri(Uri viaUri, String parentDocumentId) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(viaUri.getAuthority()).appendPath(PATH_VIA)
+                .appendPath(getViaDocumentId(viaUri)).appendPath(PATH_DOCUMENT)
+                .appendPath(parentDocumentId).appendPath(PATH_CHILDREN).build();
     }
 
     /**
@@ -580,21 +669,31 @@ public final class DocumentsContract {
     /**
      * Test if the given URI represents a {@link Document} backed by a
      * {@link DocumentsProvider}.
+     *
+     * @see #buildDocumentUri(String, String)
+     * @see #buildDocumentViaUri(Uri, String)
      */
     public static boolean isDocumentUri(Context context, Uri uri) {
         final List<String> paths = uri.getPathSegments();
-        if (paths.size() < 2) {
-            return false;
+        if (paths.size() >= 2
+                && (PATH_DOCUMENT.equals(paths.get(0)) || PATH_VIA.equals(paths.get(0)))) {
+            return isDocumentsProvider(context, uri.getAuthority());
         }
-        if (!PATH_DOCUMENT.equals(paths.get(0))) {
-            return false;
-        }
+        return false;
+    }
 
+    /** {@hide} */
+    public static boolean isViaUri(Uri uri) {
+        final List<String> paths = uri.getPathSegments();
+        return (paths.size() >= 2 && PATH_VIA.equals(paths.get(0)));
+    }
+
+    private static boolean isDocumentsProvider(Context context, String authority) {
         final Intent intent = new Intent(PROVIDER_INTERFACE);
         final List<ResolveInfo> infos = context.getPackageManager()
                 .queryIntentContentProviders(intent, 0);
         for (ResolveInfo info : infos) {
-            if (uri.getAuthority().equals(info.providerInfo.authority)) {
+            if (authority.equals(info.providerInfo.authority)) {
                 return true;
             }
         }
@@ -606,27 +705,40 @@ public final class DocumentsContract {
      */
     public static String getRootId(Uri rootUri) {
         final List<String> paths = rootUri.getPathSegments();
-        if (paths.size() < 2) {
-            throw new IllegalArgumentException("Not a root: " + rootUri);
+        if (paths.size() >= 2 && PATH_ROOT.equals(paths.get(0))) {
+            return paths.get(1);
         }
-        if (!PATH_ROOT.equals(paths.get(0))) {
-            throw new IllegalArgumentException("Not a root: " + rootUri);
-        }
-        return paths.get(1);
+        throw new IllegalArgumentException("Invalid URI: " + rootUri);
     }
 
     /**
      * Extract the {@link Document#COLUMN_DOCUMENT_ID} from the given URI.
+     *
+     * @see #isDocumentUri(Context, Uri)
      */
     public static String getDocumentId(Uri documentUri) {
         final List<String> paths = documentUri.getPathSegments();
-        if (paths.size() < 2) {
-            throw new IllegalArgumentException("Not a document: " + documentUri);
+        if (paths.size() >= 2 && PATH_DOCUMENT.equals(paths.get(0))) {
+            return paths.get(1);
         }
-        if (!PATH_DOCUMENT.equals(paths.get(0))) {
-            throw new IllegalArgumentException("Not a document: " + documentUri);
+        if (paths.size() >= 4 && PATH_VIA.equals(paths.get(0))
+                && PATH_DOCUMENT.equals(paths.get(2))) {
+            return paths.get(3);
         }
-        return paths.get(1);
+        throw new IllegalArgumentException("Invalid URI: " + documentUri);
+    }
+
+    /**
+     * Extract the via {@link Document#COLUMN_DOCUMENT_ID} from the given URI.
+     *
+     * @see #isViaUri(Uri)
+     */
+    public static String getViaDocumentId(Uri documentUri) {
+        final List<String> paths = documentUri.getPathSegments();
+        if (paths.size() >= 2 && PATH_VIA.equals(paths.get(0))) {
+            return paths.get(1);
+        }
+        throw new IllegalArgumentException("Invalid URI: " + documentUri);
     }
 
     /**
@@ -758,7 +870,6 @@ public final class DocumentsContract {
      * @param mimeType MIME type of new document
      * @param displayName name of new document
      * @return newly created document, or {@code null} if failed
-     * @hide
      */
     public static Uri createDocument(ContentResolver resolver, Uri parentDocumentUri,
             String mimeType, String displayName) {
@@ -778,13 +889,12 @@ public final class DocumentsContract {
     public static Uri createDocument(ContentProviderClient client, Uri parentDocumentUri,
             String mimeType, String displayName) throws RemoteException {
         final Bundle in = new Bundle();
-        in.putString(Document.COLUMN_DOCUMENT_ID, getDocumentId(parentDocumentUri));
+        in.putParcelable(DocumentsContract.EXTRA_URI, parentDocumentUri);
         in.putString(Document.COLUMN_MIME_TYPE, mimeType);
         in.putString(Document.COLUMN_DISPLAY_NAME, displayName);
 
         final Bundle out = client.call(METHOD_CREATE_DOCUMENT, null, in);
-        return buildDocumentUri(
-                parentDocumentUri.getAuthority(), out.getString(Document.COLUMN_DOCUMENT_ID));
+        return out.getParcelable(DocumentsContract.EXTRA_URI);
     }
 
     /**
@@ -811,7 +921,7 @@ public final class DocumentsContract {
     public static void deleteDocument(ContentProviderClient client, Uri documentUri)
             throws RemoteException {
         final Bundle in = new Bundle();
-        in.putString(Document.COLUMN_DOCUMENT_ID, getDocumentId(documentUri));
+        in.putParcelable(DocumentsContract.EXTRA_URI, documentUri);
 
         client.call(METHOD_DELETE_DOCUMENT, null, in);
     }

@@ -5979,8 +5979,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         return perm;
     }
 
-    private final boolean checkUriPermissionLocked(
-            Uri uri, int uid, final int modeFlags, int minStrength) {
+    private final boolean checkUriPermissionLocked(Uri uri, int uid, final int modeFlags) {
+        final boolean persistable = (modeFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0;
+        final int minStrength = persistable ? UriPermission.STRENGTH_PERSISTABLE
+                : UriPermission.STRENGTH_OWNED;
+
         // Root gets to do everything.
         if (uid == 0) {
             return true;
@@ -6024,8 +6027,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
         }
-        synchronized(this) {
-            return checkUriPermissionLocked(uri, uid, modeFlags, UriPermission.STRENGTH_OWNED)
+        synchronized (this) {
+            return checkUriPermissionLocked(uri, uid, modeFlags)
                     ? PackageManager.PERMISSION_GRANTED
                     : PackageManager.PERMISSION_DENIED;
         }
@@ -6137,11 +6140,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (callingUid != Process.myUid()) {
             if (!checkHoldingPermissionsLocked(pm, pi, uri, callingUid, modeFlags)) {
                 // Require they hold a strong enough Uri permission
-                final boolean persistable =
-                        (modeFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0;
-                final int minStrength = persistable ? UriPermission.STRENGTH_PERSISTABLE
-                        : UriPermission.STRENGTH_OWNED;
-                if (!checkUriPermissionLocked(uri, callingUid, modeFlags, minStrength)) {
+                if (!checkUriPermissionLocked(uri, callingUid, modeFlags)) {
                     throw new SecurityException("Uid " + callingUid
                             + " does not have permission to uri " + uri);
                 }

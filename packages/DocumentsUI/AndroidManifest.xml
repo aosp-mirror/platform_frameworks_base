@@ -9,18 +9,17 @@
         android:label="@string/app_label"
         android:supportsRtl="true">
 
-        <!-- TODO: allow rotation when state saving is in better shape -->
         <activity
             android:name=".DocumentsActivity"
             android:theme="@style/Theme"
             android:icon="@drawable/ic_doc_text">
-            <intent-filter android:priority="100">
+            <intent-filter>
                 <action android:name="android.intent.action.OPEN_DOCUMENT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.OPENABLE" />
                 <data android:mimeType="*/*" />
             </intent-filter>
-            <intent-filter android:priority="100">
+            <intent-filter>
                 <action android:name="android.intent.action.CREATE_DOCUMENT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.OPENABLE" />
@@ -31,6 +30,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.OPENABLE" />
                 <data android:mimeType="*/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.PICK_DIRECTORY" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.provider.action.MANAGE_ROOT" />
@@ -57,14 +60,5 @@
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
-
-        <!-- TODO: remove when we have real clients -->
-        <activity android:name=".TestActivity" android:enabled="false">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
     </application>
 </manifest>

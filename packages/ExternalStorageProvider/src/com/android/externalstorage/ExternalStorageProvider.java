@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.CancellationSignal;
 import android.os.Environment;
 import android.os.FileObserver;
+import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
@@ -143,7 +144,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 final RootInfo root = new RootInfo();
                 root.rootId = rootId;
                 root.flags = Root.FLAG_SUPPORTS_CREATE | Root.FLAG_LOCAL_ONLY | Root.FLAG_ADVANCED
-                        | Root.FLAG_SUPPORTS_SEARCH;
+                        | Root.FLAG_SUPPORTS_SEARCH | Root.FLAG_SUPPORTS_DIR_SELECTION;
                 if (ROOT_ID_PRIMARY_EMULATED.equals(rootId)) {
                     root.title = getContext().getString(R.string.root_internal_storage);
                 } else {
@@ -240,8 +241,8 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
             } else {
                 flags |= Document.FLAG_SUPPORTS_WRITE;
+                flags |= Document.FLAG_SUPPORTS_DELETE;
             }
-            flags |= Document.FLAG_SUPPORTS_DELETE;
         }
 
         final String displayName = file.getName();
@@ -284,11 +285,26 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     @Override
+    public boolean isChildDocument(String parentDocId, String docId) {
+        try {
+            final File parent = getFileForDocId(parentDocId).getCanonicalFile();
+            final File doc = getFileForDocId(docId).getCanonicalFile();
+            return FileUtils.contains(parent, doc);
+        } catch (IOException e) {
+            throw new IllegalArgumentException(
+                    "Failed to determine if " + docId + " is child of " + parentDocId + ": " + e);
+        }
+    }
+
+    @Override
     public String createDocument(String docId, String mimeType, String displayName)
             throws FileNotFoundException {
         final File parent = getFileForDocId(docId);
-        File file;
+        if (!parent.isDirectory()) {
+            throw new IllegalArgumentException("Parent document isn't a directory");
+        }
 
+        File file;
         if (Document.MIME_TYPE_DIR.equals(mimeType)) {
             file = new File(parent, displayName);
             if (!file.mkdir()) {
@@ -317,6 +333,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
 
     @Override
     public void deleteDocument(String docId) throws FileNotFoundException {
+        // TODO: extend to delete directories
         final File file = getFileForDocId(docId);
         if (!file.delete()) {
             throw new IllegalStateException("Failed to delete " + file);
