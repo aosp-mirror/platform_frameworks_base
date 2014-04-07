@@ -16,8 +16,7 @@
 
 package android.net.wifi;
 
-import android.net.LinkProperties;
-import android.os.Parcelable;
+import android.net.IpConfiguration;
 import android.os.Parcel;
 import android.text.TextUtils;
 
@@ -27,7 +26,7 @@ import java.util.BitSet;
  * A class representing a configured Wi-Fi network, including the
  * security configuration.
  */
-public class WifiConfiguration implements Parcelable {
+public class WifiConfiguration extends IpConfiguration {
     private static final String TAG = "WifiConfiguration";
     /** {@hide} */
     public static final String ssidVarName = "ssid";
@@ -282,50 +281,6 @@ public class WifiConfiguration implements Parcelable {
      */
     public WifiEnterpriseConfig enterpriseConfig;
 
-    /**
-     * @hide
-     */
-    public enum IpAssignment {
-        /* Use statically configured IP settings. Configuration can be accessed
-         * with linkProperties */
-        STATIC,
-        /* Use dynamically configured IP settigns */
-        DHCP,
-        /* no IP details are assigned, this is used to indicate
-         * that any existing IP settings should be retained */
-        UNASSIGNED
-    }
-    /**
-     * @hide
-     */
-    public IpAssignment ipAssignment;
-
-    /**
-     * @hide
-     */
-    public enum ProxySettings {
-        /* No proxy is to be used. Any existing proxy settings
-         * should be cleared. */
-        NONE,
-        /* Use statically configured proxy. Configuration can be accessed
-         * with linkProperties */
-        STATIC,
-        /* no proxy details are assigned, this is used to indicate
-         * that any existing proxy settings should be retained */
-        UNASSIGNED,
-        /* Use a Pac based proxy.
-         */
-        PAC
-    }
-    /**
-     * @hide
-     */
-    public ProxySettings proxySettings;
-    /**
-     * @hide
-     */
-    public LinkProperties linkProperties;
-
     public WifiConfiguration() {
         networkId = INVALID_NETWORK_ID;
         SSID = null;
@@ -343,9 +298,6 @@ public class WifiConfiguration implements Parcelable {
             wepKeys[i] = null;
         }
         enterpriseConfig = new WifiEnterpriseConfig();
-        ipAssignment = IpAssignment.UNASSIGNED;
-        proxySettings = ProxySettings.UNASSIGNED;
-        linkProperties = new LinkProperties();
     }
 
     /**
@@ -374,6 +326,7 @@ public class WifiConfiguration implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
+
         if (this.status == WifiConfiguration.Status.CURRENT) {
             sbuf.append("* ");
         } else if (this.status == WifiConfiguration.Status.DISABLED) {
@@ -448,12 +401,8 @@ public class WifiConfiguration implements Parcelable {
         sbuf.append(enterpriseConfig);
         sbuf.append('\n');
 
-        sbuf.append("IP assignment: " + ipAssignment.toString());
-        sbuf.append("\n");
-        sbuf.append("Proxy settings: " + proxySettings.toString());
-        sbuf.append("\n");
-        sbuf.append(linkProperties.toString());
-        sbuf.append("\n");
+        // Append IpConfiguration info here to keep old behavior.
+        sbuf.append(super.toString());
 
         return sbuf.toString();
     }
@@ -570,13 +519,10 @@ public class WifiConfiguration implements Parcelable {
         return KeyMgmt.NONE;
     }
 
-    /** Implement the Parcelable interface {@hide} */
-    public int describeContents() {
-        return 0;
-    }
-
     /** copy constructor {@hide} */
     public WifiConfiguration(WifiConfiguration source) {
+        super(source);
+
         if (source != null) {
             networkId = source.networkId;
             status = source.status;
@@ -600,15 +546,14 @@ public class WifiConfiguration implements Parcelable {
             allowedGroupCiphers    = (BitSet) source.allowedGroupCiphers.clone();
 
             enterpriseConfig = new WifiEnterpriseConfig(source.enterpriseConfig);
-
-            ipAssignment = source.ipAssignment;
-            proxySettings = source.proxySettings;
-            linkProperties = new LinkProperties(source.linkProperties);
         }
     }
 
     /** Implement the Parcelable interface {@hide} */
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+
         dest.writeInt(networkId);
         dest.writeInt(status);
         dest.writeInt(disableReason);
@@ -629,10 +574,6 @@ public class WifiConfiguration implements Parcelable {
         writeBitSet(dest, allowedGroupCiphers);
 
         dest.writeParcelable(enterpriseConfig, flags);
-
-        dest.writeString(ipAssignment.name());
-        dest.writeString(proxySettings.name());
-        dest.writeParcelable(linkProperties, flags);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -640,6 +581,8 @@ public class WifiConfiguration implements Parcelable {
         new Creator<WifiConfiguration>() {
             public WifiConfiguration createFromParcel(Parcel in) {
                 WifiConfiguration config = new WifiConfiguration();
+                config.setFromParcel(in);
+
                 config.networkId = in.readInt();
                 config.status = in.readInt();
                 config.disableReason = in.readInt();
@@ -659,10 +602,6 @@ public class WifiConfiguration implements Parcelable {
                 config.allowedGroupCiphers    = readBitSet(in);
 
                 config.enterpriseConfig = in.readParcelable(null);
-
-                config.ipAssignment = IpAssignment.valueOf(in.readString());
-                config.proxySettings = ProxySettings.valueOf(in.readString());
-                config.linkProperties = in.readParcelable(null);
 
                 return config;
             }
