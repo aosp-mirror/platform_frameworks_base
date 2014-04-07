@@ -78,6 +78,8 @@ public:
     ANDROID_API bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
     ANDROID_API void destroyLayer(DeferredLayerUpdater* layer);
 
+    ANDROID_API void fence();
+
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;

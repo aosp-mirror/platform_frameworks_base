@@ -2259,6 +2259,9 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mReportNextDraw) {
             mReportNextDraw = false;
+            if (mAttachInfo.mHardwareRenderer != null) {
+                mAttachInfo.mHardwareRenderer.fence();
+            }
 
             if (LOCAL_LOGV) {
                 Log.v(TAG, "FINISHED DRAWING: " + mWindowAttributes.getTitle());

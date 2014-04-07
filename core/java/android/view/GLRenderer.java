@@ -1226,6 +1226,11 @@ public class GLRenderer extends HardwareRenderer {
     }
     private static native void nSetDisplayListData(long displayList, long newData);
 
+    @Override
+    void fence() {
+        // Everything is immediate, so this is a no-op
+    }
+
     private RenderNode buildDisplayList(View view, HardwareCanvas canvas) {
         if (mDrawDelta <= 0) {
             return view.mRenderNode;

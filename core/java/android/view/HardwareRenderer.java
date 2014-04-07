@@ -576,6 +576,11 @@ public abstract class HardwareRenderer {
     abstract void setDisplayListData(long displayList, long newData);
 
     /**
+     * Blocks until all previously queued work has completed.
+     */
+    abstract void fence();
+
+    /**
      * Describes a series of frames that should be drawn on screen as a graph.
      * Each frame is composed of 1 or more elements.
      */

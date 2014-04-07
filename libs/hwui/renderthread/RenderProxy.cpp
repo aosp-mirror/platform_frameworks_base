@@ -252,6 +252,16 @@ void RenderProxy::destroyLayer(DeferredLayerUpdater* layer) {
     post(task);
 }
 
+CREATE_BRIDGE0(fence) {
+    // Intentionally empty
+    return NULL;
+}
+
+void RenderProxy::fence() {
+    SETUP_TASK(fence);
+    postAndWait(task);
+}
+
 MethodInvokeRenderTask* RenderProxy::createTask(RunnableMethod method) {
     // TODO: Consider having a small pool of these to avoid alloc churn
     return new MethodInvokeRenderTask(method);
