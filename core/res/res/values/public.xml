@@ -2146,6 +2146,7 @@
   <public type="attr" name="titleTextAppearance" />
   <public type="attr" name="subtitleTextAppearance" />
   <public type="attr" name="slideEdge" />
+  <public type="attr" name="actionBarTheme" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
