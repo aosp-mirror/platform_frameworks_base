@@ -16,16 +16,14 @@
 
 <resources>
     <color name="background_quantum_dark">@color/black</color>
-    <color name="background_quantum_light">@color/quantum_grey_50</color>
-    <color name="secondary_background_quantum_dark">@color/quantum_grey_700</color>
-    <color name="secondary_background_quantum_light">@color/quantum_grey_100</color>
+    <color name="background_quantum_light">@color/white</color>
 
     <color name="bright_foreground_quantum_dark">@color/background_quantum_light</color>
     <color name="bright_foreground_quantum_light">@color/background_quantum_dark</color>
     <!-- TODO: This is 50% alpha black -->
     <color name="bright_foreground_disabled_quantum_dark">#80000000</color>
-    <!-- TODO: This is 50% alpha grey_50 -->
-    <color name="bright_foreground_disabled_quantum_light">#80fafafa</color>
+    <!-- TODO: This is 50% alpha white -->
+    <color name="bright_foreground_disabled_quantum_light">#80ffffff</color>
     <color name="bright_foreground_inverse_quantum_dark">@color/bright_foreground_quantum_light</color>
     <color name="bright_foreground_inverse_quantum_light">@color/bright_foreground_quantum_dark</color>
 
@@ -34,40 +32,12 @@
     <color name="dim_foreground_disabled_quantum_dark">#80bebebe</color>
     <color name="dim_foreground_disabled_quantum_light">#80323232</color>
 
-    <!-- TODO: These should be theme attributes. -->
-    <color name="control_normal_foreground_quantum_light">@color/secondary_text_quantum_light</color>
-    <color name="control_activated_foreground_quantum_light">@color/quantum_teal_700</color>
-
-    <!-- TODO: These should be theme attributes. -->
-    <color name="control_normal_foreground_quantum_dark">@color/secondary_text_quantum_dark</color>
-    <color name="control_activated_foreground_quantum_dark">@color/quantum_lime_A200</color>
-
-    <!-- TODO: These should be theme attributes. -->
-    <color name="btn_default_normal_quantum_light">@color/quantum_grey_300</color>
-    <color name="btn_default_pressed_quantum_light">@color/quantum_grey_500</color>
-
-    <!-- TODO: These should be theme attributes. -->
-    <color name="btn_default_normal_quantum_dark">@color/quantum_grey_700</color>
-    <color name="btn_default_pressed_quantum_dark">@color/quantum_grey_500</color>
-
     <color name="hint_foreground_quantum_dark">@color/bright_foreground_disabled_quantum_dark</color>
     <color name="hint_foreground_quantum_light">@color/bright_foreground_disabled_quantum_light</color>
-    <!-- TODO: This is 40% alpha lime_A200 -->
-    <color name="highlighted_text_quantum_dark">#66eeff41</color>
-    <!-- TODO: This is 40% alpha teal_700 -->
+    <!-- TODO: This is 40% alpha teal_A200 -->
+    <color name="highlighted_text_quantum_dark">#660097a7</color>
+    <!-- TODO: This is 40% alpha teal_A200 -->
     <color name="highlighted_text_quantum_light">#660097a7</color>
-
-    <!-- TODO: These should all be pushed into a TimePicker widget style. -->
-    <color name="timepicker_default_background_quantum_dark">@color/background_quantum_dark</color>
-    <color name="timepicker_default_background_quantum_light">@color/background_quantum_light</color>
-    <color name="timepicker_default_text_color_quantum_dark">@color/bright_foreground_quantum_dark</color>
-    <color name="timepicker_default_text_color_quantum_light">@color/bright_foreground_quantum_light</color>
-    <color name="timepicker_default_disabled_color_quantum_dark">@color/bright_foreground_disabled_quantum_dark</color>
-    <color name="timepicker_default_disabled_color_quantum_light">@color/bright_foreground_disabled_quantum_light</color>
-    <color name="timepicker_default_ampm_selected_background_color_quantum_dark">@color/control_activated_foreground_quantum_dark</color>
-    <color name="timepicker_default_ampm_selected_background_color_quantum_light">@color/control_activated_foreground_quantum_light</color>
-    <color name="timepicker_default_ampm_unselected_background_color_quantum_dark">@color/transparent</color>
-    <color name="timepicker_default_ampm_unselected_background_color_quantum_light">@color/white</color>
 
     <!-- Primary & accent colors -->
 
@@ -155,10 +125,4 @@
     <color name="primary_text_quantum_dark">#deffffff</color>
     <color name="secondary_text_quantum_dark">#8affffff</color>
     <color name="tertiary_text_quantum_dark">#4dffffff</color>
-
-    <!-- "Theme" colors to be replaced by attrs when available -->
-    <color name="theme_color_100">@color/quantum_teal_100</color>
-    <color name="theme_color_300">@color/quantum_teal_300</color>
-    <color name="theme_color_500">@color/quantum_teal_500</color>
-    <color name="theme_color_700">@color/quantum_teal_700</color>
 </resources>
