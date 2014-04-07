@@ -321,9 +321,10 @@ public:
     }
 
     static jboolean clipPath(JNIEnv* env, jobject, jlong canvasHandle,
-                             SkPath* path, jint op) {
+                             jlong pathHandle, jint op) {
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
-        bool result = canvas->clipPath(*path, static_cast<SkRegion::Op>(op));
+        bool result = canvas->clipPath(*reinterpret_cast<SkPath*>(pathHandle),
+                                       static_cast<SkRegion::Op>(op));
         return result ? JNI_TRUE : JNI_FALSE;
     }
 
@@ -336,9 +337,9 @@ public:
     }
 
     static void setDrawFilter(JNIEnv* env, jobject, jlong canvasHandle,
-                              SkDrawFilter* filter) {
+                              jlong filterHandle) {
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
-        canvas->setDrawFilter(filter);
+        canvas->setDrawFilter(reinterpret_cast<SkDrawFilter*>(filterHandle));
     }
 
     static jboolean quickReject__RectF(JNIEnv* env, jobject, jlong canvasHandle,
@@ -350,9 +351,9 @@ public:
     }
 
     static jboolean quickReject__Path(JNIEnv* env, jobject, jlong canvasHandle,
-                                       SkPath* path) {
+                                       jlong pathHandle) {
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
-        bool result = canvas->quickReject(*path);
+        bool result = canvas->quickReject(*reinterpret_cast<SkPath*>(pathHandle));
         return result ? JNI_TRUE : JNI_FALSE;
     }
 
