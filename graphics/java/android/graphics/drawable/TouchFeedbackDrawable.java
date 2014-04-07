@@ -485,7 +485,10 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         } else if (state == null) {
             ns = new TouchFeedbackState(null, this, res);
         } else {
-            ns = state;
+            // We always need a new state since child drawables contain local
+            // state but live within the parent's constant state.
+            // TODO: Move child drawables into local state.
+            ns = new TouchFeedbackState(state, this, res);
         }
 
         if (res != null) {
