@@ -156,7 +156,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
 
     // Create an TaskDescription, returning null if the title or icon is null
     TaskDescription createTaskDescription(int taskId, int persistentTaskId, Intent baseIntent,
-            ComponentName origActivity, CharSequence description) {
+            ComponentName origActivity, CharSequence description, int userId) {
         Intent intent = new Intent(baseIntent);
         if (origActivity != null) {
             intent.setComponent(origActivity);
@@ -175,7 +175,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
 
                 TaskDescription item = new TaskDescription(taskId,
                         persistentTaskId, resolveInfo, baseIntent, info.packageName,
-                        description);
+                        description, userId);
                 item.setLabel(title);
 
                 return item;
@@ -391,7 +391,8 @@ public class RecentTasksLoader implements View.OnTouchListener {
 
             item = createTaskDescription(recentInfo.id,
                     recentInfo.persistentId, recentInfo.baseIntent,
-                    recentInfo.origActivity, recentInfo.description);
+                    recentInfo.origActivity, recentInfo.description,
+                    recentInfo.userId);
             if (item != null) {
                 loadThumbnailAndIcon(item);
             }
@@ -474,7 +475,8 @@ public class RecentTasksLoader implements View.OnTouchListener {
 
                     TaskDescription item = createTaskDescription(recentInfo.id,
                             recentInfo.persistentId, recentInfo.baseIntent,
-                            recentInfo.origActivity, recentInfo.description);
+                            recentInfo.origActivity, recentInfo.description,
+                            recentInfo.userId);
 
                     if (item != null) {
                         while (true) {
