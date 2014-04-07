@@ -270,13 +270,13 @@ void AndroidRuntime::setArgv0(const char* argv0) {
     strlcpy(mArgBlockStart, argv0, mArgBlockLength);
 }
 
-status_t AndroidRuntime::callMain(const char* className,
-    jclass clazz, int argc, const char* const argv[])
+status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
+    const Vector<String8>& args)
 {
     JNIEnv* env;
     jmethodID methodId;
 
-    ALOGD("Calling main entry %s", className);
+    ALOGD("Calling main entry %s", className.string());
 
     env = getJNIEnv();
     if (clazz == NULL || env == NULL) {
@@ -285,7 +285,7 @@ status_t AndroidRuntime::callMain(const char* className,
 
     methodId = env->GetStaticMethodID(clazz, "main", "([Ljava/lang/String;)V");
     if (methodId == NULL) {
-        ALOGE("ERROR: could not find method %s.main(String[])\n", className);
+        ALOGE("ERROR: could not find method %s.main(String[])\n", className.string());
         return UNKNOWN_ERROR;
     }
 
@@ -296,11 +296,12 @@ status_t AndroidRuntime::callMain(const char* className,
     jclass stringClass;
     jobjectArray strArray;
 
+    const size_t numArgs = args.size();
     stringClass = env->FindClass("java/lang/String");
-    strArray = env->NewObjectArray(argc, stringClass, NULL);
+    strArray = env->NewObjectArray(numArgs, stringClass, NULL);
 
-    for (int i = 0; i < argc; i++) {
-        jstring argStr = env->NewStringUTF(argv[i]);
+    for (size_t i = 0; i < numArgs; i++) {
+        jstring argStr = env->NewStringUTF(args[i].string());
         env->SetObjectArrayElement(strArray, i, argStr);
     }
 
@@ -872,20 +873,23 @@ char* AndroidRuntime::toSlashClassName(const char* className)
  * Passes the main function two arguments, the class name and the specified
  * options string.
  */
-void AndroidRuntime::start(const char* className, const char* options)
+void AndroidRuntime::start(const char* className, const Vector<String8>& options)
 {
     ALOGD("\n>>>>>> AndroidRuntime START %s <<<<<<\n",
             className != NULL ? className : "(unknown)");
+
+    static const String8 startSystemServer("start-system-server");
 
     /*
      * 'startSystemServer == true' means runtime is obsolete and not run from
      * init.rc anymore, so we print out the boot start event here.
      */
-    if (strcmp(options, "start-system-server") == 0) {
-        /* track our progress through the boot sequence */
-        const int LOG_BOOT_PROGRESS_START = 3000;
-        LOG_EVENT_LONG(LOG_BOOT_PROGRESS_START,
-                       ns2ms(systemTime(SYSTEM_TIME_MONOTONIC)));
+    for (size_t i = 0; i < options.size(); ++i) {
+        if (options[i] == startSystemServer) {
+           /* track our progress through the boot sequence */
+           const int LOG_BOOT_PROGRESS_START = 3000;
+           LOG_EVENT_LONG(LOG_BOOT_PROGRESS_START,  ns2ms(systemTime(SYSTEM_TIME_MONOTONIC)));
+        }
     }
 
     const char* rootDir = getenv("ANDROID_ROOT");
@@ -926,17 +930,20 @@ void AndroidRuntime::start(const char* className, const char* options)
     jclass stringClass;
     jobjectArray strArray;
     jstring classNameStr;
-    jstring optionsStr;
 
     stringClass = env->FindClass("java/lang/String");
     assert(stringClass != NULL);
-    strArray = env->NewObjectArray(2, stringClass, NULL);
+    strArray = env->NewObjectArray(options.size() + 1, stringClass, NULL);
     assert(strArray != NULL);
     classNameStr = env->NewStringUTF(className);
     assert(classNameStr != NULL);
     env->SetObjectArrayElement(strArray, 0, classNameStr);
-    optionsStr = env->NewStringUTF(options);
-    env->SetObjectArrayElement(strArray, 1, optionsStr);
+
+    for (size_t i = 0; i < options.size(); ++i) {
+        jstring optionsStr = env->NewStringUTF(options.itemAt(i).string());
+        assert(optionsStr != NULL);
+        env->SetObjectArrayElement(strArray, i + 1, optionsStr);
+    }
 
     /*
      * Start VM.  This thread becomes the main thread of the VM, and will
