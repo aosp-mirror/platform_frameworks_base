@@ -799,7 +799,7 @@ public class PanelView extends FrameLayout {
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(String.format("[PanelView(%s): expandedHeight=%f maxPanelHeight=%f closing=%s"
+        pw.println(String.format("[PanelView(%s): expandedHeight=%f maxPanelHeight=%d closing=%s"
                 + " tracking=%s rubberbanding=%s justPeeked=%s peekAnim=%s%s timeAnim=%s%s"
                 + "]",
                 this.getClass().getSimpleName(),
