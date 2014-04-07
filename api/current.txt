@@ -246,6 +246,7 @@ package android {
     field public static final int actionBarTabBarStyle = 16843508; // 0x10102f4
     field public static final int actionBarTabStyle = 16843507; // 0x10102f3
     field public static final int actionBarTabTextStyle = 16843509; // 0x10102f5
+    field public static final int actionBarTheme = 16843836; // 0x101043c
     field public static final int actionBarWidgetTheme = 16843671; // 0x1010397
     field public static final int actionButtonStyle = 16843480; // 0x10102d8
     field public static final int actionDropDownStyle = 16843479; // 0x10102d7
