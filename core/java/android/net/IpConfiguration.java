@@ -23,11 +23,13 @@ import android.util.Log;
 
 /**
  * A class representing a configured network.
- * @hide
  */
 public class IpConfiguration implements Parcelable {
     private static final String TAG = "IpConfiguration";
 
+    /**
+     * @hide
+     */
     public enum IpAssignment {
         /* Use statically configured IP settings. Configuration can be accessed
          * with linkProperties */
@@ -39,8 +41,14 @@ public class IpConfiguration implements Parcelable {
         UNASSIGNED
     }
 
+    /**
+     * @hide
+     */
     public IpAssignment ipAssignment;
 
+    /**
+     * @hide
+     */
     public enum ProxySettings {
         /* No proxy is to be used. Any existing proxy settings
          * should be cleared. */
@@ -56,8 +64,14 @@ public class IpConfiguration implements Parcelable {
         PAC
     }
 
+    /**
+     * @hide
+     */
     public ProxySettings proxySettings;
 
+    /**
+     * @hide
+     */
     public LinkProperties linkProperties;
 
     public IpConfiguration() {
@@ -66,7 +80,7 @@ public class IpConfiguration implements Parcelable {
         linkProperties = new LinkProperties();
     }
 
-    /** copy constructor */
+    /** copy constructor {@hide} */
     public IpConfiguration(IpConfiguration source) {
         if (source != null) {
             ipAssignment = source.ipAssignment;
@@ -110,19 +124,19 @@ public class IpConfiguration implements Parcelable {
         return sbuf.toString();
     }
 
-    /** Implement the Parcelable interface */
+    /** Implement the Parcelable interface {@hide} */
     public int describeContents() {
         return 0;
     }
 
-    /** Implement the Parcelable interface */
+    /** Implement the Parcelable interface {@hide} */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(ipAssignment.name());
         dest.writeString(proxySettings.name());
         dest.writeParcelable(linkProperties, flags);
     }
 
-    /** Implement the Parcelable interface */
+    /** Implement the Parcelable interface {@hide} */
     public static final Creator<IpConfiguration> CREATOR =
         new Creator<IpConfiguration>() {
             public IpConfiguration createFromParcel(Parcel in) {
