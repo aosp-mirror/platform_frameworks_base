@@ -1020,6 +1020,7 @@ package android {
     field public static final int shrinkColumns = 16843082; // 0x101014a
     field public static final deprecated int singleLine = 16843101; // 0x101015d
     field public static final int singleUser = 16843711; // 0x10103bf
+    field public static final int slideEdge = 16843835; // 0x101043b
     field public static final int smallIcon = 16843422; // 0x101029e
     field public static final int smallScreens = 16843396; // 0x1010284
     field public static final int smoothScrollbar = 16843313; // 0x1010231
@@ -27683,11 +27684,27 @@ package android.transition {
     method public void setResizeClip(boolean);
   }
 
+  public class CircularPropagation extends android.transition.VisibilityPropagation {
+    ctor public CircularPropagation();
+    method public long getStartDelay(android.view.ViewGroup, android.transition.Transition, android.transition.TransitionValues, android.transition.TransitionValues);
+    method public void setPropagationSpeed(float);
+  }
+
+  public class Explode extends android.transition.Visibility {
+    ctor public Explode();
+  }
+
   public class Fade extends android.transition.Visibility {
     ctor public Fade();
     ctor public Fade(int);
     field public static final int IN = 1; // 0x1
     field public static final int OUT = 2; // 0x2
+  }
+
+  public class MoveImage extends android.transition.Transition {
+    ctor public MoveImage();
+    method public void captureEndValues(android.transition.TransitionValues);
+    method public void captureStartValues(android.transition.TransitionValues);
   }
 
   public final class Scene {
@@ -27700,6 +27717,27 @@ package android.transition {
     method public android.view.ViewGroup getSceneRoot();
     method public void setEnterAction(java.lang.Runnable);
     method public void setExitAction(java.lang.Runnable);
+  }
+
+  public class SidePropagation extends android.transition.VisibilityPropagation {
+    ctor public SidePropagation();
+    method public long getStartDelay(android.view.ViewGroup, android.transition.Transition, android.transition.TransitionValues, android.transition.TransitionValues);
+    method public void setPropagationSpeed(float);
+    method public void setSide(int);
+    field public static final int BOTTOM = 3; // 0x3
+    field public static final int LEFT = 0; // 0x0
+    field public static final int RIGHT = 2; // 0x2
+    field public static final int TOP = 1; // 0x1
+  }
+
+  public class Slide extends android.transition.Visibility {
+    ctor public Slide();
+    ctor public Slide(int);
+    method public void setSlideEdge(int);
+    field public static final int BOTTOM = 3; // 0x3
+    field public static final int LEFT = 0; // 0x0
+    field public static final int RIGHT = 2; // 0x2
+    field public static final int TOP = 1; // 0x1
   }
 
   public abstract class Transition implements java.lang.Cloneable {
@@ -27719,8 +27757,11 @@ package android.transition {
     method public android.transition.Transition excludeTarget(android.view.View, boolean);
     method public android.transition.Transition excludeTarget(java.lang.Class, boolean);
     method public long getDuration();
+    method public android.graphics.Rect getEpicenter();
+    method public android.transition.Transition.EpicenterCallback getEpicenterCallback();
     method public android.animation.TimeInterpolator getInterpolator();
     method public java.lang.String getName();
+    method public android.transition.TransitionPropagation getPropagation();
     method public long getStartDelay();
     method public java.util.List<java.lang.Integer> getTargetIds();
     method public java.util.List<android.view.View> getTargets();
@@ -27730,8 +27771,15 @@ package android.transition {
     method public android.transition.Transition removeTarget(int);
     method public android.transition.Transition removeTarget(android.view.View);
     method public android.transition.Transition setDuration(long);
+    method public void setEpicenterCallback(android.transition.Transition.EpicenterCallback);
     method public android.transition.Transition setInterpolator(android.animation.TimeInterpolator);
+    method public void setPropagation(android.transition.TransitionPropagation);
     method public android.transition.Transition setStartDelay(long);
+  }
+
+  public static abstract class Transition.EpicenterCallback {
+    ctor public Transition.EpicenterCallback();
+    method public abstract android.graphics.Rect getEpicenter(android.transition.Transition);
   }
 
   public static abstract interface Transition.TransitionListener {
@@ -27760,6 +27808,13 @@ package android.transition {
     method public void transitionTo(android.transition.Scene);
   }
 
+  public abstract class TransitionPropagation {
+    ctor public TransitionPropagation();
+    method public abstract void captureValues(android.transition.TransitionValues);
+    method public abstract java.lang.String[] getPropagationProperties();
+    method public abstract long getStartDelay(android.view.ViewGroup, android.transition.Transition, android.transition.TransitionValues, android.transition.TransitionValues);
+  }
+
   public class TransitionSet extends android.transition.Transition {
     ctor public TransitionSet();
     method public android.transition.TransitionSet addTransition(android.transition.Transition);
@@ -27784,7 +27839,18 @@ package android.transition {
     method public void captureStartValues(android.transition.TransitionValues);
     method public boolean isVisible(android.transition.TransitionValues);
     method public android.animation.Animator onAppear(android.view.ViewGroup, android.transition.TransitionValues, int, android.transition.TransitionValues, int);
+    method public android.animation.Animator onAppear(android.view.ViewGroup, android.view.View, android.transition.TransitionValues, android.transition.TransitionValues);
     method public android.animation.Animator onDisappear(android.view.ViewGroup, android.transition.TransitionValues, int, android.transition.TransitionValues, int);
+    method public android.animation.Animator onDisappear(android.view.ViewGroup, android.view.View, android.transition.TransitionValues, android.transition.TransitionValues);
+  }
+
+  public abstract class VisibilityPropagation extends android.transition.TransitionPropagation {
+    ctor public VisibilityPropagation();
+    method public void captureValues(android.transition.TransitionValues);
+    method public java.lang.String[] getPropagationProperties();
+    method public int getViewVisibility(android.transition.TransitionValues);
+    method public int getViewX(android.transition.TransitionValues);
+    method public int getViewY(android.transition.TransitionValues);
   }
 
 }
