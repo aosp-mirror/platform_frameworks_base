@@ -20,8 +20,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.transition.Transition;
 import android.util.Log;
 import android.util.Pair;
@@ -136,6 +138,11 @@ public class ActivityOptions {
     /** @hide */
     public static final int ANIM_SCENE_TRANSITION = 5;
 
+    private static final int MSG_SET_LISTENER = 100;
+    private static final int MSG_HIDE_SHARED_ELEMENTS = 101;
+    private static final int MSG_PREPARE_RESTORE = 102;
+    private static final int MSG_RESTORE = 103;
+
     private String mPackageName;
     private int mAnimationType = ANIM_NONE;
     private int mCustomEnterResId;
@@ -146,7 +153,7 @@ public class ActivityOptions {
     private int mStartWidth;
     private int mStartHeight;
     private IRemoteCallback mAnimationStartedListener;
-    private IRemoteCallback mTransitionCompleteListener;
+    private ResultReceiver mTransitionCompleteListener;
     private ArrayList<String> mSharedElementNames;
     private ArrayList<String> mLocalElementNames;
 
@@ -428,8 +435,7 @@ public class ActivityOptions {
                 break;
 
             case ANIM_SCENE_TRANSITION:
-                mTransitionCompleteListener = IRemoteCallback.Stub.asInterface(
-                        opts.getBinder(KEY_TRANSITION_COMPLETE_LISTENER));
+                mTransitionCompleteListener = opts.getParcelable(KEY_TRANSITION_COMPLETE_LISTENER);
                 mSharedElementNames = opts.getStringArrayList(KEY_SHARED_ELEMENT_NAMES);
                 mLocalElementNames = opts.getStringArrayList(KEY_LOCAL_ELEMENT_NAMES);
                 break;
@@ -495,7 +501,6 @@ public class ActivityOptions {
     /** @hide */
     public void dispatchSceneTransitionStarted(final ActivityTransitionTarget target,
             ArrayList<String> sharedElementNames) {
-        boolean listenerSent = false;
         if (mTransitionCompleteListener != null) {
             IRemoteCallback callback = new IRemoteCallback.Stub() {
                 @Override
@@ -510,27 +515,28 @@ public class ActivityOptions {
             Bundle bundle = new Bundle();
             bundle.putBinder(KEY_TRANSITION_TARGET_LISTENER, callback.asBinder());
             bundle.putStringArrayList(KEY_SHARED_ELEMENT_NAMES, sharedElementNames);
-            try {
-                mTransitionCompleteListener.sendResult(bundle);
-                listenerSent = true;
-            } catch (RemoteException e) {
-                Log.w(TAG, "Couldn't retrieve transition notifications", e);
-            }
-        }
-        if (!listenerSent) {
-            target.sharedElementTransitionComplete(null);
-            target.exitTransitionComplete();
+            mTransitionCompleteListener.send(MSG_SET_LISTENER, bundle);
         }
     }
 
     /** @hide */
     public void dispatchSharedElementsReady() {
         if (mTransitionCompleteListener != null) {
-            try {
-                mTransitionCompleteListener.sendResult(null);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Couldn't synchronize shared elements", e);
-            }
+            mTransitionCompleteListener.send(MSG_HIDE_SHARED_ELEMENTS, null);
+        }
+    }
+
+    /** @hide */
+    public void dispatchPrepareRestore() {
+        if (mTransitionCompleteListener != null) {
+            mTransitionCompleteListener.send(MSG_PREPARE_RESTORE, null);
+        }
+    }
+
+    /** @hide */
+    public void dispatchRestore(Bundle sharedElementsArgs) {
+        if (mTransitionCompleteListener != null) {
+            mTransitionCompleteListener.send(MSG_RESTORE, sharedElementsArgs);
         }
     }
 
@@ -658,8 +664,7 @@ public class ActivityOptions {
             case ANIM_SCENE_TRANSITION:
                 b.putInt(KEY_ANIM_TYPE, mAnimationType);
                 if (mTransitionCompleteListener != null) {
-                    b.putBinder(KEY_TRANSITION_COMPLETE_LISTENER,
-                            mTransitionCompleteListener.asBinder());
+                    b.putParcelable(KEY_TRANSITION_COMPLETE_LISTENER, mTransitionCompleteListener);
                 }
                 b.putStringArrayList(KEY_SHARED_ELEMENT_NAMES, mSharedElementNames);
                 b.putStringArrayList(KEY_LOCAL_ELEMENT_NAMES, mLocalElementNames);
@@ -710,9 +715,11 @@ public class ActivityOptions {
         Bundle getSharedElementExitState();
         void acceptedSharedElements(ArrayList<String> sharedElementNames);
         void hideSharedElements();
+        void restore(Bundle sharedElementState);
+        void prepareForRestore();
     }
 
-    private static class ExitTransitionListener extends IRemoteCallback.Stub
+    private static class ExitTransitionListener extends ResultReceiver
             implements Transition.TransitionListener {
         private boolean mSharedElementNotified;
         private Transition mExitTransition;
@@ -724,6 +731,7 @@ public class ActivityOptions {
 
         public ExitTransitionListener(Transition exitTransition, Transition sharedElementTransition,
                 SharedElementSource sharedElementSource) {
+            super(null);
             mSharedElementSource = sharedElementSource;
             mExitTransition = exitTransition;
             mExitTransition.addListener(this);
@@ -732,17 +740,26 @@ public class ActivityOptions {
         }
 
         @Override
-        public void sendResult(Bundle data) throws RemoteException {
-            if (data != null) {
-                mTransitionCompleteCallback = IRemoteCallback.Stub.asInterface(
-                        data.getBinder(KEY_TRANSITION_TARGET_LISTENER));
-                ArrayList<String> sharedElementNames
-                        = data.getStringArrayList(KEY_SHARED_ELEMENT_NAMES);
-                mSharedElementSource.acceptedSharedElements(sharedElementNames);
-                notifySharedElement();
-                notifyExit();
-            } else {
-                mSharedElementSource.hideSharedElements();
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            switch (resultCode) {
+                case MSG_SET_LISTENER:
+                    IBinder listener = resultData.getBinder(KEY_TRANSITION_TARGET_LISTENER);
+                    mTransitionCompleteCallback = IRemoteCallback.Stub.asInterface(listener);
+                    ArrayList<String> sharedElementNames
+                            = resultData.getStringArrayList(KEY_SHARED_ELEMENT_NAMES);
+                    mSharedElementSource.acceptedSharedElements(sharedElementNames);
+                    notifySharedElement();
+                    notifyExit();
+                    break;
+                case MSG_HIDE_SHARED_ELEMENTS:
+                    mSharedElementSource.hideSharedElements();
+                    break;
+                case MSG_PREPARE_RESTORE:
+                    mSharedElementSource.prepareForRestore();
+                    break;
+                case MSG_RESTORE:
+                    mSharedElementSource.restore(resultData);
+                    break;
             }
         }
 
