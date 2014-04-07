@@ -29,5 +29,6 @@ public interface NotificationDelegate {
             String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId);
     void onPanelRevealed();
+    void onPanelHidden();
     boolean allowDisable(int what, IBinder token, String pkg);
 }

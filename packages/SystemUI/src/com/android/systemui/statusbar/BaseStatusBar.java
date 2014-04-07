@@ -970,7 +970,11 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (mPanelSlightlyVisible != visible) {
             mPanelSlightlyVisible = visible;
             try {
-                mBarService.onPanelRevealed();
+                if (visible) {
+                    mBarService.onPanelRevealed();
+                } else {
+                    mBarService.onPanelHidden();
+                }
             } catch (RemoteException ex) {
                 // Won't fail unless the world has ended.
             }
