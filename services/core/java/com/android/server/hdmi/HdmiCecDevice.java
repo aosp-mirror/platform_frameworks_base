@@ -182,11 +182,49 @@ abstract class HdmiCecDevice {
     }
 
     /**
+     * Send &lt;Active Source&gt; command. The default implementation does nothing. Should be
+     * overriden by subclass.
+     */
+    public void sendActiveSource(int physicalAddress) {
+        logWarning("<Active Source> not valid for the device type: " + mType
+                + " address:" + physicalAddress);
+    }
+
+    /**
+     * Send &lt;Inactive Source&gt; command. The default implementation does nothing. Should be
+     * overriden by subclass.
+     */
+    public void sendInactiveSource(int physicalAddress) {
+        logWarning("<Inactive Source> not valid for the device type: " + mType
+                + " address:" + physicalAddress);
+    }
+
+    /**
+     * Send &lt;Image View On&gt; command. The default implementation does nothing. Should be
+     * overriden by subclass.
+     */
+    public void sendImageViewOn() {
+        logWarning("<Image View On> not valid for the device type: " + mType);
+    }
+
+    /**
+     * Send &lt;Text View On&gt; command. The default implementation does nothing. Should be
+     * overriden by subclass.
+     */
+    public void sendTextViewOn() {
+        logWarning("<Text View On> not valid for the device type: " + mType);
+    }
+
+    /**
      * Check if the connected sink device is in powered-on state. The default implementation
      * simply returns false. Should be overriden by subclass to report the correct state.
      */
     public boolean isSinkDeviceOn() {
-        Log.w(TAG, "Not valid for the device type: " + mType);
+        logWarning("isSinkDeviceOn() not valid for the device type: " + mType);
         return false;
+    }
+
+    private void logWarning(String msg) {
+        Log.w(TAG, msg);
     }
 }

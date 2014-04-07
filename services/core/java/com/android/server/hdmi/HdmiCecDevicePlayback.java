@@ -66,14 +66,11 @@ final class HdmiCecDevicePlayback extends HdmiCecDevice {
         // 1) Response for the queried power status request arrives. Update the status.
         // 2) Broadcast or direct <Standby> command from TV, which is sent as TV itself is going
         //    into standby mode too.
-        // 3) Broadcast <Report Physical Address> command from TV, which is sent while it boots up.
         if (opcode == HdmiCec.MESSAGE_REPORT_POWER_STATUS) {
             mSinkDevicePowerStatus = params[0];
         } else if (srcAddress == HdmiCec.ADDR_TV) {
             if (opcode == HdmiCec.MESSAGE_STANDBY) {
                 mSinkDevicePowerStatus = HdmiCec.POWER_STATUS_STANDBY;
-            } else if (opcode == HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS) {
-                mSinkDevicePowerStatus = HdmiCec.POWER_STATUS_ON;
             }
         }
         super.handleMessage(srcAddress, dstAddress, opcode, params);
@@ -94,5 +91,39 @@ final class HdmiCecDevicePlayback extends HdmiCecDevice {
     @Override
     public boolean isSinkDeviceOn() {
         return mSinkDevicePowerStatus == HdmiCec.POWER_STATUS_ON;
+    }
+
+    @Override
+    public void sendActiveSource(int physicalAddress) {
+        setIsActiveSource(true);
+        byte[] param = new byte[] {
+                (byte) ((physicalAddress >> 8) & 0xff),
+                (byte) (physicalAddress & 0xff)
+        };
+        getService().sendMessage(getType(), HdmiCec.ADDR_BROADCAST, HdmiCec.MESSAGE_ACTIVE_SOURCE,
+                param);
+    }
+
+    @Override
+    public void sendInactiveSource(int physicalAddress) {
+        setIsActiveSource(false);
+        byte[] param = new byte[] {
+                (byte) ((physicalAddress >> 8) & 0xff),
+                (byte) (physicalAddress & 0xff)
+        };
+        getService().sendMessage(getType(), HdmiCec.ADDR_TV, HdmiCec.MESSAGE_INACTIVE_SOURCE,
+                param);
+    }
+
+    @Override
+    public void sendImageViewOn() {
+        getService().sendMessage(getType(), HdmiCec.ADDR_TV, HdmiCec.MESSAGE_IMAGE_VIEW_ON,
+                HdmiCecService.EMPTY_PARAM);
+    }
+
+    @Override
+    public void sendTextViewOn() {
+        getService().sendMessage(getType(), HdmiCec.ADDR_TV, HdmiCec.MESSAGE_TEXT_VIEW_ON,
+                HdmiCecService.EMPTY_PARAM);
     }
 }
