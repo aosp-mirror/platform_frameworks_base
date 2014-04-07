@@ -2608,6 +2608,23 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.USER_INFO_CHANGED";
 
     /**
+     * Broadcast sent to the primary user when an associated managed profile is added (the profile
+     * was created and is ready to be used). Carries an extra {@link #EXTRA_USER} that specifies
+     * the UserHandle of the profile that was added. This is only sent to registered receivers,
+     * not manifest receivers.
+     */
+    public static final String ACTION_MANAGED_PROFILE_ADDED =
+            "android.intent.action.MANAGED_PROFILE_ADDED";
+
+    /**
+     * Broadcast sent to the primary user when an associated managed profile is removed. Carries an
+     * extra {@link #EXTRA_USER} that specifies the UserHandle of the profile that was removed. This
+     * is only sent to registered receivers, not manifest receivers.
+     */
+    public static final String ACTION_MANAGED_PROFILE_REMOVED =
+            "android.intent.action.MANAGED_PROFILE_REMOVED";
+
+    /**
      * Sent when the user taps on the clock widget in the system's "quick settings" area.
      */
     public static final String ACTION_QUICK_CLOCK =
@@ -3301,13 +3318,21 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.ALLOW_MULTIPLE";
 
     /**
-     * The userHandle carried with broadcast intents related to addition, removal and switching of
-     * users
-     * - {@link #ACTION_USER_ADDED}, {@link #ACTION_USER_REMOVED} and {@link #ACTION_USER_SWITCHED}.
+     * The integer userHandle carried with broadcast intents related to addition, removal and
+     * switching of users and managed profiles - {@link #ACTION_USER_ADDED},
+     * {@link #ACTION_USER_REMOVED} and {@link #ACTION_USER_SWITCHED}.
+     *
      * @hide
      */
     public static final String EXTRA_USER_HANDLE =
             "android.intent.extra.user_handle";
+
+    /**
+     * The UserHandle carried with broadcasts intents related to addition and removal of managed
+     * profiles - {@link #ACTION_MANAGED_PROFILE_ADDED} and {@link #ACTION_MANAGED_PROFILE_REMOVED}.
+     */
+    public static final String EXTRA_USER =
+            "android.intent.extra.user";
 
     /**
      * Extra used in the response from a BroadcastReceiver that handles
