@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Xml;
 import android.view.InflateException;
@@ -146,7 +145,13 @@ public class TransitionInflater {
                 transition = new ChangeBounds();
                 newTransition = true;
             } else if ("slide".equals(name)) {
-                transition = new Slide();
+                transition = createSlideTransition(attrs);
+                newTransition = true;
+            } else if ("explode".equals(name)) {
+                transition = new Explode();
+                newTransition = true;
+            } else if ("moveImage".equals(name)) {
+                transition = new MoveImage();
                 newTransition = true;
             } else if ("autoTransition".equals(name)) {
                 transition = new AutoTransition();
@@ -187,6 +192,15 @@ public class TransitionInflater {
         }
 
         return transition;
+    }
+
+    private Slide createSlideTransition(AttributeSet attrs) {
+        TypedArray a = mContext.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.Slide);
+        int edge = a.getInt(com.android.internal.R.styleable.Slide_slideEdge, Slide.BOTTOM);
+        Slide slide = new Slide(edge);
+        a.recycle();
+        return slide;
     }
 
     private void getTargetIds(XmlPullParser parser,

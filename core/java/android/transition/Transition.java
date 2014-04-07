@@ -19,10 +19,12 @@ package android.transition;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
+import android.graphics.Rect;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
+import android.util.SparseLongArray;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
@@ -60,9 +62,17 @@ import java.util.List;
  * <p>Transitions can be declared in XML resource files inside the <code>res/transition</code>
  * directory. Transition resources consist of a tag name for one of the Transition
  * subclasses along with attributes to define some of the attributes of that transition.
- * For example, here is a minimal resource file that declares a {@link ChangeBounds} transition:</p>
+ * For example, here is a minimal resource file that declares a {@link ChangeBounds} transition:
  *
  * {@sample development/samples/ApiDemos/res/transition/changebounds.xml ChangeBounds}
+ *
+ * <p>{@link android.transition.Explode} transition:</p>
+ *
+ * {@sample development/samples/ApiDemos/res/transition/explode.xml Explode}
+ *
+ * <p>{@link android.transition.MoveImage} transition:</p>
+ *
+ * {@sample development/samples/ApiDemos/res/transition/move_image.xml MoveImage}
  *
  * <p>Note that attributes for the transition are not required, just as they are
  * optional when declared in code; Transitions created from XML resources will use
@@ -87,7 +97,8 @@ import java.util.List;
  *
  * Further information on XML resource descriptions for transitions can be found for
  * {@link android.R.styleable#Transition}, {@link android.R.styleable#TransitionSet},
- * {@link android.R.styleable#TransitionTarget}, and {@link android.R.styleable#Fade}.
+ * {@link android.R.styleable#TransitionTarget}, {@link android.R.styleable#Fade}, and
+ * {@link android.R.styleable#Slide}.
  *
  */
 public abstract class Transition implements Cloneable {
@@ -148,6 +159,13 @@ public abstract class Transition implements Cloneable {
     // The set of animators collected from calls to createAnimator(),
     // to be run in runAnimators()
     ArrayList<Animator> mAnimators = new ArrayList<Animator>();
+
+    // The function for calculating the Animation start delay.
+    TransitionPropagation mPropagation;
+
+    // The rectangular region for Transitions like Explode and TransitionPropagations
+    // like CircularPropagation
+    EpicenterCallback mEpicenterCallback;
 
     /**
      * Constructs a Transition object with no target objects. A transition with
@@ -435,6 +453,9 @@ public abstract class Transition implements Cloneable {
             endValuesList.add(end);
         }
         ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
+        long minStartDelay = Long.MAX_VALUE;
+        int minAnimator = mAnimators.size();
+        SparseLongArray startDelays = new SparseLongArray();
         for (int i = 0; i < startValuesList.size(); ++i) {
             TransitionValues start = startValuesList.get(i);
             TransitionValues end = endValuesList.get(i);
@@ -497,6 +518,12 @@ public abstract class Transition implements Cloneable {
                             view = (start != null) ? start.view : null;
                         }
                         if (animator != null) {
+                            if (mPropagation != null) {
+                                long delay = mPropagation
+                                        .getStartDelay(sceneRoot, this, start, end);
+                                startDelays.put(mAnimators.size(), delay);
+                                minStartDelay = Math.min(delay, minStartDelay);
+                            }
                             AnimationInfo info = new AnimationInfo(view, getName(),
                                     sceneRoot.getWindowId(), infoValues);
                             runningAnimators.put(animator, info);
@@ -504,6 +531,14 @@ public abstract class Transition implements Cloneable {
                         }
                     }
                 }
+            }
+        }
+        if (minStartDelay != 0) {
+            for (int i = 0; i < startDelays.size(); i++) {
+                int index = startDelays.keyAt(i);
+                Animator animator = mAnimators.get(index);
+                long delay = startDelays.valueAt(i) - minStartDelay + animator.getStartDelay();
+                animator.setStartDelay(delay);
             }
         }
     }
@@ -565,7 +600,7 @@ public abstract class Transition implements Cloneable {
 
     /**
      * This is called internally once all animations have been set up by the
-     * transition hierarchy. \
+     * transition hierarchy.
      *
      * @hide
      */
@@ -1010,6 +1045,7 @@ public abstract class Transition implements Cloneable {
                         } else {
                             captureEndValues(values);
                         }
+                        capturePropagationValues(values);
                         if (start) {
                             mStartValues.viewValues.put(view, values);
                             if (id >= 0) {
@@ -1035,6 +1071,7 @@ public abstract class Transition implements Cloneable {
                         } else {
                             captureEndValues(values);
                         }
+                        capturePropagationValues(values);
                         if (start) {
                             mStartValues.viewValues.put(view, values);
                         } else {
@@ -1122,6 +1159,7 @@ public abstract class Transition implements Cloneable {
             } else {
                 captureEndValues(values);
             }
+            capturePropagationValues(values);
             if (start) {
                 if (!isListViewItem) {
                     mStartValues.viewValues.put(view, values);
@@ -1340,7 +1378,7 @@ public abstract class Transition implements Cloneable {
                 animator.setDuration(getDuration());
             }
             if (getStartDelay() >= 0) {
-                animator.setStartDelay(getStartDelay());
+                animator.setStartDelay(getStartDelay() + animator.getStartDelay());
             }
             if (getInterpolator() != null) {
                 animator.setInterpolator(getInterpolator());
@@ -1471,6 +1509,98 @@ public abstract class Transition implements Cloneable {
             mListeners = null;
         }
         return this;
+    }
+
+    /**
+     * Sets the callback to use to find the epicenter of a Transition. A null value indicates
+     * that there is no epicenter in the Transition and getEpicenter() will return null.
+     * Transitions like {@link android.transition.Explode} use a point or Rect to orient
+     * the direction of travel. This is called the epicenter of the Transition and is
+     * typically centered on a touched View. The
+     * {@link android.transition.Transition.EpicenterCallback} allows a Transition to
+     * dynamically retrieve the epicenter during a Transition.
+     * @param epicenterCallback The callback to use to find the epicenter of the Transition.
+     */
+    public void setEpicenterCallback(EpicenterCallback epicenterCallback) {
+        mEpicenterCallback = epicenterCallback;
+    }
+
+    /**
+     * Returns the callback used to find the epicenter of the Transition.
+     * Transitions like {@link android.transition.Explode} use a point or Rect to orient
+     * the direction of travel. This is called the epicenter of the Transition and is
+     * typically centered on a touched View. The
+     * {@link android.transition.Transition.EpicenterCallback} allows a Transition to
+     * dynamically retrieve the epicenter during a Transition.
+     * @return the callback used to find the epicenter of the Transition.
+     */
+    public EpicenterCallback getEpicenterCallback() {
+        return mEpicenterCallback;
+    }
+
+    /**
+     * Returns the epicenter as specified by the
+     * {@link android.transition.Transition.EpicenterCallback} or null if no callback exists.
+     * @return the epicenter as specified by the
+     * {@link android.transition.Transition.EpicenterCallback} or null if no callback exists.
+     * @see #setEpicenterCallback(android.transition.Transition.EpicenterCallback)
+     */
+    public Rect getEpicenter() {
+        if (mEpicenterCallback == null) {
+            return null;
+        }
+        return mEpicenterCallback.getEpicenter(this);
+    }
+
+    /**
+     * Sets the method for determining Animator start delays.
+     * When a Transition affects several Views like {@link android.transition.Explode} or
+     * {@link android.transition.Slide}, there may be a desire to have a "wave-front" effect
+     * such that the Animator start delay depends on position of the View. The
+     * TransitionPropagation specifies how the start delays are calculated.
+     * @param transitionPropagation The class used to determine the start delay of
+     *                              Animators created by this Transition. A null value
+     *                              indicates that no delay should be used.
+     */
+    public void setPropagation(TransitionPropagation transitionPropagation) {
+        mPropagation = transitionPropagation;
+    }
+
+    /**
+     * Returns the {@link android.transition.TransitionPropagation} used to calculate Animator start
+     * delays.
+     * When a Transition affects several Views like {@link android.transition.Explode} or
+     * {@link android.transition.Slide}, there may be a desire to have a "wave-front" effect
+     * such that the Animator start delay depends on position of the View. The
+     * TransitionPropagation specifies how the start delays are calculated.
+     * @return the {@link android.transition.TransitionPropagation} used to calculate Animator start
+     * delays. This is null by default.
+     */
+    public TransitionPropagation getPropagation() {
+        return mPropagation;
+    }
+
+    /**
+     * Captures TransitionPropagation values for the given view and the
+     * hierarchy underneath it.
+     */
+    void capturePropagationValues(TransitionValues transitionValues) {
+        if (mPropagation != null) {
+            String[] propertyNames = mPropagation.getPropagationProperties();
+            if (propertyNames == null) {
+                return;
+            }
+            boolean containsAll = true;
+            for (int i = 0; i < propertyNames.length; i++) {
+                if (!transitionValues.values.containsKey(propertyNames[i])) {
+                    containsAll = false;
+                    break;
+                }
+            }
+            if (!containsAll) {
+                mPropagation.captureValues(transitionValues);
+            }
+        }
     }
 
     Transition setSceneRoot(ViewGroup sceneRoot) {
@@ -1710,4 +1840,28 @@ public abstract class Transition implements Cloneable {
         }
     }
 
+    /**
+     * Class to get the epicenter of Transition. Use
+     * {@link #setEpicenterCallback(android.transition.Transition.EpicenterCallback)} to
+     * set the callback used to calculate the epicenter of the Transition. Override
+     * {@link #getEpicenter()} to return the rectangular region in screen coordinates of
+     * the epicenter of the transition.
+     * @see #setEpicenterCallback(android.transition.Transition.EpicenterCallback)
+     */
+    public static abstract class EpicenterCallback {
+
+        /**
+         * Implementers must override to return the epicenter of the Transition in screen
+         * coordinates. Transitions like {@link android.transition.Explode} depend upon
+         * an epicenter for the Transition. In Explode, Views move toward or away from the
+         * center of the epicenter Rect along the vector between the epicenter and the center
+         * of the View appearing and disappearing. Some Transitions, such as
+         * {@link android.transition.Fade} pay no attention to the epicenter.
+         *
+         * @param transition The transition for which the epicenter applies.
+         * @return The Rect region of the epicenter of <code>transition</code> or null if
+         * there is no epicenter.
+         */
+        public abstract Rect getEpicenter(Transition transition);
+    }
 }
