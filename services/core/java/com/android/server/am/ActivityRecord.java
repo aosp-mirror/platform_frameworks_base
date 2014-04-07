@@ -522,13 +522,6 @@ final class ActivityRecord {
         if (fullscreen == toOpaque) {
             return false;
         }
-        AttributeCache.Entry ent =
-                AttributeCache.instance().get(packageName, realTheme, styleable.Window, userId);
-        if (ent == null
-                || !ent.array.getBoolean(styleable.Window_windowIsTranslucent, false)
-                || ent.array.getBoolean(styleable.Window_windowIsFloating, false)) {
-            return false;
-        }
 
         // Keep track of the number of fullscreen activities in this task.
         task.numFullscreen += toOpaque ? +1 : -1;
