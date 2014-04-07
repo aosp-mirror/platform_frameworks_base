@@ -433,7 +433,7 @@ public class StaticLayout extends Layout {
                         }
 
                         if (mLineCount >= mMaximumVisibleLineCount) {
-                            break;
+                            return;
                         }
                     }
                 }
