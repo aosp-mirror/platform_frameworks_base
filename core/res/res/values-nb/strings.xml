@@ -164,7 +164,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Slå av"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Feilrapport"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Utfør feilrapport"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Informasjon om den nåværende tilstanden til enheten din samles inn og sendes som en e-post. Det tar litt tid fra du starter feilrapporten til e-posten er klar, så vær tålmodig."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Informasjon om tilstanden til enheten din samles inn og sendes som en e-post. Det tar litt tid fra du starter feilrapporten til e-posten er klar, så vær tålmodig."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Stillemodus"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Lyden er av"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Lyden er på"</string>
@@ -681,6 +681,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Gir innehaveren tillatelse til å kalle opp den konfigurasjonsappen som ble levert av operatøren. Dette skal ikke være nødvendig for vanlige apper."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"lytte etter observasjoner om nettverksforhold"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Gir appen tillatelse til å lytte etter observasjoner om nettverksforhold. Dette skal ikke være nødvendig for vanlige apper."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"tilgang til DRM-sertifikater"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Lar en app klargjøre og bruke DRM-sertifikater. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angi passordregler"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller tillatt lengde og tillatte tegn i passord for opplåsing av skjerm."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåk forsøk på opplåsing av skjerm"</string>

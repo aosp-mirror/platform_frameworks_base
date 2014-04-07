@@ -681,6 +681,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Umožňuje držiteľovi vyvolať aplikáciu pre konfiguráciu poskytnutú operátorom. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"zachytávať informácie o stave siete"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Umožňuje aplikácii zachytávať informácie o stave siete. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"prístup k certifikátom DRM"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Umožňuje aplikácii vydávať a používať certifikáty DRM. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastaviť pravidlá pre heslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ovládanie dĺžky hesiel na odomknutie obrazovky a v nich používané znaky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovať pokusy o odomknutie obrazovky"</string>

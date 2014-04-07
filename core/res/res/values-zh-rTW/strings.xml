@@ -681,6 +681,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"允許應用程式叫用行動通訊業者提供的設定應用程式 (一般應用程式並不需要)。"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"監聽網路狀況觀察資訊"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"允許應用程式監聽網路狀況觀察資訊 (一般應用程式並不需要)。"</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"存取 DRM 憑證"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"允許應用程式佈建及使用 DRM 憑證 (一般應用程式並不需要)。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"控制螢幕解鎖密碼所允許的長度和字元。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"監視螢幕解鎖嘗試次數"</string>

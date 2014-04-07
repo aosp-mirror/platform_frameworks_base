@@ -681,6 +681,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"İzin sahibine, operatör tarafından sağlanan yapılandırma uygulamasını çalıştırma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ağ koşullarındaki gözlemleri dinle"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Bir uygulamaya, ağ koşullarındaki gözlemleri dinleme izni verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM sertifikalarına eriş"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Bir uygulamanın DRM sertifikaları için temel hazırlık yapmasına ve bunları kullanmasına izin verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ekran kilidini açma şifrelerinde izin verilen uzunluğu ve karakterleri denetleme."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekran kilidini açma denemelerini izle"</string>
