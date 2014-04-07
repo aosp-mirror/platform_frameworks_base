@@ -942,8 +942,8 @@ final class ActivityRecord {
         // for another app to start, then we have paused dispatching
         // for this activity.
         ActivityRecord r = this;
-        final ActivityStack stack = task.stack;
         if (r.waitingVisible) {
+            final ActivityStack stack = mStackSupervisor.getFocusedStack();
             // Hmmm, who might we be waiting for?
             r = stack.mResumedActivity;
             if (r == null) {
