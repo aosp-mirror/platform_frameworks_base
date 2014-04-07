@@ -59,17 +59,6 @@ RenderNode::~RenderNode() {
     delete mDisplayListData;
 }
 
-void RenderNode::destroyDisplayListDeferred(RenderNode* displayList) {
-    if (displayList) {
-        if (Caches::hasInstance()) {
-            DISPLAY_LIST_LOGD("Deferring display list destruction");
-            Caches::getInstance().deleteDisplayListDeferred(displayList);
-        } else {
-            delete displayList;
-        }
-    }
-}
-
 void RenderNode::setData(DisplayListData* data) {
     delete mDisplayListData;
     mDisplayListData = data;
@@ -104,8 +93,8 @@ void RenderNode::updateProperties() {
     }
 
     if (mDisplayListData) {
-        for (size_t i = 0; i < mDisplayListData->children.size(); i++) {
-            RenderNode* childNode = mDisplayListData->children[i]->mDisplayList;
+        for (size_t i = 0; i < mDisplayListData->children().size(); i++) {
+            RenderNode* childNode = mDisplayListData->children()[i]->mDisplayList;
             childNode->updateProperties();
         }
     }
@@ -118,8 +107,8 @@ bool RenderNode::hasFunctors() {
         return true;
     }
 
-    for (size_t i = 0; i < mDisplayListData->children.size(); i++) {
-        RenderNode* childNode = mDisplayListData->children[i]->mDisplayList;
+    for (size_t i = 0; i < mDisplayListData->children().size(); i++) {
+        RenderNode* childNode = mDisplayListData->children()[i]->mDisplayList;
         if (childNode->hasFunctors()) {
             return true;
         }
@@ -248,8 +237,8 @@ void RenderNode::computeOrdering() {
     // TODO: create temporary DDLOp and call computeOrderingImpl on top DisplayList so that
     // transform properties are applied correctly to top level children
     if (mDisplayListData == NULL) return;
-    for (unsigned int i = 0; i < mDisplayListData->children.size(); i++) {
-        DrawDisplayListOp* childOp = mDisplayListData->children[i];
+    for (unsigned int i = 0; i < mDisplayListData->children().size(); i++) {
+        DrawDisplayListOp* childOp = mDisplayListData->children()[i];
         childOp->mDisplayList->computeOrderingImpl(childOp,
                 &mProjectedNodes, &mat4::identity());
     }
@@ -277,11 +266,11 @@ void RenderNode::computeOrderingImpl(
         opState->mSkipInOrderDraw = false;
     }
 
-    if (mDisplayListData->children.size() > 0) {
+    if (mDisplayListData->children().size() > 0) {
         const bool isProjectionReceiver = mDisplayListData->projectionReceiveIndex >= 0;
         bool haveAppliedPropertiesToProjection = false;
-        for (unsigned int i = 0; i < mDisplayListData->children.size(); i++) {
-            DrawDisplayListOp* childOp = mDisplayListData->children[i];
+        for (unsigned int i = 0; i < mDisplayListData->children().size(); i++) {
+            DrawDisplayListOp* childOp = mDisplayListData->children()[i];
             RenderNode* child = childOp->mDisplayList;
 
             Vector<DrawDisplayListOp*>* projectionChildren = NULL;
@@ -375,10 +364,10 @@ void RenderNode::replayNodeInParent(ReplayStateStruct& replayStruct, const int l
 }
 
 void RenderNode::buildZSortedChildList(Vector<ZDrawDisplayListOpPair>& zTranslatedNodes) {
-    if (mDisplayListData == NULL || mDisplayListData->children.size() == 0) return;
+    if (mDisplayListData == NULL || mDisplayListData->children().size() == 0) return;
 
-    for (unsigned int i = 0; i < mDisplayListData->children.size(); i++) {
-        DrawDisplayListOp* childOp = mDisplayListData->children[i];
+    for (unsigned int i = 0; i < mDisplayListData->children().size(); i++) {
+        DrawDisplayListOp* childOp = mDisplayListData->children()[i];
         RenderNode* child = childOp->mDisplayList;
         float childZ = child->properties().getTranslationZ();
 

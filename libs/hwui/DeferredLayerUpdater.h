@@ -101,7 +101,7 @@ private:
     // Layer type specific properties
     // displayList and surfaceTexture are mutually exclusive, only 1 may be set
     // dirtyRect is only valid if displayList is set
-    RenderNode* mDisplayList;
+    sp<RenderNode> mDisplayList;
     Rect mDirtyRect;
     sp<GLConsumer> mSurfaceTexture;
     SkMatrix* mTransform;

@@ -18,6 +18,7 @@
 
 #include <utils/Condition.h>
 #include <utils/Mutex.h>
+#include <utils/StrongPointer.h>
 #include <utils/Vector.h>
 
 #include "RenderTask.h"
@@ -36,9 +37,16 @@ namespace renderthread {
 class CanvasContext;
 class RenderThread;
 
-struct SetDisplayListData {
-    RenderNode* targetNode;
-    DisplayListData* newData;
+class SetDisplayListData {
+public:
+    // This ctor exists for Vector's usage
+    SetDisplayListData();
+    SetDisplayListData(RenderNode* node, DisplayListData* newData);
+    ~SetDisplayListData();
+    void apply() const;
+private:
+    sp<RenderNode> mTargetNode;
+    DisplayListData* mNewData;
 };
 
 /*
@@ -61,10 +69,18 @@ public:
     void setRenderNode(RenderNode* renderNode);
     void setDirty(int left, int top, int right, int bottom);
     void drawFrame(RenderThread* renderThread);
+    void flushStateChanges(RenderThread* renderThread);
 
     virtual void run();
 
 private:
+    enum TaskMode {
+        MODE_INVALID,
+        MODE_FULL,
+        MODE_STATE_ONLY,
+    };
+
+    void postAndWait(RenderThread* renderThread, TaskMode mode);
     void syncFrameState();
     void unblockUiThread();
     static void drawRenderNode(CanvasContext* context, RenderNode* renderNode, Rect* dirty);
@@ -81,7 +97,8 @@ private:
     /*********************************************
      *  Single frame data
      *********************************************/
-    RenderNode* mRenderNode;
+    TaskMode mTaskMode;
+    sp<RenderNode> mRenderNode;
     Rect mDirty;
     Vector<SetDisplayListData> mDisplayListDataUpdates;
 

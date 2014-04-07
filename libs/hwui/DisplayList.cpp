@@ -29,6 +29,13 @@
 namespace android {
 namespace uirenderer {
 
+DisplayListData::DisplayListData() : projectionReceiveIndex(-1), functorCount(0), hasDrawOps(false) {
+}
+
+DisplayListData::~DisplayListData() {
+    cleanupResources();
+}
+
 void DisplayListData::cleanupResources() {
     Caches& caches = Caches::getInstance();
     caches.unregisterFunctors(functorCount);
@@ -89,6 +96,13 @@ void DisplayListData::cleanupResources() {
     paths.clear();
     matrices.clear();
     layers.clear();
+}
+
+void DisplayListData::addChild(DrawDisplayListOp* op) {
+    LOG_ALWAYS_FATAL_IF(!op->renderNode(), "DrawDisplayListOp with no render node!");
+
+    mChildren.push(op);
+    mReferenceHolders.push(op->renderNode());
 }
 
 }; // namespace uirenderer

@@ -30,7 +30,19 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-DrawFrameTask::DrawFrameTask() : mContext(0), mRenderNode(0) {
+SetDisplayListData::SetDisplayListData() : mNewData(0) {}
+
+SetDisplayListData::SetDisplayListData(RenderNode* node, DisplayListData* newData)
+        : mTargetNode(node), mNewData(newData) {
+}
+
+SetDisplayListData::~SetDisplayListData() {}
+
+void SetDisplayListData::apply() const {
+    mTargetNode->setData(mNewData);
+}
+
+DrawFrameTask::DrawFrameTask() : mContext(0), mTaskMode(MODE_INVALID), mRenderNode(0) {
 }
 
 DrawFrameTask::~DrawFrameTask() {
@@ -41,13 +53,15 @@ void DrawFrameTask::setContext(CanvasContext* context) {
 }
 
 void DrawFrameTask::setDisplayListData(RenderNode* renderNode, DisplayListData* newData) {
-    SetDisplayListData setter;
-    setter.targetNode = renderNode;
-    setter.newData = newData;
+    LOG_ALWAYS_FATAL_IF(!mContext, "Lifecycle violation, there's no context to setDisplayListData with!");
+
+    SetDisplayListData setter(renderNode, newData);
     mDisplayListDataUpdates.push(setter);
 }
 
 void DrawFrameTask::addLayer(DeferredLayerUpdater* layer) {
+    LOG_ALWAYS_FATAL_IF(!mContext, "Lifecycle violation, there's no context to addLayer with!");
+
     mLayers.push(layer);
 }
 
@@ -61,6 +75,8 @@ void DrawFrameTask::removeLayer(DeferredLayerUpdater* layer) {
 }
 
 void DrawFrameTask::setRenderNode(RenderNode* renderNode) {
+    LOG_ALWAYS_FATAL_IF(!mContext, "Lifecycle violation, there's no context to setRenderNode with!");
+
     mRenderNode = renderNode;
 }
 
@@ -69,16 +85,29 @@ void DrawFrameTask::setDirty(int left, int top, int right, int bottom) {
 }
 
 void DrawFrameTask::drawFrame(RenderThread* renderThread) {
-    LOG_ALWAYS_FATAL_IF(!mRenderNode, "Cannot drawFrame with no render node!");
+    LOG_ALWAYS_FATAL_IF(!mRenderNode.get(), "Cannot drawFrame with no render node!");
     LOG_ALWAYS_FATAL_IF(!mContext, "Cannot drawFrame with no CanvasContext!");
 
-    AutoMutex _lock(mLock);
-    renderThread->queue(this);
-    mSignal.wait(mLock);
+    postAndWait(renderThread, MODE_FULL);
 
     // Reset the single-frame data
     mDirty.setEmpty();
     mRenderNode = 0;
+}
+
+void DrawFrameTask::flushStateChanges(RenderThread* renderThread) {
+    LOG_ALWAYS_FATAL_IF(!mContext, "Cannot drawFrame with no CanvasContext!");
+
+    postAndWait(renderThread, MODE_STATE_ONLY);
+}
+
+void DrawFrameTask::postAndWait(RenderThread* renderThread, TaskMode mode) {
+    LOG_ALWAYS_FATAL_IF(mode == MODE_INVALID, "That's not a real mode, silly!");
+
+    mTaskMode = mode;
+    AutoMutex _lock(mLock);
+    renderThread->queue(this);
+    mSignal.wait(mLock);
 }
 
 void DrawFrameTask::run() {
@@ -86,20 +115,25 @@ void DrawFrameTask::run() {
 
     syncFrameState();
 
+    if (mTaskMode == MODE_STATE_ONLY) {
+        unblockUiThread();
+        return;
+    }
+
     // Grab a copy of everything we need
     Rect dirtyCopy(mDirty);
-    RenderNode* renderNode = mRenderNode;
+    sp<RenderNode> renderNode = mRenderNode;
     CanvasContext* context = mContext;
 
     // This is temporary until WebView has a solution for syncing frame state
-    bool canUnblockUiThread = !requiresSynchronousDraw(renderNode);
+    bool canUnblockUiThread = !requiresSynchronousDraw(renderNode.get());
 
     // From this point on anything in "this" is *UNSAFE TO ACCESS*
     if (canUnblockUiThread) {
         unblockUiThread();
     }
 
-    drawRenderNode(context, renderNode, &dirtyCopy);
+    drawRenderNode(context, renderNode.get(), &dirtyCopy);
 
     if (!canUnblockUiThread) {
         unblockUiThread();
@@ -111,12 +145,16 @@ void DrawFrameTask::syncFrameState() {
 
     for (size_t i = 0; i < mDisplayListDataUpdates.size(); i++) {
         const SetDisplayListData& setter = mDisplayListDataUpdates[i];
-        setter.targetNode->setData(setter.newData);
+        setter.apply();
     }
     mDisplayListDataUpdates.clear();
 
     mContext->processLayerUpdates(&mLayers);
-    mRenderNode->updateProperties();
+
+    // If we don't have an mRenderNode this is a state flush only
+    if (mRenderNode.get()) {
+        mRenderNode->updateProperties();
+    }
 }
 
 void DrawFrameTask::unblockUiThread() {
