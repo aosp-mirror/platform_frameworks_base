@@ -170,6 +170,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected int mZenMode;
 
+    protected boolean mOnKeyguard;
+
     public boolean isDeviceProvisioned() {
         return mDeviceProvisioned;
     }
@@ -1051,23 +1053,16 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected void updateExpansionStates() {
-        int N = mNotificationData.size();
-        for (int i = 0; i < N; i++) {
+        int n = mNotificationData.size();
+        for (int i = 0; i < n; i++) {
             NotificationData.Entry entry = mNotificationData.get(i);
-            if (!entry.row.isUserLocked()) {
-                if (i == (N-1)) {
-                    if (DEBUG) Log.d(TAG, "expanding top notification at " + i);
-                    entry.row.setExpanded(true);
-                } else {
-                    if (!entry.row.isUserExpanded()) {
-                        if (DEBUG) Log.d(TAG, "collapsing notification at " + i);
-                        entry.row.setExpanded(false);
-                    } else {
-                        if (DEBUG) Log.d(TAG, "ignoring user-modified notification at " + i);
-                    }
-                }
+            if (mOnKeyguard) {
+                entry.row.setExpanded(false);
             } else {
-                if (DEBUG) Log.d(TAG, "ignoring notification being held by user at " + i);
+                if (!entry.row.isUserLocked()) {
+                    boolean top = (i == n-1);
+                    entry.row.setExpanded(top || entry.row.isUserExpanded());
+                }
             }
         }
     }
