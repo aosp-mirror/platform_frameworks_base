@@ -41,6 +41,7 @@
 #include "Matrix.h"
 #include "DeferredDisplayList.h"
 #include "RenderProperties.h"
+#include "utils/VirtualLightRefBase.h"
 
 class SkBitmap;
 class SkPaint;
@@ -106,17 +107,14 @@ public:
  */
 class DisplayListData {
 public:
-    DisplayListData() : projectionReceiveIndex(-1), functorCount(0), hasDrawOps(false) {}
-    virtual ~DisplayListData() { cleanupResources(); }
+    DisplayListData();
+    ~DisplayListData();
 
     // allocator into which all ops were allocated
     LinearAllocator allocator;
 
     // pointers to all ops within display list, pointing into allocator data
     Vector<DisplayListOp*> displayListOps;
-
-    // list of children display lists for quick, non-drawing traversal
-    Vector<DrawDisplayListOp*> children;
 
     // index of DisplayListOp restore, after which projected descendents should be drawn
     int projectionReceiveIndex;
@@ -139,7 +137,15 @@ public:
         return !displayListOps.size();
     }
 
+    void addChild(DrawDisplayListOp* childOp);
+    const Vector<DrawDisplayListOp*>& children() { return mChildren; }
+
 private:
+    Vector< sp<VirtualLightRefBase> > mReferenceHolders;
+
+    // list of children display lists for quick, non-drawing traversal
+    Vector<DrawDisplayListOp*> mChildren;
+
     void cleanupResources();
 };
 

@@ -19,6 +19,7 @@
 
 #include <cutils/compiler.h>
 #include <sys/types.h>
+#include <utils/StrongPointer.h>
 
 #include <GLES2/gl2.h>
 
@@ -85,13 +86,7 @@ public:
     }
 
     void updateDeferred(RenderNode* displayList,
-            int left, int top, int right, int bottom) {
-        requireRenderer();
-        this->displayList = displayList;
-        const Rect r(left, top, right, bottom);
-        dirtyRect.unionWith(r);
-        deferredUpdateScheduled = true;
-    }
+            int left, int top, int right, int bottom);
 
     inline uint32_t getWidth() const {
         return texture.width;
@@ -294,7 +289,7 @@ public:
      */
     bool deferredUpdateScheduled;
     OpenGLRenderer* renderer;
-    RenderNode* displayList;
+    sp<RenderNode> displayList;
     Rect dirtyRect;
     bool debugDrawUpdate;
     bool hasDrawnSinceUpdate;

@@ -41,6 +41,7 @@
 #include "DeferredDisplayList.h"
 #include "DisplayList.h"
 #include "RenderProperties.h"
+#include "utils/VirtualLightRefBase.h"
 
 class SkBitmap;
 class SkPaint;
@@ -76,7 +77,7 @@ class DrawDisplayListOp;
  * recorded stream of canvas operations is refreshed. The DisplayList (and its properties) stay
  * attached.
  */
-class RenderNode {
+class RenderNode : public VirtualLightRefBase {
 public:
     ANDROID_API RenderNode();
     ANDROID_API ~RenderNode();
@@ -86,7 +87,6 @@ public:
         kReplayFlag_ClipChildren = 0x1
     };
 
-    ANDROID_API static void destroyDisplayListDeferred(RenderNode* displayList);
     ANDROID_API static void outputLogBuffer(int fd);
 
     ANDROID_API void setData(DisplayListData* newData);

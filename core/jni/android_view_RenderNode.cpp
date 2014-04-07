@@ -59,13 +59,14 @@ static void android_view_RenderNode_output(JNIEnv* env,
 
 static jlong android_view_RenderNode_create(JNIEnv* env, jobject clazz) {
     RenderNode* displayList = new RenderNode();
+    displayList->incStrong(0);
     return reinterpret_cast<jlong>(displayList);
 }
 
 static void android_view_RenderNode_destroyDisplayList(JNIEnv* env,
         jobject clazz, jlong displayListPtr) {
     RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    RenderNode::destroyDisplayListDeferred(displayList);
+    displayList->decStrong(0);
 }
 
 // ----------------------------------------------------------------------------
