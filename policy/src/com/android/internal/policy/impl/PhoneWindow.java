@@ -4144,7 +4144,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         transitioningViews.removeAll(sharedElements.values());
 
         mSceneTransitionListener.convertToTranslucent();
-
+        transition = transition.clone();
+        Rect epicenter = calcEpicenter(sharedElements, mActivityOptions.getSharedElementNames());
+        transition.setEpicenterCallback(new FixedEpicenterCallback(epicenter));
         ExitSceneBack exitScene =
                 new ExitSceneBack(onTransitionEnd, sharedElementArgs, sharedElements.values());
         exitScene.start(transition);
@@ -4178,8 +4180,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         transitionSet.addTransition(exitTransition);
         transitionSet.addTransition(sharedElementTransition);
 
+        Rect epicenter = calcEpicenter(sharedElements, activityOptions.getSharedElementNames());
+        FixedEpicenterCallback epicenterCallback = new FixedEpicenterCallback(epicenter);
+        transitionSet.setEpicenterCallback(epicenterCallback);
+
         updateExitActivityOptions(activityOptions, sharedElements,
-                sharedElementTransition, transitioningViews, exitTransition);
+                sharedElementTransition, transitioningViews, exitTransition, epicenterCallback);
 
         // Start exiting the Views that need to exit
         TransitionManager.beginDelayedTransition(mDecor, transitionSet);
@@ -4222,7 +4228,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private void updateExitActivityOptions(ActivityOptions activityOptions,
             final Map<String, View> sharedElements, Transition sharedElementTransition,
-            final ArrayList<View> transitioningViews, Transition exitTransition) {
+            final ArrayList<View> transitioningViews, Transition exitTransition,
+            final Transition.EpicenterCallback epicenterCallback) {
 
         // Schedule capturing of the shared element state
         final Bundle sharedElementArgs = new Bundle();
@@ -4246,6 +4253,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     @Override
                     public void run() {
                         Transition transition = mTransitionManager.getExitTransition(mContentScene);
+                        transition = transition.clone();
+                        transition.setEpicenterCallback(epicenterCallback);
                         TransitionManager.beginDelayedTransition(mDecor, transition);
                         for (String name : sharedElements.keySet()) {
                             if (!sharedElementNames.contains(name)) {
@@ -4276,6 +4285,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     public void run() {
                         mTransitioningViews = null;
                         Transition transition = mTransitionManager.getExitTransition(mContentScene);
+                        transition = transition.clone();
+                        transition.setEpicenterCallback(epicenterCallback);
                         setSharedElementState(sharedElements, sharedElementState);
                         setViewVisibility(sharedElements.values(), View.VISIBLE);
                         if (mSceneTransitionListener != null) {
@@ -4335,7 +4346,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private static Transition addTransitionTargets(Transition transition, Collection<View> views,
             boolean add) {
         TransitionSet set = new TransitionSet();
-        set.addTransition(transition);
+        set.addTransition(transition.clone());
         for (View view: views) {
             if (add) {
                 set.addTarget(view);
@@ -4446,6 +4457,28 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
+    private static Rect calcEpicenter(ArrayMap<String, View> sharedElements,
+            ArrayList<String> sharedElementNames) {
+        if (sharedElementNames != null) {
+            for (String name: sharedElementNames) {
+                if (name.startsWith("android:")) {
+                    return null;
+                }
+                View view = sharedElements.get(name);
+                if (view != null) {
+                    int[] loc = new int[2];
+                    view.getLocationOnScreen(loc);
+                    int left = loc[0] + Math.round(view.getTranslationX());
+                    int top = loc[1] + Math.round(view.getTranslationY());
+                    int right = left + view.getWidth();
+                    int bottom = top + view.getHeight();
+                    return new Rect(left, top, right, bottom);
+                }
+            }
+        }
+        return null;
+    }
+
     private class ExitSceneBack extends Transition.TransitionListenerAdapter implements
             Animator.AnimatorListener {
         private boolean mExitTransitionComplete;
@@ -4546,6 +4579,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private boolean mEnterTransitionStarted;
         private ArrayMap<String, View> mSharedElementTargets = new ArrayMap<String, View>();
         private ArrayList<View> mEnteringViews = new ArrayList<View>();
+        private Transition.EpicenterCallback mEpicenterCallback;
 
         public EnterScene() {
             mSceneTransitionListener.nullPendingTransition();
@@ -4566,6 +4600,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 mDecor.captureTransitioningViews(mEnteringViews);
                 mapSharedElements(mSharedElementTargets);
                 mEnteringViews.removeAll(mSharedElementTargets.values());
+                Rect epicenter = calcEpicenter(mSharedElementTargets,
+                        mActivityOptions.getSharedElementNames());
+                mEpicenterCallback = new FixedEpicenterCallback(epicenter);
 
                 setViewVisibility(mEnteringViews, View.INVISIBLE);
                 setViewVisibility(mSharedElementTargets.values(), View.INVISIBLE);
@@ -4610,6 +4647,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             transition = addTransitionTargets(transition,
                                     mSharedElementTargets.values(),
                                     true);
+                            transition.setEpicenterCallback(mEpicenterCallback);
                             if (transitionArgs == null) {
                                 TransitionManager.beginDelayedTransition(mDecor, transition);
                                 setViewVisibility(mSharedElementTargets.values(), View.VISIBLE);
@@ -4692,8 +4730,22 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 transition = TransitionManager.getDefaultTransition();
             }
             transition = addTransitionTargets(transition, mEnteringViews, true);
+            transition.setEpicenterCallback(mEpicenterCallback);
             TransitionManager.beginDelayedTransition(mDecor, transition);
             setViewVisibility(mEnteringViews, View.VISIBLE);
         }
     }
+
+    private static class FixedEpicenterCallback extends Transition.EpicenterCallback {
+        private Rect mEpicenter;
+
+        public FixedEpicenterCallback(Rect epicenter) {
+            mEpicenter = epicenter;
+        }
+
+        @Override
+        public Rect getEpicenter(Transition transition) {
+            return mEpicenter;
+        }
+    };
 }

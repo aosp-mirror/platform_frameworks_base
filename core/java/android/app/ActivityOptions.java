@@ -722,8 +722,6 @@ public class ActivityOptions {
     private static class ExitTransitionListener extends ResultReceiver
             implements Transition.TransitionListener {
         private boolean mSharedElementNotified;
-        private Transition mExitTransition;
-        private Transition mSharedElementTransition;
         private IRemoteCallback mTransitionCompleteCallback;
         private boolean mExitComplete;
         private boolean mSharedElementComplete;
@@ -733,10 +731,15 @@ public class ActivityOptions {
                 SharedElementSource sharedElementSource) {
             super(null);
             mSharedElementSource = sharedElementSource;
-            mExitTransition = exitTransition;
-            mExitTransition.addListener(this);
-            mSharedElementTransition = sharedElementTransition;
-            mSharedElementTransition.addListener(this);
+            exitTransition.addListener(this);
+            sharedElementTransition.addListener(new Transition.TransitionListenerAdapter() {
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    mSharedElementComplete = true;
+                    notifySharedElement();
+                    transition.removeListener(this);
+                }
+            });
         }
 
         @Override
@@ -769,15 +772,9 @@ public class ActivityOptions {
 
         @Override
         public void onTransitionEnd(Transition transition) {
-            if (transition == mExitTransition) {
-                mExitComplete = true;
-                notifyExit();
-                mExitTransition.removeListener(this);
-            } else {
-                mSharedElementComplete = true;
-                notifySharedElement();
-                mSharedElementTransition.removeListener(this);
-            }
+            mExitComplete = true;
+            notifyExit();
+            transition.removeListener(this);
         }
 
         @Override

@@ -17,6 +17,7 @@
 package android.transition;
 
 import android.animation.TimeInterpolator;
+import android.graphics.Rect;
 import android.util.AndroidRuntimeException;
 import android.view.View;
 import android.view.ViewGroup;
@@ -315,6 +316,15 @@ public class TransitionSet extends Transition {
         }
     }
 
+    @Override
+    void capturePropagationValues(TransitionValues transitionValues) {
+        super.capturePropagationValues(transitionValues);
+        int numTransitions = mTransitions.size();
+        for (int i = 0; i < numTransitions; ++i) {
+            mTransitions.get(i).capturePropagationValues(transitionValues);
+        }
+    }
+
     /** @hide */
     @Override
     public void pause(View sceneRoot) {
@@ -365,6 +375,24 @@ public class TransitionSet extends Transition {
     }
 
     @Override
+    public void setPropagation(TransitionPropagation propagation) {
+        super.setPropagation(propagation);
+        int numTransitions = mTransitions.size();
+        for (int i = 0; i < numTransitions; ++i) {
+            mTransitions.get(i).setPropagation(propagation);
+        }
+    }
+
+    @Override
+    public void setEpicenterCallback(EpicenterCallback epicenterCallback) {
+        super.setEpicenterCallback(epicenterCallback);
+        int numTransitions = mTransitions.size();
+        for (int i = 0; i < numTransitions; ++i) {
+            mTransitions.get(i).setEpicenterCallback(epicenterCallback);
+        }
+    }
+
+    @Override
     String toString(String indent) {
         String result = super.toString(indent);
         for (int i = 0; i < mTransitions.size(); ++i) {
@@ -383,5 +411,4 @@ public class TransitionSet extends Transition {
         }
         return clone;
     }
-
 }
