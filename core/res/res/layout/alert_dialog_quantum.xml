@@ -18,7 +18,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/parentPanel"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
@@ -102,10 +102,6 @@
                 android:maxLines="2"
                 android:minHeight="@dimen/alert_dialog_button_bar_height"
                 style="?android:attr/buttonBarButtonStyle" />
-            <View android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:visibility="invisible" />
             <Button android:id="@+id/button2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
