@@ -164,7 +164,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Slå av"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Feilrapport"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Utfør feilrapport"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Informasjon om den nåværende tilstanden til enheten din samles inn og sendes som en e-post. Det tar litt tid fra du starter feilrapporten til e-posten er klar, så vær tålmodig."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Informasjon om tilstanden til enheten din samles inn og sendes som en e-post. Det tar litt tid fra du starter feilrapporten til e-posten er klar, så vær tålmodig."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Stillemodus"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Lyden er av"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Lyden er på"</string>
@@ -687,6 +687,8 @@
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Gir appen tillatelse til å lytte etter observasjoner om nettverksforhold. Dette skal ikke være nødvendig for vanlige apper."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"endre kalibreringen av inndataenheter"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Lar appen endre kalibrasjonsparametrene for berøringsskjermen. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"tilgang til DRM-sertifikater"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Lar en app klargjøre og bruke DRM-sertifikater. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angi passordregler"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller tillatt lengde og tillatte tegn i passord for opplåsing av skjerm."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåk forsøk på opplåsing av skjerm"</string>
@@ -1319,10 +1321,10 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Lar en app bruke sikker lagring via keyguard."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Kontrollér om tastelåsen er skjult eller vist"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Tillater at en app kontrollerer tastelåsen."</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"Oppdag endringer i pålitelighetsstatusen."</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Gir appen tillatelse til å oppdage endringer i pålitelighetsstatusen."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Tilknytt en pålitelighetstagent-tjeneste."</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Gir appen tillatelse til å knyttes til en pålitelighetsagent-tjeneste."</string>
+    <string name="permlab_trust_listener" msgid="1765718054003704476">"Oppdag endringer i tillitsstatusen."</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Gir appen tillatelse til å oppdage endringer i tillitsstatusen."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Tilknytt en tillitsagent-tjeneste."</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Gir appen tillatelse til å knyttes til en tillitsagent-tjeneste."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Samhandling med oppdateringer og gjenopprettingssystem"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Tillater en app å samhandle med gjenopprettingsssystemet og systemoppdateringer."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Trykk to ganger for zoomkontroll"</string>
