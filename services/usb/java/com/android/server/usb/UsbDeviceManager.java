@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
+ *
  * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -699,7 +702,9 @@ public class UsbDeviceManager {
             int id = 0;
             Resources r = mContext.getResources();
             if (mConnected) {
-                if (containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_MTP)) {
+                if (containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_CHARGING)) {
+                    id = com.android.internal.R.string.usb_charging_notification_title;
+                } else if (containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_MTP)) {
                     id = com.android.internal.R.string.usb_mtp_notification_title;
                 } else if (containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_PTP)) {
                     id = com.android.internal.R.string.usb_ptp_notification_title;
