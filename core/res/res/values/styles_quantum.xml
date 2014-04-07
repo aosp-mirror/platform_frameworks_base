@@ -340,13 +340,13 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Quantum.TimePicker.TimeLabel" parent="TextAppearance.Quantum">
         <item name="textSize">@dimen/timepicker_time_label_size</item>
-        <item name="textColor">@color/timepicker_default_text_color_quantum_dark</item>
+        <item name="textColor">?attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.Quantum.TimePicker.AmPmLabel" parent="TextAppearance.Quantum">
         <item name="textSize">@dimen/timepicker_ampm_label_size</item>
         <item name="textAllCaps">true</item>
-        <item name="textColor">@color/timepicker_default_text_color_quantum_dark</item>
+        <item name="textColor">?attr/textColorSecondary</item>
         <item name="textStyle">bold</item>
     </style>
 
@@ -377,11 +377,11 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.Quantum.Light.CalendarViewWeekDayView" parent="TextAppearance.Quantum.CalendarViewWeekDayView"/>
 
     <style name="TextAppearance.Quantum.Light.TimePicker.TimeLabel" parent="TextAppearance.Quantum.TimePicker.TimeLabel">
-        <item name="textColor">@color/timepicker_default_text_color_quantum_light</item>
+        <item name="textColor">?attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.Quantum.Light.TimePicker.AmPmLabel" parent="TextAppearance.Quantum.TimePicker.AmPmLabel">
-        <item name="textColor">@color/timepicker_default_text_color_quantum_light</item>
+        <item name="textColor">?attr/textColorSecondary</item>
     </style>
 
     <!-- Widget Styles -->
@@ -545,16 +545,16 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.TimePicker" parent="Widget.TimePicker">
         <item name="legacyLayout">@layout/time_picker_legacy_holo</item>
         <item name="internalLayout">@layout/time_picker_holo</item>
-        <item name="disabledColor">@color/timepicker_default_disabled_color_quantum_dark</item>
-        <item name="headerSelectedTextColor">@color/holo_blue_light</item>
-        <item name="headerUnselectedTextColor">@color/timepicker_default_text_color_quantum_dark</item>
-        <item name="headerBackgroundColor">@color/timepicker_default_background_quantum_dark</item>
-        <item name="numbersTextColor">@color/timepicker_default_text_color_quantum_dark</item>
-        <item name="numbersBackgroundColor">@color/timepicker_default_background_quantum_dark</item>
-        <item name="amPmTextColor">@color/timepicker_default_text_color_quantum_dark</item>
-        <item name="amPmUnselectedBackgroundColor">@color/timepicker_default_background_quantum_dark</item>
-        <item name="amPmSelectedBackgroundColor">@color/holo_blue_light</item>
-        <item name="numbersSelectorColor">@color/holo_blue_light</item>
+        <item name="disabledColor">@color/bright_foreground_disabled_quantum_dark</item>
+        <item name="headerSelectedTextColor">?attr/colorControlActivated</item>
+        <item name="headerUnselectedTextColor">?attr/textColorPrimary</item>
+        <item name="headerBackgroundColor">?attr/colorBackground</item>
+        <item name="numbersTextColor">?attr/textColorSecondary</item>
+        <item name="numbersBackgroundColor">?attr/colorControlNormal</item>
+        <item name="amPmTextColor">?attr/textColorSecondary</item>
+        <item name="amPmUnselectedBackgroundColor">?attr/colorControlNormal</item>
+        <item name="amPmSelectedBackgroundColor">?attr/colorControlActivated</item>
+        <item name="numbersSelectorColor">?attr/colorControlActivated</item>
     </style>
 
     <style name="Widget.Quantum.DatePicker" parent="Widget.DatePicker">
@@ -758,9 +758,9 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.ActionBar" parent="Widget.ActionBar">
         <item name="titleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Title</item>
         <item name="subtitleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Subtitle</item>
-        <item name="background">@drawable/ab_transparent_quantum</item>
-        <item name="backgroundStacked">@drawable/ab_stacked_transparent_quantum</item>
-        <item name="backgroundSplit">@drawable/ab_bottom_transparent_quantum</item>
+        <item name="background">@null</item>
+        <item name="backgroundStacked">@null</item>
+        <item name="backgroundSplit">@null</item>
         <item name="divider">?attr/dividerVertical</item>
         <item name="progressBarStyle">@style/Widget.Quantum.ProgressBar.Horizontal</item>
         <item name="indeterminateProgressStyle">@style/Widget.Quantum.ProgressBar</item>
@@ -769,16 +769,9 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.ActionBar.Solid">
-        <item name="titleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Title</item>
-        <item name="subtitleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Subtitle</item>
-        <item name="background">@drawable/ab_solid_quantum</item>
-        <item name="backgroundStacked">@drawable/ab_stacked_solid_quantum</item>
-        <item name="backgroundSplit">@drawable/ab_bottom_solid_quantum</item>
-        <item name="divider">?attr/dividerVertical</item>
-        <item name="progressBarStyle">@style/Widget.Quantum.ProgressBar.Horizontal</item>
-        <item name="indeterminateProgressStyle">@style/Widget.Quantum.ProgressBar</item>
-        <item name="progressBarPadding">32dip</item>
-        <item name="itemPadding">8dip</item>
+        <item name="background">?attr/colorPrimary</item>
+        <item name="backgroundStacked">?attr/colorPrimary</item>
+        <item name="backgroundSplit">?attr/colorPrimary</item>
     </style>
 
     <style name="Widget.Quantum.ActionMode" parent="Widget.ActionMode">
@@ -869,19 +862,10 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.Light.NumberPicker" parent="Widget.Quantum.NumberPicker"/>
 
-    <style name="Widget.Quantum.Light.TimePicker" parent="Widget.TimePicker">
+    <style name="Widget.Quantum.Light.TimePicker" parent="Widget.Quantum.TimePicker">
         <item name="legacyLayout">@layout/time_picker_legacy_holo</item>
         <item name="internalLayout">@layout/time_picker_holo</item>
-        <item name="disabledColor">@color/timepicker_default_disabled_color_quantum_light</item>
-        <item name="headerSelectedTextColor">@color/holo_blue_light</item>
-        <item name="headerUnselectedTextColor">@color/timepicker_default_text_color_quantum_light</item>
-        <item name="headerBackgroundColor">@color/timepicker_default_background_quantum_light</item>
-        <item name="numbersTextColor">@color/timepicker_default_text_color_quantum_light</item>
-        <item name="numbersBackgroundColor">@color/timepicker_default_background_quantum_light</item>
-        <item name="amPmTextColor">@color/timepicker_default_text_color_quantum_light</item>
-        <item name="amPmUnselectedBackgroundColor">@color/timepicker_default_background_quantum_light</item>
-        <item name="amPmSelectedBackgroundColor">@color/holo_blue_light</item>
-        <item name="numbersSelectorColor">@color/holo_blue_light</item>
+        <item name="disabledColor">@color/bright_foreground_disabled_quantum_light</item>
     </style>
 
     <style name="Widget.Quantum.Light.DatePicker" parent="Widget.Quantum.DatePicker"/>
@@ -985,25 +969,18 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.ActionBar" parent="Widget.Quantum.ActionBar">
         <item name="titleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Title</item>
         <item name="subtitleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Subtitle</item>
-        <item name="background">@drawable/ab_transparent_quantum</item>
-        <item name="backgroundStacked">@drawable/ab_stacked_transparent_quantum</item>
-        <item name="backgroundSplit">@drawable/ab_bottom_transparent_quantum</item>
+        <item name="background">@null</item>
+        <item name="backgroundStacked">@null</item>
+        <item name="backgroundSplit">@null</item>
         <item name="homeAsUpIndicator">@drawable/ic_ab_back_quantum</item>
         <item name="progressBarStyle">@style/Widget.Quantum.Light.ProgressBar.Horizontal</item>
         <item name="indeterminateProgressStyle">@style/Widget.Quantum.Light.ProgressBar</item>
     </style>
 
     <style name="Widget.Quantum.Light.ActionBar.Solid">
-        <item name="titleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Title</item>
-        <item name="subtitleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Subtitle</item>
-        <item name="background">@drawable/ab_solid_quantum</item>
-        <item name="backgroundStacked">@drawable/ab_stacked_solid_quantum</item>
-        <item name="backgroundSplit">@drawable/ab_bottom_solid_quantum</item>
-        <item name="divider">?attr/dividerVertical</item>
-        <item name="progressBarStyle">@style/Widget.Quantum.Light.ProgressBar.Horizontal</item>
-        <item name="indeterminateProgressStyle">@style/Widget.Quantum.Light.ProgressBar</item>
-        <item name="progressBarPadding">32dip</item>
-        <item name="itemPadding">8dip</item>
+        <item name="background">?attr/colorPrimary</item>
+        <item name="backgroundStacked">?attr/colorPrimary</item>
+        <item name="backgroundSplit">?attr/colorPrimary</item>
     </style>
 
     <style name="Widget.Quantum.Light.CompoundButton.Switch" parent="Widget.Quantum.CompoundButton.Switch">
