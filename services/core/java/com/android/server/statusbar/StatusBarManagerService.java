@@ -535,6 +535,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     @Override
+    public void onPanelHidden() throws RemoteException {
+        enforceStatusBarService();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mNotificationDelegate.onPanelHidden();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
     public void onNotificationClick(String pkg, String tag, int id, int userId) {
         enforceStatusBarService();
         final int callingUid = Binder.getCallingUid();
