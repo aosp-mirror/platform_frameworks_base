@@ -120,9 +120,11 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
 
     /**
      *  Dismisses the keyguard by going to the next screen or making it gone.
+     *
+     *  @return True if the keyguard is done.
      */
-    public void dismiss() {
-        dismiss(false);
+    public boolean dismiss() {
+        return dismiss(false);
     }
 
     private void setBackButtonEnabled(boolean enabled) {

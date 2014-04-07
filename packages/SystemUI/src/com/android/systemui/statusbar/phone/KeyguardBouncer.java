@@ -60,8 +60,13 @@ public class KeyguardBouncer {
 
     public void show() {
         ensureView();
-        mRoot.setVisibility(View.VISIBLE);
-        mKeyguardView.requestFocus();
+
+        // Try to dismiss the Keyguard. If no security pattern is set, this will dismiss the whole
+        // Keyguard. If we need to authenticate, show the bouncer.
+        if (!mKeyguardView.dismiss()) {
+            mRoot.setVisibility(View.VISIBLE);
+            mKeyguardView.requestFocus();
+        }
     }
 
     public void hide() {
