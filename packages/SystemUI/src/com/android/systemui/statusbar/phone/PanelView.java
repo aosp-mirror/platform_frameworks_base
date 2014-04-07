@@ -529,7 +529,6 @@ public class PanelView extends FrameLayout {
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                mTracking = true;
                 if (mHandleView != null) {
                     mHandleView.setPressed(true);
                     // catch the press state change
@@ -561,6 +560,7 @@ public class PanelView extends FrameLayout {
                     if (h < -mTouchSlop) {
                         mInitialOffsetOnTouch = mExpandedHeight;
                         mInitialTouchY = y;
+                        mTracking = true;
                         return true;
                     }
                 }
