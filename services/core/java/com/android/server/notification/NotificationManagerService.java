@@ -1915,8 +1915,8 @@ public class NotificationManagerService extends SystemService {
                         mNotificationList.add(r);
                         mUsageStats.registerPostedByApp(r);
                     } else {
-                        old = mNotificationList.remove(index);
-                        mNotificationList.add(index, r);
+                        old = mNotificationList.get(index);
+                        mNotificationList.set(index, r);
                         mUsageStats.registerUpdatedByApp(r);
                         // Make sure we don't lose the foreground service state.
                         if (old != null) {
