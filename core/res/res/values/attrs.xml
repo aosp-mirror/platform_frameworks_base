@@ -691,6 +691,10 @@
              buttons. actionBarStyle is still used for the primary
              bar. -->
         <attr name="actionBarSplitStyle" format="reference" />
+        <!-- Reference to a theme that should be used to inflate the
+             action bar. This will be inherited by any widget inflated
+             into the action bar. -->
+        <attr name="actionBarTheme" format="reference" />
         <!-- Reference to a theme that should be used to inflate widgets
              and layouts destined for the action bar. Most of the time
              this will be a reference to the current theme, but when
