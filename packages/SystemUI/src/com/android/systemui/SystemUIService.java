@@ -26,6 +26,12 @@ import java.io.PrintWriter;
 public class SystemUIService extends Service {
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        ((SystemUIApplication) getApplication()).startServicesIfNeeded();
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
         return null;
     }

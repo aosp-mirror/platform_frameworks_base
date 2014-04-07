@@ -48,10 +48,20 @@ public class SystemUIApplication extends Application {
      * Hold a reference on the stuff we start.
      */
     private final SystemUI[] mServices = new SystemUI[SERVICES.length];
+    private boolean mServicesStarted;
     private final Map<Class<?>, Object> mComponents = new HashMap<Class<?>, Object>();
 
-    @Override
-    public void onCreate() {
+    /**
+     * Makes sure that all the SystemUI services are running. If they are already running, this is a
+     * no-op. This is needed to conditinally start all the services, as we only need to have it in
+     * the main process.
+     *
+     * <p>This method must only be called from the main thread.</p>
+     */
+    public void startServicesIfNeeded() {
+        if (mServicesStarted) {
+            return;
+        }
         final int N = SERVICES.length;
         for (int i=0; i<N; i++) {
             Class<?> cl = SERVICES[i];
@@ -68,13 +78,16 @@ public class SystemUIApplication extends Application {
             if (DEBUG) Log.d(TAG, "running: " + mServices[i]);
             mServices[i].start();
         }
+        mServicesStarted = true;
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        int len = mServices.length;
-        for (int i = 0; i < len; i++) {
-            mServices[i].onConfigurationChanged(newConfig);
+        if (mServicesStarted) {
+            int len = mServices.length;
+            for (int i = 0; i < len; i++) {
+                mServices[i].onConfigurationChanged(newConfig);
+            }
         }
     }
 
