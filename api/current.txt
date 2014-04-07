@@ -3150,6 +3150,7 @@ package android.app {
     method public void finishActivityFromChild(android.app.Activity, int);
     method public void finishAffinity();
     method public void finishFromChild(android.app.Activity);
+    method public void finishWithTransition();
     method public android.app.ActionBar getActionBar();
     method public final android.app.Application getApplication();
     method public android.content.ComponentName getCallingActivity();
@@ -30736,6 +30737,8 @@ package android.view {
     method public boolean requestFeature(int);
     method public abstract void restoreHierarchyState(android.os.Bundle);
     method public abstract android.os.Bundle saveHierarchyState();
+    method public void setAllowOverlappingEnterTransition(boolean);
+    method public void setAllowOverlappingExitTransition(boolean);
     method public void setAttributes(android.view.WindowManager.LayoutParams);
     method public abstract void setBackgroundDrawable(android.graphics.drawable.Drawable);
     method public void setBackgroundDrawableResource(int);
@@ -30764,7 +30767,6 @@ package android.view {
     method public abstract void setTitle(java.lang.CharSequence);
     method public abstract deprecated void setTitleColor(int);
     method public void setTransitionManager(android.transition.TransitionManager);
-    method public void setTriggerEarlyEnterTransition(boolean);
     method public void setType(int);
     method public void setUiOptions(int);
     method public void setUiOptions(int, int);

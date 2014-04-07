@@ -18,7 +18,6 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -1390,11 +1389,11 @@ public abstract class Window {
      * @param options Options to set or null for none
      * @hide
      */
-    public void setTransitionOptions(ActivityOptions options, SceneTransitionListener listener) {
+    public void setTransitionOptions(Bundle options, SceneTransitionListener listener) {
     }
 
     /**
-     * A callback for Activity transitions to be told when the shared element is ready to be shown
+     * A callback for Window transitions to be told when the shared element is ready to be shown
      * and start the transition to its target location.
      * @hide
      */
@@ -1407,24 +1406,54 @@ public abstract class Window {
     }
 
     /**
-     * Controls when the Activity enter scene is triggered and the background is faded in. If
-     * triggerEarly is true, the enter scene will begin as soon as possible and the background
-     * will fade in when all shared elements are ready to begin transitioning. If triggerEarly is
-     * false, the Activity enter scene and background fade will be triggered when the calling
-     * Activity's exit transition completes.
-     *
-     * @param triggerEarly Set to true to have the Activity enter scene transition in as early as
-     *                     possible or set to false to wait for the calling Activity to exit first.
+     * Controls how the Activity's start Scene is faded in and when the enter scene
+     * is triggered to start.
+     * <p>When allow is true, the enter Scene will begin as soon as possible
+     * and the background will fade in when all shared elements are ready to begin
+     * transitioning. If allow is false, the Activity enter Scene and
+     * background fade will be triggered when the calling Activity's exit transition
+     * completes.</p>
+     * @param allow Set to true to have the Activity enter scene transition in
+     *              as early as possible or set to false to wait for the calling
+     *              Activity to exit first. The default value is true.
      */
-    public void setTriggerEarlyEnterTransition(boolean triggerEarly) {
+    public void setAllowOverlappingEnterTransition(boolean allow) {
+    }
+
+    /**
+     * Controls how the Activity's Scene fades out and when the calling Activity's
+     * enter scene is triggered when finishing to return to a calling Activity.
+     * <p>When allow is true, the Scene will fade out quickly
+     * and inform the calling Activity to transition in when the fade completes.
+     * When allow is false, the calling Activity will transition in after
+     * the Activity's Scene has exited.
+     * </p>
+     * @param allow Set to true to have the Activity fade out as soon as possible
+     *              and transition in the calling Activity. The default value is
+     *              true.
+     */
+    public void setAllowOverlappingExitTransition(boolean allow) {
     }
 
     /**
      * Start the exit transition.
      * @hide
      */
-    public Bundle startExitTransition(ActivityOptions options) {
+    public Bundle startExitTransitionToCallee(Bundle options) {
         return null;
+    }
+
+    /**
+     * Starts the transition back to the calling Activity.
+     * onTransitionEnd will be called on the current thread if there is no exit transition.
+     * @hide
+     */
+    public void startExitTransitionToCaller(Runnable onTransitionEnd) {
+        onTransitionEnd.run();
+    }
+
+    /** @hide */
+    public void restoreViewVisibilityAfterTransitionToCallee() {
     }
 
     /**
