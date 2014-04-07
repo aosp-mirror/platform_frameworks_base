@@ -68,13 +68,13 @@ bool DeferredLayerUpdater::apply() {
     mLayer->setColorFilter(mColorFilter);
     mLayer->setAlpha(mAlpha, mMode);
 
-    if (mDisplayList) {
+    if (mDisplayList.get()) {
         if (mWidth != mLayer->layer.getWidth() || mHeight != mLayer->layer.getHeight()) {
             success = LayerRenderer::resizeLayer(mLayer, mWidth, mHeight);
         }
         mLayer->setBlend(mBlend);
         mDisplayList->updateProperties();
-        mLayer->updateDeferred(mDisplayList,
+        mLayer->updateDeferred(mDisplayList.get(),
                 mDirtyRect.left, mDirtyRect.top, mDirtyRect.right, mDirtyRect.bottom);
         mDirtyRect.setEmpty();
         mDisplayList = 0;

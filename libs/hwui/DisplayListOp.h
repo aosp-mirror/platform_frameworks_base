@@ -1523,6 +1523,8 @@ public:
 
     virtual const char* name() { return "DrawDisplayList"; }
 
+    RenderNode* renderNode() { return mDisplayList; }
+
 private:
     RenderNode* mDisplayList;
     const int mFlags;

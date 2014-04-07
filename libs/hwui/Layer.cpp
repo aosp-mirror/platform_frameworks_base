@@ -140,6 +140,15 @@ void Layer::removeFbo(bool flush) {
     }
 }
 
+void Layer::updateDeferred(RenderNode* displayList,
+        int left, int top, int right, int bottom) {
+    requireRenderer();
+    this->displayList = displayList;
+    const Rect r(left, top, right, bottom);
+    dirtyRect.unionWith(r);
+    deferredUpdateScheduled = true;
+}
+
 void Layer::setPaint(const SkPaint* paint) {
     OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
     setColorFilter((paint) ? paint->getColorFilter() : NULL);
@@ -244,7 +253,7 @@ void Layer::render() {
     renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,
             !isBlend());
 
-    renderer->drawDisplayList(displayList, dirtyRect, RenderNode::kReplayFlag_ClipChildren);
+    renderer->drawDisplayList(displayList.get(), dirtyRect, RenderNode::kReplayFlag_ClipChildren);
 
     renderer->finish();
 

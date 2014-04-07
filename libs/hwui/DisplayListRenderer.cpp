@@ -191,7 +191,7 @@ status_t DisplayListRenderer::drawDisplayList(RenderNode* displayList,
     DrawDisplayListOp* op = new (alloc()) DrawDisplayListOp(displayList,
             flags, *currentTransform());
     addDrawOp(op);
-    mDisplayListData->children.push(op);
+    mDisplayListData->addChild(op);
     if (displayList->isProjectionReceiver()) {
         mDisplayListData->projectionReceiveIndex = mDisplayListData->displayListOps.size() - 1;
     }
