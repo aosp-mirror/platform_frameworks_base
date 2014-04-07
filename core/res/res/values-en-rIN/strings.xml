@@ -687,6 +687,8 @@
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Allows an application to listen for observations on network conditions. Should never be needed for normal apps."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"change input device calibration"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Allows the app to modify the calibration parameters of the touch screen. Should never be needed for normal apps."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"access DRM certificates"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Allows an application to provision and use DRM certficates. Should never be needed for normal apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Set password rules"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Control the length and the characters allowed in screen-unlock passwords."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitor screen-unlock attempts"</string>

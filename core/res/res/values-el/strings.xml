@@ -687,6 +687,8 @@
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Επιτρέπει σε μια εφαρμογή να λαμβάνει παρατηρήσεις σχετικά με την κατάσταση δικτύου. Δεν θα πρέπει να απαιτείται ποτέ για κανονικές εφαρμογές."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"αλλαγή βαθμονόμησης της συσκευής εισόδου"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Επιτρέπει στην εφαρμογή να τροποποιεί τις παραμέτρους βαθμονόμησης της οθόνης αφής. Δεν απαιτείται για τις κανονικές εφαρμογές."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"πρόσβαση σε πιστοποιητικά DRM"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Επιτρέπει σε μια εφαρμογή να παρέχει και να χρησιμοποιεί πιστοποιητικά DRM. Δεν θα χρειαστεί ποτέ για κανονικές εφαρμογές."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ορισμός κανόνων κωδικού πρόσβασης"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Έλεγχος του μεγέθους και των χαρακτήρων που επιτρέπονται στους κωδικούς πρόσβασης ξεκλειδώματος οθόνης."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Παρακολούθηση προσπαθειών ξεκλειδώματος οθόνης"</string>
@@ -1321,8 +1323,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Επιτρέπει σε μια εφαρμογή τον έλεγχο του κλειδώματος πληκτρολογίου."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Αντίληψη αλλαγών καταστάσεων εμπιστοσύνης."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Επιτρέπει σε μια εφαρμογή να αντιλαμβάνεται τις αλλαγές στην κατάσταση εμπιστοσύνης."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Σύνδεση σε υπηρεσία έμπιστου αντιπροσώπου"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Επιτρέπει σε μια εφαρμογή να συνδεθεί σε μια υπηρεσία έμπιστου αντιπροσώπου."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Σύνδεση σε υπηρεσία trust agent"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Επιτρέπει σε μια εφαρμογή να συνδεθεί σε μια υπηρεσία trust agents."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Αλληλεπίδραση με το σύστημα ενημέρωσης και ανάκτησης"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Επιτρέπει σε μια εφαρμογή να αλληλεπιδρά με το σύστημα ανάκτησης και ενημερώσεων συστήματος."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Αγγίξτε δύο φορές για έλεγχο εστίασης"</string>
