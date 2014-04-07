@@ -414,7 +414,7 @@ public class RecentsTaskLoader {
 
             // Create a new task
             Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, activityLabel,
-                    activityIcon);
+                    activityIcon, t.userId);
 
             // Preload the specified number of apps
             if (i >= (taskCount - preloadCount)) {
