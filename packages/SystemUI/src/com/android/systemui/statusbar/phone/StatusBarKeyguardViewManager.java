@@ -50,12 +50,12 @@ public class StatusBarKeyguardViewManager {
     private ViewMediatorCallback mViewMediatorCallback;
     private PhoneStatusBar mPhoneStatusBar;
 
-    private KeyguardHostView mKeyguardView;
-    private ViewGroup mRoot;
     private ViewGroup mContainer;
     private StatusBarWindowManager mStatusBarWindowManager;
 
     private boolean mScreenOn = false;
+    private KeyguardBouncer mBouncer;
+    private boolean mShowing;
 
     public StatusBarKeyguardViewManager(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils) {
@@ -70,6 +70,8 @@ public class StatusBarKeyguardViewManager {
         mPhoneStatusBar = phoneStatusBar;
         mContainer = container;
         mStatusBarWindowManager = statusBarWindowManager;
+        mBouncer = new KeyguardBouncer(mContext, mViewMediatorCallback, mLockPatternUtils,
+                mStatusBarWindowManager, container);
     }
 
     /**
@@ -77,72 +79,43 @@ public class StatusBarKeyguardViewManager {
      * lazily.
      */
     public void show(Bundle options) {
-        ensureView();
+        mShowing = true;
         mStatusBarWindowManager.setKeyguardShowing(true);
-        mKeyguardView.requestFocus();
+        mPhoneStatusBar.showKeyguard();
+        mBouncer.prepare();
     }
 
-    private void ensureView() {
-        if (mRoot == null) {
-            inflateView();
-        }
-    }
-
-    private void inflateView() {
-        removeView();
-        mRoot = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.keyguard_bouncer, null);
-        mKeyguardView = (KeyguardHostView) mRoot.findViewById(R.id.keyguard_host_view);
-        mKeyguardView.setLockPatternUtils(mLockPatternUtils);
-        mKeyguardView.setViewMediatorCallback(mViewMediatorCallback);
-        mContainer.addView(mRoot, mContainer.getChildCount());
-        mRoot.setSystemUiVisibility(View.STATUS_BAR_DISABLE_HOME);
-    }
-
-    private void removeView() {
-        if (mRoot != null && mRoot.getParent() == mContainer) {
-            mContainer.removeView(mRoot);
-            mRoot = null;
-        }
+    public void showBouncer() {
+        mBouncer.show();
     }
 
     /**
      * Reset the state of the view.
      */
     public void reset() {
-        inflateView();
+        mBouncer.reset();
+        mPhoneStatusBar.showKeyguard();
     }
 
     public void onScreenTurnedOff() {
         mScreenOn = false;
-        if (mKeyguardView != null) {
-            mKeyguardView.onScreenTurnedOff();
-        }
+        mBouncer.onScreenTurnedOff();
     }
 
     public void onScreenTurnedOn(final IKeyguardShowCallback callback) {
         mScreenOn = true;
-        if (mKeyguardView != null) {
-            mKeyguardView.onScreenTurnedOn();
-            if (callback != null) {
-                callbackAfterDraw(callback);
-            }
-        } else {
-            try {
-                if (callback != null) {
-                    callback.onShown(null);
-                }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Exception calling onShown():", e);
-            }
+        mBouncer.onScreenTurnedOn();
+        if (callback != null) {
+            callbackAfterDraw(callback);
         }
     }
 
     private void callbackAfterDraw(final IKeyguardShowCallback callback) {
-        mKeyguardView.post(new Runnable() {
+        mContainer.post(new Runnable() {
             @Override
             public void run() {
                 try {
-                    callback.onShown(mKeyguardView.getWindowToken());
+                    callback.onShown(mContainer.getWindowToken());
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Exception calling onShown():", e);
                 }
@@ -151,8 +124,7 @@ public class StatusBarKeyguardViewManager {
     }
 
     public void verifyUnlock() {
-        show(null);
-        mKeyguardView.verifyUnlock();
+        dismiss();
     }
 
     public void setNeedsInput(boolean needsInput) {
@@ -160,19 +132,7 @@ public class StatusBarKeyguardViewManager {
     }
 
     public void updateUserActivityTimeout() {
-
-        // Use the user activity timeout requested by the keyguard view, if any.
-        if (mKeyguardView != null) {
-            long timeout = mKeyguardView.getUserActivityTimeout();
-            if (timeout >= 0) {
-                mStatusBarWindowManager.setKeyguardUserActivityTimeout(timeout);
-                return;
-            }
-        }
-
-        // Otherwise, use the default timeout.
-        mStatusBarWindowManager.setKeyguardUserActivityTimeout(
-                KeyguardViewMediator.AWAKE_INTERVAL_DEFAULT_MS);
+        mStatusBarWindowManager.setKeyguardUserActivityTimeout(mBouncer.getUserActivityTimeout());
     }
 
     public void setOccluded(boolean occluded) {
@@ -183,12 +143,11 @@ public class StatusBarKeyguardViewManager {
      * Hides the keyguard view
      */
     public void hide() {
+        mShowing = false;
+        mPhoneStatusBar.hideKeyguard();
         mStatusBarWindowManager.setKeyguardShowing(false);
-        if (mKeyguardView != null) {
-            mKeyguardView.cleanUp();
-            mViewMediatorCallback.keyguardGone();
-        }
-        removeView();
+        mBouncer.hide();
+        mViewMediatorCallback.keyguardGone();
     }
 
     /**
@@ -196,7 +155,11 @@ public class StatusBarKeyguardViewManager {
      */
     public void dismiss() {
         if (mScreenOn) {
-            mKeyguardView.dismiss();
+            if (mLockPatternUtils.isSecure()) {
+                showBouncer();
+            } else {
+                mViewMediatorCallback.keyguardDone(false);
+            }
         }
     }
 
@@ -204,6 +167,6 @@ public class StatusBarKeyguardViewManager {
      * @return Whether the keyguard is showing
      */
     public boolean isShowing() {
-        return mRoot != null && mRoot.getVisibility() == View.VISIBLE;
+        return mShowing;
     }
 }
