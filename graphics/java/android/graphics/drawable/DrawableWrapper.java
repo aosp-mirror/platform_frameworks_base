@@ -118,33 +118,21 @@ public class DrawableWrapper extends Drawable implements Drawable.Callback {
         return mWrappedDrawable.getDirtyBounds();
     }
 
-    /**
-     * @hide
-     */
     @Override
     public boolean supportsHotspots() {
         return mWrappedDrawable.supportsHotspots();
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void setHotspot(int id, float x, float y) {
         mWrappedDrawable.setHotspot(id, x, y);
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void removeHotspot(int id) {
         mWrappedDrawable.removeHotspot(id);
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void clearHotspots() {
         mWrappedDrawable.clearHotspots();

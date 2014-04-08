@@ -548,9 +548,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
-    /**
-     * @hide
-     */
     @Override
     public boolean supportsHotspots() {
         final ChildDrawable[] array = mLayerState.mChildren;
@@ -564,9 +561,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         return false;
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void setHotspot(int id, float x, float y) {
         final ChildDrawable[] array = mLayerState.mChildren;
@@ -576,9 +570,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void removeHotspot(int id) {
         final ChildDrawable[] array = mLayerState.mChildren;
@@ -588,9 +579,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void clearHotspots() {
         final ChildDrawable[] array = mLayerState.mChildren;
