@@ -148,6 +148,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_UNBIND_METHOD = 3000;
     static final int MSG_BIND_METHOD = 3010;
     static final int MSG_SET_ACTIVE = 3020;
+    static final int MSG_SET_CURSOR_ANCHOR_MONITOR_MODE = 3030;
 
     static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
 
@@ -2275,6 +2276,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Override
+    public void setCursorAnchorMonitorMode(IBinder token, int monitorMode) {
+        if (DEBUG) {
+            Slog.d(TAG, "setCursorAnchorMonitorMode: monitorMode=" + monitorMode);
+        }
+        if (!calledFromValidUser()) {
+            return;
+        }
+        synchronized (mMethodMap) {
+            if (token == null || mCurToken != token) {
+                if (DEBUG) {
+                    Slog.w(TAG, "Ignoring setCursorAnchorMonitorMode from uid "
+                            + Binder.getCallingUid() + " token: " + token);
+                }
+                return;
+            }
+            executeOrSendMessage(mCurMethod, mCaller.obtainMessageIO(
+                    MSG_SET_CURSOR_ANCHOR_MONITOR_MODE, monitorMode, mCurClient));
+        }
+    }
+
     private void setInputMethodWithSubtypeId(IBinder token, String id, int subtypeId) {
         synchronized (mMethodMap) {
             if (token == null) {
@@ -2504,6 +2526,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     Slog.w(TAG, "Got RemoteException sending setActive(false) notification to pid "
                             + ((ClientState)msg.obj).pid + " uid "
                             + ((ClientState)msg.obj).uid);
+                }
+                return true;
+            case MSG_SET_CURSOR_ANCHOR_MONITOR_MODE:
+                try {
+                    ((ClientState)msg.obj).client.setCursorAnchorMonitorMode(msg.arg1);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Got RemoteException sending setCursorAnchorMonitorMode "
+                            + "notification to pid " + ((ClientState)msg.obj).pid
+                            + " uid " + ((ClientState)msg.obj).uid);
                 }
                 return true;
 
