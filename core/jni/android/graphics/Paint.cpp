@@ -206,7 +206,7 @@ public:
 
     static void setStrokeWidth(JNIEnv* env, jobject paint, jfloat width) {
         NPE_CHECK_RETURN_VOID(env, paint);
-        GraphicsJNI::getNativePaint(env, paint)->setStrokeWidth(SkFloatToScalar(width));
+        GraphicsJNI::getNativePaint(env, paint)->setStrokeWidth(width);
     }
 
     static jfloat getStrokeMiter(JNIEnv* env, jobject paint) {
@@ -216,7 +216,7 @@ public:
 
     static void setStrokeMiter(JNIEnv* env, jobject paint, jfloat miter) {
         NPE_CHECK_RETURN_VOID(env, paint);
-        GraphicsJNI::getNativePaint(env, paint)->setStrokeMiter(SkFloatToScalar(miter));
+        GraphicsJNI::getNativePaint(env, paint)->setStrokeMiter(miter);
     }
 
     static jint getStrokeCap(JNIEnv* env, jobject clazz, jlong objHandle) {
@@ -364,7 +364,7 @@ public:
 
     static void setTextSize(JNIEnv* env, jobject paint, jfloat textSize) {
         NPE_CHECK_RETURN_VOID(env, paint);
-        GraphicsJNI::getNativePaint(env, paint)->setTextSize(SkFloatToScalar(textSize));
+        GraphicsJNI::getNativePaint(env, paint)->setTextSize(textSize);
     }
 
     static jfloat getTextScaleX(JNIEnv* env, jobject paint) {
@@ -374,7 +374,7 @@ public:
 
     static void setTextScaleX(JNIEnv* env, jobject paint, jfloat scaleX) {
         NPE_CHECK_RETURN_VOID(env, paint);
-        GraphicsJNI::getNativePaint(env, paint)->setTextScaleX(SkFloatToScalar(scaleX));
+        GraphicsJNI::getNativePaint(env, paint)->setTextScaleX(scaleX);
     }
 
     static jfloat getTextSkewX(JNIEnv* env, jobject paint) {
@@ -384,7 +384,7 @@ public:
 
     static void setTextSkewX(JNIEnv* env, jobject paint, jfloat skewX) {
         NPE_CHECK_RETURN_VOID(env, paint);
-        GraphicsJNI::getNativePaint(env, paint)->setTextSkewX(SkFloatToScalar(skewX));
+        GraphicsJNI::getNativePaint(env, paint)->setTextSkewX(skewX);
     }
 
     static jfloat ascent(JNIEnv* env, jobject paint) {
@@ -747,10 +747,7 @@ public:
             paint->setLooper(NULL);
         }
         else {
-            paint->setLooper(new SkBlurDrawLooper(SkFloatToScalar(radius),
-                                                  SkFloatToScalar(dx),
-                                                  SkFloatToScalar(dy),
-                                                  (SkColor)color))->unref();
+            paint->setLooper(new SkBlurDrawLooper(radius, dx, dy, (SkColor)color))->unref();
         }
     }
 
@@ -764,7 +761,7 @@ public:
         }
         SkScalar     measured;
         size_t       bytes = paint.breakText(value->getGlyphs(), value->getGlyphsCount() << 1,
-                                   SkFloatToScalar(maxWidth), &measured, tbd);
+                maxWidth, &measured, tbd);
         SkASSERT((bytes & 1) == 0);
 
         if (jmeasured && env->GetArrayLength(jmeasured) > 0) {

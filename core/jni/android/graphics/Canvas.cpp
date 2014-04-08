@@ -179,8 +179,7 @@ public:
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
         SkPaint* paint  = reinterpret_cast<SkPaint*>(paintHandle);
         SkRect bounds;
-        bounds.set(SkFloatToScalar(l), SkFloatToScalar(t), SkFloatToScalar(r),
-                   SkFloatToScalar(b));
+        bounds.set(l, t, r, b);
         int result = canvas->saveLayer(&bounds, paint,
                                       static_cast<SkCanvas::SaveFlags>(flags));
         return static_cast<jint>(result);
@@ -205,8 +204,7 @@ public:
                                 jint alpha, jint flags) {
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
         SkRect  bounds;
-        bounds.set(SkFloatToScalar(l), SkFloatToScalar(t), SkFloatToScalar(r),
-                   SkFloatToScalar(b));
+        bounds.set(l, t, r, b);
         int result = canvas->saveLayerAlpha(&bounds, alpha,
                                       static_cast<SkCanvas::SaveFlags>(flags));
         return static_cast<jint>(result);
@@ -240,29 +238,22 @@ public:
 
     static void translate(JNIEnv* env, jobject jcanvas, jfloat dx, jfloat dy) {
         NPE_CHECK_RETURN_VOID(env, jcanvas);
-        SkScalar dx_ = SkFloatToScalar(dx);
-        SkScalar dy_ = SkFloatToScalar(dy);
-        (void)GraphicsJNI::getNativeCanvas(env, jcanvas)->translate(dx_, dy_);
+        (void)GraphicsJNI::getNativeCanvas(env, jcanvas)->translate(dx, dy);
     }
 
     static void scale__FF(JNIEnv* env, jobject jcanvas, jfloat sx, jfloat sy) {
         NPE_CHECK_RETURN_VOID(env, jcanvas);
-        SkScalar sx_ = SkFloatToScalar(sx);
-        SkScalar sy_ = SkFloatToScalar(sy);
-        (void)GraphicsJNI::getNativeCanvas(env, jcanvas)->scale(sx_, sy_);
+        (void)GraphicsJNI::getNativeCanvas(env, jcanvas)->scale(sx, sy);
     }
 
     static void rotate__F(JNIEnv* env, jobject jcanvas, jfloat degrees) {
         NPE_CHECK_RETURN_VOID(env, jcanvas);
-        SkScalar degrees_ = SkFloatToScalar(degrees);
-        (void)GraphicsJNI::getNativeCanvas(env, jcanvas)->rotate(degrees_);
+        (void)GraphicsJNI::getNativeCanvas(env, jcanvas)->rotate(degrees);
     }
 
     static void skew__FF(JNIEnv* env, jobject jcanvas, jfloat sx, jfloat sy) {
         NPE_CHECK_RETURN_VOID(env, jcanvas);
-        SkScalar sx_ = SkFloatToScalar(sx);
-        SkScalar sy_ = SkFloatToScalar(sy);
-        (void)GraphicsJNI::getNativeCanvas(env, jcanvas)->skew(sx_, sy_);
+        (void)GraphicsJNI::getNativeCanvas(env, jcanvas)->skew(sx, sy);
     }
 
     static void concat(JNIEnv* env, jobject, jlong canvasHandle,
@@ -287,8 +278,7 @@ public:
                                   jfloat top, jfloat right, jfloat bottom) {
         NPE_CHECK_RETURN_ZERO(env, jcanvas);
         SkRect  r;
-        r.set(SkFloatToScalar(left), SkFloatToScalar(top),
-              SkFloatToScalar(right), SkFloatToScalar(bottom));
+        r.set(left, top, right, bottom);
         SkCanvas* c = GraphicsJNI::getNativeCanvas(env, jcanvas);
         c->clipRect(r);
         return hasNonEmptyClip(*c);
@@ -329,8 +319,7 @@ public:
                              jint op) {
         SkRect rect;
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
-        rect.set(SkFloatToScalar(left), SkFloatToScalar(top),
-                 SkFloatToScalar(right), SkFloatToScalar(bottom));
+        rect.set(left, top, right, bottom);
         canvas->clipRect(rect, static_cast<SkRegion::Op>(op));
         return hasNonEmptyClip(*canvas);
     }
@@ -378,8 +367,7 @@ public:
                                        jfloat bottom) {
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
         SkRect r;
-        r.set(SkFloatToScalar(left), SkFloatToScalar(top),
-              SkFloatToScalar(right), SkFloatToScalar(bottom));
+        r.set(left, top, right, bottom);
         bool result = canvas->quickReject(r);
         return result ? JNI_TRUE : JNI_FALSE;
     }
@@ -441,7 +429,7 @@ public:
         SkPoint* pts = storage.get();
         const float* src = floats + offset;
         for (int i = 0; i < count; i++) {
-            pts[i].set(SkFloatToScalar(src[0]), SkFloatToScalar(src[1]));
+            pts[i].set(src[0], src[1]);
             src += 2;
         }
         canvas->drawPoints(mode, count, pts, paint);
@@ -466,7 +454,7 @@ public:
         SkCanvas* canvas = GraphicsJNI::getNativeCanvas(env, jcanvas);
         const SkPaint& paint = *GraphicsJNI::getNativePaint(env, jpaint);
 
-        canvas->drawPoint(SkFloatToScalar(x), SkFloatToScalar(y), paint);
+        canvas->drawPoint(x, y, paint);
     }
 
     static void drawLine__FFFFPaint(JNIEnv* env, jobject, jlong canvasHandle,
@@ -474,9 +462,7 @@ public:
                                     jfloat stopY, jlong paintHandle) {
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
-        canvas->drawLine(SkFloatToScalar(startX), SkFloatToScalar(startY),
-                         SkFloatToScalar(stopX), SkFloatToScalar(stopY),
-                         *paint);
+        canvas->drawLine(startX, startY, stopX, stopY, *paint);
     }
 
     static void drawRect__RectFPaint(JNIEnv* env, jobject, jlong canvasHandle,
@@ -493,11 +479,7 @@ public:
                                     jfloat bottom, jlong paintHandle) {
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
-        SkScalar left_ = SkFloatToScalar(left);
-        SkScalar top_ = SkFloatToScalar(top);
-        SkScalar right_ = SkFloatToScalar(right);
-        SkScalar bottom_ = SkFloatToScalar(bottom);
-        canvas->drawRectCoords(left_, top_, right_, bottom_, *paint);
+        canvas->drawRectCoords(left, top, right, bottom, *paint);
     }
 
     static void drawOval(JNIEnv* env, jobject, jlong canvasHandle, jobject joval,
@@ -513,8 +495,7 @@ public:
                            jfloat cy, jfloat radius, jlong paintHandle) {
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
-        canvas->drawCircle(SkFloatToScalar(cx), SkFloatToScalar(cy),
-                           SkFloatToScalar(radius), *paint);
+        canvas->drawCircle(cx, cy, radius, *paint);
     }
 
     static void drawArc(JNIEnv* env, jobject, jlong canvasHandle, jobject joval,
@@ -524,8 +505,7 @@ public:
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         SkRect oval;
         GraphicsJNI::jrectf_to_rect(env, joval, &oval);
-        canvas->drawArc(oval, SkFloatToScalar(startAngle),
-                        SkFloatToScalar(sweepAngle), useCenter, *paint);
+        canvas->drawArc(oval, startAngle, sweepAngle, useCenter, *paint);
     }
 
     static void drawRoundRect(JNIEnv* env, jobject, jlong canvasHandle,
@@ -535,8 +515,7 @@ public:
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         SkRect rect;
         GraphicsJNI::jrectf_to_rect(env, jrect, &rect);
-        canvas->drawRoundRect(rect, SkFloatToScalar(rx), SkFloatToScalar(ry),
-                              *paint);
+        canvas->drawRoundRect(rect, rx, ry, *paint);
     }
 
     static void drawPath(JNIEnv* env, jobject, jlong canvasHandle, jlong pathHandle,
@@ -555,8 +534,6 @@ public:
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
         SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
-        SkScalar left_ = SkFloatToScalar(left);
-        SkScalar top_ = SkFloatToScalar(top);
 
         if (canvasDensity == bitmapDensity || canvasDensity == 0
                 || bitmapDensity == 0) {
@@ -566,14 +543,14 @@ public:
                     filteredPaint = *paint;
                 }
                 filteredPaint.setFilterLevel(SkPaint::kLow_FilterLevel);
-                canvas->drawBitmap(*bitmap, left_, top_, &filteredPaint);
+                canvas->drawBitmap(*bitmap, left, top, &filteredPaint);
             } else {
-                canvas->drawBitmap(*bitmap, left_, top_, paint);
+                canvas->drawBitmap(*bitmap, left, top, paint);
             }
         } else {
             canvas->save();
-            SkScalar scale = SkFloatToScalar(canvasDensity / (float)bitmapDensity);
-            canvas->translate(left_, top_);
+            SkScalar scale = canvasDensity / (float)bitmapDensity;
+            canvas->translate(left, top);
             canvas->scale(scale, scale);
 
             SkPaint filteredPaint;
@@ -655,8 +632,7 @@ public:
             return;
         }
 
-        canvas->drawBitmap(bitmap, SkFloatToScalar(x), SkFloatToScalar(y),
-                           paint);
+        canvas->drawBitmap(bitmap, x, y, paint);
     }
 
     static void drawBitmapMatrix(JNIEnv* env, jobject, jlong canvasHandle,
@@ -858,8 +834,8 @@ public:
             MinikinFontSkia *mfs = static_cast<MinikinFontSkia *>(layout->getFont(i));
             skFace = mfs->GetSkTypeface();
             glyphs[i] = layout->getGlyphId(i);
-            pos[i].fX = SkFloatToScalar(x + layout->getX(i));
-            pos[i].fY = SkFloatToScalar(y + layout->getY(i));
+            pos[i].fX = x + layout->getX(i);
+            pos[i].fY = y + layout->getY(i);
             if (i > 0 && skFace != lastFace) {
                 paint->setTypeface(lastFace);
                 canvas->drawPosText(glyphs + start, (i - start) << 1, pos + start, *paint);
@@ -936,22 +912,18 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
         flags = paint->getFlags();
     }
     if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
-        SkScalar left = SkFloatToScalar(x);
-        SkScalar right = SkFloatToScalar(x + length);
+        SkScalar left = x;
+        SkScalar right = x + length;
         float textSize = paint->getTextSize();
         float strokeWidth = fmax(textSize * kStdUnderline_Thickness, 1.0f);
         if (flags & SkPaint::kUnderlineText_Flag) {
-            SkScalar top = SkFloatToScalar(y + textSize * kStdUnderline_Offset
-                    - 0.5f * strokeWidth);
-            SkScalar bottom = SkFloatToScalar(y + textSize * kStdUnderline_Offset
-                    + 0.5f * strokeWidth);
+            SkScalar top = y + textSize * kStdUnderline_Offset - 0.5f * strokeWidth;
+            SkScalar bottom = y + textSize * kStdUnderline_Offset + 0.5f * strokeWidth;
             canvas->drawRectCoords(left, top, right, bottom, *paint);
         }
         if (flags & SkPaint::kStrikeThruText_Flag) {
-            SkScalar top = SkFloatToScalar(y + textSize * kStdStrikeThru_Offset
-                    - 0.5f * strokeWidth);
-            SkScalar bottom = SkFloatToScalar(y + textSize * kStdStrikeThru_Offset
-                    + 0.5f * strokeWidth);
+            SkScalar top = y + textSize * kStdStrikeThru_Offset - 0.5f * strokeWidth;
+            SkScalar bottom = y + textSize * kStdStrikeThru_Offset + 0.5f * strokeWidth;
             canvas->drawRectCoords(left, top, right, bottom, *paint);
         }
     }
@@ -967,8 +939,8 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
             int index, int count, jfloat x, jfloat y, int flags, SkPaint* paint) {
         SkPoint* posPtr = new SkPoint[count];
         for (int indx = 0; indx < count; indx++) {
-            posPtr[indx].fX = SkFloatToScalar(x + posArray[indx * 2]);
-            posPtr[indx].fY = SkFloatToScalar(y + posArray[indx * 2 + 1]);
+            posPtr[indx].fX = x + posArray[indx * 2];
+            posPtr[indx].fY = y + posArray[indx * 2 + 1];
         }
         canvas->drawPosText(glyphArray, count << 1, posPtr, *paint);
         delete[] posPtr;
@@ -1016,8 +988,8 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
         SkPoint* posPtr = posCount > 0 ? new SkPoint[posCount] : NULL;
         int indx;
         for (indx = 0; indx < posCount; indx++) {
-            posPtr[indx].fX = SkFloatToScalar(posArray[indx << 1]);
-            posPtr[indx].fY = SkFloatToScalar(posArray[(indx << 1) + 1]);
+            posPtr[indx].fX = posArray[indx << 1];
+            posPtr[indx].fY = posArray[(indx << 1) + 1];
         }
 
         SkPaint::TextEncoding encoding = paint->getTextEncoding();
@@ -1047,8 +1019,8 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
         SkPoint* posPtr = posCount > 0 ? new SkPoint[posCount] : NULL;
 
         for (int indx = 0; indx < posCount; indx++) {
-            posPtr[indx].fX = SkFloatToScalar(posArray[indx << 1]);
-            posPtr[indx].fY = SkFloatToScalar(posArray[(indx << 1) + 1]);
+            posPtr[indx].fX = posArray[indx << 1];
+            posPtr[indx].fY = posArray[(indx << 1) + 1];
         }
 
         SkPaint::TextEncoding encoding = paint->getTextEncoding();

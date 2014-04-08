@@ -58,10 +58,8 @@ void TextLayout::handleText(SkPaint *paint, const jchar* text, jsize len,
     if (value == NULL) {
         return ;
     }
-    SkScalar x_ = SkFloatToScalar(x);
-    SkScalar y_ = SkFloatToScalar(y);
     // Beware: this needs Glyph encoding (already done on the Paint constructor)
-    paint->getTextPath(value->getGlyphs(), value->getGlyphsCount() * 2, x_, y_, path);
+    paint->getTextPath(value->getGlyphs(), value->getGlyphsCount() * 2, x, y, path);
 }
 
 void TextLayout::getTextRunAdvances(SkPaint* paint, const jchar* chars, jint start,
@@ -90,9 +88,6 @@ void TextLayout::drawTextOnPath(SkPaint* paint, const jchar* text, int count,
                                 int bidiFlags, jfloat hOffset, jfloat vOffset,
                                 SkPath* path, SkCanvas* canvas) {
 
-    SkScalar h_ = SkFloatToScalar(hOffset);
-    SkScalar v_ = SkFloatToScalar(vOffset);
-
     sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
             text, 0, count, count, bidiFlags);
     if (value == NULL) {
@@ -100,7 +95,8 @@ void TextLayout::drawTextOnPath(SkPaint* paint, const jchar* text, int count,
     }
 
     // Beware: this needs Glyph encoding (already done on the Paint constructor)
-    canvas->drawTextOnPathHV(value->getGlyphs(), value->getGlyphsCount() * 2, *path, h_, v_, *paint);
+    canvas->drawTextOnPathHV(value->getGlyphs(), value->getGlyphsCount() * 2, *path,
+            hOffset, vOffset, *paint);
 }
 
 }
