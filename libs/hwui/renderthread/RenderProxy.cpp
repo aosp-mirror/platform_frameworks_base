@@ -48,7 +48,7 @@ namespace renderthread {
     LOG_ALWAYS_FATAL_IF( METHOD_INVOKE_PAYLOAD_SIZE < sizeof(ARGS(method)), \
         "METHOD_INVOKE_PAYLOAD_SIZE %d is smaller than sizeof(" #method "Args) %d", \
                 METHOD_INVOKE_PAYLOAD_SIZE, sizeof(ARGS(method))); \
-    MethodInvokeRenderTask* task = createTask((RunnableMethod) Bridge_ ## method); \
+    MethodInvokeRenderTask* task = new MethodInvokeRenderTask((RunnableMethod) Bridge_ ## method); \
     ARGS(method) *args = (ARGS(method) *) task->payload()
 
 CREATE_BRIDGE1(createContext, bool translucent) {
@@ -267,11 +267,6 @@ CREATE_BRIDGE0(fence) {
 void RenderProxy::fence() {
     SETUP_TASK(fence);
     postAndWait(task);
-}
-
-MethodInvokeRenderTask* RenderProxy::createTask(RunnableMethod method) {
-    // TODO: Consider having a small pool of these to avoid alloc churn
-    return new MethodInvokeRenderTask(method);
 }
 
 void RenderProxy::post(RenderTask* task) {
