@@ -490,6 +490,16 @@ void CanvasContext::runWithGlContext(RenderTask* task) {
     task->run();
 }
 
+Layer* CanvasContext::createRenderLayer(int width, int height) {
+    requireGlContext();
+    return LayerRenderer::createRenderLayer(width, height);
+}
+
+Layer* CanvasContext::createTextureLayer() {
+    requireGlContext();
+    return LayerRenderer::createTextureLayer();
+}
+
 void CanvasContext::requireGlContext() {
     if (mEglSurface != EGL_NO_SURFACE) {
         mGlobalContext->makeCurrent(mEglSurface);

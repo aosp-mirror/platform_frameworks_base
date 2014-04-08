@@ -35,6 +35,7 @@ class RenderNode;
 class DisplayListData;
 class OpenGLRenderer;
 class Rect;
+class Layer;
 
 namespace renderthread {
 
@@ -75,6 +76,9 @@ public:
     void invokeFunctor(Functor* functor);
 
     void runWithGlContext(RenderTask* task);
+
+    Layer* createRenderLayer(int width, int height);
+    Layer* createTextureLayer();
 
 private:
     void setSurface(EGLNativeWindowType window);
