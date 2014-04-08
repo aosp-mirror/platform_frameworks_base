@@ -17,7 +17,6 @@
 package com.android.server.usb;
 
 import android.content.Context;
-import android.content.Intent;
 import android.hardware.usb.UsbConfiguration;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
@@ -26,25 +25,21 @@ import android.hardware.usb.UsbInterface;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
-import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
 
 /**
  * UsbHostManager manages USB state in host mode.
  */
 public class UsbHostManager {
     private static final String TAG = UsbHostManager.class.getSimpleName();
-    private static final boolean DEBUG_AUDIO = false;
+    private static final boolean LOG = false;
 
     // contains all connected USB devices
     private final HashMap<String, UsbDevice> mDevices = new HashMap<String, UsbDevice>();
@@ -107,30 +102,6 @@ public class UsbHostManager {
         return false;
     }
 
-    // Broadcasts the arrival/departure of a USB audio interface
-    // card - the ALSA card number of the physical interface
-    // device - the ALSA device number of the physical interface
-    // enabled - if true, we're connecting a device (it's arrived), else disconnecting
-    private void sendDeviceNotification(int card, int device, boolean enabled,
-        boolean hasPlayback, boolean hasCapture, boolean hasMIDI) {
-      // send a sticky broadcast containing current USB state
-      Intent intent = new Intent(Intent.ACTION_USB_AUDIO_DEVICE_PLUG);
-      intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-      intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-      intent.putExtra("state", enabled ? 1 : 0);
-      intent.putExtra("card", card);
-      intent.putExtra("device", device);
-      intent.putExtra("hasPlayback", hasPlayback);
-      intent.putExtra("hasCapture", hasCapture);
-      intent.putExtra("hasMIDI", hasMIDI);
-      mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
-    }
-
-    static boolean isBuiltInUsbDevice(String deviceName) {
-      // This may be too broad an assumption
-      return deviceName.equals("/dev/bus/usb/001/001");
-    }
-
     /* Called from JNI in monitorUsbHostBus() to report new USB devices
        Returns true if successful, in which case the JNI code will continue adding configurations,
        interfaces and endpoints, and finally call endUsbDeviceAdded after all descriptors
@@ -139,59 +110,6 @@ public class UsbHostManager {
     private boolean beginUsbDeviceAdded(String deviceName, int vendorID, int productID,
             int deviceClass, int deviceSubclass, int deviceProtocol,
             String manufacturerName, String productName, String serialNumber) {
-
-      if (DEBUG_AUDIO) {
-          Slog.d(TAG, "usb:UsbHostManager.beginUsbDeviceAdded(" + deviceName + ")");
-          // Audio Class Codes:
-          // Audio: 0x01
-          // Audio Subclass Codes:
-          // undefined: 0x00
-          // audio control: 0x01
-          // audio streaming: 0x02
-          // midi streaming: 0x03
-
-          // some useful debugging info
-          Slog.d(TAG, "usb:UsbHostManager.usbDeviceAdded()");
-          Slog.d(TAG, "usb: nm:" + deviceName +
-              " vnd:" + vendorID +
-              " prd:" + productID +
-              " cls:" + deviceClass +
-              " sub:" + deviceSubclass +
-              " proto:" + deviceProtocol);
-      }
-
-      if (!isBuiltInUsbDevice(deviceName)) {
-          //TODO(pmclean) we will need this when we need to support USB interfaces
-          // beyond card1, device0 but turn them off for now
-          //com.android.alsascan.AlsaCardsParser cardsParser =
-          //    new com.android.alsascan.AlsaCardsParser();
-          //cardsParser.scan();
-          //cardsParser.Log();
-
-          // But we need to parse the device to determine its capabilities.
-          com.android.alsascan.AlsaDevicesParser devicesParser =
-              new com.android.alsascan.AlsaDevicesParser();
-          devicesParser.scan();
-          //devicesParser.Log();
-
-          boolean hasPlaybackDevices = devicesParser.hasPlaybackDevices();
-          boolean hasCaptureDevices = devicesParser.hasCaptureDevices();
-          boolean hasMIDI = devicesParser.hasMIDIDevices();
-
-          if (DEBUG_AUDIO) {
-              Slog.d(TAG, "usb: hasPlayback:" + hasPlaybackDevices
-                      + " hasCapture:" + hasCaptureDevices);
-          }
-
-          //TODO(pmclean)
-          // For now just assume that any USB device that is attached is:
-          // 1. An audio interface and
-          // 2. is card:1 device:0
-          int cardNum = 1;
-          int deviceNum = 0;
-          sendDeviceNotification(cardNum, deviceNum, true,
-                                 hasPlaybackDevices, hasCaptureDevices, hasMIDI);
-        }
 
         if (isBlackListed(deviceName) ||
                 isBlackListed(deviceClass, deviceSubclass, deviceProtocol)) {
@@ -258,9 +176,6 @@ public class UsbHostManager {
 
     /* Called from JNI in monitorUsbHostBus() to finish adding a new device */
     private void endUsbDeviceAdded() {
-        if (DEBUG_AUDIO) {
-            Slog.d(TAG, "usb:UsbHostManager.endUsbDeviceAdded()");
-        }
         if (mNewInterface != null) {
             mNewInterface.setEndpoints(
                     mNewEndpoints.toArray(new UsbEndpoint[mNewEndpoints.size()]));
@@ -289,13 +204,6 @@ public class UsbHostManager {
 
     /* Called from JNI in monitorUsbHostBus to report USB device removal */
     private void usbDeviceRemoved(String deviceName) {
-        if (DEBUG_AUDIO) {
-          Slog.d(TAG, "usb:UsbHostManager.usbDeviceRemoved() nm:" + deviceName);
-        }
-
-        // Same assumptions as the fake-out above
-        sendDeviceNotification(1, 0, false, /*NA*/false, /*NA*/false, /*NA*/false);
-
         synchronized (mLock) {
             UsbDevice device = mDevices.remove(deviceName);
             if (device != null) {
