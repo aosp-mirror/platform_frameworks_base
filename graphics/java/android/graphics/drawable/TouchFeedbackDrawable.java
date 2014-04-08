@@ -217,20 +217,11 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         return super.canApplyTheme() || mState != null && mState.mTouchThemeAttrs != null;
     }
 
-    /**
-     * @hide until hotspot APIs are finalized
-     */
     @Override
     public boolean supportsHotspots() {
         return true;
     }
 
-    /**
-     * TODO: Maybe we should set hotspots for state/id combinations? So touch
-     * would be state_pressed and the pointer ID.
-     *
-     * @hide until hotspot APIs are finalized
-     */
     @Override
     public void setHotspot(int id, float x, float y) {
         if (mTouchedRipples == null) {
@@ -261,9 +252,6 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         scheduleAnimation();
     }
 
-    /**
-     * @hide until hotspot APIs are finalized
-     */
     @Override
     public void removeHotspot(int id) {
         if (mTouchedRipples == null) {
@@ -279,9 +267,6 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         }
     }
 
-    /**
-     * @hide until hotspot APIs are finalized
-     */
     @Override
     public void clearHotspots() {
         if (mTouchedRipples == null) {

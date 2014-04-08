@@ -485,14 +485,13 @@ public abstract class Drawable {
 
     /**
      * Indicates whether the drawable supports hotspots. Hotspots are uniquely
-     * identifiable coordinates the may be added, updated and removed within the
+     * identifiable coordinates the may be added, updated and removed within a
      * drawable.
      *
      * @return true if hotspots are supported
      * @see #setHotspot(int, float, float)
      * @see #removeHotspot(int)
      * @see #clearHotspots()
-     * @hide until hotspot APIs are finalized
      */
     public boolean supportsHotspots() {
         return false;
@@ -500,33 +499,33 @@ public abstract class Drawable {
 
     /**
      * Specifies a hotspot's location within the drawable.
+     * <p>
+     * The specified key should be an id declared in the resources of the
+     * application to ensure it is unique (see the <a
+     * href={@docRoot}guide/topics/resources/more-resources.html#Id">ID resource type</a>).
      *
-     * @param id unique identifier for the hotspot
-     * @param x x-coordinate
-     * @param y y-coordinate
-     * @hide until hotspot APIs are finalized
+     * @param key The key identifying the hotspot
+     * @param x The X coordinate of the center of the hotspot
+     * @param y The Y coordinate of the center of the hotspot
      */
-    public void setHotspot(int id, float x, float y) {}
+    public void setHotspot(int key, float x, float y) {}
 
     /**
-     * Removes the specified hotspot from the drawable.
+     * Removes the hotspot with the specified key from the drawable.
      *
-     * @param id unique identifier for the hotspot
-     * @hide until hotspot APIs are finalized
+     * @param key The key identifying the hotspot
      */
-    public void removeHotspot(int id) {}
+    public void removeHotspot(int key) {}
 
     /**
      * Removes all hotspots from the drawable.
-     *
-     * @hide until hotspot APIs are finalized
      */
     public void clearHotspots() {}
 
     /**
      * Whether this drawable requests projection.
      *
-     * @hide
+     * @hide until we finalize these APIs
      */
     public boolean isProjected() {
         return false;

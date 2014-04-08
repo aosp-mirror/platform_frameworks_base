@@ -183,33 +183,21 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
         }
     }
 
-    /**
-     * @hide
-     */
     @Override
     public boolean supportsHotspots() {
         return mInsetState.mDrawable.supportsHotspots();
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void setHotspot(int id, float x, float y) {
         mInsetState.mDrawable.setHotspot(id, x, y);
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void removeHotspot(int id) {
         mInsetState.mDrawable.removeHotspot(id);
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void clearHotspots() {
         mInsetState.mDrawable.clearHotspots();
