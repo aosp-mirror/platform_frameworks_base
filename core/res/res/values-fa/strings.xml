@@ -687,6 +687,8 @@
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"به برنامه امکان می‌دهد برای بررسی شرایط شبکه گوش دهد. این امکان هرگز نباید برای برنامه‌های معمولی مورد نیاز باشد."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"تغییر کالیبراسیون دستگاه ورودی"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"به برنامه امکان می‌دهد پارامترهای کالیبراسیون صفحه لمسی را تغییر دهد. هرگز نباید برای برنامه‌های عادی مورد نیاز باشد."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"‏دسترسی به گواهی‌های DRM"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"‏به یک برنامه کاربردی اجازه ارائه مجوز و استفاده از گواهی‌های DRM را می‌دهد. هرگز برای برنامه‌های عادی مورد نیاز نیست."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تنظیم قوانین رمز ورود"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"‏طول و نویسه‎های مجاز در گذرواژه‌های بازکردن قفل صفحه را کنترل کنید."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"نمایش تلاش‌های قفل گشایی صفحه"</string>
@@ -1319,10 +1321,10 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"به یک برنامه کاربردی برای دسترسی به فضای ذخیره‌سازی ایمن محافظ کلید اجازه می‌دهد."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"کنترل نمایش و پنهان کردن محافظ کلید"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"اجازه می‌دهد برنامه‌ای محافظ کلید را کنترل کند."</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"گوش دادن به تغییرات حالت اعتماد."</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"به یک برنامه کاربردی برای گوش دادن به تغییرات در حالت اعتماد اجازه می‌دهد."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"اتصال به یک سرویس عامل اعتماد"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"به یک برنامه کاربردی برای اتصال به یک سرویس عامل اعتماد اجازه می‌دهد."</string>
+    <string name="permlab_trust_listener" msgid="1765718054003704476">"‏گوش دادن به تغییرات وضعیت trust."</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"‏به یک برنامه کاربردی برای گوش دادن به تغییرات در trust اجازه می‌دهد."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"‏اتصال به یک سرویس trust agent"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"‏به یک برنامه کاربردی برای اتصال به یک سرویس trust agent اجازه می‌دهد."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"تعامل با سیستم به‌روزرسانی و بازیابی"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"به یک برنامه کاربردی اجازه می‌دهد با سیستم بازیابی و به‌روزرسانی‌های سیستم تعامل داشته باشد."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"دوبار لمس کنید تا بزرگنمایی کنترل شود"</string>

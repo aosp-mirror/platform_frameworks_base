@@ -687,6 +687,8 @@
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permet à une application de détecter les observations sur les conditions du réseau. Ne devrait jamais être nécessaire pour les applications standards."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"modifier le calibrage du périphérique d\'entrée"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permet à l\'application de modifier les paramètres de calibrage de l\'écran tactile. Ne devrait jamais être nécessaire pour les applications standards."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"accéder aux certificats GDN"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permet à une application de fournir et d\'utiliser les certificats de GDN. Cela ne devrait jamais être nécessaire pour les applications normales."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Choisir le nombre et le type de caractères autorisés dans les mots de passe de déverrouillage de l\'écran"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gérer les tentatives de déverrouillage de l\'écran"</string>
