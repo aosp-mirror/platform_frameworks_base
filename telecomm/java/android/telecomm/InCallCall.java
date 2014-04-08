@@ -73,7 +73,7 @@ public final class InCallCall implements Parcelable {
 
     /**
      * Reason for disconnection, values are defined in {@link DisconnectCause}. Valid when call
-     * state is {@link CallState.DISCONNECTED}.
+     * state is {@link CallState#DISCONNECTED}.
      */
     public int getDisconnectCause() {
         return mDisconnectCause;

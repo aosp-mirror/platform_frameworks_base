@@ -180,7 +180,7 @@ public abstract class InCallService extends Service {
      * Indicates to the in-call app that the specified call is active but in a "post-dial" state
      * where Telecomm is now sending some dual-tone multi-frequency signaling (DTMF) tones appended
      * to the dialed number. Normal transitions are to {@link #setPostDialWait(String,String)} when
-     * the post-dial string requires user confirmation to proceed, {@link #setActive(String)} when
+     * the post-dial string requires user confirmation to proceed, and {@link CallState#ACTIVE} when
      * the post-dial tones are completed.
      *
      * @param callId The identifier of the call changing state.
