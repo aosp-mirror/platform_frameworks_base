@@ -469,11 +469,11 @@ interface INetworkManagementService
     void addDnsServersForNetId(int netId, in String[] servers, in String domains);
     void removeDnsServersForNetId(int netId, in String[] servers, in String domains);
 
-    void addRouteForNetId(in RouteInfo routeInfo);
-    void removeRouteForNetId(in RouteInfo routeInfo);
+    void addRouteForNetId(int netId, in RouteInfo routeInfo);
+    void removeRouteForNetId(int netId, in RouteInfo routeInfo);
 
-    void addLegacyRouteForNetId(in RouteInfo routeInfo, int uid);
-    void removeLegacyRouteForNetId(in RouteInfo routeInfo, int uid);
+    void addLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
+    void removeLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
 
     void setDefaultNetId(int netId, boolean resetOldSockets);
     void clearDefaultNetId();
