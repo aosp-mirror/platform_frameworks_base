@@ -78,4 +78,5 @@ interface IInputMethodManager {
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     int getInputMethodWindowVisibleHeight();
     oneway void notifyTextCommitted();
+    void setCursorAnchorMonitorMode(in IBinder token, int monitorMode);
 }

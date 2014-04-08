@@ -26,6 +26,7 @@ import com.android.internal.view.InputBindResult;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -41,13 +42,13 @@ import android.util.Pools.Pool;
 import android.util.Pools.SimplePool;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
+import android.util.SparseArray;
 import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventSender;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
-import android.util.SparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -334,6 +335,11 @@ public final class InputMethodManager {
     InputChannel mCurChannel;
     ImeInputEventSender mCurSender;
 
+    /**
+     * The current cursor/anchor monitor mode.
+     */
+    int mCursorAnchorMonitorMode = InputMethodService.CURSOR_ANCHOR_MONITOR_MODE_NONE;
+
     final Pool<PendingEvent> mPendingEventPool = new SimplePool<PendingEvent>(20);
     final SparseArray<PendingEvent> mPendingEvents = new SparseArray<PendingEvent>(20);
 
@@ -346,6 +352,7 @@ public final class InputMethodManager {
     static final int MSG_SEND_INPUT_EVENT = 5;
     static final int MSG_TIMEOUT_INPUT_EVENT = 6;
     static final int MSG_FLUSH_INPUT_EVENT = 7;
+    static final int SET_CURSOR_ANCHOR_MONITOR_MODE = 8;
 
     class H extends Handler {
         H(Looper looper) {
@@ -476,6 +483,12 @@ public final class InputMethodManager {
                     finishedInputEvent(msg.arg1, false, false);
                     return;
                 }
+                case SET_CURSOR_ANCHOR_MONITOR_MODE: {
+                    synchronized (mH) {
+                        mCursorAnchorMonitorMode = msg.arg1;
+                    }
+                    return;
+                }
             }
         }
     }
@@ -539,6 +552,11 @@ public final class InputMethodManager {
         @Override
         public void setActive(boolean active) {
             mH.sendMessage(mH.obtainMessage(MSG_SET_ACTIVE, active ? 1 : 0, 0));
+        }
+
+        @Override
+        public void setCursorAnchorMonitorMode(int monitorMode) {
+            mH.sendMessage(mH.obtainMessage(SET_CURSOR_ANCHOR_MONITOR_MODE, monitorMode, 0));
         }
     };
 
@@ -1465,9 +1483,30 @@ public final class InputMethodManager {
      * of the input editor's cursor in its window.
      */
     public boolean isWatchingCursor(View view) {
-        return false;
+        if (!isActive(view)) {
+            return false;
+        }
+        synchronized (mH) {
+            return mCursorAnchorMonitorMode ==
+                    InputMethodService.CURSOR_ANCHOR_MONITOR_MODE_CURSOR_RECT;
+        }
     }
-    
+
+    /**
+     * Set cursor/anchor monitor mode via {@link com.android.server.InputMethodManagerService}.
+     * This is an internal method for {@link android.inputmethodservice.InputMethodService} and
+     * should never be used from IMEs and applications.
+     *
+     * @hide
+     */
+    public void setCursorAnchorMonitorMode(IBinder imeToken, int monitorMode) {
+        try {
+            mService.setCursorAnchorMonitorMode(imeToken, monitorMode);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Report the current cursor location in its window.
      */
