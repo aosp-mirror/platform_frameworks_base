@@ -167,6 +167,9 @@
     <!-- Extra space above the clock in the panel -->
     <dimen name="notification_panel_header_padding_top">0dp</dimen>
 
+    <!-- Extra space above the panel holder -->
+    <dimen name="panel_holder_padding_top">0dp</dimen>
+
     <!-- Layout parameters for the notification panel -->
     <dimen name="notification_panel_margin_bottom">0dp</dimen>
     <dimen name="notification_panel_margin_left">0dp</dimen>

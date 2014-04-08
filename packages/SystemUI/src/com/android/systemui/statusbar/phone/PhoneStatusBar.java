@@ -89,7 +89,6 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
-import com.android.systemui.SystemUIApplication;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
@@ -220,6 +219,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     View mDateTimeView;
     View mClearButton;
     ImageView mSettingsButton, mNotificationButton;
+    View mKeyguardSettingsFlipButton;
 
     // carrier/wifi label
     private TextView mCarrierLabel;
@@ -2791,9 +2791,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     public void showKeyguard() {
         mOnKeyguard = true;
         instantExpandNotificationsPanel();
+        if (isFlippedToSettings()) {
+            flipToNotifications();
+        }
         mStatusBarWindow.setSystemUiVisibility(View.STATUS_BAR_DISABLE_HOME);
         mKeyguardStatusView.setVisibility(View.VISIBLE);
         mNotificationPanelHeader.setVisibility(View.GONE);
+        if (mKeyguardSettingsFlipButton == null) {
+            ViewStub flipStub = (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_flip_stub);
+            mKeyguardSettingsFlipButton = flipStub.inflate();
+            installSettingsButton(mKeyguardSettingsFlipButton);
+        }
+        mKeyguardSettingsFlipButton.setVisibility(View.VISIBLE);
+        mKeyguardSettingsFlipButton.findViewById(R.id.settings_button).setVisibility(View.VISIBLE);
         mStackScroller.setAlpha(0.8f);
         mStackScroller.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         updateExpansionStates();
@@ -2804,6 +2814,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mStatusBarWindow.setSystemUiVisibility(0);
         mKeyguardStatusView.setVisibility(View.GONE);
         mNotificationPanelHeader.setVisibility(View.VISIBLE);
+        mKeyguardSettingsFlipButton.setVisibility(View.GONE);
         mStackScroller.setAlpha(1f);
         mStackScroller.setLayerType(View.LAYER_TYPE_NONE, null);
         updateExpansionStates();
@@ -2838,6 +2849,28 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
         } else {
             return null;
+        }
+    }
+
+    private void installSettingsButton(View parent) {
+        ImageView settingsButton = (ImageView) mStatusBarWindow.findViewById(R.id.settings_button);
+        if (settingsButton != null) {
+            settingsButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    animateExpandSettingsPanel();
+                    v.setVisibility(View.INVISIBLE);
+                }
+            });
+            if (mHasSettingsPanel) {
+                // the settings panel is hiding behind this button
+                settingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
+                settingsButton.setVisibility(View.VISIBLE);
+            } else {
+                // no settings panel, go straight to settings
+                settingsButton.setVisibility(View.VISIBLE);
+                settingsButton.setImageResource(R.drawable.ic_notify_settings);
+            }
         }
     }
 }
