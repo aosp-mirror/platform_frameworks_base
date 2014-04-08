@@ -182,6 +182,12 @@ static void android_view_ThreadedRenderer_destroyLayer(JNIEnv* env, jobject claz
     proxy->destroyLayer(layer);
 }
 
+static void android_view_ThreadedRenderer_fence(JNIEnv* env, jobject clazz,
+        jlong proxyPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->fence();
+}
+
 #endif
 
 // ----------------------------------------------------------------------------
@@ -209,6 +215,7 @@ static JNINativeMethod gMethods[] = {
     { "nCreateTextureLayer", "(J)J", (void*) android_view_ThreadedRenderer_createTextureLayer },
     { "nCopyLayerInto", "(JJJ)Z", (void*) android_view_ThreadedRenderer_copyLayerInto },
     { "nDestroyLayer", "(JJ)V", (void*) android_view_ThreadedRenderer_destroyLayer },
+    { "nFence", "(J)V", (void*) android_view_ThreadedRenderer_fence },
 #endif
 };
 
