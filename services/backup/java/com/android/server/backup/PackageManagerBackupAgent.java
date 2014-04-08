@@ -189,7 +189,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 if (home != null) {
                     outputBufferStream.writeUTF(home.flattenToString());
                     outputBufferStream.writeLong(homeVersion);
-                    outputBufferStream.writeUTF(homeInstaller);
+                    outputBufferStream.writeUTF(homeInstaller != null ? homeInstaller : "" );
                     writeSignatureArray(outputBufferStream, homeSigs);
                     writeEntity(data, DEFAULT_HOME_KEY, outputBuffer.toByteArray());
                 } else {
