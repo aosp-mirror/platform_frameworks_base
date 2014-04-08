@@ -27668,6 +27668,14 @@ package android.tv {
     method public abstract boolean onTune(android.net.Uri);
   }
 
+  public abstract class TvInputSession {
+    ctor public TvInputSession();
+    method public void release();
+    method public void setSurface(android.view.Surface);
+    method public void setVolume(float);
+    method public void tune(android.net.Uri);
+  }
+
 }
 
 package android.util {
