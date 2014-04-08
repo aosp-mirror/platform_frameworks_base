@@ -10994,7 +10994,6 @@ package android.graphics.drawable {
     method public void setRepeatMode(int);
     method public void start();
     method public void stop();
-    field public static final int INFINITE = -1; // 0xffffffff
   }
 
 }
