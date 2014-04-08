@@ -288,8 +288,6 @@ public class AudioSystem
                                              DEVICE_IN_USB_DEVICE |
                                              DEVICE_IN_DEFAULT);
     public static final int DEVICE_IN_ALL_SCO = DEVICE_IN_BLUETOOTH_SCO_HEADSET;
-    public static final int DEVICE_IN_ALL_USB = (DEVICE_IN_USB_ACCESSORY |
-                                                 DEVICE_IN_USB_DEVICE);
 
     // device states, must match AudioSystem::device_connection_state
     public static final int DEVICE_STATE_UNAVAILABLE = 0;
