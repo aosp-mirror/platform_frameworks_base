@@ -199,81 +199,38 @@ public class VectorDrawable extends Drawable {
         setDuration(duration);
     }
 
-    final static class VectorDrawableState extends ConstantState {
-        int[] mThemeAttrs;
-        int mChangingConfigurations;
-        ValueAnimator mBasicAnimator;
-        VAnimatedPath mVAnimatedPath = new VAnimatedPath();
-        Rect mPadding;
-        int mIntrinsicHeight;
-        int mIntrinsicWidth;
-
-        public VectorDrawableState(VectorDrawableState copy) {
-            if (copy != null) {
-                mChangingConfigurations = copy.mChangingConfigurations;
-                mVAnimatedPath = new VAnimatedPath(copy.mVAnimatedPath);
-                mPadding = new Rect(copy.mPadding);
-                mIntrinsicHeight = copy.mIntrinsicHeight;
-                mIntrinsicWidth = copy.mIntrinsicWidth;
-            }
-        }
-
-        @Override
-        public Drawable newDrawable() {
-            return new VectorDrawable(this, null, null);
-        }
-
-        @Override
-        public Drawable newDrawable(Resources res) {
-            return new VectorDrawable(this, res, null);
-        }
-
-        @Override
-        public Drawable newDrawable(Resources res, Theme theme) {
-            return new VectorDrawable(this, res, theme);
-        }
-
-        @Override
-        public int getChangingConfigurations() {
-            return mChangingConfigurations;
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see android.graphics.drawable.Drawable#getConstantState()
-     */
     @Override
     public ConstantState getConstantState() {
         return mVectorState;
     }
 
     /**
-     * start the animation
+     * Starts the animation.
      */
     public void start() {
         mVectorState.mBasicAnimator.start();
     }
 
     /**
-     * Stop the animation.
+     * Stops the animation.
      */
     public void stop() {
         mVectorState.mBasicAnimator.end();
     }
 
     /**
-     * Get the current time point in the animation
+     * Returns the current completion value for the animation.
      *
-     * @return the current point on the animation
+     * @return the current point on the animation, typically between 0 and 1
      */
     public float geAnimationFraction() {
         return mVectorState.mVAnimatedPath.getValue();
     }
 
     /**
-     * set the time point in the animation
+     * Set the current completion value for the animation.
      *
-     * @param value the point along the animation typically between 0 and 1
+     * @param value the point along the animation, typically between 0 and 1
      */
     public void setAnimationFraction(float value) {
         mVectorState.mVAnimatedPath.setAnimationFraction(value);
@@ -290,8 +247,12 @@ public class VectorDrawable extends Drawable {
     }
 
     /**
-     * Defines what this animation should do when it reaches the end. This setting is applied only
-     * when the repeat count is either greater than 0 or {@link #INFINITE}.
+     * Defines what this animation should do when it reaches the end. This
+     * setting is applied only when the repeat count is either greater than
+     * 0 or {@link ValueAnimator#INFINITE}.
+     *
+     * @param mode the animation mode, either {@link ValueAnimator#RESTART}
+     *        or {@link ValueAnimator#REVERSE}
      */
     public void setRepeatMode(int mode) {
         mVectorState.mBasicAnimator.setRepeatMode(mode);
@@ -307,7 +268,8 @@ public class VectorDrawable extends Drawable {
     }
 
     /**
-     * @return True if this drawable repeats its animation
+     * @return the animation repeat count, either a value greater than 0 or
+     *         {@link ValueAnimator#INFINITE}
      */
     public int getRepeatCount() {
         return mVectorState.mBasicAnimator.getRepeatCount();
@@ -610,6 +572,47 @@ public class VectorDrawable extends Drawable {
             stop();
         }
         return changed;
+    }
+
+    private static class VectorDrawableState extends ConstantState {
+        int mChangingConfigurations;
+        ValueAnimator mBasicAnimator;
+        VAnimatedPath mVAnimatedPath;
+        Rect mPadding;
+        int mIntrinsicHeight;
+        int mIntrinsicWidth;
+
+        public VectorDrawableState(VectorDrawableState copy) {
+            if (copy != null) {
+                mChangingConfigurations = copy.mChangingConfigurations;
+                mVAnimatedPath = new VAnimatedPath(copy.mVAnimatedPath);
+                mPadding = new Rect(copy.mPadding);
+                mIntrinsicHeight = copy.mIntrinsicHeight;
+                mIntrinsicWidth = copy.mIntrinsicWidth;
+            } else {
+                mVAnimatedPath = new VAnimatedPath();
+            }
+        }
+
+        @Override
+        public Drawable newDrawable() {
+            return new VectorDrawable(this, null, null);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new VectorDrawable(this, res, null);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res, Theme theme) {
+            return new VectorDrawable(this, res, theme);
+        }
+
+        @Override
+        public int getChangingConfigurations() {
+            return mChangingConfigurations;
+        }
     }
 
     private static class VAnimatedPath {
@@ -951,26 +954,28 @@ public class VectorDrawable extends Drawable {
     }
 
     private static class VAnimation {
-        private final static int DIRECTION_FORWARD = 0;
-        private final static int DIRECTION_IN_AND_OUT = 1;
+        private static final String SEPARATOR = ",";
 
-        private VPath[] mPaths = new VPath[0];
+        private static final int DIRECTION_FORWARD = 0;
+        private static final int DIRECTION_IN_AND_OUT = 1;
 
         public enum Style {
             INTERPOLATE, CROSSFADE, WIPE
         }
 
-        Interpolator mAnimInterpolator = new AccelerateDecelerateInterpolator();
+        private final HashSet<String> mSeqMap = new HashSet<String>();
+
+        private Interpolator mAnimInterpolator = new AccelerateDecelerateInterpolator();
+        private VPath[] mPaths = new VPath[0];
+        private long[] mDuration = { DEFAULT_DURATION };
 
         private int[] mThemeAttrs;
         private Style mStyle;
         private int mLimitProperty = 0;
-        private long[] mDuration = {DEFAULT_DURATION};
         private long mStartOffset;
         private long mRepeat = 1;
-        private HashSet<String> mSeqMap = new HashSet<String>();
         private long mWipeDirection;
-        private int mMode = 0; // forward = 0 inAndOut = 1;
+        private int mMode = DIRECTION_FORWARD;
         private int mInterpolatorType;
         private String mId;
 
@@ -985,12 +990,13 @@ public class VectorDrawable extends Drawable {
             int name;
 
             final TypedArray a = r.obtainAttributes(attrs, R.styleable.VectorDrawableAnimation);
-            mThemeAttrs = a.extractThemeAttrs();
+            final int[] themeAttrs = a.extractThemeAttrs();
+            mThemeAttrs = themeAttrs;
 
             value = a.getString(R.styleable.VectorDrawableAnimation_sequence);
             if (value != null) {
-                sp = value.split(",");
-                VectorDrawable.VPath[] paths = new VectorDrawable.VPath[sp.length];
+                sp = value.split(SEPARATOR);
+                final VectorDrawable.VPath[] paths = new VectorDrawable.VPath[sp.length];
 
                 for (int j = 0; j < sp.length; j++) {
                     mSeqMap.add(sp[j].trim());
@@ -998,16 +1004,15 @@ public class VectorDrawable extends Drawable {
                     path.mAnimated = true;
                     paths[j] = path;
                 }
+
                 setPaths(paths);
             }
-
-            setLimitProperty(a.getInt(R.styleable.VectorDrawableAnimation_limitTo, 0));
 
             name = R.styleable.VectorDrawableAnimation_durations;
             value = a.getString(name);
             if (value != null) {
                 long totalDuration = 0;
-                sp = value.split(",");
+                sp = value.split(SEPARATOR);
 
                 final long[] dur = new long[sp.length];
                 for (int j = 0; j < dur.length; j++) {
@@ -1016,13 +1021,14 @@ public class VectorDrawable extends Drawable {
                 }
 
                 if (totalDuration == 0){
-                    throw new XmlPullParserException(a.getPositionDescription()+
-                            "total duration must not be zero");
+                    throw new XmlPullParserException(a.getPositionDescription()
+                            + " total duration must not be zero");
                 }
 
                 setDuration(dur);
             }
 
+            setLimitProperty(a.getInt(R.styleable.VectorDrawableAnimation_limitTo, 0));
             setRepeat(a.getInt(R.styleable.VectorDrawableAnimation_repeatCount, 1));
             setStartOffset(a.getInt(R.styleable.VectorDrawableAnimation_startDelay, 0));
             setMode(a.getInt(R.styleable.VectorDrawableAnimation_repeatStyle, 0));
@@ -1063,7 +1069,7 @@ public class VectorDrawable extends Drawable {
         }
 
         public void setStyle(Style style) {
-            this.mStyle = style;
+            mStyle = style;
         }
 
         public int getLimitProperty() {
@@ -1071,7 +1077,7 @@ public class VectorDrawable extends Drawable {
         }
 
         public void setLimitProperty(int limitProperty) {
-            this.mLimitProperty = limitProperty;
+            mLimitProperty = limitProperty;
         }
 
         public long[] getDuration() {
@@ -1079,7 +1085,7 @@ public class VectorDrawable extends Drawable {
         }
 
         public void setDuration(long[] duration) {
-            this.mDuration = duration;
+            mDuration = duration;
         }
 
         public long getRepeat() {
@@ -1087,7 +1093,7 @@ public class VectorDrawable extends Drawable {
         }
 
         public void setRepeat(long repeat) {
-            this.mRepeat = repeat;
+            mRepeat = repeat;
         }
 
         public long getStartOffset() {
@@ -1095,7 +1101,7 @@ public class VectorDrawable extends Drawable {
         }
 
         public void setStartOffset(long startOffset) {
-            this.mStartOffset = startOffset;
+            mStartOffset = startOffset;
         }
 
         public long getWipeDirection() {
@@ -1103,7 +1109,7 @@ public class VectorDrawable extends Drawable {
         }
 
         public void setWipeDirection(long wipeDirection) {
-            this.mWipeDirection = wipeDirection;
+            mWipeDirection = wipeDirection;
         }
 
         public int getMode() {
@@ -1111,7 +1117,7 @@ public class VectorDrawable extends Drawable {
         }
 
         public void setMode(int mode) {
-            this.mMode = mode;
+            mMode = mode;
         }
 
         public int getInterpolator() {
@@ -1119,7 +1125,7 @@ public class VectorDrawable extends Drawable {
         }
 
         public void setInterpolator(int interpolator) {
-            this.mInterpolatorType = interpolator;
+            mInterpolatorType = interpolator;
         }
 
         /**
@@ -1753,51 +1759,49 @@ public class VectorDrawable extends Drawable {
     }
 
     private static class VNode {
-        private static float[] current = new float[4];
-
-        char type;
-        float[] params;
+        private char mType;
+        private float[] mParams;
 
         public VNode(char type, float[] params) {
-            this.type = type;
-            this.params = params;
+            mType = type;
+            mParams = params;
         }
 
         public VNode(VNode n) {
-            this.type = n.type;
-            this.params = Arrays.copyOf(n.params, n.params.length);
+            mType = n.mType;
+            mParams = Arrays.copyOf(n.mParams, n.mParams.length);
         }
 
         public VNode(VNode n1, VNode n2, float t) {
-            this.type = n1.type;
-            this.params = new float[n1.params.length];
+            mType = n1.mType;
+            mParams = new float[n1.mParams.length];
             interpolate(n1, n2, t);
         }
 
         private boolean match(VNode n) {
-            if (n.type != type) {
+            if (n.mType != mType) {
                 return false;
             }
-            return (params.length == n.params.length);
+            return (mParams.length == n.mParams.length);
         }
 
         public void interpolate(VNode n1, VNode n2, float t) {
-            for (int i = 0; i < n1.params.length; i++) {
-                params[i] = n1.params[i] * (1 - t) + n2.params[i] * t;
+            for (int i = 0; i < n1.mParams.length; i++) {
+                mParams[i] = n1.mParams[i] * (1 - t) + n2.mParams[i] * t;
             }
         }
 
         private void nodeListToPath(VNode[] node, Path path) {
             float[] current = new float[4];
             for (int i = 0; i < node.length; i++) {
-                addCommand(path, current, node[i].type, node[i].params);
+                addCommand(path, current, node[i].mType, node[i].mParams);
             }
         }
 
         public static void createPath(VNode[] node, Path path) {
-            Arrays.fill(current,0);
+            float[] current = new float[4];
             for (int i = 0; i < node.length; i++) {
-                addCommand(path, current, node[i].type, node[i].params);
+                addCommand(path, current, node[i].mType, node[i].mParams);
             }
         }
 
