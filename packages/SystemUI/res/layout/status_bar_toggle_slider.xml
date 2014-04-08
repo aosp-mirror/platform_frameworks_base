@@ -29,7 +29,7 @@
         android:layout_alignParentBottom="true"
         android:button="@null"
         />
-    <SeekBar
+    <com.android.systemui.settings.ToggleSeekBar
         android:id="@+id/slider"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
