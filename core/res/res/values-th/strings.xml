@@ -681,6 +681,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"อนุญาตให้ผู้ใช้สามารถเรียกใช้แอปการกำหนดค่าของผู้ให้บริการ ซึ่งแอปทั่วไปไม่จำเป็นต้องใช้"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ฟังข้อสังเกตเกี่ยวกับสภาวะของเครือข่าย"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"อนุญาตให้แอปพลิเคชันฟังข้อสังเกตเกี่ยวกับสภาวะของเครือข่าย ไม่จำเป็นสำหรับแอปปกติ"</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"เข้าถึงใบรับรอง DRM"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"ช่วยให้แอปพลิเคชันสามารถจัดสรรและใช้ใบรับรอง DRM ได้ ไม่จำเป็นสำหรับแอปปกติทั่วไป"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ตั้งค่ากฎรหัสผ่าน"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"ควบคุมความยาวและอักขระที่อนุญาตให้ใช้ในรหัสผ่านการปลดล็อกหน้าจอ"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>

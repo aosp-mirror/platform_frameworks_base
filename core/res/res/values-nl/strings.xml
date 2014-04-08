@@ -681,6 +681,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Hiermee kan de houder de door de provider geleverde configuratie-app aanroepen. Nooit vereist voor normale apps."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"controleren op waarnemingen met betrekking tot netwerkomstandigheden"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Hiermee kan een app controleren op waarnemingen met betrekking tot netwerkomstandigheden. Nooit vereist voor normale apps."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"toegang tot DRM-certificaten"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Toestaan dat een app DRM-certificaten registreert en gebruikt. Nooit vereist voor normale apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Wachtwoordregels instellen"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"De lengte en tekens beheren die zijn toegestaan in wachtwoorden voor schermontgrendeling."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Pogingen voor schermontgrendeling bijhouden"</string>
