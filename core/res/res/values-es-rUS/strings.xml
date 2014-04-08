@@ -687,6 +687,8 @@
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permite que una aplicación detecte cambios en el estado de la red. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"cambiar la calibración del dispositivo de entrada"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permite que la aplicación modifique los parámetros de calibración de la pantalla táctil. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"Acceder a certificados DRM"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permite que una aplicación proporcione y utilice certificados DRM. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecer reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controlar la longitud y los caracteres permitidos en las contraseñas para desbloquear la pantalla"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Supervisa los intentos para desbloquear la pantalla"</string>

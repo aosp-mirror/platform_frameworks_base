@@ -687,6 +687,8 @@
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Tillader, at en applikation observerer netværksforhold. Bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"skift kalibrering for inputenheden"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Tillader, at appen ændrer kalibreringsparametrene for berøringsskærmen. Dette bør aldrig være nødvendigt for almindelige apps."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"få adgang til DRM-certifikater"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tillader, at en applikation leverer og anvender DRM-certfikater. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Indstil regler for adgangskode"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller længden samt tilladte tegn i adgangskoder til oplåsning af skærmen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåg forsøg på oplåsning af skærm"</string>
@@ -1319,10 +1321,10 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Tillader, at en applikation får adgang til et nøglebeskyttet lager."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Administrer, om nøglebeskyttelse skal vises eller skjules"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Tillader, at en applikation styrer nøglebeskyttelsen."</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"Registrer ændringer i tillidstilstand."</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Tillader, at en applikation registrerer ændringer i tillidstilstand."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Forpligt til en tillidsagenttjeneste"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Tillader, at en applikation forpligter sig til en tillidsagenttjeneste."</string>
+    <string name="permlab_trust_listener" msgid="1765718054003704476">"Registrere ændringer i trust-tilstand."</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Tillader, at en applikation registrerer ændringer i trust-tilstand."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Knytte sig til en trust agent-tjeneste"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Tillader, at en applikation knytter sig til en trust agent-tjeneste."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interager med opdaterings- og gendannelsessystemet"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Giver en applikation tilladelse til at interagere med gendannelsessystemet og systemopdateringerne."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Tryk to gange for zoomstyring"</string>

@@ -687,6 +687,8 @@
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"允许应用监听网络状况的观测信息。普通应用绝不需要此权限。"</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"更改输入设备校准设置"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"允许应用修改触摸屏的校准参数。普通应用绝不需要此权限。"</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"访问DRM证书"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"允许应用配置和使用DRM证书。普通应用绝不需要此权限。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"设置密码规则"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"控制屏幕解锁密码所允许的长度和字符。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"监视屏幕解锁尝试次数"</string>
