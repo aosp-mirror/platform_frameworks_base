@@ -253,6 +253,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     protected void finalize() throws Throwable {
         try {
             nDeleteProxy(mNativeProxy);
+            mNativeProxy = 0;
         } finally {
             super.finalize();
         }
