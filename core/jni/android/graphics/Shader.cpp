@@ -39,12 +39,11 @@ static void Color_RGBToHSV(JNIEnv* env, jobject, jint red, jint green, jint blue
 static jint Color_HSVToColor(JNIEnv* env, jobject, jint alpha, jfloatArray hsvArray)
 {
     AutoJavaFloatArray  autoHSV(env, hsvArray, 3);
-    float*      values = autoHSV.ptr();;
-    SkScalar    hsv[3];
-
-    for (int i = 0; i < 3; i++) {
-        hsv[i] = SkFloatToScalar(values[i]);
-    }
+#ifdef SK_SCALAR_IS_FLOAT
+    SkScalar*   hsv = autoHSV.ptr();
+#else
+    #error Need to convert float array to SkScalar array before calling the following function.
+#endif
 
     return static_cast<jint>(SkHSVToColor(alpha, hsv));
 }
@@ -120,28 +119,22 @@ static jlong LinearGradient_create1(JNIEnv* env, jobject o,
                                     jintArray colorArray, jfloatArray posArray, jint tileMode)
 {
     SkPoint pts[2];
-    pts[0].set(SkFloatToScalar(x0), SkFloatToScalar(y0));
-    pts[1].set(SkFloatToScalar(x1), SkFloatToScalar(y1));
+    pts[0].set(x0, y0);
+    pts[1].set(x1, y1);
 
     size_t count = env->GetArrayLength(colorArray);
     const jint* colorValues = env->GetIntArrayElements(colorArray, NULL);
 
-    SkAutoSTMalloc<8, SkScalar> storage(posArray ? count : 0);
-    SkScalar* pos = NULL;
-
-    if (posArray) {
-        AutoJavaFloatArray autoPos(env, posArray, count);
-        const float* posValues = autoPos.ptr();
-        pos = (SkScalar*)storage.get();
-        for (size_t i = 0; i < count; i++) {
-            pos[i] = SkFloatToScalar(posValues[i]);
-        }
-    }
+    AutoJavaFloatArray autoPos(env, posArray, count);
+#ifdef SK_SCALAR_IS_FLOAT
+    SkScalar* pos = autoPos.ptr();
+#else
+    #error Need to convert float array to SkScalar array before calling the following function.
+#endif
 
     SkShader* shader = SkGradientShader::CreateLinear(pts,
-                                reinterpret_cast<const SkColor*>(colorValues),
-                                pos, count,
-                                static_cast<SkShader::TileMode>(tileMode));
+            reinterpret_cast<const SkColor*>(colorValues), pos, count,
+            static_cast<SkShader::TileMode>(tileMode));
 
     env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);
     ThrowIAE_IfNull(env, shader);
@@ -252,8 +245,8 @@ static jlong LinearGradient_create2(JNIEnv* env, jobject o,
                                     jint color0, jint color1, jint tileMode)
 {
     SkPoint pts[2];
-    pts[0].set(SkFloatToScalar(x0), SkFloatToScalar(y0));
-    pts[1].set(SkFloatToScalar(x1), SkFloatToScalar(y1));
+    pts[0].set(x0, y0);
+    pts[1].set(x1, y1);
 
     SkColor colors[2];
     colors[0] = color0;
@@ -270,27 +263,21 @@ static jlong LinearGradient_create2(JNIEnv* env, jobject o,
 static jlong RadialGradient_create1(JNIEnv* env, jobject, jfloat x, jfloat y, jfloat radius,
         jintArray colorArray, jfloatArray posArray, jint tileMode) {
     SkPoint center;
-    center.set(SkFloatToScalar(x), SkFloatToScalar(y));
+    center.set(x, y);
 
     size_t      count = env->GetArrayLength(colorArray);
     const jint* colorValues = env->GetIntArrayElements(colorArray, NULL);
 
-    SkAutoSTMalloc<8, SkScalar> storage(posArray ? count : 0);
-    SkScalar*                   pos = NULL;
+    AutoJavaFloatArray autoPos(env, posArray, count);
+#ifdef SK_SCALAR_IS_FLOAT
+    SkScalar* pos = autoPos.ptr();
+#else
+    #error Need to convert float array to SkScalar array before calling the following function.
+#endif
 
-    if (posArray) {
-        AutoJavaFloatArray autoPos(env, posArray, count);
-        const float* posValues = autoPos.ptr();
-        pos = (SkScalar*)storage.get();
-        for (size_t i = 0; i < count; i++)
-            pos[i] = SkFloatToScalar(posValues[i]);
-    }
-
-    SkShader* shader = SkGradientShader::CreateRadial(center,
-                                SkFloatToScalar(radius),
-                                reinterpret_cast<const SkColor*>(colorValues),
-                                pos, count,
-                                static_cast<SkShader::TileMode>(tileMode));
+    SkShader* shader = SkGradientShader::CreateRadial(center, radius,
+            reinterpret_cast<const SkColor*>(colorValues), pos, count,
+            static_cast<SkShader::TileMode>(tileMode));
     env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues),
                                  JNI_ABORT);
 
@@ -301,14 +288,14 @@ static jlong RadialGradient_create1(JNIEnv* env, jobject, jfloat x, jfloat y, jf
 static jlong RadialGradient_create2(JNIEnv* env, jobject, jfloat x, jfloat y, jfloat radius,
         jint color0, jint color1, jint tileMode) {
     SkPoint center;
-    center.set(SkFloatToScalar(x), SkFloatToScalar(y));
+    center.set(x, y);
 
     SkColor colors[2];
     colors[0] = color0;
     colors[1] = color1;
 
-    SkShader* s = SkGradientShader::CreateRadial(center, SkFloatToScalar(radius), colors, NULL,
-                                          2, (SkShader::TileMode)tileMode);
+    SkShader* s = SkGradientShader::CreateRadial(center, radius, colors, NULL, 2,
+            (SkShader::TileMode)tileMode);
     ThrowIAE_IfNull(env, s);
     return reinterpret_cast<jlong>(s);
 }
@@ -381,22 +368,15 @@ static jlong SweepGradient_create1(JNIEnv* env, jobject, jfloat x, jfloat y,
     size_t      count = env->GetArrayLength(jcolors);
     const jint* colors = env->GetIntArrayElements(jcolors, NULL);
 
-    SkAutoSTMalloc<8, SkScalar> storage(jpositions ? count : 0);
-    SkScalar*                   pos = NULL;
+    AutoJavaFloatArray autoPos(env, jpositions, count);
+#ifdef SK_SCALAR_IS_FLOAT
+    SkScalar* pos = autoPos.ptr();
+#else
+    #error Need to convert float array to SkScalar array before calling the following function.
+#endif
 
-    if (NULL != jpositions) {
-        AutoJavaFloatArray autoPos(env, jpositions, count);
-        const float* posValues = autoPos.ptr();
-        pos = (SkScalar*)storage.get();
-        for (size_t i = 0; i < count; i++) {
-            pos[i] = SkFloatToScalar(posValues[i]);
-        }
-    }
-
-    SkShader* shader = SkGradientShader::CreateSweep(SkFloatToScalar(x),
-                                     SkFloatToScalar(y),
-                                     reinterpret_cast<const SkColor*>(colors),
-                                     pos, count);
+    SkShader* shader = SkGradientShader::CreateSweep(x, y,
+            reinterpret_cast<const SkColor*>(colors), pos, count);
     env->ReleaseIntArrayElements(jcolors, const_cast<jint*>(colors),
                                  JNI_ABORT);
     ThrowIAE_IfNull(env, shader);
@@ -408,8 +388,7 @@ static jlong SweepGradient_create2(JNIEnv* env, jobject, jfloat x, jfloat y,
     SkColor colors[2];
     colors[0] = color0;
     colors[1] = color1;
-    SkShader* s = SkGradientShader::CreateSweep(SkFloatToScalar(x), SkFloatToScalar(y),
-                                         colors, NULL, 2);
+    SkShader* s = SkGradientShader::CreateSweep(x, y, colors, NULL, 2);
     ThrowIAE_IfNull(env, s);
     return reinterpret_cast<jlong>(s);
 }

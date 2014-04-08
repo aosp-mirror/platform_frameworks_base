@@ -97,7 +97,7 @@ public:
         } else {
             canvas->save();
 
-            SkScalar scale = SkFloatToScalar(destDensity / (float)srcDensity);
+            SkScalar scale = destDensity / (float)srcDensity;
             canvas->translate(bounds.fLeft, bounds.fTop);
             canvas->scale(scale, scale);
 

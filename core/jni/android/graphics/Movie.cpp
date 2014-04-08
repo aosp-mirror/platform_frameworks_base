@@ -74,12 +74,10 @@ static void movie_draw(JNIEnv* env, jobject movie, jobject canvas,
 
     SkMovie* m = J2Movie(env, movie);
     SkCanvas* c = GraphicsJNI::getNativeCanvas(env, canvas);
-    SkScalar sx = SkFloatToScalar(fx);
-    SkScalar sy = SkFloatToScalar(fy);
     const SkBitmap& b = m->bitmap();
     const SkPaint* p = jpaint ? GraphicsJNI::getNativePaint(env, jpaint) : NULL;
 
-    c->drawBitmap(b, sx, sy, p);
+    c->drawBitmap(b, fx, fy, p);
 }
 
 static jobject movie_decodeAsset(JNIEnv* env, jobject clazz, jlong native_asset) {

@@ -12,7 +12,7 @@ public:
         const SkPaint* paint = reinterpret_cast<SkPaint *>(paintHandle);
         SkASSERT(layer);
         SkASSERT(paint);
-        layer->addLayer(*paint, SkFloatToScalar(dx), SkFloatToScalar(dy));
+        layer->addLayer(*paint, dx, dy);
     }
 };
 
