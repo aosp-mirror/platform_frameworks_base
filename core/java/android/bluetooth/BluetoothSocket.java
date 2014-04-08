@@ -325,6 +325,7 @@ public final class BluetoothSocket implements Closeable {
             }
         } catch (RemoteException e) {
             Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            throw new IOException("unable to send RPC: " + e.getMessage());
         }
     }
 
