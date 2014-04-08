@@ -45,8 +45,11 @@ import android.widget.ListView;
  * adapter, use {@link PreferenceCategoryAdapter} instead.
  * 
  * @see PreferenceCategoryAdapter
+ *
+ * @hide
  */
-class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeInternalListener {
+public class PreferenceGroupAdapter extends BaseAdapter
+        implements OnPreferenceChangeInternalListener {
     
     private static final String TAG = "PreferenceGroupAdapter";
 
@@ -87,6 +90,8 @@ class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeIn
             syncMyPreferences();
         }
     };
+
+    private int mActivatedPosition = -1;
 
     private static class PreferenceLayout implements Comparable<PreferenceLayout> {
         private int resId;
@@ -207,6 +212,10 @@ class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeIn
         return this.getItem(position).getId();
     }
 
+    public void setActivated(int position) {
+        mActivatedPosition = position;
+    }
+
     public View getView(int position, View convertView, ViewGroup parent) {
         final Preference preference = this.getItem(position);
         // Build a PreferenceLayout to compare with known ones that are cacheable.
@@ -217,8 +226,9 @@ class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeIn
         if (Collections.binarySearch(mPreferenceLayouts, mTempPreferenceLayout) < 0) {
             convertView = null;
         }
-
-        return preference.getView(convertView, parent);
+        View result = preference.getView(convertView, parent);
+        result.setActivated(position == mActivatedPosition);
+        return result;
     }
 
     @Override
