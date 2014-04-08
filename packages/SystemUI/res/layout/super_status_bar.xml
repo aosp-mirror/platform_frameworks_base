@@ -20,34 +20,29 @@
 <!-- This is the combined status bar / notification panel window. -->
 <com.android.systemui.statusbar.phone.StatusBarWindowView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusable="true"
-    android:descendantFocusability="afterDescendants"
-    android:background="@android:color/transparent"
-    >
+    android:descendantFocusability="afterDescendants">
 
     <include layout="@layout/status_bar"
         android:layout_width="match_parent"
-        android:layout_height="@*android:dimen/status_bar_height"
-        />
+        android:layout_height="@*android:dimen/status_bar_height" />
 
     <com.android.systemui.statusbar.phone.PanelHolder
         android:id="@+id/panel_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@*android:dimen/navigation_bar_height"
-        >
+        android:layout_marginTop="@dimen/panel_holder_padding_top"
+        android:layout_marginBottom="@*android:dimen/navigation_bar_height">
         <include layout="@layout/status_bar_expanded"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            android:layout_width="@dimen/notification_panel_width"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|top" />
         <ViewStub android:id="@+id/quick_settings_stub"
             android:layout="@layout/quick_settings"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            android:layout_width="@dimen/notification_panel_width"
+            android:layout_height="match_parent" />
     </com.android.systemui.statusbar.phone.PanelHolder>
 
 </com.android.systemui.statusbar.phone.StatusBarWindowView>
