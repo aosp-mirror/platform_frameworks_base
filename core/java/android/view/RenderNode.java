@@ -909,7 +909,6 @@ public class RenderNode {
     @Override
     protected void finalize() throws Throwable {
         try {
-            destroyDisplayListData();
             nDestroyDisplayList(mNativeDisplayList);
         } finally {
             super.finalize();
