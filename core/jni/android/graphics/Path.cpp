@@ -93,18 +93,18 @@ public:
         return obj->isEmpty();
     }
  
-    static jboolean isRect(JNIEnv* env, jobject clazz, jlong objHandle, jobject rect) {
-        SkRect rect_;
+    static jboolean isRect(JNIEnv* env, jobject clazz, jlong objHandle, jobject jrect) {
+        SkRect rect;
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        jboolean result = obj->isRect(&rect_);
-        GraphicsJNI::rect_to_jrectf(rect_, env, rect);
+        jboolean result = obj->isRect(&rect);
+        GraphicsJNI::rect_to_jrectf(rect, env, jrect);
         return result;
     }
  
-    static void computeBounds(JNIEnv* env, jobject clazz, jlong objHandle, jobject bounds) {
+    static void computeBounds(JNIEnv* env, jobject clazz, jlong objHandle, jobject jbounds) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        const SkRect& bounds_ = obj->getBounds();
-        GraphicsJNI::rect_to_jrectf(bounds_, env, bounds);
+        const SkRect& bounds = obj->getBounds();
+        GraphicsJNI::rect_to_jrectf(bounds, env, jbounds);
     }
  
     static void incReserve(JNIEnv* env, jobject clazz, jlong objHandle, jint extraPtCount) {
@@ -114,79 +114,49 @@ public:
  
     static void moveTo__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x, jfloat y) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkScalar x_ = SkFloatToScalar(x);
-        SkScalar y_ = SkFloatToScalar(y);
-        obj->moveTo(x_, y_);
+        obj->moveTo(x, y);
     }
  
     static void rMoveTo(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkScalar dx_ = SkFloatToScalar(dx);
-        SkScalar dy_ = SkFloatToScalar(dy);
-        obj->rMoveTo(dx_, dy_);
+        obj->rMoveTo(dx, dy);
     }
  
     static void lineTo__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x, jfloat y) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkScalar x_ = SkFloatToScalar(x);
-        SkScalar y_ = SkFloatToScalar(y);
-        obj->lineTo(x_, y_);
+        obj->lineTo(x, y);
     }
  
     static void rLineTo(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkScalar dx_ = SkFloatToScalar(dx);
-        SkScalar dy_ = SkFloatToScalar(dy);
-        obj->rLineTo(dx_, dy_);
+        obj->rLineTo(dx, dy);
     }
  
     static void quadTo__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x1, jfloat y1, jfloat x2, jfloat y2) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkScalar x1_ = SkFloatToScalar(x1);
-        SkScalar y1_ = SkFloatToScalar(y1);
-        SkScalar x2_ = SkFloatToScalar(x2);
-        SkScalar y2_ = SkFloatToScalar(y2);
-        obj->quadTo(x1_, y1_, x2_, y2_);
+        obj->quadTo(x1, y1, x2, y2);
     }
  
     static void rQuadTo(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx1, jfloat dy1, jfloat dx2, jfloat dy2) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkScalar dx1_ = SkFloatToScalar(dx1);
-        SkScalar dy1_ = SkFloatToScalar(dy1);
-        SkScalar dx2_ = SkFloatToScalar(dx2);
-        SkScalar dy2_ = SkFloatToScalar(dy2);
-        obj->rQuadTo(dx1_, dy1_, dx2_, dy2_);
+        obj->rQuadTo(dx1, dy1, dx2, dy2);
     }
  
     static void cubicTo__FFFFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x1, jfloat y1, jfloat x2, jfloat y2, jfloat x3, jfloat y3) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkScalar x1_ = SkFloatToScalar(x1);
-        SkScalar y1_ = SkFloatToScalar(y1);
-        SkScalar x2_ = SkFloatToScalar(x2);
-        SkScalar y2_ = SkFloatToScalar(y2);
-        SkScalar x3_ = SkFloatToScalar(x3);
-        SkScalar y3_ = SkFloatToScalar(y3);
-        obj->cubicTo(x1_, y1_, x2_, y2_, x3_, y3_);
+        obj->cubicTo(x1, y1, x2, y2, x3, y3);
     }
  
     static void rCubicTo(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x1, jfloat y1, jfloat x2, jfloat y2, jfloat x3, jfloat y3) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkScalar x1_ = SkFloatToScalar(x1);
-        SkScalar y1_ = SkFloatToScalar(y1);
-        SkScalar x2_ = SkFloatToScalar(x2);
-        SkScalar y2_ = SkFloatToScalar(y2);
-        SkScalar x3_ = SkFloatToScalar(x3);
-        SkScalar y3_ = SkFloatToScalar(y3);
-        obj->rCubicTo(x1_, y1_, x2_, y2_, x3_, y3_);
+        obj->rCubicTo(x1, y1, x2, y2, x3, y3);
     }
  
     static void arcTo(JNIEnv* env, jobject clazz, jlong objHandle, jobject oval, jfloat startAngle, jfloat sweepAngle, jboolean forceMoveTo) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkRect oval_;
         GraphicsJNI::jrectf_to_rect(env, oval, &oval_);
-        SkScalar startAngle_ = SkFloatToScalar(startAngle);
-        SkScalar sweepAngle_ = SkFloatToScalar(sweepAngle);
-        obj->arcTo(oval_, startAngle_, sweepAngle_, forceMoveTo);
+        obj->arcTo(oval_, startAngle, sweepAngle, forceMoveTo);
     }
  
     static void close(JNIEnv* env, jobject clazz, jlong objHandle) {
@@ -194,22 +164,18 @@ public:
         obj->close();
     }
  
-    static void addRect__RectFI(JNIEnv* env, jobject clazz, jlong objHandle, jobject rect, jint dirHandle) {
-        SkRect rect_;
+    static void addRect__RectFI(JNIEnv* env, jobject clazz, jlong objHandle, jobject jrect, jint dirHandle) {
+        SkRect rect;
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
-        GraphicsJNI::jrectf_to_rect(env, rect, &rect_);
-        obj->addRect(rect_, dir);
+        GraphicsJNI::jrectf_to_rect(env, jrect, &rect);
+        obj->addRect(rect, dir);
     }
  
     static void addRect__FFFFI(JNIEnv* env, jobject clazz, jlong objHandle, jfloat left, jfloat top, jfloat right, jfloat bottom, jint dirHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
-        SkScalar left_ = SkFloatToScalar(left);
-        SkScalar top_ = SkFloatToScalar(top);
-        SkScalar right_ = SkFloatToScalar(right);
-        SkScalar bottom_ = SkFloatToScalar(bottom);
-        obj->addRect(left_, top_, right_, bottom_, dir);
+        obj->addRect(left, top, right, bottom, dir);
     }
  
     static void addOval(JNIEnv* env, jobject clazz, jlong objHandle, jobject oval, jint dirHandle) {
@@ -223,54 +189,44 @@ public:
     static void addCircle(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x, jfloat y, jfloat radius, jint dirHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
-        SkScalar x_ = SkFloatToScalar(x);
-        SkScalar y_ = SkFloatToScalar(y);
-        SkScalar radius_ = SkFloatToScalar(radius);
-        obj->addCircle(x_, y_, radius_, dir);
+        obj->addCircle(x, y, radius, dir);
     }
  
     static void addArc(JNIEnv* env, jobject clazz, jlong objHandle, jobject oval, jfloat startAngle, jfloat sweepAngle) {
         SkRect oval_;
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         GraphicsJNI::jrectf_to_rect(env, oval, &oval_);
-        SkScalar startAngle_ = SkFloatToScalar(startAngle);
-        SkScalar sweepAngle_ = SkFloatToScalar(sweepAngle);
-        obj->addArc(oval_, startAngle_, sweepAngle_);
+        obj->addArc(oval_, startAngle, sweepAngle);
     }
  
-    static void addRoundRectXY(JNIEnv* env, jobject clazz, jlong objHandle, jobject rect,
+    static void addRoundRectXY(JNIEnv* env, jobject clazz, jlong objHandle, jobject jrect,
             jfloat rx, jfloat ry, jint dirHandle) {
-        SkRect rect_;
+        SkRect rect;
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
-        GraphicsJNI::jrectf_to_rect(env, rect, &rect_);
-        SkScalar rx_ = SkFloatToScalar(rx);
-        SkScalar ry_ = SkFloatToScalar(ry);
-        obj->addRoundRect(rect_, rx_, ry_, dir);
+        GraphicsJNI::jrectf_to_rect(env, jrect, &rect);
+        obj->addRoundRect(rect, rx, ry, dir);
     }
     
-    static void addRoundRect8(JNIEnv* env, jobject, jlong objHandle, jobject rect,
+    static void addRoundRect8(JNIEnv* env, jobject, jlong objHandle, jobject jrect,
             jfloatArray array, jint dirHandle) {
-        SkRect rect_;
+        SkRect rect;
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
-        GraphicsJNI::jrectf_to_rect(env, rect, &rect_);
+        GraphicsJNI::jrectf_to_rect(env, jrect, &rect);
         AutoJavaFloatArray  afa(env, array, 8);
+#ifdef SK_SCALAR_IS_FLOAT
         const float* src = afa.ptr();
-        SkScalar dst[8];
-        
-        for (int i = 0; i < 8; i++) {
-            dst[i] = SkFloatToScalar(src[i]);
-        }
-        obj->addRoundRect(rect_, dst, dir);
+#else
+        #error Need to convert float array to SkScalar array before calling the following function.
+#endif
+        obj->addRoundRect(rect, src, dir);
     }
     
     static void addPath__PathFF(JNIEnv* env, jobject clazz, jlong objHandle, jlong srcHandle, jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath* src = reinterpret_cast<SkPath*>(srcHandle);
-        SkScalar dx_ = SkFloatToScalar(dx);
-        SkScalar dy_ = SkFloatToScalar(dy);
-        obj->addPath(*src, dx_, dy_);
+        obj->addPath(*src, dx, dy);
     }
  
     static void addPath__Path(JNIEnv* env, jobject clazz, jlong objHandle, jlong srcHandle) {
@@ -289,23 +245,17 @@ public:
     static void offset__FFPath(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy, jlong dstHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath* dst = reinterpret_cast<SkPath*>(dstHandle);
-        SkScalar dx_ = SkFloatToScalar(dx);
-        SkScalar dy_ = SkFloatToScalar(dy);
-        obj->offset(dx_, dy_, dst);
+        obj->offset(dx, dy, dst);
     }
  
     static void offset__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkScalar dx_ = SkFloatToScalar(dx);
-        SkScalar dy_ = SkFloatToScalar(dy);
-        obj->offset(dx_, dy_);
+        obj->offset(dx, dy);
     }
 
     static void setLastPoint(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkScalar dx_ = SkFloatToScalar(dx);
-        SkScalar dy_ = SkFloatToScalar(dy);
-        obj->setLastPt(dx_, dy_);
+        obj->setLastPt(dx, dy);
     }
  
     static void transform__MatrixPath(JNIEnv* env, jobject clazz, jlong objHandle, jlong matrixHandle, jlong dstHandle) {

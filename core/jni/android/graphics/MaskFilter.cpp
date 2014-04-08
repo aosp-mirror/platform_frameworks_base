@@ -20,7 +20,7 @@ public:
     }
 
     static jlong createBlur(JNIEnv* env, jobject, jfloat radius, jint blurStyle) {
-        SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(SkFloatToScalar(radius));
+        SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(radius);
         SkMaskFilter* filter = SkBlurMaskFilter::Create(
                 (SkBlurMaskFilter::BlurStyle)blurStyle, sigma);
         ThrowIAE_IfNull(env, filter);
@@ -33,12 +33,12 @@ public:
         AutoJavaFloatArray autoDir(env, dirArray, 3);
         float* values = autoDir.ptr();
         for (int i = 0; i < 3; i++) {
-            direction[i] = SkFloatToScalar(values[i]);
+            direction[i] = values[i];
         }
 
-        SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(SkFloatToScalar(radius));
+        SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(radius);
         SkMaskFilter* filter =  SkBlurMaskFilter::CreateEmboss(sigma,
-                direction, SkFloatToScalar(ambient), SkFloatToScalar(specular));
+                direction, ambient, specular);
         ThrowIAE_IfNull(env, filter);
         return reinterpret_cast<jlong>(filter);
     }
