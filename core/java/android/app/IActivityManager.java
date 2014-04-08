@@ -228,8 +228,6 @@ public interface IActivityManager extends IInterface {
     public void forceStopPackage(final String packageName, int userId) throws RemoteException;
     
     // Note: probably don't want to allow applications access to these.
-    public void goingToSleep() throws RemoteException;
-    public void wakingUp() throws RemoteException;
     public void setLockScreenShown(boolean shown) throws RemoteException;
 
     public void unhandledBack() throws RemoteException;
@@ -249,8 +247,6 @@ public interface IActivityManager extends IInterface {
     public boolean killProcessesBelowForeground(String reason) throws RemoteException;
 
     // Special low-level communication with activity manager.
-    public void startRunning(String pkg, String cls, String action,
-            String data) throws RemoteException;
     public void handleApplicationCrash(IBinder app,
             ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException;
     public boolean handleApplicationWtf(IBinder app, String tag,
@@ -525,7 +521,6 @@ public interface IActivityManager extends IInterface {
 
     // Please keep these transaction codes the same -- they are also
     // sent by C++ code.
-    int START_RUNNING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION;
     int HANDLE_APPLICATION_CRASH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+1;
     int START_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+2;
     int UNHANDLED_BACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+3;
@@ -561,8 +556,6 @@ public interface IActivityManager extends IInterface {
     int UNBIND_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+36;
     int PUBLISH_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+37;
     int ACTIVITY_RESUMED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+38;
-    int GOING_TO_SLEEP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+39;
-    int WAKING_UP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+40;
     int SET_DEBUG_APP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+41;
     int SET_ALWAYS_FINISH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+42;
     int START_INSTRUMENTATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+43;
