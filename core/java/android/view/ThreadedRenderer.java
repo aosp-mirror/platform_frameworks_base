@@ -245,6 +245,11 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
+    void fence() {
+        nFence(mNativeProxy);
+    }
+
+    @Override
     protected void finalize() throws Throwable {
         try {
             nDeleteProxy(mNativeProxy);
@@ -277,4 +282,6 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native long nCreateTextureLayer(long nativeProxy);
     private static native boolean nCopyLayerInto(long nativeProxy, long layer, long bitmap);
     private static native void nDestroyLayer(long nativeProxy, long layer);
+
+    private static native void nFence(long nativeProxy);
 }
