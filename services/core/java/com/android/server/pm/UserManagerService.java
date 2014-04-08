@@ -258,7 +258,9 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public List<UserInfo> getProfiles(int userId) {
-        checkManageUsersPermission("query users");
+        if (userId != UserHandle.getCallingUserId()) {
+            checkManageUsersPermission("getting profiles related to user " + userId);
+        }
         synchronized (mPackagesLock) {
             UserInfo user = getUserInfoLocked(userId);
             ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
