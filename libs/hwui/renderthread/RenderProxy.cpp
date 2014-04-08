@@ -202,10 +202,9 @@ void RenderProxy::runWithGlContext(RenderTask* gltask) {
     postAndWait(task);
 }
 
-CREATE_BRIDGE2(createDisplayListLayer, int width, int height) {
-    Layer* layer = LayerRenderer::createRenderLayer(args->width, args->height);
+CREATE_BRIDGE3(createDisplayListLayer, CanvasContext* context, int width, int height) {
+    Layer* layer = args->context->createRenderLayer(args->width, args->height);
     if (!layer) return 0;
-
     return new DeferredLayerUpdater(layer);
 }
 
@@ -213,20 +212,22 @@ DeferredLayerUpdater* RenderProxy::createDisplayListLayer(int width, int height)
     SETUP_TASK(createDisplayListLayer);
     args->width = width;
     args->height = height;
+    args->context = mContext;
     void* retval = postAndWait(task);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(retval);
     mDrawFrameTask.addLayer(layer);
     return layer;
 }
 
-CREATE_BRIDGE0(createTextureLayer) {
-    Layer* layer = LayerRenderer::createTextureLayer();
+CREATE_BRIDGE1(createTextureLayer, CanvasContext* context) {
+    Layer* layer = args->context->createTextureLayer();
     if (!layer) return 0;
     return new DeferredLayerUpdater(layer);
 }
 
 DeferredLayerUpdater* RenderProxy::createTextureLayer() {
     SETUP_TASK(createTextureLayer);
+    args->context = mContext;
     void* retval = postAndWait(task);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(retval);
     mDrawFrameTask.addLayer(layer);
