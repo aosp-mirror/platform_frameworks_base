@@ -14,7 +14,6 @@
 
 package android.graphics.drawable;
 
-import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.res.Resources;
@@ -28,11 +27,7 @@ import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Region;
-import android.location.Address;
-import android.net.ParseException;
-import android.sax.StartElementListener;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
@@ -47,7 +42,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -157,8 +151,8 @@ import java.util.HashSet;
  * </dd>
  */
 public class VectorDrawable extends Drawable {
-    private static final String LOGTAG = "VectorDrawable";
-    public static final int INFINITE = ValueAnimator.INFINITE;
+    private static final String LOGTAG = VectorDrawable.class.getSimpleName();
+
     private static final String SHAPE_SIZE = "size";
     private static final String SHAPE_VIEWPORT = "viewport";
     private static final String SHAPE_GROUP = "group";
@@ -170,23 +164,32 @@ public class VectorDrawable extends Drawable {
     private static final int LINECAP_BUTT = 0;
     private static final int LINECAP_ROUND = 1;
     private static final int LINECAP_SQUARE = 2;
+
     private static final int LINEJOIN_MITER = 0;
     private static final int LINEJOIN_ROUND = 1;
     private static final int LINEJOIN_BEVEL = 2;
+
     private static final int DEFAULT_DURATION = 1000;
     private static final long DEFAULT_INFINITE_DURATION = 60 * 60 * 1000;
+
     private VectorDrawableState mVectorState;
     private int mAlpha = 0xFF;
 
     public VectorDrawable() {
-        mVectorState = new VectorDrawableState();
+        mVectorState = new VectorDrawableState(null);
         mVectorState.mBasicAnimator = ObjectAnimator.ofFloat(this, "AnimationFraction", 0, 1);
+
         setDuration(DEFAULT_DURATION);
     }
 
-    private VectorDrawable(VectorDrawableState state) {
+    private VectorDrawable(VectorDrawableState state, Resources res, Theme theme) {
         mVectorState = new VectorDrawableState(state);
         mVectorState.mBasicAnimator = ObjectAnimator.ofFloat(this, "AnimationFraction", 0, 1);
+
+        if (theme != null && canApplyTheme()) {
+            applyTheme(theme);
+        }
+
         long duration = mVectorState.mVAnimatedPath.getTotalAnimationDuration();
         if (duration == -1) { // if it set to infinite set to 1 hour
             duration = DEFAULT_INFINITE_DURATION; // TODO define correct approach for infinite
@@ -197,6 +200,7 @@ public class VectorDrawable extends Drawable {
     }
 
     final static class VectorDrawableState extends ConstantState {
+        int[] mThemeAttrs;
         int mChangingConfigurations;
         ValueAnimator mBasicAnimator;
         VAnimatedPath mVAnimatedPath = new VAnimatedPath();
@@ -204,20 +208,29 @@ public class VectorDrawable extends Drawable {
         int mIntrinsicHeight;
         int mIntrinsicWidth;
 
-        public VectorDrawableState(){
-        }
-
-        public VectorDrawableState(VectorDrawableState copy){
-            mChangingConfigurations = copy.mChangingConfigurations;
-            mVAnimatedPath = new VAnimatedPath(copy.mVAnimatedPath);
-            mPadding = new Rect(copy.mPadding);
-            mIntrinsicHeight = copy.mIntrinsicHeight;
-            mIntrinsicWidth = copy.mIntrinsicWidth;
+        public VectorDrawableState(VectorDrawableState copy) {
+            if (copy != null) {
+                mChangingConfigurations = copy.mChangingConfigurations;
+                mVAnimatedPath = new VAnimatedPath(copy.mVAnimatedPath);
+                mPadding = new Rect(copy.mPadding);
+                mIntrinsicHeight = copy.mIntrinsicHeight;
+                mIntrinsicWidth = copy.mIntrinsicWidth;
+            }
         }
 
         @Override
         public Drawable newDrawable() {
-            return new VectorDrawable(this);
+            return new VectorDrawable(this, null, null);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new VectorDrawable(this, res, null);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res, Theme theme) {
+            return new VectorDrawable(this, res, theme);
         }
 
         @Override
@@ -459,29 +472,49 @@ public class VectorDrawable extends Drawable {
     @Override
     public void inflate(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-        setAnimatedPath(inflateInternal(res, parser, attrs));
+        final VAnimatedPath p = inflateInternal(res, parser, attrs, theme);
+        setAnimatedPath(p);
     }
 
-    private VAnimatedPath inflateInternal(Resources res, XmlPullParser parser, AttributeSet attrs)
-            throws XmlPullParserException, IOException {
+    @Override
+    public boolean canApplyTheme() {
+        return super.canApplyTheme() || mVectorState != null && mVectorState.canApplyTheme();
+    }
+
+    @Override
+    public void applyTheme(Theme t) {
+        super.applyTheme(t);
+
+        final VectorDrawableState state = mVectorState;
+        final VAnimatedPath path = state.mVAnimatedPath;
+        if (path != null && path.canApplyTheme()) {
+            path.applyTheme(t);
+        }
+    }
+
+    private VAnimatedPath inflateInternal(Resources res, XmlPullParser parser, AttributeSet attrs,
+            Theme theme) throws XmlPullParserException, IOException {
+        final VAnimatedPath animatedPath = new VAnimatedPath();
+
         boolean noSizeTag = true;
         boolean noViewportTag = true;
         boolean noGroupTag = true;
         boolean noPathTag = true;
-        final VAnimatedPath animatedPath = new VAnimatedPath();
-        VectorDrawable.VGroup currentGroup = null;
+
+        VGroup currentGroup = null;
 
         int eventType = parser.getEventType();
         while (eventType != XmlPullParser.END_DOCUMENT) {
             if (eventType == XmlPullParser.START_TAG) {
-                String tagName = parser.getName();
+                final String tagName = parser.getName();
                 if (SHAPE_PATH.equals(tagName)) {
-                    VectorDrawable.VPath p = new VPath(res, attrs);
-                    currentGroup.add(p);
+                    final VPath path = new VPath();
+                    path.inflate(res, attrs, theme);
+                    currentGroup.add(path);
                     noPathTag = false;
                 } else if (SHAPE_ANIMATION.equals(tagName)) {
-                    VectorDrawable.VAnimation anim =
-                            new VAnimation(res, attrs, animatedPath.mGroupList);
+                    final VAnimation anim = new VAnimation();
+                    anim.inflate(animatedPath.mGroupList, res, attrs, theme);
                     animatedPath.addAnimation(anim);
                 } else if (SHAPE_SIZE.equals(tagName)) {
                     animatedPath.parseSize(res, attrs);
@@ -490,17 +523,17 @@ public class VectorDrawable extends Drawable {
                     animatedPath.parseViewport(res, attrs);
                     noViewportTag = false;
                 } else if (SHAPE_GROUP.equals(tagName)) {
-                    currentGroup = new VectorDrawable.VGroup();
+                    currentGroup = new VGroup();
                     animatedPath.mGroupList.add(currentGroup);
                     noGroupTag = false;
                 }  else if (SHAPE_VECTOR.equals(tagName)) {
-                    TypedArray a = res.obtainAttributes(attrs, R.styleable.VectorDrawable);
+                    final TypedArray a = res.obtainAttributes(attrs, R.styleable.VectorDrawable);
                     animatedPath.setTrigger(a.getInteger(R.styleable.VectorDrawable_trigger, 0));
 
                     // Parsing the version information.
                     // Right now, we only support version "1".
                     // If the xml didn't specify the version number, the default version is "1".
-                    int versionCode = a.getInt(R.styleable.VectorDrawable_versionCode, 1);
+                    final int versionCode = a.getInt(R.styleable.VectorDrawable_versionCode, 1);
                     if (versionCode != 1) {
                         throw new IllegalArgumentException(
                                 "So far, VectorDrawable only support version 1");
@@ -509,33 +542,41 @@ public class VectorDrawable extends Drawable {
                     a.recycle();
                 }
             }
+
             eventType = parser.next();
         }
+
         if (noSizeTag || noViewportTag || noGroupTag || noPathTag) {
-            StringBuffer tag = new StringBuffer();
+            final StringBuffer tag = new StringBuffer();
+
             if (noSizeTag) {
-                tag.append("size");
+                tag.append(SHAPE_SIZE);
             }
+
             if  (noViewportTag){
                 if (tag.length()>0) {
                     tag.append(" & ");
                 }
-                tag.append("size");
+                tag.append(SHAPE_SIZE);
             }
+
             if  (noGroupTag){
                 if (tag.length()>0) {
                     tag.append(" & ");
                 }
-                tag.append("group");
+                tag.append(SHAPE_GROUP);
             }
+
             if  (noPathTag){
                 if (tag.length()>0) {
                     tag.append(" or ");
                 }
-                tag.append("path");
+                tag.append(SHAPE_PATH);
             }
-            throw new XmlPullParserException("no "+tag+" defined");
+
+            throw new XmlPullParserException("no " + tag + " defined");
         }
+
         // post parse cleanup
         animatedPath.parseFinish();
         return animatedPath;
@@ -543,16 +584,18 @@ public class VectorDrawable extends Drawable {
 
     private void setAnimatedPath(VAnimatedPath animatedPath) {
         mVectorState.mVAnimatedPath = animatedPath;
+
         setIntrinsicWidth((int) mVectorState.mVAnimatedPath.mBaseWidth);
         setIntrinsicHeight((int) mVectorState.mVAnimatedPath.mBaseHeight);
+
         long duration = mVectorState.mVAnimatedPath.getTotalAnimationDuration();
         if (duration == -1) { // if it set to infinite set to 1 hour
             duration = DEFAULT_INFINITE_DURATION; // TODO define correct approach for infinite
             mVectorState.mBasicAnimator.setFloatValues(0, duration / 1000);
             mVectorState.mBasicAnimator.setInterpolator(new LinearInterpolator());
         }
-        setDuration(duration);
 
+        setDuration(duration);
         setAnimationFraction(0);
     }
 
@@ -570,8 +613,6 @@ public class VectorDrawable extends Drawable {
     }
 
     private static class VAnimatedPath {
-        private static final String LOGTAG = "VAnimatedPath";
-
         private ArrayList<VAnimation> mCurrentAnimList = null;
         private VPath[] mCurrentPaths;
         private float mAnimationValue = 0; // value goes from 0 to 1
@@ -585,7 +626,9 @@ public class VectorDrawable extends Drawable {
         private int[] mCurrentState = new int[0];
         private int mTrigger;
         private boolean mTriggerState;
-        ArrayList<VGroup> mGroupList = new ArrayList<VGroup>();
+
+        final ArrayList<VGroup> mGroupList = new ArrayList<VGroup>();
+
         float mBaseWidth = 1;
         float mBaseHeight = 1;
         float mViewportWidth;
@@ -594,10 +637,11 @@ public class VectorDrawable extends Drawable {
         public VAnimatedPath() {
             setup();
         }
+
         public VAnimatedPath(VAnimatedPath copy) {
             setup();
             mCurrentAnimList = new ArrayList<VAnimation>(copy.mCurrentAnimList);
-            mGroupList = new ArrayList<VGroup>(copy.mGroupList);
+            mGroupList.addAll(copy.mGroupList);
             if (copy.mCurrentPaths != null) {
                 mCurrentPaths = new VPath[copy.mCurrentPaths.length];
                 for (int i = 0; i < mCurrentPaths.length; i++) {
@@ -615,8 +659,53 @@ public class VectorDrawable extends Drawable {
             mCurrentState = new int[0];
         }
 
+        public boolean canApplyTheme() {
+            final ArrayList<VGroup> groups = mGroupList;
+            for (int i = groups.size() - 1; i >= 0; i--) {
+                final ArrayList<VPath> paths = groups.get(i).mVGList;
+                for (int j = paths.size() - 1; j >= 0; j--) {
+                    final VPath path = paths.get(j);
+                    if (path.canApplyTheme()) {
+                        return true;
+                    }
+                }
+            }
+
+            final ArrayList<VAnimation> anims = mCurrentAnimList;
+            for (int i = anims.size() - 1; i >= 0; i--) {
+                final VAnimation anim = anims.get(i);
+                if (anim.canApplyTheme()) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public void applyTheme(Theme t) {
+            final ArrayList<VGroup> groups = mGroupList;
+            for (int i = groups.size() - 1; i >= 0; i--) {
+                final ArrayList<VPath> paths = groups.get(i).mVGList;
+                for (int j = paths.size() - 1; j >= 0; j--) {
+                    final VPath path = paths.get(j);
+                    if (path.canApplyTheme()) {
+                        path.applyTheme(t);
+                    }
+                }
+            }
+
+            final ArrayList<VAnimation> anims = mCurrentAnimList;
+            for (int i = anims.size() - 1; i >= 0; i--) {
+                final VAnimation anim = anims.get(i);
+                if (anim.canApplyTheme()) {
+                    anim.applyTheme(t);
+                }
+            }
+        }
+
         public void setTrigger(int trigger){
-            int []lut = { 0,
+            final int [] lut = {
+                    0,
                     R.attr.state_pressed,
                     R.attr.state_focused,
                     R.attr.state_hovered,
@@ -626,6 +715,7 @@ public class VectorDrawable extends Drawable {
                     R.attr.state_activated,
                     R.attr.state_focused
             };
+
             mTrigger = lut[trigger];
          }
 
@@ -663,23 +753,27 @@ public class VectorDrawable extends Drawable {
          * @return true if you need to keep repeating
          */
         public boolean setAnimationFraction(float value) {
-            int len = mCurrentPaths.length;
             getTotalAnimationDuration();
+
             long animationTime = (long) (value * mTotalDuration);
 
+            final int len = mCurrentPaths.length;
             for (int i = 0; i < len; i++) {
-                VPath path = mCurrentPaths[i];
                 animationTime =
                         (long) ((mTotalDuration == -1) ? value * 1000 : mTotalDuration * value);
-                int size = mCurrentAnimList.size();
+
+                final VPath path = mCurrentPaths[i];
+                final int size = mCurrentAnimList.size();
                 for (int j = 0; j < size; j++) {
-                    VAnimation vAnimation = mCurrentAnimList.get(j);
+                    final VAnimation vAnimation = mCurrentAnimList.get(j);
                     if (vAnimation.doesAdjustPath(path)) {
                         mCurrentPaths[i] =  vAnimation.getPathAtTime(animationTime, path);
                     }
                 }
             }
-            this.mAnimationValue = value;
+
+            mAnimationValue = value;
+
             if (mTotalDuration == -1) {
                 return true;
             } else {
@@ -688,15 +782,14 @@ public class VectorDrawable extends Drawable {
         }
 
         public void draw(Canvas canvas) {
-            int w = canvas.getWidth();
-            int h = canvas.getHeight();
-            float scale = w / mViewportWidth;
-            scale = Math.min(h / mViewportHeight, scale);
-
             if (mCurrentPaths == null) {
                 Log.e(LOGTAG,"mCurrentPaths == null");
                 return;
             }
+
+            // TODO: This should probably use getBounds().
+            final int w = canvas.getWidth();
+            final int h = canvas.getHeight();
 
             for (int i = 0; i < mCurrentPaths.length; i++) {
                 if (mCurrentPaths[i] != null && mCurrentPaths[i].isVisible(mCurrentState)) {
@@ -706,8 +799,7 @@ public class VectorDrawable extends Drawable {
         }
 
         private void drawPath(VPath vPath, Canvas canvas, int w, int h) {
-            float scale = w / mViewportWidth;
-            scale = Math.min(h / mViewportHeight, scale);
+            final float scale = Math.min(h / mViewportHeight, w / mViewportWidth);
 
             vPath.toPath(mPath);
             Path path = mPath;
@@ -746,12 +838,14 @@ public class VectorDrawable extends Drawable {
             if (vPath.mClip) {
                 canvas.clipPath(mRenderPath, Region.Op.REPLACE);
             }
+
             if (vPath.mFillColor != 0) {
                 mFillPaint.setColor(vPath.mFillColor);
                 int alpha = 0xFF & (vPath.mFillColor >> 24);
                 mFillPaint.setAlpha(alpha);
                 canvas.drawPath(mRenderPath, mFillPaint);
             }
+
             if (vPath.mStrokeColor != 0) {
                 if (vPath.mStrokelineJoin != null) {
                     mStrokePaint.setStrokeJoin(vPath.mStrokelineJoin);
@@ -773,7 +867,7 @@ public class VectorDrawable extends Drawable {
          * TODO: improve memory use & performance or move to C++
          */
         public void parseFinish() {
-            HashMap<String, VAnimation> newAnimations = new HashMap<String, VAnimation>();
+            final HashMap<String, VAnimation> newAnimations = new HashMap<String, VAnimation>();
             for (VGroup group : mGroupList) {
                 for (VPath vPath : group.getPaths()) {
                     if (!vPath.mAnimated) {
@@ -784,16 +878,19 @@ public class VectorDrawable extends Drawable {
                         } else {
                             ap = newAnimations.get(vPath.getID());
                         }
+
                         ap.addPath(vPath);
                         vPath.mAnimated = true;
                     }
                 }
             }
+
             if (mCurrentAnimList == null) {
                 mCurrentAnimList = new ArrayList<VectorDrawable.VAnimation>();
             }
             mCurrentAnimList.addAll(newAnimations.values());
-            Collection<VPath> paths = mGroupList.get(0).getPaths();
+
+            final Collection<VPath> paths = mGroupList.get(0).getPaths();
             mCurrentPaths = paths.toArray(new VPath[paths.size()]);
             for (int i = 0; i < mCurrentPaths.length; i++) {
                 mCurrentPaths[i] = new VPath(mCurrentPaths[i]);
@@ -854,40 +951,41 @@ public class VectorDrawable extends Drawable {
     }
 
     private static class VAnimation {
-        private static final String LOGTAG = "VAnimation";
+        private final static int DIRECTION_FORWARD = 0;
+        private final static int DIRECTION_IN_AND_OUT = 1;
+
         private VPath[] mPaths = new VPath[0];
 
         public enum Style {
             INTERPOLATE, CROSSFADE, WIPE
         }
+
         Interpolator mAnimInterpolator = new AccelerateDecelerateInterpolator();
+
+        private int[] mThemeAttrs;
         private Style mStyle;
         private int mLimitProperty = 0;
         private long[] mDuration = {DEFAULT_DURATION};
         private long mStartOffset;
         private long mRepeat = 1;
-        private HashSet<String>mSeqMap = new HashSet<String>();
+        private HashSet<String> mSeqMap = new HashSet<String>();
         private long mWipeDirection;
         private int mMode = 0; // forward = 0 inAndOut = 1;
         private int mInterpolatorType;
         private String mId;
-        private final static int DIRECTION_FORWARD = 0;
-        private final static int DIRECTION_IN_AND_OUT = 1;
 
         public VAnimation() {
+            // Empty constructor.
         }
 
-        public boolean doesAdjustPath(VPath path) {
-            return mSeqMap.contains(path.getID());
-        }
-
-        public VAnimation(Resources r, AttributeSet attrs, ArrayList<VGroup> groups)
+        public void inflate(ArrayList<VGroup> groups, Resources r, AttributeSet attrs, Theme theme)
                 throws XmlPullParserException {
             String value;
             String[] sp;
             int name;
 
-            TypedArray a = r.obtainAttributes(attrs, R.styleable.VectorDrawableAnimation);
+            final TypedArray a = r.obtainAttributes(attrs, R.styleable.VectorDrawableAnimation);
+            mThemeAttrs = a.extractThemeAttrs();
 
             value = a.getString(R.styleable.VectorDrawableAnimation_sequence);
             if (value != null) {
@@ -910,26 +1008,40 @@ public class VectorDrawable extends Drawable {
             if (value != null) {
                 long totalDuration = 0;
                 sp = value.split(",");
-                long[] dur = new long[sp.length];
+
+                final long[] dur = new long[sp.length];
                 for (int j = 0; j < dur.length; j++) {
                     dur[j] = Long.parseLong(sp[j]);
                     totalDuration +=  dur[j];
                 }
+
                 if (totalDuration == 0){
                     throw new XmlPullParserException(a.getPositionDescription()+
                             "total duration must not be zero");
                 }
+
                 setDuration(dur);
             }
 
             setRepeat(a.getInt(R.styleable.VectorDrawableAnimation_repeatCount, 1));
-
             setStartOffset(a.getInt(R.styleable.VectorDrawableAnimation_startDelay, 0));
-
             setMode(a.getInt(R.styleable.VectorDrawableAnimation_repeatStyle, 0));
 
             fixMissingParameters();
+
             a.recycle();
+        }
+
+        public boolean canApplyTheme() {
+            return mThemeAttrs != null;
+        }
+
+        public void applyTheme(Theme t) {
+            // TODO: Apply theme.
+        }
+
+        public boolean doesAdjustPath(VPath path) {
+            return mSeqMap.contains(path.getID());
         }
 
         public String getId() {
@@ -1031,7 +1143,7 @@ public class VectorDrawable extends Drawable {
         }
 
         public void setPaths(VPath[] paths) {
-            this.mPaths = paths;
+            mPaths = paths;
         }
 
         public void addPath(VPath path) {
@@ -1049,7 +1161,7 @@ public class VectorDrawable extends Drawable {
         }
 
         public void interpolate(VPath p1, VPath p2, float time, VPath dest) {
-            dest.interpolate(time, p1, p2, dest, mLimitProperty);
+            VPath.interpolate(time, p1, p2, dest, mLimitProperty);
         }
 
         public VPath getPathAtTime(long milliseconds, VPath dest) {
@@ -1150,8 +1262,8 @@ public class VectorDrawable extends Drawable {
     }
 
     private static class VGroup {
-        private HashMap<String, VPath> mVGPathMap = new HashMap<String, VPath>();
-        private ArrayList<VPath> mVGList = new ArrayList<VPath>();
+        private final HashMap<String, VPath> mVGPathMap = new HashMap<String, VPath>();
+        private final ArrayList<VPath> mVGList = new ArrayList<VPath>();
 
         public void add(VPath path) {
             String id = path.getID();
@@ -1183,33 +1295,51 @@ public class VectorDrawable extends Drawable {
         private static final int LIMIT_TRIM_PATH_START = 3;
         private static final int LIMIT_TRIM_PATH_OFFSET = 5;
         private static final int LIMIT_TRIM_PATH_END = 4;
+
         private static final int STATE_UNDEFINED=0;
         private static final int STATE_TRUE=1;
         private static final int STATE_FALSE=2;
+
         private static final int MAX_STATES = 10;
-        private VNode[] mNode = null;
-        private String mId;
+
+        private int[] mThemeAttrs;
+
         int mStrokeColor = 0;
         float mStrokeWidth = 0;
         float mStrokeOpacity = Float.NaN;
+
         int mFillColor = 0;
         int mFillRule;
         float mFillOpacity = Float.NaN;
+
         float mRotate = 0;
         float mPivotX = 0;
         float mPivotY = 0;
+
         float mTrimPathStart = 0;
         float mTrimPathEnd = 1;
         float mTrimPathOffset = 0;
+
         boolean mAnimated = false;
         boolean mClip = false;
-        public Paint.Cap mStrokelineCap = null;
-        public Paint.Join mStrokelineJoin = null;
+        Paint.Cap mStrokelineCap = null;
+        Paint.Join mStrokelineJoin = null;
         float mStrokeMiterlimit = 4;
+
+        private VNode[] mNode = null;
+        private String mId;
         private int[] mCheckState = new int[MAX_STATES];
         private boolean[] mCheckValue = new boolean[MAX_STATES];
         private int mNumberOfStates = 0;
         private int mNumberOfTrue = 0;
+
+        public VPath() {
+            // Empty constructor.
+        }
+
+        public VPath(VPath p) {
+            copyFrom(p);
+        }
 
         public void addStateFilter(int state, boolean condition) {
             int k = 0;
@@ -1228,7 +1358,7 @@ public class VectorDrawable extends Drawable {
             }
         }
 
-        int getState(int state){
+        private int getState(int state){
             for (int i = 0; i < mNumberOfStates; i++) {
                 if (mCheckState[mNumberOfStates] == state){
                     return (mCheckValue[i])?STATE_TRUE:STATE_FALSE;
@@ -1250,34 +1380,33 @@ public class VectorDrawable extends Drawable {
             }
         }
 
-        public VPath() {
-            mId = this.toString(); // to ensure paths have unique names
-        }
-
-        public VPath(VPath p) {
-            copyFrom(p);
-        }
-
         public String getID(){
             return mId;
         }
 
-        public VPath(Resources r, AttributeSet attrs) {
-            TypedArray a = r.obtainAttributes(attrs, R.styleable.VectorDrawablePath);
+        public void inflate(Resources r, AttributeSet attrs, Theme theme) {
+            final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.VectorDrawablePath);
+            final int[] themeAttrs = a.extractThemeAttrs();
+            mThemeAttrs = themeAttrs;
+
             mClip = a.getBoolean(R.styleable.VectorDrawablePath_clipToPath, false);
             mId = a.getString(R.styleable.VectorDrawablePath_name);
             mNode = parsePath(a.getString(R.styleable.VectorDrawablePath_pathData));
-            mFillColor = a.getColor(R.styleable.VectorDrawablePath_fill, 0);
-            mFillOpacity = a.getFloat(R.styleable.VectorDrawablePath_fillOpacity, Float.NaN);
 
-            if (!Float.isNaN(mFillOpacity)) {
-                mFillColor &= 0x00FFFFFF;
-                mFillColor |= ((int) (0xFF * mFillOpacity)) << 24;
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_fill] == 0) {
+                mFillColor = a.getColor(R.styleable.VectorDrawablePath_fill, 0);
             }
+
+            if (themeAttrs == null
+                    || themeAttrs[R.styleable.VectorDrawablePath_fillOpacity] == 0) {
+                mFillOpacity = a.getFloat(R.styleable.VectorDrawablePath_fillOpacity, Float.NaN);
+            }
+
             mRotate = a.getFloat(R.styleable.VectorDrawablePath_rotation, 0);
             mPivotX = a.getFloat(R.styleable.VectorDrawablePath_pivotX, 0);
             mPivotY = a.getFloat(R.styleable.VectorDrawablePath_pivotY, 0);
-            int lineCap  = a.getInt(R.styleable.VectorDrawablePath_strokeLineCap, 0);
+
+            final int lineCap  = a.getInt(R.styleable.VectorDrawablePath_strokeLineCap, 0);
             switch (lineCap) {
                 case LINECAP_BUTT:
                     mStrokelineCap = Paint.Cap.BUTT;
@@ -1289,7 +1418,8 @@ public class VectorDrawable extends Drawable {
                     mStrokelineCap = Paint.Cap.SQUARE;
                     break;
             }
-            int lineJoin =  a.getInt(R.styleable.VectorDrawablePath_strokeLineJoin, 0);
+
+            final int lineJoin =  a.getInt(R.styleable.VectorDrawablePath_strokeLineJoin, 0);
             switch (lineJoin) {
                 case LINEJOIN_MITER:
                     mStrokelineJoin = Paint.Join.MITER;
@@ -1301,19 +1431,27 @@ public class VectorDrawable extends Drawable {
                     mStrokelineJoin = Paint.Join.BEVEL;
                     break;
             }
+
             mStrokeMiterlimit = a.getFloat(R.styleable.VectorDrawablePath_strokeMiterLimit,
                     mStrokeMiterlimit);
-            mStrokeColor = a.getColor(R.styleable.VectorDrawablePath_stroke, mStrokeColor);
-            mStrokeOpacity = a.getFloat(R.styleable.VectorDrawablePath_strokeOpacity, Float.NaN);
-            if (!Float.isNaN(mStrokeOpacity)) {
-                mStrokeColor &= 0x00FFFFFF;
-                mStrokeColor |= ((int) (0xFF * mStrokeOpacity)) << 24;
+
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_stroke] == 0) {
+                mStrokeColor = a.getColor(R.styleable.VectorDrawablePath_stroke, mStrokeColor);
             }
+
+            if (themeAttrs == null
+                    || themeAttrs[R.styleable.VectorDrawablePath_strokeOpacity] == 0) {
+                mStrokeOpacity = a.getFloat(
+                        R.styleable.VectorDrawablePath_strokeOpacity, Float.NaN);
+            }
+
             mStrokeWidth = a.getFloat(R.styleable.VectorDrawablePath_strokeWidth, 0);
             mTrimPathEnd = a.getFloat(R.styleable.VectorDrawablePath_trimPathEnd, 1);
             mTrimPathOffset = a.getFloat(R.styleable.VectorDrawablePath_trimPathOffset, 0);
             mTrimPathStart = a.getFloat(R.styleable.VectorDrawablePath_trimPathStart, 0);
-            int[] states = {R.styleable.VectorDrawablePath_state_activated,
+
+            final int[] states = {
+                    R.styleable.VectorDrawablePath_state_activated,
                     R.styleable.VectorDrawablePath_state_checkable,
                     R.styleable.VectorDrawablePath_state_checked,
                     R.styleable.VectorDrawablePath_state_enabled,
@@ -1321,13 +1459,64 @@ public class VectorDrawable extends Drawable {
                     R.styleable.VectorDrawablePath_state_hovered,
                     R.styleable.VectorDrawablePath_state_pressed,
                     R.styleable.VectorDrawablePath_state_selected,
-                    R.styleable.VectorDrawablePath_state_window_focused};
-            for (int state : states) {
+                    R.styleable.VectorDrawablePath_state_window_focused
+            };
+
+            final int N = states.length;
+            for (int i = 0; i < N; i++) {
+                final int state = states[i];
                 if (a.hasValue(state)) {
                     addStateFilter(state, a.getBoolean(state, false));
                 }
             }
+
+            updateColorAlphas();
+
             a.recycle();
+        }
+
+        public boolean canApplyTheme() {
+            return mThemeAttrs != null;
+        }
+
+        public void applyTheme(Theme t) {
+            if (mThemeAttrs == null) {
+                return;
+            }
+
+            final TypedArray a = t.resolveAttributes(
+                    mThemeAttrs, R.styleable.VectorDrawablePath, 0, 0);
+
+            if (a.hasValue(R.styleable.VectorDrawablePath_fill)) {
+                mFillColor = a.getColor(R.styleable.VectorDrawablePath_fill, 0);
+            }
+
+            if (a.hasValue(R.styleable.VectorDrawablePath_fillOpacity)) {
+                mFillOpacity = a.getFloat(R.styleable.VectorDrawablePath_fillOpacity, Float.NaN);
+            }
+
+            if (a.hasValue(R.styleable.VectorDrawablePath_stroke)) {
+                mStrokeColor = a.getColor(R.styleable.VectorDrawablePath_stroke, mStrokeColor);
+            }
+
+            if (a.hasValue(R.styleable.VectorDrawablePath_strokeOpacity)) {
+                mStrokeOpacity = a.getFloat(
+                        R.styleable.VectorDrawablePath_strokeOpacity, Float.NaN);
+            }
+
+            updateColorAlphas();
+        }
+
+        private void updateColorAlphas() {
+            if (!Float.isNaN(mFillOpacity)) {
+                mFillColor &= 0x00FFFFFF;
+                mFillColor |= ((int) (0xFF * mFillOpacity)) << 24;
+            }
+
+            if (!Float.isNaN(mStrokeOpacity)) {
+                mStrokeColor &= 0x00FFFFFF;
+                mStrokeColor |= ((int) (0xFF * mStrokeOpacity)) << 24;
+            }
         }
 
         private static int nextStart(String s, int end) {
@@ -1564,9 +1753,11 @@ public class VectorDrawable extends Drawable {
     }
 
     private static class VNode {
+        private static float[] current = new float[4];
+
         char type;
         float[] params;
-        private static float[] current = new float[4];
+
         public VNode(char type, float[] params) {
             this.type = type;
             this.params = params;
