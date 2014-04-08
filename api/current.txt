@@ -21213,6 +21213,16 @@ package android.provider {
     field public static final deprecated android.net.Uri DELETED_CONTENT_URI;
     field public static final deprecated java.lang.String GROUP_ANDROID_STARRED = "Starred in Android";
     field public static final deprecated java.lang.String GROUP_MY_CONTACTS = "Contacts";
+    field public static final java.lang.String NON_SYNCABLE_ACCOUNT = "non_syncable";
+    field public static final java.lang.String NON_SYNCABLE_ACCOUNT_TYPE = "android.local";
+    field public static final java.lang.String _SYNC_ACCOUNT = "_sync_account";
+    field public static final java.lang.String _SYNC_ACCOUNT_TYPE = "_sync_account_type";
+    field public static final java.lang.String _SYNC_DIRTY = "_sync_dirty";
+    field public static final java.lang.String _SYNC_ID = "_sync_id";
+    field public static final java.lang.String _SYNC_LOCAL_ID = "_sync_local_id";
+    field public static final java.lang.String _SYNC_MARK = "_sync_mark";
+    field public static final java.lang.String _SYNC_TIME = "_sync_time";
+    field public static final java.lang.String _SYNC_VERSION = "_sync_version";
   }
 
   public static abstract deprecated interface Contacts.GroupsColumns {
@@ -21314,9 +21324,19 @@ package android.provider {
     field public static final deprecated android.net.Uri CONTENT_URI;
     field public static final deprecated java.lang.String DEFAULT_SORT_ORDER = "name ASC";
     field public static final deprecated android.net.Uri DELETED_CONTENT_URI;
+    field public static final java.lang.String NON_SYNCABLE_ACCOUNT = "non_syncable";
+    field public static final java.lang.String NON_SYNCABLE_ACCOUNT_TYPE = "android.local";
     field public static final deprecated java.lang.String PRIMARY_EMAIL_ID = "primary_email";
     field public static final deprecated java.lang.String PRIMARY_ORGANIZATION_ID = "primary_organization";
     field public static final deprecated java.lang.String PRIMARY_PHONE_ID = "primary_phone";
+    field public static final java.lang.String _SYNC_ACCOUNT = "_sync_account";
+    field public static final java.lang.String _SYNC_ACCOUNT_TYPE = "_sync_account_type";
+    field public static final java.lang.String _SYNC_DIRTY = "_sync_dirty";
+    field public static final java.lang.String _SYNC_ID = "_sync_id";
+    field public static final java.lang.String _SYNC_LOCAL_ID = "_sync_local_id";
+    field public static final java.lang.String _SYNC_MARK = "_sync_mark";
+    field public static final java.lang.String _SYNC_TIME = "_sync_time";
+    field public static final java.lang.String _SYNC_VERSION = "_sync_version";
   }
 
   public static final deprecated class Contacts.People.ContactMethods implements android.provider.BaseColumns android.provider.Contacts.ContactMethodsColumns android.provider.Contacts.PeopleColumns {
@@ -21379,6 +21399,16 @@ package android.provider {
     field public static final deprecated java.lang.String CONTENT_DIRECTORY = "photo";
     field public static final deprecated android.net.Uri CONTENT_URI;
     field public static final deprecated java.lang.String DEFAULT_SORT_ORDER = "person ASC";
+    field public static final java.lang.String NON_SYNCABLE_ACCOUNT = "non_syncable";
+    field public static final java.lang.String NON_SYNCABLE_ACCOUNT_TYPE = "android.local";
+    field public static final java.lang.String _SYNC_ACCOUNT = "_sync_account";
+    field public static final java.lang.String _SYNC_ACCOUNT_TYPE = "_sync_account_type";
+    field public static final java.lang.String _SYNC_DIRTY = "_sync_dirty";
+    field public static final java.lang.String _SYNC_ID = "_sync_id";
+    field public static final java.lang.String _SYNC_LOCAL_ID = "_sync_local_id";
+    field public static final java.lang.String _SYNC_MARK = "_sync_mark";
+    field public static final java.lang.String _SYNC_TIME = "_sync_time";
+    field public static final java.lang.String _SYNC_VERSION = "_sync_version";
   }
 
   public static abstract deprecated interface Contacts.PhotosColumns {
@@ -32205,6 +32235,9 @@ package android.webkit {
     method public static synchronized android.webkit.CookieSyncManager createInstance(android.content.Context);
     method public static synchronized android.webkit.CookieSyncManager getInstance();
     method protected void syncFromRamToFlash();
+    field protected static final java.lang.String LOGTAG = "websync";
+    field protected android.webkit.WebViewDatabase mDataBase;
+    field protected android.os.Handler mHandler;
   }
 
   public class DateSorter {
@@ -47244,7 +47277,47 @@ package java.util.zip {
     method public void setMethod(int);
     method public void setSize(long);
     method public void setTime(long);
+    field public static final int CENATT = 36; // 0x24
+    field public static final int CENATX = 38; // 0x26
+    field public static final int CENCOM = 32; // 0x20
+    field public static final int CENCRC = 16; // 0x10
+    field public static final int CENDSK = 34; // 0x22
+    field public static final int CENEXT = 30; // 0x1e
+    field public static final int CENFLG = 8; // 0x8
+    field public static final int CENHDR = 46; // 0x2e
+    field public static final int CENHOW = 10; // 0xa
+    field public static final int CENLEN = 24; // 0x18
+    field public static final int CENNAM = 28; // 0x1c
+    field public static final int CENOFF = 42; // 0x2a
+    field public static final long CENSIG = 33639248L; // 0x2014b50L
+    field public static final int CENSIZ = 20; // 0x14
+    field public static final int CENTIM = 12; // 0xc
+    field public static final int CENVEM = 4; // 0x4
+    field public static final int CENVER = 6; // 0x6
     field public static final int DEFLATED = 8; // 0x8
+    field public static final int ENDCOM = 20; // 0x14
+    field public static final int ENDHDR = 22; // 0x16
+    field public static final int ENDOFF = 16; // 0x10
+    field public static final long ENDSIG = 101010256L; // 0x6054b50L
+    field public static final int ENDSIZ = 12; // 0xc
+    field public static final int ENDSUB = 8; // 0x8
+    field public static final int ENDTOT = 10; // 0xa
+    field public static final int EXTCRC = 4; // 0x4
+    field public static final int EXTHDR = 16; // 0x10
+    field public static final int EXTLEN = 12; // 0xc
+    field public static final long EXTSIG = 134695760L; // 0x8074b50L
+    field public static final int EXTSIZ = 8; // 0x8
+    field public static final int LOCCRC = 14; // 0xe
+    field public static final int LOCEXT = 28; // 0x1c
+    field public static final int LOCFLG = 6; // 0x6
+    field public static final int LOCHDR = 30; // 0x1e
+    field public static final int LOCHOW = 8; // 0x8
+    field public static final int LOCLEN = 22; // 0x16
+    field public static final int LOCNAM = 26; // 0x1a
+    field public static final long LOCSIG = 67324752L; // 0x4034b50L
+    field public static final int LOCSIZ = 18; // 0x12
+    field public static final int LOCTIM = 10; // 0xa
+    field public static final int LOCVER = 4; // 0x4
     field public static final int STORED = 0; // 0x0
   }
 
@@ -47268,6 +47341,46 @@ package java.util.zip {
     method public java.io.InputStream getInputStream(java.util.zip.ZipEntry) throws java.io.IOException;
     method public java.lang.String getName();
     method public int size();
+    field public static final int CENATT = 36; // 0x24
+    field public static final int CENATX = 38; // 0x26
+    field public static final int CENCOM = 32; // 0x20
+    field public static final int CENCRC = 16; // 0x10
+    field public static final int CENDSK = 34; // 0x22
+    field public static final int CENEXT = 30; // 0x1e
+    field public static final int CENFLG = 8; // 0x8
+    field public static final int CENHDR = 46; // 0x2e
+    field public static final int CENHOW = 10; // 0xa
+    field public static final int CENLEN = 24; // 0x18
+    field public static final int CENNAM = 28; // 0x1c
+    field public static final int CENOFF = 42; // 0x2a
+    field public static final long CENSIG = 33639248L; // 0x2014b50L
+    field public static final int CENSIZ = 20; // 0x14
+    field public static final int CENTIM = 12; // 0xc
+    field public static final int CENVEM = 4; // 0x4
+    field public static final int CENVER = 6; // 0x6
+    field public static final int ENDCOM = 20; // 0x14
+    field public static final int ENDHDR = 22; // 0x16
+    field public static final int ENDOFF = 16; // 0x10
+    field public static final long ENDSIG = 101010256L; // 0x6054b50L
+    field public static final int ENDSIZ = 12; // 0xc
+    field public static final int ENDSUB = 8; // 0x8
+    field public static final int ENDTOT = 10; // 0xa
+    field public static final int EXTCRC = 4; // 0x4
+    field public static final int EXTHDR = 16; // 0x10
+    field public static final int EXTLEN = 12; // 0xc
+    field public static final long EXTSIG = 134695760L; // 0x8074b50L
+    field public static final int EXTSIZ = 8; // 0x8
+    field public static final int LOCCRC = 14; // 0xe
+    field public static final int LOCEXT = 28; // 0x1c
+    field public static final int LOCFLG = 6; // 0x6
+    field public static final int LOCHDR = 30; // 0x1e
+    field public static final int LOCHOW = 8; // 0x8
+    field public static final int LOCLEN = 22; // 0x16
+    field public static final int LOCNAM = 26; // 0x1a
+    field public static final long LOCSIG = 67324752L; // 0x4034b50L
+    field public static final int LOCSIZ = 18; // 0x12
+    field public static final int LOCTIM = 10; // 0xa
+    field public static final int LOCVER = 4; // 0x4
     field public static final int OPEN_DELETE = 4; // 0x4
     field public static final int OPEN_READ = 1; // 0x1
   }
@@ -47277,6 +47390,46 @@ package java.util.zip {
     method public void closeEntry() throws java.io.IOException;
     method protected java.util.zip.ZipEntry createZipEntry(java.lang.String);
     method public java.util.zip.ZipEntry getNextEntry() throws java.io.IOException;
+    field public static final int CENATT = 36; // 0x24
+    field public static final int CENATX = 38; // 0x26
+    field public static final int CENCOM = 32; // 0x20
+    field public static final int CENCRC = 16; // 0x10
+    field public static final int CENDSK = 34; // 0x22
+    field public static final int CENEXT = 30; // 0x1e
+    field public static final int CENFLG = 8; // 0x8
+    field public static final int CENHDR = 46; // 0x2e
+    field public static final int CENHOW = 10; // 0xa
+    field public static final int CENLEN = 24; // 0x18
+    field public static final int CENNAM = 28; // 0x1c
+    field public static final int CENOFF = 42; // 0x2a
+    field public static final long CENSIG = 33639248L; // 0x2014b50L
+    field public static final int CENSIZ = 20; // 0x14
+    field public static final int CENTIM = 12; // 0xc
+    field public static final int CENVEM = 4; // 0x4
+    field public static final int CENVER = 6; // 0x6
+    field public static final int ENDCOM = 20; // 0x14
+    field public static final int ENDHDR = 22; // 0x16
+    field public static final int ENDOFF = 16; // 0x10
+    field public static final long ENDSIG = 101010256L; // 0x6054b50L
+    field public static final int ENDSIZ = 12; // 0xc
+    field public static final int ENDSUB = 8; // 0x8
+    field public static final int ENDTOT = 10; // 0xa
+    field public static final int EXTCRC = 4; // 0x4
+    field public static final int EXTHDR = 16; // 0x10
+    field public static final int EXTLEN = 12; // 0xc
+    field public static final long EXTSIG = 134695760L; // 0x8074b50L
+    field public static final int EXTSIZ = 8; // 0x8
+    field public static final int LOCCRC = 14; // 0xe
+    field public static final int LOCEXT = 28; // 0x1c
+    field public static final int LOCFLG = 6; // 0x6
+    field public static final int LOCHDR = 30; // 0x1e
+    field public static final int LOCHOW = 8; // 0x8
+    field public static final int LOCLEN = 22; // 0x16
+    field public static final int LOCNAM = 26; // 0x1a
+    field public static final long LOCSIG = 67324752L; // 0x4034b50L
+    field public static final int LOCSIZ = 18; // 0x12
+    field public static final int LOCTIM = 10; // 0xa
+    field public static final int LOCVER = 4; // 0x4
   }
 
   public class ZipOutputStream extends java.util.zip.DeflaterOutputStream {
@@ -47286,7 +47439,47 @@ package java.util.zip {
     method public void setComment(java.lang.String);
     method public void setLevel(int);
     method public void setMethod(int);
+    field public static final int CENATT = 36; // 0x24
+    field public static final int CENATX = 38; // 0x26
+    field public static final int CENCOM = 32; // 0x20
+    field public static final int CENCRC = 16; // 0x10
+    field public static final int CENDSK = 34; // 0x22
+    field public static final int CENEXT = 30; // 0x1e
+    field public static final int CENFLG = 8; // 0x8
+    field public static final int CENHDR = 46; // 0x2e
+    field public static final int CENHOW = 10; // 0xa
+    field public static final int CENLEN = 24; // 0x18
+    field public static final int CENNAM = 28; // 0x1c
+    field public static final int CENOFF = 42; // 0x2a
+    field public static final long CENSIG = 33639248L; // 0x2014b50L
+    field public static final int CENSIZ = 20; // 0x14
+    field public static final int CENTIM = 12; // 0xc
+    field public static final int CENVEM = 4; // 0x4
+    field public static final int CENVER = 6; // 0x6
     field public static final int DEFLATED = 8; // 0x8
+    field public static final int ENDCOM = 20; // 0x14
+    field public static final int ENDHDR = 22; // 0x16
+    field public static final int ENDOFF = 16; // 0x10
+    field public static final long ENDSIG = 101010256L; // 0x6054b50L
+    field public static final int ENDSIZ = 12; // 0xc
+    field public static final int ENDSUB = 8; // 0x8
+    field public static final int ENDTOT = 10; // 0xa
+    field public static final int EXTCRC = 4; // 0x4
+    field public static final int EXTHDR = 16; // 0x10
+    field public static final int EXTLEN = 12; // 0xc
+    field public static final long EXTSIG = 134695760L; // 0x8074b50L
+    field public static final int EXTSIZ = 8; // 0x8
+    field public static final int LOCCRC = 14; // 0xe
+    field public static final int LOCEXT = 28; // 0x1c
+    field public static final int LOCFLG = 6; // 0x6
+    field public static final int LOCHDR = 30; // 0x1e
+    field public static final int LOCHOW = 8; // 0x8
+    field public static final int LOCLEN = 22; // 0x16
+    field public static final int LOCNAM = 26; // 0x1a
+    field public static final long LOCSIG = 67324752L; // 0x4034b50L
+    field public static final int LOCSIZ = 18; // 0x12
+    field public static final int LOCTIM = 10; // 0xa
+    field public static final int LOCVER = 4; // 0x4
     field public static final int STORED = 0; // 0x0
   }
 
