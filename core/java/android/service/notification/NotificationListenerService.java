@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.Log;
 
 /**
@@ -121,11 +122,43 @@ public abstract class NotificationListenerService extends Service {
      *     {@link android.app.NotificationManager#notify(String, int, android.app.Notification)}.
      * @param id  ID of the notification as specified by the notifying app in
      *     {@link android.app.NotificationManager#notify(String, int, android.app.Notification)}.
+     * <p>
+     * @deprecated Use {@link #cancelNotification(String key)}
+     * instead. Beginning with {@link android.os.Build.VERSION_CODES#L} this method will no longer
+     * cancel the notification. It will continue to cancel the notification for applications
+     * whose {@code targetSdkVersion} is earlier than {@link android.os.Build.VERSION_CODES#L}.
      */
     public final void cancelNotification(String pkg, String tag, int id) {
         if (!isBound()) return;
         try {
-            getNotificationInterface().cancelNotificationFromListener(mWrapper, pkg, tag, id);
+            getNotificationInterface().cancelNotificationFromListener(
+                    mWrapper, pkg, tag, id);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+    }
+
+    /**
+     * Inform the notification manager about dismissal of a single notification.
+     * <p>
+     * Use this if your listener has a user interface that allows the user to dismiss individual
+     * notifications, similar to the behavior of Android's status bar and notification panel.
+     * It should be called after the user dismisses a single notification using your UI;
+     * upon being informed, the notification manager will actually remove the notification
+     * and you will get an {@link #onNotificationRemoved(StatusBarNotification)} callback.
+     * <P>
+     * <b>Note:</b> If your listener allows the user to fire a notification's
+     * {@link android.app.Notification#contentIntent} by tapping/clicking/etc., you should call
+     * this method at that time <i>if</i> the Notification in question has the
+     * {@link android.app.Notification#FLAG_AUTO_CANCEL} flag set.
+     * <p>
+     * @param key Notification to dismiss from {@link StatusBarNotification#getKey()}.
+     */
+    public final void cancelNotification(String key) {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().cancelNotificationsFromListener(mWrapper,
+                    new String[] {key});
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
