@@ -2825,4 +2825,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mExpandedVisible = true;
         mNotificationPanel.setExpandedFraction(1);
     }
+
+    /**
+     * @return a ViewGroup that spans the entire panel which contains the quick settings
+     */
+    public ViewGroup getQuickSettingsOverlayParent() {
+        if (mHasSettingsPanel) {
+            if (mHasFlipSettings) {
+                return mNotificationPanel;
+            } else {
+                return mSettingsPanel;
+            }
+        } else {
+            return null;
+        }
+    }
 }
