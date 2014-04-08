@@ -68,10 +68,8 @@ public abstract class CallService extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SET_CALL_SERVICE_ADAPTER:
-                    CallServiceAdapter adapter =
-                            new CallServiceAdapter((ICallServiceAdapter) msg.obj);
-                    mAdapter = adapter;
-                    onAdapterAttached(adapter);
+                    mAdapter = new CallServiceAdapter((ICallServiceAdapter) msg.obj);
+                    onAdapterAttached(mAdapter);
                     break;
                 case MSG_IS_COMPATIBLE_WITH:
                     isCompatibleWith((CallInfo) msg.obj);

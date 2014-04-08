@@ -22,7 +22,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * A parcelable holder class of Call information data. This class is intended for transfering call
@@ -32,7 +31,7 @@ import java.util.UUID;
 public final class CallInfo implements Parcelable {
 
     /**
-     * Unique identifier for the call as a UUID string.
+     * Unique identifier for the call.
      */
     private final String mId;
 
@@ -60,18 +59,6 @@ public final class CallInfo implements Parcelable {
 
     /** The descriptor for the call service currently routing this call. */
     private final CallServiceDescriptor mCurrentCallServiceDescriptor;
-
-    // There are 4 timestamps that are important to a call:
-    // 1) Created timestamp - The time at which the user explicitly chose to make the call.
-    // 2) Connected timestamp - The time at which a call service confirms that it has connected
-    //    this call. This happens through a method-call to either newOutgoingCall or newIncomingCall
-    //    on CallServiceAdapter. Generally this should coincide roughly to the user physically
-    //    hearing/seeing a ring.
-    //    TODO(santoscordon): Consider renaming Call-active to better match the others.
-    // 3) Call-active timestamp - The time at which the call switches to the active state. This
-    //    happens when the user answers an incoming call or an outgoing call was answered by the
-    //    other party.
-    // 4) Disconnected timestamp - The time at which the call was disconnected.
 
     public CallInfo(String id, CallState state, Uri handle) {
         this(id, state, handle, null, Bundle.EMPTY, null);
@@ -141,16 +128,10 @@ public final class CallInfo implements Parcelable {
         return mCurrentCallServiceDescriptor;
     }
 
-    //
-    // Parceling related code below here.
-    //
-
     /**
      * Responsible for creating CallInfo objects for deserialized Parcels.
      */
-    public static final Parcelable.Creator<CallInfo> CREATOR =
-            new Parcelable.Creator<CallInfo> () {
-
+    public static final Parcelable.Creator<CallInfo> CREATOR = new Parcelable.Creator<CallInfo> () {
         @Override
         public CallInfo createFromParcel(Parcel source) {
             String id = source.readString();

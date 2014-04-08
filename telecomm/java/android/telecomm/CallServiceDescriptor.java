@@ -108,6 +108,21 @@ public final class CallServiceDescriptor implements Parcelable {
         return mNetworkType;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof CallServiceDescriptor)) {
+            return false;
+        }
+        CallServiceDescriptor descriptor = (CallServiceDescriptor) obj;
+        return mCallServiceId.equals(descriptor.mCallServiceId) &&
+                mComponentName.equals(descriptor.mComponentName) &&
+                mNetworkType == descriptor.mNetworkType;
+    }
+
     /**
      * @param context {@link Context} to use for the construction of the {@link Builder}.
      * @return A new {@link Builder} instance.

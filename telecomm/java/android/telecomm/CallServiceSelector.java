@@ -50,10 +50,9 @@ public abstract class CallServiceSelector extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SET_CALL_SERVICE_SELECTOR_ADAPTER:
-                    CallServiceSelectorAdapter adapter = new CallServiceSelectorAdapter(
+                    mAdapter = new CallServiceSelectorAdapter(
                             (ICallServiceSelectorAdapter) msg.obj);
-                    mAdapter = adapter;
-                    onAdapterAttached(adapter);
+                    onAdapterAttached(mAdapter);
                     break;
                 case MSG_SELECT:
                     SomeArgs args = (SomeArgs) msg.obj;
