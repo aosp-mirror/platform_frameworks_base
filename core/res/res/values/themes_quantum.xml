@@ -296,10 +296,11 @@ please see themes_device_defaults.xml.
         <item name="actionBarTabTextStyle">@style/Widget.Quantum.ActionBar.TabText</item>
         <item name="actionModeStyle">@style/Widget.Quantum.ActionMode</item>
         <item name="actionModeCloseButtonStyle">@style/Widget.Quantum.ActionButton.CloseMode</item>
-        <item name="actionBarStyle">@style/Widget.Quantum.ActionBar</item>
+        <item name="actionBarStyle">@style/Widget.Quantum.ActionBar.Solid</item>
         <item name="actionBarSize">@dimen/action_bar_default_height</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Quantum.PopupWindow.ActionMode</item>
         <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarTheme">@null</item>
         <item name="actionBarItemBackground">@drawable/item_background_quantum</item>
 
         <item name="actionModeCutDrawable">@drawable/ic_menu_cut_quantum</item>
@@ -356,18 +357,18 @@ please see themes_device_defaults.xml.
         <item name="fastScrollOverlayPosition">atThumb</item>
 
         <!-- Color palette -->
-        <item name="colorPrimaryDark">@color/quantum_grey_700</item>
-        <item name="colorPrimary">@color/quantum_grey_500</item>
-        <item name="colorPrimaryLight">@color/quantum_grey_100</item>
+        <item name="colorPrimaryDark">@color/quantum_blue_700</item>
+        <item name="colorPrimary">@color/quantum_blue_500</item>
+        <item name="colorPrimaryLight">@color/quantum_blue_100</item>
         <item name="colorAccent">@color/quantum_teal_A200</item>
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
-        <item name="colorControlActivated">?attr/colorPrimaryDark</item>
+        <item name="colorControlActivated">?attr/colorPrimary</item>
         <item name="colorButtonNormal">@color/quantum_grey_700</item>
         <item name="colorButtonPressed">@color/quantum_grey_500</item>
         <!-- TODO: Remove these attrs and move into button style. -->
         <item name="colorButtonNormalColored">?attr/colorPrimary</item>
-        <item name="colorButtonPressedColored">?attr/colorPrimaryDark</item>
+        <item name="colorButtonPressedColored">?attr/colorPrimaryLight</item>
     </style>
 
     <!-- Quantum Paper theme (light version). -->
@@ -634,6 +635,7 @@ please see themes_device_defaults.xml.
         <item name="actionBarSize">@dimen/action_bar_default_height</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Quantum.Light.PopupWindow.ActionMode</item>
         <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarTheme">@null</item>
         <item name="actionBarItemBackground">@drawable/item_background_quantum</item>
 
         <item name="actionModeCutDrawable">@drawable/ic_menu_cut_quantum</item>
@@ -686,18 +688,18 @@ please see themes_device_defaults.xml.
         <item name="fastScrollOverlayPosition">atThumb</item>
 
         <!-- Color palette -->
-        <item name="colorPrimaryDark">@color/quantum_grey_700</item>
-        <item name="colorPrimary">@color/quantum_grey_500</item>
-        <item name="colorPrimaryLight">@color/quantum_grey_100</item>
+        <item name="colorPrimaryDark">@color/quantum_blue_700</item>
+        <item name="colorPrimary">@color/quantum_blue_500</item>
+        <item name="colorPrimaryLight">@color/quantum_blue_100</item>
         <item name="colorAccent">@color/quantum_teal_A200</item>
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
-        <item name="colorControlActivated">?attr/colorPrimaryLight</item>
+        <item name="colorControlActivated">?attr/colorPrimary</item>
         <item name="colorButtonNormal">@color/quantum_grey_100</item>
         <item name="colorButtonPressed">@color/quantum_grey_500</item>
         <!-- TODO: Remove these attrs and move into button style. -->
         <item name="colorButtonNormalColored">?attr/colorPrimary</item>
-        <item name="colorButtonPressedColored">?attr/colorPrimaryLight</item>
+        <item name="colorButtonPressedColored">?attr/colorPrimaryDark</item>
     </style>
 
     <!-- Variant of the quantum (light) theme that has a solid (opaque) action bar
