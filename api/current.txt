@@ -29,6 +29,7 @@ package android {
     field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
     field public static final java.lang.String BIND_TEXT_SERVICE = "android.permission.BIND_TEXT_SERVICE";
     field public static final java.lang.String BIND_TRUST_AGENT_SERVICE = "android.permission.BIND_TRUST_AGENT_SERVICE";
+    field public static final java.lang.String BIND_TV_INPUT = "android.permission.BIND_TV_INPUT";
     field public static final java.lang.String BIND_VPN_SERVICE = "android.permission.BIND_VPN_SERVICE";
     field public static final java.lang.String BIND_WALLPAPER = "android.permission.BIND_WALLPAPER";
     field public static final java.lang.String BLUETOOTH = "android.permission.BLUETOOTH";
@@ -6497,6 +6498,7 @@ package android.content {
     field public static final java.lang.String STORAGE_SERVICE = "storage";
     field public static final java.lang.String TELEPHONY_SERVICE = "phone";
     field public static final java.lang.String TEXT_SERVICES_MANAGER_SERVICE = "textservices";
+    field public static final java.lang.String TV_INPUT_SERVICE = "tv_input";
     field public static final java.lang.String UI_MODE_SERVICE = "uimode";
     field public static final java.lang.String USB_SERVICE = "usb";
     field public static final java.lang.String USER_SERVICE = "user";
@@ -27610,6 +27612,60 @@ package android.transition {
     method public int getViewVisibility(android.transition.TransitionValues);
     method public int getViewX(android.transition.TransitionValues);
     method public int getViewY(android.transition.TransitionValues);
+  }
+
+}
+
+package android.tv {
+
+  public final class TvInputInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.content.ComponentName getComponent();
+    method public java.lang.String getId();
+    method public java.lang.String getPackageName();
+    method public java.lang.String getServiceName();
+    method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
+    method public void writeToParcel(android.os.Parcel, int);
+  }
+
+  public final class TvInputManager {
+    method public void createSession(android.content.ComponentName, android.tv.TvInputManager.SessionCreateCallback, android.os.Handler);
+    method public boolean getAvailability(android.content.ComponentName);
+    method public java.util.List<android.tv.TvInputInfo> getTvInputList();
+    method public void registerListener(android.content.ComponentName, android.tv.TvInputManager.TvInputListener, android.os.Handler);
+    method public void unregisterListener(android.content.ComponentName, android.tv.TvInputManager.TvInputListener);
+  }
+
+  public static final class TvInputManager.Session {
+    method public void release();
+    method public void setSurface(android.view.Surface);
+    method public void setVolume(float);
+    method public void tune(android.net.Uri);
+  }
+
+  public static abstract interface TvInputManager.SessionCreateCallback {
+    method public abstract void onSessionCreated(android.tv.TvInputManager.Session);
+  }
+
+  public static abstract class TvInputManager.TvInputListener {
+    ctor public TvInputManager.TvInputListener();
+    method public void onAvailabilityChanged(android.content.ComponentName, boolean);
+  }
+
+  public abstract class TvInputService extends android.app.Service {
+    ctor public TvInputService();
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract android.tv.TvInputService.TvInputSessionImpl onCreateSession();
+    method public final void setAvailable(boolean);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.tv.TvInputService";
+  }
+
+  public static abstract class TvInputService.TvInputSessionImpl {
+    ctor public TvInputService.TvInputSessionImpl();
+    method public abstract void onRelease();
+    method public abstract boolean onSetSurface(android.view.Surface);
+    method public abstract void onSetVolume(float);
+    method public abstract boolean onTune(android.net.Uri);
   }
 
 }

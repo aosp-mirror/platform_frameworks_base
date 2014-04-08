@@ -2609,6 +2609,16 @@ public abstract class Context {
     public static final String TRUST_SERVICE = "trust";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.tv.TvInputManager} for interacting with TV inputs on the
+     * device.
+     *
+     * @see #getSystemService
+     * @see android.tv.TvInputManager
+     */
+    public static final String TV_INPUT_SERVICE = "tv_input";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
