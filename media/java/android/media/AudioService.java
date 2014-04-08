@@ -43,7 +43,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
-import android.hardware.usb.UsbManager;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.os.Binder;
@@ -529,7 +528,6 @@ public class AudioService extends IAudioService.Stub {
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
-        intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
 
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         // TODO merge orientation and rotation
@@ -3977,8 +3975,7 @@ public class AudioService extends IAudioService.Stub {
                     (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE))) {
                 setBluetoothA2dpOnInt(true);
             }
-            boolean isUsb = ((device & AudioSystem.DEVICE_OUT_ALL_USB) != 0) ||
-                            ((device & AudioSystem.DEVICE_IN_ALL_USB) != 0);
+            boolean isUsb = ((device & AudioSystem.DEVICE_OUT_ALL_USB) != 0);
             handleDeviceConnection((state == 1), device, (isUsb ? name : ""));
             if (state != 0) {
                 if ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
@@ -4086,31 +4083,18 @@ public class AudioService extends IAudioService.Stub {
             } else if (action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG) ||
                            action.equals(Intent.ACTION_USB_AUDIO_DEVICE_PLUG)) {
                 state = intent.getIntExtra("state", 0);
-
                 int alsaCard = intent.getIntExtra("card", -1);
                 int alsaDevice = intent.getIntExtra("device", -1);
-                boolean hasPlayback = intent.getBooleanExtra("hasPlayback", false);
-                boolean hasCapture = intent.getBooleanExtra("hasCapture", false);
-                boolean hasMIDI = intent.getBooleanExtra("hasMIDI", false);
-
                 String params = (alsaCard == -1 && alsaDevice == -1 ? ""
                                     : "card=" + alsaCard + ";device=" + alsaDevice);
-
-                //TODO(pmclean) - Ignore for now the hasPlayback & hasCapture flags since we
-                // still need to call setWiredDeviceConnectionState() on disconnect (when we
-                // don't have card/device files to parse for this info). We will need to store
-                // that info here when we get smarter about multiple USB card/devices.
-                // Playback Device
                 device = action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG) ?
                         AudioSystem.DEVICE_OUT_USB_ACCESSORY : AudioSystem.DEVICE_OUT_USB_DEVICE;
+                Log.v(TAG, "Broadcast Receiver: Got "
+                        + (action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG) ?
+                              "ACTION_USB_AUDIO_ACCESSORY_PLUG" : "ACTION_USB_AUDIO_DEVICE_PLUG")
+                        + ", state = " + state + ", card: " + alsaCard + ", device: " + alsaDevice);
                 setWiredDeviceConnectionState(device, state, params);
-
-                // Capture Device
-                device = action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG) ?
-                    AudioSystem.DEVICE_IN_USB_ACCESSORY : AudioSystem.DEVICE_IN_USB_DEVICE;
-                setWiredDeviceConnectionState(device, state, params);
-            }
-            else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
+            } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
                 boolean broadcast = false;
                 int scoAudioState = AudioManager.SCO_AUDIO_STATE_ERROR;
                 synchronized (mScoClients) {
@@ -4215,7 +4199,7 @@ public class AudioService extends IAudioService.Stub {
                         mStreamStates[AudioSystem.STREAM_MUSIC], 0);
             }
         }
-    } // end class AudioServiceBroadcastReceiver
+    }
 
     //==========================================================================================
     // RemoteControlDisplay / RemoteControlClient / Remote info
