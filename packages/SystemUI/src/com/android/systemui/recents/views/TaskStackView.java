@@ -524,8 +524,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 (Constants.Values.TaskStackView.StackPeekHeightPct * mStackRect.height()));
         int size = Math.min(minHeight, Math.min(mStackRect.width(), mStackRect.height()));
         int centerX = mStackRect.centerX();
-        mTaskRect.set(centerX - size / 2, mStackRectSansPeek.top,
-                centerX + size / 2, mStackRectSansPeek.top + size);
+        mTaskRect.set(mStackRect.left, mStackRectSansPeek.top,
+                mStackRect.right, mStackRectSansPeek.top + size);
 
         // Update the scroll bounds
         updateMinMaxScroll(false);

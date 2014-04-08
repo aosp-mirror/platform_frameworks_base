@@ -43,6 +43,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     boolean mVisible;
     boolean mTaskLaunched;
 
+    // Broadcast receiver to handle messages from our RecentsService
     BroadcastReceiver mServiceBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -60,6 +61,14 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     dismissRecentsIfVisible();
                 }
             }
+        }
+    };
+
+    // Broadcast receiver to handle messages from the system
+    BroadcastReceiver mScreenOffReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            finish();
         }
     };
 
@@ -110,12 +119,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Initialize the loader and the configuration
         RecentsTaskLoader.initialize(this);
         RecentsConfiguration.reinitialize(this);
-
-        // Set the background dim
-        WindowManager.LayoutParams wlp = getWindow().getAttributes();
-        wlp.dimAmount = Constants.Values.Window.BackgroundDim;
-        getWindow().setAttributes(wlp);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
         // Create the view hierarchy
         mRecentsView = new RecentsView(this);
@@ -170,12 +173,37 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsActivity|onResume]", "",
                 Console.AnsiRed);
         super.onResume();
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        Console.log(Constants.DebugFlags.App.SystemUIHandshake,
+                "[RecentsActivity|onAttachedToWindow]", "",
+                Console.AnsiRed);
+        super.onAttachedToWindow();
 
         // Register the broadcast receiver to handle messages from our service
         IntentFilter filter = new IntentFilter();
         filter.addAction(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY);
         filter.addAction(RecentsService.ACTION_FINISH_RECENTS_ACTIVITY);
         registerReceiver(mServiceBroadcastReceiver, filter);
+
+        // Register the broadcast receiver to handle messages when the screen is turned off
+        filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(mScreenOffReceiver, filter);
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        Console.log(Constants.DebugFlags.App.SystemUIHandshake,
+                "[RecentsActivity|onDetachedFromWindow]", "",
+                Console.AnsiRed);
+        super.onDetachedFromWindow();
+
+        // Unregister any broadcast receivers we have registered
+        unregisterReceiver(mServiceBroadcastReceiver);
+        unregisterReceiver(mScreenOffReceiver);
     }
 
     @Override
@@ -183,9 +211,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsActivity|onPause]", "",
                 Console.AnsiRed);
         super.onPause();
-
-        // Unregister any broadcast receivers we have registered
-        unregisterReceiver(mServiceBroadcastReceiver);
     }
 
     @Override
