@@ -91,7 +91,6 @@ private:
 
     void destroyContext();
 
-    MethodInvokeRenderTask* createTask(RunnableMethod method);
     void post(RenderTask* task);
     void* postAndWait(MethodInvokeRenderTask* task);
 
