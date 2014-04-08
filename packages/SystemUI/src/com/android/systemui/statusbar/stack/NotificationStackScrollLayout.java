@@ -31,7 +31,6 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.OverScroller;
 
 import com.android.systemui.ExpandHelper;
@@ -708,6 +707,12 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         return swipeWantsIt || scrollWantsIt ||
                 super.onInterceptTouchEvent(ev);
+    }
+
+    @Override
+    protected void onViewRemoved(View child) {
+        super.onViewRemoved(child);
+        mCurrentStackScrollState.removeViewStateForView(child);
     }
 
     private boolean onInterceptTouchEventScroll(MotionEvent ev) {
