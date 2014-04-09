@@ -22,9 +22,7 @@ import android.os.Process;
 import android.os.SELinux;
 import android.os.SystemProperties;
 import android.util.Log;
-
 import dalvik.system.PathClassLoader;
-
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -34,8 +32,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-
 import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
 import libcore.io.Libcore;
@@ -59,7 +57,7 @@ class ZygoteConnection {
     private static final int CONNECTION_TIMEOUT_MILLIS = 1000;
 
     /** max number of arguments that a connection can specify */
-    private static final int MAX_ZYGOTE_ARGC=1024;
+    private static final int MAX_ZYGOTE_ARGC = 1024;
 
     /**
      * The command socket.
@@ -73,15 +71,18 @@ class ZygoteConnection {
     private final BufferedReader mSocketReader;
     private final Credentials peer;
     private final String peerSecurityContext;
+    private final String abiList;
 
     /**
      * Constructs instance from connected socket.
      *
      * @param socket non-null; connected socket
+     * @param abiList non-null; a list of ABIs this zygote supports.
      * @throws IOException
      */
-    ZygoteConnection(LocalSocket socket) throws IOException {
+    ZygoteConnection(LocalSocket socket, String abiList) throws IOException {
         mSocket = socket;
+        this.abiList = abiList;
 
         mSocketOutStream
                 = new DataOutputStream(socket.getOutputStream());
@@ -108,43 +109,6 @@ class ZygoteConnection {
      */
     FileDescriptor getFileDesciptor() {
         return mSocket.getFileDescriptor();
-    }
-
-    /**
-     * Reads start commands from an open command socket.
-     * Start commands are presently a pair of newline-delimited lines
-     * indicating a) class to invoke main() on b) nice name to set argv[0] to.
-     * Continues to read commands and forkAndSpecialize children until
-     * the socket is closed. This method is used in ZYGOTE_FORK_MODE
-     *
-     * @throws ZygoteInit.MethodAndArgsCaller trampoline to invoke main()
-     * method in child process
-     */
-    void run() throws ZygoteInit.MethodAndArgsCaller {
-
-        int loopCount = ZygoteInit.GC_LOOP_COUNT;
-
-        while (true) {
-            /*
-             * Call gc() before we block in readArgumentList().
-             * It's work that has to be done anyway, and it's better
-             * to avoid making every child do it.  It will also
-             * madvise() any free memory as a side-effect.
-             *
-             * Don't call it every time, because walking the entire
-             * heap is a lot of overhead to free a few hundred bytes.
-             */
-            if (loopCount <= 0) {
-                ZygoteInit.gc();
-                loopCount = ZygoteInit.GC_LOOP_COUNT;
-            } else {
-                loopCount--;
-            }
-
-            if (runOnce()) {
-                break;
-            }
-        }
     }
 
     /**
@@ -196,6 +160,11 @@ class ZygoteConnection {
 
         try {
             parsedArgs = new Arguments(args);
+
+            if (parsedArgs.abiListQuery) {
+                return handleAbiListQuery();
+            }
+
             if (parsedArgs.permittedCapabilities != 0 || parsedArgs.effectiveCapabilities != 0) {
                 throw new ZygoteSecurityException("Client may not specify capabilities: " +
                         "permitted=0x" + Long.toHexString(parsedArgs.permittedCapabilities) +
@@ -284,6 +253,18 @@ class ZygoteConnection {
         } finally {
             IoUtils.closeQuietly(childPipeFd);
             IoUtils.closeQuietly(serverPipeFd);
+        }
+    }
+
+    private boolean handleAbiListQuery() {
+        try {
+            final byte[] abiListBytes = abiList.getBytes(StandardCharsets.US_ASCII);
+            mSocketOutStream.writeInt(abiListBytes.length);
+            mSocketOutStream.write(abiListBytes);
+            return false;
+        } catch (IOException ioe) {
+            Log.e(TAG, "Error writing to command socket", ioe);
+            return true;
         }
     }
 
@@ -386,6 +367,11 @@ class ZygoteConnection {
          * (or after a '--')
          */
         String remainingArgs[];
+
+        /**
+         * Whether the current arguments constitute an ABI list query.
+         */
+        boolean abiListQuery;
 
         /**
          * Constructs instance and parses args
@@ -540,6 +526,8 @@ class ZygoteConnection {
                     mountExternal = Zygote.MOUNT_EXTERNAL_MULTIUSER;
                 } else if (arg.equals("--mount-external-multiuser-all")) {
                     mountExternal = Zygote.MOUNT_EXTERNAL_MULTIUSER_ALL;
+                } else if (arg.equals("--query-abi-list")) {
+                    abiListQuery = true;
                 } else {
                     break;
                 }
@@ -975,7 +963,7 @@ class ZygoteConnection {
             mSocketOutStream.writeInt(pid);
             mSocketOutStream.writeBoolean(usingWrapper);
         } catch (IOException ex) {
-            Log.e(TAG, "Error reading from command socket", ex);
+            Log.e(TAG, "Error writing to command socket", ex);
             return true;
         }
 
