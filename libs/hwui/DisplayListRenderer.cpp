@@ -192,7 +192,9 @@ status_t DisplayListRenderer::drawDisplayList(RenderNode* displayList,
             flags, *currentTransform());
     addDrawOp(op);
     mDisplayListData->addChild(op);
-    if (displayList->isProjectionReceiver()) {
+
+    if (displayList->stagingProperties().isProjectionReceiver()) {
+        // use staging property, since recording on UI thread
         mDisplayListData->projectionReceiveIndex = mDisplayListData->displayListOps.size() - 1;
     }
 

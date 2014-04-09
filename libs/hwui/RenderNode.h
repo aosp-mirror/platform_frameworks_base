@@ -105,6 +105,10 @@ public:
         return mDisplayListData && mDisplayListData->hasDrawOps;
     }
 
+    const char* getName() const {
+        return mName.string();
+    }
+
     void setName(const char* name) {
         if (name) {
             char* lastPeriod = strrchr(name, '.');
@@ -127,10 +131,6 @@ public:
     RenderProperties& mutateStagingProperties() {
         mNeedsPropertiesSync = true;
         return mStagingProperties;
-    }
-
-    bool isProjectionReceiver() {
-        return properties().isProjectionReceiver();
     }
 
     int getWidth() {
