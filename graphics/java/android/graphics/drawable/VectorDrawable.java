@@ -1852,27 +1852,25 @@ public class VectorDrawable extends Drawable {
             }
         }
 
-        private void nodeListToPath(VNode[] node, Path path) {
-            float[] current = new float[4];
-            for (int i = 0; i < node.length; i++) {
-                addCommand(path, current, node[i].mType, node[i].mParams);
-            }
-        }
-
         public static void createPath(VNode[] node, Path path) {
             float[] current = new float[4];
+            char previousCommand = 'm';
             for (int i = 0; i < node.length; i++) {
-                addCommand(path, current, node[i].mType, node[i].mParams);
+                addCommand(path, current, previousCommand, node[i].mType, node[i].mParams);
+                previousCommand = node[i].mType;
             }
         }
 
-        private static void addCommand(Path path, float[] current, char cmd, float[] val) {
+        private static void addCommand(Path path, float[] current,
+                char previousCmd, char cmd, float[] val) {
 
             int incr = 2;
             float currentX = current[0];
             float currentY = current[1];
             float ctrlPointX = current[2];
             float ctrlPointY = current[3];
+            float reflectiveCtrlPointX;
+            float reflectiveCtrlPointY;
 
             switch (cmd) {
                 case 'z':
@@ -1952,12 +1950,8 @@ public class VectorDrawable extends Drawable {
                         currentY = val[k + 0];
                         break;
                     case 'c': // curveto - Draws a cubic Bézier curve (relative)
-                        path.rCubicTo(val[k + 0],
-                                val[k + 1],
-                                val[k + 2],
-                                val[k + 3],
-                                val[k + 4],
-                                val[k + 5]);
+                        path.rCubicTo(val[k + 0], val[k + 1], val[k + 2], val[k + 3],
+                                val[k + 4], val[k + 5]);
 
                         ctrlPointX = currentX + val[k + 2];
                         ctrlPointY = currentY + val[k + 3];
@@ -1966,20 +1960,22 @@ public class VectorDrawable extends Drawable {
 
                         break;
                     case 'C': // curveto - Draws a cubic Bézier curve
-                        path.cubicTo(val[k + 0],
-                                val[k + 1],
-                                val[k + 2],
-                                val[k + 3],
-                                val[k + 4],
-                                val[k + 5]);
+                        path.cubicTo(val[k + 0], val[k + 1], val[k + 2], val[k + 3],
+                                val[k + 4], val[k + 5]);
                         currentX = val[k + 4];
                         currentY = val[k + 5];
                         ctrlPointX = val[k + 2];
                         ctrlPointY = val[k + 3];
-
                         break;
                     case 's': // smooth curveto - Draws a cubic Bézier curve (reflective cp)
-                        path.rCubicTo(currentX - ctrlPointX, currentY  - ctrlPointY,
+                        reflectiveCtrlPointX = 0;
+                        reflectiveCtrlPointY = 0;
+                        if (previousCmd == 'c' || previousCmd == 's'
+                                || previousCmd == 'C' || previousCmd == 'S') {
+                            reflectiveCtrlPointX = currentX - ctrlPointX;
+                            reflectiveCtrlPointY = currentY - ctrlPointY;
+                        }
+                        path.rCubicTo(reflectiveCtrlPointX, reflectiveCtrlPointY,
                                 val[k + 0], val[k + 1],
                                 val[k + 2], val[k + 3]);
 
@@ -1989,47 +1985,63 @@ public class VectorDrawable extends Drawable {
                         currentY += val[k + 3];
                         break;
                     case 'S': // shorthand/smooth curveto Draws a cubic Bézier curve(reflective cp)
-                        path.cubicTo(2 * currentX - ctrlPointX,
-                                2 * currentY - ctrlPointY,
-                                val[k + 0],
-                                val[k + 1],
-                                val[k + 2],
-                                val[k + 3]);
-                        currentX = val[k + 2];
-                        currentY = val[k + 3];
+                        reflectiveCtrlPointX = currentX;
+                        reflectiveCtrlPointY = currentY;
+                        if (previousCmd == 'c' || previousCmd == 's'
+                                || previousCmd == 'C' || previousCmd == 'S') {
+                            reflectiveCtrlPointX = 2 * currentX - ctrlPointX;
+                            reflectiveCtrlPointY = 2 * currentY - ctrlPointY;
+                        }
+                        path.cubicTo(reflectiveCtrlPointX, reflectiveCtrlPointY,
+                                val[k + 0], val[k + 1], val[k + 2], val[k + 3]);
                         ctrlPointX = val[k + 0];
                         ctrlPointY = val[k + 1];
+                        currentX = val[k + 2];
+                        currentY = val[k + 3];
                         break;
                     case 'q': // Draws a quadratic Bézier (relative)
                         path.rQuadTo(val[k + 0], val[k + 1], val[k + 2], val[k + 3]);
+                        ctrlPointX = currentX + val[k + 0];
+                        ctrlPointY = currentY + val[k + 1];
                         currentX += val[k + 2];
                         currentY += val[k + 3];
-                        ctrlPointX = val[k + 0];
-                        ctrlPointY = val[k + 1];
                         break;
                     case 'Q': // Draws a quadratic Bézier
                         path.quadTo(val[k + 0], val[k + 1], val[k + 2], val[k + 3]);
-                        currentX = val[k + 2];
-                        currentY = val[k + 3];
                         ctrlPointX = val[k + 0];
                         ctrlPointY = val[k + 1];
+                        currentX = val[k + 2];
+                        currentY = val[k + 3];
                         break;
                     case 't': // Draws a quadratic Bézier curve(reflective control point)(relative)
-                        path.rQuadTo(currentX - ctrlPointX, currentY - ctrlPointY,
+                        reflectiveCtrlPointX = 0;
+                        reflectiveCtrlPointY = 0;
+                        if (previousCmd == 'q' || previousCmd == 't'
+                                || previousCmd == 'Q' || previousCmd == 'T') {
+                            reflectiveCtrlPointX = currentX - ctrlPointX;
+                            reflectiveCtrlPointY = currentY - ctrlPointY;
+                        }
+                        path.rQuadTo(reflectiveCtrlPointX, reflectiveCtrlPointY,
                                 val[k + 0], val[k + 1]);
-                        ctrlPointX = ctrlPointX + currentX;
-                        ctrlPointY = ctrlPointY + currentY;
+                        ctrlPointX = reflectiveCtrlPointX;
+                        ctrlPointY = reflectiveCtrlPointY;
                         currentX += val[k + 0];
                         currentY += val[k + 1];
-
                         break;
                     case 'T': // Draws a quadratic Bézier curve (reflective control point)
-                        path.quadTo(currentX * 2 - ctrlPointX, currentY * 2 - ctrlPointY,
+                        reflectiveCtrlPointX = currentX;
+                        reflectiveCtrlPointY = currentY;
+                        if (previousCmd == 'q' || previousCmd == 't'
+                                || previousCmd == 'Q' || previousCmd == 'T') {
+                            reflectiveCtrlPointX = 2 * currentX - ctrlPointX;
+                            reflectiveCtrlPointY = 2 * currentY - ctrlPointY;
+                        }
+                        path.quadTo(reflectiveCtrlPointX, reflectiveCtrlPointY,
                                 val[k + 0], val[k + 1]);
+                        ctrlPointX = reflectiveCtrlPointX;
+                        ctrlPointY = reflectiveCtrlPointY;
                         currentX = val[k + 0];
-                        currentY = val[k + 1]; // TODO: Check this logic
-                        ctrlPointX = -(val[k + 0] - currentX);
-                        ctrlPointY = -(val[k + 1] - currentY);
+                        currentY = val[k + 1];
                         break;
                     case 'a': // Draws an elliptical arc
                         // (rx ry x-axis-rotation large-arc-flag sweep-flag x y)
@@ -2047,7 +2059,6 @@ public class VectorDrawable extends Drawable {
                         currentY += val[k + 6];
                         ctrlPointX = currentX;
                         ctrlPointY = currentY;
-
                         break;
                     case 'A': // Draws an elliptical arc
                         drawArc(path,
@@ -2066,6 +2077,7 @@ public class VectorDrawable extends Drawable {
                         ctrlPointY = currentY;
                         break;
                 }
+                previousCmd = cmd;
             }
             current[0] = currentX;
             current[1] = currentY;
