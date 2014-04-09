@@ -322,10 +322,6 @@ public class VectorDrawable extends Drawable {
         }
     }
 
-    /**
-     * Not implemented yet
-     * @hide
-     */
     @Override
     public void setColorFilter(ColorFilter colorFilter) {
         // TODO: support color filter
