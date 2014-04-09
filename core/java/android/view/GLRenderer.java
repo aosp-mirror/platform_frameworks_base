@@ -838,6 +838,11 @@ public class GLRenderer extends HardwareRenderer {
         }
     }
 
+    @Override
+    void pauseSurface(Surface surface) {
+        // No-op
+    }
+
     boolean initializeEgl() {
         synchronized (sEglLock) {
             if (sEgl == null && sEglConfig == null) {

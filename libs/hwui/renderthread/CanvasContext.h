@@ -63,6 +63,7 @@ public:
 
     bool initialize(EGLNativeWindowType window);
     void updateSurface(EGLNativeWindowType window);
+    void pauseSurface(EGLNativeWindowType window);
     void setup(int width, int height);
     void setDisplayListData(RenderNode* displayList, DisplayListData* newData);
     void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters);
@@ -83,7 +84,7 @@ public:
 private:
     void setSurface(EGLNativeWindowType window);
     void swapBuffers();
-    void makeCurrent();
+    void requireSurface();
 
     friend class InvokeFunctorsTask;
     void invokeFunctors();

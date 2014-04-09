@@ -92,10 +92,10 @@ CREATE_BRIDGE2(initialize, CanvasContext* context, EGLNativeWindowType window) {
     return (void*) args->context->initialize(args->window);
 }
 
-bool RenderProxy::initialize(EGLNativeWindowType window) {
+bool RenderProxy::initialize(const sp<ANativeWindow>& window) {
     SETUP_TASK(initialize);
     args->context = mContext;
-    args->window = window;
+    args->window = window.get();
     return (bool) postAndWait(task);
 }
 
@@ -104,11 +104,23 @@ CREATE_BRIDGE2(updateSurface, CanvasContext* context, EGLNativeWindowType window
     return NULL;
 }
 
-void RenderProxy::updateSurface(EGLNativeWindowType window) {
+void RenderProxy::updateSurface(const sp<ANativeWindow>& window) {
     SETUP_TASK(updateSurface);
     args->context = mContext;
-    args->window = window;
-    post(task);
+    args->window = window.get();
+    postAndWait(task);
+}
+
+CREATE_BRIDGE2(pauseSurface, CanvasContext* context, EGLNativeWindowType window) {
+    args->context->pauseSurface(args->window);
+    return NULL;
+}
+
+void RenderProxy::pauseSurface(const sp<ANativeWindow>& window) {
+    SETUP_TASK(pauseSurface);
+    args->context = mContext;
+    args->window = window.get();
+    postAndWait(task);
 }
 
 CREATE_BRIDGE3(setup, CanvasContext* context, int width, int height) {

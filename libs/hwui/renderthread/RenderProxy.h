@@ -59,8 +59,9 @@ public:
     ANDROID_API RenderProxy(bool translucent);
     ANDROID_API virtual ~RenderProxy();
 
-    ANDROID_API bool initialize(EGLNativeWindowType window);
-    ANDROID_API void updateSurface(EGLNativeWindowType window);
+    ANDROID_API bool initialize(const sp<ANativeWindow>& window);
+    ANDROID_API void updateSurface(const sp<ANativeWindow>& window);
+    ANDROID_API void pauseSurface(const sp<ANativeWindow>& window);
     ANDROID_API void setup(int width, int height);
     ANDROID_API void setDisplayListData(RenderNode* renderNode, DisplayListData* newData);
     ANDROID_API void drawDisplayList(RenderNode* displayList,

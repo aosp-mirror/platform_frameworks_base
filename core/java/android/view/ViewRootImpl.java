@@ -1421,6 +1421,12 @@ public final class ViewRootImpl implements ViewParent,
                             host.getMeasuredHeight() + ", params=" + params);
                 }
 
+                if (mAttachInfo.mHardwareRenderer != null) {
+                    // relayoutWindow may decide to destroy mSurface. As that decision
+                    // happens in WindowManager service, we need to be defensive here
+                    // and stop using the surface in case it gets destroyed.
+                    mAttachInfo.mHardwareRenderer.pauseSurface(mSurface);
+                }
                 final int surfaceGenerationId = mSurface.getGenerationId();
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
                 if (!mDrawDuringWindowsAnimating &&
