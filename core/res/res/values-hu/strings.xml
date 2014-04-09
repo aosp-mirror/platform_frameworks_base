@@ -682,7 +682,7 @@
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"hálózati körülményekkel kapcsolatos észrevételek figyelemmel kísérése"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Lehetővé teszi egy alkalmazás számára, hogy figyelemmel kísérje a hálózati körülményekkel kapcsolatos észrevételeket. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM-tanúsítványokhoz való hozzáférés"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Engedélyezi egy alkalmazás számára a DRM-tanúsítványokhoz való hozzáférést és azok használatát. Átlagos alkalmazásoknak erre nem lehet szüksége."</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Engedélyezi egy alkalmazás számára a DRM-tanúsítványokhoz való hozzáférést és azok használatát. Átlagos alkalmazásoknak erre nem lehet szükségük."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Jelszavakkal kapcsolatos szabályok beállítása"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"A képernyőzár-feloldási jelszavakban engedélyezett karakterek és hosszúság vezérlése."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Képernyőzár-feloldási kísérletek figyelése"</string>
