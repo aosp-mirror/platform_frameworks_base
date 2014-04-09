@@ -349,6 +349,7 @@ please see themes_device_defaults.xml.
         <item name="actionMenuTextAppearance">@android:style/TextAppearance.Holo.Widget.ActionBar.Menu</item>
         <item name="actionMenuTextColor">?android:attr/textColorPrimary</item>
         <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarTheme">@null</item>
         <item name="actionBarDivider">?android:attr/dividerVertical</item>
         <item name="actionBarItemBackground">?android:attr/selectableItemBackground</item>
 
@@ -1194,6 +1195,7 @@ please see themes_device_defaults.xml.
         <item name="actionBarSize">@dimen/action_bar_default_height</item>
         <item name="actionModePopupWindowStyle">@android:style/Widget.Holo.PopupWindow.ActionMode</item>
         <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarTheme">@null</item>
 
         <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_holo_dark</item>
         <item name="actionModeCopyDrawable">@android:drawable/ic_menu_copy_holo_dark</item>
@@ -1526,6 +1528,7 @@ please see themes_device_defaults.xml.
         <item name="actionBarSize">@dimen/action_bar_default_height</item>
         <item name="actionModePopupWindowStyle">@android:style/Widget.Holo.Light.PopupWindow.ActionMode</item>
         <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarTheme">@null</item>
 
         <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_holo_light</item>
         <item name="actionModeCopyDrawable">@android:drawable/ic_menu_copy_holo_light</item>
@@ -1585,6 +1588,7 @@ please see themes_device_defaults.xml.
         <item name="android:windowContentOverlay">@android:drawable/ab_solid_shadow_holo</item>
         <item name="android:actionBarStyle">@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse</item>
         <item name="actionBarWidgetTheme">@android:style/Theme.Holo</item>
+        <item name="actionBarTheme">@null</item>
 
         <item name="actionDropDownStyle">@android:style/Widget.Holo.Spinner.DropDown.ActionBar</item>
         <item name="actionButtonStyle">@android:style/Widget.Holo.ActionButton</item>
