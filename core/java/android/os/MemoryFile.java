@@ -63,12 +63,17 @@ public class MemoryFile
      * Allocates a new ashmem region. The region is initially not purgable.
      *
      * @param name optional name for the file (can be null).
-     * @param length of the memory file in bytes.
+     * @param length of the memory file in bytes, must be non-negative.
      * @throws IOException if the memory file could not be created.
      */
     public MemoryFile(String name, int length) throws IOException {
         mLength = length;
-        mFD = native_open(name, length);
+        if (length >= 0) {
+            mFD = native_open(name, length);
+        } else {
+            throw new IOException("Invalid length: " + length);
+        }
+
         if (length > 0) {
             mAddress = native_mmap(mFD, length, PROT_READ | PROT_WRITE);
         } else {
