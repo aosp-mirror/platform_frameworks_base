@@ -1208,20 +1208,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case GOING_TO_SLEEP_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            goingToSleep();
-            reply.writeNoException();
-            return true;
-        }
-
-        case WAKING_UP_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            wakingUp();
-            reply.writeNoException();
-            return true;
-        }
-
         case SET_LOCK_SCREEN_SHOWN_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             setLockScreenShown(data.readInt() != 0);
@@ -1291,17 +1277,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             boolean res = killProcessesBelowForeground(reason);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
-            return true;
-        }
-
-        case START_RUNNING_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            String pkg = data.readString();
-            String cls = data.readString();
-            String action = data.readString();
-            String indata = data.readString();
-            startRunning(pkg, cls, action, indata);
-            reply.writeNoException();
             return true;
         }
 
@@ -3672,26 +3647,6 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return pfd;
     }
-    public void goingToSleep() throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        mRemote.transact(GOING_TO_SLEEP_TRANSACTION, data, reply, 0);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
-    }
-    public void wakingUp() throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        mRemote.transact(WAKING_UP_TRANSACTION, data, reply, 0);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
-    }
     public void setLockScreenShown(boolean shown) throws RemoteException
     {
         Parcel data = Parcel.obtain();
@@ -3781,20 +3736,6 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return res;
-    }
-    public void startRunning(String pkg, String cls, String action,
-            String indata) throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeString(pkg);
-        data.writeString(cls);
-        data.writeString(action);
-        data.writeString(indata);
-        mRemote.transact(START_RUNNING_TRANSACTION, data, reply, 0);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
     }
     public boolean testIsSystemReady()
     {
