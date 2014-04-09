@@ -177,13 +177,13 @@ static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz UNUSED,
             break;
         }
         if (ret < 0) {
-            if (errno == EINTR) {
+            if (ret == -EINTR) {
                 continue;
             }
-            if (errno == EINVAL) {
+            if (ret == -EINVAL) {
                 jniThrowException(env, "java/io/IOException", "Event too short");
-            } else if (errno != EAGAIN) {
-                jniThrowIOException(env, errno);  // Will throw on return
+            } else if (ret != -EAGAIN) {
+                jniThrowIOException(env, -ret);  // Will throw on return
             }
             break;
         }
