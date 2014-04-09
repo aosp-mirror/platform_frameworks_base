@@ -2804,6 +2804,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
         mKeyguardSettingsFlipButton.setVisibility(View.VISIBLE);
         mKeyguardSettingsFlipButton.findViewById(R.id.settings_button).setVisibility(View.VISIBLE);
+        mKeyguardSettingsFlipButton.findViewById(R.id.notification_button)
+                .setVisibility(View.INVISIBLE);
         updateRowStates();
     }
 
@@ -2849,24 +2851,38 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     private void installSettingsButton(View parent) {
-        ImageView settingsButton = (ImageView) mStatusBarWindow.findViewById(R.id.settings_button);
+        final ImageView settingsButton =
+                (ImageView) mStatusBarWindow.findViewById(R.id.settings_button);
+        final ImageView notificationButton =
+                (ImageView) mStatusBarWindow.findViewById(R.id.notification_button);
         if (settingsButton != null) {
             settingsButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     animateExpandSettingsPanel();
                     v.setVisibility(View.INVISIBLE);
+                    notificationButton.setVisibility(View.VISIBLE);
                 }
             });
+            settingsButton.setVisibility(View.VISIBLE);
             if (mHasSettingsPanel) {
                 // the settings panel is hiding behind this button
                 settingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
-                settingsButton.setVisibility(View.VISIBLE);
             } else {
                 // no settings panel, go straight to settings
-                settingsButton.setVisibility(View.VISIBLE);
                 settingsButton.setImageResource(R.drawable.ic_notify_settings);
             }
+        }
+        if (notificationButton != null) {
+            notificationButton.setVisibility(View.INVISIBLE);
+            notificationButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    flipToNotifications();
+                    v.setVisibility(View.INVISIBLE);
+                    settingsButton.setVisibility(View.VISIBLE);
+                }
+            });
         }
     }
 }
