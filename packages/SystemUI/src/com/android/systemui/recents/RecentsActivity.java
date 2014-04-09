@@ -73,7 +73,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     };
 
     /** Updates the set of recent tasks */
-    void updateRecentsTasks() {
+    void updateRecentsTasks(Intent launchIntent) {
+        // Update the configuration based on the launch intent
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        config.launchedWithThumbnailAnimation = launchIntent.getBooleanExtra(
+                AlternateRecentsComponent.EXTRA_ANIMATING_WITH_THUMBNAIL, false);
+
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         SpaceNode root = loader.reload(this, Constants.Values.RecentsTaskLoader.PreloadFirstTasksCount);
         ArrayList<TaskStack> stacks = root.getStacks();
@@ -137,7 +142,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         setContentView(mContainerView);
 
         // Update the recent tasks
-        updateRecentsTasks();
+        updateRecentsTasks(getIntent());
     }
 
     @Override
@@ -157,7 +162,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         RecentsConfiguration.reinitialize(this);
 
         // Update the recent tasks
-        updateRecentsTasks();
+        updateRecentsTasks(intent);
     }
 
     @Override

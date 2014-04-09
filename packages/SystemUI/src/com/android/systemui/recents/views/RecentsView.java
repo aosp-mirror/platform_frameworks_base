@@ -277,7 +277,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 Constants.DebugFlags.App.TimeRecentsLaunchKey, "onTaskLaunched");
 
         // Launch the app right away if there is no task view, otherwise, animate the icon out first
-        if (tv == null || !Constants.Values.TaskView.AnimateFrontTaskIconOnLeavingRecents) {
+        if (tv == null || !Constants.Values.TaskView.AnimateFrontTaskBarOnLeavingRecents) {
             post(launchRunnable);
         } else {
             tv.animateOnLeavingRecents(launchRunnable);

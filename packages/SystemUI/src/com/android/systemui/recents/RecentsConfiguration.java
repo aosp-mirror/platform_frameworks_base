@@ -41,6 +41,8 @@ public class RecentsConfiguration {
     public int filteringNewViewsMinAnimDuration;
     public int taskBarEnterAnimDuration;
 
+    public boolean launchedWithThumbnailAnimation;
+
     /** Private constructor */
     private RecentsConfiguration() {}
 
