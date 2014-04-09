@@ -29,6 +29,7 @@ import android.graphics.Bitmap;
 interface IUserManager {
     UserInfo createUser(in String name, int flags);
     UserInfo createProfileForUser(in String name, int flags, int userHandle);
+    void setUserEnabled(int userHandle);
     boolean removeUser(int userHandle);
     void setUserName(int userHandle, String name);
     void setUserIcon(int userHandle, in Bitmap icon);

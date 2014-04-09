@@ -27,8 +27,8 @@ import android.os.UserHandle;
  */
 public class UserInfo implements Parcelable {
 
-    /** 6 bits for user type */
-    public static final int FLAG_MASK_USER_TYPE = 0x0000003F;
+    /** 8 bits for user type */
+    public static final int FLAG_MASK_USER_TYPE = 0x000000FF;
 
     /**
      * *************************** NOTE ***************************
@@ -69,6 +69,11 @@ public class UserInfo implements Parcelable {
      * corporate data.
      */
     public static final int FLAG_MANAGED_PROFILE = 0x00000020;
+
+    /**
+     * Indicates that this user is disabled.
+     */
+    public static final int FLAG_DISABLED = 0x00000040;
 
 
     public static final int NO_PROFILE_GROUP_ID = -1;
@@ -115,6 +120,10 @@ public class UserInfo implements Parcelable {
 
     public boolean isManagedProfile() {
         return (flags & FLAG_MANAGED_PROFILE) == FLAG_MANAGED_PROFILE;
+    }
+
+    public boolean isEnabled() {
+        return (flags & FLAG_DISABLED) != FLAG_DISABLED;
     }
 
     /**

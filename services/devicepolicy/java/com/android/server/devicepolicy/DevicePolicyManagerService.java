@@ -2903,11 +2903,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             int userId = UserHandle.getCallingUserId();
             Slog.d(LOG_TAG, "Enabling the profile for: " + userId);
 
-            mDeviceOwner.setProfileEnabled(userId);
-            mDeviceOwner.writeOwnerFile();
-
+            UserManager um = UserManager.get(mContext);
             long id = Binder.clearCallingIdentity();
             try {
+                um.setUserEnabled(userId);
                 Intent intent = new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED);
                 intent.putExtra(Intent.EXTRA_USER, new UserHandle(UserHandle.getCallingUserId()));
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY |
@@ -2946,23 +2945,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         return null;
-    }
-
-    @Override
-    public boolean isProfileEnabled(int userHandle) {
-        if (!mHasFeature) {
-            // If device policy management is not enabled, then the userHandle cannot belong to a
-            // managed profile. All other profiles are considered enabled.
-            return true;
-        }
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
-
-        synchronized (this) {
-            if (mDeviceOwner != null) {
-                 return mDeviceOwner.isProfileEnabled(userHandle);
-            }
-        }
-        return true;
     }
 
     private boolean isDeviceProvisioned() {
