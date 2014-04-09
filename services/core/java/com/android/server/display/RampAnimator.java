@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.power;
+package com.android.server.display;
 
 import android.animation.ValueAnimator;
 import android.util.IntProperty;

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.server.power;
+package com.android.server.display;
 
+import com.android.internal.app.IBatteryStats;
+import com.android.server.LocalServices;
+import com.android.server.am.BatteryStatsService;
 import com.android.server.lights.LightsManager;
-import com.android.server.twilight.TwilightListener;
-import com.android.server.twilight.TwilightManager;
-import com.android.server.twilight.TwilightState;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -29,10 +29,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
+import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.MathUtils;
@@ -80,23 +83,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // The minimum reduction in brightness when dimmed.
     private static final int SCREEN_DIM_MINIMUM_REDUCTION = 10;
 
-    // If true, enables the use of the current time as an auto-brightness adjustment.
-    // The basic idea here is to expand the dynamic range of auto-brightness
-    // when it is especially dark outside.  The light sensor tends to perform
-    // poorly at low light levels so we compensate for it by making an
-    // assumption about the environment.
-    private static final boolean USE_TWILIGHT_ADJUSTMENT =
-            PowerManager.useTwilightAdjustmentFeature();
-
-    // Specifies the maximum magnitude of the time of day adjustment.
-    private static final float TWILIGHT_ADJUSTMENT_MAX_GAMMA = 1.5f;
-
-    // The amount of time after or before sunrise over which to start adjusting
-    // the gamma.  We want the change to happen gradually so that it is below the
-    // threshold of perceptibility and so that the adjustment has maximum effect
-    // well after dusk.
-    private static final long TWILIGHT_ADJUSTMENT_TIME = DateUtils.HOUR_IN_MILLIS * 2;
-
     private static final int ELECTRON_BEAM_ON_ANIMATION_DURATION_MILLIS = 250;
     private static final int ELECTRON_BEAM_OFF_ANIMATION_DURATION_MILLIS = 400;
 
@@ -120,23 +106,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private final Object mLock = new Object();
 
-    // Notifier for sending asynchronous notifications.
-    private final Notifier mNotifier;
-
-    // The display suspend blocker.
-    // Held while there are pending state change notifications.
-    private final SuspendBlocker mDisplaySuspendBlocker;
-
-    // The display blanker.
-    private final DisplayBlanker mDisplayBlanker;
-
     // Our handler.
     private final DisplayControllerHandler mHandler;
 
     // Asynchronous callbacks into the power manager service.
     // Only invoked from the handler thread while no locks are held.
-    private final Callbacks mCallbacks;
-    private Handler mCallbackHandler;
+    private final DisplayPowerCallbacks mCallbacks;
+
+    // Battery stats.
+    private final IBatteryStats mBatteryStats;
 
     // The lights service.
     private final LightsManager mLights;
@@ -246,18 +224,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     /**
      * Creates the display power controller.
      */
-    public DisplayPowerController(Looper looper, Context context, Notifier notifier,
-            LightsManager lights, TwilightManager twilight, SensorManager sensorManager,
-            SuspendBlocker displaySuspendBlocker, DisplayBlanker displayBlanker,
-            Callbacks callbacks, Handler callbackHandler) {
-        mHandler = new DisplayControllerHandler(looper);
-        mNotifier = notifier;
-        mDisplaySuspendBlocker = displaySuspendBlocker;
-        mDisplayBlanker = displayBlanker;
+    public DisplayPowerController(Context context,
+            DisplayPowerCallbacks callbacks, Handler handler, SensorManager sensorManager) {
+        mHandler = new DisplayControllerHandler(handler.getLooper());
         mCallbacks = callbacks;
-        mCallbackHandler = callbackHandler;
 
-        mLights = lights;
+        mBatteryStats = BatteryStatsService.getService();
+        mLights = LocalServices.getService(LightsManager.class);
         mSensorManager = sensorManager;
 
         final Resources resources = context.getResources();
@@ -297,8 +270,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 if (screenBrightness[0] < screenBrightnessRangeMinimum) {
                     screenBrightnessRangeMinimum = clampAbsoluteBrightness(screenBrightness[0]);
                 }
-                mAutomaticBrightnessController = new AutomaticBrightnessController(this, looper,
-                        twilight, sensorManager, screenAutoBrightnessSpline,
+                mAutomaticBrightnessController = new AutomaticBrightnessController(this,
+                        handler.getLooper(), sensorManager, screenAutoBrightnessSpline,
                         lightSensorWarmUpTimeConfig, screenBrightnessRangeMinimum,
                         mScreenBrightnessRangeMaximum);
             }
@@ -393,7 +366,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void initialize() {
-        mPowerState = new DisplayPowerState(new ElectronBeam(), mDisplayBlanker,
+        mPowerState = new DisplayPowerState(new ElectronBeam(), mCallbacks,
                 mLights.getLight(LightsManager.LIGHT_ID_BACKLIGHT));
 
         mElectronBeamOnAnimator = ObjectAnimator.ofFloat(
@@ -409,13 +382,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mScreenBrightnessRampAnimator = new RampAnimator<DisplayPowerState>(
                 mPowerState, DisplayPowerState.SCREEN_BRIGHTNESS);
 
-        // Initialize screen on state.
-        if (mPowerState.isScreenOn()) {
-            mNotifier.onScreenOn();
-        } else {
-            mNotifier.onScreenOff();
+        // Initialize screen state for battery stats.
+        try {
+            if (mPowerState.isScreenOn()) {
+                mBatteryStats.noteScreenOn();
+            } else {
+                mBatteryStats.noteScreenOff();
+            }
+            mBatteryStats.noteScreenBrightness(mPowerState.getScreenBrightness());
+        } catch (RemoteException ex) {
+            // same process
         }
-        mNotifier.onScreenBrightness(mPowerState.getScreenBrightness());
     }
 
     private final Animator.AnimatorListener mAnimatorListener = new Animator.AnimatorListener() {
@@ -653,10 +630,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void setScreenOn(boolean on) {
         if (mPowerState.isScreenOn() != on) {
             mPowerState.setScreenOn(on);
-            if (on) {
-                mNotifier.onScreenOn();
-            } else {
-                mNotifier.onScreenOff();
+            try {
+                if (on) {
+                    mBatteryStats.noteScreenOn();
+                } else {
+                    mBatteryStats.noteScreenOff();
+                }
+            } catch (RemoteException ex) {
+                // same process
             }
         }
     }
@@ -668,7 +649,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private void animateScreenBrightness(int target, int rate) {
         if (mScreenBrightnessRampAnimator.animateTo(target, rate)) {
-            mNotifier.onScreenBrightness(target);
+            try {
+                mBatteryStats.noteScreenBrightness(target);
+            } catch (RemoteException ex) {
+                // same process
+            }
         }
     }
 
@@ -753,60 +738,60 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void clearPendingProximityDebounceTime() {
         if (mPendingProximityDebounceTime >= 0) {
             mPendingProximityDebounceTime = -1;
-            mDisplaySuspendBlocker.release(); // release wake lock
+            mCallbacks.releaseSuspendBlocker(); // release wake lock
         }
     }
 
     private void setPendingProximityDebounceTime(long debounceTime) {
         if (mPendingProximityDebounceTime < 0) {
-            mDisplaySuspendBlocker.acquire(); // acquire wake lock
+            mCallbacks.acquireSuspendBlocker(); // acquire wake lock
         }
         mPendingProximityDebounceTime = debounceTime;
     }
 
     private void sendOnStateChangedWithWakelock() {
-        mDisplaySuspendBlocker.acquire();
-        mCallbackHandler.post(mOnStateChangedRunnable);
+        mCallbacks.acquireSuspendBlocker();
+        mHandler.post(mOnStateChangedRunnable);
     }
 
     private final Runnable mOnStateChangedRunnable = new Runnable() {
         @Override
         public void run() {
             mCallbacks.onStateChanged();
-            mDisplaySuspendBlocker.release();
+            mCallbacks.releaseSuspendBlocker();
         }
     };
 
     private void sendOnProximityPositiveWithWakelock() {
-        mDisplaySuspendBlocker.acquire();
-        mCallbackHandler.post(mOnProximityPositiveRunnable);
+        mCallbacks.acquireSuspendBlocker();
+        mHandler.post(mOnProximityPositiveRunnable);
     }
 
     private final Runnable mOnProximityPositiveRunnable = new Runnable() {
         @Override
         public void run() {
             mCallbacks.onProximityPositive();
-            mDisplaySuspendBlocker.release();
+            mCallbacks.releaseSuspendBlocker();
         }
     };
 
     private void sendOnProximityNegativeWithWakelock() {
-        mDisplaySuspendBlocker.acquire();
-        mCallbackHandler.post(mOnProximityNegativeRunnable);
+        mCallbacks.acquireSuspendBlocker();
+        mHandler.post(mOnProximityNegativeRunnable);
     }
 
     private final Runnable mOnProximityNegativeRunnable = new Runnable() {
         @Override
         public void run() {
             mCallbacks.onProximityNegative();
-            mDisplaySuspendBlocker.release();
+            mCallbacks.releaseSuspendBlocker();
         }
     };
 
     public void dump(final PrintWriter pw) {
         synchronized (mLock) {
             pw.println();
-            pw.println("Display Controller Locked State:");
+            pw.println("Display Power Controller Locked State:");
             pw.println("  mDisplayReadyLocked=" + mDisplayReadyLocked);
             pw.println("  mPendingRequestLocked=" + mPendingRequestLocked);
             pw.println("  mPendingRequestChangedLocked=" + mPendingRequestChangedLocked);
@@ -816,7 +801,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
 
         pw.println();
-        pw.println("Display Controller Configuration:");
+        pw.println("Display Power Controller Configuration:");
         pw.println("  mScreenBrightnessDozeConfig=" + mScreenBrightnessDozeConfig);
         pw.println("  mScreenBrightnessDimConfig=" + mScreenBrightnessDimConfig);
         pw.println("  mScreenBrightnessRangeMinimum=" + mScreenBrightnessRangeMinimum);
@@ -834,7 +819,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private void dumpLocal(PrintWriter pw) {
         pw.println();
-        pw.println("Display Controller Thread State:");
+        pw.println("Display Power Controller Thread State:");
         pw.println("  mPowerRequest=" + mPowerRequest);
         pw.println("  mWaitingForNegativeProximity=" + mWaitingForNegativeProximity);
 
@@ -911,15 +896,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private static int clampAbsoluteBrightness(int value) {
         return MathUtils.constrain(value, PowerManager.BRIGHTNESS_OFF, PowerManager.BRIGHTNESS_ON);
-    }
-
-    /**
-     * Asynchronous callbacks from the power controller to the power manager service.
-     */
-    public interface Callbacks {
-        void onStateChanged();
-        void onProximityPositive();
-        void onProximityNegative();
     }
 
     private final class DisplayControllerHandler extends Handler {

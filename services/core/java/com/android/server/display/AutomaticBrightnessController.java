@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.power;
+package com.android.server.display;
 
+import com.android.server.LocalServices;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
@@ -25,6 +26,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -172,10 +174,10 @@ class AutomaticBrightnessController {
     private float mLastScreenAutoBrightnessGamma = 1.0f;
 
     public AutomaticBrightnessController(Callbacks callbacks, Looper looper,
-            TwilightManager twilight, SensorManager sensorManager, Spline autoBrightnessSpline,
+            SensorManager sensorManager, Spline autoBrightnessSpline,
             int lightSensorWarmUpTime, int brightnessMin, int brightnessMax) {
         mCallbacks = callbacks;
-        mTwilight = twilight;
+        mTwilight = LocalServices.getService(TwilightManager.class);
         mSensorManager = sensorManager;
         mScreenAutoBrightnessSpline = autoBrightnessSpline;
         mScreenBrightnessRangeMinimum = brightnessMin;
@@ -198,7 +200,7 @@ class AutomaticBrightnessController {
         return mScreenAutoBrightness;
     }
 
-    public void updatePowerState(DisplayPowerRequest request) {
+    public void updatePowerState(DisplayManagerInternal.DisplayPowerRequest request) {
         if (setScreenAutoBrightnessAdjustment(request.screenAutoBrightnessAdjustment)
                 || setLightSensorEnabled(request.wantLightSensorEnabled())) {
             updateAutoBrightness(false /*sendUpdate*/);
