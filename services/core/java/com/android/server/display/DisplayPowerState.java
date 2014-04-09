@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.server.power;
+package com.android.server.display;
 
 import com.android.server.lights.Light;
 
+import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -32,8 +33,8 @@ import java.io.PrintWriter;
 /**
  * Controls the display power state.
  * <p>
- * This component is similar in nature to a {@link View} except that it describes
- * the properties of a display.  When properties are changed, the component
+ * This component is similar in nature to a {@link android.view.View} except that it
+ * describes the properties of a display.  When properties are changed, the component
  * invalidates itself and posts a callback to apply the changes in a consistent order.
  * This mechanism enables multiple properties of the display power state to be animated
  * together smoothly by the animation framework.  Some of the work to blank or unblank
@@ -43,8 +44,7 @@ import java.io.PrintWriter;
  * that belongs to the {@link DisplayPowerController}.
  * </p><p>
  * We don't need to worry about holding a suspend blocker here because the
- * {@link PowerManagerService} does that for us whenever there is a change
- * in progress.
+ * power manager does that for us whenever there is a change in progress.
  * </p>
  */
 final class DisplayPowerState {
@@ -55,7 +55,7 @@ final class DisplayPowerState {
     private final Handler mHandler;
     private final Choreographer mChoreographer;
     private final ElectronBeam mElectronBeam;
-    private final DisplayBlanker mDisplayBlanker;
+    private final DisplayPowerCallbacks mCallbacks;
     private final Light mBacklight;
     private final PhotonicModulator mPhotonicModulator;
 
@@ -72,11 +72,11 @@ final class DisplayPowerState {
     private Runnable mCleanListener;
 
     public DisplayPowerState(ElectronBeam electronBean,
-            DisplayBlanker displayBlanker, Light backlight) {
+            DisplayPowerCallbacks callbacks, Light backlight) {
         mHandler = new Handler(true /*async*/);
         mChoreographer = Choreographer.getInstance();
         mElectronBeam = electronBean;
-        mDisplayBlanker = displayBlanker;
+        mCallbacks = callbacks;
         mBacklight = backlight;
         mPhotonicModulator = new PhotonicModulator();
 
@@ -403,13 +403,13 @@ final class DisplayPowerState {
                                 + ", backlight=" + backlight);
                     }
                     if (onChanged && on) {
-                        mDisplayBlanker.unblankAllDisplays();
+                        mCallbacks.unblankAllDisplays();
                     }
                     if (backlightChanged) {
                         mBacklight.setBrightness(backlight);
                     }
                     if (onChanged && !on) {
-                        mDisplayBlanker.blankAllDisplays();
+                        mCallbacks.blankAllDisplays();
                     }
                 }
 
