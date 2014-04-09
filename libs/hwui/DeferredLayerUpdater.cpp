@@ -73,7 +73,7 @@ bool DeferredLayerUpdater::apply() {
             success = LayerRenderer::resizeLayer(mLayer, mWidth, mHeight);
         }
         mLayer->setBlend(mBlend);
-        mDisplayList->updateProperties();
+        mDisplayList->pushStagingChanges();
         mLayer->updateDeferred(mDisplayList.get(),
                 mDirtyRect.left, mDirtyRect.top, mDirtyRect.right, mDirtyRect.bottom);
         mDirtyRect.setEmpty();

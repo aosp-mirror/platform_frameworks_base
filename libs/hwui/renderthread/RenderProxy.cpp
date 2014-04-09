@@ -124,10 +124,6 @@ void RenderProxy::setup(int width, int height) {
     post(task);
 }
 
-void RenderProxy::setDisplayListData(RenderNode* renderNode, DisplayListData* newData) {
-    mDrawFrameTask.setDisplayListData(renderNode, newData);
-}
-
 void RenderProxy::drawDisplayList(RenderNode* displayList,
         int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom) {
     mDrawFrameTask.setRenderNode(displayList);

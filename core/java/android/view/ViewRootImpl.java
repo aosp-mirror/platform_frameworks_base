@@ -1499,7 +1499,7 @@ public final class ViewRootImpl implements ViewParent,
                                 com.android.internal.R.integer.config_mediumAnimTime);
 
                         layerCanvas.restoreToCount(restoreCount);
-                        layerRenderNode.end(mAttachInfo.mHardwareRenderer, layerCanvas);
+                        layerRenderNode.end(layerCanvas);
                         layerRenderNode.setCaching(true);
                         layerRenderNode.setLeftTopRightBottom(0, 0, mWidth, mHeight);
                         mTempRect.set(0, 0, mWidth, mHeight);

@@ -41,32 +41,34 @@ using namespace uirenderer;
 // DisplayList view properties
 // ----------------------------------------------------------------------------
 
-static void android_view_RenderNode_setDisplayListName(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jstring name) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
+static void android_view_RenderNode_output(JNIEnv* env,
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->output();
+}
+
+static jlong android_view_RenderNode_create(JNIEnv* env, jobject clazz, jstring name) {
+    RenderNode* renderNode = new RenderNode();
+    renderNode->incStrong(0);
     if (name != NULL) {
         const char* textArray = env->GetStringUTFChars(name, NULL);
-        displayList->setName(textArray);
+        renderNode->setName(textArray);
         env->ReleaseStringUTFChars(name, textArray);
     }
+    return reinterpret_cast<jlong>(renderNode);
 }
 
-static void android_view_RenderNode_output(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->output();
+static void android_view_RenderNode_destroyRenderNode(JNIEnv* env,
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->decStrong(0);
 }
 
-static jlong android_view_RenderNode_create(JNIEnv* env, jobject clazz) {
-    RenderNode* displayList = new RenderNode();
-    displayList->incStrong(0);
-    return reinterpret_cast<jlong>(displayList);
-}
-
-static void android_view_RenderNode_destroyDisplayList(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->decStrong(0);
+static void android_view_RenderNode_setDisplayListData(JNIEnv* env,
+        jobject clazz, jlong renderNodePtr, jlong newDataPtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    DisplayListData* newData = reinterpret_cast<DisplayListData*>(newDataPtr);
+    renderNode->setStagingDisplayList(newData);
 }
 
 // ----------------------------------------------------------------------------
@@ -74,201 +76,201 @@ static void android_view_RenderNode_destroyDisplayList(JNIEnv* env,
 // ----------------------------------------------------------------------------
 
 static void android_view_RenderNode_setCaching(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jboolean caching) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setCaching(caching);
+        jobject clazz, jlong renderNodePtr, jboolean caching) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setCaching(caching);
 }
 
 static void android_view_RenderNode_setStaticMatrix(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jlong matrixPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
+        jobject clazz, jlong renderNodePtr, jlong matrixPtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
-    displayList->mutateStagingProperties().setStaticMatrix(matrix);
+    renderNode->mutateStagingProperties().setStaticMatrix(matrix);
 }
 
 static void android_view_RenderNode_setAnimationMatrix(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jlong matrixPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
+        jobject clazz, jlong renderNodePtr, jlong matrixPtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
-    displayList->mutateStagingProperties().setAnimationMatrix(matrix);
+    renderNode->mutateStagingProperties().setAnimationMatrix(matrix);
 }
 
 static void android_view_RenderNode_setClipToBounds(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jboolean clipToBounds) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setClipToBounds(clipToBounds);
+        jobject clazz, jlong renderNodePtr, jboolean clipToBounds) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setClipToBounds(clipToBounds);
 }
 
 static void android_view_RenderNode_setProjectBackwards(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jboolean shouldProject) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setProjectBackwards(shouldProject);
+        jobject clazz, jlong renderNodePtr, jboolean shouldProject) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setProjectBackwards(shouldProject);
 }
 
 static void android_view_RenderNode_setProjectionReceiver(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jboolean shouldRecieve) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setProjectionReceiver(shouldRecieve);
+        jobject clazz, jlong renderNodePtr, jboolean shouldRecieve) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setProjectionReceiver(shouldRecieve);
 }
 
 static void android_view_RenderNode_setOutlineRoundRect(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jint left, jint top,
+        jobject clazz, jlong renderNodePtr, jint left, jint top,
         jint right, jint bottom, jfloat radius) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().mutableOutline().setRoundRect(left, top, right, bottom, radius);
-    displayList->mutateStagingProperties().updateClipPath();
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().mutableOutline().setRoundRect(left, top, right, bottom, radius);
+    renderNode->mutateStagingProperties().updateClipPath();
 }
 
 static void android_view_RenderNode_setOutlineConvexPath(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jlong outlinePathPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
+        jobject clazz, jlong renderNodePtr, jlong outlinePathPtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     SkPath* outlinePath = reinterpret_cast<SkPath*>(outlinePathPtr);
-    displayList->mutateStagingProperties().mutableOutline().setConvexPath(outlinePath);
-    displayList->mutateStagingProperties().updateClipPath();
+    renderNode->mutateStagingProperties().mutableOutline().setConvexPath(outlinePath);
+    renderNode->mutateStagingProperties().updateClipPath();
 }
 
 static void android_view_RenderNode_setOutlineEmpty(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().mutableOutline().setEmpty();
-    displayList->mutateStagingProperties().updateClipPath();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().mutableOutline().setEmpty();
+    renderNode->mutateStagingProperties().updateClipPath();
 }
 
 static void android_view_RenderNode_setClipToOutline(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jboolean clipToOutline) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().mutableOutline().setShouldClip(clipToOutline);
-    displayList->mutateStagingProperties().updateClipPath();
+        jobject clazz, jlong renderNodePtr, jboolean clipToOutline) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().mutableOutline().setShouldClip(clipToOutline);
+    renderNode->mutateStagingProperties().updateClipPath();
 }
 
 static void android_view_RenderNode_setRevealClip(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jboolean shouldClip, jboolean inverseClip,
+        jobject clazz, jlong renderNodePtr, jboolean shouldClip, jboolean inverseClip,
         jfloat x, jfloat y, jfloat radius) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().mutableRevealClip().set(
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().mutableRevealClip().set(
             shouldClip, inverseClip, x, y, radius);
-    displayList->mutateStagingProperties().updateClipPath();
+    renderNode->mutateStagingProperties().updateClipPath();
 }
 
 static void android_view_RenderNode_setAlpha(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, float alpha) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setAlpha(alpha);
+        jobject clazz, jlong renderNodePtr, float alpha) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setAlpha(alpha);
 }
 
 static void android_view_RenderNode_setHasOverlappingRendering(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, bool hasOverlappingRendering) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setHasOverlappingRendering(hasOverlappingRendering);
+        jobject clazz, jlong renderNodePtr, bool hasOverlappingRendering) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setHasOverlappingRendering(hasOverlappingRendering);
 }
 
 static void android_view_RenderNode_setTranslationX(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, float tx) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setTranslationX(tx);
+        jobject clazz, jlong renderNodePtr, float tx) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setTranslationX(tx);
 }
 
 static void android_view_RenderNode_setTranslationY(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, float ty) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setTranslationY(ty);
+        jobject clazz, jlong renderNodePtr, float ty) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setTranslationY(ty);
 }
 
 static void android_view_RenderNode_setTranslationZ(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, float tz) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setTranslationZ(tz);
+        jobject clazz, jlong renderNodePtr, float tz) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setTranslationZ(tz);
 }
 
 static void android_view_RenderNode_setRotation(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, float rotation) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setRotation(rotation);
+        jobject clazz, jlong renderNodePtr, float rotation) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setRotation(rotation);
 }
 
 static void android_view_RenderNode_setRotationX(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, float rx) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setRotationX(rx);
+        jobject clazz, jlong renderNodePtr, float rx) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setRotationX(rx);
 }
 
 static void android_view_RenderNode_setRotationY(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, float ry) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setRotationY(ry);
+        jobject clazz, jlong renderNodePtr, float ry) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setRotationY(ry);
 }
 
 static void android_view_RenderNode_setScaleX(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, float sx) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setScaleX(sx);
+        jobject clazz, jlong renderNodePtr, float sx) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setScaleX(sx);
 }
 
 static void android_view_RenderNode_setScaleY(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, float sy) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setScaleY(sy);
+        jobject clazz, jlong renderNodePtr, float sy) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setScaleY(sy);
 }
 
 static void android_view_RenderNode_setPivotX(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, float px) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setPivotX(px);
+        jobject clazz, jlong renderNodePtr, float px) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setPivotX(px);
 }
 
 static void android_view_RenderNode_setPivotY(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, float py) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setPivotY(py);
+        jobject clazz, jlong renderNodePtr, float py) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setPivotY(py);
 }
 
 static void android_view_RenderNode_setCameraDistance(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, float distance) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setCameraDistance(distance);
+        jobject clazz, jlong renderNodePtr, float distance) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setCameraDistance(distance);
 }
 
 static void android_view_RenderNode_setLeft(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, int left) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setLeft(left);
+        jobject clazz, jlong renderNodePtr, int left) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setLeft(left);
 }
 
 static void android_view_RenderNode_setTop(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, int top) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setTop(top);
+        jobject clazz, jlong renderNodePtr, int top) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setTop(top);
 }
 
 static void android_view_RenderNode_setRight(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, int right) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setRight(right);
+        jobject clazz, jlong renderNodePtr, int right) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setRight(right);
 }
 
 static void android_view_RenderNode_setBottom(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, int bottom) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setBottom(bottom);
+        jobject clazz, jlong renderNodePtr, int bottom) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setBottom(bottom);
 }
 
 static void android_view_RenderNode_setLeftTopRightBottom(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, int left, int top,
+        jobject clazz, jlong renderNodePtr, int left, int top,
         int right, int bottom) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().setLeftTopRightBottom(left, top, right, bottom);
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setLeftTopRightBottom(left, top, right, bottom);
 }
 
 static void android_view_RenderNode_offsetLeftAndRight(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, float offset) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().offsetLeftRight(offset);
+        jobject clazz, jlong renderNodePtr, float offset) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().offsetLeftRight(offset);
 }
 
 static void android_view_RenderNode_offsetTopAndBottom(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, float offset) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().offsetTopBottom(offset);
+        jobject clazz, jlong renderNodePtr, float offset) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().offsetTopBottom(offset);
 }
 
 // ----------------------------------------------------------------------------
@@ -276,105 +278,105 @@ static void android_view_RenderNode_offsetTopAndBottom(JNIEnv* env,
 // ----------------------------------------------------------------------------
 
 static jboolean android_view_RenderNode_hasOverlappingRendering(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().hasOverlappingRendering();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().hasOverlappingRendering();
 }
 
 static jfloat android_view_RenderNode_getAlpha(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().getAlpha();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getAlpha();
 }
 
 static jfloat android_view_RenderNode_getLeft(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().getLeft();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getLeft();
 }
 
 static jfloat android_view_RenderNode_getTop(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().getTop();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getTop();
 }
 
 static jfloat android_view_RenderNode_getRight(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().getRight();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getRight();
 }
 
 static jfloat android_view_RenderNode_getBottom(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().getBottom();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getBottom();
 }
 
 static jfloat android_view_RenderNode_getCameraDistance(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().getCameraDistance();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getCameraDistance();
 }
 
 static jfloat android_view_RenderNode_getScaleX(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().getScaleX();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getScaleX();
 }
 
 static jfloat android_view_RenderNode_getScaleY(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().getScaleY();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getScaleY();
 }
 
 static jfloat android_view_RenderNode_getTranslationX(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().getTranslationX();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getTranslationX();
 }
 
 static jfloat android_view_RenderNode_getTranslationY(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().getTranslationY();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getTranslationY();
 }
 
 static jfloat android_view_RenderNode_getTranslationZ(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().getTranslationZ();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getTranslationZ();
 }
 
 static jfloat android_view_RenderNode_getRotation(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().getRotation();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getRotation();
 }
 
 static jfloat android_view_RenderNode_getRotationX(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().getRotationX();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getRotationX();
 }
 
 static jfloat android_view_RenderNode_getRotationY(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().getRotationY();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getRotationY();
 }
 
 static jboolean android_view_RenderNode_isPivotExplicitlySet(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().isPivotExplicitlySet();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().isPivotExplicitlySet();
 }
 
 static jboolean android_view_RenderNode_hasIdentityMatrix(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    return displayList->stagingProperties().getMatrixFlags() == 0;
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getMatrixFlags() == 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -382,16 +384,16 @@ static jboolean android_view_RenderNode_hasIdentityMatrix(JNIEnv* env,
 // ----------------------------------------------------------------------------
 
 static void android_view_RenderNode_getTransformMatrix(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jlong outMatrixPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
+        jobject clazz, jlong renderNodePtr, jlong outMatrixPtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     SkMatrix* outMatrix = reinterpret_cast<SkMatrix*>(outMatrixPtr);
 
-    displayList->mutateStagingProperties().updateMatrix();
-    const SkMatrix* transformMatrix = displayList->stagingProperties().getTransformMatrix();
+    renderNode->mutateStagingProperties().updateMatrix();
+    const SkMatrix* transformMatrix = renderNode->stagingProperties().getTransformMatrix();
 
-    if (displayList->stagingProperties().getMatrixFlags() == TRANSLATION) {
-        outMatrix->setTranslate(displayList->stagingProperties().getTranslationX(),
-                displayList->stagingProperties().getTranslationY());
+    if (renderNode->stagingProperties().getMatrixFlags() == TRANSLATION) {
+        outMatrix->setTranslate(renderNode->stagingProperties().getTranslationX(),
+                renderNode->stagingProperties().getTranslationY());
     } else if (transformMatrix) {
         *outMatrix = *transformMatrix;
     } else {
@@ -400,9 +402,9 @@ static void android_view_RenderNode_getTransformMatrix(JNIEnv* env,
 }
 
 static void android_view_RenderNode_getInverseTransformMatrix(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jlong outMatrixPtr) {
+        jobject clazz, jlong renderNodePtr, jlong outMatrixPtr) {
     // load transform matrix
-    android_view_RenderNode_getTransformMatrix(env, clazz, displayListPtr, outMatrixPtr);
+    android_view_RenderNode_getTransformMatrix(env, clazz, renderNodePtr, outMatrixPtr);
     SkMatrix* outMatrix = reinterpret_cast<SkMatrix*>(outMatrixPtr);
 
     // return it inverted
@@ -413,17 +415,17 @@ static void android_view_RenderNode_getInverseTransformMatrix(JNIEnv* env,
 }
 
 static jfloat android_view_RenderNode_getPivotX(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().updateMatrix();
-    return displayList->stagingProperties().getPivotX();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().updateMatrix();
+    return renderNode->stagingProperties().getPivotX();
 }
 
 static jfloat android_view_RenderNode_getPivotY(JNIEnv* env,
-        jobject clazz, jlong displayListPtr) {
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    displayList->mutateStagingProperties().updateMatrix();
-    return displayList->stagingProperties().getPivotY();
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().updateMatrix();
+    return renderNode->stagingProperties().getPivotY();
 }
 
 #endif // USE_OPENGL_RENDERER
@@ -436,10 +438,9 @@ const char* const kClassPathName = "android/view/RenderNode";
 
 static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
-    { "nCreate",               "()J",    (void*) android_view_RenderNode_create },
-    { "nDestroyDisplayList",   "(J)V",   (void*) android_view_RenderNode_destroyDisplayList },
-    { "nSetDisplayListName",   "(JLjava/lang/String;)V",
-            (void*) android_view_RenderNode_setDisplayListName },
+    { "nCreate",               "(Ljava/lang/String;)J",    (void*) android_view_RenderNode_create },
+    { "nDestroyRenderNode",   "(J)V",   (void*) android_view_RenderNode_destroyRenderNode },
+    { "nSetDisplayListData",   "(JJ)V", (void*) android_view_RenderNode_setDisplayListData },
     { "nOutput",               "(J)V",  (void*) android_view_RenderNode_output },
 
     { "nSetCaching",           "(JZ)V",  (void*) android_view_RenderNode_setCaching },

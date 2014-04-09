@@ -1338,7 +1338,6 @@ public class Editor {
 
         layout.drawBackground(canvas, highlight, highlightPaint, cursorOffsetVertical,
                 firstLine, lastLine);
-        final HardwareRenderer renderer = mTextView.getHardwareRenderer();
 
         if (layout instanceof DynamicLayout) {
             if (mTextDisplayLists == null) {
@@ -1402,7 +1401,7 @@ public class Editor {
                             // No need to untranslate, previous context is popped after
                             // drawDisplayList
                         } finally {
-                            blockDisplayList.end(renderer, hardwareCanvas);
+                            blockDisplayList.end(hardwareCanvas);
                             // Same as drawDisplayList below, handled by our TextView's parent
                             blockDisplayList.setClipToBounds(false);
                         }

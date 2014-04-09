@@ -1221,11 +1221,6 @@ public class GLRenderer extends HardwareRenderer {
         }
     }
 
-    void setDisplayListData(long displayList, long newData) {
-        nSetDisplayListData(displayList, newData);
-    }
-    private static native void nSetDisplayListData(long displayList, long newData);
-
     @Override
     void fence() {
         // Everything is immediate, so this is a no-op
@@ -1317,7 +1312,7 @@ public class GLRenderer extends HardwareRenderer {
         }
 
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "drawDisplayList");
-        nUpdateRenderNodeProperties(displayList.getNativeDisplayList());
+        nPushStagingChanges(displayList.getNativeDisplayList());
         try {
             status |= canvas.drawDisplayList(displayList, mRedrawClip,
                     RenderNode.FLAG_CLIP_CHILDREN);
@@ -1476,7 +1471,7 @@ public class GLRenderer extends HardwareRenderer {
 
     static native void nDestroyLayer(long layerPtr);
 
-    private static native void nUpdateRenderNodeProperties(long displayListPtr);
+    private static native void nPushStagingChanges(long displayListPtr);
 
     class DrawPerformanceDataProvider extends GraphDataProvider {
         private final int mGraphType;

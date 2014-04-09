@@ -37,18 +37,6 @@ namespace renderthread {
 class CanvasContext;
 class RenderThread;
 
-class SetDisplayListData {
-public:
-    // This ctor exists for Vector's usage
-    SetDisplayListData();
-    SetDisplayListData(RenderNode* node, DisplayListData* newData);
-    ~SetDisplayListData();
-    void apply() const;
-private:
-    sp<RenderNode> mTargetNode;
-    DisplayListData* mNewData;
-};
-
 /*
  * This is a special Super Task. It is re-used multiple times by RenderProxy,
  * and contains state (such as layer updaters & new DisplayListDatas) that is
@@ -62,7 +50,6 @@ public:
 
     void setContext(CanvasContext* context);
 
-    void setDisplayListData(RenderNode* renderNode, DisplayListData* newData);
     void addLayer(DeferredLayerUpdater* layer);
     void removeLayer(DeferredLayerUpdater* layer);
 
@@ -100,7 +87,6 @@ private:
     TaskMode mTaskMode;
     sp<RenderNode> mRenderNode;
     Rect mDirty;
-    Vector<SetDisplayListData> mDisplayListDataUpdates;
 
     /*********************************************
      *  Multi frame data

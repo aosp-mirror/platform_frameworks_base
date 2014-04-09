@@ -103,14 +103,6 @@ static void android_view_ThreadedRenderer_setup(JNIEnv* env, jobject clazz,
     proxy->setup(width, height);
 }
 
-static void android_view_ThreadedRenderer_setDisplayListData(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jlong displayListPtr, jlong newDataPtr) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    DisplayListData* newData = reinterpret_cast<DisplayListData*>(newDataPtr);
-    proxy->setDisplayListData(displayList, newData);
-}
-
 static void android_view_ThreadedRenderer_drawDisplayList(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlong displayListPtr, jint dirtyLeft, jint dirtyTop,
         jint dirtyRight, jint dirtyBottom) {
@@ -204,7 +196,6 @@ static JNINativeMethod gMethods[] = {
     { "nInitialize", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_initialize },
     { "nUpdateSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_updateSurface },
     { "nSetup", "(JII)V", (void*) android_view_ThreadedRenderer_setup },
-    { "nSetDisplayListData", "(JJJ)V", (void*) android_view_ThreadedRenderer_setDisplayListData },
     { "nDrawDisplayList", "(JJIIII)V", (void*) android_view_ThreadedRenderer_drawDisplayList },
     { "nDestroyCanvas", "(J)V", (void*) android_view_ThreadedRenderer_destroyCanvas },
     { "nAttachFunctor", "(JJ)V", (void*) android_view_ThreadedRenderer_attachFunctor },

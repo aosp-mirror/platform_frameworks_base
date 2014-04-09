@@ -142,19 +142,11 @@ static void android_view_GLRenderer_destroyLayer(JNIEnv* env, jobject clazz,
     LayerRenderer::destroyLayer(layer);
 }
 
-static void android_view_GLRenderer_setDisplayListData(JNIEnv* env, jobject clazz,
-        jlong displayListPtr, jlong newDataPtr) {
-    using namespace android::uirenderer;
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    DisplayListData* newData = reinterpret_cast<DisplayListData*>(newDataPtr);
-    displayList->setData(newData);
-}
-
-static void android_view_GLRenderer_updateRenderNodeProperties(JNIEnv* env, jobject clazz,
+static void android_view_GLRenderer_pushStagingChanges(JNIEnv* env, jobject clazz,
         jlong renderNodePtr) {
     using namespace android::uirenderer;
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    renderNode->updateProperties();
+    renderNode->pushStagingChanges();
 }
 
 static void android_view_GLRenderer_invokeFunctor(JNIEnv* env, jobject clazz,
@@ -195,8 +187,7 @@ static JNINativeMethod gMethods[] = {
 
     { "getSystemTime",         "()J",   (void*) android_view_GLRenderer_getSystemTime },
     { "nDestroyLayer",         "(J)V",  (void*) android_view_GLRenderer_destroyLayer },
-    { "nSetDisplayListData",  "(JJ)V", (void*) android_view_GLRenderer_setDisplayListData },
-    { "nUpdateRenderNodeProperties", "(J)V", (void*) android_view_GLRenderer_updateRenderNodeProperties },
+    { "nPushStagingChanges", "(J)V", (void*) android_view_GLRenderer_pushStagingChanges },
     { "nInvokeFunctor",        "(JZ)V", (void*) android_view_GLRenderer_invokeFunctor },
 #endif
 
