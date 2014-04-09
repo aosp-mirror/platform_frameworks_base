@@ -33,7 +33,7 @@ please see styles_device_defaults.xml.
     <eat-comment/>
 
     <style name="Preference.Quantum">
-        <item name="layout">@layout/preference_holo</item>
+        <item name="layout">@layout/preference_quantum</item>
     </style>
 
     <style name="PreferenceFragment.Quantum">
@@ -42,13 +42,13 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Preference.Quantum.Information">
-        <item name="layout">@layout/preference_information_holo</item>
+        <item name="layout">@layout/preference_information_quantum</item>
         <item name="enabled">false</item>
         <item name="shouldDisableView">false</item>
     </style>
 
     <style name="Preference.Quantum.Category">
-        <item name="layout">@layout/preference_category_holo</item>
+        <item name="layout">@layout/preference_category_quantum</item>
         <!-- The title should not dim if the category is disabled, instead only the preference children should dim. -->
         <item name="shouldDisableView">false</item>
         <item name="selectable">false</item>
