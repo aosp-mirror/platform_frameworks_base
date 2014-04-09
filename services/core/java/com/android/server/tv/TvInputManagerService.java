@@ -151,8 +151,11 @@ public final class TvInputManagerService extends SystemService {
 
     private void removeUser(int userId) {
         synchronized (mLock) {
+            UserState userState = mUserStates.get(userId);
+            if (userState == null) {
+                return;
+            }
             // Release created sessions.
-            UserState userState = getUserStateLocked(userId);
             for (SessionState state : userState.sessionStateMap.values()) {
                 if (state.session != null) {
                     try {
