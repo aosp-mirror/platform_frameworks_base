@@ -72,8 +72,6 @@ public class Constants {
         public static class Window {
             // The dark background dim is set behind the empty recents view
             public static final float DarkBackgroundDim = 0.5f;
-            // The background dim is set behind the card stack
-            public static final float BackgroundDim = 0.35f;
         }
 
         public static class RecentsTaskLoader {
@@ -100,9 +98,6 @@ public class Constants {
         public static class TaskView {
             public static final boolean AnimateFrontTaskIconOnEnterRecents = true;
             public static final boolean AnimateFrontTaskIconOnLeavingRecents = true;
-
-            public static final boolean UseRoundedCorners = false;
-            public static final float RoundedCornerRadiusDps = 3;
         }
     }
 }
