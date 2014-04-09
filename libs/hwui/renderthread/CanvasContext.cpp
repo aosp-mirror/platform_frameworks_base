@@ -347,6 +347,7 @@ void CanvasContext::setSurface(EGLNativeWindowType window) {
 
     if (mEglSurface != EGL_NO_SURFACE) {
         mDirtyRegionsEnabled = mGlobalContext->enableDirtyRegions(mEglSurface);
+        mGlobalContext->makeCurrent(mEglSurface);
         mHaveNewSurface = true;
     }
 }
@@ -356,14 +357,15 @@ void CanvasContext::swapBuffers() {
     mHaveNewSurface = false;
 }
 
-void CanvasContext::makeCurrent() {
+void CanvasContext::requireSurface() {
+    LOG_ALWAYS_FATAL_IF(mEglSurface == EGL_NO_SURFACE,
+            "requireSurface() called but no surface set!");
     mGlobalContext->makeCurrent(mEglSurface);
 }
 
 bool CanvasContext::initialize(EGLNativeWindowType window) {
     if (mCanvas) return false;
     setSurface(window);
-    makeCurrent();
     mCanvas = new OpenGLRenderer();
     mCanvas->initProperties();
     return true;
@@ -371,7 +373,11 @@ bool CanvasContext::initialize(EGLNativeWindowType window) {
 
 void CanvasContext::updateSurface(EGLNativeWindowType window) {
     setSurface(window);
-    makeCurrent();
+}
+
+void CanvasContext::pauseSurface(EGLNativeWindowType window) {
+    // TODO: For now we just need a fence, in the future suspend any animations
+    // and such to prevent from trying to render into this surface
 }
 
 void CanvasContext::setup(int width, int height) {
@@ -460,7 +466,7 @@ void CanvasContext::invokeFunctors() {
 
     if (!mCanvas) return;
 
-    makeCurrent();
+    requireSurface();
     Rect dirty;
     mCanvas->invokeFunctors(dirty);
 }
@@ -491,12 +497,12 @@ void CanvasContext::runWithGlContext(RenderTask* task) {
 }
 
 Layer* CanvasContext::createRenderLayer(int width, int height) {
-    requireGlContext();
+    requireSurface();
     return LayerRenderer::createRenderLayer(width, height);
 }
 
 Layer* CanvasContext::createTextureLayer() {
-    requireGlContext();
+    requireSurface();
     return LayerRenderer::createTextureLayer();
 }
 
