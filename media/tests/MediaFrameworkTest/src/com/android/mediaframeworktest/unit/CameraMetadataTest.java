@@ -552,29 +552,72 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         };
         int availableFormatTag = CameraMetadataNative.getTag("android.scaler.availableFormats");
 
-        // Write
-        mMetadata.set(CameraCharacteristics.SCALER_AVAILABLE_FORMATS, availableFormats);
+        Key<int[]> formatKey = CameraCharacteristics.SCALER_AVAILABLE_FORMATS;
 
-        byte[] availableFormatValues = mMetadata.readValues(availableFormatTag);
+        validateArrayMetadataReadWriteOverride(formatKey, availableFormats,
+                expectedIntValues, availableFormatTag);
 
-        ByteBuffer bf = ByteBuffer.wrap(availableFormatValues).order(ByteOrder.nativeOrder());
+        //
+        // android.scaler.availableStreamConfigurations (int x n x 4 array)
+        //
+        final int OUTPUT = CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS_OUTPUT;
+        int[] availableStreamConfigs = new int[] {
+                0x20, 3280, 2464, OUTPUT, // RAW16
+                0x23, 3264, 2448, OUTPUT, // YCbCr_420_888
+                0x23, 3200, 2400, OUTPUT, // YCbCr_420_888
+                0x100, 3264, 2448, OUTPUT, // ImageFormat.JPEG
+                0x100, 3200, 2400, OUTPUT, // ImageFormat.JPEG
+                0x100, 2592, 1944, OUTPUT, // ImageFormat.JPEG
+                0x100, 2048, 1536, OUTPUT, // ImageFormat.JPEG
+                0x100, 1920, 1080, OUTPUT  // ImageFormat.JPEG
+        };
+        int[] expectedAvailableStreamConfigs = new int[] {
+                0x20, 3280, 2464, OUTPUT, // RAW16
+                0x23, 3264, 2448, OUTPUT, // YCbCr_420_888
+                0x23, 3200, 2400, OUTPUT, // YCbCr_420_888
+                0x21, 3264, 2448, OUTPUT, // BLOB
+                0x21, 3200, 2400, OUTPUT, // BLOB
+                0x21, 2592, 1944, OUTPUT, // BLOB
+                0x21, 2048, 1536, OUTPUT, // BLOB
+                0x21, 1920, 1080, OUTPUT  // BLOB
+        };
+        int availableStreamConfigTag =
+                CameraMetadataNative.getTag("android.scaler.availableStreamConfigurations");
 
-        assertEquals(expectedIntValues.length * 4, availableFormatValues.length);
-        for (int i = 0; i < expectedIntValues.length; ++i) {
-            assertEquals(expectedIntValues[i], bf.getInt());
-        }
-        // Read
-        byte[] availableFormatsAsByteArray = new byte[expectedIntValues.length * 4];
-        ByteBuffer availableFormatsByteBuffer =
-                ByteBuffer.wrap(availableFormatsAsByteArray).order(ByteOrder.nativeOrder());
-        for (int value : expectedIntValues) {
-            availableFormatsByteBuffer.putInt(value);
-        }
-        mMetadata.writeValues(availableFormatTag, availableFormatsAsByteArray);
+        Key<int[]> configKey = CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS;
+        validateArrayMetadataReadWriteOverride(configKey, availableStreamConfigs,
+                expectedAvailableStreamConfigs, availableStreamConfigTag);
 
-        int[] resultFormats = mMetadata.get(CameraCharacteristics.SCALER_AVAILABLE_FORMATS);
-        assertNotNull("result available formats shouldn't be null", resultFormats);
-        assertArrayEquals(availableFormats, resultFormats);
+        //
+        // android.scaler.availableMinFrameDurations (int x n x 4 array)
+
+        //
+        long[] availableMinDurations = new long[] {
+                0x20, 3280, 2464, 33333336, // RAW16
+                0x23, 3264, 2448, 33333336, // YCbCr_420_888
+                0x23, 3200, 2400, 33333336, // YCbCr_420_888
+                0x100, 3264, 2448, 33333336, // ImageFormat.JPEG
+                0x100, 3200, 2400, 33333336, // ImageFormat.JPEG
+                0x100, 2592, 1944, 33333336, // ImageFormat.JPEG
+                0x100, 2048, 1536, 33333336, // ImageFormat.JPEG
+                0x100, 1920, 1080, 33333336  // ImageFormat.JPEG
+        };
+        long[] expectedAvailableMinDurations = new long[] {
+                0x20, 3280, 2464, 33333336, // RAW16
+                0x23, 3264, 2448, 33333336, // YCbCr_420_888
+                0x23, 3200, 2400, 33333336, // YCbCr_420_888
+                0x21, 3264, 2448, 33333336, // BLOB
+                0x21, 3200, 2400, 33333336, // BLOB
+                0x21, 2592, 1944, 33333336, // BLOB
+                0x21, 2048, 1536, 33333336, // BLOB
+                0x21, 1920, 1080, 33333336  // BLOB
+        };
+        int availableMinDurationsTag =
+                CameraMetadataNative.getTag("android.scaler.availableMinFrameDurations");
+
+        Key<long[]> durationKey = CameraCharacteristics.SCALER_AVAILABLE_MIN_FRAME_DURATIONS;
+        validateArrayMetadataReadWriteOverride(durationKey, availableMinDurations,
+                expectedAvailableMinDurations, availableMinDurationsTag);
 
         //
         // android.statistics.faces (Face x n array)
@@ -638,5 +681,60 @@ public class CameraMetadataTest extends junit.framework.TestCase {
             assertNull(resultSimpleFaces[i].getMouthPosition());
         }
 
+    }
+
+    /**
+     * Validate metadata array tag read/write override.
+     *
+     * <p>Only support long and int array for now, can be easily extend to support other
+     * primitive arrays.</p>
+     */
+    private <T> void validateArrayMetadataReadWriteOverride(Key<T> key, T writeValues,
+            T readValues, int tag) {
+        Class<T> type = key.getType();
+        if (!type.isArray()) {
+            throw new IllegalArgumentException("This function expects an key with array type");
+        } else if (type != int[].class && type != long[].class) {
+            throw new IllegalArgumentException("This function expects long or int array values");
+        }
+
+        // Write
+        mMetadata.set(key, writeValues);
+
+        byte[] readOutValues = mMetadata.readValues(tag);
+
+        ByteBuffer bf = ByteBuffer.wrap(readOutValues).order(ByteOrder.nativeOrder());
+
+        int readValuesLength = Array.getLength(readValues);
+        int readValuesNumBytes = readValuesLength * 4;
+        if (type == long[].class) {
+            readValuesNumBytes = readValuesLength * 8;
+        }
+
+        assertEquals(readValuesNumBytes, readOutValues.length);
+        for (int i = 0; i < readValuesLength; ++i) {
+            if (type == int[].class) {
+                assertEquals(Array.getInt(readValues, i), bf.getInt());
+            } else if (type == long[].class) {
+                assertEquals(Array.getLong(readValues, i), bf.getLong());
+            }
+        }
+
+        // Read
+        byte[] readOutValuesAsByteArray = new byte[readValuesNumBytes];
+        ByteBuffer readOutValuesByteBuffer =
+                ByteBuffer.wrap(readOutValuesAsByteArray).order(ByteOrder.nativeOrder());
+        for (int i = 0; i < readValuesLength; ++i) {
+            if (type == int[].class) {
+                readOutValuesByteBuffer.putInt(Array.getInt(readValues, i));
+            } else if (type == long[].class) {
+                readOutValuesByteBuffer.putLong(Array.getLong(readValues, i));
+            }
+        }
+        mMetadata.writeValues(tag, readOutValuesAsByteArray);
+
+        T result = mMetadata.get(key);
+        assertNotNull(key.getName() + " result shouldn't be null", result);
+        assertArrayEquals(writeValues, result);
     }
 }
