@@ -166,11 +166,6 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void setDisplayListData(long displayList, long newData) {
-        nSetDisplayListData(mNativeProxy, displayList, newData);
-    }
-
-    @Override
     void draw(View view, AttachInfo attachInfo, HardwareDrawCallbacks callbacks, Rect dirty) {
         attachInfo.mIgnoreDirtyState = true;
         attachInfo.mDrawingTime = SystemClock.uptimeMillis();

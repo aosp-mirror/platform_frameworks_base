@@ -49,7 +49,12 @@ void RenderNode::outputLogBuffer(int fd) {
     fflush(file);
 }
 
-RenderNode::RenderNode() : mDestroyed(false), mNeedsPropertiesSync(false), mDisplayListData(0) {
+RenderNode::RenderNode()
+        : mDestroyed(false)
+        , mNeedsPropertiesSync(false)
+        , mNeedsDisplayListDataSync(false)
+        , mDisplayListData(0)
+        , mStagingDisplayListData(0) {
 }
 
 RenderNode::~RenderNode() {
@@ -57,13 +62,15 @@ RenderNode::~RenderNode() {
 
     mDestroyed = true;
     delete mDisplayListData;
+    delete mStagingDisplayListData;
 }
 
-void RenderNode::setData(DisplayListData* data) {
-    delete mDisplayListData;
-    mDisplayListData = data;
-    if (mDisplayListData) {
-        Caches::getInstance().registerFunctors(mDisplayListData->functorCount);
+void RenderNode::setStagingDisplayList(DisplayListData* data) {
+    mNeedsDisplayListDataSync = true;
+    delete mStagingDisplayListData;
+    mStagingDisplayListData = data;
+    if (mStagingDisplayListData) {
+        Caches::getInstance().registerFunctors(mStagingDisplayListData->functorCount);
     }
 }
 
@@ -86,16 +93,29 @@ void RenderNode::output(uint32_t level) {
     ALOGD("%*sDone (%p, %s)", (level - 1) * 2, "", this, mName.string());
 }
 
-void RenderNode::updateProperties() {
+void RenderNode::pushStagingChanges() {
     if (mNeedsPropertiesSync) {
         mNeedsPropertiesSync = false;
         mProperties = mStagingProperties;
     }
+    if (mNeedsDisplayListDataSync) {
+        mNeedsDisplayListDataSync = false;
+        // Do a push pass on the old tree to handle freeing DisplayListData
+        // that are no longer used
+        pushSubTreeStagingChanges(mDisplayListData);
+        delete mDisplayListData;
+        mDisplayListData = mStagingDisplayListData;
+        mStagingDisplayListData = 0;
+    }
 
-    if (mDisplayListData) {
-        for (size_t i = 0; i < mDisplayListData->children().size(); i++) {
-            RenderNode* childNode = mDisplayListData->children()[i]->mDisplayList;
-            childNode->updateProperties();
+    pushSubTreeStagingChanges(mDisplayListData);
+}
+
+void RenderNode::pushSubTreeStagingChanges(DisplayListData* subtree) {
+    if (subtree) {
+        for (size_t i = 0; i < subtree->children().size(); i++) {
+            RenderNode* childNode = subtree->children()[i]->mDisplayList;
+            childNode->pushStagingChanges();
         }
     }
 }
