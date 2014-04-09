@@ -384,6 +384,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"აპს შეეძლება ზედა დონის ინტერფეისის ვიჯეტთან დაკავშირება. არასდროს გამოიყენება ჩვეულებრივ აპებში."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"მოწყობილობის ადმინთან ინტერაქცია"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"აპს შეეძლება მოწყობილობის ადმინისტრატორისთვის intent ობიექტების გაგზავნა. არასდროს გამოიყენება ჩვეულებრივ აპებში."</string>
+    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
+    <skip />
+    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"მოწყობილობის ადმინისტრატორს დამატება ან ამოშლა"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"საშუალებას აძლევს მფლობელს დაამატოს ან ამოშალოს მოწყობილობის აქტიური ადმინისტრატორები. ჩვეულებრივ აპებს, ალბათ, არასოდეს დაჭირდება"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ეკრანის ორიენტაციის შეცვლა"</string>

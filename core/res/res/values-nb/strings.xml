@@ -384,6 +384,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Lar innehaveren binde seg til det øverste nivået av grensesnittet for en modultjeneste. Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"kommunisere med enhetsadministrator"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Lar innehaveren sende hensikter til en enhetsadministrator. Skal aldri være nødvendig for normale apper."</string>
+    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
+    <skip />
+    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"legge til eller fjerne en enhetsadministrator"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Tillater innehaveren å legge til eller fjerne aktive enhetsadministratorer. Dette skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"snu skjermen"</string>
@@ -688,7 +692,7 @@
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"endre kalibreringen av inndataenheter"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Lar appen endre kalibrasjonsparametrene for berøringsskjermen. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"tilgang til DRM-sertifikater"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Lar en app klargjøre og bruke DRM-sertifikater. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tillater at en app klargjøre og bruke DRM-sertifikater. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angi passordregler"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller tillatt lengde og tillatte tegn i passord for opplåsing av skjerm."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåk forsøk på opplåsing av skjerm"</string>
