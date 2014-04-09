@@ -89,7 +89,7 @@ public:
 
     ANDROID_API static void outputLogBuffer(int fd);
 
-    ANDROID_API void setData(DisplayListData* newData);
+    ANDROID_API void setStagingDisplayList(DisplayListData* newData);
 
     void computeOrdering();
 
@@ -141,7 +141,7 @@ public:
         return properties().getHeight();
     }
 
-    ANDROID_API void updateProperties();
+    ANDROID_API void pushStagingChanges();
 
     // Returns true if this RenderNode or any of its children have functors
     bool hasFunctors();
@@ -203,6 +203,8 @@ private:
         const char* mText;
     };
 
+    static void pushSubTreeStagingChanges(DisplayListData* subtree);
+
     String8 mName;
     bool mDestroyed; // used for debugging crash, TODO: remove once invalid state crash fixed
 
@@ -210,7 +212,9 @@ private:
     RenderProperties mProperties;
     RenderProperties mStagingProperties;
 
+    bool mNeedsDisplayListDataSync;
     DisplayListData* mDisplayListData;
+    DisplayListData* mStagingDisplayListData;
 
     /**
      * Draw time state - these properties are only set and used during rendering

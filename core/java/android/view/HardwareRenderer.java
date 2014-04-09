@@ -580,8 +580,6 @@ public abstract class HardwareRenderer {
         mRequested = requested;
     }
 
-    abstract void setDisplayListData(long displayList, long newData);
-
     /**
      * Blocks until all previously queued work has completed.
      */

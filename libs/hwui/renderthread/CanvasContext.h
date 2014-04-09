@@ -65,7 +65,6 @@ public:
     void updateSurface(EGLNativeWindowType window);
     void pauseSurface(EGLNativeWindowType window);
     void setup(int width, int height);
-    void setDisplayListData(RenderNode* displayList, DisplayListData* newData);
     void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters);
     void drawDisplayList(RenderNode* displayList, Rect* dirty);
     void destroyCanvas();
