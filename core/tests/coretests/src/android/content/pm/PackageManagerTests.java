@@ -61,7 +61,10 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -3066,6 +3069,262 @@ public class PackageManagerTests extends AndroidTestCase {
                 cleanUpInstall(ip);
             }
         }
+    }
+
+    /**
+     * The following tests are related to testing KeySets-based key rotation
+     */
+    /*
+     * Check if an apk which does not specify an upgrade-keyset may be upgraded
+     * by an apk which does
+     */
+    public void testNoKSToUpgradeKS() throws Exception {
+        replaceCerts(R.raw.keyset_sa_unone, R.raw.keyset_sa_ua, true, false, -1);
+    }
+
+    /*
+     * Check if an apk which does specify an upgrade-keyset may be downgraded to
+     * an apk which does not
+     */
+    public void testUpgradeKSToNoKS() throws Exception {
+        replaceCerts(R.raw.keyset_sa_ua, R.raw.keyset_sa_unone, true, false, -1);
+    }
+
+    /*
+     * Check if an apk signed by a key other than the upgrade keyset can update
+     * an app
+     */
+    public void testUpgradeKSWithWrongKey() throws Exception {
+        replaceCerts(R.raw.keyset_sa_ua, R.raw.keyset_sb_ua, true, true,
+                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+    }
+
+    /*
+     * Check if an apk signed by its signing key, which is not an upgrade key,
+     * can upgrade an app.
+     */
+    public void testUpgradeKSWithWrongSigningKey() throws Exception {
+        replaceCerts(R.raw.keyset_sa_ub, R.raw.keyset_sa_ub, true, true,
+                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+    }
+
+    /*
+     * Check if an apk signed by its upgrade key, which is not its signing key,
+     * can upgrade an app.
+     */
+    public void testUpgradeKSWithUpgradeKey() throws Exception {
+        replaceCerts(R.raw.keyset_sa_ub, R.raw.keyset_sb_ub, true, false, -1);
+    }
+    /*
+     * Check if an apk signed by its upgrade key, which is its signing key, can
+     * upgrade an app.
+     */
+    public void testUpgradeKSWithSigningUpgradeKey() throws Exception {
+        replaceCerts(R.raw.keyset_sa_ua, R.raw.keyset_sa_ua, true, false, -1);
+    }
+
+    /*
+     * Check if an apk signed by multiple keys, one of which is its upgrade key,
+     * can upgrade an app.
+     */
+    public void testMultipleUpgradeKSWithUpgradeKey() throws Exception {
+        replaceCerts(R.raw.keyset_sa_ua, R.raw.keyset_sab_ua, true, false, -1);
+    }
+
+    /*
+     * Check if an apk signed by multiple keys, one of which is its signing key,
+     * but none of which is an upgrade key, can upgrade an app.
+     */
+    public void testMultipleUpgradeKSWithSigningKey() throws Exception {
+        replaceCerts(R.raw.keyset_sau_ub, R.raw.keyset_sa_ua, true, true,
+                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+    }
+
+    /*
+     * Check if an apk which defines multiple (two) upgrade keysets is
+     * upgrade-able by either.
+     */
+    public void testUpgradeKSWithMultipleUpgradeKeySets() throws Exception {
+        replaceCerts(R.raw.keyset_sa_ua_ub, R.raw.keyset_sa_ua, true, false, -1);
+        replaceCerts(R.raw.keyset_sa_ua_ub, R.raw.keyset_sb_ub, true, false, -1);
+    }
+
+    /*
+     * Check if an apk's sigs are changed after upgrading with a non-signing
+     * key.
+     *
+     * TODO: consider checking against hard-coded Signatures in the Sig-tests
+     */
+    public void testSigChangeAfterUpgrade() throws Exception {
+        // install original apk and grab sigs
+        installFromRawResource("tmp.apk", R.raw.keyset_sa_ub,
+                0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        PackageManager pm = getPm();
+        String pkgName = "com.android.frameworks.coretests.keysets";
+        PackageInfo pi = pm.getPackageInfo(pkgName, PackageManager.GET_SIGNATURES);
+        assertTrue("Package should only have one signature, sig A",
+                pi.signatures.length == 1);
+        String sigBefore = pi.signatures[0].toCharsString();
+        // install apk signed by different upgrade KeySet
+        installFromRawResource("tmp2.apk", R.raw.keyset_sb_ub,
+                PackageManager.INSTALL_REPLACE_EXISTING, false, false, -1,
+                PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        pi = pm.getPackageInfo(pkgName, PackageManager.GET_SIGNATURES);
+        assertTrue("Package should only have one signature, sig B",
+                pi.signatures.length == 1);
+        String sigAfter = pi.signatures[0].toCharsString();
+        assertFalse("Package signatures did not change after upgrade!",
+                sigBefore.equals(sigAfter));
+        cleanUpInstall(pkgName);
+    }
+
+    /*
+     * Check if an apk's sig is the same  after upgrading with a signing
+     * key.
+     */
+    public void testSigSameAfterUpgrade() throws Exception {
+        // install original apk and grab sigs
+        installFromRawResource("tmp.apk", R.raw.keyset_sa_ua,
+                0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        PackageManager pm = getPm();
+        String pkgName = "com.android.frameworks.coretests.keysets";
+        PackageInfo pi = pm.getPackageInfo(pkgName, PackageManager.GET_SIGNATURES);
+        assertTrue("Package should only have one signature, sig A",
+                pi.signatures.length == 1);
+        String sigBefore = pi.signatures[0].toCharsString();
+        // install apk signed by same upgrade KeySet
+        installFromRawResource("tmp2.apk", R.raw.keyset_sa_ua,
+                PackageManager.INSTALL_REPLACE_EXISTING, false, false, -1,
+                PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        pi = pm.getPackageInfo(pkgName, PackageManager.GET_SIGNATURES);
+        assertTrue("Package should only have one signature, sig A",
+                pi.signatures.length == 1);
+        String sigAfter = pi.signatures[0].toCharsString();
+        assertTrue("Package signatures changed after upgrade!",
+                sigBefore.equals(sigAfter));
+        cleanUpInstall(pkgName);
+    }
+
+    /*
+     * Check if an apk's sigs are the same after upgrading with an app with
+     * a subset of the original signing keys.
+     */
+    public void testSigRemovedAfterUpgrade() throws Exception {
+        // install original apk and grab sigs
+        installFromRawResource("tmp.apk", R.raw.keyset_sab_ua,
+                0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        PackageManager pm = getPm();
+        String pkgName = "com.android.frameworks.coretests.keysets";
+        PackageInfo pi = pm.getPackageInfo(pkgName, PackageManager.GET_SIGNATURES);
+        assertTrue("Package should have two signatures, sig A and sig B",
+                pi.signatures.length == 2);
+        Set<String> sigsBefore = new HashSet<String>();
+        for (int i = 0; i < pi.signatures.length; i++) {
+            sigsBefore.add(pi.signatures[i].toCharsString());
+        }
+        // install apk signed subset upgrade KeySet
+        installFromRawResource("tmp2.apk", R.raw.keyset_sa_ua,
+                PackageManager.INSTALL_REPLACE_EXISTING, false, false, -1,
+                PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        pi = pm.getPackageInfo(pkgName, PackageManager.GET_SIGNATURES);
+        assertTrue("Package should only have one signature, sig A",
+                pi.signatures.length == 1);
+        String sigAfter = pi.signatures[0].toCharsString();
+        assertTrue("Original package signatures did not contain new sig",
+                sigsBefore.contains(sigAfter));
+        cleanUpInstall(pkgName);
+    }
+
+    /*
+     * Check if an apk's sigs are added to after upgrading with an app with
+     * a superset of the original signing keys.
+     */
+    public void testSigAddedAfterUpgrade() throws Exception {
+        // install original apk and grab sigs
+        installFromRawResource("tmp.apk", R.raw.keyset_sa_ua,
+                0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        PackageManager pm = getPm();
+        String pkgName = "com.android.frameworks.coretests.keysets";
+        PackageInfo pi = pm.getPackageInfo(pkgName, PackageManager.GET_SIGNATURES);
+        assertTrue("Package should only have one signature, sig A",
+                pi.signatures.length == 1);
+        String sigBefore = pi.signatures[0].toCharsString();
+        // install apk signed subset upgrade KeySet
+        installFromRawResource("tmp2.apk", R.raw.keyset_sab_ua,
+                PackageManager.INSTALL_REPLACE_EXISTING, false, false, -1,
+                PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        pi = pm.getPackageInfo(pkgName, PackageManager.GET_SIGNATURES);
+        assertTrue("Package should have two signatures, sig A and sig B",
+                pi.signatures.length == 2);
+        Set<String> sigsAfter = new HashSet<String>();
+        for (int i = 0; i < pi.signatures.length; i++) {
+            sigsAfter.add(pi.signatures[i].toCharsString());
+        }
+        assertTrue("Package signatures did not change after upgrade!",
+                sigsAfter.contains(sigBefore));
+        cleanUpInstall(pkgName);
+    }
+
+    /*
+     * Check if an apk gains signature-level permission after changing to the a
+     * new signature, for which a permission should be granted.
+     */
+    public void testUpgradeSigPermGained() throws Exception {
+        // install apk which defines permission
+        installFromRawResource("permDef.apk", R.raw.keyset_permdef_sa_unone,
+                0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        // install apk which uses permission but does not have sig
+        installFromRawResource("permUse.apk", R.raw.keyset_permuse_sb_ua_ub,
+                0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        // verify that package does not have perm before
+        PackageManager pm = getPm();
+        String permPkgName = "com.android.frameworks.coretests.keysets_permdef";
+        String pkgName = "com.android.frameworks.coretests.keysets";
+        String permName = "com.android.frameworks.coretests.keysets_permdef.keyset_perm";
+        assertFalse("keyset permission granted to app without same signature!",
+                    pm.checkPermission(permName, pkgName)
+                    == PackageManager.PERMISSION_GRANTED);
+        // upgrade to apk with perm signature
+        installFromRawResource("permUse2.apk", R.raw.keyset_permuse_sa_ua_ub,
+                PackageManager.INSTALL_REPLACE_EXISTING, false, false, -1,
+                PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        assertTrue("keyset permission not granted to app after upgrade to same sig",
+                    pm.checkPermission(permName, pkgName)
+                    == PackageManager.PERMISSION_GRANTED);
+        cleanUpInstall(permPkgName);
+        cleanUpInstall(pkgName);
+    }
+
+    /*
+     * Check if an apk loses signature-level permission after changing to the a
+     * new signature, from one which a permission should be granted.
+     */
+    public void testUpgradeSigPermLost() throws Exception {
+        // install apk which defines permission
+        installFromRawResource("permDef.apk", R.raw.keyset_permdef_sa_unone,
+                0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        // install apk which uses permission, signed by same sig
+        installFromRawResource("permUse.apk", R.raw.keyset_permuse_sa_ua_ub,
+                0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        // verify that package does not have perm before
+        PackageManager pm = getPm();
+        String permPkgName = "com.android.frameworks.coretests.keysets_permdef";
+        String pkgName = "com.android.frameworks.coretests.keysets";
+        String permName = "com.android.frameworks.coretests.keysets_permdef.keyset_perm";
+        assertTrue("keyset permission not granted to app with same sig",
+                    pm.checkPermission(permName, pkgName)
+                    == PackageManager.PERMISSION_GRANTED);
+        // upgrade to apk without perm signature
+        installFromRawResource("permUse2.apk", R.raw.keyset_permuse_sb_ua_ub,
+                PackageManager.INSTALL_REPLACE_EXISTING, false, false, -1,
+                PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+
+        assertFalse("keyset permission not revoked from app which upgraded to a "
+                    + "different signature",
+                    pm.checkPermission(permName, pkgName)
+                    == PackageManager.PERMISSION_GRANTED);
+        cleanUpInstall(permPkgName);
+        cleanUpInstall(pkgName);
     }
 
     /**
