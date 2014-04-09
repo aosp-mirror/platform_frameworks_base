@@ -1194,6 +1194,12 @@ public class UserManagerService extends IUserManager.Stub {
             // Write the restrictions to XML
             writeApplicationRestrictionsLocked(packageName, restrictions, userId);
         }
+
+        // Notify package of changes via an intent - only sent to explicitly registered receivers.
+        Intent changeIntent = new Intent(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
+        changeIntent.setPackage(packageName);
+        changeIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        mContext.sendBroadcastAsUser(changeIntent, new UserHandle(userId));
     }
 
     @Override

@@ -51,6 +51,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.net.ProxyProperties;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -3051,6 +3052,46 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 pm.clearPackagePersistentPreferredActivities(packageName, UserHandle.getCallingUserId());
             } catch (RemoteException re) {
                 // Shouldn't happen
+            } finally {
+                restoreCallingIdentity(id);
+            }
+        }
+    }
+
+    @Override
+    public void setApplicationRestrictions(ComponentName who, String packageName, Bundle settings) {
+        final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
+
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            UserManager um = UserManager.get(mContext);
+            long id = Binder.clearCallingIdentity();
+            try {
+                um.setApplicationRestrictions(packageName, settings, userHandle);
+            } finally {
+                restoreCallingIdentity(id);
+            }
+        }
+    }
+
+    @Override
+    public Bundle getApplicationRestrictions(ComponentName who, String packageName) {
+        final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
+
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            UserManager um = UserManager.get(mContext);
+            long id = Binder.clearCallingIdentity();
+            try {
+                return um.getApplicationRestrictions(packageName, userHandle);
             } finally {
                 restoreCallingIdentity(id);
             }
