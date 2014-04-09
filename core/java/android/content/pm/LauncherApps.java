@@ -176,6 +176,9 @@ public class LauncherApps {
      */
     public void startActivityForProfile(ComponentName component, Rect sourceBounds,
             Bundle opts, UserHandle user) {
+        if (DEBUG) {
+            Log.i(TAG, "StartActivityForProfile " + component + " " + user.getIdentifier());
+        }
         try {
             mService.startActivityAsUser(component, sourceBounds, opts, user);
         } catch (RemoteException re) {
