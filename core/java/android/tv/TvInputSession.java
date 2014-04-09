@@ -21,8 +21,6 @@ import android.view.Surface;
 
 /**
  * The TvInputSession provides the per-session functionality of TvInputService.
- *
- * @hide
  */
 public abstract class TvInputSession {
     /**
