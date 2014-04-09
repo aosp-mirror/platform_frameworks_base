@@ -10631,6 +10631,7 @@ package android.graphics.drawable {
     method public void setTileModeXY(android.graphics.Shader.TileMode, android.graphics.Shader.TileMode);
     method public final void setTileModeY(android.graphics.Shader.TileMode);
     method public void setTint(android.content.res.ColorStateList);
+    method public void setTintMode(android.graphics.PorterDuff.Mode);
   }
 
   public class ClipDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
@@ -10908,6 +10909,7 @@ package android.graphics.drawable {
     method public void setTargetDensity(android.util.DisplayMetrics);
     method public void setTargetDensity(int);
     method public void setTint(android.content.res.ColorStateList);
+    method public void setTintMode(android.graphics.PorterDuff.Mode);
   }
 
   public class PaintDrawable extends android.graphics.drawable.ShapeDrawable {
@@ -10998,6 +11000,9 @@ package android.graphics.drawable {
 
   public class TouchFeedbackDrawable extends android.graphics.drawable.LayerDrawable {
     method public android.graphics.Rect getDirtyBounds();
+    method public android.content.res.ColorStateList getTint();
+    method public void setTint(android.content.res.ColorStateList);
+    method public void setTintMode(android.graphics.PorterDuff.Mode);
   }
 
   public class TransitionDrawable extends android.graphics.drawable.LayerDrawable implements android.graphics.drawable.Drawable.Callback {
