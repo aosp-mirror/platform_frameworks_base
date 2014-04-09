@@ -846,11 +846,11 @@ public class VectorDrawable extends Drawable {
             }
 
             if (vPath.mStrokeColor != 0) {
-                if (vPath.mStrokelineJoin != null) {
-                    mStrokePaint.setStrokeJoin(vPath.mStrokelineJoin);
+                if (vPath.mStrokeLineJoin != null) {
+                    mStrokePaint.setStrokeJoin(vPath.mStrokeLineJoin);
                 }
-                if (vPath.mStrokelineCap != null) {
-                    mStrokePaint.setStrokeCap(vPath.mStrokelineCap);
+                if (vPath.mStrokeLineCap != null) {
+                    mStrokePaint.setStrokeCap(vPath.mStrokeLineCap);
                 }
                 mStrokePaint.setStrokeMiter(vPath.mStrokeMiterlimit * scale);
                 mStrokePaint.setColor(vPath.mStrokeColor);
@@ -1324,8 +1324,8 @@ public class VectorDrawable extends Drawable {
 
         boolean mAnimated = false;
         boolean mClip = false;
-        Paint.Cap mStrokelineCap = null;
-        Paint.Join mStrokelineJoin = null;
+        Paint.Cap mStrokeLineCap = null;
+        Paint.Join mStrokeLineJoin = null;
         float mStrokeMiterlimit = 4;
 
         private VNode[] mNode = null;
@@ -1382,8 +1382,34 @@ public class VectorDrawable extends Drawable {
             }
         }
 
-        public String getID(){
+        public String getID() {
             return mId;
+        }
+
+        private Paint.Cap getStrokeLineCap(int id, Paint.Cap defValue) {
+            switch (id) {
+                case LINECAP_BUTT:
+                    return Paint.Cap.BUTT;
+                case LINECAP_ROUND:
+                    return Paint.Cap.ROUND;
+                case LINECAP_SQUARE:
+                    return Paint.Cap.SQUARE;
+                default:
+                    return defValue;
+            }
+        }
+
+        private Paint.Join getStrokeLineJoin(int id, Paint.Join defValue) {
+            switch (id) {
+                case LINEJOIN_MITER:
+                    return Paint.Join.MITER;
+                case LINEJOIN_ROUND:
+                    return Paint.Join.ROUND;
+                case LINEJOIN_BEVEL:
+                    return Paint.Join.BEVEL;
+                default:
+                    return defValue;
+            }
         }
 
         public void inflate(Resources r, AttributeSet attrs, Theme theme) {
@@ -1391,51 +1417,57 @@ public class VectorDrawable extends Drawable {
             final int[] themeAttrs = a.extractThemeAttrs();
             mThemeAttrs = themeAttrs;
 
-            mClip = a.getBoolean(R.styleable.VectorDrawablePath_clipToPath, false);
-            mId = a.getString(R.styleable.VectorDrawablePath_name);
-            mNode = parsePath(a.getString(R.styleable.VectorDrawablePath_pathData));
+            // NOTE: The set of attributes loaded here MUST match the
+            // set of attributes loaded in applyTheme.
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_clipToPath] == 0) {
+                mClip = a.getBoolean(R.styleable.VectorDrawablePath_clipToPath, mClip);
+            }
+
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_name] == 0) {
+                mId = a.getString(R.styleable.VectorDrawablePath_name);
+            }
+
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_pathData] == 0) {
+                mNode = parsePath(a.getString(R.styleable.VectorDrawablePath_pathData));
+            }
 
             if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_fill] == 0) {
-                mFillColor = a.getColor(R.styleable.VectorDrawablePath_fill, 0);
+                mFillColor = a.getColor(R.styleable.VectorDrawablePath_fill, mFillColor);
+            }
+
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_fillOpacity] == 0) {
+                mFillOpacity = a.getFloat(R.styleable.VectorDrawablePath_fillOpacity, mFillOpacity);
+            }
+
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_rotation] == 0) {
+                mRotate = a.getFloat(R.styleable.VectorDrawablePath_rotation, mRotate);
+            }
+
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_pivotX] == 0) {
+                mPivotX = a.getFloat(R.styleable.VectorDrawablePath_pivotX, mPivotX);
+            }
+
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_pivotY] == 0) {
+                mPivotY = a.getFloat(R.styleable.VectorDrawablePath_pivotY, mPivotY);
             }
 
             if (themeAttrs == null
-                    || themeAttrs[R.styleable.VectorDrawablePath_fillOpacity] == 0) {
-                mFillOpacity = a.getFloat(R.styleable.VectorDrawablePath_fillOpacity, Float.NaN);
+                    || themeAttrs[R.styleable.VectorDrawablePath_strokeLineCap] == 0) {
+                mStrokeLineCap = getStrokeLineCap(
+                        a.getInt(R.styleable.VectorDrawablePath_strokeLineCap, -1), mStrokeLineCap);
             }
 
-            mRotate = a.getFloat(R.styleable.VectorDrawablePath_rotation, 0);
-            mPivotX = a.getFloat(R.styleable.VectorDrawablePath_pivotX, 0);
-            mPivotY = a.getFloat(R.styleable.VectorDrawablePath_pivotY, 0);
-
-            final int lineCap  = a.getInt(R.styleable.VectorDrawablePath_strokeLineCap, 0);
-            switch (lineCap) {
-                case LINECAP_BUTT:
-                    mStrokelineCap = Paint.Cap.BUTT;
-                    break;
-                case LINECAP_ROUND:
-                    mStrokelineCap = Paint.Cap.ROUND;
-                    break;
-                case LINECAP_SQUARE:
-                    mStrokelineCap = Paint.Cap.SQUARE;
-                    break;
+            if (themeAttrs == null
+                    || themeAttrs[R.styleable.VectorDrawablePath_strokeLineJoin] == 0) {
+                mStrokeLineJoin = getStrokeLineJoin(
+                        a.getInt(R.styleable.VectorDrawablePath_strokeLineJoin, -1), mStrokeLineJoin);
             }
 
-            final int lineJoin =  a.getInt(R.styleable.VectorDrawablePath_strokeLineJoin, 0);
-            switch (lineJoin) {
-                case LINEJOIN_MITER:
-                    mStrokelineJoin = Paint.Join.MITER;
-                    break;
-                case LINEJOIN_ROUND:
-                    mStrokelineJoin = Paint.Join.ROUND;
-                    break;
-                case LINEJOIN_BEVEL:
-                    mStrokelineJoin = Paint.Join.BEVEL;
-                    break;
+            if (themeAttrs == null
+                    || themeAttrs[R.styleable.VectorDrawablePath_strokeMiterLimit] == 0) {
+                mStrokeMiterlimit = a.getFloat(
+                        R.styleable.VectorDrawablePath_strokeMiterLimit, mStrokeMiterlimit);
             }
-
-            mStrokeMiterlimit = a.getFloat(R.styleable.VectorDrawablePath_strokeMiterLimit,
-                    mStrokeMiterlimit);
 
             if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_stroke] == 0) {
                 mStrokeColor = a.getColor(R.styleable.VectorDrawablePath_stroke, mStrokeColor);
@@ -1444,14 +1476,30 @@ public class VectorDrawable extends Drawable {
             if (themeAttrs == null
                     || themeAttrs[R.styleable.VectorDrawablePath_strokeOpacity] == 0) {
                 mStrokeOpacity = a.getFloat(
-                        R.styleable.VectorDrawablePath_strokeOpacity, Float.NaN);
+                        R.styleable.VectorDrawablePath_strokeOpacity, mStrokeOpacity);
             }
 
-            mStrokeWidth = a.getFloat(R.styleable.VectorDrawablePath_strokeWidth, 0);
-            mTrimPathEnd = a.getFloat(R.styleable.VectorDrawablePath_trimPathEnd, 1);
-            mTrimPathOffset = a.getFloat(R.styleable.VectorDrawablePath_trimPathOffset, 0);
-            mTrimPathStart = a.getFloat(R.styleable.VectorDrawablePath_trimPathStart, 0);
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_strokeWidth] == 0) {
+                mStrokeWidth = a.getFloat(R.styleable.VectorDrawablePath_strokeWidth, mStrokeWidth);
+            }
 
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_trimPathEnd] == 0) {
+                mTrimPathEnd = a.getFloat(R.styleable.VectorDrawablePath_trimPathEnd, mTrimPathEnd);
+            }
+
+            if (themeAttrs == null
+                    || themeAttrs[R.styleable.VectorDrawablePath_trimPathOffset] == 0) {
+                mTrimPathOffset = a.getFloat(
+                        R.styleable.VectorDrawablePath_trimPathOffset, mTrimPathOffset);
+            }
+
+            if (themeAttrs == null
+                    || themeAttrs[R.styleable.VectorDrawablePath_trimPathStart] == 0) {
+                mTrimPathStart = a.getFloat(
+                        R.styleable.VectorDrawablePath_trimPathStart, mTrimPathStart);
+            }
+
+            // TODO: Consider replacing this with existing state attributes.
             final int[] states = {
                     R.styleable.VectorDrawablePath_state_activated,
                     R.styleable.VectorDrawablePath_state_checkable,
@@ -1489,22 +1537,39 @@ public class VectorDrawable extends Drawable {
             final TypedArray a = t.resolveAttributes(
                     mThemeAttrs, R.styleable.VectorDrawablePath, 0, 0);
 
-            if (a.hasValue(R.styleable.VectorDrawablePath_fill)) {
-                mFillColor = a.getColor(R.styleable.VectorDrawablePath_fill, 0);
+            mClip = a.getBoolean(R.styleable.VectorDrawablePath_clipToPath, mClip);
+
+            if (a.hasValue(R.styleable.VectorDrawablePath_name)) {
+                mId = a.getString(R.styleable.VectorDrawablePath_name);
             }
 
-            if (a.hasValue(R.styleable.VectorDrawablePath_fillOpacity)) {
-                mFillOpacity = a.getFloat(R.styleable.VectorDrawablePath_fillOpacity, Float.NaN);
+            if (a.hasValue(R.styleable.VectorDrawablePath_pathData)) {
+                mNode = parsePath(a.getString(R.styleable.VectorDrawablePath_pathData));
             }
 
-            if (a.hasValue(R.styleable.VectorDrawablePath_stroke)) {
-                mStrokeColor = a.getColor(R.styleable.VectorDrawablePath_stroke, mStrokeColor);
-            }
+            mFillColor = a.getColor(R.styleable.VectorDrawablePath_fill, mFillColor);
+            mFillOpacity = a.getFloat(R.styleable.VectorDrawablePath_fillOpacity, mFillOpacity);
 
-            if (a.hasValue(R.styleable.VectorDrawablePath_strokeOpacity)) {
-                mStrokeOpacity = a.getFloat(
-                        R.styleable.VectorDrawablePath_strokeOpacity, Float.NaN);
-            }
+            mRotate = a.getFloat(R.styleable.VectorDrawablePath_rotation, mRotate);
+            mPivotX = a.getFloat(R.styleable.VectorDrawablePath_pivotX, mPivotX);
+            mPivotY = a.getFloat(R.styleable.VectorDrawablePath_pivotY, mPivotY);
+
+            mStrokeLineCap = getStrokeLineCap(a.getInt(
+                    R.styleable.VectorDrawablePath_strokeLineCap, -1), mStrokeLineCap);
+            mStrokeLineJoin = getStrokeLineJoin(a.getInt(
+                    R.styleable.VectorDrawablePath_strokeLineJoin, -1), mStrokeLineJoin);
+            mStrokeMiterlimit = a.getFloat(
+                    R.styleable.VectorDrawablePath_strokeMiterLimit, mStrokeMiterlimit);
+            mStrokeColor = a.getColor(R.styleable.VectorDrawablePath_stroke, mStrokeColor);
+            mStrokeOpacity = a.getFloat(
+                    R.styleable.VectorDrawablePath_strokeOpacity, mStrokeOpacity);
+            mStrokeWidth = a.getFloat(R.styleable.VectorDrawablePath_strokeWidth, mStrokeWidth);
+
+            mTrimPathEnd = a.getFloat(R.styleable.VectorDrawablePath_trimPathEnd, mTrimPathEnd);
+            mTrimPathOffset = a.getFloat(
+                    R.styleable.VectorDrawablePath_trimPathOffset, mTrimPathOffset);
+            mTrimPathStart = a.getFloat(
+                    R.styleable.VectorDrawablePath_trimPathStart, mTrimPathStart);
 
             updateColorAlphas();
         }
@@ -1626,8 +1691,8 @@ public class VectorDrawable extends Drawable {
             mTrimPathStart = p1.mTrimPathStart;
             mTrimPathEnd = p1.mTrimPathEnd;
             mTrimPathOffset = p1.mTrimPathOffset;
-            mStrokelineCap = p1.mStrokelineCap;
-            mStrokelineJoin = p1.mStrokelineJoin;
+            mStrokeLineCap = p1.mStrokeLineCap;
+            mStrokeLineJoin = p1.mStrokeLineJoin;
             mStrokeMiterlimit = p1.mStrokeMiterlimit;
             mNumberOfStates = p1.mNumberOfStates;
             for (int i = 0; i < mNumberOfStates; i++) {
@@ -1664,13 +1729,13 @@ public class VectorDrawable extends Drawable {
                     returnPath.mTrimPathOffset = t1 * p1.mTrimPathOffset + t * p2.mTrimPathOffset;
                     returnPath.mStrokeMiterlimit =
                             t1 * p1.mStrokeMiterlimit + t * p2.mStrokeMiterlimit;
-                    returnPath.mStrokelineCap = p1.mStrokelineCap;
-                    if (returnPath.mStrokelineCap == null) {
-                        returnPath.mStrokelineCap = p2.mStrokelineCap;
+                    returnPath.mStrokeLineCap = p1.mStrokeLineCap;
+                    if (returnPath.mStrokeLineCap == null) {
+                        returnPath.mStrokeLineCap = p2.mStrokeLineCap;
                     }
-                    returnPath.mStrokelineJoin = p1.mStrokelineJoin;
-                    if (returnPath.mStrokelineJoin == null) {
-                        returnPath.mStrokelineJoin = p2.mStrokelineJoin;
+                    returnPath.mStrokeLineJoin = p1.mStrokeLineJoin;
+                    if (returnPath.mStrokeLineJoin == null) {
+                        returnPath.mStrokeLineJoin = p2.mStrokeLineJoin;
                     }
                     returnPath.mFillRule = p1.mFillRule;
 
