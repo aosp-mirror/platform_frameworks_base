@@ -416,15 +416,6 @@ public class UserManager {
     }
 
     /**
-     * Renamed, just present to avoid multi project commit.
-     * TODO delete.
-     * @hide
-     */
-    public UserInfo createRelatedUser(String name, int flags, int relatedUserId) {
-        return createProfileForUser(name, flags, relatedUserId);
-    }
-
-    /**
      * Creates a user with the specified name and options as a profile of another user.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
@@ -466,15 +457,6 @@ public class UserManager {
             Log.w(TAG, "Could not get user list", re);
             return null;
         }
-    }
-
-    /**
-     * Renaming, left to avoid multi project commit.
-     * TODO Delete.
-     * @hide
-     */
-    public List<UserInfo> getRelatedUsers(int userHandle) {
-        return getProfiles(userHandle);
     }
 
     /**
