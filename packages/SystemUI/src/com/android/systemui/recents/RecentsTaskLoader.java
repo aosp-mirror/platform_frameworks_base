@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -213,6 +212,7 @@ class TaskResourceLoader implements Runnable {
                                 Console.log(Constants.DebugFlags.App.TaskDataLoader,
                                         "    [TaskResourceLoader|loadThumbnail]",
                                         thumbnail);
+                                thumbnail.setHasAlpha(false);
                                 loadThumbnail = thumbnail;
                                 mThumbnailCache.put(t.key, thumbnail);
                             } else {
@@ -331,13 +331,9 @@ public class RecentsTaskLoader {
 
         // Create the default assets
         Bitmap icon = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        icon.eraseColor(0x00000000);
         mDefaultThumbnail = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas();
-        c.setBitmap(icon);
-        c.drawColor(0x00000000);
-        c.setBitmap(mDefaultThumbnail);
-        c.drawColor(0x00000000);
-        c.setBitmap(null);
+        mDefaultThumbnail.eraseColor(0x00000000);
         mDefaultApplicationIcon = new BitmapDrawable(context.getResources(), icon);
         Console.log(Constants.DebugFlags.App.TaskDataLoader,
                 "[RecentsTaskLoader|defaultBitmaps]",
@@ -454,6 +450,7 @@ public class RecentsTaskLoader {
                             "[RecentsTaskLoader|loadingTaskThumbnail]");
                     task.thumbnail = ssp.getTaskThumbnail(task.key.id);
                     if (task.thumbnail != null) {
+                        task.thumbnail.setHasAlpha(false);
                         mThumbnailCache.put(task.key, task.thumbnail);
                     } else {
                         task.thumbnail = mDefaultThumbnail;

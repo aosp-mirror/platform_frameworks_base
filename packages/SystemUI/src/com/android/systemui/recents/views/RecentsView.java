@@ -108,6 +108,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
@@ -118,6 +119,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
         // We measure our stack views sans the status bar.  It will handle the nav bar itself.
         RecentsConfiguration config = RecentsConfiguration.getInstance();
+        int childWidth = width - config.systemInsets.right;
         int childHeight = height - config.systemInsets.top;
 
         // Measure each child
@@ -125,7 +127,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         for (int i = 0; i < childCount; i++) {
             final View child = getChildAt(i);
             if (child.getVisibility() != GONE) {
-                child.measure(widthMeasureSpec,
+                child.measure(MeasureSpec.makeMeasureSpec(childWidth, widthMode),
                         MeasureSpec.makeMeasureSpec(childHeight, heightMode));
             }
         }
@@ -255,11 +257,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                             | Intent.FLAG_ACTIVITY_TASK_ON_HOME
                             | Intent.FLAG_ACTIVITY_NEW_TASK);
                     try {
+                        UserHandle taskUser = new UserHandle(task.userId);
                         if (opts != null) {
-                            getContext().startActivityAsUser(i, opts.toBundle(),
-                                    new UserHandle(task.userId));
+                            getContext().startActivityAsUser(i, opts.toBundle(), taskUser);
                         } else {
-                            getContext().startActivityAsUser(i, new UserHandle(task.userId));
+                            getContext().startActivityAsUser(i, taskUser);
                         }
                     } catch (ActivityNotFoundException anfe) {
                         Console.logError(getContext(), "Could not start Activity");

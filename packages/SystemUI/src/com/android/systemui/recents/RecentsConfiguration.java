@@ -17,6 +17,7 @@
 package com.android.systemui.recents;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
@@ -61,6 +62,12 @@ public class RecentsConfiguration {
         Resources res = context.getResources();
         DisplayMetrics dm = res.getDisplayMetrics();
         mDisplayMetrics = dm;
+
+        boolean isLandscape = res.getConfiguration().orientation ==
+                Configuration.ORIENTATION_LANDSCAPE;
+        Console.log(Constants.DebugFlags.UI.MeasureAndLayout,
+                "[RecentsConfiguration|orientation]", isLandscape ? "Landscape" : "Portrait",
+                Console.AnsiGreen);
 
         displayRect.set(0, 0, dm.widthPixels, dm.heightPixels);
         animationPxMovementPerSecond =
