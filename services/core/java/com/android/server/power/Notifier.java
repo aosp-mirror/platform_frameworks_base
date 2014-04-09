@@ -16,10 +16,13 @@
 
 package com.android.server.power;
 
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.EventLogTags;
+import com.android.server.LocalServices;
 
 import android.app.ActivityManagerNative;
 import android.content.BroadcastReceiver;
@@ -82,6 +85,7 @@ final class Notifier {
     private final SuspendBlocker mSuspendBlocker;
     private final ScreenOnBlocker mScreenOnBlocker;
     private final WindowManagerPolicy mPolicy;
+    private final ActivityManagerInternal mActivityManagerInternal;
 
     private final NotifierHandler mHandler;
     private final Intent mScreenOnIntent;
@@ -116,6 +120,7 @@ final class Notifier {
         mSuspendBlocker = suspendBlocker;
         mScreenOnBlocker = screenOnBlocker;
         mPolicy = policy;
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         mHandler = new NotifierHandler(looper);
         mScreenOnIntent = new Intent(Intent.ACTION_SCREEN_ON);
@@ -417,12 +422,7 @@ final class Notifier {
         EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 1, 0, 0, 0);
 
         mPolicy.screenTurningOn(mScreenOnListener);
-
-        try {
-            ActivityManagerNative.getDefault().wakingUp();
-        } catch (RemoteException e) {
-            // ignore it
-        }
+        mActivityManagerInternal.wakingUp();
 
         if (ActivityManagerNative.isSystemReady()) {
             mContext.sendOrderedBroadcastAsUser(mScreenOnIntent, UserHandle.ALL, null,
@@ -473,11 +473,7 @@ final class Notifier {
         EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 0, why, 0, 0);
 
         mPolicy.screenTurnedOff(why);
-        try {
-            ActivityManagerNative.getDefault().goingToSleep();
-        } catch (RemoteException e) {
-            // ignore it.
-        }
+        mActivityManagerInternal.goingToSleep();
 
         if (ActivityManagerNative.isSystemReady()) {
             mContext.sendOrderedBroadcastAsUser(mScreenOffIntent, UserHandle.ALL, null,
