@@ -17,7 +17,6 @@
 package android.tv;
 
 import android.tv.ITvInputServiceCallback;
-import android.tv.ITvInputSession;
 import android.tv.ITvInputSessionCallback;
 
 /**
