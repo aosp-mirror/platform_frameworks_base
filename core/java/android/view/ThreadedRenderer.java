@@ -54,25 +54,43 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private int mWidth, mHeight;
     private long mNativeProxy;
+    private boolean mInitialized = false;
 
     ThreadedRenderer(boolean translucent) {
         mNativeProxy = nCreateProxy(translucent);
-        setEnabled(mNativeProxy != 0);
     }
 
     @Override
     void destroy(boolean full) {
+        mInitialized = false;
+        updateEnabledState(null);
         nDestroyCanvas(mNativeProxy);
+    }
+
+    private void updateEnabledState(Surface surface) {
+        if (surface == null || !surface.isValid()) {
+            setEnabled(false);
+        } else {
+            setEnabled(mInitialized);
+        }
     }
 
     @Override
     boolean initialize(Surface surface) throws OutOfResourcesException {
+        mInitialized = true;
+        updateEnabledState(surface);
         return nInitialize(mNativeProxy, surface);
     }
 
     @Override
     void updateSurface(Surface surface) throws OutOfResourcesException {
+        updateEnabledState(surface);
         nUpdateSurface(mNativeProxy, surface);
+    }
+
+    @Override
+    void pauseSurface(Surface surface) {
+        nPauseSurface(mNativeProxy, surface);
     }
 
     @Override
@@ -267,6 +285,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private static native boolean nInitialize(long nativeProxy, Surface window);
     private static native void nUpdateSurface(long nativeProxy, Surface window);
+    private static native void nPauseSurface(long nativeProxy, Surface window);
     private static native void nSetup(long nativeProxy, int width, int height);
     private static native void nSetDisplayListData(long nativeProxy, long displayList,
             long newData);

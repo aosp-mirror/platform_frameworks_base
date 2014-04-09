@@ -234,6 +234,13 @@ public abstract class HardwareRenderer {
     abstract void updateSurface(Surface surface) throws OutOfResourcesException;
 
     /**
+     * Stops any rendering into the surface. Use this if it is unclear whether
+     * or not the surface used by the HardwareRenderer will be changing. It
+     * Suspends any rendering into the surface, but will not do any destruction
+     */
+    abstract void pauseSurface(Surface surface);
+
+    /**
      * Destroys all hardware rendering resources associated with the specified
      * view hierarchy.
      *
