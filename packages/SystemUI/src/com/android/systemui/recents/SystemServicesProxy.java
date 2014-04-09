@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 
@@ -52,9 +51,7 @@ public class SystemServicesProxy {
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
             // Create a dummy icon
             mDummyIcon = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-            Canvas c = new Canvas(mDummyIcon);
-            c.drawColor(0xFF999999);
-            c.setBitmap(null);
+            mDummyIcon.eraseColor(0xFF999999);
         }
     }
 
@@ -117,9 +114,7 @@ public class SystemServicesProxy {
         // If we are mocking, then just return a dummy thumbnail
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
             Bitmap thumbnail = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-            Canvas c = new Canvas(thumbnail);
-            c.drawColor(0xff333333);
-            c.setBitmap(null);
+            thumbnail.eraseColor(0xff333333);
             return thumbnail;
         }
 
