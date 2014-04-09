@@ -72,6 +72,10 @@ public class StackScrollState {
         return mStateMap.get(requestedView);
     }
 
+    public void removeViewStateForView(View child) {
+        mStateMap.remove(child);
+    }
+
     /**
      * Apply the properties saved in {@link #mStateMap} to the children of the {@link #mHostView}.
      * The properties are only applied if they effectively changed.
