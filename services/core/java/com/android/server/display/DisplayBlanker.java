@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_SERVER_POWER_MANAGER_SERVICE_H
-#define _ANDROID_SERVER_POWER_MANAGER_SERVICE_H
+package com.android.server.display;
 
-#include "JNIHelp.h"
-#include "jni.h"
-
-#include <androidfw/PowerManager.h>
-
-namespace android {
-
-extern void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType);
-
-} // namespace android
-
-#endif // _ANDROID_SERVER_POWER_MANAGER_SERVICE_H
+/**
+ * Interface used to update the actual display state.
+ */
+public interface DisplayBlanker {
+    void requestDisplayState(int state);
+}

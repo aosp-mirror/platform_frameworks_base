@@ -97,6 +97,7 @@ public class DozeTestDream extends DreamService {
         setLowProfile(true);
         setFullscreen(true);
         setContentView(R.layout.dream);
+        setScreenBright(false);
 
         mAlarmClock = (TextView)findViewById(R.id.alarm_clock);
 

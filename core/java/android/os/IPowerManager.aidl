@@ -37,8 +37,8 @@ interface IPowerManager
     void wakeUp(long time);
     void goToSleep(long time, int reason);
     void nap(long time);
+    boolean isInteractive();
 
-    boolean isScreenOn();
     void reboot(boolean confirm, String reason, boolean wait);
     void shutdown(boolean confirm, boolean wait);
     void crash(String message);

@@ -1730,7 +1730,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void updateScreenOn() {
         synchronized (mRulesLock) {
             try {
-                mScreenOn = mPowerManager.isScreenOn();
+                mScreenOn = mPowerManager.isInteractive();
             } catch (RemoteException e) {
                 // ignored; service lives in system_server
             }

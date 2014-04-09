@@ -18,7 +18,6 @@ package com.android.server.display;
 
 import com.android.server.lights.Light;
 
-import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -27,6 +26,7 @@ import android.util.FloatProperty;
 import android.util.IntProperty;
 import android.util.Slog;
 import android.view.Choreographer;
+import android.view.Display;
 
 import java.io.PrintWriter;
 
@@ -54,12 +54,12 @@ final class DisplayPowerState {
 
     private final Handler mHandler;
     private final Choreographer mChoreographer;
-    private final ElectronBeam mElectronBeam;
-    private final DisplayPowerCallbacks mCallbacks;
+    private final DisplayBlanker mBlanker;
     private final Light mBacklight;
+    private final ElectronBeam mElectronBeam;
     private final PhotonicModulator mPhotonicModulator;
 
-    private boolean mScreenOn;
+    private int mScreenState;
     private int mScreenBrightness;
     private boolean mScreenReady;
     private boolean mScreenUpdatePending;
@@ -71,13 +71,12 @@ final class DisplayPowerState {
 
     private Runnable mCleanListener;
 
-    public DisplayPowerState(ElectronBeam electronBean,
-            DisplayPowerCallbacks callbacks, Light backlight) {
+    public DisplayPowerState(DisplayBlanker blanker, Light backlight, ElectronBeam electronBeam) {
         mHandler = new Handler(true /*async*/);
         mChoreographer = Choreographer.getInstance();
-        mElectronBeam = electronBean;
-        mCallbacks = callbacks;
+        mBlanker = blanker;
         mBacklight = backlight;
+        mElectronBeam = electronBeam;
         mPhotonicModulator = new PhotonicModulator();
 
         // At boot time, we know that the screen is on and the electron beam
@@ -86,7 +85,7 @@ final class DisplayPowerState {
         // Although we set the brightness to full on here, the display power controller
         // will reset the brightness to a new level immediately before the changes
         // actually have a chance to be applied.
-        mScreenOn = true;
+        mScreenState = Display.STATE_ON;
         mScreenBrightness = PowerManager.BRIGHTNESS_ON;
         scheduleScreenUpdate();
 
@@ -122,25 +121,25 @@ final class DisplayPowerState {
     };
 
     /**
-     * Sets whether the screen is on or off.
+     * Sets whether the screen is on, off, or dozing.
      */
-    public void setScreenOn(boolean on) {
-        if (mScreenOn != on) {
+    public void setScreenState(int state) {
+        if (mScreenState != state) {
             if (DEBUG) {
-                Slog.d(TAG, "setScreenOn: on=" + on);
+                Slog.d(TAG, "setScreenState: state=" + state);
             }
 
-            mScreenOn = on;
+            mScreenState = state;
             mScreenReady = false;
             scheduleScreenUpdate();
         }
     }
 
     /**
-     * Returns true if the screen is on.
+     * Gets the desired screen state.
      */
-    public boolean isScreenOn() {
-        return mScreenOn;
+    public int getScreenState() {
+        return mScreenState;
     }
 
     /**
@@ -155,7 +154,7 @@ final class DisplayPowerState {
             }
 
             mScreenBrightness = brightness;
-            if (mScreenOn) {
+            if (mScreenState != Display.STATE_OFF) {
                 mScreenReady = false;
                 scheduleScreenUpdate();
             }
@@ -219,7 +218,7 @@ final class DisplayPowerState {
             }
 
             mElectronBeamLevel = level;
-            if (mScreenOn) {
+            if (mScreenState != Display.STATE_OFF) {
                 mScreenReady = false;
                 scheduleScreenUpdate(); // update backlight brightness
             }
@@ -256,7 +255,7 @@ final class DisplayPowerState {
     public void dump(PrintWriter pw) {
         pw.println();
         pw.println("Display Power State:");
-        pw.println("  mScreenOn=" + mScreenOn);
+        pw.println("  mScreenState=" + Display.stateToString(mScreenState));
         pw.println("  mScreenBrightness=" + mScreenBrightness);
         pw.println("  mScreenReady=" + mScreenReady);
         pw.println("  mScreenUpdatePending=" + mScreenUpdatePending);
@@ -302,8 +301,9 @@ final class DisplayPowerState {
         public void run() {
             mScreenUpdatePending = false;
 
-            int brightness = mScreenOn && mElectronBeamLevel > 0f ? mScreenBrightness : 0;
-            if (mPhotonicModulator.setState(mScreenOn, brightness)) {
+            int brightness = mScreenState != Display.STATE_OFF
+                    && mElectronBeamLevel > 0f ? mScreenBrightness : 0;
+            if (mPhotonicModulator.setState(mScreenState, brightness)) {
                 if (DEBUG) {
                     Slog.d(TAG, "Screen ready");
                 }
@@ -335,26 +335,26 @@ final class DisplayPowerState {
      * Updates the state of the screen and backlight asynchronously on a separate thread.
      */
     private final class PhotonicModulator {
-        private static final boolean INITIAL_SCREEN_ON = false; // unknown, assume off
+        private static final int INITIAL_SCREEN_STATE = Display.STATE_OFF; // unknown, assume off
         private static final int INITIAL_BACKLIGHT = -1; // unknown
 
         private final Object mLock = new Object();
 
-        private boolean mPendingOn = INITIAL_SCREEN_ON;
+        private int mPendingState = INITIAL_SCREEN_STATE;
         private int mPendingBacklight = INITIAL_BACKLIGHT;
-        private boolean mActualOn = INITIAL_SCREEN_ON;
+        private int mActualState = INITIAL_SCREEN_STATE;
         private int mActualBacklight = INITIAL_BACKLIGHT;
         private boolean mChangeInProgress;
 
-        public boolean setState(boolean on, int backlight) {
+        public boolean setState(int state, int backlight) {
             synchronized (mLock) {
-                if (on != mPendingOn || backlight != mPendingBacklight) {
+                if (state != mPendingState || backlight != mPendingBacklight) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Requesting new screen state: on=" + on
-                                + ", backlight=" + backlight);
+                        Slog.d(TAG, "Requesting new screen state: state="
+                                + Display.stateToString(state) + ", backlight=" + backlight);
                     }
 
-                    mPendingOn = on;
+                    mPendingState = state;
                     mPendingBacklight = backlight;
 
                     if (!mChangeInProgress) {
@@ -369,9 +369,9 @@ final class DisplayPowerState {
         public void dump(PrintWriter pw) {
             pw.println();
             pw.println("Photonic Modulator State:");
-            pw.println("  mPendingOn=" + mPendingOn);
+            pw.println("  mPendingState=" + Display.stateToString(mPendingState));
             pw.println("  mPendingBacklight=" + mPendingBacklight);
-            pw.println("  mActualOn=" + mActualOn);
+            pw.println("  mActualState=" + Display.stateToString(mActualState));
             pw.println("  mActualBacklight=" + mActualBacklight);
             pw.println("  mChangeInProgress=" + mChangeInProgress);
         }
@@ -381,35 +381,35 @@ final class DisplayPowerState {
             public void run() {
                 // Apply pending changes until done.
                 for (;;) {
-                    final boolean on;
-                    final boolean onChanged;
+                    final int state;
+                    final boolean stateChanged;
                     final int backlight;
                     final boolean backlightChanged;
                     synchronized (mLock) {
-                        on = mPendingOn;
-                        onChanged = (on != mActualOn);
+                        state = mPendingState;
+                        stateChanged = (state != mActualState);
                         backlight = mPendingBacklight;
                         backlightChanged = (backlight != mActualBacklight);
-                        if (!onChanged && !backlightChanged) {
+                        if (!stateChanged && !backlightChanged) {
                             mChangeInProgress = false;
                             break;
                         }
-                        mActualOn = on;
+                        mActualState = state;
                         mActualBacklight = backlight;
                     }
 
                     if (DEBUG) {
-                        Slog.d(TAG, "Updating screen state: on=" + on
-                                + ", backlight=" + backlight);
+                        Slog.d(TAG, "Updating screen state: state="
+                                + Display.stateToString(state) + ", backlight=" + backlight);
                     }
-                    if (onChanged && on) {
-                        mCallbacks.unblankAllDisplays();
+                    if (stateChanged && state != Display.STATE_OFF) {
+                        mBlanker.requestDisplayState(state);
                     }
                     if (backlightChanged) {
                         mBacklight.setBrightness(backlight);
                     }
-                    if (onChanged && !on) {
-                        mCallbacks.blankAllDisplays();
+                    if (stateChanged && state == Display.STATE_OFF) {
+                        mBlanker.requestDisplayState(state);
                     }
                 }
 

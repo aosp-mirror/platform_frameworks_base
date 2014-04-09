@@ -42,8 +42,6 @@ namespace android {
 // ----------------------------------------------------------------------------
 
 static struct {
-    jmethodID wakeUpFromNative;
-    jmethodID goToSleepFromNative;
     jmethodID userActivityFromNative;
 } gPowerManagerServiceClassInfo;
 
@@ -51,10 +49,6 @@ static struct {
 
 static jobject gPowerManagerServiceObj;
 static struct power_module* gPowerModule;
-
-static Mutex gPowerManagerLock;
-static bool gScreenOn;
-static bool gScreenBright;
 
 static nsecs_t gLastEventTime[USER_ACTIVITY_EVENT_LAST + 1];
 
@@ -71,16 +65,6 @@ static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodNa
         return true;
     }
     return false;
-}
-
-bool android_server_PowerManagerService_isScreenOn() {
-    AutoMutex _l(gPowerManagerLock);
-    return gScreenOn;
-}
-
-bool android_server_PowerManagerService_isScreenBright() {
-    AutoMutex _l(gPowerManagerLock);
-    return gScreenBright;
 }
 
 void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType) {
@@ -114,28 +98,6 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
     }
 }
 
-void android_server_PowerManagerService_wakeUp(nsecs_t eventTime) {
-    if (gPowerManagerServiceObj) {
-        JNIEnv* env = AndroidRuntime::getJNIEnv();
-
-        env->CallVoidMethod(gPowerManagerServiceObj,
-                gPowerManagerServiceClassInfo.wakeUpFromNative,
-                nanoseconds_to_milliseconds(eventTime));
-        checkAndClearExceptionFromCallback(env, "wakeUpFromNative");
-    }
-}
-
-void android_server_PowerManagerService_goToSleep(nsecs_t eventTime) {
-    if (gPowerManagerServiceObj) {
-        JNIEnv* env = AndroidRuntime::getJNIEnv();
-
-        env->CallVoidMethod(gPowerManagerServiceObj,
-                gPowerManagerServiceClassInfo.goToSleepFromNative,
-                nanoseconds_to_milliseconds(eventTime), 0);
-        checkAndClearExceptionFromCallback(env, "goToSleepFromNative");
-    }
-}
-
 // ----------------------------------------------------------------------------
 
 static void nativeInit(JNIEnv* env, jobject obj) {
@@ -148,13 +110,6 @@ static void nativeInit(JNIEnv* env, jobject obj) {
     } else {
         ALOGE("Couldn't load %s module (%s)", POWER_HARDWARE_MODULE_ID, strerror(-err));
     }
-}
-
-static void nativeSetPowerState(JNIEnv* env,
-        jclass clazz, jboolean screenOn, jboolean screenBright) {
-    AutoMutex _l(gPowerManagerLock);
-    gScreenOn = screenOn;
-    gScreenBright = screenBright;
 }
 
 static void nativeAcquireSuspendBlocker(JNIEnv *env, jclass clazz, jstring nameStr) {
@@ -195,8 +150,6 @@ static JNINativeMethod gPowerManagerServiceMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit", "()V",
             (void*) nativeInit },
-    { "nativeSetPowerState", "(ZZ)V",
-            (void*) nativeSetPowerState },
     { "nativeAcquireSuspendBlocker", "(Ljava/lang/String;)V",
             (void*) nativeAcquireSuspendBlocker },
     { "nativeReleaseSuspendBlocker", "(Ljava/lang/String;)V",
@@ -229,12 +182,6 @@ int register_android_server_PowerManagerService(JNIEnv* env) {
     jclass clazz;
     FIND_CLASS(clazz, "com/android/server/power/PowerManagerService");
 
-    GET_METHOD_ID(gPowerManagerServiceClassInfo.wakeUpFromNative, clazz,
-            "wakeUpFromNative", "(J)V");
-
-    GET_METHOD_ID(gPowerManagerServiceClassInfo.goToSleepFromNative, clazz,
-            "goToSleepFromNative", "(JI)V");
-
     GET_METHOD_ID(gPowerManagerServiceClassInfo.userActivityFromNative, clazz,
             "userActivityFromNative", "(JII)V");
 
@@ -242,8 +189,6 @@ int register_android_server_PowerManagerService(JNIEnv* env) {
     for (int i = 0; i <= USER_ACTIVITY_EVENT_LAST; i++) {
         gLastEventTime[i] = LLONG_MIN;
     }
-    gScreenOn = true;
-    gScreenBright = true;
     gPowerManagerServiceObj = NULL;
     gPowerModule = NULL;
     return 0;

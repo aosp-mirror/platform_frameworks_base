@@ -282,6 +282,7 @@ final class OverlayDisplayWindow implements DumpUtils.Dump {
             if (displayId == mDefaultDisplay.getDisplayId()) {
                 if (updateDefaultDisplayInfo()) {
                     relayout();
+                    mListener.onStateChanged(mDefaultDisplayInfo.state);
                 } else {
                     dismiss();
                 }
@@ -301,7 +302,8 @@ final class OverlayDisplayWindow implements DumpUtils.Dump {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture,
                 int width, int height) {
-            mListener.onWindowCreated(surfaceTexture, mDefaultDisplayInfo.refreshRate);
+            mListener.onWindowCreated(surfaceTexture, mDefaultDisplayInfo.refreshRate,
+                    mDefaultDisplayInfo.state);
         }
 
         @Override
@@ -370,7 +372,9 @@ final class OverlayDisplayWindow implements DumpUtils.Dump {
      * Watches for significant changes in the overlay display window lifecycle.
      */
     public interface Listener {
-        public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate);
+        public void onWindowCreated(SurfaceTexture surfaceTexture,
+                float refreshRate, int state);
         public void onWindowDestroyed();
+        public void onStateChanged(int state);
     }
 }
