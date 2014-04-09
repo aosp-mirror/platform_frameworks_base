@@ -386,11 +386,12 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
             dataSize = buffer->stride * buffer->height;
             break;
         case HAL_PIXEL_FORMAT_Y16:
+            bytesPerPixel = 2;
             // Single plane, 16bpp, strides are specified in pixels, not in bytes
             ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
 
             pData = buffer->data;
-            dataSize = buffer->stride * buffer->height * 2;
+            dataSize = buffer->stride * buffer->height * bytesPerPixel;
             break;
         case HAL_PIXEL_FORMAT_BLOB:
             // Used for JPEG data, height must be 1, width == size, single plane.
@@ -402,9 +403,10 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
             break;
         case HAL_PIXEL_FORMAT_RAW_SENSOR:
             // Single plane 16bpp bayer data.
+            bytesPerPixel = 2;
             ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
             pData = buffer->data;
-            dataSize = buffer->width * 2 * buffer->height;
+            dataSize = buffer->stride * buffer->height * bytesPerPixel;
             break;
         case HAL_PIXEL_FORMAT_RGBA_8888:
         case HAL_PIXEL_FORMAT_RGBX_8888:
