@@ -3392,7 +3392,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mForcingShowNavBarLayer = win.getSurfaceLayer();
         }
         if (attrs.type == TYPE_STATUS_BAR && (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
-            mTopFullscreenOpaqueWindowState = win;
             mForceStatusBarFromKeyguard = true;
         }
         if (mTopFullscreenOpaqueWindowState == null &&
