@@ -1362,6 +1362,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
         }
+
+        if (attrs.type != TYPE_STATUS_BAR) {
+            // The status bar is the only window allowed to exhibit keyguard behavior.
+            attrs.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+        }
     }
     
     void readLidState() {
