@@ -24,7 +24,6 @@ import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
-import com.android.server.twilight.TwilightManager;
 import com.android.server.Watchdog;
 
 import android.Manifest;
@@ -39,6 +38,7 @@ import android.database.ContentObserver;
 import android.hardware.SensorManager;
 import android.hardware.SystemSensorManager;
 import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Binder;
@@ -177,7 +177,6 @@ public final class PowerManagerService extends com.android.server.SystemService
     private PowerManagerHandler mHandler;
     private WindowManagerPolicy mPolicy;
     private Notifier mNotifier;
-    private DisplayPowerController mDisplayPowerController;
     private WirelessChargerDetector mWirelessChargerDetector;
     private SettingsObserver mSettingsObserver;
     private DreamManagerInternal mDreamManager;
@@ -257,9 +256,6 @@ public final class PowerManagerService extends com.android.server.SystemService
     // The screen on blocker used to keep the screen from turning on while the lock
     // screen is coming up.
     private final ScreenOnBlockerImpl mScreenOnBlocker;
-
-    // The display blanker used to turn the screen on or off.
-    private final DisplayBlankerImpl mDisplayBlanker;
 
     // True if systemReady() has been called.
     private boolean mSystemReady;
@@ -417,7 +413,6 @@ public final class PowerManagerService extends com.android.server.SystemService
             mHoldingDisplaySuspendBlocker = true;
 
             mScreenOnBlocker = new ScreenOnBlockerImpl();
-            mDisplayBlanker = new DisplayBlankerImpl();
             mWakefulness = WAKEFULNESS_AWAKE;
         }
 
@@ -457,7 +452,7 @@ public final class PowerManagerService extends com.android.server.SystemService
         // into the activity manager to check permissions.  Unfortunately the
         // activity manager is not running when the constructor is called, so we
         // have to defer setting the screen state until this point.
-        mDisplayBlanker.unblankAllDisplays();
+        mDisplayPowerCallbacks.unblankAllDisplays();
     }
 
     void setPolicy(WindowManagerPolicy policy) {
@@ -484,19 +479,15 @@ public final class PowerManagerService extends com.android.server.SystemService
                     mAppOps, createSuspendBlockerLocked("PowerManagerService.Broadcasts"),
                     mScreenOnBlocker, mPolicy);
 
-            // The display power controller runs on the power manager service's
-            // own handler thread to ensure timely operation.
-            mDisplayPowerController = new DisplayPowerController(mHandler.getLooper(),
-                    mContext, mNotifier, mLightsManager,
-                    LocalServices.getService(TwilightManager.class), sensorManager,
-                    mDisplaySuspendBlocker, mDisplayBlanker,
-                    mDisplayPowerControllerCallbacks, mHandler);
-
             mWirelessChargerDetector = new WirelessChargerDetector(sensorManager,
                     createSuspendBlockerLocked("PowerManagerService.WirelessChargerDetector"),
                     mHandler);
             mSettingsObserver = new SettingsObserver(mHandler);
             mAttentionLight = mLightsManager.getLight(LightsManager.LIGHT_ID_ATTENTION);
+
+            // Initialize display power management.
+            mDisplayManagerInternal.initPowerManagement(
+                    mDisplayPowerCallbacks, mHandler, sensorManager);
 
             // Register for broadcasts from other components of the system.
             IntentFilter filter = new IntentFilter();
@@ -810,7 +801,7 @@ public final class PowerManagerService extends com.android.server.SystemService
                     return true;
 
                 case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
-                    return mSystemReady && mDisplayPowerController.isProximitySensorAvailable();
+                    return mSystemReady && mDisplayManagerInternal.isProximitySensorAvailable();
 
                 default:
                     return false;
@@ -1633,7 +1624,7 @@ public final class PowerManagerService extends com.android.server.SystemService
 
             mDisplayPowerRequest.blockScreenOn = mScreenOnBlocker.isHeld();
 
-            mDisplayReady = mDisplayPowerController.requestPowerState(mDisplayPowerRequest,
+            mDisplayReady = mDisplayManagerInternal.requestPowerState(mDisplayPowerRequest,
                     mRequestWaitForNegativeProximity);
             mRequestWaitForNegativeProximity = false;
 
@@ -1675,8 +1666,10 @@ public final class PowerManagerService extends com.android.server.SystemService
         return DisplayPowerRequest.SCREEN_STATE_DIM;
     }
 
-    private final DisplayPowerController.Callbacks mDisplayPowerControllerCallbacks =
-            new DisplayPowerController.Callbacks() {
+    private final DisplayManagerInternal.DisplayPowerCallbacks mDisplayPowerCallbacks =
+            new DisplayManagerInternal.DisplayPowerCallbacks() {
+        private boolean mBlanked;
+
         @Override
         public void onStateChanged() {
             synchronized (mLock) {
@@ -1702,6 +1695,51 @@ public final class PowerManagerService extends com.android.server.SystemService
                 userActivityNoUpdateLocked(SystemClock.uptimeMillis(),
                         PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
                 updatePowerStateLocked();
+            }
+        }
+
+        @Override
+        public void acquireSuspendBlocker() {
+            mDisplaySuspendBlocker.acquire();
+        }
+
+        @Override
+        public void releaseSuspendBlocker() {
+            mDisplaySuspendBlocker.release();
+        }
+
+        @Override
+        public void blankAllDisplays() {
+            synchronized (this) {
+                mBlanked = true;
+                mDisplayManagerInternal.blankAllDisplaysFromPowerManager();
+                if (!mDecoupleInteractiveModeFromDisplayConfig) {
+                    setInteractiveModeLocked(false);
+                }
+                if (!mDecoupleAutoSuspendModeFromDisplayConfig) {
+                    setAutoSuspendModeLocked(true);
+                }
+            }
+        }
+
+        @Override
+        public void unblankAllDisplays() {
+            synchronized (this) {
+                if (!mDecoupleAutoSuspendModeFromDisplayConfig) {
+                    setAutoSuspendModeLocked(false);
+                }
+                if (!mDecoupleInteractiveModeFromDisplayConfig) {
+                    setInteractiveModeLocked(true);
+                }
+                mDisplayManagerInternal.unblankAllDisplaysFromPowerManager();
+                mBlanked = false;
+            }
+        }
+
+        @Override
+        public String toString() {
+            synchronized (this) {
+                return "blanked=" + mBlanked;
             }
         }
     };
@@ -2018,7 +2056,6 @@ public final class PowerManagerService extends com.android.server.SystemService
     private void dumpInternal(PrintWriter pw) {
         pw.println("POWER MANAGER (dumpsys power)\n");
 
-        final DisplayPowerController dpc;
         final WirelessChargerDetector wcd;
         synchronized (mLock) {
             pw.println("Power Manager State:");
@@ -2123,14 +2160,9 @@ public final class PowerManagerService extends com.android.server.SystemService
             pw.println("Screen On Blocker: " + mScreenOnBlocker);
 
             pw.println();
-            pw.println("Display Blanker: " + mDisplayBlanker);
+            pw.println("Display Power: " + mDisplayPowerCallbacks);
 
-            dpc = mDisplayPowerController;
             wcd = mWirelessChargerDetector;
-        }
-
-        if (dpc != null) {
-            dpc.dump(pw);
         }
 
         if (wcd != null) {
@@ -2467,45 +2499,6 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
     }
 
-    private final class DisplayBlankerImpl implements DisplayBlanker {
-        private boolean mBlanked;
-
-        @Override
-        public void blankAllDisplays() {
-            synchronized (this) {
-                mBlanked = true;
-                mDisplayManagerInternal.blankAllDisplaysFromPowerManager();
-                if (!mDecoupleInteractiveModeFromDisplayConfig) {
-                    setInteractiveModeLocked(false);
-                }
-                if (!mDecoupleAutoSuspendModeFromDisplayConfig) {
-                    setAutoSuspendModeLocked(true);
-                }
-            }
-        }
-
-        @Override
-        public void unblankAllDisplays() {
-            synchronized (this) {
-                if (!mDecoupleAutoSuspendModeFromDisplayConfig) {
-                    setAutoSuspendModeLocked(false);
-                }
-                if (!mDecoupleInteractiveModeFromDisplayConfig) {
-                    setInteractiveModeLocked(true);
-                }
-                mDisplayManagerInternal.unblankAllDisplaysFromPowerManager();
-                mBlanked = false;
-            }
-        }
-
-        @Override
-        public String toString() {
-            synchronized (this) {
-                return "blanked=" + mBlanked;
-            }
-        }
-    }
-
     private final class BinderService extends IPowerManager.Stub {
         @Override // Binder call
         public void acquireWakeLockWithUid(IBinder lock, int flags, String tag,
@@ -2830,7 +2823,7 @@ public final class PowerManagerService extends com.android.server.SystemService
          *
          * @param adj The overridden brightness, or Float.NaN to disable the override.
          *
-         * @see Settings.System#SCREEN_AUTO_BRIGHTNESS_ADJ
+         * @see android.provider.Settings.System#SCREEN_AUTO_BRIGHTNESS_ADJ
          */
         @Override // Binder call
         public void setTemporaryScreenAutoBrightnessAdjustmentSettingOverride(float adj) {

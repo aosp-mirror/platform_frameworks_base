@@ -189,51 +189,6 @@ final class Notifier {
     }
 
     /**
-     * Called when the screen is turned on.
-     */
-    public void onScreenOn() {
-        if (DEBUG) {
-            Slog.d(TAG, "onScreenOn");
-        }
-
-        try {
-            mBatteryStats.noteScreenOn();
-        } catch (RemoteException ex) {
-            // Ignore
-        }
-    }
-
-    /**
-     * Called when the screen is turned off.
-     */
-    public void onScreenOff() {
-        if (DEBUG) {
-            Slog.d(TAG, "onScreenOff");
-        }
-
-        try {
-            mBatteryStats.noteScreenOff();
-        } catch (RemoteException ex) {
-            // Ignore
-        }
-    }
-
-    /**
-     * Called when the screen changes brightness.
-     */
-    public void onScreenBrightness(int brightness) {
-        if (DEBUG) {
-            Slog.d(TAG, "onScreenBrightness: brightness=" + brightness);
-        }
-
-        try {
-            mBatteryStats.noteScreenBrightness(brightness);
-        } catch (RemoteException ex) {
-            // Ignore
-        }
-    }
-
-    /**
      * Called when the device is waking up from sleep and the
      * display is about to be turned on.
      */
