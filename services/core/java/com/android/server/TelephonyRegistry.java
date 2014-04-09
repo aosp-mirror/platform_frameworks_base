@@ -22,8 +22,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.LinkCapabilities;
 import android.net.LinkProperties;
+import android.net.NetworkCapabilities;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -120,7 +120,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private LinkProperties mDataConnectionLinkProperties;
 
-    private LinkCapabilities mDataConnectionLinkCapabilities;
+    private NetworkCapabilities mDataConnectionNetworkCapabilities;
 
     private Bundle mCellLocation = new Bundle();
 
@@ -553,7 +553,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     public void notifyDataConnection(int state, boolean isDataConnectivityPossible,
             String reason, String apn, String apnType, LinkProperties linkProperties,
-            LinkCapabilities linkCapabilities, int networkType, boolean roaming) {
+            NetworkCapabilities networkCapabilities, int networkType, boolean roaming) {
         if (!checkNotifyPermission("notifyDataConnection()" )) {
             return;
         }
@@ -587,7 +587,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mDataConnectionPossible = isDataConnectivityPossible;
             mDataConnectionReason = reason;
             mDataConnectionLinkProperties = linkProperties;
-            mDataConnectionLinkCapabilities = linkCapabilities;
+            mDataConnectionNetworkCapabilities = networkCapabilities;
             if (mDataConnectionNetworkType != networkType) {
                 mDataConnectionNetworkType = networkType;
                 // need to tell registered listeners about the new network type
@@ -624,7 +624,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             handleRemoveListLocked();
         }
         broadcastDataConnectionStateChanged(state, isDataConnectivityPossible, reason, apn,
-                apnType, linkProperties, linkCapabilities, roaming);
+                apnType, linkProperties, networkCapabilities, roaming);
         broadcastPreciseDataConnectionStateChanged(state, networkType, apnType, apn, reason,
                 linkProperties, "");
     }
@@ -794,7 +794,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("  mDataConnectionReason=" + mDataConnectionReason);
             pw.println("  mDataConnectionApn=" + mDataConnectionApn);
             pw.println("  mDataConnectionLinkProperties=" + mDataConnectionLinkProperties);
-            pw.println("  mDataConnectionLinkCapabilities=" + mDataConnectionLinkCapabilities);
+            pw.println("  mDataConnectionNetworkCapabilities=" +
+                    mDataConnectionNetworkCapabilities);
             pw.println("  mCellLocation=" + mCellLocation);
             pw.println("  mCellInfo=" + mCellInfo);
             pw.println("  mDcRtInfo=" + mDcRtInfo);
@@ -862,7 +863,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private void broadcastDataConnectionStateChanged(int state,
             boolean isDataConnectivityPossible,
             String reason, String apn, String apnType, LinkProperties linkProperties,
-            LinkCapabilities linkCapabilities, boolean roaming) {
+            NetworkCapabilities networkCapabilities, boolean roaming) {
         // Note: not reporting to the battery stats service here, because the
         // status bar takes care of that after taking into account all of the
         // required info.
@@ -882,8 +883,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 intent.putExtra(PhoneConstants.DATA_IFACE_NAME_KEY, iface);
             }
         }
-        if (linkCapabilities != null) {
-            intent.putExtra(PhoneConstants.DATA_LINK_CAPABILITIES_KEY, linkCapabilities);
+        if (networkCapabilities != null) {
+            intent.putExtra(PhoneConstants.DATA_NETWORK_CAPABILITIES_KEY, networkCapabilities);
         }
         if (roaming) intent.putExtra(PhoneConstants.DATA_NETWORK_ROAMING_KEY, true);
 

@@ -1117,7 +1117,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 if (tracker != null) {
                     final NetworkInfo info = getFilteredNetworkInfo(tracker, uid);
                     result.add(new NetworkState(
-                            info, tracker.getLinkProperties(), tracker.getLinkCapabilities()));
+                            info, tracker.getLinkProperties(), tracker.getNetworkCapabilities()));
                 }
             }
         }
@@ -1129,7 +1129,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             final NetworkStateTracker tracker = mNetTrackers[networkType];
             if (tracker != null) {
                 return new NetworkState(tracker.getNetworkInfo(), tracker.getLinkProperties(),
-                        tracker.getLinkCapabilities());
+                        tracker.getNetworkCapabilities());
             }
         }
         return null;

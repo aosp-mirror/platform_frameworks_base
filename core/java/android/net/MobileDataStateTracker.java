@@ -66,7 +66,6 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
     private Handler mTarget;
     private Context mContext;
     private LinkProperties mLinkProperties;
-    private LinkCapabilities mLinkCapabilities;
     private boolean mPrivateDnsRouteSet = false;
     private boolean mDefaultRouteSet = false;
 
@@ -200,11 +199,11 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
         }
         mLinkProperties.setMtu(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_mobile_mtu));
-        mLinkCapabilities = intent.getParcelableExtra(
-                PhoneConstants.DATA_LINK_CAPABILITIES_KEY);
-        if (mLinkCapabilities == null) {
-            loge("CONNECTED event did not supply link capabilities.");
-            mLinkCapabilities = new LinkCapabilities();
+        mNetworkCapabilities = intent.getParcelableExtra(
+                PhoneConstants.DATA_NETWORK_CAPABILITIES_KEY);
+        if (mNetworkCapabilities == null) {
+            loge("CONNECTED event did not supply network capabilities.");
+            mNetworkCapabilities = new NetworkCapabilities();
         }
     }
 
@@ -316,10 +315,10 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
                             Slog.d(TAG, "LinkProperties = " );
                         }
 
-                        if (mLinkCapabilities != null) {
-                            Slog.d(TAG, "LinkCapabilities = " + mLinkCapabilities);
+                        if (mNetworkCapabilities != null) {
+                            Slog.d(TAG, mNetworkCapabilities.toString());
                         } else {
-                            Slog.d(TAG, "LinkCapabilities = " );
+                            Slog.d(TAG, "NetworkCapabilities = " );
                         }
                     }
 
@@ -748,14 +747,6 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
     @Override
     public LinkProperties getLinkProperties() {
         return new LinkProperties(mLinkProperties);
-    }
-
-    /**
-     * @see android.net.NetworkStateTracker#getLinkCapabilities()
-     */
-    @Override
-    public LinkCapabilities getLinkCapabilities() {
-        return new LinkCapabilities(mLinkCapabilities);
     }
 
     public void supplyMessenger(Messenger messenger) {

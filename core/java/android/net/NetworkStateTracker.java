@@ -111,12 +111,9 @@ public interface NetworkStateTracker {
     public LinkProperties getLinkProperties();
 
     /**
-     * A capability is an Integer/String pair, the capabilities
-     * are defined in the class LinkSocket#Key.
-     *
      * @return a copy of this connections capabilities, may be empty but never null.
      */
-    public LinkCapabilities getLinkCapabilities();
+    public NetworkCapabilities getNetworkCapabilities();
 
     /**
      * Get interesting information about this network link

@@ -44,7 +44,7 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
 
     protected NetworkInfo mNetworkInfo;
     protected LinkProperties mLinkProperties;
-    protected LinkCapabilities mLinkCapabilities;
+    protected NetworkCapabilities mNetworkCapabilities;
     protected Network mNetwork = new Network(ConnectivityManager.INVALID_NET_ID);
 
     private AtomicBoolean mTeardownRequested = new AtomicBoolean(false);
@@ -55,7 +55,7 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
         mNetworkInfo = new NetworkInfo(
                 networkType, -1, ConnectivityManager.getNetworkTypeName(networkType), null);
         mLinkProperties = new LinkProperties();
-        mLinkCapabilities = new LinkCapabilities();
+        mNetworkCapabilities = new NetworkCapabilities();
     }
 
     protected BaseNetworkStateTracker() {
@@ -99,8 +99,8 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
     }
 
     @Override
-    public LinkCapabilities getLinkCapabilities() {
-        return new LinkCapabilities(mLinkCapabilities);
+    public NetworkCapabilities getNetworkCapabilities() {
+        return new NetworkCapabilities(mNetworkCapabilities);
     }
 
     @Override

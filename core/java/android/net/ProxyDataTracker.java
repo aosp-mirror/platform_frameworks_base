@@ -104,7 +104,7 @@ public class ProxyDataTracker extends BaseNetworkStateTracker {
     public ProxyDataTracker() {
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_PROXY, 0, NETWORK_TYPE, "");
         mLinkProperties = new LinkProperties();
-        mLinkCapabilities = new LinkCapabilities();
+        mNetworkCapabilities = new NetworkCapabilities();
         mNetworkInfo.setIsAvailable(true);
         try {
           mLinkProperties.addDns(InetAddress.getByName(DNS1));

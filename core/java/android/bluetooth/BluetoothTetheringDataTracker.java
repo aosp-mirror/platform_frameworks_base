@@ -20,7 +20,7 @@ import android.net.BaseNetworkStateTracker;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.DhcpResults;
-import android.net.LinkCapabilities;
+import android.net.NetworkCapabilities;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
@@ -75,7 +75,7 @@ public class BluetoothTetheringDataTracker extends BaseNetworkStateTracker {
     private BluetoothTetheringDataTracker() {
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_BLUETOOTH, 0, NETWORKTYPE, "");
         mLinkProperties = new LinkProperties();
-        mLinkCapabilities = new LinkCapabilities();
+        mNetworkCapabilities = new NetworkCapabilities();
 
         mNetworkInfo.setIsAvailable(false);
         setTeardownRequested(false);
@@ -240,16 +240,6 @@ public class BluetoothTetheringDataTracker extends BaseNetworkStateTracker {
         synchronized (mLinkPropertiesLock) {
             return new LinkProperties(mLinkProperties);
         }
-    }
-
-   /**
-     * A capability is an Integer/String pair, the capabilities
-     * are defined in the class LinkSocket#Key.
-     *
-     * @return a copy of this connections capabilities, may be empty but never null.
-     */
-    public LinkCapabilities getLinkCapabilities() {
-        return new LinkCapabilities(mLinkCapabilities);
     }
 
     /**

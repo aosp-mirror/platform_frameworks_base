@@ -190,13 +190,6 @@ public class DummyDataStateTracker extends BaseNetworkStateTracker {
         return new LinkProperties(mLinkProperties);
     }
 
-    /**
-     * @see android.net.NetworkStateTracker#getLinkCapabilities()
-     */
-    public LinkCapabilities getLinkCapabilities() {
-        return new LinkCapabilities(mLinkCapabilities);
-    }
-
     public void setDependencyMet(boolean met) {
         // not supported on this network
     }

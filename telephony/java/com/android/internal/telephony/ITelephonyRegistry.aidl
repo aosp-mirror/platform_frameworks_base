@@ -18,7 +18,7 @@ package com.android.internal.telephony;
 
 import android.content.Intent;
 import android.net.LinkProperties;
-import android.net.LinkCapabilities;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.telephony.CellInfo;
 import android.telephony.DataConnectionRealTimeInfo;
@@ -37,7 +37,7 @@ interface ITelephonyRegistry {
     void notifyDataActivity(int state);
     void notifyDataConnection(int state, boolean isDataConnectivityPossible,
             String reason, String apn, String apnType, in LinkProperties linkProperties,
-            in LinkCapabilities linkCapabilities, int networkType, boolean roaming);
+            in NetworkCapabilities networkCapabilities, int networkType, boolean roaming);
     void notifyDataConnectionFailed(String reason, String apnType);
     void notifyCellLocation(in Bundle cellLocation);
     void notifyOtaspChanged(in int otaspMode);

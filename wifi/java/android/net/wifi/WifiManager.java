@@ -402,12 +402,12 @@ public class WifiManager {
     public static final String EXTRA_LINK_PROPERTIES = "linkProperties";
 
     /**
-     * The lookup key for a {@link android.net.LinkCapabilities} object associated with the
+     * The lookup key for a {@link android.net.NetworkCapabilities} object associated with the
      * Wi-Fi network. Retrieve with
      * {@link android.content.Intent#getParcelableExtra(String)}.
      * @hide
      */
-    public static final String EXTRA_LINK_CAPABILITIES = "linkCapabilities";
+    public static final String EXTRA_NETWORK_CAPABILITIES = "networkCapabilities";
 
     /**
      * The network IDs of the configured networks could have changed.

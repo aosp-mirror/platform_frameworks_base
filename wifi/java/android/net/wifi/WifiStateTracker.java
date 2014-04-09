@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.BaseNetworkStateTracker;
-import android.net.LinkCapabilities;
+import android.net.NetworkCapabilities;
 import android.net.LinkQualityInfo;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
@@ -65,7 +65,7 @@ public class WifiStateTracker extends BaseNetworkStateTracker {
     public WifiStateTracker(int netType, String networkName) {
         mNetworkInfo = new NetworkInfo(netType, 0, networkName, "");
         mLinkProperties = new LinkProperties();
-        mLinkCapabilities = new LinkCapabilities();
+        mNetworkCapabilities = new NetworkCapabilities();
 
         mNetworkInfo.setIsAvailable(false);
         setTeardownRequested(false);
@@ -183,17 +183,6 @@ public class WifiStateTracker extends BaseNetworkStateTracker {
     }
 
     /**
-     * A capability is an Integer/String pair, the capabilities
-     * are defined in the class LinkSocket#Key.
-     *
-     * @return a copy of this connections capabilities, may be empty but never null.
-     */
-    @Override
-    public LinkCapabilities getLinkCapabilities() {
-        return new LinkCapabilities(mLinkCapabilities);
-    }
-
-    /**
      * Return link info
      * @return an object of type WifiLinkQualityInfo
      */
@@ -264,10 +253,10 @@ public class WifiStateTracker extends BaseNetworkStateTracker {
                 if (mLinkProperties == null) {
                     mLinkProperties = new LinkProperties();
                 }
-                mLinkCapabilities = intent.getParcelableExtra(
-                        WifiManager.EXTRA_LINK_CAPABILITIES);
-                if (mLinkCapabilities == null) {
-                    mLinkCapabilities = new LinkCapabilities();
+                mNetworkCapabilities = intent.getParcelableExtra(
+                        WifiManager.EXTRA_NETWORK_CAPABILITIES);
+                if (mNetworkCapabilities == null) {
+                    mNetworkCapabilities = new NetworkCapabilities();
                 }
 
                 mWifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
@@ -323,4 +312,3 @@ public class WifiStateTracker extends BaseNetworkStateTracker {
         mSamplingDataTracker.stopSampling(s);
     }
 }
-

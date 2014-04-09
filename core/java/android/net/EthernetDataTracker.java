@@ -103,7 +103,7 @@ public class EthernetDataTracker extends BaseNetworkStateTracker {
     private EthernetDataTracker() {
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_ETHERNET, 0, NETWORKTYPE, "");
         mLinkProperties = new LinkProperties();
-        mLinkCapabilities = new LinkCapabilities();
+        mNetworkCapabilities = new NetworkCapabilities();
     }
 
     private void interfaceUpdated() {
@@ -370,16 +370,6 @@ public class EthernetDataTracker extends BaseNetworkStateTracker {
      */
     public synchronized LinkProperties getLinkProperties() {
         return new LinkProperties(mLinkProperties);
-    }
-
-   /**
-     * A capability is an Integer/String pair, the capabilities
-     * are defined in the class LinkSocket#Key.
-     *
-     * @return a copy of this connections capabilities, may be empty but never null.
-     */
-    public LinkCapabilities getLinkCapabilities() {
-        return new LinkCapabilities(mLinkCapabilities);
     }
 
     /**
