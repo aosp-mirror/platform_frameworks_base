@@ -51,14 +51,14 @@ class SystemUIMessageHandler extends Handler {
         Context context = mContext.get();
         if (context == null) return;
 
-        if (msg.what == RecentsService.MSG_UPDATE_RECENTS_FOR_CONFIGURATION) {
+        if (msg.what == AlternateRecentsComponent.MSG_UPDATE_FOR_CONFIGURATION) {
             RecentsTaskLoader.initialize(context);
             RecentsConfiguration.reinitialize(context);
 
             try {
                 Bundle data = msg.getData();
-                Rect windowRect = (Rect) data.getParcelable("windowRect");
-                Rect systemInsets = (Rect) data.getParcelable("systemInsets");
+                Rect windowRect = data.getParcelable(AlternateRecentsComponent.KEY_WINDOW_RECT);
+                Rect systemInsets = data.getParcelable(AlternateRecentsComponent.KEY_SYSTEM_INSETS);
 
                 // Create a dummy task stack & compute the rect for the thumbnail to animate to
                 TaskStack stack = new TaskStack(context);
@@ -73,7 +73,8 @@ class SystemUIMessageHandler extends Handler {
                 tsv.computeRects(windowRect.width(), windowRect.height() - systemInsets.top, 0);
                 tsv.boundScroll();
                 transform = tsv.getStackTransform(0, tsv.getStackScroll());
-                replyData.putParcelable("singleCountTaskRect", new Rect(transform.rect));
+                replyData.putParcelable(AlternateRecentsComponent.KEY_SINGLE_TASK_STACK_RECT,
+                        new Rect(transform.rect));
 
                 // Also calculate the target task rect when there are multiple tasks
                 stack.addTask(new Task());
@@ -81,19 +82,20 @@ class SystemUIMessageHandler extends Handler {
                 tsv.setStackScrollRaw(Integer.MAX_VALUE);
                 tsv.boundScroll();
                 transform = tsv.getStackTransform(1, tsv.getStackScroll());
-                replyData.putParcelable("multipleCountTaskRect", new Rect(transform.rect));
+                replyData.putParcelable(AlternateRecentsComponent.KEY_MULTIPLE_TASK_STACK_RECT,
+                        new Rect(transform.rect));
 
-                data.putParcelable("replyData", replyData);
+                data.putParcelable(AlternateRecentsComponent.KEY_CONFIGURATION_DATA, replyData);
                 Message reply = Message.obtain(null,
-                        RecentsService.MSG_UPDATE_RECENTS_FOR_CONFIGURATION, 0, 0);
+                        AlternateRecentsComponent.MSG_UPDATE_FOR_CONFIGURATION, 0, 0);
                 reply.setData(data);
                 msg.replyTo.send(reply);
             } catch (RemoteException re) {
                 re.printStackTrace();
             }
-        } else if (msg.what == RecentsService.MSG_CLOSE_RECENTS) {
+        } else if (msg.what == AlternateRecentsComponent.MSG_CLOSE_RECENTS) {
             // Do nothing
-        } else if (msg.what == RecentsService.MSG_TOGGLE_RECENTS) {
+        } else if (msg.what == AlternateRecentsComponent.MSG_TOGGLE_RECENTS) {
             // Send a broadcast to toggle recents
             Intent intent = new Intent(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY);
             intent.setPackage(context.getPackageName());
@@ -112,11 +114,6 @@ class SystemUIMessageHandler extends Handler {
 public class RecentsService extends Service {
     final static String ACTION_FINISH_RECENTS_ACTIVITY = "action_finish_recents_activity";
     final static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
-
-    // XXX: This should be getting the message from recents definition
-    final static int MSG_UPDATE_RECENTS_FOR_CONFIGURATION = 0;
-    final static int MSG_CLOSE_RECENTS = 4;
-    final static int MSG_TOGGLE_RECENTS = 5;
 
     Messenger mSystemUIMessenger = new Messenger(new SystemUIMessageHandler(this));
 

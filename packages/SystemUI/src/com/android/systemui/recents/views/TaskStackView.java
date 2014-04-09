@@ -563,8 +563,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             requestSynchronizeStackViewsWithModel();
             synchronizeStackViewsWithModel();
 
-            // Animate the icon of the first task view
-            if (Constants.Values.TaskView.AnimateFrontTaskIconOnEnterRecents) {
+            // Animate the task bar of the first task view
+            if (config.launchedWithThumbnailAnimation &&
+                    Constants.Values.TaskView.AnimateFrontTaskBarOnEnterRecents) {
                 TaskView tv = (TaskView) getChildAt(getChildCount() - 1);
                 if (tv != null) {
                     tv.animateOnEnterRecents();

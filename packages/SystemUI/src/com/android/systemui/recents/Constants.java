@@ -96,8 +96,8 @@ public class Constants {
         }
 
         public static class TaskView {
-            public static final boolean AnimateFrontTaskIconOnEnterRecents = true;
-            public static final boolean AnimateFrontTaskIconOnLeavingRecents = true;
+            public static final boolean AnimateFrontTaskBarOnEnterRecents = true;
+            public static final boolean AnimateFrontTaskBarOnLeavingRecents = true;
         }
     }
 }
