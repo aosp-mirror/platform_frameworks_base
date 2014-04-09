@@ -32,30 +32,20 @@ class AppRuntime : public AndroidRuntime
 public:
     AppRuntime(char* argBlockStart, const size_t argBlockLength)
         : AndroidRuntime(argBlockStart, argBlockLength)
-        , mParentDir(NULL)
-        , mClassName(NULL)
         , mClass(NULL)
-        , mArgC(0)
-        , mArgV(NULL)
     {
     }
 
-#if 0
-    // this appears to be unused
-    const char* getParentDir() const
-    {
-        return mParentDir;
-    }
-#endif
-
-    const char* getClassName() const
-    {
-        return mClassName;
+    void setClassNameAndArgs(const String8& className, int argc, char * const *argv) {
+        mClassName = className;
+        for (int i = 0; i < argc; ++i) {
+             mArgs.add(String8(argv[i]));
+        }
     }
 
     virtual void onVmCreated(JNIEnv* env)
     {
-        if (mClassName == NULL) {
+        if (mClassName.isEmpty()) {
             return; // Zygote. Nothing to do here.
         }
 
@@ -72,10 +62,10 @@ public:
          * executing boot class Java code and thereby deny ourselves access to
          * non-boot classes.
          */
-        char* slashClassName = toSlashClassName(mClassName);
+        char* slashClassName = toSlashClassName(mClassName.string());
         mClass = env->FindClass(slashClassName);
         if (mClass == NULL) {
-            ALOGE("ERROR: could not find class '%s'\n", mClassName);
+            ALOGE("ERROR: could not find class '%s'\n", mClassName.string());
         }
         free(slashClassName);
 
@@ -89,7 +79,7 @@ public:
         proc->startThreadPool();
 
         AndroidRuntime* ar = AndroidRuntime::getRuntime();
-        ar->callMain(mClassName, mClass, mArgC, mArgV);
+        ar->callMain(mClassName, mClass, mArgs);
 
         IPCThreadState::self()->stopProcess();
     }
@@ -115,11 +105,9 @@ public:
     }
 
 
-    const char* mParentDir;
-    const char* mClassName;
+    String8 mClassName;
+    Vector<String8> mArgs;
     jclass mClass;
-    int mArgC;
-    const char* const* mArgV;
 };
 
 }
@@ -155,7 +143,26 @@ int main(int argc, char* const argv[])
     argc--;
     argv++;
 
-    // Everything up to '--' or first non '-' arg goes to the vm
+    // Everything up to '--' or first non '-' arg goes to the vm.
+    //
+    // The first argument after the VM args is the "parent dir", which
+    // is currently unused.
+    //
+    // After the parent dir, we expect one or more the following internal
+    // arguments :
+    //
+    // --zygote : Start in zygote mode
+    // --start-system-server : Start the system server.
+    // --application : Start in application (stand alone, non zygote) mode.
+    // --nice-name : The nice name for this process.
+    //
+    // For non zygote starts, these arguments will be followed by
+    // the main class name. All remaining arguments are passed to
+    // the main method of this class.
+    //
+    // For zygote starts, all remaining arguments are passed to the zygote.
+    // main function.
+
 
     int i = runtime.addVmArguments(argc, argv);
 
@@ -163,14 +170,13 @@ int main(int argc, char* const argv[])
     bool zygote = false;
     bool startSystemServer = false;
     bool application = false;
-    const char* parentDir = NULL;
     const char* niceName = NULL;
-    const char* className = NULL;
+    String8 className;
+
+    ++i;  // Skip unused "parent dir" argument.
     while (i < argc) {
         const char* arg = argv[i++];
-        if (!parentDir) {
-            parentDir = arg;
-        } else if (strcmp(arg, "--zygote") == 0) {
+        if (strcmp(arg, "--zygote") == 0) {
             zygote = true;
             niceName = "zygote";
         } else if (strcmp(arg, "--start-system-server") == 0) {
@@ -180,8 +186,29 @@ int main(int argc, char* const argv[])
         } else if (strncmp(arg, "--nice-name=", 12) == 0) {
             niceName = arg + 12;
         } else {
-            className = arg;
+            className.setTo(arg);
             break;
+        }
+    }
+
+    Vector<String8> args;
+    if (!className.isEmpty()) {
+        // We're not in zygote mode, the only argument we need to pass
+        // to RuntimeInit is the application argument.
+        //
+        // The Remainder of args get passed to startup class main(). Make
+        // copies of them before we overwrite them with the process name.
+        args.add(application ? String8("application") : String8("tool"));
+        runtime.setClassNameAndArgs(className, argc - i, argv + i);
+    } else {
+        if (startSystemServer) {
+            args.add(String8("start-system-server"));
+        }
+
+        // In zygote mode, pass all remaining arguments to the zygote
+        // main() method.
+        for (; i < argc; ++i) {
+            args.add(String8(argv[i]));
         }
     }
 
@@ -190,18 +217,10 @@ int main(int argc, char* const argv[])
         set_process_name(niceName);
     }
 
-    runtime.mParentDir = parentDir;
-
     if (zygote) {
-        runtime.start("com.android.internal.os.ZygoteInit",
-                startSystemServer ? "start-system-server" : "");
+        runtime.start("com.android.internal.os.ZygoteInit", args);
     } else if (className) {
-        // Remainder of args get passed to startup class main()
-        runtime.mClassName = className;
-        runtime.mArgC = argc - i;
-        runtime.mArgV = argv + i;
-        runtime.start("com.android.internal.os.RuntimeInit",
-                application ? "application" : "tool");
+        runtime.start("com.android.internal.os.RuntimeInit", args);
     } else {
         fprintf(stderr, "Error: no class name or --zygote supplied.\n");
         app_usage();
