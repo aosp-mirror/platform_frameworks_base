@@ -58,31 +58,62 @@ public class SearchIndexablesContract {
      * Indexable xml resources colums.
      */
     public static final String[] INDEXABLES_XML_RES_COLUMNS = new String[] {
-            XmlResource.COLUMN_RANK,
-            XmlResource.COLUMN_XML_RESID,
-            XmlResource.COLUMN_CLASS_NAME,
-            XmlResource.COLUMN_ICON_RESID,
-            XmlResource.COLUMN_INTENT_ACTION,
-            XmlResource.COLUMN_INTENT_TARGET_PACKAGE,
-            XmlResource.COLUMN_INTENT_TARGET_CLASS
+            XmlResource.COLUMN_RANK,                    // 0
+            XmlResource.COLUMN_XML_RESID,               // 1
+            XmlResource.COLUMN_CLASS_NAME,              // 2
+            XmlResource.COLUMN_ICON_RESID,              // 3
+            XmlResource.COLUMN_INTENT_ACTION,           // 4
+            XmlResource.COLUMN_INTENT_TARGET_PACKAGE,   // 5
+            XmlResource.COLUMN_INTENT_TARGET_CLASS      // 6
     };
+
+    /**
+     * Indexable xml resources colums indices.
+     */
+    public static final int COLUMN_INDEX_XML_RES_RANK = 0;
+    public static final int COLUMN_INDEX_XML_RES_RESID = 1;
+    public static final int COLUMN_INDEX_XML_RES_CLASS_NAME = 2;
+    public static final int COLUMN_INDEX_XML_RES_ICON_RESID = 3;
+    public static final int COLUMN_INDEX_XML_RES_INTENT_ACTION = 4;
+    public static final int COLUMN_INDEX_XML_RES_INTENT_TARGET_PACKAGE = 5;
+    public static final int COLUMN_INDEX_XML_RES_INTENT_TARGET_CLASS = 6;
 
     /**
      * Indexable raw data colums.
      */
     public static final String[] INDEXABLES_RAW_COLUMNS = new String[] {
-            RawData.COLUMN_RANK,
-            RawData.COLUMN_TITLE,
-            RawData.COLUMN_SUMMARY_ON,
-            RawData.COLUMN_SUMMARY_OFF,
-            RawData.COLUMN_KEYWORDS,
-            RawData.COLUMN_SCREEN_TITLE,
-            RawData.COLUMN_CLASS_NAME,
-            RawData.COLUMN_ICON_RESID,
-            RawData.COLUMN_INTENT_ACTION,
-            RawData.COLUMN_INTENT_TARGET_PACKAGE,
-            RawData.COLUMN_INTENT_TARGET_CLASS,
+            RawData.COLUMN_RANK,                    // 0
+            RawData.COLUMN_TITLE,                   // 1
+            RawData.COLUMN_SUMMARY_ON,              // 2
+            RawData.COLUMN_SUMMARY_OFF,             // 3
+            RawData.COLUMN_ENTRIES,                 // 4
+            RawData.COLUMN_KEYWORDS,                // 5
+            RawData.COLUMN_SCREEN_TITLE,            // 6
+            RawData.COLUMN_CLASS_NAME,              // 7
+            RawData.COLUMN_ICON_RESID,              // 8
+            RawData.COLUMN_INTENT_ACTION,           // 9
+            RawData.COLUMN_INTENT_TARGET_PACKAGE,   // 10
+            RawData.COLUMN_INTENT_TARGET_CLASS,     // 11
+            RawData.COLUMN_KEY,                     // 12
     };
+
+    /**
+     * Indexable raw data colums indices.
+     */
+    public static final int COLUMN_INDEX_RAW_RANK = 0;
+    public static final int COLUMN_INDEX_RAW_TITLE = 1;
+    public static final int COLUMN_INDEX_RAW_SUMMARY_ON = 2;
+    public static final int COLUMN_INDEX_RAW_SUMMARY_OFF = 3;
+    public static final int COLUMN_INDEX_RAW_ENTRIES = 4;
+    public static final int COLUMN_INDEX_RAW_KEYWORDS = 5;
+    public static final int COLUMN_INDEX_RAW_SCREEN_TITLE = 6;
+    public static final int COLUMN_INDEX_RAW_CLASS_NAME = 7;
+    public static final int COLUMN_INDEX_RAW_ICON_RESID = 8;
+    public static final int COLUMN_INDEX_RAW_INTENT_ACTION = 9;
+    public static final int COLUMN_INDEX_RAW_INTENT_TARGET_PACKAGE = 10;
+    public static final int COLUMN_INDEX_RAW_INTENT_TARGET_CLASS = 11;
+    public static final int COLUMN_INDEX_RAW_KEY = 12;
+
 
     /**
      * Constants related to a {@link SearchIndexableResource}.
@@ -134,6 +165,11 @@ public class SearchIndexablesContract {
         public static final String COLUMN_SUMMARY_OFF = "summaryOff";
 
         /**
+         * Entries associated with the raw data (when the data can can several values).
+         */
+        public static final String COLUMN_ENTRIES = "entries";
+
+        /**
          * Keywords' raw data.
          */
         public static final String COLUMN_KEYWORDS = "keywords";
@@ -142,6 +178,11 @@ public class SearchIndexablesContract {
          * Fragment's title associated with the raw data.
          */
         public static final String COLUMN_SCREEN_TITLE = "screenTitle";
+
+        /**
+         * Key associated with the raw data. The key needs to be unique.
+         */
+        public static final String COLUMN_KEY = "key";
     }
 
     /**
