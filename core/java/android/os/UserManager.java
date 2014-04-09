@@ -20,10 +20,16 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Bitmap.Config;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.android.internal.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -474,7 +480,7 @@ public class UserManager {
     /**
      * Returns list of the profiles of userHandle including
      * userHandle itself.
-     * 
+     *
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @param userHandle profiles of this user will be returned.
      * @return the list of profiles.
@@ -490,9 +496,67 @@ public class UserManager {
     }
 
     /**
-     * Returns information for all users on this device.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
-     * @param excludeDying specify if the list should exclude users being removed.
+     * Returns a list of UserHandles for profiles associated with this user, including this user.
+     *
+     * @return A non-empty list of UserHandles associated with the calling user.
+     */
+    public List<UserHandle> getUserProfiles() {
+        ArrayList<UserHandle> profiles = new ArrayList<UserHandle>();
+        List<UserInfo> users = getProfiles(UserHandle.myUserId());
+        for (UserInfo info : users) {
+            UserHandle userHandle = new UserHandle(info.id);
+            profiles.add(userHandle);
+        }
+        return profiles;
+    }
+
+    /** @hide */
+    public Drawable getBadgedDrawableForUser(Drawable icon, UserHandle user) {
+        int badgeResId = getBadgeResIdForUser(user.getIdentifier());
+        if (badgeResId == 0) {
+            return icon;
+        } else {
+            Drawable badgeIcon = mContext.getPackageManager()
+                    .getDrawable("system", badgeResId, null);
+            return getMergedDrawable(icon, badgeIcon);
+        }
+    }
+
+    private int getBadgeResIdForUser(int userHandle) {
+        // Return the framework-provided badge.
+        if (userHandle == UserHandle.myUserId()) {
+            UserInfo user = getUserInfo(userHandle);
+            /* TODO: Allow managed profiles for other users in the future */
+            if (!user.isManagedProfile()
+                    || user.profileGroupId != getUserInfo(UserHandle.USER_OWNER).profileGroupId) {
+                return 0;
+            }
+        }
+        return com.android.internal.R.drawable.ic_corp_badge;
+    }
+
+    private Drawable getMergedDrawable(Drawable icon, Drawable badge) {
+        final int width = icon.getIntrinsicWidth();
+        final int height = icon.getIntrinsicHeight();
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        icon.setBounds(0, 0, width, height);
+        icon.draw(canvas);
+        badge.setBounds(0, 0, width, height);
+        badge.draw(canvas);
+        BitmapDrawable merged = new BitmapDrawable(bitmap);
+        if (icon instanceof BitmapDrawable) {
+            merged.setTargetDensity(((BitmapDrawable) icon).getBitmap().getDensity());
+        }
+        return merged;
+    }
+
+    /**
+     * Returns information for all users on this device. Requires
+     * {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * 
+     * @param excludeDying specify if the list should exclude users being
+     *            removed.
      * @return the list of users that were created.
      * @hide
      */
