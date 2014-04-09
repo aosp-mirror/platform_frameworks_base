@@ -471,10 +471,6 @@ public class MediaFocusControl implements OnFinished {
                 final FocusRequester exFocusOwner = mFocusStack.pop();
                 exFocusOwner.handleFocusLoss(AudioManager.AUDIOFOCUS_LOSS);
                 exFocusOwner.release();
-                // clear RCD
-                synchronized(mPRStack) {
-                    clearRemoteControlDisplay_syncAfRcs();
-                }
             }
         }
     }
@@ -535,10 +531,6 @@ public class MediaFocusControl implements OnFinished {
             if (signal) {
                 // notify the new top of the stack it gained focus
                 notifyTopOfAudioFocusStack();
-                // there's a new top of the stack, let the remote control know
-                synchronized(mPRStack) {
-                    checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
-                }
             }
         } else {
             // focus is abandoned by a client that's not at the top of the stack,
@@ -582,10 +574,6 @@ public class MediaFocusControl implements OnFinished {
             // we removed an entry at the top of the stack:
             //  notify the new top of the stack it gained focus.
             notifyTopOfAudioFocusStack();
-            // there's a new top of the stack, let the remote control know
-            synchronized(mPRStack) {
-                checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
-            }
         }
     }
 
@@ -694,10 +682,6 @@ public class MediaFocusControl implements OnFinished {
             mFocusStack.push(new FocusRequester(mainStreamType, focusChangeHint, fd, cb,
                     clientId, afdh, callingPackageName, Binder.getCallingUid()));
 
-            // there's a new top of the stack, let the remote control know
-            synchronized(mPRStack) {
-                checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
-            }
         }//synchronized(mAudioFocusLock)
 
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
@@ -1237,11 +1221,11 @@ public class MediaFocusControl implements OnFinished {
     /**
      * Helper function:
      * Set the new remote control receiver at the top of the RC focus stack.
-     * Called synchronized on mAudioFocusLock, then mPRStack
+     * Called synchronized on mPRStack
      * precondition: mediaIntent != null
      * @return true if mPRStack was changed, false otherwise
      */
-    private boolean pushMediaButtonReceiver_syncAfRcs(PendingIntent mediaIntent,
+    private boolean pushMediaButtonReceiver_syncPrs(PendingIntent mediaIntent,
             ComponentName target, IBinder token) {
         // already at top of stack?
         if (!mPRStack.empty() && mPRStack.peek().hasMatchingMediaButtonIntent(mediaIntent)) {
@@ -1285,10 +1269,10 @@ public class MediaFocusControl implements OnFinished {
     /**
      * Helper function:
      * Remove the remote control receiver from the RC focus stack.
-     * Called synchronized on mAudioFocusLock, then mPRStack
+     * Called synchronized on mPRStack
      * precondition: pi != null
      */
-    private void removeMediaButtonReceiver_syncAfRcs(PendingIntent pi) {
+    private void removeMediaButtonReceiver_syncPrs(PendingIntent pi) {
         try {
             for (int index = mPRStack.size()-1; index >= 0; index--) {
                 final PlayerRecord prse = mPRStack.elementAt(index);
@@ -1470,7 +1454,7 @@ public class MediaFocusControl implements OnFinished {
      * Helper function:
      * Called synchronized on mPRStack
      */
-    private void clearRemoteControlDisplay_syncAfRcs() {
+    private void clearRemoteControlDisplay_syncPrs() {
         synchronized(mCurrentRcLock) {
             mCurrentRcClient = null;
         }
@@ -1480,20 +1464,20 @@ public class MediaFocusControl implements OnFinished {
 
     /**
      * Helper function for code readability: only to be called from
-     *    checkUpdateRemoteControlDisplay_syncAfRcs() which checks the preconditions for
+     *    checkUpdateRemoteControlDisplay_syncPrs() which checks the preconditions for
      *    this method.
      * Preconditions:
-     *    - called synchronized mAudioFocusLock then on mPRStack
+     *    - called synchronized on mPRStack
      *    - mPRStack.isEmpty() is false
      */
-    private void updateRemoteControlDisplay_syncAfRcs(int infoChangedFlags) {
+    private void updateRemoteControlDisplay_syncPrs(int infoChangedFlags) {
         PlayerRecord prse = mPRStack.peek();
         int infoFlagsAboutToBeUsed = infoChangedFlags;
         // this is where we enforce opt-in for information display on the remote controls
         //   with the new AudioManager.registerRemoteControlClient() API
         if (prse.getRcc() == null) {
             //Log.w(TAG, "Can't update remote control display with null remote control client");
-            clearRemoteControlDisplay_syncAfRcs();
+            clearRemoteControlDisplay_syncPrs();
             return;
         }
         synchronized(mCurrentRcLock) {
@@ -1511,62 +1495,25 @@ public class MediaFocusControl implements OnFinished {
 
     /**
      * Helper function:
-     * Called synchronized on mAudioFocusLock, then mPRStack
+     * Called synchronized on mPRStack
      * Check whether the remote control display should be updated, triggers the update if required
      * @param infoChangedFlags the flags corresponding to the remote control client information
      *     that has changed, if applicable (checking for the update conditions might trigger a
      *     clear, rather than an update event).
      */
-    private void checkUpdateRemoteControlDisplay_syncAfRcs(int infoChangedFlags) {
+    private void checkUpdateRemoteControlDisplay_syncPrs(int infoChangedFlags) {
         // determine whether the remote control display should be refreshed
-        // if either stack is empty, there is a mismatch, so clear the RC display
-        if (mPRStack.isEmpty() || mFocusStack.isEmpty()) {
-            clearRemoteControlDisplay_syncAfRcs();
+        // if the player record stack is empty, there is nothing to display, so clear the RC display
+        if (mPRStack.isEmpty()) {
+            clearRemoteControlDisplay_syncPrs();
             return;
         }
 
-        // determine which entry in the AudioFocus stack to consider, and compare against the
-        // top of the stack for the media button event receivers : simply using the top of the
-        // stack would make the entry disappear from the RemoteControlDisplay in conditions such as
-        // notifications playing during music playback.
-        // Crawl the AudioFocus stack from the top until an entry is found with the following
-        // characteristics:
-        // - focus gain on STREAM_MUSIC stream
-        // - non-transient focus gain on a stream other than music
-        FocusRequester af = null;
-        try {
-            for (int index = mFocusStack.size()-1; index >= 0; index--) {
-                FocusRequester fr = mFocusStack.elementAt(index);
-                if ((fr.getStreamType() == AudioManager.STREAM_MUSIC)
-                        || (fr.getGainRequest() == AudioManager.AUDIOFOCUS_GAIN)) {
-                    af = fr;
-                    break;
-                }
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            Log.e(TAG, "Wrong index accessing audio focus stack when updating RCD: " + e);
-            af = null;
-        }
-        if (af == null) {
-            clearRemoteControlDisplay_syncAfRcs();
-            return;
-        }
-
-        // if the audio focus and RC owners belong to different packages, there is a mismatch, clear
-        if (!af.hasSamePackage(mPRStack.peek().getCallingPackageName())) {
-            clearRemoteControlDisplay_syncAfRcs();
-            return;
-        }
-        // if the audio focus didn't originate from the same Uid as the one in which the remote
-        //   control information will be retrieved, clear
-        if (!af.hasSameUid(mPRStack.peek().getCallingUid())) {
-            clearRemoteControlDisplay_syncAfRcs();
-            return;
-        }
+        // this is where more rules for refresh go
 
         // refresh conditions were verified: update the remote controls
-        // ok to call: synchronized mAudioFocusLock then on mPRStack, mPRStack is not empty
-        updateRemoteControlDisplay_syncAfRcs(infoChangedFlags);
+        // ok to call: synchronized on mPRStack, mPRStack is not empty
+        updateRemoteControlDisplay_syncPrs(infoChangedFlags);
     }
 
     /**
@@ -1582,35 +1529,33 @@ public class MediaFocusControl implements OnFinished {
 
     private void onPromoteRcc(int rccId) {
         if (DEBUG_RC) { Log.d(TAG, "Promoting RCC " + rccId); }
-        synchronized(mAudioFocusLock) {
-            synchronized(mPRStack) {
-                // ignore if given RCC ID is already at top of remote control stack
-                if (!mPRStack.isEmpty() && (mPRStack.peek().getRccId() == rccId)) {
-                    return;
-                }
-                int indexToPromote = -1;
-                try {
-                    for (int index = mPRStack.size()-1; index >= 0; index--) {
-                        final PlayerRecord prse = mPRStack.elementAt(index);
-                        if (prse.getRccId() == rccId) {
-                            indexToPromote = index;
-                            break;
-                        }
+        synchronized(mPRStack) {
+            // ignore if given RCC ID is already at top of remote control stack
+            if (!mPRStack.isEmpty() && (mPRStack.peek().getRccId() == rccId)) {
+                return;
+            }
+            int indexToPromote = -1;
+            try {
+                for (int index = mPRStack.size()-1; index >= 0; index--) {
+                    final PlayerRecord prse = mPRStack.elementAt(index);
+                    if (prse.getRccId() == rccId) {
+                        indexToPromote = index;
+                        break;
                     }
-                    if (indexToPromote >= 0) {
-                        if (DEBUG_RC) { Log.d(TAG, "  moving RCC from index " + indexToPromote
-                                + " to " + (mPRStack.size()-1)); }
-                        final PlayerRecord prse = mPRStack.remove(indexToPromote);
-                        mPRStack.push(prse);
-                        // the RC stack changed, reevaluate the display
-                        checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
-                    }
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    // not expected to happen, indicates improper concurrent modification
-                    Log.e(TAG, "Wrong index accessing RC stack, lock error? ", e);
                 }
-            }//synchronized(mPRStack)
-        }//synchronized(mAudioFocusLock)
+                if (indexToPromote >= 0) {
+                    if (DEBUG_RC) { Log.d(TAG, "  moving RCC from index " + indexToPromote
+                            + " to " + (mPRStack.size()-1)); }
+                    final PlayerRecord prse = mPRStack.remove(indexToPromote);
+                    mPRStack.push(prse);
+                    // the RC stack changed, reevaluate the display
+                    checkUpdateRemoteControlDisplay_syncPrs(RC_INFO_ALL);
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                // not expected to happen, indicates improper concurrent modification
+                Log.e(TAG, "Wrong index accessing RC stack, lock error? ", e);
+            }
+        }//synchronized(mPRStack)
     }
 
     /**
@@ -1621,12 +1566,10 @@ public class MediaFocusControl implements OnFinished {
             IBinder token) {
         Log.i(TAG, "  Remote Control   registerMediaButtonIntent() for " + mediaIntent);
 
-        synchronized(mAudioFocusLock) {
-            synchronized(mPRStack) {
-                if (pushMediaButtonReceiver_syncAfRcs(mediaIntent, eventReceiver, token)) {
-                    // new RC client, assume every type of information shall be queried
-                    checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
-                }
+        synchronized(mPRStack) {
+            if (pushMediaButtonReceiver_syncPrs(mediaIntent, eventReceiver, token)) {
+                // new RC client, assume every type of information shall be queried
+                checkUpdateRemoteControlDisplay_syncPrs(RC_INFO_ALL);
             }
         }
     }
@@ -1639,14 +1582,12 @@ public class MediaFocusControl implements OnFinished {
     {
         Log.i(TAG, "  Remote Control   unregisterMediaButtonIntent() for " + mediaIntent);
 
-        synchronized(mAudioFocusLock) {
-            synchronized(mPRStack) {
-                boolean topOfStackWillChange = isCurrentRcController(mediaIntent);
-                removeMediaButtonReceiver_syncAfRcs(mediaIntent);
-                if (topOfStackWillChange) {
-                    // current RC client will change, assume every type of info needs to be queried
-                    checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
-                }
+        synchronized(mPRStack) {
+            boolean topOfStackWillChange = isCurrentRcController(mediaIntent);
+            removeMediaButtonReceiver_syncPrs(mediaIntent);
+            if (topOfStackWillChange) {
+                // current RC client will change, assume every type of info needs to be queried
+                checkUpdateRemoteControlDisplay_syncPrs(RC_INFO_ALL);
             }
         }
     }
@@ -1697,42 +1638,40 @@ public class MediaFocusControl implements OnFinished {
             IRemoteControlClient rcClient, String callingPackageName) {
         if (DEBUG_RC) Log.i(TAG, "Register remote control client rcClient="+rcClient);
         int rccId = RemoteControlClient.RCSE_ID_UNREGISTERED;
-        synchronized(mAudioFocusLock) {
-            synchronized(mPRStack) {
-                // store the new display information
-                try {
-                    for (int index = mPRStack.size()-1; index >= 0; index--) {
-                        final PlayerRecord prse = mPRStack.elementAt(index);
-                        if(prse.hasMatchingMediaButtonIntent(mediaIntent)) {
-                            prse.resetControllerInfoForRcc(rcClient, callingPackageName,
-                                    Binder.getCallingUid());
+        synchronized(mPRStack) {
+            // store the new display information
+            try {
+                for (int index = mPRStack.size()-1; index >= 0; index--) {
+                    final PlayerRecord prse = mPRStack.elementAt(index);
+                    if(prse.hasMatchingMediaButtonIntent(mediaIntent)) {
+                        prse.resetControllerInfoForRcc(rcClient, callingPackageName,
+                                Binder.getCallingUid());
 
-                            if (rcClient == null) {
-                                break;
-                            }
-
-                            rccId = prse.getRccId();
-
-                            // there is a new (non-null) client:
-                            //     give the new client the displays (if any)
-                            if (mRcDisplays.size() > 0) {
-                                plugRemoteControlDisplaysIntoClient_syncRcStack(prse.getRcc());
-                            }
+                        if (rcClient == null) {
                             break;
                         }
-                    }//for
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    // not expected to happen, indicates improper concurrent modification
-                    Log.e(TAG, "Wrong index accessing RC stack, lock error? ", e);
-                }
 
-                // if the eventReceiver is at the top of the stack
-                // then check for potential refresh of the remote controls
-                if (isCurrentRcController(mediaIntent)) {
-                    checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
-                }
-            }//synchronized(mPRStack)
-        }//synchronized(mAudioFocusLock)
+                        rccId = prse.getRccId();
+
+                        // there is a new (non-null) client:
+                        //     give the new client the displays (if any)
+                        if (mRcDisplays.size() > 0) {
+                            plugRemoteControlDisplaysIntoClient_syncPrs(prse.getRcc());
+                        }
+                        break;
+                    }
+                }//for
+            } catch (ArrayIndexOutOfBoundsException e) {
+                // not expected to happen, indicates improper concurrent modification
+                Log.e(TAG, "Wrong index accessing RC stack, lock error? ", e);
+            }
+
+            // if the eventReceiver is at the top of the stack
+            // then check for potential refresh of the remote controls
+            if (isCurrentRcController(mediaIntent)) {
+                checkUpdateRemoteControlDisplay_syncPrs(RC_INFO_ALL);
+            }
+        }//synchronized(mPRStack)
         return rccId;
     }
 
@@ -1743,29 +1682,27 @@ public class MediaFocusControl implements OnFinished {
     protected void unregisterRemoteControlClient(PendingIntent mediaIntent,
             IRemoteControlClient rcClient) {
         if (DEBUG_RC) Log.i(TAG, "Unregister remote control client rcClient="+rcClient);
-        synchronized(mAudioFocusLock) {
-            synchronized(mPRStack) {
-                boolean topRccChange = false;
-                try {
-                    for (int index = mPRStack.size()-1; index >= 0; index--) {
-                        final PlayerRecord prse = mPRStack.elementAt(index);
-                        if ((prse.hasMatchingMediaButtonIntent(mediaIntent))
-                                && rcClient.equals(prse.getRcc())) {
-                            // we found the IRemoteControlClient to unregister
-                            prse.resetControllerInfoForNoRcc();
-                            topRccChange = (index == mPRStack.size()-1);
-                            // there can only be one matching RCC in the RC stack, we're done
-                            break;
-                        }
+        synchronized(mPRStack) {
+            boolean topRccChange = false;
+            try {
+                for (int index = mPRStack.size()-1; index >= 0; index--) {
+                    final PlayerRecord prse = mPRStack.elementAt(index);
+                    if ((prse.hasMatchingMediaButtonIntent(mediaIntent))
+                            && rcClient.equals(prse.getRcc())) {
+                        // we found the IRemoteControlClient to unregister
+                        prse.resetControllerInfoForNoRcc();
+                        topRccChange = (index == mPRStack.size()-1);
+                        // there can only be one matching RCC in the RC stack, we're done
+                        break;
                     }
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    // not expected to happen, indicates improper concurrent modification
-                    Log.e(TAG, "Wrong index accessing RC stack, lock error? ", e);
                 }
-                if (topRccChange) {
-                    // no more RCC for the RCD, check for potential refresh of the remote controls
-                    checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
-                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                // not expected to happen, indicates improper concurrent modification
+                Log.e(TAG, "Wrong index accessing RC stack, lock error? ", e);
+            }
+            if (topRccChange) {
+                // no more RCC for the RCD, check for potential refresh of the remote controls
+                checkUpdateRemoteControlDisplay_syncPrs(RC_INFO_ALL);
             }
         }
     }
@@ -1843,7 +1780,7 @@ public class MediaFocusControl implements OnFinished {
      * Plug each registered display into the specified client
      * @param rcc, guaranteed non null
      */
-    private void plugRemoteControlDisplaysIntoClient_syncRcStack(IRemoteControlClient rcc) {
+    private void plugRemoteControlDisplaysIntoClient_syncPrs(IRemoteControlClient rcc) {
         final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
         while (displayIterator.hasNext()) {
             final DisplayInfoForServer di = displayIterator.next();
