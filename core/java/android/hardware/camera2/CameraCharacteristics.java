@@ -950,6 +950,19 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<int[]>("android.sensor.info.sensitivityRange", int[].class);
 
     /**
+     * <p>Arrangement of color filters on sensor;
+     * represents the colors in the top-left 2x2 section of
+     * the sensor, in reading order</p>
+     * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGGB
+     * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GRBG
+     * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GBRG
+     * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_BGGR
+     * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGB
+     */
+    public static final Key<Integer> SENSOR_INFO_COLOR_FILTER_ARRANGEMENT =
+            new Key<Integer>("android.sensor.info.colorFilterArrangement", int.class);
+
+    /**
      * <p>Range of valid exposure
      * times used by {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}.</p>
      *
