@@ -109,9 +109,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     public static final int EXPANDED_LEAVE_ALONE = -10000;
     public static final int EXPANDED_FULL_OPEN = -10001;
 
-    private static final String EXTRA_INTERCEPT = "android.intercept";
-    private static final float INTERCEPTED_ALPHA = .2f;
-
     protected CommandQueue mCommandQueue;
     protected IStatusBarService mBarService;
     protected H mHandler = createHandler();
@@ -1049,7 +1046,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (DEBUG) {
             Log.d(TAG, "addNotificationViews: added at " + pos);
         }
-        updateInterceptedState(entry);
         updateExpansionStates();
         updateNotificationIcons();
     }
@@ -1082,30 +1078,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected void setZenMode(int mode) {
         if (!isDeviceProvisioned()) return;
-        final boolean change = mZenMode != mode;
         mZenMode = mode;
-        final int N = mNotificationData.size();
-        for (int i = 0; i < N; i++) {
-            final NotificationData.Entry entry = mNotificationData.get(i);
-            if (change && !shouldIntercept()) {
-                entry.notification.getNotification().extras.putBoolean(EXTRA_INTERCEPT, false);
-            }
-            updateInterceptedState(entry);
-        }
         updateNotificationIcons();
-    }
-
-    private boolean shouldIntercept() {
-        return mZenMode != Settings.Global.ZEN_MODE_OFF;
-    }
-
-    protected boolean shouldIntercept(Notification n) {
-        return shouldIntercept() && n.extras.getBoolean(EXTRA_INTERCEPT);
-    }
-
-    private void updateInterceptedState(NotificationData.Entry entry) {
-        final boolean intercepted = shouldIntercept(entry.notification.getNotification());
-        entry.row.findViewById(R.id.container).setAlpha(intercepted ? INTERCEPTED_ALPHA : 1);
     }
 
     protected abstract void haltTicker();
@@ -1312,7 +1286,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         } else {
             entry.content.setOnClickListener(null);
         }
-        updateInterceptedState(entry);
     }
 
     protected void notifyHeadsUpScreenOn(boolean screenOn) {
