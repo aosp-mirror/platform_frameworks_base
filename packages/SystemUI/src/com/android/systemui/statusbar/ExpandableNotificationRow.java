@@ -36,8 +36,16 @@ public class ExpandableNotificationRow extends FrameLayout {
     /** are we showing the "public" version */
     private boolean mShowingPublic;
 
+    private LatestItemView mLatestItemView;
+
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mLatestItemView = (LatestItemView) findViewById(R.id.container);
     }
 
     public int getRowHeight() {
@@ -92,5 +100,20 @@ public class ExpandableNotificationRow extends FrameLayout {
         // TODO: animation?
         publicLayout.setVisibility(show ? View.VISIBLE : View.GONE);
         findViewById(R.id.expanded).setVisibility(show ? View.GONE : View.VISIBLE);
+    }
+
+    /**
+     * Sets the notification as dimmed, meaning that it will appear in a more gray variant.
+     */
+    public void setDimmed(boolean dimmed) {
+        mLatestItemView.setDimmed(dimmed);
+    }
+
+    /**
+     * Sets the notification as locked. In the locked state, the first tap will produce a quantum
+     * ripple to make the notification brighter and only the second tap will cause a click.
+     */
+    public void setLocked(boolean locked) {
+        mLatestItemView.setLocked(locked);
     }
 }

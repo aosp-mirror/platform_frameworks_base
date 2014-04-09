@@ -17,7 +17,6 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:internal="http://schemas.android.com/apk/prv/res/android"
-    android:background="@android:drawable/notification_quantum_bg"
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="64dp"

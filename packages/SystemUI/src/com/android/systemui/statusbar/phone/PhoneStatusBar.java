@@ -2804,9 +2804,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
         mKeyguardSettingsFlipButton.setVisibility(View.VISIBLE);
         mKeyguardSettingsFlipButton.findViewById(R.id.settings_button).setVisibility(View.VISIBLE);
-        mStackScroller.setAlpha(0.8f);
-        mStackScroller.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        updateExpansionStates();
+        updateRowStates();
     }
 
     public void hideKeyguard() {
@@ -2815,9 +2813,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mKeyguardStatusView.setVisibility(View.GONE);
         mNotificationPanelHeader.setVisibility(View.VISIBLE);
         mKeyguardSettingsFlipButton.setVisibility(View.GONE);
-        mStackScroller.setAlpha(1f);
-        mStackScroller.setLayerType(View.LAYER_TYPE_NONE, null);
-        updateExpansionStates();
+        updateRowStates();
     }
 
     public void userActivity() {
