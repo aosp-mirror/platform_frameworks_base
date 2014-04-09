@@ -706,6 +706,7 @@ please see themes_device_defaults.xml.
          with an inverse color profile. The dark action bar sharply stands out against
          the light content. -->
     <style name="Theme.Quantum.Light.DarkActionBar">
+        <item name="actionBarWidgetTheme">@null</item>
         <item name="actionBarTheme">@style/Theme.Quantum</item>
     </style>
 
