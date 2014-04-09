@@ -171,7 +171,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             transform.visible = false;
         } else {
             transform.rect.offset(0, transform.translationY);
-            Utilities.scaleRectAboutCenter(transform.rect, scale);
+            Utilities.scaleRectAboutCenter(transform.rect, transform.scale);
             transform.visible = Rect.intersects(mRect, transform.rect);
         }
         transform.t = t;
@@ -388,8 +388,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int stackHeight = mStackRectSansPeek.height();
         int maxScrollHeight = taskHeight + (int) ((numTasks - 1) *
                 Constants.Values.TaskStackView.StackOverlapPct * taskHeight);
-        mMinScroll = Math.min(stackHeight, maxScrollHeight) - stackHeight;
-        mMaxScroll = maxScrollHeight - stackHeight;
+
+        if (numTasks <= 1) {
+            // If there is only one task, then center the task in the stack rect (sans peek)
+            mMinScroll = mMaxScroll = -(stackHeight - taskHeight) / 2;
+        } else {
+            mMinScroll = Math.min(stackHeight, maxScrollHeight) - stackHeight;
+            mMaxScroll = maxScrollHeight - stackHeight;
+        }
 
         // Debug logging
         if (Constants.DebugFlags.UI.MeasureAndLayout) {
@@ -479,8 +485,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 // Clip against the next view (if we aren't animating its alpha)
                 nextTv = (TaskView) getChildAt(curIndex + 1);
                 if (nextTv.getAlpha() == 1f) {
-                    Rect curRect = tv.getClippingRect(mTmpRect, false);
-                    Rect nextRect = nextTv.getClippingRect(mTmpRect2, true);
+                    Rect curRect = tv.getClippingRect(mTmpRect);
+                    Rect nextRect = nextTv.getClippingRect(mTmpRect2);
                     RecentsConfiguration config = RecentsConfiguration.getInstance();
                     // The hit rects are relative to the task view, which needs to be offset by the
                     // system bar height
@@ -523,7 +529,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int minHeight = (int) (mStackRect.height() -
                 (Constants.Values.TaskStackView.StackPeekHeightPct * mStackRect.height()));
         int size = Math.min(minHeight, Math.min(mStackRect.width(), mStackRect.height()));
-        int centerX = mStackRect.centerX();
         mTaskRect.set(mStackRect.left, mStackRectSansPeek.top,
                 mStackRect.right, mStackRectSansPeek.top + size);
 

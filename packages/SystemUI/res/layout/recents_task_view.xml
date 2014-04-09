@@ -43,7 +43,11 @@
             android:textSize="24sp"
             android:textColor="#ffffffff"
             android:text="@string/recents_empty_message"
-            android:fontFamily="sans-serif-thin" />
+            android:fontFamily="sans-serif-thin"
+            android:singleLine="true"
+            android:maxLines="2"
+            android:ellipsize="marquee"
+            android:fadingEdge="horizontal" />
         <ImageView
             android:id="@+id/activity_icon"
             android:layout_width="@dimen/recents_task_view_activity_icon_size"

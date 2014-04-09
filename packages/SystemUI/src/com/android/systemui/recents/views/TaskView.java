@@ -20,9 +20,8 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
+import android.graphics.Outline;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -35,8 +34,6 @@ import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.Utilities;
 import com.android.systemui.recents.model.Task;
-
-import java.util.Random;
 
 
 /* A task view */
@@ -54,8 +51,6 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
     TaskBarView mBarView;
     TaskViewCallbacks mCb;
 
-    Path mRoundedRectClipPath = new Path();
-
 
     public TaskView(Context context) {
         this(context, null);
@@ -71,7 +66,6 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
 
     public TaskView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        setWillNotDraw(false);
     }
 
     @Override
@@ -82,31 +76,6 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
         mBarView.mApplicationIcon.setOnClickListener(this);
         if (mTaskDataLoaded) {
             onTaskDataLoaded(false);
-        }
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-        // Update the rounded rect clip path
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-        float radius = config.pxFromDp(Constants.Values.TaskView.RoundedCornerRadiusDps);
-        mRoundedRectClipPath.reset();
-        mRoundedRectClipPath.addRoundRect(new RectF(0, 0, getMeasuredWidth(), getMeasuredHeight()),
-                radius, radius, Path.Direction.CW);
-    }
-
-    @Override
-    protected void dispatchDraw(Canvas canvas) {
-        int restoreCount = 0;
-        if (Constants.Values.TaskView.UseRoundedCorners) {
-            restoreCount = canvas.save();
-            canvas.clipPath(mRoundedRectClipPath);
-        }
-        super.dispatchDraw(canvas);
-        if (Constants.Values.TaskView.UseRoundedCorners) {
-            canvas.restoreToCount(restoreCount);
         }
     }
 
@@ -195,7 +164,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
                 .translationY(0)
                 .setStartDelay(235)
                 .setInterpolator(BakedBezierInterpolator.INSTANCE)
-                .setDuration(Utilities.calculateTranslationAnimationDuration(translate))
+                .setDuration(config.taskBarEnterAnimDuration)
                 .withLayer()
                 .start();
     }
@@ -214,23 +183,21 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
             .setInterpolator(BakedBezierInterpolator.INSTANCE)
             .setDuration(Utilities.calculateTranslationAnimationDuration(translate))
             .withLayer()
-            .withEndAction(r)
+            .withEndAction(new Runnable() {
+                @Override
+                public void run() {
+                    post(r);
+                }
+            })
             .start();
     }
 
     /** Returns the rect we want to clip (it may not be the full rect) */
-    Rect getClippingRect(Rect outRect, boolean accountForRoundedRects) {
+    Rect getClippingRect(Rect outRect) {
         getHitRect(outRect);
         // XXX: We should get the hit rect of the thumbnail view and intersect, but this is faster
         outRect.right = outRect.left + mThumbnailView.getRight();
         outRect.bottom = outRect.top + mThumbnailView.getBottom();
-        // We need to shrink the next rect by the rounded corners since those are draw on
-        // top of the current view
-        if (accountForRoundedRects) {
-            RecentsConfiguration config = RecentsConfiguration.getInstance();
-            float radius = config.pxFromDp(Constants.Values.TaskView.RoundedCornerRadiusDps);
-            outRect.inset((int) radius, (int) radius);
-        }
         return outRect;
     }
 
