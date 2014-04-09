@@ -64,7 +64,7 @@ public class ZygoteInit {
 
     private static final String PROPERTY_DISABLE_OPENGL_PRELOADING = "ro.zygote.disable_gl_preload";
 
-    private static final String ANDROID_SOCKET_ENV = "ANDROID_SOCKET_zygote";
+    private static final String ANDROID_SOCKET_PREFIX = "ANDROID_SOCKET_";
 
     private static final int LOG_BOOT_PROGRESS_PRELOAD_START = 3020;
     private static final int LOG_BOOT_PROGRESS_PRELOAD_END = 3030;
@@ -72,8 +72,9 @@ public class ZygoteInit {
     /** when preloading, GC after allocating this many bytes */
     private static final int PRELOAD_GC_THRESHOLD = 50000;
 
-    public static final String USAGE_STRING =
-            " <\"start-system-server\"|\"\" for startSystemServer>";
+    private static final String ABI_LIST_ARG = "--abi-list=";
+
+    private static final String SOCKET_NAME_ARG = "--socket-name=";
 
     private static LocalServerSocket sServerSocket;
 
@@ -150,15 +151,15 @@ public class ZygoteInit {
      *
      * @throws RuntimeException when open fails
      */
-    private static void registerZygoteSocket() {
+    private static void registerZygoteSocket(String socketName) {
         if (sServerSocket == null) {
             int fileDesc;
+            final String fullSocketName = ANDROID_SOCKET_PREFIX + socketName;
             try {
-                String env = System.getenv(ANDROID_SOCKET_ENV);
+                String env = System.getenv(fullSocketName);
                 fileDesc = Integer.parseInt(env);
             } catch (RuntimeException ex) {
-                throw new RuntimeException(
-                        ANDROID_SOCKET_ENV + " unset or invalid", ex);
+                throw new RuntimeException(fullSocketName + " unset or invalid", ex);
             }
 
             try {
@@ -175,9 +176,9 @@ public class ZygoteInit {
      * Waits for and accepts a single command connection. Throws
      * RuntimeException on failure.
      */
-    private static ZygoteConnection acceptCommandPeer() {
+    private static ZygoteConnection acceptCommandPeer(String abiList) {
         try {
-            return new ZygoteConnection(sServerSocket.accept());
+            return new ZygoteConnection(sServerSocket.accept(), abiList);
         } catch (IOException ex) {
             throw new RuntimeException(
                     "IOException during accept()", ex);
@@ -567,7 +568,26 @@ public class ZygoteInit {
             // Start profiling the zygote initialization.
             SamplingProfilerIntegration.start();
 
-            registerZygoteSocket();
+            boolean startSystemServer = false;
+            String socketName = "zygote";
+            String abiList = null;
+            for (int i = 1; i < argv.length; i++) {
+                if ("start-system-server".equals(argv[i])) {
+                    startSystemServer = true;
+                } else if (argv[i].startsWith(ABI_LIST_ARG)) {
+                    abiList = argv[i].substring(ABI_LIST_ARG.length());
+                } else if (argv[i].startsWith(SOCKET_NAME_ARG)) {
+                    socketName = argv[i].substring(SOCKET_NAME_ARG.length());
+                } else {
+                    throw new RuntimeException("Unknown command line argument: " + argv[i]);
+                }
+            }
+
+            if (abiList == null) {
+                throw new RuntimeException("No ABI list supplied.");
+            }
+
+            registerZygoteSocket(socketName);
             EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_START,
                 SystemClock.uptimeMillis());
             preload();
@@ -584,20 +604,12 @@ public class ZygoteInit {
             // Zygote.
             Trace.setTracingEnabled(false);
 
-            // If requested, start system server directly from Zygote
-            if (argv.length != 2) {
-                throw new RuntimeException(argv[0] + USAGE_STRING);
-            }
-
-            if (argv[1].equals("start-system-server")) {
+            if (startSystemServer) {
                 startSystemServer();
-            } else if (!argv[1].equals("")) {
-                throw new RuntimeException(argv[0] + USAGE_STRING);
             }
 
             Log.i(TAG, "Accepting command socket connections");
-
-            runSelectLoop();
+            runSelectLoop(abiList);
 
             closeServerSocket();
         } catch (MethodAndArgsCaller caller) {
@@ -617,7 +629,7 @@ public class ZygoteInit {
      * @throws MethodAndArgsCaller in a child process when a main() should
      * be executed.
      */
-    private static void runSelectLoop() throws MethodAndArgsCaller {
+    private static void runSelectLoop(String abiList) throws MethodAndArgsCaller {
         ArrayList<FileDescriptor> fds = new ArrayList<FileDescriptor>();
         ArrayList<ZygoteConnection> peers = new ArrayList<ZygoteConnection>();
         FileDescriptor[] fdArray = new FileDescriptor[4];
@@ -656,7 +668,7 @@ public class ZygoteInit {
             if (index < 0) {
                 throw new RuntimeException("Error in select()");
             } else if (index == 0) {
-                ZygoteConnection newPeer = acceptCommandPeer();
+                ZygoteConnection newPeer = acceptCommandPeer(abiList);
                 peers.add(newPeer);
                 fds.add(newPeer.getFileDesciptor());
             } else {
