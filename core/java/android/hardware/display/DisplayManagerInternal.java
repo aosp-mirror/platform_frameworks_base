@@ -16,6 +16,9 @@
 
 package android.hardware.display;
 
+import android.hardware.SensorManager;
+import android.os.Handler;
+import android.os.PowerManager;
 import android.view.DisplayInfo;
 
 /**
@@ -24,6 +27,36 @@ import android.view.DisplayInfo;
  * @hide Only for use within the system server.
  */
 public abstract class DisplayManagerInternal {
+    /**
+     * Called by the power manager to initialize power management facilities.
+     */
+    public abstract void initPowerManagement(DisplayPowerCallbacks callbacks,
+            Handler handler, SensorManager sensorManager);
+
+    /**
+     * Called by the power manager to request a new power state.
+     * <p>
+     * The display power controller makes a copy of the provided object and then
+     * begins adjusting the power state to match what was requested.
+     * </p>
+     *
+     * @param request The requested power state.
+     * @param waitForNegativeProximity If true, issues a request to wait for
+     * negative proximity before turning the screen back on, assuming the screen
+     * was turned off by the proximity sensor.
+     * @return True if display is ready, false if there are important changes that must
+     * be made asynchronously (such as turning the screen on), in which case the caller
+     * should grab a wake lock, watch for {@link DisplayPowerCallbacks#onStateChanged()}
+     * then try the request again later until the state converges.
+     */
+    public abstract boolean requestPowerState(DisplayPowerRequest request,
+            boolean waitForNegativeProximity);
+
+    /**
+     * Returns true if the proximity sensor screen-off function is available.
+     */
+    public abstract boolean isProximitySensorAvailable();
+
     /**
      * Called by the power manager to blank all displays.
      */
@@ -97,6 +130,137 @@ public abstract class DisplayManagerInternal {
      */
     public abstract void setDisplayHasContent(int displayId, boolean hasContent,
             boolean inTraversal);
+
+    /**
+     * Describes the requested power state of the display.
+     *
+     * This object is intended to describe the general characteristics of the
+     * power state, such as whether the screen should be on or off and the current
+     * brightness controls leaving the DisplayPowerController to manage the
+     * details of how the transitions between states should occur.  The goal is for
+     * the PowerManagerService to focus on the global power state and not
+     * have to micro-manage screen off animations, auto-brightness and other effects.
+     */
+    public static final class DisplayPowerRequest {
+        public static final int SCREEN_STATE_OFF = 0;
+        public static final int SCREEN_STATE_DOZE = 1;
+        public static final int SCREEN_STATE_DIM = 2;
+        public static final int SCREEN_STATE_BRIGHT = 3;
+
+        // The requested minimum screen power state: off, doze, dim or bright.
+        public int screenState;
+
+        // If true, the proximity sensor overrides the screen state when an object is
+        // nearby, turning it off temporarily until the object is moved away.
+        public boolean useProximitySensor;
+
+        // The desired screen brightness in the range 0 (minimum / off) to 255 (brightest).
+        // The display power controller may choose to clamp the brightness.
+        // When auto-brightness is enabled, this field should specify a nominal default
+        // value to use while waiting for the light sensor to report enough data.
+        public int screenBrightness;
+
+        // The screen auto-brightness adjustment factor in the range -1 (dimmer) to 1 (brighter).
+        public float screenAutoBrightnessAdjustment;
+
+        // If true, enables automatic brightness control.
+        public boolean useAutoBrightness;
+
+        // If true, prevents the screen from completely turning on if it is currently off.
+        // The display does not enter a "ready" state if this flag is true and screen on is
+        // blocked.  The window manager policy blocks screen on while it prepares the keyguard to
+        // prevent the user from seeing intermediate updates.
+        //
+        // Technically, we may not block the screen itself from turning on (because that introduces
+        // extra unnecessary latency) but we do prevent content on screen from becoming
+        // visible to the user.
+        public boolean blockScreenOn;
+
+        public DisplayPowerRequest() {
+            screenState = SCREEN_STATE_BRIGHT;
+            useProximitySensor = false;
+            screenBrightness = PowerManager.BRIGHTNESS_ON;
+            screenAutoBrightnessAdjustment = 0.0f;
+            useAutoBrightness = false;
+            blockScreenOn = false;
+        }
+
+        public DisplayPowerRequest(DisplayPowerRequest other) {
+            copyFrom(other);
+        }
+
+        // Returns true if we want the screen on in any mode, including doze.
+        public boolean wantScreenOnAny() {
+            return screenState != SCREEN_STATE_OFF;
+        }
+
+        // Returns true if we want the screen on in a normal mode, excluding doze.
+        // This is usually what we want to tell the rest of the system.  For compatibility
+        // reasons, we pretend the screen is off when dozing.
+        public boolean wantScreenOnNormal() {
+            return screenState == SCREEN_STATE_DIM || screenState == SCREEN_STATE_BRIGHT;
+        }
+
+        public boolean wantLightSensorEnabled() {
+            // Specifically, we don't want the light sensor while dozing.
+            return useAutoBrightness && wantScreenOnNormal();
+        }
+
+        public void copyFrom(DisplayPowerRequest other) {
+            screenState = other.screenState;
+            useProximitySensor = other.useProximitySensor;
+            screenBrightness = other.screenBrightness;
+            screenAutoBrightnessAdjustment = other.screenAutoBrightnessAdjustment;
+            useAutoBrightness = other.useAutoBrightness;
+            blockScreenOn = other.blockScreenOn;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof DisplayPowerRequest
+                    && equals((DisplayPowerRequest)o);
+        }
+
+        public boolean equals(DisplayPowerRequest other) {
+            return other != null
+                    && screenState == other.screenState
+                    && useProximitySensor == other.useProximitySensor
+                    && screenBrightness == other.screenBrightness
+                    && screenAutoBrightnessAdjustment == other.screenAutoBrightnessAdjustment
+                    && useAutoBrightness == other.useAutoBrightness
+                    && blockScreenOn == other.blockScreenOn;
+        }
+
+        @Override
+        public int hashCode() {
+            return 0; // don't care
+        }
+
+        @Override
+        public String toString() {
+            return "screenState=" + screenState
+                    + ", useProximitySensor=" + useProximitySensor
+                    + ", screenBrightness=" + screenBrightness
+                    + ", screenAutoBrightnessAdjustment=" + screenAutoBrightnessAdjustment
+                    + ", useAutoBrightness=" + useAutoBrightness
+                    + ", blockScreenOn=" + blockScreenOn;
+        }
+    }
+
+    /**
+     * Asynchronous callbacks from the power controller to the power manager service.
+     */
+    public interface DisplayPowerCallbacks {
+        void onStateChanged();
+        void onProximityPositive();
+        void onProximityNegative();
+
+        void acquireSuspendBlocker();
+        void releaseSuspendBlocker();
+
+        void blankAllDisplays();
+        void unblankAllDisplays();
+    }
 
     /**
      * Called within a Surface transaction whenever the size or orientation of a

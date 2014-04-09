@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.server.power;
+package com.android.server.display;
 
+import com.android.internal.app.IBatteryStats;
+import com.android.server.LocalServices;
+import com.android.server.am.BatteryStatsService;
 import com.android.server.lights.LightsManager;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
@@ -29,10 +32,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
+import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.FloatMath;
@@ -160,23 +166,15 @@ final class DisplayPowerController {
 
     private final Object mLock = new Object();
 
-    // Notifier for sending asynchronous notifications.
-    private final Notifier mNotifier;
-
-    // The display suspend blocker.
-    // Held while there are pending state change notifications.
-    private final SuspendBlocker mDisplaySuspendBlocker;
-
-    // The display blanker.
-    private final DisplayBlanker mDisplayBlanker;
-
     // Our handler.
     private final DisplayControllerHandler mHandler;
 
     // Asynchronous callbacks into the power manager service.
     // Only invoked from the handler thread while no locks are held.
-    private final Callbacks mCallbacks;
-    private Handler mCallbackHandler;
+    private final DisplayPowerCallbacks mCallbacks;
+
+    // Battery stats.
+    private final IBatteryStats mBatteryStats;
 
     // The lights service.
     private final LightsManager mLights;
@@ -350,19 +348,14 @@ final class DisplayPowerController {
     /**
      * Creates the display power controller.
      */
-    public DisplayPowerController(Looper looper, Context context, Notifier notifier,
-            LightsManager lights, TwilightManager twilight, SensorManager sensorManager,
-            SuspendBlocker displaySuspendBlocker, DisplayBlanker displayBlanker,
-            Callbacks callbacks, Handler callbackHandler) {
-        mHandler = new DisplayControllerHandler(looper);
-        mNotifier = notifier;
-        mDisplaySuspendBlocker = displaySuspendBlocker;
-        mDisplayBlanker = displayBlanker;
+    public DisplayPowerController(Context context,
+            DisplayPowerCallbacks callbacks, Handler handler, SensorManager sensorManager) {
+        mHandler = new DisplayControllerHandler(handler.getLooper());
         mCallbacks = callbacks;
-        mCallbackHandler = callbackHandler;
 
-        mLights = lights;
-        mTwilight = twilight;
+        mBatteryStats = BatteryStatsService.getService();
+        mLights = LocalServices.getService(LightsManager.class);
+        mTwilight = LocalServices.getService(TwilightManager.class);
         mSensorManager = sensorManager;
 
         final Resources resources = context.getResources();
@@ -527,7 +520,7 @@ final class DisplayPowerController {
     }
 
     private void initialize() {
-        mPowerState = new DisplayPowerState(new ElectronBeam(), mDisplayBlanker,
+        mPowerState = new DisplayPowerState(new ElectronBeam(), mCallbacks,
                 mLights.getLight(LightsManager.LIGHT_ID_BACKLIGHT));
 
         mElectronBeamOnAnimator = ObjectAnimator.ofFloat(
@@ -779,10 +772,14 @@ final class DisplayPowerController {
     private void setScreenOn(boolean on) {
         if (mPowerState.isScreenOn() != on) {
             mPowerState.setScreenOn(on);
-            if (on) {
-                mNotifier.onScreenOn();
-            } else {
-                mNotifier.onScreenOff();
+            try {
+                if (on) {
+                    mBatteryStats.noteScreenOn();
+                } else {
+                    mBatteryStats.noteScreenOff();
+                }
+            } catch (RemoteException ex) {
+                // same process
             }
         }
     }
@@ -811,7 +808,11 @@ final class DisplayPowerController {
 
     private void animateScreenBrightness(int target, int rate) {
         if (mScreenBrightnessRampAnimator.animateTo(target, rate)) {
-            mNotifier.onScreenBrightness(target);
+            try {
+                mBatteryStats.noteScreenBrightness(target);
+            } catch (RemoteException ex) {
+                // same process
+            }
         }
     }
 
@@ -896,13 +897,13 @@ final class DisplayPowerController {
     private void clearPendingProximityDebounceTime() {
         if (mPendingProximityDebounceTime >= 0) {
             mPendingProximityDebounceTime = -1;
-            mDisplaySuspendBlocker.release(); // release wake lock
+            mCallbacks.releaseSuspendBlocker(); // release wake lock
         }
     }
 
     private void setPendingProximityDebounceTime(long debounceTime) {
         if (mPendingProximityDebounceTime < 0) {
-            mDisplaySuspendBlocker.acquire(); // acquire wake lock
+            mCallbacks.acquireSuspendBlocker(); // acquire wake lock
         }
         mPendingProximityDebounceTime = debounceTime;
     }
@@ -1172,48 +1173,48 @@ final class DisplayPowerController {
     }
 
     private void sendOnStateChangedWithWakelock() {
-        mDisplaySuspendBlocker.acquire();
-        mCallbackHandler.post(mOnStateChangedRunnable);
+        mCallbacks.acquireSuspendBlocker();
+        mHandler.post(mOnStateChangedRunnable);
     }
 
     private final Runnable mOnStateChangedRunnable = new Runnable() {
         @Override
         public void run() {
             mCallbacks.onStateChanged();
-            mDisplaySuspendBlocker.release();
+            mCallbacks.releaseSuspendBlocker();
         }
     };
 
     private void sendOnProximityPositiveWithWakelock() {
-        mDisplaySuspendBlocker.acquire();
-        mCallbackHandler.post(mOnProximityPositiveRunnable);
+        mCallbacks.acquireSuspendBlocker();
+        mHandler.post(mOnProximityPositiveRunnable);
     }
 
     private final Runnable mOnProximityPositiveRunnable = new Runnable() {
         @Override
         public void run() {
             mCallbacks.onProximityPositive();
-            mDisplaySuspendBlocker.release();
+            mCallbacks.releaseSuspendBlocker();
         }
     };
 
     private void sendOnProximityNegativeWithWakelock() {
-        mDisplaySuspendBlocker.acquire();
-        mCallbackHandler.post(mOnProximityNegativeRunnable);
+        mCallbacks.acquireSuspendBlocker();
+        mHandler.post(mOnProximityNegativeRunnable);
     }
 
     private final Runnable mOnProximityNegativeRunnable = new Runnable() {
         @Override
         public void run() {
             mCallbacks.onProximityNegative();
-            mDisplaySuspendBlocker.release();
+            mCallbacks.releaseSuspendBlocker();
         }
     };
 
     public void dump(final PrintWriter pw) {
         synchronized (mLock) {
             pw.println();
-            pw.println("Display Controller Locked State:");
+            pw.println("Display Power Controller Locked State:");
             pw.println("  mDisplayReadyLocked=" + mDisplayReadyLocked);
             pw.println("  mPendingRequestLocked=" + mPendingRequestLocked);
             pw.println("  mPendingRequestChangedLocked=" + mPendingRequestChangedLocked);
@@ -1223,7 +1224,7 @@ final class DisplayPowerController {
         }
 
         pw.println();
-        pw.println("Display Controller Configuration:");
+        pw.println("Display Power Controller Configuration:");
         pw.println("  mScreenBrightnessDozeConfig=" + mScreenBrightnessDozeConfig);
         pw.println("  mScreenBrightnessDimConfig=" + mScreenBrightnessDimConfig);
         pw.println("  mScreenBrightnessRangeMinimum=" + mScreenBrightnessRangeMinimum);
@@ -1243,7 +1244,7 @@ final class DisplayPowerController {
 
     private void dumpLocal(PrintWriter pw) {
         pw.println();
-        pw.println("Display Controller Thread State:");
+        pw.println("Display Power Controller Thread State:");
         pw.println("  mPowerRequest=" + mPowerRequest);
         pw.println("  mWaitingForNegativeProximity=" + mWaitingForNegativeProximity);
 
@@ -1300,15 +1301,6 @@ final class DisplayPowerController {
             default:
                 return Integer.toString(state);
         }
-    }
-
-    /**
-     * Asynchronous callbacks from the power controller to the power manager service.
-     */
-    public interface Callbacks {
-        void onStateChanged();
-        void onProximityPositive();
-        void onProximityNegative();
     }
 
     private final class DisplayControllerHandler extends Handler {
