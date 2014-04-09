@@ -524,15 +524,14 @@ public class UserManager {
 
     private int getBadgeResIdForUser(int userHandle) {
         // Return the framework-provided badge.
-        if (userHandle == UserHandle.myUserId()) {
-            UserInfo user = getUserInfo(userHandle);
-            /* TODO: Allow managed profiles for other users in the future */
-            if (!user.isManagedProfile()
-                    || user.profileGroupId != getUserInfo(UserHandle.USER_OWNER).profileGroupId) {
-                return 0;
+        List<UserInfo> userProfiles = getProfiles(UserHandle.myUserId());
+        for (UserInfo user : userProfiles) {
+            if (user.id == userHandle
+                    && user.isManagedProfile()) {
+                return com.android.internal.R.drawable.ic_corp_badge;
             }
         }
-        return com.android.internal.R.drawable.ic_corp_badge;
+        return 0;
     }
 
     private Drawable getMergedDrawable(Drawable icon, Drawable badge) {
