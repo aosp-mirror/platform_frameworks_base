@@ -30,18 +30,6 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-SetDisplayListData::SetDisplayListData() : mNewData(0) {}
-
-SetDisplayListData::SetDisplayListData(RenderNode* node, DisplayListData* newData)
-        : mTargetNode(node), mNewData(newData) {
-}
-
-SetDisplayListData::~SetDisplayListData() {}
-
-void SetDisplayListData::apply() const {
-    mTargetNode->setData(mNewData);
-}
-
 DrawFrameTask::DrawFrameTask() : mContext(0), mTaskMode(MODE_INVALID), mRenderNode(0) {
 }
 
@@ -50,13 +38,6 @@ DrawFrameTask::~DrawFrameTask() {
 
 void DrawFrameTask::setContext(CanvasContext* context) {
     mContext = context;
-}
-
-void DrawFrameTask::setDisplayListData(RenderNode* renderNode, DisplayListData* newData) {
-    LOG_ALWAYS_FATAL_IF(!mContext, "Lifecycle violation, there's no context to setDisplayListData with!");
-
-    SetDisplayListData setter(renderNode, newData);
-    mDisplayListDataUpdates.push(setter);
 }
 
 void DrawFrameTask::addLayer(DeferredLayerUpdater* layer) {
@@ -143,17 +124,11 @@ void DrawFrameTask::run() {
 void DrawFrameTask::syncFrameState() {
     ATRACE_CALL();
 
-    for (size_t i = 0; i < mDisplayListDataUpdates.size(); i++) {
-        const SetDisplayListData& setter = mDisplayListDataUpdates[i];
-        setter.apply();
-    }
-    mDisplayListDataUpdates.clear();
-
     mContext->processLayerUpdates(&mLayers);
 
     // If we don't have an mRenderNode this is a state flush only
     if (mRenderNode.get()) {
-        mRenderNode->updateProperties();
+        mRenderNode->pushStagingChanges();
     }
 }
 

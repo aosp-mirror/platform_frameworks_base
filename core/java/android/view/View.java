@@ -13549,11 +13549,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return A new or reused DisplayList object.
      */
     private void updateDisplayListIfDirty(@NonNull RenderNode renderNode, boolean isLayer) {
-        final HardwareRenderer renderer = getHardwareRenderer();
         if (renderNode == null) {
             throw new IllegalArgumentException("RenderNode must not be null");
         }
-        if (renderer == null || !canHaveDisplayList()) {
+        if (!canHaveDisplayList()) {
             // can't populate RenderNode, don't try
             return;
         }
@@ -13627,20 +13626,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                 }
             } finally {
-                renderNode.end(renderer, canvas);
+                renderNode.end(canvas);
                 renderNode.setCaching(caching);
                 if (isLayer) {
                     renderNode.setLeftTopRightBottom(0, 0, width, height);
                 } else {
                     setDisplayListProperties(renderNode);
-                }
-
-                if (renderer != getHardwareRenderer()) {
-                    Log.w(VIEW_LOG_TAG, "View was detached during a draw() call!");
-                    // TODO: Should this be elevated to a crash?
-                    // For now have it behaves the same as it previously did, it
-                    // will result in the DisplayListData being destroyed later
-                    // than it could be but oh well...
                 }
             }
         } else if (!isLayer) {
@@ -14913,7 +14904,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final int height = bounds.height();
         final HardwareCanvas canvas = displayList.start(width, height);
         drawable.draw(canvas);
-        displayList.end(getHardwareRenderer(), canvas);
+        displayList.end(canvas);
 
         // Set up drawable properties that are view-independent.
         displayList.setLeftTopRightBottom(bounds.left, bounds.top, bounds.right, bounds.bottom);
