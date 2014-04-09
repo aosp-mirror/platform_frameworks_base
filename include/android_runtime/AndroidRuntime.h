@@ -55,8 +55,7 @@ public:
     /**
      * Call a class's static main method with the given arguments,
      */
-    status_t callMain(const char* className, jclass clazz, int argc,
-        const char* const argv[]);
+    status_t callMain(const String8& className, jclass clazz, const Vector<String8>& args);
 
     /**
      * Find a class, with the input either of the form
@@ -66,7 +65,7 @@ public:
 
     int addVmArguments(int argc, const char* const argv[]);
 
-    void start(const char *classname, const char* options);
+    void start(const char *classname, const Vector<String8>& options);
 
     void exit(int code);
 
