@@ -44,6 +44,7 @@ import android.view.View;
 import android.view.WindowManager;
 import com.android.systemui.R;
 
+import java.util.Iterator;
 import java.util.List;
 
 /** A proxy implementation for the recents component */
@@ -57,8 +58,11 @@ public class AlternateRecentsComponent {
                 Resources res = mContext.getResources();
                 float statusBarHeight = res.getDimensionPixelSize(
                         com.android.internal.R.dimen.status_bar_height);
-                mFirstTaskRect = (Rect) msg.getData().getParcelable("taskRect");
-                mFirstTaskRect.offset(0, (int) statusBarHeight);
+                Bundle replyData = msg.getData().getParcelable("replyData");
+                mSingleCountFirstTaskRect = replyData.getParcelable("singleCountTaskRect");
+                mSingleCountFirstTaskRect.offset(0, (int) statusBarHeight);
+                mMultipleCountFirstTaskRect = replyData.getParcelable("multipleCountTaskRect");
+                mMultipleCountFirstTaskRect.offset(0, (int) statusBarHeight);
             }
         }
     }
@@ -114,7 +118,8 @@ public class AlternateRecentsComponent {
     RecentsServiceConnection mConnection = new RecentsServiceConnection();
 
     View mStatusBarView;
-    Rect mFirstTaskRect = new Rect();
+    Rect mSingleCountFirstTaskRect = new Rect();
+    Rect mMultipleCountFirstTaskRect = new Rect();
     long mLastToggleTime;
 
     public AlternateRecentsComponent(Context context) {
@@ -227,20 +232,24 @@ public class AlternateRecentsComponent {
         return null;
     }
 
-    /** Returns whether there is a first task */
-    boolean hasFirstTask() {
+    /** Returns whether there is are multiple recents tasks */
+    boolean hasMultipleRecentsTask() {
+        // NOTE: Currently there's no method to get the number of non-home tasks, so we have to
+        // compute this ourselves
         SystemServicesProxy ssp = mSystemServicesProxy;
-        List<ActivityManager.RecentTaskInfo> tasks = ssp.getRecentTasks(1,
+        List<ActivityManager.RecentTaskInfo> tasks = ssp.getRecentTasks(4,
                 UserHandle.CURRENT.getIdentifier());
-        for (ActivityManager.RecentTaskInfo t : tasks) {
+        Iterator<ActivityManager.RecentTaskInfo> iter = tasks.iterator();
+        while (iter.hasNext()) {
+            ActivityManager.RecentTaskInfo t = iter.next();
+
             // Skip tasks in the home stack
             if (ssp.isInHomeStack(t.persistentId)) {
+                iter.remove();
                 continue;
             }
-
-            return true;
         }
-        return false;
+        return (tasks.size() > 1);
     }
 
     /** Converts from the device rotation to the degree */
@@ -287,8 +296,10 @@ public class AlternateRecentsComponent {
         // to launch the first task or dismiss itself
         SystemServicesProxy ssp = mSystemServicesProxy;
         List<ActivityManager.RunningTaskInfo> tasks = ssp.getRunningTasks(1);
+        boolean isTopTaskHome = false;
         if (!tasks.isEmpty()) {
-            ComponentName topActivity = tasks.get(0).topActivity;
+            ActivityManager.RunningTaskInfo topTask = tasks.get(0);
+            ComponentName topActivity = topTask.topActivity;
 
             // Check if the front most activity is recents
             if (topActivity.getPackageName().equals(sRecentsPackage) &&
@@ -311,16 +322,30 @@ public class AlternateRecentsComponent {
                 mLastToggleTime = System.currentTimeMillis();
                 return;
             }
+
+            // Determine whether the top task is currently home
+            isTopTaskHome = ssp.isInHomeStack(topTask.id);
         }
 
         // Otherwise, Recents is not the front-most activity and we should animate into it
-        Rect taskRect = mFirstTaskRect;
-        if (taskRect != null && taskRect.width() > 0 && taskRect.height() > 0 && hasFirstTask()) {
+        boolean hasMultipleTasks = hasMultipleRecentsTask();
+        Rect taskRect = hasMultipleTasks ? mMultipleCountFirstTaskRect : mSingleCountFirstTaskRect;
+        if (!isTopTaskHome && taskRect != null && taskRect.width() > 0 && taskRect.height() > 0) {
             // Loading from thumbnail
             Bitmap thumbnail;
             Bitmap firstThumbnail = loadFirstTaskThumbnail();
-            if (firstThumbnail == null) {
-                // Load the thumbnail from the screenshot
+            if (firstThumbnail != null) {// Create the thumbnail
+                thumbnail = Bitmap.createBitmap(taskRect.width(), taskRect.height(),
+                        Bitmap.Config.ARGB_8888);
+                int size = Math.min(firstThumbnail.getWidth(), firstThumbnail.getHeight());
+                Canvas c = new Canvas(thumbnail);
+                c.drawBitmap(firstThumbnail, new Rect(0, 0, size, size),
+                        new Rect(0, 0, taskRect.width(), taskRect.height()), null);
+                c.setBitmap(null);
+                // Recycle the old thumbnail
+                firstThumbnail.recycle();
+            } else {
+                // Load the thumbnail from the screenshot if can't get one from the system
                 WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
                 Display display = wm.getDefaultDisplay();
                 Bitmap screenshot = takeScreenshot(display);
@@ -328,29 +353,18 @@ public class AlternateRecentsComponent {
                 int size = Math.min(screenshot.getWidth(), screenshot.getHeight());
                 int statusBarHeight = res.getDimensionPixelSize(
                         com.android.internal.R.dimen.status_bar_height);
-                thumbnail = Bitmap.createBitmap(mFirstTaskRect.width(), mFirstTaskRect.height(),
+                thumbnail = Bitmap.createBitmap(taskRect.width(), taskRect.height(),
                         Bitmap.Config.ARGB_8888);
                 Canvas c = new Canvas(thumbnail);
                 c.drawBitmap(screenshot, new Rect(0, statusBarHeight, size, statusBarHeight + size),
-                        new Rect(0, 0, mFirstTaskRect.width(), mFirstTaskRect.height()), null);
+                        new Rect(0, 0, taskRect.width(), taskRect.height()), null);
                 c.setBitmap(null);
-                // Recycle the old screenshot
+                // Recycle the temporary screenshot
                 screenshot.recycle();
-            } else {
-                // Create the thumbnail
-                thumbnail = Bitmap.createBitmap(mFirstTaskRect.width(), mFirstTaskRect.height(),
-                        Bitmap.Config.ARGB_8888);
-                int size = Math.min(firstThumbnail.getWidth(), firstThumbnail.getHeight());
-                Canvas c = new Canvas(thumbnail);
-                c.drawBitmap(firstThumbnail, new Rect(0, 0, size, size),
-                        new Rect(0, 0, mFirstTaskRect.width(), mFirstTaskRect.height()), null);
-                c.setBitmap(null);
-                // Recycle the old thumbnail
-                firstThumbnail.recycle();
             }
 
             ActivityOptions opts = ActivityOptions.makeThumbnailScaleDownAnimation(mStatusBarView,
-                    thumbnail, mFirstTaskRect.left, mFirstTaskRect.top, null);
+                    thumbnail, taskRect.left, taskRect.top, null);
             startAlternateRecentsActivity(opts);
         } else {
             ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,

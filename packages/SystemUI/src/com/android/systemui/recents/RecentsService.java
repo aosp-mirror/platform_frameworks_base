@@ -26,6 +26,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskViewTransform;
@@ -62,14 +63,27 @@ class SystemUIMessageHandler extends Handler {
                 // Create a dummy task stack & compute the rect for the thumbnail to animate to
                 TaskStack stack = new TaskStack(context);
                 TaskStackView tsv = new TaskStackView(context, stack);
-                // Since the nav bar height is already accounted for in the windowRect, don't pass
-                // in a bottom inset
+                Bundle replyData = new Bundle();
+                TaskViewTransform transform;
+
+                // Calculate the target task rect for when there is one task
+                // NOTE: Since the nav bar height is already accounted for in the windowRect, don't
+                // pass in a bottom inset
+                stack.addTask(new Task());
                 tsv.computeRects(windowRect.width(), windowRect.height() - systemInsets.top, 0);
                 tsv.boundScroll();
-                TaskViewTransform transform = tsv.getStackTransform(0, tsv.getStackScroll());
-                Rect taskRect = new Rect(transform.rect);
+                transform = tsv.getStackTransform(0, tsv.getStackScroll());
+                replyData.putParcelable("singleCountTaskRect", new Rect(transform.rect));
 
-                data.putParcelable("taskRect", taskRect);
+                // Also calculate the target task rect when there are multiple tasks
+                stack.addTask(new Task());
+                tsv.computeRects(windowRect.width(), windowRect.height() - systemInsets.top, 0);
+                tsv.setStackScrollRaw(Integer.MAX_VALUE);
+                tsv.boundScroll();
+                transform = tsv.getStackTransform(1, tsv.getStackScroll());
+                replyData.putParcelable("multipleCountTaskRect", new Rect(transform.rect));
+
+                data.putParcelable("replyData", replyData);
                 Message reply = Message.obtain(null,
                         RecentsService.MSG_UPDATE_RECENTS_FOR_CONFIGURATION, 0, 0);
                 reply.setData(data);

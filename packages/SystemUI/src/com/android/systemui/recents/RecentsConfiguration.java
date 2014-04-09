@@ -39,6 +39,7 @@ public class RecentsConfiguration {
 
     public int filteringCurrentViewsMinAnimDuration;
     public int filteringNewViewsMinAnimDuration;
+    public int taskBarEnterAnimDuration;
 
     /** Private constructor */
     private RecentsConfiguration() {}
@@ -76,6 +77,8 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_filter_animate_current_views_min_duration);
         filteringNewViewsMinAnimDuration =
                 res.getInteger(R.integer.recents_filter_animate_new_views_min_duration);
+        taskBarEnterAnimDuration =
+                res.getInteger(R.integer.recents_animate_task_bar_enter_duration);
     }
 
     public void updateSystemInsets(Rect insets) {

@@ -69,6 +69,10 @@ public class Task {
 
     TaskCallbacks mCb;
 
+    public Task() {
+        // Only used by RecentsService for task rect calculations.
+    }
+
     public Task(int id, boolean isActive, Intent intent, String activityTitle,
                 Bitmap activityIcon, int userId) {
         this.key = new TaskKey(id, intent);
