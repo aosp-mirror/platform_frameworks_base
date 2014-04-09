@@ -48,7 +48,7 @@ class PersistentPreferredActivity extends IntentFilter {
         mComponent = ComponentName.unflattenFromString(shortComponent);
         if (mComponent == null) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
-                    "Error in package manager settings <hard-preferred-activity>: " +
+                    "Error in package manager settings: " +
                             "Bad activity name " + shortComponent +
                             " at " + parser.getPositionDescription());
         }
@@ -65,7 +65,7 @@ class PersistentPreferredActivity extends IntentFilter {
                     break;
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
-                            "Unknown element under <hard-preferred-activity>: " + tagName +
+                            "Unknown element: " + tagName +
                             " at " + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                 }
@@ -75,7 +75,7 @@ class PersistentPreferredActivity extends IntentFilter {
             readFromXml(parser);
         } else {
             PackageManagerService.reportSettingsProblem(Log.WARN,
-                    "Missing element under <hard-preferred-activity>: filter at " +
+                    "Missing element filter at " +
                     parser.getPositionDescription());
             XmlUtils.skipCurrentTag(parser);
         }
