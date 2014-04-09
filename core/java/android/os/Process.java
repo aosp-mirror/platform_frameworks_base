@@ -19,15 +19,15 @@ package android.os;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.util.Log;
-
 import com.android.internal.os.Zygote;
-
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-
+import java.util.Arrays;
+import java.util.List;
 import libcore.io.Libcore;
 
 /*package*/ class ZygoteStartFailedEx extends Exception {
@@ -48,17 +48,7 @@ public class Process {
 
     private static final String ZYGOTE_SOCKET = "zygote";
 
-    /**
-     * Name of a process for running the platform's media services.
-     * {@hide}
-     */
-    public static final String ANDROID_SHARED_MEDIA = "com.android.process.media";
-
-    /**
-     * Name of the process that Google content providers can share.
-     * {@hide}
-     */
-    public static final String GOOGLE_SHARED_APP_CONTENT = "com.google.process.content";
+    private static final String SECONDARY_ZYGOTE_SOCKET = "zygote_secondary";
 
     /**
      * Defines the UID/GID under which system code runs.
@@ -345,15 +335,112 @@ public class Process {
     public static final int SIGNAL_QUIT = 3;
     public static final int SIGNAL_KILL = 9;
     public static final int SIGNAL_USR1 = 10;
-    
-    // State for communicating with zygote process
 
-    static LocalSocket sZygoteSocket;
-    static DataInputStream sZygoteInputStream;
-    static BufferedWriter sZygoteWriter;
+    /**
+     * State for communicating with the zygote process.
+     */
+    static class ZygoteState {
+        final LocalSocket socket;
+        final DataInputStream inputStream;
+        final BufferedWriter writer;
+        final List<String> abiList;
 
-    /** true if previous zygote open failed */
-    static boolean sPreviousZygoteOpenFailed;
+        boolean mClosed;
+
+        private ZygoteState(LocalSocket socket, DataInputStream inputStream,
+                BufferedWriter writer, List<String> abiList) {
+            this.socket = socket;
+            this.inputStream = inputStream;
+            this.writer = writer;
+            this.abiList = abiList;
+        }
+
+        static ZygoteState connect(String socketAddress, int tries) throws ZygoteStartFailedEx {
+            LocalSocket zygoteSocket = null;
+            DataInputStream zygoteInputStream = null;
+            BufferedWriter zygoteWriter = null;
+
+            /*
+             * See bug #811181: Sometimes runtime can make it up before zygote.
+             * Really, we'd like to do something better to avoid this condition,
+             * but for now just wait a bit...
+             *
+             * TODO: This bug was filed in 2007. Get rid of this code. The zygote
+             * forks the system_server so it shouldn't be possible for the zygote
+             * socket to be brought up after the system_server is.
+             */
+            for (int i = 0; i < tries; i++) {
+                if (i > 0) {
+                    try {
+                        Log.i("Zygote", "Zygote not up yet, sleeping...");
+                        Thread.sleep(ZYGOTE_RETRY_MILLIS);
+                    } catch (InterruptedException ex) {
+                        throw new ZygoteStartFailedEx(ex);
+                    }
+                }
+
+                try {
+                    zygoteSocket = new LocalSocket();
+                    zygoteSocket.connect(new LocalSocketAddress(socketAddress,
+                            LocalSocketAddress.Namespace.RESERVED));
+
+                    zygoteInputStream = new DataInputStream(zygoteSocket.getInputStream());
+
+                    zygoteWriter = new BufferedWriter(new OutputStreamWriter(
+                            zygoteSocket.getOutputStream()), 256);
+                    break;
+                } catch (IOException ex) {
+                    if (zygoteSocket != null) {
+                        try {
+                            zygoteSocket.close();
+                        } catch (IOException ex2) {
+                            Log.e(LOG_TAG,"I/O exception on close after exception", ex2);
+                        }
+                    }
+
+                    zygoteSocket = null;
+                }
+            }
+
+            if (zygoteSocket == null) {
+                throw new ZygoteStartFailedEx("connect failed");
+            }
+
+            String abiListString = getAbiList(zygoteWriter, zygoteInputStream);
+            Log.i("Zygote", "Process: zygote socket opened, supported ABIS: " + abiListString);
+
+            return new ZygoteState(zygoteSocket, zygoteInputStream, zygoteWriter,
+                    Arrays.asList(abiListString.split(",")));
+        }
+
+        boolean matches(String abi) {
+            return abiList.contains(abi);
+        }
+
+        void close() {
+            try {
+                socket.close();
+            } catch (IOException ex) {
+                Log.e(LOG_TAG,"I/O exception on routine close", ex);
+            }
+
+            mClosed = true;
+        }
+
+        boolean isClosed() {
+            return mClosed;
+        }
+    }
+
+    /**
+     * The state of the connection to the primary zygote.
+     */
+    static ZygoteState primaryZygoteState;
+
+    /**
+     * The state of the connection to the secondary zygote.
+     */
+    static ZygoteState secondaryZygoteState;
 
     /**
      * Start a new process.
@@ -395,7 +482,9 @@ public class Process {
                                   String[] zygoteArgs) {
         try {
             return startViaZygote(processClass, niceName, uid, gid, gids,
-                    debugFlags, mountExternal, targetSdkVersion, seInfo, zygoteArgs);
+                    debugFlags, mountExternal, targetSdkVersion, seInfo,
+                    null, /* zygoteAbi TODO: Replace this with the real ABI */
+                    zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -408,78 +497,31 @@ public class Process {
     static final int ZYGOTE_RETRY_MILLIS = 500;
 
     /**
-     * Tries to open socket to Zygote process if not already open. If
-     * already open, does nothing.  May block and retry.
+     * Queries the zygote for the list of ABIS it supports.
+     *
+     * @throws ZygoteStartFailedEx if the query failed.
      */
-    private static void openZygoteSocketIfNeeded() 
+    private static String getAbiList(BufferedWriter writer, DataInputStream inputStream)
             throws ZygoteStartFailedEx {
+        try {
 
-        int retryCount;
+            // Each query starts with the argument count (1 in this case)
+            writer.write("1");
+            // ... followed by a new-line.
+            writer.newLine();
+            // ... followed by our only argument.
+            writer.write("--query-abi-list");
+            writer.newLine();
+            writer.flush();
 
-        if (sPreviousZygoteOpenFailed) {
-            /*
-             * If we've failed before, expect that we'll fail again and
-             * don't pause for retries.
-             */
-            retryCount = 0;
-        } else {
-            retryCount = 10;            
-        }
+            // The response is a length prefixed stream of ASCII bytes.
+            int numBytes = inputStream.readInt();
+            byte[] bytes = new byte[numBytes];
+            inputStream.readFully(bytes);
 
-        /*
-         * See bug #811181: Sometimes runtime can make it up before zygote.
-         * Really, we'd like to do something better to avoid this condition,
-         * but for now just wait a bit...
-         */
-        for (int retry = 0
-                ; (sZygoteSocket == null) && (retry < (retryCount + 1))
-                ; retry++ ) {
-
-            if (retry > 0) {
-                try {
-                    Log.i("Zygote", "Zygote not up yet, sleeping...");
-                    Thread.sleep(ZYGOTE_RETRY_MILLIS);
-                } catch (InterruptedException ex) {
-                    // should never happen
-                }
-            }
-
-            try {
-                sZygoteSocket = new LocalSocket();
-
-                sZygoteSocket.connect(new LocalSocketAddress(ZYGOTE_SOCKET, 
-                        LocalSocketAddress.Namespace.RESERVED));
-
-                sZygoteInputStream
-                        = new DataInputStream(sZygoteSocket.getInputStream());
-
-                sZygoteWriter =
-                    new BufferedWriter(
-                            new OutputStreamWriter(
-                                    sZygoteSocket.getOutputStream()),
-                            256);
-
-                Log.i("Zygote", "Process: zygote socket opened");
-
-                sPreviousZygoteOpenFailed = false;
-                break;
-            } catch (IOException ex) {
-                if (sZygoteSocket != null) {
-                    try {
-                        sZygoteSocket.close();
-                    } catch (IOException ex2) {
-                        Log.e(LOG_TAG,"I/O exception on close after exception",
-                                ex2);
-                    }
-                }
-
-                sZygoteSocket = null;
-            }
-        }
-
-        if (sZygoteSocket == null) {
-            sPreviousZygoteOpenFailed = true;
-            throw new ZygoteStartFailedEx("connect failed");                 
+            return new String(bytes, StandardCharsets.US_ASCII);
+        } catch (IOException ioe) {
+            throw new ZygoteStartFailedEx(ioe);
         }
     }
 
@@ -487,14 +529,12 @@ public class Process {
      * Sends an argument list to the zygote process, which starts a new child
      * and returns the child's pid. Please note: the present implementation
      * replaces newlines in the argument list with spaces.
-     * @param args argument list
-     * @return An object that describes the result of the attempt to start the process.
+     *
      * @throws ZygoteStartFailedEx if process start failed for any reason
      */
-    private static ProcessStartResult zygoteSendArgsAndGetResult(ArrayList<String> args)
+    private static ProcessStartResult zygoteSendArgsAndGetResult(
+            ZygoteState zygoteState, ArrayList<String> args)
             throws ZygoteStartFailedEx {
-        openZygoteSocketIfNeeded();
-
         try {
             /**
              * See com.android.internal.os.ZygoteInit.readArgumentList()
@@ -506,9 +546,11 @@ public class Process {
              * the child or -1 on failure, followed by boolean to
              * indicate whether a wrapper process was used.
              */
+            final BufferedWriter writer = zygoteState.writer;
+            final DataInputStream inputStream = zygoteState.inputStream;
 
-            sZygoteWriter.write(Integer.toString(args.size()));
-            sZygoteWriter.newLine();
+            writer.write(Integer.toString(args.size()));
+            writer.newLine();
 
             int sz = args.size();
             for (int i = 0; i < sz; i++) {
@@ -517,32 +559,22 @@ public class Process {
                     throw new ZygoteStartFailedEx(
                             "embedded newlines not allowed");
                 }
-                sZygoteWriter.write(arg);
-                sZygoteWriter.newLine();
+                writer.write(arg);
+                writer.newLine();
             }
 
-            sZygoteWriter.flush();
+            writer.flush();
 
             // Should there be a timeout on this?
             ProcessStartResult result = new ProcessStartResult();
-            result.pid = sZygoteInputStream.readInt();
+            result.pid = inputStream.readInt();
             if (result.pid < 0) {
                 throw new ZygoteStartFailedEx("fork() failed");
             }
-            result.usingWrapper = sZygoteInputStream.readBoolean();
+            result.usingWrapper = inputStream.readBoolean();
             return result;
         } catch (IOException ex) {
-            try {
-                if (sZygoteSocket != null) {
-                    sZygoteSocket.close();
-                }
-            } catch (IOException ex2) {
-                // we're going to fail anyway
-                Log.e(LOG_TAG,"I/O exception on routine close", ex2);
-            }
-
-            sZygoteSocket = null;
-
+            zygoteState.close();
             throw new ZygoteStartFailedEx(ex);
         }
     }
@@ -559,6 +591,7 @@ public class Process {
      * @param debugFlags Additional flags.
      * @param targetSdkVersion The target SDK version for the app.
      * @param seInfo null-ok SELinux information for the new process.
+     * @param abi the ABI the process should use.
      * @param extraArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
      * @throws ZygoteStartFailedEx if process start failed for any reason
@@ -570,6 +603,7 @@ public class Process {
                                   int debugFlags, int mountExternal,
                                   int targetSdkVersion,
                                   String seInfo,
+                                  String abi,
                                   String[] extraArgs)
                                   throws ZygoteStartFailedEx {
         synchronized(Process.class) {
@@ -637,10 +671,61 @@ public class Process {
                 }
             }
 
-            return zygoteSendArgsAndGetResult(argsForZygote);
+            return zygoteSendArgsAndGetResult(openZygoteSocketIfNeeded(abi), argsForZygote);
         }
     }
-    
+
+    /**
+     * Returns the number of times we attempt a connection to the zygote. We
+     * sleep for {@link #ZYGOTE_RETRY_MILLIS} milliseconds between each try.
+     *
+     * This could probably be removed, see TODO in {@code ZygoteState#connect}.
+     */
+    private static int getNumTries(ZygoteState state) {
+        // Retry 10 times for the first connection to each zygote.
+        if (state == null) {
+            return 11;
+        }
+
+        // This means the connection has already been established, but subsequently
+        // closed, possibly due to an IOException. We retry just once if that's the
+        // case.
+        return 1;
+    }
+
+    /**
+     * Tries to open socket to Zygote process if not already open. If
+     * already open, does nothing.  May block and retry.
+     */
+    private static ZygoteState openZygoteSocketIfNeeded(String abi) throws ZygoteStartFailedEx {
+        if (primaryZygoteState == null || primaryZygoteState.isClosed()) {
+            primaryZygoteState = ZygoteState.connect(ZYGOTE_SOCKET, getNumTries(primaryZygoteState));
+        }
+
+        // TODO: Revert this temporary change. This is required to test
+        // and submit this change ahead of the package manager changes
+        // that supply this abi.
+        if (abi == null) {
+            return primaryZygoteState;
+        }
+
+        if (primaryZygoteState.matches(abi)) {
+            return primaryZygoteState;
+        }
+
+        // The primary zygote didn't match. Try the secondary.
+        if (secondaryZygoteState == null || secondaryZygoteState.isClosed()) {
+            secondaryZygoteState = ZygoteState.connect(SECONDARY_ZYGOTE_SOCKET,
+                    getNumTries(secondaryZygoteState));
+        }
+
+        if (secondaryZygoteState.matches(abi)) {
+            return secondaryZygoteState;
+        }
+
+        throw new ZygoteStartFailedEx("Unsupported zygote ABI: " + abi);
+    }
+
     /**
      * Returns elapsed milliseconds of the time this process has run.
      * @return  Returns the number of milliseconds this process has return.
