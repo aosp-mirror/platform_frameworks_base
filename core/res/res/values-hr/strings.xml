@@ -384,6 +384,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Nositelju omogućuje vezanje uz sučelje najviše razine usluge widgeta. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interakcija s administratorom uređaja"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Nositelju omogućuje slanje namjera administratoru uređaja. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"povezivanje s TV ulazom"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Nositelju omogućuje vezanje uz sučelje najviše razine TV ulaza. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"dodavanje ili uklanjanje administratora uređaja"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Omogućuje nositelju dodavanje ili uklanjanje administratora aktivnih uređaja. Nikada ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"promjena orijentacije zaslona"</string>
@@ -688,7 +690,7 @@
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"promjena kalibracije uređaja za unos"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Omogućuje aplikaciji izmjenu parametara kalibracije dodirnog zaslona. Ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"pristup DRM certifikatima"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Aplikaciji omogućuje pružanje i korištenje DRM certifikata. Nikad ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Aplikaciji omogućuje pružanje i korištenje DRM certifikata. Ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Postavi pravila zaporke"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Upravljajte duljinom zaporki za otključavanje zaslona i dopuštenim znakovima u tim zaporkama."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Nadgledaj pokušaje otključavanja zaslona"</string>
