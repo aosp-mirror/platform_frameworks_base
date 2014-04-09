@@ -43,7 +43,13 @@ class FilteredTaskList {
         ArrayList<Task> prevFilteredTasks = new ArrayList<Task>(mFilteredTasks);
         mFilter = filter;
         updateFilteredTasks();
-        return !prevFilteredTasks.equals(mFilteredTasks);
+        if (!prevFilteredTasks.equals(mFilteredTasks)) {
+            return true;
+        } else {
+            // If the tasks are exactly the same pre/post filter, then just reset it
+            mFilter = null;
+            return false;
+        }
     }
 
     /** Removes the task filter and returns the previous touch state */

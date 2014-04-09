@@ -58,10 +58,10 @@ public class AlternateRecentsComponent {
                 Resources res = mContext.getResources();
                 float statusBarHeight = res.getDimensionPixelSize(
                         com.android.internal.R.dimen.status_bar_height);
-                Bundle replyData = msg.getData().getParcelable("replyData");
-                mSingleCountFirstTaskRect = replyData.getParcelable("singleCountTaskRect");
+                Bundle replyData = msg.getData().getParcelable(KEY_CONFIGURATION_DATA);
+                mSingleCountFirstTaskRect = replyData.getParcelable(KEY_SINGLE_TASK_STACK_RECT);
                 mSingleCountFirstTaskRect.offset(0, (int) statusBarHeight);
-                mMultipleCountFirstTaskRect = replyData.getParcelable("multipleCountTaskRect");
+                mMultipleCountFirstTaskRect = replyData.getParcelable(KEY_MULTIPLE_TASK_STACK_RECT);
                 mMultipleCountFirstTaskRect.offset(0, (int) statusBarHeight);
             }
         }
@@ -93,12 +93,20 @@ public class AlternateRecentsComponent {
         }
     }
 
-    final static int MSG_UPDATE_FOR_CONFIGURATION = 0;
-    final static int MSG_UPDATE_TASK_THUMBNAIL = 1;
-    final static int MSG_PRELOAD_TASKS = 2;
-    final static int MSG_CANCEL_PRELOAD_TASKS = 3;
-    final static int MSG_CLOSE_RECENTS = 4;
-    final static int MSG_TOGGLE_RECENTS = 5;
+    final public static int MSG_UPDATE_FOR_CONFIGURATION = 0;
+    final public static int MSG_UPDATE_TASK_THUMBNAIL = 1;
+    final public static int MSG_PRELOAD_TASKS = 2;
+    final public static int MSG_CANCEL_PRELOAD_TASKS = 3;
+    final public static int MSG_CLOSE_RECENTS = 4;
+    final public static int MSG_TOGGLE_RECENTS = 5;
+
+    final public static String EXTRA_ANIMATING_WITH_THUMBNAIL = "recents.animatingWithThumbnail";
+    final public static String KEY_CONFIGURATION_DATA = "recents.data.updateForConfiguration";
+    final public static String KEY_WINDOW_RECT = "recents.windowRect";
+    final public static String KEY_SYSTEM_INSETS = "recents.systemInsets";
+    final public static String KEY_SINGLE_TASK_STACK_RECT = "recents.singleCountTaskRect";
+    final public static String KEY_MULTIPLE_TASK_STACK_RECT = "recents.multipleCountTaskRect";
+
 
     final static int sMinToggleDelay = 425;
 
@@ -195,8 +203,8 @@ public class AlternateRecentsComponent {
             // Try and update the recents configuration
             try {
                 Bundle data = new Bundle();
-                data.putParcelable("windowRect", rect);
-                data.putParcelable("systemInsets", new Rect(0, statusBarHeight, 0, 0));
+                data.putParcelable(KEY_WINDOW_RECT, rect);
+                data.putParcelable(KEY_SYSTEM_INSETS, new Rect(0, statusBarHeight, 0, 0));
                 Message msg = Message.obtain(null, MSG_UPDATE_FOR_CONFIGURATION, 0, 0);
                 msg.setData(data);
                 msg.replyTo = mMessenger;
@@ -226,8 +234,7 @@ public class AlternateRecentsComponent {
                 return null;
             }
 
-            Bitmap thumbnail = ssp.getTaskThumbnail(t.persistentId);
-            return thumbnail;
+            return ssp.getTaskThumbnail(t.persistentId);
         }
         return null;
     }
@@ -365,12 +372,12 @@ public class AlternateRecentsComponent {
 
             ActivityOptions opts = ActivityOptions.makeThumbnailScaleDownAnimation(mStatusBarView,
                     thumbnail, taskRect.left, taskRect.top, null);
-            startAlternateRecentsActivity(opts);
+            startAlternateRecentsActivity(opts, true);
         } else {
             ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
                     R.anim.recents_from_launcher_enter,
                     R.anim.recents_from_launcher_exit);
-            startAlternateRecentsActivity(opts);
+            startAlternateRecentsActivity(opts, false);
         }
 
         Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsStartup,
@@ -379,11 +386,12 @@ public class AlternateRecentsComponent {
     }
 
     /** Starts the recents activity */
-    void startAlternateRecentsActivity(ActivityOptions opts) {
+    void startAlternateRecentsActivity(ActivityOptions opts, boolean animatingWithThumbnail) {
         Intent intent = new Intent(sToggleRecentsAction);
         intent.setClassName(sRecentsPackage, sRecentsActivity);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        intent.putExtra(EXTRA_ANIMATING_WITH_THUMBNAIL, animatingWithThumbnail);
         if (opts != null) {
             mContext.startActivityAsUser(intent, opts.toBundle(), new UserHandle(
                     UserHandle.USER_CURRENT));
