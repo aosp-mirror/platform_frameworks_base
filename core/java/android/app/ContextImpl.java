@@ -72,6 +72,7 @@ import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.INetworkPolicyManager;
 import android.net.NetworkPolicyManager;
+import android.net.NetworkScoreManager;
 import android.net.Uri;
 import android.net.nsd.INsdManager;
 import android.net.nsd.NsdManager;
@@ -654,6 +655,12 @@ class ContextImpl extends Context {
                 ITvInputManager service = ITvInputManager.Stub.asInterface(iBinder);
                 return new TvInputManager(service, UserHandle.myUserId());
             }});
+
+        registerService(NETWORK_SCORE_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                return new NetworkScoreManager(ctx);
+            }
+        });
     }
 
     static ContextImpl getImpl(Context context) {
