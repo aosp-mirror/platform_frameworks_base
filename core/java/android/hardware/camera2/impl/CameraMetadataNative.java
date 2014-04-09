@@ -461,6 +461,10 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
             return (T) getFaces();
         } else if (key.equals(CaptureResult.STATISTICS_FACE_RECTANGLES)) {
             return (T) getFaceRectangles();
+        } else if (key.equals(CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS)) {
+            return (T) getAvailableStreamConfigurations();
+        } else if (key.equals(CameraCharacteristics.SCALER_AVAILABLE_MIN_FRAME_DURATIONS)) {
+            return (T) getAvailableMinFrameDurations();
         }
 
         // For other keys, get() falls back to getBase()
@@ -479,6 +483,50 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         }
 
         return availableFormats;
+    }
+
+    private int[] getAvailableStreamConfigurations() {
+        final int NUM_ELEMENTS_IN_CONFIG = 4;
+        int[] availableConfigs =
+                getBase(CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS);
+        if (availableConfigs != null) {
+            if (availableConfigs.length % NUM_ELEMENTS_IN_CONFIG != 0) {
+                Log.w(TAG, "availableStreamConfigurations is malformed, length must be multiple"
+                        + " of " + NUM_ELEMENTS_IN_CONFIG);
+                return availableConfigs;
+            }
+
+            for (int i = 0; i < availableConfigs.length; i += NUM_ELEMENTS_IN_CONFIG) {
+                // JPEG has different value between native and managed side, need override.
+                if (availableConfigs[i] == NATIVE_JPEG_FORMAT) {
+                    availableConfigs[i] = ImageFormat.JPEG;
+                }
+            }
+        }
+
+        return availableConfigs;
+    }
+
+    private long[] getAvailableMinFrameDurations() {
+        final int NUM_ELEMENTS_IN_DURATION = 4;
+        long[] availableMinDurations =
+                getBase(CameraCharacteristics.SCALER_AVAILABLE_MIN_FRAME_DURATIONS);
+        if (availableMinDurations != null) {
+            if (availableMinDurations.length % NUM_ELEMENTS_IN_DURATION != 0) {
+                Log.w(TAG, "availableStreamConfigurations is malformed, length must be multiple"
+                        + " of " + NUM_ELEMENTS_IN_DURATION);
+                return availableMinDurations;
+            }
+
+            for (int i = 0; i < availableMinDurations.length; i += NUM_ELEMENTS_IN_DURATION) {
+                // JPEG has different value between native and managed side, need override.
+                if (availableMinDurations[i] == NATIVE_JPEG_FORMAT) {
+                    availableMinDurations[i] = ImageFormat.JPEG;
+                }
+            }
+        }
+
+        return availableMinDurations;
     }
 
     private Face[] getFaces() {
@@ -607,10 +655,54 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
             return setAvailableFormats((int[]) value);
         } else if (key.equals(CaptureResult.STATISTICS_FACE_RECTANGLES)) {
             return setFaceRectangles((Rect[]) value);
+        } else if (key.equals(CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS)) {
+            return setAvailableStreamConfigurations((int[])value);
+        } else if (key.equals(CameraCharacteristics.SCALER_AVAILABLE_MIN_FRAME_DURATIONS)) {
+            return setAvailableMinFrameDurations((long[])value);
         }
 
         // For other keys, set() falls back to setBase().
         return false;
+    }
+
+    private boolean setAvailableStreamConfigurations(int[] value) {
+        final int NUM_ELEMENTS_IN_CONFIG = 4;
+        int[] availableConfigs = value;
+        if (value == null) {
+            // Let setBase() to handle the null value case.
+            return false;
+        }
+
+        int[] newValues = new int[availableConfigs.length];
+        for (int i = 0; i < availableConfigs.length; i++) {
+            newValues[i] = availableConfigs[i];
+            if (i % NUM_ELEMENTS_IN_CONFIG == 0 && availableConfigs[i] == ImageFormat.JPEG) {
+                newValues[i] = NATIVE_JPEG_FORMAT;
+            }
+        }
+
+        setBase(CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS, newValues);
+        return true;
+    }
+
+    private boolean setAvailableMinFrameDurations(long[] value) {
+        final int NUM_ELEMENTS_IN_DURATION = 4;
+        long[] availableDurations = value;
+        if (value == null) {
+            // Let setBase() to handle the null value case.
+            return false;
+        }
+
+        long[] newValues = new long[availableDurations.length];
+        for (int i = 0; i < availableDurations.length; i++) {
+            newValues[i] = availableDurations[i];
+            if (i % NUM_ELEMENTS_IN_DURATION == 0 && availableDurations[i] == ImageFormat.JPEG) {
+                newValues[i] = NATIVE_JPEG_FORMAT;
+            }
+        }
+
+        setBase(CameraCharacteristics.SCALER_AVAILABLE_MIN_FRAME_DURATIONS, newValues);
+        return true;
     }
 
     private boolean setAvailableFormats(int[] value) {
