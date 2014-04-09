@@ -10,8 +10,9 @@
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
 #include <utils/Log.h>
-#include <cutils/process_name.h>
 #include <cutils/memory.h>
+#include <cutils/process_name.h>
+#include <cutils/properties.h>
 #include <cutils/trace.h>
 #include <android_runtime/AndroidRuntime.h>
 
@@ -135,6 +136,12 @@ static size_t computeArgBlockSize(int argc, char* const argv[]) {
     return (end - start);
 }
 
+#if defined(__LP64__)
+static const char ABI_LIST_PROPERTY[] = "ro.product.cpu.abilist64";
+#else
+static const char ABI_LIST_PROPERTY[] = "ro.product.cpu.abilist32";
+#endif
+
 int main(int argc, char* const argv[])
 {
     AppRuntime runtime(argv[0], computeArgBlockSize(argc, argv));
@@ -204,6 +211,17 @@ int main(int argc, char* const argv[])
         if (startSystemServer) {
             args.add(String8("start-system-server"));
         }
+
+        char prop[PROP_VALUE_MAX];
+        if (property_get(ABI_LIST_PROPERTY, prop, NULL) == 0) {
+            LOG_ALWAYS_FATAL("app_process: Unable to deterimine ABI list from property %s.",
+                ABI_LIST_PROPERTY);
+            return 11;
+        }
+
+        String8 abiFlag("--abi-list=");
+        abiFlag.append(prop);
+        args.add(abiFlag);
 
         // In zygote mode, pass all remaining arguments to the zygote
         // main() method.
