@@ -61,6 +61,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.service.notification.StatusBarNotification;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -93,6 +94,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
+import com.android.systemui.statusbar.InterceptedNotifications;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
@@ -355,6 +357,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }};
 
     private Runnable mOnFlipRunnable;
+    private InterceptedNotifications mIntercepted;
 
     private final OnChildLocationsChangedListener mOnChildLocationsChangedListener =
             new OnChildLocationsChangedListener() {
@@ -373,7 +376,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         super.setZenMode(mode);
         if (mModeIcon == null) return;
         if (!isDeviceProvisioned()) return;
-        mModeIcon.setVisibility(mode != Settings.Global.ZEN_MODE_OFF ? View.VISIBLE : View.GONE);
+        final boolean zen = mode != Settings.Global.ZEN_MODE_OFF;
+        mModeIcon.setVisibility(zen ? View.VISIBLE : View.GONE);
+        if (!zen) {
+            mIntercepted.releaseIntercepted();
+        }
     }
 
     @Override
@@ -381,7 +388,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
         updateDisplaySize();
-
+        mIntercepted = new InterceptedNotifications(mContext, this);
         super.start(); // calls createAndAddWindows()
 
         addNavigationBar();
@@ -953,49 +960,54 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mStatusIcons.removeViewAt(viewIndex);
     }
 
+    public UserHandle getCurrentUserHandle() {
+        return new UserHandle(mCurrentUserId);
+    }
+
     public void addNotification(IBinder key, StatusBarNotification notification) {
         if (DEBUG) Log.d(TAG, "addNotification score=" + notification.getScore());
         Entry shadeEntry = createNotificationViews(key, notification);
         if (shadeEntry == null) {
             return;
         }
-        if (!shouldIntercept(notification.getNotification())) {
-            if (mUseHeadsUp && shouldInterrupt(notification)) {
-                if (DEBUG) Log.d(TAG, "launching notification in heads up mode");
-                Entry interruptionCandidate = new Entry(key, notification, null);
-                ViewGroup holder = mHeadsUpNotificationView.getHolder();
-                if (inflateViewsForHeadsUp(interruptionCandidate, holder)) {
-                    mInterruptingNotificationTime = System.currentTimeMillis();
-                    mInterruptingNotificationEntry = interruptionCandidate;
-                    shadeEntry.setInterruption();
+        if (mZenMode != Global.ZEN_MODE_OFF && mIntercepted.tryIntercept(key, notification)) {
+            return;
+        }
+        if (mUseHeadsUp && shouldInterrupt(notification)) {
+            if (DEBUG) Log.d(TAG, "launching notification in heads up mode");
+            Entry interruptionCandidate = new Entry(key, notification, null);
+            ViewGroup holder = mHeadsUpNotificationView.getHolder();
+            if (inflateViewsForHeadsUp(interruptionCandidate, holder)) {
+                mInterruptingNotificationTime = System.currentTimeMillis();
+                mInterruptingNotificationEntry = interruptionCandidate;
+                shadeEntry.setInterruption();
 
-                    // 1. Populate mHeadsUpNotificationView
-                    mHeadsUpNotificationView.setNotification(mInterruptingNotificationEntry);
+                // 1. Populate mHeadsUpNotificationView
+                mHeadsUpNotificationView.setNotification(mInterruptingNotificationEntry);
 
-                    // 2. Animate mHeadsUpNotificationView in
-                    mHandler.sendEmptyMessage(MSG_SHOW_HEADS_UP);
+                // 2. Animate mHeadsUpNotificationView in
+                mHandler.sendEmptyMessage(MSG_SHOW_HEADS_UP);
 
-                    // 3. Set alarm to age the notification off
-                    resetHeadsUpDecayTimer();
-                }
-            } else if (notification.getNotification().fullScreenIntent != null) {
-                // Stop screensaver if the notification has a full-screen intent.
-                // (like an incoming phone call)
-                awakenDreams();
+                // 3. Set alarm to age the notification off
+                resetHeadsUpDecayTimer();
+            }
+        } else if (notification.getNotification().fullScreenIntent != null) {
+            // Stop screensaver if the notification has a full-screen intent.
+            // (like an incoming phone call)
+            awakenDreams();
 
-                // not immersive & a full-screen alert should be shown
-                if (DEBUG) Log.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
-                try {
-                    notification.getNotification().fullScreenIntent.send();
-                } catch (PendingIntent.CanceledException e) {
-                }
-            } else {
-                // usual case: status bar visible & not immersive
+            // not immersive & a full-screen alert should be shown
+            if (DEBUG) Log.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
+            try {
+                notification.getNotification().fullScreenIntent.send();
+            } catch (PendingIntent.CanceledException e) {
+            }
+        } else {
+            // usual case: status bar visible & not immersive
 
-                // show the ticker if there isn't already a heads up
-                if (mInterruptingNotificationEntry == null) {
-                    tick(null, notification, true);
-                }
+            // show the ticker if there isn't already a heads up
+            if (mInterruptingNotificationEntry == null) {
+                tick(null, notification, true);
             }
         }
         addNotificationViews(shadeEntry);
@@ -1011,6 +1023,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 && mHeadsUpNotificationView.isClearable()) {
             mHandler.sendEmptyMessageDelayed(MSG_HIDE_HEADS_UP, mHeadsUpNotificationDecay);
         }
+    }
+
+    @Override
+    public void updateNotification(IBinder key, StatusBarNotification notification) {
+        super.updateNotification(key, notification);
+        mIntercepted.update(key, notification);
     }
 
     public void removeNotification(IBinder key) {
@@ -1034,7 +1052,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 animateCollapsePanels();
             }
         }
-
+        mIntercepted.remove(key);
         setAreThereNotifications();
     }
 
@@ -1151,7 +1169,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 // in "public" mode (atop a secure keyguard), secret notifs are totally hidden
                 continue;
             }
-            if (shouldIntercept(ent.notification.getNotification())) {
+            if (mIntercepted.isSyntheticEntry(ent)) {
                 continue;
             }
             toShow.add(ent.icon);
