@@ -595,7 +595,6 @@ public class BitmapDrawable extends Drawable {
      * Specifies the blending mode used to apply tint.
      *
      * @param tintMode A Porter-Duff blending mode
-     * @hide Pending finalization of supported Modes
      */
     public void setTintMode(Mode tintMode) {
         if (mBitmapState.mTintMode != tintMode) {
@@ -606,10 +605,7 @@ public class BitmapDrawable extends Drawable {
     }
 
     /**
-     * Returns the tint mode for this drawable, or {@code null} if none set.
-     *
-     * @return the tint mode for this drawable, or {@code null} if none set
-     * @hide
+     * @hide only needed by a hack within ProgressBar
      */
     public Mode getTintMode() {
         return mBitmapState.mTintMode;

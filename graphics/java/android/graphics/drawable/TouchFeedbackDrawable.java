@@ -124,6 +124,41 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         return super.isStateful() || mState.mTint != null && mState.mTint.isStateful();
     }
 
+    /**
+     * Specifies a tint for drawing touch feedback ripples.
+     *
+     * @param tint Color state list to use for tinting touch feedback ripples,
+     *        or null to clear the tint
+     */
+    public void setTint(ColorStateList tint) {
+        if (mState.mTint != tint) {
+            mState.mTint = tint;
+            invalidateSelf();
+        }
+    }
+
+    /**
+     * Returns the tint color for touch feedback ripples.
+     *
+     * @return Color state list to use for tinting touch feedback ripples, or
+     *         null if none set
+     */
+    public ColorStateList getTint() {
+        return mState.mTint;
+    }
+
+    /**
+     * Specifies the blending mode used to draw touch feedback ripples.
+     *
+     * @param tintMode A Porter-Duff blending mode
+     */
+    public void setTintMode(Mode tintMode) {
+        if (mState.mTintMode != tintMode) {
+            mState.mTintMode = tintMode;
+            invalidateSelf();
+        }
+    }
+
     @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
