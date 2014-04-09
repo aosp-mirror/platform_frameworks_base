@@ -21,6 +21,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.SensorManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
@@ -171,6 +172,9 @@ public final class DisplayManagerService extends SystemService {
     // List of all display transaction listeners.
     private final CopyOnWriteArrayList<DisplayTransactionListener> mDisplayTransactionListeners =
             new CopyOnWriteArrayList<DisplayTransactionListener>();
+
+    // Display power controller.
+    private DisplayPowerController mDisplayPowerController;
 
     // Set to true if all displays have been blanked by the power manager.
     private int mAllDisplayBlankStateFromPowerManager = DISPLAY_BLANK_STATE_UNKNOWN;
@@ -936,6 +940,10 @@ public final class DisplayManagerService extends SystemService {
                 pw.println("  " + i + ": mPid=" + callback.mPid
                         + ", mWifiDisplayScanRequested=" + callback.mWifiDisplayScanRequested);
             }
+
+            if (mDisplayPowerController != null) {
+                mDisplayPowerController.dump(pw);
+            }
         }
     }
 
@@ -1313,6 +1321,27 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private final class LocalService extends DisplayManagerInternal {
+        @Override
+        public void initPowerManagement(DisplayPowerCallbacks callbacks, Handler handler,
+                SensorManager sensorManager) {
+            synchronized (mSyncRoot) {
+                mDisplayPowerController = new DisplayPowerController(
+                        mContext, callbacks, handler, sensorManager);
+            }
+        }
+
+        @Override
+        public boolean requestPowerState(DisplayPowerRequest request,
+                boolean waitForNegativeProximity) {
+            return mDisplayPowerController.requestPowerState(request,
+                    waitForNegativeProximity);
+        }
+
+        @Override
+        public boolean isProximitySensorAvailable() {
+            return mDisplayPowerController.isProximitySensorAvailable();
+        }
+
         @Override
         public void blankAllDisplaysFromPowerManager() {
             blankAllDisplaysFromPowerManagerInternal();
