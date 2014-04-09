@@ -112,5 +112,7 @@
     <integer name="recents_filter_animate_current_views_min_duration">175</integer>
     <!-- The min animation duration for animating views that are newly visible. -->
     <integer name="recents_filter_animate_new_views_min_duration">125</integer>
+    <!-- The min animation duration for animating views that are newly visible. -->
+    <integer name="recents_animate_task_bar_enter_duration">200</integer>
 </resources>
 

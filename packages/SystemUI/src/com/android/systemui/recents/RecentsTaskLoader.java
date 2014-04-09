@@ -358,18 +358,9 @@ public class RecentsTaskLoader {
         return mSystemServicesProxy;
     }
 
-    /** Reload the set of recent tasks */
-    SpaceNode reload(Context context, int preloadCount) {
-        Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|reload]");
-        Resources res = context.getResources();
-        ArrayList<Task> tasksToForceLoad = new ArrayList<Task>();
-        TaskStack stack = new TaskStack(context);
-        SpaceNode root = new SpaceNode(context);
-        root.setStack(stack);
-
+    private List<ActivityManager.RecentTaskInfo> getRecentTasks(Context context) {
         long t1 = System.currentTimeMillis();
 
-        // Get the recent tasks
         SystemServicesProxy ssp = mSystemServicesProxy;
         List<ActivityManager.RecentTaskInfo> tasks =
                 ssp.getRecentTasks(25, UserHandle.CURRENT.getIdentifier());
@@ -396,6 +387,24 @@ public class RecentsTaskLoader {
                 continue;
             }
         }
+
+        return tasks;
+    }
+
+    /** Reload the set of recent tasks */
+    SpaceNode reload(Context context, int preloadCount) {
+        long t1 = System.currentTimeMillis();
+
+        Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|reload]");
+        Resources res = context.getResources();
+        ArrayList<Task> tasksToForceLoad = new ArrayList<Task>();
+        TaskStack stack = new TaskStack(context);
+        SpaceNode root = new SpaceNode(context);
+        root.setStack(stack);
+
+        // Get the recent tasks
+        SystemServicesProxy ssp = mSystemServicesProxy;
+        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(context);
 
         // Add each task to the task stack
         t1 = System.currentTimeMillis();
