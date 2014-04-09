@@ -435,8 +435,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
             if (version > 0 && version < Build.VERSION_CODES.GINGERBREAD) {
                 content.setBackgroundResource(R.drawable.notification_row_legacy_bg);
-            } else {
-                content.setBackgroundResource(com.android.internal.R.drawable.notification_bg);
             }
         }
     }
@@ -1004,7 +1002,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         // Remove the expanded view.
         ViewGroup rowParent = (ViewGroup)entry.row.getParent();
         if (rowParent != null) rowParent.removeView(entry.row);
-        updateExpansionStates();
+        updateRowStates();
         updateNotificationIcons();
 
         return entry.notification;
@@ -1048,7 +1046,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             Log.d(TAG, "addNotificationViews: added at " + pos);
         }
         updateInterceptedState(entry);
-        updateExpansionStates();
+        updateRowStates();
         updateNotificationIcons();
     }
 
@@ -1056,7 +1054,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         addNotificationViews(createNotificationViews(key, notification));
     }
 
-    protected void updateExpansionStates() {
+    /**
+     * Updates expanded, dimmed and locked states of notification rows.
+     */
+    protected void updateRowStates() {
         int n = mNotificationData.size();
         for (int i = 0; i < n; i++) {
             NotificationData.Entry entry = mNotificationData.get(i);
@@ -1068,6 +1069,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                     entry.row.setExpanded(top || entry.row.isUserExpanded());
                 }
             }
+            entry.row.setDimmed(mOnKeyguard);
+            entry.row.setLocked(mOnKeyguard);
         }
     }
 
@@ -1222,7 +1225,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     handleNotificationError(key, notification, "Couldn't update icon: " + ic);
                     return;
                 }
-                updateExpansionStates();
+                updateRowStates();
             }
             catch (RuntimeException e) {
                 // It failed to add cleanly.  Log, and remove the view from the panel.
