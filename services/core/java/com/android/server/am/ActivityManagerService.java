@@ -24,7 +24,6 @@ import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
-
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 import android.app.AppOpsManager;
@@ -33,6 +32,7 @@ import android.app.IActivityContainerCallback;
 import android.appwidget.AppWidgetManager;
 import android.graphics.Rect;
 import android.util.ArrayMap;
+
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
@@ -50,6 +50,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
+import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
@@ -71,6 +72,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
@@ -797,9 +799,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     /**
      * Used to control how we initialize the service.
      */
-    boolean mStartRunning = false;
     ComponentName mTopComponent;
-    String mTopAction;
+    String mTopAction = Intent.ACTION_MAIN;
     String mTopData;
     boolean mProcessesReady = false;
     boolean mSystemReady = false;
@@ -2006,7 +2007,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         mBatteryStatsService.publish(mContext);
         mUsageStatsService.publish(mContext);
         mAppOpsService.publish(mContext);
-        startRunning(null, null, null, null);
+
+        LocalServices.addService(ActivityManagerInternal.class, new LocalService());
     }
 
     @Override
@@ -8185,13 +8187,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mSleeping || mShuttingDown;
     }
 
-    public void goingToSleep() {
-        if (checkCallingPermission(android.Manifest.permission.DEVICE_POWER)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires permission "
-                    + android.Manifest.permission.DEVICE_POWER);
-        }
-
+    void goingToSleep() {
         synchronized(this) {
             mWentToSleep = true;
             updateEventDispatchingLocked();
@@ -8266,13 +8262,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public void wakingUp() {
-        if (checkCallingPermission(android.Manifest.permission.DEVICE_POWER)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires permission "
-                    + android.Manifest.permission.DEVICE_POWER);
-        }
-
+    void wakingUp() {
         synchronized(this) {
             mWentToSleep = false;
             updateEventDispatchingLocked();
@@ -8994,25 +8984,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public final void startRunning(String pkg, String cls, String action,
-            String data) {
-        synchronized(this) {
-            if (mStartRunning) {
-                return;
-            }
-            mStartRunning = true;
-            mTopComponent = pkg != null && cls != null
-                    ? new ComponentName(pkg, cls) : null;
-            mTopAction = action != null ? action : Intent.ACTION_MAIN;
-            mTopData = data;
-            if (!mSystemReady) {
-                return;
-            }
-        }
-
-        systemReady(null);
-    }
-
     private void retrieveSettings() {
         final ContentResolver resolver = mContext.getContentResolver();
         String debugApp = Settings.Global.getString(
@@ -9225,9 +9196,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             mAppOpsService.systemReady();
             mSystemReady = true;
-            if (!mStartRunning) {
-                return;
-            }
         }
 
         ArrayList<ProcessRecord> procsToKill = null;
@@ -10907,8 +10875,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             if (dumpAll) {
                 pw.println("  Total persistent processes: " + numPers);
-                pw.println("  mStartRunning=" + mStartRunning
-                        + " mProcessesReady=" + mProcessesReady
+                pw.println("  mProcessesReady=" + mProcessesReady
                         + " mSystemReady=" + mSystemReady);
                 pw.println("  mBooting=" + mBooting
                         + " mBooted=" + mBooted
@@ -16561,5 +16528,17 @@ public final class ActivityManagerService extends ActivityManagerNative
         ActivityInfo info = new ActivityInfo(aInfo);
         info.applicationInfo = getAppInfoForUser(info.applicationInfo, userId);
         return info;
+    }
+
+    private final class LocalService extends ActivityManagerInternal {
+        @Override
+        public void goingToSleep() {
+            ActivityManagerService.this.goingToSleep();
+        }
+
+        @Override
+        public void wakingUp() {
+            ActivityManagerService.this.wakingUp();
+        }
     }
 }
