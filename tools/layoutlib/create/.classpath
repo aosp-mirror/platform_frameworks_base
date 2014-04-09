@@ -4,6 +4,6 @@
 	<classpathentry excluding="mock_data/" kind="src" path="tests"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="var" path="ANDROID_SRC/prebuilts/tools/common/asm-tools/asm-4.0.jar" sourcepath="/ANDROID_PLAT/prebuilts/tools/common/asm-tools/src-4.0.zip"/>
+	<classpathentry kind="var" path="ANDROID_PLAT_SRC/prebuilts/misc/common/asm/asm-4.0.jar" sourcepath="/ANDROID_PLAT_SRC/prebuilts/misc/common/asm/src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
