@@ -3175,8 +3175,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     // The active window also determined events from which
                     // windows are delivered.
                     synchronized (mLock) {
+                        mFocusedWindowId = getFocusedWindowId();
                         if (mWindowsForAccessibilityCallback == null
-                                && windowId == getFocusedWindowId()) {
+                                && windowId == mFocusedWindowId) {
                             mActiveWindowId = windowId;
                         }
                     }
