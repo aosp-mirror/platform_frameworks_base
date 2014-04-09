@@ -11592,6 +11592,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_BASE_GAIN_FACTOR;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_BLACK_LEVEL_PATTERN;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_ACTIVE_ARRAY_SIZE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_COLOR_FILTER_ARRANGEMENT;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_EXPOSURE_TIME_RANGE;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_MAX_FRAME_DURATION;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_PHYSICAL_SIZE;
@@ -11788,6 +11789,11 @@ package android.hardware.camera2 {
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_ZSL = 4; // 0x4
     field public static final int SCALER_AVAILABLE_STREAM_CONFIGURATIONS_INPUT = 1; // 0x1
     field public static final int SCALER_AVAILABLE_STREAM_CONFIGURATIONS_OUTPUT = 0; // 0x0
+    field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_BGGR = 3; // 0x3
+    field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GBRG = 2; // 0x2
+    field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GRBG = 1; // 0x1
+    field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGB = 4; // 0x4
+    field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGGB = 0; // 0x0
     field public static final int SENSOR_REFERENCE_ILLUMINANT_CLOUDY_WEATHER = 10; // 0xa
     field public static final int SENSOR_REFERENCE_ILLUMINANT_COOL_WHITE_FLUORESCENT = 14; // 0xe
     field public static final int SENSOR_REFERENCE_ILLUMINANT_D50 = 23; // 0x17

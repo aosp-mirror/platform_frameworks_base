@@ -425,6 +425,38 @@ public abstract class CameraMetadata {
     public static final int SCALER_AVAILABLE_STREAM_CONFIGURATIONS_INPUT = 1;
 
     //
+    // Enumeration values for CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+    //
+
+    /**
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     */
+    public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGGB = 0;
+
+    /**
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     */
+    public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GRBG = 1;
+
+    /**
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     */
+    public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GBRG = 2;
+
+    /**
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     */
+    public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_BGGR = 3;
+
+    /**
+     * <p>Sensor is not Bayer; output has 3 16-bit
+     * values for each pixel, instead of just 1 16-bit value
+     * per pixel.</p>
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     */
+    public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGB = 4;
+
+    //
     // Enumeration values for CameraCharacteristics#LED_AVAILABLE_LEDS
     //
 
