@@ -345,7 +345,6 @@ public class NinePatchDrawable extends Drawable {
      * Specifies the blending mode used to apply tint.
      *
      * @param tintMode A Porter-Duff blending mode
-     * @hide Pending finalization of supported Modes
      */
     public void setTintMode(Mode tintMode) {
         if (mNinePatchState.mTintMode != tintMode) {
