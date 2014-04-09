@@ -533,8 +533,7 @@ public class Preference implements Comparable<Preference> {
      * @see #onCreateView(ViewGroup)
      */
     protected void onBindView(View view) {
-        final TextView titleView = (TextView) view.findViewById(
-                com.android.internal.R.id.title);
+        final TextView titleView = (TextView) view.findViewById(com.android.internal.R.id.title);
         if (titleView != null) {
             final CharSequence title = getTitle();
             if (!TextUtils.isEmpty(title)) {
@@ -557,7 +556,7 @@ public class Preference implements Comparable<Preference> {
             }
         }
 
-        ImageView imageView = (ImageView) view.findViewById(com.android.internal.R.id.icon);
+        final ImageView imageView = (ImageView) view.findViewById(com.android.internal.R.id.icon);
         if (imageView != null) {
             if (mIconResId != 0 || mIcon != null) {
                 if (mIcon == null) {
@@ -568,6 +567,11 @@ public class Preference implements Comparable<Preference> {
                 }
             }
             imageView.setVisibility(mIcon != null ? View.VISIBLE : View.GONE);
+        }
+
+        final View imageFrame = view.findViewById(com.android.internal.R.id.icon_frame);
+        if (imageFrame != null) {
+            imageFrame.setVisibility(mIcon != null ? View.VISIBLE : View.GONE);
         }
 
         if (mShouldDisableView) {

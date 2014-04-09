@@ -109,11 +109,13 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemHeightSmall">48dip</item>
         <item name="listPreferredItemHeightLarge">80dip</item>
         <item name="dropdownListPreferredItemHeight">?attr/listPreferredItemHeightSmall</item>
-        <item name="textAppearanceListItemSmall">?attr/textAppearanceMedium</item>
-        <item name="listPreferredItemPaddingLeft">8dip</item>
-        <item name="listPreferredItemPaddingRight">8dip</item>
-        <item name="listPreferredItemPaddingStart">8dip</item>
-        <item name="listPreferredItemPaddingEnd">8dip</item>
+        <item name="textAppearanceListItem">@style/TextAppearance.Quantum.Subhead</item>
+        <item name="textAppearanceListItemSmall">@style/TextAppearance.Quantum.Subhead</item>
+        <item name="textAppearanceListItemSecondary">@style/TextAppearance.Quantum.Body1</item>
+        <item name="listPreferredItemPaddingLeft">16dip</item>
+        <item name="listPreferredItemPaddingRight">16dip</item>
+        <item name="listPreferredItemPaddingStart">16dip</item>
+        <item name="listPreferredItemPaddingEnd">16dip</item>
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
@@ -269,6 +271,7 @@ please see themes_device_defaults.xml.
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Quantum.PreferenceScreen</item>
         <item name="preferenceFragmentStyle">@style/PreferenceFragment.Quantum</item>
+        <item name="preferenceFragmentPaddingSide">0dip</item>
         <item name="preferenceCategoryStyle">@style/Preference.Quantum.Category</item>
         <item name="preferenceStyle">@style/Preference.Quantum</item>
         <item name="preferenceInformationStyle">@style/Preference.Quantum.Information</item>
@@ -278,7 +281,7 @@ please see themes_device_defaults.xml.
         <item name="dialogPreferenceStyle">@style/Preference.Quantum.DialogPreference</item>
         <item name="editTextPreferenceStyle">@style/Preference.Quantum.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@style/Preference.Quantum.RingtonePreference</item>
-        <item name="preferenceLayoutChild">@layout/preference_child_holo</item>
+        <item name="preferenceLayoutChild">@layout/preference_child_quantum</item>
         <item name="detailsElementBackground">?attr/colorBackground</item>
 
         <!-- Search widget styles -->
@@ -442,11 +445,13 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemHeightSmall">48dip</item>
         <item name="listPreferredItemHeightLarge">80dip</item>
         <item name="dropdownListPreferredItemHeight">?attr/listPreferredItemHeightSmall</item>
-        <item name="textAppearanceListItemSmall">?attr/textAppearanceMedium</item>
-        <item name="listPreferredItemPaddingLeft">8dip</item>
-        <item name="listPreferredItemPaddingRight">8dip</item>
-        <item name="listPreferredItemPaddingStart">8dip</item>
-        <item name="listPreferredItemPaddingEnd">8dip</item>
+        <item name="textAppearanceListItem">@style/TextAppearance.Quantum.Subhead</item>
+        <item name="textAppearanceListItemSmall">@style/TextAppearance.Quantum.Subhead</item>
+        <item name="textAppearanceListItemSecondary">@style/TextAppearance.Quantum.Body1</item>
+        <item name="listPreferredItemPaddingLeft">16dip</item>
+        <item name="listPreferredItemPaddingRight">16dip</item>
+        <item name="listPreferredItemPaddingStart">16dip</item>
+        <item name="listPreferredItemPaddingEnd">16dip</item>
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
@@ -601,6 +606,7 @@ please see themes_device_defaults.xml.
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Quantum.PreferenceScreen</item>
         <item name="preferenceFragmentStyle">@style/PreferenceFragment.Quantum</item>
+        <item name="preferenceFragmentPaddingSide">0dip</item>
         <item name="preferenceCategoryStyle">@style/Preference.Quantum.Category</item>
         <item name="preferenceStyle">@style/Preference.Quantum</item>
         <item name="preferenceInformationStyle">@style/Preference.Quantum.Information</item>
@@ -610,7 +616,7 @@ please see themes_device_defaults.xml.
         <item name="dialogPreferenceStyle">@style/Preference.Quantum.DialogPreference</item>
         <item name="editTextPreferenceStyle">@style/Preference.Quantum.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@style/Preference.Quantum.RingtonePreference</item>
-        <item name="preferenceLayoutChild">@layout/preference_child_holo</item>
+        <item name="preferenceLayoutChild">@layout/preference_child_quantum</item>
         <item name="detailsElementBackground">?attr/colorBackground</item>
 
         <!-- PreferenceFrameLayout attributes -->

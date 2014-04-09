@@ -126,6 +126,7 @@ please see themes_device_defaults.xml.
         <item name="dropdownListPreferredItemHeight">?android:attr/listPreferredItemHeight</item>
         <item name="textAppearanceListItem">?android:attr/textAppearanceLarge</item>
         <item name="textAppearanceListItemSmall">?android:attr/textAppearanceLarge</item>
+        <item name="textAppearanceListItemSecondary">?android:attr/textAppearanceSmall</item>
         <item name="listPreferredItemPaddingLeft">6dip</item>
         <item name="listPreferredItemPaddingRight">6dip</item>
         <item name="listPreferredItemPaddingStart">6dip</item>
@@ -702,6 +703,7 @@ please see themes_device_defaults.xml.
         <item name="itemTextAppearance">@android:style/TextAppearance.Large.Inverse</item>
         <item name="textAppearanceListItem">@android:style/TextAppearance.Large.Inverse</item>
         <item name="textAppearanceListItemSmall">@android:style/TextAppearance.Large.Inverse</item>
+        <item name="textAppearanceListItemSecondary">@android:style/TextAppearance.Small.Inverse</item>
     </style>
 
     <!-- Default heme for the TimePicker dialog windows, which is used by the
@@ -1007,6 +1009,7 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemHeightLarge">80dip</item>
         <item name="dropdownListPreferredItemHeight">?android:attr/listPreferredItemHeightSmall</item>
         <item name="textAppearanceListItemSmall">?android:attr/textAppearanceMedium</item>
+        <item name="textAppearanceListItemSecondary">?android:attr/textAppearanceSmall</item>
         <item name="listPreferredItemPaddingLeft">8dip</item>
         <item name="listPreferredItemPaddingRight">8dip</item>
         <item name="listPreferredItemPaddingStart">8dip</item>
@@ -1337,6 +1340,7 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemHeightLarge">80dip</item>
         <item name="dropdownListPreferredItemHeight">?android:attr/listPreferredItemHeightSmall</item>
         <item name="textAppearanceListItemSmall">?android:attr/textAppearanceMedium</item>
+        <item name="textAppearanceListItemSecondary">?android:attr/textAppearanceSmall</item>
         <item name="listPreferredItemPaddingLeft">8dip</item>
         <item name="listPreferredItemPaddingRight">8dip</item>
         <item name="listPreferredItemPaddingStart">8dip</item>
