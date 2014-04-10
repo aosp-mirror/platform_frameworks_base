@@ -67,8 +67,6 @@ public:
             int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
     ANDROID_API void destroyCanvas();
 
-    ANDROID_API void attachFunctor(Functor* functor);
-    ANDROID_API void detachFunctor(Functor* functor);
     ANDROID_API void invokeFunctor(Functor* functor, bool waitForCompletion);
 
     ANDROID_API void runWithGlContext(RenderTask* task);

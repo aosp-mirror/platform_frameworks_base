@@ -313,14 +313,11 @@ CanvasContext::CanvasContext(bool translucent)
         , mDirtyRegionsEnabled(false)
         , mOpaque(!translucent)
         , mCanvas(0)
-        , mHaveNewSurface(false)
-        , mInvokeFunctorsPending(false)
-        , mInvokeFunctorsTask(this) {
+        , mHaveNewSurface(false) {
     mGlobalContext = GlobalContext::get();
 }
 
 CanvasContext::~CanvasContext() {
-    removeFunctorsTask();
     destroyCanvas();
 }
 
@@ -432,55 +429,17 @@ void CanvasContext::drawDisplayList(RenderNode* displayList, Rect* dirty) {
     }
 }
 
-void InvokeFunctorsTask::run() {
-    mContext->invokeFunctors();
-}
-
-void CanvasContext::attachFunctor(Functor* functor) {
-    if (!mCanvas) return;
-
-    mCanvas->attachFunctor(functor);
-    removeFunctorsTask();
-    queueFunctorsTask(0);
-}
-
-void CanvasContext::detachFunctor(Functor* functor) {
-    if (!mCanvas) return;
-
-    mCanvas->detachFunctor(functor);
-}
-
 void CanvasContext::invokeFunctor(Functor* functor) {
+    ATRACE_CALL();
     DrawGlInfo::Mode mode = DrawGlInfo::kModeProcessNoContext;
     if (mGlobalContext->hasContext()) {
         requireGlContext();
         mode = DrawGlInfo::kModeProcess;
     }
-    (*functor)(mode, NULL);
-}
-
-void CanvasContext::invokeFunctors() {
-    mInvokeFunctorsPending = false;
-
-    if (!mCanvas) return;
-
-    requireSurface();
-    Rect dirty;
-    mCanvas->invokeFunctors(dirty);
-}
-
-void CanvasContext::removeFunctorsTask() {
-    if (!mInvokeFunctorsPending) return;
-
-    mInvokeFunctorsPending = false;
-    mRenderThread.remove(&mInvokeFunctorsTask);
-}
-
-void CanvasContext::queueFunctorsTask(int delayMs) {
-    if (mInvokeFunctorsPending) return;
-
-    mInvokeFunctorsPending = true;
-    mRenderThread.queueDelayed(&mInvokeFunctorsTask, delayMs);
+    // TODO: Remove the dummy info in the future
+    DrawGlInfo dummyInfo;
+    memset(&dummyInfo, 0, sizeof(DrawGlInfo));
+    (*functor)(mode, &dummyInfo);
 }
 
 bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
