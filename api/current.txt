@@ -32923,6 +32923,7 @@ package android.webkit {
     method public boolean getMediaPlaybackRequiresUserGesture();
     method public synchronized int getMinimumFontSize();
     method public synchronized int getMinimumLogicalFontSize();
+    method public abstract int getMixedContentMode();
     method public deprecated synchronized android.webkit.WebSettings.PluginState getPluginState();
     method public synchronized java.lang.String getSansSerifFontFamily();
     method public boolean getSaveFormData();
@@ -32967,6 +32968,7 @@ package android.webkit {
     method public void setMediaPlaybackRequiresUserGesture(boolean);
     method public synchronized void setMinimumFontSize(int);
     method public synchronized void setMinimumLogicalFontSize(int);
+    method public abstract void setMixedContentMode(int);
     method public void setNeedInitialFocus(boolean);
     method public deprecated synchronized void setPluginState(android.webkit.WebSettings.PluginState);
     method public deprecated synchronized void setRenderPriority(android.webkit.WebSettings.RenderPriority);
@@ -32988,6 +32990,9 @@ package android.webkit {
     field public static final int LOAD_DEFAULT = -1; // 0xffffffff
     field public static final deprecated int LOAD_NORMAL = 0; // 0x0
     field public static final int LOAD_NO_CACHE = 2; // 0x2
+    field public static final int MIXED_CONTENT_ALWAYS_ALLOW = 0; // 0x0
+    field public static final int MIXED_CONTENT_COMPATIBILITY_MODE = 2; // 0x2
+    field public static final int MIXED_CONTENT_NEVER_ALLOW = 1; // 0x1
   }
 
   public static final class WebSettings.LayoutAlgorithm extends java.lang.Enum {
