@@ -30,7 +30,7 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-DrawFrameTask::DrawFrameTask() : mContext(0), mTaskMode(MODE_INVALID), mRenderNode(0) {
+DrawFrameTask::DrawFrameTask() : mContext(0), mRenderNode(0) {
 }
 
 DrawFrameTask::~DrawFrameTask() {
@@ -69,23 +69,14 @@ void DrawFrameTask::drawFrame(RenderThread* renderThread) {
     LOG_ALWAYS_FATAL_IF(!mRenderNode.get(), "Cannot drawFrame with no render node!");
     LOG_ALWAYS_FATAL_IF(!mContext, "Cannot drawFrame with no CanvasContext!");
 
-    postAndWait(renderThread, MODE_FULL);
+    postAndWait(renderThread);
 
     // Reset the single-frame data
     mDirty.setEmpty();
     mRenderNode = 0;
 }
 
-void DrawFrameTask::flushStateChanges(RenderThread* renderThread) {
-    LOG_ALWAYS_FATAL_IF(!mContext, "Cannot drawFrame with no CanvasContext!");
-
-    postAndWait(renderThread, MODE_STATE_ONLY);
-}
-
-void DrawFrameTask::postAndWait(RenderThread* renderThread, TaskMode mode) {
-    LOG_ALWAYS_FATAL_IF(mode == MODE_INVALID, "That's not a real mode, silly!");
-
-    mTaskMode = mode;
+void DrawFrameTask::postAndWait(RenderThread* renderThread) {
     AutoMutex _lock(mLock);
     renderThread->queue(this);
     mSignal.wait(mLock);
@@ -96,11 +87,6 @@ void DrawFrameTask::run() {
 
     // canUnblockUiThread is temporary until WebView has a solution for syncing frame state
     bool canUnblockUiThread = syncFrameState();
-
-    if (mTaskMode == MODE_STATE_ONLY) {
-        unblockUiThread();
-        return;
-    }
 
     // Grab a copy of everything we need
     Rect dirtyCopy(mDirty);
@@ -125,12 +111,9 @@ bool DrawFrameTask::syncFrameState() {
     bool hasFunctors = false;
     mContext->processLayerUpdates(&mLayers, &hasFunctors);
 
-    // If we don't have an mRenderNode this is a state flush only
-    if (mRenderNode.get()) {
-        TreeInfo info = {0};
-        mRenderNode->prepareTree(info);
-        hasFunctors |= info.hasFunctors;
-    }
+    TreeInfo info = {0};
+    mRenderNode->prepareTree(info);
+    hasFunctors |= info.hasFunctors;
 
     return !hasFunctors;
 }

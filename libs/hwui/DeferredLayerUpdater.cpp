@@ -41,6 +41,7 @@ DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer, OpenGLRenderer* rendere
 
 DeferredLayerUpdater::~DeferredLayerUpdater() {
     SkSafeUnref(mColorFilter);
+    setTransform(0);
     if (mLayer) {
         mCaches.resourceCache.decrementRefcount(mLayer);
     }

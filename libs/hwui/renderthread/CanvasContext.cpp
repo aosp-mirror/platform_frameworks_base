@@ -387,6 +387,7 @@ void CanvasContext::setup(int width, int height) {
 
 void CanvasContext::processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters,
         bool* hasFunctors) {
+    LOG_ALWAYS_FATAL_IF(!mCanvas, "Cannot process layer updates without a canvas!");
     mGlobalContext->makeCurrent(mEglSurface);
     for (size_t i = 0; i < layerUpdaters->size(); i++) {
         DeferredLayerUpdater* update = layerUpdaters->itemAt(i);
