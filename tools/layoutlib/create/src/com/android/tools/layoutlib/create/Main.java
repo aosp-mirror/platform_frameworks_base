@@ -115,6 +115,7 @@ public class Main {
                         "android.database.ContentObserver", // for Digital clock
                         "com.android.i18n.phonenumbers.*",  // for TextView with autolink attribute
                         "android.app.DatePickerDialog",     // b.android.com/28318
+                        "android.app.TimePickerDialog",     // b.android.com/61515
                     },
                     excludeClasses,
                     new String[] {
