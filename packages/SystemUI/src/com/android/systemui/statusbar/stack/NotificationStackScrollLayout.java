@@ -656,9 +656,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         int height = 0;
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            height += child.getHeight();
-            if (i < getChildCount()-1) {
-                height += mPaddingBetweenElements;
+            if (child.getVisibility() != View.GONE) {
+                height += child.getHeight();
+                if (i < getChildCount()-1) {
+                    height += mPaddingBetweenElements;
+                }
             }
         }
         mContentHeight = height;

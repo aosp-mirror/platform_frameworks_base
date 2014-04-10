@@ -63,7 +63,8 @@ public class StackScrollState {
             }
             // initialize with the default values of the view
             viewState.height = child.getHeight();
-            viewState.alpha = 1.0f;
+            viewState.alpha = 1;
+            viewState.gone = child.getVisibility() == View.GONE;
         }
     }
 
@@ -116,7 +117,7 @@ public class StackScrollState {
                 // apply visibility
                 int oldVisibility = child.getVisibility();
                 int newVisibility = becomesInvisible ? View.INVISIBLE : View.VISIBLE;
-                if (newVisibility != oldVisibility) {
+                if (newVisibility != oldVisibility && !state.gone) {
                     child.setVisibility(newVisibility);
                 }
 
@@ -164,6 +165,7 @@ public class StackScrollState {
         float yTranslation;
         float zTranslation;
         int height;
+        boolean gone;
 
         /**
          * The location this view is currently rendered at.
