@@ -415,11 +415,9 @@ public class StackScrollAlgorithm {
      */
     private void updateZValuesForState(StackScrollState resultState,
             StackScrollAlgorithmState algorithmState) {
-        ViewGroup hostView = resultState.getHostView();
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
             View child = algorithmState.visibleChildren.get(i);
-            if (child.getVisibility() == View.GONE) continue;
             StackScrollState.ViewState childViewState = resultState.getViewStateForView(child);
             if (i < algorithmState.itemsInTopStack) {
                 float stackIndex = algorithmState.itemsInTopStack - i;
@@ -453,8 +451,8 @@ public class StackScrollAlgorithm {
     }
 
     private void updateFirstChildHeightWhileExpanding(ViewGroup hostView) {
-        if (hostView.getChildCount() > 0) {
-            mFirstChildWhileExpanding = hostView.getChildAt(0);
+        mFirstChildWhileExpanding = findFirstVisibleChild(hostView);
+        if (mFirstChildWhileExpanding != null) {
             if (mExpandedOnStart) {
 
                 // We are collapsing the shade, so the first child can get as most as high as the
@@ -466,9 +464,19 @@ public class StackScrollAlgorithm {
                 mFirstChildMaxHeight = getMaxAllowedChildHeight(mFirstChildWhileExpanding);
             }
         } else {
-            mFirstChildWhileExpanding = null;
             mFirstChildMaxHeight = 0;
         }
+    }
+
+    private View findFirstVisibleChild(ViewGroup container) {
+        int childCount = container.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = container.getChildAt(i);
+            if (child.getVisibility() != View.GONE) {
+                return child;
+            }
+        }
+        return null;
     }
 
     public void onExpansionStopped() {
