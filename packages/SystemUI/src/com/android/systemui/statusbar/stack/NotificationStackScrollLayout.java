@@ -89,7 +89,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * The current State this Layout is in
      */
     private final StackScrollState mCurrentStackScrollState = new StackScrollState(this);
-    
+
     private OnChildLocationsChangedListener mListener;
 
     public NotificationStackScrollLayout(Context context) {
@@ -336,7 +336,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 continue;
             }
             float top = slidingChild.getTranslationY();
-            float bottom = top + slidingChild.getMeasuredHeight();
+            float bottom = top + slidingChild.getHeight();
             int left = slidingChild.getLeft();
             int right = slidingChild.getRight();
 
@@ -713,6 +713,13 @@ public class NotificationStackScrollLayout extends ViewGroup
     protected void onViewRemoved(View child) {
         super.onViewRemoved(child);
         mCurrentStackScrollState.removeViewStateForView(child);
+        mStackScrollAlgorithm.notifyChildrenChanged(this);
+    }
+
+    @Override
+    protected void onViewAdded(View child) {
+        super.onViewAdded(child);
+        mStackScrollAlgorithm.notifyChildrenChanged(this);
     }
 
     private boolean onInterceptTouchEventScroll(MotionEvent ev) {
@@ -856,6 +863,21 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public int getEmptyBottomMargin() {
         return Math.max(getHeight() - mContentHeight, 0);
+    }
+
+    public void onExpansionStarted() {
+        mStackScrollAlgorithm.onExpansionStarted(mCurrentStackScrollState);
+    }
+
+    public void onExpansionStopped() {
+        mStackScrollAlgorithm.onExpansionStopped();
+    }
+
+    public void setIsExpanded(boolean isExpanded) {
+        mStackScrollAlgorithm.setIsExpanded(isExpanded);
+        if (!isExpanded) {
+            mOwnScrollY = 0;
+        }
     }
 
     /**

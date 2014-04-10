@@ -139,6 +139,7 @@ public class NotificationPanelView extends PanelView {
      * @param expandedHeight the new expanded height
      */
     private void updateNotificationStackHeight(float expandedHeight) {
+        mNotificationStackScroller.setIsExpanded(expandedHeight > 0.0f);
         float childOffset = getRelativeTop(mNotificationStackScroller)
                 - mNotificationParent.getTranslationY();
         int newStackHeight = (int) (expandedHeight - childOffset);
@@ -167,5 +168,17 @@ public class NotificationPanelView extends PanelView {
     @Override
     protected int getDesiredMeasureHeight() {
         return mMaxPanelHeight;
+    }
+
+    @Override
+    protected void onExpandingStarted() {
+        super.onExpandingStarted();
+        mNotificationStackScroller.onExpansionStarted();
+    }
+
+    @Override
+    protected void onExpandingFinished() {
+        super.onExpandingFinished();
+        mNotificationStackScroller.onExpansionStopped();
     }
 }
