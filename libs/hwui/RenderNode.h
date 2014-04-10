@@ -65,6 +65,11 @@ class SaveOp;
 class RestoreToCountOp;
 class DrawDisplayListOp;
 
+struct TreeInfo {
+    bool hasFunctors;
+    // TODO: Damage calculations? Flag to skip staging pushes for RT animations?
+};
+
 /**
  * Primary class for storing recorded canvas commands, as well as per-View/ViewGroup display properties.
  *
@@ -141,10 +146,7 @@ public:
         return properties().getHeight();
     }
 
-    ANDROID_API void pushStagingChanges();
-
-    // Returns true if this RenderNode or any of its children have functors
-    bool hasFunctors();
+    ANDROID_API void prepareTree(TreeInfo& info);
 
 private:
     typedef key_value_pair_t<float, DrawDisplayListOp*> ZDrawDisplayListOpPair;
@@ -203,7 +205,9 @@ private:
         const char* mText;
     };
 
-    static void pushSubTreeStagingChanges(DisplayListData* subtree);
+    void prepareTreeImpl(TreeInfo& info);
+    void pushStagingChanges(TreeInfo& info);
+    void prepareSubTree(TreeInfo& info, DisplayListData* subtree);
 
     String8 mName;
     bool mDestroyed; // used for debugging crash, TODO: remove once invalid state crash fixed

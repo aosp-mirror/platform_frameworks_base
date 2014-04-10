@@ -94,7 +94,8 @@ void DrawFrameTask::postAndWait(RenderThread* renderThread, TaskMode mode) {
 void DrawFrameTask::run() {
     ATRACE_NAME("DrawFrame");
 
-    syncFrameState();
+    // canUnblockUiThread is temporary until WebView has a solution for syncing frame state
+    bool canUnblockUiThread = syncFrameState();
 
     if (mTaskMode == MODE_STATE_ONLY) {
         unblockUiThread();
@@ -105,9 +106,6 @@ void DrawFrameTask::run() {
     Rect dirtyCopy(mDirty);
     sp<RenderNode> renderNode = mRenderNode;
     CanvasContext* context = mContext;
-
-    // This is temporary until WebView has a solution for syncing frame state
-    bool canUnblockUiThread = !requiresSynchronousDraw(renderNode.get());
 
     // From this point on anything in "this" is *UNSAFE TO ACCESS*
     if (canUnblockUiThread) {
@@ -121,15 +119,20 @@ void DrawFrameTask::run() {
     }
 }
 
-void DrawFrameTask::syncFrameState() {
+bool DrawFrameTask::syncFrameState() {
     ATRACE_CALL();
 
-    mContext->processLayerUpdates(&mLayers);
+    bool hasFunctors = false;
+    mContext->processLayerUpdates(&mLayers, &hasFunctors);
 
     // If we don't have an mRenderNode this is a state flush only
     if (mRenderNode.get()) {
-        mRenderNode->pushStagingChanges();
+        TreeInfo info = {0};
+        mRenderNode->prepareTree(info);
+        hasFunctors |= info.hasFunctors;
     }
+
+    return !hasFunctors;
 }
 
 void DrawFrameTask::unblockUiThread() {
@@ -145,10 +148,6 @@ void DrawFrameTask::drawRenderNode(CanvasContext* context, RenderNode* renderNod
         dirty = 0;
     }
     context->drawDisplayList(renderNode, dirty);
-}
-
-bool DrawFrameTask::requiresSynchronousDraw(RenderNode* renderNode) {
-    return renderNode->hasFunctors();
 }
 
 } /* namespace renderthread */

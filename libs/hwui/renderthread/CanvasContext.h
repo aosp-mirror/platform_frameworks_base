@@ -65,7 +65,7 @@ public:
     void updateSurface(EGLNativeWindowType window);
     void pauseSurface(EGLNativeWindowType window);
     void setup(int width, int height);
-    void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters);
+    void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters, bool* hasFunctors);
     void drawDisplayList(RenderNode* displayList, Rect* dirty);
     void destroyCanvas();
 

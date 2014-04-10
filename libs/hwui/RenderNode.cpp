@@ -93,7 +93,18 @@ void RenderNode::output(uint32_t level) {
     ALOGD("%*sDone (%p, %s)", (level - 1) * 2, "", this, mName.string());
 }
 
-void RenderNode::pushStagingChanges() {
+void RenderNode::prepareTree(TreeInfo& info) {
+    ATRACE_CALL();
+
+    prepareTreeImpl(info);
+}
+
+void RenderNode::prepareTreeImpl(TreeInfo& info) {
+    pushStagingChanges(info);
+    prepareSubTree(info, mDisplayListData);
+}
+
+void RenderNode::pushStagingChanges(TreeInfo& info) {
     if (mNeedsPropertiesSync) {
         mNeedsPropertiesSync = false;
         mProperties = mStagingProperties;
@@ -102,39 +113,25 @@ void RenderNode::pushStagingChanges() {
         mNeedsDisplayListDataSync = false;
         // Do a push pass on the old tree to handle freeing DisplayListData
         // that are no longer used
-        pushSubTreeStagingChanges(mDisplayListData);
+        TreeInfo oldTreeInfo = {0};
+        prepareSubTree(oldTreeInfo, mDisplayListData);
+        // TODO: The damage for the old tree should be accounted for
         delete mDisplayListData;
         mDisplayListData = mStagingDisplayListData;
         mStagingDisplayListData = 0;
     }
-
-    pushSubTreeStagingChanges(mDisplayListData);
 }
 
-void RenderNode::pushSubTreeStagingChanges(DisplayListData* subtree) {
+void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
     if (subtree) {
+        if (!info.hasFunctors) {
+            info.hasFunctors = subtree->functorCount;
+        }
         for (size_t i = 0; i < subtree->children().size(); i++) {
             RenderNode* childNode = subtree->children()[i]->mDisplayList;
-            childNode->pushStagingChanges();
+            childNode->prepareTreeImpl(info);
         }
     }
-}
-
-bool RenderNode::hasFunctors() {
-    if (!mDisplayListData) return false;
-
-    if (mDisplayListData->functorCount) {
-        return true;
-    }
-
-    for (size_t i = 0; i < mDisplayListData->children().size(); i++) {
-        RenderNode* childNode = mDisplayListData->children()[i]->mDisplayList;
-        if (childNode->hasFunctors()) {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 /*

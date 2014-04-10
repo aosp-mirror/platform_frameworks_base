@@ -127,7 +127,8 @@ static void android_view_HardwareLayer_updateRenderLayer(JNIEnv* env, jobject cl
 static jboolean android_view_HardwareLayer_flushChanges(JNIEnv* env, jobject clazz,
         jlong layerUpdaterPtr) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
-    return layer->apply();
+    bool ignoredHasFunctors;
+    return layer->apply(&ignoredHasFunctors);
 }
 
 static jlong android_view_HardwareLayer_getLayer(JNIEnv* env, jobject clazz,
