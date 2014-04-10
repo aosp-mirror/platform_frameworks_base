@@ -87,6 +87,8 @@
     <uses-permission android:name="android.permission.MANAGE_USERS" />
     <uses-permission android:name="android.permission.BLUETOOTH_STACK" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.RETRIEVE_WINDOW_TOKEN" />
+    <uses-permission android:name="android.permission.RENDER_STATS" />
 
     <application android:label="@string/app_label">
         <provider

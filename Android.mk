@@ -432,6 +432,8 @@ aidl_files := \
 	frameworks/base/core/java/android/view/MotionEvent.aidl \
 	frameworks/base/core/java/android/view/Surface.aidl \
 	frameworks/base/core/java/android/view/WindowManager.aidl \
+	frameworks/base/core/java/android/view/WindowAnimationFrameStats.aidl \
+	frameworks/base/core/java/android/view/WindowContentFrameStats.aidl \
 	frameworks/base/core/java/android/widget/RemoteViews.aidl \
 	frameworks/base/core/java/com/android/internal/textservice/ISpellCheckerService.aidl \
 	frameworks/base/core/java/com/android/internal/textservice/ISpellCheckerSession.aidl \
