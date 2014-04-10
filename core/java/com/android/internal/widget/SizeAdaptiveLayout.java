@@ -107,8 +107,6 @@ public class SizeAdaptiveLayout extends ViewGroup {
         }
         if (background instanceof ColorDrawable) {
             mModestyPanel.setBackgroundDrawable(background);
-        } else {
-            mModestyPanel.setBackgroundColor(Color.BLACK);
         }
         SizeAdaptiveLayout.LayoutParams layout =
                 new SizeAdaptiveLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
