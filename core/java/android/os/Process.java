@@ -466,6 +466,7 @@ public class Process {
      * @param debugFlags Additional flags.
      * @param targetSdkVersion The target SDK version for the app.
      * @param seInfo null-ok SELinux information for the new process.
+     * @param abi non-null the ABI this app should be started with.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      * 
      * @return An object that describes the result of the attempt to start the process.
@@ -479,12 +480,12 @@ public class Process {
                                   int debugFlags, int mountExternal,
                                   int targetSdkVersion,
                                   String seInfo,
+                                  String abi,
                                   String[] zygoteArgs) {
         try {
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     debugFlags, mountExternal, targetSdkVersion, seInfo,
-                    null, /* zygoteAbi TODO: Replace this with the real ABI */
-                    zygoteArgs);
+                    abi, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -700,13 +701,6 @@ public class Process {
     private static ZygoteState openZygoteSocketIfNeeded(String abi) throws ZygoteStartFailedEx {
         if (primaryZygoteState == null || primaryZygoteState.isClosed()) {
             primaryZygoteState = ZygoteState.connect(ZYGOTE_SOCKET, getNumTries(primaryZygoteState));
-        }
-
-        // TODO: Revert this temporary change. This is required to test
-        // and submit this change ahead of the package manager changes
-        // that supply this abi.
-        if (abi == null) {
-            return primaryZygoteState;
         }
 
         if (primaryZygoteState.matches(abi)) {
