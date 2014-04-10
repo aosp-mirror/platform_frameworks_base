@@ -384,6 +384,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en widget. Ska inte behövas för vanliga appar."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"arbeta med en enhetsadministratör"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Tillåter att innehavaren skickar avsikter till en enhetsadministratör. Vanliga appar behöver aldrig göra detta."</string>
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"binda till en tv-insignal"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en tv-insignal. Ska inte behövas för vanliga appar."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"lägga till eller ta bort en enhetsadministratör"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Innehavaren får lägga till eller ta bort aktiva enhetsadministratörer. Detta ska normalt inte behövas för vanliga appar."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ändra bildskärmens rikting"</string>
