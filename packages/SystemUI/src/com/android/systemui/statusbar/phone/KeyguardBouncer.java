@@ -105,6 +105,10 @@ public class KeyguardBouncer {
         return KeyguardViewMediator.AWAKE_INTERVAL_DEFAULT_MS;
     }
 
+    public boolean isShowing() {
+        return mRoot != null && mRoot.getVisibility() == View.VISIBLE;
+    }
+
     private void ensureView() {
         if (mRoot == null) {
             inflateView();
@@ -127,5 +131,9 @@ public class KeyguardBouncer {
             mContainer.removeView(mRoot);
             mRoot = null;
         }
+    }
+
+    public boolean onBackPressed() {
+        return mKeyguardView != null && mKeyguardView.handleBackKey();
     }
 }
