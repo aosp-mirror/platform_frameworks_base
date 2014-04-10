@@ -142,11 +142,12 @@ static void android_view_GLRenderer_destroyLayer(JNIEnv* env, jobject clazz,
     LayerRenderer::destroyLayer(layer);
 }
 
-static void android_view_GLRenderer_pushStagingChanges(JNIEnv* env, jobject clazz,
+static void android_view_GLRenderer_prepareTree(JNIEnv* env, jobject clazz,
         jlong renderNodePtr) {
     using namespace android::uirenderer;
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    renderNode->pushStagingChanges();
+    TreeInfo info = {0};
+    renderNode->prepareTree(info);
 }
 
 static void android_view_GLRenderer_invokeFunctor(JNIEnv* env, jobject clazz,
@@ -187,7 +188,7 @@ static JNINativeMethod gMethods[] = {
 
     { "getSystemTime",         "()J",   (void*) android_view_GLRenderer_getSystemTime },
     { "nDestroyLayer",         "(J)V",  (void*) android_view_GLRenderer_destroyLayer },
-    { "nPushStagingChanges", "(J)V", (void*) android_view_GLRenderer_pushStagingChanges },
+    { "nPrepareTree", "(J)V", (void*) android_view_GLRenderer_prepareTree },
     { "nInvokeFunctor",        "(JZ)V", (void*) android_view_GLRenderer_invokeFunctor },
 #endif
 
