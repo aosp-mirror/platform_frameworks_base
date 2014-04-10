@@ -1991,7 +1991,7 @@ public abstract class Context {
             //@hide: NETWORK_STATS_SERVICE,
             //@hide: NETWORK_POLICY_SERVICE,
             WIFI_SERVICE,
-            WIFI_HOTSPOT_SERVICE,
+            WIFI_PASSPOINT_SERVICE,
             WIFI_P2P_SERVICE,
             WIFI_SCANNING_SERVICE,
             NSD_SERVICE,
@@ -2352,13 +2352,13 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
-     * android.net.wifi.hotspot.WifiHotspotManager} for handling management of
-     * Wi-Fi hotspot access.
+     * android.net.wifi.passpoint.PasspointManager} for handling management of
+     * Wi-Fi passpoint access.
      *
      * @see #getSystemService
-     * @see android.net.wifi.hotspot.WifiHotspotManager
+     * @see android.net.wifi.passpoint.PasspointManager
      */
-    public static final String WIFI_HOTSPOT_SERVICE = "wifihotspot";
+    public static final String WIFI_PASSPOINT_SERVICE = "wifipasspoint";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link

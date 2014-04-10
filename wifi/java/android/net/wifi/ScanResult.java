@@ -16,6 +16,8 @@
 
 package android.net.wifi;
 
+import android.net.wifi.passpoint.PasspointInfo;
+import android.net.wifi.passpoint.PasspointManager;
 import android.os.Parcelable;
 import android.os.Parcel;
 
@@ -77,6 +79,12 @@ public class ScanResult implements Parcelable {
     public int distanceSdCm;
 
     /**
+     * Passpoint ANQP information. This is not fetched automatically.
+     * Use {@link PasspointManager#requestAnqpInfo} to request ANQP info.
+     */
+    public PasspointInfo passpoint;
+
+    /**
      * {@hide}
      */
     public final static int UNSPECIFIED = -1;
@@ -122,6 +130,8 @@ public class ScanResult implements Parcelable {
             distanceCm = source.distanceCm;
             distanceSdCm = source.distanceSdCm;
             seen = source.seen;
+            if (source.passpoint != null)
+                passpoint = new PasspointInfo(source.passpoint);
         }
     }
 
@@ -155,6 +165,8 @@ public class ScanResult implements Parcelable {
         sb.append(", distanceSd: ").append((distanceSdCm != UNSPECIFIED ? distanceSdCm : "?")).
                 append("(cm)");
 
+        if (passpoint != null) sb.append(passpoint.toString());
+
         return sb.toString();
     }
 
@@ -178,6 +190,12 @@ public class ScanResult implements Parcelable {
         dest.writeLong(timestamp);
         dest.writeInt(distanceCm);
         dest.writeInt(distanceSdCm);
+        if (passpoint != null) {
+            dest.writeInt(1);
+            passpoint.writeToParcel(dest, flags);
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -188,7 +206,7 @@ public class ScanResult implements Parcelable {
                 if (in.readInt() == 1) {
                     wifiSsid = WifiSsid.CREATOR.createFromParcel(in);
                 }
-                return new ScanResult(
+                ScanResult sr = new ScanResult(
                     wifiSsid,
                     in.readString(),
                     in.readString(),
@@ -198,6 +216,10 @@ public class ScanResult implements Parcelable {
                     in.readInt(),
                     in.readInt()
                 );
+                if (in.readInt() == 1) {
+                    sr.passpoint = PasspointInfo.CREATOR.createFromParcel(in);
+                }
+                return sr;
             }
 
             public ScanResult[] newArray(int size) {

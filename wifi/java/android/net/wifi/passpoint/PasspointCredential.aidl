@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-package android.net.wifi.hotspot;
+package android.net.wifi.passpoint;
 
-/**
- * Interface that allows controlling and querying Hotspot connectivity.
- *
- * {@hide}
- */
-interface IWifiHotspotManager
-{
-    void test();
-}
-
+parcelable PasspointCredential;
