@@ -1783,18 +1783,6 @@ public class WifiManager {
         }
     }
 
-    /**
-     * Get a reference to WifiStateMachine handler.
-     * @return Messenger pointing to the WifiService handler
-     * @hide
-     */
-    public Messenger getWifiStateMachineMessenger() {
-        try {
-            return mService.getWifiStateMachineMessenger();
-        } catch (RemoteException e) {
-            return null;
-        }
-    }
 
     /**
      * Returns the file in which IP and proxy configuration data is stored

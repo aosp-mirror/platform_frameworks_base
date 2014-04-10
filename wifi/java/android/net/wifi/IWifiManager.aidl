@@ -111,8 +111,6 @@ interface IWifiManager
 
     Messenger getWifiServiceMessenger();
 
-    Messenger getWifiStateMachineMessenger();
-
     String getConfigFile();
 
     void enableTdls(String remoteIPAddress, boolean enable);
