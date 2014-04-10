@@ -30,8 +30,8 @@ final class PackageSetting extends PackageSettingBase {
     SharedUserSetting sharedUser;
 
     PackageSetting(String name, String realName, File codePath, File resourcePath,
-            String nativeLibraryPathString, int pVersionCode, int pkgFlags) {
-        super(name, realName, codePath, resourcePath, nativeLibraryPathString, pVersionCode,
+            String nativeLibraryPathString, String requiredCpuAbiString, int pVersionCode, int pkgFlags) {
+        super(name, realName, codePath, resourcePath, nativeLibraryPathString, requiredCpuAbiString, pVersionCode,
                 pkgFlags);
     }
 
