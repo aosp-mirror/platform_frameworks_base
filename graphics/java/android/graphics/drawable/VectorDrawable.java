@@ -17,8 +17,8 @@ package android.graphics.drawable;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Matrix;
@@ -30,7 +30,6 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Xml;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
@@ -39,7 +38,6 @@ import com.android.internal.R;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,6 +45,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+
 /**
  * This lets you create a drawable based on an XML vector graphic
  * It can be defined in an XML file with the <code>&lt;vector></code> element.
@@ -172,7 +171,8 @@ public class VectorDrawable extends Drawable {
     private static final int DEFAULT_DURATION = 1000;
     private static final long DEFAULT_INFINITE_DURATION = 60 * 60 * 1000;
 
-    private VectorDrawableState mVectorState;
+    private final VectorDrawableState mVectorState;
+
     private int mAlpha = 0xFF;
 
     public VectorDrawable() {
@@ -282,14 +282,17 @@ public class VectorDrawable extends Drawable {
 
     @Override
     protected boolean onStateChange(int[] state) {
+        super.onStateChange(state);
+
         mVectorState.mVAnimatedPath.setState(state);
-        int direction = mVectorState.mVAnimatedPath.getTrigger(state);
-        if (direction>0) {
+
+        final int direction = mVectorState.mVAnimatedPath.getTrigger(state);
+        if (direction > 0) {
             animateForward();
-        } else if (direction<0) {
+        } else if (direction < 0) {
             animateBackward();
         }
-        super.onStateChange(state);
+
         invalidateSelf();
         return true;
     }
@@ -310,7 +313,11 @@ public class VectorDrawable extends Drawable {
 
     @Override
     public void draw(Canvas canvas) {
-        mVectorState.mVAnimatedPath.draw(canvas);
+        final int saveCount = canvas.save();
+        final Rect bounds = getBounds();
+        canvas.translate(bounds.left, bounds.top);
+        mVectorState.mVAnimatedPath.draw(canvas, bounds.width(), bounds.height());
+        canvas.restoreToCount(saveCount);
     }
 
     @Override
@@ -327,10 +334,6 @@ public class VectorDrawable extends Drawable {
         // TODO: support color filter
     }
 
-    /**
-     * Returns a {@link android.graphics.PixelFormat graphics.PixelFormat}
-     * value of TRANSLUCENT.
-     */
     @Override
     public int getOpacity() {
         return PixelFormat.TRANSLUCENT;
@@ -364,38 +367,14 @@ public class VectorDrawable extends Drawable {
         invalidateSelf();
     }
 
-    /**
-     * Sets the intrinsic (default) width for this shape.
-     *
-     * @param width the intrinsic width (in pixels)
-     */
-    public void setIntrinsicWidth(int width) {
-        if (mVectorState.mIntrinsicWidth != width) {
-            mVectorState.mIntrinsicWidth = width;
-            invalidateSelf();
-        }
-    }
-
-    /**
-     * Sets the intrinsic (default) height for this shape.
-     *
-     * @param height the intrinsic height (in pixels)
-     */
-    public void setIntrinsicHeight(int height) {
-        if (mVectorState.mIntrinsicHeight != height) {
-            mVectorState.mIntrinsicHeight = height;
-            invalidateSelf();
-        }
-    }
-
     @Override
     public int getIntrinsicWidth() {
-        return mVectorState.mIntrinsicWidth;
+        return (int) mVectorState.mVAnimatedPath.mBaseWidth;
     }
 
     @Override
     public int getIntrinsicHeight() {
-        return mVectorState.mIntrinsicHeight;
+        return (int) mVectorState.mVAnimatedPath.mBaseHeight;
     }
 
     @Override
@@ -406,25 +385,6 @@ public class VectorDrawable extends Drawable {
         } else {
             return super.getPadding(padding);
         }
-    }
-
-    /** @hide */
-    public static VectorDrawable create(Resources resources, int rid) {
-        try {
-            VectorDrawable drawable = new VectorDrawable();
-            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-            factory.setNamespaceAware(true);
-            XmlPullParser xpp = resources.getXml(rid);
-            AttributeSet attrs = Xml.asAttributeSet(xpp);
-            drawable.inflate(resources, xpp, attrs);
-            drawable.setAnimationFraction(0);
-            return drawable;
-        } catch (XmlPullParserException e) {
-            Log.e(LOGTAG, "parser error", e);
-        } catch (IOException e) {
-            Log.e(LOGTAG, "parser error", e);
-        }
-        return null;
     }
 
     @Override
@@ -543,9 +503,6 @@ public class VectorDrawable extends Drawable {
     private void setAnimatedPath(VAnimatedPath animatedPath) {
         mVectorState.mVAnimatedPath = animatedPath;
 
-        setIntrinsicWidth((int) mVectorState.mVAnimatedPath.mBaseWidth);
-        setIntrinsicHeight((int) mVectorState.mVAnimatedPath.mBaseHeight);
-
         long duration = mVectorState.mVAnimatedPath.getTotalAnimationDuration();
         if (duration == -1) { // if it set to infinite set to 1 hour
             duration = DEFAULT_INFINITE_DURATION; // TODO define correct approach for infinite
@@ -575,18 +532,12 @@ public class VectorDrawable extends Drawable {
         ValueAnimator mBasicAnimator;
         VAnimatedPath mVAnimatedPath;
         Rect mPadding;
-        int mIntrinsicHeight;
-        int mIntrinsicWidth;
 
         public VectorDrawableState(VectorDrawableState copy) {
             if (copy != null) {
                 mChangingConfigurations = copy.mChangingConfigurations;
                 mVAnimatedPath = new VAnimatedPath(copy.mVAnimatedPath);
                 mPadding = new Rect(copy.mPadding);
-                mIntrinsicHeight = copy.mIntrinsicHeight;
-                mIntrinsicWidth = copy.mIntrinsicWidth;
-            } else {
-                mVAnimatedPath = new VAnimatedPath();
             }
         }
 
@@ -612,17 +563,31 @@ public class VectorDrawable extends Drawable {
     }
 
     private static class VAnimatedPath {
-        private ArrayList<VAnimation> mCurrentAnimList = null;
+        private static final int [] TRIGGER_MAP = {
+                0,
+                R.attr.state_pressed,
+                R.attr.state_focused,
+                R.attr.state_hovered,
+                R.attr.state_selected,
+                R.attr.state_checkable,
+                R.attr.state_checked,
+                R.attr.state_activated,
+                R.attr.state_focused
+        };
+
+        private final Path mPath = new Path();
+        private final Path mRenderPath = new Path();
+        private final Matrix mMatrix = new Matrix();
+
+        private ArrayList<VAnimation> mCurrentAnimList;
         private VPath[] mCurrentPaths;
-        private float mAnimationValue = 0; // value goes from 0 to 1
-        private Paint mStrokePaint = null;
-        private Paint mFillPaint = null;
+        private Paint mStrokePaint;
+        private Paint mFillPaint;
         private PathMeasure mPathMeasure;
-        private Path mPath = new Path();
-        private Path mRenderPath = new Path();
-        private Matrix mMatrix = new Matrix();
-        private long mTotalDuration;
+
         private int[] mCurrentState = new int[0];
+        private float mAnimationValue;
+        private long mTotalDuration;
         private int mTrigger;
         private boolean mTriggerState;
 
@@ -634,11 +599,9 @@ public class VectorDrawable extends Drawable {
         float mViewportHeight;
 
         public VAnimatedPath() {
-            setup();
         }
 
         public VAnimatedPath(VAnimatedPath copy) {
-            setup();
             mCurrentAnimList = new ArrayList<VAnimation>(copy.mCurrentAnimList);
             mGroupList.addAll(copy.mGroupList);
             if (copy.mCurrentPaths != null) {
@@ -703,28 +666,7 @@ public class VectorDrawable extends Drawable {
         }
 
         public void setTrigger(int trigger){
-            final int [] lut = {
-                    0,
-                    R.attr.state_pressed,
-                    R.attr.state_focused,
-                    R.attr.state_hovered,
-                    R.attr.state_selected,
-                    R.attr.state_checkable,
-                    R.attr.state_checked,
-                    R.attr.state_activated,
-                    R.attr.state_focused
-            };
-
-            mTrigger = lut[trigger];
-         }
-
-        private void setup(){
-            mStrokePaint = new Paint();
-            mStrokePaint.setStyle(Paint.Style.STROKE);
-            mStrokePaint.setAntiAlias(true);
-            mFillPaint = new Paint();
-            mFillPaint.setStyle(Paint.Style.FILL);
-            mFillPaint.setAntiAlias(true);
+            mTrigger = VAnimatedPath.getStateForTrigger(trigger);
         }
 
         public long getTotalAnimationDuration() {
@@ -780,15 +722,11 @@ public class VectorDrawable extends Drawable {
             }
         }
 
-        public void draw(Canvas canvas) {
+        public void draw(Canvas canvas, int w, int h) {
             if (mCurrentPaths == null) {
                 Log.e(LOGTAG,"mCurrentPaths == null");
                 return;
             }
-
-            // TODO: This should probably use getBounds().
-            final int w = canvas.getWidth();
-            final int h = canvas.getHeight();
 
             for (int i = 0; i < mCurrentPaths.length; i++) {
                 if (mCurrentPaths[i] != null && mCurrentPaths[i].isVisible(mCurrentState)) {
@@ -801,7 +739,7 @@ public class VectorDrawable extends Drawable {
             final float scale = Math.min(h / mViewportHeight, w / mViewportWidth);
 
             vPath.toPath(mPath);
-            Path path = mPath;
+            final Path path = mPath;
 
             if (vPath.mTrimPathStart != 0.0f || vPath.mTrimPathEnd != 1.0f) {
                 float start = (vPath.mTrimPathStart + vPath.mTrimPathOffset) % 1.0f;
@@ -839,24 +777,36 @@ public class VectorDrawable extends Drawable {
             }
 
             if (vPath.mFillColor != 0) {
+                if (mFillPaint == null) {
+                    mFillPaint = new Paint();
+                    mFillPaint.setStyle(Paint.Style.FILL);
+                    mFillPaint.setAntiAlias(true);
+                }
+
                 mFillPaint.setColor(vPath.mFillColor);
-                int alpha = 0xFF & (vPath.mFillColor >> 24);
-                mFillPaint.setAlpha(alpha);
                 canvas.drawPath(mRenderPath, mFillPaint);
             }
 
             if (vPath.mStrokeColor != 0) {
+                if (mStrokePaint == null) {
+                    mStrokePaint = new Paint();
+                    mStrokePaint.setStyle(Paint.Style.STROKE);
+                    mStrokePaint.setAntiAlias(true);
+                }
+
+                final Paint strokePaint = mStrokePaint;
                 if (vPath.mStrokeLineJoin != null) {
-                    mStrokePaint.setStrokeJoin(vPath.mStrokeLineJoin);
+                    strokePaint.setStrokeJoin(vPath.mStrokeLineJoin);
                 }
+
                 if (vPath.mStrokeLineCap != null) {
-                    mStrokePaint.setStrokeCap(vPath.mStrokeLineCap);
+                    strokePaint.setStrokeCap(vPath.mStrokeLineCap);
                 }
-                mStrokePaint.setStrokeMiter(vPath.mStrokeMiterlimit * scale);
-                mStrokePaint.setColor(vPath.mStrokeColor);
-                mStrokePaint.setAlpha(0xFF & (vPath.mStrokeColor >> 24));
-                mStrokePaint.setStrokeWidth(vPath.mStrokeWidth * scale);
-                canvas.drawPath(mRenderPath, mStrokePaint);
+
+                strokePaint.setStrokeMiter(vPath.mStrokeMiterlimit * scale);
+                strokePaint.setColor(vPath.mStrokeColor);
+                strokePaint.setStrokeWidth(vPath.mStrokeWidth * scale);
+                canvas.drawPath(mRenderPath, strokePaint);
             }
         }
 
@@ -926,7 +876,7 @@ public class VectorDrawable extends Drawable {
 
         private void parseViewport(Resources r, AttributeSet attrs)
                 throws XmlPullParserException {
-            TypedArray a = r.obtainAttributes(attrs, R.styleable.VectorDrawableViewport);
+            final TypedArray a = r.obtainAttributes(attrs, R.styleable.VectorDrawableViewport);
             mViewportWidth = a.getFloat(R.styleable.VectorDrawableViewport_viewportWidth, 0);
             mViewportHeight = a.getFloat(R.styleable.VectorDrawableViewport_viewportHeight, 0);
             if (mViewportWidth == 0 || mViewportHeight == 0) {
@@ -938,7 +888,7 @@ public class VectorDrawable extends Drawable {
 
         private void parseSize(Resources r, AttributeSet attrs)
                 throws XmlPullParserException  {
-            TypedArray a = r.obtainAttributes(attrs, R.styleable.VectorDrawableSize);
+            final TypedArray a = r.obtainAttributes(attrs, R.styleable.VectorDrawableSize);
             mBaseWidth = a.getDimension(R.styleable.VectorDrawableSize_width, 0);
             mBaseHeight = a.getDimension(R.styleable.VectorDrawableSize_height, 0);
             if (mBaseWidth == 0 || mBaseHeight == 0) {
@@ -946,6 +896,10 @@ public class VectorDrawable extends Drawable {
                         "<size> tag requires width & height to be set");
             }
             a.recycle();
+        }
+
+        private static final int getStateForTrigger(int trigger) {
+            return TRIGGER_MAP[trigger];
         }
     }
 
@@ -1324,8 +1278,8 @@ public class VectorDrawable extends Drawable {
 
         boolean mAnimated = false;
         boolean mClip = false;
-        Paint.Cap mStrokeLineCap = null;
-        Paint.Join mStrokeLineJoin = null;
+        Paint.Cap mStrokeLineCap = Paint.Cap.BUTT;
+        Paint.Join mStrokeLineJoin = Paint.Join.MITER;
         float mStrokeMiterlimit = 4;
 
         private VNode[] mNode = null;
@@ -1775,32 +1729,29 @@ public class VectorDrawable extends Drawable {
             return returnPath;
         }
 
-        private static int rgbInterpolate(float t, int color1, int color2) {
-            int ret;
-            if (color1 == color2) {
-                return color2;
-            }
-            if (color1 == 0) {
-                return color2;
-            }
-            if (color2 == 0) {
-                return color1;
+        private static int rgbInterpolate(float fraction, int startColor, int endColor) {
+            if (startColor == endColor) {
+                return startColor;
+            } else if (startColor == 0) {
+                return endColor;
+            } else if (endColor == 0) {
+                return startColor;
             }
 
-            float t1 = 1 - t;
-            ret = 0xFF & (((int) ((color1 & 0xFF) * t1 + (color2 & 0xFF) * t)));
-            color1 >>= 8;
-                    color2 >>= 8;
+            final int startA = (startColor >> 24) & 0xff;
+            final int startR = (startColor >> 16) & 0xff;
+            final int startG = (startColor >> 8) & 0xff;
+            final int startB = startColor & 0xff;
 
-                    ret |= 0xFF00 & (((int) ((color1 & 0xFF) * t1 + (color2 & 0xFF) * t)) << 8);
-                    color1 >>= 8;
-                    color2 >>= 8;
-            ret |= 0xFF0000 & (((int) ((color1 & 0xFF) * t1 + (color2 & 0xFF) * t)) << 16);
-            color1 >>= 8;
-            color2 >>= 8;
-            ret |= 0xFF000000 & (((int) ((color1 & 0xFF) * t1 + (color2 & 0xFF) * t)) << 24);
+            final int endA = (endColor >> 24) & 0xff;
+            final int endR = (endColor >> 16) & 0xff;
+            final int endG = (endColor >> 8) & 0xff;
+            final int endB = endColor & 0xff;
 
-            return ret;
+            return ((startA + (int)(fraction * (endA - startA))) << 24) |
+                    ((startR + (int)(fraction * (endR - startR))) << 16) |
+                    ((startG + (int)(fraction * (endG - startG))) << 8) |
+                    ((startB + (int)(fraction * (endB - startB))));
         }
 
         public boolean isVisible(int[] state) {
