@@ -43,17 +43,6 @@ class GlobalContext;
 class CanvasContext;
 class RenderThread;
 
-class InvokeFunctorsTask : public RenderTask {
-public:
-    InvokeFunctorsTask(CanvasContext* context)
-        : mContext(context) {}
-
-    virtual void run();
-
-private:
-    CanvasContext* mContext;
-};
-
 // This per-renderer class manages the bridge between the global EGL context
 // and the render surface.
 class CanvasContext {
@@ -71,8 +60,6 @@ public:
 
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
 
-    void attachFunctor(Functor* functor);
-    void detachFunctor(Functor* functor);
     void invokeFunctor(Functor* functor);
 
     void runWithGlContext(RenderTask* task);
@@ -85,11 +72,6 @@ private:
     void swapBuffers();
     void requireSurface();
 
-    friend class InvokeFunctorsTask;
-    void invokeFunctors();
-    void removeFunctorsTask();
-    void queueFunctorsTask(int delayMs = FUNCTOR_PROCESS_DELAY);
-
     void requireGlContext();
 
     GlobalContext* mGlobalContext;
@@ -100,10 +82,6 @@ private:
     bool mOpaque;
     OpenGLRenderer* mCanvas;
     bool mHaveNewSurface;
-
-    bool mInvokeFunctorsPending;
-    InvokeFunctorsTask mInvokeFunctorsTask;
-
 };
 
 } /* namespace renderthread */
