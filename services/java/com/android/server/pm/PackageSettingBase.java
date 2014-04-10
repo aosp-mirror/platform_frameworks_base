@@ -53,6 +53,7 @@ class PackageSettingBase extends GrantedPermissions {
     File resourcePath;
     String resourcePathString;
     String nativeLibraryPathString;
+    String requiredCpuAbiString;
     long timeStamp;
     long firstInstallTime;
     long lastUpdateTime;
@@ -80,11 +81,11 @@ class PackageSettingBase extends GrantedPermissions {
     /* package name of the app that installed this package */
     String installerPackageName;
     PackageSettingBase(String name, String realName, File codePath, File resourcePath,
-            String nativeLibraryPathString, int pVersionCode, int pkgFlags) {
+            String nativeLibraryPathString, String requiredCpuAbiString, int pVersionCode, int pkgFlags) {
         super(pkgFlags);
         this.name = name;
         this.realName = realName;
-        init(codePath, resourcePath, nativeLibraryPathString, pVersionCode);
+        init(codePath, resourcePath, nativeLibraryPathString, requiredCpuAbiString, pVersionCode);
     }
 
     /**
@@ -101,6 +102,7 @@ class PackageSettingBase extends GrantedPermissions {
         resourcePath = base.resourcePath;
         resourcePathString = base.resourcePathString;
         nativeLibraryPathString = base.nativeLibraryPathString;
+        requiredCpuAbiString = base.requiredCpuAbiString;
         timeStamp = base.timeStamp;
         firstInstallTime = base.firstInstallTime;
         lastUpdateTime = base.lastUpdateTime;
@@ -128,12 +130,13 @@ class PackageSettingBase extends GrantedPermissions {
     }
 
     void init(File codePath, File resourcePath, String nativeLibraryPathString,
-            int pVersionCode) {
+            String requiredCpuAbiString, int pVersionCode) {
         this.codePath = codePath;
         this.codePathString = codePath.toString();
         this.resourcePath = resourcePath;
         this.resourcePathString = resourcePath.toString();
         this.nativeLibraryPathString = nativeLibraryPathString;
+        this.requiredCpuAbiString = requiredCpuAbiString;
         this.versionCode = pVersionCode;
     }
 
@@ -164,6 +167,7 @@ class PackageSettingBase extends GrantedPermissions {
         grantedPermissions = base.grantedPermissions;
         gids = base.gids;
 
+        requiredCpuAbiString = base.requiredCpuAbiString;
         timeStamp = base.timeStamp;
         firstInstallTime = base.firstInstallTime;
         lastUpdateTime = base.lastUpdateTime;
