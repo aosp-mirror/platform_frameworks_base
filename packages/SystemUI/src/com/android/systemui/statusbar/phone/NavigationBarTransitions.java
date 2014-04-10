@@ -117,7 +117,7 @@ public final class NavigationBarTransitions extends BarTransitions {
     @Override
     public void setContentVisible(boolean visible) {
         final float alpha = visible ? 1 : 0;
-        fadeContent(mView.getCameraButton(), alpha);
+        fadeContent(mView.getBackButton(), alpha);
         fadeContent(mView.getSearchLight(), alpha);
     }
 
