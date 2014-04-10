@@ -20,6 +20,8 @@ import android.view.Surface;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.CaptureRequest;
 
+import android.hardware.camera2.LongParcelable;
+
 /** @hide */
 interface ICameraDeviceUser
 {
@@ -31,9 +33,13 @@ interface ICameraDeviceUser
     // ints here are status_t
 
     // non-negative value is the requestId. negative value is status_t
-    int submitRequest(in CaptureRequest request, boolean streaming);
+    int submitRequest(in CaptureRequest request, boolean streaming,
+                      out LongParcelable lastFrameNumber);
 
-    int cancelRequest(int requestId);
+    int submitRequestList(in List<CaptureRequest> requestList, boolean streaming,
+                          out LongParcelable lastFrameNumber);
+
+    int cancelRequest(int requestId, out LongParcelable lastFrameNumber);
 
     int deleteStream(int streamId);
 
@@ -46,5 +52,5 @@ interface ICameraDeviceUser
 
     int waitUntilIdle();
 
-    int flush();
+    int flush(out LongParcelable lastFrameNumber);
 }
