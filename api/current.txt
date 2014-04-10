@@ -11031,8 +11031,6 @@ package android.graphics.drawable {
     method public void setAnimationFraction(float);
     method public void setColorFilter(android.graphics.ColorFilter);
     method public void setDuration(long);
-    method public void setIntrinsicHeight(int);
-    method public void setIntrinsicWidth(int);
     method public void setPadding(android.graphics.Rect);
     method public void setPadding(int, int, int, int);
     method public void setRepeatCount(int);
