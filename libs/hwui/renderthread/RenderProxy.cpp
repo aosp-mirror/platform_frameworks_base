@@ -75,9 +75,6 @@ CREATE_BRIDGE1(destroyContext, CanvasContext* context) {
 
 void RenderProxy::destroyContext() {
     if (mContext) {
-        // Flush any pending changes to ensure all garbage is destroyed
-        mDrawFrameTask.flushStateChanges(&mRenderThread);
-
         SETUP_TASK(destroyContext);
         args->context = mContext;
         mContext = 0;
@@ -149,10 +146,6 @@ CREATE_BRIDGE1(destroyCanvas, CanvasContext* context) {
 }
 
 void RenderProxy::destroyCanvas() {
-    // If the canvas is being destroyed we won't be drawing again anytime soon
-    // So flush any pending state changes to allow for resource cleanup.
-    mDrawFrameTask.flushStateChanges(&mRenderThread);
-
     SETUP_TASK(destroyCanvas);
     args->context = mContext;
     post(task);
