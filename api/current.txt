@@ -24803,7 +24803,7 @@ package android.speech.tts {
     method public abstract void onUtteranceCompleted(java.lang.String);
   }
 
-  public final class TextToSpeechClient {
+  public class TextToSpeechClient {
     ctor public TextToSpeechClient(android.content.Context, java.lang.String, boolean, android.speech.tts.TextToSpeechClient.RequestCallbacks, android.speech.tts.TextToSpeechClient.ConnectionCallbacks);
     ctor public TextToSpeechClient(android.content.Context, android.speech.tts.TextToSpeechClient.RequestCallbacks, android.speech.tts.TextToSpeechClient.ConnectionCallbacks);
     method public void connect();

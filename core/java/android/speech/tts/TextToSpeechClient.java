@@ -57,7 +57,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * successful callback is the client usable.
  * <p>
  * After successful connection, the list of all available voices can be obtained
- * by calling the {@link TextToSpeechClient#getEngineStatus() method. The client can
+ * by calling the {@link TextToSpeechClient#getEngineStatus()} method. The client can
  * choose a voice using some custom heuristic and build a {@link RequestConfig} object
  * using {@link RequestConfig.Builder}, or can use one of the common heuristics found
  * in ({@link RequestConfigHelper}.
@@ -69,7 +69,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * {@link ConnectionCallbacks#onEngineStatusChange} with new set of available voices as argument.
  * In response, the client HAVE to recreate all {@link RequestConfig} instances in use.
  */
-public final class TextToSpeechClient {
+public class TextToSpeechClient {
     private static final String TAG = TextToSpeechClient.class.getSimpleName();
 
     private final Object mLock = new Object();
