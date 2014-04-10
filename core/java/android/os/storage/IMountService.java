@@ -625,12 +625,13 @@ public interface IMountService extends IInterface {
                 return _result;
             }
 
-            public int encryptStorage(String password) throws RemoteException {
+            public int encryptStorage(int type, String password) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 int _result;
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeInt(type);
                     _data.writeString(password);
                     mRemote.transact(Stub.TRANSACTION_encryptStorage, _data, _reply, 0);
                     _reply.readException();
@@ -1210,8 +1211,9 @@ public interface IMountService extends IInterface {
                 }
                 case TRANSACTION_encryptStorage: {
                     data.enforceInterface(DESCRIPTOR);
+                    int type = data.readInt();
                     String password = data.readString();
-                    int result = encryptStorage(password);
+                    int result = encryptStorage(type, password);
                     reply.writeNoException();
                     reply.writeInt(result);
                     return true;
@@ -1495,7 +1497,7 @@ public interface IMountService extends IInterface {
     /**
      * Encrypts storage.
      */
-    public int encryptStorage(String password) throws RemoteException;
+    public int encryptStorage(int type, String password) throws RemoteException;
 
     /**
      * Changes the encryption password.
