@@ -278,6 +278,8 @@
     <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
     <string name="low_memory" product="tablet">Tablet storage is full. Delete some files to free space.</string>
     <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
+    <string name="low_memory" product="watch">Watch storage is full. Delete some files to free space.</string>
+    <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
     <string name="low_memory" product="default">Phone storage is full. Delete some files to free space.</string>
 
     <!-- SSL CA cert notification --> <skip />
@@ -324,6 +326,9 @@
     <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the phone, there will
          be a confirmation dialog.  This is the message. -->
     <string name="shutdown_confirm" product="tablet">Your tablet will shut down.</string>
+    <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the watch, there will
+         be a confirmation dialog.  This is the message. -->
+    <string name="shutdown_confirm" product="watch">Your watch will shut down.</string>
     <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the phone, there will
          be a confirmation dialog.  This is the message. -->
     <string name="shutdown_confirm" product="default">Your phone will shut down.</string>
