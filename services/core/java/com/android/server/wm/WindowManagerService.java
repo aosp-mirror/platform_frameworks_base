@@ -24,6 +24,7 @@ import android.util.ArraySet;
 import android.util.TimeUtils;
 import android.view.IWindowId;
 
+import android.view.WindowContentFrameStats;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.PhoneWindowManager;
@@ -625,6 +626,8 @@ public class WindowManagerService extends IWindowManager.Stub
     SparseArray<TaskStack> mStackIdToStack = new SparseArray<TaskStack>();
 
     private final PointerEventDispatcher mPointerEventDispatcher;
+
+    private WindowContentFrameStats mTempWindowRenderStats;
 
     final class DragInputEventReceiver extends InputEventReceiver {
         public DragInputEventReceiver(InputChannel inputChannel, Looper looper) {
@@ -10262,6 +10265,51 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public boolean isSafeModeEnabled() {
         return mSafeMode;
+    }
+
+    @Override
+    public boolean clearWindowContentFrameStats(IBinder token) {
+        if (!checkCallingPermission(Manifest.permission.FRAME_STATS,
+                "clearWindowContentFrameStats()")) {
+            throw new SecurityException("Requires FRAME_STATS permission");
+        }
+        synchronized (mWindowMap) {
+            WindowState windowState = mWindowMap.get(token);
+            if (windowState == null) {
+                return false;
+            }
+            SurfaceControl surfaceControl = windowState.mWinAnimator.mSurfaceControl;
+            if (surfaceControl == null) {
+                return false;
+            }
+            return surfaceControl.clearContentFrameStats();
+        }
+    }
+
+    @Override
+    public WindowContentFrameStats getWindowContentFrameStats(IBinder token) {
+        if (!checkCallingPermission(Manifest.permission.FRAME_STATS,
+                "getWindowContentFrameStats()")) {
+            throw new SecurityException("Requires FRAME_STATS permission");
+        }
+        synchronized (mWindowMap) {
+            WindowState windowState = mWindowMap.get(token);
+            if (windowState == null) {
+                return null;
+            }
+            SurfaceControl surfaceControl = windowState.mWinAnimator.mSurfaceControl;
+            if (surfaceControl == null) {
+                return null;
+            }
+            if (mTempWindowRenderStats == null) {
+                mTempWindowRenderStats = new WindowContentFrameStats();
+            }
+            WindowContentFrameStats stats = mTempWindowRenderStats;
+            if (!surfaceControl.getContentFrameStats(stats)) {
+                return null;
+            }
+            return stats;
+        }
     }
 
     void dumpPolicyLocked(PrintWriter pw, String[] args, boolean dumpAll) {
