@@ -22,8 +22,8 @@ final class PendingPackage extends PackageSettingBase {
     final int sharedId;
 
     PendingPackage(String name, String realName, File codePath, File resourcePath,
-            String nativeLibraryPathString, int sharedId, int pVersionCode, int pkgFlags) {
-        super(name, realName, codePath, resourcePath, nativeLibraryPathString, pVersionCode,
+            String nativeLibraryPathString, String requiredCpuAbiString, int sharedId, int pVersionCode, int pkgFlags) {
+        super(name, realName, codePath, resourcePath, nativeLibraryPathString, requiredCpuAbiString, pVersionCode,
                 pkgFlags);
         this.sharedId = sharedId;
     }

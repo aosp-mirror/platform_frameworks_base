@@ -2738,11 +2738,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                 debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
             }
 
+            String requiredAbi = app.info.requiredCpuAbi;
+            if (requiredAbi == null) {
+                requiredAbi = Build.SUPPORTED_ABIS[0];
+            }
+
             // Start the process.  It will either succeed and return a result containing
             // the PID of the new process, or else throw a RuntimeException.
             Process.ProcessStartResult startResult = Process.start("android.app.ActivityThread",
                     app.processName, uid, uid, gids, debugFlags, mountExternal,
-                    app.info.targetSdkVersion, app.info.seinfo, null);
+                    app.info.targetSdkVersion, app.info.seinfo, requiredAbi, null);
 
             BatteryStatsImpl bs = mBatteryStatsService.getActiveStatistics();
             synchronized (bs) {
