@@ -50,6 +50,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     private boolean mAutoConnect;
     private int mConnState;
     private final Object mStateLock = new Object();
+    private Boolean mDeviceBusy = false;
 
     private static final int CONN_STATE_IDLE = 0;
     private static final int CONN_STATE_CONNECTING = 1;
@@ -165,6 +166,10 @@ public final class BluetoothGatt implements BluetoothProfile {
                     } else {
                         mConnState = CONN_STATE_IDLE;
                     }
+                }
+
+                synchronized(mDeviceBusy) {
+                    mDeviceBusy = false;
                 }
             }
 
@@ -301,6 +306,11 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (!address.equals(mDevice.getAddress())) {
                     return;
                 }
+
+                synchronized(mDeviceBusy) {
+                    mDeviceBusy = false;
+                }
+
                 if ((status == GATT_INSUFFICIENT_AUTHENTICATION
                   || status == GATT_INSUFFICIENT_ENCRYPTION)
                   && mAuthRetry == false) {
@@ -348,6 +358,11 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (!address.equals(mDevice.getAddress())) {
                     return;
                 }
+
+                synchronized(mDeviceBusy) {
+                    mDeviceBusy = false;
+                }
+
                 BluetoothGattService service = getService(mDevice, srvcUuid.getUuid(),
                                                           srvcInstId, srvcType);
                 if (service == null) return;
@@ -425,6 +440,11 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (!address.equals(mDevice.getAddress())) {
                     return;
                 }
+
+                synchronized(mDeviceBusy) {
+                    mDeviceBusy = false;
+                }
+
                 BluetoothGattService service = getService(mDevice, srvcUuid.getUuid(),
                                                           srvcInstId, srvcType);
                 if (service == null) return;
@@ -474,6 +494,11 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (!address.equals(mDevice.getAddress())) {
                     return;
                 }
+
+                synchronized(mDeviceBusy) {
+                    mDeviceBusy = false;
+                }
+
                 BluetoothGattService service = getService(mDevice, srvcUuid.getUuid(),
                                                           srvcInstId, srvcType);
                 if (service == null) return;
@@ -519,6 +544,11 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (!address.equals(mDevice.getAddress())) {
                     return;
                 }
+
+                synchronized(mDeviceBusy) {
+                    mDeviceBusy = false;
+                }
+
                 try {
                     mCallback.onReliableWriteCompleted(BluetoothGatt.this, status);
                 } catch (Exception ex) {
@@ -851,6 +881,11 @@ public final class BluetoothGatt implements BluetoothProfile {
         BluetoothDevice device = service.getDevice();
         if (device == null) return false;
 
+        synchronized(mDeviceBusy) {
+            if (mDeviceBusy) return false;
+            mDeviceBusy = true;
+        }
+
         try {
             mService.readCharacteristic(mClientIf, device.getAddress(),
                 service.getType(), service.getInstanceId(),
@@ -858,6 +893,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 new ParcelUuid(characteristic.getUuid()), AUTHENTICATION_NONE);
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
+            mDeviceBusy = false;
             return false;
         }
 
@@ -890,6 +926,11 @@ public final class BluetoothGatt implements BluetoothProfile {
         BluetoothDevice device = service.getDevice();
         if (device == null) return false;
 
+        synchronized(mDeviceBusy) {
+            if (mDeviceBusy) return false;
+            mDeviceBusy = true;
+        }
+
         try {
             mService.writeCharacteristic(mClientIf, device.getAddress(),
                 service.getType(), service.getInstanceId(),
@@ -899,6 +940,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 characteristic.getValue());
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
+            mDeviceBusy = false;
             return false;
         }
 
@@ -930,6 +972,11 @@ public final class BluetoothGatt implements BluetoothProfile {
         BluetoothDevice device = service.getDevice();
         if (device == null) return false;
 
+        synchronized(mDeviceBusy) {
+            if (mDeviceBusy) return false;
+            mDeviceBusy = true;
+        }
+
         try {
             mService.readDescriptor(mClientIf, device.getAddress(), service.getType(),
                 service.getInstanceId(), new ParcelUuid(service.getUuid()),
@@ -938,6 +985,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 AUTHENTICATION_NONE);
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
+            mDeviceBusy = false;
             return false;
         }
 
@@ -968,6 +1016,11 @@ public final class BluetoothGatt implements BluetoothProfile {
         BluetoothDevice device = service.getDevice();
         if (device == null) return false;
 
+        synchronized(mDeviceBusy) {
+            if (mDeviceBusy) return false;
+            mDeviceBusy = true;
+        }
+
         try {
             mService.writeDescriptor(mClientIf, device.getAddress(), service.getType(),
                 service.getInstanceId(), new ParcelUuid(service.getUuid()),
@@ -977,6 +1030,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 descriptor.getValue());
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
+            mDeviceBusy = false;
             return false;
         }
 
@@ -1034,10 +1088,16 @@ public final class BluetoothGatt implements BluetoothProfile {
         if (DBG) Log.d(TAG, "executeReliableWrite() - device: " + mDevice.getAddress());
         if (mService == null || mClientIf == 0) return false;
 
+        synchronized(mDeviceBusy) {
+            if (mDeviceBusy) return false;
+            mDeviceBusy = true;
+        }
+
         try {
             mService.endReliableWrite(mClientIf, mDevice.getAddress(), true);
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
+            mDeviceBusy = false;
             return false;
         }
 
