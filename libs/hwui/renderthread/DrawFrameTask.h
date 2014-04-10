@@ -56,18 +56,11 @@ public:
     void setRenderNode(RenderNode* renderNode);
     void setDirty(int left, int top, int right, int bottom);
     void drawFrame(RenderThread* renderThread);
-    void flushStateChanges(RenderThread* renderThread);
 
     virtual void run();
 
 private:
-    enum TaskMode {
-        MODE_INVALID,
-        MODE_FULL,
-        MODE_STATE_ONLY,
-    };
-
-    void postAndWait(RenderThread* renderThread, TaskMode mode);
+    void postAndWait(RenderThread* renderThread);
     bool syncFrameState();
     void unblockUiThread();
     static void drawRenderNode(CanvasContext* context, RenderNode* renderNode, Rect* dirty);
@@ -80,7 +73,6 @@ private:
     /*********************************************
      *  Single frame data
      *********************************************/
-    TaskMode mTaskMode;
     sp<RenderNode> mRenderNode;
     Rect mDirty;
 
