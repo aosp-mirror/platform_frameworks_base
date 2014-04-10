@@ -320,24 +320,14 @@ interface INetworkManagementService
     void removeIdleTimer(String iface);
 
     /**
-     * Sets the name of the default interface in the DNS resolver.
+     * Bind name servers to a network in the DNS resolver.
      */
-    void setDefaultInterfaceForDns(String iface);
+    void setDnsServersForNetwork(int netId, in String[] servers, String domains);
 
     /**
-     * Bind name servers to an interface in the DNS resolver.
+     * Flush the DNS cache associated with the specified network.
      */
-    void setDnsServersForInterface(String iface, in String[] servers, String domains);
-
-    /**
-     * Flush the DNS cache associated with the default interface.
-     */
-    void flushDefaultDnsCache();
-
-    /**
-     * Flush the DNS cache associated with the specified interface.
-     */
-    void flushInterfaceDnsCache(String iface);
+    void flushNetworkDnsCache(int netId);
 
     void setFirewallEnabled(boolean enabled);
     boolean isFirewallEnabled();
@@ -350,7 +340,7 @@ interface INetworkManagementService
      * Set all packets from users [uid_start,uid_end] to go through interface iface
      * iface must already be set for marked forwarding by {@link setMarkedForwarding}
      */
-    void setUidRangeRoute(String iface, int uid_start, int uid_end);
+    void setUidRangeRoute(String iface, int uid_start, int uid_end, boolean forward_dns);
 
     /**
      * Clears the special routing rules for users [uid_start,uid_end]
@@ -400,31 +390,6 @@ interface INetworkManagementService
      * Clears an exemption set by {@link setHostExemption}
      */
     void clearHostExemption(in LinkAddress host);
-
-    /**
-     * Set a process (pid) to use the name servers associated with the specified interface.
-     */
-    void setDnsInterfaceForPid(String iface, int pid);
-
-    /**
-     * Clear a process (pid) from being associated with an interface.
-     */
-    void clearDnsInterfaceForPid(int pid);
-
-    /**
-    * Set a range of user ids to use the name servers associated with the specified interface.
-    */
-    void setDnsInterfaceForUidRange(String iface, int uid_start, int uid_end);
-
-    /**
-    * Clear a user range from being associated with an interface.
-    */
-    void clearDnsInterfaceForUidRange(String iface, int uid_start, int uid_end);
-
-    /**
-    * Clear the mappings from pid to Dns interface and from uid range to Dns interface.
-    */
-    void clearDnsInterfaceMaps();
 
     /**
      * Start the clatd (464xlat) service

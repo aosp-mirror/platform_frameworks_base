@@ -2620,18 +2620,18 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 }
                             }
                         }
-                        if (resetDns) {
-                            flushVmDnsCache();
-                            if (VDBG) log("resetting DNS cache for " + iface);
-                            try {
-                                mNetd.flushInterfaceDnsCache(iface);
-                            } catch (Exception e) {
-                                // never crash - catch them all
-                                if (DBG) loge("Exception resetting dns cache: " + e);
-                            }
-                        }
                     } else {
                         loge("Can't reset connection for type "+netType);
+                    }
+                }
+                if (resetDns) {
+                    flushVmDnsCache();
+                    if (VDBG) log("resetting DNS cache for type " + netType);
+                    try {
+                        mNetd.flushNetworkDnsCache(mNetTrackers[netType].getNetwork().netId);
+                    } catch (Exception e) {
+                        // never crash - catch them all
+                        if (DBG) loge("Exception resetting dns cache: " + e);
                     }
                 }
             }
@@ -2834,7 +2834,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 if (p == null) continue;
                 if (mNetRequestersPids[i].contains(myPid)) {
                     try {
-                        mNetd.setDnsInterfaceForPid(p.getInterfaceName(), pid);
+                        // TODO: Reimplement this via local variable in bionic.
+                        // mNetd.setDnsNetworkForPid(nt.getNetwork().netId, pid);
                     } catch (Exception e) {
                         Slog.e(TAG, "exception reasseses pid dns: " + e);
                     }
@@ -2844,7 +2845,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         // nothing found - delete
         try {
-            mNetd.clearDnsInterfaceForPid(pid);
+            // TODO: Reimplement this via local variable in bionic.
+            // mNetd.clearDnsNetworkForPid(pid);
         } catch (Exception e) {
             Slog.e(TAG, "exception clear interface from pid: " + e);
         }
@@ -2869,8 +2871,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     // Caller must grab mDnsLock.
-    private void updateDnsLocked(String network, String iface,
-            Collection<InetAddress> dnses, String domains, boolean defaultDns) {
+    private void updateDnsLocked(String network, int netId,
+            Collection<InetAddress> dnses, String domains) {
         int last = 0;
         if (dnses.size() == 0 && mDefaultDns != null) {
             dnses = new ArrayList();
@@ -2881,10 +2883,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         try {
-            mNetd.setDnsServersForInterface(iface, NetworkUtils.makeStrings(dnses), domains);
-            if (defaultDns) {
-                mNetd.setDefaultInterfaceForDns(iface);
-            }
+            mNetd.setDnsServersForNetwork(netId, NetworkUtils.makeStrings(dnses), domains);
 
             for (InetAddress dns : dnses) {
                 ++last;
@@ -2909,14 +2908,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             LinkProperties p = nt.getLinkProperties();
             if (p == null) return;
             Collection<InetAddress> dnses = p.getDnses();
+            int netId = nt.getNetwork().netId;
             if (mNetConfigs[netType].isDefault()) {
                 String network = nt.getNetworkInfo().getTypeName();
                 synchronized (mDnsLock) {
-                    updateDnsLocked(network, p.getInterfaceName(), dnses, p.getDomains(), true);
+                    updateDnsLocked(network, netId, dnses, p.getDomains());
                 }
             } else {
                 try {
-                    mNetd.setDnsServersForInterface(p.getInterfaceName(),
+                    mNetd.setDnsServersForNetwork(netId,
                             NetworkUtils.makeStrings(dnses), p.getDomains());
                 } catch (Exception e) {
                     if (DBG) loge("exception setting dns servers: " + e);
@@ -2925,7 +2925,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 List<Integer> pids = mNetRequestersPids[netType];
                 for (Integer pid : pids) {
                     try {
-                        mNetd.setDnsInterfaceForPid(p.getInterfaceName(), pid);
+                        // TODO: Reimplement this via local variable in bionic.
+                        // mNetd.setDnsNetworkForPid(netId, pid);
                     } catch (Exception e) {
                         Slog.e(TAG, "exception setting interface for pid: " + e);
                     }
@@ -3878,7 +3879,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
             // Apply DNS changes.
             synchronized (mDnsLock) {
-                updateDnsLocked("VPN", iface, addresses, domains, false);
+                // TODO: Re-enable this when the netId of the VPN is known.
+                // updateDnsLocked("VPN", netId, addresses, domains);
             }
 
             // Temporarily disable the default proxy (not global).
@@ -3946,21 +3948,21 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         public void addUidForwarding(String interfaze, int uidStart, int uidEnd,
                 boolean forwardDns) {
-            try {
-                mNetd.setUidRangeRoute(interfaze,uidStart, uidEnd);
-                if (forwardDns) mNetd.setDnsInterfaceForUidRange(interfaze, uidStart, uidEnd);
-            } catch (RemoteException e) {
-            }
+            // TODO: Re-enable this when the netId of the VPN is known.
+            // try {
+            //     mNetd.setUidRangeRoute(netId, uidStart, uidEnd, forwardDns);
+            // } catch (RemoteException e) {
+            // }
 
         }
 
         public void clearUidForwarding(String interfaze, int uidStart, int uidEnd,
                 boolean forwardDns) {
-            try {
-                mNetd.clearUidRangeRoute(interfaze, uidStart, uidEnd);
-                if (forwardDns) mNetd.clearDnsInterfaceForUidRange(interfaze, uidStart, uidEnd);
-            } catch (RemoteException e) {
-            }
+            // TODO: Re-enable this when the netId of the VPN is known.
+            // try {
+            //     mNetd.clearUidRangeRoute(interfaze, uidStart, uidEnd);
+            // } catch (RemoteException e) {
+            // }
 
         }
     }

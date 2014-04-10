@@ -1616,20 +1616,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setDefaultInterfaceForDns(String iface) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("resolver", "setdefaultif", iface);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
-    public void setDnsServersForInterface(String iface, String[] servers, String domains) {
+    public void setDnsServersForNetwork(int netId, String[] servers, String domains) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final Command cmd = new Command("resolver", "setifdns", iface,
+        final Command cmd = new Command("resolver", "setnetdns", netId,
                 (domains == null ? "" : domains));
 
         for (String s : servers) {
@@ -1647,11 +1637,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setUidRangeRoute(String iface, int uid_start, int uid_end) {
+    public void setUidRangeRoute(String iface, int uid_start, int uid_end, boolean forward_dns) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("interface", "fwmark",
-                    "uid", "add", iface, uid_start, uid_end);
+                    "uid", "add", iface, uid_start, uid_end, forward_dns ? 1 : 0);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -1662,7 +1652,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("interface", "fwmark",
-                    "uid", "remove", iface, uid_start, uid_end);
+                    "uid", "remove", iface, uid_start, uid_end, 0);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -1759,51 +1749,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setDnsInterfaceForUidRange(String iface, int uid_start, int uid_end) {
+    public void flushNetworkDnsCache(int netId) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            mConnector.execute("resolver", "setifaceforuidrange", iface, uid_start, uid_end);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
-    public void clearDnsInterfaceForUidRange(String iface, int uid_start, int uid_end) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("resolver", "clearifaceforuidrange", iface, uid_start, uid_end);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
-    public void clearDnsInterfaceMaps() {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("resolver", "clearifacemapping");
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-
-    @Override
-    public void flushDefaultDnsCache() {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("resolver", "flushdefaultif");
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
-    public void flushInterfaceDnsCache(String iface) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("resolver", "flushif", iface);
+            mConnector.execute("resolver", "flushnet", netId);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -1878,28 +1827,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         final int uid = Binder.getCallingUid();
         if (uid != Process.SYSTEM_UID) {
             throw new SecurityException("Only available to AID_SYSTEM");
-        }
-    }
-
-    @Override
-    public void setDnsInterfaceForPid(String iface, int pid) throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("resolver", "setifaceforpid", iface, pid);
-        } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Error communicating with native deamon to set interface for pid" + iface, e);
-        }
-    }
-
-    @Override
-    public void clearDnsInterfaceForPid(int pid) throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("resolver", "clearifaceforpid", pid);
-        } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Error communicating with native deamon to clear interface for pid " + pid, e);
         }
     }
 
