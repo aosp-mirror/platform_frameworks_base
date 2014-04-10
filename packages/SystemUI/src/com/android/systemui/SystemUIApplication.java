@@ -51,6 +51,15 @@ public class SystemUIApplication extends Application {
     private boolean mServicesStarted;
     private final Map<Class<?>, Object> mComponents = new HashMap<Class<?>, Object>();
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        // Set the application theme that is inherited by all services. Note that setting the
+        // application theme in the manifest does only work for activities. Keep this in sync with
+        // the theme set there.
+        setTheme(R.style.systemui_theme);
+    }
+
     /**
      * Makes sure that all the SystemUI services are running. If they are already running, this is a
      * no-op. This is needed to conditinally start all the services, as we only need to have it in
