@@ -1132,6 +1132,7 @@ package android {
     field public static final int textAppearanceLargeInverse = 16842819; // 0x1010043
     field public static final int textAppearanceLargePopupMenu = 16843521; // 0x1010301
     field public static final int textAppearanceListItem = 16843678; // 0x101039e
+    field public static final int textAppearanceListItemSecondary = 16843838; // 0x101043e
     field public static final int textAppearanceListItemSmall = 16843679; // 0x101039f
     field public static final int textAppearanceMedium = 16842817; // 0x1010041
     field public static final int textAppearanceMediumInverse = 16842820; // 0x1010044
