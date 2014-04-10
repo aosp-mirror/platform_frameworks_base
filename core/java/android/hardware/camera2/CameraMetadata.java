@@ -940,6 +940,17 @@ public abstract class CameraMetadata {
      */
     public static final int CONTROL_CAPTURE_INTENT_ZERO_SHUTTER_LAG = 5;
 
+    /**
+     * <p>This request is for manual capture use case where
+     * the applications want to directly control the capture parameters
+     * (e.g. {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}, {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} etc.).</p>
+     *
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
+     */
+    public static final int CONTROL_CAPTURE_INTENT_MANUAL = 6;
+
     //
     // Enumeration values for CaptureRequest#CONTROL_EFFECT_MODE
     //
