@@ -127,20 +127,6 @@ static void android_view_ThreadedRenderer_destroyCanvas(JNIEnv* env, jobject cla
     proxy->destroyCanvas();
 }
 
-static void android_view_ThreadedRenderer_attachFunctor(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jlong functorPtr) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    Functor* functor = reinterpret_cast<Functor*>(functorPtr);
-    proxy->attachFunctor(functor);
-}
-
-static void android_view_ThreadedRenderer_detachFunctor(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jlong functorPtr) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    Functor* functor = reinterpret_cast<Functor*>(functorPtr);
-    proxy->detachFunctor(functor);
-}
-
 static void android_view_ThreadedRenderer_invokeFunctor(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlong functorPtr, jboolean waitForCompletion) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -209,8 +195,6 @@ static JNINativeMethod gMethods[] = {
     { "nSetup", "(JII)V", (void*) android_view_ThreadedRenderer_setup },
     { "nDrawDisplayList", "(JJIIII)V", (void*) android_view_ThreadedRenderer_drawDisplayList },
     { "nDestroyCanvas", "(J)V", (void*) android_view_ThreadedRenderer_destroyCanvas },
-    { "nAttachFunctor", "(JJ)V", (void*) android_view_ThreadedRenderer_attachFunctor },
-    { "nDetachFunctor", "(JJ)V", (void*) android_view_ThreadedRenderer_detachFunctor },
     { "nInvokeFunctor", "(JJZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
     { "nRunWithGlContext", "(JLjava/lang/Runnable;)V", (void*) android_view_ThreadedRenderer_runWithGlContext },
     { "nCreateDisplayListLayer", "(JII)J", (void*) android_view_ThreadedRenderer_createDisplayListLayer },
