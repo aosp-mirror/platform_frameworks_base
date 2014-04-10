@@ -107,7 +107,6 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
         mSecurityContainer.setSecurityCallback(this);
         mSecurityContainer.showPrimarySecurityScreen(false);
         // mSecurityContainer.updateSecurityViews(false /* not bouncing */);
-        setBackButtonEnabled(false);
     }
 
     /**
@@ -127,12 +126,6 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
         return dismiss(false);
     }
 
-    private void setBackButtonEnabled(boolean enabled) {
-        setSystemUiVisibility(enabled ?
-                getSystemUiVisibility() & ~View.STATUS_BAR_DISABLE_BACK :
-                getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
-    }
-
     protected void showBouncer(boolean show) {
         CharSequence what = getContext().getResources().getText(
                 show ? R.string.keyguard_accessibility_show_bouncer
@@ -143,8 +136,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
 
     public boolean handleBackKey() {
         if (mSecurityContainer.getCurrentSecuritySelection() == SecurityMode.Account) {
-            // go back to primary screen and re-disable back
-            setBackButtonEnabled(false);
+            // go back to primary screen
             mSecurityContainer.showPrimarySecurityScreen(false /*turningOff*/);
             return true;
         }
@@ -207,12 +199,6 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
 
     @Override
     public void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput) {
-        // Enable or disable the back button based on security mode
-        if (securityMode == SecurityMode.Account && !mLockPatternUtils.isPermanentlyLocked()) {
-            // we're showing account as a backup, provide a way to get back to primary
-            setBackButtonEnabled(true);
-        }
-
         if (mViewMediatorCallback != null) {
             mViewMediatorCallback.setNeedsInput(needsInput);
         }

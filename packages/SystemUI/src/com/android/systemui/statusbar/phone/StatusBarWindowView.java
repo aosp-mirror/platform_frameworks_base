@@ -79,7 +79,7 @@ public class StatusBarWindowView extends FrameLayout
         switch (event.getKeyCode()) {
         case KeyEvent.KEYCODE_BACK:
             if (!down) {
-                mService.animateCollapsePanels();
+                mService.onBackPressed();
             }
             return true;
         }

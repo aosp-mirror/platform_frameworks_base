@@ -62,7 +62,6 @@ public class StatusBarKeyguardViewManager {
         mContext = context;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
-
     }
 
     public void registerStatusBar(PhoneStatusBar phoneStatusBar,
@@ -83,10 +82,12 @@ public class StatusBarKeyguardViewManager {
         mStatusBarWindowManager.setKeyguardShowing(true);
         mPhoneStatusBar.showKeyguard();
         mBouncer.prepare();
+        updateBackButtonState();
     }
 
     public void showBouncer() {
         mBouncer.show();
+        updateBackButtonState();
     }
 
     /**
@@ -95,6 +96,7 @@ public class StatusBarKeyguardViewManager {
     public void reset() {
         mBouncer.reset();
         mPhoneStatusBar.showKeyguard();
+        updateBackButtonState();
     }
 
     public void onScreenTurnedOff() {
@@ -164,5 +166,29 @@ public class StatusBarKeyguardViewManager {
      */
     public boolean isShowing() {
         return mShowing;
+    }
+
+    /**
+     * Notifies this manager that the back button has been pressed.
+     *
+     * @return whether the back press has been handled
+     */
+    public boolean onBackPressed() {
+        if (mBouncer.isShowing()) {
+            mBouncer.hide();
+            mPhoneStatusBar.showKeyguard();
+            updateBackButtonState();
+            return true;
+        }
+        return false;
+    }
+
+    private void updateBackButtonState() {
+        int vis = mContainer.getSystemUiVisibility();
+        if (mBouncer.isShowing()) {
+            mContainer.setSystemUiVisibility(vis & ~View.STATUS_BAR_DISABLE_BACK);
+        } else {
+            mContainer.setSystemUiVisibility(vis | View.STATUS_BAR_DISABLE_BACK);
+        }
     }
 }

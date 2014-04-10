@@ -2857,6 +2857,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     }
 
+    public boolean onBackPressed() {
+        if (mOnKeyguard) {
+            return mStatusBarKeyguardViewManager.onBackPressed();
+        } else {
+            animateCollapsePanels();
+            return true;
+        }
+    }
+
     private void showBouncer() {
         if (mOnKeyguard) {
             mStatusBarKeyguardViewManager.dismiss();
