@@ -1064,10 +1064,8 @@ public class MediaFocusControl implements OnFinished {
     private boolean mHasRemotePlayback;
 
     /**
-     *  The stack of remote control event receivers.
-     *  Code sections and methods that modify the remote control event receiver stack are
-     *  synchronized on mPRStack, but also BEFORE on mFocusLock as any change in either
-     *  stack, audio focus or RC, can lead to a change in the remote control display
+     * The stack of remote control event receivers.
+     * All read and write operations on mPRStack are synchronized.
      */
     private final Stack<PlayerRecord> mPRStack = new Stack<PlayerRecord>();
 
