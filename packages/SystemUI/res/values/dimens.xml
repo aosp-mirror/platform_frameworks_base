@@ -260,4 +260,7 @@
 
     <!-- Width of the zen mode interstitial dialog. -->
     <dimen name="zen_mode_dialog_width">320dp</dimen>
+
+    <!-- Camera affordance drag distance -->
+    <dimen name="camera_drag_distance">100dp</dimen>
 </resources>
