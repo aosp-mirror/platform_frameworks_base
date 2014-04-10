@@ -22,12 +22,15 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.hardware.input.InputManager;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.view.IWindowManager;
 import android.view.InputEvent;
 import android.view.SurfaceControl;
+import android.view.WindowAnimationFrameStats;
+import android.view.WindowContentFrameStats;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
 
@@ -46,6 +49,9 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
 
     private final IWindowManager mWindowManager = IWindowManager.Stub.asInterface(
             ServiceManager.getService(Service.WINDOW_SERVICE));
+
+    private final IAccessibilityManager mAccessibilityManager = IAccessibilityManager.Stub.asInterface(
+            ServiceManager.getService(Service.ACCESSIBILITY_SERVICE));
 
     private final Object mLock = new Object();
 
@@ -138,6 +144,76 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             return SurfaceControl.screenshot(width, height);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public boolean clearWindowContentFrameStats(int windowId) throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            IBinder token = mAccessibilityManager.getWindowToken(windowId);
+            if (token == null) {
+                return false;
+            }
+            return mWindowManager.clearWindowContentFrameStats(token);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public WindowContentFrameStats getWindowContentFrameStats(int windowId) throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            IBinder token = mAccessibilityManager.getWindowToken(windowId);
+            if (token == null) {
+                return null;
+            }
+            return mWindowManager.getWindowContentFrameStats(token);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void clearWindowAnimationFrameStats() {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            SurfaceControl.clearAnimationFrameStats();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public WindowAnimationFrameStats getWindowAnimationFrameStats() {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            WindowAnimationFrameStats stats = new WindowAnimationFrameStats();
+            SurfaceControl.getAnimationFrameStats(stats);
+            return stats;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

@@ -20,7 +20,6 @@ import dalvik.system.CloseGuard;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.view.Surface;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
@@ -58,6 +57,11 @@ public class SurfaceControl {
     private static native void nativeSetFlags(long nativeObject, int flags, int mask);
     private static native void nativeSetWindowCrop(long nativeObject, int l, int t, int r, int b);
     private static native void nativeSetLayerStack(long nativeObject, int layerStack);
+
+    private static native boolean nativeClearContentFrameStats(long nativeObject);
+    private static native boolean nativeGetContentFrameStats(long nativeObject, WindowContentFrameStats outStats);
+    private static native boolean nativeClearAnimationFrameStats();
+    private static native boolean nativeGetAnimationFrameStats(WindowAnimationFrameStats outStats);
 
     private static native IBinder nativeGetBuiltInDisplay(int physicalDisplayId);
     private static native IBinder nativeCreateDisplay(String name, boolean secure);
@@ -357,6 +361,24 @@ public class SurfaceControl {
         nativeSetTransparentRegionHint(mNativeObject, region);
     }
 
+    public boolean clearContentFrameStats() {
+        checkNotReleased();
+        return nativeClearContentFrameStats(mNativeObject);
+    }
+
+    public boolean getContentFrameStats(WindowContentFrameStats outStats) {
+        checkNotReleased();
+        return nativeGetContentFrameStats(mNativeObject, outStats);
+    }
+
+    public static boolean clearAnimationFrameStats() {
+        return nativeClearAnimationFrameStats();
+    }
+
+    public static boolean getAnimationFrameStats(WindowAnimationFrameStats outStats) {
+        return nativeGetAnimationFrameStats(outStats);
+    }
+
     /**
      * Sets an alpha value for the entire Surface.  This value is combined with the
      * per-pixel alpha.  It may be used with opaque Surfaces.
@@ -542,7 +564,6 @@ public class SurfaceControl {
         return nativeGetBuiltInDisplay(builtInDisplayId);
     }
 
-
     /**
      * Copy the current screen contents into the provided {@link Surface}
      *
@@ -592,7 +613,6 @@ public class SurfaceControl {
         screenshot(display, consumer, 0, 0, 0, 0, true, false);
     }
 
-
     /**
      * Copy the current screen contents into a bitmap and return it.
      *
@@ -626,8 +646,8 @@ public class SurfaceControl {
     }
 
     /**
-     * Like {@link SurfaceControl#screenshot(int, int, int, int)} but includes all
-     * Surfaces in the screenshot.
+     * Like {@link SurfaceControl#screenshot(int, int, int, int, boolean)} but
+     * includes all Surfaces in the screenshot.
      *
      * @param width The desired width of the returned bitmap; the raw
      * screen will be scaled down to this size.

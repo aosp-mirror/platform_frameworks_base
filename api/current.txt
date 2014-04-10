@@ -4752,9 +4752,13 @@ package android.app {
   }
 
   public final class UiAutomation {
+    method public void clearWindowAnimationFrameStats();
+    method public boolean clearWindowContentFrameStats(int);
     method public android.view.accessibility.AccessibilityEvent executeAndWaitForEvent(java.lang.Runnable, android.app.UiAutomation.AccessibilityEventFilter, long) throws java.util.concurrent.TimeoutException;
     method public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow();
     method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
+    method public android.view.WindowAnimationFrameStats getWindowAnimationFrameStats();
+    method public android.view.WindowContentFrameStats getWindowContentFrameStats(int);
     method public java.util.List<android.view.accessibility.AccessibilityWindowInfo> getWindows();
     method public boolean injectInputEvent(android.view.InputEvent, boolean);
     method public final boolean performGlobalAction(int);
@@ -28445,6 +28449,18 @@ package android.view {
     method public static android.view.FocusFinder getInstance();
   }
 
+  public abstract class FrameStats {
+    ctor public FrameStats();
+    method public final long getEndTimeNano();
+    method public final int getFrameCount();
+    method public final long getFramePresentedTimeNano(int);
+    method public final long getRefreshPeriodNano();
+    method public final long getStartTimeNano();
+    field public static final long UNDEFINED_TIME_NANO = -1L; // 0xffffffffffffffffL
+    field protected long[] mFramesPresentedTimeNano;
+    field protected long mRefreshPeriodNano;
+  }
+
   public class GestureDetector {
     ctor public deprecated GestureDetector(android.view.GestureDetector.OnGestureListener, android.os.Handler);
     ctor public deprecated GestureDetector(android.view.GestureDetector.OnGestureListener);
@@ -30767,6 +30783,20 @@ package android.view {
     method public abstract void onWindowDismissed();
     method public abstract void onWindowFocusChanged(boolean);
     method public abstract android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
+  }
+
+  public final class WindowAnimationFrameStats extends android.view.FrameStats implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class WindowContentFrameStats extends android.view.FrameStats implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getFramePostedTimeNano(int);
+    method public long getFrameReadyTimeNano(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public class WindowId implements android.os.Parcelable {

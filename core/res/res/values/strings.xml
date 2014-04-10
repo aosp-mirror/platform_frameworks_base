@@ -830,6 +830,20 @@
          user consent.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_retrieveWindowToken">retrieve window token</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_retrieveWindowToken">Allows an application to retrieve
+        the window token. Malicious apps may perfrom unauthorized interaction with
+        the application window impersonating the system.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_frameStats">retrieve frame statistics</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_frameStats">Allows an application to collect
+        frame statistics. Malicious apps may observe the frame statistics
+        of windows from other apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_filter_events">filter events</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_filter_events">Allows an application to register an input filter

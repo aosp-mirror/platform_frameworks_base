@@ -23,22 +23,13 @@ import com.android.internal.view.IInputMethodClient;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
-import android.view.Display;
-import android.view.Gravity;
-import android.view.IApplicationToken;
-import android.view.IInputFilter;
-import android.view.IOnKeyguardExitResult;
-import android.view.IRotationWatcher;
-import android.view.IWindowManager;
-import android.view.IWindowSession;
 
-import java.util.List;
+import java.lang.Override;
 
 /**
  * Basic implementation of {@link IWindowManager} so that {@link Display} (and
@@ -465,5 +456,19 @@ public class IWindowManagerImpl implements IWindowManager {
 
     @Override
     public void enableScreenIfNeeded() throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public boolean clearWindowContentRenderStats(IBinder token) throws RemoteException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public WindowContentFrameStats getWindowContentRenderStats(IBinder token)
+            throws RemoteException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
