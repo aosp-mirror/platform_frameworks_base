@@ -74,7 +74,14 @@ public class Build {
 
     /** A hardware serial number, if available.  Alphanumeric only, case-insensitive. */ 
     public static final String SERIAL = getString("ro.serialno");
-  
+
+    /**
+     * A list of ABIs (in priority) order supported by this device.
+     *
+     * @hide
+     */
+    public static final String[] SUPPORTED_ABIS = getString("ro.product.cpu.abilist").split(",");
+
     /** Various version strings. */
     public static class VERSION {
         /**
