@@ -384,6 +384,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service de widget. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interagir avec l\'administrateur d\'un périphérique"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permet à l\'application autorisée d\'envoyer des intentions à l\'administrateur de l\'appareil. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
+    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
+    <skip />
+    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"ajouter ou supprimer un administrateur de l\'appareil"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Permet à l\'application d\'ajouter ou de supprimer des administrateurs actifs de l\'appareil. Les applications standards ne devraient jamais utiliser cette autorisation."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"modifier l\'orientation de l\'écran"</string>

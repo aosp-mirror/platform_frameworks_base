@@ -384,6 +384,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Inaruhusu mmiliki kushurutisha kusano ya kiwango cha juu ya huduma ya wijeti. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"jiunge na msimamizi wa kifaa"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Inamruhusu mmiliki kutuma malengo kwa msimamizi wa kifaa. Haipaswi kuhitajika kwa programu za kawaida."</string>
+    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
+    <skip />
+    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"ongeza au ondoa msimamizi wa kifaa"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Inaruhusu mmiliki kuongeza au kuondoa wasimamizi wa kifaa waliopo. Kamwe kisihitajike kwa ajili ya programu za kawaida."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"badilisha uelekezo wa skrini"</string>

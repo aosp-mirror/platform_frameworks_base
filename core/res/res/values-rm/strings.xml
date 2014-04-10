@@ -601,6 +601,10 @@
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interacziun cun in administratur dad apparats"</string>
     <!-- no translation found for permdesc_bindDeviceAdmin (569715419543907930) -->
     <skip />
+    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
+    <skip />
+    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
+    <skip />
     <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
     <skip />
     <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->

@@ -384,6 +384,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unui serviciu widget. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interacţionare cu administratorul unui dispozitiv"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permite proprietarului să trimită intenţii către un administrator al dispozitivului. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
+    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
+    <skip />
+    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"adăugarea sau eliminarea unui administrator de dispozitiv"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Permite proprietarului să adauge sau să elimine administratorii activi ai dispozitivului. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"modificare orientare ecran"</string>
@@ -687,7 +691,7 @@
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permite unei aplicații să asculte observații despre starea rețelei. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"schimbați calibrarea dispozitivului de intrare"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permite aplicației să modifice parametrii de calibrare a ecranului tactil. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
-    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"accesați certificatele DRM"</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"accesează certificatele DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permite unei aplicații să furnizeze și să utilizeze certificate DRM. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setaţi reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Stabiliţi lungimea şi tipul de caractere permise în parolele pentru deblocarea ecranului."</string>
