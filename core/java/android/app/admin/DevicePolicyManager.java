@@ -1534,14 +1534,21 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    public void setActiveAdmin(ComponentName policyReceiver, boolean refreshing) {
+    public void setActiveAdmin(ComponentName policyReceiver, boolean refreshing, int userHandle) {
         if (mService != null) {
             try {
-                mService.setActiveAdmin(policyReceiver, refreshing, UserHandle.myUserId());
+                mService.setActiveAdmin(policyReceiver, refreshing, userHandle);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
         }
+    }
+
+    /**
+     * @hide
+     */
+    public void setActiveAdmin(ComponentName policyReceiver, boolean refreshing) {
+        setActiveAdmin(policyReceiver, refreshing, UserHandle.myUserId());
     }
 
     /**
