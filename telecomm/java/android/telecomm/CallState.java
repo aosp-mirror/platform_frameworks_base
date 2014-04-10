@@ -26,9 +26,8 @@ public enum CallState {
     /**
      * Indicates that a call is new and not connected. This is used as the default state internally
      * within Telecomm and should not be used between Telecomm and call services. Call services are
-     * not expected to ever interact with NEW calls so we keep this value hidden as a Telecomm
-     * internal-only value.
-     * @hide
+     * not expected to ever interact with NEW calls, but {@link InCallService}s will see calls in
+     * this state.
      */
     NEW,
 

@@ -25069,6 +25069,7 @@ package android.telecomm {
     enum_constant public static final android.telecomm.CallState ACTIVE;
     enum_constant public static final android.telecomm.CallState DIALING;
     enum_constant public static final android.telecomm.CallState DISCONNECTED;
+    enum_constant public static final android.telecomm.CallState NEW;
     enum_constant public static final android.telecomm.CallState ON_HOLD;
     enum_constant public static final android.telecomm.CallState POST_DIAL;
     enum_constant public static final android.telecomm.CallState POST_DIAL_WAIT;
