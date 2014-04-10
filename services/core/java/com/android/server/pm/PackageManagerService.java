@@ -60,8 +60,8 @@ import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.content.ServiceConnection;
 import android.content.IntentSender.SendIntentException;
+import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ContainerEncryptionParams;
@@ -74,14 +74,15 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.ManifestDigest;
 import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
-import android.content.pm.PackageUserState;
 import android.content.pm.PackageParser.ActivityIntentInfo;
 import android.content.pm.PackageStats;
+import android.content.pm.PackageUserState;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
@@ -89,7 +90,6 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
-import android.content.pm.ManifestDigest;
 import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
@@ -100,6 +100,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Environment.UserEnvironment;
 import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -116,7 +117,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.os.Environment.UserEnvironment;
 import android.os.UserManager;
 import android.security.KeyStore;
 import android.security.SystemKeyStore;
@@ -4870,7 +4870,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
 
                         try {
-                            if (copyNativeLibrariesForInternalApp(scanFile, nativeLibraryDir) != PackageManager.INSTALL_SUCCEEDED) {
+                            int copyRet = copyNativeLibrariesForInternalApp(scanFile, nativeLibraryDir);
+                            if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
                                 Slog.e(TAG, "Unable to copy native libraries");
                                 mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
                                 return null;
@@ -5430,7 +5431,21 @@ public class PackageManagerService extends IPackageManager.Stub {
          * If this is an internal application or our nativeLibraryPath points to
          * the app-lib directory, unpack the libraries if necessary.
          */
-        return NativeLibraryHelper.copyNativeBinariesIfNeededLI(scanFile, nativeLibraryDir);
+        final NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(scanFile);
+        try {
+            int abi = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_ABIS);
+            if (abi >= 0) {
+                int copyRet = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle,
+                        nativeLibraryDir, Build.SUPPORTED_ABIS[abi]);
+                if (copyRet != PackageManager.INSTALL_SUCCEEDED) {
+                    return copyRet;
+                }
+            }
+
+            return abi;
+        } finally {
+            handle.close();
+        }
     }
 
     private void killApplication(String pkgName, int appId, String reason) {
@@ -8384,7 +8399,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             try {
                 int copyRet = copyNativeLibrariesForInternalApp(codeFile, nativeLibraryFile);
-                if (copyRet != PackageManager.INSTALL_SUCCEEDED) {
+                if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
                     return copyRet;
                 }
             } catch (IOException e) {
@@ -11898,8 +11913,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     final File newNativeDir = new File(newNativePath);
 
                                     if (!isForwardLocked(pkg) && !isExternal(pkg)) {
-                                        NativeLibraryHelper.copyNativeBinariesIfNeededLI(
-                                                new File(newCodePath), newNativeDir);
+                                        // NOTE: We do not report any errors from the APK scan and library
+                                        // copy at this point.
+                                        NativeLibraryHelper.ApkHandle handle =
+                                                new NativeLibraryHelper.ApkHandle(newCodePath);
+                                        final int abi = NativeLibraryHelper.findSupportedAbi(
+                                                handle, Build.SUPPORTED_ABIS);
+                                        if (abi >= 0) {
+                                            NativeLibraryHelper.copyNativeBinariesIfNeededLI(
+                                                    handle, newNativeDir, Build.SUPPORTED_ABIS[abi]);
+                                        }
+                                        handle.close();
                                     }
                                     final int[] users = sUserManager.getUserIds();
                                     for (int user : users) {
