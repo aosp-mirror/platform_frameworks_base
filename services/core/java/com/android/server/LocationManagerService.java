@@ -179,6 +179,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private PackageManager mPackageManager;
     private String mGeoFencerPackageName;
     private GeoFencerBase mGeoFencer;
+    private boolean mGeoFencerEnabled;
     private PowerManager mPowerManager;
     private UserManager mUserManager;
     private GeocoderProxy mGeocodeProvider;
@@ -242,7 +243,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         super();
         mContext = context;
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
-
+        mGeoFencerEnabled = false;
         if (D) Log.d(TAG, "Constructed");
 
         // most startup is deferred until systemReady()
@@ -513,8 +514,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (mGeoFencerPackageName != null &&
                 mPackageManager.resolveService(new Intent(mGeoFencerPackageName), 0) != null){
             mGeoFencer = GeoFencerProxy.getGeoFencerProxy(mContext, mGeoFencerPackageName);
+            mGeoFencerEnabled = true;
         } else {
             mGeoFencer = null;
+            mGeoFencerEnabled = false;
         }
 
         // bind to fused hardware provider if supported
@@ -1809,7 +1812,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
         long identity = Binder.clearCallingIdentity();
         try {
-            if (mGeoFencer != null) {
+            if (mGeoFencer != null && mGeoFencerEnabled) {
                 long expiration;
                 if (sanitizedRequest.getExpireAt() == Long.MAX_VALUE) {
                     expiration = -1; // -1 means forever
@@ -1839,7 +1842,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // geo-fence manager uses the public location API, need to clear identity
         long identity = Binder.clearCallingIdentity();
         try {
-            if (mGeoFencer != null) {
+            if (mGeoFencer != null && mGeoFencerEnabled) {
                 mGeoFencer.remove(intent);
             } else {
                 mGeofenceManager.removeFence(geofence, intent);
@@ -2434,6 +2437,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     removeProviderLocked(p);
                 }
             }
+            mGeoFencerEnabled = false;
             addTestProviderLocked(name, properties);
             updateProvidersLocked();
         }
@@ -2469,6 +2473,9 @@ public class LocationManagerService extends ILocationManager.Stub {
             long identity = Binder.clearCallingIdentity();
             removeProviderLocked(mProvidersByName.get(provider));
 
+            if (mGeoFencer != null) {
+                mGeoFencerEnabled = true;
+            }
             // reinstate real provider if available
             LocationProviderInterface realProvider = mRealProviders.get(provider);
             if (realProvider != null) {
@@ -2623,7 +2630,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             mGeofenceManager.dump(pw);
 
-            if (mGeoFencer != null) {
+            if (mGeoFencer != null && mGeoFencerEnabled) {
                 mGeoFencer.dump(pw, "");
             }
 
