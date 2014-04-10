@@ -68,13 +68,9 @@ private:
     };
 
     void postAndWait(RenderThread* renderThread, TaskMode mode);
-    void syncFrameState();
+    bool syncFrameState();
     void unblockUiThread();
     static void drawRenderNode(CanvasContext* context, RenderNode* renderNode, Rect* dirty);
-
-    // This checks to see if there are any drawGlFunctors which would require
-    // a synchronous drawRenderNode()
-    static bool requiresSynchronousDraw(RenderNode* renderNode);
 
     Mutex mLock;
     Condition mSignal;
