@@ -30,6 +30,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Xml;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
@@ -38,6 +39,7 @@ import com.android.internal.R;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -408,6 +410,27 @@ public class VectorDrawable extends Drawable {
         if (path != null && path.canApplyTheme()) {
             path.applyTheme(t);
         }
+    }
+
+    /** @hide */
+    public static VectorDrawable create(Resources resources, int rid) {
+        try {
+            final XmlPullParser xpp = resources.getXml(rid);
+            final AttributeSet attrs = Xml.asAttributeSet(xpp);
+            final XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+
+            final VectorDrawable drawable = new VectorDrawable();
+            drawable.inflate(resources, xpp, attrs);
+            drawable.setAnimationFraction(0);
+
+            return drawable;
+        } catch (XmlPullParserException e) {
+            Log.e(LOGTAG, "parser error", e);
+        } catch (IOException e) {
+            Log.e(LOGTAG, "parser error", e);
+        }
+        return null;
     }
 
     private VAnimatedPath inflateInternal(Resources res, XmlPullParser parser, AttributeSet attrs,
