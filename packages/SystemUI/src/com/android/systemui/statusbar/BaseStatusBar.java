@@ -138,7 +138,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected IDreamManager mDreamManager;
     PowerManager mPowerManager;
-    protected int mRowHeight;
+    protected int mRowMinHeight;
+    protected int mRowMaxHeight;
 
     // public mode, private notifications, etc
     private boolean mLockscreenPublicMode = false;
@@ -878,7 +879,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
         entry.row = row;
-        entry.row.setRowHeight(mRowHeight);
+        entry.row.setHeightRange(mRowMinHeight, mRowMaxHeight);
         entry.content = content;
         entry.expanded = contentViewLocal;
         entry.expandedPublic = publicViewLocal;
@@ -1068,11 +1069,11 @@ public abstract class BaseStatusBar extends SystemUI implements
         for (int i = n-1; i >= 0; i--) {
             NotificationData.Entry entry = mNotificationData.get(i);
             if (mOnKeyguard) {
-                entry.row.setExpanded(false);
+                entry.row.setSystemExpanded(false);
             } else {
                 if (!entry.row.isUserLocked()) {
                     boolean top = (i == n-1);
-                    entry.row.setExpanded(top || entry.row.isUserExpanded());
+                    entry.row.setSystemExpanded(top || entry.row.isUserExpanded());
                 }
             }
             entry.row.setDimmed(mOnKeyguard);
@@ -1243,13 +1244,14 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (DEBUG) Log.d(TAG, "contents was " + (contentsUnchanged ? "unchanged" : "changed"));
             if (DEBUG) Log.d(TAG, "order was " + (orderUnchanged ? "unchanged" : "changed"));
             if (DEBUG) Log.d(TAG, "notification is " + (isTopAnyway ? "top" : "not top"));
-            final boolean wasExpanded = oldEntry.row.isUserExpanded();
             removeNotificationViews(key);
             addNotificationViews(key, notification);  // will also replace the heads up
-            if (wasExpanded) {
-                final NotificationData.Entry newEntry = mNotificationData.findByKey(key);
-                newEntry.row.setExpanded(true);
-                newEntry.row.setUserExpanded(true);
+            final NotificationData.Entry newEntry = mNotificationData.findByKey(key);
+            final boolean userChangedExpansion = oldEntry.row.hasUserChangedExpansion();
+            if (userChangedExpansion) {
+                boolean userExpanded = oldEntry.row.isUserExpanded();
+                newEntry.row.applyExpansionToLayout(userExpanded);
+                newEntry.row.setUserExpanded(userExpanded);
             }
         }
 

@@ -216,6 +216,7 @@ public class PanelView extends FrameLayout {
                 mTimeAnimator.end();
                 mRubberbanding = false;
                 mClosing = false;
+                onExpandingFinished();
             }
         }
     };
@@ -228,6 +229,12 @@ public class PanelView extends FrameLayout {
 
     public void setRubberbandingEnabled(boolean enable) {
         mRubberbandingEnabled = enable;
+    }
+
+    protected void onExpandingFinished() {
+    }
+
+    protected void onExpandingStarted() {
     }
 
     private void runPeekAnimation() {
@@ -398,7 +405,7 @@ public class PanelView extends FrameLayout {
                 initVelocityTracker();
                 trackMovement(event);
                 mTimeAnimator.cancel(); // end any outstanding animations
-                mBar.onTrackingStarted(PanelView.this);
+                onTrackingStarted();
                 mInitialOffsetOnTouch = mExpandedHeight;
                 if (mExpandedHeight == 0) {
                     mJustPeeked = true;
@@ -443,7 +450,7 @@ public class PanelView extends FrameLayout {
                     mHandleView.setPressed(false);
                     postInvalidate(); // catch the press state change
                 }
-                mBar.onTrackingStopped(PanelView.this);
+                onTrackingStopped();
                 trackMovement(event);
 
                 float vel = getCurrentVelocity();
@@ -456,6 +463,15 @@ public class PanelView extends FrameLayout {
                 break;
         }
         return true;
+    }
+
+    protected void onTrackingStopped() {
+        mBar.onTrackingStopped(PanelView.this);
+    }
+
+    protected void onTrackingStarted() {
+        mBar.onTrackingStarted(PanelView.this);
+        onExpandingStarted();
     }
 
     private float getCurrentVelocity() {
@@ -561,6 +577,7 @@ public class PanelView extends FrameLayout {
                         mInitialOffsetOnTouch = mExpandedHeight;
                         mInitialTouchY = y;
                         mTracking = true;
+                        onTrackingStarted();
                         return true;
                     }
                 }
@@ -598,6 +615,8 @@ public class PanelView extends FrameLayout {
 
         if (always||mVel != 0) {
             animationTick(0); // begin the animation
+        } else {
+            onExpandingFinished();
         }
     }
 
@@ -776,6 +795,7 @@ public class PanelView extends FrameLayout {
         if (!isFullyCollapsed()) {
             mTimeAnimator.cancel();
             mClosing = true;
+            onExpandingStarted();
             // collapse() should never be a rubberband, even if an animation is already running
             mRubberbanding = false;
             fling(-mSelfCollapseVelocityPx, /*always=*/ true);
@@ -786,6 +806,7 @@ public class PanelView extends FrameLayout {
         if (DEBUG) logf("expand: " + this);
         if (isFullyCollapsed()) {
             mBar.startOpeningPanel(this);
+            onExpandingStarted();
             fling(mSelfExpandVelocityPx, /*always=*/ true);
         } else if (DEBUG) {
             if (DEBUG) logf("skipping expansion: is expanded");

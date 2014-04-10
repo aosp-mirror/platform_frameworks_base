@@ -498,6 +498,7 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setSlippery(boolean newSlippery) {
+        Log.i(TAG, "setSlippery: " + newSlippery);
         WindowManager.LayoutParams lp = (WindowManager.LayoutParams) getLayoutParams();
         if (lp != null) {
             boolean oldSlippery = (lp.flags & WindowManager.LayoutParams.FLAG_SLIPPERY) != 0;

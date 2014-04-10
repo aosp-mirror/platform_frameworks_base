@@ -21,6 +21,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 
 import java.util.ArrayList;
 
@@ -48,6 +49,11 @@ public class StackScrollAlgorithm {
 
     private float mLayoutHeight;
     private StackScrollAlgorithmState mTempAlgorithmState = new StackScrollAlgorithmState();
+    private boolean mIsExpansionChanging;
+    private int mFirstChildMaxHeight;
+    private boolean mIsExpanded;
+    private View mFirstChildWhileExpanding;
+    private boolean mExpandedOnStart;
 
     public StackScrollAlgorithm(Context context) {
         initConstants(context);
@@ -137,8 +143,11 @@ public class StackScrollAlgorithm {
             StackScrollAlgorithmState algorithmState) {
         float stackHeight = getLayoutHeight();
 
+        // The starting position of the bottom stack peek
+        float bottomPeekStart = stackHeight - mBottomStackPeekSize;
+
         // The position where the bottom stack starts.
-        float transitioningPositionStart = stackHeight - mCollapsedSize - mBottomStackPeekSize;
+        float transitioningPositionStart = bottomPeekStart - mCollapsedSize;
 
         // The y coordinate of the current child.
         float currentYPosition = 0.0f;
@@ -170,8 +179,8 @@ public class StackScrollAlgorithm {
                 // Case 2:
                 // First element of regular scrollview comes next, so the position is just the
                 // scrolling position
-                nextYPosition = Math.min(scrollOffset, transitioningPositionStart);
-                childViewState.location = StackScrollState.ViewState.LOCATION_TOP_STACK_PEEKING;
+                nextYPosition = updateStateForFirstScrollingChild(transitioningPositionStart,
+                        childViewState, scrollOffset);
             } else if (nextYPosition >= transitioningPositionStart) {
                 if (currentYPosition >= transitioningPositionStart) {
                     // Case 3:
@@ -203,6 +212,32 @@ public class StackScrollAlgorithm {
             currentYPosition = nextYPosition;
             yPositionInScrollView = yPositionInScrollViewAfterElement;
         }
+    }
+
+    /**
+     * Update the state for the first child which is in the regular scrolling area.
+     *
+     * @param transitioningPositionStart the transition starting position of the bottom stack
+     * @param childViewState the view state of the child
+     * @param scrollOffset the position in the regular scroll view after this child
+     * @return the next child position
+     */
+    private float updateStateForFirstScrollingChild(float transitioningPositionStart,
+            StackScrollState.ViewState childViewState, float scrollOffset) {
+        childViewState.location = StackScrollState.ViewState.LOCATION_TOP_STACK_PEEKING;
+        if (scrollOffset < transitioningPositionStart) {
+            return scrollOffset;
+        } else {
+            return transitioningPositionStart;
+        }
+    }
+
+    private int getMaxAllowedChildHeight(View child) {
+        if (child instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            return row.getMaximumAllowedExpandHeight();
+        }
+        return child.getHeight();
     }
 
     private float updateStateForChildTransitioningInBottom(StackScrollAlgorithmState algorithmState,
@@ -353,7 +388,17 @@ public class StackScrollAlgorithm {
                 }
             } else {
                 algorithmState.lastTopStackIndex = i;
+                if (i == 0) {
 
+                    // The starting position of the bottom stack peek
+                    float bottomPeekStart = getLayoutHeight() - mBottomStackPeekSize;
+                    // Collapse and expand the first child while the shade is being expanded
+                    float maxHeight = mIsExpansionChanging && child == mFirstChildWhileExpanding
+                            ? mFirstChildMaxHeight
+                            : childHeight;
+                    childViewState.height = (int) Math.max(Math.min(bottomPeekStart, maxHeight),
+                            mCollapsedSize);
+                }
                 // We are already past the stack so we can end the loop
                 break;
             }
@@ -398,6 +443,47 @@ public class StackScrollAlgorithm {
 
     public void setLayoutHeight(float layoutHeight) {
         this.mLayoutHeight = layoutHeight;
+    }
+
+    public void onExpansionStarted(StackScrollState currentState) {
+        mIsExpansionChanging = true;
+        mExpandedOnStart = mIsExpanded;
+        ViewGroup hostView = currentState.getHostView();
+        updateFirstChildHeightWhileExpanding(hostView);
+    }
+
+    private void updateFirstChildHeightWhileExpanding(ViewGroup hostView) {
+        if (hostView.getChildCount() > 0) {
+            mFirstChildWhileExpanding = hostView.getChildAt(0);
+            if (mExpandedOnStart) {
+
+                // We are collapsing the shade, so the first child can get as most as high as the
+                // current height.
+                mFirstChildMaxHeight = mFirstChildWhileExpanding.getHeight();
+            } else {
+
+                // We are expanding the shade, expand it to its full height.
+                mFirstChildMaxHeight = getMaxAllowedChildHeight(mFirstChildWhileExpanding);
+            }
+        } else {
+            mFirstChildWhileExpanding = null;
+            mFirstChildMaxHeight = 0;
+        }
+    }
+
+    public void onExpansionStopped() {
+        mIsExpansionChanging = false;
+        mFirstChildWhileExpanding = null;
+    }
+
+    public void setIsExpanded(boolean isExpanded) {
+        this.mIsExpanded = isExpanded;
+    }
+
+    public void notifyChildrenChanged(ViewGroup hostView) {
+        if (mIsExpansionChanging) {
+            updateFirstChildHeightWhileExpanding(hostView);
+        }
     }
 
     class StackScrollAlgorithmState {
