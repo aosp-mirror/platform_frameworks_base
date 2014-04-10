@@ -4083,8 +4083,19 @@ public class AudioService extends IAudioService.Stub {
                         }
                     }
                 }
-            } else if (action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG) ||
-                           action.equals(Intent.ACTION_USB_AUDIO_DEVICE_PLUG)) {
+            } else if (action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG)) {
+                state = intent.getIntExtra("state", 0);
+
+                int alsaCard = intent.getIntExtra("card", -1);
+                int alsaDevice = intent.getIntExtra("device", -1);
+
+                String params = (alsaCard == -1 && alsaDevice == -1 ? ""
+                                    : "card=" + alsaCard + ";device=" + alsaDevice);
+
+                // Playback Device
+                device = AudioSystem.DEVICE_OUT_USB_ACCESSORY;
+                setWiredDeviceConnectionState(device, state, params);
+            } else if (action.equals(Intent.ACTION_USB_AUDIO_DEVICE_PLUG)) {
                 state = intent.getIntExtra("state", 0);
 
                 int alsaCard = intent.getIntExtra("card", -1);
@@ -4096,21 +4107,18 @@ public class AudioService extends IAudioService.Stub {
                 String params = (alsaCard == -1 && alsaDevice == -1 ? ""
                                     : "card=" + alsaCard + ";device=" + alsaDevice);
 
-                //TODO(pmclean) - Ignore for now the hasPlayback & hasCapture flags since we
-                // still need to call setWiredDeviceConnectionState() on disconnect (when we
-                // don't have card/device files to parse for this info). We will need to store
-                // that info here when we get smarter about multiple USB card/devices.
                 // Playback Device
-                device = action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG) ?
-                        AudioSystem.DEVICE_OUT_USB_ACCESSORY : AudioSystem.DEVICE_OUT_USB_DEVICE;
-                setWiredDeviceConnectionState(device, state, params);
+                if (hasPlayback) {
+                    device = AudioSystem.DEVICE_OUT_USB_DEVICE;
+                    setWiredDeviceConnectionState(device, state, params);
+                }
 
                 // Capture Device
-                device = action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG) ?
-                    AudioSystem.DEVICE_IN_USB_ACCESSORY : AudioSystem.DEVICE_IN_USB_DEVICE;
-                setWiredDeviceConnectionState(device, state, params);
-            }
-            else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
+                if (hasCapture) {
+                    device = AudioSystem.DEVICE_IN_USB_DEVICE;
+                    setWiredDeviceConnectionState(device, state, params);
+                }
+            } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
                 boolean broadcast = false;
                 int scoAudioState = AudioManager.SCO_AUDIO_STATE_ERROR;
                 synchronized (mScoClients) {
