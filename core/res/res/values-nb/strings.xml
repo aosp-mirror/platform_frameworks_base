@@ -682,7 +682,7 @@
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"lytte etter observasjoner om nettverksforhold"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Gir appen tillatelse til å lytte etter observasjoner om nettverksforhold. Dette skal ikke være nødvendig for vanlige apper."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"tilgang til DRM-sertifikater"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Lar en app klargjøre og bruke DRM-sertifikater. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tillater at en app klargjøre og bruke DRM-sertifikater. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angi passordregler"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller tillatt lengde og tillatte tegn i passord for opplåsing av skjerm."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåk forsøk på opplåsing av skjerm"</string>
