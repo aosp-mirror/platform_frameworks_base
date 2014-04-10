@@ -11727,6 +11727,7 @@ package android.hardware.camera2 {
     field public static final int CONTROL_AWB_STATE_LOCKED = 3; // 0x3
     field public static final int CONTROL_AWB_STATE_SEARCHING = 1; // 0x1
     field public static final int CONTROL_CAPTURE_INTENT_CUSTOM = 0; // 0x0
+    field public static final int CONTROL_CAPTURE_INTENT_MANUAL = 6; // 0x6
     field public static final int CONTROL_CAPTURE_INTENT_PREVIEW = 1; // 0x1
     field public static final int CONTROL_CAPTURE_INTENT_STILL_CAPTURE = 2; // 0x2
     field public static final int CONTROL_CAPTURE_INTENT_VIDEO_RECORD = 3; // 0x3

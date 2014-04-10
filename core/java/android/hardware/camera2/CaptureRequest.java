@@ -714,16 +714,21 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * auto-focus, auto-white balance) routines about the purpose
      * of this capture, to help the camera device to decide optimal 3A
      * strategy.</p>
-     * <p>This control is only effective if <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF</code>
-     * and any 3A routine is active.</p>
+     * <p>This control (except for MANUAL) is only effective if
+     * <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF</code> and any 3A routine is active.</p>
+     * <p>ZERO_SHUTTER_LAG must be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
+     * contains ZSL. MANUAL must be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
+     * contains MANUAL_SENSOR.</p>
      *
      * @see CaptureRequest#CONTROL_MODE
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see #CONTROL_CAPTURE_INTENT_CUSTOM
      * @see #CONTROL_CAPTURE_INTENT_PREVIEW
      * @see #CONTROL_CAPTURE_INTENT_STILL_CAPTURE
      * @see #CONTROL_CAPTURE_INTENT_VIDEO_RECORD
      * @see #CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT
      * @see #CONTROL_CAPTURE_INTENT_ZERO_SHUTTER_LAG
+     * @see #CONTROL_CAPTURE_INTENT_MANUAL
      */
     public static final Key<Integer> CONTROL_CAPTURE_INTENT =
             new Key<Integer>("android.control.captureIntent", int.class);
