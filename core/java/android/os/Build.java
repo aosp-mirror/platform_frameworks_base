@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.text.TextUtils;
+
 import com.android.internal.telephony.TelephonyProperties;
 
 /**
@@ -509,7 +511,39 @@ public class Build {
     public static final String TAGS = getString("ro.build.tags");
 
     /** A string that uniquely identifies this build.  Do not attempt to parse this value. */
-    public static final String FINGERPRINT = getString("ro.build.fingerprint");
+    public static final String FINGERPRINT = deriveFingerprint();
+
+    /**
+     * Some devices split the fingerprint components between multiple
+     * partitions, so we might derive the fingerprint at runtime.
+     */
+    private static String deriveFingerprint() {
+        String finger = SystemProperties.get("ro.build.fingerprint");
+        if (TextUtils.isEmpty(finger)) {
+            finger = getString("ro.product.brand") + '/' +
+                    getString("ro.product.name") + '/' +
+                    getString("ro.product.device") + ':' +
+                    getString("ro.build.version.release") + '/' +
+                    getString("ro.build.id") + '/' +
+                    getString("ro.build.version.incremental") + ':' +
+                    getString("ro.build.type") + '/' +
+                    getString("ro.build.tags");
+        }
+        return finger;
+    }
+
+    /**
+     * Ensure that raw fingerprint system property is defined. If it was derived
+     * dynamically by {@link #deriveFingerprint()} this is where we push the
+     * derived value into the property service.
+     *
+     * @hide
+     */
+    public static void ensureFingerprintProperty() {
+        if (TextUtils.isEmpty(SystemProperties.get("ro.build.fingerprint"))) {
+            SystemProperties.set("ro.build.fingerprint", FINGERPRINT);
+        }
+    }
 
     // The following properties only make sense for internal engineering builds.
     public static final long TIME = getLong("ro.build.date.utc") * 1000;
