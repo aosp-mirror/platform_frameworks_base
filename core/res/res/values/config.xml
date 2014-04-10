@@ -1069,8 +1069,11 @@
         -->
     </string-array>
 
-    <!-- Component name of the service providing geofence API support. -->
-    <string name="config_geofenceProvider" translatable="false">com.qualcomm.location</string>
+    <!-- Component name of the geofence services provider. -->
+    <string name="config_geofenceServicesProvider" translatable="false">com.qualcomm.location</string>
+
+    <!-- Component name of the combo network location provider. -->
+    <string name="config_comboNetworkLocationProvider" translatable="false">com.qualcomm.location</string>
 
     <!-- Boolean indicating if current platform supports bluetooth SCO for off call
     use cases -->
