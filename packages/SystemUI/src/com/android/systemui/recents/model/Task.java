@@ -37,25 +37,33 @@ public class Task {
     public static class TaskKey {
         public final int id;
         public final Intent baseIntent;
+        public final int userId;
 
-        public TaskKey(int id, Intent intent) {
+        public TaskKey(int id, Intent intent, int userId) {
             this.id = id;
             this.baseIntent = intent;
+            this.userId = userId;
         }
 
         @Override
         public boolean equals(Object o) {
-            return hashCode() == o.hashCode();
+            if (!(o instanceof TaskKey)) {
+                return false;
+            }
+            return id == ((TaskKey) o).id
+                    && userId == ((TaskKey) o).userId;
         }
 
         @Override
         public int hashCode() {
-            return id;
+            return (id << 5) + userId;
         }
 
         @Override
         public String toString() {
-            return "Task.Key: " + id + ", " + baseIntent.getComponent().getPackageName();
+            return "Task.Key: " + id + ", "
+                    + "u" + userId + ", "
+                    + baseIntent.getComponent().getPackageName();
         }
     }
 
@@ -71,7 +79,7 @@ public class Task {
 
     public Task(int id, boolean isActive, Intent intent, String activityTitle,
                 Bitmap activityIcon, int userId) {
-        this.key = new TaskKey(id, intent);
+        this.key = new TaskKey(id, intent, userId);
         this.activityLabel = activityTitle;
         this.activityIcon = activityIcon;
         this.isActive = isActive;

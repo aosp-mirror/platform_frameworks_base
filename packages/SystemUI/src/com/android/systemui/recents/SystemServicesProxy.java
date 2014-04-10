@@ -18,14 +18,19 @@ package com.android.systemui.recents;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.RemoteException;
+import android.os.UserHandle;
+import android.os.UserManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +43,8 @@ import java.util.Random;
 public class SystemServicesProxy {
     ActivityManager mAm;
     PackageManager mPm;
+    IPackageManager mIpm;
+    UserManager mUm;
     String mPackage;
 
     Bitmap mDummyIcon;
@@ -46,6 +53,8 @@ public class SystemServicesProxy {
     public SystemServicesProxy(Context context) {
         mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         mPm = context.getPackageManager();
+        mUm = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        mIpm = AppGlobals.getPackageManager();
         mPackage = context.getPackageName();
 
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
@@ -142,14 +151,19 @@ public class SystemServicesProxy {
         mAm.removeTask(taskId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
     }
 
-    /** Returns the activity info for a given component name */
-    public ActivityInfo getActivityInfo(ComponentName cn) {
-        if (mPm == null) return null;
+    /**
+     * Returns the activity info for a given component name.
+     * 
+     * @param ComponentName The component name of the activity.
+     * @param userId The userId of the user that this is for.
+     */
+    public ActivityInfo getActivityInfo(ComponentName cn, int userId) {
+        if (mIpm == null) return null;
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) return null;
 
         try {
-            return mPm.getActivityInfo(cn, PackageManager.GET_META_DATA);
-        } catch (PackageManager.NameNotFoundException e) {
+            return mIpm.getActivityInfo(cn, PackageManager.GET_META_DATA, userId);
+        } catch (RemoteException e) {
             e.printStackTrace();
             return null;
         }
@@ -167,15 +181,22 @@ public class SystemServicesProxy {
         return info.loadLabel(mPm).toString();
     }
 
-    /** Returns the activity icon */
-    public Drawable getActivityIcon(ActivityInfo info) {
-        if (mPm == null) return null;
+    /**
+     * Returns the activity icon for the ActivityInfo for a user, badging if
+     * necessary.
+     */
+    public Drawable getActivityIcon(ActivityInfo info, int userId) {
+        if (mPm == null || mUm == null) return null;
 
         // If we are mocking, then return a mock label
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
             return new ColorDrawable(0xFF666666);
         }
 
-        return info.loadIcon(mPm);
+        Drawable icon = info.loadIcon(mPm);
+        if (userId != UserHandle.myUserId()) {
+            icon = mUm.getBadgedDrawableForUser(icon, new UserHandle(userId));
+        }
+        return icon;
     }
 }
