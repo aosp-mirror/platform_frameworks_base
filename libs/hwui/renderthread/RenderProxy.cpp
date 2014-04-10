@@ -151,36 +151,13 @@ void RenderProxy::destroyCanvas() {
     post(task);
 }
 
-CREATE_BRIDGE2(attachFunctor, CanvasContext* context, Functor* functor) {
-    args->context->attachFunctor(args->functor);
-    return NULL;
-}
-
-void RenderProxy::attachFunctor(Functor* functor) {
-    SETUP_TASK(attachFunctor);
-    args->context = mContext;
-    args->functor = functor;
-    post(task);
-}
-
-CREATE_BRIDGE2(detachFunctor, CanvasContext* context, Functor* functor) {
-    args->context->detachFunctor(args->functor);
-    return NULL;
-}
-
-void RenderProxy::detachFunctor(Functor* functor) {
-    SETUP_TASK(detachFunctor);
-    args->context = mContext;
-    args->functor = functor;
-    post(task);
-}
-
 CREATE_BRIDGE2(invokeFunctor, CanvasContext* context, Functor* functor) {
     args->context->invokeFunctor(args->functor);
     return NULL;
 }
 
 void RenderProxy::invokeFunctor(Functor* functor, bool waitForCompletion) {
+    ATRACE_CALL();
     SETUP_TASK(invokeFunctor);
     args->context = mContext;
     args->functor = functor;

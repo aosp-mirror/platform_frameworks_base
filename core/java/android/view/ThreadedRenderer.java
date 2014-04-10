@@ -190,12 +190,12 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     @Override
     void detachFunctor(long functor) {
-        nDetachFunctor(mNativeProxy, functor);
+        // no-op, we never attach functors to need to detach them
     }
 
     @Override
     void attachFunctor(AttachInfo attachInfo, long functor) {
-        nAttachFunctor(mNativeProxy, functor);
+        invokeFunctor(functor, true);
     }
 
     @Override
@@ -289,8 +289,6 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nRunWithGlContext(long nativeProxy, Runnable runnable);
     private static native void nDestroyCanvas(long nativeProxy);
 
-    private static native void nAttachFunctor(long nativeProxy, long functor);
-    private static native void nDetachFunctor(long nativeProxy, long functor);
     private static native void nInvokeFunctor(long nativeProxy, long functor, boolean waitForCompletion);
 
     private static native long nCreateDisplayListLayer(long nativeProxy, int width, int height);
