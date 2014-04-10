@@ -68,6 +68,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -95,8 +96,10 @@ import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.InterceptedNotifications;
+import com.android.systemui.statusbar.LatestItemView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
+import com.android.systemui.statusbar.NotificationOverflowIconsView;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -218,6 +221,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     // top bar
     View mNotificationPanelHeader;
     View mKeyguardStatusView;
+    int mKeyguardMaxNotificationCount;
     View mDateTimeView;
     View mClearButton;
     ImageView mSettingsButton, mNotificationButton;
@@ -514,6 +518,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 R.id.notification_stack_scroller);
         mStackScroller.setLongPressListener(getNotificationLongClicker());
         mStackScroller.setChildLocationsChangedListener(mOnChildLocationsChangedListener);
+
+        mKeyguardIconOverflowContainer = LayoutInflater.from(mContext).inflate(
+                R.layout.status_bar_notification_keyguard_overflow, mStackScroller, false);
+        ((LatestItemView) mKeyguardIconOverflowContainer.findViewById(R.id.container)).setLocked(true);
+        mOverflowIconsView = (NotificationOverflowIconsView) mKeyguardIconOverflowContainer.findViewById(
+                R.id.overflow_icons_view);
+        mOverflowIconsView.setMoreText(
+                (TextView) mKeyguardIconOverflowContainer.findViewById(R.id.more_text));
+        mStackScroller.addView(mKeyguardIconOverflowContainer);
 
         mExpandedContents = mStackScroller;
 
@@ -1117,7 +1130,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         ArrayList<View> toRemove = new ArrayList<View>();
         for (int i=0; i< mStackScroller.getChildCount(); i++) {
             View child = mStackScroller.getChildAt(i);
-            if (!toShow.contains(child)) {
+            if (!toShow.contains(child) && child != mKeyguardIconOverflowContainer) {
                 toRemove.add(child);
             }
         }
@@ -2630,6 +2643,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mHeadsUpNotificationDecay = res.getInteger(R.integer.heads_up_notification_decay);
         mRowHeight =  res.getDimensionPixelSize(R.dimen.notification_row_min_height);
 
+        mKeyguardMaxNotificationCount = res.getInteger(R.integer.keyguard_max_notification_count);
+
         if (false) Log.v(TAG, "updateResources");
     }
 
@@ -2851,6 +2866,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private void instantExpandNotificationsPanel() {
         mExpandedVisible = true;
         mNotificationPanel.setExpandedFraction(1);
+    }
+
+    @Override
+    protected int getMaxKeyguardNotifications() {
+        return mKeyguardMaxNotificationCount;
     }
 
     /**

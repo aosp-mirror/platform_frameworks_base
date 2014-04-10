@@ -22,6 +22,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.android.systemui.R;
 
+import java.util.ArrayList;
+
 /**
  * The Algorithm of the {@link com.android.systemui.statusbar.stack
  * .NotificationStackScrollLayout} which can be queried for {@link com.android.systemui.statusbar
@@ -92,6 +94,7 @@ public class StackScrollAlgorithm {
         algorithmState.lastTopStackIndex = 0;
         algorithmState.scrollY = resultState.getScrollY();
         algorithmState.itemsInBottomStack = 0.0f;
+        updateVisibleChildren(resultState, algorithmState);
 
         // Phase 1:
         findNumberOfItemsInTopStackAndUpdateState(resultState, algorithmState);
@@ -104,6 +107,23 @@ public class StackScrollAlgorithm {
 
         // write the algorithm state to the result
         resultState.setScrollY(algorithmState.scrollY);
+    }
+
+    /**
+     * Update the visible children on the state.
+     */
+    private void updateVisibleChildren(StackScrollState resultState,
+            StackScrollAlgorithmState state) {
+        ViewGroup hostView = resultState.getHostView();
+        int childCount = hostView.getChildCount();
+        state.visibleChildren.clear();
+        state.visibleChildren.ensureCapacity(childCount);
+        for (int i = 0; i < childCount; i++) {
+            View v = hostView.getChildAt(i);
+            if (v.getVisibility() != View.GONE) {
+                state.visibleChildren.add(v);
+            }
+        }
     }
 
     /**
@@ -126,11 +146,10 @@ public class StackScrollAlgorithm {
         // How far in is the element currently transitioning into the bottom stack.
         float yPositionInScrollView = 0.0f;
 
-        ViewGroup hostView = resultState.getHostView();
-        int childCount = hostView.getChildCount();
+        int childCount = algorithmState.visibleChildren.size();
         int numberOfElementsCompletelyIn = (int) algorithmState.itemsInTopStack;
         for (int i = 0; i < childCount; i++) {
-            View child = hostView.getChildAt(i);
+            View child = algorithmState.visibleChildren.get(i);
             StackScrollState.ViewState childViewState = resultState.getViewStateForView(child);
             childViewState.yTranslation = currentYPosition;
             childViewState.location = StackScrollState.ViewState.LOCATION_UNKNOWN;
@@ -282,12 +301,11 @@ public class StackScrollAlgorithm {
 
         // The y Position if the element would be in a regular scrollView
         float yPositionInScrollView = 0.0f;
-        ViewGroup hostView = resultState.getHostView();
-        int childCount = hostView.getChildCount();
+        int childCount = algorithmState.visibleChildren.size();
 
         // find the number of elements in the top stack.
         for (int i = 0; i < childCount; i++) {
-            View child = hostView.getChildAt(i);
+            View child = algorithmState.visibleChildren.get(i);
             StackScrollState.ViewState childViewState = resultState.getViewStateForView(child);
             int childHeight = child.getHeight();
             float yPositionInScrollViewAfterElement = yPositionInScrollView
@@ -353,9 +371,10 @@ public class StackScrollAlgorithm {
     private void updateZValuesForState(StackScrollState resultState,
             StackScrollAlgorithmState algorithmState) {
         ViewGroup hostView = resultState.getHostView();
-        int childCount = hostView.getChildCount();
+        int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
-            View child = hostView.getChildAt(i);
+            View child = algorithmState.visibleChildren.get(i);
+            if (child.getVisibility() == View.GONE) continue;
             StackScrollState.ViewState childViewState = resultState.getViewStateForView(child);
             if (i < algorithmState.itemsInTopStack) {
                 float stackIndex = algorithmState.itemsInTopStack - i;
@@ -415,6 +434,11 @@ public class StackScrollAlgorithm {
          * how far in is the element currently transitioning into the bottom stack
          */
         public float partialInBottom;
+
+        /**
+         * The children from the host view which are not gone.
+         */
+        public final ArrayList<View> visibleChildren = new ArrayList<View>();
     }
 
 }

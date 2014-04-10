@@ -138,6 +138,11 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
+    protected int getMaxKeyguardNotifications() {
+        return 0;
+    }
+
+    @Override
     public void animateExpandSettingsPanel() {
     }
 

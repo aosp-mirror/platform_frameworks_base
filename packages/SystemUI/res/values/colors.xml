@@ -45,4 +45,7 @@
 
     <!-- Tint color for active Quick Settings icons. -->
     <color name="ic_qs_on">#ffffffff</color>
+
+    <!-- Tint color for the content on the notification overflow card. -->
+    <color name="keyguard_overflow_content_color">#ff666666</color>
 </resources>
