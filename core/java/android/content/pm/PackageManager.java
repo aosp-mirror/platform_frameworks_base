@@ -970,6 +970,7 @@ public abstract class PackageManager {
      * @hide
      * @deprecated
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_NFC_HCE = "android.hardware.nfc.hce";
 
@@ -1266,6 +1267,7 @@ public abstract class PackageManager {
      * something like a DPAD, not through touch or mouse.
      * @deprecated use {@link #FEATURE_LEANBACK} instead.
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEVISION = "android.hardware.type.television";
 
@@ -1455,17 +1457,33 @@ public abstract class PackageManager {
     public abstract Intent getLaunchIntentForPackage(String packageName);
 
     /**
-     * Return an array of all of the secondary group-ids that have been
-     * assigned to a package.
-     *
-     * <p>Throws {@link NameNotFoundException} if a package with the given
-     * name cannot be found on the system.
-     *
+     * Return a "good" intent to launch a front-door Leanback activity in a
+     * package, for use for example to implement an "open" button when browsing
+     * through packages. The current implementation will look for a main
+     * activity in the category {@link Intent#CATEGORY_LEANBACK_LAUNCHER}, or
+     * return null if no main leanback activities are found.
+     * <p>
+     * Throws {@link NameNotFoundException} if a package with the given name
+     * cannot be found on the system.
+     * 
+     * @param packageName The name of the package to inspect.
+     * @return Returns either a fully-qualified Intent that can be used to launch
+     *         the main Leanback activity in the package, or null if the package
+     *         does not contain such an activity.
+     */
+    public abstract Intent getLeanbackLaunchIntentForPackage(String packageName);
+
+    /**
+     * Return an array of all of the secondary group-ids that have been assigned
+     * to a package.
+     * <p>
+     * Throws {@link NameNotFoundException} if a package with the given name
+     * cannot be found on the system.
+     * 
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
-     *                    desired package.
-     *
-     * @return Returns an int array of the assigned gids, or null if there
-     * are none.
+     *            desired package.
+     * @return Returns an int array of the assigned gids, or null if there are
+     *         none.
      */
     public abstract int[] getPackageGids(String packageName)
             throws NameNotFoundException;
@@ -2449,7 +2467,7 @@ public abstract class PackageManager {
     /**
      * Return the generic icon for an activity that is used when no specific
      * icon is defined.
-     * 
+     *
      * @return Drawable Image of the icon.
      */
     public abstract Drawable getDefaultActivityIcon();
