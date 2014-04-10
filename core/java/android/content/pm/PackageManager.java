@@ -675,6 +675,25 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_USER_RESTRICTED = -111;
 
     /**
+     * Installation failed return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
+     * if the system failed to install the package because its packaged native code did not
+     * match any of the ABIs supported by the system.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FAILED_NO_MATCHING_ABIS = -112;
+
+    /**
+     * Internal return code for NativeLibraryHelper methods to indicate that the package
+     * being processed did not contain any native code. This is placed here only so that
+     * it can belong to the same value space as the other install failure codes.
+     *
+     * @hide
+     */
+    public static final int NO_NATIVE_LIBRARIES = -113;
+
+    /**
      * Flag parameter for {@link #deletePackage} to indicate that you don't want to delete the
      * package's data directory.
      *

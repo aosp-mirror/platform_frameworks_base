@@ -30,6 +30,7 @@ import android.content.pm.PackageParser;
 import android.content.res.ObbInfo;
 import android.content.res.ObbScanner;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
 import android.os.FileUtils;
@@ -39,10 +40,8 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.app.IMediaContainerService;
@@ -343,11 +342,13 @@ public class DefaultContainerService extends IntentService {
         // The .apk file
         String codePath = packageURI.getPath();
         File codeFile = new File(codePath);
+        NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(codePath);
+        final int abi = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_ABIS);
 
         // Calculate size of container needed to hold base APK.
         final int sizeMb;
         try {
-            sizeMb = calculateContainerSize(codeFile, isForwardLocked);
+            sizeMb = calculateContainerSize(handle, codeFile, abi, isForwardLocked);
         } catch (IOException e) {
             Slog.w(TAG, "Problem when trying to copy " + codeFile.getPath());
             return null;
@@ -410,7 +411,14 @@ public class DefaultContainerService extends IntentService {
 
         final File sharedLibraryDir = new File(newCachePath, LIB_DIR_NAME);
         if (sharedLibraryDir.mkdir()) {
-            int ret = NativeLibraryHelper.copyNativeBinariesIfNeededLI(codeFile, sharedLibraryDir);
+            int ret = PackageManager.INSTALL_SUCCEEDED;
+            if (abi >= 0) {
+                ret = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle,
+                        sharedLibraryDir, Build.SUPPORTED_ABIS[abi]);
+            } else if (abi != PackageManager.NO_NATIVE_LIBRARIES) {
+                ret = abi;
+            }
+
             if (ret != PackageManager.INSTALL_SUCCEEDED) {
                 Slog.e(TAG, "Could not copy native libraries to " + sharedLibraryDir.getPath());
                 PackageHelper.destroySdDir(newCid);
@@ -824,6 +832,17 @@ public class DefaultContainerService extends IntentService {
         return availSdMb > sizeMb;
     }
 
+    private int calculateContainerSize(File apkFile, boolean forwardLocked) throws IOException {
+        NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(apkFile);
+        final int abi = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_ABIS);
+
+        try {
+            return calculateContainerSize(handle, apkFile, abi, forwardLocked);
+        } finally {
+            handle.close();
+        }
+    }
+
     /**
      * Calculate the container size for an APK. Takes into account the
      * 
@@ -831,7 +850,8 @@ public class DefaultContainerService extends IntentService {
      * @return size in megabytes (2^20 bytes)
      * @throws IOException when there is a problem reading the file
      */
-    private int calculateContainerSize(File apkFile, boolean forwardLocked) throws IOException {
+    private int calculateContainerSize(NativeLibraryHelper.ApkHandle apkHandle,
+            File apkFile, int abiIndex, boolean forwardLocked) throws IOException {
         // Calculate size of container needed to hold base APK.
         long sizeBytes = apkFile.length();
         if (sizeBytes == 0 && !apkFile.exists()) {
@@ -840,7 +860,10 @@ public class DefaultContainerService extends IntentService {
 
         // Check all the native files that need to be copied and add that to the
         // container size.
-        sizeBytes += NativeLibraryHelper.sumNativeBinariesLI(apkFile);
+        if (abiIndex >= 0) {
+            sizeBytes += NativeLibraryHelper.sumNativeBinariesLI(apkHandle,
+                    Build.SUPPORTED_ABIS[abiIndex]);
+        }
 
         if (forwardLocked) {
             sizeBytes += PackageHelper.extractPublicFiles(apkFile.getPath(), null);
