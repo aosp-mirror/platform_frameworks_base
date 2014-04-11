@@ -56,7 +56,10 @@ class LocalSocketImpl
         /** {@inheritDoc} */
         @Override
         public int available() throws IOException {
-            return available_native(fd);
+            FileDescriptor myFd = fd;
+            if (myFd == null) throw new IOException("socket closed");
+
+            return available_native(myFd);
         }
 
         /** {@inheritDoc} */
