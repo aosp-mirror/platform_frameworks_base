@@ -460,13 +460,13 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public boolean clearWindowContentRenderStats(IBinder token) throws RemoteException {
+    public boolean clearWindowContentFrameStats(IBinder token) throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public WindowContentFrameStats getWindowContentRenderStats(IBinder token)
+    public WindowContentFrameStats getWindowContentFrameStats(IBinder token)
             throws RemoteException {
         // TODO Auto-generated method stub
         return null;
