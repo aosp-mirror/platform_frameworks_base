@@ -210,7 +210,6 @@ private:
     void prepareSubTree(TreeInfo& info, DisplayListData* subtree);
 
     String8 mName;
-    bool mDestroyed; // used for debugging crash, TODO: remove once invalid state crash fixed
 
     bool mNeedsPropertiesSync;
     RenderProperties mProperties;
