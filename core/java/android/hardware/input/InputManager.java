@@ -857,7 +857,7 @@ public final class InputManager {
          * @hide
          */
         @Override
-        public void vibrate(int owningUid, String owningPackage, long milliseconds,
+        public void vibrate(int uid, String opPkg, long milliseconds,
                 int streamHint) {
             vibrate(new long[] { 0, milliseconds}, -1);
         }
@@ -866,7 +866,7 @@ public final class InputManager {
          * @hide
          */
         @Override
-        public void vibrate(int owningUid, String owningPackage, long[] pattern, int repeat,
+        public void vibrate(int uid, String opPkg, long[] pattern, int repeat,
                 int streamHint) {
             if (repeat >= pattern.length) {
                 throw new ArrayIndexOutOfBoundsException();

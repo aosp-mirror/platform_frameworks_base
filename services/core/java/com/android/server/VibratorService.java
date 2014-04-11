@@ -86,19 +86,19 @@ public class VibratorService extends IVibratorService.Stub
         private final int     mRepeat;
         private final int     mStreamHint;
         private final int     mUid;
-        private final String  mPackageName;
+        private final String  mOpPkg;
 
-        Vibration(IBinder token, long millis, int streamHint, int uid, String packageName) {
-            this(token, millis, null, 0, streamHint, uid, packageName);
+        Vibration(IBinder token, long millis, int streamHint, int uid, String opPkg) {
+            this(token, millis, null, 0, streamHint, uid, opPkg);
         }
 
         Vibration(IBinder token, long[] pattern, int repeat, int streamHint, int uid,
-                String packageName) {
-            this(token, 0, pattern, repeat, streamHint, uid, packageName);
+                String opPkg) {
+            this(token, 0, pattern, repeat, streamHint, uid, opPkg);
         }
 
         private Vibration(IBinder token, long millis, long[] pattern,
-                int repeat, int streamHint, int uid, String packageName) {
+                int repeat, int streamHint, int uid, String opPkg) {
             mToken = token;
             mTimeout = millis;
             mStartTime = SystemClock.uptimeMillis();
@@ -106,7 +106,7 @@ public class VibratorService extends IVibratorService.Stub
             mRepeat = repeat;
             mStreamHint = streamHint;
             mUid = uid;
-            mPackageName = packageName;
+            mOpPkg = opPkg;
         }
 
         public void binderDied() {
@@ -194,7 +194,7 @@ public class VibratorService extends IVibratorService.Stub
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
     }
 
-    public void vibrate(int uid, String packageName, long milliseconds, int streamHint,
+    public void vibrate(int uid, String opPkg, long milliseconds, int streamHint,
             IBinder token) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -211,7 +211,7 @@ public class VibratorService extends IVibratorService.Stub
             return;
         }
 
-        Vibration vib = new Vibration(token, milliseconds, streamHint, uid, packageName);
+        Vibration vib = new Vibration(token, milliseconds, streamHint, uid, opPkg);
 
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -347,10 +347,10 @@ public class VibratorService extends IVibratorService.Stub
     private void startVibrationLocked(final Vibration vib) {
         try {
             int mode = mAppOpsService.checkAudioOperation(AppOpsManager.OP_VIBRATE,
-                    vib.mStreamHint, vib.mUid, vib.mPackageName);
+                    vib.mStreamHint, vib.mUid, vib.mOpPkg);
             if (mode == AppOpsManager.MODE_ALLOWED) {
                 mode = mAppOpsService.startOperation(AppOpsManager.getToken(mAppOpsService),
-                    AppOpsManager.OP_VIBRATE, vib.mUid, vib.mPackageName);
+                    AppOpsManager.OP_VIBRATE, vib.mUid, vib.mOpPkg);
             }
             if (mode != AppOpsManager.MODE_ALLOWED) {
                 if (mode == AppOpsManager.MODE_ERRORED) {
@@ -377,7 +377,7 @@ public class VibratorService extends IVibratorService.Stub
             try {
                 mAppOpsService.finishOperation(AppOpsManager.getToken(mAppOpsService),
                         AppOpsManager.OP_VIBRATE, mCurrentVibration.mUid,
-                        mCurrentVibration.mPackageName);
+                        mCurrentVibration.mOpPkg);
             } catch (RemoteException e) {
             }
             mCurrentVibration = null;

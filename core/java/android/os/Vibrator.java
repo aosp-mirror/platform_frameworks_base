@@ -135,7 +135,7 @@ public abstract class Vibrator {
      * Like {@link #vibrate(long, int)}, but allowing the caller to specify that
      * the vibration is owned by someone else.
      */
-    public abstract void vibrate(int owningUid, String owningPackage,
+    public abstract void vibrate(int uid, String opPkg,
             long milliseconds, int streamHint);
 
     /**
@@ -143,7 +143,7 @@ public abstract class Vibrator {
      * Like {@link #vibrate(long[], int, int)}, but allowing the caller to specify that
      * the vibration is owned by someone else.
      */
-    public abstract void vibrate(int owningUid, String owningPackage,
+    public abstract void vibrate(int uid, String opPkg,
             long[] pattern, int repeat, int streamHint);
 
     /**
