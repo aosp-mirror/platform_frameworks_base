@@ -393,7 +393,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // Initialize screen state for battery stats.
         try {
-            if (mPowerState.isScreenOn()) {
+            if (mPowerState.getScreenState() != Display.STATE_OFF) {
                 mBatteryStats.noteScreenOn();
             } else {
                 mBatteryStats.noteScreenOff();
