@@ -384,10 +384,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Дозволяє власникові прив’язуватися до інтерфейсу верхнього рівня служби віджетів. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"взаємодіяти з адмін. пристрою"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Дозволяє власнику надсилати задавані функції адміністратору пристрою. Ніколи не застосовується для звичайних програм."</string>
-    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
-    <skip />
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"прив’язуватися до вводу телевізора"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Дозволяє власникові прив’язуватися до інтерфейсу верхнього рівня вводу телевізора. Ніколи не застосовується для звичайних додатків."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"додавати чи вилучати адміністраторів пристрою"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Дозволяє власнику додавати чи вилучати активних адміністраторів пристрою. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"змінювати орієнтацію екрана"</string>

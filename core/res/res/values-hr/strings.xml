@@ -384,10 +384,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Nositelju omogućuje vezanje uz sučelje najviše razine usluge widgeta. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interakcija s administratorom uređaja"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Nositelju omogućuje slanje namjera administratoru uređaja. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
-    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
-    <skip />
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"povezivanje s TV ulazom"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Nositelju omogućuje vezanje uz sučelje najviše razine TV ulaza. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"dodavanje ili uklanjanje administratora uređaja"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Omogućuje nositelju dodavanje ili uklanjanje administratora aktivnih uređaja. Nikada ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"promjena orijentacije zaslona"</string>

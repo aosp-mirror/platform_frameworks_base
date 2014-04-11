@@ -47,8 +47,5 @@
         android:supportsRtl="true"
         android:requiredForProfile="all">
 
-        <service android:name=".KeyguardService"
-            android:exported="true" />
-
     </application>
 </manifest>

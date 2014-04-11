@@ -29,6 +29,8 @@ import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 
+import java.lang.Override;
+
 /**
  * Basic implementation of {@link IWindowManager} so that {@link Display} (and
  * {@link Display_Delegate}) can return a valid instance.
@@ -453,13 +455,19 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public boolean clearWindowContentFrameStats(IBinder token) {
+    public void enableScreenIfNeeded() throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public boolean clearWindowContentFrameStats(IBinder token) throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public WindowContentFrameStats getWindowContentFrameStats(IBinder token) {
+    public WindowContentFrameStats getWindowContentFrameStats(IBinder token)
+            throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }

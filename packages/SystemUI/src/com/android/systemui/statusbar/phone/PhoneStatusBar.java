@@ -16,14 +16,16 @@
 
 package com.android.systemui.statusbar.phone;
 
+
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
+import static com.android.systemui.statusbar.stack.NotificationStackScrollLayout.OnChildLocationsChangedListener;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -66,6 +68,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -84,15 +87,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.InterceptedNotifications;
+import com.android.systemui.statusbar.LatestItemView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
+import com.android.systemui.statusbar.NotificationOverflowIconsView;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -174,6 +181,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     StatusBarWindowView mStatusBarWindow;
     PhoneStatusBarView mStatusBarView;
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
+    private StatusBarWindowManager mStatusBarWindowManager;
 
     int mPixelFormat;
     Object mQueueLock = new Object();
@@ -212,9 +220,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     // top bar
     View mNotificationPanelHeader;
+    View mKeyguardStatusView;
+    int mKeyguardMaxNotificationCount;
     View mDateTimeView;
     View mClearButton;
     ImageView mSettingsButton, mNotificationButton;
+    View mKeyguardSettingsFlipButton;
 
     // carrier/wifi label
     private TextView mCarrierLabel;
@@ -337,6 +348,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private int mNavigationBarMode;
     private Boolean mScreenOn;
 
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private ViewMediatorCallback mKeyguardViewMediatorCallback;
+
     private final Runnable mAutohide = new Runnable() {
         @Override
         public void run() {
@@ -348,6 +362,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     private Runnable mOnFlipRunnable;
     private InterceptedNotifications mIntercepted;
+
+    private final OnChildLocationsChangedListener mOnChildLocationsChangedListener =
+            new OnChildLocationsChangedListener() {
+        @Override
+        public void onChildLocationsChanged(NotificationStackScrollLayout stackScrollLayout) {
+            userActivity();
+        }
+    };
 
     public void setOnFlipRunnable(Runnable onFlipRunnable) {
         mOnFlipRunnable = onFlipRunnable;
@@ -388,6 +410,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     Settings.Global.getUriFor(SETTING_HEADS_UP_TICKER), true,
                     mHeadsUpObserver);
         }
+        startKeyguard();
     }
 
     // ================================================================================
@@ -494,10 +517,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mStackScroller = (NotificationStackScrollLayout) mStatusBarWindow.findViewById(
                 R.id.notification_stack_scroller);
         mStackScroller.setLongPressListener(getNotificationLongClicker());
+        mStackScroller.setChildLocationsChangedListener(mOnChildLocationsChangedListener);
+
+        mKeyguardIconOverflowContainer = LayoutInflater.from(mContext).inflate(
+                R.layout.status_bar_notification_keyguard_overflow, mStackScroller, false);
+        ((LatestItemView) mKeyguardIconOverflowContainer.findViewById(R.id.container)).setLocked(true);
+        mOverflowIconsView = (NotificationOverflowIconsView) mKeyguardIconOverflowContainer.findViewById(
+                R.id.overflow_icons_view);
+        mOverflowIconsView.setMoreText(
+                (TextView) mKeyguardIconOverflowContainer.findViewById(R.id.more_text));
+        mStackScroller.addView(mKeyguardIconOverflowContainer);
 
         mExpandedContents = mStackScroller;
 
         mNotificationPanelHeader = mStatusBarWindow.findViewById(R.id.header);
+        mKeyguardStatusView = mStatusBarWindow.findViewById(R.id.keyguard_status_view);
 
         mClearButton = mStatusBarWindow.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
@@ -687,6 +721,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         return mStatusBarView;
     }
 
+    private void startKeyguard() {
+        KeyguardViewMediator keyguardViewMediator = getComponent(KeyguardViewMediator.class);
+        mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
+                mStatusBarWindow, mStatusBarWindowManager);
+        mKeyguardViewMediatorCallback = keyguardViewMediator.getViewMediatorCallback();
+    }
+
     @Override
     protected void onShowSearchPanel() {
         if (mNavigationBarView != null) {
@@ -762,10 +803,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
             mWindowManager.updateViewLayout(mNavigationBarView, lp);
         }
-    }
-
-    protected int getStatusBarGravity() {
-        return Gravity.TOP | Gravity.FILL_HORIZONTAL;
     }
 
     public int getStatusBarHeight() {
@@ -1024,7 +1061,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
 
             if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0
-                    && !mNotificationPanel.isTracking()) {
+                    && !mNotificationPanel.isTracking() && !mOnKeyguard) {
                 animateCollapsePanels();
             }
         }
@@ -1093,7 +1130,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         ArrayList<View> toRemove = new ArrayList<View>();
         for (int i=0; i< mStackScroller.getChildCount(); i++) {
             View child = mStackScroller.getChildAt(i);
-            if (!toShow.contains(child)) {
+            if (!toShow.contains(child) && child != mKeyguardIconOverflowContainer) {
                 toRemove.add(child);
             }
         }
@@ -1493,24 +1530,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         // Expand the window to encompass the full screen in anticipation of the drag.
         // This is only possible to do atomically because the status bar is at the top of the screen!
-        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
-        lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        lp.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-        lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-        mWindowManager.updateViewLayout(mStatusBarWindow, lp);
+        mStatusBarWindowManager.setStatusBarExpanded(true);
 
         visibilityChanged(true);
 
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
-    }
-
-    private void releaseFocus() {
-        if (mStatusBarWindow == null) return;
-        WindowManager.LayoutParams lp =
-                (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
-        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        lp.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-        mWindowManager.updateViewLayout(mStatusBarWindow, lp);
     }
 
     public void animateCollapsePanels() {
@@ -1524,9 +1548,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     + " flags=" + flags);
         }
 
-        // release focus immediately to kick off focus change transition
-        releaseFocus();
-
         if ((flags & CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL) == 0) {
             mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
             mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
@@ -1538,6 +1559,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         if (mStatusBarWindow != null) {
+
+            // release focus immediately to kick off focus change transition
+            mStatusBarWindowManager.setStatusBarFocusable(false);
+
             mStatusBarWindow.cancelExpandHelper();
             mStatusBarView.collapseAllPanels(true);
         }
@@ -1796,11 +1821,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         visibilityChanged(false);
 
         // Shrink the window to the size of the status bar only
-        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
-        lp.height = getStatusBarHeight();
-        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        lp.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-        mWindowManager.updateViewLayout(mStatusBarWindow, lp);
+        mStatusBarWindowManager.setStatusBarExpanded(false);
 
         if ((mDisabled & StatusBarManager.DISABLE_NOTIFICATION_ICONS) == 0) {
             setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
@@ -1815,6 +1836,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
+
+        showBouncer();
     }
 
     public boolean interceptTouchEvent(MotionEvent event) {
@@ -2303,30 +2326,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     private void addStatusBarWindow() {
-        // Put up the view
-        final int height = getStatusBarHeight();
-
-        // Now that the status bar window encompasses the sliding panel and its
-        // translucent backdrop, the entire thing is made TRANSLUCENT and is
-        // hardware-accelerated.
-        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                height,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
-                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
-                    | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-                PixelFormat.TRANSLUCENT);
-
-        lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-
-        lp.gravity = getStatusBarGravity();
-        lp.setTitle("StatusBar");
-        lp.packageName = mContext.getPackageName();
-
         makeStatusBarView();
-        mWindowManager.addView(mStatusBarWindow, lp);
+        mStatusBarWindowManager = new StatusBarWindowManager(mContext);
+        mStatusBarWindowManager.add(mStatusBarWindow, getStatusBarHeight());
     }
 
     void setNotificationIconVisibility(boolean visible, int anim) {
@@ -2464,8 +2466,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
             else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 mScreenOn = false;
-                // no waiting!
-                makeExpandedInvisible();
                 notifyNavigationBarScreenOn(false);
                 notifyHeadsUpScreenOn(false);
                 finishBarAnimations();
@@ -2644,6 +2644,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mRowMinHeight =  res.getDimensionPixelSize(R.dimen.notification_row_min_height);
         mRowMaxHeight =  res.getDimensionPixelSize(R.dimen.notification_row_max_height);
 
+        mKeyguardMaxNotificationCount = res.getInteger(R.integer.keyguard_max_notification_count);
+
         if (false) Log.v(TAG, "updateResources");
     }
 
@@ -2813,6 +2815,122 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         View v = mStatusBarView.findViewById(id);
         if (v instanceof DemoMode) {
             ((DemoMode)v).dispatchDemoCommand(command, args);
+        }
+    }
+
+    public boolean isOnKeyguard() {
+        return mOnKeyguard;
+    }
+
+    public void showKeyguard() {
+        mOnKeyguard = true;
+        instantExpandNotificationsPanel();
+        if (isFlippedToSettings()) {
+            flipToNotifications();
+        }
+        mStatusBarWindow.setSystemUiVisibility(View.STATUS_BAR_DISABLE_HOME);
+        mKeyguardStatusView.setVisibility(View.VISIBLE);
+        mNotificationPanelHeader.setVisibility(View.GONE);
+        if (mKeyguardSettingsFlipButton == null) {
+            ViewStub flipStub = (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_flip_stub);
+            mKeyguardSettingsFlipButton = flipStub.inflate();
+            installSettingsButton(mKeyguardSettingsFlipButton);
+        }
+        mKeyguardSettingsFlipButton.setVisibility(View.VISIBLE);
+        mKeyguardSettingsFlipButton.findViewById(R.id.settings_button).setVisibility(View.VISIBLE);
+        mKeyguardSettingsFlipButton.findViewById(R.id.notification_button)
+                .setVisibility(View.INVISIBLE);
+        updateRowStates();
+    }
+
+    public void hideKeyguard() {
+        mOnKeyguard = false;
+        mStatusBarWindow.setSystemUiVisibility(0);
+        mKeyguardStatusView.setVisibility(View.GONE);
+        mNotificationPanelHeader.setVisibility(View.VISIBLE);
+        mKeyguardSettingsFlipButton.setVisibility(View.GONE);
+        updateRowStates();
+    }
+
+    public void userActivity() {
+        if (mOnKeyguard) {
+            mKeyguardViewMediatorCallback.userActivity();
+        }
+    }
+
+    public boolean onBackPressed() {
+        if (mOnKeyguard) {
+            return mStatusBarKeyguardViewManager.onBackPressed();
+        } else {
+            animateCollapsePanels();
+            return true;
+        }
+    }
+
+    private void showBouncer() {
+        if (mOnKeyguard) {
+            mStatusBarKeyguardViewManager.dismiss();
+        }
+    }
+
+    private void instantExpandNotificationsPanel() {
+        mExpandedVisible = true;
+        mNotificationPanel.setExpandedFraction(1);
+    }
+
+    @Override
+    protected int getMaxKeyguardNotifications() {
+        return mKeyguardMaxNotificationCount;
+    }
+
+    /**
+     * @return a ViewGroup that spans the entire panel which contains the quick settings
+     */
+    public ViewGroup getQuickSettingsOverlayParent() {
+        if (mHasSettingsPanel) {
+            if (mHasFlipSettings) {
+                return mNotificationPanel;
+            } else {
+                return mSettingsPanel;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private void installSettingsButton(View parent) {
+        final ImageView settingsButton =
+                (ImageView) mStatusBarWindow.findViewById(R.id.settings_button);
+        final ImageView notificationButton =
+                (ImageView) mStatusBarWindow.findViewById(R.id.notification_button);
+        if (settingsButton != null) {
+            settingsButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    animateExpandSettingsPanel();
+                    v.setVisibility(View.INVISIBLE);
+                    notificationButton.setVisibility(View.VISIBLE);
+                }
+            });
+            settingsButton.setVisibility(View.VISIBLE);
+            if (mHasSettingsPanel) {
+                // the settings panel is hiding behind this button
+                settingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
+            } else {
+                // no settings panel, go straight to settings
+                settingsButton.setImageResource(R.drawable.ic_notify_settings);
+            }
+        }
+        if (notificationButton != null) {
+            notificationButton.setVisibility(View.INVISIBLE);
+            notificationButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    flipToNotifications();
+                    v.setVisibility(View.INVISIBLE);
+                    settingsButton.setVisibility(View.VISIBLE);
+                }
+            });
         }
     }
 }

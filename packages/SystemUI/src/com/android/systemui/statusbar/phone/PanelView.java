@@ -651,6 +651,12 @@ public class PanelView extends FrameLayout {
         int newHeight = getMeasuredHeight();
         if (newHeight != mMaxPanelHeight) {
             mMaxPanelHeight = newHeight;
+            // If the user isn't actively poking us, let's rubberband to the content
+            if (!mTracking && !mRubberbanding && !mTimeAnimator.isStarted()
+                    && mExpandedHeight > 0 && mExpandedHeight != mMaxPanelHeight
+                    && mMaxPanelHeight > 0) {
+                mExpandedHeight = mMaxPanelHeight;
+            }
         }
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(
                     getDesiredMeasureHeight(), MeasureSpec.AT_MOST);

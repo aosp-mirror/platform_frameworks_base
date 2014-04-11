@@ -384,10 +384,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"‏מאפשר למשתמש לבצע איגוד לממשק הרמה העליונה של שירות Widget. הרשאה זו לעולם אינה נחוצה לאפליקציות רגילים."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"קיים אינטראקציה עם מנהל המכשיר"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"מאפשר למשתמש לשלוח כוונות למנהל התקנים. הרשאה זו לעולם אינה נחוצה לאפליקציות רגילים."</string>
-    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
-    <skip />
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"איגוד לקלט טלוויזיה"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"הרשאה זו מאפשרת למחזיק בה לבצע איגוד לממשק הרמה העליונה של קלט טלוויזיה. הרשאה זו אף פעם אינה אמורה להיות נחוצה לאפליקציות רגילות."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"הוספה או הסרה של מנהלי מכשיר"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"מאפשרת לבעלים להוסיף או להסיר מנהלי מכשיר פעילים. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"שנה את כיוון המסך"</string>

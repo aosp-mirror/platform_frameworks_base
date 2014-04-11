@@ -169,6 +169,7 @@
                 android:scaleType="center"
                 android:visibility="gone"
                 android:contentDescription="@string/accessibility_camera_button"
+                systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
                 />
         </FrameLayout>
 

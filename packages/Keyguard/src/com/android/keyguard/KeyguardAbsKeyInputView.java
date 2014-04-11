@@ -231,7 +231,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
         if (mCallback != null) {
-            mCallback.userActivity(KeyguardViewManager.DIGIT_PRESS_WAKE_MILLIS);
+            mCallback.userActivity(KeyguardConstants.DIGIT_PRESS_WAKE_MILLIS);
         }
     }
 
