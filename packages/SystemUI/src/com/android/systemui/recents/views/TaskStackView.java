@@ -52,11 +52,12 @@ import java.util.HashMap;
 /* The visual representation of a task stack view */
 public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCallbacks,
         TaskView.TaskViewCallbacks, ViewPool.ViewPoolConsumer<TaskView, Task>,
-        View.OnClickListener {
+        View.OnClickListener, View.OnLongClickListener {
 
     /** The TaskView callbacks */
     interface TaskStackViewCallbacks {
         public void onTaskLaunched(TaskStackView stackView, TaskView tv, TaskStack stack, Task t);
+        public void onTaskAppInfoLaunched(Task t);
     }
 
     TaskStack mStack;
@@ -75,6 +76,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     int mMinScroll;
     int mMaxScroll;
     int mStashedScroll;
+    int mLastInfoPaneStackScroll;
     OverScroller mScroller;
     ObjectAnimator mScrollAnimator;
 
@@ -281,6 +283,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void setStackScroll(int value) {
         mStackScroll = value;
         requestSynchronizeStackViewsWithModel();
+
+        // Close any open info panes if the user has scrolled away from them
+        boolean isAnimatingScroll = (mScrollAnimator != null && mScrollAnimator.isRunning());
+        if (mLastInfoPaneStackScroll > -1 && !isAnimatingScroll) {
+            RecentsConfiguration config = RecentsConfiguration.getInstance();
+            if (Math.abs(mStackScroll - mLastInfoPaneStackScroll) >
+                    config.taskStackScrollDismissInfoPaneDistance) {
+                // Close any open info panes
+                closeOpenInfoPanes();
+            }
+        }
     }
     /** Sets the current stack scroll without synchronizing the stack view with the model */
     public void setStackScrollRaw(int value) {
@@ -300,19 +313,24 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // Enable hw layers on the stack
             addHwLayersRefCount("animateBoundScroll");
 
-            // Abort any current animations
-            abortScroller();
-            abortBoundScrollAnimation();
-
             // Start a new scroll animation
-            animateScroll(curScroll, newScroll);
-            mScrollAnimator.start();
+            animateScroll(curScroll, newScroll, new Runnable() {
+                @Override
+                public void run() {
+                    // Disable hw layers on the stack
+                    decHwLayersRefCount("animateBoundScroll");
+                }
+            });
         }
         return mScrollAnimator;
     }
 
     /** Animates the stack scroll */
-    void animateScroll(int curScroll, int newScroll) {
+    void animateScroll(int curScroll, int newScroll, final Runnable postRunnable) {
+        // Abort any current animations
+        abortScroller();
+        abortBoundScrollAnimation();
+
         mScrollAnimator = ObjectAnimator.ofInt(this, "stackScroll", curScroll, newScroll);
         mScrollAnimator.setDuration(Utilities.calculateTranslationAnimationDuration(newScroll -
                 curScroll, 250));
@@ -326,20 +344,23 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mScrollAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                // Disable hw layers on the stack
-                decHwLayersRefCount("animateBoundScroll");
+                if (postRunnable != null) {
+                    postRunnable.run();
+                }
+                mScrollAnimator.removeAllListeners();
             }
         });
+        mScrollAnimator.start();
     }
 
     /** Aborts any current stack scrolls */
     void abortBoundScrollAnimation() {
         if (mScrollAnimator != null) {
             mScrollAnimator.cancel();
-            mScrollAnimator.removeAllListeners();
         }
     }
 
+    /** Aborts the scroller and any current fling */
     void abortScroller() {
         if (!mScroller.isFinished()) {
             // Abort the scroller
@@ -405,6 +426,21 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (boundScrollToNewMinMax) {
             boundScroll();
         }
+    }
+
+    /** Closes any open info panes. */
+    boolean closeOpenInfoPanes() {
+        if (!Constants.DebugFlags.App.EnableInfoPane) return false;
+
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            TaskView tv = (TaskView) getChildAt(i);
+            if (tv.isInfoPaneVisible()) {
+                tv.hideInfoPane();
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Enables the hw layers and increments the hw layer requirement ref count */
@@ -644,7 +680,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         requestSynchronizeStackViewsWithModel(Utilities.calculateTranslationAnimationDuration(movement));
     }
 
-
     /**
      * Creates the animations for all the children views that need to be removed or to move views
      * to their un/filtered position when we are un/filtering a stack, and returns the duration
@@ -789,6 +824,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     public void onStackFiltered(TaskStack newStack, final ArrayList<Task> curTasks,
                                 Task filteredTask) {
+        // Close any open info panes
+        closeOpenInfoPanes();
+
         // Stash the scroll and filtered task for us to restore to when we unfilter
         mStashedScroll = getStackScroll();
 
@@ -813,6 +851,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void onStackUnfiltered(TaskStack newStack, final ArrayList<Task> curTasks) {
+        // Close any open info panes
+        closeOpenInfoPanes();
+
         // Calculate the current task transforms
         final ArrayList<TaskViewTransform> curTaskTransforms =
                 getStackTransforms(curTasks, getStackScroll(), null, true);
@@ -892,6 +933,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
             // Set the callbacks and listeners for this new view
             tv.setOnClickListener(this);
+            if (Constants.DebugFlags.App.EnableInfoPane) {
+                tv.setOnLongClickListener(this);
+            }
             tv.setCallbacks(this);
         } else {
             attachViewToParent(tv, insertIndex, tv.getLayoutParams());
@@ -926,6 +970,24 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
+    @Override
+    public void onTaskInfoPanelShown(TaskView tv) {
+        // Do nothing
+    }
+
+    @Override
+    public void onTaskInfoPanelHidden(TaskView tv) {
+        // Unset the saved scroll
+        mLastInfoPaneStackScroll = -1;
+    }
+
+    @Override
+    public void onTaskAppInfoClicked(TaskView tv) {
+        if (mCb != null) {
+            mCb.onTaskAppInfoLaunched(tv.getTask());
+        }
+    }
+
     /**** View.OnClickListener Implementation ****/
 
     @Override
@@ -935,9 +997,50 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         Console.log(Constants.DebugFlags.UI.ClickEvents, "[TaskStack|Clicked|Thumbnail]",
                 task + " cb: " + mCb);
 
+        // Close any open info panes if the user taps on another task
+        if (closeOpenInfoPanes()) {
+            return;
+        }
+
         if (mCb != null) {
             mCb.onTaskLaunched(this, tv, mStack, task);
         }
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        if (!Constants.DebugFlags.App.EnableInfoPane) return false;
+
+        TaskView tv = (TaskView) v;
+
+        // Close any other task info panels if we launch another info pane
+        closeOpenInfoPanes();
+
+        // Scroll the task view so that it is maximally visible
+        float overlapHeight = Constants.Values.TaskStackView.StackOverlapPct * mTaskRect.height();
+        int taskIndex = mStack.indexOfTask(tv.getTask());
+        int curScroll = getStackScroll();
+        int newScroll = (int) Math.max(mMinScroll, Math.min(mMaxScroll, taskIndex * overlapHeight));
+        TaskViewTransform transform = getStackTransform(taskIndex, curScroll);
+        Rect nonOverlapRect = new Rect(transform.rect);
+        if (taskIndex < (mStack.getTaskCount() - 1)) {
+            nonOverlapRect.bottom = nonOverlapRect.top + (int) overlapHeight;
+        }
+
+        // XXX: Use HW Layers
+        if (transform.t < 0f) {
+            animateScroll(curScroll, newScroll, null);
+        } else if (nonOverlapRect.bottom > mStackRectSansPeek.bottom) {
+            // Check if we are out of bounds, if so, just scroll it in such that the bottom of the
+            // task view is visible
+            newScroll = curScroll - (mStackRectSansPeek.bottom - nonOverlapRect.bottom);
+            animateScroll(curScroll, newScroll, null);
+        }
+        mLastInfoPaneStackScroll = newScroll;
+
+        // Show the info pane for this task view
+        tv.showInfoPane(new Rect(0, 0, 0, (int) overlapHeight));
+        return true;
     }
 }
 
@@ -1153,9 +1256,10 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 int activePointerIndex = ev.findPointerIndex(mActivePointerId);
                 int x = (int) ev.getX(activePointerIndex);
                 int y = (int) ev.getY(activePointerIndex);
+                int yTotal = Math.abs(y - mInitialMotionY);
                 int deltaY = mLastMotionY - y;
                 if (!mIsScrolling) {
-                    if (Math.abs(y - mInitialMotionY) > mScrollTouchSlop) {
+                    if (yTotal > mScrollTouchSlop) {
                         mIsScrolling = true;
                         // Initialize the velocity tracker
                         initOrResetVelocityTracker();
@@ -1276,6 +1380,13 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         final ViewParent parent = mSv.getParent();
         if (parent != null) {
             parent.requestDisallowInterceptTouchEvent(true);
+        }
+        // If the info panel is currently showing on this view, then we need to dismiss it
+        if (Constants.DebugFlags.App.EnableInfoPane) {
+            TaskView tv = (TaskView) v;
+            if (tv.isInfoPaneVisible()) {
+                tv.hideInfoPane();
+            }
         }
     }
 
