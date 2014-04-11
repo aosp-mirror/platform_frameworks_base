@@ -27,6 +27,16 @@
 
 #include "Matrix.h"
 
+/**
+ * Convenience value to check for float values that are close enough to zero to be considered
+ * zero.
+ */
+#define NONZERO_EPSILON .001f
+
+static inline bool is_zero(float value) {
+    return (value >= -NONZERO_EPSILON) || (value <= NONZERO_EPSILON);
+}
+
 namespace android {
 namespace uirenderer {
 
@@ -42,22 +52,18 @@ RenderProperties::PrimitiveFields::PrimitiveFields()
         , mPivotX(0), mPivotY(0)
         , mLeft(0), mTop(0), mRight(0), mBottom(0)
         , mWidth(0), mHeight(0)
-        , mPrevWidth(-1), mPrevHeight(-1)
         , mPivotExplicitlySet(false)
-        , mMatrixDirty(false)
-        , mMatrixFlags(0)
+        , mMatrixOrPivotDirty(false)
         , mCaching(false) {
 }
 
 RenderProperties::ComputedFields::ComputedFields()
         : mTransformMatrix(NULL)
-        , mTransformMatrix3D(NULL)
         , mClipPath(NULL) {
 }
 
 RenderProperties::ComputedFields::~ComputedFields() {
     delete mTransformMatrix;
-    delete mTransformMatrix3D;
     delete mClipPath;
 }
 
@@ -82,7 +88,7 @@ RenderProperties& RenderProperties::operator=(const RenderProperties& other) {
         updateClipPath();
 
         // Force recalculation of the matrix, since other's dirty bit may be clear
-        mPrimitiveFields.mMatrixDirty = true;
+        mPrimitiveFields.mMatrixOrPivotDirty = true;
         updateMatrix();
     }
     return *this;
@@ -100,8 +106,8 @@ void RenderProperties::debugOutputProperties(const int level) const {
         ALOGD("%*sConcatMatrix (animation) %p: " SK_MATRIX_STRING,
                 level * 2, "", mAnimationMatrix, SK_MATRIX_ARGS(mAnimationMatrix));
     }
-    if (mPrimitiveFields.mMatrixFlags != 0) {
-        if (mPrimitiveFields.mMatrixFlags == TRANSLATION) {
+    if (hasTransformMatrix()) {
+        if (isTransformTranslateOnly()) {
             ALOGD("%*sTranslate %.2f, %.2f, %.2f",
                     level * 2, "", mPrimitiveFields.mTranslationX, mPrimitiveFields.mTranslationY, mPrimitiveFields.mTranslationZ);
         } else {
@@ -134,52 +140,36 @@ void RenderProperties::debugOutputProperties(const int level) const {
 }
 
 void RenderProperties::updateMatrix() {
-    if (mPrimitiveFields.mMatrixDirty) {
-        // NOTE: mComputedFields.mTransformMatrix won't be up to date if a DisplayList goes from a complex transform
-        // to a pure translate. This is safe because the mPrimitiveFields.matrix isn't read in pure translate cases.
-        if (mPrimitiveFields.mMatrixFlags && mPrimitiveFields.mMatrixFlags != TRANSLATION) {
-            if (!mComputedFields.mTransformMatrix) {
-                // only allocate a mPrimitiveFields.matrix if we have a complex transform
-                mComputedFields.mTransformMatrix = new SkMatrix();
-            }
-            if (!mPrimitiveFields.mPivotExplicitlySet) {
-                if (mPrimitiveFields.mWidth != mPrimitiveFields.mPrevWidth || mPrimitiveFields.mHeight != mPrimitiveFields.mPrevHeight) {
-                    mPrimitiveFields.mPrevWidth = mPrimitiveFields.mWidth;
-                    mPrimitiveFields.mPrevHeight = mPrimitiveFields.mHeight;
-                    mPrimitiveFields.mPivotX = mPrimitiveFields.mPrevWidth / 2.0f;
-                    mPrimitiveFields.mPivotY = mPrimitiveFields.mPrevHeight / 2.0f;
-                }
-            }
-
-            if ((mPrimitiveFields.mMatrixFlags & ROTATION_3D) == 0) {
-                mComputedFields.mTransformMatrix->setTranslate(
-                        mPrimitiveFields.mTranslationX, mPrimitiveFields.mTranslationY);
-                mComputedFields.mTransformMatrix->preRotate(mPrimitiveFields.mRotation,
-                        mPrimitiveFields.mPivotX, mPrimitiveFields.mPivotY);
-                mComputedFields.mTransformMatrix->preScale(
-                        mPrimitiveFields.mScaleX, mPrimitiveFields.mScaleY,
-                        mPrimitiveFields.mPivotX, mPrimitiveFields.mPivotY);
-            } else {
-                if (!mComputedFields.mTransformMatrix3D) {
-                    mComputedFields.mTransformMatrix3D = new SkMatrix();
-                }
-                mComputedFields.mTransformMatrix->reset();
-                mComputedFields.mTransformCamera.save();
-                mComputedFields.mTransformMatrix->preScale(
-                        mPrimitiveFields.mScaleX, mPrimitiveFields.mScaleY,
-                        mPrimitiveFields.mPivotX, mPrimitiveFields.mPivotY);
-                mComputedFields.mTransformCamera.rotateX(mPrimitiveFields.mRotationX);
-                mComputedFields.mTransformCamera.rotateY(mPrimitiveFields.mRotationY);
-                mComputedFields.mTransformCamera.rotateZ(-mPrimitiveFields.mRotation);
-                mComputedFields.mTransformCamera.getMatrix(mComputedFields.mTransformMatrix3D);
-                mComputedFields.mTransformMatrix3D->preTranslate(-mPrimitiveFields.mPivotX, -mPrimitiveFields.mPivotY);
-                mComputedFields.mTransformMatrix3D->postTranslate(mPrimitiveFields.mPivotX + mPrimitiveFields.mTranslationX,
-                        mPrimitiveFields.mPivotY + mPrimitiveFields.mTranslationY);
-                mComputedFields.mTransformMatrix->postConcat(*mComputedFields.mTransformMatrix3D);
-                mComputedFields.mTransformCamera.restore();
-            }
+    if (mPrimitiveFields.mMatrixOrPivotDirty) {
+        if (!mComputedFields.mTransformMatrix) {
+            // only allocate a mPrimitiveFields.matrix if we have a complex transform
+            mComputedFields.mTransformMatrix = new SkMatrix();
         }
-        mPrimitiveFields.mMatrixDirty = false;
+        if (!mPrimitiveFields.mPivotExplicitlySet) {
+            mPrimitiveFields.mPivotX = mPrimitiveFields.mWidth / 2.0f;
+            mPrimitiveFields.mPivotY = mPrimitiveFields.mHeight / 2.0f;
+        }
+        SkMatrix* transform = mComputedFields.mTransformMatrix;
+        transform->reset();
+        if (is_zero(getRotationX()) && is_zero(getRotationY())) {
+            transform->setTranslate(getTranslationX(), getTranslationY());
+            transform->preRotate(getRotation(), getPivotX(), getPivotY());
+            transform->preScale(getScaleX(), getScaleY(), getPivotX(), getPivotY());
+        } else {
+            SkMatrix transform3D;
+            mComputedFields.mTransformCamera.save();
+            transform->preScale(getScaleX(), getScaleY(), getPivotX(), getPivotY());
+            mComputedFields.mTransformCamera.rotateX(mPrimitiveFields.mRotationX);
+            mComputedFields.mTransformCamera.rotateY(mPrimitiveFields.mRotationY);
+            mComputedFields.mTransformCamera.rotateZ(-mPrimitiveFields.mRotation);
+            mComputedFields.mTransformCamera.getMatrix(&transform3D);
+            transform3D.preTranslate(-getPivotX(), -getPivotY());
+            transform3D.postTranslate(getPivotX() + getTranslationX(),
+                    getPivotY() + getTranslationY());
+            transform->postConcat(transform3D);
+            mComputedFields.mTransformCamera.restore();
+        }
+        mPrimitiveFields.mMatrixOrPivotDirty = false;
     }
 }
 
