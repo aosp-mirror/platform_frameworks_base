@@ -1691,6 +1691,9 @@ public class WebView extends AbsoluteLayout
      * thread of this WebView. Care is therefore required to maintain thread
      * safety.</li>
      * <li> The Java object's fields are not accessible.</li>
+     * <li> For applications targeted to API level {@link android.os.Build.VERSION_CODES#L}
+     * and above, methods of injected Java objects are enumerable from
+     * JavaScript.</li>
      * </ul>
      *
      * @param object the Java object to inject into this WebView's JavaScript
