@@ -88,7 +88,7 @@ public final class HdmiCecClient {
     }
 
     /**
-     * Send &lt;TextViewOn&gt; message.
+     * Send &lt;Text View On&gt; message.
      */
     public void sendTextViewOn() {
         try {
@@ -99,13 +99,27 @@ public final class HdmiCecClient {
     }
 
     /**
-     * Send &lt;ImageViewOn&gt; message.
+     * Send &lt;Image View On&gt; message.
      */
     public void sendImageViewOn() {
         try {
             mService.sendImageViewOn(mBinder);
         } catch (RemoteException e) {
             Log.e(TAG, "sendImageViewOn threw exception ", e);
+        }
+    }
+
+    /**
+     * Send &lt;Give Device Power Status&gt; message.
+     *
+     * @param address logical address of the device to send the message to, such as
+     *        {@link HdmiCec#ADDR_TV}.
+     */
+    public void sendGiveDevicePowerStatus(int address) {
+        try {
+            mService.sendGiveDevicePowerStatus(mBinder, address);
+        } catch (RemoteException e) {
+            Log.e(TAG, "sendGiveDevicePowerStatus threw exception ", e);
         }
     }
 
