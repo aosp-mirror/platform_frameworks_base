@@ -39,8 +39,8 @@ import java.util.List;
  */
 public class KeyguardTouchDelegate {
     // TODO: propagate changes to these to {@link KeyguardServiceDelegate}
-    static final String KEYGUARD_PACKAGE = "com.android.keyguard";
-    static final String KEYGUARD_CLASS = "com.android.keyguard.KeyguardService";
+    static final String KEYGUARD_PACKAGE = "com.android.systemui";
+    static final String KEYGUARD_CLASS = "com.android.systemui.keyguard.KeyguardService";
 
     private static KeyguardTouchDelegate sInstance;
     private static final List<OnKeyguardConnectionListener> sConnectionListeners =
