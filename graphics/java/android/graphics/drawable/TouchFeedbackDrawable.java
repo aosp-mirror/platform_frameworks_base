@@ -44,9 +44,6 @@ import java.io.IOException;
  * Documentation pending.
  */
 public class TouchFeedbackDrawable extends LayerDrawable {
-    private static final PorterDuffXfermode DST_ATOP = new PorterDuffXfermode(Mode.DST_ATOP);
-    private static final PorterDuffXfermode DST_IN = new PorterDuffXfermode(Mode.DST_IN);
-
     /** The maximum number of ripples supported. */
     private static final int MAX_RIPPLES = 10;
 
@@ -153,10 +150,8 @@ public class TouchFeedbackDrawable extends LayerDrawable {
      * @param tintMode A Porter-Duff blending mode
      */
     public void setTintMode(Mode tintMode) {
-        if (mState.mTintMode != tintMode) {
-            mState.mTintMode = tintMode;
-            invalidateSelf();
-        }
+        mState.setTintMode(tintMode);
+        invalidateSelf();
     }
 
     @Override
@@ -187,8 +182,8 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         }
 
         if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_tintMode] == 0) {
-            mState.mTintMode = Drawable.parseTintMode(
-                    a.getInt(R.styleable.TouchFeedbackDrawable_tintMode, -1), Mode.SRC_ATOP);
+            mState.setTintMode(Drawable.parseTintMode(
+                    a.getInt(R.styleable.TouchFeedbackDrawable_tintMode, -1), Mode.SRC_ATOP));
         }
 
         if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_pinned] == 0) {
@@ -238,8 +233,8 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         }
 
         if (a.hasValue(R.styleable.TouchFeedbackDrawable_tintMode)) {
-            mState.mTintMode = Drawable.parseTintMode(
-                    a.getInt(R.styleable.TouchFeedbackDrawable_tintMode, -1), Mode.SRC_ATOP);
+            mState.setTintMode(Drawable.parseTintMode(
+                    a.getInt(R.styleable.TouchFeedbackDrawable_tintMode, -1), Mode.SRC_ATOP));
         }
 
         if (a.hasValue(R.styleable.TouchFeedbackDrawable_pinned)) {
@@ -382,8 +377,9 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         // If we have ripples and content, we need a masking layer. This will
         // merge DST_ATOP onto (effectively under) the ripple layer.
         if (drewRipples && !projected && rippleRestoreCount >= 0) {
+            final PorterDuffXfermode xfermode = mState.getTintXfermode();
             canvas.saveLayer(bounds.left, bounds.top,
-                    bounds.right, bounds.bottom, getMaskingPaint(DST_ATOP), 0);
+                    bounds.right, bounds.bottom, getMaskingPaint(xfermode), 0);
         }
 
         Drawable mask = null;
@@ -401,7 +397,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         if (mask != null && drewRipples) {
             // TODO: This will also mask the lower layer, which is bad.
             canvas.saveLayer(bounds.left, bounds.top, bounds.right,
-                    bounds.bottom, getMaskingPaint(DST_IN), 0);
+                    bounds.bottom, getMaskingPaint(mState.mTintXfermode), 0);
             mask.draw(canvas);
         }
 
@@ -459,7 +455,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     static class TouchFeedbackState extends LayerState {
         int[] mTouchThemeAttrs;
         ColorStateList mTint;
-        Mode mTintMode;
+        PorterDuffXfermode mTintXfermode;
         boolean mPinned;
 
         public TouchFeedbackState(
@@ -469,9 +465,18 @@ public class TouchFeedbackDrawable extends LayerDrawable {
             if (orig != null) {
                 mTouchThemeAttrs = orig.mTouchThemeAttrs;
                 mTint = orig.mTint;
-                mTintMode = orig.mTintMode;
+                mTintXfermode = orig.mTintXfermode;
                 mPinned = orig.mPinned;
             }
+        }
+        
+        public void setTintMode(Mode mode) {
+            final Mode invertedMode = TouchFeedbackState.invertPorterDuffMode(mode);
+            mTintXfermode = new PorterDuffXfermode(invertedMode);
+        }
+        
+        public PorterDuffXfermode getTintXfermode() {
+            return mTintXfermode;
         }
 
         @Override
@@ -492,6 +497,33 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         @Override
         public Drawable newDrawable(Resources res, Theme theme) {
             return new TouchFeedbackDrawable(this, res, theme);
+        }
+
+        /**
+         * Inverts SRC and DST in PorterDuff blending modes.
+         */
+        private static Mode invertPorterDuffMode(Mode src) {
+            switch (src) {
+                case SRC_ATOP:
+                    return Mode.DST_ATOP;
+                case SRC_IN:
+                    return Mode.DST_IN;
+                case SRC_OUT:
+                    return Mode.DST_OUT;
+                case SRC_OVER:
+                    return Mode.DST_OVER;
+                case DST_ATOP:
+                    return Mode.SRC_ATOP;
+                case DST_IN:
+                    return Mode.SRC_IN;
+                case DST_OUT:
+                    return Mode.SRC_OUT;
+                case DST_OVER:
+                    return Mode.SRC_OVER;
+                default:
+                    // Everything else is agnostic to SRC versus DST.
+                    return src;
+            }
         }
     }
 
