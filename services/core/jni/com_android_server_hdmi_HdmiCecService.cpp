@@ -204,6 +204,11 @@ cec_logical_address_t HdmiCecHandler::initLogicalDevice(cec_device_type_t type) 
     } else {
         ALOGV("Logical Address Allocation success: %d", addr);
         mLogicalDevices.insert(std::pair<cec_device_type_t, cec_logical_address_t>(type, addr));
+
+        // Broadcast <Report Physical Address> when a new logical address was allocated to let
+        // other devices discover the new logical device and its logical - physical address
+        // association.
+        sendReportPhysicalAddress();
     }
     return addr;
 }
