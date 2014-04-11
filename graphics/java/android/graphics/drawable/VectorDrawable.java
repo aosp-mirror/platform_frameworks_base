@@ -1997,8 +1997,8 @@ public class VectorDrawable extends Drawable {
                         }
                         path.rQuadTo(reflectiveCtrlPointX, reflectiveCtrlPointY,
                                 val[k + 0], val[k + 1]);
-                        ctrlPointX = reflectiveCtrlPointX;
-                        ctrlPointY = reflectiveCtrlPointY;
+                        ctrlPointX = currentX + reflectiveCtrlPointX;
+                        ctrlPointY = currentY + reflectiveCtrlPointY;
                         currentX += val[k + 0];
                         currentY += val[k + 1];
                         break;
