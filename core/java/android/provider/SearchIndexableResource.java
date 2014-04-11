@@ -62,4 +62,17 @@ public class SearchIndexableResource extends SearchIndexableData {
     public SearchIndexableResource(Context context) {
         super(context);
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("SearchIndexableResource[");
+        sb.append(super.toString());
+        sb.append(", ");
+        sb.append("xmlResId: ");
+        sb.append(xmlResId);
+        sb.append("]");
+
+        return sb.toString();
+    }
 }

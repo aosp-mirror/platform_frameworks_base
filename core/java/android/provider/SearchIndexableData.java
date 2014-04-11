@@ -128,4 +128,44 @@ public abstract class SearchIndexableData {
         locale = Locale.getDefault();
         enabled = true;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("SearchIndexableData[context: ");
+        sb.append(context);
+        sb.append(", ");
+        sb.append("locale: ");
+        sb.append(locale);
+        sb.append(", ");
+        sb.append("enabled: ");
+        sb.append(enabled);
+        sb.append(", ");
+        sb.append("rank: ");
+        sb.append(rank);
+        sb.append(", ");
+        sb.append("key: ");
+        sb.append(key);
+        sb.append(", ");
+        sb.append("className: ");
+        sb.append(className);
+        sb.append(", ");
+        sb.append("packageName: ");
+        sb.append(packageName);
+        sb.append(", ");
+        sb.append("iconResId: ");
+        sb.append(iconResId);
+        sb.append(", ");
+        sb.append("intentAction: ");
+        sb.append(intentAction);
+        sb.append(", ");
+        sb.append("intentTargetPackage: ");
+        sb.append(intentTargetPackage);
+        sb.append(", ");
+        sb.append("intentTargetClass: ");
+        sb.append(intentTargetClass);
+        sb.append("]");
+
+        return sb.toString();
+    }
 }
