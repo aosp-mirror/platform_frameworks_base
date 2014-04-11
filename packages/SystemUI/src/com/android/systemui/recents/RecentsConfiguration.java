@@ -83,6 +83,7 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_animate_task_bar_enter_duration);
     }
 
+    /** Updates the system insets */
     public void updateSystemInsets(Rect insets) {
         systemInsets.set(insets);
     }
