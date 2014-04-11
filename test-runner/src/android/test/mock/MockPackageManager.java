@@ -78,6 +78,12 @@ public class MockPackageManager extends PackageManager {
     }
 
     @Override
+    public Intent getLeanbackLaunchIntentForPackage(String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+
     public int[] getPackageGids(String packageName) throws NameNotFoundException {
         throw new UnsupportedOperationException();
     }
