@@ -453,13 +453,13 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public boolean clearWindowContentRenderStats(IBinder token) {
+    public boolean clearWindowContentFrameStats(IBinder token) {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public WindowContentFrameStats getWindowContentRenderStats(IBinder token) {
+    public WindowContentFrameStats getWindowContentFrameStats(IBinder token) {
         // TODO Auto-generated method stub
         return null;
     }
