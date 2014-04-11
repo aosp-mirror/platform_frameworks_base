@@ -297,6 +297,28 @@ public final class UiAutomation {
     }
 
     /**
+     * Find the view that has the specified focus type. The search is performed
+     * across all windows.
+     * <p>
+     * <strong>Note:</strong> In order to access the windows you have to opt-in
+     * to retrieve the interactive windows by setting the
+     * {@link AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS} flag.
+     * Otherwise, the search will be performed only in the active window.
+     * </p>
+     *
+     * @param focus The focus to find. One of {@link AccessibilityNodeInfo#FOCUS_INPUT} or
+     *         {@link AccessibilityNodeInfo#FOCUS_ACCESSIBILITY}.
+     * @return The node info of the focused view or null.
+     *
+     * @see AccessibilityNodeInfo#FOCUS_INPUT
+     * @see AccessibilityNodeInfo#FOCUS_ACCESSIBILITY
+     */
+    public AccessibilityNodeInfo findFocus(int focus) {
+        return AccessibilityInteractionClient.getInstance().findFocus(mConnectionId,
+                AccessibilityNodeInfo.ANY_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID, focus);
+    }
+
+    /**
      * Gets the an {@link AccessibilityServiceInfo} describing this UiAutomation.
      * This method is useful if one wants to change some of the dynamically
      * configurable properties at runtime.

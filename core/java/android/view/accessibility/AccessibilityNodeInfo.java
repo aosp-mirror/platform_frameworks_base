@@ -77,6 +77,9 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int ACTIVE_WINDOW_ID = UNDEFINED_ITEM_ID;
 
     /** @hide */
+    public static final int ANY_WINDOW_ID = -2;
+
+    /** @hide */
     public static final int FLAG_PREFETCH_PREDECESSORS = 0x00000001;
 
     /** @hide */

@@ -8790,11 +8790,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             && !pointInView(event.getX(), event.getY()))) {
                 mSendingHoverAccessibilityEvents = false;
                 sendAccessibilityHoverEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
-                // If the window does not have input focus we take away accessibility
-                // focus as soon as the user stop hovering over the view.
-                if (mAttachInfo != null && !mAttachInfo.mHasWindowFocus) {
-                    getViewRootImpl().setAccessibilityFocus(null, null);
-                }
             }
         }
 
