@@ -17,10 +17,12 @@
 package com.android.systemui.recent;
 
 import android.app.ActivityManager;
+import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
@@ -30,7 +32,9 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -162,9 +166,14 @@ public class RecentTasksLoader implements View.OnTouchListener {
             intent.setComponent(origActivity);
         }
         final PackageManager pm = mContext.getPackageManager();
+        final IPackageManager ipm = AppGlobals.getPackageManager();
         intent.setFlags((intent.getFlags()&~Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
                 | Intent.FLAG_ACTIVITY_NEW_TASK);
-        final ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
+        ResolveInfo resolveInfo = null;
+        try {
+            resolveInfo = ipm.resolveIntent(intent, null, 0, userId);
+        } catch (RemoteException re) {
+        }
         if (resolveInfo != null) {
             final ActivityInfo info = resolveInfo.activityInfo;
             final String title = info.loadLabel(pm).toString();
@@ -192,7 +201,11 @@ public class RecentTasksLoader implements View.OnTouchListener {
         final PackageManager pm = mContext.getPackageManager();
         Bitmap thumbnail = am.getTaskTopThumbnail(td.persistentTaskId);
         Drawable icon = getFullResIcon(td.resolveInfo, pm);
-
+        if (td.userId != UserHandle.myUserId()) {
+            // Need to badge the icon
+            final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            icon = um.getBadgedDrawableForUser(icon, new UserHandle(td.userId));
+        }
         if (DEBUG) Log.v(TAG, "Loaded bitmap for task "
                 + td + ": " + thumbnail);
         synchronized (td) {
