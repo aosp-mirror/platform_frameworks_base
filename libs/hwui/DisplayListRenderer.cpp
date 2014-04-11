@@ -258,11 +258,11 @@ status_t DisplayListRenderer::drawBitmapData(const SkBitmap* bitmap, float left,
 
 status_t DisplayListRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
         const float* vertices, const int* colors, const SkPaint* paint) {
-    int count = (meshWidth + 1) * (meshHeight + 1) * 2;
+    int vertexCount = (meshWidth + 1) * (meshHeight + 1);
     bitmap = refBitmap(bitmap);
-    vertices = refBuffer<float>(vertices, count);
+    vertices = refBuffer<float>(vertices, vertexCount * 2); // 2 floats per vertex
     paint = refPaint(paint);
-    colors = refBuffer<int>(colors, count);
+    colors = refBuffer<int>(colors, vertexCount); // 1 color per vertex
 
     addDrawOp(new (alloc()) DrawBitmapMeshOp(bitmap, meshWidth, meshHeight,
                     vertices, colors, paint));
