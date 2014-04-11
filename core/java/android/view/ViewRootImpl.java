@@ -2174,10 +2174,7 @@ public final class ViewRootImpl implements ViewParent,
             mResizePaint.setAlpha(mResizeAlpha);
             canvas.drawHardwareLayer(mResizeBuffer, 0.0f, mHardwareYOffset, mResizePaint);
         }
-        // TODO: this
-        if (!HardwareRenderer.sUseRenderThread) {
-            drawAccessibilityFocusedDrawableIfNeeded(canvas);
-        }
+        drawAccessibilityFocusedDrawableIfNeeded(canvas);
     }
 
     /**

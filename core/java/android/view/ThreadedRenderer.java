@@ -55,9 +55,12 @@ public class ThreadedRenderer extends HardwareRenderer {
     private int mWidth, mHeight;
     private long mNativeProxy;
     private boolean mInitialized = false;
+    private RenderNode mRootNode;
 
     ThreadedRenderer(boolean translucent) {
         mNativeProxy = nCreateProxy(translucent);
+        mRootNode = RenderNode.create("RootNode");
+        mRootNode.setClipToBounds(false);
     }
 
     @Override
@@ -127,6 +130,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     void setup(int width, int height) {
         mWidth = width;
         mHeight = height;
+        mRootNode.setLeftTopRightBottom(0, 0, mWidth, mHeight);
         nSetup(mNativeProxy, width, height);
     }
 
@@ -165,10 +169,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     public void repeatLastDraw() {
     }
 
-    @Override
-    void draw(View view, AttachInfo attachInfo, HardwareDrawCallbacks callbacks, Rect dirty) {
-        attachInfo.mIgnoreDirtyState = true;
-        attachInfo.mDrawingTime = SystemClock.uptimeMillis();
+    private void updateRootDisplayList(View view, HardwareDrawCallbacks callbacks) {
         view.mPrivateFlags |= View.PFLAG_DRAWN;
 
         view.mRecreateDisplayList = (view.mPrivateFlags & View.PFLAG_INVALIDATED)
@@ -176,15 +177,27 @@ public class ThreadedRenderer extends HardwareRenderer {
         view.mPrivateFlags &= ~View.PFLAG_INVALIDATED;
 
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
-        RenderNode displayList = view.getDisplayList();
+        HardwareCanvas canvas = mRootNode.start(mWidth, mHeight);
+        callbacks.onHardwarePostDraw(canvas);
+        canvas.drawDisplayList(view.getDisplayList());
+        callbacks.onHardwarePostDraw(canvas);
+        mRootNode.end(canvas);
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
 
         view.mRecreateDisplayList = false;
+    }
+
+    @Override
+    void draw(View view, AttachInfo attachInfo, HardwareDrawCallbacks callbacks, Rect dirty) {
+        attachInfo.mIgnoreDirtyState = true;
+        attachInfo.mDrawingTime = SystemClock.uptimeMillis();
+
+        updateRootDisplayList(view, callbacks);
 
         if (dirty == null) {
             dirty = NULL_RECT;
         }
-        nDrawDisplayList(mNativeProxy, displayList.getNativeDisplayList(),
+        nDrawDisplayList(mNativeProxy, mRootNode.getNativeDisplayList(),
                 dirty.left, dirty.top, dirty.right, dirty.bottom);
     }
 
