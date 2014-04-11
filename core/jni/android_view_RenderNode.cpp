@@ -376,7 +376,8 @@ static jboolean android_view_RenderNode_isPivotExplicitlySet(JNIEnv* env,
 static jboolean android_view_RenderNode_hasIdentityMatrix(JNIEnv* env,
         jobject clazz, jlong renderNodePtr) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    return renderNode->stagingProperties().getMatrixFlags() == 0;
+    renderNode->mutateStagingProperties().updateMatrix();
+    return !renderNode->stagingProperties().hasTransformMatrix();
 }
 
 // ----------------------------------------------------------------------------
@@ -391,10 +392,7 @@ static void android_view_RenderNode_getTransformMatrix(JNIEnv* env,
     renderNode->mutateStagingProperties().updateMatrix();
     const SkMatrix* transformMatrix = renderNode->stagingProperties().getTransformMatrix();
 
-    if (renderNode->stagingProperties().getMatrixFlags() == TRANSLATION) {
-        outMatrix->setTranslate(renderNode->stagingProperties().getTranslationX(),
-                renderNode->stagingProperties().getTranslationY());
-    } else if (transformMatrix) {
+    if (transformMatrix) {
         *outMatrix = *transformMatrix;
     } else {
         outMatrix->setIdentity();
