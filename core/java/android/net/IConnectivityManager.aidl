@@ -150,4 +150,6 @@ interface IConnectivityManager
     void setProvisioningNotificationVisible(boolean visible, int networkType, in String extraInfo, in String url);
 
     void setAirplaneMode(boolean enable);
+
+    void registerNetworkFactory(in Messenger messenger);
 }

@@ -1587,4 +1587,11 @@ public class ConnectivityManager {
         } catch (RemoteException e) {
         }
     }
+
+    /** {@hide} */
+    public void registerNetworkFactory(Messenger messenger) {
+        try {
+            mService.registerNetworkFactory(messenger);
+        } catch (RemoteException e) { }
+    }
 }

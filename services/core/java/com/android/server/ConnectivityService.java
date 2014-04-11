@@ -29,6 +29,7 @@ import static android.net.ConnectivityManager.TYPE_WIMAX;
 import static android.net.ConnectivityManager.TYPE_PROXY;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
+import static android.net.ConnectivityServiceProtocol.NetworkFactoryProtocol;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
@@ -66,10 +67,12 @@ import android.net.LinkProperties.CompareResult;
 import android.net.LinkQualityInfo;
 import android.net.MobileDataStateTracker;
 import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkConfig;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkQuotaInfo;
+import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.NetworkStateTracker;
 import android.net.NetworkUtils;
@@ -119,6 +122,7 @@ import com.android.internal.telephony.DctConstants;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
@@ -372,6 +376,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private static final int EVENT_PROXY_HAS_CHANGED = 16;
 
+    /**
+     * used internally when registering NetworkFactories
+     * obj = Messenger
+     */
+    private static final int EVENT_REGISTER_NETWORK_FACTORY = 17;
+
     /** Handler used for internal events. */
     private InternalHandler mHandler;
     /** Handler used for incoming {@link NetworkStateTracker} events. */
@@ -460,6 +470,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             INetworkStatsService statsService, INetworkPolicyManager policyManager,
             NetworkFactory netFactory) {
         if (DBG) log("ConnectivityService starting up");
+
+        NetworkCapabilities netCap = new NetworkCapabilities();
+        netCap.addNetworkCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        netCap.addNetworkCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
+        NetworkRequest netRequest = new NetworkRequest(netCap);
+        mNetworkRequests.append(netRequest.requestId, netRequest);
 
         HandlerThread handlerThread = new HandlerThread("ConnectivityServiceThread");
         handlerThread.start();
@@ -3048,6 +3064,22 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         public void handleMessage(Message msg) {
             NetworkInfo info;
             switch (msg.what) {
+                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED: {
+                    AsyncChannel ac = (AsyncChannel) msg.obj;
+                    if (mNetworkFactories.contains(ac)) {
+                        if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
+                            if (VDBG) log("NetworkFactory connected");
+                            for (int i = 0; i < mNetworkRequests.size(); i++) {
+                                ac.sendMessage(NetworkFactoryProtocol.CMD_REQUEST_NETWORK,
+                                    mNetworkRequests.valueAt(i));
+                            }
+                        } else {
+                            loge("Error connecting NetworkFactory");
+                            mNetworkFactories.remove((AsyncChannel) msg.obj);
+                        }
+                    }
+                    break;
+                }
                 case NetworkStateTracker.EVENT_STATE_CHANGED: {
                     info = (NetworkInfo) msg.obj;
                     NetworkInfo.State state = info.getState();
@@ -3239,6 +3271,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
                 case EVENT_PROXY_HAS_CHANGED: {
                     handleApplyDefaultProxy((ProxyInfo)msg.obj);
+                    break;
+                }
+                case EVENT_REGISTER_NETWORK_FACTORY: {
+                    handleRegisterNetworkFactory((Messenger)msg.obj);
                     break;
                 }
             }
@@ -5081,4 +5117,21 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         long wakeupTime = SystemClock.elapsedRealtime() + timeoutInMilliseconds;
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, wakeupTime, intent);
     }
+
+    private final ArrayList<AsyncChannel> mNetworkFactories = new ArrayList<AsyncChannel>();
+
+    public void registerNetworkFactory(Messenger messenger) {
+        enforceConnectivityInternalPermission();
+
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_FACTORY, messenger));
+    }
+
+    private void handleRegisterNetworkFactory(Messenger messenger) {
+        if (VDBG) log("Got NetworkFactory Messenger");
+        AsyncChannel ac = new AsyncChannel();
+        mNetworkFactories.add(ac);
+        ac.connect(mContext, mTrackerHandler, messenger);
+    }
+
+    private final SparseArray<NetworkRequest> mNetworkRequests = new SparseArray<NetworkRequest>();
 }

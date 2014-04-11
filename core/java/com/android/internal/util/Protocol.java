@@ -55,5 +55,6 @@ public class Protocol {
     public static final int BASE_DNS_PINGER                                         = 0x00050000;
     public static final int BASE_NSD_MANAGER                                        = 0x00060000;
     public static final int BASE_NETWORK_STATE_TRACKER                              = 0x00070000;
+    public static final int BASE_CONNECTIVITY_SERVICE                               = 0x00080000;
     //TODO: define all used protocols
 }
