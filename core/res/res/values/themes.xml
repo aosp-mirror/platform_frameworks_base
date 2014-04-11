@@ -892,11 +892,6 @@ please see themes_device_defaults.xml.
         <item name="android:windowCloseOnTouchOutside">false</item>
     </style>
 
-    <style name="Theme.Panel.Volume">
-        <item name="android:windowAnimationStyle">@android:style/Animation.VolumePanel</item>
-        <item name="android:windowCloseOnTouchOutside">true</item>
-    </style>
-
     <!-- Default theme with an Action Bar. -->
     <style name="Theme.WithActionBar">
         <item name="android:windowActionBar">true</item>
