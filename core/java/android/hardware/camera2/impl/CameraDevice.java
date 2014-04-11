@@ -292,6 +292,70 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         return submitCaptureRequest(requests, listener, handler, /*streaming*/false);
     }
 
+    /**
+     * This method checks lastFrameNumber returned from ICameraDeviceUser methods for
+     * starting and stopping repeating request and flushing.
+     *
+     * <p>If lastFrameNumber is NO_FRAMES_CAPTURED, it means that the request was never
+     * sent to HAL. Then onCaptureSequenceCompleted is immediately triggered.
+     * If lastFrameNumber is non-negative, then the requestId and lastFrameNumber pair
+     * is added to the list mFrameNumberRequestPairs.</p>
+     *
+     * @param requestId the request ID of the current repeating request.
+     *
+     * @param lastFrameNumber last frame number returned from binder.
+     */
+    private void checkEarlyTriggerSequenceComplete(
+            final int requestId, final long lastFrameNumber) {
+        // lastFrameNumber being equal to NO_FRAMES_CAPTURED means that the request
+        // was never sent to HAL. Should trigger onCaptureSequenceCompleted immediately.
+        if (lastFrameNumber == CaptureListener.NO_FRAMES_CAPTURED) {
+            final CaptureListenerHolder holder;
+            int index = mCaptureListenerMap.indexOfKey(requestId);
+            holder = (index >= 0) ? mCaptureListenerMap.valueAt(index) : null;
+            if (holder != null) {
+                mCaptureListenerMap.removeAt(index);
+            }
+
+            if (holder != null) {
+                if (DEBUG) {
+                    Log.v(TAG, "immediately trigger onCaptureSequenceCompleted because"
+                            + " request did not reach HAL");
+                }
+
+                Runnable resultDispatch = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!CameraDevice.this.isClosed()) {
+                            if (DEBUG) {
+                                Log.d(TAG, String.format(
+                                        "early trigger sequence complete for request %d",
+                                        requestId));
+                            }
+                            if (lastFrameNumber < Integer.MIN_VALUE
+                                    || lastFrameNumber > Integer.MAX_VALUE) {
+                                throw new AssertionError(lastFrameNumber + " cannot be cast to int");
+                            }
+                            holder.getListener().onCaptureSequenceCompleted(
+                                    CameraDevice.this,
+                                    requestId,
+                                    (int)lastFrameNumber);
+                        }
+                    }
+                };
+                holder.getHandler().post(resultDispatch);
+            } else {
+                Log.w(TAG, String.format(
+                        "did not register listener to request %d",
+                        requestId));
+            }
+        } else {
+            mFrameNumberRequestPairs.add(
+                    new SimpleEntry<Long, Integer>(lastFrameNumber,
+                            requestId));
+        }
+    }
+
     private int submitCaptureRequest(List<CaptureRequest> requestList, CaptureListener listener,
             Handler handler, boolean repeating) throws CameraAccessException {
 
@@ -313,7 +377,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             try {
                 requestId = mRemoteDevice.submitRequestList(requestList, repeating,
                         /*out*/lastFrameNumberRef);
-                if (!repeating) {
+                if (DEBUG) {
                     Log.v(TAG, "last frame number " + lastFrameNumberRef.getNumber());
                 }
             } catch (CameraRuntimeException e) {
@@ -322,25 +386,17 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 // impossible
                 return -1;
             }
+
             if (listener != null) {
                 mCaptureListenerMap.put(requestId, new CaptureListenerHolder(listener,
                         requestList, handler, repeating));
             }
 
             long lastFrameNumber = lastFrameNumberRef.getNumber();
-            /**
-             * If it's the first repeating request, then returned lastFrameNumber can be
-             * negative. Otherwise, it should always be non-negative.
-             */
-            if (((lastFrameNumber < 0) && (requestId > 0))
-                    || ((lastFrameNumber < 0) && (!repeating))) {
-                throw new AssertionError(String.format("returned bad frame number %d",
-                        lastFrameNumber));
-            }
+
             if (repeating) {
                 if (mRepeatingRequestId != REQUEST_ID_NONE) {
-                    mFrameNumberRequestPairs.add(
-                            new SimpleEntry<Long, Integer>(lastFrameNumber, mRepeatingRequestId));
+                    checkEarlyTriggerSequenceComplete(mRepeatingRequestId, lastFrameNumber);
                 }
                 mRepeatingRequestId = requestId;
             } else {
@@ -395,12 +451,9 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                     LongParcelable lastFrameNumberRef = new LongParcelable();
                     mRemoteDevice.cancelRequest(requestId, /*out*/lastFrameNumberRef);
                     long lastFrameNumber = lastFrameNumberRef.getNumber();
-                    if ((lastFrameNumber < 0) && (requestId > 0)) {
-                        throw new AssertionError(String.format("returned bad frame number %d",
-                                lastFrameNumber));
-                    }
-                    mFrameNumberRequestPairs.add(
-                            new SimpleEntry<Long, Integer>(lastFrameNumber, requestId));
+
+                    checkEarlyTriggerSequenceComplete(requestId, lastFrameNumber);
+
                 } catch (CameraRuntimeException e) {
                     throw e.asChecked();
                 } catch (RemoteException e) {
@@ -443,11 +496,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 mRemoteDevice.flush(/*out*/lastFrameNumberRef);
                 if (mRepeatingRequestId != REQUEST_ID_NONE) {
                     long lastFrameNumber = lastFrameNumberRef.getNumber();
-                    if (lastFrameNumber < 0) {
-                        Log.e(TAG, String.format("returned bad frame number %d", lastFrameNumber));
-                    }
-                    mFrameNumberRequestPairs.add(
-                            new SimpleEntry<Long, Integer>(lastFrameNumber, mRepeatingRequestId));
+                    checkEarlyTriggerSequenceComplete(mRepeatingRequestId, lastFrameNumber);
                     mRepeatingRequestId = REQUEST_ID_NONE;
                 }
             } catch (CameraRuntimeException e) {
@@ -582,8 +631,8 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                  */
                 if (frameNumber != mCompletedFrameNumber + 1) {
                     throw new AssertionError(String.format(
-                            "result frame number %d comes out of order",
-                            frameNumber));
+                            "result frame number %d comes out of order, should be %d + 1",
+                            frameNumber, mCompletedFrameNumber));
                 }
                 mCompletedFrameNumber++;
             }
@@ -607,11 +656,18 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 final int requestId = frameNumberRequestPair.getValue();
                 final CaptureListenerHolder holder;
                 synchronized (mLock) {
-                    int index = CameraDevice.this.mCaptureListenerMap.indexOfKey(requestId);
-                    holder = (index >= 0) ? CameraDevice.this.mCaptureListenerMap.valueAt(index)
+                    int index = mCaptureListenerMap.indexOfKey(requestId);
+                    holder = (index >= 0) ? mCaptureListenerMap.valueAt(index)
                             : null;
                     if (holder != null) {
-                        CameraDevice.this.mCaptureListenerMap.removeAt(index);
+                        mCaptureListenerMap.removeAt(index);
+                        if (DEBUG) {
+                            Log.v(TAG, String.format(
+                                    "remove holder for requestId %d, "
+                                    + "because lastFrame %d is <= %d",
+                                    requestId, frameNumberRequestPair.getKey(),
+                                    completedFrameNumber));
+                        }
                     }
                 }
                 iter.remove();
@@ -628,11 +684,16 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                                             requestId));
                                 }
 
+                                long lastFrameNumber = frameNumberRequestPair.getKey();
+                                if (lastFrameNumber < Integer.MIN_VALUE
+                                        || lastFrameNumber > Integer.MAX_VALUE) {
+                                    throw new AssertionError(lastFrameNumber
+                                            + " cannot be cast to int");
+                                }
                                 holder.getListener().onCaptureSequenceCompleted(
                                     CameraDevice.this,
                                     requestId,
-                                    // TODO: this is problematic, crop long to int
-                                    frameNumberRequestPair.getKey().intValue());
+                                    (int)lastFrameNumber);
                             }
                         }
                     };
@@ -705,6 +766,9 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             }
 
             // Fire onCaptureSequenceCompleted
+            if (DEBUG) {
+                Log.v(TAG, String.format("got error frame %d", resultExtras.getFrameNumber()));
+            }
             mFrameNumberTracker.updateTracker(resultExtras.getFrameNumber(), /*error*/true);
             checkAndFireSequenceComplete();
 
@@ -766,18 +830,28 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             if (DEBUG) {
                 Log.d(TAG, "Received result for id " + requestId);
             }
-            final CaptureListenerHolder holder =
-                    CameraDevice.this.mCaptureListenerMap.get(requestId);
+            final CaptureListenerHolder holder;
+            synchronized (mLock) {
+                holder = CameraDevice.this.mCaptureListenerMap.get(requestId);
+            }
 
             Boolean quirkPartial = result.get(CaptureResult.QUIRKS_PARTIAL_RESULT);
             boolean quirkIsPartialResult = (quirkPartial != null && quirkPartial);
 
             // Check if we have a listener for this
             if (holder == null) {
+                if (DEBUG) {
+                    Log.v(TAG, "holder is null, early return");
+                }
                 return;
             }
 
-            if (isClosed()) return;
+            if (isClosed()) {
+                if (DEBUG) {
+                    Log.v(TAG, "camera is closed, early return");
+                }
+                return;
+            }
 
             final CaptureRequest request = holder.getRequest(resultExtras.getSubsequenceId());
             final CaptureResult resultAsCapture = new CaptureResult(result, request, requestId);
