@@ -194,12 +194,14 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         private final int mDensityDpi;
         private final boolean mSecure;
 
-        private Surface mSurface;
+        private int mState;
         private SurfaceTexture mSurfaceTexture;
+        private Surface mSurface;
         private DisplayDeviceInfo mInfo;
 
         public OverlayDisplayDevice(IBinder displayToken, String name,
-                int width, int height, float refreshRate, int densityDpi, boolean secure,
+                int width, int height, float refreshRate,
+                int densityDpi, boolean secure, int state,
                 SurfaceTexture surfaceTexture) {
             super(OverlayDisplayAdapter.this, displayToken);
             mName = name;
@@ -208,6 +210,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
             mRefreshRate = refreshRate;
             mDensityDpi = densityDpi;
             mSecure = secure;
+            mState = state;
             mSurfaceTexture = surfaceTexture;
         }
 
@@ -230,6 +233,11 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
             }
         }
 
+        public void setStateLocked(int state) {
+            mState = state;
+            mInfo = null;
+        }
+
         @Override
         public DisplayDeviceInfo getDisplayDeviceInfoLocked() {
             if (mInfo == null) {
@@ -247,6 +255,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 }
                 mInfo.type = Display.TYPE_OVERLAY;
                 mInfo.touch = DisplayDeviceInfo.TOUCH_NONE;
+                mInfo.state = mState;
             }
             return mInfo;
         }
@@ -288,11 +297,12 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
 
         // Called on the UI thread.
         @Override
-        public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate) {
+        public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate, int state) {
             synchronized (getSyncRoot()) {
                 IBinder displayToken = SurfaceControl.createDisplay(mName, mSecure);
                 mDevice = new OverlayDisplayDevice(displayToken, mName,
-                        mWidth, mHeight, refreshRate, mDensityDpi, mSecure, surfaceTexture);
+                        mWidth, mHeight, refreshRate, mDensityDpi, mSecure,
+                        state, surfaceTexture);
 
                 sendDisplayDeviceEventLocked(mDevice, DISPLAY_DEVICE_EVENT_ADDED);
             }
@@ -305,6 +315,17 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 if (mDevice != null) {
                     mDevice.destroyLocked();
                     sendDisplayDeviceEventLocked(mDevice, DISPLAY_DEVICE_EVENT_REMOVED);
+                }
+            }
+        }
+
+        // Called on the UI thread.
+        @Override
+        public void onStateChanged(int state) {
+            synchronized (getSyncRoot()) {
+                if (mDevice != null) {
+                    mDevice.setStateLocked(state);
+                    sendDisplayDeviceEventLocked(mDevice, DISPLAY_DEVICE_EVENT_CHANGED);
                 }
             }
         }

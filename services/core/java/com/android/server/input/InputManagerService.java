@@ -185,6 +185,7 @@ public class InputManagerService extends IInputManager.Stub
             InputChannel fromChannel, InputChannel toChannel);
     private static native void nativeSetPointerSpeed(long ptr, int speed);
     private static native void nativeSetShowTouches(long ptr, boolean enabled);
+    private static native void nativeSetInteractive(long ptr, boolean interactive);
     private static native void nativeReloadCalibration(long ptr);
     private static native void nativeVibrate(long ptr, int deviceId, long[] pattern,
             int repeat, int token);
@@ -1404,14 +1405,13 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn) {
-        return mWindowManagerCallbacks.interceptKeyBeforeQueueing(
-                event, policyFlags, isScreenOn);
+    private int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
+        return mWindowManagerCallbacks.interceptKeyBeforeQueueing(event, policyFlags);
     }
 
     // Native callback.
-    private int interceptMotionBeforeQueueingWhenScreenOff(long whenNanos, int policyFlags) {
-        return mWindowManagerCallbacks.interceptMotionBeforeQueueingWhenScreenOff(
+    private int interceptWakeMotionBeforeQueueing(long whenNanos, int policyFlags) {
+        return mWindowManagerCallbacks.interceptWakeMotionBeforeQueueing(
                 whenNanos, policyFlags);
     }
 
@@ -1570,9 +1570,9 @@ public class InputManagerService extends IInputManager.Stub
         public long notifyANR(InputApplicationHandle inputApplicationHandle,
                 InputWindowHandle inputWindowHandle, String reason);
 
-        public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn);
+        public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags);
 
-        public int interceptMotionBeforeQueueingWhenScreenOff(long whenNanos, int policyFlags);
+        public int interceptWakeMotionBeforeQueueing(long whenNanos, int policyFlags);
 
         public long interceptKeyBeforeDispatching(InputWindowHandle focus,
                 KeyEvent event, int policyFlags);
@@ -1739,6 +1739,11 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public boolean injectInputEvent(InputEvent event, int displayId, int mode) {
             return injectInputEventInternal(event, displayId, mode);
+        }
+
+        @Override
+        public void setInteractive(boolean interactive) {
+            nativeSetInteractive(mPtr, interactive);
         }
     }
 }

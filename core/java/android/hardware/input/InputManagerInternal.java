@@ -25,12 +25,18 @@ import android.view.InputEvent;
  * @hide Only for use within the system server.
  */
 public abstract class InputManagerInternal {
+    public abstract boolean injectInputEvent(InputEvent event, int displayId, int mode);
+
     /**
-     * Sets information about the displays as needed by the input system.
-     * The input system should copy this information if required.
+     * Called by the display manager to set information about the displays as needed
+     * by the input system.  The input system must copy this information to retain it.
      */
     public abstract void setDisplayViewports(DisplayViewport defaultViewport,
             DisplayViewport externalTouchViewport);
 
-    public abstract boolean injectInputEvent(InputEvent event, int displayId, int mode);
+    /**
+     * Called by the power manager to tell the input manager whether it should start
+     * watching for wake events.
+     */
+    public abstract void setInteractive(boolean interactive);
 }

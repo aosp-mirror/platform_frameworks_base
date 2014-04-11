@@ -58,16 +58,6 @@ public abstract class DisplayManagerInternal {
     public abstract boolean isProximitySensorAvailable();
 
     /**
-     * Called by the power manager to blank all displays.
-     */
-    public abstract void blankAllDisplaysFromPowerManager();
-
-    /**
-     * Called by the power manager to unblank all displays.
-     */
-    public abstract void unblankAllDisplaysFromPowerManager();
-
-    /**
      * Returns information about the specified logical display.
      *
      * @param displayId The logical display id.
@@ -254,12 +244,10 @@ public abstract class DisplayManagerInternal {
         void onStateChanged();
         void onProximityPositive();
         void onProximityNegative();
+        void onDisplayStateChange(int state); // one of the Display state constants
 
         void acquireSuspendBlocker();
         void releaseSuspendBlocker();
-
-        void blankAllDisplays();
-        void unblankAllDisplays();
     }
 
     /**
