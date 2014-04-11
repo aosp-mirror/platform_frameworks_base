@@ -4953,6 +4953,7 @@ package android.app.admin {
     method public void setPasswordMinimumSymbols(android.content.ComponentName, int);
     method public void setPasswordMinimumUpperCase(android.content.ComponentName, int);
     method public void setPasswordQuality(android.content.ComponentName, int);
+    method public void setProfileEnabled(android.content.ComponentName);
     method public int setStorageEncryption(android.content.ComponentName, boolean);
     method public void wipeData(int);
     field public static final java.lang.String ACTION_ADD_DEVICE_ADMIN = "android.app.action.ADD_DEVICE_ADMIN";

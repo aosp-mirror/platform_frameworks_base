@@ -1756,8 +1756,26 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Sets the enabled state of the profile. A profile should be enabled only once it is ready to
+     * be used. Only the profile owner can call this.
+     *
+     * @see #isPRofileOwnerApp
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     */
+    public void setProfileEnabled(ComponentName admin) {
+        if (mService != null) {
+            try {
+                mService.setProfileEnabled(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
      * Used to determine if a particular package is registered as the Profile Owner for the
-     * current user. A profile owner is a special device admin that has additional priviledges
+     * current user. A profile owner is a special device admin that has additional privileges
      * within the managed profile.
      *
      * @param packageName The package name of the app to compare with the registered profile owner.
