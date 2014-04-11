@@ -492,7 +492,20 @@ public class UserManager {
         return profiles;
     }
 
-    /** @hide */
+    /**
+     * If the target user is a managed profile of the calling user or the caller
+     * is itself a managed profile, then this returns a badged copy of the given
+     * icon to be able to distinguish it from the original icon.
+     * <P>
+     * If the original drawable is not a BitmapDrawable, then the original
+     * drawable is returned.
+     * </P>
+     *
+     * @param icon The icon to badge.
+     * @param user The target user.
+     * @return A drawable that combines the original icon and a badge as
+     *         determined by the system.
+     */
     public Drawable getBadgedDrawableForUser(Drawable icon, UserHandle user) {
         int badgeResId = getBadgeResIdForUser(user.getIdentifier());
         if (badgeResId == 0) {
