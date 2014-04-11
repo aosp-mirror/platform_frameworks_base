@@ -42,6 +42,7 @@ import android.util.MathUtils;
 import android.util.Slog;
 import android.util.Spline;
 import android.util.TimeUtils;
+import android.view.Display;
 
 import java.io.PrintWriter;
 
@@ -121,6 +122,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     // The sensor manager.
     private final SensorManager mSensorManager;
+
+    // The display blanker.
+    private final DisplayBlanker mBlanker;
 
     // The proximity sensor, or null if not available or needed.
     private Sensor mProximitySensor;
@@ -225,13 +229,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
      * Creates the display power controller.
      */
     public DisplayPowerController(Context context,
-            DisplayPowerCallbacks callbacks, Handler handler, SensorManager sensorManager) {
+            DisplayPowerCallbacks callbacks, Handler handler,
+            SensorManager sensorManager, DisplayBlanker blanker) {
         mHandler = new DisplayControllerHandler(handler.getLooper());
         mCallbacks = callbacks;
 
         mBatteryStats = BatteryStatsService.getService();
         mLights = LocalServices.getService(LightsManager.class);
         mSensorManager = sensorManager;
+        mBlanker = blanker;
 
         final Resources resources = context.getResources();
 
@@ -366,8 +372,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void initialize() {
-        mPowerState = new DisplayPowerState(new ElectronBeam(), mCallbacks,
-                mLights.getLight(LightsManager.LIGHT_ID_BACKLIGHT));
+        // Initialize the power state object for the default display.
+        // In the future, we might manage multiple displays independently.
+        mPowerState = new DisplayPowerState(mBlanker,
+                mLights.getLight(LightsManager.LIGHT_ID_BACKLIGHT),
+                new ElectronBeam(Display.DEFAULT_DISPLAY));
 
         mElectronBeamOnAnimator = ObjectAnimator.ofFloat(
                 mPowerState, DisplayPowerState.ELECTRON_BEAM_LEVEL, 0.0f, 1.0f);
@@ -523,7 +532,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Animate the screen on or off unless blocked.
         if (mScreenOffBecauseOfProximity) {
             // Screen off due to proximity.
-            setScreenOn(false);
+            setScreenState(Display.STATE_OFF);
             unblockScreenOn();
         } else if (mPowerRequest.wantScreenOnAny()) {
             // Want screen on.
@@ -534,7 +543,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 // Turn the screen on.  The contents of the screen may not yet
                 // be visible if the electron beam has not been dismissed because
                 // its last frame of animation is solid black.
-                setScreenOn(true);
+                setScreenState(mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DOZE
+                        ? Display.STATE_DOZING : Display.STATE_ON);
 
                 if (mPowerRequest.blockScreenOn
                         && mPowerState.getElectronBeamLevel() == 0.0f) {
@@ -567,12 +577,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             if (!mElectronBeamOnAnimator.isStarted()) {
                 if (!mElectronBeamOffAnimator.isStarted()) {
                     if (mPowerState.getElectronBeamLevel() == 0.0f) {
-                        setScreenOn(false);
+                        setScreenState(Display.STATE_OFF);
                     } else if (mPowerState.prepareElectronBeam(
                             mElectronBeamFadesConfig ?
                                     ElectronBeam.MODE_FADE :
                                             ElectronBeam.MODE_COOL_DOWN)
-                            && mPowerState.isScreenOn()) {
+                            && mPowerState.getScreenState() != Display.STATE_OFF) {
                         mElectronBeamOffAnimator.start();
                     } else {
                         mElectronBeamOffAnimator.end();
@@ -610,9 +620,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void blockScreenOn() {
         if (!mScreenOnWasBlocked) {
             mScreenOnWasBlocked = true;
+            mScreenOnBlockStartRealTime = SystemClock.elapsedRealtime();
             if (DEBUG) {
                 Slog.d(TAG, "Blocked screen on.");
-                mScreenOnBlockStartRealTime = SystemClock.elapsedRealtime();
             }
         }
     }
@@ -627,11 +637,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    private void setScreenOn(boolean on) {
-        if (mPowerState.isScreenOn() != on) {
-            mPowerState.setScreenOn(on);
+    private void setScreenState(int state) {
+        if (mPowerState.getScreenState() != state) {
+            mPowerState.setScreenState(state);
             try {
-                if (on) {
+                if (state != Display.STATE_OFF) {
                     mBatteryStats.noteScreenOn();
                 } else {
                     mBatteryStats.noteScreenOff();

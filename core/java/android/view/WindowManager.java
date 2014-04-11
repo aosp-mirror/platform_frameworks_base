@@ -608,7 +608,10 @@ public interface WindowManager extends ViewManager {
          * screen is pressed, you will receive this first touch event.  Usually
          * the first touch event is consumed by the system since the user can
          * not see what they are pressing on.
+         *
+         * @deprecated This flag has no effect.
          */
+        @Deprecated
         public static final int FLAG_TOUCHABLE_WHEN_WAKING = 0x00000040;
         
         /** Window flag: as long as this window is visible to the user, keep

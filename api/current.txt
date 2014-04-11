@@ -19735,7 +19735,8 @@ package android.os {
 
   public final class PowerManager {
     method public void goToSleep(long);
-    method public boolean isScreenOn();
+    method public boolean isInteractive();
+    method public deprecated boolean isScreenOn();
     method public android.os.PowerManager.WakeLock newWakeLock(int, java.lang.String);
     method public void reboot(java.lang.String);
     method public void userActivity(long, boolean);
@@ -28412,6 +28413,7 @@ package android.view {
     method public float getRefreshRate();
     method public int getRotation();
     method public void getSize(android.graphics.Point);
+    method public int getState();
     method public deprecated int getWidth();
     method public boolean isValid();
     field public static final int DEFAULT_DISPLAY = 0; // 0x0
@@ -28419,6 +28421,10 @@ package android.view {
     field public static final int FLAG_PRIVATE = 4; // 0x4
     field public static final int FLAG_SECURE = 2; // 0x2
     field public static final int FLAG_SUPPORTS_PROTECTED_BUFFERS = 1; // 0x1
+    field public static final int STATE_DOZING = 3; // 0x3
+    field public static final int STATE_OFF = 1; // 0x1
+    field public static final int STATE_ON = 2; // 0x2
+    field public static final int STATE_UNKNOWN = 0; // 0x0
   }
 
   public class DragEvent implements android.os.Parcelable {
@@ -28764,7 +28770,7 @@ package android.view {
     field public static final int FLAG_SOFT_KEYBOARD = 2; // 0x2
     field public static final int FLAG_TRACKING = 512; // 0x200
     field public static final int FLAG_VIRTUAL_HARD_KEY = 64; // 0x40
-    field public static final int FLAG_WOKE_HERE = 1; // 0x1
+    field public static final deprecated int FLAG_WOKE_HERE = 1; // 0x1
     field public static final int KEYCODE_0 = 7; // 0x7
     field public static final int KEYCODE_1 = 8; // 0x8
     field public static final int KEYCODE_2 = 9; // 0x9
@@ -30898,7 +30904,7 @@ package android.view {
     field public static final int FLAG_SHOW_WALLPAPER = 1048576; // 0x100000
     field public static final int FLAG_SHOW_WHEN_LOCKED = 524288; // 0x80000
     field public static final int FLAG_SPLIT_TOUCH = 8388608; // 0x800000
-    field public static final int FLAG_TOUCHABLE_WHEN_WAKING = 64; // 0x40
+    field public static final deprecated int FLAG_TOUCHABLE_WHEN_WAKING = 64; // 0x40
     field public static final int FLAG_TRANSLUCENT_NAVIGATION = 134217728; // 0x8000000
     field public static final int FLAG_TRANSLUCENT_STATUS = 67108864; // 0x4000000
     field public static final int FLAG_TURN_SCREEN_ON = 2097152; // 0x200000

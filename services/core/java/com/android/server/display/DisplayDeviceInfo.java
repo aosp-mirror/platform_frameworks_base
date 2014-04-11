@@ -176,6 +176,11 @@ final class DisplayDeviceInfo {
     public String address;
 
     /**
+     * Display state.
+     */
+    public int state = Display.STATE_ON;
+
+    /**
      * The UID of the application that owns this display, or zero if it is owned by the system.
      * <p>
      * If the display is private, then only the owner can use it.
@@ -219,6 +224,7 @@ final class DisplayDeviceInfo {
                 && rotation == other.rotation
                 && type == other.type
                 && Objects.equal(address, other.address)
+                && state == other.state
                 && ownerUid == other.ownerUid
                 && Objects.equal(ownerPackageName, other.ownerPackageName);
     }
@@ -241,6 +247,7 @@ final class DisplayDeviceInfo {
         rotation = other.rotation;
         type = other.type;
         address = other.address;
+        state = other.state;
         ownerUid = other.ownerUid;
         ownerPackageName = other.ownerPackageName;
     }
@@ -260,6 +267,7 @@ final class DisplayDeviceInfo {
         if (address != null) {
             sb.append(", address ").append(address);
         }
+        sb.append(", state ").append(Display.stateToString(state));
         if (ownerUid != 0 || ownerPackageName != null) {
             sb.append(", owner ").append(ownerPackageName);
             sb.append(" (uid ").append(ownerUid).append(")");

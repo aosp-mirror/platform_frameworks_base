@@ -2362,7 +2362,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean interceptFallback(WindowState win, KeyEvent fallbackEvent, int policyFlags) {
-        int actions = interceptKeyBeforeQueueing(fallbackEvent, policyFlags, true);
+        int actions = interceptKeyBeforeQueueing(fallbackEvent, policyFlags);
         if ((actions & ACTION_PASS_TO_USER) != 0) {
             long delayMillis = interceptKeyBeforeDispatching(
                     win, fallbackEvent, policyFlags);
@@ -3837,12 +3837,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn) {
+    public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
         if (!mSystemBooted) {
             // If we have not yet booted, don't let key events do anything.
             return 0;
         }
 
+        final boolean interactive = (policyFlags & FLAG_INTERACTIVE) != 0;
         final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
         final boolean canceled = event.isCanceled();
         final int keyCode = event.getKeyCode();
@@ -3854,7 +3855,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // This will prevent any keys other than the power button from waking the screen
         // when the keyguard is hidden by another activity.
         final boolean keyguardActive = (mKeyguardDelegate == null ? false :
-                                            (isScreenOn ?
+                                            (interactive ?
                                                 mKeyguardDelegate.isShowingAndNotOccluded() :
                                                 mKeyguardDelegate.isShowing()));
 
@@ -3866,7 +3867,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (DEBUG_INPUT) {
             Log.d(TAG, "interceptKeyTq keycode=" + keyCode
-                    + " screenIsOn=" + isScreenOn + " keyguardActive=" + keyguardActive
+                    + " interactive=" + interactive + " keyguardActive=" + keyguardActive
                     + " policyFlags=" + Integer.toHexString(policyFlags));
         }
 
@@ -3875,18 +3876,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
         }
 
-        // Basic policy based on screen state and keyguard.
-        // FIXME: This policy isn't quite correct.  We shouldn't care whether the screen
-        //        is on or off, really.  We should care about whether the device is in an
-        //        interactive state or is in suspend pretending to be "off".
-        //        The primary screen might be turned off due to proximity sensor or
-        //        because we are presenting media on an auxiliary screen or remotely controlling
-        //        the device some other way (which is why we have an exemption here for injected
-        //        events).
+        // Basic policy based on interactive state.
         int result;
         boolean isWakeKey = (policyFlags & (WindowManagerPolicy.FLAG_WAKE
                 | WindowManagerPolicy.FLAG_WAKE_DROPPED)) != 0;
-        if (isScreenOn || (isInjected && !isWakeKey)) {
+        if (interactive || (isInjected && !isWakeKey)) {
             // When the screen is on or if the key is injected pass the key to the application.
             result = ACTION_PASS_TO_USER;
         } else {
@@ -3911,7 +3905,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
                 if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
                     if (down) {
-                        if (isScreenOn && !mVolumeDownKeyTriggered
+                        if (interactive && !mVolumeDownKeyTriggered
                                 && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
                             mVolumeDownKeyTriggered = true;
                             mVolumeDownKeyTime = event.getDownTime();
@@ -3925,7 +3919,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
                     if (down) {
-                        if (isScreenOn && !mVolumeUpKeyTriggered
+                        if (interactive && !mVolumeUpKeyTriggered
                                 && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
                             mVolumeUpKeyTriggered = true;
                             cancelPendingPowerKeyAction();
@@ -3993,7 +3987,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             Log.w(TAG, "ITelephony threw RemoteException", ex);
                         }
                     }
-                    interceptPowerKeyDown(!isScreenOn || hungUp);
+                    interceptPowerKeyDown(!interactive || hungUp);
                 } else {
                     if (interceptPowerKeyUp(canceled)) {
                         if ((mEndcallBehavior
@@ -4020,7 +4014,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (panic) {
                         mHandler.post(mRequestTransientNav);
                     }
-                    if (isScreenOn && !mPowerKeyTriggered
+                    if (interactive && !mPowerKeyTriggered
                             && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
                         mPowerKeyTriggered = true;
                         mPowerKeyTime = event.getDownTime();
@@ -4046,7 +4040,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             Log.w(TAG, "ITelephony threw RemoteException", ex);
                         }
                     }
-                    interceptPowerKeyDown(!isScreenOn || hungUp
+                    interceptPowerKeyDown(!interactive || hungUp
                             || mVolumeDownKeyTriggered || mVolumeUpKeyTriggered);
                 } else {
                     mPowerKeyTriggered = false;
@@ -4179,15 +4173,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public int interceptMotionBeforeQueueingWhenScreenOff(long whenNanos, int policyFlags) {
-        int result = 0;
-
-        final boolean isWakeMotion = (policyFlags
-                & (WindowManagerPolicy.FLAG_WAKE | WindowManagerPolicy.FLAG_WAKE_DROPPED)) != 0;
-        if (isWakeMotion) {
-            mPowerManager.wakeUp(whenNanos / 1000000);
-        }
-        return result;
+    public int interceptWakeMotionBeforeQueueing(long whenNanos, int policyFlags) {
+        // We already know this is a wake motion so just wake up.
+        // Note that we would observe policyFlags containing
+        // FLAG_WAKE and FLAG_INTERACTIVE here.
+        mPowerManager.wakeUp(whenNanos / 1000000);
+        return 0;
     }
 
     void dispatchMediaKeyWithWakeLock(KeyEvent event) {

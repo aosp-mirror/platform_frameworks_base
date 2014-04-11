@@ -121,10 +121,6 @@ public final class DisplayManagerService extends SystemService {
     private static final int MSG_REQUEST_TRAVERSAL = 4;
     private static final int MSG_UPDATE_VIEWPORT = 5;
 
-    private static final int DISPLAY_BLANK_STATE_UNKNOWN = 0;
-    private static final int DISPLAY_BLANK_STATE_BLANKED = 1;
-    private static final int DISPLAY_BLANK_STATE_UNBLANKED = 2;
-
     private final Context mContext;
     private final DisplayManagerHandler mHandler;
     private final Handler mUiHandler;
@@ -176,8 +172,9 @@ public final class DisplayManagerService extends SystemService {
     // Display power controller.
     private DisplayPowerController mDisplayPowerController;
 
-    // Set to true if all displays have been blanked by the power manager.
-    private int mAllDisplayBlankStateFromPowerManager = DISPLAY_BLANK_STATE_UNKNOWN;
+    // The overall display state, independent of changes that might influence one
+    // display or another in particular.
+    private int mGlobalDisplayState = Display.STATE_UNKNOWN;
 
     // Set to true when there are pending display changes that have yet to be applied
     // to the surface flinger state.
@@ -315,21 +312,11 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void blankAllDisplaysFromPowerManagerInternal() {
+    private void requestGlobalDisplayStateInternal(int state) {
         synchronized (mSyncRoot) {
-            if (mAllDisplayBlankStateFromPowerManager != DISPLAY_BLANK_STATE_BLANKED) {
-                mAllDisplayBlankStateFromPowerManager = DISPLAY_BLANK_STATE_BLANKED;
-                updateAllDisplayBlankingLocked();
-                scheduleTraversalLocked(false);
-            }
-        }
-    }
-
-    private void unblankAllDisplaysFromPowerManagerInternal() {
-        synchronized (mSyncRoot) {
-            if (mAllDisplayBlankStateFromPowerManager != DISPLAY_BLANK_STATE_UNBLANKED) {
-                mAllDisplayBlankStateFromPowerManager = DISPLAY_BLANK_STATE_UNBLANKED;
-                updateAllDisplayBlankingLocked();
+            if (mGlobalDisplayState != state) {
+                mGlobalDisplayState = state;
+                updateGlobalDisplayStateLocked();
                 scheduleTraversalLocked(false);
             }
         }
@@ -616,7 +603,7 @@ public final class DisplayManagerService extends SystemService {
 
         mDisplayDevices.add(device);
         addLogicalDisplayLocked(device);
-        updateDisplayBlankingLocked(device);
+        updateDisplayStateLocked(device);
         scheduleTraversalLocked(false);
     }
 
@@ -655,27 +642,20 @@ public final class DisplayManagerService extends SystemService {
         scheduleTraversalLocked(false);
     }
 
-    private void updateAllDisplayBlankingLocked() {
+    private void updateGlobalDisplayStateLocked() {
         final int count = mDisplayDevices.size();
         for (int i = 0; i < count; i++) {
             DisplayDevice device = mDisplayDevices.get(i);
-            updateDisplayBlankingLocked(device);
+            updateDisplayStateLocked(device);
         }
     }
 
-    private void updateDisplayBlankingLocked(DisplayDevice device) {
+    private void updateDisplayStateLocked(DisplayDevice device) {
         // Blank or unblank the display immediately to match the state requested
-        // by the power manager (if known).
+        // by the display power controller (if known).
         DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         if ((info.flags & DisplayDeviceInfo.FLAG_NEVER_BLANK) == 0) {
-            switch (mAllDisplayBlankStateFromPowerManager) {
-                case DISPLAY_BLANK_STATE_BLANKED:
-                    device.blankLocked();
-                    break;
-                case DISPLAY_BLANK_STATE_UNBLANKED:
-                    device.unblankLocked();
-                    break;
-            }
+            device.requestDisplayStateLocked(mGlobalDisplayState);
         }
     }
 
@@ -816,9 +796,7 @@ public final class DisplayManagerService extends SystemService {
                     + device.getDisplayDeviceInfoLocked());
             return;
         }
-        boolean isBlanked = (mAllDisplayBlankStateFromPowerManager == DISPLAY_BLANK_STATE_BLANKED)
-                && (info.flags & DisplayDeviceInfo.FLAG_NEVER_BLANK) == 0;
-        display.configureDisplayInTransactionLocked(device, isBlanked);
+        display.configureDisplayInTransactionLocked(device, info.state == Display.STATE_OFF);
 
         // Update the viewports if needed.
         if (!mDefaultViewport.valid
@@ -897,8 +875,7 @@ public final class DisplayManagerService extends SystemService {
             pw.println("  mOnlyCode=" + mOnlyCore);
             pw.println("  mSafeMode=" + mSafeMode);
             pw.println("  mPendingTraversal=" + mPendingTraversal);
-            pw.println("  mAllDisplayBlankStateFromPowerManager="
-                    + mAllDisplayBlankStateFromPowerManager);
+            pw.println("  mGlobalDisplayState=" + Display.stateToString(mGlobalDisplayState));
             pw.println("  mNextNonDefaultDisplayId=" + mNextNonDefaultDisplayId);
             pw.println("  mDefaultViewport=" + mDefaultViewport);
             pw.println("  mExternalTouchViewport=" + mExternalTouchViewport);
@@ -1322,11 +1299,26 @@ public final class DisplayManagerService extends SystemService {
 
     private final class LocalService extends DisplayManagerInternal {
         @Override
-        public void initPowerManagement(DisplayPowerCallbacks callbacks, Handler handler,
+        public void initPowerManagement(final DisplayPowerCallbacks callbacks, Handler handler,
                 SensorManager sensorManager) {
             synchronized (mSyncRoot) {
+                DisplayBlanker blanker = new DisplayBlanker() {
+                    @Override
+                    public void requestDisplayState(int state) {
+                        // The order of operations is important for legacy reasons.
+                        if (state == Display.STATE_OFF) {
+                            requestGlobalDisplayStateInternal(state);
+                        }
+
+                        callbacks.onDisplayStateChange(state);
+
+                        if (state != Display.STATE_OFF) {
+                            requestGlobalDisplayStateInternal(state);
+                        }
+                    }
+                };
                 mDisplayPowerController = new DisplayPowerController(
-                        mContext, callbacks, handler, sensorManager);
+                        mContext, callbacks, handler, sensorManager, blanker);
             }
         }
 
@@ -1340,16 +1332,6 @@ public final class DisplayManagerService extends SystemService {
         @Override
         public boolean isProximitySensorAvailable() {
             return mDisplayPowerController.isProximitySensorAvailable();
-        }
-
-        @Override
-        public void blankAllDisplaysFromPowerManager() {
-            blankAllDisplaysFromPowerManagerInternal();
-        }
-
-        @Override
-        public void unblankAllDisplaysFromPowerManager() {
-            unblankAllDisplaysFromPowerManagerInternal();
         }
 
         @Override
