@@ -2888,6 +2888,32 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
+    public void setProfileEnabled(ComponentName who) {
+        if (!mHasFeature) {
+            return;
+        }
+        synchronized (this) {
+            // Check for permissions
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            // Check if this is the profile owner who is calling
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            Slog.d(LOG_TAG, "Enabling the profile for: " + UserHandle.getCallingUserId());
+            long id = Binder.clearCallingIdentity();
+
+            try {
+                Intent intent = new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED);
+                intent.putExtra(Intent.EXTRA_USER, new UserHandle(UserHandle.getCallingUserId()));
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                mContext.sendBroadcastAsUser(intent, UserHandle.OWNER);
+            } finally {
+                restoreCallingIdentity(id);
+            }
+        }
+    }
+
+    @Override
     public String getProfileOwner(int userHandle) {
         if (!mHasFeature) {
             return null;
