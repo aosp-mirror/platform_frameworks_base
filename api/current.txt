@@ -5074,6 +5074,26 @@ package android.app.maintenance {
 
 }
 
+package android.app.task {
+
+  public class TaskParams implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getTaskId();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public abstract class TaskService extends android.app.Service {
+    ctor public TaskService();
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract void onStartTask(android.app.task.TaskParams, android.os.Bundle);
+    method public abstract boolean onStopTask(android.app.task.TaskParams);
+    method public final void taskFinished(android.app.task.TaskParams, boolean);
+    field public static final java.lang.String PERMISSION_BIND = "android.permission.BIND_TASK_SERVICE";
+  }
+
+}
+
 package android.appwidget {
 
   public class AppWidgetHost {
@@ -7429,6 +7449,55 @@ package android.content {
 
   public abstract interface SyncStatusObserver {
     method public abstract void onStatusChanged(int);
+  }
+
+  public class Task implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getBackoffPolicy();
+    method public android.os.Bundle getExtras();
+    method public long getInitialBackoffMillis();
+    method public long getIntervalMillis();
+    method public long getMaxExecutionDelayMillis();
+    method public long getMinLatencyMillis();
+    method public int getNetworkCapabilities();
+    method public java.lang.String getServiceClassName();
+    method public int getTaskId();
+    method public boolean isPeriodic();
+    method public boolean isRequireCharging();
+    method public boolean isRequireDeviceIdle();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public static abstract interface Task.BackoffPolicy {
+    field public static final int EXPONENTIAL = 1; // 0x1
+    field public static final int LINEAR = 0; // 0x0
+  }
+
+  public final class Task.Builder {
+    ctor public Task.Builder(int, java.lang.Class<android.app.task.TaskService>);
+    method public android.content.Task build();
+    method public android.content.Task.Builder setBackoffCriteria(long, int);
+    method public android.content.Task.Builder setExtras(android.os.Bundle);
+    method public android.content.Task.Builder setMinimumLatency(long);
+    method public android.content.Task.Builder setOverrideDeadline(long);
+    method public android.content.Task.Builder setPeriodic(long);
+    method public android.content.Task.Builder setRequiredNetworkCapabilities(int);
+    method public android.content.Task.Builder setRequiresCharging(boolean);
+    method public android.content.Task.Builder setRequiresDeviceIdle(boolean);
+  }
+
+  public static abstract interface Task.NetworkType {
+    field public static final int ANY = 0; // 0x0
+    field public static final int UNMETERED = 1; // 0x1
+  }
+
+  public abstract class TaskManager {
+    ctor public TaskManager();
+    method public abstract void cancel(int);
+    method public abstract void cancelAll();
+    method public abstract java.util.List<android.content.Task> getAllPendingTasks();
+    method public abstract int schedule(android.content.Task);
   }
 
   public class UriMatcher {
