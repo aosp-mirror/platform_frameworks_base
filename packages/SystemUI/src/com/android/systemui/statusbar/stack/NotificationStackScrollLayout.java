@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 
 import android.graphics.Canvas;
-import android.graphics.Outline;
 import android.graphics.Paint;
 
 import android.util.AttributeSet;
@@ -31,6 +30,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.OverScroller;
 
 import com.android.systemui.ExpandHelper;
@@ -55,7 +55,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private static final int INVALID_POINTER = -1;
 
     private SwipeHelper mSwipeHelper;
-    private boolean mSwipingInProgress = true;
+    private boolean mSwipingInProgress;
     private int mCurrentStackHeight = Integer.MAX_VALUE;
     private int mOwnScrollY;
     private int mMaxLayoutHeight;
@@ -73,7 +73,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private int mSidePaddings;
     private Paint mDebugPaint;
-    private int mBackgroundRoundedRectCornerRadius;
     private int mContentHeight;
     private int mCollapsedSize;
     private int mBottomStackPeekSize;
@@ -145,9 +144,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         mSidePaddings = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_side_padding);
-        mBackgroundRoundedRectCornerRadius = context.getResources()
-                .getDimensionPixelSize(
-                        com.android.internal.R.dimen.notification_quantum_rounded_rect_radius);
         mCollapsedSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_row_min_height);
         mBottomStackPeekSize = context.getResources()
@@ -177,18 +173,23 @@ public class NotificationStackScrollLayout extends ViewGroup
             View child = getChildAt(i);
             float width = child.getMeasuredWidth();
             float height = child.getMeasuredHeight();
-            int oldWidth = child.getWidth();
-            int oldHeight = child.getHeight();
             child.layout((int) (centerX - width / 2.0f),
                     0,
                     (int) (centerX + width / 2.0f),
                     (int) height);
-            updateChildOutline(child, width, height, oldWidth, oldHeight);
         }
         setMaxLayoutHeight(getHeight() - mEmptyMarginBottom);
-        updateScrollPositionIfNecessary();
-        updateChildren();
         updateContentHeight();
+        getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                updateScrollPositionIfNecessary();
+                updateChildren();
+                getViewTreeObserver().removeOnPreDrawListener(this);
+                return true;
+            }
+        });
+
     }
 
     public void setChildLocationsChangedListener(OnChildLocationsChangedListener listener) {
@@ -227,7 +228,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             mCurrentStackScrollState.setScrollY(mOwnScrollY);
             mStackScrollAlgorithm.getStackScrollState(mCurrentStackScrollState);
             mCurrentStackScrollState.apply();
-            mOwnScrollY = mCurrentStackScrollState.getScrollY();
             if (mListener != null) {
                 mListener.onChildLocationsChanged(this);
             }
@@ -238,31 +238,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private boolean isCurrentlyAnimating() {
         return false;
-    }
-
-    private void updateChildOutline(View child,
-                                    float width,
-                                    float height,
-                                    int oldWidth,
-                                    int oldHeight) {
-        // The children currently have paddings inside themselfs because of the expansion
-        // visualization. In order for the shadows to work correctly we have to set the correct
-        // outline.
-        View container = child.findViewById(R.id.container);
-        if (container != null && (oldWidth != width || oldHeight != height)) {
-            Outline outline = getOutlineForSize(container.getLeft(),
-                    container.getTop(),
-                    container.getWidth(),
-                    container.getHeight());
-            child.setOutline(outline);
-        }
-    }
-
-    private Outline getOutlineForSize(int leftInset, int topInset, int width, int height) {
-        Outline result = new Outline();
-        result.setRoundRect(leftInset, topInset, leftInset + width, topInset + height,
-                mBackgroundRoundedRectCornerRadius);
-        return result;
     }
 
     private void updateScrollPositionIfNecessary() {
@@ -284,7 +259,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      *
      * @return either the layout height or the externally defined height, whichever is smaller
      */
-    private float getLayoutHeight() {
+    private int getLayoutHeight() {
         return Math.min(mMaxLayoutHeight, mCurrentStackHeight);
     }
 
@@ -640,12 +615,46 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private int getScrollRange() {
         int scrollRange = 0;
-        if (getChildCount() > 0) {
+        View firstChild = getFirstChildNotGone();
+        if (firstChild != null) {
             int contentHeight = getContentHeight();
-            scrollRange = Math.max(0,
-                    contentHeight - mMaxLayoutHeight + mBottomStackPeekSize);
+            int firstChildMaxExpandHeight = getMaxExpandHeight(firstChild);
+            int firstChildExpandPotential = firstChildMaxExpandHeight - firstChild.getHeight();
+
+            // If we already scrolled in, the first child is layouted smaller than it actually
+            // could be when expanded. We have to compensate for this loss of the contentHeight
+            // by adding the expand potential again.
+            contentHeight += firstChildExpandPotential;
+            scrollRange = Math.max(0, contentHeight - mMaxLayoutHeight + mBottomStackPeekSize);
+            if (scrollRange > 0 && getChildCount() > 0) {
+                // We want to at least be able collapse the first item and not ending in a weird
+                // end state.
+                scrollRange = Math.max(scrollRange, firstChildMaxExpandHeight - mCollapsedSize);
+            }
         }
         return scrollRange;
+    }
+
+    /**
+     * @return the first child which has visibility unequal to GONE
+     */
+    private View getFirstChildNotGone() {
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child.getVisibility() != View.GONE) {
+                return child;
+            }
+        }
+        return null;
+    }
+
+    private int getMaxExpandHeight(View view) {
+        if (view instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            return row.getMaximumAllowedExpandHeight();
+        }
+        return view.getHeight();
     }
 
     private int getContentHeight() {
