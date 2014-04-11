@@ -14,42 +14,38 @@
      limitations under the License.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="448dp"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/visible_panel"
+    android:orientation="horizontal"
+    android:layout_width="300dp"
     android:layout_height="wrap_content">
+
     <LinearLayout
-        android:id="@+id/visible_panel"
-        android:layout_width="match_parent"
+        android:id="@+id/slider_group"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <LinearLayout
-            android:id="@+id/slider_group"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-            <!-- Sliders go here -->
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/expand_button_divider"
-            android:src="?attr/dividerVertical"
-            android:layout_width="wrap_content"
-            android:layout_height="32dip"
-            android:scaleType="fitXY"
-            android:layout_gravity="top"
-            android:layout_marginTop="16dip"
-            android:layout_marginBottom="16dip" />
-
-        <ImageView
-            android:id="@+id/expand_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:padding="16dip"
-            android:background="?attr/selectableItemBackground"
-            android:src="@drawable/ic_sysbar_quicksettings" />
-
+        android:layout_weight="1"
+        android:orientation="vertical">
+        <!-- Sliders go here -->
     </LinearLayout>
-</FrameLayout>
+
+    <ImageView
+        android:id="@+id/expand_button_divider"
+        android:src="?attr/dividerVertical"
+        android:layout_width="wrap_content"
+        android:layout_height="32dip"
+        android:scaleType="fitXY"
+        android:layout_gravity="top"
+        android:layout_marginTop="16dip"
+        android:layout_marginBottom="16dip" />
+
+    <ImageView
+        android:id="@+id/expand_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:padding="16dip"
+        android:background="?attr/selectableItemBackground"
+        android:src="@drawable/ic_sysbar_quicksettings" />
+
+</LinearLayout>
