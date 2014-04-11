@@ -2968,12 +2968,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private boolean mLastIsOpaque;
 
     /**
-     * Convenience value to check for float values that are close enough to zero to be considered
-     * zero.
-     */
-    private static final float NONZERO_EPSILON = .001f;
-
-    /**
      * The distance in pixels from the left edge of this view's parent
      * to the left edge of this view.
      * {@hide}

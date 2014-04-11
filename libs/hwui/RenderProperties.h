@@ -28,12 +28,6 @@
 #include "RevealClip.h"
 #include "Outline.h"
 
-#define TRANSLATION 0x0001
-#define ROTATION    0x0002
-#define ROTATION_3D 0x0004
-#define SCALE       0x0008
-#define PIVOT       0x0010
-
 class SkBitmap;
 class SkPaint;
 
@@ -114,7 +108,7 @@ public:
     void setTranslationX(float translationX) {
         if (translationX != mPrimitiveFields.mTranslationX) {
             mPrimitiveFields.mTranslationX = translationX;
-            onTranslationUpdate();
+            mPrimitiveFields.mMatrixOrPivotDirty = true;
         }
     }
 
@@ -125,7 +119,7 @@ public:
     void setTranslationY(float translationY) {
         if (translationY != mPrimitiveFields.mTranslationY) {
             mPrimitiveFields.mTranslationY = translationY;
-            onTranslationUpdate();
+            mPrimitiveFields.mMatrixOrPivotDirty = true;
         }
     }
 
@@ -136,7 +130,7 @@ public:
     void setTranslationZ(float translationZ) {
         if (translationZ != mPrimitiveFields.mTranslationZ) {
             mPrimitiveFields.mTranslationZ = translationZ;
-            onTranslationUpdate();
+            mPrimitiveFields.mMatrixOrPivotDirty = true;
         }
     }
 
@@ -147,12 +141,7 @@ public:
     void setRotation(float rotation) {
         if (rotation != mPrimitiveFields.mRotation) {
             mPrimitiveFields.mRotation = rotation;
-            mPrimitiveFields.mMatrixDirty = true;
-            if (mPrimitiveFields.mRotation == 0.0f) {
-                mPrimitiveFields.mMatrixFlags &= ~ROTATION;
-            } else {
-                mPrimitiveFields.mMatrixFlags |= ROTATION;
-            }
+            mPrimitiveFields.mMatrixOrPivotDirty = true;
         }
     }
 
@@ -163,12 +152,7 @@ public:
     void setRotationX(float rotationX) {
         if (rotationX != mPrimitiveFields.mRotationX) {
             mPrimitiveFields.mRotationX = rotationX;
-            mPrimitiveFields.mMatrixDirty = true;
-            if (mPrimitiveFields.mRotationX == 0.0f && mPrimitiveFields.mRotationY == 0.0f) {
-                mPrimitiveFields.mMatrixFlags &= ~ROTATION_3D;
-            } else {
-                mPrimitiveFields.mMatrixFlags |= ROTATION_3D;
-            }
+            mPrimitiveFields.mMatrixOrPivotDirty = true;
         }
     }
 
@@ -179,12 +163,7 @@ public:
     void setRotationY(float rotationY) {
         if (rotationY != mPrimitiveFields.mRotationY) {
             mPrimitiveFields.mRotationY = rotationY;
-            mPrimitiveFields.mMatrixDirty = true;
-            if (mPrimitiveFields.mRotationX == 0.0f && mPrimitiveFields.mRotationY == 0.0f) {
-                mPrimitiveFields.mMatrixFlags &= ~ROTATION_3D;
-            } else {
-                mPrimitiveFields.mMatrixFlags |= ROTATION_3D;
-            }
+            mPrimitiveFields.mMatrixOrPivotDirty = true;
         }
     }
 
@@ -195,12 +174,7 @@ public:
     void setScaleX(float scaleX) {
         if (scaleX != mPrimitiveFields.mScaleX) {
             mPrimitiveFields.mScaleX = scaleX;
-            mPrimitiveFields.mMatrixDirty = true;
-            if (mPrimitiveFields.mScaleX == 1.0f && mPrimitiveFields.mScaleY == 1.0f) {
-                mPrimitiveFields.mMatrixFlags &= ~SCALE;
-            } else {
-                mPrimitiveFields.mMatrixFlags |= SCALE;
-            }
+            mPrimitiveFields.mMatrixOrPivotDirty = true;
         }
     }
 
@@ -211,12 +185,7 @@ public:
     void setScaleY(float scaleY) {
         if (scaleY != mPrimitiveFields.mScaleY) {
             mPrimitiveFields.mScaleY = scaleY;
-            mPrimitiveFields.mMatrixDirty = true;
-            if (mPrimitiveFields.mScaleX == 1.0f && mPrimitiveFields.mScaleY == 1.0f) {
-                mPrimitiveFields.mMatrixFlags &= ~SCALE;
-            } else {
-                mPrimitiveFields.mMatrixFlags |= SCALE;
-            }
+            mPrimitiveFields.mMatrixOrPivotDirty = true;
         }
     }
 
@@ -226,12 +195,7 @@ public:
 
     void setPivotX(float pivotX) {
         mPrimitiveFields.mPivotX = pivotX;
-        mPrimitiveFields.mMatrixDirty = true;
-        if (mPrimitiveFields.mPivotX == 0.0f && mPrimitiveFields.mPivotY == 0.0f) {
-            mPrimitiveFields.mMatrixFlags &= ~PIVOT;
-        } else {
-            mPrimitiveFields.mMatrixFlags |= PIVOT;
-        }
+        mPrimitiveFields.mMatrixOrPivotDirty = true;
         mPrimitiveFields.mPivotExplicitlySet = true;
     }
 
@@ -245,12 +209,7 @@ public:
 
     void setPivotY(float pivotY) {
         mPrimitiveFields.mPivotY = pivotY;
-        mPrimitiveFields.mMatrixDirty = true;
-        if (mPrimitiveFields.mPivotX == 0.0f && mPrimitiveFields.mPivotY == 0.0f) {
-            mPrimitiveFields.mMatrixFlags &= ~PIVOT;
-        } else {
-            mPrimitiveFields.mMatrixFlags |= PIVOT;
-        }
+        mPrimitiveFields.mMatrixOrPivotDirty = true;
         mPrimitiveFields.mPivotExplicitlySet = true;
     }
 
@@ -264,7 +223,7 @@ public:
 
     void setCameraDistance(float distance) {
         if (distance != getCameraDistance()) {
-            mPrimitiveFields.mMatrixDirty = true;
+            mPrimitiveFields.mMatrixOrPivotDirty = true;
             mComputedFields.mTransformCamera.setCameraLocation(0, 0, distance);
         }
     }
@@ -278,8 +237,8 @@ public:
         if (left != mPrimitiveFields.mLeft) {
             mPrimitiveFields.mLeft = left;
             mPrimitiveFields.mWidth = mPrimitiveFields.mRight - mPrimitiveFields.mLeft;
-            if (mPrimitiveFields.mMatrixFlags > TRANSLATION && !mPrimitiveFields.mPivotExplicitlySet) {
-                mPrimitiveFields.mMatrixDirty = true;
+            if (!mPrimitiveFields.mPivotExplicitlySet) {
+                mPrimitiveFields.mMatrixOrPivotDirty = true;
             }
         }
     }
@@ -292,8 +251,8 @@ public:
         if (top != mPrimitiveFields.mTop) {
             mPrimitiveFields.mTop = top;
             mPrimitiveFields.mHeight = mPrimitiveFields.mBottom - mPrimitiveFields.mTop;
-            if (mPrimitiveFields.mMatrixFlags > TRANSLATION && !mPrimitiveFields.mPivotExplicitlySet) {
-                mPrimitiveFields.mMatrixDirty = true;
+            if (!mPrimitiveFields.mPivotExplicitlySet) {
+                mPrimitiveFields.mMatrixOrPivotDirty = true;
             }
         }
     }
@@ -306,8 +265,8 @@ public:
         if (right != mPrimitiveFields.mRight) {
             mPrimitiveFields.mRight = right;
             mPrimitiveFields.mWidth = mPrimitiveFields.mRight - mPrimitiveFields.mLeft;
-            if (mPrimitiveFields.mMatrixFlags > TRANSLATION && !mPrimitiveFields.mPivotExplicitlySet) {
-                mPrimitiveFields.mMatrixDirty = true;
+            if (!mPrimitiveFields.mPivotExplicitlySet) {
+                mPrimitiveFields.mMatrixOrPivotDirty = true;
             }
         }
     }
@@ -320,8 +279,8 @@ public:
         if (bottom != mPrimitiveFields.mBottom) {
             mPrimitiveFields.mBottom = bottom;
             mPrimitiveFields.mHeight = mPrimitiveFields.mBottom - mPrimitiveFields.mTop;
-            if (mPrimitiveFields.mMatrixFlags > TRANSLATION && !mPrimitiveFields.mPivotExplicitlySet) {
-                mPrimitiveFields.mMatrixDirty = true;
+            if (!mPrimitiveFields.mPivotExplicitlySet) {
+                mPrimitiveFields.mMatrixOrPivotDirty = true;
             }
         }
     }
@@ -336,8 +295,8 @@ public:
             mPrimitiveFields.mTop = top;
             mPrimitiveFields.mWidth = mPrimitiveFields.mRight - mPrimitiveFields.mLeft;
             mPrimitiveFields.mHeight = mPrimitiveFields.mBottom - mPrimitiveFields.mTop;
-            if (mPrimitiveFields.mMatrixFlags > TRANSLATION && !mPrimitiveFields.mPivotExplicitlySet) {
-                mPrimitiveFields.mMatrixDirty = true;
+            if (!mPrimitiveFields.mPivotExplicitlySet) {
+                mPrimitiveFields.mMatrixOrPivotDirty = true;
             }
         }
     }
@@ -350,8 +309,8 @@ public:
             mPrimitiveFields.mBottom = bottom;
             mPrimitiveFields.mWidth = mPrimitiveFields.mRight - mPrimitiveFields.mLeft;
             mPrimitiveFields.mHeight = mPrimitiveFields.mBottom - mPrimitiveFields.mTop;
-            if (mPrimitiveFields.mMatrixFlags > TRANSLATION && !mPrimitiveFields.mPivotExplicitlySet) {
-                mPrimitiveFields.mMatrixDirty = true;
+            if (!mPrimitiveFields.mPivotExplicitlySet) {
+                mPrimitiveFields.mMatrixOrPivotDirty = true;
             }
         }
     }
@@ -360,8 +319,8 @@ public:
         if (offset != 0) {
             mPrimitiveFields.mLeft += offset;
             mPrimitiveFields.mRight += offset;
-            if (mPrimitiveFields.mMatrixFlags > TRANSLATION && !mPrimitiveFields.mPivotExplicitlySet) {
-                mPrimitiveFields.mMatrixDirty = true;
+            if (!mPrimitiveFields.mPivotExplicitlySet) {
+                mPrimitiveFields.mMatrixOrPivotDirty = true;
             }
         }
     }
@@ -370,8 +329,8 @@ public:
         if (offset != 0) {
             mPrimitiveFields.mTop += offset;
             mPrimitiveFields.mBottom += offset;
-            if (mPrimitiveFields.mMatrixFlags > TRANSLATION && !mPrimitiveFields.mPivotExplicitlySet) {
-                mPrimitiveFields.mMatrixDirty = true;
+            if (!mPrimitiveFields.mPivotExplicitlySet) {
+                mPrimitiveFields.mMatrixOrPivotDirty = true;
             }
         }
     }
@@ -392,11 +351,17 @@ public:
         return mAnimationMatrix;
     }
 
-    uint32_t getMatrixFlags() const {
-        return mPrimitiveFields.mMatrixFlags;
+    bool hasTransformMatrix() const {
+        return getTransformMatrix() && !getTransformMatrix()->isIdentity();
+    }
+
+    // May only call this if hasTransformMatrix() is true
+    bool isTransformTranslateOnly() const {
+        return getTransformMatrix()->getType() == SkMatrix::kTranslate_Mask;
     }
 
     const SkMatrix* getTransformMatrix() const {
+        LOG_ALWAYS_FATAL_IF(mPrimitiveFields.mMatrixOrPivotDirty, "Cannot get a dirty matrix!");
         return mComputedFields.mTransformMatrix;
     }
 
@@ -452,14 +417,6 @@ public:
     }
 
 private:
-    void onTranslationUpdate() {
-        mPrimitiveFields.mMatrixDirty = true;
-        if (mPrimitiveFields.mTranslationX == 0.0f && mPrimitiveFields.mTranslationY == 0.0f && mPrimitiveFields.mTranslationZ == 0.0f) {
-            mPrimitiveFields.mMatrixFlags &= ~TRANSLATION;
-        } else {
-            mPrimitiveFields.mMatrixFlags |= TRANSLATION;
-        }
-    }
 
     // Rendering properties
     struct PrimitiveFields {
@@ -478,10 +435,8 @@ private:
         float mPivotX, mPivotY;
         int mLeft, mTop, mRight, mBottom;
         int mWidth, mHeight;
-        int mPrevWidth, mPrevHeight;
         bool mPivotExplicitlySet;
-        bool mMatrixDirty;
-        uint32_t mMatrixFlags;
+        bool mMatrixOrPivotDirty;
         bool mCaching;
     } mPrimitiveFields;
 
@@ -506,7 +461,6 @@ private:
         SkMatrix* mTransformMatrix;
 
         Sk3DView mTransformCamera;
-        SkMatrix* mTransformMatrix3D;
         SkPath* mClipPath; // TODO: remove this, create new ops for efficient/special case clipping
         SkRegion::Op mClipPathOp;
     } mComputedFields;

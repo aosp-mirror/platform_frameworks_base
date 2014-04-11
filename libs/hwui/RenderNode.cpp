@@ -154,8 +154,8 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
     } else if (properties().getAnimationMatrix()) {
         renderer.concatMatrix(properties().getAnimationMatrix());
     }
-    if (properties().getMatrixFlags() != 0) {
-        if (properties().getMatrixFlags() == TRANSLATION) {
+    if (properties().hasTransformMatrix()) {
+        if (properties().isTransformTranslateOnly()) {
             renderer.translate(properties().getTranslationX(), properties().getTranslationY());
         } else {
             renderer.concatMatrix(*properties().getTransformMatrix());
@@ -214,8 +214,8 @@ void RenderNode::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform)
         mat4 anim(*properties().getAnimationMatrix());
         matrix.multiply(anim);
     }
-    if (properties().getMatrixFlags() != 0) {
-        if (properties().getMatrixFlags() == TRANSLATION) {
+    if (properties().hasTransformMatrix()) {
+        if (properties().isTransformTranslateOnly()) {
             matrix.translate(properties().getTranslationX(), properties().getTranslationY(),
                     true3dTransform ? properties().getTranslationZ() : 0.0f);
         } else {
