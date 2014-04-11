@@ -35,10 +35,10 @@ start the SDK Manager and read <a href="{@docRoot}sdk/installing/adding-packages
 
 </div>
 
-  
+
 
 <div id="mac" class="docs" style="display:none">
-  
+
 <h3>Getting started on Mac</h3>
 
 <ol>
@@ -62,7 +62,7 @@ read <a href="{@docRoot}sdk/installing/adding-packages.html"
 
 
 <div id="linux" class="docs" style="display:none">
-  
+
 <h3>Getting started on Linux</h3>
 
 <ol>
@@ -97,17 +97,23 @@ read <a href="{@docRoot}sdk/installing/adding-packages.html"
   <li>Here are the steps to install Java and Eclipse, prior to installing
   the Android SDK and ADT Plugin.
     <ol>
-      <li>If you are running a 64-bit distribution on your development
-      machine, you need to install the <code>ia32-libs</code> package using
-      <code>apt-get:</code>:
-      <pre>apt-get install ia32-libs</pre>
+      <li><p>If you are running a 64-bit distribution on your development
+      machine, you need to install additional packages first. For Ubuntu 13.10 (Saucy Salamander)
+      and above, install the <code>libncurses5:i386</code>, <code>libstdc++6:i386</code>, and
+      <code>zlib1g:i386</code> packages using <code>apt-get</code>:</p>
+      <pre class="no-pretty-print">sudo dpkg --add-architecture i386
+sudo apt-get update
+sudo apt-get install libncurses5:i386 libstdc++6:i386 zlib1g:i386</pre>
+      <p>For earlier versions of Ubuntu, install the <code>ia32-libs</code> package using
+      <code>apt-get</code>:</p>
+      <pre class="no-pretty-print">apt-get install ia32-libs</pre>
       </li>
-      <li>Next, install Java: <pre>apt-get install sun-java6-jdk</pre></li>
-      <li>The Ubuntu package manager does not currently offer an Eclipse 3.6
+      <li>Next, install Java: <pre class="no-pretty-print">apt-get install sun-java6-jdk</pre></li>
+      <li>The Ubuntu package manager does not currently offer an Eclipse 3.7
       version for download, so we recommend that you download Eclipse from
       eclipse.org (<a
-      href="http://www.eclipse.org/downloads/">http://www.eclipse.org/
-      downloads/</a>). A Java or RCP version of Eclipse is recommended.</li>
+      href="http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a>).
+      A Java or RCP version of Eclipse is recommended.</li>
       <li>Follow the steps given in previous sections to install the SDK
       and the ADT plugin. </li>
     </ol>
@@ -137,7 +143,7 @@ read <a href="{@docRoot}sdk/installing/adding-packages.html"
     // not running a compatible OS, so just show all the docs
     $('.docs').show();
   }
-  
+
   function showAll() {
     $('.docs').each(function() {
       if (!$(this).is(':visible')) {
