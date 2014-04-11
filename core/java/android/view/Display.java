@@ -204,6 +204,36 @@ public final class Display {
     public static final int TYPE_VIRTUAL = 5;
 
     /**
+     * Display state: The display state is unknown.
+     *
+     * @see #getState
+     */
+    public static final int STATE_UNKNOWN = 0;
+
+    /**
+     * Display state: The display is off.
+     *
+     * @see #getState
+     */
+    public static final int STATE_OFF = 1;
+
+    /**
+     * Display state: The display is on.
+     *
+     * @see #getState
+     */
+    public static final int STATE_ON = 2;
+
+    /**
+     * Display state: The display is dozing in a low-power state; it may be showing
+     * system-provided content while the device is in a non-interactive state.
+     *
+     * @see #getState
+     * @see android.os.PowerManager#isInteractive
+     */
+    public static final int STATE_DOZING = 3;
+
+    /**
      * Internal method to create a display.
      * Applications should use {@link android.view.WindowManager#getDefaultDisplay()}
      * or {@link android.hardware.display.DisplayManager#getDisplay}
@@ -628,6 +658,19 @@ public final class Display {
     }
 
     /**
+     * Gets the state of the display, such as whether it is on or off.
+     *
+     * @return The state of the display: one of {@link #STATE_OFF}, {@link #STATE_ON},
+     * {@link #STATE_DOZING}, or {@link #STATE_UNKNOWN}.
+     */
+    public int getState() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mIsValid ? mDisplayInfo.state : STATE_UNKNOWN;
+        }
+    }
+
+    /**
      * Returns true if the specified UID has access to this display.
      * @hide
      */
@@ -718,5 +761,22 @@ public final class Display {
                 return Integer.toString(type);
         }
     }
-}
 
+    /**
+     * @hide
+     */
+    public static String stateToString(int state) {
+        switch (state) {
+            case STATE_UNKNOWN:
+                return "UNKNOWN";
+            case STATE_OFF:
+                return "OFF";
+            case STATE_ON:
+                return "ON";
+            case STATE_DOZING:
+                return "DOZING";
+            default:
+                return Integer.toString(state);
+        }
+    }
+}

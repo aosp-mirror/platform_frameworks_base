@@ -248,10 +248,10 @@ void InputDispatcher::dispatchOnce() {
 void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) {
     nsecs_t currentTime = now();
 
-    // Reset the key repeat timer whenever we disallow key events, even if the next event
-    // is not a key.  This is to ensure that we abort a key repeat if the device is just coming
-    // out of sleep.
-    if (!mPolicy->isKeyRepeatEnabled()) {
+    // Reset the key repeat timer whenever normal dispatch is suspended while the
+    // device is in a non-interactive state.  This is to ensure that we abort a key
+    // repeat if the device is just coming out of sleep.
+    if (!mDispatchEnabled) {
         resetKeyRepeatLocked();
     }
 
@@ -1135,30 +1135,6 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
 
     // For security reasons, we defer updating the touch state until we are sure that
     // event injection will be allowed.
-    //
-    // FIXME In the original code, screenWasOff could never be set to true.
-    //       The reason is that the POLICY_FLAG_WOKE_HERE
-    //       and POLICY_FLAG_BRIGHT_HERE flags were set only when preprocessing raw
-    //       EV_KEY, EV_REL and EV_ABS events.  As it happens, the touch event was
-    //       actually enqueued using the policyFlags that appeared in the final EV_SYN
-    //       events upon which no preprocessing took place.  So policyFlags was always 0.
-    //       In the new native input dispatcher we're a bit more careful about event
-    //       preprocessing so the touches we receive can actually have non-zero policyFlags.
-    //       Unfortunately we obtain undesirable behavior.
-    //
-    //       Here's what happens:
-    //
-    //       When the device dims in anticipation of going to sleep, touches
-    //       in windows which have FLAG_TOUCHABLE_WHEN_WAKING cause
-    //       the device to brighten and reset the user activity timer.
-    //       Touches on other windows (such as the launcher window)
-    //       are dropped.  Then after a moment, the device goes to sleep.  Oops.
-    //
-    //       Also notice how screenWasOff was being initialized using POLICY_FLAG_BRIGHT_HERE
-    //       instead of POLICY_FLAG_WOKE_HERE...
-    //
-    bool screenWasOff = false; // original policy: policyFlags & POLICY_FLAG_BRIGHT_HERE;
-
     int32_t displayId = entry->displayId;
     int32_t action = entry->action;
     int32_t maskedAction = action & AMOTION_EVENT_ACTION_MASK;
@@ -1243,10 +1219,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
                     isTouchModal = (flags & (InputWindowInfo::FLAG_NOT_FOCUSABLE
                             | InputWindowInfo::FLAG_NOT_TOUCH_MODAL)) == 0;
                     if (isTouchModal || windowInfo->touchableRegionContainsPoint(x, y)) {
-                        if (! screenWasOff
-                                || (flags & InputWindowInfo::FLAG_TOUCHABLE_WHEN_WAKING)) {
-                            newTouchedWindowHandle = windowHandle;
-                        }
+                        newTouchedWindowHandle = windowHandle;
                         break; // found touched window, exit window loop
                     }
                 }
@@ -2409,10 +2382,6 @@ void InputDispatcher::notifyKey(const NotifyKeyArgs* args) {
 
     mPolicy->interceptKeyBeforeQueueing(&event, /*byref*/ policyFlags);
 
-    if (policyFlags & POLICY_FLAG_WOKE_HERE) {
-        flags |= AKEY_EVENT_FLAG_WOKE_HERE;
-    }
-
     bool needWake;
     { // acquire lock
         mLock.lock();
@@ -2590,10 +2559,6 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event, int32_t displ
 
         if (!(policyFlags & POLICY_FLAG_FILTERED)) {
             mPolicy->interceptKeyBeforeQueueing(keyEvent, /*byref*/ policyFlags);
-        }
-
-        if (policyFlags & POLICY_FLAG_WOKE_HERE) {
-            flags |= AKEY_EVENT_FLAG_WOKE_HERE;
         }
 
         mLock.lock();

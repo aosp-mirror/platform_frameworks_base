@@ -69,7 +69,7 @@ static struct {
     jmethodID notifyANR;
     jmethodID filterInputEvent;
     jmethodID interceptKeyBeforeQueueing;
-    jmethodID interceptMotionBeforeQueueingWhenScreenOff;
+    jmethodID interceptWakeMotionBeforeQueueing;
     jmethodID interceptKeyBeforeDispatching;
     jmethodID dispatchUnhandledKey;
     jmethodID checkInjectEventsPermission;
@@ -181,6 +181,7 @@ public:
     void setSystemUiVisibility(int32_t visibility);
     void setPointerSpeed(int32_t speed);
     void setShowTouches(bool enabled);
+    void setInteractive(bool interactive);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -201,7 +202,6 @@ public:
     virtual void notifyInputChannelBroken(const sp<InputWindowHandle>& inputWindowHandle);
     virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags);
     virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig);
-    virtual bool isKeyRepeatEnabled();
     virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags);
     virtual void interceptMotionBeforeQueueing(nsecs_t when, uint32_t& policyFlags);
     virtual nsecs_t interceptKeyBeforeDispatching(
@@ -249,13 +249,11 @@ private:
         wp<PointerController> pointerController;
     } mLocked;
 
+    volatile bool mInteractive;
+
     void updateInactivityTimeoutLocked(const sp<PointerController>& controller);
     void handleInterceptActions(jint wmActions, nsecs_t when, uint32_t& policyFlags);
     void ensureSpriteControllerLocked();
-
-    // Power manager interactions.
-    bool isScreenOn();
-    bool isScreenBright();
 
     static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
 
@@ -268,7 +266,7 @@ private:
 
 NativeInputManager::NativeInputManager(jobject contextObj,
         jobject serviceObj, const sp<Looper>& looper) :
-        mLooper(looper) {
+        mLooper(looper), mInteractive(true) {
     JNIEnv* env = jniEnv();
 
     mContextObj = env->NewGlobalRef(contextObj);
@@ -624,11 +622,6 @@ void NativeInputManager::getDispatcherConfiguration(InputDispatcherConfiguration
     }
 }
 
-bool NativeInputManager::isKeyRepeatEnabled() {
-    // Only enable automatic key repeating when the screen is on.
-    return isScreenOn();
-}
-
 void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray) {
     Vector<sp<InputWindowHandle> > windowHandles;
 
@@ -740,12 +733,8 @@ void NativeInputManager::setShowTouches(bool enabled) {
             InputReaderConfiguration::CHANGE_SHOW_TOUCHES);
 }
 
-bool NativeInputManager::isScreenOn() {
-    return android_server_PowerManagerService_isScreenOn();
-}
-
-bool NativeInputManager::isScreenBright() {
-    return android_server_PowerManagerService_isScreenBright();
+void NativeInputManager::setInteractive(bool interactive) {
+    mInteractive = interactive;
 }
 
 bool NativeInputManager::filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) {
@@ -786,18 +775,18 @@ void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
     // - Ignore untrusted events and pass them along.
     // - Ask the window manager what to do with normal events and trusted injected events.
     // - For normal events wake and brighten the screen if currently off or dim.
+    if (mInteractive) {
+        policyFlags |= POLICY_FLAG_INTERACTIVE;
+    }
     if ((policyFlags & POLICY_FLAG_TRUSTED)) {
         nsecs_t when = keyEvent->getEventTime();
-        bool isScreenOn = this->isScreenOn();
-        bool isScreenBright = this->isScreenBright();
-
         JNIEnv* env = jniEnv();
         jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
         jint wmActions;
         if (keyEventObj) {
             wmActions = env->CallIntMethod(mServiceObj,
                     gServiceClassInfo.interceptKeyBeforeQueueing,
-                    keyEventObj, policyFlags, isScreenOn);
+                    keyEventObj, policyFlags);
             if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
                 wmActions = 0;
             }
@@ -806,16 +795,6 @@ void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
         } else {
             ALOGE("Failed to obtain key event object for interceptKeyBeforeQueueing.");
             wmActions = 0;
-        }
-
-        if (!(policyFlags & POLICY_FLAG_INJECTED)) {
-            if (!isScreenOn) {
-                policyFlags |= POLICY_FLAG_WOKE_HERE;
-            }
-
-            if (!isScreenBright) {
-                policyFlags |= POLICY_FLAG_BRIGHT_HERE;
-            }
         }
 
         handleInterceptActions(wmActions, when, /*byref*/ policyFlags);
@@ -830,24 +809,22 @@ void NativeInputManager::interceptMotionBeforeQueueing(nsecs_t when, uint32_t& p
     // - No special filtering for injected events required at this time.
     // - Filter normal events based on screen state.
     // - For normal events brighten (but do not wake) the screen if currently dim.
+    if (mInteractive) {
+        policyFlags |= POLICY_FLAG_INTERACTIVE;
+    }
     if ((policyFlags & POLICY_FLAG_TRUSTED) && !(policyFlags & POLICY_FLAG_INJECTED)) {
-        if (isScreenOn()) {
+        if (policyFlags & POLICY_FLAG_INTERACTIVE) {
             policyFlags |= POLICY_FLAG_PASS_TO_USER;
-
-            if (!isScreenBright()) {
-                policyFlags |= POLICY_FLAG_BRIGHT_HERE;
-            }
-        } else {
+        } else if (policyFlags & (POLICY_FLAG_WAKE | POLICY_FLAG_WAKE_DROPPED)) {
             JNIEnv* env = jniEnv();
             jint wmActions = env->CallIntMethod(mServiceObj,
-                        gServiceClassInfo.interceptMotionBeforeQueueingWhenScreenOff,
+                        gServiceClassInfo.interceptWakeMotionBeforeQueueing,
                         when, policyFlags);
             if (checkAndClearExceptionFromCallback(env,
-                    "interceptMotionBeforeQueueingWhenScreenOff")) {
+                    "interceptWakeMotionBeforeQueueing")) {
                 wmActions = 0;
             }
 
-            policyFlags |= POLICY_FLAG_WOKE_HERE | POLICY_FLAG_BRIGHT_HERE;
             handleInterceptActions(wmActions, when, /*byref*/ policyFlags);
         }
     } else {
@@ -1230,6 +1207,13 @@ static void nativeSetShowTouches(JNIEnv* env,
     im->setShowTouches(enabled);
 }
 
+static void nativeSetInteractive(JNIEnv* env,
+        jclass clazz, jlong ptr, jboolean interactive) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->setInteractive(interactive);
+}
+
 static void nativeVibrate(JNIEnv* env,
         jclass clazz, jlong ptr, jint deviceId, jlongArray patternObj,
         jint repeat, jint token) {
@@ -1335,6 +1319,8 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeSetPointerSpeed },
     { "nativeSetShowTouches", "(JZ)V",
             (void*) nativeSetShowTouches },
+    { "nativeSetInteractive", "(JZ)V",
+            (void*) nativeSetInteractive },
     { "nativeVibrate", "(JI[JII)V",
             (void*) nativeVibrate },
     { "nativeCancelVibrate", "(JII)V",
@@ -1391,11 +1377,10 @@ int register_android_server_InputManager(JNIEnv* env) {
             "filterInputEvent", "(Landroid/view/InputEvent;I)Z");
 
     GET_METHOD_ID(gServiceClassInfo.interceptKeyBeforeQueueing, clazz,
-            "interceptKeyBeforeQueueing", "(Landroid/view/KeyEvent;IZ)I");
+            "interceptKeyBeforeQueueing", "(Landroid/view/KeyEvent;I)I");
 
-    GET_METHOD_ID(gServiceClassInfo.interceptMotionBeforeQueueingWhenScreenOff,
-            clazz,
-            "interceptMotionBeforeQueueingWhenScreenOff", "(JI)I");
+    GET_METHOD_ID(gServiceClassInfo.interceptWakeMotionBeforeQueueing, clazz,
+            "interceptWakeMotionBeforeQueueing", "(JI)I");
 
     GET_METHOD_ID(gServiceClassInfo.interceptKeyBeforeDispatching, clazz,
             "interceptKeyBeforeDispatching",

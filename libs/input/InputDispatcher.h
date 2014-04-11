@@ -211,9 +211,6 @@ public:
     /* Gets the input dispatcher configuration. */
     virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) = 0;
 
-    /* Returns true if automatic key repeating is enabled. */
-    virtual bool isKeyRepeatEnabled() = 0;
-
     /* Filters an input event.
      * Return true to dispatch the event unmodified, false to consume the event.
      * A filter can also transform and inject events later by passing POLICY_FLAG_FILTERED
