@@ -48,6 +48,7 @@ public class SearchIndexableResource extends SearchIndexableData {
      * @param iconResId the resource ID associated with the data.
      */
     public SearchIndexableResource(int rank, int xmlResId, String className, int iconResId) {
+        super();
         this.rank = rank;
         this.xmlResId = xmlResId;
         this.className = className;
