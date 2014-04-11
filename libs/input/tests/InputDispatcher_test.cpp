@@ -65,10 +65,6 @@ private:
         *outConfig = mConfig;
     }
 
-    virtual bool isKeyRepeatEnabled() {
-        return true;
-    }
-
     virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) {
         return true;
     }

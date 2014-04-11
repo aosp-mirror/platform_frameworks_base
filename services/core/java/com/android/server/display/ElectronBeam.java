@@ -35,7 +35,6 @@ import android.opengl.GLES11Ext;
 import android.os.Looper;
 import android.util.FloatMath;
 import android.util.Slog;
-import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface.OutOfResourcesException;
 import android.view.Surface;
@@ -73,6 +72,8 @@ final class ElectronBeam {
     // be ready to run smoothly.  We use 3 frames because we are triple-buffered.
     // See code for details.
     private static final int DEJANK_FRAMES = 3;
+
+    private final int mDisplayId;
 
     // Set to true when the animation context has been fully prepared.
     private boolean mPrepared;
@@ -118,8 +119,8 @@ final class ElectronBeam {
      */
     public static final int MODE_FADE = 2;
 
-
-    public ElectronBeam() {
+    public ElectronBeam(int displayId) {
+        mDisplayId = displayId;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
     }
 
@@ -139,7 +140,7 @@ final class ElectronBeam {
 
         // Get the display size and layer stack.
         // This is not expected to change while the electron beam surface is showing.
-        DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(Display.DEFAULT_DISPLAY);
+        DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(mDisplayId);
         mDisplayLayerStack = displayInfo.layerStack;
         mDisplayWidth = displayInfo.getNaturalWidth();
         mDisplayHeight = displayInfo.getNaturalHeight();
@@ -528,7 +529,8 @@ final class ElectronBeam {
             mSurface = new Surface();
             mSurface.copyFrom(mSurfaceControl);
 
-            mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManagerInternal, mSurfaceControl);
+            mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManagerInternal,
+                    mDisplayId, mSurfaceControl);
             mSurfaceLayout.onDisplayTransaction();
         } finally {
             SurfaceControl.closeTransaction();
@@ -687,11 +689,13 @@ final class ElectronBeam {
      */
     private static final class NaturalSurfaceLayout implements DisplayTransactionListener {
         private final DisplayManagerInternal mDisplayManagerInternal;
+        private final int mDisplayId;
         private SurfaceControl mSurfaceControl;
 
         public NaturalSurfaceLayout(DisplayManagerInternal displayManagerInternal,
-                SurfaceControl surfaceControl) {
+                int displayId, SurfaceControl surfaceControl) {
             mDisplayManagerInternal = displayManagerInternal;
+            mDisplayId = displayId;
             mSurfaceControl = surfaceControl;
             mDisplayManagerInternal.registerDisplayTransactionListener(this);
         }
@@ -710,8 +714,7 @@ final class ElectronBeam {
                     return;
                 }
 
-                DisplayInfo displayInfo =
-                        mDisplayManagerInternal.getDisplayInfo(Display.DEFAULT_DISPLAY);
+                DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(mDisplayId);
                 switch (displayInfo.rotation) {
                     case Surface.ROTATION_0:
                         mSurfaceControl.setPosition(0, 0);

@@ -86,8 +86,7 @@ public interface WindowManagerPolicy {
     public final static int FLAG_FILTERED = 0x04000000;
     public final static int FLAG_DISABLE_KEY_REPEAT = 0x08000000;
 
-    public final static int FLAG_WOKE_HERE = 0x10000000;
-    public final static int FLAG_BRIGHT_HERE = 0x20000000;
+    public final static int FLAG_INTERACTIVE = 0x20000000;
     public final static int FLAG_PASS_TO_USER = 0x40000000;
 
     // Flags used for indicating whether the internal and/or external input devices
@@ -735,11 +734,10 @@ public interface WindowManagerPolicy {
      * because it's the most fragile.
      * @param event The key event.
      * @param policyFlags The policy flags associated with the key.
-     * @param isScreenOn True if the screen is already on
      *
      * @return Actions flags: may be {@link #ACTION_PASS_TO_USER}.
      */
-    public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn);
+    public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags);
 
     /**
      * Called from the input reader thread before a motion is enqueued when the screen is off.
@@ -752,7 +750,7 @@ public interface WindowManagerPolicy {
      *
      * @return Actions flags: may be {@link #ACTION_PASS_TO_USER}.
      */
-    public int interceptMotionBeforeQueueingWhenScreenOff(long whenNanos, int policyFlags);
+    public int interceptWakeMotionBeforeQueueing(long whenNanos, int policyFlags);
 
     /**
      * Called from the input dispatcher thread before a key is dispatched to a window.
