@@ -50,17 +50,13 @@ void RenderNode::outputLogBuffer(int fd) {
 }
 
 RenderNode::RenderNode()
-        : mDestroyed(false)
-        , mNeedsPropertiesSync(false)
+        : mNeedsPropertiesSync(false)
         , mNeedsDisplayListDataSync(false)
         , mDisplayListData(0)
         , mStagingDisplayListData(0) {
 }
 
 RenderNode::~RenderNode() {
-    LOG_ALWAYS_FATAL_IF(mDestroyed, "Double destroyed DisplayList %p", this);
-
-    mDestroyed = true;
     delete mDisplayListData;
     delete mStagingDisplayListData;
 }
@@ -525,10 +521,6 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
 template <class T>
 void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
     const int level = handler.level();
-    if (CC_UNLIKELY(mDestroyed)) { // temporary debug logging
-        ALOGW("Error: %s is drawing after destruction", mName.string());
-        CRASH();
-    }
     if (mDisplayListData->isEmpty() || properties().getAlpha() <= 0) {
         DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, mName.string());
         return;
