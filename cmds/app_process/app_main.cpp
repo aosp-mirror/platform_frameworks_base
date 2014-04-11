@@ -138,8 +138,10 @@ static size_t computeArgBlockSize(int argc, char* const argv[]) {
 
 #if defined(__LP64__)
 static const char ABI_LIST_PROPERTY[] = "ro.product.cpu.abilist64";
+static const char ZYGOTE_NICE_NAME[] = "zygote64";
 #else
 static const char ABI_LIST_PROPERTY[] = "ro.product.cpu.abilist32";
+static const char ZYGOTE_NICE_NAME[] = "zygote";
 #endif
 
 int main(int argc, char* const argv[])
@@ -185,15 +187,18 @@ int main(int argc, char* const argv[])
         const char* arg = argv[i++];
         if (strcmp(arg, "--zygote") == 0) {
             zygote = true;
-            niceName = "zygote";
+            niceName = ZYGOTE_NICE_NAME;
         } else if (strcmp(arg, "--start-system-server") == 0) {
             startSystemServer = true;
         } else if (strcmp(arg, "--application") == 0) {
             application = true;
         } else if (strncmp(arg, "--nice-name=", 12) == 0) {
             niceName = arg + 12;
-        } else {
+        } else if (strncmp(arg, "--", 2) != 0) {
             className.setTo(arg);
+            break;
+        } else {
+            --i;
             break;
         }
     }
