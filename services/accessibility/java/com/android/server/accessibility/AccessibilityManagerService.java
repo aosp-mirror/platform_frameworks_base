@@ -166,8 +166,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private final Point mTempPoint = new Point();
 
-    private final Display mDefaultDisplay;
-
     private final PackageManager mPackageManager;
 
     private final WindowManagerInternal mWindowManagerService;
@@ -176,7 +174,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private final MainHandler mMainHandler;
 
-    private Service mQueryBridge;
+    private InteractionBridge mInteractionBridge;
 
     private AlertDialog mEnableTouchExplorationDialog;
 
@@ -232,10 +230,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
         mSecurityPolicy = new SecurityPolicy();
         mMainHandler = new MainHandler(mContext.getMainLooper());
-        //TODO: (multi-display) We need to support multiple displays.
-        DisplayManager displayManager = (DisplayManager)
-                mContext.getSystemService(Context.DISPLAY_SERVICE);
-        mDefaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
         registerBroadcastReceivers();
         new AccessibilityContentObserver(mMainHandler).register(
                 context.getContentResolver());
@@ -401,7 +395,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 return true; // yes, recycle the event
             }
             if (mSecurityPolicy.canDispatchAccessibilityEventLocked(event)) {
-                mSecurityPolicy.updateActiveWindowLocked(event.getWindowId(), event.getEventType());
+                mSecurityPolicy.updateActiveAndAccessibilityFocusedWindowLocked(event.getWindowId(),
+                        event.getSourceNodeId(), event.getEventType());
                 mSecurityPolicy.updateEventSourceLocked(event);
                 notifyAccessibilityServicesDelayedLocked(event, false);
                 notifyAccessibilityServicesDelayedLocked(event, true);
@@ -725,46 +720,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * @return Whether accessibility focus was found and the bounds are populated.
      */
     // TODO: (multi-display) Make sure this works for multiple displays.
-    boolean getAccessibilityFocusBoundsInActiveWindow(Rect outBounds) {
-        // Instead of keeping track of accessibility focus events per
-        // window to be able to find the focus in the active window,
-        // we take a stateless approach and look it up. This is fine
-        // since we do this only when the user clicks/long presses.
-        Service service = getQueryBridge();
-        final int connectionId = service.mId;
-        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        client.addConnection(connectionId, service);
-        try {
-            AccessibilityNodeInfo root = AccessibilityInteractionClient.getInstance()
-                    .getRootInActiveWindow(connectionId);
-            if (root == null) {
-                return false;
-            }
-            AccessibilityNodeInfo focus = root.findFocus(
-                    AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
-            if (focus == null) {
-                return false;
-            }
-            focus.getBoundsInScreen(outBounds);
-
-            MagnificationSpec spec = service.getCompatibleMagnificationSpec(focus.getWindowId());
-            if (spec != null && !spec.isNop()) {
-                outBounds.offset((int) -spec.offsetX, (int) -spec.offsetY);
-                outBounds.scale(1 / spec.scale);
-            }
-
-            // Clip to the window rectangle.
-            Rect windowBounds = mTempRect;
-            getActiveWindowBounds(windowBounds);
-            outBounds.intersect(windowBounds);
-            // Clip to the screen rectangle.
-            mDefaultDisplay.getRealSize(mTempPoint);
-            outBounds.intersect(0,  0,  mTempPoint.x, mTempPoint.y);
-
-            return true;
-        } finally {
-            client.removeConnection(connectionId);
-        }
+    boolean getAccessibilityFocusBounds(Rect outBounds) {
+        return getInteractionBridgeLocked().getAccessibilityFocusBoundsNotLocked(outBounds);
     }
 
     /**
@@ -855,14 +812,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
-    private Service getQueryBridge() {
-        if (mQueryBridge == null) {
-            AccessibilityServiceInfo info = new AccessibilityServiceInfo();
-            info.setCapabilities(AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT);
-            mQueryBridge = new Service(UserHandle.USER_NULL,
-                    sFakeAccessibilityServiceComponentName, info);
+    private InteractionBridge getInteractionBridgeLocked() {
+        if (mInteractionBridge == null) {
+            mInteractionBridge = new InteractionBridge();
         }
-        return mQueryBridge;
+        return mInteractionBridge;
     }
 
     private boolean notifyGestureLocked(int gestureId, boolean isDefault) {
@@ -1333,9 +1287,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private void onUserStateChangedLocked(UserState userState) {
         // TODO: Remove this hack
         mInitialized = true;
-        updateLegacyCapabilities(userState);
+        updateLegacyCapabilitiesLocked(userState);
         updateServicesLocked(userState);
-        updateWindowsForAccessibilityCallback(userState);
+        updateWindowsForAccessibilityCallbackLocked(userState);
+        updateAccessibilityFocusBehaviorLocked(userState);
         updateFilterKeyEventsLocked(userState);
         updateTouchExplorationLocked(userState);
         updateEnhancedWebAccessibilityLocked(userState);
@@ -1344,7 +1299,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         scheduleUpdateClientsIfNeededLocked(userState);
     }
 
-    private void updateWindowsForAccessibilityCallback(UserState userState) {
+    private void updateAccessibilityFocusBehaviorLocked(UserState userState) {
+        // If there is no service that can operate with interactive windows
+        // then we keep the old behavior where a window loses accessibility
+        // focus if it is no longer active. This still changes the behavior
+        // for services that do not operate with interactive windows and run
+        // at the same time as the one(s) which does. In practice however,
+        // there is only one service that uses accessibility focus and it
+        // is typically the one that operates with interactive windows, So,
+        // this is fine. Note that to allow a service to work across windows
+        // we have to allow accessibility focus stay in any of them. Sigh...
+        List<Service> boundServices = userState.mBoundServices;
+        final int boundServiceCount = boundServices.size();
+        for (int i = 0; i < boundServiceCount; i++) {
+            Service boundService = boundServices.get(i);
+            if (boundService.canRetrieveInteractiveWindowsLocked()) {
+                userState.mAccessibilityFocusOnlyInActiveWindow = false;
+                return;
+            }
+        }
+        userState.mAccessibilityFocusOnlyInActiveWindow = true;
+    }
+
+    private void updateWindowsForAccessibilityCallbackLocked(UserState userState) {
         if (userState.mIsAccessibilityEnabled) {
             // We observe windows for accessibility only if there is at least
             // one bound service that can retrieve window content that specified
@@ -1357,8 +1334,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int boundServiceCount = boundServices.size();
             for (int i = 0; i < boundServiceCount; i++) {
                 Service boundService = boundServices.get(i);
-                if (mSecurityPolicy.canRetrieveWindowContentLocked(boundService)
-                        && boundService.mRetrieveInteractiveWindows) {
+                if (boundService.canRetrieveInteractiveWindowsLocked()) {
                     boundServiceCanRetrieveInteractiveWindows = true;
                     break;
                 }
@@ -1381,7 +1357,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
-    private void updateLegacyCapabilities(UserState userState) {
+    private void updateLegacyCapabilitiesLocked(UserState userState) {
         // Up to JB-MR1 we had a white list with services that can enable touch
         // exploration. When a service is first started we show a dialog to the
         // use to get a permission to white list the service.
@@ -1582,6 +1558,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         DisplayAdjustmentUtils.applyAdjustments(mContext, userState.mUserId);
     }
 
+    private MagnificationSpec getCompatibleMagnificationSpecLocked(int windowId) {
+        IBinder windowToken = mGlobalWindowTokens.get(windowId);
+        if (windowToken == null) {
+            windowToken = getCurrentUserStateLocked().mWindowTokens.get(windowId);
+        }
+        if (windowToken != null) {
+            return mWindowManagerService.getCompatibleMagnificationSpecForWindow(
+                    windowToken);
+        }
+        return null;
+    }
+
     @Override
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
         mSecurityPolicy.enforceCallingPermission(Manifest.permission.DUMP, FUNCTION_DUMP);
@@ -1658,6 +1646,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public static final int MSG_UPDATE_INPUT_FILTER = 6;
         public static final int MSG_SHOW_ENABLED_TOUCH_EXPLORATION_DIALOG = 7;
         public static final int MSG_SEND_KEY_EVENT_TO_INPUT_FILTER = 8;
+        public static final int MSG_CLEAR_ACCESSIBILITY_FOCUS = 9;
 
         public MainHandler(Looper looper) {
             super(looper);
@@ -1712,6 +1701,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case MSG_SHOW_ENABLED_TOUCH_EXPLORATION_DIALOG: {
                     Service service = (Service) msg.obj;
                     showEnableTouchExplorationDialog(service);
+                } break;
+
+                case MSG_CLEAR_ACCESSIBILITY_FOCUS: {
+                    final int windowId = msg.arg1;
+                    InteractionBridge bridge;
+                    synchronized (mLock) {
+                        bridge = getInteractionBridgeLocked();
+                    }
+                    bridge.clearAccessibilityFocusNotLocked(windowId);
                 } break;
             }
         }
@@ -1981,6 +1979,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
         }
 
+        public boolean canRetrieveInteractiveWindowsLocked() {
+            return mSecurityPolicy.canRetrieveWindowContentLocked(this)
+                    && mRetrieveInteractiveWindows;
+        }
+
         @Override
         public void setServiceInfo(AccessibilityServiceInfo info) {
             final long identity = Binder.clearCallingIdentity();
@@ -2109,7 +2112,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
-            MagnificationSpec spec = getCompatibleMagnificationSpec(resolvedWindowId);
+            MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
                 connection.findAccessibilityNodeInfosByViewId(accessibilityNodeId,
                         viewIdResName, interactionId, callback, mFetchFlags, interrogatingPid,
@@ -2153,7 +2156,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
-            MagnificationSpec spec = getCompatibleMagnificationSpec(resolvedWindowId);
+            MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
                 connection.findAccessibilityNodeInfosByText(accessibilityNodeId, text,
                         interactionId, callback, mFetchFlags, interrogatingPid, interrogatingTid,
@@ -2197,7 +2200,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
-            MagnificationSpec spec = getCompatibleMagnificationSpec(resolvedWindowId);
+            MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
                 connection.findAccessibilityNodeInfoByAccessibilityId(accessibilityNodeId,
                         interactionId, callback, mFetchFlags | flags, interrogatingPid,
@@ -2227,7 +2230,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
-                resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
+                resolvedWindowId = resolveAccessibilityWindowIdForFindFocusLocked(
+                        accessibilityWindowId, focusType);
                 final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId);
                 if (!permissionGranted) {
@@ -2241,14 +2245,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
-            MagnificationSpec spec = getCompatibleMagnificationSpec(resolvedWindowId);
+            MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
                 connection.findFocus(accessibilityNodeId, focusType, interactionId, callback,
                         mFetchFlags, interrogatingPid, interrogatingTid, spec);
                 return true;
             } catch (RemoteException re) {
                 if (DEBUG) {
-                    Slog.e(LOG_TAG, "Error calling findAccessibilityFocus()");
+                    Slog.e(LOG_TAG, "Error calling findFocus()");
                 }
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
@@ -2284,7 +2288,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
-            MagnificationSpec spec = getCompatibleMagnificationSpec(resolvedWindowId);
+            MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
                 connection.focusSearch(accessibilityNodeId, direction, interactionId, callback,
                         mFetchFlags, interrogatingPid, interrogatingTid, spec);
@@ -2729,16 +2733,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return accessibilityWindowId;
         }
 
-        private MagnificationSpec getCompatibleMagnificationSpec(int windowId) {
-            IBinder windowToken = mGlobalWindowTokens.get(windowId);
-            if (windowToken == null) {
-                windowToken = getCurrentUserStateLocked().mWindowTokens.get(windowId);
+        private int resolveAccessibilityWindowIdForFindFocusLocked(int windowId, int focusType) {
+            if (windowId == AccessibilityNodeInfo.ACTIVE_WINDOW_ID) {
+                return mSecurityPolicy.mActiveWindowId;
             }
-            if (windowToken != null) {
-                return mWindowManagerService.getCompatibleMagnificationSpecForWindow(
-                        windowToken);
+            if (windowId == AccessibilityNodeInfo.ANY_WINDOW_ID) {
+                if (focusType == AccessibilityNodeInfo.FOCUS_INPUT) {
+                    return mSecurityPolicy.mFocusedWindowId;
+                } else if (focusType == AccessibilityNodeInfo.FOCUS_ACCESSIBILITY) {
+                    return mSecurityPolicy.mAccessibilityFocusedWindowId;
+                }
             }
-            return null;
+            return windowId;
         }
 
         private final class InvocationHandler extends Handler {
@@ -3031,7 +3037,86 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    private final class InteractionBridge {
+        private final Display mDefaultDisplay;
+        private final int mConnectionId;
+        private final AccessibilityInteractionClient mClient;
+
+        public InteractionBridge() {
+            AccessibilityServiceInfo info = new AccessibilityServiceInfo();
+            info.setCapabilities(AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT);
+            info.flags |= AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS;
+            info.flags |= AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+            Service service = new Service(UserHandle.USER_NULL,
+                    sFakeAccessibilityServiceComponentName, info);
+
+            mConnectionId = service.mId;
+
+            mClient = AccessibilityInteractionClient.getInstance();
+            mClient.addConnection(mConnectionId, service);
+
+            //TODO: (multi-display) We need to support multiple displays.
+            DisplayManager displayManager = (DisplayManager)
+                    mContext.getSystemService(Context.DISPLAY_SERVICE);
+            mDefaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+        }
+
+        public void clearAccessibilityFocusNotLocked(int windowId) {
+            AccessibilityNodeInfo focus = getAccessibilityFocusNotLocked(windowId);
+            if (focus != null) {
+                focus.performAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+            }
+        }
+
+        public boolean getAccessibilityFocusBoundsNotLocked(Rect outBounds) {
+            AccessibilityNodeInfo focus = getAccessibilityFocusNotLocked();
+            if (focus == null) {
+                return false;
+            }
+
+            synchronized (mLock) {
+                focus.getBoundsInScreen(outBounds);
+
+                MagnificationSpec spec = getCompatibleMagnificationSpecLocked(focus.getWindowId());
+                if (spec != null && !spec.isNop()) {
+                    outBounds.offset((int) -spec.offsetX, (int) -spec.offsetY);
+                    outBounds.scale(1 / spec.scale);
+                }
+
+                // Clip to the window rectangle.
+                Rect windowBounds = mTempRect;
+                getActiveWindowBounds(windowBounds);
+                outBounds.intersect(windowBounds);
+
+                // Clip to the screen rectangle.
+                mDefaultDisplay.getRealSize(mTempPoint);
+                outBounds.intersect(0, 0, mTempPoint.x, mTempPoint.y);
+
+                return true;
+            }
+        }
+
+        private AccessibilityNodeInfo getAccessibilityFocusNotLocked() {
+            final int focusedWindowId;
+            synchronized (mLock) {
+                focusedWindowId = mSecurityPolicy.mAccessibilityFocusedWindowId;
+                if (focusedWindowId == SecurityPolicy.INVALID_WINDOW_ID) {
+                    return null;
+                }
+            }
+            return getAccessibilityFocusNotLocked(focusedWindowId);
+        }
+
+        private AccessibilityNodeInfo getAccessibilityFocusNotLocked(int windowId) {
+            return mClient.findFocus(mConnectionId,
+                    windowId, AccessibilityNodeInfo.ROOT_NODE_ID,
+                    AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
+        }
+    }
+
     final class SecurityPolicy {
+        public static final int INVALID_WINDOW_ID = -1;
+
         private static final int VALID_ACTIONS =
             AccessibilityNodeInfo.ACTION_CLICK
             | AccessibilityNodeInfo.ACTION_LONG_CLICK
@@ -3075,8 +3160,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public final List<AccessibilityWindowInfo> mWindows =
                 new ArrayList<AccessibilityWindowInfo>();
 
-        public int mActiveWindowId;
-        public int mFocusedWindowId;
+        public int mActiveWindowId = INVALID_WINDOW_ID;
+        public int mFocusedWindowId = INVALID_WINDOW_ID;
+        public int mAccessibilityFocusedWindowId = INVALID_WINDOW_ID;
+        public long mAccessibilityFocusNodeId = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+
         public AccessibilityEvent mShowingFocusedWindowEvent;
 
         private boolean mTouchInteractionInProgress;
@@ -3129,9 +3217,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 mWindows.remove(i).recycle();
             }
 
-            mFocusedWindowId = -1;
+            mFocusedWindowId = INVALID_WINDOW_ID;
             if (!mTouchInteractionInProgress) {
-                mActiveWindowId = -1;
+                mActiveWindowId = INVALID_WINDOW_ID;
             }
 
             // If the active window goes away while the user is touch exploring we
@@ -3159,7 +3247,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
 
                 if (mTouchInteractionInProgress && activeWindowGone) {
-                    mActiveWindowId = -1;
+                    mActiveWindowId = INVALID_WINDOW_ID;
                 }
 
                 // Focused window may change the active one, so set the
@@ -3193,7 +3281,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
         }
 
-        public void updateActiveWindowLocked(int windowId, int eventType) {
+        public void updateActiveAndAccessibilityFocusedWindowLocked(int windowId, long nodeId,
+                int eventType) {
             // The active window is either the window that has input focus or
             // the window that the user is currently touching. If the user is
             // touching a window that does not have input focus as soon as the
@@ -3228,6 +3317,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         }
                     }
                 } break;
+
+                case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED: {
+                    synchronized (mLock) {
+                        if (mAccessibilityFocusedWindowId != windowId) {
+                            mMainHandler.obtainMessage(MainHandler.MSG_CLEAR_ACCESSIBILITY_FOCUS,
+                                    mAccessibilityFocusedWindowId, 0).sendToTarget();
+                            mAccessibilityFocusedWindowId = windowId;
+                            mAccessibilityFocusNodeId = nodeId;
+                        }
+                    }
+                } break;
+
+                case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED: {
+                    synchronized (mLock) {
+                        if (mAccessibilityFocusNodeId == nodeId) {
+                            mAccessibilityFocusNodeId = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+                        }
+                        if (mAccessibilityFocusNodeId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID
+                                && mAccessibilityFocusedWindowId == windowId) {
+                            mAccessibilityFocusedWindowId = INVALID_WINDOW_ID;
+                        }
+                    }
+                } break;
             }
         }
 
@@ -3248,7 +3360,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // (they are a result of user touching the screen) so change of
                 // the active window before all hover accessibility events from
                 // the touched window are delivered is fine.
+                final int oldActiveWindow = mSecurityPolicy.mActiveWindowId;
                 setActiveWindowLocked(mFocusedWindowId);
+
+                // If there is no service that can operate with active windows
+                // we keep accessibility focus behavior to constrain it only in
+                // the active window. Look at updateAccessibilityFocusBehaviorLocked
+                // for details.
+                if (oldActiveWindow != mSecurityPolicy.mActiveWindowId
+                        && mAccessibilityFocusedWindowId == oldActiveWindow
+                        && getCurrentUserStateLocked().mAccessibilityFocusOnlyInActiveWindow) {
+                    mMainHandler.obtainMessage(MainHandler.MSG_CLEAR_ACCESSIBILITY_FOCUS,
+                            oldActiveWindow, 0).sendToTarget();
+                }
             }
         }
 
@@ -3403,6 +3527,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public boolean mIsDisplayMagnificationEnabled;
         public boolean mIsFilterKeyEventsEnabled;
         public boolean mHasDisplayColorAdjustment;
+        public boolean mAccessibilityFocusOnlyInActiveWindow;
 
         private Service mUiAutomationService;
         private IAccessibilityServiceClient mUiAutomationServiceClient;
