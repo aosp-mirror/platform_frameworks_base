@@ -47,6 +47,8 @@ import android.os.Debug;
 import android.os.SystemProperties;
 import android.os.Environment;
 
+import libcore.io.IoUtils;
+
 /**
  * The VideoEditor implementation {@hide}
  */
@@ -1859,15 +1861,15 @@ public class VideoEditorImpl implements VideoEditor {
                 }
             }
 
+            FileOutputStream stream = null;
             try {
-                FileOutputStream stream = new FileOutputStream(mProjectPath + "/"
-                                                          + THUMBNAIL_FILENAME);
+                stream = new FileOutputStream(mProjectPath + "/" + THUMBNAIL_FILENAME);
                 projectBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                 stream.flush();
-                stream.close();
             } catch (IOException e) {
                 throw new IllegalArgumentException ("Error creating project thumbnail");
             } finally {
+                IoUtils.closeQuietly(stream);
                 projectBitmap.recycle();
             }
         }
