@@ -192,8 +192,9 @@ class TaskResourceLoader implements Runnable {
                                     " forceLoad: " + forceLoadTask);
                     // Load the application icon
                     if (loadIcon == null || forceLoadTask) {
-                        ActivityInfo info = ssp.getActivityInfo(t.key.baseIntent.getComponent());
-                        Drawable icon = ssp.getActivityIcon(info);
+                        ActivityInfo info = ssp.getActivityInfo(t.key.baseIntent.getComponent(),
+                                t.userId);
+                        Drawable icon = ssp.getActivityIcon(info, t.userId);
                         if (!mCancelled) {
                             if (icon != null) {
                                 Console.log(Constants.DebugFlags.App.TaskDataLoader,
@@ -411,7 +412,7 @@ public class RecentsTaskLoader {
         int taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = tasks.get(i);
-            ActivityInfo info = ssp.getActivityInfo(t.baseIntent.getComponent());
+            ActivityInfo info = ssp.getActivityInfo(t.baseIntent.getComponent(), t.userId);
             String activityLabel = (t.activityLabel == null ? ssp.getActivityLabel(info) :
                     t.activityLabel.toString());
             Bitmap activityIcon = t.activityIcon;
@@ -437,7 +438,7 @@ public class RecentsTaskLoader {
                     }
                 }
                 if (task.applicationIcon == null) {
-                    task.applicationIcon = ssp.getActivityIcon(info);
+                    task.applicationIcon = ssp.getActivityIcon(info, task.userId);
                     if (task.applicationIcon != null) {
                         mApplicationIconCache.put(task.key, task.applicationIcon);
                     } else {
