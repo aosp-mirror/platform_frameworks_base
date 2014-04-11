@@ -121,6 +121,16 @@ public abstract class CallServiceSelector extends Service {
     }
 
     /**
+     * Cancel the outgoing call. Any subsequent calls to {@link #select(CallInfo, List)} will be
+     * ignored.
+     *
+     * @param callInfo The call to canceled.
+     */
+    protected final void cancelOutgoingCall(CallInfo callInfo) {
+        getAdapter().cancelOutgoingCall(callInfo.getId());
+    }
+
+    /**
      * Lifecycle callback which is called when this {@link CallServiceSelector} has been attached
      * to a {@link CallServiceSelectorAdapter}, indicating {@link #getAdapter()} is now safe to use.
      *

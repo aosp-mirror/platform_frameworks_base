@@ -35,5 +35,7 @@ oneway interface ICallServiceSelectorAdapter {
             String callId,
             in List<CallServiceDescriptor> selectedCallServiceDescriptors);
 
+    void cancelOutgoingCall(String callId);
+
     void setHandoffInfo(String callId, in Uri handle, in Bundle extras);
 }
