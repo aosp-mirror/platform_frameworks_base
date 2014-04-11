@@ -26,16 +26,15 @@
         android:id="@+id/stream_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="16dip"
+        android:paddingLeft="16dip"
         android:background="?attr/selectableItemBackground"
-        />
+        android:contentDescription="@null" />
 
     <SeekBar
         style="?android:attr/seekBarStyle"
         android:id="@+id/seekbar"
-        android:layout_width="300dp"
+        android:layout_width="252dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:padding="16dip"
         android:layout_marginEnd="16dip" />
 

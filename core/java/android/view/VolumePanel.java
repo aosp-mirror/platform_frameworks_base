@@ -27,6 +27,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.AudioService;
 import android.media.AudioSystem;
@@ -238,6 +240,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             cleanUp();
         }
 
+        @Override
         public void onDismiss(DialogInterface unused) {
             mContext.unregisterReceiver(this);
             cleanUp();
@@ -259,8 +262,8 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         mAudioService = volumeService;
 
         // For now, only show master volume if master volume is supported
-        boolean useMasterVolume = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_useMasterVolume);
+       final boolean useMasterVolume = context.getResources().getBoolean(
+               R.bool.config_useMasterVolume);
         if (useMasterVolume) {
             for (int i = 0; i < STREAMS.length; i++) {
                 StreamResources streamRes = STREAMS[i];
@@ -268,10 +271,18 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             }
         }
 
-        LayoutInflater inflater = (LayoutInflater) context
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = mView = inflater.inflate(R.layout.volume_adjust, null);
+        final TypedArray a = context.obtainStyledAttributes(null,
+                com.android.internal.R.styleable.AlertDialog,
+                com.android.internal.R.attr.alertDialogStyle, 0);
+        final Drawable background = a.getDrawable(R.styleable.AlertDialog_fullBright);
+        a.recycle();
+
+        final LayoutInflater inflater = (LayoutInflater) context.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+        mView = inflater.inflate(R.layout.volume_adjust, null);
+        mView.setBackground(background);
         mView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
             public boolean onTouch(View v, MotionEvent event) {
                 resetTimeout();
                 return false;
@@ -279,10 +290,11 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         });
         mPanel = (ViewGroup) mView.findViewById(R.id.visible_panel);
         mSliderGroup = (ViewGroup) mView.findViewById(R.id.slider_group);
-        mMoreButton = (ImageView) mView.findViewById(R.id.expand_button);
-        mDivider = (ImageView) mView.findViewById(R.id.expand_button_divider);
+        mMoreButton = mView.findViewById(R.id.expand_button);
+        mDivider = mView.findViewById(R.id.expand_button_divider);
 
         mDialog = new Dialog(context, R.style.Theme_Panel_Volume) {
+            @Override
             public boolean onTouchEvent(MotionEvent event) {
                 if (isShowing() && event.getAction() == MotionEvent.ACTION_OUTSIDE &&
                         sConfirmSafeVolumeDialog == null) {
@@ -292,22 +304,25 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
                 return false;
             }
         };
+        
         mDialog.setTitle("Volume control"); // No need to localize
         mDialog.setContentView(mView);
         mDialog.setOnDismissListener(new OnDismissListener() {
+            @Override
             public void onDismiss(DialogInterface dialog) {
                 mActiveStreamType = -1;
                 mAudioManager.forceVolumeControlStream(mActiveStreamType);
             }
         });
+
         // Change some window properties
-        Window window = mDialog.getWindow();
+        final Window window = mDialog.getWindow();
         window.setGravity(Gravity.TOP);
-        LayoutParams lp = window.getAttributes();
+
+        final LayoutParams lp = window.getAttributes();
         lp.token = null;
         // Offset from the top
-        lp.y = mContext.getResources().getDimensionPixelOffset(
-                com.android.internal.R.dimen.volume_panel_top);
+        lp.y = mContext.getResources().getDimensionPixelOffset(R.dimen.volume_panel_top);
         lp.type = LayoutParams.TYPE_VOLUME_OVERLAY;
         lp.width = LayoutParams.WRAP_CONTENT;
         lp.height = LayoutParams.WRAP_CONTENT;
@@ -320,6 +335,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
         mVoiceCapable = context.getResources().getBoolean(R.bool.config_voice_capable);
         mShowCombinedVolumes = !mVoiceCapable && !useMasterVolume;
+        
         // If we don't want to show multiple volumes, hide the settings button and divider
         if (!mShowCombinedVolumes) {
             mMoreButton.setVisibility(View.GONE);
@@ -328,10 +344,10 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             mMoreButton.setOnClickListener(this);
         }
 
-        boolean masterVolumeOnly = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_useMasterVolume);
-        boolean masterVolumeKeySounds = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_useVolumeKeySounds);
+        final boolean masterVolumeOnly = context.getResources().getBoolean(
+                R.bool.config_useMasterVolume);
+        final boolean masterVolumeKeySounds = mContext.getResources().getBoolean(
+                R.bool.config_useVolumeKeySounds);
 
         mPlayMasterStreamTones = masterVolumeOnly && masterVolumeKeySounds;
 
@@ -347,7 +363,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         final IntentFilter filter = new IntentFilter();
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         mContext.registerReceiver(new BroadcastReceiver() {
-
+            @Override
             public void onReceive(Context context, Intent intent) {
                 final String action = intent.getAction();
 
@@ -400,17 +416,21 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     }
 
     private void createSliders() {
-        LayoutInflater inflater = (LayoutInflater) mContext
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        final Resources res = mContext.getResources();
+        final LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+
         mStreamControls = new HashMap<Integer, StreamControl>(STREAMS.length);
-        Resources res = mContext.getResources();
+
         for (int i = 0; i < STREAMS.length; i++) {
             StreamResources streamRes = STREAMS[i];
-            int streamType = streamRes.streamType;
+
+            final int streamType = streamRes.streamType;
             if (mVoiceCapable && streamRes == StreamResources.NotificationStream) {
                 streamRes = StreamResources.RingerStream;
             }
-            StreamControl sc = new StreamControl();
+
+            final StreamControl sc = new StreamControl();
             sc.streamType = streamType;
             sc.group = (ViewGroup) inflater.inflate(R.layout.volume_adjust_item, null);
             sc.group.setTag(sc);
@@ -421,7 +441,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             sc.iconMuteRes = streamRes.iconMuteRes;
             sc.icon.setImageResource(sc.iconRes);
             sc.seekbarView = (SeekBar) sc.group.findViewById(R.id.seekbar);
-            int plusOne = (streamType == AudioSystem.STREAM_BLUETOOTH_SCO ||
+            final int plusOne = (streamType == AudioSystem.STREAM_BLUETOOTH_SCO ||
                     streamType == AudioSystem.STREAM_VOICE_CALL) ? 1 : 0;
             sc.seekbarView.setMax(getStreamMaxVolume(streamType) + plusOne);
             sc.seekbarView.setOnSeekBarChangeListener(this);
@@ -433,7 +453,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     private void reorderSliders(int activeStreamType) {
         mSliderGroup.removeAllViews();
 
-        StreamControl active = mStreamControls.get(activeStreamType);
+        final StreamControl active = mStreamControls.get(activeStreamType);
         if (active == null) {
             Log.e("VolumePanel", "Missing stream type! - " + activeStreamType);
             mActiveStreamType = -1;
