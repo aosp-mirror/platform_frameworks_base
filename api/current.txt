@@ -11033,6 +11033,7 @@ package android.hardware.hdmi {
   public final class HdmiCecClient {
     method public boolean isTvOn();
     method public void sendActiveSource();
+    method public void sendGiveDevicePowerStatus(int);
     method public void sendImageViewOn();
     method public void sendInactiveSource();
     method public void sendTextViewOn();

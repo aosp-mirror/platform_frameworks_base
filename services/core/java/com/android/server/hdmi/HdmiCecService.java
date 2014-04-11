@@ -277,14 +277,7 @@ public final class HdmiCecService extends SystemService {
             enforceAccessPermission();
             synchronized (mLock) {
                 HdmiCecDevice device = getLogicalDeviceLocked(b);
-                device.setIsActiveSource(true);
-                int physicalAddress = nativeGetPhysicalAddress(mNativePtr);
-                byte[] param = new byte[] {
-                    (byte) ((physicalAddress >> 8) & 0xff),
-                    (byte) (physicalAddress & 0xff)
-                };
-                nativeSendMessage(mNativePtr, device.getType(), HdmiCec.ADDR_BROADCAST,
-                        HdmiCec.MESSAGE_ACTIVE_SOURCE, param);
+                device.sendActiveSource(nativeGetPhysicalAddress(mNativePtr));
             }
         }
 
@@ -293,9 +286,7 @@ public final class HdmiCecService extends SystemService {
             enforceAccessPermission();
             synchronized (mLock) {
                 HdmiCecDevice device = getLogicalDeviceLocked(b);
-                device.setIsActiveSource(false);
-                nativeSendMessage(mNativePtr, device.getType(), HdmiCec.ADDR_BROADCAST,
-                        HdmiCec.MESSAGE_INACTIVE_SOURCE, EMPTY_PARAM);
+                device.sendInactiveSource(nativeGetPhysicalAddress(mNativePtr));
             }
         }
 
@@ -304,8 +295,7 @@ public final class HdmiCecService extends SystemService {
             enforceAccessPermission();
             synchronized (mLock) {
                 HdmiCecDevice device = getLogicalDeviceLocked(b);
-                nativeSendMessage(mNativePtr, device.getType(), HdmiCec.ADDR_TV,
-                        HdmiCec.MESSAGE_IMAGE_VIEW_ON, EMPTY_PARAM);
+                device.sendImageViewOn();
             }
         }
 
@@ -314,8 +304,16 @@ public final class HdmiCecService extends SystemService {
             enforceAccessPermission();
             synchronized (mLock) {
                 HdmiCecDevice device = getLogicalDeviceLocked(b);
-                nativeSendMessage(mNativePtr, device.getType(), HdmiCec.ADDR_TV,
-                        HdmiCec.MESSAGE_TEXT_VIEW_ON, EMPTY_PARAM);
+                device.sendTextViewOn();
+            }
+        }
+
+        public void sendGiveDevicePowerStatus(IBinder b, int address) {
+            enforceAccessPermission();
+            synchronized (mLock) {
+                HdmiCecDevice device = getLogicalDeviceLocked(b);
+                nativeSendMessage(mNativePtr, device.getType(), address,
+                        HdmiCec.MESSAGE_GIVE_DEVICE_POWER_STATUS, EMPTY_PARAM);
             }
         }
 
