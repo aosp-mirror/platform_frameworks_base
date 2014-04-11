@@ -2456,6 +2456,7 @@ package android.accessibilityservice {
 
   public abstract class AccessibilityService extends android.app.Service {
     ctor public AccessibilityService();
+    method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
     method public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow();
     method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
     method public java.util.List<android.view.accessibility.AccessibilityWindowInfo> getWindows();
@@ -4755,6 +4756,7 @@ package android.app {
     method public void clearWindowAnimationFrameStats();
     method public boolean clearWindowContentFrameStats(int);
     method public android.view.accessibility.AccessibilityEvent executeAndWaitForEvent(java.lang.Runnable, android.app.UiAutomation.AccessibilityEventFilter, long) throws java.util.concurrent.TimeoutException;
+    method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
     method public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow();
     method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
     method public android.view.WindowAnimationFrameStats getWindowAnimationFrameStats();

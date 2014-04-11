@@ -1159,7 +1159,7 @@ class TouchExplorer implements EventStreamTransformation {
                 // No last touch explored event but there is accessibility focus in
                 // the active window. We click in the middle of the focus bounds.
                 Rect focusBounds = mTempRect;
-                if (mAms.getAccessibilityFocusBoundsInActiveWindow(focusBounds)) {
+                if (mAms.getAccessibilityFocusBounds(focusBounds)) {
                     clickLocationX = focusBounds.centerX();
                     clickLocationY = focusBounds.centerY();
                 } else {
@@ -1177,7 +1177,7 @@ class TouchExplorer implements EventStreamTransformation {
                     mAms.getActiveWindowBounds(activeWindowBounds);
                     if (activeWindowBounds.contains(clickLocationX, clickLocationY)) {
                         Rect focusBounds = mTempRect;
-                        if (mAms.getAccessibilityFocusBoundsInActiveWindow(focusBounds)) {
+                        if (mAms.getAccessibilityFocusBounds(focusBounds)) {
                             if (!focusBounds.contains(clickLocationX, clickLocationY)) {
                                 clickLocationX = focusBounds.centerX();
                                 clickLocationY = focusBounds.centerY();
@@ -1332,7 +1332,7 @@ class TouchExplorer implements EventStreamTransformation {
                 // No last touch explored event but there is accessibility focus in
                 // the active window. We click in the middle of the focus bounds.
                 Rect focusBounds = mTempRect;
-                if (mAms.getAccessibilityFocusBoundsInActiveWindow(focusBounds)) {
+                if (mAms.getAccessibilityFocusBounds(focusBounds)) {
                     clickLocationX = focusBounds.centerX();
                     clickLocationY = focusBounds.centerY();
                 } else {
@@ -1350,7 +1350,7 @@ class TouchExplorer implements EventStreamTransformation {
                     mAms.getActiveWindowBounds(activeWindowBounds);
                     if (activeWindowBounds.contains(clickLocationX, clickLocationY)) {
                         Rect focusBounds = mTempRect;
-                        if (mAms.getAccessibilityFocusBoundsInActiveWindow(focusBounds)) {
+                        if (mAms.getAccessibilityFocusBounds(focusBounds)) {
                             if (!focusBounds.contains(clickLocationX, clickLocationY)) {
                                 clickLocationX = focusBounds.centerX();
                                 clickLocationY = focusBounds.centerY();

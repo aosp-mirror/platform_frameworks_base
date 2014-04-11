@@ -163,6 +163,19 @@ public final class AccessibilityInteractionClient
     }
 
     /**
+     * Gets the root {@link AccessibilityNodeInfo} in a given window.
+     *
+     * @param connectionId The id of a connection for interacting with the system.
+     * @param windowId The window id.
+     * @return The root {@link AccessibilityNodeInfo} if found, null otherwise.
+     */
+    public AccessibilityNodeInfo getRootInWindow(int connectionId, int windowId) {
+        return findAccessibilityNodeInfoByAccessibilityId(connectionId, windowId,
+                AccessibilityNodeInfo.ROOT_NODE_ID, false,
+                AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS);
+    }
+
+    /**
      * Gets the info for a window.
      *
      * @param connectionId The id of a connection for interacting with the system.
