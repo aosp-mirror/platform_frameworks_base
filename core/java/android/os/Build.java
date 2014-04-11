@@ -17,6 +17,7 @@
 package android.os;
 
 import android.text.TextUtils;
+import android.util.Slog;
 
 import com.android.internal.telephony.TelephonyProperties;
 
@@ -24,6 +25,8 @@ import com.android.internal.telephony.TelephonyProperties;
  * Information about the current build, extracted from system properties.
  */
 public class Build {
+    private static final String TAG = "Build";
+
     /** Value used for when a build property is unknown. */
     public static final String UNKNOWN = "unknown";
 
@@ -541,7 +544,11 @@ public class Build {
      */
     public static void ensureFingerprintProperty() {
         if (TextUtils.isEmpty(SystemProperties.get("ro.build.fingerprint"))) {
-            SystemProperties.set("ro.build.fingerprint", FINGERPRINT);
+            try {
+                SystemProperties.set("ro.build.fingerprint", FINGERPRINT);
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Failed to set fingerprint property", e);
+            }
         }
     }
 
