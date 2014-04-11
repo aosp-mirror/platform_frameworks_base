@@ -134,9 +134,9 @@ public class TaskStack {
         /* Notifies when a task has been removed from the stack */
         public void onStackTaskRemoved(TaskStack stack, Task t);
         /** Notifies when the stack was filtered */
-        public void onStackFiltered(TaskStack newStack, ArrayList<Task> curStack, Task t);
+        public void onStackFiltered(TaskStack newStack, ArrayList<Task> curTasks, Task t);
         /** Notifies when the stack was un-filtered */
-        public void onStackUnfiltered(TaskStack newStack, ArrayList<Task> curStack);
+        public void onStackUnfiltered(TaskStack newStack, ArrayList<Task> curTasks);
     }
 
     Context mContext;
