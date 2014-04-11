@@ -23,6 +23,7 @@ import android.hardware.ICameraServiceListener;
 import android.hardware.IProCameraCallbacks;
 import android.hardware.IProCameraUser;
 import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureResultExtras;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.impl.CameraMetadataNative;
@@ -151,21 +152,50 @@ public class CameraBinderTest extends AndroidTestCase {
 
     static class DummyCameraDeviceCallbacks extends ICameraDeviceCallbacks.Stub {
 
-        @Override
-        public void onCameraError(int errorCode) {
-        }
-
-        @Override
-        public void onCameraIdle() {
-        }
-
-        @Override
-        public void onCaptureStarted(int requestId, long timestamp) {
-        }
-
-        @Override
-        public void onResultReceived(int frameId, CameraMetadataNative result)
+        /*
+         * (non-Javadoc)
+         * @see
+         * android.hardware.camera2.ICameraDeviceCallbacks#onCameraError(int,
+         * android.hardware.camera2.CaptureResultExtras)
+         */
+        public void onCameraError(int errorCode, CaptureResultExtras resultExtras)
                 throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see
+         * android.hardware.camera2.ICameraDeviceCallbacks#onCaptureStarted(
+         * android.hardware.camera2.CaptureResultExtras, long)
+         */
+        public void onCaptureStarted(CaptureResultExtras resultExtras, long timestamp)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see
+         * android.hardware.camera2.ICameraDeviceCallbacks#onResultReceived(
+         * android.hardware.camera2.impl.CameraMetadataNative,
+         * android.hardware.camera2.CaptureResultExtras)
+         */
+        public void onResultReceived(CameraMetadataNative result, CaptureResultExtras resultExtras)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see android.hardware.camera2.ICameraDeviceCallbacks#onCameraIdle()
+         */
+        public void onCameraIdle() throws RemoteException {
+            // TODO Auto-generated method stub
+
         }
     }
 
