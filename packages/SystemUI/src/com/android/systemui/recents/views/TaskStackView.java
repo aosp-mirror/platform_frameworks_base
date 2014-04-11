@@ -26,6 +26,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -45,6 +46,7 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 /* The visual representation of a task stack view */
@@ -75,9 +77,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     int mStashedScroll;
     OverScroller mScroller;
     ObjectAnimator mScrollAnimator;
-
-    // Filtering
-    AnimatorSet mFilterChildrenAnimator;
 
     // Optimizations
     int mHwLayersRefCount;
@@ -645,163 +644,22 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         requestSynchronizeStackViewsWithModel(Utilities.calculateTranslationAnimationDuration(movement));
     }
 
-    @Override
-    public void onStackFiltered(TaskStack newStack, final ArrayList<Task> curStack,
-                                Task filteredTask) {
-        // NOTE: This code assumes that the current (unfiltered) stack is a superset of the new
-        // (filtered) stack
-        // XXX: Use HW Layers
 
-        // Stash the scroll and filtered task for us to restore to when we unfilter
-        mStashedScroll = getStackScroll();
-
-        // Compute the transforms of the items in the current stack
-        final ArrayList<TaskViewTransform> curTaskTransforms =
-                getStackTransforms(curStack, mStashedScroll, null, true);
-
-        // Scroll the item to the top of the stack (sans-peek) rect so that we can see it better
-        updateMinMaxScroll(false);
-        float overlapHeight = Constants.Values.TaskStackView.StackOverlapPct * mTaskRect.height();
-        setStackScrollRaw((int) (newStack.indexOfTask(filteredTask) * overlapHeight));
-        boundScrollRaw();
-
-        // Compute the transforms of the items in the new stack after setting the new scroll
-        final ArrayList<TaskViewTransform> taskTransforms =
-                getStackTransforms(mStack.getTasks(), getStackScroll(), null, true);
-
-        // Animate all of the existing views on screen either out of view (if they are not visible
-        // in the new stack) or to their final positions in the new stack
-        final ArrayList<TaskView> childrenToReturnToPool = new ArrayList<TaskView>();
-        final ArrayList<Task> tasks = mStack.getTasks();
-        ArrayList<Animator> childViewAnims = new ArrayList<Animator>();
-        int childCount = getChildCount();
-        int movement = 0;
-        for (int i = 0; i < childCount; i++) {
-            TaskView tv = (TaskView) getChildAt(i);
-            Task task = tv.getTask();
-            TaskViewTransform toTransform;
-            int taskIndex = tasks.indexOf(task);
-
-            boolean willBeInvisible = (taskIndex < 0) || !taskTransforms.get(taskIndex).visible;
-            if (willBeInvisible) {
-                // Compose a new transform that fades and slides the task out of view
-                TaskViewTransform fromTransform = curTaskTransforms.get(curStack.indexOf(task));
-                toTransform = new TaskViewTransform(fromTransform);
-                tv.updateViewPropertiesToTaskTransform(null, fromTransform, 0);
-                tv.prepareTaskTransformForFilterTaskHidden(toTransform);
-
-                childrenToReturnToPool.add(tv);
-            } else {
-                toTransform = taskTransforms.get(taskIndex);
-
-                // Use the movement of the visible views to calculate the duration of the animation
-                movement = Math.max(movement,
-                        Math.abs(toTransform.translationY - (int) tv.getTranslationY()));
-            }
-            childViewAnims.add(tv.getAnimatorToTaskTransform(toTransform));
-        }
-
-        // Cancel the previous animation
-        if (mFilterChildrenAnimator != null) {
-            mFilterChildrenAnimator.cancel();
-            mFilterChildrenAnimator.removeAllListeners();
-        }
-
-        // Create a new animation for the existing children
-        final RecentsConfiguration config = RecentsConfiguration.getInstance();
-        mFilterChildrenAnimator = new AnimatorSet();
-        mFilterChildrenAnimator.setDuration(
-                Utilities.calculateTranslationAnimationDuration(movement,
-                        config.filteringCurrentViewsMinAnimDuration));
-        mFilterChildrenAnimator.setInterpolator(BakedBezierInterpolator.INSTANCE);
-        mFilterChildrenAnimator.addListener(new AnimatorListenerAdapter() {
-            boolean isCancelled;
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                isCancelled = true;
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (isCancelled) return;
-
-                // Return all the removed children to the view pool
-                for (TaskView tv : childrenToReturnToPool) {
-                    mViewPool.returnViewToPool(tv);
-                }
-
-                // For views that are not already visible, animate them in
-                ArrayList<Animator> newViewsAnims = new ArrayList<Animator>();
-                int taskCount = tasks.size();
-                int movement = 0;
-                int offset = 0;
-                for (int i = 0; i < taskCount; i++) {
-                    Task task = tasks.get(i);
-                    TaskViewTransform toTransform = taskTransforms.get(i);
-                    if (toTransform.visible) {
-                        TaskViewTransform fromTransform =
-                                curTaskTransforms.get(curStack.indexOf(task));
-                        TaskView tv = getChildViewForTask(task);
-                        if (tv == null) {
-                            tv = mViewPool.pickUpViewFromPool(task, task);
-                            // Compose a new transform that fades and slides the new task in
-                            fromTransform = new TaskViewTransform(toTransform);
-                            tv.prepareTaskTransformForFilterTaskHidden(fromTransform);
-                            tv.updateViewPropertiesToTaskTransform(null, fromTransform, 0);
-
-                            Animator anim = tv.getAnimatorToTaskTransform(toTransform);
-                            anim.setStartDelay(offset *
-                                    Constants.Values.TaskStackView.FilterStartDelay);
-                            newViewsAnims.add(anim);
-
-                            // Use the movement of the newly visible views to calculate the duration
-                            // of the animation
-                            movement = Math.max(movement, Math.abs(toTransform.translationY -
-                                    fromTransform.translationY));
-                            offset++;
-                        }
-                    }
-
-                    // Animate the new views in
-                    mFilterChildrenAnimator = new AnimatorSet();
-                    mFilterChildrenAnimator.setDuration(
-                            Utilities.calculateTranslationAnimationDuration(movement,
-                                    config.filteringNewViewsMinAnimDuration));
-                    mFilterChildrenAnimator.setInterpolator(BakedBezierInterpolator.INSTANCE);
-                    mFilterChildrenAnimator.playTogether(newViewsAnims);
-                    mFilterChildrenAnimator.start();
-                }
-                invalidate();
-            }
-        });
-        mFilterChildrenAnimator.playTogether(childViewAnims);
-        mFilterChildrenAnimator.start();
-    }
-
-    @Override
-    public void onStackUnfiltered(TaskStack newStack, final ArrayList<Task> curStack) {
-        // Compute the transforms of the items in the current stack
-        final int curScroll = getStackScroll();
-        final ArrayList<TaskViewTransform> curTaskTransforms =
-                getStackTransforms(curStack, curScroll, null, true);
-
-        // Restore the stashed scroll
-        updateMinMaxScroll(false);
-        setStackScrollRaw(mStashedScroll);
-        boundScrollRaw();
-
-        // Compute the transforms of the items in the new stack after restoring the stashed scroll
-        final ArrayList<TaskViewTransform> taskTransforms =
-                getStackTransforms(mStack.getTasks(), getStackScroll(), null, true);
-
+    /**
+     * Creates the animations for all the children views that need to be removed or to move views
+     * to their un/filtered position when we are un/filtering a stack, and returns the duration
+     * for these animations.
+     */
+    int getExitTransformsForFilterAnimation(ArrayList<Task> curTasks,
+                        ArrayList<TaskViewTransform> curTaskTransforms,
+                        ArrayList<Task> tasks, ArrayList<TaskViewTransform> taskTransforms,
+                        HashMap<TaskView, Pair<Integer, TaskViewTransform>> childViewTransformsOut,
+                        ArrayList<TaskView> childrenToRemoveOut,
+                        RecentsConfiguration config) {
         // Animate all of the existing views out of view (if they are not in the visible range in
         // the new stack) or to their final positions in the new stack
-        final ArrayList<TaskView> childrenToRemove = new ArrayList<TaskView>();
-        final ArrayList<Task> tasks = mStack.getTasks();
-        ArrayList<Animator> childViewAnims = new ArrayList<Animator>();
-        int childCount = getChildCount();
         int movement = 0;
+        int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             TaskView tv = (TaskView) getChildAt(i);
             Task task = tv.getTask();
@@ -811,104 +669,166 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // If the view is no longer visible, then we should just animate it out
             boolean willBeInvisible = taskIndex < 0 || !taskTransforms.get(taskIndex).visible;
             if (willBeInvisible) {
-                toTransform = new TaskViewTransform(taskTransforms.get(taskIndex));
+                if (taskIndex < 0) {
+                    toTransform = curTaskTransforms.get(curTasks.indexOf(task));
+                } else {
+                    toTransform = new TaskViewTransform(taskTransforms.get(taskIndex));
+                }
                 tv.prepareTaskTransformForFilterTaskVisible(toTransform);
-                childrenToRemove.add(tv);
+                childrenToRemoveOut.add(tv);
             } else {
                 toTransform = taskTransforms.get(taskIndex);
                 // Use the movement of the visible views to calculate the duration of the animation
                 movement = Math.max(movement, Math.abs(toTransform.translationY -
                         (int) tv.getTranslationY()));
             }
-
-            Animator anim = tv.getAnimatorToTaskTransform(toTransform);
-            childViewAnims.add(anim);
+            childViewTransformsOut.put(tv, new Pair(0, toTransform));
         }
+        return Utilities.calculateTranslationAnimationDuration(movement,
+                config.filteringCurrentViewsMinAnimDuration);
+    }
 
-        // Cancel the previous animation
-        if (mFilterChildrenAnimator != null) {
-            mFilterChildrenAnimator.cancel();
-            mFilterChildrenAnimator.removeAllListeners();
+    /**
+     * Creates the animations for all the children views that need to be animated in when we are
+     * un/filtering a stack, and returns the duration for these animations.
+     */
+    int getEnterTransformsForFilterAnimation(ArrayList<Task> tasks,
+                         ArrayList<TaskViewTransform> taskTransforms,
+                         HashMap<TaskView, Pair<Integer, TaskViewTransform>> childViewTransformsOut,
+                         RecentsConfiguration config) {
+        int offset = 0;
+        int movement = 0;
+        int taskCount = tasks.size();
+        for (int i = taskCount - 1; i >= 0; i--) {
+            Task task = tasks.get(i);
+            TaskViewTransform toTransform = taskTransforms.get(i);
+            if (toTransform.visible) {
+                TaskView tv = getChildViewForTask(task);
+                if (tv == null) {
+                    // For views that are not already visible, animate them in
+                    tv = mViewPool.pickUpViewFromPool(task, task);
+
+                    // Compose a new transform to fade and slide the new task in
+                    TaskViewTransform fromTransform = new TaskViewTransform(toTransform);
+                    tv.prepareTaskTransformForFilterTaskHidden(fromTransform);
+                    tv.updateViewPropertiesToTaskTransform(null, fromTransform, 0);
+
+                    int startDelay = offset *
+                            Constants.Values.TaskStackView.FilterStartDelay;
+                    childViewTransformsOut.put(tv, new Pair(startDelay, toTransform));
+
+                    // Use the movement of the new views to calculate the duration of the animation
+                    movement = Math.max(movement,
+                            Math.abs(toTransform.translationY - fromTransform.translationY));
+                    offset++;
+                }
+            }
         }
+        return Utilities.calculateTranslationAnimationDuration(movement,
+                config.filteringNewViewsMinAnimDuration);
+    }
 
-        // Create a new animation for the existing children
+    /** Orchestrates the animations of the current child views and any new views. */
+    void doFilteringAnimation(ArrayList<Task> curTasks,
+                              ArrayList<TaskViewTransform> curTaskTransforms,
+                              final ArrayList<Task> tasks,
+                              final ArrayList<TaskViewTransform> taskTransforms) {
         final RecentsConfiguration config = RecentsConfiguration.getInstance();
-        mFilterChildrenAnimator = new AnimatorSet();
-        mFilterChildrenAnimator.setDuration(
-                Utilities.calculateTranslationAnimationDuration(movement,
-                        config.filteringCurrentViewsMinAnimDuration));
-        mFilterChildrenAnimator.setInterpolator(BakedBezierInterpolator.INSTANCE);
-        mFilterChildrenAnimator.addListener(new AnimatorListenerAdapter() {
-            boolean isCancelled;
 
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                isCancelled = true;
-            }
+        // Calculate the transforms to animate out all the existing views if they are not in the
+        // new visible range (or to their final positions in the stack if they are)
+        final ArrayList<TaskView> childrenToRemove = new ArrayList<TaskView>();
+        final HashMap<TaskView, Pair<Integer, TaskViewTransform>> childViewTransforms =
+                new HashMap<TaskView, Pair<Integer, TaskViewTransform>>();
+        int duration = getExitTransformsForFilterAnimation(curTasks, curTaskTransforms, tasks,
+                taskTransforms, childViewTransforms, childrenToRemove, config);
 
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (isCancelled) return;
+        // If all the current views are in the visible range of the new stack, then don't wait for
+        // views to animate out and animate all the new views into their place
+        final boolean unifyNewViewAnimation = childrenToRemove.isEmpty();
+        if (unifyNewViewAnimation) {
+            int inDuration = getEnterTransformsForFilterAnimation(tasks, taskTransforms,
+                    childViewTransforms, config);
+            duration = Math.max(duration, inDuration);
+        }
 
-                // Return all the removed children to the view pool
-                for (TaskView tv : childrenToRemove) {
-                    mViewPool.returnViewToPool(tv);
-                }
+        // Animate all the views to their final transforms
+        for (final TaskView tv : childViewTransforms.keySet()) {
+            Pair<Integer, TaskViewTransform> t = childViewTransforms.get(tv);
+            tv.animate().cancel();
+            tv.animate()
+                    .setStartDelay(t.first)
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            childViewTransforms.remove(tv);
+                            if (childViewTransforms.isEmpty()) {
+                                // Return all the removed children to the view pool
+                                for (TaskView tv : childrenToRemove) {
+                                    mViewPool.returnViewToPool(tv);
+                                }
 
-                // Increment the hw layers ref count
-                addHwLayersRefCount("unfilteredNewViews");
-
-                // For views that are not already visible, animate them in
-                ArrayList<Animator> newViewAnims = new ArrayList<Animator>();
-                int taskCount = tasks.size();
-                int movement = 0;
-                int offset = 0;
-                for (int i = 0; i < taskCount; i++) {
-                    Task task = tasks.get(i);
-                    TaskViewTransform toTransform = taskTransforms.get(i);
-                    if (toTransform.visible) {
-                        TaskView tv = getChildViewForTask(task);
-                        if (tv == null) {
-                            // For views that are not already visible, animate them in
-                            tv = mViewPool.pickUpViewFromPool(task, task);
-
-                            // Compose a new transform to fade and slide the new task in
-                            TaskViewTransform fromTransform = new TaskViewTransform(toTransform);
-                            tv.prepareTaskTransformForFilterTaskHidden(fromTransform);
-                            tv.updateViewPropertiesToTaskTransform(null, fromTransform, 0);
-
-                            Animator anim = tv.getAnimatorToTaskTransform(toTransform);
-                            anim.setStartDelay(offset *
-                                    Constants.Values.TaskStackView.FilterStartDelay);
-                            newViewAnims.add(anim);
-                            // Use the movement of the newly visible views to calculate the duration
-                            // of the animation
-                            movement = Math.max(movement,
-                                    Math.abs(toTransform.translationY - fromTransform.translationY));
-                            offset++;
+                                if (!unifyNewViewAnimation) {
+                                    // For views that are not already visible, animate them in
+                                    childViewTransforms.clear();
+                                    int duration = getEnterTransformsForFilterAnimation(tasks,
+                                            taskTransforms, childViewTransforms, config);
+                                    for (final TaskView tv : childViewTransforms.keySet()) {
+                                        Pair<Integer, TaskViewTransform> t = childViewTransforms.get(tv);
+                                        tv.animate().setStartDelay(t.first);
+                                        tv.updateViewPropertiesToTaskTransform(null, t.second, duration);
+                                    }
+                                }
+                            }
                         }
-                    }
-                }
+                    });
+            tv.updateViewPropertiesToTaskTransform(null, t.second, duration);
+        }
+    }
 
-                // Run the animation
-                mFilterChildrenAnimator = new AnimatorSet();
-                mFilterChildrenAnimator.setDuration(
-                        Utilities.calculateTranslationAnimationDuration(movement,
-                                config.filteringNewViewsMinAnimDuration));
-                mFilterChildrenAnimator.playTogether(newViewAnims);
-                mFilterChildrenAnimator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        // Decrement the hw layers ref count
-                        decHwLayersRefCount("unfilteredNewViews");
-                    }
-                });
-                mFilterChildrenAnimator.start();
-                invalidate();
-            }
-        });
-        mFilterChildrenAnimator.playTogether(childViewAnims);
-        mFilterChildrenAnimator.start();
+    @Override
+    public void onStackFiltered(TaskStack newStack, final ArrayList<Task> curTasks,
+                                Task filteredTask) {
+        // Stash the scroll and filtered task for us to restore to when we unfilter
+        mStashedScroll = getStackScroll();
+
+        // Calculate the current task transforms
+        ArrayList<TaskViewTransform> curTaskTransforms =
+                getStackTransforms(curTasks, getStackScroll(), null, true);
+
+        // Scroll the item to the top of the stack (sans-peek) rect so that we can see it better
+        updateMinMaxScroll(false);
+        float overlapHeight = Constants.Values.TaskStackView.StackOverlapPct * mTaskRect.height();
+        setStackScrollRaw((int) (newStack.indexOfTask(filteredTask) * overlapHeight));
+        boundScrollRaw();
+
+        // Compute the transforms of the items in the new stack after setting the new scroll
+        final ArrayList<Task> tasks = mStack.getTasks();
+        final ArrayList<TaskViewTransform> taskTransforms =
+                getStackTransforms(mStack.getTasks(), getStackScroll(), null, true);
+
+        // Animate
+        doFilteringAnimation(curTasks, curTaskTransforms, tasks, taskTransforms);
+    }
+
+    @Override
+    public void onStackUnfiltered(TaskStack newStack, final ArrayList<Task> curTasks) {
+        // Calculate the current task transforms
+        final ArrayList<TaskViewTransform> curTaskTransforms =
+                getStackTransforms(curTasks, getStackScroll(), null, true);
+
+        // Restore the stashed scroll
+        updateMinMaxScroll(false);
+        setStackScrollRaw(mStashedScroll);
+        boundScrollRaw();
+
+        // Compute the transforms of the items in the new stack after restoring the stashed scroll
+        final ArrayList<Task> tasks = mStack.getTasks();
+        final ArrayList<TaskViewTransform> taskTransforms =
+                getStackTransforms(tasks, getStackScroll(), null, true);
+
+        // Animate
+        doFilteringAnimation(curTasks, curTaskTransforms, tasks, taskTransforms);
 
         // Clear the saved vars
         mStashedScroll = 0;

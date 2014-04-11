@@ -16,21 +16,13 @@
 
 package com.android.systemui.recents.views;
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Outline;
-import android.graphics.Path;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
 import com.android.systemui.recents.BakedBezierInterpolator;
-import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.Utilities;
 import com.android.systemui.recents.model.Task;
@@ -115,18 +107,6 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
         }
     }
 
-    /** Returns an animator to animate this task to the specified transform */
-    Animator getAnimatorToTaskTransform(TaskViewTransform toTransform) {
-        AnimatorSet anims = new AnimatorSet();
-        anims.playTogether(
-                ObjectAnimator.ofFloat(this, "translationY", toTransform.translationY),
-                ObjectAnimator.ofFloat(this, "scaleX", toTransform.scale),
-                ObjectAnimator.ofFloat(this, "scaleY", toTransform.scale),
-                ObjectAnimator.ofFloat(this, "alpha", toTransform.alpha)
-        );
-        return anims;
-    }
-
     /** Resets this view's properties */
     void resetViewProperties() {
         setTranslationX(0f);
@@ -136,12 +116,20 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
         setAlpha(1f);
     }
 
+    /**
+     * When we are un/filtering, this method will set up the transform that we are animating to,
+     * in order to hide the task.
+     */
     void prepareTaskTransformForFilterTaskHidden(TaskViewTransform toTransform) {
         // Fade the view out and slide it away
         toTransform.alpha = 0f;
         toTransform.translationY += 200;
     }
 
+    /**
+     * When we are un/filtering, this method will setup the transform that we are animating from,
+     * in order to show the task.
+     */
     void prepareTaskTransformForFilterTaskVisible(TaskViewTransform fromTransform) {
         // Fade the view in
         fromTransform.alpha = 0f;

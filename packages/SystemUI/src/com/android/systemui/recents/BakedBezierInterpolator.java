@@ -24,9 +24,6 @@ public class BakedBezierInterpolator implements TimeInterpolator {
      * P3 (1.0, 1.0)
      *
      * Values sampled with x at regular intervals between 0 and 1.
-     *
-     * These values were generated using:
-     *   ./scripts/bezier_interpolator_values_gen.py 0.4 0.2
      */
     private static final float[] VALUES = new float[] {
         0.0f, 0.0002f, 0.0009f, 0.0019f, 0.0036f, 0.0059f, 0.0086f, 0.0119f, 0.0157f, 0.0209f,
