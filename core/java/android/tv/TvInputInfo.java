@@ -87,6 +87,34 @@ public final class TvInputInfo implements Parcelable {
         return 0;
     }
 
+    @Override
+    public int hashCode() {
+        return mId.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+
+        if (!(o instanceof TvInputInfo)) {
+            return false;
+        }
+
+        TvInputInfo obj = (TvInputInfo) o;
+        return mId.equals(obj.mId)
+                && mService.serviceInfo.packageName.equals(obj.mService.serviceInfo.packageName)
+                && mService.serviceInfo.name.equals(obj.mService.serviceInfo.name);
+    }
+
+    @Override
+    public String toString() {
+        return "TvInputInfo{id=" + mId
+                + ", pkg=" + mService.serviceInfo.packageName
+                + ", service=" + mService.serviceInfo.name + "}";
+    }
+
     /**
      * Used to package this object into a {@link Parcel}.
      *
