@@ -15,12 +15,16 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="true" android:state_pressed="true">
+    <item android:state_enabled="false">
+        <bitmap android:src="@drawable/scrubber_control_off_qntm_alpha"
+            android:tint="?attr/colorControlNormal" />
+    </item>
+    <item android:state_pressed="true">
         <bitmap android:src="@drawable/scrubber_control_on_pressed_qntm_alpha"
             android:tint="?attr/colorControlActivated" />
     </item>
     <item>
         <bitmap android:src="@drawable/scrubber_control_on_qntm_alpha"
-            android:tint="?attr/colorControlNormal" />
+            android:tint="?attr/colorControlActivated" />
     </item>
 </selector>
