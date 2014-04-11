@@ -115,6 +115,7 @@ public abstract class SearchIndexableData {
      * Default constructor.
      */
     public SearchIndexableData() {
+        locale = Locale.getDefault();
         enabled = true;
     }
 
@@ -124,9 +125,8 @@ public abstract class SearchIndexableData {
      * @param ctx the Context
      */
     public SearchIndexableData(Context ctx) {
+        this();
         context = ctx;
-        locale = Locale.getDefault();
-        enabled = true;
     }
 
     @Override
