@@ -107,15 +107,9 @@ abstract class DisplayDevice {
     }
 
     /**
-     * Blanks the display, if supported.
+     * Sets the display state, if supported.
      */
-    public void blankLocked() {
-    }
-
-    /**
-     * Unblanks the display, if supported.
-     */
-    public void unblankLocked() {
+    public void requestDisplayStateLocked(int state) {
     }
 
     /**

@@ -180,6 +180,11 @@ public final class DisplayInfo implements Parcelable {
     public float physicalYDpi;
 
     /**
+     * The state of the display, such as {@link android.view.Display#STATE_ON}.
+     */
+    public int state;
+
+    /**
      * The UID of the application that owns this display, or zero if it is owned by the system.
      * <p>
      * If the display is private, then only the owner can use it.
@@ -248,6 +253,7 @@ public final class DisplayInfo implements Parcelable {
                 && logicalDensityDpi == other.logicalDensityDpi
                 && physicalXDpi == other.physicalXDpi
                 && physicalYDpi == other.physicalYDpi
+                && state == other.state
                 && ownerUid == other.ownerUid
                 && Objects.equal(ownerPackageName, other.ownerPackageName);
     }
@@ -280,6 +286,7 @@ public final class DisplayInfo implements Parcelable {
         logicalDensityDpi = other.logicalDensityDpi;
         physicalXDpi = other.physicalXDpi;
         physicalYDpi = other.physicalYDpi;
+        state = other.state;
         ownerUid = other.ownerUid;
         ownerPackageName = other.ownerPackageName;
     }
@@ -307,6 +314,7 @@ public final class DisplayInfo implements Parcelable {
         logicalDensityDpi = source.readInt();
         physicalXDpi = source.readFloat();
         physicalYDpi = source.readFloat();
+        state = source.readInt();
         ownerUid = source.readInt();
         ownerPackageName = source.readString();
     }
@@ -335,6 +343,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(logicalDensityDpi);
         dest.writeFloat(physicalXDpi);
         dest.writeFloat(physicalYDpi);
+        dest.writeInt(state);
         dest.writeInt(ownerUid);
         dest.writeString(ownerPackageName);
     }
@@ -431,7 +440,7 @@ public final class DisplayInfo implements Parcelable {
         sb.append(smallestNominalAppHeight);
         sb.append(", ");
         sb.append(refreshRate);
-        sb.append(" fps, rotation");
+        sb.append(" fps, rotation ");
         sb.append(rotation);
         sb.append(", density ");
         sb.append(logicalDensityDpi);
@@ -446,6 +455,8 @@ public final class DisplayInfo implements Parcelable {
         if (address != null) {
             sb.append(", address ").append(address);
         }
+        sb.append(", state ");
+        sb.append(Display.stateToString(state));
         if (ownerUid != 0 || ownerPackageName != null) {
             sb.append(", owner ").append(ownerPackageName);
             sb.append(" (uid ").append(ownerUid).append(")");

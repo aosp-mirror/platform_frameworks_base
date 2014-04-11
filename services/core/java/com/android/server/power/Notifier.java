@@ -28,6 +28,7 @@ import android.app.ActivityManagerNative;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.input.InputManagerInternal;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -86,6 +87,7 @@ final class Notifier {
     private final ScreenOnBlocker mScreenOnBlocker;
     private final WindowManagerPolicy mPolicy;
     private final ActivityManagerInternal mActivityManagerInternal;
+    private final InputManagerInternal mInputManagerInternal;
 
     private final NotifierHandler mHandler;
     private final Intent mScreenOnIntent;
@@ -121,6 +123,7 @@ final class Notifier {
         mScreenOnBlocker = screenOnBlocker;
         mPolicy = policy;
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
 
         mHandler = new NotifierHandler(looper);
         mScreenOnIntent = new Intent(Intent.ACTION_SCREEN_ON);
@@ -232,73 +235,58 @@ final class Notifier {
     }
 
     /**
-     * Called when the device is waking up from sleep and the
-     * display is about to be turned on.
+     * Notifies that the device is changing interactive state.
      */
-    public void onWakeUpStarted() {
+    public void onInteractiveStateChangeStarted(boolean interactive, int reason) {
         if (DEBUG) {
-            Slog.d(TAG, "onWakeUpStarted");
+            Slog.d(TAG, "onInteractiveChangeStarted: interactive=" + interactive
+                    + ", reason=" + reason);
         }
 
         synchronized (mLock) {
-            if (mActualPowerState != POWER_STATE_AWAKE) {
-                mActualPowerState = POWER_STATE_AWAKE;
-                mPendingWakeUpBroadcast = true;
-                if (!mScreenOnBlockerAcquired) {
-                    mScreenOnBlockerAcquired = true;
-                    mScreenOnBlocker.acquire();
+            if (interactive) {
+                // Waking up...
+                if (mActualPowerState != POWER_STATE_AWAKE) {
+                    mActualPowerState = POWER_STATE_AWAKE;
+                    mPendingWakeUpBroadcast = true;
+                    if (!mScreenOnBlockerAcquired) {
+                        mScreenOnBlockerAcquired = true;
+                        mScreenOnBlocker.acquire();
+                    }
+                    updatePendingBroadcastLocked();
                 }
-                updatePendingBroadcastLocked();
+            } else {
+                // Going to sleep...
+                mLastGoToSleepReason = reason;
             }
+            mInputManagerInternal.setInteractive(interactive);
         }
     }
 
     /**
-     * Called when the device has finished waking up from sleep
-     * and the display has been turned on.
+     * Notifies that the device has finished changing interactive state.
      */
-    public void onWakeUpFinished() {
+    public void onInteractiveStateChangeFinished(boolean interactive) {
         if (DEBUG) {
-            Slog.d(TAG, "onWakeUpFinished");
-        }
-    }
-
-    /**
-     * Called when the device is going to sleep.
-     */
-    public void onGoToSleepStarted(int reason) {
-        if (DEBUG) {
-            Slog.d(TAG, "onGoToSleepStarted");
+            Slog.d(TAG, "onInteractiveChangeFinished");
         }
 
         synchronized (mLock) {
-            mLastGoToSleepReason = reason;
-        }
-    }
-
-    /**
-     * Called when the device has finished going to sleep and the
-     * display has been turned off.
-     *
-     * This is a good time to make transitions that we don't want the user to see,
-     * such as bringing the key guard to focus.  There's no guarantee for this,
-     * however because the user could turn the device on again at any time.
-     * Some things may need to be protected by other mechanisms that defer screen on.
-     */
-    public void onGoToSleepFinished() {
-        if (DEBUG) {
-            Slog.d(TAG, "onGoToSleepFinished");
-        }
-
-        synchronized (mLock) {
-            if (mActualPowerState != POWER_STATE_ASLEEP) {
-                mActualPowerState = POWER_STATE_ASLEEP;
-                mPendingGoToSleepBroadcast = true;
-                if (mUserActivityPending) {
-                    mUserActivityPending = false;
-                    mHandler.removeMessages(MSG_USER_ACTIVITY);
+            if (!interactive) {
+                // Finished going to sleep...
+                // This is a good time to make transitions that we don't want the user to see,
+                // such as bringing the key guard to focus.  There's no guarantee for this,
+                // however because the user could turn the device on again at any time.
+                // Some things may need to be protected by other mechanisms that defer screen on.
+                if (mActualPowerState != POWER_STATE_ASLEEP) {
+                    mActualPowerState = POWER_STATE_ASLEEP;
+                    mPendingGoToSleepBroadcast = true;
+                    if (mUserActivityPending) {
+                        mUserActivityPending = false;
+                        mHandler.removeMessages(MSG_USER_ACTIVITY);
+                    }
+                    updatePendingBroadcastLocked();
                 }
-                updatePendingBroadcastLocked();
             }
         }
     }

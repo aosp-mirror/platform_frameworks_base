@@ -789,10 +789,20 @@ public class DreamService extends Service implements Window.Callback {
             return;
         }
 
-        // start it up
-        if (mDebug) Slog.v(TAG, "Calling onDreamingStarted()");
-        mStarted = true;
-        onDreamingStarted();
+        // We need to defer calling onDreamingStarted until after onWindowAttached,
+        // which is posted to the handler by addView, so we post onDreamingStarted
+        // to the handler also.  Need to watch out here in case detach occurs before
+        // this callback is invoked.
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mWindow != null) {
+                    if (mDebug) Slog.v(TAG, "Calling onDreamingStarted()");
+                    mStarted = true;
+                    onDreamingStarted();
+                }
+            }
+        });
     }
 
     private void safelyFinish() {

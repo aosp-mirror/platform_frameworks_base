@@ -1166,7 +1166,11 @@ public class KeyEvent extends InputEvent implements Parcelable {
 
     /**
      * This mask is set if the device woke because of this key event.
+     *
+     * @deprecated This flag will never be set by the system since the system
+     * consumes all wake keys itself.
      */
+    @Deprecated
     public static final int FLAG_WOKE_HERE = 0x1;
 
     /**

@@ -62,6 +62,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TimeUtils;
+import android.view.Display;
 import android.view.WindowManagerPolicy;
 
 import java.io.FileDescriptor;
@@ -209,6 +210,10 @@ public final class PowerManagerService extends com.android.server.SystemService
     // A bitfield that summarizes the state of all active wakelocks.
     private int mWakeLockSummary;
 
+    // True if the device is in an interactive state.
+    private boolean mInteractive;
+    private boolean mInteractiveChanging;
+
     // If true, instructs the display controller to wait for the proximity sensor to
     // go negative before turning the screen on.
     private boolean mRequestWaitForNegativeProximity;
@@ -216,11 +221,6 @@ public final class PowerManagerService extends com.android.server.SystemService
     // Timestamp of the last time the device was awoken or put to sleep.
     private long mLastWakeTime;
     private long mLastSleepTime;
-
-    // True if we need to send a wake up or go to sleep finished notification
-    // when the display is ready.
-    private boolean mSendWakeUpFinishedNotificationWhenReady;
-    private boolean mSendGoToSleepFinishedNotificationWhenReady;
 
     // Timestamp of the last call to user activity.
     private long mLastUserActivityTime;
@@ -265,11 +265,11 @@ public final class PowerManagerService extends com.android.server.SystemService
 
     // True if auto-suspend mode is enabled.
     // Refer to autosuspend.h.
-    private boolean mAutoSuspendModeEnabled;
+    private boolean mHalAutoSuspendModeEnabled;
 
     // True if interactive mode is enabled.
     // Refer to power.h.
-    private boolean mInteractiveModeEnabled;
+    private boolean mHalInteractiveModeEnabled;
 
     // True if the device is plugged into a power source.
     private boolean mIsPowered;
@@ -289,10 +289,10 @@ public final class PowerManagerService extends com.android.server.SystemService
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
 
     // True to decouple auto-suspend mode from the display state.
-    private boolean mDecoupleAutoSuspendModeFromDisplayConfig;
+    private boolean mDecoupleHalAutoSuspendModeFromDisplayConfig;
 
     // True to decouple interactive mode from the display state.
-    private boolean mDecoupleInteractiveModeFromDisplayConfig;
+    private boolean mDecoupleHalInteractiveModeFromDisplayConfig;
 
     // True if the device should wake up when plugged or unplugged.
     private boolean mWakeUpWhenPluggedOrUnpluggedConfig;
@@ -397,7 +397,6 @@ public final class PowerManagerService extends com.android.server.SystemService
 
     private native void nativeInit();
 
-    private static native void nativeSetPowerState(boolean screenOn, boolean screenBright);
     private static native void nativeAcquireSuspendBlocker(String name);
     private static native void nativeReleaseSuspendBlocker(String name);
     private static native void nativeSetInteractive(boolean enable);
@@ -412,13 +411,17 @@ public final class PowerManagerService extends com.android.server.SystemService
             mDisplaySuspendBlocker = createSuspendBlockerLocked("PowerManagerService.Display");
             mDisplaySuspendBlocker.acquire();
             mHoldingDisplaySuspendBlocker = true;
+            mHalAutoSuspendModeEnabled = false;
+            mHalInteractiveModeEnabled = true;
 
             mScreenOnBlocker = new ScreenOnBlockerImpl();
             mWakefulness = WAKEFULNESS_AWAKE;
-        }
+            mInteractive = true;
 
-        nativeInit();
-        nativeSetPowerState(true, true);
+            nativeInit();
+            nativeSetAutoSuspend(false);
+            nativeSetInteractive(true);
+        }
     }
 
     @Override
@@ -446,14 +449,6 @@ public final class PowerManagerService extends com.android.server.SystemService
 
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
-
-        // Forcibly turn the screen on at boot so that it is in a known power state.
-        // We do this in init() rather than in the constructor because setting the
-        // screen state requires a call into surface flinger which then needs to call back
-        // into the activity manager to check permissions.  Unfortunately the
-        // activity manager is not running when the constructor is called, so we
-        // have to defer setting the screen state until this point.
-        mDisplayPowerCallbacks.unblankAllDisplays();
     }
 
     void setPolicy(WindowManagerPolicy policy) {
@@ -547,9 +542,9 @@ public final class PowerManagerService extends com.android.server.SystemService
     private void readConfigurationLocked() {
         final Resources resources = mContext.getResources();
 
-        mDecoupleAutoSuspendModeFromDisplayConfig = resources.getBoolean(
+        mDecoupleHalAutoSuspendModeFromDisplayConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_powerDecoupleAutoSuspendModeFromDisplay);
-        mDecoupleInteractiveModeFromDisplayConfig = resources.getBoolean(
+        mDecoupleHalInteractiveModeFromDisplayConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_powerDecoupleInteractiveModeFromDisplay);
         mWakeUpWhenPluggedOrUnpluggedConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_unplugTurnsOnScreen);
@@ -867,11 +862,6 @@ public final class PowerManagerService extends com.android.server.SystemService
         return false;
     }
 
-    // Called from native code.
-    private void wakeUpFromNative(long eventTime) {
-        wakeUpInternal(eventTime);
-    }
-
     private void wakeUpInternal(long eventTime) {
         synchronized (mLock) {
             if (wakeUpNoUpdateLocked(eventTime)) {
@@ -902,24 +892,14 @@ public final class PowerManagerService extends com.android.server.SystemService
                 break;
         }
 
-        if (mWakefulness != WAKEFULNESS_DREAMING) {
-            sendPendingNotificationsLocked();
-            mNotifier.onWakeUpStarted();
-            mSendWakeUpFinishedNotificationWhenReady = true;
-        }
-
         mLastWakeTime = eventTime;
-        mWakefulness = WAKEFULNESS_AWAKE;
         mDirty |= DIRTY_WAKEFULNESS;
+        mWakefulness = WAKEFULNESS_AWAKE;
+        setInteractiveStateLocked(true, 0);
 
         userActivityNoUpdateLocked(
                 eventTime, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
         return true;
-    }
-
-    // Called from native code.
-    private void goToSleepFromNative(long eventTime, int reason) {
-        goToSleepInternal(eventTime, reason);
     }
 
     private void goToSleepInternal(long eventTime, int reason) {
@@ -958,14 +938,11 @@ public final class PowerManagerService extends com.android.server.SystemService
                 break;
         }
 
-        sendPendingNotificationsLocked();
-        mNotifier.onGoToSleepStarted(reason);
-        mSendGoToSleepFinishedNotificationWhenReady = true;
-
         mLastSleepTime = eventTime;
         mDirty |= DIRTY_WAKEFULNESS;
         mWakefulness = WAKEFULNESS_DOZING;
         mSandmanSummoned = true;
+        setInteractiveStateLocked(false, reason);
 
         // Report the number of wake locks that will be cleared by going to sleep.
         int numWakeLocksCleared = 0;
@@ -1007,6 +984,7 @@ public final class PowerManagerService extends com.android.server.SystemService
         mDirty |= DIRTY_WAKEFULNESS;
         mWakefulness = WAKEFULNESS_DREAMING;
         mSandmanSummoned = true;
+        setInteractiveStateLocked(true, 0);
         return true;
     }
 
@@ -1025,7 +1003,25 @@ public final class PowerManagerService extends com.android.server.SystemService
 
         mDirty |= DIRTY_WAKEFULNESS;
         mWakefulness = WAKEFULNESS_ASLEEP;
+        setInteractiveStateLocked(false, PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
         return true;
+    }
+
+    private void setInteractiveStateLocked(boolean interactive, int reason) {
+        if (mInteractive != interactive) {
+            finishInteractiveStateChangeLocked();
+
+            mInteractive = interactive;
+            mInteractiveChanging = true;
+            mNotifier.onInteractiveStateChangeStarted(interactive, reason);
+        }
+    }
+
+    private void finishInteractiveStateChangeLocked() {
+        if (mInteractiveChanging) {
+            mNotifier.onInteractiveStateChangeFinished(mInteractive);
+            mInteractiveChanging = false;
+        }
     }
 
     /**
@@ -1071,24 +1067,13 @@ public final class PowerManagerService extends com.android.server.SystemService
 
         // Phase 3: Send notifications, if needed.
         if (mDisplayReady) {
-            sendPendingNotificationsLocked();
+            finishInteractiveStateChangeLocked();
         }
 
         // Phase 4: Update suspend blocker.
         // Because we might release the last suspend blocker here, we need to make sure
         // we finished everything else first!
         updateSuspendBlockerLocked();
-    }
-
-    private void sendPendingNotificationsLocked() {
-        if (mSendWakeUpFinishedNotificationWhenReady) {
-            mSendWakeUpFinishedNotificationWhenReady = false;
-            mNotifier.onWakeUpFinished();
-        }
-        if (mSendGoToSleepFinishedNotificationWhenReady) {
-            mSendGoToSleepFinishedNotificationWhenReady = false;
-            mNotifier.onGoToSleepFinished();
-        }
     }
 
     /**
@@ -1210,45 +1195,42 @@ public final class PowerManagerService extends com.android.server.SystemService
                         mWakeLockSummary |= WAKE_LOCK_CPU;
                         break;
                     case PowerManager.FULL_WAKE_LOCK:
-                        if (mWakefulness == WAKEFULNESS_AWAKE
-                                || mWakefulness == WAKEFULNESS_DREAMING) {
-                            mWakeLockSummary |= WAKE_LOCK_CPU
-                                    | WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_BUTTON_BRIGHT;
-                        }
-                        if (mWakefulness == WAKEFULNESS_AWAKE) {
-                            mWakeLockSummary |= WAKE_LOCK_STAY_AWAKE;
-                        }
+                        mWakeLockSummary |= WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_BUTTON_BRIGHT;
                         break;
                     case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
-                        if (mWakefulness == WAKEFULNESS_AWAKE
-                                || mWakefulness == WAKEFULNESS_DREAMING) {
-                            mWakeLockSummary |= WAKE_LOCK_CPU | WAKE_LOCK_SCREEN_BRIGHT;
-                        }
-                        if (mWakefulness == WAKEFULNESS_AWAKE) {
-                            mWakeLockSummary |= WAKE_LOCK_STAY_AWAKE;
-                        }
+                        mWakeLockSummary |= WAKE_LOCK_SCREEN_BRIGHT;
                         break;
                     case PowerManager.SCREEN_DIM_WAKE_LOCK:
-                        if (mWakefulness == WAKEFULNESS_AWAKE
-                                || mWakefulness == WAKEFULNESS_DREAMING) {
-                            mWakeLockSummary |= WAKE_LOCK_CPU | WAKE_LOCK_SCREEN_DIM;
-                        }
-                        if (mWakefulness == WAKEFULNESS_AWAKE) {
-                            mWakeLockSummary |= WAKE_LOCK_STAY_AWAKE;
-                        }
+                        mWakeLockSummary |= WAKE_LOCK_SCREEN_DIM;
                         break;
                     case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
-                        if (mWakefulness == WAKEFULNESS_AWAKE
-                                || mWakefulness == WAKEFULNESS_DREAMING
-                                || mWakefulness == WAKEFULNESS_DOZING) {
-                            mWakeLockSummary |= WAKE_LOCK_PROXIMITY_SCREEN_OFF;
-                        }
+                        mWakeLockSummary |= WAKE_LOCK_PROXIMITY_SCREEN_OFF;
                         break;
                     case PowerManager.DOZE_WAKE_LOCK:
-                        if (mWakefulness == WAKEFULNESS_DOZING) {
-                            mWakeLockSummary |= WAKE_LOCK_DOZE;
-                        }
+                        mWakeLockSummary |= WAKE_LOCK_DOZE;
                         break;
+                }
+            }
+
+            // Cancel wake locks that make no sense based on the current state.
+            if (mWakefulness != WAKEFULNESS_DOZING) {
+                mWakeLockSummary &= ~WAKE_LOCK_DOZE;
+            }
+            if (mWakefulness == WAKEFULNESS_ASLEEP
+                    || (mWakeLockSummary & WAKE_LOCK_DOZE) != 0) {
+                mWakeLockSummary &= ~(WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM
+                        | WAKE_LOCK_BUTTON_BRIGHT);
+                if (mWakefulness == WAKEFULNESS_ASLEEP) {
+                    mWakeLockSummary &= ~WAKE_LOCK_PROXIMITY_SCREEN_OFF;
+                }
+            }
+
+            // Infer implied wake locks where necessary based on the current state.
+            if ((mWakeLockSummary & (WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM)) != 0) {
+                if (mWakefulness == WAKEFULNESS_AWAKE) {
+                    mWakeLockSummary |= WAKE_LOCK_CPU | WAKE_LOCK_STAY_AWAKE;
+                } else if (mWakefulness == WAKEFULNESS_DREAMING) {
+                    mWakeLockSummary |= WAKE_LOCK_CPU;
                 }
             }
 
@@ -1269,12 +1251,14 @@ public final class PowerManagerService extends com.android.server.SystemService
      */
     private void updateUserActivitySummaryLocked(long now, int dirty) {
         // Update the status of the user activity timeout timer.
-        if ((dirty & (DIRTY_USER_ACTIVITY | DIRTY_WAKEFULNESS | DIRTY_SETTINGS)) != 0) {
+        if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY
+                | DIRTY_WAKEFULNESS | DIRTY_SETTINGS)) != 0) {
             mHandler.removeMessages(MSG_USER_ACTIVITY_TIMEOUT);
 
             long nextTimeout = 0;
             if (mWakefulness == WAKEFULNESS_AWAKE
-                    || mWakefulness == WAKEFULNESS_DREAMING) {
+                    || mWakefulness == WAKEFULNESS_DREAMING
+                    || mWakefulness == WAKEFULNESS_DOZING) {
                 final int screenOffTimeout = getScreenOffTimeoutLocked();
                 final int screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
 
@@ -1598,8 +1582,6 @@ public final class PowerManagerService extends com.android.server.SystemService
                 | DIRTY_SETTINGS | DIRTY_SCREEN_ON_BLOCKER_RELEASED)) != 0) {
             final int newScreenState = getDesiredScreenPowerStateLocked();
             mDisplayPowerRequest.screenState = newScreenState;
-            nativeSetPowerState(isScreenOnLocked(),
-                    newScreenState == DisplayPowerRequest.SCREEN_STATE_BRIGHT);
 
             int screenBrightness = mScreenBrightnessSettingDefault;
             float screenAutoBrightnessAdjustment = 0.0f;
@@ -1681,7 +1663,7 @@ public final class PowerManagerService extends com.android.server.SystemService
 
     private final DisplayManagerInternal.DisplayPowerCallbacks mDisplayPowerCallbacks =
             new DisplayManagerInternal.DisplayPowerCallbacks() {
-        private boolean mBlanked;
+        private int mDisplayState = Display.STATE_UNKNOWN;
 
         @Override
         public void onStateChanged() {
@@ -1712,6 +1694,33 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
 
         @Override
+        public void onDisplayStateChange(int state) {
+            // This method is only needed to support legacy display blanking behavior
+            // where the display's power state is coupled to suspend or to the power HAL.
+            // The order of operations matters here.
+            synchronized (mLock) {
+                if (mDisplayState != state) {
+                    mDisplayState = state;
+                    if (state == Display.STATE_OFF) {
+                        if (!mDecoupleHalInteractiveModeFromDisplayConfig) {
+                            setHalInteractiveModeLocked(false);
+                        }
+                        if (!mDecoupleHalAutoSuspendModeFromDisplayConfig) {
+                            setHalAutoSuspendModeLocked(true);
+                        }
+                    } else {
+                        if (!mDecoupleHalAutoSuspendModeFromDisplayConfig) {
+                            setHalAutoSuspendModeLocked(false);
+                        }
+                        if (!mDecoupleHalInteractiveModeFromDisplayConfig) {
+                            setHalInteractiveModeLocked(true);
+                        }
+                    }
+                }
+            }
+        }
+
+        @Override
         public void acquireSuspendBlocker() {
             mDisplaySuspendBlocker.acquire();
         }
@@ -1722,37 +1731,9 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
 
         @Override
-        public void blankAllDisplays() {
-            synchronized (this) {
-                mBlanked = true;
-                mDisplayManagerInternal.blankAllDisplaysFromPowerManager();
-                if (!mDecoupleInteractiveModeFromDisplayConfig) {
-                    setInteractiveModeLocked(false);
-                }
-                if (!mDecoupleAutoSuspendModeFromDisplayConfig) {
-                    setAutoSuspendModeLocked(true);
-                }
-            }
-        }
-
-        @Override
-        public void unblankAllDisplays() {
-            synchronized (this) {
-                if (!mDecoupleAutoSuspendModeFromDisplayConfig) {
-                    setAutoSuspendModeLocked(false);
-                }
-                if (!mDecoupleInteractiveModeFromDisplayConfig) {
-                    setInteractiveModeLocked(true);
-                }
-                mDisplayManagerInternal.unblankAllDisplaysFromPowerManager();
-                mBlanked = false;
-            }
-        }
-
-        @Override
         public String toString() {
             synchronized (this) {
-                return "blanked=" + mBlanked;
+                return "state=" + Display.stateToString(mDisplayState);
             }
         }
     };
@@ -1773,11 +1754,11 @@ public final class PowerManagerService extends com.android.server.SystemService
 
         // Disable auto-suspend if needed.
         if (!autoSuspend) {
-            if (mDecoupleAutoSuspendModeFromDisplayConfig) {
-                setAutoSuspendModeLocked(false);
+            if (mDecoupleHalAutoSuspendModeFromDisplayConfig) {
+                setHalAutoSuspendModeLocked(false);
             }
-            if (mDecoupleInteractiveModeFromDisplayConfig) {
-                setInteractiveModeLocked(true);
+            if (mDecoupleHalInteractiveModeFromDisplayConfig) {
+                setHalInteractiveModeLocked(true);
             }
         }
 
@@ -1803,11 +1784,11 @@ public final class PowerManagerService extends com.android.server.SystemService
 
         // Enable auto-suspend if needed.
         if (autoSuspend) {
-            if (mDecoupleInteractiveModeFromDisplayConfig) {
-                setInteractiveModeLocked(false);
+            if (mDecoupleHalInteractiveModeFromDisplayConfig) {
+                setHalInteractiveModeLocked(false);
             }
-            if (mDecoupleAutoSuspendModeFromDisplayConfig) {
-                setAutoSuspendModeLocked(true);
+            if (mDecoupleHalAutoSuspendModeFromDisplayConfig) {
+                setHalAutoSuspendModeLocked(true);
             }
         }
     }
@@ -1834,40 +1815,30 @@ public final class PowerManagerService extends com.android.server.SystemService
         return false;
     }
 
-    private void setAutoSuspendModeLocked(boolean enable) {
-        if (enable != mAutoSuspendModeEnabled) {
+    private void setHalAutoSuspendModeLocked(boolean enable) {
+        if (enable != mHalAutoSuspendModeEnabled) {
             if (DEBUG) {
-                Slog.d(TAG, "Setting auto-suspend mode to " + enable);
+                Slog.d(TAG, "Setting HAL auto-suspend mode to " + enable);
             }
-            mAutoSuspendModeEnabled = enable;
+            mHalAutoSuspendModeEnabled = enable;
             nativeSetAutoSuspend(enable);
         }
     }
 
-    private void setInteractiveModeLocked(boolean enable) {
-        if (enable != mInteractiveModeEnabled) {
+    private void setHalInteractiveModeLocked(boolean enable) {
+        if (enable != mHalInteractiveModeEnabled) {
             if (DEBUG) {
-                Slog.d(TAG, "Setting interactive mode to " + enable);
+                Slog.d(TAG, "Setting HAL interactive mode to " + enable);
             }
-            mInteractiveModeEnabled = enable;
+            mHalInteractiveModeEnabled = enable;
             nativeSetInteractive(enable);
         }
     }
 
-    private boolean isScreenOnInternal() {
+    private boolean isInteractiveInternal() {
         synchronized (mLock) {
-            // XXX This is a temporary hack to let certain parts of the system pretend the
-            // screen is still on even when dozing and we would normally want to report
-            // screen off.  Will be removed when the window manager is modified to use
-            // the true blanking state of the display.
-            return isScreenOnLocked()
-                    || mWakefulness == WAKEFULNESS_DOZING;
+            return mInteractive;
         }
-    }
-
-    private boolean isScreenOnLocked() {
-        return mWakefulness == WAKEFULNESS_AWAKE
-                || mWakefulness == WAKEFULNESS_DREAMING;
     }
 
     private void handleBatteryStateChangedLocked() {
@@ -2090,6 +2061,7 @@ public final class PowerManagerService extends com.android.server.SystemService
             pw.println("Power Manager State:");
             pw.println("  mDirty=0x" + Integer.toHexString(mDirty));
             pw.println("  mWakefulness=" + wakefulnessToString(mWakefulness));
+            pw.println("  mInteractive=" + mInteractive);
             pw.println("  mIsPowered=" + mIsPowered);
             pw.println("  mPlugType=" + mPlugType);
             pw.println("  mBatteryLevel=" + mBatteryLevel);
@@ -2099,8 +2071,8 @@ public final class PowerManagerService extends com.android.server.SystemService
             pw.println("  mProximityPositive=" + mProximityPositive);
             pw.println("  mBootCompleted=" + mBootCompleted);
             pw.println("  mSystemReady=" + mSystemReady);
-            pw.println("  mAutoSuspendModeEnabled=" + mAutoSuspendModeEnabled);
-            pw.println("  mInteactiveModeEnabled=" + mInteractiveModeEnabled);
+            pw.println("  mHalAutoSuspendModeEnabled=" + mHalAutoSuspendModeEnabled);
+            pw.println("  mHalInteractiveModeEnabled=" + mHalInteractiveModeEnabled);
             pw.println("  mWakeLockSummary=0x" + Integer.toHexString(mWakeLockSummary));
             pw.println("  mUserActivitySummary=0x" + Integer.toHexString(mUserActivitySummary));
             pw.println("  mRequestWaitForNegativeProximity=" + mRequestWaitForNegativeProximity);
@@ -2108,10 +2080,6 @@ public final class PowerManagerService extends com.android.server.SystemService
             pw.println("  mSandmanSummoned=" + mSandmanSummoned);
             pw.println("  mLastWakeTime=" + TimeUtils.formatUptime(mLastWakeTime));
             pw.println("  mLastSleepTime=" + TimeUtils.formatUptime(mLastSleepTime));
-            pw.println("  mSendWakeUpFinishedNotificationWhenReady="
-                    + mSendWakeUpFinishedNotificationWhenReady);
-            pw.println("  mSendGoToSleepFinishedNotificationWhenReady="
-                    + mSendGoToSleepFinishedNotificationWhenReady);
             pw.println("  mLastUserActivityTime=" + TimeUtils.formatUptime(mLastUserActivityTime));
             pw.println("  mLastUserActivityTimeNoChangeLights="
                     + TimeUtils.formatUptime(mLastUserActivityTimeNoChangeLights));
@@ -2121,10 +2089,10 @@ public final class PowerManagerService extends com.android.server.SystemService
 
             pw.println();
             pw.println("Settings and Configuration:");
-            pw.println("  mDecoupleAutoSuspendModeFromDisplayConfig="
-                    + mDecoupleAutoSuspendModeFromDisplayConfig);
-            pw.println("  mDecoupleInteractiveModeFromDisplayConfig="
-                    + mDecoupleInteractiveModeFromDisplayConfig);
+            pw.println("  mDecoupleHalAutoSuspendModeFromDisplayConfig="
+                    + mDecoupleHalAutoSuspendModeFromDisplayConfig);
+            pw.println("  mDecoupleHalInteractiveModeFromDisplayConfig="
+                    + mDecoupleHalInteractiveModeFromDisplayConfig);
             pw.println("  mWakeUpWhenPluggedOrUnpluggedConfig="
                     + mWakeUpWhenPluggedOrUnpluggedConfig);
             pw.println("  mSuspendWhenScreenOffDueToProximityConfig="
@@ -2725,10 +2693,10 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
 
         @Override // Binder call
-        public boolean isScreenOn() {
+        public boolean isInteractive() {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return isScreenOnInternal();
+                return isInteractiveInternal();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
