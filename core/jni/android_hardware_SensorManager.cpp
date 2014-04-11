@@ -49,6 +49,8 @@ struct SensorOffsets
     jfieldID    minDelay;
     jfieldID    fifoReservedEventCount;
     jfieldID    fifoMaxEventCount;
+    jfieldID    stringType;
+    jfieldID    requiredPermission;
 } gSensorOffsets;
 
 
@@ -73,6 +75,9 @@ nativeClassInit (JNIEnv *_env, jclass _this)
     sensorOffsets.fifoReservedEventCount =
             _env->GetFieldID(sensorClass, "mFifoReservedEventCount",  "I");
     sensorOffsets.fifoMaxEventCount = _env->GetFieldID(sensorClass, "mFifoMaxEventCount",  "I");
+    sensorOffsets.stringType = _env->GetFieldID(sensorClass, "mStringType", "Ljava/lang/String;");
+    sensorOffsets.requiredPermission = _env->GetFieldID(sensorClass, "mRequiredPermission",
+                                                        "Ljava/lang/String;");
 }
 
 static jint
@@ -89,6 +94,8 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
     const SensorOffsets& sensorOffsets(gSensorOffsets);
     jstring name = env->NewStringUTF(list->getName().string());
     jstring vendor = env->NewStringUTF(list->getVendor().string());
+    jstring stringType = env->NewStringUTF(list->getStringType().string());
+    jstring requiredPermission = env->NewStringUTF(list->getRequiredPermission().string());
     env->SetObjectField(sensor, sensorOffsets.name,      name);
     env->SetObjectField(sensor, sensorOffsets.vendor,    vendor);
     env->SetIntField(sensor, sensorOffsets.version,      list->getVersion());
@@ -100,7 +107,11 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
     env->SetIntField(sensor, sensorOffsets.minDelay,     list->getMinDelay());
     env->SetIntField(sensor, sensorOffsets.fifoReservedEventCount,
                      list->getFifoReservedEventCount());
-    env->SetIntField(sensor, sensorOffsets.fifoMaxEventCount, list->getFifoMaxEventCount());
+    env->SetIntField(sensor, sensorOffsets.fifoMaxEventCount,
+                     list->getFifoMaxEventCount());
+    env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
+    env->SetObjectField(sensor, sensorOffsets.requiredPermission,
+                        requiredPermission);
     next++;
     return size_t(next) < count ? next : 0;
 }
