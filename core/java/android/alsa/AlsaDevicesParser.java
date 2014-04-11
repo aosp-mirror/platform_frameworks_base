@@ -205,12 +205,47 @@ public class AlsaDevicesParser {
         return mHasPlaybackDevices;
     }
 
+    public boolean hasPlaybackDevices(int card) {
+        for (int index = 0; index < deviceRecords_.size(); index++) {
+            AlsaDeviceRecord deviceRecord = deviceRecords_.get(index);
+            if (deviceRecord.mCardNum == card &&
+                deviceRecord.mDeviceType == AlsaDeviceRecord.kDeviceType_Audio &&
+                deviceRecord.mDeviceDir == AlsaDeviceRecord.kDeviceDir_Playback) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean hasCaptureDevices() {
         return mHasCaptureDevices;
     }
 
+    public boolean hasCaptureDevices(int card) {
+        for (int index = 0; index < deviceRecords_.size(); index++) {
+            AlsaDeviceRecord deviceRecord = deviceRecords_.get(index);
+            if (deviceRecord.mCardNum == card &&
+                deviceRecord.mDeviceType == AlsaDeviceRecord.kDeviceType_Audio &&
+                deviceRecord.mDeviceDir == AlsaDeviceRecord.kDeviceDir_Capture) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean hasMIDIDevices() {
         return mHasMIDIDevices;
+    }
+
+    public boolean hasMIDIDevices(int card) {
+        for (int index = 0; index < deviceRecords_.size(); index++) {
+            AlsaDeviceRecord deviceRecord = deviceRecords_.get(index);
+            if (deviceRecord.mCardNum == card &&
+                deviceRecord.mDeviceType == AlsaDeviceRecord.kDeviceType_MIDI) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void scan() {
