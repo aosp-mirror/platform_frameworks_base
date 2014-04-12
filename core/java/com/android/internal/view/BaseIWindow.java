@@ -57,10 +57,6 @@ public class BaseIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void dispatchScreenState(boolean on) {
-    }
-
-    @Override
     public void windowFocusChanged(boolean hasFocus, boolean touchEnabled) {
     }
 

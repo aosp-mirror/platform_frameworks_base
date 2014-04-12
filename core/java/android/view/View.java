@@ -17128,8 +17128,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // If the screen is off assume the animation start time is now instead of
             // the next frame we draw. Keeping the START_ON_FIRST_FRAME start time
             // would cause the animation to start when the screen turns back on
-            if (mAttachInfo != null && !mAttachInfo.mScreenOn &&
-                    animation.getStartTime() == Animation.START_ON_FIRST_FRAME) {
+            if (mAttachInfo != null && mAttachInfo.mDisplayState == Display.STATE_OFF
+                    && animation.getStartTime() == Animation.START_ON_FIRST_FRAME) {
                 animation.setStartTime(AnimationUtils.currentAnimationTimeMillis());
             }
             animation.reset();
@@ -19108,7 +19108,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * A set of information given to a view when it is attached to its parent
      * window.
      */
-    static class AttachInfo {
+    final static class AttachInfo {
         interface Callbacks {
             void playSoundEffect(int effectId);
             boolean performHapticFeedback(int effectId, boolean always);
@@ -19171,7 +19171,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean mHardwareAccelerationRequested;
         HardwareRenderer mHardwareRenderer;
 
-        boolean mScreenOn;
+        /**
+         * The state of the display to which the window is attached, as reported
+         * by {@link Display#getState()}.  Note that the display state constants
+         * declared by {@link Display} do not exactly line up with the screen state
+         * constants declared by {@link View} (there are more display states than
+         * screen states).
+         */
+        int mDisplayState = Display.STATE_UNKNOWN;
 
         /**
          * Scale factor used by the compatibility mode

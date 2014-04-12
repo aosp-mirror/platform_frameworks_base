@@ -50,7 +50,6 @@ oneway interface IWindow {
     void moved(int newX, int newY);
     void dispatchAppVisibility(boolean visible);
     void dispatchGetNewSurface();
-    void dispatchScreenState(boolean on);
 
     /**
      * Tell the window that it is either gaining or losing focus.  Keep it up
