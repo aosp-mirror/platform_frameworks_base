@@ -94,6 +94,12 @@ public:
      */
     const UvMapper* uvMapper;
 
+    /**
+     * Whether or not the Texture is marked in use and thus not evictable for
+     * the current frame. This is reset at the start of a new frame.
+     */
+    bool isInUse;
+
 private:
     /**
      * Last wrap modes set on this texture. Defaults to GL_CLAMP_TO_EDGE.

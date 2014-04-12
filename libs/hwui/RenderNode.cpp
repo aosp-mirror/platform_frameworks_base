@@ -109,7 +109,7 @@ void RenderNode::pushStagingChanges(TreeInfo& info) {
         mNeedsDisplayListDataSync = false;
         // Do a push pass on the old tree to handle freeing DisplayListData
         // that are no longer used
-        TreeInfo oldTreeInfo = {0};
+        TreeInfo oldTreeInfo;
         prepareSubTree(oldTreeInfo, mDisplayListData);
         // TODO: The damage for the old tree should be accounted for
         delete mDisplayListData;
@@ -120,8 +120,15 @@ void RenderNode::pushStagingChanges(TreeInfo& info) {
 
 void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
     if (subtree) {
-        if (!info.hasFunctors) {
-            info.hasFunctors = subtree->functorCount;
+        TextureCache& cache = Caches::getInstance().textureCache;
+        info.hasFunctors |= subtree->functorCount;
+        // TODO: Fix ownedBitmapResources to not require disabling prepareTextures
+        // and thus falling out of async drawing path.
+        if (subtree->ownedBitmapResources.size()) {
+            info.prepareTextures = false;
+        }
+        for (size_t i = 0; info.prepareTextures && i < subtree->bitmapResources.size(); i++) {
+            info.prepareTextures = cache.prefetchAndMarkInUse(subtree->bitmapResources[i]);
         }
         for (size_t i = 0; i < subtree->children().size(); i++) {
             RenderNode* childNode = subtree->children()[i]->mDisplayList;

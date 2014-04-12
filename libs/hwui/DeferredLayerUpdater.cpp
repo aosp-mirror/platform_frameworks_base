@@ -63,7 +63,7 @@ void DeferredLayerUpdater::setDisplayList(RenderNode* displayList,
     }
 }
 
-bool DeferredLayerUpdater::apply(bool* hasFunctors) {
+bool DeferredLayerUpdater::apply(TreeInfo& info) {
     bool success = true;
     // These properties are applied the same to both layer types
     mLayer->setColorFilter(mColorFilter);
@@ -74,11 +74,7 @@ bool DeferredLayerUpdater::apply(bool* hasFunctors) {
             success = LayerRenderer::resizeLayer(mLayer, mWidth, mHeight);
         }
         mLayer->setBlend(mBlend);
-        TreeInfo info = {0};
         mDisplayList->prepareTree(info);
-        if (info.hasFunctors) {
-            *hasFunctors = true;
-        }
         mLayer->updateDeferred(mDisplayList.get(),
                 mDirtyRect.left, mDirtyRect.top, mDirtyRect.right, mDirtyRect.bottom);
         mDirtyRect.setEmpty();

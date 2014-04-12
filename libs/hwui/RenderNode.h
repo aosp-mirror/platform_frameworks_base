@@ -66,7 +66,13 @@ class RestoreToCountOp;
 class DrawDisplayListOp;
 
 struct TreeInfo {
+    TreeInfo()
+            : hasFunctors(false)
+            , prepareTextures(false)
+    {}
+
     bool hasFunctors;
+    bool prepareTextures;
     // TODO: Damage calculations? Flag to skip staging pushes for RT animations?
 };
 
