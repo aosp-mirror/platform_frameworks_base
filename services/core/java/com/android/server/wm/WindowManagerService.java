@@ -7039,7 +7039,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mDisplayEnabled) {
                 mInputMonitor.setEventDispatchingLw(enabled);
             }
-            sendScreenStatusToClientsLocked();
         }
     }
 
@@ -7157,23 +7156,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void systemReady() {
         mPolicy.systemReady();
-    }
-
-    // TODO(multidisplay): Call isScreenOn for each display.
-    private void sendScreenStatusToClientsLocked() {
-        final boolean on = mPowerManager.isScreenOn();
-        final int numDisplays = mDisplayContents.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final WindowList windows = mDisplayContents.valueAt(displayNdx).getWindowList();
-            final int numWindows = windows.size();
-            for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
-                try {
-                    windows.get(winNdx).mClient.dispatchScreenState(on);
-                } catch (RemoteException e) {
-                    // Ignored
-                }
-            }
-        }
     }
 
     // -------------------------------------------------------------
