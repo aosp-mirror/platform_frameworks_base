@@ -69,6 +69,7 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
 
     private static final int MATCH_RES_CODE = 1;
     private static final int MATCH_RAW_CODE = 2;
+    private static final int MATCH_NON_INDEXABLE_KEYS_CODE = 3;
 
     /**
      * Implementation is provided by the parent class.
@@ -82,6 +83,8 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
                 MATCH_RES_CODE);
         mMatcher.addURI(mAuthority, SearchIndexablesContract.INDEXABLES_RAW_PATH,
                 MATCH_RAW_CODE);
+        mMatcher.addURI(mAuthority, SearchIndexablesContract.NON_INDEXABLES_KEYS_PATH,
+                MATCH_NON_INDEXABLE_KEYS_CODE);
 
         // Sanity check our setup
         if (!info.exported) {
@@ -105,6 +108,8 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
                 return queryXmlResources(null);
             case MATCH_RAW_CODE:
                 return queryRawData(null);
+            case MATCH_NON_INDEXABLE_KEYS_CODE:
+                return queryNonIndexableKeys(null);
             default:
                 throw new UnsupportedOperationException("Unknown Uri " + uri);
         }
@@ -113,7 +118,7 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
     /**
      * Returns all {@link android.provider.SearchIndexablesContract.XmlResource}.
      *
-     * Those are usually xml resource ID to some {@link android.preference.PreferenceScreen}.
+     * Those are Xml resource IDs to some {@link android.preference.PreferenceScreen}.
      *
      * @param projection list of {@link android.provider.SearchIndexablesContract.XmlResource}
      *                   columns to put into the cursor. If {@code null} all supported columns
@@ -124,13 +129,24 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
     /**
      * Returns all {@link android.provider.SearchIndexablesContract.RawData}.
      *
-     * Those are raw indexable data.
+     * Those are the raw indexable data.
      *
      * @param projection list of {@link android.provider.SearchIndexablesContract.RawData} columns
      *                   to put into the cursor. If {@code null} all supported columns should be
      *                   included.
      */
     public abstract Cursor queryRawData(String[] projection);
+
+    /**
+     * Returns all {@link android.provider.SearchIndexablesContract.NonIndexableKey}.
+     *
+     * Those are the non indexable data keys.
+     *
+     * @param projection list of {@link android.provider.SearchIndexablesContract.NonIndexableKey}
+     *                   columns to put into the cursor. If {@code null} all supported columns
+     *                   should be included.
+     */
+    public abstract Cursor queryNonIndexableKeys(String[] projection);
 
     @Override
     public String getType(Uri uri) {
@@ -139,14 +155,15 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
                 return SearchIndexablesContract.XmlResource.MIME_TYPE;
             case MATCH_RAW_CODE:
                 return SearchIndexablesContract.RawData.MIME_TYPE;
+            case MATCH_NON_INDEXABLE_KEYS_CODE:
+                return SearchIndexablesContract.NonIndexableKey.MIME_TYPE;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
     }
 
     /**
-     * Implementation is provided by the parent class. Throws by default, and
-     * cannot be overriden.
+     * Implementation is provided by the parent class. Throws by default, and cannot be overriden.
      */
     @Override
     public final Uri insert(Uri uri, ContentValues values) {
@@ -154,8 +171,7 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class. Throws by default, and
-     * cannot be overriden.
+     * Implementation is provided by the parent class. Throws by default, and cannot be overriden.
      */
     @Override
     public final int delete(Uri uri, String selection, String[] selectionArgs) {
@@ -163,8 +179,7 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class. Throws by default, and
-     * cannot be overriden.
+     * Implementation is provided by the parent class. Throws by default, and cannot be overriden.
      */
     @Override
     public final int update(
