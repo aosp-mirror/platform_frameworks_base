@@ -165,7 +165,7 @@ public class SearchIndexablesContract {
         public static final String COLUMN_SUMMARY_OFF = "summaryOff";
 
         /**
-         * Entries associated with the raw data (when the data can can several values).
+         * Entries associated with the raw data (when the data can have several values).
          */
         public static final String COLUMN_ENTRIES = "entries";
 
@@ -175,7 +175,7 @@ public class SearchIndexablesContract {
         public static final String COLUMN_KEYWORDS = "keywords";
 
         /**
-         * Fragment's title associated with the raw data.
+         * Fragment or Activity title associated with the raw data.
          */
         public static final String COLUMN_SCREEN_TITLE = "screenTitle";
 
