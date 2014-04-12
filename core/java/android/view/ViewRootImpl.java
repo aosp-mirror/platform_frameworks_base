@@ -37,6 +37,8 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManager.DisplayListener;
 import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Bundle;
@@ -134,6 +136,7 @@ public final class ViewRootImpl implements ViewParent,
     final Context mContext;
     final IWindowSession mWindowSession;
     final Display mDisplay;
+    final DisplayManager mDisplayManager;
     final String mBasePackageName;
 
     final int[] mTmpLocation = new int[2];
@@ -370,9 +373,7 @@ public final class ViewRootImpl implements ViewParent,
         mNoncompatDensity = context.getResources().getDisplayMetrics().noncompatDensityDpi;
         mFallbackEventHandler = PolicyManager.makeNewFallbackEventHandler(context);
         mChoreographer = Choreographer.getInstance();
-
-        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        mAttachInfo.mScreenOn = powerManager.isScreenOn();
+        mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         loadSystemProperties();
     }
 
@@ -427,6 +428,10 @@ public final class ViewRootImpl implements ViewParent,
         synchronized (this) {
             if (mView == null) {
                 mView = view;
+
+                mAttachInfo.mDisplayState = mDisplay.getState();
+                mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
+
                 mViewLayoutDirectionInitial = mView.getRawLayoutDirection();
                 mFallbackEventHandler.setView(view);
                 mWindowAttributes.copyFrom(attrs);
@@ -797,18 +802,43 @@ public final class ViewRootImpl implements ViewParent,
         scheduleTraversals();
     }
 
-    void handleScreenStateChange(boolean on) {
-        if (on != mAttachInfo.mScreenOn) {
-            mAttachInfo.mScreenOn = on;
-            if (mView != null) {
-                mView.dispatchScreenStateChanged(on ? View.SCREEN_STATE_ON : View.SCREEN_STATE_OFF);
-            }
-            if (on) {
-                mFullRedrawNeeded = true;
-                scheduleTraversals();
+    private final DisplayListener mDisplayListener = new DisplayListener() {
+        @Override
+        public void onDisplayChanged(int displayId) {
+            if (mView != null && mDisplay.getDisplayId() == displayId) {
+                final int oldDisplayState = mAttachInfo.mDisplayState;
+                final int newDisplayState = mDisplay.getState();
+                if (oldDisplayState != newDisplayState) {
+                    mAttachInfo.mDisplayState = newDisplayState;
+                    if (oldDisplayState != Display.STATE_UNKNOWN) {
+                        final int oldScreenState = toViewScreenState(oldDisplayState);
+                        final int newScreenState = toViewScreenState(newDisplayState);
+                        if (oldScreenState != newScreenState) {
+                            mView.dispatchScreenStateChanged(newScreenState);
+                        }
+                        if (oldDisplayState == Display.STATE_OFF) {
+                            // Draw was suppressed so we need to for it to happen here.
+                            mFullRedrawNeeded = true;
+                            scheduleTraversals();
+                        }
+                    }
+                }
             }
         }
-    }
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+        }
+
+        @Override
+        public void onDisplayAdded(int displayId) {
+        }
+
+        private int toViewScreenState(int displayState) {
+            return displayState == Display.STATE_OFF ?
+                    View.SCREEN_STATE_OFF : View.SCREEN_STATE_ON;
+        }
+    };
 
     @Override
     public void requestFitSystemWindows() {
@@ -2244,7 +2274,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void performDraw() {
-        if (!mAttachInfo.mScreenOn && !mReportNextDraw) {
+        if (mAttachInfo.mDisplayState == Display.STATE_OFF && !mReportNextDraw) {
             return;
         }
 
@@ -2870,6 +2900,8 @@ public final class ViewRootImpl implements ViewParent,
             mInputChannel = null;
         }
 
+        mDisplayManager.unregisterDisplayListener(mDisplayListener);
+
         unscheduleTraversals();
     }
 
@@ -2949,7 +2981,6 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_DISPATCH_SYSTEM_UI_VISIBILITY = 17;
     private final static int MSG_UPDATE_CONFIGURATION = 18;
     private final static int MSG_PROCESS_INPUT_EVENTS = 19;
-    private final static int MSG_DISPATCH_SCREEN_STATE = 20;
     private final static int MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST = 21;
     private final static int MSG_DISPATCH_DONE_ANIMATING = 22;
     private final static int MSG_INVALIDATE_WORLD = 23;
@@ -2996,8 +3027,6 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_UPDATE_CONFIGURATION";
                 case MSG_PROCESS_INPUT_EVENTS:
                     return "MSG_PROCESS_INPUT_EVENTS";
-                case MSG_DISPATCH_SCREEN_STATE:
-                    return "MSG_DISPATCH_SCREEN_STATE";
                 case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST:
                     return "MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST";
                 case MSG_DISPATCH_DONE_ANIMATING:
@@ -3210,11 +3239,6 @@ public final class ViewRootImpl implements ViewParent,
                     config = mLastConfiguration;
                 }
                 updateConfiguration(config, false);
-            } break;
-            case MSG_DISPATCH_SCREEN_STATE: {
-                if (mView != null) {
-                    handleScreenStateChange(msg.arg1 == 1);
-                }
             } break;
             case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST: {
                 setAccessibilityFocus(null, null);
@@ -5792,12 +5816,6 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
-    public void dispatchScreenStateChange(boolean on) {
-        Message msg = mHandler.obtainMessage(MSG_DISPATCH_SCREEN_STATE);
-        msg.arg1 = on ? 1 : 0;
-        mHandler.sendMessage(msg);
-    }
-
     public void dispatchGetNewSurface() {
         Message msg = mHandler.obtainMessage(MSG_DISPATCH_GET_NEW_SURFACE);
         mHandler.sendMessage(msg);
@@ -6132,14 +6150,6 @@ public final class ViewRootImpl implements ViewParent,
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchAppVisibility(visible);
-            }
-        }
-
-        @Override
-        public void dispatchScreenState(boolean on) {
-            final ViewRootImpl viewAncestor = mViewAncestor.get();
-            if (viewAncestor != null) {
-                viewAncestor.dispatchScreenStateChange(on);
             }
         }
 
