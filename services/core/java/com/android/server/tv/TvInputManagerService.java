@@ -197,8 +197,8 @@ public final class TvInputManagerService extends SystemService {
         UserState userState = getUserStateLocked(userId);
         ServiceState serviceState = userState.serviceStateMap.get(name);
         if (serviceState == null) {
-            throw new IllegalStateException("Service state not found for " + name + " (userId=" +
-                    userId + ")");
+            throw new IllegalStateException("Service state not found for " + name + " (userId="
+                    + userId + ")");
         }
         return serviceState;
     }
@@ -233,8 +233,8 @@ public final class TvInputManagerService extends SystemService {
         if (serviceState == null) {
             return;
         }
-        boolean isStateEmpty = serviceState.clients.size() == 0
-                && serviceState.sessionStateMap.size() == 0;
+        boolean isStateEmpty = serviceState.clients.isEmpty()
+                && serviceState.sessionTokens.isEmpty();
         if (serviceState.service == null && !isStateEmpty && userId == mCurrentUserId) {
             // This means that the service is not yet connected but its state indicates that we
             // have pending requests. Then, connect the service.
@@ -263,7 +263,9 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private void createSessionInternalLocked(ITvInputService service, final IBinder sessionToken,
-            final SessionState sessionState, final int userId) {
+            final int userId) {
+        final SessionState sessionState =
+                getUserStateLocked(userId).sessionStateMap.get(sessionToken);
         if (DEBUG) {
             Log.d(TAG, "createSessionInternalLocked(name=" + sessionState.name.getClassName()
                     + ")");
@@ -319,10 +321,10 @@ public final class TvInputManagerService extends SystemService {
         UserState userState = getUserStateLocked(userId);
         SessionState sessionState = userState.sessionStateMap.remove(sessionToken);
 
-        // Also remove the session state from the session state map of the current service.
+        // Also remove the session token from the session token list of the current service.
         ServiceState serviceState = userState.serviceStateMap.get(sessionState.name);
         if (serviceState != null) {
-            serviceState.sessionStateMap.remove(sessionToken);
+            serviceState.sessionTokens.remove(sessionToken);
         }
         updateServiceConnectionLocked(sessionState.name, userId);
     }
@@ -465,11 +467,11 @@ public final class TvInputManagerService extends SystemService {
                         serviceState = new ServiceState(name, resolvedUserId);
                         userState.serviceStateMap.put(name, serviceState);
                     }
-                    serviceState.sessionStateMap.put(sessionToken, sessionState);
+                    serviceState.sessionTokens.add(sessionToken);
 
                     if (serviceState.service != null) {
                         createSessionInternalLocked(serviceState.service, sessionToken,
-                                sessionState, resolvedUserId);
+                                resolvedUserId);
                     } else {
                         updateServiceConnectionLocked(name, resolvedUserId);
                     }
@@ -580,8 +582,7 @@ public final class TvInputManagerService extends SystemService {
 
     private final class ServiceState {
         private final List<IBinder> clients = new ArrayList<IBinder>();
-        private final ArrayMap<IBinder, SessionState> sessionStateMap = new ArrayMap<IBinder,
-                SessionState>();
+        private final List<IBinder> sessionTokens = new ArrayList<IBinder>();
         private final ServiceConnection connection;
 
         private ITvInputService service;
@@ -637,10 +638,8 @@ public final class TvInputManagerService extends SystemService {
                 }
 
                 // And create sessions, if any.
-                for (Map.Entry<IBinder, SessionState> entry : serviceState.sessionStateMap
-                        .entrySet()) {
-                    createSessionInternalLocked(serviceState.service, entry.getKey(),
-                            entry.getValue(), mUserId);
+                for (IBinder sessionToken : serviceState.sessionTokens) {
+                    createSessionInternalLocked(serviceState.service, sessionToken, mUserId);
                 }
             }
         }
