@@ -21,6 +21,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.service.notification.StatusBarNotification;
 
+import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
@@ -98,6 +99,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void hideSearchPanel();
         public void cancelPreloadRecentApps();
         public void setWindowState(int window, int state);
+
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -232,6 +234,7 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
@@ -295,7 +298,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     mCallbacks.topAppWindowChanged(msg.arg1 != 0);
                     break;
                 case MSG_SHOW_IME_BUTTON:
-                    mCallbacks.setImeWindowStatus((IBinder)msg.obj, msg.arg1, msg.arg2);
+                    mCallbacks.setImeWindowStatus((IBinder) msg.obj, msg.arg1, msg.arg2);
                     break;
                 case MSG_SET_HARD_KEYBOARD_STATUS:
                     mCallbacks.setHardKeyboardStatus(msg.arg1 != 0, msg.arg2 != 0);
@@ -312,6 +315,7 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_SET_WINDOW_STATE:
                     mCallbacks.setWindowState(msg.arg1, msg.arg2);
                     break;
+
             }
         }
     }

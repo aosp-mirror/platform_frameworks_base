@@ -60,7 +60,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
 
     private AudioManager mAudioManager;
     private TelephonyManager mTelephonyManager = null;
-    protected KeyguardViewMediator.ViewMediatorCallback mViewMediatorCallback;
+    protected ViewMediatorCallback mViewMediatorCallback;
     protected LockPatternUtils mLockPatternUtils;
     private OnDismissAction mDismissAction;
 
@@ -68,7 +68,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     // they will be handled here for specific media types such as music, otherwise
     // the audio service will bring up the volume dialog.
     private static final boolean KEYGUARD_MANAGES_VOLUME = true;
-    private static final boolean DEBUG = false;
+    public static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardViewBase";
 
     private KeyguardSecurityContainer mSecurityContainer;
@@ -107,7 +107,6 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
         mSecurityContainer.setSecurityCallback(this);
         mSecurityContainer.showPrimarySecurityScreen(false);
         // mSecurityContainer.updateSecurityViews(false /* not bouncing */);
-        setBackButtonEnabled(false);
     }
 
     /**
@@ -120,15 +119,11 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
 
     /**
      *  Dismisses the keyguard by going to the next screen or making it gone.
+     *
+     *  @return True if the keyguard is done.
      */
-    public void dismiss() {
-        dismiss(false);
-    }
-
-    private void setBackButtonEnabled(boolean enabled) {
-        setSystemUiVisibility(enabled ?
-                getSystemUiVisibility() & ~View.STATUS_BAR_DISABLE_BACK :
-                getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
+    public boolean dismiss() {
+        return dismiss(false);
     }
 
     protected void showBouncer(boolean show) {
@@ -141,8 +136,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
 
     public boolean handleBackKey() {
         if (mSecurityContainer.getCurrentSecuritySelection() == SecurityMode.Account) {
-            // go back to primary screen and re-disable back
-            setBackButtonEnabled(false);
+            // go back to primary screen
             mSecurityContainer.showPrimarySecurityScreen(false /*turningOff*/);
             return true;
         }
@@ -205,12 +199,6 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
 
     @Override
     public void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput) {
-        // Enable or disable the back button based on security mode
-        if (securityMode == SecurityMode.Account && !mLockPatternUtils.isPermanentlyLocked()) {
-            // we're showing account as a backup, provide a way to get back to primary
-            setBackButtonEnabled(true);
-        }
-
         if (mViewMediatorCallback != null) {
             mViewMediatorCallback.setNeedsInput(needsInput);
         }
@@ -231,7 +219,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     /**
      * Called when the screen turned off.
      */
-    protected void onScreenTurnedOff() {
+    public void onScreenTurnedOff() {
         if (DEBUG) Log.d(TAG, String.format("screen off, instance %s at %s",
                 Integer.toHexString(hashCode()), SystemClock.uptimeMillis()));
         // Once the screen turns off, we no longer consider this to be first boot and we want the
@@ -245,7 +233,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     /**
      * Called when the screen turned on.
      */
-    protected void onScreenTurnedOn() {
+    public void onScreenTurnedOn() {
         if (DEBUG) Log.d(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
         mSecurityContainer.showPrimarySecurityScreen(false);
         mSecurityContainer.onResume(KeyguardSecurityView.SCREEN_ON);
@@ -433,8 +421,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
         return false;
     }
 
-    public void setViewMediatorCallback(
-            KeyguardViewMediator.ViewMediatorCallback viewMediatorCallback) {
+    public void setViewMediatorCallback(ViewMediatorCallback viewMediatorCallback) {
         mViewMediatorCallback = viewMediatorCallback;
         // Update ViewMediator with the current input method requirements
         mViewMediatorCallback.setNeedsInput(mSecurityContainer.needsInput());
@@ -484,7 +471,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
         mActivityLauncher.launchCamera(getHandler(), null);
     }
 
-    protected void setLockPatternUtils(LockPatternUtils utils) {
+    public void setLockPatternUtils(LockPatternUtils utils) {
         mLockPatternUtils = utils;
         mSecurityContainer.setLockPatternUtils(utils);
     }

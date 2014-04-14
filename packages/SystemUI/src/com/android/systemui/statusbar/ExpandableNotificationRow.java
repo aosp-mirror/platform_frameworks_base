@@ -40,6 +40,8 @@ public class ExpandableNotificationRow extends FrameLayout {
     /** Are we showing the "public" version */
     private boolean mShowingPublic;
 
+    private LatestItemView mLatestItemView;
+
     /**
      * Is this notification expanded by the system. The expansion state can be overridden by the
      * user expansion.
@@ -59,7 +61,9 @@ public class ExpandableNotificationRow extends FrameLayout {
         super.onFinishInflate();
         mPublicLayout = (SizeAdaptiveLayout) findViewById(R.id.expandedPublic);
         mPrivateLayout = (SizeAdaptiveLayout) findViewById(R.id.expanded);
+        mLatestItemView = (LatestItemView) findViewById(R.id.container);
     }
+
 
     public void setHeightRange(int rowMinHeight, int rowMaxHeight) {
         mRowMinHeight = rowMinHeight;
@@ -152,8 +156,6 @@ public class ExpandableNotificationRow extends FrameLayout {
         return mShowingPublic ? mRowMinHeight : getMaxExpandHeight();
     }
 
-
-
     private void updateMaxExpandHeight() {
         ViewGroup.LayoutParams lp = getLayoutParams();
         int oldHeight = lp.height;
@@ -195,11 +197,26 @@ public class ExpandableNotificationRow extends FrameLayout {
         mPrivateLayout.setVisibility(show ? View.GONE : View.VISIBLE);
     }
 
+    /**
+     * Sets the notification as dimmed, meaning that it will appear in a more gray variant.
+     */
+    public void setDimmed(boolean dimmed) {
+        mLatestItemView.setDimmed(dimmed);
+    }
+
     public int getMaxExpandHeight() {
         if (mMaxHeightNeedsUpdate) {
             updateMaxExpandHeight();
             mMaxHeightNeedsUpdate = false;
         }
         return mMaxExpandHeight;
+    }
+
+    /**
+     * Sets the notification as locked. In the locked state, the first tap will produce a quantum
+     * ripple to make the notification brighter and only the second tap will cause a click.
+     */
+    public void setLocked(boolean locked) {
+        mLatestItemView.setLocked(locked);
     }
 }

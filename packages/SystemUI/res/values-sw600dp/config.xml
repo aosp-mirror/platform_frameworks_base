@@ -30,5 +30,5 @@
     <integer name="quick_settings_user_time_settings_tile_span">1</integer>
 
     <!-- Enable the "flip settings" panel -->
-    <bool name="config_hasFlipSettingsPanel">false</bool>
+    <bool name="config_hasFlipSettingsPanel">true</bool>
 </resources>

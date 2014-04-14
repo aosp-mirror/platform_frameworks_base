@@ -30,7 +30,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 
 public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSecurityView {
-    private static final boolean DEBUG = KeyguardViewMediator.DEBUG;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardSecurityView";
     private KeyguardSecurityModel mSecurityModel;
     private boolean mEnableFallback; // TODO: This should get the value from KeyguardPatternView

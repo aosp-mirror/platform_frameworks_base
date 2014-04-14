@@ -42,7 +42,7 @@ import com.android.internal.telephony.PhoneConstants;
 public class KeyguardSimPukView extends KeyguardAbsKeyInputView
         implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
     private static final String LOG_TAG = "KeyguardSimPukView";
-    private static final boolean DEBUG = KeyguardViewMediator.DEBUG;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
     public static final String TAG = "KeyguardSimPukView";
 
     private ProgressDialog mSimUnlockProgressDialog = null;

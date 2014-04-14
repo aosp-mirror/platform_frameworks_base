@@ -37,8 +37,9 @@ import android.view.View;
 
 public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "FULLockscreen";
+    private static final String FACE_LOCK_PACKAGE = "com.android.facelock";
 
     private final Context mContext;
     private final LockPatternUtils mLockPatternUtils;
@@ -128,7 +129,8 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         if (!mBoundToService) {
             Log.d(TAG, "Binding to Face Unlock service for user="
                     + mLockPatternUtils.getCurrentUser());
-            mContext.bindServiceAsUser(new Intent(IFaceLockInterface.class.getName()),
+            mContext.bindServiceAsUser(
+                    new Intent(IFaceLockInterface.class.getName()).setPackage(FACE_LOCK_PACKAGE),
                     mConnection,
                     Context.BIND_AUTO_CREATE,
                     new UserHandle(mLockPatternUtils.getCurrentUser()));

@@ -32,6 +32,7 @@
         android:layout_marginTop="@dimen/notification_divider_height"
         android:focusable="true"
         android:clickable="true"
+        android:background="@*android:drawable/notification_quantum_bg"
         >
 
         <com.android.internal.widget.SizeAdaptiveLayout android:id="@+id/expanded"

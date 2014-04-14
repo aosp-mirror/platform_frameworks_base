@@ -1,0 +1,200 @@
+/*
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License
+ */
+
+package com.android.systemui.statusbar.phone;
+
+import android.app.ActionBar;
+import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.res.Resources;
+import android.graphics.PixelFormat;
+import android.os.SystemProperties;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+
+import com.android.keyguard.R;
+
+/**
+ * Encapsulates all logic for the status bar window state management.
+ */
+public class StatusBarWindowManager {
+
+    private final Context mContext;
+    private final WindowManager mWindowManager;
+    private View mStatusBarView;
+    private WindowManager.LayoutParams mLp;
+    private int mBarHeight;
+    private final boolean mKeyguardScreenRotation;
+
+    private final State mCurrentState = new State();
+
+    public StatusBarWindowManager(Context context) {
+        mContext = context;
+        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        mKeyguardScreenRotation = shouldEnableKeyguardScreenRotation();
+    }
+
+    private boolean shouldEnableKeyguardScreenRotation() {
+        Resources res = mContext.getResources();
+        return SystemProperties.getBoolean("lockscreen.rot_override", false)
+                || res.getBoolean(R.bool.config_enableLockScreenRotation);
+    }
+
+    /**
+     * Adds the status bar view to the window manager.
+     *
+     * @param statusBarView The view to add.
+     * @param barHeight The height of the status bar in collapsed state.
+     */
+    public void add(View statusBarView, int barHeight) {
+
+        // Now that the status bar window encompasses the sliding panel and its
+        // translucent backdrop, the entire thing is made TRANSLUCENT and is
+        // hardware-accelerated.
+        mLp = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                barHeight,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
+                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
+                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                PixelFormat.TRANSLUCENT);
+
+        mLp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        mLp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
+        mLp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+        mLp.setTitle("StatusBar");
+        mLp.packageName = mContext.getPackageName();
+        mStatusBarView = statusBarView;
+        mBarHeight = barHeight;
+        mWindowManager.addView(mStatusBarView, mLp);
+    }
+
+    private void applyKeyguardFlags(State state) {
+        if (state.keyguardShowing) {
+            mLp.flags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+            mLp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+        } else {
+            mLp.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+            mLp.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+        }
+    }
+
+    private void adjustScreenOrientation(State state) {
+        if (!state.isKeyguardShowingAndNotOccluded() || mKeyguardScreenRotation) {
+            mLp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_USER;
+        } else {
+            mLp.screenOrientation =  ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+        }
+    }
+
+    private void applyFocusableFlag(State state) {
+        if (state.isKeyguardShowingAndNotOccluded() && state.keyguardNeedsInput) {
+            mLp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+            mLp.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+        } else if (state.isKeyguardShowingAndNotOccluded() || state.statusBarFocusable) {
+            mLp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+            mLp.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+        } else {
+            mLp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+            mLp.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+        }
+    }
+
+    private void applyHeight(State state) {
+        boolean expanded = state.isKeyguardShowingAndNotOccluded() || state.statusBarExpanded;
+        if (expanded) {
+            mLp.height = ViewGroup.LayoutParams.MATCH_PARENT;
+        } else {
+            mLp.height = mBarHeight;
+        }
+    }
+
+    private void applyUserActivityTimeout(State state) {
+        if (state.isKeyguardShowingAndNotOccluded()) {
+            mLp.userActivityTimeout = state.keyguardUserActivityTimeout;
+        } else {
+            mLp.userActivityTimeout = -1;
+        }
+    }
+
+    private void applyInputFeatures(State state) {
+        if (state.isKeyguardShowingAndNotOccluded()) {
+            mLp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
+        } else {
+            mLp.inputFeatures &= ~WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
+        }
+    }
+
+    private void apply(State state) {
+        applyKeyguardFlags(state);
+        applyFocusableFlag(state);
+        adjustScreenOrientation(state);
+        applyHeight(state);
+        applyUserActivityTimeout(state);
+        applyInputFeatures(state);
+        mWindowManager.updateViewLayout(mStatusBarView, mLp);
+    }
+
+    public void setKeyguardShowing(boolean showing) {
+        mCurrentState.keyguardShowing = showing;
+        apply(mCurrentState);
+    }
+
+    public void setKeyguardOccluded(boolean occluded) {
+        mCurrentState.keyguardOccluded = occluded;
+        apply(mCurrentState);
+    }
+
+    public void setKeyguardNeedsInput(boolean needsInput) {
+        mCurrentState.keyguardNeedsInput = needsInput;
+        apply(mCurrentState);
+    }
+
+    public void setStatusBarExpanded(boolean expanded) {
+        mCurrentState.statusBarExpanded = expanded;
+        mCurrentState.statusBarFocusable = expanded;
+        apply(mCurrentState);
+    }
+
+    public void setStatusBarFocusable(boolean focusable) {
+        mCurrentState.statusBarFocusable = focusable;
+        apply(mCurrentState);
+    }
+
+    public void setKeyguardUserActivityTimeout(long timeout) {
+        mCurrentState.keyguardUserActivityTimeout = timeout;
+        apply(mCurrentState);
+    }
+
+    private static class State {
+        boolean keyguardShowing;
+        boolean keyguardOccluded;
+        boolean keyguardNeedsInput;
+        boolean statusBarExpanded;
+        boolean statusBarFocusable;
+        long keyguardUserActivityTimeout;
+
+        private boolean isKeyguardShowingAndNotOccluded() {
+            return keyguardShowing && !keyguardOccluded;
+        }
+    }
+}
