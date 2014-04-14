@@ -56,6 +56,18 @@ public final class CallServiceSelectorAdapter {
     }
 
     /**
+     * Cancels the specified outgoing call.
+     *
+     * @param callId The ID of the call to cancel.
+     */
+    public void cancelOutgoingCall(String callId) {
+        try {
+            mAdapter.cancelOutgoingCall(callId);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Associates handoff information with an ongoing call. Calls can switch from one call service
      * to another. Setting handle to a non-null value marks the call as switchable.
      *

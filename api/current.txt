@@ -25086,6 +25086,7 @@ package android.telecomm {
 
   public abstract class CallServiceSelector extends android.app.Service {
     ctor protected CallServiceSelector();
+    method protected final void cancelOutgoingCall(android.telecomm.CallInfo);
     method protected final android.telecomm.CallServiceSelectorAdapter getAdapter();
     method protected final java.util.Collection<android.telecomm.CallInfo> getCalls();
     method protected void onAdapterAttached(android.telecomm.CallServiceSelectorAdapter);
@@ -25094,6 +25095,7 @@ package android.telecomm {
   }
 
   public final class CallServiceSelectorAdapter {
+    method public void cancelOutgoingCall(java.lang.String);
     method public void setHandoffInfo(java.lang.String, android.net.Uri, android.os.Bundle);
     method public void setSelectedCallServices(java.lang.String, java.util.List<android.telecomm.CallServiceDescriptor>);
   }
