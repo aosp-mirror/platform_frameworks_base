@@ -17,6 +17,8 @@
 
     <!-- Default height of an action bar. -->
     <dimen name="action_bar_default_height_quantum">56dp</dimen>
+    <!-- Default padding of an action bar. -->
+    <dimen name="action_bar_default_padding_quantum">4dp</dimen>
     <!-- Vertical padding around action bar icons. -->
     <dimen name="action_bar_icon_vertical_padding_quantum">16dp</dimen>
     <!-- Text size for action bar titles -->
@@ -27,6 +29,10 @@
     <dimen name="action_bar_subtitle_top_margin_quantum">-3dp</dimen>
     <!-- Bottom margin for action bar subtitles -->
     <dimen name="action_bar_subtitle_bottom_margin_quantum">5dp</dimen>
+
+    <dimen name="action_button_min_width_quantum">48dp</dimen>
+    <dimen name="action_button_min_height_quantum">48dp</dimen>
+    <dimen name="action_overflow_min_width_quantum">36dp</dimen>
 
     <dimen name="text_size_display_4_quantum">112sp</dimen>
     <dimen name="text_size_display_3_quantum">56sp</dimen>

@@ -713,10 +713,9 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.PopupMenu" parent="Widget.Quantum.ListPopupWindow"/>
 
     <style name="Widget.Quantum.ActionButton" parent="Widget.ActionButton">
-        <item name="minWidth">@dimen/action_button_min_width</item>
+        <item name="minWidth">@dimen/action_button_min_width_quantum</item>
+        <item name="minHeight">@dimen/action_button_min_height_quantum</item>
         <item name="gravity">center</item>
-        <item name="paddingStart">12dip</item>
-        <item name="paddingEnd">12dip</item>
         <item name="scaleType">center</item>
         <item name="maxLines">2</item>
     </style>
@@ -729,6 +728,9 @@ please see styles_device_defaults.xml.
         <item name="src">@drawable/ic_menu_moreoverflow_quantum</item>
         <item name="background">?attr/actionBarItemBackground</item>
         <item name="contentDescription">@string/action_menu_overflow_description</item>
+        <item name="minWidth">@dimen/action_overflow_min_width_quantum</item>
+        <item name="minHeight">@dimen/action_button_min_height_quantum</item>
+        <item name="scaleType">center</item>
     </style>
 
     <style name="Widget.Quantum.ActionButton.TextButton" parent="Widget.Quantum.ButtonBar"/>
@@ -756,16 +758,19 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.ActionBar" parent="Widget.ActionBar">
-        <item name="titleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Title</item>
-        <item name="subtitleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Subtitle</item>
         <item name="background">@null</item>
         <item name="backgroundStacked">@null</item>
         <item name="backgroundSplit">@null</item>
+        <item name="displayOptions">showHome|showTitle</item>
         <item name="divider">?attr/dividerVertical</item>
+        <item name="titleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Title</item>
+        <item name="subtitleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Subtitle</item>
         <item name="progressBarStyle">@style/Widget.Quantum.ProgressBar.Horizontal</item>
         <item name="indeterminateProgressStyle">@style/Widget.Quantum.ProgressBar</item>
         <item name="progressBarPadding">32dip</item>
         <item name="itemPadding">8dip</item>
+        <item name="homeLayout">@layout/action_bar_home_quantum</item>
+        <item name="gravity">center_vertical</item>
     </style>
 
     <style name="Widget.Quantum.ActionBar.Solid">
