@@ -39,8 +39,8 @@ import java.util.List;
  */
 public class KeyguardTouchDelegate {
     // TODO: propagate changes to these to {@link KeyguardServiceDelegate}
-    static final String KEYGUARD_PACKAGE = "com.android.keyguard";
-    static final String KEYGUARD_CLASS = "com.android.keyguard.KeyguardService";
+    static final String KEYGUARD_PACKAGE = "com.android.systemui";
+    static final String KEYGUARD_CLASS = "com.android.systemui.keyguard.KeyguardService";
 
     private static KeyguardTouchDelegate sInstance;
     private static final List<OnKeyguardConnectionListener> sConnectionListeners =
@@ -140,16 +140,16 @@ public class KeyguardTouchDelegate {
         return false;
     }
 
-    public boolean isShowingAndNotHidden() {
+    public boolean isShowingAndNotOccluded() {
         final IKeyguardService service = mService;
         if (service != null) {
             try {
-                return service.isShowingAndNotHidden();
+                return service.isShowingAndNotOccluded();
             } catch (RemoteException e) {
                 Slog.w(TAG , "Remote Exception", e);
             }
         } else {
-            Slog.w(TAG, "isShowingAndNotHidden(): NO SERVICE!");
+            Slog.w(TAG, "isShowingAndNotOccluded(): NO SERVICE!");
         }
         return false;
     }

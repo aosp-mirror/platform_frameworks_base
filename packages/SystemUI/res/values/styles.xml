@@ -168,5 +168,7 @@
         <!-- Note: must be dp to fit in status bar -->
         <item name="android:textSize">14dp</item>
     </style>
-    
+
+    <style name="systemui_theme" parent="@android:style/Theme.DeviceDefault" />
+
 </resources>

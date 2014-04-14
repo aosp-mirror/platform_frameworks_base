@@ -384,10 +384,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"ອະນຸຍາດໃຫ້ຜູ່ຖືຜູກກັບອິນເຕີເຟດລະດັບສູງສຸດ ຂອງບໍລິການວິເຈັດ. ບໍ່ຈຳເປັນສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"ຕິດຕໍ່ກັບຜູ່ເບິ່ງແຍງອຸປະກອນ"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"ອະນຸຍາດໃຫ້ເຈົ້າຂອງສົ່ງເຈດຕະນາຫາຜູ່ເບິ່ງແຍງລະບົບອຸປະກອນ. ແອັບຯທົ່ວໄປບໍ່ຄວນຈຳເປັນຕ້ອງໃຊ້."</string>
-    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
-    <skip />
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"ຜູກ​ກັບ​ການ​ປ້ອນ​ຂໍ້​ມູນ​ເຂົ້າ​ໂທ​ລະ​ທັດ"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ຜູ່​ຖື​ຜູກ​ຕິດ​ກັບ​ສ່ວ​ນ​ຕິດ​ຕໍ່​ລະ​ດັບ​ສູງ​ສຸດ​ຂອງ​ການ​ປ້ອນ​ຂໍ້​ມູນ​ເຂົ້າ​ໂທ​ລະ​ທັດ. ແອັບຯ​ທົ່ວ​ໄປ​ບໍ່​ຄວນ​ຈຳ​ເປັນ​ຕ້ອງ​ໃຊ້."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"ເພີ່ມ ຫຼືລຶບຜູ່ເບິ່ງແຍງລະບົບອຸປະກອນ"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"ອະນຸຍາດໃຫ້ເຈົ້າຂອງສາມາດລຶບ ຫຼືລຶບຂໍ້ມູນອຸປະກອນທີ່ນຳໃຊ້ໄດ້. ແອັບຯທົ່ວໄປບໍ່ຈຳເປັນຕ້ອງໃຊ້."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ປ່ຽນລວງຂອງໜ້າຈໍ"</string>

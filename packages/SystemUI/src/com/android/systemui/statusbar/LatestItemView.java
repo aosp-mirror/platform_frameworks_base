@@ -17,15 +17,43 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 
 public class LatestItemView extends FrameLayout {
+
+    private static final long DOUBLETAP_TIMEOUT_MS = 1000;
+
+    private boolean mDimmed;
+    private boolean mLocked;
+
+    /**
+     * Flag to indicate that the notification has been touched once and the second touch will
+     * click it.
+     */
+    private boolean mActivated;
+
+    private float mDownX;
+    private float mDownY;
+    private final float mTouchSlop;
+    private boolean mHotspotActive;
+
     public LatestItemView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
+
+    private final Runnable mTapTimeoutRunnable = new Runnable() {
+        @Override
+        public void run() {
+            makeInactive();
+        }
+    };
 
     @Override
     public void setOnClickListener(OnClickListener l) {
@@ -44,5 +72,95 @@ public class LatestItemView extends FrameLayout {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (mLocked) {
+            return handleTouchEventLocked(event);
+        } else {
+            return super.onTouchEvent(event);
+        }
+    }
+
+    private boolean handleTouchEventLocked(MotionEvent event) {
+        int action = event.getActionMasked();
+        Drawable background = getBackground();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                mDownX = event.getX();
+                mDownY = event.getY();
+                if (!mActivated) {
+                    background.setHotspot(0, event.getX(), event.getY());
+                    mHotspotActive = true;
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (!isWithinTouchSlop(event)) {
+                    makeInactive();
+                    return false;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                if (isWithinTouchSlop(event)) {
+                    if (!mActivated) {
+                        mActivated = true;
+                        postDelayed(mTapTimeoutRunnable, DOUBLETAP_TIMEOUT_MS);
+                    } else {
+                        performClick();
+                        makeInactive();
+                    }
+                } else {
+                    makeInactive();
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                makeInactive();
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
+
+    /**
+     * Cancels the hotspot and makes the notification inactive.
+     */
+    private void makeInactive() {
+        if (mHotspotActive) {
+            // Make sure that we clear the hotspot from the center.
+            getBackground().setHotspot(0, getWidth()/2, getHeight()/2);
+            getBackground().removeHotspot(0);
+            mHotspotActive = false;
+        }
+        mActivated = false;
+        removeCallbacks(mTapTimeoutRunnable);
+    }
+
+    private boolean isWithinTouchSlop(MotionEvent event) {
+        return Math.abs(event.getX() - mDownX) < mTouchSlop
+                && Math.abs(event.getY() - mDownY) < mTouchSlop;
+    }
+
+    /**
+     * Sets the notification as dimmed, meaning that it will appear in a more gray variant.
+     */
+    public void setDimmed(boolean dimmed) {
+        if (mDimmed != dimmed) {
+            mDimmed = dimmed;
+            if (dimmed) {
+                setBackgroundResource(com.android.internal.R.drawable.notification_quantum_bg_dim);
+            } else {
+                setBackgroundResource(com.android.internal.R.drawable.notification_quantum_bg);
+            }
+        }
+    }
+
+    /**
+     * Sets the notification as locked. In the locked state, the first tap will produce a quantum
+     * ripple to make the notification brighter and only the second tap will cause a click.
+     */
+    public void setLocked(boolean locked) {
+        mLocked = locked;
     }
 }

@@ -23,12 +23,12 @@ import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import android.app.AppOpsManager;
@@ -1010,7 +1010,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 && (mConfiguration == null
                         || (mConfiguration.diff(mService.mCurConfiguration) != 0));
 
-        if (mAttrs.type == TYPE_KEYGUARD) {
+        if ((mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
             // Retain configuration changed status until resetConfiguration called.
             mConfigHasChanged |= configChanged;
             configChanged = mConfigHasChanged;

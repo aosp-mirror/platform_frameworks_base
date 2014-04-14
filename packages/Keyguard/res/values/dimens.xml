@@ -158,7 +158,7 @@
     <dimen name="bottom_text_spacing_digital">-8dp</dimen>
     <dimen name="label_font_size">14dp</dimen>
     <dimen name="widget_label_font_size">14dp</dimen>
-    <dimen name="widget_big_font_size">80dp</dimen>
+    <dimen name="widget_big_font_size">60dp</dimen>
     <dimen name="big_font_size">120dp</dimen>
 
 </resources>

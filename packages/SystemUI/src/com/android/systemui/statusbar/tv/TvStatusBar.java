@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 
+import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.statusbar.BaseStatusBar;
 
@@ -93,10 +94,6 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected void createAndAddWindows() {
-    }
-
-    @Override
     protected WindowManager.LayoutParams getSearchLayoutParams(
             LayoutParams layoutParams) {
         return null;
@@ -141,7 +138,16 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
+    protected int getMaxKeyguardNotifications() {
+        return 0;
+    }
+
+    @Override
     public void animateExpandSettingsPanel() {
+    }
+
+    @Override
+    protected void createAndAddWindows() {
     }
 
     @Override
