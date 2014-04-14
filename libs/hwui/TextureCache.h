@@ -62,6 +62,18 @@ public:
     void operator()(const SkBitmap*& bitmap, Texture*& texture);
 
     /**
+     * Resets all Textures to not be marked as in use
+     */
+    void resetMarkInUse();
+
+    /**
+     * Attempts to precache the SkBitmap. Returns true if a Texture was successfully
+     * acquired for the bitmap, false otherwise. If a Texture was acquired it is
+     * marked as in use.
+     */
+    bool prefetchAndMarkInUse(const SkBitmap* bitmap);
+
+    /**
      * Returns the texture associated with the specified bitmap. If the texture
      * cannot be found in the cache, a new texture is generated.
      */
@@ -116,6 +128,11 @@ public:
     void setFlushRate(float flushRate);
 
 private:
+
+    bool canMakeTextureFromBitmap(const SkBitmap* bitmap);
+
+    Texture* getCachedTexture(const SkBitmap* bitmap);
+
     /**
      * Generates the texture from a bitmap into the specified texture structure.
      *

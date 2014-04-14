@@ -85,7 +85,6 @@ void DrawFrameTask::postAndWait(RenderThread* renderThread) {
 void DrawFrameTask::run() {
     ATRACE_NAME("DrawFrame");
 
-    // canUnblockUiThread is temporary until WebView has a solution for syncing frame state
     bool canUnblockUiThread = syncFrameState();
 
     // Grab a copy of everything we need
@@ -105,17 +104,20 @@ void DrawFrameTask::run() {
     }
 }
 
+static void prepareTreeInfo(TreeInfo& info) {
+    info.prepareTextures = true;
+}
+
 bool DrawFrameTask::syncFrameState() {
     ATRACE_CALL();
-
-    bool hasFunctors = false;
-    mContext->processLayerUpdates(&mLayers, &hasFunctors);
-
-    TreeInfo info = {0};
+    mContext->makeCurrent();
+    Caches::getInstance().textureCache.resetMarkInUse();
+    TreeInfo info;
+    prepareTreeInfo(info);
+    mContext->processLayerUpdates(&mLayers, info);
     mRenderNode->prepareTree(info);
-    hasFunctors |= info.hasFunctors;
-
-    return !hasFunctors;
+    // If prepareTextures is false, we ran out of texture cache space
+    return !info.hasFunctors && info.prepareTextures;
 }
 
 void DrawFrameTask::unblockUiThread() {

@@ -146,8 +146,8 @@ static void android_view_GLRenderer_prepareTree(JNIEnv* env, jobject clazz,
         jlong renderNodePtr) {
     using namespace android::uirenderer;
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    TreeInfo info = {0};
-    renderNode->prepareTree(info);
+    TreeInfo ignoredInfo;
+    renderNode->prepareTree(ignoredInfo);
 }
 
 static void android_view_GLRenderer_invokeFunctor(JNIEnv* env, jobject clazz,

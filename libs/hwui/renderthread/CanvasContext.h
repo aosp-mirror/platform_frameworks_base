@@ -23,6 +23,7 @@
 #include <utils/Functor.h>
 #include <utils/Vector.h>
 
+#include "../RenderNode.h"
 #include "RenderTask.h"
 
 #define FUNCTOR_PROCESS_DELAY 4
@@ -31,8 +32,6 @@ namespace android {
 namespace uirenderer {
 
 class DeferredLayerUpdater;
-class RenderNode;
-class DisplayListData;
 class OpenGLRenderer;
 class Rect;
 class Layer;
@@ -54,7 +53,8 @@ public:
     void updateSurface(EGLNativeWindowType window);
     void pauseSurface(EGLNativeWindowType window);
     void setup(int width, int height);
-    void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters, bool* hasFunctors);
+    void makeCurrent();
+    void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters, TreeInfo& info);
     void drawDisplayList(RenderNode* displayList, Rect* dirty);
     void destroyCanvasAndSurface();
 

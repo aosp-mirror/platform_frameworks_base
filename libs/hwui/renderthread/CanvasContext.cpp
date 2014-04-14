@@ -382,13 +382,18 @@ void CanvasContext::setup(int width, int height) {
     mCanvas->setViewport(width, height);
 }
 
-void CanvasContext::processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters,
-        bool* hasFunctors) {
-    LOG_ALWAYS_FATAL_IF(!mCanvas, "Cannot process layer updates without a canvas!");
+void CanvasContext::makeCurrent() {
     mGlobalContext->makeCurrent(mEglSurface);
+}
+
+void CanvasContext::processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters,
+        TreeInfo& info) {
+    LOG_ALWAYS_FATAL_IF(!mCanvas, "Cannot process layer updates without a canvas!");
+    makeCurrent();
     for (size_t i = 0; i < layerUpdaters->size(); i++) {
         DeferredLayerUpdater* update = layerUpdaters->itemAt(i);
-        LOG_ALWAYS_FATAL_IF(!update->apply(hasFunctors), "Failed to update layer!");
+        bool success = update->apply(info);
+        LOG_ALWAYS_FATAL_IF(!success, "Failed to update layer!");
         if (update->backingLayer()->deferredUpdateScheduled) {
             mCanvas->pushLayerUpdate(update->backingLayer());
         }
@@ -444,8 +449,8 @@ void CanvasContext::invokeFunctor(Functor* functor) {
 
 bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
     requireGlContext();
-    bool hasFunctors;
-    layer->apply(&hasFunctors);
+    TreeInfo info;
+    layer->apply(info);
     return LayerRenderer::copyLayer(layer->backingLayer(), bitmap);
 }
 
