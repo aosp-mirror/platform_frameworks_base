@@ -56,7 +56,7 @@ public:
     void setup(int width, int height);
     void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters, bool* hasFunctors);
     void drawDisplayList(RenderNode* displayList, Rect* dirty);
-    void destroyCanvas();
+    void destroyCanvasAndSurface();
 
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
 
