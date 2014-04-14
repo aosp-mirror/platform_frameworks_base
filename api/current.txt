@@ -15808,10 +15808,13 @@ package android.net.nsd {
   public final class NsdServiceInfo implements android.os.Parcelable {
     ctor public NsdServiceInfo();
     method public int describeContents();
+    method public java.util.Map<java.lang.String, byte[]> getAttributes();
     method public java.net.InetAddress getHost();
     method public int getPort();
     method public java.lang.String getServiceName();
     method public java.lang.String getServiceType();
+    method public void removeAttribute(java.lang.String);
+    method public void setAttribute(java.lang.String, java.lang.String);
     method public void setHost(java.net.InetAddress);
     method public void setPort(int);
     method public void setServiceName(java.lang.String);
