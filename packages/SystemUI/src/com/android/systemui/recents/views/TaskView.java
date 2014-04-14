@@ -17,8 +17,10 @@
 package com.android.systemui.recents.views;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
@@ -29,18 +31,26 @@ import com.android.systemui.recents.model.Task;
 
 
 /* A task view */
-public class TaskView extends FrameLayout implements View.OnClickListener, Task.TaskCallbacks {
+public class TaskView extends FrameLayout implements View.OnClickListener,
+        Task.TaskCallbacks {
     /** The TaskView callbacks */
     interface TaskViewCallbacks {
         public void onTaskIconClicked(TaskView tv);
+        public void onTaskInfoPanelShown(TaskView tv);
+        public void onTaskInfoPanelHidden(TaskView tv);
+        public void onTaskAppInfoClicked(TaskView tv);
+
         // public void onTaskViewReboundToTask(TaskView tv, Task t);
     }
 
     Task mTask;
     boolean mTaskDataLoaded;
+    boolean mTaskInfoPaneVisible;
+    Point mLastTouchDown = new Point();
 
     TaskThumbnailView mThumbnailView;
     TaskBarView mBarView;
+    TaskInfoView mInfoView;
     TaskViewCallbacks mCb;
 
 
@@ -65,10 +75,22 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
         // Bind the views
         mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
         mBarView = (TaskBarView) findViewById(R.id.task_view_bar);
-        mBarView.mApplicationIcon.setOnClickListener(this);
+        mInfoView = (TaskInfoView) findViewById(R.id.task_view_info_pane);
+
         if (mTaskDataLoaded) {
             onTaskDataLoaded(false);
         }
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_MOVE:
+                mLastTouchDown.set((int) ev.getX(), (int) ev.getY());
+                break;
+        }
+        return super.onInterceptTouchEvent(ev);
     }
 
     /** Set callback */
@@ -189,6 +211,63 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
         return outRect;
     }
 
+    /** Returns whether this task has an info pane visible */
+    boolean isInfoPaneVisible() {
+        return mTaskInfoPaneVisible;
+    }
+
+    /** Shows the info pane if it is not visible. */
+    void showInfoPane(Rect taskVisibleRect) {
+        if (mTaskInfoPaneVisible) return;
+
+        // Remove the bar view from the visible rect and update the info pane contents
+        taskVisibleRect.top += mBarView.getMeasuredHeight();
+        mInfoView.updateContents(taskVisibleRect);
+
+        // Show the info pane and animate it into view
+        mInfoView.setVisibility(View.VISIBLE);
+        mInfoView.animateCircularClip(mLastTouchDown, 0f, 1f, null, true);
+        mInfoView.setOnClickListener(this);
+        mTaskInfoPaneVisible = true;
+
+        // Notify any callbacks
+        if (mCb != null) {
+            mCb.onTaskInfoPanelShown(this);
+        }
+    }
+
+    /** Hides the info pane if it is visible. */
+    void hideInfoPane() {
+        if (!mTaskInfoPaneVisible) return;
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+
+        // Cancel any circular clip animation
+        mInfoView.cancelCircularClipAnimation();
+
+        // Animate the info pane out
+        mInfoView.animate()
+                .alpha(0f)
+                .setDuration(config.taskViewInfoPaneAnimDuration)
+                .setInterpolator(BakedBezierInterpolator.INSTANCE)
+                .withLayer()
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mInfoView.setVisibility(View.INVISIBLE);
+                        mInfoView.setOnClickListener(null);
+
+                        mInfoView.setAlpha(1f);
+                    }
+                })
+                .start();
+        mTaskInfoPaneVisible = false;
+
+        // Notify any callbacks
+        if (mCb != null) {
+            mCb.onTaskInfoPanelHidden(this);
+        }
+    }
+
     /** Enable the hw layers on this task view */
     void enableHwLayers() {
         mThumbnailView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
@@ -209,27 +288,39 @@ public class TaskView extends FrameLayout implements View.OnClickListener, Task.
 
     @Override
     public void onTaskDataLoaded(boolean reloadingTaskData) {
-        if (mThumbnailView != null && mBarView != null) {
+        if (mThumbnailView != null && mBarView != null && mInfoView != null) {
             // Bind each of the views to the new task data
             mThumbnailView.rebindToTask(mTask, reloadingTaskData);
             mBarView.rebindToTask(mTask, reloadingTaskData);
+            // Rebind any listeners
+            mBarView.mApplicationIcon.setOnClickListener(this);
+            mInfoView.mAppInfoButton.setOnClickListener(this);
         }
         mTaskDataLoaded = true;
     }
 
     @Override
     public void onTaskDataUnloaded() {
-        if (mThumbnailView != null && mBarView != null) {
+        if (mThumbnailView != null && mBarView != null && mInfoView != null) {
             // Unbind each of the views from the task data and remove the task callback
             mTask.setCallbacks(null);
             mThumbnailView.unbindFromTask();
             mBarView.unbindFromTask();
+            // Unbind any listeners
+            mBarView.mApplicationIcon.setOnClickListener(null);
+            mInfoView.mAppInfoButton.setOnClickListener(null);
         }
         mTaskDataLoaded = false;
     }
 
     @Override
     public void onClick(View v) {
-        mCb.onTaskIconClicked(this);
+        if (v == mInfoView) {
+            // Do nothing
+        } else if (v == mBarView.mApplicationIcon) {
+            mCb.onTaskIconClicked(this);
+        } else if (v == mInfoView.mAppInfoButton) {
+            mCb.onTaskAppInfoClicked(this);
+        }
     }
 }

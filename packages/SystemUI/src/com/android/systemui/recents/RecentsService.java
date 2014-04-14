@@ -112,7 +112,6 @@ class SystemUIMessageHandler extends Handler {
 
 /* Service */
 public class RecentsService extends Service {
-    final static String ACTION_FINISH_RECENTS_ACTIVITY = "action_finish_recents_activity";
     final static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
 
     Messenger mSystemUIMessenger = new Messenger(new SystemUIMessageHandler(this));

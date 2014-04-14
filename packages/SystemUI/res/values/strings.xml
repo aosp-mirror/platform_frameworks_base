@@ -509,6 +509,8 @@
 
     <!-- Recents: The empty recents string. [CHAR LIMIT=NONE] -->
     <string name="recents_empty_message">RECENTS</string>
+    <!-- Recents: The info panel app info button string. [CHAR LIMIT=NONE] -->
+    <string name="recents_app_info_button_label">Application Info</string>
 
 
     <!-- Glyph to be overlaid atop the battery when the level is extremely low. Do not translate. -->

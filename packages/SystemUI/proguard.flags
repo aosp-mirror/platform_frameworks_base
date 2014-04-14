@@ -6,7 +6,7 @@
   public void setGlowAlpha(float);
   public void setGlowScale(float);
 }
--keep class com.android.systemui.recents.views.TaskIconView {
+-keep class com.android.systemui.recents.views.TaskInfoView {
 	public void setCircularClipRadius(float);
 	public float getCircularClipRadius();
 }

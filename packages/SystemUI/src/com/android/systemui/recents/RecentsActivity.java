@@ -50,11 +50,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             String action = intent.getAction();
             Console.log(Constants.DebugFlags.App.SystemUIHandshake,
                     "[RecentsActivity|serviceBroadcast]", action, Console.AnsiRed);
-            if (action.equals(RecentsService.ACTION_FINISH_RECENTS_ACTIVITY)) {
-                if (Constants.DebugFlags.App.EnableToggleNewRecentsActivity) {
-                    finish();
-                }
-            } else if (action.equals(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
+            if (action.equals(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
                 // Try and unfilter and filtered stacks
                 if (!mRecentsView.unfilterFilteredStacks()) {
                     // If there are no filtered stacks, dismiss recents and launch the first task
@@ -190,7 +186,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Register the broadcast receiver to handle messages from our service
         IntentFilter filter = new IntentFilter();
         filter.addAction(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY);
-        filter.addAction(RecentsService.ACTION_FINISH_RECENTS_ACTIVITY);
         registerReceiver(mServiceBroadcastReceiver, filter);
 
         // Register the broadcast receiver to handle messages when the screen is turned off
@@ -224,11 +219,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 Console.AnsiRed);
         super.onStop();
 
-        // Finish the current recents activity after we have launched a task
-        if (mTaskLaunched && Constants.DebugFlags.App.EnableToggleNewRecentsActivity) {
-            finish();
-        }
-
         mVisible = false;
         mTaskLaunched = false;
     }
@@ -250,8 +240,18 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     public void onBackPressed() {
-        if (!mRecentsView.unfilterFilteredStacks()) {
-            super.onBackPressed();
+        boolean interceptedByInfoPanelClose = false;
+
+        // Try and return from any open info panes
+        if (Constants.DebugFlags.App.EnableInfoPane) {
+            interceptedByInfoPanelClose = mRecentsView.closeOpenInfoPanes();
+        }
+
+        // If we haven't been intercepted already, then unfilter any stacks
+        if (!interceptedByInfoPanelClose) {
+            if (!mRecentsView.unfilterFilteredStacks()) {
+                super.onBackPressed();
+            }
         }
     }
 
