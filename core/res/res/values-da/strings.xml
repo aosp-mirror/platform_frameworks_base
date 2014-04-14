@@ -460,6 +460,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Tillader, at appen kan læse de personlige profiloplysninger, der er gemt på din enhed, f.eks. dit navn og dine kontaktoplysninger. Det betyder, at appen kan identificere dig og sende dine profiloplysninger til andre."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"ændre dit eget kontaktkort"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Tillader, at appen kan ændre eller tilføje oplysninger i din personlige profil, der er gemt på din enhed, f.eks. dit navn eller dine kontaktoplysninger. Dette betyder, at andre apps kan identificere dig og sende profiloplysninger til andre."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"kropssensorer (f.eks. pulsmålere)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Tillader, at appen får adgang til data fra sensorer, du bruger til at måle, hvad der sker inde i din krop, f.eks. din puls."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"læs din sociale strøm"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Tillader, at appen kan få adgang til og synkronisere sociale opdateringer fra dig og dine venner. Vær forsigtig, når du deler oplysninger – med denne tilladelse kan appen læse kommunikation mellem dig og dine venner på sociale netværk, uanset fortrolighed. Bemærk! Denne tilladelse håndhæves muligvis ikke på alle sociale netværk."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"skriv i din sociale strøm"</string>
@@ -1153,7 +1155,7 @@
     <string name="smv_process" msgid="5120397012047462446">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> har overtrådt sin egen StrictMode-politik."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android opgraderes..."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimerer app <xliff:g id="NUMBER_0">%1$d</xliff:g> ud af <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
-    <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Sådan åbner du dine apps."</string>
+    <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Åbner dine apps."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Gennemfører start."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> er i gang"</string>
     <string name="heavy_weight_notification_detail" msgid="1721681741617898865">"Tryk for at skifte til appen"</string>

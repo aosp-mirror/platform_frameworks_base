@@ -460,6 +460,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Umožňuje aplikácii čítať informácie v osobnom profile uložené v zariadení, ako je vaše meno a kontaktné informácie. Znamená to, že vás ostatné aplikácie môžu identifikovať a odoslať informácie o vašom profile iným aplikáciám."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"upraviť vlastnú kartu kontaktu"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Umožňuje aplikácii zmeniť alebo pridať do osobného profilu informácie uložené vo vašom zariadení, ako je vaše meno a kontaktné informácie. Znamená to, že vás aplikácia môže identifikovať a odoslať informácie o vašom profile ostatným aplikáciám."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"telesné senzory (napr. snímače tepu)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Umožňuje aplikácii pristupovať k údajom zo senzorov, pomocou ktorých meriate činnosť svojho tela, napríklad tep."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"čítať váš sociálny stream"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Umožňuje aplikácii pristupovať k sociálnym aktualizáciám od vás a vašich priateľov a synchronizovať ich. Pri zdieľaní informácií dávajte pozor – toto povolenie umožňuje aplikácii čítať komunikáciu medzi vami a vašimi priateľmi v sociálnych sieťach, a to bez ohľadu na jej dôvernosť. Poznámka: Toto povolenie nie je možné vynucovať v prípade všetkých sociálnych sietí."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"písať do vášho sociálneho streamu"</string>
@@ -540,9 +542,9 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Povoľuje prístup k ovládaču kernel MTP na implementáciu protokolu MTP USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testovanie hardvéru"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Umožňuje aplikácii ovládať rôzne periférie na účely testovania hardvéru."</string>
-    <string name="permlab_callPhone" msgid="3925836347681847954">"priame volanie na telefónne čísla"</string>
+    <string name="permlab_callPhone" msgid="3925836347681847954">"priamo volať na telefónne čísla"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Umožňuje aplikácii volať telefónne čísla bez vášho zásahu. V dôsledku toho sa môžu účtovať neočakávané poplatky alebo sa môžu uskutočniť neočakávané hovory. Toto povolenie neumožňuje aplikácii volať na čísla tiesňového volania."</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"priame volanie na ľubovoľné telefónne čísla"</string>
+    <string name="permlab_callPrivileged" msgid="4198349211108497879">"priamo volať na ľubovoľné telefónne čísla"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Umožňuje aplikácii volať na akékoľvek telefónne číslo (bez vášho zásahu) vrátane čísiel tiesňového volania. Škodlivé aplikácie môžu uskutočňovať zbytočné a nezákonné volania na tiesňové linky."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"priamo spustiť nastavenie tabletu CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"priamo spustiť nastavenie telefónu CDMA"</string>
