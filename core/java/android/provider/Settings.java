@@ -5097,6 +5097,13 @@ public final class Settings {
        public static final String NETWORK_PREFERENCE = "network_preference";
 
        /**
+        * Which package name to use for network scoring. If null, or if the package is not a valid
+        * scorer app, external network scores will neither be requested nor accepted.
+        * @hide
+        */
+       public static final String NETWORK_SCORER_APP = "network_scorer_app";
+
+       /**
         * If the NITZ_UPDATE_DIFF time is exceeded then an automatic adjustment
         * to SystemClock will be allowed even if NITZ_UPDATE_SPACING has not been
         * exceeded.
