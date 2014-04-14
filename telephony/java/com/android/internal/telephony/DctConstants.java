@@ -97,6 +97,8 @@ public class DctConstants {
     public static final int CMD_ENABLE_MOBILE_PROVISIONING = BASE + 37;
     public static final int CMD_IS_PROVISIONING_APN = BASE + 38;
     public static final int EVENT_PROVISIONING_APN_ALARM = BASE + 39;
+    public static final int EVENT_DATA_RAT_CHANGED = BASE + 40;
+    public static final int CMD_NET_STAT_POLL = BASE + 41;
 
     /***** Constants *****/
 

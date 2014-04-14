@@ -1780,4 +1780,8 @@
   <java-symbol type="string" name="reboot_progress" />
   <java-symbol type="string" name="reboot_system" />
   
+  <!-- CM -->
+  <java-symbol type="bool" name="config_samsung_stk" />
+  <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
+
 </resources>
