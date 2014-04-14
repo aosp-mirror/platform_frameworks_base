@@ -97,7 +97,7 @@ public:
 
     virtual void onExit(int code)
     {
-        if (mClassName == NULL) {
+        if (mClassName.isEmpty()) {
             // if zygote
             IPCThreadState::self()->stopProcess();
         }
