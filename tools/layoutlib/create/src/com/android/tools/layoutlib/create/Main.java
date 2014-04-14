@@ -116,6 +116,7 @@ public class Main {
                         "com.android.i18n.phonenumbers.*",  // for TextView with autolink attribute
                         "android.app.DatePickerDialog",     // b.android.com/28318
                         "android.app.TimePickerDialog",     // b.android.com/61515
+                        "com.android.internal.view.menu.ActionMenu",
                     },
                     excludeClasses,
                     new String[] {

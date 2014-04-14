@@ -170,6 +170,15 @@ public class WindowDecorActionBar extends ActionBar {
         init(dialog.getWindow().getDecorView());
     }
 
+    /**
+     * Only for edit mode.
+     * @hide
+     */
+    public WindowDecorActionBar(View layout) {
+        assert layout.isInEditMode();
+        init(layout);
+    }
+
     private void init(View decor) {
         mOverlayLayout = (ActionBarOverlayLayout) decor.findViewById(
                 com.android.internal.R.id.action_bar_overlay_layout);
@@ -559,8 +568,8 @@ public class WindowDecorActionBar extends ActionBar {
             return;
         }
 
-        final FragmentTransaction trans = mActivity.getFragmentManager().beginTransaction()
-                .disallowAddToBackStack();
+        final FragmentTransaction trans = mActionView.isInEditMode() ? null :
+                mActivity.getFragmentManager().beginTransaction().disallowAddToBackStack();
 
         if (mSelectedTab == tab) {
             if (mSelectedTab != null) {
@@ -578,7 +587,7 @@ public class WindowDecorActionBar extends ActionBar {
             }
         }
 
-        if (!trans.isEmpty()) {
+        if (trans != null && !trans.isEmpty()) {
             trans.commit();
         }
     }
