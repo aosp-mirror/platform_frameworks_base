@@ -28,8 +28,9 @@ public class Constants {
         public static class App {
             public static final boolean EnableTaskFiltering = true;
             public static final boolean EnableTaskStackClipping = false;
-            public static final boolean EnableToggleNewRecentsActivity = false;
-            // This disables the bitmap and icon caches to
+            public static final boolean EnableInfoPane = true;
+
+            // This disables the bitmap and icon caches
             public static final boolean DisableBackgroundCache = false;
             // For debugging, this enables us to create mock recents tasks
             public static final boolean EnableSystemServicesProxy = false;

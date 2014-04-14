@@ -114,6 +114,8 @@
     <integer name="recents_filter_animate_new_views_min_duration">125</integer>
     <!-- The min animation duration for animating views that are newly visible. -->
     <integer name="recents_animate_task_bar_enter_duration">200</integer>
+    <!-- The animation duration for animating in the info pane. -->
+    <integer name="recents_animate_task_view_info_pane_duration">150</integer>
 
     <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
      card. -->

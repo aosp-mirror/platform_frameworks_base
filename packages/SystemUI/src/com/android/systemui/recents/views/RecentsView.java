@@ -17,13 +17,16 @@
 package com.android.systemui.recents.views;
 
 import android.app.ActivityOptions;
+import android.app.TaskStackBuilder;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.FrameLayout;
 import com.android.systemui.recents.Console;
@@ -179,6 +182,21 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return true;
     }
 
+    /** Closes any open info panes */
+    public boolean closeOpenInfoPanes() {
+        if (mBSP != null) {
+            // Get the first stack view
+            int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                TaskStackView stackView = (TaskStackView) getChildAt(i);
+                if (stackView.closeOpenInfoPanes()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /** Unfilters any filtered stacks */
     public boolean unfilterFilteredStacks() {
         if (mBSP != null) {
@@ -205,6 +223,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         if (mCb != null) {
             mCb.onTaskLaunching();
         }
+
+        // Close any open info panes
+        closeOpenInfoPanes();
 
         final Runnable launchRunnable = new Runnable() {
             @Override
@@ -282,5 +303,16 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         } else {
             tv.animateOnLeavingRecents(launchRunnable);
         }
+    }
+
+    @Override
+    public void onTaskAppInfoLaunched(Task t) {
+        // Create a new task stack with the application info details activity
+        Intent baseIntent = t.key.baseIntent;
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.fromParts("package", baseIntent.getComponent().getPackageName(), null));
+        intent.setComponent(intent.resolveActivity(getContext().getPackageManager()));
+        TaskStackBuilder.create(getContext())
+                .addNextIntentWithParentStack(intent).startActivities();
     }
 }
