@@ -38,10 +38,13 @@ import android.util.SparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import com.android.internal.app.IBatteryStats;
@@ -443,14 +446,14 @@ public class NsdService extends INsdManager.Stub {
                     case NativeResponseCode.SERVICE_FOUND:
                         /* NNN uniqueId serviceName regType domain */
                         if (DBG) Slog.d(TAG, "SERVICE_FOUND Raw: " + raw);
-                        servInfo = new NsdServiceInfo(cooked[2], cooked[3], null);
+                        servInfo = new NsdServiceInfo(cooked[2], cooked[3]);
                         clientInfo.mChannel.sendMessage(NsdManager.SERVICE_FOUND, 0,
                                 clientId, servInfo);
                         break;
                     case NativeResponseCode.SERVICE_LOST:
                         /* NNN uniqueId serviceName regType domain */
                         if (DBG) Slog.d(TAG, "SERVICE_LOST Raw: " + raw);
-                        servInfo = new NsdServiceInfo(cooked[2], cooked[3], null);
+                        servInfo = new NsdServiceInfo(cooked[2], cooked[3]);
                         clientInfo.mChannel.sendMessage(NsdManager.SERVICE_LOST, 0,
                                 clientId, servInfo);
                         break;
@@ -463,7 +466,7 @@ public class NsdService extends INsdManager.Stub {
                     case NativeResponseCode.SERVICE_REGISTERED:
                         /* NNN regId serviceName regType */
                         if (DBG) Slog.d(TAG, "SERVICE_REGISTERED Raw: " + raw);
-                        servInfo = new NsdServiceInfo(cooked[2], null, null);
+                        servInfo = new NsdServiceInfo(cooked[2], null);
                         clientInfo.mChannel.sendMessage(NsdManager.REGISTER_SERVICE_SUCCEEDED,
                                 id, clientId, servInfo);
                         break;
@@ -679,9 +682,22 @@ public class NsdService extends INsdManager.Stub {
     private boolean registerService(int regId, NsdServiceInfo service) {
         if (DBG) Slog.d(TAG, "registerService: " + regId + " " + service);
         try {
-            //Add txtlen and txtdata
-            mNativeConnector.execute("mdnssd", "register", regId, service.getServiceName(),
+            Command cmd = new Command("mdnssd", "register", regId, service.getServiceName(),
                     service.getServiceType(), service.getPort());
+
+            // Add TXT records as additional arguments.
+            Map<String, byte[]> txtRecords = service.getAttributes();
+            for (String key : txtRecords.keySet()) {
+                try {
+                    // TODO: Send encoded TXT record as bytes once NDC/netd supports binary data.
+                    cmd.appendArg(String.format(Locale.US, "%s=%s", key,
+                            new String(txtRecords.get(key), "UTF_8")));
+                } catch (UnsupportedEncodingException e) {
+                    Slog.e(TAG, "Failed to encode txtRecord " + e);
+                }
+            }
+
+            mNativeConnector.execute(cmd);
         } catch(NativeDaemonConnectorException e) {
             Slog.e(TAG, "Failed to execute registerService " + e);
             return false;
