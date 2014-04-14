@@ -21,7 +21,7 @@
     and the security view. -->
 <com.android.keyguard.KeyguardSimpleHostView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
+    xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_host_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent">

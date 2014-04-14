@@ -37,6 +37,7 @@ public class PhoneStatusBarView extends PanelBar {
 
     PhoneStatusBar mBar;
     int mScrimColor;
+    int mScrimColorKeyguard;
     float mSettingsPanelDragzoneFrac;
     float mSettingsPanelDragzoneMin;
 
@@ -52,6 +53,7 @@ public class PhoneStatusBarView extends PanelBar {
 
         Resources res = getContext().getResources();
         mScrimColor = res.getColor(R.color.notification_panel_scrim_color);
+        mScrimColorKeyguard = res.getColor(R.color.notification_panel_scrim_color_keyguard);
         mSettingsPanelDragzoneMin = res.getDimension(R.dimen.settings_panel_dragzone_min);
         try {
             mSettingsPanelDragzoneFrac = res.getFraction(R.dimen.settings_panel_dragzone_fraction, 1, 1);
@@ -217,6 +219,7 @@ public class PhoneStatusBarView extends PanelBar {
         if (panel == mFadingPanel && mScrimColor != 0 && ActivityManager.isHighEndGfx()
                 && mBar.mStatusBarWindow != null) {
             if (mShouldFade) {
+                int scrimColor = mBar.isOnKeyguard() ? mScrimColorKeyguard : mScrimColor;
                 frac = mPanelExpandedFractionSum; // don't judge me
                 // let's start this 20% of the way down the screen
                 frac = frac * 1.2f - 0.2f;
@@ -226,7 +229,7 @@ public class PhoneStatusBarView extends PanelBar {
                     // woo, special effects
                     final float k = (float)(1f-0.5f*(1f-Math.cos(3.14159f * Math.pow(1f-frac, 2f))));
                     // attenuate background color alpha by k
-                    final int color = (int) ((mScrimColor >>> 24) * k) << 24 | (mScrimColor & 0xFFFFFF);
+                    final int color = (int) ((scrimColor >>> 24) * k) << 24 | (scrimColor & 0xFFFFFF);
                     mBar.mStatusBarWindow.setBackgroundColor(color);
                 }
             }
@@ -249,5 +252,6 @@ public class PhoneStatusBarView extends PanelBar {
         mBar.animateHeadsUp(mNotificationPanel == panel, mPanelExpandedFractionSum);
 
         mBar.updateCarrierLabelVisibility(false);
+        mBar.userActivity();
     }
 }

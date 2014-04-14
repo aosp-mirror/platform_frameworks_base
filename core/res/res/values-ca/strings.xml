@@ -388,6 +388,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permet que el titular vinculi a la interfície de nivell superior d\'un servei de widget. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar amb un administrador del dispositiu"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permet que el titular enviï intents a un administrador del sistema. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"Vinculació a una entrada de televisor"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Permet que el titular es vinculi a la interfície de nivell superior d\'una entrada de televisor. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"afegeix un administrador al dispositiu o suprimeix-lo"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Permet que el titular afegeixi administradors actius al dispositiu o en suprimeixi. No s\'hauria de necessitar per a les aplicacions normals."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"canviar l\'orientació de la pantalla"</string>

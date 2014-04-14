@@ -236,6 +236,11 @@ interface IWindowManager
     boolean isSafeModeEnabled();
 
     /**
+     * Enables the screen if all conditions are met.
+     */
+    void enableScreenIfNeeded();
+
+    /**
      * Clears the frame statistics for a given window.
      *
      * @param token The window token.

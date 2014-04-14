@@ -388,6 +388,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Эзэмшигч нь виджет үйлчилгээний дээд-төвшиний интерфейстэй холбох боломжтой. Энгийн апп-д шаардлагагүй."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"төхөөрөмжийн админтай харилцан үйлчлэх"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Эзэмшигч нь төхөөрөмжийн админруу интент илгээх боломжтой. Энгийн апп-д шаардлагагүй."</string>
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"ТВ оролт холбох"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Эзэмшигч нь ТВ оролтын дээд-төвшиний интерфейстэй холбох боломжтой. Энгийн апп-д шаардлагагүй."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"төхөөрөмжийн админ нэмэх, хасах"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Эзэмшигч нь идэвхтэй төхөөрөмжийн администраторыг нэмэх, хасах боломжтой. Энгийн апп-д шаардлагагүй."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"дэлгэцний чиглэлийг солих"</string>

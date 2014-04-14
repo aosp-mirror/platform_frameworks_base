@@ -24,8 +24,8 @@
     <dimen name="notification_panel_margin_left">16dp</dimen>
 
     <!-- Gravity for the notification & quick settings panels -->
-    <!-- 0x800033 = start|top ; 0x800035 = end|top -->
-    <integer name="notification_panel_layout_gravity">0x800033</integer>
+    <!-- 0x31 = top|center_horizontal ; 0x800035 = end|top -->
+    <integer name="notification_panel_layout_gravity">0x31</integer>
     <integer name="settings_panel_layout_gravity">0x800035</integer>
 
     <!-- Diameter of outer shape drawable shown in navbar search-->
@@ -41,9 +41,8 @@
     <dimen name="status_bar_recents_thumbnail_width">200dp</dimen>
     <dimen name="status_bar_recents_thumbnail_height">177dp</dimen>
 
-    <!-- On tablet-sized devices, we allocate the rightmost third(ish) of the draggable status bar
-         to quick settings. -->
-    <item type="dimen" name="settings_panel_dragzone_fraction">35%</item>
+    <!-- On tablets, panels drop from the statusbar instead of overlapping it. -->
+    <dimen name="panel_holder_padding_top">@*android:dimen/status_bar_height</dimen>
 
     <!-- Minimum fraction of the screen that should be taken up by the notification panel. -->
     <item type="dimen" name="notification_panel_min_height_frac">40%</item>

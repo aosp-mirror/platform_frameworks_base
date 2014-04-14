@@ -168,9 +168,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected int mZenMode;
 
-    public IStatusBarService getStatusBarService() {
-        return mBarService;
-    }
+    protected boolean mOnKeyguard;
+    protected View mKeyguardIconOverflowContainer;
+    protected NotificationOverflowIconsView mOverflowIconsView;
 
     public boolean isDeviceProvisioned() {
         return mDeviceProvisioned;
@@ -435,8 +435,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
             if (version > 0 && version < Build.VERSION_CODES.GINGERBREAD) {
                 content.setBackgroundResource(R.drawable.notification_row_legacy_bg);
-            } else {
-                content.setBackgroundResource(com.android.internal.R.drawable.notification_bg);
             }
         }
     }
@@ -1004,7 +1002,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         // Remove the expanded view.
         ViewGroup rowParent = (ViewGroup)entry.row.getParent();
         if (rowParent != null) rowParent.removeView(entry.row);
-        updateExpansionStates();
+        updateRowStates();
         updateNotificationIcons();
 
         return entry.notification;
@@ -1047,7 +1045,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (DEBUG) {
             Log.d(TAG, "addNotificationViews: added at " + pos);
         }
-        updateExpansionStates();
+        updateRowStates();
         updateNotificationIcons();
     }
 
@@ -1055,28 +1053,53 @@ public abstract class BaseStatusBar extends SystemUI implements
         addNotificationViews(createNotificationViews(key, notification));
     }
 
-    protected void updateExpansionStates() {
+    /**
+     * @return The number of notifications we show on Keyguard.
+     */
+    protected abstract int getMaxKeyguardNotifications();
 
-        // TODO: Handle user expansion better
-        int N = mNotificationData.size();
-        for (int i = 0; i < N; i++) {
+    /**
+     * Updates expanded, dimmed and locked states of notification rows.
+     */
+    protected void updateRowStates() {
+        int maxKeyguardNotifications = getMaxKeyguardNotifications();
+        mOverflowIconsView.removeAllViews();
+        int n = mNotificationData.size();
+        int visibleNotifications = 0;
+        for (int i = n-1; i >= 0; i--) {
             NotificationData.Entry entry = mNotificationData.get(i);
-            if (!entry.row.isUserLocked()) {
-                if (i == (N-1)) {
-                    if (DEBUG) Log.d(TAG, "expanding top notification at " + i);
-                    entry.row.setSystemExpanded(true);
-                } else {
-                    if (!entry.row.isUserExpanded()) {
-                        if (DEBUG) Log.d(TAG, "collapsing notification at " + i);
-                        entry.row.setSystemExpanded(false);
-                    } else {
-                        if (DEBUG) Log.d(TAG, "ignoring user-modified notification at " + i);
-                    }
+            if (mOnKeyguard) {
+                entry.row.setSystemExpanded(false);
+            } else {
+                if (!entry.row.isUserLocked()) {
+                    boolean top = (i == n-1);
+                    entry.row.setSystemExpanded(top || entry.row.isUserExpanded());
+                }
+            }
+            entry.row.setDimmed(mOnKeyguard);
+            entry.row.setLocked(mOnKeyguard);
+            boolean showOnKeyguard = shouldShowOnKeyguard(entry.notification);
+            if (mOnKeyguard && (visibleNotifications >= maxKeyguardNotifications
+                    || !showOnKeyguard)) {
+                entry.row.setVisibility(View.GONE);
+                if (showOnKeyguard) {
+                    mOverflowIconsView.addNotification(entry);
                 }
             } else {
-                if (DEBUG) Log.d(TAG, "ignoring notification being held by user at " + i);
+                entry.row.setVisibility(View.VISIBLE);
+                visibleNotifications++;
             }
         }
+
+        if (mOnKeyguard && mOverflowIconsView.getChildCount() > 0) {
+            mKeyguardIconOverflowContainer.setVisibility(View.VISIBLE);
+        } else {
+            mKeyguardIconOverflowContainer.setVisibility(View.GONE);
+        }
+    }
+
+    private boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
+        return sbn.getNotification().priority >= Notification.PRIORITY_LOW;
     }
 
     protected void setZenMode(int mode) {
@@ -1208,7 +1231,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     handleNotificationError(key, notification, "Couldn't update icon: " + ic);
                     return;
                 }
-                updateExpansionStates();
+                updateRowStates();
             }
             catch (RuntimeException e) {
                 // It failed to add cleanly.  Log, and remove the view from the panel.
@@ -1315,7 +1338,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         boolean interrupt = (isFullscreen || (isHighPriority && (isNoisy || hasTicker)))
                 && isAllowed
                 && mPowerManager.isScreenOn()
-                && !keyguard.isShowingAndNotHidden()
+                && !keyguard.isShowingAndNotOccluded()
                 && !keyguard.isInputRestricted();
         try {
             interrupt = interrupt && !mDreamManager.isDreaming();

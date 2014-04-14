@@ -43,7 +43,7 @@ import java.util.List;
 
 public abstract class KeyguardActivityLauncher {
     private static final String TAG = KeyguardActivityLauncher.class.getSimpleName();
-    private static final boolean DEBUG = KeyguardHostView.DEBUG;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String META_DATA_KEYGUARD_LAYOUT = "com.android.keyguard.layout";
     private static final Intent SECURE_CAMERA_INTENT =
             new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE)

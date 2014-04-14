@@ -61,7 +61,7 @@ import java.util.List;
 
 public class KeyguardHostView extends KeyguardViewBase {
     private static final String TAG = "KeyguardHostView";
-    public static boolean DEBUG = KeyguardViewMediator.DEBUG;
+    public static boolean DEBUG = KeyguardConstants.DEBUG;
     public static boolean DEBUGXPORT = true; // debug music transport control
 
     // Transport control states.
@@ -118,7 +118,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         void userActivity();
     }
 
-    /*package*/ interface OnDismissAction {
+    public interface OnDismissAction {
         /* returns true if the dismiss should be deferred */
         boolean onDismiss();
     }
@@ -241,7 +241,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
         }
         @Override
-        void onMusicClientIdChanged(
+        public void onMusicClientIdChanged(
                 int clientGeneration, boolean clearing, android.app.PendingIntent intent) {
             // Set transport state to invisible until we know music is playing (below)
             if (DEBUGXPORT && (mClientGeneration != clientGeneration || clearing)) {
@@ -449,7 +449,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     @Override
-    protected void setLockPatternUtils(LockPatternUtils utils) {
+    public void setLockPatternUtils(LockPatternUtils utils) {
         super.setLockPatternUtils(utils);
         getSecurityContainer().updateSecurityViews(mViewStateManager.isBouncing());
     }

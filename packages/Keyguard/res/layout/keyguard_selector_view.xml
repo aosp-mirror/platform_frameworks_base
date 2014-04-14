@@ -20,7 +20,7 @@
 <!-- This is the selector widget that allows the user to select an action. -->
 <com.android.keyguard.KeyguardSelectorView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
+    xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_selector_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
