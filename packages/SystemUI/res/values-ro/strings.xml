@@ -209,4 +209,9 @@
     <string name="description_target_search" msgid="3091587249776033139">"Căutaţi"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Glisaţi în sus pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Glisaţi spre stânga pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+  <plurals name="zen_mode_notification_title">
+    <item quantity="one" msgid="7809876956258040354">"Notificare ascunsă"</item>
+    <item quantity="other" msgid="7388721375827338153">"%d de notificări ascunse"</item>
+  </plurals>
+    <string name="zen_mode_notification_text" msgid="8336623711388065713">"Atingeți pentru a afișa"</string>
 </resources>

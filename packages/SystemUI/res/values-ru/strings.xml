@@ -213,4 +213,9 @@
     <string name="description_target_search" msgid="3091587249776033139">"Поиск"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Проведите вверх, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Проведите влево, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+  <plurals name="zen_mode_notification_title">
+    <item quantity="one" msgid="7809876956258040354">"Оповещение скрыто"</item>
+    <item quantity="other" msgid="7388721375827338153">"Скрыто оповещений: %d"</item>
+  </plurals>
+    <string name="zen_mode_notification_text" msgid="8336623711388065713">"Нажмите, чтобы открыть"</string>
 </resources>
