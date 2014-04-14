@@ -500,6 +500,7 @@ public class Paint {
 
         mBidiFlags = BIDI_DEFAULT_LTR;
         setTextLocale(Locale.getDefault());
+        setElegantTextHeight(false);
     }
     
     /**
@@ -1219,6 +1220,22 @@ public class Paint {
         mLocale = locale;
         native_setTextLocale(mNativePaint, locale.toString());
     }
+
+    /**
+     * Get the elegant metrics flag.
+     *
+     * @return true if elegant metrics are enabled for text drawing.
+     */
+    public native boolean isElegantTextHeight();
+
+    /**
+     * Set the paint's elegant height metrics flag. This setting selects font
+     * variants that have not been compacted to fit Latin-based vertical
+     * metrics, and also increases top and bottom bounds to provide more space.
+     *
+     * @param elegant set the paint's elegant metrics flag for drawing text.
+     */
+    public native void setElegantTextHeight(boolean elegant);
 
     /**
      * Return the paint's text size.

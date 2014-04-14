@@ -3357,6 +3357,8 @@
         <attr name="shadowDy" format="float" />
         <!-- Radius of the shadow. -->
         <attr name="shadowRadius" format="float" />
+        <!-- Elegant text height, especially for less compacted complex script text. -->
+        <attr name="elegantTextHeight" format="boolean" />
     </declare-styleable>
     <declare-styleable name="TextClock">
         <!-- Specifies the formatting pattern used to show the time and/or date
@@ -3648,6 +3650,8 @@
         <attr name="textIsSelectable" />
         <!-- Present the text in ALL CAPS. This may use a small-caps form when available. -->
         <attr name="textAllCaps" />
+        <!-- Elegant text height, especially for less compacted complex script text. -->
+        <attr name="elegantTextHeight" />
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->

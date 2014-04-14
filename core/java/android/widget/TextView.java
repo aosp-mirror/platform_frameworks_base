@@ -652,6 +652,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         boolean allCaps = false;
         int shadowcolor = 0;
         float dx = 0, dy = 0, r = 0;
+        boolean elegant = false;
 
         final Resources.Theme theme = context.getTheme();
 
@@ -727,6 +728,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 case com.android.internal.R.styleable.TextAppearance_shadowRadius:
                     r = appearance.getFloat(attr, 0);
+                    break;
+
+                case com.android.internal.R.styleable.TextAppearance_elegantTextHeight:
+                    elegant = appearance.getBoolean(attr, false);
                     break;
                 }
             }
@@ -1065,6 +1070,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case com.android.internal.R.styleable.TextView_textAllCaps:
                 allCaps = a.getBoolean(attr, false);
                 break;
+
+            case com.android.internal.R.styleable.TextView_elegantTextHeight:
+                elegant = a.getBoolean(attr, false);
+                break;
             }
         }
         a.recycle();
@@ -1245,6 +1254,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setHighlightColor(textColorHighlight);
         }
         setRawTextSize(textSize);
+        setElegantTextHeight(elegant);
 
         if (allCaps) {
             setTransformationMethod(new AllCapsTransformationMethod(getContext()));
@@ -2468,6 +2478,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setTransformationMethod(new AllCapsTransformationMethod(getContext()));
         }
 
+        if (appearance.hasValue(com.android.internal.R.styleable.TextAppearance_elegantTextHeight)) {
+            setElegantTextHeight(appearance.getBoolean(
+                com.android.internal.R.styleable.TextAppearance_elegantTextHeight, false));
+        }
+
         appearance.recycle();
     }
 
@@ -2612,6 +2627,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public Typeface getTypeface() {
         return mTextPaint.getTypeface();
+    }
+
+    /**
+     * Set the TextView's elegant height metrics flag. This setting selects font
+     * variants that have not been compacted to fit Latin-based vertical
+     * metrics, and also increases top and bottom bounds to provide more space.
+     *
+     * @param elegant set the paint's elegant metrics flag.
+     */
+    public void setElegantTextHeight(boolean elegant) {
+        mTextPaint.setElegantTextHeight(elegant);
     }
 
     /**

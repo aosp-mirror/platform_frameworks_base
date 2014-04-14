@@ -10035,6 +10035,7 @@ package android.graphics {
     method public android.graphics.Xfermode getXfermode();
     method public final boolean isAntiAlias();
     method public final boolean isDither();
+    method public boolean isElegantTextHeight();
     method public final boolean isFakeBoldText();
     method public final boolean isFilterBitmap();
     method public final boolean isLinearText();
@@ -10053,6 +10054,7 @@ package android.graphics {
     method public void setColor(int);
     method public android.graphics.ColorFilter setColorFilter(android.graphics.ColorFilter);
     method public void setDither(boolean);
+    method public void setElegantTextHeight(boolean);
     method public void setFakeBoldText(boolean);
     method public void setFilterBitmap(boolean);
     method public void setFlags(int);
@@ -34903,6 +34905,7 @@ package android.widget {
     method public void setCursorVisible(boolean);
     method public void setCustomSelectionActionModeCallback(android.view.ActionMode.Callback);
     method public final void setEditableFactory(android.text.Editable.Factory);
+    method public void setElegantTextHeight(boolean);
     method public void setEllipsize(android.text.TextUtils.TruncateAt);
     method public void setEms(int);
     method public void setError(java.lang.CharSequence);
