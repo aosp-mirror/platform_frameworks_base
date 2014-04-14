@@ -202,9 +202,9 @@ please see themes_device_defaults.xml.
         <item name="scrollbarTrackVertical">@null</item>
 
         <!-- Text selection handle attributes -->
-        <item name="textSelectHandleLeft">@drawable/text_select_handle_left</item>
-        <item name="textSelectHandleRight">@drawable/text_select_handle_right</item>
-        <item name="textSelectHandle">@drawable/text_select_handle_middle</item>
+        <item name="textSelectHandleLeft">@drawable/text_select_handle_left_quantum</item>
+        <item name="textSelectHandleRight">@drawable/text_select_handle_right_quantum</item>
+        <item name="textSelectHandle">@drawable/text_select_handle_middle_quantum</item>
         <item name="textSelectHandleWindowStyle">@style/Widget.Quantum.TextSelectHandle</item>
         <item name="textSuggestionsWindowStyle">@style/Widget.Quantum.TextSuggestionsPopupWindow</item>
         <item name="textCursorDrawable">@drawable/text_cursor_quantum</item>
@@ -321,7 +321,14 @@ please see themes_device_defaults.xml.
         <item name="segmentedButtonStyle">@style/Widget.Quantum.SegmentedButton</item>
 
         <!-- SearchView attributes -->
-        <item name="searchDropdownBackground">@drawable/search_dropdown_dark</item>
+        <item name="searchDropdownBackground">?attr/colorBackground</item>
+        <item name="searchViewTextField">@drawable/textfield_search_quantum</item>
+        <item name="searchViewTextFieldRight">@drawable/textfield_search_quantum</item>
+        <item name="searchViewCloseIcon">@android:drawable/ic_clear_quantum</item>
+        <item name="searchViewSearchIcon">@android:drawable/ic_search_api_quantum</item>
+        <item name="searchViewGoIcon">@android:drawable/ic_go_search_api_quantum</item>
+        <item name="searchViewVoiceIcon">@android:drawable/ic_voice_search_api_quantum</item>
+        <item name="searchViewEditQuery">@android:drawable/ic_commit_search_api_quantum</item>
 
         <item name="searchDialogTheme">@style/Theme.Quantum.SearchBar</item>
 
@@ -537,9 +544,9 @@ please see themes_device_defaults.xml.
         <item name="scrollbarTrackVertical">@null</item>
 
         <!-- Text selection handle attributes -->
-        <item name="textSelectHandleLeft">@drawable/text_select_handle_left</item>
-        <item name="textSelectHandleRight">@drawable/text_select_handle_right</item>
-        <item name="textSelectHandle">@drawable/text_select_handle_middle</item>
+        <item name="textSelectHandleLeft">@drawable/text_select_handle_left_quantum</item>
+        <item name="textSelectHandleRight">@drawable/text_select_handle_right_quantum</item>
+        <item name="textSelectHandle">@drawable/text_select_handle_middle_quantum</item>
         <item name="textSelectHandleWindowStyle">@style/Widget.Quantum.TextSelectHandle</item>
         <item name="textSuggestionsWindowStyle">@style/Widget.Quantum.Light.TextSuggestionsPopupWindow</item>
         <item name="textCursorDrawable">@drawable/text_cursor_quantum</item>
@@ -659,7 +666,14 @@ please see themes_device_defaults.xml.
         <item name="segmentedButtonStyle">@style/Widget.Quantum.Light.SegmentedButton</item>
 
         <!-- SearchView attributes -->
-        <item name="searchDropdownBackground">@drawable/search_dropdown_light</item>
+        <item name="searchDropdownBackground">?attr/colorBackground</item>
+        <item name="searchViewTextField">@drawable/textfield_search_quantum</item>
+        <item name="searchViewTextFieldRight">@drawable/textfield_search_quantum</item>
+        <item name="searchViewCloseIcon">@android:drawable/ic_clear_quantum</item>
+        <item name="searchViewSearchIcon">@android:drawable/ic_search_api_quantum</item>
+        <item name="searchViewGoIcon">@android:drawable/ic_go_search_api_quantum</item>
+        <item name="searchViewVoiceIcon">@android:drawable/ic_voice_search_api_quantum</item>
+        <item name="searchViewEditQuery">@android:drawable/ic_commit_search_api_quantum</item>
 
         <item name="searchDialogTheme">@style/Theme.Quantum.Light.SearchBar</item>
 
