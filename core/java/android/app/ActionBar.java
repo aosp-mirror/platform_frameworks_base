@@ -1239,6 +1239,8 @@ public abstract class ActionBar {
 
         public LayoutParams(int width, int height, int gravity) {
             super(width, height);
+
+            this.gravity = gravity;
         }
 
         public LayoutParams(int gravity) {
