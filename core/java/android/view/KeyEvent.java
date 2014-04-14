@@ -639,8 +639,13 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * Wakes up the device.  Behaves somewhat like {@link #KEYCODE_POWER} but it
      * has no effect if the device is already awake. */
     public static final int KEYCODE_WAKEUP          = 224;
+    /** Key code constant: Pairing key.
+     * Initiates peripheral pairing mode. Useful for pairing remote control
+     * devices or game controllers, especially if no other input mode is
+     * available. */
+    public static final int KEYCODE_PAIRING         = 225;
 
-    private static final int LAST_KEYCODE = KEYCODE_WAKEUP;
+    private static final int LAST_KEYCODE = KEYCODE_PAIRING;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()

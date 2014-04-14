@@ -30829,6 +30829,7 @@ package android.view {
     field public static final int KEYCODE_P = 44; // 0x2c
     field public static final int KEYCODE_PAGE_DOWN = 93; // 0x5d
     field public static final int KEYCODE_PAGE_UP = 92; // 0x5c
+    field public static final int KEYCODE_PAIRING = 225; // 0xe1
     field public static final int KEYCODE_PERIOD = 56; // 0x38
     field public static final int KEYCODE_PICTSYMBOLS = 94; // 0x5e
     field public static final int KEYCODE_PLUS = 81; // 0x51

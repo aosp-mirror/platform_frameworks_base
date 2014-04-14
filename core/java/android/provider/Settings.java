@@ -773,12 +773,23 @@ public final class Settings {
      * Activity Action: Show Device Name Settings.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard
-     * against ithis.
+     * against this.
      *
      * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String DEVICE_NAME_SETTINGS = "android.settings.DEVICE_NAME";
+
+    /**
+     * Activity Action: Show pairing settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard
+     * against this.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PAIRING_SETTINGS = "android.settings.PAIRING_SETTINGS";
 
     // End of Intent actions for Settings
 
