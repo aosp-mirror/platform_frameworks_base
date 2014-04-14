@@ -65,7 +65,7 @@ public:
     ANDROID_API void setup(int width, int height);
     ANDROID_API void drawDisplayList(RenderNode* displayList,
             int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
-    ANDROID_API void destroyCanvas();
+    ANDROID_API void destroyCanvasAndSurface();
 
     ANDROID_API void invokeFunctor(Functor* functor, bool waitForCompletion);
 

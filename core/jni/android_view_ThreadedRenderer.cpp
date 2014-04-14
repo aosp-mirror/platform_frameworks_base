@@ -121,10 +121,10 @@ static void android_view_ThreadedRenderer_drawDisplayList(JNIEnv* env, jobject c
     proxy->drawDisplayList(displayList, dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
 }
 
-static void android_view_ThreadedRenderer_destroyCanvas(JNIEnv* env, jobject clazz,
+static void android_view_ThreadedRenderer_destroyCanvasAndSurface(JNIEnv* env, jobject clazz,
         jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->destroyCanvas();
+    proxy->destroyCanvasAndSurface();
 }
 
 static void android_view_ThreadedRenderer_invokeFunctor(JNIEnv* env, jobject clazz,
@@ -194,7 +194,7 @@ static JNINativeMethod gMethods[] = {
     { "nPauseSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_pauseSurface },
     { "nSetup", "(JII)V", (void*) android_view_ThreadedRenderer_setup },
     { "nDrawDisplayList", "(JJIIII)V", (void*) android_view_ThreadedRenderer_drawDisplayList },
-    { "nDestroyCanvas", "(J)V", (void*) android_view_ThreadedRenderer_destroyCanvas },
+    { "nDestroyCanvasAndSurface", "(J)V", (void*) android_view_ThreadedRenderer_destroyCanvasAndSurface },
     { "nInvokeFunctor", "(JJZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
     { "nRunWithGlContext", "(JLjava/lang/Runnable;)V", (void*) android_view_ThreadedRenderer_runWithGlContext },
     { "nCreateDisplayListLayer", "(JII)J", (void*) android_view_ThreadedRenderer_createDisplayListLayer },

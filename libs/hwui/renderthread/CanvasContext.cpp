@@ -318,10 +318,10 @@ CanvasContext::CanvasContext(bool translucent)
 }
 
 CanvasContext::~CanvasContext() {
-    destroyCanvas();
+    destroyCanvasAndSurface();
 }
 
-void CanvasContext::destroyCanvas() {
+void CanvasContext::destroyCanvasAndSurface() {
     if (mCanvas) {
         delete mCanvas;
         mCanvas = 0;

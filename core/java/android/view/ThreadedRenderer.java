@@ -67,7 +67,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     void destroy(boolean full) {
         mInitialized = false;
         updateEnabledState(null);
-        nDestroyCanvas(mNativeProxy);
+        nDestroyCanvasAndSurface(mNativeProxy);
     }
 
     private void updateEnabledState(Surface surface) {
@@ -300,7 +300,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nDrawDisplayList(long nativeProxy, long displayList,
             int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
     private static native void nRunWithGlContext(long nativeProxy, Runnable runnable);
-    private static native void nDestroyCanvas(long nativeProxy);
+    private static native void nDestroyCanvasAndSurface(long nativeProxy);
 
     private static native void nInvokeFunctor(long nativeProxy, long functor, boolean waitForCompletion);
 
