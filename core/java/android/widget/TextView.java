@@ -714,19 +714,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     break;
 
                 case com.android.internal.R.styleable.TextAppearance_shadowColor:
-                    shadowcolor = a.getInt(attr, 0);
+                    shadowcolor = appearance.getInt(attr, 0);
                     break;
 
                 case com.android.internal.R.styleable.TextAppearance_shadowDx:
-                    dx = a.getFloat(attr, 0);
+                    dx = appearance.getFloat(attr, 0);
                     break;
 
                 case com.android.internal.R.styleable.TextAppearance_shadowDy:
-                    dy = a.getFloat(attr, 0);
+                    dy = appearance.getFloat(attr, 0);
                     break;
 
                 case com.android.internal.R.styleable.TextAppearance_shadowRadius:
-                    r = a.getFloat(attr, 0);
+                    r = appearance.getFloat(attr, 0);
                     break;
                 }
             }
