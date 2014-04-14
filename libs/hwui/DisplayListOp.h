@@ -286,12 +286,6 @@ public:
 
     int getFlags() const { return mFlags; }
 private:
-    SaveOp() {}
-    DisplayListOp* reinit(int flags) {
-        mFlags = flags;
-        return this;
-    }
-
     int mFlags;
 };
 
@@ -318,12 +312,6 @@ public:
     virtual const char* name() { return "RestoreToCount"; }
 
 private:
-    RestoreToCountOp() {}
-    DisplayListOp* reinit(int count) {
-        mCount = count;
-        return this;
-    }
-
     int mCount;
 };
 
@@ -514,7 +502,6 @@ public:
     }
 
 protected:
-    ClipOp() {}
     virtual bool isRect() { return false; }
 
     SkRegion::Op mOp;
@@ -539,13 +526,6 @@ protected:
     virtual bool isRect() { return true; }
 
 private:
-    ClipRectOp() {}
-    DisplayListOp* reinit(float left, float top, float right, float bottom, SkRegion::Op op) {
-        mOp = op;
-        mArea.set(left, top, right, bottom);
-        return this;
-    }
-
     Rect mArea;
 };
 

@@ -121,29 +121,49 @@ void TextureCache::operator()(const SkBitmap*&, Texture*& texture) {
 // Caching
 ///////////////////////////////////////////////////////////////////////////////
 
-Texture* TextureCache::get(const SkBitmap* bitmap) {
+void TextureCache::resetMarkInUse() {
+    LruCache<const SkBitmap*, Texture*>::Iterator iter(mCache);
+    while (iter.next()) {
+        iter.value()->isInUse = false;
+    }
+}
+
+bool TextureCache::canMakeTextureFromBitmap(const SkBitmap* bitmap) {
+    if (bitmap->width() > mMaxTextureSize || bitmap->height() > mMaxTextureSize) {
+        ALOGW("Bitmap too large to be uploaded into a texture (%dx%d, max=%dx%d)",
+                bitmap->width(), bitmap->height(), mMaxTextureSize, mMaxTextureSize);
+        return false;
+    }
+    return true;
+}
+
+// Returns a prepared Texture* that either is already in the cache or can fit
+// in the cache (and is thus added to the cache)
+Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
     Texture* texture = mCache.get(bitmap);
 
     if (!texture) {
-        if (bitmap->width() > mMaxTextureSize || bitmap->height() > mMaxTextureSize) {
-            ALOGW("Bitmap too large to be uploaded into a texture (%dx%d, max=%dx%d)",
-                    bitmap->width(), bitmap->height(), mMaxTextureSize, mMaxTextureSize);
+        if (!canMakeTextureFromBitmap(bitmap)) {
             return NULL;
         }
 
         const uint32_t size = bitmap->rowBytes() * bitmap->height();
+        bool canCache = size < mMaxSize;
         // Don't even try to cache a bitmap that's bigger than the cache
-        if (size < mMaxSize) {
-            while (mSize + size > mMaxSize) {
+        while (canCache && mSize + size > mMaxSize) {
+            Texture* oldest = mCache.peekOldestValue();
+            if (oldest && !oldest->isInUse) {
                 mCache.removeOldest();
+            } else {
+                canCache = false;
             }
         }
 
-        texture = new Texture();
-        texture->bitmapSize = size;
-        generateTexture(bitmap, texture, false);
+        if (canCache) {
+            texture = new Texture();
+            texture->bitmapSize = size;
+            generateTexture(bitmap, texture, false);
 
-        if (size < mMaxSize) {
             mSize += size;
             TEXTURE_LOGD("TextureCache::get: create texture(%p): name, size, mSize = %d, %d, %d",
                      bitmap, texture->id, size, mSize);
@@ -151,11 +171,37 @@ Texture* TextureCache::get(const SkBitmap* bitmap) {
                 ALOGD("Texture created, size = %d", size);
             }
             mCache.put(bitmap, texture);
-        } else {
-            texture->cleanup = true;
         }
-    } else if (bitmap->getGenerationID() != texture->generation) {
+    } else if (!texture->isInUse && bitmap->getGenerationID() != texture->generation) {
+        // Texture was in the cache but is dirty, re-upload
+        // TODO: Re-adjust the cache size if the bitmap's dimensions have changed
         generateTexture(bitmap, texture, true);
+    }
+
+    return texture;
+}
+
+bool TextureCache::prefetchAndMarkInUse(const SkBitmap* bitmap) {
+    Texture* texture = getCachedTexture(bitmap);
+    if (texture) {
+        texture->isInUse = true;
+    }
+    return texture;
+}
+
+Texture* TextureCache::get(const SkBitmap* bitmap) {
+    Texture* texture = getCachedTexture(bitmap);
+
+    if (!texture) {
+        if (!canMakeTextureFromBitmap(bitmap)) {
+            return NULL;
+        }
+
+        const uint32_t size = bitmap->rowBytes() * bitmap->height();
+        texture = new Texture();
+        texture->bitmapSize = size;
+        generateTexture(bitmap, texture, false);
+        texture->cleanup = true;
     }
 
     return texture;
