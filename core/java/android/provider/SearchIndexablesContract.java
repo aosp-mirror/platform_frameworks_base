@@ -35,7 +35,7 @@ public class SearchIndexablesContract {
     private static final String SETTINGS = "settings";
 
     /**
-     * Indexable references name.
+     * Indexable reference names.
      */
     public static final String INDEXABLES_XML_RES = "indexables_xml_res";
 
@@ -45,7 +45,7 @@ public class SearchIndexablesContract {
     public static final String INDEXABLES_XML_RES_PATH = SETTINGS + "/" + INDEXABLES_XML_RES;
 
     /**
-     * Indexable raw data name.
+     * Indexable raw data names.
      */
     public static final String INDEXABLES_RAW = "indexables_raw";
 
@@ -53,6 +53,16 @@ public class SearchIndexablesContract {
      * ContentProvider path for indexable raw data.
      */
     public static final String INDEXABLES_RAW_PATH = SETTINGS + "/" + INDEXABLES_RAW;
+
+    /**
+     * Non indexable data keys.
+     */
+    public static final String NON_INDEXABLES_KEYS = "non_indexables_key";
+
+    /**
+     * ContentProvider path for non indexable data keys.
+     */
+    public static final String NON_INDEXABLES_KEYS_PATH = SETTINGS + "/" + NON_INDEXABLES_KEYS;
 
     /**
      * Indexable xml resources colums.
@@ -114,6 +124,17 @@ public class SearchIndexablesContract {
     public static final int COLUMN_INDEX_RAW_INTENT_TARGET_CLASS = 11;
     public static final int COLUMN_INDEX_RAW_KEY = 12;
 
+    /**
+     * Indexable raw data colums.
+     */
+    public static final String[] NON_INDEXABLES_KEYS_COLUMNS = new String[] {
+            NonIndexableKey.COLUMN_KEY_VALUE      // 0
+    };
+
+    /**
+     * Non indexable data keys colums indices.
+     */
+    public static final int COLUMN_INDEX_NON_INDEXABLE_KEYS_KEY_VALUE = 0;
 
     /**
      * Constants related to a {@link SearchIndexableResource}.
@@ -183,6 +204,24 @@ public class SearchIndexablesContract {
          * Key associated with the raw data. The key needs to be unique.
          */
         public static final String COLUMN_KEY = "key";
+    }
+
+    /**
+     * Constants related to a {@link SearchIndexableResource} and {@link SearchIndexableData}.
+     *
+     * This is a description of a data (thru its unique key) that cannot be indexed.
+     */
+    public static final class NonIndexableKey extends BaseColumns {
+        private NonIndexableKey() {
+        }
+
+        public static final String MIME_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE +
+                "/" + NON_INDEXABLES_KEYS;
+
+        /**
+         * Key for the non indexable data.
+         */
+        public static final String COLUMN_KEY_VALUE = "key";
     }
 
     /**
