@@ -140,15 +140,18 @@ void RenderProxy::drawDisplayList(RenderNode* displayList,
     mDrawFrameTask.drawFrame(&mRenderThread);
 }
 
-CREATE_BRIDGE1(destroyCanvas, CanvasContext* context) {
-    args->context->destroyCanvas();
+CREATE_BRIDGE1(destroyCanvasAndSurface, CanvasContext* context) {
+    args->context->destroyCanvasAndSurface();
     return NULL;
 }
 
-void RenderProxy::destroyCanvas() {
-    SETUP_TASK(destroyCanvas);
+void RenderProxy::destroyCanvasAndSurface() {
+    SETUP_TASK(destroyCanvasAndSurface);
     args->context = mContext;
-    post(task);
+    // destroyCanvasAndSurface() needs a fence as when it returns the
+    // underlying BufferQueue is going to be released from under
+    // the render thread.
+    postAndWait(task);
 }
 
 CREATE_BRIDGE2(invokeFunctor, CanvasContext* context, Functor* functor) {
