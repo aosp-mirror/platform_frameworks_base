@@ -73,7 +73,7 @@ SkiaShader::SkiaShader(): mCaches(NULL) {
 }
 
 SkiaShader::SkiaShader(Type type, SkShader* key, SkShader::TileMode tileX,
-        SkShader::TileMode tileY, SkMatrix* matrix, bool blend):
+        SkShader::TileMode tileY, const SkMatrix* matrix, bool blend):
         mType(type), mKey(key), mTileX(tileX), mTileY(tileY), mBlend(blend),
         mCaches(NULL) {
     setMatrix(matrix);
@@ -98,6 +98,49 @@ void SkiaShader::bindTexture(Texture* texture, GLenum wrapS, GLenum wrapT) {
 void SkiaShader::computeScreenSpaceMatrix(mat4& screenSpace, const mat4& modelView) {
     screenSpace.loadMultiply(mUnitMatrix, mShaderMatrix);
     screenSpace.multiply(modelView);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Layer shader
+///////////////////////////////////////////////////////////////////////////////
+
+SkiaLayerShader::SkiaLayerShader(Layer* layer, const SkMatrix* matrix):
+        SkiaShader(kBitmap, NULL, SkShader::kClamp_TileMode, SkShader::kClamp_TileMode,
+                matrix, layer->isBlend()), mLayer(layer) {
+    updateLocalMatrix(matrix);
+}
+
+SkiaShader* SkiaLayerShader::copy() {
+    SkiaLayerShader* copy = new SkiaLayerShader();
+    copy->copyFrom(*this);
+    copy->mLayer = mLayer;
+    return copy;
+}
+
+void SkiaLayerShader::describe(ProgramDescription& description, const Extensions& extensions) {
+    description.hasBitmap = true;
+}
+
+void SkiaLayerShader::setupProgram(Program* program, const mat4& modelView,
+        const Snapshot& snapshot, GLuint* textureUnit) {
+    GLuint textureSlot = (*textureUnit)++;
+    Caches::getInstance().activeTexture(textureSlot);
+
+    const float width = mLayer->getWidth();
+    const float height = mLayer->getHeight();
+
+    mat4 textureTransform;
+    computeScreenSpaceMatrix(textureTransform, modelView);
+
+    // Uniforms
+    mLayer->bindTexture();
+    mLayer->setWrap(GL_CLAMP_TO_EDGE);
+    mLayer->setFilter(GL_LINEAR);
+
+    glUniform1i(program->getUniform("bitmapSampler"), textureSlot);
+    glUniformMatrix4fv(program->getUniform("textureTransform"), 1,
+            GL_FALSE, &textureTransform.data[0]);
+    glUniform2f(program->getUniform("textureDimension"), 1.0f / width, 1.0f / height);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

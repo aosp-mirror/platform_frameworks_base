@@ -184,20 +184,15 @@ status_t DisplayListRenderer::drawDisplayList(RenderNode* displayList,
     // dirty is an out parameter and should not be recorded,
     // it matters only when replaying the display list
 
-    // TODO: To be safe, the display list should be ref-counted in the
-    //       resources cache, but we rely on the caller (UI toolkit) to
-    //       do the right thing for now
+    if (displayList->stagingProperties().isProjectionReceiver()) {
+        // use staging property, since recording on UI thread
+        mDisplayListData->projectionReceiveIndex = mDisplayListData->displayListOps.size();
+    }
 
     DrawDisplayListOp* op = new (alloc()) DrawDisplayListOp(displayList,
             flags, *currentTransform());
     addDrawOp(op);
     mDisplayListData->addChild(op);
-
-    if (displayList->stagingProperties().isProjectionReceiver()) {
-        // use staging property, since recording on UI thread
-        mDisplayListData->projectionReceiveIndex = mDisplayListData->displayListOps.size() - 1;
-    }
-
     return DrawGlInfo::kStatusDone;
 }
 

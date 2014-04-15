@@ -287,7 +287,7 @@ static jint android_view_GLES20Canvas_saveLayerClip(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong paintPtr, jint saveFlags) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
-    const android::uirenderer::Rect& bounds(renderer->getClipBounds());
+    const android::uirenderer::Rect& bounds(renderer->getLocalClipBounds());
     return renderer->saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom,
             paint, saveFlags);
 }
@@ -302,7 +302,7 @@ static jint android_view_GLES20Canvas_saveLayerAlpha(JNIEnv* env, jobject clazz,
 static jint android_view_GLES20Canvas_saveLayerAlphaClip(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jint alpha, jint saveFlags) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    const android::uirenderer::Rect& bounds(renderer->getClipBounds());
+    const android::uirenderer::Rect& bounds(renderer->getLocalClipBounds());
     return renderer->saveLayerAlpha(bounds.left, bounds.top, bounds.right, bounds.bottom,
             alpha, saveFlags);
 }
@@ -356,7 +356,7 @@ static jboolean android_view_GLES20Canvas_clipRegion(JNIEnv* env, jobject clazz,
 static jboolean android_view_GLES20Canvas_getClipBounds(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jobject rect) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    const android::uirenderer::Rect& bounds(renderer->getClipBounds());
+    const android::uirenderer::Rect& bounds(renderer->getLocalClipBounds());
 
     env->CallVoidMethod(rect, gRectClassInfo.set,
             int(bounds.left), int(bounds.top), int(bounds.right), int(bounds.bottom));
@@ -870,8 +870,7 @@ static jlong android_view_GLES20Canvas_finishRecording(JNIEnv* env,
     return reinterpret_cast<jlong>(renderer->finishRecording());
 }
 
-static jlong android_view_GLES20Canvas_createDisplayListRenderer(JNIEnv* env,
-        jobject clazz) {
+static jlong android_view_GLES20Canvas_createDisplayListRenderer(JNIEnv* env, jobject clazz) {
     return reinterpret_cast<jlong>(new DisplayListRenderer);
 }
 

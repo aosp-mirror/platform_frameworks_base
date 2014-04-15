@@ -167,7 +167,7 @@ public:
     virtual void concatMatrix(const SkMatrix* matrix) = 0;
 
     // clip
-    virtual const Rect& getClipBounds() const = 0;
+    virtual const Rect& getLocalClipBounds() const = 0;
     virtual bool quickRejectConservative(float left, float top,
             float right, float bottom) const = 0;
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op) = 0;
