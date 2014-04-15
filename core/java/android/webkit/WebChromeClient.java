@@ -296,6 +296,30 @@ public class WebChromeClient {
     public void onGeolocationPermissionsHidePrompt() {}
 
     /**
+     * Notify the host application that web content is requesting permission to
+     * access the specified resources and the permission currently isn't granted
+     * or denied. The host application must invoke {@link PermissionRequest#grant(long)}
+     * or {@link PermissionRequest#deny()}.
+     *
+     * If this method isn't overridden, the permission is denied.
+     *
+     * @param request the PermissionRequest from current web content.
+     * @hide
+     */
+    public void onPermissionRequest(PermissionRequest request) {
+        request.deny();
+    }
+
+    /**
+     * Notify the host application that the given permission request
+     * has been canceled. Any related UI should therefore be hidden.
+     *
+     * @param request the PermissionRequest need be canceled.
+     * @hide
+     */
+    public void onPermissionRequestCanceled(PermissionRequest request) {}
+
+    /**
      * Tell the client that a JavaScript execution timeout has occured. And the
      * client may decide whether or not to interrupt the execution. If the
      * client returns true, the JavaScript will be interrupted. If the client
