@@ -788,13 +788,13 @@ public class LockPatternUtils {
      */
     public int getKeyguardStoredPasswordQuality() {
         int quality =
-                (int) getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+                (int) getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
         // If the user has chosen to use weak biometric sensor, then return the backup locking
         // method and treat biometric as a special case.
         if (quality == DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK) {
             quality =
                 (int) getLong(PASSWORD_TYPE_ALTERNATE_KEY,
-                        DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
         }
         return quality;
     }
@@ -804,7 +804,7 @@ public class LockPatternUtils {
      */
     public boolean usingBiometricWeak() {
         int quality =
-                (int) getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+                (int) getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
         return quality == DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK;
     }
 
@@ -943,11 +943,12 @@ public class LockPatternUtils {
      */
     public boolean isLockPatternEnabled() {
         final boolean backupEnabled =
-                getLong(PASSWORD_TYPE_ALTERNATE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING)
-                == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
+                getLong(PASSWORD_TYPE_ALTERNATE_KEY,
+                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED)
+                                == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 
         return getBoolean(Settings.Secure.LOCK_PATTERN_ENABLED, false)
-                && (getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING)
+                && (getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED)
                         == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING ||
                         (usingBiometricWeak() && backupEnabled));
     }
