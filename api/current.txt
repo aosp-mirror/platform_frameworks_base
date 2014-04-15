@@ -1650,7 +1650,10 @@ package android {
     field public static final int decelerate_cubic = 17563651; // 0x10c0003
     field public static final int decelerate_quad = 17563649; // 0x10c0001
     field public static final int decelerate_quint = 17563653; // 0x10c0005
+    field public static final int fast_out_linear_in = 17563663; // 0x10c000f
+    field public static final int fast_out_slow_in = 17563661; // 0x10c000d
     field public static final int linear = 17563659; // 0x10c000b
+    field public static final int linear_out_slow_in = 17563662; // 0x10c000e
     field public static final int overshoot = 17563656; // 0x10c0008
   }
 
