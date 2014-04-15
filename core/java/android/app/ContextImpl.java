@@ -82,6 +82,7 @@ import android.net.wifi.hotspot.WifiHotspotManager;
 import android.net.wifi.p2p.IWifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.nfc.NfcManager;
+import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -402,6 +403,11 @@ class ContextImpl extends Context {
         registerService(DOWNLOAD_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
                     return new DownloadManager(ctx.getContentResolver(), ctx.getPackageName());
+                }});
+
+        registerService(BATTERY_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return new BatteryManager();
                 }});
 
         registerService(NFC_SERVICE, new ServiceFetcher() {
