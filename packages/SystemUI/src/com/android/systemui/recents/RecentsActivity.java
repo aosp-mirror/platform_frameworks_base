@@ -93,6 +93,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         } else {
             mEmptyView.setVisibility(View.GONE);
+
+            // Un-dim the background
+            WindowManager.LayoutParams wlp = getWindow().getAttributes();
+            wlp.dimAmount = 0f;
+            getWindow().setAttributes(wlp);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         }
     }
 

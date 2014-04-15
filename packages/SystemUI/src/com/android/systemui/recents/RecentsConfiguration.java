@@ -41,7 +41,9 @@ public class RecentsConfiguration {
     public int filteringNewViewsMinAnimDuration;
     public int taskBarEnterAnimDuration;
     public int taskStackScrollDismissInfoPaneDistance;
+    public int taskStackMaxDim;
     public int taskViewInfoPaneAnimDuration;
+    public int taskViewRoundedCornerRadiusPx;
 
     public boolean launchedWithThumbnailAnimation;
 
@@ -85,8 +87,11 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_animate_task_bar_enter_duration);
         taskStackScrollDismissInfoPaneDistance = res.getDimensionPixelSize(
                 R.dimen.recents_task_stack_scroll_dismiss_info_pane_distance);
+        taskStackMaxDim = res.getInteger(R.integer.recents_max_task_stack_view_dim);
         taskViewInfoPaneAnimDuration =
                 res.getInteger(R.integer.recents_animate_task_view_info_pane_duration);
+        taskViewRoundedCornerRadiusPx =
+                res.getDimensionPixelSize(R.dimen.recents_task_view_rounded_corners_radius);
     }
 
     /** Updates the system insets */
