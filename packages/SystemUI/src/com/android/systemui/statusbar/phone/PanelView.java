@@ -334,6 +334,7 @@ public class PanelView extends FrameLayout {
 
         mTimeAnimator = new TimeAnimator();
         mTimeAnimator.setTimeListener(mAnimationCallback);
+        setOnHierarchyChangeListener(mHierarchyListener);
     }
 
     private void loadDimens() {
@@ -630,11 +631,6 @@ public class PanelView extends FrameLayout {
         return mViewName;
     }
 
-    @Override
-    protected void onViewAdded(View child) {
-        if (DEBUG) logf("onViewAdded: " + child);
-    }
-
     public View getHandle() {
         return mHandleView;
     }
@@ -834,4 +830,15 @@ public class PanelView extends FrameLayout {
                 mTimeAnimator, ((mTimeAnimator!=null && mTimeAnimator.isStarted())?" (started)":"")
         ));
     }
+
+    private final OnHierarchyChangeListener mHierarchyListener = new OnHierarchyChangeListener() {
+        @Override
+        public void onChildViewAdded(View parent, View child) {
+            if (DEBUG) logf("onViewAdded: " + child);
+        }
+
+        @Override
+        public void onChildViewRemoved(View parent, View child) {
+        }
+    };
 }
