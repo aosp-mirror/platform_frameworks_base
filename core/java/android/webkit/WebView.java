@@ -25,7 +25,6 @@ import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.net.http.SslCertificate;
 import android.os.Build;
 import android.os.Bundle;
@@ -1638,21 +1637,6 @@ public class WebView extends AbsoluteLayout
     public void setWebChromeClient(WebChromeClient client) {
         checkThread();
         mProvider.setWebChromeClient(client);
-    }
-
-    /**
-     * Preauthorize the given origin to access resources.
-     * This authorization only valid for this WebView instance life cycle and
-     * will not retained.
-     *
-     * @param origin the origin authorized to access resources
-     * @param resources the resource authorized to be accessed by origin.
-     *
-     * @hide
-     */
-    public void preauthorizePermission(Uri origin, long resources) {
-        checkThread();
-        mProvider.preauthorizePermission(origin, resources);
     }
 
     /**
