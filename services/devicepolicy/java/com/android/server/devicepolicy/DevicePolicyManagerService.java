@@ -2905,7 +2905,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try {
                 Intent intent = new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED);
                 intent.putExtra(Intent.EXTRA_USER, new UserHandle(UserHandle.getCallingUserId()));
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY |
+                        Intent.FLAG_RECEIVER_FOREGROUND);
                 mContext.sendBroadcastAsUser(intent, UserHandle.OWNER);
             } finally {
                 restoreCallingIdentity(id);
