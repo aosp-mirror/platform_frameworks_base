@@ -2120,6 +2120,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     log("tryFailover: set mActiveDefaultNetwork=-1, prevNetType=" + prevNetType);
                 }
                 mActiveDefaultNetwork = -1;
+                try {
+                    mNetd.clearDefaultNetId();
+                } catch (Exception e) {
+                    loge("Exception clearing default network :" + e);
+                }
             }
 
             // don't signal a reconnect for anything lower or equal priority than our
@@ -2423,6 +2428,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
             }
             mActiveDefaultNetwork = newNetType;
+            try {
+                mNetd.setDefaultNetId(thisNetId);
+            } catch (Exception e) {
+                loge("Exception setting default network :" + e);
+            }
             // this will cause us to come up initially as unconnected and switching
             // to connected after our normal pause unless somebody reports us as reall
             // disconnected
