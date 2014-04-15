@@ -16,9 +16,15 @@
 
 package android.os;
 
+import android.os.BatteryProperty;
+import android.os.IBatteryPropertiesRegistrar;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+
 /**
  * The BatteryManager class contains strings and constants used for values
- * in the {@link android.content.Intent#ACTION_BATTERY_CHANGED} Intent.
+ * in the {@link android.content.Intent#ACTION_BATTERY_CHANGED} Intent, and
+ * provides a method for querying battery and charging properties.
  */
 public class BatteryManager {
     /**
@@ -121,4 +127,30 @@ public class BatteryManager {
     /** @hide */
     public static final int BATTERY_PLUGGED_ANY =
             BATTERY_PLUGGED_AC | BATTERY_PLUGGED_USB | BATTERY_PLUGGED_WIRELESS;
+
+    private IBatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
+
+    /**
+     * Return the requested battery property.
+     *
+     * @param id identifier from {@link BatteryProperty} of the requested property
+     * @return a {@link BatteryProperty} object that returns the property value, or null on error
+     */
+    public BatteryProperty getProperty(int id) throws RemoteException {
+        if (mBatteryPropertiesRegistrar == null) {
+            IBinder b = ServiceManager.getService("batteryproperties");
+            mBatteryPropertiesRegistrar =
+                IBatteryPropertiesRegistrar.Stub.asInterface(b);
+
+            if (mBatteryPropertiesRegistrar == null)
+                return null;
+        }
+
+        BatteryProperty prop = new BatteryProperty(Integer.MIN_VALUE);
+        if ((mBatteryPropertiesRegistrar.getProperty(id, prop) == 0) &&
+            (prop.getInt() != Integer.MIN_VALUE))
+            return prop;
+        else
+            return null;
+    }
 }

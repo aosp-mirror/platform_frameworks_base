@@ -2009,6 +2009,7 @@ public abstract class Context {
             CAMERA_SERVICE,
             PRINT_SERVICE,
             MEDIA_SESSION_SERVICE,
+            BATTERY_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -2060,6 +2061,8 @@ public abstract class Context {
      * <dd> An {@link android.app.UiModeManager} for controlling UI modes.
      * <dt> {@link #DOWNLOAD_SERVICE} ("download")
      * <dd> A {@link android.app.DownloadManager} for requesting HTTP downloads
+     * <dt> {@link #BATTERY_SERVICE} ("batterymanager")
+     * <dd> A {@link android.os.Battery} for managing battery state
      * </dl>
      *
      * <p>Note:  System services obtained via this API may be closely associated with
@@ -2113,6 +2116,8 @@ public abstract class Context {
      * @see android.app.UiModeManager
      * @see #DOWNLOAD_SERVICE
      * @see android.app.DownloadManager
+     * @see #BATTERY_SERVICE
+     * @see android.os.BatteryManager
      */
     public abstract Object getSystemService(@ServiceName @NonNull String name);
 
@@ -2478,6 +2483,14 @@ public abstract class Context {
      * @see #getSystemService
      */
     public static final String DOWNLOAD_SERVICE = "download";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.os.BatteryManager} for managing battery state.
+     *
+     * @see #getSystemService
+     */
+    public static final String BATTERY_SERVICE = "batterymanager";
 
     /**
      * Use with {@link #getSystemService} to retrieve a
