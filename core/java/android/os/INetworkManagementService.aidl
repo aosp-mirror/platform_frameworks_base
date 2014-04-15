@@ -431,16 +431,13 @@ interface INetworkManagementService
      */
     void removeNetwork(int netId);
 
-    void addDnsServersForNetId(int netId, in String[] servers, in String domains);
-    void removeDnsServersForNetId(int netId, in String[] servers, in String domains);
-
     void addRouteForNetId(int netId, in RouteInfo routeInfo);
     void removeRouteForNetId(int netId, in RouteInfo routeInfo);
 
     void addLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
     void removeLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
 
-    void setDefaultNetId(int netId, boolean resetOldSockets);
+    void setDefaultNetId(int netId);
     void clearDefaultNetId();
 
     void setPermission(boolean internal, boolean changeNetState, in int[] uids);

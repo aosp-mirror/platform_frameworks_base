@@ -1972,34 +1972,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void addDnsServersForNetId(int netId, String[] servers, String domains) {
-        modifyDnsServersForNetId(netId, servers, domains, ADD);
-    }
-
-    @Override
-    public void removeDnsServersForNetId(int netId, String[] servers,
-            String domains) {
-        modifyDnsServersForNetId(netId, servers, domains, REMOVE);
-    }
-
-    private void modifyDnsServersForNetId(int netId, String[] servers,
-            String domains, String action) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
-        final Command cmd = new Command("network", "dns", action, netId, servers.length);
-        for(int i=0; i<servers.length; i++) {
-            cmd.appendArg(servers[i]);
-        }
-        cmd.appendArg((domains == null ? "" : domains));
-
-        try {
-            mConnector.execute(cmd);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
     public void addRouteForNetId(int netId, RouteInfo routeInfo) {
         modifyRouteForNetId(netId, routeInfo, ADD);
     }
@@ -2058,11 +2030,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setDefaultNetId(int netId, boolean resetOldSockets) {
+    public void setDefaultNetId(int netId) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         try {
-            mConnector.execute("network", "default", "set", netId, resetOldSockets);
+            mConnector.execute("network", "default", "set", netId);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
