@@ -116,6 +116,8 @@
     <integer name="recents_animate_task_bar_enter_duration">200</integer>
     <!-- The animation duration for animating in the info pane. -->
     <integer name="recents_animate_task_view_info_pane_duration">150</integer>
+    <!-- The minimum alpha for the dim applied to cards that go deeper into the stack. -->
+    <integer name="recents_max_task_stack_view_dim">96</integer>
 
     <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
      card. -->
