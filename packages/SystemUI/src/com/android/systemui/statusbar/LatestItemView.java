@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -46,7 +45,8 @@ public class LatestItemView extends FrameLayout {
     private float mDownX;
     private float mDownY;
     private final float mTouchSlop;
-    private boolean mHotspotActive;
+
+    private OnActivatedListener mOnActivatedListener;
 
     public LatestItemView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -90,14 +90,17 @@ public class LatestItemView extends FrameLayout {
 
     private boolean handleTouchEventLocked(MotionEvent event) {
         int action = event.getActionMasked();
-        Drawable background = getBackground();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mDownX = event.getX();
                 mDownY = event.getY();
-                if (!mActivated) {
-                    background.setHotspot(0, event.getX(), event.getY());
-                    mHotspotActive = true;
+
+                // Call the listener tentatively directly, even if we don't know whether the user
+                // will stay within the touch slop, as the listener is implemented as a scale
+                // animation, which is cancellable without jarring effects when swiping away
+                // notifications.
+                if (mOnActivatedListener != null) {
+                    mOnActivatedListener.onActivated(this);
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -109,7 +112,7 @@ public class LatestItemView extends FrameLayout {
             case MotionEvent.ACTION_UP:
                 if (isWithinTouchSlop(event)) {
                     if (!mActivated) {
-                        mActivated = true;
+                        makeActive(event.getX(), event.getY());
                         postDelayed(mTapTimeoutRunnable, DOUBLETAP_TIMEOUT_MS);
                     } else {
                         performClick();
@@ -128,17 +131,24 @@ public class LatestItemView extends FrameLayout {
         return true;
     }
 
+    private void makeActive(float x, float y) {
+        getBackground().setHotspot(0, x, y);
+        mActivated = true;
+    }
+
     /**
      * Cancels the hotspot and makes the notification inactive.
      */
     private void makeInactive() {
-        if (mHotspotActive) {
+        if (mActivated) {
             // Make sure that we clear the hotspot from the center.
-            getBackground().setHotspot(0, getWidth()/2, getHeight()/2);
+            getBackground().setHotspot(0, getWidth() / 2, getHeight() / 2);
             getBackground().removeHotspot(0);
-            mHotspotActive = false;
+            mActivated = false;
         }
-        mActivated = false;
+        if (mOnActivatedListener != null) {
+            mOnActivatedListener.onReset(this);
+        }
         removeCallbacks(mTapTimeoutRunnable);
     }
 
@@ -179,5 +189,14 @@ public class LatestItemView extends FrameLayout {
 
     private void updateBackgroundResource() {
         setBackgroundResource(mDimmed ? mDimmedBgResId : mBgResId);
+    }
+
+    public void setOnActivatedListener(OnActivatedListener onActivatedListener) {
+        mOnActivatedListener = onActivatedListener;
+    }
+
+    public interface OnActivatedListener {
+        void onActivated(View view);
+        void onReset(View view);
     }
 }

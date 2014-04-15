@@ -14,7 +14,8 @@
   ~ limitations under the License
   -->
 
-<FrameLayout
+<!-- Extends FrameLayout -->
+<com.android.systemui.statusbar.NotificationOverflowContainer
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -48,4 +49,4 @@
             android:layout_height="wrap_content"
             />
     </com.android.systemui.statusbar.LatestItemView>
-</FrameLayout>
+</com.android.systemui.statusbar.NotificationOverflowContainer>
