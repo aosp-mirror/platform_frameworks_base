@@ -41,7 +41,7 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_gravity="right|top"
-        android:layout_marginTop="@*android:dimen/status_bar_height"
+        android:layout_marginTop="@dimen/status_bar_height"
         android:visibility="gone" />
 
     <LinearLayout
