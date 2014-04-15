@@ -3292,19 +3292,23 @@ public class PackageParser {
         if (packageName == null || packageName.length() == 0) {
             Slog.i(TAG, "verifier package name was null; skipping");
             return null;
-        } else if (encodedPublicKey == null) {
-            Slog.i(TAG, "verifier " + packageName + " public key was null; skipping");
         }
 
-        PublicKey publicKey = parsePublicKey(encodedPublicKey);
-        if (publicKey != null) {
-            return new VerifierInfo(packageName, publicKey);
+        final PublicKey publicKey = parsePublicKey(encodedPublicKey);
+        if (publicKey == null) {
+            Slog.i(TAG, "Unable to parse verifier public key for " + packageName);
+            return null;
         }
 
-        return null;
+        return new VerifierInfo(packageName, publicKey);
     }
 
-    public static final PublicKey parsePublicKey(String encodedPublicKey) {
+    public static final PublicKey parsePublicKey(final String encodedPublicKey) {
+        if (encodedPublicKey == null) {
+            Slog.i(TAG, "Could not parse null public key");
+            return null;
+        }
+
         EncodedKeySpec keySpec;
         try {
             final byte[] encoded = Base64.decode(encodedPublicKey, Base64.DEFAULT);
