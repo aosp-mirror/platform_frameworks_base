@@ -2062,7 +2062,7 @@ public abstract class Context {
      * <dt> {@link #DOWNLOAD_SERVICE} ("download")
      * <dd> A {@link android.app.DownloadManager} for requesting HTTP downloads
      * <dt> {@link #BATTERY_SERVICE} ("batterymanager")
-     * <dd> A {@link android.os.Battery} for managing battery state
+     * <dd> A {@link android.os.BatteryManager} for managing battery state
      * </dl>
      *
      * <p>Note:  System services obtained via this API may be closely associated with
