@@ -462,24 +462,24 @@
              transitions between different window content. -->
         <attr name="windowContentTransitionManager" format="reference" />
 
-        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+        <!-- Reference to a Transition XML resource defining the desired Transition
              used to move Views into the initial Window's content Scene. Corresponds to
              {@link android.view.Window#setEnterTransition(android.transition.Transition)}. -->
         <attr name="windowEnterTransition" format="reference"/>
 
-        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+        <!-- Reference to a Transition XML resource defining the desired Transition
              used to move Views out of the Window's content Scene when launching a new Activity.
              Corresponds to
              {@link android.view.Window#setExitTransition(android.transition.Transition)}. -->
         <attr name="windowExitTransition" format="reference"/>
 
-        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+        <!-- Reference to a Transition XML resource defining the desired Transition
              used to move shared elements transferred into the Window's initial content Scene.
              Corresponds to {@link android.view.Window#setSharedElementEnterTransition(
              android.transition.Transition)}. -->
         <attr name="windowSharedElementEnterTransition" format="reference"/>
 
-        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+        <!-- Reference to a Transition XML resource defining the desired Transition
              used when starting a new Activity to move shared elements prior to transferring
              to the called Activity.
              Corresponds to {@link android.view.Window#setSharedElementExitTransition(

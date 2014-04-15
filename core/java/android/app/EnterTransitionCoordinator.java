@@ -264,7 +264,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator
         mExitTransitionComplete = true;
         exitAfterSharedElementTransition();
         super.onExitTransitionEnd();
-        clearConnections();
     }
 
     @Override
@@ -287,6 +286,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator
                 mActivity.overridePendingTransition(0, 0);
             }
             notifyExitTransitionComplete();
+            clearConnections();
         }
     }
 }

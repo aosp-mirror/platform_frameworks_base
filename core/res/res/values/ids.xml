@@ -84,4 +84,5 @@
   <item type="id" name="scene_layoutid_cache" />
   <item type="id" name="shared_element_name" />
   <item type="id" name="mask" />
+  <item type="id" name="shared_element" />
 </resources>
