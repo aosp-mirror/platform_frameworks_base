@@ -25,7 +25,8 @@ import android.widget.FrameLayout;
 import com.android.internal.widget.SizeAdaptiveLayout;
 import com.android.systemui.R;
 
-public class ExpandableNotificationRow extends FrameLayout {
+public class ExpandableNotificationRow extends FrameLayout
+        implements LatestItemView.OnActivatedListener {
     private int mRowMinHeight;
     private int mRowMaxHeight;
 
@@ -51,6 +52,8 @@ public class ExpandableNotificationRow extends FrameLayout {
     private SizeAdaptiveLayout mPrivateLayout;
     private int mMaxExpandHeight;
     private boolean mMaxHeightNeedsUpdate;
+    private NotificationActivator mActivator;
+    private LatestItemView.OnActivatedListener mOnActivatedListener;
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -62,8 +65,10 @@ public class ExpandableNotificationRow extends FrameLayout {
         mPublicLayout = (SizeAdaptiveLayout) findViewById(R.id.expandedPublic);
         mPrivateLayout = (SizeAdaptiveLayout) findViewById(R.id.expanded);
         mLatestItemView = (LatestItemView) findViewById(R.id.container);
-    }
 
+        mActivator = new NotificationActivator(this);
+        mLatestItemView.setOnActivatedListener(this);
+    }
 
     public void setHeightRange(int rowMinHeight, int rowMaxHeight) {
         mRowMinHeight = rowMinHeight;
@@ -202,6 +207,7 @@ public class ExpandableNotificationRow extends FrameLayout {
      */
     public void setDimmed(boolean dimmed) {
         mLatestItemView.setDimmed(dimmed);
+        mActivator.setDimmed(dimmed);
     }
 
     public int getMaxExpandHeight() {
@@ -218,6 +224,28 @@ public class ExpandableNotificationRow extends FrameLayout {
      */
     public void setLocked(boolean locked) {
         mLatestItemView.setLocked(locked);
+    }
+
+    public void setOnActivatedListener(LatestItemView.OnActivatedListener listener) {
+        mOnActivatedListener = listener;
+    }
+
+    public NotificationActivator getActivator() {
+        return mActivator;
+    }
+
+    @Override
+    public void onActivated(View view) {
+        if (mOnActivatedListener != null) {
+            mOnActivatedListener.onActivated(this);
+        }
+    }
+
+    @Override
+    public void onReset(View view) {
+        if (mOnActivatedListener != null) {
+            mOnActivatedListener.onReset(this);
+        }
     }
 
     /**

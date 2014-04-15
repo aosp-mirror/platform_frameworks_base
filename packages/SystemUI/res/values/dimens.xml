@@ -83,7 +83,7 @@
     <dimen name="notification_mid_height">128dp</dimen>
 
     <!-- Height of a small notification in the status bar plus glow, padding, etc -->
-    <dimen name="notification_row_min_height">70dp</dimen>
+    <dimen name="notification_row_min_height">68dp</dimen>
 
     <!-- Height of a large notification in the status bar plus glow, padding, etc -->
     <dimen name="notification_row_max_height">260dp</dimen>
@@ -98,7 +98,7 @@
     <dimen name="status_bar_icon_padding">0dp</dimen>
 
     <!-- half the distance between notifications in the panel -->
-    <dimen name="notification_divider_height">3dp</dimen>
+    <dimen name="notification_divider_height">2dp</dimen>
 
     <!-- Notification drawer tuning parameters (phone UI) -->
     <!-- Initial velocity of the shade when expanding on its own -->

@@ -83,7 +83,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public abstract class BaseStatusBar extends SystemUI implements
-        CommandQueue.Callbacks {
+        CommandQueue.Callbacks, LatestItemView.OnActivatedListener {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
@@ -169,8 +169,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected int mZenMode;
 
     protected boolean mOnKeyguard;
-    protected View mKeyguardIconOverflowContainer;
-    protected NotificationOverflowIconsView mOverflowIconsView;
+    protected NotificationOverflowContainer mKeyguardIconOverflowContainer;
 
     public boolean isDeviceProvisioned() {
         return mDeviceProvisioned;
@@ -882,6 +881,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         entry.row = row;
         entry.row.setHeightRange(mRowMinHeight, mRowMaxHeight);
+        entry.row.setOnActivatedListener(this);
         entry.content = content;
         entry.expanded = contentViewLocal;
         entry.expandedPublic = publicViewLocal;
@@ -1067,7 +1067,7 @@ public abstract class BaseStatusBar extends SystemUI implements
      */
     protected void updateRowStates() {
         int maxKeyguardNotifications = getMaxKeyguardNotifications();
-        mOverflowIconsView.removeAllViews();
+        mKeyguardIconOverflowContainer.getIconsView().removeAllViews();
         int n = mNotificationData.size();
         int visibleNotifications = 0;
         for (int i = n-1; i >= 0; i--) {
@@ -1087,7 +1087,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     || !showOnKeyguard)) {
                 entry.row.setVisibility(View.GONE);
                 if (showOnKeyguard) {
-                    mOverflowIconsView.addNotification(entry);
+                    mKeyguardIconOverflowContainer.getIconsView().addNotification(entry);
                 }
             } else {
                 entry.row.setVisibility(View.VISIBLE);
@@ -1095,10 +1095,46 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
 
-        if (mOnKeyguard && mOverflowIconsView.getChildCount() > 0) {
+        if (mOnKeyguard && mKeyguardIconOverflowContainer.getIconsView().getChildCount() > 0) {
             mKeyguardIconOverflowContainer.setVisibility(View.VISIBLE);
         } else {
             mKeyguardIconOverflowContainer.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onActivated(View view) {
+        int n = mNotificationData.size();
+        for (int i = 0; i < n; i++) {
+            NotificationData.Entry entry = mNotificationData.get(i);
+            if (entry.row.getVisibility() != View.GONE) {
+                if (view == entry.row) {
+                    entry.row.getActivator().activate();
+                } else {
+                    entry.row.getActivator().activateInverse();
+                }
+            }
+        }
+        if (mKeyguardIconOverflowContainer.getVisibility() != View.GONE) {
+            if (view == mKeyguardIconOverflowContainer) {
+                mKeyguardIconOverflowContainer.getActivator().activate();
+            } else {
+                mKeyguardIconOverflowContainer.getActivator().activateInverse();
+            }
+        }
+    }
+
+    @Override
+    public void onReset(View view) {
+        int n = mNotificationData.size();
+        for (int i = 0; i < n; i++) {
+            NotificationData.Entry entry = mNotificationData.get(i);
+            if (entry.row.getVisibility() != View.GONE) {
+                entry.row.getActivator().reset();
+            }
+        }
+        if (mKeyguardIconOverflowContainer.getVisibility() != View.GONE) {
+            mKeyguardIconOverflowContainer.getActivator().reset();
         }
     }
 

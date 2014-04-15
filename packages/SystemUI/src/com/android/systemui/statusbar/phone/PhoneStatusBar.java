@@ -99,6 +99,7 @@ import com.android.systemui.statusbar.InterceptedNotifications;
 import com.android.systemui.statusbar.LatestItemView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
+import com.android.systemui.statusbar.NotificationOverflowContainer;
 import com.android.systemui.statusbar.NotificationOverflowIconsView;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -519,13 +520,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mStackScroller.setLongPressListener(getNotificationLongClicker());
         mStackScroller.setChildLocationsChangedListener(mOnChildLocationsChangedListener);
 
-        mKeyguardIconOverflowContainer = LayoutInflater.from(mContext).inflate(
-                R.layout.status_bar_notification_keyguard_overflow, mStackScroller, false);
-        ((LatestItemView) mKeyguardIconOverflowContainer.findViewById(R.id.container)).setLocked(true);
-        mOverflowIconsView = (NotificationOverflowIconsView) mKeyguardIconOverflowContainer.findViewById(
-                R.id.overflow_icons_view);
-        mOverflowIconsView.setMoreText(
-                (TextView) mKeyguardIconOverflowContainer.findViewById(R.id.more_text));
+        mKeyguardIconOverflowContainer =
+                (NotificationOverflowContainer) LayoutInflater.from(mContext).inflate(
+                        R.layout.status_bar_notification_keyguard_overflow, mStackScroller, false);
+        mKeyguardIconOverflowContainer.setOnActivatedListener(this);
         mStackScroller.addView(mKeyguardIconOverflowContainer);
 
         mExpandedContents = mStackScroller;
@@ -2876,6 +2874,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private void instantExpandNotificationsPanel() {
         mExpandedVisible = true;
         mNotificationPanel.setExpandedFraction(1);
+    }
+
+    @Override
+    public void onActivated(View view) {
+        userActivity();
+        super.onActivated(view);
     }
 
     @Override
