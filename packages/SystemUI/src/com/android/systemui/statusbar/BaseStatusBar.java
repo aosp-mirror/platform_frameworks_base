@@ -423,9 +423,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
 
-    protected void applyLegacyRowBackground(StatusBarNotification sbn, View content) {
-        if (sbn.getNotification().contentView.getLayoutId() !=
-                com.android.internal.R.layout.notification_template_base) {
+    protected void applyLegacyRowBackground(StatusBarNotification sbn,
+            NotificationData.Entry entry) {
+        if (entry.expanded.getId() != com.android.internal.R.id.status_bar_latest_event_content) {
             int version = 0;
             try {
                 ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(sbn.getPackageName(), 0);
@@ -434,7 +434,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Log.e(TAG, "Failed looking up ApplicationInfo for " + sbn.getPackageName(), ex);
             }
             if (version > 0 && version < Build.VERSION_CODES.GINGERBREAD) {
-                content.setBackgroundResource(R.drawable.notification_row_legacy_bg);
+                entry.row.setBackgroundResource(R.drawable.notification_row_legacy_bg);
+            } else if (version < Build.VERSION_CODES.L) {
+                entry.row.setBackgroundResourceIds(
+                        com.android.internal.R.drawable.notification_bg,
+                        com.android.internal.R.drawable.notification_bg_dim);
             }
         }
     }
@@ -869,8 +873,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         row.setDrawingCacheEnabled(true);
 
-        applyLegacyRowBackground(sbn, content);
-
         if (MULTIUSER_DEBUG) {
             TextView debug = (TextView) row.findViewById(R.id.debug_info);
             if (debug != null) {
@@ -884,6 +886,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         entry.expanded = contentViewLocal;
         entry.expandedPublic = publicViewLocal;
         entry.setBigContentView(bigContentViewLocal);
+
+        applyLegacyRowBackground(sbn, entry);
 
         return true;
     }
