@@ -25,6 +25,7 @@
 
 #include "../RenderNode.h"
 #include "RenderTask.h"
+#include "RenderThread.h"
 
 #define FUNCTOR_PROCESS_DELAY 4
 
@@ -39,15 +40,13 @@ class Layer;
 namespace renderthread {
 
 class GlobalContext;
-class CanvasContext;
-class RenderThread;
 
 // This per-renderer class manages the bridge between the global EGL context
 // and the render surface.
-class CanvasContext {
+class CanvasContext : public IFrameCallback {
 public:
-    CanvasContext(bool translucent);
-    ~CanvasContext();
+    CanvasContext(bool translucent, RenderNode* rootRenderNode);
+    virtual ~CanvasContext();
 
     bool initialize(EGLNativeWindowType window);
     void updateSurface(EGLNativeWindowType window);
@@ -55,8 +54,12 @@ public:
     void setup(int width, int height);
     void makeCurrent();
     void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters, TreeInfo& info);
-    void drawDisplayList(RenderNode* displayList, Rect* dirty);
+    void prepareTree(TreeInfo& info);
+    void draw(Rect* dirty);
     void destroyCanvasAndSurface();
+
+    // IFrameCallback, Chroreographer-driven frame callback entry point
+    virtual void doFrame(nsecs_t frameTimeNanos);
 
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
 
@@ -82,6 +85,8 @@ private:
     bool mOpaque;
     OpenGLRenderer* mCanvas;
     bool mHaveNewSurface;
+
+    const sp<RenderNode> mRootRenderNode;
 };
 
 } /* namespace renderthread */

@@ -23,6 +23,7 @@
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 
+#include <Animator.h>
 #include <DisplayListRenderer.h>
 #include <RenderNode.h>
 
@@ -438,6 +439,25 @@ static jfloat android_view_RenderNode_getPivotY(JNIEnv* env,
     return renderNode->stagingProperties().getPivotY();
 }
 
+// ----------------------------------------------------------------------------
+// RenderProperties - Animations
+// ----------------------------------------------------------------------------
+
+static void android_view_RenderNode_addAnimator(JNIEnv* env, jobject clazz,
+        jlong renderNodePtr, jlong animatorPtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    RenderPropertyAnimator* animator = reinterpret_cast<RenderPropertyAnimator*>(animatorPtr);
+    renderNode->addAnimator(animator);
+}
+
+static void android_view_RenderNode_removeAnimator(JNIEnv* env, jobject clazz,
+        jlong renderNodePtr, jlong animatorPtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    RenderPropertyAnimator* animator = reinterpret_cast<RenderPropertyAnimator*>(animatorPtr);
+    renderNode->removeAnimator(animator);
+}
+
+
 #endif // USE_OPENGL_RENDERER
 
 // ----------------------------------------------------------------------------
@@ -513,6 +533,9 @@ static JNINativeMethod gMethods[] = {
 
     { "nGetPivotX",                "(J)F",  (void*) android_view_RenderNode_getPivotX },
     { "nGetPivotY",                "(J)F",  (void*) android_view_RenderNode_getPivotY },
+
+    { "nAddAnimator",              "(JJ)V", (void*) android_view_RenderNode_addAnimator },
+    { "nRemoveAnimator",           "(JJ)V", (void*) android_view_RenderNode_removeAnimator },
 #endif
 };
 

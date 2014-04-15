@@ -56,14 +56,14 @@ class RenderProxyBridge;
  */
 class ANDROID_API RenderProxy {
 public:
-    ANDROID_API RenderProxy(bool translucent);
+    ANDROID_API RenderProxy(bool translucent, RenderNode* rootNode);
     ANDROID_API virtual ~RenderProxy();
 
     ANDROID_API bool initialize(const sp<ANativeWindow>& window);
     ANDROID_API void updateSurface(const sp<ANativeWindow>& window);
     ANDROID_API void pauseSurface(const sp<ANativeWindow>& window);
     ANDROID_API void setup(int width, int height);
-    ANDROID_API void drawDisplayList(RenderNode* displayList,
+    ANDROID_API void syncAndDrawFrame(
             int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
     ANDROID_API void destroyCanvasAndSurface();
 

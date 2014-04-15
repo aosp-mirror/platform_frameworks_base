@@ -20,6 +20,9 @@
     #define LOG_TAG "OpenGLRenderer"
 #endif
 
+#include <set>
+#include <vector>
+
 #include <SkCamera.h>
 #include <SkMatrix.h>
 
@@ -41,6 +44,7 @@
 #include "DeferredDisplayList.h"
 #include "DisplayList.h"
 #include "RenderProperties.h"
+#include "TreeInfo.h"
 #include "utils/VirtualLightRefBase.h"
 
 class SkBitmap;
@@ -65,17 +69,6 @@ class SaveOp;
 class RestoreToCountOp;
 class DrawDisplayListOp;
 
-struct TreeInfo {
-    TreeInfo()
-            : hasFunctors(false)
-            , prepareTextures(false)
-    {}
-
-    bool hasFunctors;
-    bool prepareTextures;
-    // TODO: Damage calculations? Flag to skip staging pushes for RT animations?
-};
-
 /**
  * Primary class for storing recorded canvas commands, as well as per-View/ViewGroup display properties.
  *
@@ -91,7 +84,7 @@ struct TreeInfo {
 class RenderNode : public VirtualLightRefBase {
 public:
     ANDROID_API RenderNode();
-    ANDROID_API ~RenderNode();
+    ANDROID_API virtual ~RenderNode();
 
     // See flags defined in DisplayList.java
     enum ReplayFlag {
@@ -152,7 +145,19 @@ public:
         return properties().getHeight();
     }
 
-    ANDROID_API void prepareTree(TreeInfo& info);
+    ANDROID_API virtual void prepareTree(TreeInfo& info);
+
+    // UI thread only!
+    ANDROID_API void addAnimator(const sp<RenderPropertyAnimator>& animator) {
+        mStagingAnimators.insert(animator);
+        mNeedsAnimatorsSync = true;
+    }
+
+    // UI thread only!
+    ANDROID_API void removeAnimator(const sp<RenderPropertyAnimator>& animator) {
+        mStagingAnimators.erase(animator);
+        mNeedsAnimatorsSync = true;
+    }
 
 private:
     typedef key_value_pair_t<float, DrawDisplayListOp*> ZDrawDisplayListOpPair;
@@ -214,6 +219,7 @@ private:
 
     void prepareTreeImpl(TreeInfo& info);
     void pushStagingChanges(TreeInfo& info);
+    void evaluateAnimations(TreeInfo& info);
     void prepareSubTree(TreeInfo& info, DisplayListData* subtree);
 
     String8 mName;
@@ -225,6 +231,10 @@ private:
     bool mNeedsDisplayListDataSync;
     DisplayListData* mDisplayListData;
     DisplayListData* mStagingDisplayListData;
+
+    bool mNeedsAnimatorsSync;
+    std::set< sp<RenderPropertyAnimator> > mStagingAnimators;
+    std::vector< sp<RenderPropertyAnimator> > mAnimators;
 
     /**
      * Draw time state - these properties are only set and used during rendering

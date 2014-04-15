@@ -18,6 +18,10 @@
 #define RENDERTHREAD_H_
 
 #include "RenderTask.h"
+
+#include <memory>
+#include <set>
+
 #include <cutils/compiler.h>
 #include <utils/Looper.h>
 #include <utils/Mutex.h>
@@ -25,8 +29,12 @@
 #include <utils/Thread.h>
 
 namespace android {
+class DisplayEventReceiver;
+
 namespace uirenderer {
 namespace renderthread {
+
+class DispatchFrameCallbacks;
 
 class TaskQueue {
 public:
@@ -42,6 +50,15 @@ private:
     RenderTask* mTail;
 };
 
+// Mimics android.view.Choreographer.FrameCallback
+class IFrameCallback {
+public:
+    virtual void doFrame(nsecs_t frameTimeNanos) = 0;
+
+protected:
+    ~IFrameCallback() {}
+};
+
 class ANDROID_API RenderThread : public Thread, public Singleton<RenderThread> {
 public:
     // RenderThread takes complete ownership of tasks that are queued
@@ -50,14 +67,24 @@ public:
     void queueDelayed(RenderTask* task, int delayMs);
     void remove(RenderTask* task);
 
+    // Mimics android.view.Choreographer
+    void postFrameCallback(IFrameCallback* callback);
+    void removeFrameCallback(IFrameCallback* callback);
+
 protected:
     virtual bool threadLoop();
 
 private:
     friend class Singleton<RenderThread>;
+    friend class DispatchFrameCallbacks;
 
     RenderThread();
     virtual ~RenderThread();
+
+    void initializeDisplayEventReceiver();
+    static int displayEventReceiverCallback(int fd, int events, void* data);
+    void drainDisplayEventQueue();
+    void dispatchFrameCallbacks();
 
     // Returns the next task to be run. If this returns NULL nextWakeup is set
     // to the time to requery for the nextTask to run. mNextWakeup is also
@@ -69,6 +96,13 @@ private:
 
     nsecs_t mNextWakeup;
     TaskQueue mQueue;
+
+    DisplayEventReceiver* mDisplayEventReceiver;
+    bool mVsyncRequested;
+    std::set<IFrameCallback*> mFrameCallbacks;
+    bool mFrameCallbackTaskPending;
+    DispatchFrameCallbacks* mFrameCallbackTask;
+    nsecs_t mFrameTime;
 };
 
 } /* namespace renderthread */

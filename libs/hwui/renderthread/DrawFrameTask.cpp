@@ -30,7 +30,7 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-DrawFrameTask::DrawFrameTask() : mContext(0), mRenderNode(0) {
+DrawFrameTask::DrawFrameTask() : mContext(0) {
 }
 
 DrawFrameTask::~DrawFrameTask() {
@@ -55,25 +55,17 @@ void DrawFrameTask::removeLayer(DeferredLayerUpdater* layer) {
     }
 }
 
-void DrawFrameTask::setRenderNode(RenderNode* renderNode) {
-    LOG_ALWAYS_FATAL_IF(!mContext, "Lifecycle violation, there's no context to setRenderNode with!");
-
-    mRenderNode = renderNode;
-}
-
 void DrawFrameTask::setDirty(int left, int top, int right, int bottom) {
     mDirty.set(left, top, right, bottom);
 }
 
 void DrawFrameTask::drawFrame(RenderThread* renderThread) {
-    LOG_ALWAYS_FATAL_IF(!mRenderNode.get(), "Cannot drawFrame with no render node!");
     LOG_ALWAYS_FATAL_IF(!mContext, "Cannot drawFrame with no CanvasContext!");
 
     postAndWait(renderThread);
 
     // Reset the single-frame data
     mDirty.setEmpty();
-    mRenderNode = 0;
 }
 
 void DrawFrameTask::postAndWait(RenderThread* renderThread) {
@@ -88,8 +80,7 @@ void DrawFrameTask::run() {
     bool canUnblockUiThread = syncFrameState();
 
     // Grab a copy of everything we need
-    Rect dirtyCopy(mDirty);
-    sp<RenderNode> renderNode = mRenderNode;
+    Rect dirty(mDirty);
     CanvasContext* context = mContext;
 
     // From this point on anything in "this" is *UNSAFE TO ACCESS*
@@ -97,15 +88,20 @@ void DrawFrameTask::run() {
         unblockUiThread();
     }
 
-    drawRenderNode(context, renderNode.get(), &dirtyCopy);
+    context->draw(&dirty);
 
     if (!canUnblockUiThread) {
         unblockUiThread();
     }
 }
 
-static void prepareTreeInfo(TreeInfo& info) {
+static void initTreeInfo(TreeInfo& info) {
     info.prepareTextures = true;
+    info.performStagingPush = true;
+    info.evaluateAnimations = true;
+    // TODO: Get this from Choreographer
+    nsecs_t frameTimeNs = systemTime(CLOCK_MONOTONIC);
+    info.frameTimeMs = nanoseconds_to_milliseconds(frameTimeNs);
 }
 
 bool DrawFrameTask::syncFrameState() {
@@ -113,9 +109,9 @@ bool DrawFrameTask::syncFrameState() {
     mContext->makeCurrent();
     Caches::getInstance().textureCache.resetMarkInUse();
     TreeInfo info;
-    prepareTreeInfo(info);
+    initTreeInfo(info);
     mContext->processLayerUpdates(&mLayers, info);
-    mRenderNode->prepareTree(info);
+    mContext->prepareTree(info);
     // If prepareTextures is false, we ran out of texture cache space
     return !info.hasFunctors && info.prepareTextures;
 }
@@ -123,16 +119,6 @@ bool DrawFrameTask::syncFrameState() {
 void DrawFrameTask::unblockUiThread() {
     AutoMutex _lock(mLock);
     mSignal.signal();
-}
-
-void DrawFrameTask::drawRenderNode(CanvasContext* context, RenderNode* renderNode, Rect* dirty) {
-    ATRACE_CALL();
-
-    if (dirty->bottom == -1 && dirty->left == -1
-            && dirty->top == -1 && dirty->right == -1) {
-        dirty = 0;
-    }
-    context->drawDisplayList(renderNode, dirty);
 }
 
 } /* namespace renderthread */

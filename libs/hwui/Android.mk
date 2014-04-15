@@ -11,6 +11,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		font/CacheTexture.cpp \
 		font/Font.cpp \
 		AmbientShadow.cpp \
+		Animator.cpp \
 		AssetAtlas.cpp \
 		FontRenderer.cpp \
 		GammaFontRenderer.cpp \
@@ -25,6 +26,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		FboCache.cpp \
 		GradientCache.cpp \
 		Image.cpp \
+		Interpolator.cpp \
 		Layer.cpp \
 		LayerCache.cpp \
 		LayerRenderer.cpp \
@@ -65,6 +67,8 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		$(JNI_H_INCLUDE) \
 		$(LOCAL_PATH)/../../include/utils \
 		external/skia/src/core
+
+	include external/stlport/libstlport.mk
 
 	LOCAL_CFLAGS += -DUSE_OPENGL_RENDERER -DEGL_EGLEXT_PROTOTYPES -DGL_GLEXT_PROTOTYPES
 	LOCAL_CFLAGS += -Wno-unused-parameter
