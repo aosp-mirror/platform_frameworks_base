@@ -26,7 +26,6 @@
 #include <VideoEditorOsal.h>
 #include <VideoEditorLogging.h>
 #include <VideoEditorOsal.h>
-#include <marker.h>
 
 extern "C" {
 #include <M4OSA_Clock.h>
@@ -106,9 +105,6 @@ jobject videoEditProp_getProperties(
     VIDEOEDIT_LOG_API(
             ANDROID_LOG_INFO, "VIDEO_EDITOR_PROPERTIES",
             "videoEditProp_getProperties()");
-
-    // Add a text marker (the condition must always be true).
-    ADD_TEXT_MARKER_FUN(NULL != pEnv)
 
     // Initialize the classes.
     videoEditPropClass_init(&initialized, (JNIEnv*)pEnv);
@@ -192,9 +188,6 @@ jobject videoEditProp_getProperties(
             // dereferencing of pClipProperties).
             if (gotten)
             {
-                // Add a code marker (the condition must always be true).
-                ADD_CODE_MARKER_FUN(NULL != pClipProperties)
-
                 // Log the API call.
                 VIDEOEDIT_LOG_API(
                         ANDROID_LOG_INFO, "VIDEO_EDITOR_PROPERTIES",
@@ -315,9 +308,6 @@ jobject videoEditProp_getProperties(
     // Free the file path.
     videoEditOsal_free(pFile);
     pFile = M4OSA_NULL;
-
-    // Add a text marker (the condition must always be true).
-    ADD_TEXT_MARKER_FUN(NULL != pEnv)
 
     // Return the Properties object.
     return(properties);
