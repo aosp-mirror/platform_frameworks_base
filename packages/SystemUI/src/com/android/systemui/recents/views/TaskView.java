@@ -16,15 +16,22 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.TimeInterpolator;
+import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
 import com.android.systemui.recents.BakedBezierInterpolator;
+import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.Utilities;
 import com.android.systemui.recents.model.Task;
@@ -43,10 +50,15 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
         // public void onTaskViewReboundToTask(TaskView tv, Task t);
     }
 
+    int mDim;
+    int mMaxDim;
+    TimeInterpolator mDimInterpolator = new AccelerateInterpolator();
+
     Task mTask;
     boolean mTaskDataLoaded;
     boolean mTaskInfoPaneVisible;
     Point mLastTouchDown = new Point();
+    Path mRoundedRectClipPath = new Path();
 
     TaskThumbnailView mThumbnailView;
     TaskBarView mBarView;
@@ -68,10 +80,14 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
 
     public TaskView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        setWillNotDraw(false);
     }
 
     @Override
     protected void onFinishInflate() {
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        mMaxDim = config.taskStackMaxDim;
+
         // Bind the views
         mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
         mBarView = (TaskBarView) findViewById(R.id.task_view_bar);
@@ -80,6 +96,18 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
         if (mTaskDataLoaded) {
             onTaskDataLoaded(false);
         }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        // Update the rounded rect clip path
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        float radius = config.taskViewRoundedCornerRadiusPx;
+        mRoundedRectClipPath.reset();
+        mRoundedRectClipPath.addRoundRect(new RectF(0, 0, getMeasuredWidth(), getMeasuredHeight()),
+                radius, radius, Path.Direction.CW);
     }
 
     @Override
@@ -120,6 +148,12 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
                     .setDuration(duration)
                     .setInterpolator(BakedBezierInterpolator.INSTANCE)
                     .withLayer()
+                    .setUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                        @Override
+                        public void onAnimationUpdate(ValueAnimator animation) {
+                            updateDimOverlayFromScale();
+                        }
+                    })
                     .start();
         } else {
             setTranslationY(toTransform.translationY);
@@ -127,6 +161,8 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
             setScaleY(toTransform.scale);
             setAlpha(toTransform.alpha);
         }
+        updateDimOverlayFromScale();
+        invalidate();
     }
 
     /** Resets this view's properties */
@@ -136,6 +172,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
         setScaleX(1f);
         setScaleY(1f);
         setAlpha(1f);
+        invalidate();
     }
 
     /**
@@ -276,6 +313,29 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
     /** Disable the hw layers on this task view */
     void disableHwLayers() {
         mThumbnailView.setLayerType(View.LAYER_TYPE_NONE, null);
+    }
+
+    /** Update the dim as a function of the scale of this view. */
+    void updateDimOverlayFromScale() {
+        float minScale = Constants.Values.TaskStackView.StackPeekMinScale;
+        float scaleRange = 1f - minScale;
+        float dim = (1f - getScaleX()) / scaleRange;
+        dim = mDimInterpolator.getInterpolation(Math.min(dim, 1f));
+        mDim = Math.max(0, Math.min(mMaxDim, (int) (dim * 255)));
+        invalidate();
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        // Apply the rounded rect clip path on the whole view
+        canvas.clipPath(mRoundedRectClipPath);
+
+        super.draw(canvas);
+
+        // Apply the dim if necessary
+        if (mDim > 0) {
+            canvas.drawColor(mDim << 24);
+        }
     }
 
     /**** TaskCallbacks Implementation ****/
