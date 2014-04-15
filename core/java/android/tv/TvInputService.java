@@ -123,7 +123,7 @@ public abstract class TvInputService extends Service {
     public abstract TvInputSessionImpl onCreateSession();
 
     /**
-     * Base class for derived classes to implement to provide {@link TvInputSession}.
+     * Base class for derived classes to implement to provide {@link TvInputManager.Session}.
      */
     public abstract static class TvInputSessionImpl {
         /**
@@ -155,52 +155,35 @@ public abstract class TvInputService extends Service {
          * @return {@code true} the tuning was successful, {@code false} otherwise.
          */
         public abstract boolean onTune(Uri channelUri);
-    }
-
-    /**
-     * Internal implementation of {@link TvInputSession}. This takes care of basic maintenance of
-     * the TV input session but most behavior must be implemented in {@link TvInputSessionImpl}
-     * returned by {@link TvInputService#onCreateSession}.
-     */
-    private static class TvInputSessionImplInternal extends TvInputSession {
-        private final TvInputSessionImpl mSessionImpl;
-
-        public TvInputSessionImplInternal(TvInputSessionImpl sessionImpl) {
-            mSessionImpl = sessionImpl;
-        }
 
         /**
          * This method is called when the application would like to stop using the current input
          * session.
          */
-        @Override
-        public final void release() {
-            mSessionImpl.onRelease();
+        void release() {
+            onRelease();
         }
 
         /**
-         * Calls {@link TvInputSessionImpl#onSetSurface}.
+         * Calls {@link onSetSurface}.
          */
-        @Override
-        public final void setSurface(Surface surface) {
-            mSessionImpl.onSetSurface(surface);
+        void setSurface(Surface surface) {
+            onSetSurface(surface);
             // TODO: Handle failure.
         }
 
         /**
-         * Calls {@link TvInputSessionImpl#onSetVolume}.
+         * Calls {@link onSetVolume}.
          */
-        @Override
-        public final void setVolume(float volume) {
-            mSessionImpl.onSetVolume(volume);
+        void setVolume(float volume) {
+            onSetVolume(volume);
         }
 
         /**
-         * Calls {@link TvInputSessionImpl#onTune}.
+         * Calls {@link onTune}.
          */
-        @Override
-        public final void tune(Uri channelUri) {
-            mSessionImpl.onTune(channelUri);
+        void tune(Uri channelUri) {
+            onTune(channelUri);
             // TODO: Handle failure.
         }
     }
@@ -222,7 +205,7 @@ public abstract class TvInputService extends Service {
                             return;
                         }
                         ITvInputSession stub = new ITvInputSessionWrapper(TvInputService.this,
-                                new TvInputSessionImplInternal(sessionImpl));
+                                sessionImpl);
                         cb.onSessionCreated(stub);
                     } catch (RemoteException e) {
                         Log.e(TAG, "error in onSessionCreated");
