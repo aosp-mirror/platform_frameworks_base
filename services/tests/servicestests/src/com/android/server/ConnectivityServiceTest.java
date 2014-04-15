@@ -165,7 +165,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         // verify that both routes were added and DNS was flushed
         verify(mNetManager).addRoute(eq(MOBILE_IFACE), eq(MOBILE_ROUTE_V4));
         verify(mNetManager).addRoute(eq(MOBILE_IFACE), eq(MOBILE_ROUTE_V6));
-        verify(mNetManager).flushInterfaceDnsCache(MOBILE_IFACE);
+        verify(mNetManager).flushNetworkDnsCache(mMobile.tracker.getNetwork().netId);
 
     }
 
@@ -202,7 +202,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         // verify that wifi routes added, and teardown requested
         verify(mNetManager).addRoute(eq(WIFI_IFACE), eq(WIFI_ROUTE_V4));
         verify(mNetManager).addRoute(eq(WIFI_IFACE), eq(WIFI_ROUTE_V6));
-        verify(mNetManager).flushInterfaceDnsCache(WIFI_IFACE);
+        verify(mNetManager).flushNetworkDnsCache(mWifi.tracker.getNetwork().netId);
         verify(mMobile.tracker).teardown();
 
         reset(mNetManager, mMobile.tracker);
