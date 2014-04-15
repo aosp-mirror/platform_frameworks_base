@@ -15,7 +15,9 @@
   ~ limitations under the License
   -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#ffcccccc" />
-    <corners android:radius="2dp" />
-</shape>
+<touch-feedback
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:tint="#ff444444"
+    >
+    <item android:drawable="@drawable/notification_bg_normal" />
+</touch-feedback>

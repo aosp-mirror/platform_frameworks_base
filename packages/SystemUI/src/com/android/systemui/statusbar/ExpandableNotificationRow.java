@@ -219,4 +219,14 @@ public class ExpandableNotificationRow extends FrameLayout {
     public void setLocked(boolean locked) {
         mLatestItemView.setLocked(locked);
     }
+
+    /**
+     * Sets the resource id for the background of this notification.
+     *
+     * @param bgResId The background resource to use in normal state.
+     * @param dimmedBgResId The background resource to use in dimmed state.
+     */
+    public void setBackgroundResourceIds(int bgResId, int dimmedBgResId) {
+        mLatestItemView.setBackgroundResourceIds(bgResId, dimmedBgResId);
+    }
 }

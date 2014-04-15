@@ -25,12 +25,17 @@ import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 
+import com.android.internal.R;
+
 public class LatestItemView extends FrameLayout {
 
     private static final long DOUBLETAP_TIMEOUT_MS = 1000;
 
     private boolean mDimmed;
     private boolean mLocked;
+
+    private int mBgResId = R.drawable.notification_quantum_bg;
+    private int mDimmedBgResId = R.drawable.notification_quantum_bg_dim;
 
     /**
      * Flag to indicate that the notification has been touched once and the second touch will
@@ -148,11 +153,7 @@ public class LatestItemView extends FrameLayout {
     public void setDimmed(boolean dimmed) {
         if (mDimmed != dimmed) {
             mDimmed = dimmed;
-            if (dimmed) {
-                setBackgroundResource(com.android.internal.R.drawable.notification_quantum_bg_dim);
-            } else {
-                setBackgroundResource(com.android.internal.R.drawable.notification_quantum_bg);
-            }
+            updateBackgroundResource();
         }
     }
 
@@ -162,5 +163,21 @@ public class LatestItemView extends FrameLayout {
      */
     public void setLocked(boolean locked) {
         mLocked = locked;
+    }
+
+    /**
+     * Sets the resource id for the background of this notification.
+     *
+     * @param bgResId The background resource to use in normal state.
+     * @param dimmedBgResId The background resource to use in dimmed state.
+     */
+    public void setBackgroundResourceIds(int bgResId, int dimmedBgResId) {
+        mBgResId = bgResId;
+        mDimmedBgResId = dimmedBgResId;
+        updateBackgroundResource();
+    }
+
+    private void updateBackgroundResource() {
+        setBackgroundResource(mDimmed ? mDimmedBgResId : mBgResId);
     }
 }
