@@ -24,7 +24,6 @@
 #include <VideoEditorJava.h>
 #include <VideoEditorOsal.h>
 #include <VideoEditorLogging.h>
-#include <marker.h>
 #include <VideoEditorClasses.h>
 #include <VideoEditorThumbnailMain.h>
 #include <M4OSA_Debug.h>
@@ -438,7 +437,7 @@ static void jniPreviewProgressCallback (void* cookie, M4OSA_UInt32 msgType,
                                     M4VS, (M4OSA_Char*)"videoEdito JNI overlayFile");
             if (pContext->mOverlayFileName != NULL) {
                 strncpy (pContext->mOverlayFileName,
-                    (const char*)pContext->pEditSettings->\
+                    (const char*)pContext->pEditSettings->
                     Effects[overlayEffectIndex].xVSS.pFramingFilePath, overlayFileNameLen);
                 //Change the name to png file
                 extPos = strstr(pContext->mOverlayFileName, ".rgb");
@@ -1560,9 +1559,6 @@ videoEditor_populateSettings(
     int *pOverlayIndex = M4OSA_NULL;
     M4OSA_Char* pTempChar = M4OSA_NULL;
 
-    // Add a code marker (the condition must always be true).
-    ADD_CODE_MARKER_FUN(NULL != pEnv)
-
     // Validate the settings parameter.
     videoEditJava_checkAndThrowIllegalArgumentException(&needToBeLoaded, pEnv,
                                                 (NULL == settings),
@@ -2196,10 +2192,6 @@ static jint videoEditor_getPixels(
     M4OSA_Context   mContext = M4OSA_NULL;
     jint*           m_dst32 = M4OSA_NULL;
 
-
-    // Add a text marker (the condition must always be true).
-    ADD_TEXT_MARKER_FUN(NULL != env)
-
     const char *pString = env->GetStringUTFChars(path, NULL);
     if (pString == M4OSA_NULL) {
         if (env != NULL) {
@@ -2536,9 +2528,6 @@ videoEditor_init(
     M4OSA_ERR             result                 = M4NO_ERROR;
 
     VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEO_EDITOR", "videoEditor_init()");
-
-    // Add a text marker (the condition must always be true).
-    ADD_TEXT_MARKER_FUN(NULL != pEnv)
 
     // Get the context.
     pContext = (ManualEditContext*)videoEditClasses_getContext(&initialized, pEnv, thiz);
@@ -2948,9 +2937,6 @@ videoEditor_loadSettings(
 
     VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEO_EDITOR", "videoEditor_loadSettings()");
 
-    // Add a code marker (the condition must always be true).
-    ADD_CODE_MARKER_FUN(NULL != pEnv)
-
     // Get the context.
     pContext = (ManualEditContext*)videoEditClasses_getContext(&needToBeLoaded,
                                                                 pEnv, thiz);
@@ -3122,9 +3108,6 @@ videoEditor_release(
     M4OSA_ERR          result   = M4NO_ERROR;
 
     VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEO_EDITOR", "videoEditor_release()");
-
-    // Add a text marker (the condition must always be true).
-    ADD_TEXT_MARKER_FUN(NULL != pEnv)
 
     // Get the context.
     pContext = (ManualEditContext*)videoEditClasses_getContext(&released, pEnv, thiz);
@@ -3633,15 +3616,9 @@ jint JNI_OnLoad(
 
     VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR", "JNI_OnLoad()");
 
-    // Add a text marker (the condition must always be true).
-    ADD_TEXT_MARKER_FUN(NULL != pVm)
-
     // Check the JNI version.
     if (pVm->GetEnv(&pEnv, JNI_VERSION_1_4) == JNI_OK)
     {
-        // Add a code marker (the condition must always be true).
-        ADD_CODE_MARKER_FUN(NULL != pEnv)
-
         // Register the manual edit JNI methods.
         if (videoEditor_registerManualEditMethods((JNIEnv*)pEnv) == 0)
         {
