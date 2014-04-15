@@ -8,7 +8,7 @@ page.title=GCM Cloud Connection Server (XMPP)
 <h2>In this document</h2>
 
 <ol class="toc">
-  <li><a href="#usage">How to Use CCS</a>
+  <li><a href="#connecting">Establishing a Connection</a>
     <ol class="toc">
       <li><a href="#auth">Authentication</a></li>
       </ol>
@@ -46,19 +46,20 @@ target="_android">CCS and User Notifications Signup Form</a></li>
 <p class="note"><strong>Note:</strong> To try out this feature, sign up using
 <a href="https://services.google.com/fb/forms/gcm/">this form</a>.</p>
 
-<p>The GCM Cloud Connection Server (CCS) is a connection server based on XMPP.
-CCS allows 3rd-party app servers (which you're
-responsible for implementing) to communicate
-with Android devices by  establishing a persistent TCP connection with Google
-servers using the XMPP protocol. This communication is asynchronous and bidirectional.</p>
+<p>The GCM Cloud Connection Server (CCS) is an XMPP endpoint that provides a
+persistent, asynchronous, bidirectional connection to Google servers. The
+connection can be used to send and receive messages between your server and
+your users' GCM-connected devices.</p>
+
 <p>You can continue to use the HTTP request mechanism to send messages to GCM
 servers, side-by-side with CCS which uses XMPP. Some of the benefits of CCS include:</p>
+
 <ul>
   <li>The asynchronous nature of XMPP allows you to send more messages with fewer
 resources.</li>
-  <li>Communication is bidirectional&mdash;not only can the server send messages
-to the device, but the device can send messages back to the server.</li>
-<li>You can send messages back using the same connection used for receiving,
+  <li>Communication is bidirectional&mdash;not only can your server send messages
+to the device, but the device can send messages back to your server.</li>
+  <li>The device can send messages back using the same connection used for receiving,
 thereby improving battery life.</li>
 </ul>
 
@@ -73,22 +74,34 @@ APIs. For examples, see
 <a href="server.html#params">Implementing GCM Server</a> for a list of all the message
 parameters and which connection server(s) supports them.</p>
 
+<h2 id="connecting">Establishing a Connection</h2>
 
-<h2 id="usage">How to Use CCS</h2>
+<p>CCS just uses XMPP as an authenticated transport layer, so you can use most
+XMPP libraries to manage the connection. For an example, see <a href="#smack">
+Java sample using the Smack library</a>.</p>
 
-<p>GCM Cloud Connection Server (CCS) is an XMPP endpoint, running on
-{@code http://gcm.googleapis.com} port 5235.</p>
+<p>The CCS XMPP endpoint runs at {@code gcm.googleapis.com:5235}. When testing
+functionality (with non-production users), you should instead connect to
+{@code gcm-staging.googleapis.com:5236} (note the different port). Testing on
+staging (a smaller environment where the latest CCS builds run) is beneficial
+both for isolating real users from test code, as well as for early detection of
+unexpected behavior changes.</p>
 
-<p>CCS requires a Transport Layer Security (TLS) connection. That means the  XMPP
-client must initiate a TLS connection.
-For example in Java, you would call {@code setSocketFactory(SSLSocketFactory)}.</p>
+<p>The connection has two important requirements:</p>
 
-<p>CCS requires a SASL PLAIN authentication mechanism using
-{@code &lt;your_GCM_Sender_Id&gt;&#64;gcm.googleapis.com} (GCM sender ID) and the
-API key as the password, where the sender ID and API key are the same as described
-in <a href="gs.html">Getting Started</a>.</p>
+<ul>
+  <li>You must initiate a Transport Layer Security (TLS) connection. Note that
+  CCS doesn't currently support the <a href="http://xmpp.org/rfcs/rfc3920.html"
+  class="external-link" target="_android">STARTTLS extension</a>.</li>
+  <li>CCS requires a SASL PLAIN authentication mechanism using
+  {@code &lt;your_GCM_Sender_Id&gt;&#64;gcm.googleapis.com} (GCM sender ID)
+  and the API key as the password, where the sender ID and API key are the same
+  as described in <a href="gs.html">Getting Started</a>.</li>
+</ul>
 
-<p> You can use most XMPP libraries to interact with CCS.</p>
+<p>If at any point the connection fails, you should immediately reconnect.
+There is no need to back off after a disconnect that happens after
+authentication.</p>
 
 <h3 id="auth">Authentication</h3>
 
@@ -100,11 +113,11 @@ in <a href="gs.html">Getting Started</a>.</p>
 </pre>
 <h4>Server</h4>
 <pre>&lt;str:features xmlns:str=&quot;http://etherx.jabber.org/streams&quot;&gt;
- &lt;mechanisms xmlns=&quot;urn:ietf:params:xml:ns:xmpp-sasl&quot;&gt;
-   &lt;mechanism&gt;X-OAUTH2&lt;/mechanism&gt;
-   &lt;mechanism&gt;X-GOOGLE-TOKEN&lt;/mechanism&gt;
-   &lt;mechanism&gt;PLAIN&lt;/mechanism&gt;
- &lt;/mechanisms&gt;
+ &lt;mechanisms xmlns=&quot;urn:ietf:params:xml:ns:xmpp-sasl&quot;&gt;
+   &lt;mechanism&gt;X-OAUTH2&lt;/mechanism&gt;
+   &lt;mechanism&gt;X-GOOGLE-TOKEN&lt;/mechanism&gt;
+   &lt;mechanism&gt;PLAIN&lt;/mechanism&gt;
+ &lt;/mechanisms&gt;
 &lt;/str:features&gt;
 </pre>
 
@@ -118,16 +131,18 @@ mFTeUIzcmNaTmtmbnFLZEZiOW1oekNCaVlwT1JEQTJKV1d0dw==&lt;/auth&gt;
 <pre>&lt;success xmlns=&quot;urn:ietf:params:xml:ns:xmpp-sasl&quot;/&gt;</pre>
 
 <h2 id="format">Message Format</h2>
-<p>CCS uses normal XMPP <code>&lt;message&gt;</code> stanzas. The body of the message must be:
-</p>
+<p>Once the XMPP connection is established, CCS and your server use normal XMPP
+<code>&lt;message&gt;</code> stanzas to send JSON-encoded messages back and
+forth. The body of the <code>&lt;message&gt;</code> must be:</p>
 <pre>
 &lt;gcm xmlns:google:mobile:data&gt;
     <em>JSON payload</em>
 &lt;/gcm&gt;
 </pre>
 
-<p>The JSON payload for server-to-device is similar to what the GCM http endpoint
-uses, with these exceptions:</p>
+<p>The JSON payload for regular GCM messages is similar to
+<a href="http.html#request">what the GCM http endpoint uses</a>, with these
+exceptions:</p>
 <ul>
   <li>There is no support for multiple recipients.</li>
   <li>{@code to} is used instead of {@code registration_ids}.</li>
@@ -136,14 +151,13 @@ identifies the message in an XMPP connection. The ACK or NACK from CCS uses the
 {@code message_id} to identify a message sent from 3rd-party app servers to CCS.
 Therefore, it's important that this {@code message_id} not only be unique, but
 always present.</li>
-
-<li>For ACK/NACK messages that are special control messages, you also need to
-include a {@code message_type} field in the JSON message. The value can be either
-'ack' or 'nack'. For example:
-
-<pre>message_type = ('ack');</pre>
-  </li>
 </ul>
+
+<p>In addition to regular GCM messages, control messages are sent, indicated by
+the {@code message_type} field in the JSON object. The value can be either
+'ack' or 'nack', or 'control' (see formats below). Any GCM message with an
+unknown {@code message_type} can be ignored by your server.</p>
+
 <p>For each device message your app server receives from CCS, it needs to send
 an ACK message.
 It never needs to send a NACK message. If you don't send an ACK for a message,
@@ -251,7 +265,9 @@ message is &quot;nack&quot;. A NACK message contains:</p>
 &lt;/message&gt;</pre>
 
 
-<p>The following table lists some of the more common NACK error codes.</p>
+<p>The following table lists NACK error codes. Unless otherwise
+indicated, a NACKed message should not be retried. Unexpected NACK error codes
+should be treated the same as {@code INTERNAL_SERVER_ERROR}.</p>
 
 <p class="table-caption" id="table1">
   <strong>Table 1.</strong> NACK error codes.</p>
@@ -262,8 +278,17 @@ message is &quot;nack&quot;. A NACK message contains:</p>
 <th>Description</th>
 </tr>
 <tr>
+<td>{@code BAD_ACK}</td>
+<td>The ACK message is improperly formed.</td>
+</tr>
+<tr>
 <td>{@code BAD_REGISTRATION}</td>
-<td>The device has a registration ID, but it's invalid.</td>
+<td>The device has a registration ID, but it's invalid or expired.</td>
+</tr>
+<tr>
+<td>{@code CONNECTION_DRAINING}</td>
+<td>The message couldn't be processed because the connection is draining. The
+message should be immediately retried over another connection.</td>
 </tr>
 <tr>
 <td>{@code DEVICE_UNREGISTERED}</td>
@@ -274,25 +299,20 @@ message is &quot;nack&quot;. A NACK message contains:</p>
 <td>The server encountered an error while trying to process the request.</td>
 </tr>
 <tr>
+<td>{@code INVALID_JSON}</td>
+<td>The JSON message payload was not valid.</td>
+</tr>
+<tr>
+<td>{@code QUOTA_EXCEEDED}</td>
+<td>The rate of messages to a particular registration ID (in other words, to a
+sender/device pair) is too high. If you want to retry the message, try using a slower
+rate.</td>
+</tr>
+<tr>
 <td>{@code SERVICE_UNAVAILABLE}</td>
-<td>The CCS connection server is temporarily unavailable, try again later
-(using exponential backoff, etc.).</td>
-</tr>
-<tr>
-<td>{@code BAD_ACK}</td>
-<td>The ACK message is improperly formed.</td>
-</tr>
-<tr>
-<td>{@code AUTHENTICATION_FAILED}</td>
-<td>This is a 401 error indicating that there was an error authenticating the sender account.</td>
-</tr>
-<tr>
-<td>{@code INVALID_TTL}</td>
-<td>There was an error in the supplied "time to live" value.</td>
-</tr>
-<tr>
-<td>{@code JSON_TYPE_ERROR}</td>
-<td>There was an error in the supplied JSON data type.</td>
+<td>CCS is not currently able to process the message. The
+message should be retried over the same connection using exponential backoff
+with an initial delay of 1 second.</td>
 </tr>
 </table>
 
@@ -319,6 +339,28 @@ A stanza error contains:</p>
 &lt;/message&gt;
 </pre>
 
+<h4 id="control">Control messages</h4>
+
+<p>Periodically, CCS needs to close down a connection to perform load balancing. Before it
+closes the connection, CCS sends a {@code CONNECTION_DRAINING} message to indicate that the connection is being drained
+and will be closed soon. "Draining" refers to shutting off the flow of messages coming into a
+connection, but allowing whatever is already in the pipeline to continue. When you receive
+a {@code CONNECTION_DRAINING} message, you should immediately begin sending messages to another CCS
+connection, opening a new connection if necessary. You should, however, keep the original
+connection open and continue receiving messages that may come over the connection (and
+ACKing them)&mdash;CCS will handle initiating a connection close when it is ready.</p>
+
+<p>The {@code CONNECTION_DRAINING} message looks like this:</p>
+<pre>&lt;message&gt;
+  &lt;data:gcm xmlns:data=&quot;google:mobile:data&quot;&gt;
+  {
+    &quot;message_type&quot;:&quot;control&quot;
+    &quot;control_type&quot;:&quot;CONNECTION_DRAINING&quot;
+  }
+  &lt;/data:gcm&gt;
+&lt;/message&gt;</pre>
+
+<p>{@code CONNECTION_DRAINING} is currently the only {@code control_type} supported.</p>
 
 <h2 id="upstream">Upstream Messages</h2>
 
@@ -381,7 +423,7 @@ response to the above message:</p>
 
 <p>Every message sent to CCS receives either an ACK or a NACK response. Messages
 that haven't received one of these responses are considered pending. If the pending
-message count reaches 1000, the 3rd-party app server should stop sending new messages
+message count reaches 100, the 3rd-party app server should stop sending new messages
 and wait for CCS to acknowledge some of the existing pending messages as illustrated in
 figure 1:</p>
 
@@ -395,7 +437,7 @@ figure 1:</p>
 if there are too many unacknowledged messages. Therefore, the 3rd-party app server
 should "ACK" upstream messages, received from the client application via CCS, as soon as possible
 to maintain a constant flow of incoming messages. The aforementioned pending message limit doesn't
-apply to these ACKs. Even if the pending message count reaches 1000, the 3rd-party app server
+apply to these ACKs. Even if the pending message count reaches 100, the 3rd-party app server
 should continue sending ACKs for messages received from CCS to avoid blocking delivery of new
 upstream messages.</p>
 
@@ -795,7 +837,7 @@ USERNAME = "Your GCM Sender Id"
 PASSWORD = "API Key"
 REGISTRATION_ID = "Registration Id of the target device"
 
-unacked_messages_quota = 1000
+unacked_messages_quota = 100
 send_queue = []
 
 # Return a random alphanumerical id
