@@ -27,7 +27,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.Interpolator;
@@ -2395,6 +2394,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int PFLAG3_FITTING_SYSTEM_WINDOWS = 0x100;
 
+    /**
+     * Flag indicating that nested scrolling is enabled for this view.
+     * The view will optionally cooperate with views up its parent chain to allow for
+     * integrated nested scrolling along the same axis.
+     */
+    static final int PFLAG3_NESTED_SCROLLING_ENABLED = 0x200;
+
     /* End of masks for mPrivateFlags3 */
 
     static final int DRAG_MASK = PFLAG2_DRAG_CAN_ACCEPT | PFLAG2_DRAG_HOVERED;
@@ -2845,6 +2851,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #onScreenStateChanged(int)
      */
     public static final int SCREEN_STATE_ON = 0x1;
+
+    /**
+     * Indicates no axis of view scrolling.
+     */
+    public static final int SCROLL_AXIS_NONE = 0;
+
+    /**
+     * Indicates scrolling along the horizontal axis.
+     */
+    public static final int SCROLL_AXIS_HORIZONTAL = 1 << 0;
+
+    /**
+     * Indicates scrolling along the vertical axis.
+     */
+    public static final int SCROLL_AXIS_VERTICAL = 1 << 1;
 
     /**
      * Controls the over-scroll mode for this view.
@@ -3473,6 +3494,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     ViewOverlay mOverlay;
 
     /**
+     * The currently active parent view for receiving delegated nested scrolling events.
+     * This is set by {@link #startNestedScroll(int)} during a touch interaction and cleared
+     * by {@link #stopNestedScroll()} at the same point where we clear
+     * requestDisallowInterceptTouchEvent.
+     */
+    private ViewParent mNestedScrollingParent;
+
+    /**
      * Consistency verifier for debugging purposes.
      * @hide
      */
@@ -3481,6 +3510,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     new InputEventConsistencyVerifier(this, 0) : null;
 
     private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
+
+    private int[] mTempNestedScrollConsumed;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -3962,6 +3993,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case R.styleable.View_sharedElementName:
                     setSharedElementName(a.getString(attr));
+                    break;
+                case R.styleable.View_nestedScrollingEnabled:
+                    setNestedScrollingEnabled(a.getBoolean(attr, false));
                     break;
             }
         }
@@ -7976,27 +8010,46 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return True if the event was handled by the view, false otherwise.
      */
     public boolean dispatchTouchEvent(MotionEvent event) {
+        boolean result = false;
+
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onTouchEvent(event, 0);
+        }
+
+        final int actionMasked = event.getActionMasked();
+        if (actionMasked == MotionEvent.ACTION_DOWN) {
+            // Defensive cleanup for new gesture
+            stopNestedScroll();
         }
 
         if (onFilterTouchEventForSecurity(event)) {
             //noinspection SimplifiableIfStatement
             ListenerInfo li = mListenerInfo;
-            if (li != null && li.mOnTouchListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
+            if (li != null && li.mOnTouchListener != null
+                    && (mViewFlags & ENABLED_MASK) == ENABLED
                     && li.mOnTouchListener.onTouch(this, event)) {
-                return true;
+                result = true;
             }
 
-            if (onTouchEvent(event)) {
-                return true;
+            if (!result && onTouchEvent(event)) {
+                result = true;
             }
         }
 
-        if (mInputEventConsistencyVerifier != null) {
+        if (!result && mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onUnhandledEvent(event, 0);
         }
-        return false;
+
+        // Clean up after nested scrolls if this is the end of a gesture;
+        // also cancel it if we tried an ACTION_DOWN but we didn't want the rest
+        // of the gesture.
+        if (actionMasked == MotionEvent.ACTION_UP ||
+                actionMasked == MotionEvent.ACTION_CANCEL ||
+                (actionMasked == MotionEvent.ACTION_DOWN && !result)) {
+            stopNestedScroll();
+        }
+
+        return result;
     }
 
     /**
@@ -12735,6 +12788,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         removeLongPressCallback();
         removePerformClickCallback();
         removeSendViewScrolledAccessibilityEventCallback();
+        stopNestedScroll();
 
         destroyDrawingCache();
         destroyLayer(false);
@@ -17898,6 +17952,245 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             throw new IllegalArgumentException("Invalid overscroll mode " + overScrollMode);
         }
         mOverScrollMode = overScrollMode;
+    }
+
+    /**
+     * Enable or disable nested scrolling for this view.
+     *
+     * <p>If this property is set to true the view will be permitted to initiate nested
+     * scrolling operations with a compatible parent view in the current hierarchy. If this
+     * view does not implement nested scrolling this will have no effect.</p>
+     *
+     * @param enabled true to enable nested scrolling, false to disable
+     *
+     * @see #isNestedScrollingEnabled()
+     */
+    public void setNestedScrollingEnabled(boolean enabled) {
+        if (enabled) {
+            mPrivateFlags3 |= PFLAG3_NESTED_SCROLLING_ENABLED;
+        } else {
+            mPrivateFlags3 &= ~PFLAG3_NESTED_SCROLLING_ENABLED;
+        }
+    }
+
+    /**
+     * Returns true if nested scrolling is enabled for this view.
+     *
+     * <p>If nested scrolling is enabled and this View class implementation supports it,
+     * this view will act as a nested scrolling child view when applicable, forwarding data
+     * about the scroll operation in progress to a compatible and cooperating nested scrolling
+     * parent.</p>
+     *
+     * @return true if nested scrolling is enabled
+     *
+     * @see #setNestedScrollingEnabled(boolean)
+     */
+    public boolean isNestedScrollingEnabled() {
+        return (mPrivateFlags3 & PFLAG3_NESTED_SCROLLING_ENABLED) ==
+                PFLAG3_NESTED_SCROLLING_ENABLED;
+    }
+
+    /**
+     * Begin a nestable scroll operation along the given axes.
+     *
+     * <p>A view starting a nested scroll promises to abide by the following contract:</p>
+     *
+     * <p>The view will call startNestedScroll upon initiating a scroll operation. In the case
+     * of a touch scroll this corresponds to the initial {@link MotionEvent#ACTION_DOWN}.
+     * In the case of touch scrolling the nested scroll will be terminated automatically in
+     * the same manner as {@link ViewParent#requestDisallowInterceptTouchEvent(boolean)}.
+     * In the event of programmatic scrolling the caller must explicitly call
+     * {@link #stopNestedScroll()} to indicate the end of the nested scroll.</p>
+     *
+     * <p>If <code>startNestedScroll</code> returns true, a cooperative parent was found.
+     * If it returns false the caller may ignore the rest of this contract until the next scroll.
+     * </p>
+     *
+     * <p>At each incremental step of the scroll the caller should invoke
+     * {@link #dispatchNestedPreScroll(int, int, int[], int[]) dispatchNestedPreScroll}
+     * once it has calculated the requested scrolling delta. If it returns true the nested scrolling
+     * parent at least partially consumed the scroll and the caller should adjust the amount it
+     * scrolls by.</p>
+     *
+     * <p>After applying the remainder of the scroll delta the caller should invoke
+     * {@link #dispatchNestedScroll(int, int, int, int, int[]) dispatchNestedScroll}, passing
+     * both the delta consumed and the delta unconsumed. A nested scrolling parent may treat
+     * these values differently. See {@link ViewParent#onNestedScroll(View, int, int, int, int)}.
+     * </p>
+     *
+     * @param axes Flags consisting of a combination of {@link #SCROLL_AXIS_HORIZONTAL} and/or
+     *             {@link #SCROLL_AXIS_VERTICAL}.
+     * @return true if a cooperative parent was found and nested scrolling has been enabled for
+     *         the current gesture.
+     *
+     * @see #stopNestedScroll()
+     * @see #dispatchNestedPreScroll(int, int, int[], int[])
+     * @see #dispatchNestedScroll(int, int, int, int, int[])
+     */
+    public boolean startNestedScroll(int axes) {
+        if (isNestedScrollingEnabled()) {
+            ViewParent p = getParent();
+            View child = this;
+            while (p != null) {
+                try {
+                    if (p.onStartNestedScroll(child, this, axes)) {
+                        mNestedScrollingParent = p;
+                        p.onNestedScrollAccepted(child, this, axes);
+                        return true;
+                    }
+                } catch (AbstractMethodError e) {
+                    Log.e(VIEW_LOG_TAG, "ViewParent " + p + " does not implement interface " +
+                            "method onStartNestedScroll", e);
+                    // Allow the search upward to continue
+                }
+                if (p instanceof View) {
+                    child = (View) p;
+                }
+                p = p.getParent();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Stop a nested scroll in progress.
+     *
+     * <p>Calling this method when a nested scroll is not currently in progress is harmless.</p>
+     *
+     * @see #startNestedScroll(int)
+     */
+    public void stopNestedScroll() {
+        if (mNestedScrollingParent != null) {
+            mNestedScrollingParent.onStopNestedScroll(this);
+            mNestedScrollingParent = null;
+        }
+    }
+
+    /**
+     * Returns true if this view has a nested scrolling parent.
+     *
+     * <p>The presence of a nested scrolling parent indicates that this view has initiated
+     * a nested scroll and it was accepted by an ancestor view further up the view hierarchy.</p>
+     *
+     * @return whether this view has a nested scrolling parent
+     */
+    public boolean hasNestedScrollingParent() {
+        return mNestedScrollingParent != null;
+    }
+
+    /**
+     * Dispatch one step of a nested scroll in progress.
+     *
+     * <p>Implementations of views that support nested scrolling should call this to report
+     * info about a scroll in progress to the current nested scrolling parent. If a nested scroll
+     * is not currently in progress or nested scrolling is not
+     * {@link #isNestedScrollingEnabled() enabled} for this view this method does nothing.</p>
+     *
+     * <p>Compatible View implementations should also call
+     * {@link #dispatchNestedPreScroll(int, int, int[], int[]) dispatchNestedPreScroll} before
+     * consuming a component of the scroll event themselves.</p>
+     *
+     * @param dxConsumed Horizontal distance in pixels consumed by this view during this scroll step
+     * @param dyConsumed Vertical distance in pixels consumed by this view during this scroll step
+     * @param dxUnconsumed Horizontal scroll distance in pixels not consumed by this view
+     * @param dyUnconsumed Horizontal scroll distance in pixels not consumed by this view
+     * @param offsetInWindow Optional. If not null, on return this will contain the offset
+     *                       in local view coordinates of this view from before this operation
+     *                       to after it completes. View implementations may use this to adjust
+     *                       expected input coordinate tracking.
+     * @return true if the event was dispatched, false if it could not be dispatched.
+     * @see #dispatchNestedPreScroll(int, int, int[], int[])
+     */
+    public boolean dispatchNestedScroll(int dxConsumed, int dyConsumed,
+            int dxUnconsumed, int dyUnconsumed, int[] offsetInWindow) {
+        if (isNestedScrollingEnabled() && mNestedScrollingParent != null) {
+            int startX = 0;
+            int startY = 0;
+            if (offsetInWindow != null) {
+                getLocationInWindow(offsetInWindow);
+                startX = offsetInWindow[0];
+                startY = offsetInWindow[1];
+            }
+
+            mNestedScrollingParent.onNestedScroll(this, dxConsumed, dyConsumed,
+                    dxUnconsumed, dyUnconsumed);
+
+            if (offsetInWindow != null) {
+                getLocationInWindow(offsetInWindow);
+                offsetInWindow[0] -= startX;
+                offsetInWindow[1] -= startY;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Dispatch one step of a nested scroll in progress before this view consumes any portion of it.
+     *
+     * <p>Nested pre-scroll events are to nested scroll events what touch intercept is to touch.
+     * <code>dispatchNestedPreScroll</code> offers an opportunity for the parent view in a nested
+     * scrolling operation to consume some or all of the scroll operation before the child view
+     * consumes it.</p>
+     *
+     * @param dx Horizontal scroll distance in pixels
+     * @param dy Vertical scroll distance in pixels
+     * @param consumed Output. If not null, consumed[0] will contain the consumed component of dx
+     *                 and consumed[1] the consumed dy.
+     * @param offsetInWindow Optional. If not null, on return this will contain the offset
+     *                       in local view coordinates of this view from before this operation
+     *                       to after it completes. View implementations may use this to adjust
+     *                       expected input coordinate tracking.
+     * @return true if the parent consumed some or all of the scroll delta
+     * @see #dispatchNestedScroll(int, int, int, int, int[])
+     */
+    public boolean dispatchNestedPreScroll(int dx, int dy, int[] consumed, int[] offsetInWindow) {
+        if (isNestedScrollingEnabled() && mNestedScrollingParent != null) {
+            int startX = 0;
+            int startY = 0;
+            if (offsetInWindow != null) {
+                getLocationInWindow(offsetInWindow);
+                startX = offsetInWindow[0];
+                startY = offsetInWindow[1];
+            }
+
+            if (consumed == null) {
+                if (mTempNestedScrollConsumed == null) {
+                    mTempNestedScrollConsumed = new int[2];
+                }
+                consumed = mTempNestedScrollConsumed;
+            }
+            consumed[0] = 0;
+            consumed[1] = 0;
+            mNestedScrollingParent.onNestedPreScroll(this, dx, dy, consumed);
+
+            if (offsetInWindow != null) {
+                getLocationInWindow(offsetInWindow);
+                offsetInWindow[0] -= startX;
+                offsetInWindow[1] -= startY;
+            }
+            return consumed[0] != 0 || consumed[1] != 0;
+        }
+        return false;
+    }
+
+    /**
+     * Dispatch a fling to a nested scrolling parent.
+     *
+     * <p>If a nested scrolling child view would normally fling but it is at the edge of its
+     * own content it should use this method to delegate the fling to its nested scrolling parent.
+     * The view implementation can use a {@link VelocityTracker} to obtain the velocity values
+     * to pass.</p>
+     *
+     * @param velocityX Horizontal fling velocity in pixels per second
+     * @param velocityY Vertical fling velocity in pixels per second
+     * @return true if the nested scrolling parent consumed the fling
+     */
+    public boolean dispatchNestedFling(float velocityX, float velocityY) {
+        if (isNestedScrollingEnabled() && mNestedScrollingParent != null) {
+            return mNestedScrollingParent.onNestedFling(this, velocityX, velocityY);
+        }
+        return false;
     }
 
     /**

@@ -2153,6 +2153,7 @@
   <public type="attr" name="colorPrimary" />
   <public type="attr" name="colorPrimaryDark" />
   <public type="attr" name="colorAccent" />
+  <public type="attr" name="nestedScrollingEnabled" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 

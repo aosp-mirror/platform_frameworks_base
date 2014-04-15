@@ -460,6 +460,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @ViewDebug.ExportedProperty(category = "layout")
     private int mChildCountWithTransientState = 0;
 
+    /**
+     * Currently registered axes for nested scrolling. Flag set consisting of
+     * {@link #SCROLL_AXIS_HORIZONTAL} {@link #SCROLL_AXIS_VERTICAL} or {@link #SCROLL_AXIS_NONE}
+     * for null.
+     */
+    private int mNestedScrollAxes;
+
     public ViewGroup(Context context) {
         this(context, null);
     }
@@ -2011,6 +2018,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         clearTouchTargets();
         resetCancelNextUpFlag(this);
         mGroupFlags &= ~FLAG_DISALLOW_INTERCEPT;
+        mNestedScrollAxes = SCROLL_AXIS_NONE;
     }
 
     /**
@@ -5854,6 +5862,74 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public boolean shouldDelayChildPressedState() {
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public boolean onStartNestedScroll(View child, View target, int nestedScrollAxes) {
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void onNestedScrollAccepted(View child, View target, int axes) {
+        mNestedScrollAxes = axes;
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * <p>The default implementation of onStopNestedScroll calls
+     * {@link #stopNestedScroll()} to halt any recursive nested scrolling in progress.</p>
+     */
+    @Override
+    public void onStopNestedScroll(View child) {
+        // Stop any recursive nested scrolling.
+        stopNestedScroll();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void onNestedScroll(View target, int dxConsumed, int dyConsumed,
+            int dxUnconsumed, int dyUnconsumed) {
+        // Do nothing
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
+        // Do nothing
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public boolean onNestedFling(View target, float velocityX, float velocityY) {
+        return false;
+    }
+
+    /**
+     * Return the current axes of nested scrolling for this ViewGroup.
+     *
+     * <p>A ViewGroup returning something other than {@link #SCROLL_AXIS_NONE} is currently
+     * acting as a nested scrolling parent for one or more descendant views in the hierarchy.</p>
+     *
+     * @return Flags indicating the current axes of nested scrolling
+     * @see #SCROLL_AXIS_HORIZONTAL
+     * @see #SCROLL_AXIS_VERTICAL
+     * @see #SCROLL_AXIS_NONE
+     */
+    public int getNestedScrollAxes() {
+        return mNestedScrollAxes;
     }
 
     /** @hide */

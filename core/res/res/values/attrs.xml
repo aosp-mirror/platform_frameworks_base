@@ -2357,6 +2357,10 @@
              Activity to UI element in the called Activity. Names should be unique in the
              View hierarchy. -->
         <attr name="sharedElementName" format="string" />
+
+        <!-- Specifies that this view should permit nested scrolling within a compatible
+             ancestor view. -->
+        <attr name="nestedScrollingEnabled" format="boolean" />
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
