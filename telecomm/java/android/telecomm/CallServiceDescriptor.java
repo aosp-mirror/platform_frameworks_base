@@ -22,6 +22,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -121,6 +122,13 @@ public final class CallServiceDescriptor implements Parcelable {
         return mCallServiceId.equals(descriptor.mCallServiceId) &&
                 mComponentName.equals(descriptor.mComponentName) &&
                 mNetworkType == descriptor.mNetworkType;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.US, "[%s, component: %s]",
+                CallServiceDescriptor.class.getSimpleName(),
+                mComponentName == null ? "null" : mComponentName.flattenToShortString());
     }
 
     /**
