@@ -19,6 +19,7 @@ package android.tv;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Message;
+import android.tv.TvInputService.TvInputSessionImpl;
 import android.util.Log;
 import android.view.Surface;
 
@@ -38,10 +39,10 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_SET_VOLUME = 3;
     private static final int DO_TUNE = 4;
 
-    private TvInputSession mTvInputSession;
+    private TvInputSessionImpl mTvInputSession;
     private final HandlerCaller mCaller;
 
-    public ITvInputSessionWrapper(Context context, TvInputSession session) {
+    public ITvInputSessionWrapper(Context context, TvInputSessionImpl session) {
         mCaller = new HandlerCaller(context, null, this, true /* asyncHandler */);
         mTvInputSession = session;
     }

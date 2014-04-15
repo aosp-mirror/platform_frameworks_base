@@ -282,7 +282,7 @@ public final class TvInputManager {
     }
 
     /**
-     * Creates a {@link TvInputSession} interface for a given TV input.
+     * Creates a {@link Session} for a given TV input.
      * <p>
      * The number of sessions that can be created at the same time is limited by the capability of
      * the given TV input.
