@@ -7167,7 +7167,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             final int itemCount = getCount();
             final int clampedPosition = MathUtils.constrain(targetPosition, 0, itemCount - 1);
-            final int clampedBoundPosition = MathUtils.constrain(boundPosition, 0, itemCount - 1);
+            final int clampedBoundPosition = MathUtils.constrain(boundPosition, -1, itemCount - 1);
             final int firstPosition = getFirstVisiblePosition();
             final int lastPosition = firstPosition + getChildCount();
             final int targetRow = getRowForPosition(clampedPosition);
