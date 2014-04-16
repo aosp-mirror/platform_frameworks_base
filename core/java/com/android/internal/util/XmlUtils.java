@@ -912,6 +912,15 @@ public class XmlUtils {
         }
     }
 
+    public static int readIntAttribute(XmlPullParser in, String name, int defaultValue) {
+        final String value = in.getAttributeValue(null, name);
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
     public static int readIntAttribute(XmlPullParser in, String name) throws IOException {
         final String value = in.getAttributeValue(null, name);
         try {

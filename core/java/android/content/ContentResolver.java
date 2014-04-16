@@ -1643,7 +1643,8 @@ public abstract class ContentResolver {
      */
     public void takePersistableUriPermission(Uri uri, @Intent.AccessUriMode int modeFlags) {
         try {
-            ActivityManagerNative.getDefault().takePersistableUriPermission(uri, modeFlags);
+            ActivityManagerNative.getDefault().takePersistableUriPermission(
+                    ContentProvider.getUriWithoutUserId(uri), modeFlags, resolveUserId(uri));
         } catch (RemoteException e) {
         }
     }
@@ -1658,7 +1659,8 @@ public abstract class ContentResolver {
      */
     public void releasePersistableUriPermission(Uri uri, @Intent.AccessUriMode int modeFlags) {
         try {
-            ActivityManagerNative.getDefault().releasePersistableUriPermission(uri, modeFlags);
+            ActivityManagerNative.getDefault().releasePersistableUriPermission(
+                    ContentProvider.getUriWithoutUserId(uri), modeFlags, resolveUserId(uri));
         } catch (RemoteException e) {
         }
     }
@@ -2462,4 +2464,9 @@ public abstract class ContentResolver {
     private final Context mContext;
     final String mPackageName;
     private static final String TAG = "ContentResolver";
+
+    /** @hide */
+    public int resolveUserId(Uri uri) {
+        return ContentProvider.getUserIdFromUri(uri, mContext.getUserId());
+    }
 }

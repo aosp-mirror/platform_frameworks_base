@@ -70,13 +70,13 @@ final class UriPermissionOwner {
         removeUriPermissionLocked(null, mode);
     }
 
-    void removeUriPermissionLocked(Uri uri, int mode) {
+    void removeUriPermissionLocked(ActivityManagerService.GrantUri grantUri, int mode) {
         if ((mode & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0
                 && mReadPerms != null) {
             Iterator<UriPermission> it = mReadPerms.iterator();
             while (it.hasNext()) {
                 UriPermission perm = it.next();
-                if (uri == null || uri.equals(perm.uri)) {
+                if (grantUri == null || grantUri.equals(perm.uri)) {
                     perm.removeReadOwner(this);
                     service.removeUriPermissionIfNeededLocked(perm);
                     it.remove();
@@ -91,7 +91,7 @@ final class UriPermissionOwner {
             Iterator<UriPermission> it = mWritePerms.iterator();
             while (it.hasNext()) {
                 UriPermission perm = it.next();
-                if (uri == null || uri.equals(perm.uri)) {
+                if (grantUri == null || grantUri.equals(perm.uri)) {
                     perm.removeWriteOwner(this);
                     service.removeUriPermissionIfNeededLocked(perm);
                     it.remove();

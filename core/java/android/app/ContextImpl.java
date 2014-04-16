@@ -26,6 +26,7 @@ import com.android.internal.util.Preconditions;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -1818,8 +1819,8 @@ class ContextImpl extends Context {
     public void grantUriPermission(String toPackage, Uri uri, int modeFlags) {
          try {
             ActivityManagerNative.getDefault().grantUriPermission(
-                    mMainThread.getApplicationThread(), toPackage, uri,
-                    modeFlags);
+                    mMainThread.getApplicationThread(), toPackage,
+                    ContentProvider.getUriWithoutUserId(uri), modeFlags, resolveUserId(uri));
         } catch (RemoteException e) {
         }
     }
@@ -1828,8 +1829,8 @@ class ContextImpl extends Context {
     public void revokeUriPermission(Uri uri, int modeFlags) {
          try {
             ActivityManagerNative.getDefault().revokeUriPermission(
-                    mMainThread.getApplicationThread(), uri,
-                    modeFlags);
+                    mMainThread.getApplicationThread(),
+                    ContentProvider.getUriWithoutUserId(uri), modeFlags, resolveUserId(uri));
         } catch (RemoteException e) {
         }
     }
@@ -1838,10 +1839,15 @@ class ContextImpl extends Context {
     public int checkUriPermission(Uri uri, int pid, int uid, int modeFlags) {
         try {
             return ActivityManagerNative.getDefault().checkUriPermission(
-                    uri, pid, uid, modeFlags);
+                    ContentProvider.getUriWithoutUserId(uri), pid, uid, modeFlags,
+                    resolveUserId(uri));
         } catch (RemoteException e) {
             return PackageManager.PERMISSION_DENIED;
         }
+    }
+
+    private int resolveUserId(Uri uri) {
+        return ContentProvider.getUserIdFromUri(uri, getUserId());
     }
 
     @Override
@@ -2280,12 +2286,16 @@ class ContextImpl extends Context {
 
         @Override
         protected IContentProvider acquireProvider(Context context, String auth) {
-            return mMainThread.acquireProvider(context, auth, mUser.getIdentifier(), true);
+            return mMainThread.acquireProvider(context,
+                    ContentProvider.getAuthorityWithoutUserId(auth),
+                    resolveUserIdFromAuthority(auth), true);
         }
 
         @Override
         protected IContentProvider acquireExistingProvider(Context context, String auth) {
-            return mMainThread.acquireExistingProvider(context, auth, mUser.getIdentifier(), true);
+            return mMainThread.acquireExistingProvider(context,
+                    ContentProvider.getAuthorityWithoutUserId(auth),
+                    resolveUserIdFromAuthority(auth), true);
         }
 
         @Override
@@ -2295,7 +2305,9 @@ class ContextImpl extends Context {
 
         @Override
         protected IContentProvider acquireUnstableProvider(Context c, String auth) {
-            return mMainThread.acquireProvider(c, auth, mUser.getIdentifier(), false);
+            return mMainThread.acquireProvider(c,
+                    ContentProvider.getAuthorityWithoutUserId(auth),
+                    resolveUserIdFromAuthority(auth), false);
         }
 
         @Override
@@ -2311,6 +2323,11 @@ class ContextImpl extends Context {
         @Override
         public void appNotRespondingViaProvider(IContentProvider icp) {
             mMainThread.appNotRespondingViaProvider(icp.asBinder());
+        }
+
+        /** @hide */
+        protected int resolveUserIdFromAuthority(String auth) {
+            return ContentProvider.getUserIdFromAuthority(auth, mUser.getIdentifier());
         }
     }
 }

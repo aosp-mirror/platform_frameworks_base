@@ -1113,7 +1113,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int pid = data.readInt();
             int uid = data.readInt();
             int mode = data.readInt();
-            int res = checkUriPermission(uri, pid, uid, mode);
+            int userId = data.readInt();
+            int res = checkUriPermission(uri, pid, uid, mode, userId);
             reply.writeNoException();
             reply.writeInt(res);
             return true;
@@ -1138,7 +1139,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String targetPkg = data.readString();
             Uri uri = Uri.CREATOR.createFromParcel(data);
             int mode = data.readInt();
-            grantUriPermission(app, targetPkg, uri, mode);
+            int userId = data.readInt();
+            grantUriPermission(app, targetPkg, uri, mode, userId);
             reply.writeNoException();
             return true;
         }
@@ -1149,7 +1151,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             IApplicationThread app = ApplicationThreadNative.asInterface(b);
             Uri uri = Uri.CREATOR.createFromParcel(data);
             int mode = data.readInt();
-            revokeUriPermission(app, uri, mode);
+            int userId = data.readInt();
+            revokeUriPermission(app, uri, mode, userId);
             reply.writeNoException();
             return true;
         }
@@ -1158,7 +1161,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             Uri uri = Uri.CREATOR.createFromParcel(data);
             int mode = data.readInt();
-            takePersistableUriPermission(uri, mode);
+            int userId = data.readInt();
+            takePersistableUriPermission(uri, mode, userId);
             reply.writeNoException();
             return true;
         }
@@ -1167,7 +1171,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             Uri uri = Uri.CREATOR.createFromParcel(data);
             int mode = data.readInt();
-            releasePersistableUriPermission(uri, mode);
+            int userId = data.readInt();
+            releasePersistableUriPermission(uri, mode, userId);
             reply.writeNoException();
             return true;
         }
@@ -1601,7 +1606,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String targetPkg = data.readString();
             Uri uri = Uri.CREATOR.createFromParcel(data);
             int mode = data.readInt();
-            grantUriPermissionFromOwner(owner, fromUid, targetPkg, uri, mode);
+            int userId = data.readInt();
+            grantUriPermissionFromOwner(owner, fromUid, targetPkg, uri, mode, userId);
             reply.writeNoException();
             return true;
         }
@@ -1611,10 +1617,11 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             IBinder owner = data.readStrongBinder();
             Uri uri = null;
             if (data.readInt() != 0) {
-                Uri.CREATOR.createFromParcel(data);
+                uri = Uri.CREATOR.createFromParcel(data);
             }
             int mode = data.readInt();
-            revokeUriPermissionFromOwner(owner, uri, mode);
+            int userId = data.readInt();
+            revokeUriPermissionFromOwner(owner, uri, mode, userId);
             reply.writeNoException();
             return true;
         }
@@ -1625,7 +1632,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String targetPkg = data.readString();
             Uri uri = Uri.CREATOR.createFromParcel(data);
             int modeFlags = data.readInt();
-            int res = checkGrantUriPermission(callingUid, targetPkg, uri, modeFlags);
+            int userId = data.readInt();
+            int res = checkGrantUriPermission(callingUid, targetPkg, uri, modeFlags, userId);
             reply.writeNoException();
             reply.writeInt(res);
             return true;
@@ -3543,7 +3551,7 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return res;
     }
-    public int checkUriPermission(Uri uri, int pid, int uid, int mode) 
+    public int checkUriPermission(Uri uri, int pid, int uid, int mode, int userId)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -3552,6 +3560,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(pid);
         data.writeInt(uid);
         data.writeInt(mode);
+        data.writeInt(userId);
         mRemote.transact(CHECK_URI_PERMISSION_TRANSACTION, data, reply, 0);
         reply.readException();
         int res = reply.readInt();
@@ -3560,7 +3569,7 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
     public void grantUriPermission(IApplicationThread caller, String targetPkg,
-            Uri uri, int mode) throws RemoteException {
+            Uri uri, int mode, int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -3568,19 +3577,21 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(targetPkg);
         uri.writeToParcel(data, 0);
         data.writeInt(mode);
+        data.writeInt(userId);
         mRemote.transact(GRANT_URI_PERMISSION_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
     }
     public void revokeUriPermission(IApplicationThread caller, Uri uri,
-            int mode) throws RemoteException {
+            int mode, int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(caller.asBinder());
         uri.writeToParcel(data, 0);
         data.writeInt(mode);
+        data.writeInt(userId);
         mRemote.transact(REVOKE_URI_PERMISSION_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
@@ -3588,12 +3599,14 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public void takePersistableUriPermission(Uri uri, int mode) throws RemoteException {
+    public void takePersistableUriPermission(Uri uri, int mode, int userId)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         uri.writeToParcel(data, 0);
         data.writeInt(mode);
+        data.writeInt(userId);
         mRemote.transact(TAKE_PERSISTABLE_URI_PERMISSION_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
@@ -3601,12 +3614,14 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public void releasePersistableUriPermission(Uri uri, int mode) throws RemoteException {
+    public void releasePersistableUriPermission(Uri uri, int mode, int userId)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         uri.writeToParcel(data, 0);
         data.writeInt(mode);
+        data.writeInt(userId);
         mRemote.transact(RELEASE_PERSISTABLE_URI_PERMISSION_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
@@ -4160,7 +4175,7 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     public void grantUriPermissionFromOwner(IBinder owner, int fromUid, String targetPkg,
-            Uri uri, int mode) throws RemoteException {
+            Uri uri, int mode, int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -4169,6 +4184,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(targetPkg);
         uri.writeToParcel(data, 0);
         data.writeInt(mode);
+        data.writeInt(userId);
         mRemote.transact(GRANT_URI_PERMISSION_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
@@ -4176,7 +4192,7 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     public void revokeUriPermissionFromOwner(IBinder owner, Uri uri,
-            int mode) throws RemoteException {
+            int mode, int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -4188,6 +4204,7 @@ class ActivityManagerProxy implements IActivityManager
             data.writeInt(0);
         }
         data.writeInt(mode);
+        data.writeInt(userId);
         mRemote.transact(REVOKE_URI_PERMISSION_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
@@ -4195,7 +4212,7 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     public int checkGrantUriPermission(int callingUid, String targetPkg,
-            Uri uri, int modeFlags) throws RemoteException {
+            Uri uri, int modeFlags, int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -4203,6 +4220,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(targetPkg);
         uri.writeToParcel(data, 0);
         data.writeInt(modeFlags);
+        data.writeInt(userId);
         mRemote.transact(CHECK_GRANT_URI_PERMISSION_TRANSACTION, data, reply, 0);
         reply.readException();
         int res = reply.readInt();

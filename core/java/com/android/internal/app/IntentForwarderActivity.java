@@ -84,6 +84,7 @@ public class IntentForwarderActivity extends Activity  {
             Slog.e(TAG, "PackageManagerService is dead?");
         }
         if (canForward) {
+            newIntent.prepareToLeaveUser(callingUserId);
             startActivityAsUser(newIntent, userDest);
         } else {
             Slog.wtf(TAG, "the intent: " + newIntent + "cannot be forwarded from user "

@@ -16,6 +16,7 @@
 
 package android.content;
 
+import static android.content.ContentProvider.maybeAddUserId;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -186,7 +187,7 @@ public class ClipData implements Parcelable {
         final CharSequence mText;
         final String mHtmlText;
         final Intent mIntent;
-        final Uri mUri;
+        Uri mUri;
 
         /**
          * Create an Item consisting of a single block of (possibly styled) text.
@@ -805,6 +806,24 @@ public class ClipData implements Parcelable {
             }
             if (item.mUri != null && StrictMode.vmFileUriExposureEnabled()) {
                 item.mUri.checkFileUriExposed("ClipData.Item.getUri()");
+            }
+        }
+    }
+
+    /**
+     * Prepare this {@link ClipData} to leave an app process.
+     *
+     * @hide
+     */
+    public void prepareToLeaveUser(int userId) {
+        final int size = mItems.size();
+        for (int i = 0; i < size; i++) {
+            final Item item = mItems.get(i);
+            if (item.mIntent != null) {
+                item.mIntent.prepareToLeaveUser(userId);
+            }
+            if (item.mUri != null) {
+                item.mUri = maybeAddUserId(item.mUri, userId);
             }
         }
     }
