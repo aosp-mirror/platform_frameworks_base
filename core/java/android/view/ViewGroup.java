@@ -2960,14 +2960,24 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
-        int saveCount = 0;
+        int clipSaveCount = 0;
         final boolean clipToPadding = (flags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK;
+        boolean hasClipBounds = mClipBounds != null && !sIgnoreClipBoundsForChildren;
+        boolean clippingNeeded = clipToPadding || hasClipBounds;
+
+        if (clippingNeeded) {
+            clipSaveCount = canvas.save();
+        }
+
         if (clipToPadding) {
-            saveCount = canvas.save();
             canvas.clipRect(mScrollX + mPaddingLeft, mScrollY + mPaddingTop,
                     mScrollX + mRight - mLeft - mPaddingRight,
                     mScrollY + mBottom - mTop - mPaddingBottom);
+        }
 
+        if (hasClipBounds) {
+            canvas.clipRect(mClipBounds.left, mClipBounds.top, mClipBounds.right,
+                    mClipBounds.bottom);
         }
 
         // We will draw our child's animation, let's reset the flag
@@ -3008,8 +3018,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             onDebugDraw(canvas);
         }
 
-        if (clipToPadding) {
-            canvas.restoreToCount(saveCount);
+        if (clippingNeeded) {
+            canvas.restoreToCount(clipSaveCount);
         }
 
         // mGroupFlags might have been updated by drawChild()
