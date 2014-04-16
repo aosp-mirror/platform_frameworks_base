@@ -906,6 +906,14 @@
         silently replace the content of any webpage with malicious variants.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_broadcastScoreNetworks">send score networks broadcast</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_broadcastScoreNetworks">Allows the app
+        to broadcast a notification that networks need to be scored.
+        Never needed for normal apps.
+    </string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setProcessLimit">limit number of running processes</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_setProcessLimit">Allows the app
@@ -1879,6 +1887,15 @@
       connect the tablet to and disconnect the tablet from WiMAX networks.</string>
     <string name="permdesc_changeWimaxState" product="default">Allows the app to
       connect the phone to and disconnect the phone from WiMAX networks.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_scoreNetworks">score networks</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_scoreNetworks" product="tablet">Allows the app to
+      rank networks and influence which networks the tablet should prefer.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_scoreNetworks" product="default">Allows the app to
+        rank networks and influence which networks the phone should prefer.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bluetooth">pair with Bluetooth devices</string>

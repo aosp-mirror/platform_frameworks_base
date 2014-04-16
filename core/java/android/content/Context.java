@@ -2643,6 +2643,14 @@ public abstract class Context {
     public static final String TV_INPUT_SERVICE = "tv_input";
 
     /**
+     * {@link android.net.NetworkScoreManager} for managing network scoring.
+     * @see #getSystemService
+     * @see android.net.NetworkScoreManager
+     * @hide
+     */
+    public static final String NETWORK_SCORE_SERVICE = "network_score";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
