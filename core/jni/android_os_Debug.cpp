@@ -24,6 +24,7 @@
 
 #include <cutils/log.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -824,9 +825,9 @@ static void dumpNativeHeap(FILE* fp)
                 break;
             } else {
 #ifdef __LP64__
-                fprintf(fp, " %016x", backtrace[bt]);
+                fprintf(fp, " %016" PRIxPTR, backtrace[bt]);
 #else
-                fprintf(fp, " %08x", backtrace[bt]);
+                fprintf(fp, " %08" PRIxPTR, backtrace[bt]);
 #endif
             }
         }
