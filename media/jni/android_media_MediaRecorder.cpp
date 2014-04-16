@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+#include <assert.h>
+#include <fcntl.h>
+#include <inttypes.h>
+#include <limits.h>
+#include <stdio.h>
+#include <unistd.h>
+
 //#define LOG_NDEBUG 0
 #define LOG_TAG "MediaRecorderJNI"
 #include <utils/Log.h>
@@ -22,11 +29,6 @@
 #include <camera/ICameraService.h>
 #include <camera/Camera.h>
 #include <media/mediarecorder.h>
-#include <stdio.h>
-#include <assert.h>
-#include <limits.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <utils/threads.h>
 
 #include "jni.h"
@@ -303,7 +305,7 @@ android_media_MediaRecorder_setMaxFileSize(
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
 
     char params[64];
-    sprintf(params, "max-filesize=%lld", max_filesize_bytes);
+    sprintf(params, "max-filesize=%" PRId64, max_filesize_bytes);
 
     process_media_recorder_call(env, mr->setParameters(String8(params)), "java/lang/RuntimeException", "setMaxFileSize failed.");
 }
