@@ -92,8 +92,8 @@ public class ActivityView extends ViewGroup {
         super.onAttachedToWindow();
         try {
             final IBinder token = mActivity.getActivityToken();
-            mActivityContainer =
-                    ActivityManagerNative.getDefault().createActivityContainer(token, null);
+            mActivityContainer = ActivityManagerNative.getDefault().createActivityContainer(token,
+                      new ActivityContainerCallback());
         } catch (RemoteException e) {
             throw new IllegalStateException("ActivityView: Unable to create ActivityContainer. "
                     + e);
@@ -281,5 +281,15 @@ public class ActivityView extends ViewGroup {
 //            Log.d(TAG, "onSurfaceTextureUpdated");
         }
 
+    }
+
+    private class ActivityContainerCallback extends IActivityContainerCallback.Stub {
+        @Override
+        public void setVisible(IBinder container, boolean visible) {
+            if (DEBUG) Log.v(TAG, "setVisible(): container=" + container + " visible=" + visible);
+            if (visible) {
+            } else {
+            }
+        }
     }
 }
