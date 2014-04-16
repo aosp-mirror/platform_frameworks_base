@@ -32,6 +32,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.telephony.CellLocation;
+import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -128,6 +129,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private int mOtaspMode = ServiceStateTracker.OTASP_UNKNOWN;
 
     private List<CellInfo> mCellInfo = null;
+
+    private DataConnectionRealTimeInfo mDcRtInfo = new DataConnectionRealTimeInfo();
 
     private int mRingingCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
 
@@ -324,6 +327,13 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             remove(r.binder);
                         }
                     }
+                    if ((events & PhoneStateListener.LISTEN_DATA_CONNECTION_REAL_TIME_INFO) != 0) {
+                        try {
+                            r.callback.onDataConnectionRealTimeInfoChanged(mDcRtInfo);
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
+                    }
                     if ((events & PhoneStateListener.LISTEN_PRECISE_CALL_STATE) != 0) {
                         try {
                             r.callback.onPreciseCallStateChanged(mPreciseCallState);
@@ -442,6 +452,31 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             Slog.d(TAG, "notifyCellInfo: mCellInfo=" + mCellInfo + " r=" + r);
                         }
                         r.callback.onCellInfoChanged(cellInfo);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    public void notifyDataConnectionRealTimeInfo(DataConnectionRealTimeInfo dcRtInfo) {
+        if (!checkNotifyPermission("notifyDataConnectionRealTimeInfo()")) {
+            return;
+        }
+
+        synchronized (mRecords) {
+            mDcRtInfo = dcRtInfo;
+            for (Record r : mRecords) {
+                if (validateEventsAndUserLocked(r,
+                        PhoneStateListener.LISTEN_DATA_CONNECTION_REAL_TIME_INFO)) {
+                    try {
+                        if (DBG_LOC) {
+                            Slog.d(TAG, "notifyDataConnectionRealTimeInfo: mDcRtInfo="
+                                    + mDcRtInfo + " r=" + r);
+                        }
+                        r.callback.onDataConnectionRealTimeInfoChanged(mDcRtInfo);
                     } catch (RemoteException ex) {
                         mRemoveList.add(r.binder);
                     }
@@ -754,6 +789,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("  mDataConnectionLinkCapabilities=" + mDataConnectionLinkCapabilities);
             pw.println("  mCellLocation=" + mCellLocation);
             pw.println("  mCellInfo=" + mCellInfo);
+            pw.println("  mDcRtInfo=" + mDcRtInfo);
             pw.println("registrations: count=" + recordCount);
             for (Record r : mRecords) {
                 pw.println("  " + r.pkgForDebug + " 0x" + Integer.toHexString(r.events));

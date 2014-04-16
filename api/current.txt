@@ -25413,6 +25413,18 @@ package android.telephony {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
+  public class DataConnectionRealTimeInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getDcPowerState();
+    method public long getTime();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static int DC_POWER_STATE_HIGH;
+    field public static int DC_POWER_STATE_LOW;
+    field public static int DC_POWER_STATE_MEDIUM;
+    field public static int DC_POWER_STATE_UNKNOWN;
+  }
+
   public class DisconnectCause {
     method public static java.lang.String toString(int);
     field public static final int BUSY = 4; // 0x4

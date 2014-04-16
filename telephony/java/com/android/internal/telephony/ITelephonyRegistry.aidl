@@ -20,9 +20,10 @@ import android.content.Intent;
 import android.net.LinkProperties;
 import android.net.LinkCapabilities;
 import android.os.Bundle;
+import android.telephony.CellInfo;
+import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
-import android.telephony.CellInfo;
 import com.android.internal.telephony.IPhoneStateListener;
 
 interface ITelephonyRegistry {
@@ -46,4 +47,5 @@ interface ITelephonyRegistry {
     void notifyDisconnectCause(int disconnectCause, int preciseDisconnectCause);
     void notifyPreciseDataConnectionFailed(String reason, String apnType, String apn,
             String failCause);
+    void notifyDataConnectionRealTimeInfo(in DataConnectionRealTimeInfo dcRtInfo);
 }
