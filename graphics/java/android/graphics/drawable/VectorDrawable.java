@@ -206,6 +206,11 @@ public class VectorDrawable extends Drawable {
         return mVectorState;
     }
 
+    @Override
+    public void jumpToCurrentState() {
+        mVectorState.mBasicAnimator.end();
+    }
+
     /**
      * Starts the animation.
      */
