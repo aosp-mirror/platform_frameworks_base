@@ -1171,6 +1171,11 @@ public final class ViewRootImpl implements ViewParent,
         m.preTranslate(-attachInfo.mWindowLeft, -attachInfo.mWindowTop);
     }
 
+    void dispatchApplyInsets(View host) {
+        mFitSystemWindowsInsets.set(mAttachInfo.mContentInsets);
+        host.dispatchApplyWindowInsets(new WindowInsets(mFitSystemWindowsInsets));
+    }
+
     private void performTraversals() {
         // cache mView since it is used so much below...
         final View host = mView;
@@ -1257,8 +1262,7 @@ public final class ViewRootImpl implements ViewParent,
             }
             host.dispatchAttachedToWindow(attachInfo, 0);
             attachInfo.mTreeObserver.dispatchOnWindowAttachedChange(true);
-            mFitSystemWindowsInsets.set(mAttachInfo.mContentInsets);
-            host.fitSystemWindows(mFitSystemWindowsInsets);
+            dispatchApplyInsets(host);
             //Log.i(TAG, "Screen on initialized: " + attachInfo.mKeepScreenOn);
 
         } else {
@@ -1383,9 +1387,8 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mFitSystemWindowsRequested) {
             mFitSystemWindowsRequested = false;
-            mFitSystemWindowsInsets.set(mAttachInfo.mContentInsets);
             mLastOverscanRequested = mAttachInfo.mOverscanRequested;
-            host.fitSystemWindows(mFitSystemWindowsInsets);
+            dispatchApplyInsets(host);
             if (mLayoutRequested) {
                 // Short-circuit catching a new layout request here, so
                 // we don't need to go through two layout passes when things
@@ -1559,8 +1562,7 @@ public final class ViewRootImpl implements ViewParent,
                     mLastSystemUiVisibility = mAttachInfo.mSystemUiVisibility;
                     mLastOverscanRequested = mAttachInfo.mOverscanRequested;
                     mFitSystemWindowsRequested = false;
-                    mFitSystemWindowsInsets.set(mAttachInfo.mContentInsets);
-                    host.fitSystemWindows(mFitSystemWindowsInsets);
+                    dispatchApplyInsets(host);
                 }
                 if (visibleInsetsChanged) {
                     mAttachInfo.mVisibleInsets.set(mPendingVisibleInsets);
