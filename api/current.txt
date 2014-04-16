@@ -10950,7 +10950,9 @@ package android.hardware.display {
 
   public final class VirtualDisplay {
     method public android.view.Display getDisplay();
+    method public android.view.Surface getSurface();
     method public void release();
+    method public void setSurface(android.view.Surface);
   }
 
 }
