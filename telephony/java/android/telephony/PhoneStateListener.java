@@ -188,6 +188,17 @@ public class PhoneStateListener {
      */
     public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE            = 0x00001000;
 
+    /**
+     * Listen for real time info for all data connections (cellular)).
+     * {@more}
+     * Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
+     * READ_PRECISE_PHONE_STATE}
+     *
+     * @see #onDataConnectionRealTimeInfoChanged(DataConnectionRealTimeInfo)
+     * @hide
+     */
+    public static final int LISTEN_DATA_CONNECTION_REAL_TIME_INFO           = 0x00002000;
+
     public PhoneStateListener() {
     }
 
@@ -335,6 +346,16 @@ public class PhoneStateListener {
     }
 
     /**
+     * Callback invoked when data connection state changes with precise information.
+     *
+     * @hide
+     */
+    public void onDataConnectionRealTimeInfoChanged(
+            DataConnectionRealTimeInfo dcRtInfo) {
+        // default implementation empty
+    }
+
+    /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
      */
@@ -396,6 +417,12 @@ public class PhoneStateListener {
             Message.obtain(mHandler, LISTEN_PRECISE_DATA_CONNECTION_STATE, 0, 0,
                     dataConnectionState).sendToTarget();
         }
+
+        public void onDataConnectionRealTimeInfoChanged(
+                DataConnectionRealTimeInfo dcRtInfo) {
+            Message.obtain(mHandler, LISTEN_DATA_CONNECTION_REAL_TIME_INFO, 0, 0,
+                    dcRtInfo).sendToTarget();
+        }
     };
 
     Handler mHandler = new Handler() {
@@ -441,6 +468,11 @@ public class PhoneStateListener {
                     break;
                 case LISTEN_PRECISE_DATA_CONNECTION_STATE:
                     PhoneStateListener.this.onPreciseDataConnectionStateChanged((PreciseDataConnectionState)msg.obj);
+                    break;
+                case LISTEN_DATA_CONNECTION_REAL_TIME_INFO:
+                    PhoneStateListener.this.onDataConnectionRealTimeInfoChanged(
+                            (DataConnectionRealTimeInfo)msg.obj);
+                    break;
             }
         }
     };
