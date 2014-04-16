@@ -1030,6 +1030,195 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<Integer>("android.sensor.info.whiteLevel", int.class);
 
     /**
+     * <p>The standard reference illuminant used as the scene light source when
+     * calculating the {@link CameraCharacteristics#SENSOR_COLOR_TRANSFORM1 android.sensor.colorTransform1},
+     * {@link CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM1 android.sensor.calibrationTransform1}, and
+     * {@link CameraCharacteristics#SENSOR_FORWARD_MATRIX1 android.sensor.forwardMatrix1} matrices.</p>
+     * <p>The values in this tag correspond to the values defined for the
+     * EXIF LightSource tag. These illuminants are standard light sources
+     * that are often used calibrating camera devices.</p>
+     * <p>If this tag is present, then {@link CameraCharacteristics#SENSOR_COLOR_TRANSFORM1 android.sensor.colorTransform1},
+     * {@link CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM1 android.sensor.calibrationTransform1}, and
+     * {@link CameraCharacteristics#SENSOR_FORWARD_MATRIX1 android.sensor.forwardMatrix1} will also be present.</p>
+     * <p>Some devices may choose to provide a second set of calibration
+     * information for improved quality, including
+     * {@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2 android.sensor.referenceIlluminant2} and its corresponding matrices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM1
+     * @see CameraCharacteristics#SENSOR_COLOR_TRANSFORM1
+     * @see CameraCharacteristics#SENSOR_FORWARD_MATRIX1
+     * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_DAYLIGHT
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_FLUORESCENT
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_TUNGSTEN
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_FLASH
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_FINE_WEATHER
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_CLOUDY_WEATHER
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_SHADE
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_DAYLIGHT_FLUORESCENT
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_DAY_WHITE_FLUORESCENT
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_COOL_WHITE_FLUORESCENT
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_WHITE_FLUORESCENT
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_STANDARD_A
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_STANDARD_B
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_STANDARD_C
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_D55
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_D65
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_D75
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_D50
+     * @see #SENSOR_REFERENCE_ILLUMINANT1_ISO_STUDIO_TUNGSTEN
+     */
+    public static final Key<Integer> SENSOR_REFERENCE_ILLUMINANT1 =
+            new Key<Integer>("android.sensor.referenceIlluminant1", int.class);
+
+    /**
+     * <p>The standard reference illuminant used as the scene light source when
+     * calculating the {@link CameraCharacteristics#SENSOR_COLOR_TRANSFORM2 android.sensor.colorTransform2},
+     * {@link CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM2 android.sensor.calibrationTransform2}, and
+     * {@link CameraCharacteristics#SENSOR_FORWARD_MATRIX2 android.sensor.forwardMatrix2} matrices.</p>
+     * <p>See {@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1 android.sensor.referenceIlluminant1} for more details.
+     * Valid values for this are the same as those given for the first
+     * reference illuminant.</p>
+     * <p>If this tag is present, then {@link CameraCharacteristics#SENSOR_COLOR_TRANSFORM2 android.sensor.colorTransform2},
+     * {@link CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM2 android.sensor.calibrationTransform2}, and
+     * {@link CameraCharacteristics#SENSOR_FORWARD_MATRIX2 android.sensor.forwardMatrix2} will also be present.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM2
+     * @see CameraCharacteristics#SENSOR_COLOR_TRANSFORM2
+     * @see CameraCharacteristics#SENSOR_FORWARD_MATRIX2
+     * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
+     */
+    public static final Key<Byte> SENSOR_REFERENCE_ILLUMINANT2 =
+            new Key<Byte>("android.sensor.referenceIlluminant2", byte.class);
+
+    /**
+     * <p>A per-device calibration transform matrix that maps from the
+     * reference sensor colorspace to the actual device sensor colorspace.</p>
+     * <p>This matrix is used to correct for per-device variations in the
+     * sensor colorspace, and is used for processing raw buffer data.</p>
+     * <p>The matrix is expressed as a 3x3 matrix in row-major-order, and
+     * contains a per-device calibration transform that maps colors
+     * from reference sensor color space (i.e. the "golden module"
+     * colorspace) into this camera device's native sensor color
+     * space under the first reference illuminant
+     * ({@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1 android.sensor.referenceIlluminant1}).</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
+     */
+    public static final Key<Rational[]> SENSOR_CALIBRATION_TRANSFORM1 =
+            new Key<Rational[]>("android.sensor.calibrationTransform1", Rational[].class);
+
+    /**
+     * <p>A per-device calibration transform matrix that maps from the
+     * reference sensor colorspace to the actual device sensor colorspace
+     * (this is the colorspace of the raw buffer data).</p>
+     * <p>This matrix is used to correct for per-device variations in the
+     * sensor colorspace, and is used for processing raw buffer data.</p>
+     * <p>The matrix is expressed as a 3x3 matrix in row-major-order, and
+     * contains a per-device calibration transform that maps colors
+     * from reference sensor color space (i.e. the "golden module"
+     * colorspace) into this camera device's native sensor color
+     * space under the second reference illuminant
+     * ({@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2 android.sensor.referenceIlluminant2}).</p>
+     * <p>This matrix will only be present if the second reference
+     * illuminant is present.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
+     */
+    public static final Key<Rational[]> SENSOR_CALIBRATION_TRANSFORM2 =
+            new Key<Rational[]>("android.sensor.calibrationTransform2", Rational[].class);
+
+    /**
+     * <p>A matrix that transforms color values from CIE XYZ color space to
+     * reference sensor color space.</p>
+     * <p>This matrix is used to convert from the standard CIE XYZ color
+     * space to the reference sensor colorspace, and is used when processing
+     * raw buffer data.</p>
+     * <p>The matrix is expressed as a 3x3 matrix in row-major-order, and
+     * contains a color transform matrix that maps colors from the CIE
+     * XYZ color space to the reference sensor color space (i.e. the
+     * "golden module" colorspace) under the first reference illuminant
+     * ({@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1 android.sensor.referenceIlluminant1}).</p>
+     * <p>The white points chosen in both the reference sensor color space
+     * and the CIE XYZ colorspace when calculating this transform will
+     * match the standard white point for the first reference illuminant
+     * (i.e. no chromatic adaptation will be applied by this transform).</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
+     */
+    public static final Key<Rational[]> SENSOR_COLOR_TRANSFORM1 =
+            new Key<Rational[]>("android.sensor.colorTransform1", Rational[].class);
+
+    /**
+     * <p>A matrix that transforms color values from CIE XYZ color space to
+     * reference sensor color space.</p>
+     * <p>This matrix is used to convert from the standard CIE XYZ color
+     * space to the reference sensor colorspace, and is used when processing
+     * raw buffer data.</p>
+     * <p>The matrix is expressed as a 3x3 matrix in row-major-order, and
+     * contains a color transform matrix that maps colors from the CIE
+     * XYZ color space to the reference sensor color space (i.e. the
+     * "golden module" colorspace) under the second reference illuminant
+     * ({@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2 android.sensor.referenceIlluminant2}).</p>
+     * <p>The white points chosen in both the reference sensor color space
+     * and the CIE XYZ colorspace when calculating this transform will
+     * match the standard white point for the second reference illuminant
+     * (i.e. no chromatic adaptation will be applied by this transform).</p>
+     * <p>This matrix will only be present if the second reference
+     * illuminant is present.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
+     */
+    public static final Key<Rational[]> SENSOR_COLOR_TRANSFORM2 =
+            new Key<Rational[]>("android.sensor.colorTransform2", Rational[].class);
+
+    /**
+     * <p>A matrix that transforms white balanced camera colors from the reference
+     * sensor colorspace to the CIE XYZ colorspace with a D50 whitepoint.</p>
+     * <p>This matrix is used to convert to the standard CIE XYZ colorspace, and
+     * is used when processing raw buffer data.</p>
+     * <p>This matrix is expressed as a 3x3 matrix in row-major-order, and contains
+     * a color transform matrix that maps white balanced colors from the
+     * reference sensor color space to the CIE XYZ color space with a D50 white
+     * point.</p>
+     * <p>Under the first reference illuminant ({@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1 android.sensor.referenceIlluminant1})
+     * this matrix is chosen so that the standard white point for this reference
+     * illuminant in the reference sensor colorspace is mapped to D50 in the
+     * CIE XYZ colorspace.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
+     */
+    public static final Key<Rational[]> SENSOR_FORWARD_MATRIX1 =
+            new Key<Rational[]>("android.sensor.forwardMatrix1", Rational[].class);
+
+    /**
+     * <p>A matrix that transforms white balanced camera colors from the reference
+     * sensor colorspace to the CIE XYZ colorspace with a D50 whitepoint.</p>
+     * <p>This matrix is used to convert to the standard CIE XYZ colorspace, and
+     * is used when processing raw buffer data.</p>
+     * <p>This matrix is expressed as a 3x3 matrix in row-major-order, and contains
+     * a color transform matrix that maps white balanced colors from the
+     * reference sensor color space to the CIE XYZ color space with a D50 white
+     * point.</p>
+     * <p>Under the second reference illuminant ({@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2 android.sensor.referenceIlluminant2})
+     * this matrix is chosen so that the standard white point for this reference
+     * illuminant in the reference sensor colorspace is mapped to D50 in the
+     * CIE XYZ colorspace.</p>
+     * <p>This matrix will only be present if the second reference
+     * illuminant is present.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
+     */
+    public static final Key<Rational[]> SENSOR_FORWARD_MATRIX2 =
+            new Key<Rational[]>("android.sensor.forwardMatrix2", Rational[].class);
+
+    /**
      * <p>Gain factor from electrons to raw units when
      * ISO=100</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
