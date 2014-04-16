@@ -17,19 +17,17 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
-import android.os.RemoteException;
-import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.KeyguardHostView;
 import com.android.keyguard.KeyguardViewBase;
 import com.android.keyguard.R;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+
+import static com.android.keyguard.KeyguardSecurityModel.*;
 
 /**
  * A class which manages the bouncer on the lockscreen.
@@ -66,6 +64,7 @@ public class KeyguardBouncer {
         if (!mKeyguardView.dismiss()) {
             mRoot.setVisibility(View.VISIBLE);
             mKeyguardView.requestFocus();
+            mKeyguardView.onResume();
         }
     }
 
@@ -84,14 +83,8 @@ public class KeyguardBouncer {
     }
 
     public void onScreenTurnedOff() {
-        if (mKeyguardView != null) {
-            mKeyguardView.onScreenTurnedOff();
-        }
-    }
-
-    public void onScreenTurnedOn() {
-        if (mKeyguardView != null) {
-            mKeyguardView.onScreenTurnedOn();
+        if (mKeyguardView != null && mRoot.getVisibility() == View.VISIBLE) {
+            mKeyguardView.onPause();
         }
     }
 
@@ -135,5 +128,18 @@ public class KeyguardBouncer {
 
     public boolean onBackPressed() {
         return mKeyguardView != null && mKeyguardView.handleBackKey();
+    }
+
+    /**
+     * @return True if and only if the current security method should be shown before showing
+     *         the notifications on Keyguard, like SIM PIN/PUK.
+     */
+    public boolean needsFullscreenBouncer() {
+        if (mKeyguardView != null) {
+            SecurityMode mode = mKeyguardView.getSecurityMode();
+            return mode == SecurityMode.SimPin
+                    || mode == SecurityMode.SimPuk;
+        }
+        return false;
     }
 }

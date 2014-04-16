@@ -128,6 +128,10 @@ public class StatusBarWindowManager {
         }
     }
 
+    private void applyFitsSystemWindows(State state) {
+        mStatusBarView.setFitsSystemWindows(!state.isKeyguardShowingAndNotOccluded());
+    }
+
     private void applyUserActivityTimeout(State state) {
         if (state.isKeyguardShowingAndNotOccluded()) {
             mLp.userActivityTimeout = state.keyguardUserActivityTimeout;
@@ -151,6 +155,7 @@ public class StatusBarWindowManager {
         applyHeight(state);
         applyUserActivityTimeout(state);
         applyInputFeatures(state);
+        applyFitsSystemWindows(state);
         mWindowManager.updateViewLayout(mStatusBarView, mLp);
     }
 
