@@ -136,4 +136,31 @@ public class KeyguardBouncer {
     public boolean onBackPressed() {
         return mKeyguardView != null && mKeyguardView.handleBackKey();
     }
+
+    /**
+     * @return True if and only if the current security method should be shown before showing
+     *         the notifications on Keyguard, like SIM PIN/PUK.
+     */
+    public boolean needsFullscreenBouncer() {
+        if (mKeyguardView != null) {
+            SecurityMode mode = mKeyguardView.getSecurityMode();
+            return mode == SecurityMode.SimPin
+                    || mode == SecurityMode.SimPuk;
+        }
+        return false;
+    }
+
+    public boolean onMenuPressed() {
+        ensureView();
+        if (mKeyguardView.handleMenuKey()) {
+
+            // We need to show it in case it is secure. If not, it will get dismissed in any case.
+            mRoot.setVisibility(View.VISIBLE);
+            mKeyguardView.requestFocus();
+            mKeyguardView.onResume();
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
