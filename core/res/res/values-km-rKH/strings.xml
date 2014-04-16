@@ -135,6 +135,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"ធ្វើ​សម​កាល​កម្ម"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"មាន​ការ​លុប <xliff:g id="CONTENT_TYPE">%s</xliff:g> ច្រើន​ពេក។"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ឧបករណ៍​ផ្ទុក​នៃ​​កុំព្យូទ័រ​បន្ទះ​ពេញ។ លុប​ឯកសារ​មួយ​ចំនួន​។"</string>
+    <!-- no translation found for low_memory (4415914910770005166) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"ឧបករណ៍​ផ្ទុក​ទូរស័ព្ទ​ពេញ! លុប​ឯកសារ​មួយ​ចំនួន​ដើម្បី​បង្កើន​ទំហំ។"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"បណ្ដាញ​អាច​ត្រូវ​បាន​តាមដាន"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"ដោយ​ភាគី​ទីបី​ដែល​មិន​ស្គាល់"</string>
@@ -152,6 +154,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"បើក​កម្មវិធី​រោទ៍"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"កំពុង​បិទ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"កុំព្យូទ័រ​បន្ទះ​របស់​អ្នក​នឹង​បិទ។"</string>
+    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
+    <skip />
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"ទូរស័ព្ទ​របស់​អ្នក​នឹង​បិទ។"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"តើ​អ្នក​ចង់​បិទ​?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"ចាប់ផ្ដើម​ឡើងវិញ​ដើម្បី​ចូល​របៀប​សុវត្ថិភាព"</string>
@@ -315,6 +319,10 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"ឲ្យ​កម្មវិធី​ទៅ​យក​មាតិកា​បង្អួច​សកម្ម។ កម្មវិធី​ព្យាបាទ​អាច​ទៅ​យក​មាតិកា​បង្អួច​ទាំង​មូល និង​ពិនិត្យ​អត្ថបទ​ទាំងអស់ លើកលែង​តែ​ពាក្យ​សម្ងាត់។"</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"បើក​មធ្យោបាយ​ងាយស្រួល​ជា​បណ្ដោះ​អាសន្ន"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"ឲ្យ​កម្មវិធី​បើក​ភាព​ងាយស្រួល​លើ​ឧបករណ៍​ជា​បណ្ដោះអាសន្ន។ កម្មវិធី​ព្យាបាទ​អាច​បើក​ភាព​ងាយស្រួល​ដោយ​មិន​ឲ្យ​អ្នក​ប្រើ​ដឹង។"</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"ទៅ​យក​និមិត្តសញ្ញា​​បង្អួច"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"ឲ្យ​កម្មវិធី​ទៅ​យក​និមិត្តសញ្ញា​បង្អួច។ កម្មវិធី​ព្យាបាទ​អាច​អនុវត្ត​អន្តរកម្ម​ដែល​មិន​បាន​អនុញ្ញាត​ជា​មួយ​​បង្អួច​កម្មវិធី​ដោយ​ក្លែង​ធ្វើ​ជា​ប្រព័ន្ធ។"</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"ទៅ​យក​ស្ថិតិ​ស៊ុម"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"ឲ្យ​កម្មវិធី​ប្រមូល​ស្ថិតិ​ស៊ុម​។ កម្មវិធី​ព្យាបាទ​អាច​សង្កេត​មើល​បង្អួច​ស្ថិតិ​ស៊ុម​ពី​កម្មវិធី​ផ្សេង។"</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"ច្រោះ​ព្រឹត្តិការណ៍"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"ឲ្យ​កម្មវិធី​ចុះ​ឈ្មោះ​តម្រង​បញ្ចូល​​ដែល​ច្រោះ​​ព្រឹត្តិការណ៍​របស់​អ្នក​ប្រើ​ទាំងអស់​មុន​ពេល​ពួក​វា​ត្រូវ​បាន​ផ្ដាច់។ កម្មវិធី​ព្យាបាទ​អាច​ពិនិត្យ​ចំណុច​ប្រទាក់​ប្រព័ន្ធ​ដោយ​គ្មាន​អំពើ​ពី​អ្នក​ប្រើ។"</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"បិទ​​ដោយ​ផ្នែក"</string>
@@ -331,6 +339,10 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"ឲ្យ​កម្មវិធី​ប្រកាស​ការ​ជូន​ដំណឹង​​ការ​ទទួល​សារ​ SMS ។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា​​ដើម្បី​​បន្លំ​សារ SMS ចូល។"</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"ផ្ញើ​ការ​ប្រកាស​បាន​ទទួល​ WAP-PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"ឲ្យ​កម្មវិធី​ប្រកាស​ការ​ជូន​ដំណឹង​ថា​បាន​ទទួល​សារ WAP PUSH ។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា​ដើម្បី​​ក្លែង​​បង្កាន់ដៃ​សារ MMS ឬ​ជំនួស​មាតិកា​ទំព័រ​បណ្ដាញ​ណាមួយ​ស្ងាត់​ៗ​​​ដោយ​អ្វី​ដែល​ក្លែងក្លាយ។"</string>
+    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
+    <skip />
+    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
+    <skip />
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"កំណត់​ចំនួន​ដំណើរការ​ដែល​កំពុង​ដំណើរការ"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"ឲ្យ​កម្មវិធី​ពិនិត្យ​ចំនួន​ដំណើរការ​អតិបរមា​ដែល​នឹង​ដំណើរការ។ មិន​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"បង្ខំ​​ឲ្យ​បិទ​កម្មវិធី​ក្នុង​ផ្ទៃ​ខាង​ក្រោយ"</string>
@@ -460,6 +472,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"ឲ្យ​កម្មវិធី​អាន​ព័ត៌មាន​ប្រវត្តិរូប​ផ្ទាល់ខ្លួន​ដែល​មាន​លើ​ឧបករណ៍​របស់​អ្នក ដូច​ជា ឈ្មោះ និង​ព័ត៌មាន​ទំនាក់ទំនង។ វា​មាន​ន័យ​ថា កម្មវិធី​អាច​កំណត់​អ្នក និង​អាច​ផ្ញើ​ព័ត៌មាន​ប្រវត្តិរូប​របស់​អ្នក​ទៅ​អ្នក​ផ្សេង។"</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"កែ​កាត​ទំនាក់ទំនង​ផ្ទាល់​ខ្លួន​របស់​អ្នក"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"ឲ្យ​កម្មវិធី​ប្ដូរ ឬ​បន្ថែម​ព័ត៌មាន​ប្រវត្តិរូប​ផ្ទាល់​ខ្លួន​ដែល​បាន​រក្សាទុក​ក្នុង​ឧបករណ៍​របស់​អ្នក ដូចជា ឈ្មោះ និង​ព័ត៌មាន​ទំនាក់ទំនង​របស់​អ្នក។ នេះ​មាន​ន័យ​ថា​កម្មវិធី​អាច​កំណត់​អ្នក និង​ផ្ញើ​ព័ត៌មាន​ប្រវត្តិរូប​របស់​អ្នក​ទៅ​អ្នក​ផ្សេង។"</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"ឧបករណ៍ចាប់សញ្ញារាងកាយ(ដូចជាម៉ាស៊ីនវាស់ចង្វាក់បេះដូង)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"​ឲ្យ​​កម្មវិធី​ដើម្បី​ចូល​ដំណើរការ​ទិន្នន័យ​ពី​ឧបករណ៍​ចាប់​សញ្ញា​ដែល​អ្នក​ប្រើ​ ដើម្បី​វាស់​ពី​អ្វី​ដែល​កំពុង​កើត​ឡើង​នៅ​ខាង​ក្នុង​ខ្លួន​របស់​អ្នក​ដូច​ជា​ចង្វាក់​បេះដូង​។"</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"អាន​ចរន្ត​​សង្គម​របស់​អ្នក"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ និង​ធ្វើ​សម​កាល​កម្ម​បច្ចុប្បន្នភាព​សង្គម​ពី​អ្នក​ និង​មិត្តភ័ក្ដិ។ ប្រយ័ត្ន​ពេល​ចែករំលែក​ព័ត៌មាន វា​អនុញ្ញាត​ឲ្យ​កម្មវិធី​អាន​ការ​ទាក់ទង​រវាង​អ្នក​ និង​មិត្តភ័ក្ដិ​លើ​បណ្ដាញ​សង្គម ទាក់ទង​នឹង​ព័ត៌មាន​សម្ងាត់។ ចំណាំ៖​ សិទ្ធិ​នេះ​មិន​អាច​ត្រូវ​បាន​​អនុវត្ត​លើ​បណ្ដាញ​សង្គម​ទាំង​អស់​បាន​ទេ។"</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"សរសេរ​ទៅ​ចរន្ត​សង្គម​របស់​អ្នក"</string>
@@ -630,6 +644,12 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"ប្ដូរ​ស្ថានភាព WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"ឲ្យ​កម្មវិធី​តភ្ជាប់​ និង​ផ្ដាច់​កុំព្យូទ័រ​បន្ទះ​ពី​បណ្ដាញ WiMAX ។"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"ឲ្យ​កម្មវិធី​ភ្ជាប់​ទូរស័ព្ទ​ និង​ផ្ដាច់​ពី​បណ្ដាញ WiMAX ។"</string>
+    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
+    <skip />
     <string name="permlab_bluetooth" msgid="6127769336339276828">"ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ប៊្លូធូស"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"ឲ្យ​កម្មវិធី​មើល​ការ​កំណត់​រចនាសម្ព័ន្ធ​​ប៊្លូធូស​លើ​​កុំព្យូទ័រ​បន្ទះ ព្រម​ទាំង​ធ្វើ​ការ​តភ្ជាប់ និង​ទទួល​​ជា​មួយ​ឧបករណ៍​បាន​ផ្គូផ្គង។"</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"ឲ្យ​កម្មវិធី​មើល​​ការ​កំណត់​រចនាសម្ព័ន្ធ​ប៊្លូធូស​ក្នុង​ទូរស័ព្ទ ដើម្បី​ទទួល និង​តភ្ជាប់​ជា​មួយ​ឧបករណ៍​បាន​ផ្គូផ្គង។"</string>

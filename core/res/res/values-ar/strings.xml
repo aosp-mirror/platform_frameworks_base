@@ -135,6 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"مزامنة"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"عمليات حذف <xliff:g id="CONTENT_TYPE">%s</xliff:g> كثيرة للغاية."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"سعة تخزين الجهاز اللوحي ممتلئة! احذف بعض الملفات لإخلاء مساحة."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"سعة تخزين المشاهدة ممتلئة! احذف بعض الملفات لتحرير مساحة."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"سعة تخزين الهاتف ممتلئة. احذف بعض الملفات لإخلاء مساحة."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"قد تكون الشبكة مراقبة"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"بواسطة جهة خارجية غير معلومة"</string>
@@ -152,6 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"تشغيل الرنين"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"جارٍ إيقاف التشغيل..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"سيتم إيقاف تشغيل الجهاز اللوحي."</string>
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"سيتم إيقاف المشاهدة."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"سيتم إيقاف تشغيل هاتفك."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"هل تريد إيقاف التشغيل؟"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"إعادة تشغيل في الوضع الآمن"</string>
@@ -315,6 +317,10 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"للسماح للتطبيق باسترداد محتوى النافذة النشطة. يمكن للبرامج الضارة استرداد محتوى النافذة بالكامل وفحص جميع النصوص الموجودة بها باستثناء كلمات المرور."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"تمكين إمكانية الدخول مؤقتًا"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"يتيح لتطبيق تمكين إمكانية الدخول مؤقتًا بالجهاز. قد تتيح التطبيقات الضارة تمكين إمكانية الدخول بدون موافقة المستخدم."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"استرداد النافذة التي تم التقاطها"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"يتيح للتطبيق استعادة النافذة التي تم التقاطها. وقد تتمكن التطبيقات الضارة من تنفيذ تفاعل غير مصرح به مع نافذة التطبيق التي تنتحل صفة النظام."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"استرداد الإحصاءات الإطارية"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"يتيح للتطبيق جمع إحصاءات إطارية. وقد تتمكن التطبيقات الضارة من رصد الإحصاءات الإطارية للنوافذ من تطبيقات أخرى."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"تصفية الأحداث"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"للسماح لأحد التطبيقات بتسجيل فلتر إدخال يعمل على تصفية مجموعة البث من جميع أحداث المستخدمين قبل إرسالها. يمكن أن يتحكم برنامج ضار في واجهة المستخدم النظام دون تدخل المستخدم."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"إيقاف تشغيل جزئي"</string>
@@ -331,6 +337,10 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"‏للسماح للتطبيق ببث إشعار باستلام رسالة قصيرة SMS. قد تستخدم التطبيقات الضارة هذا لتزييف الرسائل القصيرة SMS الواردة."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"‏إرسال بث WAP-PUSH المستلم"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"‏للسماح للتطبيق ببث إشعار باستلام رسالة WAP PUSH. يمكن أن تستخدم التطبيقات الضارة هذا لتزيف استلام رسالة وسائط متعددة أو لاستبدال محتوى أي صفحة ويب بمتغيرات ضارة بشكل غير ملحوظ."</string>
+    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
+    <skip />
+    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
+    <skip />
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"تحديد عدد العمليات قيد التشغيل"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"للسماح للتطبيق بالتحكم في الحد الأقصى لعدد العمليات التي سيتم تشغيلها. غير مطلوب على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"فرض إغلاق تطبيقات الخلفية"</string>
@@ -460,6 +470,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"للسماح للتطبيق بقراءة المعلومات الشخصية في الملف الشخصي المخزنة على الجهاز، مثل اسمك ومعلومات جهات الاتصال. ويعني ذلك أنه يمكن للتطبيق التعرف عليك كما يمكنه إرسال معلومات ملفك الشخصي إلى الآخرين."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"تعديل بطاقة جهة الاتصال الخاصة"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"للسماح للتطبيق بتغيير المعلومات الشخصية في الملف الشخصي المخزنة على الجهاز أو الإضافة إليها، مثل اسمك ومعلومات جهات الاتصال. ويعني ذلك أنه يمكن للتطبيق التعرف عليك كما يمكنه إرسال معلومات ملفك الشخصي إلى الآخرين."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"أجهزة استشعار الجسم (مثل شاشات معدل ضربات القلب)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"للسماح للتطبيق بالدخول إلى البيانات من أجهزة الاستشعار التي تستخدمها لقياس ما يجري داخل جسمك، مثل معدل ضربات القلب."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"قراءة المشاركات الاجتماعية"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"للسماح للتطبيق بالدخول إلى التحديثات الاجتماعية منك ومن أصدقائك ومزامنتها. توخ الحذر عند مشاركة المعلومات، حيث يتيح هذا للتطبيق قراءة عمليات التواصل بينك وبين أصدقائك على الشبكات الاجتماعية، بغض النظر عن مدى السرية. ملاحظة: لا يجوز فرض هذا الإذن على جميع الشبكات الاجتماعية."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"كتابة إلى المشاركات الاجتماعية"</string>
@@ -630,6 +642,12 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"‏تغيير حالة WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"‏للسماح للتطبيق بتوصيل الجهاز اللوحي بشبكات WiMAX وقطع اتصاله بها."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"‏للسماح للتطبيق بتوصيل الهاتف بشبكات WiMAX وقطع اتصاله بها."</string>
+    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
+    <skip />
     <string name="permlab_bluetooth" msgid="6127769336339276828">"الاتصال بأجهزة بلوتوث"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"للسماح للتطبيق بعرض تهيئة البلوتوث على الجهاز اللوحي وإجراء اتصالات وقبولها مع الأجهزة المقترنة."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"للسماح للتطبيق بعرض تهيئة البلوتوث على الهاتف وإجراء اتصالات وقبولها مع الأجهزة المقترنة."</string>

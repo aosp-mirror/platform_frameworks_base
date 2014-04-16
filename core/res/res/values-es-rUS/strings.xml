@@ -135,6 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sincronización"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Demasiadas eliminaciones de <xliff:g id="CONTENT_TYPE">%s</xliff:g>"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Se ha agotado el espacio de almacenamiento de la tablet. Elimina algunos archivos para liberar espacio."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"El almacenamiento del reloj está completo. Elimina algunos archivos para liberar espacio."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Se ha agotado el espacio de almacenamiento del dispositivo. Elimina algunos archivos para liberar espacio."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Es posible que la red esté supervisada"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Por un tercero desconocido"</string>
@@ -152,6 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Timbre activado"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Apagando…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tu tablet se apagará."</string>
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Se apagará el reloj."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Tu dispositivo se apagará."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"¿Deseas apagarlo?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Reiniciar en modo seguro"</string>
@@ -315,6 +317,10 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Permite que la aplicación recupere el contenido de la ventana activa. Las aplicaciones maliciosas pueden recuperar el contenido completo de la ventana y examinar todo el texto, excepto las contraseñas."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"Activación temporal de la accesibilidad"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Permite a una aplicación activar temporalmente la accesibilidad en el dispositivo. Las aplicaciones maliciosas pueden activar la accesibilidad sin el consentimiento del usuario."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"recuperar token de ventana"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Permite que una aplicación recupere el token de ventana. Las aplicaciones maliciosas pueden interaccionar sin autorización con la ventana de la aplicación al hacerse pasar por el sistema."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"recuperar estadísticas de marcos"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"Permite que una aplicación recopile estadísticas de marcos. Las aplicaciones maliciosas pueden observar estas estadísticas de ventanas desde otras aplicaciones."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrar eventos"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permite que una aplicación registre un filtro de entrada que filtre la transmisión de todos los eventos del usuario antes de ser enviados. Las aplicaciones maliciosas pueden controlar la IU del sistema sin la intervención del usuario."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"cierre parcial"</string>
@@ -331,6 +337,10 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Permite que la aplicación transmita una notificación acerca de la recepción de un mensaje SMS. Las aplicaciones maliciosas pueden utilizar este permiso para falsificar mensajes SMS entrantes."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"enviar emisiones WAP-PUSH-recibido"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Permite que la aplicación transmita una notificación acerca de la recepción de un mensaje WAP PUSH. Las aplicaciones maliciosas pueden utilizar este permiso para falsificar la recepción de mensajes MMS o para reemplazar sin aviso el contenido de cualquier página web con variantes maliciosas."</string>
+    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
+    <skip />
+    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
+    <skip />
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"limitar la cantidad de procesos en ejecución"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Permite que la aplicación controle la cantidad máxima de procesos que se ejecutarán. Las aplicaciones normales no deben utilizar este permiso."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"forzar el cierre de aplicaciones de fondo"</string>
@@ -384,10 +394,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permite al propietario vincularse a la interfaz de nivel superior del servicio de widget. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar con un administrador de dispositivos"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permite enviar intentos a un administrador de dispositivos. Las aplicaciones normales no deberían necesitar este permiso."</string>
-    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
-    <skip />
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"vincular a una entrada de TV"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Permite al propietario vincularse a la interfaz de nivel superior de una entrada de TV. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"agregar o eliminar un administrador de dispositivos"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Permite al propietario agregar o eliminar administradores de dispositivos activos. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"cambiar la orientación de la pantalla"</string>
@@ -462,6 +470,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Permite que la aplicación consulte la información del perfil personal almacenada en el dispositivo, como el nombre o la información de contacto, lo que significa que la aplicación puede identificar al usuario y enviar la información de su perfil a otros usuarios."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"modif. tarjeta contacto propia"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Permite que la aplicación modifique la información del perfil personal almacenada en el dispositivo, como el nombre o la información de contacto, o que agregue contenido a esa información. Esto significa que puede identificarte y enviar la información de tu perfil a otros usuarios."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"sensores corporales (frec. card)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Permite que la aplicación acceda a datos de sensores que utilizas para medir lo que sucede en tu cuerpo, como la frecuencia cardíaca."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"Lectura de tu muro social"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Permite que la aplicación acceda a las actualizaciones de tus redes sociales y las de tus amigos, y que las sincronice. Ten cuidado al compartir información, ya que la aplicación puede utilizar este permiso para leer las conversaciones que tengas con tus amigos en las redes sociales sin tener en cuenta si son confidenciales. Nota: Este permiso no se puede utilizar en todas las redes sociales."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"Escritura en tu muro social"</string>
@@ -632,6 +642,12 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Cambiar el estado de WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Permite que la aplicación conecte la tablet a una red WiMAX y que la desconecte de ella."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Permite que la aplicación conecte el dispositivo a una red WiMAX y que lo desconecte de ella."</string>
+    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
+    <skip />
     <string name="permlab_bluetooth" msgid="6127769336339276828">"vincular con dispositivos Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Permite que la aplicación vea la configuración de Bluetooth de la tablet y que cree y acepte conexiones con los dispositivos sincronizados."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permite que la aplicación vea la configuración de Bluetooth del dispositivo y que cree y acepte conexiones con los dispositivos sincronizados."</string>

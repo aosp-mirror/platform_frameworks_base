@@ -135,6 +135,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synchronizovať"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Príliš veľa odstránených položiek služby <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Ukladací priestor tabletu je plný. Odstráňte niektoré súbory a uvoľnite miesto."</string>
+    <!-- no translation found for low_memory (4415914910770005166) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"Pamäť telefónu je plná. Odstráňte niektoré súbory a uvoľnite miesto."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Sieť môže byť monitorovaná"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Neznámou treťou stranou"</string>
@@ -152,6 +154,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Zvonenie je zapnuté"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Prebieha vypínanie..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Váš tablet bude vypnutý."</string>
+    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
+    <skip />
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Váš telefón bude vypnutý."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Chcete zariadenie vypnúť?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Reštartovať do núdzového režimu"</string>
@@ -315,6 +319,10 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Umožňuje aplikácii načítať obsah aktívneho okna. Škodlivé aplikácie môžu získať celý obsah okna a preskúmať celý jeho text okrem hesiel."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"dočasné povolenie zjednodušenia ovládania"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Umožňuje aplikácii dočasne povoliť zjednodušenie ovládania v zariadení. Škodlivé aplikáciu môžu zjednodušenie ovládania povoliť bez súhlasu používateľa."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"získať token okna"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Umožňuje aplikácii získať token okna. Škodlivé aplikácie sa môžu správať ako systém a vykonať neautorizovanú interakciu s oknom aplikácie."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"získať štatistiky rámcov"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"Umožňuje aplikácii zhromažďovať štatistiky rámcov. Škodlivé aplikácie môžu sledovať štatistiky rámcov okien z iných aplikácií."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrovanie udalostí"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Umožňuje aplikácii zaregistrovať vstupný filter, ktorý filtruje stream všetkých prenosov používateľa pred ich odvysielaním. Škodlivá aplikácia môže bez zásahu používateľa ovládať používateľské rozhranie systému."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"Čiastočné vypnutie"</string>
@@ -331,6 +339,10 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Umožňuje aplikácii vysielať oznámenie, že správa SMS bola doručená. Škodlivé aplikácie môžu toto nastavenie použiť na falšovanie prichádzajúcich správ SMS."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"odoslanie vysielania typu WAP-PUSH-received"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Umožňuje aplikácii vysielať oznámenie, že správa WAP PUSH bola doručená. Škodlivé aplikácie môžu použiť toto nastavenie na vytvorenie potvrdenia o doručení správy MMS alebo na utajené nahradenie obsahu akejkoľvek stránky škodlivými variantmi."</string>
+    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
+    <skip />
+    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
+    <skip />
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"obmedzenie počtu spustených procesov"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Umožňuje aplikácii kontrolovať maximálny počet spustených procesov. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"vynútiť zavretie aplikácií na pozadí"</string>
@@ -460,6 +472,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Umožňuje aplikácii čítať informácie v osobnom profile uložené v zariadení, ako je vaše meno a kontaktné informácie. Znamená to, že vás ostatné aplikácie môžu identifikovať a odoslať informácie o vašom profile iným aplikáciám."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"upraviť vlastnú kartu kontaktu"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Umožňuje aplikácii zmeniť alebo pridať do osobného profilu informácie uložené vo vašom zariadení, ako je vaše meno a kontaktné informácie. Znamená to, že vás aplikácia môže identifikovať a odoslať informácie o vašom profile ostatným aplikáciám."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"telesné senzory (napr. snímače tepu)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Umožňuje aplikácii pristupovať k údajom zo senzorov, pomocou ktorých meriate činnosť svojho tela, napríklad tep."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"čítať váš sociálny stream"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Umožňuje aplikácii pristupovať k sociálnym aktualizáciám od vás a vašich priateľov a synchronizovať ich. Pri zdieľaní informácií dávajte pozor – toto povolenie umožňuje aplikácii čítať komunikáciu medzi vami a vašimi priateľmi v sociálnych sieťach, a to bez ohľadu na jej dôvernosť. Poznámka: Toto povolenie nie je možné vynucovať v prípade všetkých sociálnych sietí."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"písať do vášho sociálneho streamu"</string>
@@ -544,9 +558,9 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Povoľuje prístup k ovládaču kernel MTP na implementáciu protokolu MTP USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testovanie hardvéru"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Umožňuje aplikácii ovládať rôzne periférie na účely testovania hardvéru."</string>
-    <string name="permlab_callPhone" msgid="3925836347681847954">"priame volanie na telefónne čísla"</string>
+    <string name="permlab_callPhone" msgid="3925836347681847954">"priamo volať na telefónne čísla"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Umožňuje aplikácii volať telefónne čísla bez vášho zásahu. V dôsledku toho sa môžu účtovať neočakávané poplatky alebo sa môžu uskutočniť neočakávané hovory. Toto povolenie neumožňuje aplikácii volať na čísla tiesňového volania."</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"priame volanie na ľubovoľné telefónne čísla"</string>
+    <string name="permlab_callPrivileged" msgid="4198349211108497879">"priamo volať na ľubovoľné telefónne čísla"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Umožňuje aplikácii volať na akékoľvek telefónne číslo (bez vášho zásahu) vrátane čísiel tiesňového volania. Škodlivé aplikácie môžu uskutočňovať zbytočné a nezákonné volania na tiesňové linky."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"priamo spustiť nastavenie tabletu CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"priamo spustiť nastavenie telefónu CDMA"</string>
@@ -630,6 +644,12 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Zmeniť stav siete WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Umožňuje aplikácii pripojiť tablet k sieťam WiMAX a odpojiť ho od nich."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Umožňuje aplikácii pripojiť telefón k sieťam WiMAX a odpojiť ho od nich."</string>
+    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
+    <skip />
     <string name="permlab_bluetooth" msgid="6127769336339276828">"párovať so zariadeniami Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Umožňuje aplikácii zobraziť informácie o konfigurácii Bluetooth na tablete. Taktiež jej umožňuje nadväzovať a akceptovať spojenia so spárovanými zariadeniami."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Umožňuje aplikácii zobraziť informácie o konfigurácii Bluetooth na telefóne. Taktiež jej umožňuje nadväzovať a akceptovať spojenia so spárovanými zariadeniami."</string>

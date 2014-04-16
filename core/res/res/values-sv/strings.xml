@@ -135,6 +135,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synkronisera"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"För många <xliff:g id="CONTENT_TYPE">%s</xliff:g>-borttagningar."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Pekdatorns lagringsutrymme är fullt. Ta bort några filer för att frigöra utrymme."</string>
+    <!-- no translation found for low_memory (4415914910770005166) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"Mobilens lagringsutrymme är fullt. Ta bort några filer för att frigöra utrymme."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Nätverket kan vara övervakat"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Av en okänd tredje part"</string>
@@ -152,6 +154,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringsignal på"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutar…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din surfplatta stängs av."</string>
+    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
+    <skip />
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Din telefon stängs av."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vill du stänga av?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Starta om i felsäkert läge"</string>
@@ -315,6 +319,10 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Tillåter att appen hämtar innehållet i det aktiva fönstret. Skadliga appar kan hämta allt innehåll i fönstret och läsa all text utom lösenord."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"aktivera tillgänglighetsläget tillfälligt"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Tillåt att en app tillfälligt aktiverar tillgänglighetsläget på enheten. Skadliga appar kan aktivera tillgänglighetsläget utan användarens medgivande."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"hämta fönstrets token"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Appen tillåts hämta fönstrets token. Skadliga appar kan interagera med appens fönster på ett otillåtet sätt och efterlikna systemet."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"hämta ramstatistik"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"Appen tillåts samla in ramstatistik. Skadliga appar kan registrera statistik om ramar i andra appars fönster."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrera händelser"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Tillåter att appen registrerar indatafilter som filtrerar flödet med användarhändelser innan de skickas. Skadliga appar kan styra systemets användargränssnitt utan att användaren gör något."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"avsluta delvis"</string>
@@ -331,6 +339,10 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Tillåter att appen sänder ut en avisering när SMS tas emot. Skadliga appar kan använda detta för att förfalska inkommande SMS."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"skicka WAP-PUSH-mottagen sändning"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Tillåter att appen skickar ett meddelande om att ett WAP PUSH-meddelande har tagits emot. Skadliga appar kan använda detta för att förfalska mottagning av MMS eller för att obemärkt byta ut innehållet på en webbsida mot skadligt innehåll."</string>
+    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
+    <skip />
+    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
+    <skip />
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"begränsa antalet processer som körs"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Tillåter att appen styr högsta antalet processer som körs. Behövs inte för vanliga appar."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"tvinga bakgrundsappar att avslutas"</string>
@@ -460,6 +472,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Tillåter att appen läser personliga profiluppgifter som sparats på din enhet, t.ex. ditt namn och kontaktuppgifter. Det innebär att appen kan identifiera dig och skicka profiluppgifter till andra."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"ändra ditt eget kontaktkort"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Tillåter att appen ändrar eller lägger till personliga profiluppgifter som sparats på din enhet, till exempel ditt namn och dina kontaktuppgifter. Det innebär att appen kan identifiera dig och skicka profiluppgifter till andra."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"kroppssens. (för hjärtat m.m.)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Tillåter att appen får åtkomst till data från sensorer som används för att mäta vad som sker inuti kroppen, till exempel hjärtfrekvens."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"läs mitt sociala flöde"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Tillåter att appen kommer åt och synkroniserar sociala uppdateringar från dig och dina vänner. Var försiktig när du delar information – med den här behörigheten tillåts appen att läsa kommunikation mellan dig och dina vänner på sociala nätverk oavsett sekretessnivå. Observera att den här behörigheten kanske inte är tillämplig på alla sociala nätverk."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"skriv till mitt sociala flöde"</string>
@@ -630,6 +644,12 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"ändra WiMAX-status"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Tillåter att appen ansluter surfplattan till eller kopplar från WiMAX-nätverk."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Tillåter att appen ansluter mobilen till eller kopplar från WiMAX-nätverk."</string>
+    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
+    <skip />
     <string name="permlab_bluetooth" msgid="6127769336339276828">"koppla till Bluetooth-enheter"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Tillåter att appen kommer åt pekdatorns Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Tillåter att appen kommer åt mobilens Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>

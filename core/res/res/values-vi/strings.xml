@@ -135,6 +135,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Đồng bộ hóa"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Quá nhiều lần xóa <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Bộ nhớ máy tính bảng đã đầy. Hãy xóa một số tệp để tạo thêm dung lượng."</string>
+    <!-- no translation found for low_memory (4415914910770005166) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"Bộ nhớ điện thoại đã đầy. Hãy xóa một số tệp để tạo thêm dung lượng."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Mạng có thể được giám sát"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Bởi một bên thứ ba không xác định"</string>
@@ -152,6 +154,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Bật chuông"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Đang tắt…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Máy tính bảng của bạn sẽ tắt."</string>
+    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
+    <skip />
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Điện thoại của bạn sẽ tắt."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Bạn có muốn tắt không?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Khởi động lại ở chế độ an toàn"</string>
@@ -315,6 +319,10 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Cho phép ứng dụng truy xuất nội dung của cửa sổ hiện hành. Ứng dụng độc hại có thể truy xuất toàn bộ nội dung của cửa sổ cũng như xem xét toàn bộ văn bản của cửa sổ ngoại trừ mật khẩu."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"tạm thời bật trợ năng"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Cho phép ứng dụng tạm thời bật trợ năng trên thiết bị. Các ứng dụng độc hại có thể bật trợ năng mà không có sự đồng ý của người dùng."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"truy xuất mã thông báo cửa sổ"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Cho phép một ứng dụng truy xuất mã thông báo cửa sổ. Các ứng dụng độc hại có thể thực hiện hoạt động tương tác trái phép với cửa sổ ứng dụng mạo danh hệ thống."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"truy xuất số liệu thống kê về khung"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"Cho phép một ứng dụng thu thập số liệu thống kê về khung. Ứng dụng độc hại có thể quan sát số liệu thống kê về khung của cửa sổ từ ứng dụng khác."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"lọc sự kiện"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Cho phép ứng dụng đăng ký bộ lọc dữ liệu nhập để lọc luồng tất cả các sự kiện người dùng trước khi chúng được gửi đi. Ứng dụng độc hại có thể kiểm soát Giao diện người dùng hệ thống mà không cần sự can thiệp của người dùng."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"tắt từng phần"</string>
@@ -331,6 +339,10 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Cho phép ứng dụng truyền phát thông báo cho biết đã nhận được tin nhắn SMS. Ứng dụng độc hại có thể sử dụng quyền này để giả mạo tin nhắn SMS đến."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"gửi truyền phát WAP-PUSH nhận được"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Cho phép ứng dụng truyền phát thông báo cho biết rằng đã nhận được tin nhắn WAP PUSH. Ứng dụng độc hại có thể sử dụng quyền này để giả mạo xác nhận đã nhận được tin nhắn MMS hoặc ngầm thay thế nội dung của bất kỳ trang web nào bằng các biến thể độc hại."</string>
+    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
+    <skip />
+    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
+    <skip />
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"giới hạn số quá trình đang chạy"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Cho phép ứng dụng kiểm soát số quy trình tối đa sẽ chạy. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"buộc ứng dụng nền đóng"</string>
@@ -384,10 +396,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ tiện ích con. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"tương tác với quản trị viên thiết bị"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Cho phép chủ sở hữu gửi các ý định đến quản trị viên thiết bị. Không cần thiết cho các ứng dụng thông thường."</string>
-    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
-    <skip />
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"liên kết với đầu vào TV"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của đầu vào TV. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"thêm hoặc xóa quản trị viên thiết bị"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Cho phép chủ sở hữu thêm hoặc xóa quản trị viên thiết bị đang hoạt động. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"thay đổi hướng màn hình"</string>
@@ -462,6 +472,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Cho phép ứng dụng đọc thông tin tiểu sử cá nhân được lưu trữ trên thiết bị, chẳng hạn như tên và thông tin liên hệ của bạn. Điều này có nghĩa là ứng dụng có thể xác định danh tính của bạn và gửi thông tin tiểu sử của bạn cho người khác."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"sửa đổi thẻ liên hệ của riêng bạn"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Cho phép ứng dụng thay đổi hoặc thêm vào thông tin tiểu sử cá nhân được lưu trữ trên thiết bị, chẳng hạn như tên và thông tin liên hệ của bạn. Điều này có nghĩa là ứng dụng có thể xác định danh tính của bạn và gửi thông tin tiểu sử của bạn cho người khác."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"cảm biến cơ thể (như máy đo nhịp tim)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Cho phép ứng dụng truy cập dữ liệu từ cảm biến mà bạn sử dụng để đo những gì đang diễn ra bên trong cơ thể của bạn, chẳng hạn như nhịp tim."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"đọc luồng xã hội của bạn"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Cho phép ứng dụng truy cập và đồng bộ hóa các cập nhật xã hội của bạn và bạn bè bạn. Hãy cẩn trọng khi chia sẻ thông tin -- việc này có thể cho phép ứng dụng đọc thông tin liên lạc giữa bạn và bạn bè bạn trên các mạng xã hội, bất kể tính bí mật là gì. Lưu ý: quyền này có thể không được thực thi trên tất cả các mạng xã hội."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ghi luồng xã hội của bạn"</string>
@@ -632,6 +644,12 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Thay đổi trạng thái WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Cho phép ứng dụng kết nối máy tính bảng và ngắt kết nối máy tính bảng khỏi mạng WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Cho phép ứng dụng kết nối điện thoại và ngắt kết nối điện thoại khỏi mạng WiMAX."</string>
+    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
+    <skip />
     <string name="permlab_bluetooth" msgid="6127769336339276828">"ghép nối với thiết bị Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Cho phép ứng dụng xem cấu hình của Bluetooth trên máy tính bảng và tạo và chấp nhận các kết nối với các thiết bị được ghép nối."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Cho phép ứng dụng xem cấu hình của Bluetooth trên điện thoại, tạo và chấp nhận các kết nối với các thiết bị được ghép nối."</string>

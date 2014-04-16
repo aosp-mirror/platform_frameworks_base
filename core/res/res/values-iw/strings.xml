@@ -135,6 +135,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"סינכרון"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"יש מחיקות רבות מדי של <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"שטח האחסון של הטאבלט מלא. מחק קבצים כדי לפנות מקום."</string>
+    <!-- no translation found for low_memory (4415914910770005166) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"שטח האחסון של הטלפון מלא. מחק חלק מהקבצים כדי לפנות שטח."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ייתכן שהרשת מנוטרת"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"על ידי צד שלישי לא מוכר"</string>
@@ -152,6 +154,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"צלצול מופעל"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"מכבה..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"הטאבלט שלך יכבה."</string>
+    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
+    <skip />
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"הטלפון שלך יכובה."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"האם ברצונך לבצע כיבוי?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"אתחל למצב בטוח"</string>
@@ -315,6 +319,10 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"מאפשר לאפליקציה לאחזר את התוכן של החלון הפעיל. אפליקציות זדוניות עלולות לאחזר את תוכן החלון כולו ולבחון את כל הטקסט שבו, מלבד סיסמאות."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"הפעלת נגישות זמנית"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"מאפשר לאפליקציה להפעיל באופן זמני נגישות במכשיר. אפליקציות זדוניות עלולות לאפשר נגישות ללא הסכמת משתמש."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"אחזור אסימון חלון"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"מאפשרת לאפליקציה לאחזר את אסימון החלון. אפליקציות זדוניות עשויות לבצע אינטראקציה בלתי מורשית עם חלון האפליקציה, ולהעמיד פנים שהן המערכת."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"אחזור סטטיסטיקת מסגרת"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"מאפשרת לאפליקציה לאסוף סטטיסטיקת מסגרת. אפליקציות זדוניות עשויות לבחון את סטטיסטיקת המסגרת של חלונות מאפליקציות אחרות."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"סנן אירועים"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"‏מאפשר לאפליקציה לרשום מסנן קלט שמסנן את הזרם של כל אירועי המשתמש לפני שהם נשלחים. אפליקציה זדונית עשויה לשלוט ב-UI של המערכת ללא התערבות משתמש."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"כיבוי חלקי"</string>
@@ -331,6 +339,10 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"‏מאפשר לאפליקציה לשדר התראה על כך שהתקבלה הודעת SMS. אפליקציות זדוניות עלולות להשתמש בכך כדי לזייף הודעות SMS נכנסות."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"‏שלח שידור שהתקבל באמצעות WAP-PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"‏מאפשר לאפליקציה לשדר התראה על כך שהתקבלה הודעה מסוג WAP PUSH. אפליקציות זדוניות עלולות להשתמש בכך כדי לזייף קבלה של הודעות MMS או כדי להחליף בחשאי את התוכן של דף אינטרנט כלשהו בגירסאות זדוניות."</string>
+    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
+    <skip />
+    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
+    <skip />
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"הגבל את מספר התהליכים הפועלים"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"מאפשר לאפליקציה לשלוט על המספר המרבי של תהליכים שיפעלו. הרשאה זו לעולם אינה נחוצה לאפליקציות רגילים."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"אילוץ סגירה של אפליקציות ברקע"</string>
@@ -460,6 +472,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"מאפשר לאפליקציה לקרוא פרטים מהפרופיל האישי המאוחסנים במכשיר, כגון שמך ופרטי אנשי הקשר שלך. משמעות הדבר שהאפליקציה תוכל לזהות אותך ולשלוח את פרטי הפרופיל שלך לאנשים אחרים."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"שינוי כרטיס איש הקשר שלך"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"מאפשר לאפליקציה לשנות או להוסיף נתונים לפרטי הפרופיל האישי המאוחסנים במכשיר, כגון שמך ופרטי הקשר שלך. משמעות הדבר שהאפליקציה יכולה לזהות אותך ועשוי לשלוח את פרטי הפרופיל שלך לאנשים אחרים."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"חיישני גוף (כמו מוניטורים עבור קצב לב)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"מאפשר לאפליקציה לגשת לנתוני חיישנים שבהם אתה משתמש כדי למדוד פעילות המתרחשת בתוך הגוף, כמו קצב לב."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"קריאת הזרם החברתי שלך"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"מאפשר לאפליקציה גישה ויכולת סנכרון של עדכונים חברתיים שאתה וחבריך מבצעים. היזהר בעת שיתוף מידע -- הדבר מתיר לאפליקציה לקרוא התכתבויות בינך ובין חבריך ברשתות חברתיות, ללא התחשבות בסודיות. שים לב: ייתכן שאישור זה לא נאכף בכל הרשתות החברתיות."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"כתיבה בזרם החברתי שלך"</string>
@@ -630,6 +644,12 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"‏שנה את מצב WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"‏מאפשר לאפליקציה לחבר את הטאבלט לרשתות WiMAX ולהתנתק מהן."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"‏מאפשר לאפליקציה לחבר את הטלפון לרשתות WiMAX ולהתנתק מהן."</string>
+    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
+    <skip />
     <string name="permlab_bluetooth" msgid="6127769336339276828">"‏התאמה למכשירי Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"‏מאפשר לאפליקציה להציג את תצורת ה-Bluetooth בטאבלט, וכן ליצור ולקבל חיבורים עם מכשירים מותאמים."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"‏מאפשר לאפליקציה להציג את תצורת ה-Bluetooth בטלפון, וכן ליצור ולקבל חיבורים עם מכשירים מותאמים."</string>

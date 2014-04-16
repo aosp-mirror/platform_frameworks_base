@@ -160,6 +160,8 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Memia blers cuntegns stizzads (<xliff:g id="CONTENT_TYPE">%s</xliff:g>)."</string>
     <!-- no translation found for low_memory (6494019234102154896) -->
     <skip />
+    <!-- no translation found for low_memory (4415914910770005166) -->
+    <skip />
     <!-- no translation found for low_memory (3475999286680000541) -->
     <skip />
     <!-- no translation found for ssl_ca_cert_warning (5848402127455021714) -->
@@ -185,6 +187,8 @@
     <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Vegn serrà..."</string>
     <!-- no translation found for shutdown_confirm (3385745179555731470) -->
+    <skip />
+    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
     <skip />
     <!-- no translation found for shutdown_confirm (649792175242821353) -->
     <skip />
@@ -478,6 +482,14 @@
     <skip />
     <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
     <skip />
+    <!-- no translation found for permlab_retrieveWindowToken (7154762602367758602) -->
+    <skip />
+    <!-- no translation found for permdesc_retrieveWindowToken (668173747687795074) -->
+    <skip />
+    <!-- no translation found for permlab_frameStats (7056374987314361639) -->
+    <skip />
+    <!-- no translation found for permdesc_frameStats (4758001089491284919) -->
+    <skip />
     <!-- no translation found for permlab_filter_events (8675535648807427389) -->
     <skip />
     <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
@@ -503,6 +515,10 @@
     <skip />
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"trametter in broadcast retschavì da WAP-PUSH"</string>
     <!-- no translation found for permdesc_broadcastWapPush (4783402525039442729) -->
+    <skip />
+    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
+    <skip />
+    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
     <skip />
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"limitar il dumber maximal da process exequids"</string>
     <!-- no translation found for permdesc_setProcessLimit (7318061314040879542) -->
@@ -747,6 +763,10 @@
     <!-- no translation found for permlab_writeProfile (907793628777397643) -->
     <skip />
     <!-- no translation found for permdesc_writeProfile (5552084294598465899) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors (4871091374767171066) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors (2998865085124153531) -->
     <skip />
     <!-- no translation found for permlab_readSocialStream (1268920956152419170) -->
     <skip />
@@ -1056,6 +1076,12 @@
     <!-- no translation found for permdesc_changeWimaxState (3156456504084201805) -->
     <skip />
     <!-- no translation found for permdesc_changeWimaxState (697025043004923798) -->
+    <skip />
+    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
     <skip />
     <!-- no translation found for permlab_bluetooth (6127769336339276828) -->
     <skip />
