@@ -22,6 +22,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -2040,5 +2041,44 @@ public class DevicePolicyManager {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
         }
+    }
+
+    /**
+     * Called by profile or device owner to re-enable a system app that was disabled by default
+     * when the managed profile was created. This should only be called from a profile or device
+     * owner running within a managed profile.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName The package to be re-enabled in the current profile.
+     */
+    public void enableSystemApp(ComponentName admin, String packageName) {
+        if (mService != null) {
+            try {
+                mService.enableSystemApp(admin, packageName);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to install package: " + packageName);
+            }
+        }
+    }
+
+    /**
+     * Called by profile or device owner to re-enable system apps by intent that were disabled
+     * by default when the managed profile was created. This should only be called from a profile
+     * or device owner running within a managed profile.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param intent An intent matching the app(s) to be installed. All apps that resolve for this
+     *               intent will be re-enabled in the current profile.
+     * @returns int The number of activities that matched the intent and were installed.
+     */
+    public int enableSystemApp(ComponentName admin, Intent intent) {
+        if (mService != null) {
+            try {
+                return mService.enableSystemAppWithIntent(admin, intent);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to install packages matching filter: " + intent);
+            }
+        }
+        return 0;
     }
 }
