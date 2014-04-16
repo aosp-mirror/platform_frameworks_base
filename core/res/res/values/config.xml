@@ -1332,10 +1332,10 @@
          Example: com.google.android.myapp/.resolver.MyResolverActivity  -->
     <string name="config_customResolverActivity"></string>
 
-    <!-- Name of the activity that prompts the user to reject, accept, or whitelist
+    <!-- Name of the activity or service that prompts the user to reject, accept, or whitelist
          an adb host's public key, when an unwhitelisted host connects to the local adbd.
          Can be customized for other product types -->
-    <string name="config_customAdbPublicKeyActivity"
+    <string name="config_customAdbPublicKeyConfirmationComponent"
             >com.android.systemui/com.android.systemui.usb.UsbDebuggingActivity</string>
 
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
