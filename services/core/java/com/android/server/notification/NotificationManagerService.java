@@ -198,8 +198,7 @@ public class NotificationManagerService extends SystemService {
     private final UserProfiles mUserProfiles = new UserProfiles();
     private NotificationListeners mListeners;
     private ConditionProviders mConditionProviders;
-
-    private final NotificationUsageStats mUsageStats = new NotificationUsageStats();
+    private NotificationUsageStats mUsageStats;
 
     private static final String EXTRA_INTERCEPT = "android.intercept";
 
@@ -858,6 +857,7 @@ public class NotificationManagerService extends SystemService {
         });
         final File systemDir = new File(Environment.getDataDirectory(), "system");
         mPolicyFile = new AtomicFile(new File(systemDir, "notification_policy.xml"));
+        mUsageStats = new NotificationUsageStats(getContext());
 
         importOldBlockDb();
 
