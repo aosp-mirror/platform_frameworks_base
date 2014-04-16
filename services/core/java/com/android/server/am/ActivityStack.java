@@ -1025,6 +1025,16 @@ final class ActivityStack {
         return mStackSupervisor.isFrontStack(this);
     }
 
+    private void setVisibile(ActivityRecord r, boolean visible) {
+        r.visible = visible;
+        mWindowManager.setAppVisibility(r.appToken, visible);
+        final ArrayList<ActivityStack> containers = r.mChildContainers;
+        for (int containerNdx = containers.size() - 1; containerNdx >= 0; --containerNdx) {
+            ActivityContainer container = containers.get(containerNdx).mActivityContainer;
+            container.setVisible(visible);
+        }
+    }
+
     /**
      * Version of ensureActivitiesVisible that can easily be called anywhere.
      */
@@ -1103,8 +1113,7 @@ final class ActivityStack {
                             if (!r.visible) {
                                 if (DEBUG_VISBILITY) Slog.v(
                                         TAG, "Starting and making visible: " + r);
-                                r.visible = true;
-                                mWindowManager.setAppVisibility(r.appToken, true);
+                                setVisibile(r, true);
                             }
                             if (r != starting) {
                                 mStackSupervisor.startSpecificActivityLocked(r, false, false);
@@ -1130,7 +1139,7 @@ final class ActivityStack {
                                 if (mTranslucentActivityWaiting != null) {
                                     mUndrawnActivitiesBelowTopTranslucent.add(r);
                                 }
-                                mWindowManager.setAppVisibility(r.appToken, true);
+                                setVisibile(r, true);
                                 r.sleeping = false;
                                 r.app.pendingUiClean = true;
                                 r.app.thread.scheduleWindowVisibility(r.appToken, true);
@@ -1165,9 +1174,8 @@ final class ActivityStack {
                     // sure they no longer are keeping the screen frozen.
                     if (r.visible) {
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Making invisible: " + r);
-                        r.visible = false;
                         try {
-                            mWindowManager.setAppVisibility(r.appToken, false);
+                            setVisibile(r, false);
                             switch (r.state) {
                                 case STOPPING:
                                 case STOPPED:
