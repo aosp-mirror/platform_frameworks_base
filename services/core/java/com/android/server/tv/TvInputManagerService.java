@@ -277,8 +277,14 @@ public final class TvInputManagerService extends SystemService {
                 }
                 synchronized (mLock) {
                     sessionState.session = session;
-                    sendSessionTokenToClientLocked(sessionState.client, sessionState.name,
-                            sessionToken, sessionState.seq, userId);
+                    if (session == null) {
+                        removeSessionStateLocked(sessionToken, userId);
+                        sendSessionTokenToClientLocked(sessionState.client, sessionState.name, null,
+                                sessionState.seq, userId);
+                    } else {
+                        sendSessionTokenToClientLocked(sessionState.client, sessionState.name,
+                                sessionToken, sessionState.seq, userId);
+                    }
                 }
             }
         };
@@ -288,6 +294,7 @@ public final class TvInputManagerService extends SystemService {
             service.createSession(callback);
         } catch (RemoteException e) {
             Log.e(TAG, "error in createSession", e);
+            removeSessionStateLocked(sessionToken, userId);
             sendSessionTokenToClientLocked(sessionState.client, sessionState.name, null,
                     sessionState.seq, userId);
         }
@@ -305,6 +312,19 @@ public final class TvInputManagerService extends SystemService {
             // This means that the session creation failed. We might want to disconnect the service.
             updateServiceConnectionLocked(name, userId);
         }
+    }
+
+    private void removeSessionStateLocked(IBinder sessionToken, int userId) {
+        // Remove the session state from the global session state map of the current user.
+        UserState userState = getUserStateLocked(userId);
+        SessionState sessionState = userState.sessionStateMap.remove(sessionToken);
+
+        // Also remove the session state from the session state map of the current service.
+        ServiceState serviceState = userState.serviceStateMap.get(sessionState.name);
+        if (serviceState != null) {
+            serviceState.sessionStateMap.remove(sessionToken);
+        }
+        updateServiceConnectionLocked(sessionState.name, userId);
     }
 
     private final class BinderService extends ITvInputManager.Stub {
@@ -474,17 +494,7 @@ public final class TvInputManagerService extends SystemService {
                         Log.e(TAG, "error in release", e);
                     }
 
-                    // Remove its state from the global session state map of the current user.
-                    UserState userState = getUserStateLocked(resolvedUserId);
-                    SessionState sessionState = userState.sessionStateMap.remove(sessionToken);
-
-                    // Also remove it from the session state map of the current service.
-                    ServiceState serviceState = userState.serviceStateMap.get(sessionState.name);
-                    if (serviceState != null) {
-                        serviceState.sessionStateMap.remove(sessionToken);
-                    }
-
-                    updateServiceConnectionLocked(sessionState.name, resolvedUserId);
+                    removeSessionStateLocked(sessionToken, resolvedUserId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
