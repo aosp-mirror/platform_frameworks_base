@@ -80,9 +80,25 @@ public class StatusBarKeyguardViewManager {
     public void show(Bundle options) {
         mShowing = true;
         mStatusBarWindowManager.setKeyguardShowing(true);
-        mPhoneStatusBar.showKeyguard();
-        mBouncer.prepare();
+        showBouncerOrKeyguard();
         updateBackButtonState();
+    }
+
+    /**
+     * Shows the notification keyguard or the bouncer depending on
+     * {@link KeyguardBouncer#needsFullscreenBouncer()}.
+     */
+    private void showBouncerOrKeyguard() {
+        if (mBouncer.needsFullscreenBouncer()) {
+
+            // The keyguard might be showing (already). So we need to hide it.
+            mPhoneStatusBar.hideKeyguard();
+            mBouncer.show();
+        } else {
+            mPhoneStatusBar.showKeyguard();
+            mBouncer.hide();
+            mBouncer.prepare();
+        }
     }
 
     public void showBouncer() {
@@ -94,8 +110,7 @@ public class StatusBarKeyguardViewManager {
      * Reset the state of the view.
      */
     public void reset() {
-        mBouncer.reset();
-        mPhoneStatusBar.showKeyguard();
+        showBouncerOrKeyguard();
         updateBackButtonState();
     }
 
@@ -106,7 +121,6 @@ public class StatusBarKeyguardViewManager {
 
     public void onScreenTurnedOn(final IKeyguardShowCallback callback) {
         mScreenOn = true;
-        mBouncer.onScreenTurnedOn();
         if (callback != null) {
             callbackAfterDraw(callback);
         }
@@ -185,7 +199,8 @@ public class StatusBarKeyguardViewManager {
 
     private void updateBackButtonState() {
         int vis = mContainer.getSystemUiVisibility();
-        if (mBouncer.isShowing()) {
+        boolean bouncerDismissable = mBouncer.isShowing() && !mBouncer.needsFullscreenBouncer();
+        if (bouncerDismissable || !mShowing) {
             mContainer.setSystemUiVisibility(vis & ~View.STATUS_BAR_DISABLE_BACK);
         } else {
             mContainer.setSystemUiVisibility(vis | View.STATUS_BAR_DISABLE_BACK);

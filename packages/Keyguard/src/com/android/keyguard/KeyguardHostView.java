@@ -22,10 +22,8 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.KeyguardUpdateMonitor.DisplayClientState;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.SearchManager;
 import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetHostView;
@@ -36,7 +34,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.media.RemoteControlClient;
@@ -44,7 +41,6 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -55,9 +51,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RemoteViews.OnClickHandler;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 public class KeyguardHostView extends KeyguardViewBase {
     private static final String TAG = "KeyguardHostView";
@@ -595,16 +589,16 @@ public class KeyguardHostView extends KeyguardViewBase {
     };
 
     @Override
-    public void onScreenTurnedOn() {
-        super.onScreenTurnedOn();
+    public void onResume() {
+        super.onResume();
         if (mViewStateManager != null) {
             mViewStateManager.showUsabilityHints();
         }
     }
 
     @Override
-    public void onScreenTurnedOff() {
-        super.onScreenTurnedOff();
+    public void onPause() {
+        super.onPause();
         // We use mAppWidgetToShow to show a particular widget after you add it-- once the screen
         // turns off we reset that behavior
         clearAppWidgetToShow();
