@@ -1998,7 +1998,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             IBinder parentActivityToken = data.readStrongBinder();
             IActivityContainerCallback callback =
-                    (IActivityContainerCallback) data.readStrongBinder();
+                    IActivityContainerCallback.Stub.asInterface(data.readStrongBinder());
             IActivityContainer activityContainer =
                     createActivityContainer(parentActivityToken, callback);
             reply.writeNoException();
@@ -4627,7 +4627,7 @@ class ActivityManagerProxy implements IActivityManager
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(parentActivityToken);
-        data.writeStrongBinder((IBinder)callback);
+        data.writeStrongBinder(callback == null ? null : callback.asBinder());
         mRemote.transact(CREATE_ACTIVITY_CONTAINER_TRANSACTION, data, reply, 0);
         reply.readException();
         final int result = reply.readInt();

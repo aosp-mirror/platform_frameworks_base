@@ -126,6 +126,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final int HANDLE_DISPLAY_ADDED = FIRST_SUPERVISOR_STACK_MSG + 5;
     static final int HANDLE_DISPLAY_CHANGED = FIRST_SUPERVISOR_STACK_MSG + 6;
     static final int HANDLE_DISPLAY_REMOVED = FIRST_SUPERVISOR_STACK_MSG + 7;
+    static final int CONTAINER_CALLBACK_VISIBILITY = FIRST_SUPERVISOR_STACK_MSG + 8;
 
     private final static String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
 
@@ -2952,6 +2953,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 case HANDLE_DISPLAY_REMOVED: {
                     handleDisplayRemovedLocked(msg.arg1);
                 } break;
+                case CONTAINER_CALLBACK_VISIBILITY: {
+                    final ActivityContainer container = (ActivityContainer) msg.obj;
+                    try {
+                        // We only send this message if mCallback is non-null.
+                        container.mCallback.setVisible(container.asBinder(), msg.arg1 == 1);
+                    } catch (RemoteException e) {
+                    }
+                }
             }
         }
     }
@@ -2962,6 +2971,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final ActivityStack mStack;
         final ActivityRecord mParentActivity;
         final String mIdString;
+
+        boolean mVisible = true;
 
         /** Display this ActivityStack is currently on. Null if not attached to a Display. */
         ActivityDisplay mActivityDisplay;
@@ -3107,6 +3118,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 mActivityDisplay.getBounds(outBounds);
             } else {
                 outBounds.set(0, 0);
+            }
+        }
+
+        void setVisible(boolean visible) {
+            if (mVisible != visible) {
+                mVisible = visible;
+                if (mCallback != null) {
+                    mHandler.obtainMessage(CONTAINER_CALLBACK_VISIBILITY, visible ? 1 : 0,
+                            0 /* unused */, this).sendToTarget();
+                }
             }
         }
 
