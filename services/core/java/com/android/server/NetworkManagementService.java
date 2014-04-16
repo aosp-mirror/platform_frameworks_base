@@ -868,36 +868,24 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void addRoute(String interfaceName, RouteInfo route) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        modifyRoute(interfaceName, ADD, route, DEFAULT);
+    public void addRoute(int netId, RouteInfo route) {
+        modifyRoute(netId, ADD, route);
     }
 
     @Override
-    public void removeRoute(String interfaceName, RouteInfo route) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        modifyRoute(interfaceName, REMOVE, route, DEFAULT);
+    public void removeRoute(int netId, RouteInfo route) {
+        modifyRoute(netId, REMOVE, route);
     }
 
-    @Override
-    public void addSecondaryRoute(String interfaceName, RouteInfo route) {
+    private void modifyRoute(int netId, String action, RouteInfo route) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        modifyRoute(interfaceName, ADD, route, SECONDARY);
-    }
 
-    @Override
-    public void removeSecondaryRoute(String interfaceName, RouteInfo route) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        modifyRoute(interfaceName, REMOVE, route, SECONDARY);
-    }
+        final Command cmd = new Command("network", "route", action, netId);
 
-    private void modifyRoute(String interfaceName, String action, RouteInfo route, String type) {
-        final Command cmd = new Command("interface", "route", action, interfaceName, type);
-
-        // create triplet: dest-ip-addr prefixlength gateway-ip-addr
+        // create triplet: interface dest-ip-addr/prefixlength gateway-ip-addr
         final LinkAddress la = route.getDestination();
-        cmd.appendArg(la.getAddress().getHostAddress());
-        cmd.appendArg(la.getNetworkPrefixLength());
+        cmd.appendArg(route.getInterface());
+        cmd.appendArg(la.getAddress().getHostAddress() + "/" + la.getNetworkPrefixLength());
         cmd.appendArg(route.getGateway().getHostAddress());
 
         try {
@@ -1966,35 +1954,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         try {
             mConnector.execute("network", "destroy", netId);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
-    public void addRouteForNetId(int netId, RouteInfo routeInfo) {
-        modifyRouteForNetId(netId, routeInfo, ADD);
-    }
-
-    @Override
-    public void removeRouteForNetId(int netId, RouteInfo routeInfo) {
-        modifyRouteForNetId(netId, routeInfo, REMOVE);
-    }
-
-    private void modifyRouteForNetId(int netId, RouteInfo routeInfo, String action) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
-        final Command cmd = new Command("network", "route", action, netId);
-
-        // create quadlet: dest-ip-addr prefixlength gateway-ip-addr iface
-        final LinkAddress la = routeInfo.getDestination();
-        cmd.appendArg(la.getAddress().getHostAddress());
-        cmd.appendArg(la.getNetworkPrefixLength());
-        cmd.appendArg(routeInfo.getGateway().getHostAddress());
-        cmd.appendArg(routeInfo.getInterface());
-
-        try {
-            mConnector.execute(cmd);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }

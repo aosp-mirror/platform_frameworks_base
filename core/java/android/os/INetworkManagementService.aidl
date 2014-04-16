@@ -99,24 +99,12 @@ interface INetworkManagementService
     /**
      * Add the specified route to the interface.
      */
-    void addRoute(String iface, in RouteInfo route);
+    void addRoute(int netId, in RouteInfo route);
 
     /**
      * Remove the specified route from the interface.
      */
-    void removeRoute(String iface, in RouteInfo route);
-
-    /**
-     * Add the specified route to a secondary interface
-     * This will go into a special route table to be accessed
-     * via ip rules
-     */
-    void addSecondaryRoute(String iface, in RouteInfo route);
-
-    /**
-     * Remove the specified secondary route.
-     */
-    void removeSecondaryRoute(String iface, in RouteInfo route);
+    void removeRoute(int netId, in RouteInfo route);
 
     /**
      * Set the specified MTU size
@@ -430,9 +418,6 @@ interface INetworkManagementService
      * remove a network
      */
     void removeNetwork(int netId);
-
-    void addRouteForNetId(int netId, in RouteInfo routeInfo);
-    void removeRouteForNetId(int netId, in RouteInfo routeInfo);
 
     void addLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
     void removeLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
