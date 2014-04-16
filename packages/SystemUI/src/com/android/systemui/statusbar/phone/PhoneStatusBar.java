@@ -2855,6 +2855,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     }
 
+    public boolean onMenuPressed() {
+        return mOnKeyguard && mStatusBarKeyguardViewManager.onMenuPressed();
+    }
+
     public boolean onBackPressed() {
         if (mOnKeyguard) {
             return mStatusBarKeyguardViewManager.onBackPressed();

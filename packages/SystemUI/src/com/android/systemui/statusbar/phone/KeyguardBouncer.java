@@ -142,4 +142,18 @@ public class KeyguardBouncer {
         }
         return false;
     }
+
+    public boolean onMenuPressed() {
+        ensureView();
+        if (mKeyguardView.handleMenuKey()) {
+
+            // We need to show it in case it is secure. If not, it will get dismissed in any case.
+            mRoot.setVisibility(View.VISIBLE);
+            mKeyguardView.requestFocus();
+            mKeyguardView.onResume();
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
