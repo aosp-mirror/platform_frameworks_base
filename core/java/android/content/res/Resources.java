@@ -1463,7 +1463,7 @@ public class Resources {
         private final long mTheme;
 
         // Needed by layoutlib.
-        /*package*/ int getNativeTheme() {
+        /*package*/ long getNativeTheme() {
             return mTheme;
         }
     }
