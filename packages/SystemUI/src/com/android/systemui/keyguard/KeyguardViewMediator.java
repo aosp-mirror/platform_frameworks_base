@@ -1285,6 +1285,9 @@ public class KeyguardViewMediator extends SystemUI {
                     flags |= StatusBarManager.DISABLE_SEARCH;
                 }
             }
+            if (isShowingAndNotOccluded()) {
+                flags |= StatusBarManager.DISABLE_HOME;
+            }
 
             if (DEBUG) {
                 Log.d(TAG, "adjustStatusBarLocked: mShowing=" + mShowing + " mOccluded=" + mOccluded

@@ -217,9 +217,9 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     }
 
     /**
-     * Called when the screen turned off.
+     * Called when the Keyguard is not actively shown anymore on the screen.
      */
-    public void onScreenTurnedOff() {
+    public void onPause() {
         if (DEBUG) Log.d(TAG, String.format("screen off, instance %s at %s",
                 Integer.toHexString(hashCode()), SystemClock.uptimeMillis()));
         // Once the screen turns off, we no longer consider this to be first boot and we want the
@@ -231,9 +231,9 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     }
 
     /**
-     * Called when the screen turned on.
+     * Called when the Keyguard is actively shown on the screen.
      */
-    public void onScreenTurnedOn() {
+    public void onResume() {
         if (DEBUG) Log.d(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
         mSecurityContainer.showPrimarySecurityScreen(false);
         mSecurityContainer.onResume(KeyguardSecurityView.SCREEN_ON);
@@ -474,6 +474,10 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     public void setLockPatternUtils(LockPatternUtils utils) {
         mLockPatternUtils = utils;
         mSecurityContainer.setLockPatternUtils(utils);
+    }
+
+    public SecurityMode getSecurityMode() {
+        return mSecurityContainer.getSecurityMode();
     }
 
     protected abstract void onUserSwitching(boolean switching);
