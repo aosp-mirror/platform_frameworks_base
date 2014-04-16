@@ -16,6 +16,7 @@
 #define LOG_NDEBUG 1
 #define LOG_TAG "VideoEditorMain"
 #include <dlfcn.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <utils/Log.h>
@@ -3371,7 +3372,7 @@ M4OSA_ERR M4MA_generateAudioGraphFile(JNIEnv* pEnv, M4OSA_Char* pInputFileURL,
     err = M4OSA_fileReadOpen (&inputFileHandle, pInputFileURL, M4OSA_kFileRead);
     if (inputFileHandle == M4OSA_NULL) {
         VIDEOEDIT_LOG_ERROR(ANDROID_LOG_INFO, "VIDEO_EDITOR",
-            "M4MA_generateAudioGraphFile: Cannot open input file 0x%lx", err);
+            "M4MA_generateAudioGraphFile: Cannot open input file 0x%" PRIx32, err);
         return err;
     }
 
@@ -3405,7 +3406,7 @@ M4OSA_ERR M4MA_generateAudioGraphFile(JNIEnv* pEnv, M4OSA_Char* pInputFileURL,
         bufferIn.m_bufferSize = samplesCountInBytes*sizeof(M4OSA_UInt16);
     } else {
         VIDEOEDIT_LOG_ERROR(ANDROID_LOG_INFO, "VIDEO_EDITOR",
-            "M4MA_generateAudioGraphFile: Malloc failed for bufferIn.m_dataAddress 0x%lx",
+            "M4MA_generateAudioGraphFile: Malloc failed for bufferIn.m_dataAddress 0x%" PRIx32,
             M4ERR_ALLOC);
         return M4ERR_ALLOC;
     }
@@ -3445,7 +3446,7 @@ M4OSA_ERR M4MA_generateAudioGraphFile(JNIEnv* pEnv, M4OSA_Char* pInputFileURL,
         if (err != M4NO_ERROR) {
             // if out value of bytes-read is 0, break
             if ( numBytesToRead == 0) {
-                VIDEOEDIT_LOG_ERROR(ANDROID_LOG_INFO, "VIDEO_EDITOR", "numBytesToRead 0x%lx",
+                VIDEOEDIT_LOG_ERROR(ANDROID_LOG_INFO, "VIDEO_EDITOR", "numBytesToRead 0x%" PRIx32,
                 numBytesToRead);
                 break; /* stop if file is empty or EOF */
             }
@@ -3497,7 +3498,7 @@ M4OSA_ERR M4MA_generateAudioGraphFile(JNIEnv* pEnv, M4OSA_Char* pInputFileURL,
 
     } while (numBytesToRead != 0);
 
-    VIDEOEDIT_LOG_ERROR(ANDROID_LOG_INFO, "VIDEO_EDITOR", "loop 0x%lx", volumeValuesCount);
+    VIDEOEDIT_LOG_ERROR(ANDROID_LOG_INFO, "VIDEO_EDITOR", "loop 0x%" PRIx32, volumeValuesCount);
 
     /* if some error occured in fwrite */
     if (numBytesToRead != 0) {
