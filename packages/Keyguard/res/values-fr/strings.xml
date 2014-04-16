@@ -20,6 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"Protection des touches"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Saisissez le code PIN."</string>
     <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Saisissez la clé PUK et le nouveau code PIN de la carte SIM."</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"Clé PUK de la carte SIM"</string>

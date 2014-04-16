@@ -20,6 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"Keyguard"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Введите PIN-код"</string>
     <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Введите PUK-код и новый PIN-код"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"PUK-код"</string>
