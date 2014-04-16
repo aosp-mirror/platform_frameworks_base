@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -44,10 +45,14 @@ import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManagerGlobal;
 
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,6 +69,11 @@ public class WallpaperManager {
     private static boolean DEBUG = false;
     private float mWallpaperXStep = -1;
     private float mWallpaperYStep = -1;
+
+    /** {@hide} */
+    private static final String PROP_WALLPAPER = "ro.config.wallpaper";
+    /** {@hide} */
+    private static final String PROP_WALLPAPER_COMPONENT = "ro.config.wallpaper_component";
 
     /**
      * Activity Action: Show settings for choosing wallpaper. Do not use directly to construct
@@ -298,8 +308,7 @@ public class WallpaperManager {
         
         private Bitmap getDefaultWallpaperLocked(Context context) {
             try {
-                InputStream is = context.getResources().openRawResource(
-                        com.android.internal.R.drawable.default_wallpaper);
+                InputStream is = openDefaultWallpaper(context);
                 if (is != null) {
                     int width = mService.getWidthHint();
                     int height = mService.getHeightHint();
@@ -403,8 +412,7 @@ public class WallpaperManager {
         horizontalAlignment = Math.max(0, Math.min(1, horizontalAlignment));
         verticalAlignment = Math.max(0, Math.min(1, verticalAlignment));
 
-        InputStream is = new BufferedInputStream(
-                resources.openRawResource(com.android.internal.R.drawable.default_wallpaper));
+        InputStream is = new BufferedInputStream(openDefaultWallpaper(mContext));
 
         if (is == null) {
             Log.e(TAG, "default wallpaper input stream is null");
@@ -429,8 +437,7 @@ public class WallpaperManager {
                     }
                 }
 
-                is = new BufferedInputStream(resources.openRawResource(
-                        com.android.internal.R.drawable.default_wallpaper));
+                is = new BufferedInputStream(openDefaultWallpaper(mContext));
 
                 RectF cropRectF;
 
@@ -479,8 +486,7 @@ public class WallpaperManager {
 
                 if (crop == null) {
                     // BitmapRegionDecoder has failed, try to crop in-memory
-                    is = new BufferedInputStream(resources.openRawResource(
-                            com.android.internal.R.drawable.default_wallpaper));
+                    is = new BufferedInputStream(openDefaultWallpaper(mContext));
                     Bitmap fullSize = null;
                     if (is != null) {
                         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -1009,6 +1015,53 @@ public class WallpaperManager {
      * wallpaper.
      */
     public void clear() throws IOException {
-        setResource(com.android.internal.R.drawable.default_wallpaper);
+        setStream(openDefaultWallpaper(mContext));
+    }
+
+    /**
+     * Open stream representing the default static image wallpaper.
+     *
+     * @hide
+     */
+    public static InputStream openDefaultWallpaper(Context context) {
+        final String path = SystemProperties.get(PROP_WALLPAPER);
+        if (!TextUtils.isEmpty(path)) {
+            final File file = new File(path);
+            if (file.exists()) {
+                try {
+                    return new FileInputStream(file);
+                } catch (IOException e) {
+                    // Ignored, fall back to platform default below
+                }
+            }
+        }
+        return context.getResources().openRawResource(
+                com.android.internal.R.drawable.default_wallpaper);
+    }
+
+    /**
+     * Return {@link ComponentName} of the default live wallpaper, or
+     * {@code null} if none is defined.
+     *
+     * @hide
+     */
+    public static ComponentName getDefaultWallpaperComponent(Context context) {
+        String flat = SystemProperties.get(PROP_WALLPAPER_COMPONENT);
+        if (!TextUtils.isEmpty(flat)) {
+            final ComponentName cn = ComponentName.unflattenFromString(flat);
+            if (cn != null) {
+                return cn;
+            }
+        }
+
+        flat = context.getString(com.android.internal.R.string.default_wallpaper_component);
+        if (!TextUtils.isEmpty(flat)) {
+            final ComponentName cn = ComponentName.unflattenFromString(flat);
+            if (cn != null) {
+                return cn;
+            }
+        }
+
+        return null;
     }
 }

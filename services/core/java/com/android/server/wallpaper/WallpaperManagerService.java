@@ -25,6 +25,7 @@ import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
 import android.app.PendingIntent;
 import android.app.WallpaperInfo;
+import android.app.WallpaperManager;
 import android.app.backup.BackupManager;
 import android.app.backup.WallpaperBackupHelper;
 import android.content.BroadcastReceiver;
@@ -844,13 +845,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         
         try {
             if (componentName == null) {
-                String defaultComponent = 
-                    mContext.getString(com.android.internal.R.string.default_wallpaper_component);
-                if (defaultComponent != null) {
-                    // See if there is a default wallpaper component specified
-                    componentName = ComponentName.unflattenFromString(defaultComponent);
-                    if (DEBUG) Slog.v(TAG, "Use default component wallpaper:" + componentName);
-                }
+                componentName = WallpaperManager.getDefaultWallpaperComponent(mContext);
                 if (componentName == null) {
                     // Fall back to static image wallpaper
                     componentName = IMAGE_WALLPAPER;
