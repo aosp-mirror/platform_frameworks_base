@@ -3192,7 +3192,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             Animation a = mAppTransition.loadAnimation(lp, transit, enter, width, height,
-                    containingFrame, contentInsets);
+                    mCurConfiguration.orientation, containingFrame, contentInsets);
             if (a != null) {
                 if (DEBUG_ANIM) {
                     RuntimeException e = null;

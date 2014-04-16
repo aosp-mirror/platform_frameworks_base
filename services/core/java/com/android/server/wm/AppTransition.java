@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -146,6 +147,9 @@ public class AppTransition implements Dump {
     private int mNextAppTransitionStartY;
     private int mNextAppTransitionStartWidth;
     private int mNextAppTransitionStartHeight;
+
+    private Rect mTmpFromClipRect = new Rect();
+    private Rect mTmpToClipRect = new Rect();
 
     private final static int APP_STATE_IDLE = 0;
     private final static int APP_STATE_READY = 1;
@@ -485,7 +489,7 @@ public class AppTransition implements Dump {
      * activity that is leaving, and the activity that is entering.
      */
     Animation createAlternateThumbnailEnterExitAnimationLocked(int thumbTransitState, int appWidth,
-                                                    int appHeight, int transit,
+                                                    int appHeight, int orientation, int transit,
                                                     Rect containingFrame, Rect contentInsets) {
         Animation a;
         final int thumbWidthI = mNextAppTransitionThumbnail.getWidth();
@@ -493,21 +497,36 @@ public class AppTransition implements Dump {
         final int thumbHeightI = mNextAppTransitionThumbnail.getHeight();
         final float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
 
+        // Used for the ENTER_SCALE_UP and EXIT_SCALE_DOWN transitions
+        float scale = 1f;
+        int scaledTopDecor = 0;
+
         switch (thumbTransitState) {
             case THUMBNAIL_TRANSITION_ENTER_SCALE_UP: {
                 // Entering app scales up with the thumbnail
-                float scale = thumbWidth / appWidth;
-                int unscaledThumbHeight = (int) (thumbHeight / scale);
-                int scaledTopDecor = (int) (scale * contentInsets.top);
-                Rect fromClipRect = new Rect(containingFrame);
-                fromClipRect.bottom = (fromClipRect.top + unscaledThumbHeight);
-                Rect toClipRect = new Rect(containingFrame);
+                if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    // In portrait, we scale the width and clip to the top/left square
+                    scale = thumbWidth / appWidth;
+                    scaledTopDecor = (int) (scale * contentInsets.top);
+                    int unscaledThumbHeight = (int) (thumbHeight / scale);
+                    mTmpFromClipRect.set(containingFrame);
+                    mTmpFromClipRect.bottom = (mTmpFromClipRect.top + unscaledThumbHeight);
+                    mTmpToClipRect.set(containingFrame);
+                } else {
+                    // In landscape, we scale the height and clip to the top/left square
+                    scale = thumbHeight / (appHeight - contentInsets.top);
+                    scaledTopDecor = (int) (scale * contentInsets.top);
+                    int unscaledThumbWidth = (int) (thumbWidth / scale);
+                    mTmpFromClipRect.set(containingFrame);
+                    mTmpFromClipRect.right = (mTmpFromClipRect.left + unscaledThumbWidth);
+                    mTmpToClipRect.set(containingFrame);
+                }
 
                 Animation scaleAnim = new ScaleAnimation(scale, 1, scale, 1,
                         computePivot(mNextAppTransitionStartX, scale),
                         computePivot(mNextAppTransitionStartY, scale));
                 Animation alphaAnim = new AlphaAnimation(1, 1);
-                Animation clipAnim = new ClipRectAnimation(fromClipRect, toClipRect);
+                Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
                 Animation translateAnim = new TranslateAnimation(0, 0, -scaledTopDecor, 0);
 
                 AnimationSet set = new AnimationSet(true);
@@ -539,18 +558,29 @@ public class AppTransition implements Dump {
             }
             case THUMBNAIL_TRANSITION_EXIT_SCALE_DOWN: {
                 // Exiting the current app, the app should scale down with the thumbnail
-                float scale = thumbWidth / appWidth;
-                int unscaledThumbHeight = (int) (thumbHeight / scale);
-                int scaledTopDecor = (int) (scale * contentInsets.top);
-                Rect fromClipRect = new Rect(containingFrame);
-                Rect toClipRect = new Rect(containingFrame);
-                toClipRect.bottom = (toClipRect.top + unscaledThumbHeight);
+                if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    // In portrait, we scale the width and clip to the top/left square
+                    scale = thumbWidth / appWidth;
+                    scaledTopDecor = (int) (scale * contentInsets.top);
+                    int unscaledThumbHeight = (int) (thumbHeight / scale);
+                    mTmpFromClipRect.set(containingFrame);
+                    mTmpToClipRect.set(containingFrame);
+                    mTmpToClipRect.bottom = (mTmpToClipRect.top + unscaledThumbHeight);
+                } else {
+                    // In landscape, we scale the height and clip to the top/left square
+                    scale = thumbHeight / (appHeight - contentInsets.top);
+                    scaledTopDecor = (int) (scale * contentInsets.top);
+                    int unscaledThumbWidth = (int) (thumbWidth / scale);
+                    mTmpFromClipRect.set(containingFrame);
+                    mTmpToClipRect.set(containingFrame);
+                    mTmpToClipRect.right = (mTmpToClipRect.left + unscaledThumbWidth);
+                }
 
                 Animation scaleAnim = new ScaleAnimation(1, scale, 1, scale,
                         computePivot(mNextAppTransitionStartX, scale),
                         computePivot(mNextAppTransitionStartY, scale));
                 Animation alphaAnim = new AlphaAnimation(1, 1);
-                Animation clipAnim = new ClipRectAnimation(fromClipRect, toClipRect);
+                Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
                 Animation translateAnim = new TranslateAnimation(0, 0, 0, -scaledTopDecor);
 
                 AnimationSet set = new AnimationSet(true);
@@ -637,7 +667,8 @@ public class AppTransition implements Dump {
 
 
     Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
-                            int appWidth, int appHeight, Rect containingFrame, Rect contentInsets) {
+                            int appWidth, int appHeight, int orientation,
+                            Rect containingFrame, Rect contentInsets) {
         Animation a;
         if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM) {
             a = loadAnimation(mNextAppTransitionPackage, enter ?
@@ -660,8 +691,8 @@ public class AppTransition implements Dump {
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP);
             if (mUseAlternateThumbnailAnimation) {
                 a = createAlternateThumbnailEnterExitAnimationLocked(
-                        getThumbnailTransitionState(enter), appWidth, appHeight, transit,
-                        containingFrame, contentInsets);
+                        getThumbnailTransitionState(enter), appWidth, appHeight, orientation,
+                        transit, containingFrame, contentInsets);
             } else {
                 a = createThumbnailEnterExitAnimationLocked(getThumbnailTransitionState(enter),
                         appWidth, appHeight, transit);
