@@ -69,8 +69,8 @@
     <item msgid="2762241247228983754">"Farve"</item>
   </string-array>
   <string-array name="orientation_labels">
-    <item msgid="4061931020926489228">"Portræt"</item>
-    <item msgid="3199660090246166812">"Landskab"</item>
+    <item msgid="4061931020926489228">"Stående"</item>
+    <item msgid="3199660090246166812">"Liggende"</item>
   </string-array>
   <string-array name="page_options_labels">
     <item msgid="7421377442011699994">"Alle"</item>
