@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.preference.Preference.OnPreferenceChangeInternalListener;
 import android.view.View;
@@ -91,7 +93,8 @@ public class PreferenceGroupAdapter extends BaseAdapter
         }
     };
 
-    private int mActivatedPosition = -1;
+    private int mHighlightedPosition = -1;
+    private Drawable mHighlightedDrawable;
 
     private static class PreferenceLayout implements Comparable<PreferenceLayout> {
         private int resId;
@@ -212,8 +215,18 @@ public class PreferenceGroupAdapter extends BaseAdapter
         return this.getItem(position).getId();
     }
 
-    public void setActivated(int position) {
-        mActivatedPosition = position;
+    /**
+     * @hide
+     */
+    public void setHighlighted(int position) {
+        mHighlightedPosition = position;
+    }
+
+    /**
+     * @hide
+     */
+    public void setHighlightedDrawable(Drawable drawable) {
+        mHighlightedDrawable = drawable;
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -227,7 +240,9 @@ public class PreferenceGroupAdapter extends BaseAdapter
             convertView = null;
         }
         View result = preference.getView(convertView, parent);
-        result.setActivated(position == mActivatedPosition);
+        if (position == mHighlightedPosition && mHighlightedDrawable != null) {
+            result.setBackgroundDrawable(mHighlightedDrawable);
+        }
         return result;
     }
 
