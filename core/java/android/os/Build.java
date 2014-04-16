@@ -476,6 +476,11 @@ public class Build {
         public static final int KITKAT = 19;
 
         /**
+         * Android 4.5: KitKat for watches, snacks on the run.
+         */
+        public static final int KITKAT_WATCH = CUR_DEVELOPMENT; // STOPSHIP: update API level
+
+        /**
          * L!
          *
          * <p>Applications targeting this or a later release will get these
