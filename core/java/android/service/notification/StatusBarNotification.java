@@ -32,7 +32,7 @@ public class StatusBarNotification implements Parcelable {
     private final String key;
 
     private final int uid;
-    private final String basePkg;
+    private final String opPkg;
     private final int initialPid;
     private final Notification notification;
     private final UserHandle user;
@@ -41,26 +41,20 @@ public class StatusBarNotification implements Parcelable {
     private final int score;
 
     /** @hide */
-    public StatusBarNotification(String pkg, int id, String tag, int uid, int initialPid, int score,
-            Notification notification, UserHandle user) {
-        this(pkg, null, id, tag, uid, initialPid, score, notification, user);
-    }
-
-    /** @hide */
-    public StatusBarNotification(String pkg, String basePkg, int id, String tag, int uid,
+    public StatusBarNotification(String pkg, String opPkg, int id, String tag, int uid,
             int initialPid, int score, Notification notification, UserHandle user) {
-        this(pkg, basePkg, id, tag, uid, initialPid, score, notification, user,
+        this(pkg, opPkg, id, tag, uid, initialPid, score, notification, user,
                 System.currentTimeMillis());
     }
 
-    public StatusBarNotification(String pkg, String basePkg, int id, String tag, int uid,
+    public StatusBarNotification(String pkg, String opPkg, int id, String tag, int uid,
             int initialPid, int score, Notification notification, UserHandle user,
             long postTime) {
         if (pkg == null) throw new NullPointerException();
         if (notification == null) throw new NullPointerException();
 
         this.pkg = pkg;
-        this.basePkg = pkg;
+        this.opPkg = opPkg;
         this.id = id;
         this.tag = tag;
         this.uid = uid;
@@ -75,7 +69,7 @@ public class StatusBarNotification implements Parcelable {
 
     public StatusBarNotification(Parcel in) {
         this.pkg = in.readString();
-        this.basePkg = in.readString();
+        this.opPkg = in.readString();
         this.id = in.readInt();
         if (in.readInt() != 0) {
             this.tag = in.readString();
@@ -93,12 +87,12 @@ public class StatusBarNotification implements Parcelable {
     }
 
     private String key() {
-        return pkg + '|' + basePkg + '|' + id + '|' + tag + '|' + uid;
+        return pkg + '|' + opPkg + '|' + id + '|' + tag + '|' + uid;
     }
 
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(this.pkg);
-        out.writeString(this.basePkg);
+        out.writeString(this.opPkg);
         out.writeInt(this.id);
         if (this.tag != null) {
             out.writeInt(1);
@@ -139,14 +133,14 @@ public class StatusBarNotification implements Parcelable {
     public StatusBarNotification cloneLight() {
         final Notification no = new Notification();
         this.notification.cloneInto(no, false); // light copy
-        return new StatusBarNotification(this.pkg, this.basePkg,
+        return new StatusBarNotification(this.pkg, this.opPkg,
                 this.id, this.tag, this.uid, this.initialPid,
                 this.score, no, this.user, this.postTime);
     }
 
     @Override
     public StatusBarNotification clone() {
-        return new StatusBarNotification(this.pkg, this.basePkg,
+        return new StatusBarNotification(this.pkg, this.opPkg,
                 this.id, this.tag, this.uid, this.initialPid,
                 this.score, this.notification.clone(), this.user, this.postTime);
     }
@@ -205,9 +199,9 @@ public class StatusBarNotification implements Parcelable {
         return uid;
     }
 
-    /** The notifying app's base package. @hide */
-    public String getBasePkg() {
-        return basePkg;
+    /** The package used for AppOps tracking. @hide */
+    public String getOpPkg() {
+        return opPkg;
     }
 
     /** @hide */
