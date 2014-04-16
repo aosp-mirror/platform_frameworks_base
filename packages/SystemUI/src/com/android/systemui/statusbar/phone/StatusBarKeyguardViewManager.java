@@ -206,4 +206,8 @@ public class StatusBarKeyguardViewManager {
             mContainer.setSystemUiVisibility(vis | View.STATUS_BAR_DISABLE_BACK);
         }
     }
+
+    public boolean onMenuPressed() {
+        return mBouncer.onMenuPressed();
+    }
 }
