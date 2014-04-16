@@ -588,6 +588,19 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     @Override
+    public void onNotificationVisibilityChanged(
+            String[] newlyVisibleKeys, String[] noLongerVisibleKeys) throws RemoteException {
+        enforceStatusBarService();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mNotificationDelegate.onNotificationVisibilityChanged(
+                    newlyVisibleKeys, noLongerVisibleKeys);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
     public void onClearAllNotifications(int userId) {
         enforceStatusBarService();
         final int callingUid = Binder.getCallingUid();

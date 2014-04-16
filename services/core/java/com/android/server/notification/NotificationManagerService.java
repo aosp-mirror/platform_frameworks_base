@@ -1071,6 +1071,16 @@ public class NotificationManagerService extends SystemService {
             }
             return true;
         }
+
+        @Override
+        public void onNotificationVisibilityChanged(
+                String[] newlyVisibleKeys, String[] noLongerVisibleKeys) {
+            // Using ';' as separator since eventlogs uses ',' to separate
+            // args.
+            EventLogTags.writeNotificationVisibilityChanged(
+                    TextUtils.join(";", newlyVisibleKeys),
+                    TextUtils.join(";", noLongerVisibleKeys));
+        }
     };
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {

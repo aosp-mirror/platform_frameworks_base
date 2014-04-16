@@ -63,6 +63,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -111,10 +112,14 @@ import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.stack.NotificationStackScrollLayout.OnChildLocationsChangedListener;
+import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     static final String TAG = "PhoneStatusBar";
@@ -146,6 +151,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private static final int STATUS_OR_NAV_TRANSIENT =
             View.STATUS_BAR_TRANSIENT | View.NAVIGATION_BAR_TRANSIENT;
     private static final long AUTOHIDE_TIMEOUT_MS = 3000;
+
+    /** The minimum delay in ms between reports of notification visibility. */
+    private static final int VISIBILITY_REPORT_MIN_DELAY_MS = 500;
 
     // fling gesture tuning parameters, scaled to display density
     private float mSelfExpandVelocityPx; // classic value: 2000px/s
@@ -375,6 +383,82 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     public void setOnFlipRunnable(Runnable onFlipRunnable) {
         mOnFlipRunnable = onFlipRunnable;
     }
+
+    /** Keys of notifications currently visible to the user. */
+    private final ArraySet<String> mCurrentlyVisibleNotifications = new ArraySet<String>();
+    private long mLastVisibilityReportUptimeMs;
+
+    private static final int VISIBLE_LOCATIONS = ViewState.LOCATION_FIRST_CARD
+            | ViewState.LOCATION_TOP_STACK_PEEKING
+            | ViewState.LOCATION_MAIN_AREA
+            | ViewState.LOCATION_BOTTOM_STACK_PEEKING;
+
+    private final OnChildLocationsChangedListener mNotificationLocationsChangedListener =
+            new OnChildLocationsChangedListener() {
+                @Override
+                public void onChildLocationsChanged(
+                        NotificationStackScrollLayout stackScrollLayout) {
+                    if (mHandler.hasCallbacks(mVisibilityReporter)) {
+                        // Visibilities will be reported when the existing
+                        // callback is executed.
+                        return;
+                    }
+                    // Calculate when we're allowed to run the visibility
+                    // reporter. Note that this timestamp might already have
+                    // passed. That's OK, the callback will just be executed
+                    // ASAP.
+                    long nextReportUptimeMs =
+                            mLastVisibilityReportUptimeMs + VISIBILITY_REPORT_MIN_DELAY_MS;
+                    mHandler.postAtTime(mVisibilityReporter, nextReportUptimeMs);
+                }
+            };
+
+    // Tracks notifications currently visible in mNotificationStackScroller and
+    // emits visibility events via NoMan on changes.
+    private final Runnable mVisibilityReporter = new Runnable() {
+        private final ArrayList<String> mTmpNewlyVisibleNotifications = new ArrayList<String>();
+        private final ArrayList<String> mTmpCurrentlyVisibleNotifications = new ArrayList<String>();
+
+        @Override
+        public void run() {
+            mLastVisibilityReportUptimeMs = SystemClock.uptimeMillis();
+
+            // 1. Loop over mNotificationData entries:
+            //   A. Keep list of visible notifications.
+            //   B. Keep list of previously hidden, now visible notifications.
+            // 2. Compute no-longer visible notifications by removing currently
+            //    visible notifications from the set of previously visible
+            //    notifications.
+            // 3. Report newly visible and no-longer visible notifications.
+            // 4. Keep currently visible notifications for next report.
+            int N = mNotificationData.size();
+            for (int i = 0; i < N; i++) {
+                Entry entry = mNotificationData.get(i);
+                String key = entry.notification.getKey();
+                boolean previouslyVisible = mCurrentlyVisibleNotifications.contains(key);
+                boolean currentlyVisible =
+                        (mStackScroller.getChildLocation(entry.row) & VISIBLE_LOCATIONS) != 0;
+                if (currentlyVisible) {
+                    // Build new set of visible notifications.
+                    mTmpCurrentlyVisibleNotifications.add(key);
+                }
+                if (!previouslyVisible && currentlyVisible) {
+                    mTmpNewlyVisibleNotifications.add(key);
+                }
+            }
+            ArraySet<String> noLongerVisibleNotifications = mCurrentlyVisibleNotifications;
+            noLongerVisibleNotifications.removeAll(mTmpCurrentlyVisibleNotifications);
+
+            logNotificationVisibilityChanges(
+                    mTmpNewlyVisibleNotifications, noLongerVisibleNotifications);
+
+            mCurrentlyVisibleNotifications.clear();
+            mCurrentlyVisibleNotifications.addAll(mTmpCurrentlyVisibleNotifications);
+
+            mTmpNewlyVisibleNotifications.clear();
+            mTmpCurrentlyVisibleNotifications.clear();
+        }
+    };
 
     @Override
     public void setZenMode(int mode) {
@@ -2645,6 +2729,41 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mKeyguardMaxNotificationCount = res.getInteger(R.integer.keyguard_max_notification_count);
 
         if (false) Log.v(TAG, "updateResources");
+    }
+
+    // Visibility reporting
+
+    @Override
+    protected void visibilityChanged(boolean visible) {
+        if (visible) {
+            mStackScroller.setChildLocationsChangedListener(mNotificationLocationsChangedListener);
+        } else {
+            // Report all notifications as invisible and turn down the
+            // reporter.
+            if (!mCurrentlyVisibleNotifications.isEmpty()) {
+                logNotificationVisibilityChanges(
+                        Collections.<String>emptyList(), mCurrentlyVisibleNotifications);
+                mCurrentlyVisibleNotifications.clear();
+            }
+            mHandler.removeCallbacks(mVisibilityReporter);
+            mStackScroller.setChildLocationsChangedListener(null);
+        }
+        super.visibilityChanged(visible);
+    }
+
+    private void logNotificationVisibilityChanges(
+            Collection<String> newlyVisible, Collection<String> noLongerVisible) {
+        if (newlyVisible.isEmpty() && noLongerVisible.isEmpty()) {
+            return;
+        }
+
+        String[] newlyVisibleAr = newlyVisible.toArray(new String[newlyVisible.size()]);
+        String[] noLongerVisibleAr = noLongerVisible.toArray(new String[noLongerVisible.size()]);
+        try {
+            mBarService.onNotificationVisibilityChanged(newlyVisibleAr, noLongerVisibleAr);
+        } catch (RemoteException e) {
+            // Ignore.
+        }
     }
 
     //
