@@ -234,6 +234,7 @@
     <protected-broadcast android:name="android.net.conn.NETWORK_CONDITIONS_MEASURED" />
     <protected-broadcast
             android:name="android.net.ConnectivityService.action.PKT_CNT_SAMPLE_INTERVAL_ELAPSED" />
+    <protected-broadcast android:name="android.net.scoring.SCORE_NETWORKS" />
     <protected-broadcast android:name="android.intent.action.EXTERNAL_APPLICATIONS_AVAILABLE" />
     <protected-broadcast android:name="android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABLE" />
     <protected-broadcast android:name="android.intent.action.AIRPLANE_MODE" />
@@ -761,6 +762,13 @@
         android:protectionLevel="dangerous"
         android:description="@string/permdesc_changeWimaxState"
         android:label="@string/permlab_changeWimaxState" />
+
+    <!-- Allows applications to act as network scorers. @hide -->
+    <permission android:name="android.permission.SCORE_NETWORKS"
+        android:permissionGroup="android.permission-group.NETWORK"
+        android:protectionLevel="normal"
+        android:description="@string/permdesc_scoreNetworks"
+        android:label="@string/permlab_scoreNetworks" />
 
     <!-- ======================================= -->
     <!-- Permissions for short range, peripheral networks -->
@@ -2289,6 +2297,13 @@
         android:label="@string/permlab_broadcastWapPush"
         android:description="@string/permdesc_broadcastWapPush"
         android:protectionLevel="signature" />
+
+    <!-- Allows an application to broadcast a SCORE_NETWORKS request.
+         <p>Not for use by third-party applications. @hide -->
+    <permission android:name="android.permission.BROADCAST_SCORE_NETWORKS"
+        android:label="@string/permlab_broadcastScoreNetworks"
+        android:description="@string/permdesc_broadcastScoreNetworks"
+        android:protectionLevel="signature|system" />
 
     <!-- Not for use by third-party applications. -->
     <permission android:name="android.permission.MASTER_CLEAR"
