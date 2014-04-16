@@ -20,6 +20,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
+import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -50,9 +51,12 @@ public class BidiRenderer {
         }
     }
 
-    /* package */ Graphics2D graphics;
-    /* package */ Paint_Delegate paint;
-    /* package */ char[] text;
+    private Graphics2D mGraphics;
+    private Paint_Delegate mPaint;
+    private char[] mText;
+    // Bounds of the text drawn so far.
+    private RectF mBounds;
+    private float mBaseline;
 
     /**
      * @param graphics May be null.
@@ -61,9 +65,9 @@ public class BidiRenderer {
      */
     /* package */ BidiRenderer(Graphics2D graphics, Paint_Delegate paint, char[] text) {
         assert (paint != null);
-        this.graphics = graphics;
-        this.paint = paint;
-        this.text = text;
+        mGraphics = graphics;
+        mPaint = paint;
+        mText = text;
     }
 
     /**
@@ -77,61 +81,62 @@ public class BidiRenderer {
      * @param advances If not null, then advances for each character to be rendered are returned
      *            here.
      * @param advancesIndex index into advances from where the advances need to be filled.
-     * @param draw If true and {@link graphics} is not null, draw the rendered text on the graphics
+     * @param draw If true and {@code graphics} is not null, draw the rendered text on the graphics
      *            at the given co-ordinates
      * @param x The x-coordinate of the left edge of where the text should be drawn on the given
      *            graphics.
-     * @param y The y-coordinate at which to draw the text on the given graphics.
-     * @return The x-coordinate of the right edge of the drawn text. In other words,
-     *            x + the width of the text.
+     * @param y The y-coordinate at which to draw the text on the given mGraphics.
+     * @return A rectangle specifying the bounds of the text drawn.
      */
-    /* package */ float renderText(int start, int limit, boolean isRtl, float advances[],
+    /* package */ RectF renderText(int start, int limit, boolean isRtl, float[] advances,
             int advancesIndex, boolean draw, float x, float y) {
         // We break the text into scripts and then select font based on it and then render each of
         // the script runs.
-        for (ScriptRun run : getScriptRuns(text, start, limit, isRtl, paint.getFonts())) {
+        mBounds = new RectF(x, y, x, y);
+        mBaseline = y;
+        for (ScriptRun run : getScriptRuns(mText, start, limit, isRtl, mPaint.getFonts())) {
             int flag = Font.LAYOUT_NO_LIMIT_CONTEXT | Font.LAYOUT_NO_START_CONTEXT;
             flag |= isRtl ? Font.LAYOUT_RIGHT_TO_LEFT : Font.LAYOUT_LEFT_TO_RIGHT;
-            x = renderScript(run.start, run.limit, run.font, flag, advances, advancesIndex, draw,
-                    x, y);
+            renderScript(run.start, run.limit, run.font, flag, advances, advancesIndex, draw);
             advancesIndex += run.limit - run.start;
         }
-        return x;
+        return mBounds;
     }
 
     /**
-     * Render a script run. Use the preferred font to render as much as possible. This also
-     * implements a fallback mechanism to render characters that cannot be drawn using the
-     * preferred font.
-     *
-     * @return x + width of the text drawn.
+     * Render a script run to the right of the bounds passed. Use the preferred font to render as
+     * much as possible. This also implements a fallback mechanism to render characters that cannot
+     * be drawn using the preferred font.
      */
-    private float renderScript(int start, int limit, FontInfo preferredFont, int flag,
-            float advances[], int advancesIndex, boolean draw, float x, float y) {
-        List<FontInfo> fonts = paint.getFonts();
+    private void renderScript(int start, int limit, FontInfo preferredFont, int flag,
+            float[] advances, int advancesIndex, boolean draw) {
+        List<FontInfo> fonts = mPaint.getFonts();
         if (fonts == null || preferredFont == null) {
-            return x;
+            return;
         }
 
         while (start < limit) {
             boolean foundFont = false;
-            int canDisplayUpTo = preferredFont.mFont.canDisplayUpTo(text, start, limit);
+            int canDisplayUpTo = preferredFont.mFont.canDisplayUpTo(mText, start, limit);
             if (canDisplayUpTo == -1) {
-                return render(start, limit, preferredFont, flag, advances, advancesIndex, draw,
-                        x, y);
-            } else if (canDisplayUpTo > start) { // can draw something
-                x = render(start, canDisplayUpTo, preferredFont, flag, advances, advancesIndex,
-                        draw, x, y);
+                // We can draw all characters in the text.
+                render(start, limit, preferredFont, flag, advances, advancesIndex, draw);
+                return;
+            }
+            if (canDisplayUpTo > start) {
+                // We can draw something.
+                render(start, canDisplayUpTo, preferredFont, flag, advances, advancesIndex, draw);
                 advancesIndex += canDisplayUpTo - start;
                 start = canDisplayUpTo;
             }
 
-            int charCount = Character.isHighSurrogate(text[start]) ? 2 : 1;
+            // The current character cannot be drawn with the preferred font. Cycle through all the
+            // fonts to check which one can draw it.
+            int charCount = Character.isHighSurrogate(mText[start]) ? 2 : 1;
             for (FontInfo font : fonts) {
-                canDisplayUpTo = font.mFont.canDisplayUpTo(text, start, start + charCount);
+                canDisplayUpTo = font.mFont.canDisplayUpTo(mText, start, start + charCount);
                 if (canDisplayUpTo == -1) {
-                    x = render(start, start+charCount, font, flag, advances, advancesIndex, draw,
-                            x, y);
+                    render(start, start+charCount, font, flag, advances, advancesIndex, draw);
                     start += charCount;
                     advancesIndex += charCount;
                     foundFont = true;
@@ -143,45 +148,62 @@ public class BidiRenderer {
                 // probably appear as a box or a blank space. We could, probably, use some
                 // heuristics and break the character into the base character and diacritics and
                 // then draw it, but it's probably not worth the effort.
-                x = render(start, start + charCount, preferredFont, flag, advances, advancesIndex,
-                        draw, x, y);
+                render(start, start + charCount, preferredFont, flag, advances, advancesIndex,
+                        draw);
                 start += charCount;
                 advancesIndex += charCount;
             }
         }
-        return x;
     }
 
     /**
-     * Render the text with the given font.
+     * Renders the text to the right of the bounds with the given font.
+     * @param font The font to render the text with.
      */
-    private float render(int start, int limit, FontInfo font, int flag, float advances[],
-            int advancesIndex, boolean draw, float x, float y) {
+    private void render(int start, int limit, FontInfo font, int flag, float[] advances,
+            int advancesIndex, boolean draw) {
 
-        float totalAdvance = 0;
         // Since the metrics don't have anti-aliasing set, we create a new FontRenderContext with
         // the anti-aliasing set.
         FontRenderContext f = font.mMetrics.getFontRenderContext();
-        FontRenderContext frc = new FontRenderContext(f.getTransform(), paint.isAntiAliased(),
+        FontRenderContext frc = new FontRenderContext(f.getTransform(), mPaint.isAntiAliased(),
                 f.usesFractionalMetrics());
-        GlyphVector gv = font.mFont.layoutGlyphVector(frc, text, start, limit, flag);
+        GlyphVector gv = font.mFont.layoutGlyphVector(frc, mText, start, limit, flag);
         int ng = gv.getNumGlyphs();
         int[] ci = gv.getGlyphCharIndices(0, ng, null);
-        for (int i = 0; i < ng; i++) {
-            float adv = gv.getGlyphMetrics(i).getAdvanceX();
-            if (advances != null) {
+        if (advances != null) {
+            for (int i = 0; i < ng; i++) {
                 int adv_idx = advancesIndex + ci[i];
-                advances[adv_idx] += adv;
+                advances[adv_idx] += gv.getGlyphMetrics(i).getAdvanceX();
             }
-            totalAdvance += adv;
         }
-        if (draw && graphics != null) {
-            graphics.drawGlyphVector(gv, x, y);
+        if (draw && mGraphics != null) {
+            mGraphics.drawGlyphVector(gv, mBounds.right, mBaseline);
         }
-        return x + totalAdvance;
+
+        // Update the bounds.
+        Rectangle2D awtBounds = gv.getLogicalBounds();
+        RectF bounds = awtRectToAndroidRect(awtBounds, mBounds.right, mBaseline);
+        // If the width of the bounds is zero, no text had been drawn earlier. Hence, use the
+        // coordinates from the bounds as an offset.
+        if (Math.abs(mBounds.right - mBounds.left) == 0) {
+            mBounds = bounds;
+        } else {
+            mBounds.union(bounds);
+        }
     }
 
     // --- Static helper methods ---
+
+    private static RectF awtRectToAndroidRect(Rectangle2D awtRec, float offsetX, float offsetY) {
+        float left = (float) awtRec.getX();
+        float top = (float) awtRec.getY();
+        float right = (float) (left + awtRec.getWidth());
+        float bottom = (float) (top + awtRec.getHeight());
+        RectF androidRect = new RectF(left, top, right, bottom);
+        androidRect.offset(offsetX, offsetY);
+        return androidRect;
+    }
 
     /* package */  static List<ScriptRun> getScriptRuns(char[] text, int start, int limit,
             boolean isRtl, List<FontInfo> fonts) {
