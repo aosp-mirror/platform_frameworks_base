@@ -1461,6 +1461,11 @@ public class Resources {
 
         private final AssetManager mAssets;
         private final long mTheme;
+
+        // Needed by layoutlib.
+        /*package*/ int getNativeTheme() {
+            return mTheme;
+        }
     }
 
     /**
