@@ -19,6 +19,9 @@ package com.android.server.tv;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -26,13 +29,18 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.database.Cursor;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.TvContract;
 import android.tv.ITvInputClient;
 import android.tv.ITvInputManager;
 import android.tv.ITvInputService;
@@ -41,13 +49,14 @@ import android.tv.ITvInputSession;
 import android.tv.ITvInputSessionCallback;
 import android.tv.TvInputInfo;
 import android.tv.TvInputService;
-import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Surface;
 
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.os.SomeArgs;
+import com.android.server.IoThread;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
@@ -63,6 +72,8 @@ public final class TvInputManagerService extends SystemService {
 
     private final Context mContext;
 
+    private final ContentResolver mContentResolver;
+
     // A global lock.
     private final Object mLock = new Object();
 
@@ -72,10 +83,17 @@ public final class TvInputManagerService extends SystemService {
     // A map from user id to UserState.
     private final SparseArray<UserState> mUserStates = new SparseArray<UserState>();
 
+    private final Handler mLogHandler;
+
     public TvInputManagerService(Context context) {
         super(context);
+
         mContext = context;
+        mContentResolver = context.getContentResolver();
+        mLogHandler = new LogHandler(IoThread.get().getLooper());
+
         registerBroadcastReceivers();
+
         synchronized (mLock) {
             mUserStates.put(mCurrentUserId, new UserState());
             buildTvInputListLocked(mCurrentUserId);
@@ -325,6 +343,14 @@ public final class TvInputManagerService extends SystemService {
         UserState userState = getUserStateLocked(userId);
         SessionState sessionState = userState.sessionStateMap.remove(sessionToken);
 
+        // Close the open log entry, if any.
+        if (sessionState.logUri != null) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = sessionState.logUri;
+            args.arg2 = System.currentTimeMillis();
+            mLogHandler.obtainMessage(LogHandler.MSG_CLOSE_ENTRY, args).sendToTarget();
+        }
+
         // Also remove the session token from the session token list of the current service.
         ServiceState serviceState = userState.serviceStateMap.get(sessionState.name);
         if (serviceState != null) {
@@ -384,7 +410,7 @@ public final class TvInputManagerService extends SystemService {
                     UserState userState = getUserStateLocked(resolvedUserId);
                     ServiceState serviceState = userState.serviceStateMap.get(name);
                     if (serviceState == null) {
-                        serviceState = new ServiceState(name, resolvedUserId);
+                        serviceState = new ServiceState(resolvedUserId);
                         userState.serviceStateMap.put(name, serviceState);
                     }
                     IBinder iBinder = client.asBinder();
@@ -468,7 +494,7 @@ public final class TvInputManagerService extends SystemService {
                     // Also, add them to the session state map of the current service.
                     ServiceState serviceState = userState.serviceStateMap.get(name);
                     if (serviceState == null) {
-                        serviceState = new ServiceState(name, resolvedUserId);
+                        serviceState = new ServiceState(resolvedUserId);
                         userState.serviceStateMap.put(name, serviceState);
                     }
                     serviceState.sessionTokens.add(sessionToken);
@@ -557,6 +583,35 @@ public final class TvInputManagerService extends SystemService {
                 synchronized (mLock) {
                     try {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId).tune(channelUri);
+
+                        long currentTime = System.currentTimeMillis();
+                        long channelId = ContentUris.parseId(channelUri);
+
+                        // Close the open log entry first, if any.
+                        UserState userState = getUserStateLocked(resolvedUserId);
+                        SessionState sessionState = userState.sessionStateMap.get(sessionToken);
+                        if (sessionState.logUri != null) {
+                            SomeArgs args = SomeArgs.obtain();
+                            args.arg1 = sessionState.logUri;
+                            args.arg2 = currentTime;
+                            mLogHandler.obtainMessage(LogHandler.MSG_CLOSE_ENTRY, args)
+                                    .sendToTarget();
+                        }
+
+                        // Create a log entry and fill it later.
+                        ContentValues values = new ContentValues();
+                        values.put(TvContract.WatchedPrograms.WATCH_START_TIME_UTC_MILLIS,
+                                currentTime);
+                        values.put(TvContract.WatchedPrograms.WATCH_END_TIME_UTC_MILLIS, 0);
+                        values.put(TvContract.WatchedPrograms.CHANNEL_ID, channelId);
+
+                        sessionState.logUri = mContentResolver.insert(
+                                TvContract.WatchedPrograms.CONTENT_URI, values);
+                        SomeArgs args = SomeArgs.obtain();
+                        args.arg1 = sessionState.logUri;
+                        args.arg2 = ContentUris.parseId(channelUri);
+                        args.arg3 = currentTime;
+                        mLogHandler.obtainMessage(LogHandler.MSG_OPEN_ENTRY, args).sendToTarget();
                     } catch (RemoteException e) {
                         Slog.e(TAG, "error in tune", e);
                         return;
@@ -652,7 +707,7 @@ public final class TvInputManagerService extends SystemService {
         private boolean bound;
         private boolean available;
 
-        private ServiceState(ComponentName name, int userId) {
+        private ServiceState(int userId) {
             this.connection = new InputServiceConnection(userId);
         }
     }
@@ -664,6 +719,7 @@ public final class TvInputManagerService extends SystemService {
         private final int callingUid;
 
         private ITvInputSession session;
+        private Uri logUri;
 
         private SessionState(ComponentName name, ITvInputClient client, int seq, int callingUid) {
             this.name = name;
@@ -736,6 +792,149 @@ public final class TvInputManagerService extends SystemService {
                     client.onAvailabilityChanged(name, isAvailable);
                 }
             }
+        }
+    }
+
+    private final class LogHandler extends Handler {
+        private static final int MSG_OPEN_ENTRY = 1;
+        private static final int MSG_UPDATE_ENTRY = 2;
+        private static final int MSG_CLOSE_ENTRY = 3;
+
+        public LogHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_OPEN_ENTRY: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Uri uri = (Uri) args.arg1;
+                    long channelId = (long) args.arg2;
+                    long time = (long) args.arg3;
+                    onOpenEntry(uri, channelId, time);
+                    args.recycle();
+                    return;
+                }
+                case MSG_UPDATE_ENTRY: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Uri uri = (Uri) args.arg1;
+                    long channelId = (long) args.arg2;
+                    long time = (long) args.arg3;
+                    onUpdateEntry(uri, channelId, time);
+                    args.recycle();
+                    return;
+                }
+                case MSG_CLOSE_ENTRY: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Uri uri = (Uri) args.arg1;
+                    long time = (long) args.arg2;
+                    onCloseEntry(uri, time);
+                    args.recycle();
+                    return;
+                }
+                default: {
+                    Log.w(TAG, "Unhandled message code: " + msg.what);
+                    return;
+                }
+            }
+        }
+
+        private void onOpenEntry(Uri uri, long channelId, long watchStarttime) {
+            String[] projection = {
+                    TvContract.Programs.TITLE,
+                    TvContract.Programs.START_TIME_UTC_MILLIS,
+                    TvContract.Programs.END_TIME_UTC_MILLIS,
+                    TvContract.Programs.DESCRIPTION
+            };
+            String selection = TvContract.Programs.CHANNEL_ID + "=? AND "
+                    + TvContract.Programs.START_TIME_UTC_MILLIS + "<=? AND "
+                    + TvContract.Programs.END_TIME_UTC_MILLIS + ">?";
+            String[] selectionArgs = {
+                    String.valueOf(channelId),
+                    String.valueOf(watchStarttime),
+                    String.valueOf(watchStarttime)
+            };
+            String sortOrder = TvContract.Programs.START_TIME_UTC_MILLIS + " ASC";
+            Cursor cursor = null;
+            try {
+                cursor = mContentResolver.query(TvContract.Programs.CONTENT_URI, projection,
+                        selection, selectionArgs, sortOrder);
+                if (cursor != null && cursor.moveToNext()) {
+                    ContentValues values = new ContentValues();
+                    values.put(TvContract.WatchedPrograms.TITLE, cursor.getString(0));
+                    values.put(TvContract.WatchedPrograms.START_TIME_UTC_MILLIS, cursor.getLong(1));
+                    long endTime = cursor.getLong(2);
+                    values.put(TvContract.WatchedPrograms.END_TIME_UTC_MILLIS, endTime);
+                    values.put(TvContract.WatchedPrograms.DESCRIPTION, cursor.getString(3));
+                    mContentResolver.update(uri, values, null, null);
+
+                    // Schedule an update when the current program ends.
+                    SomeArgs args = SomeArgs.obtain();
+                    args.arg1 = uri;
+                    args.arg2 = channelId;
+                    args.arg3 = endTime;
+                    Message msg = obtainMessage(LogHandler.MSG_UPDATE_ENTRY, args);
+                    sendMessageDelayed(msg, endTime - System.currentTimeMillis());
+                }
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        }
+
+        private void onUpdateEntry(Uri uri, long channelId, long time) {
+            String[] projection = {
+                    TvContract.WatchedPrograms.WATCH_START_TIME_UTC_MILLIS,
+                    TvContract.WatchedPrograms.WATCH_END_TIME_UTC_MILLIS,
+                    TvContract.WatchedPrograms.TITLE,
+                    TvContract.WatchedPrograms.START_TIME_UTC_MILLIS,
+                    TvContract.WatchedPrograms.END_TIME_UTC_MILLIS,
+                    TvContract.WatchedPrograms.DESCRIPTION
+            };
+            Cursor cursor = null;
+            try {
+                cursor = mContentResolver.query(uri, projection, null, null, null);
+                if (cursor != null && cursor.moveToNext()) {
+                    long watchStartTime = cursor.getLong(0);
+                    long watchEndTime = cursor.getLong(1);
+                    String title = cursor.getString(2);
+                    long startTime = cursor.getLong(3);
+                    long endTime = cursor.getLong(4);
+                    String description = cursor.getString(5);
+
+                    // Do nothing if the current log entry is already closed.
+                    if (watchEndTime > 0) {
+                        return;
+                    }
+
+                    // The current program has just ended. Create a (complete) log entry off the
+                    // current entry.
+                    ContentValues values = new ContentValues();
+                    values.put(TvContract.WatchedPrograms.WATCH_START_TIME_UTC_MILLIS,
+                            watchStartTime);
+                    values.put(TvContract.WatchedPrograms.WATCH_END_TIME_UTC_MILLIS, time);
+                    values.put(TvContract.WatchedPrograms.CHANNEL_ID, channelId);
+                    values.put(TvContract.WatchedPrograms.TITLE, title);
+                    values.put(TvContract.WatchedPrograms.START_TIME_UTC_MILLIS, startTime);
+                    values.put(TvContract.WatchedPrograms.END_TIME_UTC_MILLIS, endTime);
+                    values.put(TvContract.WatchedPrograms.DESCRIPTION, description);
+                    mContentResolver.insert(TvContract.WatchedPrograms.CONTENT_URI, values);
+                }
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+            // Re-open the current log entry with the next program information.
+            onOpenEntry(uri, channelId, time);
+        }
+
+        private void onCloseEntry(Uri uri, long watchEndTime) {
+            ContentValues values = new ContentValues();
+            values.put(TvContract.WatchedPrograms.WATCH_END_TIME_UTC_MILLIS, watchEndTime);
+            mContentResolver.update(uri, values, null, null);
         }
     }
 }
