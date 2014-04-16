@@ -49,24 +49,24 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 /**
- * This lets you create a drawable based on an XML vector graphic
- * It can be defined in an XML file with the <code>&lt;vector></code> element.
+ * This lets you create a drawable based on an XML vector graphic It can be
+ * defined in an XML file with the <code>&lt;vector></code> element.
  * <p/>
  * The vector drawable has 6 elements:
  * <p/>
  * <dl>
  * <dt><code>&lt;vector></code></dt>
  * <dd>The attribute <code>android:trigger</code> defines a state change that
- * will drive the animation </dd>
+ * will drive the animation</dd>
  * <dd>The attribute <code>android:versionCode</code> defines the version of
- * VectorDrawable </dd>
+ * VectorDrawable</dd>
  * <dt><code>&lt;size></code></dt>
  * <dd>Used to defined the intrinsic Width Height size of the drawable using
- * <code>android:width</code> and <code>android:height</code> </dd>
+ * <code>android:width</code> and <code>android:height</code></dd>
  * <dt><code>&lt;viewport></code></dt>
  * <dd>Used to defined the size of the virtual canvas the paths are drawn on.
- * The size is defined using the attributes <code>android:viewportHeight
- * </code> <code>android:viewportWidth</code></dd>
+ * The size is defined using the attributes <code>android:viewportHeight</code>
+ * <code>android:viewportWidth</code></dd>
  * <dt><code>&lt;group></code></dt>
  * <dd>Defines a "key frame" in the animation if there is only one group the
  * drawable is static 2D image that has no animation.</dd>
@@ -80,7 +80,8 @@ import java.util.HashSet;
  * <dt><code>android:fill</code>
  * <dd>Defines the color to fill the path (none if not present).</dd></dt>
  * <dt><code>android:stroke</code>
- * <dd>Defines the color to draw the path outline (none if not present).</dd></dt>
+ * <dd>Defines the color to draw the path outline (none if not present).</dd>
+ * </dt>
  * <dt><code>android:strokeWidth</code>
  * <dd>The width a path stroke</dd></dt>
  * <dt><code>android:strokeOpacity</code>
@@ -98,7 +99,8 @@ import java.util.HashSet;
  * <dt><code>android:trimPathEnd</code>
  * <dd>The fraction of the path to trim from the end from 0 to 1</dd></dt>
  * <dt><code>android:trimPathOffset</code>
- * <dd>Shift trim region (allows showed region to include the start and end) from 0 to 1</dd></dt>
+ * <dd>Shift trim region (allows showed region to include the start and end)
+ * from 0 to 1</dd></dt>
  * <dt><code>android:clipToPath</code>
  * <dd>Path will set the clip path</dd></dt>
  * <dt><code>android:strokeLineCap</code>
@@ -135,19 +137,20 @@ import java.util.HashSet;
  * <dt><code>android:sequence</code>
  * <dd>Configures this animation sequence between the named paths.</dd></dt>
  * <dt><code>android:limitTo</code>
- * <dd>Limits an animation to only interpolate the selected variable
- * unlimited, path, rotation, trimPathStart, trimPathEnd, trimPathOffset</dd></dt>
+ * <dd>Limits an animation to only interpolate the selected variable unlimited,
+ * path, rotation, trimPathStart, trimPathEnd, trimPathOffset</dd></dt>
  * <dt><code>android:repeatCount</code>
  * <dd>Number of times to loop this aspect of the animation</dd></dt>
  * <dt><code>android:durations</code>
- * <dd>The duration of each step in the animation in milliseconds
- * Must contain the number of named paths - 1</dd></dt>
+ * <dd>The duration of each step in the animation in milliseconds Must contain
+ * the number of named paths - 1</dd></dt>
  * <dt><code>android:startDelay</code>
  * <dd></dd></dt>
  * <dt><code>android:repeatStyle</code>
- *  <dd>when repeating how does it repeat back and forth or a to b: forward, inAndOut</dd></dt>
+ * <dd>when repeating how does it repeat back and forth or a to b: forward,
+ * inAndOut</dd></dt>
  * <dt><code>android:animate</code>
- *  <dd>linear, accelerate, decelerate, easing</dd></dt>
+ * <dd>linear, accelerate, decelerate, easing</dd></dt>
  * </dl>
  * </dd>
  */
@@ -193,8 +196,10 @@ public class VectorDrawable extends Drawable {
         }
 
         long duration = mVectorState.mVAnimatedPath.getTotalAnimationDuration();
-        if (duration == -1) { // if it set to infinite set to 1 hour
-            duration = DEFAULT_INFINITE_DURATION; // TODO define correct approach for infinite
+        if (duration == -1) {
+            // If duration is infinite, set to 1 hour.
+            // TODO: Define correct approach for infinite.
+            duration = DEFAULT_INFINITE_DURATION;
             mVectorState.mBasicAnimator.setFloatValues(0, duration / 1000);
             mVectorState.mBasicAnimator.setInterpolator(new LinearInterpolator());
         }
@@ -219,7 +224,7 @@ public class VectorDrawable extends Drawable {
     }
 
     /**
-     * Stops the animation.
+     * Stops the animation and moves to the end state.
      */
     public void stop() {
         mVectorState.mBasicAnimator.end();
@@ -255,11 +260,11 @@ public class VectorDrawable extends Drawable {
 
     /**
      * Defines what this animation should do when it reaches the end. This
-     * setting is applied only when the repeat count is either greater than
-     * 0 or {@link ValueAnimator#INFINITE}.
+     * setting is applied only when the repeat count is either greater than 0 or
+     * {@link ValueAnimator#INFINITE}.
      *
-     * @param mode the animation mode, either {@link ValueAnimator#RESTART}
-     *        or {@link ValueAnimator#REVERSE}
+     * @param mode the animation mode, either {@link ValueAnimator#RESTART} or
+     *            {@link ValueAnimator#REVERSE}
      */
     public void setRepeatMode(int mode) {
         mVectorState.mBasicAnimator.setRepeatMode(mode);
@@ -304,16 +309,16 @@ public class VectorDrawable extends Drawable {
         return true;
     }
 
-    private void animateForward(){
+    private void animateForward() {
         if (!mVectorState.mBasicAnimator.isStarted()) {
-            mVectorState.mBasicAnimator.setFloatValues(0,1);
+            mVectorState.mBasicAnimator.setFloatValues(0, 1);
             start();
         }
     }
 
-    private void animateBackward(){
+    private void animateBackward() {
         if (!mVectorState.mBasicAnimator.isStarted()) {
-            mVectorState.mBasicAnimator.setFloatValues(.99f,0);
+            mVectorState.mBasicAnimator.setFloatValues(.99f, 0);
             start();
         }
     }
@@ -347,8 +352,8 @@ public class VectorDrawable extends Drawable {
     }
 
     /**
-     * Sets padding for this shape, defined by a Rect object. Define the padding in the Rect object
-     * as: left, top, right, bottom.
+     * Sets padding for this shape, defined by a Rect object. Define the padding
+     * in the Rect object as: left, top, right, bottom.
      */
     public void setPadding(Rect padding) {
         setPadding(padding.left, padding.top, padding.right, padding.bottom);
@@ -472,13 +477,14 @@ public class VectorDrawable extends Drawable {
                     currentGroup = new VGroup();
                     animatedPath.mGroupList.add(currentGroup);
                     noGroupTag = false;
-                }  else if (SHAPE_VECTOR.equals(tagName)) {
+                } else if (SHAPE_VECTOR.equals(tagName)) {
                     final TypedArray a = res.obtainAttributes(attrs, R.styleable.VectorDrawable);
                     animatedPath.setTrigger(a.getInteger(R.styleable.VectorDrawable_trigger, 0));
 
                     // Parsing the version information.
                     // Right now, we only support version "1".
-                    // If the xml didn't specify the version number, the default version is "1".
+                    // If the xml didn't specify the version number, the default
+                    // version is "1".
                     final int versionCode = a.getInt(R.styleable.VectorDrawable_versionCode, 1);
                     if (versionCode != 1) {
                         throw new IllegalArgumentException(
@@ -499,22 +505,22 @@ public class VectorDrawable extends Drawable {
                 tag.append(SHAPE_SIZE);
             }
 
-            if  (noViewportTag){
-                if (tag.length()>0) {
+            if (noViewportTag) {
+                if (tag.length() > 0) {
                     tag.append(" & ");
                 }
                 tag.append(SHAPE_SIZE);
             }
 
-            if  (noGroupTag){
-                if (tag.length()>0) {
+            if (noGroupTag) {
+                if (tag.length() > 0) {
                     tag.append(" & ");
                 }
                 tag.append(SHAPE_GROUP);
             }
 
-            if  (noPathTag){
-                if (tag.length()>0) {
+            if (noPathTag) {
+                if (tag.length() > 0) {
                     tag.append(" or ");
                 }
                 tag.append(SHAPE_PATH);
@@ -533,7 +539,8 @@ public class VectorDrawable extends Drawable {
 
         long duration = mVectorState.mVAnimatedPath.getTotalAnimationDuration();
         if (duration == -1) { // if it set to infinite set to 1 hour
-            duration = DEFAULT_INFINITE_DURATION; // TODO define correct approach for infinite
+            duration = DEFAULT_INFINITE_DURATION; // TODO define correct
+                                                  // approach for infinite
             mVectorState.mBasicAnimator.setFloatValues(0, duration / 1000);
             mVectorState.mBasicAnimator.setInterpolator(new LinearInterpolator());
         }
