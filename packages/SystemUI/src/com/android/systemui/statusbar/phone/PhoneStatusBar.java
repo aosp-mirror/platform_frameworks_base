@@ -2846,7 +2846,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mStatusBarWindow.setSystemUiVisibility(0);
         mKeyguardStatusView.setVisibility(View.GONE);
         mNotificationPanelHeader.setVisibility(View.VISIBLE);
-        mKeyguardSettingsFlipButton.setVisibility(View.GONE);
+        if (mKeyguardSettingsFlipButton != null) {
+            mKeyguardSettingsFlipButton.setVisibility(View.GONE);
+        }
         updateRowStates();
     }
 
