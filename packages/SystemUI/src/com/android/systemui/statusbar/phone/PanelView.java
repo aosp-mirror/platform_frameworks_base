@@ -221,6 +221,7 @@ public class PanelView extends FrameLayout {
     protected int mMaxPanelHeight = 0;
     private String mViewName;
     protected float mInitialTouchY;
+    protected float mInitialTouchX;
     protected float mFinalTouchY;
 
     protected void onExpandingFinished() {
@@ -375,12 +376,14 @@ public class PanelView extends FrameLayout {
             mTrackingPointer = event.getPointerId(pointerIndex);
         }
         final float y = event.getY(pointerIndex);
+        final float x = event.getX(pointerIndex);
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mTracking = true;
 
                 mInitialTouchY = y;
+                mInitialTouchX = x;
                 initVelocityTracker();
                 trackMovement(event);
                 mTimeAnimator.cancel(); // end any outstanding animations
@@ -398,9 +401,11 @@ public class PanelView extends FrameLayout {
                     // gesture is ongoing, find a new pointer to track
                     final int newIndex = event.getPointerId(0) != upPointer ? 0 : 1;
                     final float newY = event.getY(newIndex);
+                    final float newX = event.getX(newIndex);
                     mTrackingPointer = event.getPointerId(newIndex);
                     mInitialOffsetOnTouch = mExpandedHeight;
                     mInitialTouchY = newY;
+                    mInitialTouchX = newX;
                 }
                 break;
 
@@ -515,18 +520,17 @@ public class PanelView extends FrameLayout {
             pointerIndex = 0;
             mTrackingPointer = event.getPointerId(pointerIndex);
         }
+        final float x = event.getX(pointerIndex);
         final float y = event.getY(pointerIndex);
         boolean scrolledToBottom = isScrolledToBottom();
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mInitialTouchY = y;
+                mInitialTouchX = x;
                 initVelocityTracker();
                 trackMovement(event);
                 mTimeAnimator.cancel(); // end any outstanding animations
-                if (mExpandedHeight == 0 || y > getContentHeight()) {
-                    return true;
-                }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
                 final int upPointer = event.getPointerId(event.getActionIndex());
@@ -534,8 +538,8 @@ public class PanelView extends FrameLayout {
                     // gesture is ongoing, find a new pointer to track
                     final int newIndex = event.getPointerId(0) != upPointer ? 0 : 1;
                     mTrackingPointer = event.getPointerId(newIndex);
-                    final float newY = event.getY(newIndex);
-                    mInitialTouchY = newY;
+                    mInitialTouchX = event.getX(newIndex);
+                    mInitialTouchY = event.getY(newIndex);
                 }
                 break;
 
@@ -543,9 +547,10 @@ public class PanelView extends FrameLayout {
                 final float h = y - mInitialTouchY;
                 trackMovement(event);
                 if (scrolledToBottom) {
-                    if (h < -mTouchSlop) {
+                    if (h < -mTouchSlop && h < -Math.abs(x - mInitialTouchX)) {
                         mInitialOffsetOnTouch = mExpandedHeight;
                         mInitialTouchY = y;
+                        mInitialTouchX = x;
                         mTracking = true;
                         onTrackingStarted();
                         return true;
@@ -619,7 +624,7 @@ public class PanelView extends FrameLayout {
             }
         }
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                    getDesiredMeasureHeight(), MeasureSpec.AT_MOST);
+                getDesiredMeasureHeight(), MeasureSpec.AT_MOST);
         setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
     }
 

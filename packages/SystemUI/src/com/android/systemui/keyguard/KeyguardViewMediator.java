@@ -1271,11 +1271,6 @@ public class KeyguardViewMediator extends SystemUI {
                 // (like recents). Temporary enable/disable (e.g. the "back" button) are
                 // done in KeyguardHostView.
                 flags |= StatusBarManager.DISABLE_RECENT;
-                if ((isSecure() && !mAllowNotificationsWhenSecure)
-                        || !ENABLE_INSECURE_STATUS_BAR_EXPAND) {
-                    // showing secure lockscreen; disable expanding.
-                    flags |= StatusBarManager.DISABLE_EXPAND;
-                }
                 if (isSecure()) {
                     // showing secure lockscreen; disable ticker and switch private notifications
                     // to show their public versions, if available.
