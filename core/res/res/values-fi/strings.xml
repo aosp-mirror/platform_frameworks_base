@@ -135,6 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synkronointi"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Liikaa <xliff:g id="CONTENT_TYPE">%s</xliff:g>-poistoja."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Tablet-laitteen tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Kellon tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Puhelimen tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Verkkoa saatetaan valvoa"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Valvoja on tuntematon kolmas osapuoli."</string>
@@ -152,6 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Soittoääni: normaali"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Suljetaan..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet-laitteesi sammutetaan."</string>
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Kello sammutetaan."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Puhelin suljetaan."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Haluatko sammuttaa?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Käynnistä vikasietotilassa"</string>
@@ -1186,8 +1188,8 @@
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Soittoäänet"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Tuntematon soittoääni"</string>
   <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Wifi-verkko käytettävissä"</item>
-    <item quantity="other" msgid="4192424489168397386">"Wifi-verkkoja käytettävissä"</item>
+    <item quantity="one" msgid="6654123987418168693">"Wi-Fi-verkko käytettävissä"</item>
+    <item quantity="other" msgid="4192424489168397386">"Wi-Fi-verkkoja käytettävissä"</item>
   </plurals>
   <plurals name="wifi_available_detailed">
     <item quantity="one" msgid="1634101450343277345">"Avoin wifi-verkko käytettävissä"</item>
@@ -1197,10 +1199,10 @@
     <string name="network_available_sign_in" msgid="8495155593358054676">"Kirjaudu verkkoon"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wifi-yhteyden muodostaminen epäonnistui"</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi-yhteyden muodostaminen epäonnistui"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" : huono internetyhteys."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Suora wifi-yhteys"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Käynnistä suora wifi-yhteys. Wifi-asiakas/-hotspot poistetaan käytöstä."</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Käynnistä suora wifi-yhteys. Wi-Fi-asiakas/-hotspot poistetaan käytöstä."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Suoran wifi-yhteyden käynnistäminen epäonnistui."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct on käytössä"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Tarkastele asetuksia koskettamalla"</string>
@@ -1456,12 +1458,12 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G-tiedonsiirto pois käytöstä"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G-tiedonsiirto pois käytöstä"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobiilitiedonsiirto pois käytöstä"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wifi-tiedonsiirto pois käytöstä"</string>
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi-tiedonsiirto pois käytöstä"</string>
     <string name="data_usage_limit_body" msgid="3317964706973601386">"Ota käyttöön koskettamalla."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G-tiedonsiirtoraja ylitetty"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G-tiedonsiirtoraja ylitetty"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Mobiilitiedonsiirtoraja ylitetty"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wifi-tiedonsiirtoraja ylitetty"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi-tiedonsiirtoraja ylitetty"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> yli asetetun rajan"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Rajoitettu taustatietojen käyttö"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"Poista rajoitus koskettamalla."</string>

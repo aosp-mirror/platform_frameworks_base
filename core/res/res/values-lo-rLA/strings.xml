@@ -135,6 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"ຊິ້ງຂໍ້ມູນ"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"ມີການລຶບ <xliff:g id="CONTENT_TYPE">%s</xliff:g> ຫຼາຍເກີນໄປ."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ພື້ນທີ່ຈັດເກັບຂໍ້ມູນໃນແທັບເລັດເຕັມ. ລຶບບາງໄຟລ໌ອອກເພື່ອເພີ່ມພື້ນທີ່ຫວ່າງ."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ໃນ​ໂມງ​ເຕັມ​ແລ້ວ. ໃຫ້​ລຶບ​ໄຟ​ລ໌​ບາງ​ອັນ​ທີ່ບໍ່​ໄດ້​ໃຊ້​ອອກ​ເພື່ອ​ເພີ່ມ​ເນື້ອ​ທີ່​ຫວ່າງ."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ພື້ນທີ່ໃນໂທລະສັບເຕັມແລ້ວ. ກະລຸນາລຶບບາງໄຟລ໌ອອກເພື່ອເພີ່ມພື້ນທີ່ຫວ່າງ."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ການນຳໃຊ້ເຄືອຂ່າຍອາດມີການກວດສອບຕິດຕາມ"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"ໂດຍບຸກຄົນທີສາມທີ່ບໍ່ຮູ້ຈັກ"</string>
@@ -152,6 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"ເປີດສຽງໂທເຂົ້າແລ້ວ"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"ກຳລັງປິດລະບົບລົງ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ແທັບເລັດຂອງທ່ານຈະຖືກປິດ."</string>
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"ໂມງ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ປິດ​ໄວ້."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"ໂທລະສັບຂອງທ່ານຈະຖືກປິດ."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"ທ່ານຕ້ອງການທີ່ຈະປິດບໍ່?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"ຣີບູດເຂົ້າ safe mode"</string>
