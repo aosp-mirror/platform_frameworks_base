@@ -105,7 +105,7 @@ static jlong BitmapShader_postConstructor(JNIEnv* env, jobject o, jlong shaderHa
 #ifdef USE_OPENGL_RENDERER
     SkiaShader* skiaShader = new SkiaBitmapShader(bitmap, shader,
             static_cast<SkShader::TileMode>(tileModeX), static_cast<SkShader::TileMode>(tileModeY),
-            NULL, (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+            NULL, !shader->isOpaque());
     return reinterpret_cast<jlong>(skiaShader);
 #else
     return NULL;
@@ -205,7 +205,7 @@ static jlong LinearGradient_postCreate1(JNIEnv* env, jobject o, jlong shaderHand
 
     SkiaShader* skiaShader = new SkiaLinearGradientShader(storedBounds, storedColors,
             storedPositions, stopCount, shader, static_cast<SkShader::TileMode>(tileMode), NULL,
-            (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+            !shader->isOpaque());
 
     env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);
     return reinterpret_cast<jlong>(skiaShader);
@@ -232,7 +232,7 @@ static jlong LinearGradient_postCreate2(JNIEnv* env, jobject o, jlong shaderHand
 
     SkiaShader* skiaShader = new SkiaLinearGradientShader(storedBounds, storedColors,
             storedPositions, 2, shader, static_cast<SkShader::TileMode>(tileMode), NULL,
-            (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+            !shader->isOpaque());
 
     return reinterpret_cast<jlong>(skiaShader);
 #else
@@ -330,7 +330,7 @@ static jlong RadialGradient_postCreate1(JNIEnv* env, jobject o, jlong shaderHand
 
     SkiaShader* skiaShader = new SkiaCircularGradientShader(x, y, radius, storedColors,
             storedPositions, count, shader, (SkShader::TileMode) tileMode, NULL,
-            (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+            !shader->isOpaque());
 
     env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);
     return reinterpret_cast<jlong>(skiaShader);
@@ -353,7 +353,7 @@ static jlong RadialGradient_postCreate2(JNIEnv* env, jobject o, jlong shaderHand
 
     SkiaShader* skiaShader = new SkiaCircularGradientShader(x, y, radius, storedColors,
             storedPositions, 2, shader, (SkShader::TileMode) tileMode, NULL,
-            (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+            !shader->isOpaque());
 
     return reinterpret_cast<jlong>(skiaShader);
 #else
@@ -422,7 +422,7 @@ static jlong SweepGradient_postCreate1(JNIEnv* env, jobject o, jlong shaderHandl
     }
 
     SkiaShader* skiaShader = new SkiaSweepGradientShader(x, y, storedColors, storedPositions, count,
-            shader, NULL, (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+            shader, NULL, !shader->isOpaque());
 
     env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);
     return reinterpret_cast<jlong>(skiaShader);
@@ -444,7 +444,7 @@ static jlong SweepGradient_postCreate2(JNIEnv* env, jobject o, jlong shaderHandl
     storedColors[1] = static_cast<uint32_t>(color1);
 
     SkiaShader* skiaShader = new SkiaSweepGradientShader(x, y, storedColors, storedPositions, 2,
-            shader, NULL, (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+            shader, NULL, !shader->isOpaque());
 
     return reinterpret_cast<jlong>(skiaShader);
 #else
