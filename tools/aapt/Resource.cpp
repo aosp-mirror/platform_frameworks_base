@@ -179,24 +179,6 @@ bool isValidResourceType(const String8& type)
         || type == "color" || type == "menu" || type == "mipmap";
 }
 
-static sp<AaptFile> getResourceFile(const sp<AaptAssets>& assets, bool makeIfNecessary=true)
-{
-    sp<AaptGroup> group = assets->getFiles().valueFor(String8("resources.arsc"));
-    sp<AaptFile> file;
-    if (group != NULL) {
-        file = group->getFiles().valueFor(AaptGroupEntry());
-        if (file != NULL) {
-            return file;
-        }
-    }
-
-    if (!makeIfNecessary) {
-        return NULL;
-    }
-    return assets->addFile(String8("resources.arsc"), AaptGroupEntry(), String8(),
-                            NULL, String8());
-}
-
 static status_t parsePackage(Bundle* bundle, const sp<AaptAssets>& assets,
     const sp<AaptGroup>& grp)
 {
@@ -356,23 +338,6 @@ static status_t preProcessImages(const Bundle* bundle, const sp<AaptAssets>& ass
             hasErrors = true;
         }
     }
-    return (hasErrors || (res < NO_ERROR)) ? UNKNOWN_ERROR : NO_ERROR;
-}
-
-status_t postProcessImages(const sp<AaptAssets>& assets,
-                           ResourceTable* table,
-                           const sp<ResourceTypeSet>& set)
-{
-    ResourceDirIterator it(set, String8("drawable"));
-    bool hasErrors = false;
-    ssize_t res;
-    while ((res=it.next()) == NO_ERROR) {
-        res = postProcessImage(assets, table, it.getFile());
-        if (res < NO_ERROR) {
-            hasErrors = true;
-        }
-    }
-
     return (hasErrors || (res < NO_ERROR)) ? UNKNOWN_ERROR : NO_ERROR;
 }
 
@@ -906,7 +871,38 @@ status_t updatePreProcessedCache(Bundle* bundle)
     return 0;
 }
 
-status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
+status_t generateAndroidManifestForSplit(const String16& package, const sp<ApkSplit>& split,
+        sp<AaptFile>& outFile) {
+    const String8 filename("AndroidManifest.xml");
+    const String16 androidPrefix("android");
+    const String16 androidNSUri("http://schemas.android.com/apk/res/android");
+    sp<XMLNode> root = XMLNode::newNamespace(filename, androidPrefix, androidNSUri);
+
+    // Build the <manifest> tag
+    sp<XMLNode> manifest = XMLNode::newElement(filename, String16(), String16("manifest"));
+
+    // Add the 'package' attribute which is set to the original package name.
+    manifest->addAttribute(String16(), String16("package"), package);
+
+    // Add the 'split' attribute which describes the configurations included.
+    String8 splitName("config_");
+    splitName.append(split->getDirectorySafeName());
+    manifest->addAttribute(String16(), String16("split"), String16(splitName));
+
+    // Build an empty <application> tag (required).
+    sp<XMLNode> app = XMLNode::newElement(filename, String16(), String16("application"));
+    manifest->addChild(app);
+    root->addChild(manifest);
+
+    status_t err = root->flatten(outFile, true, true);
+    if (err != NO_ERROR) {
+        return err;
+    }
+    outFile->setCompressionMethod(ZipEntry::kCompressDeflated);
+    return NO_ERROR;
+}
+
+status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuilder>& builder)
 {
     // First, look for a package file to parse.  This is required to
     // be able to generate the resource information.
@@ -1122,12 +1118,6 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
     // --------------------------------------------------------------------
 
     if (table.hasResources()) {
-        sp<AaptFile> resFile(getResourceFile(assets));
-        if (resFile == NULL) {
-            fprintf(stderr, "Error: unable to generate entry for resource data\n");
-            return UNKNOWN_ERROR;
-        }
-
         err = table.assignResourceIds();
         if (err < NO_ERROR) {
             return err;
@@ -1235,16 +1225,24 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
     }
 
     if (drawables != NULL) {
-        err = postProcessImages(assets, &table, drawables);
-        if (err != NO_ERROR) {
+        ResourceDirIterator it(drawables, String8("drawable"));
+        while ((err=it.next()) == NO_ERROR) {
+            err = postProcessImage(assets, &table, it.getFile());
+            if (err != NO_ERROR) {
+                hasErrors = true;
+            }
+        }
+
+        if (err < NO_ERROR) {
             hasErrors = true;
         }
+        err = NO_ERROR;
     }
 
     if (colors != NULL) {
         ResourceDirIterator it(colors, String8("color"));
         while ((err=it.next()) == NO_ERROR) {
-          err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
+            err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
             if (err != NO_ERROR) {
                 hasErrors = true;
             }
@@ -1261,12 +1259,13 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
         while ((err=it.next()) == NO_ERROR) {
             String8 src = it.getFile()->getPrintableSource();
             err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
-            if (err != NO_ERROR) {
+            if (err == NO_ERROR) {
+                ResXMLTree block;
+                block.setTo(it.getFile()->getData(), it.getFile()->getSize(), true);
+                checkForIds(src, block);
+            } else {
                 hasErrors = true;
             }
-            ResXMLTree block;
-            block.setTo(it.getFile()->getData(), it.getFile()->getSize(), true);
-            checkForIds(src, block);
         }
 
         if (err < NO_ERROR) {
@@ -1319,15 +1318,35 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
             return err;
         }
 
-        resFile = getResourceFile(assets);
-        if (resFile == NULL) {
-            fprintf(stderr, "Error: unable to generate entry for resource data\n");
-            return UNKNOWN_ERROR;
-        }
+        Vector<sp<ApkSplit> >& splits = builder->getSplits();
+        const size_t numSplits = splits.size();
+        for (size_t i = 0; i < numSplits; i++) {
+            sp<ApkSplit>& split = splits.editItemAt(i);
+            sp<AaptFile> flattenedTable = new AaptFile(String8("resources.arsc"),
+                    AaptGroupEntry(), String8());
+            err = table.flatten(bundle, split->getResourceFilter(), flattenedTable);
+            if (err != NO_ERROR) {
+                fprintf(stderr, "Failed to generate resource table for split '%s'\n",
+                        split->getPrintableName().string());
+                return err;
+            }
+            split->addEntry(String8("resources.arsc"), flattenedTable);
 
-        err = table.flatten(bundle, resFile);
-        if (err < NO_ERROR) {
-            return err;
+            if (split->isBase()) {
+                resFile = flattenedTable;
+                finalResTable.add(flattenedTable->getData(), flattenedTable->getSize());
+            } else {
+                sp<AaptFile> generatedManifest = new AaptFile(String8("AndroidManifest.xml"),
+                        AaptGroupEntry(), String8());
+                err = generateAndroidManifestForSplit(String16(assets->getPackage()), split,
+                        generatedManifest);
+                if (err != NO_ERROR) {
+                    fprintf(stderr, "Failed to generate AndroidManifest.xml for split '%s'\n",
+                            split->getPrintableName().string());
+                    return err;
+                }
+                split->addEntry(String8("AndroidManifest.xml"), generatedManifest);
+            }
         }
 
         if (bundle->getPublicOutputFile()) {
@@ -1343,18 +1362,13 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
             table.writePublicDefinitions(String16(assets->getPackage()), fp);
             fclose(fp);
         }
-        
-        // Read resources back in,
-        finalResTable.add(resFile->getData(), resFile->getSize());
-        
-#if 0
-        NOISY(
-              printf("Generated resources:\n");
-              finalResTable.print();
-        )
-#endif
+
+        if (finalResTable.getTableCount() == 0 || resFile == NULL) {
+            fprintf(stderr, "No resource table was generated.\n");
+            return UNKNOWN_ERROR;
+        }
     }
-    
+
     // Perform a basic validation of the manifest file.  This time we
     // parse it with the comments intact, so that we can use them to
     // generate java docs...  so we are not going to write this one

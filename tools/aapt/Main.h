@@ -10,8 +10,12 @@
 #include <utils/threads.h>
 #include <utils/List.h>
 #include <utils/Errors.h>
-#include "Bundle.h"
+#include <utils/StrongPointer.h>
+
 #include "AaptAssets.h"
+#include "ApkBuilder.h"
+#include "Bundle.h"
+#include "ResourceFilter.h"
 #include "ZipFile.h"
 
 
@@ -21,6 +25,8 @@
 #if BENCHMARK
     #include <time.h>
 #endif /* BENCHMARK */
+
+class OutputSet;
 
 extern int doVersion(Bundle* bundle);
 extern int doList(Bundle* bundle);
@@ -34,13 +40,13 @@ extern int doSingleCrunch(Bundle* bundle);
 extern int calcPercent(long uncompressedLen, long compressedLen);
 
 extern android::status_t writeAPK(Bundle* bundle,
-    const sp<AaptAssets>& assets,
-    const android::String8& outputFile);
+    const android::String8& outputFile,
+    const android::sp<OutputSet>& outputSet);
 
 extern android::status_t updatePreProcessedCache(Bundle* bundle);
 
 extern android::status_t buildResources(Bundle* bundle,
-    const sp<AaptAssets>& assets);
+    const sp<AaptAssets>& assets, sp<ApkBuilder>& builder);
 
 extern android::status_t writeResourceSymbols(Bundle* bundle,
     const sp<AaptAssets>& assets, const String8& pkgName, bool includePrivate);
@@ -48,8 +54,6 @@ extern android::status_t writeResourceSymbols(Bundle* bundle,
 extern android::status_t writeProguardFile(Bundle* bundle, const sp<AaptAssets>& assets);
 
 extern bool isValidResourceType(const String8& type);
-
-ssize_t processAssets(Bundle* bundle, ZipFile* zip, const sp<AaptAssets>& assets);
 
 extern status_t filterResources(Bundle* bundle, const sp<AaptAssets>& assets);
 
