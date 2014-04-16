@@ -1497,9 +1497,9 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void enqueueNotificationWithTag(String pkg, String basePkg, String tag, int id,
+        public void enqueueNotificationWithTag(String pkg, String opPkg, String tag, int id,
                 Notification notification, int[] idOut, int userId) throws RemoteException {
-            enqueueNotificationInternal(pkg, basePkg, Binder.getCallingUid(),
+            enqueueNotificationInternal(pkg, opPkg, Binder.getCallingUid(),
                     Binder.getCallingPid(), tag, id, notification, idOut, userId);
         }
 
@@ -1849,14 +1849,14 @@ public class NotificationManagerService extends SystemService {
      */
     private final NotificationManagerInternal mInternalService = new NotificationManagerInternal() {
         @Override
-        public void enqueueNotification(String pkg, String basePkg, int callingUid, int callingPid,
+        public void enqueueNotification(String pkg, String opPkg, int callingUid, int callingPid,
                 String tag, int id, Notification notification, int[] idReceived, int userId) {
-            enqueueNotificationInternal(pkg, basePkg, callingUid, callingPid, tag, id, notification,
+            enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
                     idReceived, userId);
         }
     };
 
-    void enqueueNotificationInternal(final String pkg, String basePkg, final int callingUid,
+    void enqueueNotificationInternal(final String pkg, final String opPkg, final int callingUid,
             final int callingPid, final String tag, final int id, final Notification notification,
             int[] idOut, int incomingUserId) {
         if (DBG) {
@@ -1981,7 +1981,8 @@ public class NotificationManagerService extends SystemService {
                 if (DBG) Slog.v(TAG, "canInterrupt=" + canInterrupt + " intercept=" + intercept);
                 synchronized (mNotificationList) {
                     final StatusBarNotification n = new StatusBarNotification(
-                            pkg, id, tag, callingUid, callingPid, score, notification, user);
+                            pkg, opPkg, id, tag, callingUid, callingPid, score, notification,
+                            user);
                     NotificationRecord r = new NotificationRecord(n);
                     NotificationRecord old = null;
 
@@ -2157,7 +2158,7 @@ public class NotificationManagerService extends SystemService {
                                 // notifying app does not have the VIBRATE permission.
                                 long identity = Binder.clearCallingIdentity();
                                 try {
-                                    mVibrator.vibrate(r.sbn.getUid(), r.sbn.getBasePkg(),
+                                    mVibrator.vibrate(r.sbn.getUid(), r.sbn.getOpPkg(),
                                         useDefaultVibrate ? mDefaultVibrationPattern
                                             : mFallbackVibrationPattern,
                                         ((notification.flags & Notification.FLAG_INSISTENT) != 0)
@@ -2168,7 +2169,7 @@ public class NotificationManagerService extends SystemService {
                             } else if (notification.vibrate.length > 1) {
                                 // If you want your own vibration pattern, you need the VIBRATE
                                 // permission
-                                mVibrator.vibrate(r.sbn.getUid(), r.sbn.getBasePkg(),
+                                mVibrator.vibrate(r.sbn.getUid(), r.sbn.getOpPkg(),
                                         notification.vibrate,
                                     ((notification.flags & Notification.FLAG_INSISTENT) != 0)
                                             ? 0: -1, notification.audioStreamType);

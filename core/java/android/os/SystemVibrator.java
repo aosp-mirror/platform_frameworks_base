@@ -58,13 +58,13 @@ public class SystemVibrator extends Vibrator {
      * @hide
      */
     @Override
-    public void vibrate(int owningUid, String owningPackage, long milliseconds, int streamHint) {
+    public void vibrate(int uid, String opPkg, long milliseconds, int streamHint) {
         if (mService == null) {
             Log.w(TAG, "Failed to vibrate; no vibrator service.");
             return;
         }
         try {
-            mService.vibrate(owningUid, owningPackage, milliseconds, streamHint, mToken);
+            mService.vibrate(uid, opPkg, milliseconds, streamHint, mToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to vibrate.", e);
         }
@@ -74,7 +74,7 @@ public class SystemVibrator extends Vibrator {
      * @hide
      */
     @Override
-    public void vibrate(int owningUid, String owningPackage, long[] pattern, int repeat,
+    public void vibrate(int uid, String opPkg, long[] pattern, int repeat,
             int streamHint) {
         if (mService == null) {
             Log.w(TAG, "Failed to vibrate; no vibrator service.");
@@ -85,7 +85,7 @@ public class SystemVibrator extends Vibrator {
         // anyway
         if (repeat < pattern.length) {
             try {
-                mService.vibratePattern(owningUid, owningPackage, pattern, repeat, streamHint,
+                mService.vibratePattern(uid, opPkg, pattern, repeat, streamHint,
                         mToken);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to vibrate.", e);

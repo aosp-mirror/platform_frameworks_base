@@ -40,7 +40,7 @@ public class NullVibrator extends Vibrator {
      * @hide
      */
     @Override
-    public void vibrate(int owningUid, String owningPackage, long milliseconds, int streamHint) {
+    public void vibrate(int uid, String opPkg, long milliseconds, int streamHint) {
         vibrate(milliseconds);
     }
 
@@ -48,7 +48,7 @@ public class NullVibrator extends Vibrator {
      * @hide
      */
     @Override
-    public void vibrate(int owningUid, String owningPackage, long[] pattern, int repeat,
+    public void vibrate(int uid, String opPkg, long[] pattern, int repeat,
             int streamHint) {
         if (repeat >= pattern.length) {
             throw new ArrayIndexOutOfBoundsException();
