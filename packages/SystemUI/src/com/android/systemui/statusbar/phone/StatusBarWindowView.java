@@ -77,11 +77,15 @@ public class StatusBarWindowView extends FrameLayout
     public boolean dispatchKeyEvent(KeyEvent event) {
         boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
         switch (event.getKeyCode()) {
-        case KeyEvent.KEYCODE_BACK:
-            if (!down) {
-                mService.onBackPressed();
-            }
-            return true;
+            case KeyEvent.KEYCODE_BACK:
+                if (!down) {
+                    mService.onBackPressed();
+                }
+                return true;
+            case KeyEvent.KEYCODE_MENU:
+                if (!down) {
+                    return mService.onMenuPressed();
+                }
         }
         return super.dispatchKeyEvent(event);
     }
