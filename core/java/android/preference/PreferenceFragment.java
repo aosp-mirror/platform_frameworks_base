@@ -337,6 +337,26 @@ public abstract class PreferenceFragment extends Fragment implements
         return mList;
     }
 
+    /** @hide */
+    public boolean hasListView() {
+        if (mList != null) {
+            return true;
+        }
+        View root = getView();
+        if (root == null) {
+            return false;
+        }
+        View rawListView = root.findViewById(android.R.id.list);
+        if (!(rawListView instanceof ListView)) {
+            return false;
+        }
+        mList = (ListView)rawListView;
+        if (mList == null) {
+            return false;
+        }
+        return true;
+    }
+
     private void ensureList() {
         if (mList != null) {
             return;
