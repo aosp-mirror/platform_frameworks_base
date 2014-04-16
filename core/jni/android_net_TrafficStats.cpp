@@ -19,6 +19,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -85,9 +86,9 @@ static int parseIfaceStats(const char* iface, struct Stats* stats) {
     uint64_t rxBytes, rxPackets, txBytes, txPackets, tcpRxPackets, tcpTxPackets;
 
     while (fgets(buffer, sizeof(buffer), fp) != NULL) {
-        int matched = sscanf(buffer, "%31s %llu %llu %llu %llu "
-                "%*u %llu %*u %*u %*u %*u "
-                "%*u %llu %*u %*u %*u %*u", cur_iface, &rxBytes,
+        int matched = sscanf(buffer, "%31s %" SCNu64 " %" SCNu64 " %" SCNu64
+                " %" SCNu64 " " "%*u %" SCNu64 " %*u %*u %*u %*u "
+                "%*u %" SCNu64 " %*u %*u %*u %*u", cur_iface, &rxBytes,
                 &rxPackets, &txBytes, &txPackets, &tcpRxPackets, &tcpTxPackets);
         if (matched >= 5) {
             if (matched == 7) {
@@ -129,9 +130,11 @@ static int parseUidStats(const uint32_t uid, struct Stats* stats) {
     uint64_t tag, rxBytes, rxPackets, txBytes, txPackets;
 
     while (fgets(buffer, sizeof(buffer), fp) != NULL) {
-        if (sscanf(buffer, "%d %31s 0x%llx %u %u %llu %llu %llu %llu", &idx,
-                iface, &tag, &cur_uid, &set, &rxBytes, &rxPackets, &txBytes,
-                &txPackets) == 9) {
+        if (sscanf(buffer,
+                "%" SCNu32 " %31s 0x%" SCNx64 " %u %u %" SCNu64 " %" SCNu64
+                " %" SCNu64 " %" SCNu64 "",
+                &idx, iface, &tag, &cur_uid, &set, &rxBytes, &rxPackets,
+                &txBytes, &txPackets) == 9) {
             if (uid == cur_uid && tag == 0L) {
                 stats->rxBytes += rxBytes;
                 stats->rxPackets += rxPackets;
