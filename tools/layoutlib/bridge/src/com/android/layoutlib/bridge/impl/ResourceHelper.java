@@ -165,6 +165,9 @@ public final class ResourceHelper {
      * @param context the current context
      */
     public static Drawable getDrawable(ResourceValue value, BridgeContext context) {
+        if (value == null) {
+            return null;
+        }
         String stringValue = value.getValue();
         if (RenderResources.REFERENCE_NULL.equals(stringValue)) {
             return null;
