@@ -17,6 +17,7 @@
 #undef LOG_TAG
 #define LOG_TAG "CursorWindow"
 
+#include <inttypes.h>
 #include <jni.h>
 #include <JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
@@ -225,7 +226,7 @@ static jstring nativeGetString(JNIEnv* env, jclass clazz, jlong windowPtr,
     } else if (type == CursorWindow::FIELD_TYPE_INTEGER) {
         int64_t value = window->getFieldSlotValueLong(fieldSlot);
         char buf[32];
-        snprintf(buf, sizeof(buf), "%lld", value);
+        snprintf(buf, sizeof(buf), "%" PRId64, value);
         return env->NewStringUTF(buf);
     } else if (type == CursorWindow::FIELD_TYPE_FLOAT) {
         double value = window->getFieldSlotValueDouble(fieldSlot);
@@ -314,7 +315,7 @@ static void nativeCopyStringToBuffer(JNIEnv* env, jclass clazz, jlong windowPtr,
     } else if (type == CursorWindow::FIELD_TYPE_INTEGER) {
         int64_t value = window->getFieldSlotValueLong(fieldSlot);
         char buf[32];
-        snprintf(buf, sizeof(buf), "%lld", value);
+        snprintf(buf, sizeof(buf), "%" PRId64, value);
         fillCharArrayBufferUTF(env, bufferObj, buf, strlen(buf));
     } else if (type == CursorWindow::FIELD_TYPE_FLOAT) {
         double value = window->getFieldSlotValueDouble(fieldSlot);
