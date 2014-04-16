@@ -47,6 +47,8 @@ interface IStatusBarService
             int uid, int initialPid, String message, int userId);
     void onClearAllNotifications(int userId);
     void onNotificationClear(String pkg, String tag, int id, int userId);
+    void onNotificationVisibilityChanged(
+            in String[] newlyVisibleKeys, in String[] noLongerVisibleKeys);
     void setSystemUiVisibility(int vis, int mask);
     void setHardKeyboardEnabled(boolean enabled);
     void toggleRecentApps();
