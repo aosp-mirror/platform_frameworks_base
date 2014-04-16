@@ -30958,7 +30958,6 @@ package android.view {
     method public boolean hasInsets();
     method public boolean hasSystemWindowInsets();
     method public boolean hasWindowDecorInsets();
-    method public boolean isRound();
   }
 
   public abstract interface WindowManager implements android.view.ViewManager {

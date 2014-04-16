@@ -33,7 +33,6 @@ public class WindowInsets {
     private Rect mSystemWindowInsets;
     private Rect mWindowDecorInsets;
     private Rect mTempRect;
-    private boolean mIsRound;
 
     private static final Rect EMPTY_RECT = new Rect(0, 0, 0, 0);
 
@@ -47,14 +46,8 @@ public class WindowInsets {
 
     /** @hide */
     public WindowInsets(Rect systemWindowInsets, Rect windowDecorInsets) {
-        this(systemWindowInsets, windowDecorInsets, false);
-    }
-
-    /** @hide */
-    public WindowInsets(Rect systemWindowInsets, Rect windowDecorInsets, boolean isRound) {
         mSystemWindowInsets = systemWindowInsets;
         mWindowDecorInsets = windowDecorInsets;
-        mIsRound = isRound;
     }
 
     /**
@@ -65,12 +58,12 @@ public class WindowInsets {
     public WindowInsets(WindowInsets src) {
         mSystemWindowInsets = src.mSystemWindowInsets;
         mWindowDecorInsets = src.mWindowDecorInsets;
-        mIsRound = src.mIsRound;
     }
 
     /** @hide */
     public WindowInsets(Rect systemWindowInsets) {
-        this(systemWindowInsets, EMPTY_RECT);
+        mSystemWindowInsets = systemWindowInsets;
+        mWindowDecorInsets = EMPTY_RECT;
     }
 
     /**
@@ -227,20 +220,6 @@ public class WindowInsets {
         return hasSystemWindowInsets() || hasWindowDecorInsets();
     }
 
-    /**
-     * Returns true if the associated window has a round shape.
-     *
-     * <p>A round window's left, top, right and bottom edges reach all the way to the
-     * associated edges of the window but the corners may not be visible. Views responding
-     * to round insets should take care to not lay out critical elements within the corners
-     * where they may not be accessible.</p>
-     *
-     * @return True if the window is round
-     */
-    public boolean isRound() {
-        return mIsRound;
-    }
-
     public WindowInsets cloneWithSystemWindowInsetsConsumed() {
         final WindowInsets result = new WindowInsets(this);
         result.mSystemWindowInsets = new Rect(0, 0, 0, 0);
@@ -294,6 +273,6 @@ public class WindowInsets {
     @Override
     public String toString() {
         return "WindowInsets{systemWindowInsets=" + mSystemWindowInsets + " windowDecorInsets=" +
-                mWindowDecorInsets + (isRound() ? "round}" : "}");
+                mWindowDecorInsets + "}";
     }
 }
