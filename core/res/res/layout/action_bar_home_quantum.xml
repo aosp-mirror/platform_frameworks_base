@@ -25,9 +25,13 @@
         android:visibility="gone"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:scaleType="center" />
+        android:scaleType="centerInside" />
     <ImageView android:id="@android:id/home"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dip"
+        android:layout_marginTop="@android:dimen/action_bar_icon_vertical_padding"
+        android:layout_marginBottom="@android:dimen/action_bar_icon_vertical_padding"
+        android:adjustViewBounds="true"
         android:scaleType="fitCenter" />
 </view>
