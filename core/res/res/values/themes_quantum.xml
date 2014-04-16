@@ -303,7 +303,7 @@ please see themes_device_defaults.xml.
         <item name="actionBarSize">@dimen/action_bar_default_height_quantum</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Quantum.PopupWindow.ActionMode</item>
         <item name="actionBarWidgetTheme">@null</item>
-        <item name="actionBarTheme">@style/Theme.Quantum.ActionBar</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.Quantum.ActionBarWidget</item>
         <item name="actionBarItemBackground">@drawable/item_background_quantum</item>
 
         <item name="actionModeCutDrawable">@drawable/ic_menu_cut_quantum</item>
@@ -648,7 +648,7 @@ please see themes_device_defaults.xml.
         <item name="actionBarSize">@dimen/action_bar_default_height_quantum</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Quantum.Light.PopupWindow.ActionMode</item>
         <item name="actionBarWidgetTheme">@null</item>
-        <item name="actionBarTheme">@style/Theme.Quantum.Light.ActionBar</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.Quantum.Light.ActionBarWidget</item>
         <item name="actionBarItemBackground">@drawable/item_background_quantum</item>
 
         <item name="actionModeCutDrawable">@drawable/ic_menu_cut_quantum</item>
@@ -722,11 +722,21 @@ please see themes_device_defaults.xml.
         <item name="colorButtonPressedColored">?attr/colorPrimaryDark</item>
     </style>
 
-    <style name="Theme.Quantum.ActionBar">
+    <style name="ThemeOverlay" />
+    <style name="ThemeOverlay.Quantum" />
+    <style name="ThemeOverlay.Quantum.Light" />
+
+    <!-- Variant of the quantum theme that replaces the activated control color
+         (which by default is identical to the action bar background color) with
+         the normal control color . -->
+    <style name="ThemeOverlay.Quantum.ActionBarWidget">
         <item name="colorControlActivated">?attr/colorControlNormal</item>
     </style>
 
-    <style name="Theme.Quantum.Light.ActionBar">
+    <!-- Variant of the quantum (light) theme that replaces the activated control
+         color (which by default is identical to the action bar background color)
+         with the normal control color . -->
+    <style name="ThemeOverlay.Quantum.Light.ActionBarWidget">
         <item name="colorControlActivated">?attr/colorControlNormal</item>
     </style>
 
@@ -734,8 +744,7 @@ please see themes_device_defaults.xml.
          with an inverse color profile. The dark action bar sharply stands out against
          the light content. -->
     <style name="Theme.Quantum.Light.DarkActionBar">
-        <item name="actionBarWidgetTheme">@null</item>
-        <item name="actionBarTheme">@style/Theme.Quantum.ActionBar</item>
+        <!-- TODO -->
     </style>
 
     <!-- Variant of the quantum (dark) theme with no action bar. -->

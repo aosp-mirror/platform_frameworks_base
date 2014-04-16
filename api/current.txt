@@ -382,6 +382,7 @@ package android {
     field public static final int codes = 16843330; // 0x1010242
     field public static final int collapseColumns = 16843083; // 0x101014b
     field public static final int color = 16843173; // 0x10101a5
+    field public static final int colorAccent = 16843842; // 0x1010442
     field public static final int colorActivatedHighlight = 16843664; // 0x1010390
     field public static final int colorBackground = 16842801; // 0x1010031
     field public static final int colorBackgroundCacheHint = 16843435; // 0x10102ab
@@ -397,6 +398,9 @@ package android {
     field public static final int colorLongPressedHighlight = 16843662; // 0x101038e
     field public static final int colorMultiSelectHighlight = 16843665; // 0x1010391
     field public static final int colorPressedHighlight = 16843661; // 0x101038d
+    field public static final int colorPrimary = 16843840; // 0x1010440
+    field public static final int colorPrimaryDark = 16843841; // 0x1010441
+    field public static final int colorPrimaryLight = 16843839; // 0x101043f
     field public static final int columnCount = 16843639; // 0x1010377
     field public static final int columnDelay = 16843215; // 0x10101cf
     field public static final int columnOrderPreserved = 16843640; // 0x1010378
