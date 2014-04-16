@@ -28,7 +28,7 @@ public class KeyguardSecurityModel {
      * The different types of security available for {@link Mode#UnlockScreen}.
      * @see com.android.internal.policy.impl.LockPatternKeyguardView#getUnlockMode()
      */
-    enum SecurityMode {
+    public enum SecurityMode {
         Invalid, // NULL state
         None, // No security enabled
         Pattern, // Unlock by drawing a pattern.

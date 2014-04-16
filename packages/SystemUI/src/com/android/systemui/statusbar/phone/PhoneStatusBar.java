@@ -2826,7 +2826,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (isFlippedToSettings()) {
             flipToNotifications();
         }
-        mStatusBarWindow.setSystemUiVisibility(View.STATUS_BAR_DISABLE_HOME);
         mKeyguardStatusView.setVisibility(View.VISIBLE);
         mNotificationPanelHeader.setVisibility(View.GONE);
         if (mKeyguardSettingsFlipButton == null) {
@@ -2843,11 +2842,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     public void hideKeyguard() {
         mOnKeyguard = false;
-        mStatusBarWindow.setSystemUiVisibility(0);
         mKeyguardStatusView.setVisibility(View.GONE);
         mNotificationPanelHeader.setVisibility(View.VISIBLE);
         mKeyguardSettingsFlipButton.setVisibility(View.GONE);
         updateRowStates();
+        instantCollapseNotificationPanel();
     }
 
     public void userActivity() {
@@ -2874,6 +2873,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private void instantExpandNotificationsPanel() {
         mExpandedVisible = true;
         mNotificationPanel.setExpandedFraction(1);
+    }
+
+    private void instantCollapseNotificationPanel() {
+        mNotificationPanel.setExpandedFraction(0);
     }
 
     @Override
