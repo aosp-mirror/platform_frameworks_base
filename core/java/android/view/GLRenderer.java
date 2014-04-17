@@ -1177,7 +1177,7 @@ public class GLRenderer extends HardwareRenderer {
                     callbacks.onHardwarePreDraw(canvas);
 
                     if (displayList != null) {
-                        status |= drawDisplayList(attachInfo, canvas, displayList, status);
+                        status |= drawDisplayList(canvas, displayList, status);
                     } else {
                         // Shouldn't reach here
                         view.draw(canvas);
@@ -1308,8 +1308,8 @@ public class GLRenderer extends HardwareRenderer {
         return status;
     }
 
-    private int drawDisplayList(View.AttachInfo attachInfo, HardwareCanvas canvas,
-            RenderNode displayList, int status) {
+    private int drawDisplayList(HardwareCanvas canvas, RenderNode displayList,
+            int status) {
 
         long drawDisplayListStartTime = 0;
         if (mProfileEnabled) {
