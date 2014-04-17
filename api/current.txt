@@ -12217,6 +12217,14 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_MODE;
   }
 
+  public final class ColorSpaceTransform {
+    ctor public ColorSpaceTransform(android.hardware.camera2.Rational[]);
+    ctor public ColorSpaceTransform(int[]);
+    method public void copyElements(android.hardware.camera2.Rational[], int);
+    method public void copyElements(int[], int);
+    method public android.hardware.camera2.Rational getElement(int, int);
+  }
+
   public final class Face {
     method public android.graphics.Rect getBounds();
     method public int getId();
@@ -12227,6 +12235,21 @@ package android.hardware.camera2 {
     field public static final int ID_UNSUPPORTED = -1; // 0xffffffff
     field public static final int SCORE_MAX = 100; // 0x64
     field public static final int SCORE_MIN = 1; // 0x1
+  }
+
+  public final class MeteringRectangle {
+    ctor public MeteringRectangle(int, int, int, int, int);
+    ctor public MeteringRectangle(android.graphics.Point, android.util.Size, int);
+    ctor public MeteringRectangle(android.graphics.Rect, int);
+    method public boolean equals(android.hardware.camera2.MeteringRectangle);
+    method public int getHeight();
+    method public int getMeteringWeight();
+    method public android.graphics.Rect getRect();
+    method public android.util.Size getSize();
+    method public android.graphics.Point getUpperLeftPoint();
+    method public int getWidth();
+    method public int getX();
+    method public int getY();
   }
 
   public final class Rational {
@@ -28707,6 +28730,25 @@ package android.util {
     method public boolean isReadOnly();
     method public static android.util.Property<T, V> of(java.lang.Class<T>, java.lang.Class<V>, java.lang.String);
     method public void set(T, V);
+  }
+
+  public final class Range {
+    ctor public Range(T, T);
+    method public static android.util.Range<T> create(T, T);
+    method public T getLower();
+    method public T getUpper();
+  }
+
+  public final class Size {
+    ctor public Size(int, int);
+    method public int getHeight();
+    method public int getWidth();
+  }
+
+  public final class SizeF {
+    ctor public SizeF(float, float);
+    method public float getHeight();
+    method public float getWidth();
   }
 
   public class SparseArray implements java.lang.Cloneable {

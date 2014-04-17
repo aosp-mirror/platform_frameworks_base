@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-package android.hardware.camera2;
-
-// TODO: Delete this class, since it was moved to android.util as public API
+package android.util;
 
 /**
  * Immutable class for describing width and height dimensions in pixels.
- *
- * @hide
  */
 public final class Size {
     /**
@@ -30,7 +26,7 @@ public final class Size {
      * @param width The width of the size, in pixels
      * @param height The height of the size, in pixels
      */
-    public Size(final int width, final int height) {
+    public Size(int width, int height) {
         mWidth = width;
         mHeight = height;
     }
@@ -39,7 +35,7 @@ public final class Size {
      * Get the width of the size (in pixels).
      * @return width
      */
-    public final int getWidth() {
+    public int getWidth() {
         return mWidth;
     }
 
@@ -47,7 +43,7 @@ public final class Size {
      * Get the height of the size (in pixels).
      * @return height
      */
-    public final int getHeight() {
+    public int getHeight() {
         return mHeight;
     }
 
@@ -72,7 +68,7 @@ public final class Size {
             return true;
         }
         if (obj instanceof Size) {
-            final Size other = (Size) obj;
+            Size other = (Size) obj;
             return mWidth == other.mWidth && mHeight == other.mHeight;
         }
         return false;
