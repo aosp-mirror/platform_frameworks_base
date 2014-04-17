@@ -517,6 +517,16 @@ public final class DisplayManagerService extends SystemService {
         return -1;
     }
 
+    private void setVirtualDisplaySurfaceInternal(IBinder appToken, Surface surface) {
+        synchronized (mSyncRoot) {
+            if (mVirtualDisplayAdapter == null) {
+                return;
+            }
+
+            mVirtualDisplayAdapter.setVirtualDisplaySurfaceLocked(appToken, surface);
+        }
+    }
+
     private void releaseVirtualDisplayInternal(IBinder appToken) {
         synchronized (mSyncRoot) {
             if (mVirtualDisplayAdapter == null) {
@@ -1221,9 +1231,6 @@ public final class DisplayManagerService extends SystemService {
                 throw new IllegalArgumentException("width, height, and densityDpi must be "
                         + "greater than 0");
             }
-            if (surface == null) {
-                throw new IllegalArgumentException("surface must not be null");
-            }
             if (callingUid != Process.SYSTEM_UID &&
                     (flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
                 if (mContext.checkCallingPermission(android.Manifest.permission.CAPTURE_VIDEO_OUTPUT)
@@ -1249,6 +1256,16 @@ public final class DisplayManagerService extends SystemService {
             try {
                 return createVirtualDisplayInternal(appToken, callingUid, packageName,
                         name, width, height, densityDpi, surface, flags);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void setVirtualDisplaySurface(IBinder appToken, Surface surface) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                setVirtualDisplaySurfaceInternal(appToken, surface);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
