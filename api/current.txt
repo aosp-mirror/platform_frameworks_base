@@ -1284,6 +1284,8 @@ package android {
     field public static final int windowActionBar = 16843469; // 0x10102cd
     field public static final int windowActionBarOverlay = 16843492; // 0x10102e4
     field public static final int windowActionModeOverlay = 16843485; // 0x10102dd
+    field public static final int windowAllowEnterTransitionOverlap = 16843848; // 0x1010448
+    field public static final int windowAllowExitTransitionOverlap = 16843847; // 0x1010447
     field public static final int windowAnimationStyle = 16842926; // 0x10100ae
     field public static final int windowBackground = 16842836; // 0x1010054
     field public static final int windowCloseOnTouchOutside = 16843611; // 0x101035b
@@ -1293,7 +1295,9 @@ package android {
     field public static final int windowDisablePreview = 16843298; // 0x1010222
     field public static final int windowEnableSplitTouch = 16843543; // 0x1010317
     field public static final int windowEnterAnimation = 16842932; // 0x10100b4
+    field public static final int windowEnterTransition = 16843843; // 0x1010443
     field public static final int windowExitAnimation = 16842933; // 0x10100b5
+    field public static final int windowExitTransition = 16843844; // 0x1010444
     field public static final int windowFrame = 16842837; // 0x1010055
     field public static final int windowFullscreen = 16843277; // 0x101020d
     field public static final int windowHideAnimation = 16842935; // 0x10100b7
@@ -1304,6 +1308,8 @@ package android {
     field public static final int windowNoDisplay = 16843294; // 0x101021e
     field public static final int windowNoTitle = 16842838; // 0x1010056
     field public static final int windowOverscan = 16843727; // 0x10103cf
+    field public static final int windowSharedElementEnterTransition = 16843845; // 0x1010445
+    field public static final int windowSharedElementExitTransition = 16843846; // 0x1010446
     field public static final int windowShowAnimation = 16842934; // 0x10100b6
     field public static final int windowShowWallpaper = 16843410; // 0x1010292
     field public static final int windowSoftInputMode = 16843307; // 0x101022b
@@ -2454,6 +2460,11 @@ package android {
     field public static final int l_resource_pad9 = 16974328; // 0x10301f8
   }
 
+  public static final class R.transition {
+    ctor public R.transition();
+    field public static final int no_transition = 17760256; // 0x10f0000
+  }
+
   public static final class R.xml {
     ctor public R.xml();
   }
@@ -3209,8 +3220,6 @@ package android.app {
     method public void onAttachFragment(android.app.Fragment);
     method public void onAttachedToWindow();
     method public void onBackPressed();
-    method public void onCaptureSharedElementEnd();
-    method public void onCaptureSharedElementStart(android.transition.Transition);
     method protected void onChildTitleChanged(android.app.Activity, java.lang.CharSequence);
     method public void onConfigurationChanged(android.content.res.Configuration);
     method public void onContentChanged();
@@ -3283,6 +3292,7 @@ package android.app {
     method public final void runOnUiThread(java.lang.Runnable);
     method public void setActionBar(android.widget.Toolbar);
     method public void setActivityLabelAndIcon(java.lang.CharSequence, android.graphics.Bitmap);
+    method public void setActivityTransitionListener(android.app.ActivityOptions.ActivityTransitionListener);
     method public void setContentTransitionManager(android.transition.TransitionManager);
     method public void setContentView(int);
     method public void setContentView(android.view.View);
@@ -3500,11 +3510,25 @@ package android.app {
   public class ActivityOptions {
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
     method public static android.app.ActivityOptions makeScaleUpAnimation(android.view.View, int, int, int, int);
-    method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.view.View, java.lang.String);
-    method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.util.Pair<android.view.View, java.lang.String>...);
+    method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.view.Window, android.view.View, java.lang.String);
+    method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.view.Window, android.app.ActivityOptions.ActivityTransitionListener);
     method public static android.app.ActivityOptions makeThumbnailScaleUpAnimation(android.view.View, android.graphics.Bitmap, int, int);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
+  }
+
+  public static class ActivityOptions.ActivityTransitionListener {
+    ctor public ActivityOptions.ActivityTransitionListener();
+    method public android.util.Pair<android.view.View, java.lang.String>[] getSharedElementsMapping();
+    method public void onCaptureSharedElementEnd();
+    method public void onCaptureSharedElementStart();
+    method public void onEnterReady();
+    method public void onExitTransitionComplete();
+    method public void onRemoteExitComplete();
+    method public void onSharedElementExitTransitionComplete();
+    method public void onSharedElementTransferred(java.util.List<java.lang.String>, java.util.List<android.view.View>);
+    method public void onStartEnterTransition(java.util.List<java.lang.String>, java.util.List<android.view.View>);
+    method public void onStartExitTransition(java.util.List<java.lang.String>, java.util.List<android.view.View>);
   }
 
   public class AlarmManager {
@@ -27754,7 +27778,6 @@ package android.transition {
     method public static void beginDelayedTransition(android.view.ViewGroup, android.transition.Transition);
     method public static void go(android.transition.Scene);
     method public static void go(android.transition.Scene, android.transition.Transition);
-    method public void setExitTransition(android.transition.Scene, android.transition.Transition);
     method public void setTransition(android.transition.Scene, android.transition.Transition);
     method public void setTransition(android.transition.Scene, android.transition.Scene, android.transition.Transition);
     method public void transitionTo(android.transition.Scene);
@@ -30791,6 +30814,8 @@ package android.view {
     method public abstract void closeAllPanels();
     method public abstract void closePanel(int);
     method public android.view.View findViewById(int);
+    method public boolean getAllowEnterTransitionOverlap();
+    method public boolean getAllowExitTransitionOverlap();
     method public final android.view.WindowManager.LayoutParams getAttributes();
     method public final android.view.Window.Callback getCallback();
     method public final android.view.Window getContainer();
@@ -30798,10 +30823,14 @@ package android.view {
     method public final android.content.Context getContext();
     method public abstract android.view.View getCurrentFocus();
     method public abstract android.view.View getDecorView();
+    method public android.transition.Transition getEnterTransition();
+    method public android.transition.Transition getExitTransition();
     method protected final int getFeatures();
     method protected final int getForcedWindowFlags();
     method public abstract android.view.LayoutInflater getLayoutInflater();
     method protected final int getLocalFeatures();
+    method public android.transition.Transition getSharedElementEnterTransition();
+    method public android.transition.Transition getSharedElementExitTransition();
     method public android.transition.TransitionManager getTransitionManager();
     method public abstract int getVolumeControlStream();
     method public android.view.WindowManager getWindowManager();
@@ -30815,7 +30844,6 @@ package android.view {
     method public abstract boolean isFloating();
     method public abstract boolean isShortcutKey(int, android.view.KeyEvent);
     method public final void makeActive();
-    method public void mapTransitionTargets(java.util.Map<java.lang.String, java.lang.String>);
     method protected abstract void onActive();
     method public abstract void onConfigurationChanged(android.content.res.Configuration);
     method public abstract void openPanel(int, android.view.KeyEvent);
@@ -30826,8 +30854,8 @@ package android.view {
     method public boolean requestFeature(int);
     method public abstract void restoreHierarchyState(android.os.Bundle);
     method public abstract android.os.Bundle saveHierarchyState();
-    method public void setAllowOverlappingEnterTransition(boolean);
-    method public void setAllowOverlappingExitTransition(boolean);
+    method public void setAllowEnterTransitionOverlap(boolean);
+    method public void setAllowExitTransitionOverlap(boolean);
     method public void setAttributes(android.view.WindowManager.LayoutParams);
     method public abstract void setBackgroundDrawable(android.graphics.drawable.Drawable);
     method public void setBackgroundDrawableResource(int);
@@ -30840,6 +30868,8 @@ package android.view {
     method public abstract void setContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method protected void setDefaultWindowFormat(int);
     method public void setDimAmount(float);
+    method public void setEnterTransition(android.transition.Transition);
+    method public void setExitTransition(android.transition.Transition);
     method public abstract void setFeatureDrawable(int, android.graphics.drawable.Drawable);
     method public abstract void setFeatureDrawableAlpha(int, int);
     method public abstract void setFeatureDrawableResource(int, int);
@@ -30852,6 +30882,8 @@ package android.view {
     method public void setLayout(int, int);
     method public void setLocalFocus(boolean, boolean);
     method public void setLogo(int);
+    method public void setSharedElementEnterTransition(android.transition.Transition);
+    method public void setSharedElementExitTransition(android.transition.Transition);
     method public void setSoftInputMode(int);
     method public abstract void setTitle(java.lang.CharSequence);
     method public abstract deprecated void setTitleColor(int);

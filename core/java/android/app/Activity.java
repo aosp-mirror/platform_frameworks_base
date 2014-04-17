@@ -18,7 +18,6 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.transition.Scene;
-import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.util.ArrayMap;
 import android.util.SuperNotCalledException;
@@ -773,6 +772,8 @@ public class Activity extends ContextThemeWrapper
 
     private Thread mUiThread;
     final Handler mHandler = new Handler();
+    private ActivityOptions mCalledActivityOptions;
+    private EnterTransitionCoordinator mEnterTransitionCoordinator;
 
     /** Return the intent that started this activity. */
     public Intent getIntent() {
@@ -1026,6 +1027,9 @@ public class Activity extends ContextThemeWrapper
             mTitleReady = true;
             onTitleChanged(getTitle(), getTitleColor());
         }
+        if (mEnterTransitionCoordinator != null) {
+            mEnterTransitionCoordinator.readyToEnter();
+        }
         mCalled = true;
     }
 
@@ -1106,6 +1110,7 @@ public class Activity extends ContextThemeWrapper
     protected void onResume() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onResume " + this);
         getApplication().dispatchActivityResumed(this);
+        mCalledActivityOptions = null;
         mCalled = true;
     }
 
@@ -1398,8 +1403,9 @@ public class Activity extends ContextThemeWrapper
     protected void onStop() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStop " + this);
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
-        if (mWindow != null) {
-            mWindow.restoreViewVisibilityAfterTransitionToCallee();
+        if (mCalledActivityOptions != null) {
+            mCalledActivityOptions.dispatchActivityStopped();
+            mCalledActivityOptions = null;
         }
         getApplication().dispatchActivityStopped(this);
         mTranslucentCallback = null;
@@ -3484,7 +3490,7 @@ public class Activity extends ContextThemeWrapper
     public void startActivityForResult(Intent intent, int requestCode) {
         Bundle options = null;
         if (mWindow.hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)) {
-            options = ActivityOptions.makeSceneTransitionAnimation().toBundle();
+            options = ActivityOptions.makeSceneTransitionAnimation(mWindow, null).toBundle();
         }
         startActivityForResult(intent, requestCode, options);
     }
@@ -3526,14 +3532,8 @@ public class Activity extends ContextThemeWrapper
     public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
         if (options != null) {
             ActivityOptions activityOptions = new ActivityOptions(options);
-            if (activityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
-                if (mActionBar != null) {
-                    ArrayMap<String, View> sharedElementMap = new ArrayMap<String, View>();
-                    mActionBar.captureSharedElements(sharedElementMap);
-                    activityOptions.addSharedElements(sharedElementMap);
-                }
-                options = mWindow.startExitTransitionToCallee(options);
-            }
+            activityOptions.dispatchStartExit();
+            mCalledActivityOptions = activityOptions;
         }
         if (mParent == null) {
             Instrumentation.ActivityResult ar =
@@ -4391,16 +4391,15 @@ public class Activity extends ContextThemeWrapper
      * to reverse its exit Transition. When the exit Transition completes,
      * {@link #finish()} is called. If no entry Transition was used, finish() is called
      * immediately and the Activity exit Transition is run.
-     * @see android.view.Window#setTriggerEarlySceneTransition(boolean, boolean)
-     * @see android.app.ActivityOptions#makeSceneTransitionAnimation(android.view.View, String)
+     * @see android.app.ActivityOptions#makeSceneTransitionAnimation(android.view.Window,
+     * android.app.ActivityOptions.ActivityTransitionListener)
      */
     public void finishWithTransition() {
-        mWindow.startExitTransitionToCaller(new Runnable() {
-            @Override
-            public void run() {
-                finish();
-            }
-        });
+        if (mEnterTransitionCoordinator != null) {
+            mEnterTransitionCoordinator.startExit();
+        } else {
+            finish();
+        }
     }
 
     /**
@@ -5346,6 +5345,21 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    /**
+     * When {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.view.Window,
+     * android.app.ActivityOptions.ActivityTransitionListener)} was used to start an Activity,
+     * the Window will be triggered to enter with a Transition. <code>listener</code> allows
+     * The Activity to listen to events of the entering transition and control the mapping of
+     * shared elements. This requires {@link Window#FEATURE_CONTENT_TRANSITIONS}.
+     *
+     * @param listener Used to listen to events in the entering transition.
+     */
+    public void setActivityTransitionListener(ActivityOptions.ActivityTransitionListener listener) {
+        if (mEnterTransitionCoordinator != null) {
+            mEnterTransitionCoordinator.setActivityTransitionListener(listener);
+        }
+    }
+
     // ------------------ Internal API ------------------
     
     final void setParent(Activity parent) {
@@ -5413,34 +5427,12 @@ public class Activity extends ContextThemeWrapper
         }
         mWindowManager = mWindow.getWindowManager();
         mCurrentConfig = config;
-        Window.SceneTransitionListener sceneTransitionListener
-                = new Window.SceneTransitionListener() {
-            @Override
-            public void nullPendingTransition() {
-                overridePendingTransition(0, 0);
+        if (options != null) {
+            ActivityOptions activityOptions = new ActivityOptions(options);
+            if (activityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
+                mEnterTransitionCoordinator = activityOptions.createEnterActivityTransition(this);
             }
-
-            @Override
-            public void convertFromTranslucent() {
-                Activity.this.convertFromTranslucent();
-            }
-
-            @Override
-            public void convertToTranslucent() {
-                Activity.this.convertToTranslucent(null);
-            }
-
-            @Override
-            public void sharedElementStart(Transition transition) {
-                Activity.this.onCaptureSharedElementStart(transition);
-            }
-
-            @Override
-            public void sharedElementEnd() {
-                Activity.this.onCaptureSharedElementEnd();
-            }
-        };
-        mWindow.setTransitionOptions(options, sceneTransitionListener);
+        }
     }
 
     /** @hide */
@@ -5625,26 +5617,6 @@ public class Activity extends ContextThemeWrapper
         if (mLoaderManager != null) {
             mLoaderManager.doDestroy();
         }
-    }
-
-    /**
-     * Called when setting up Activity Scene transitions when the start state for shared
-     * elements has been captured. Override this method to modify the start position of shared
-     * elements for the entry Transition.
-     *
-     * @param transition The <code>Transition</code> being used to change
-     *                   bounds of shared elements in the source Activity to
-     *                   the bounds defined by the entering Scene.
-     */
-    public void onCaptureSharedElementStart(Transition transition) {
-    }
-
-    /**
-     * Called when setting up Activity Scene transitions when the final state for
-     * shared elements state has been captured. Override this method to modify the destination
-     * position of shared elements for the entry Transition.
-     */
-    public void onCaptureSharedElementEnd() {
     }
 
     /**
