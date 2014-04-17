@@ -182,14 +182,14 @@ public class VectorDrawable extends Drawable {
 
     public VectorDrawable() {
         mVectorState = new VectorDrawableState(null);
-        mVectorState.mBasicAnimator = ObjectAnimator.ofFloat(this, "AnimationFraction", 0, 1);
+        mVectorState.mBasicAnimator = ObjectAnimator.ofFloat(this, "AnimationFraction", 0, 0);
 
         setDuration(DEFAULT_DURATION);
     }
 
     private VectorDrawable(VectorDrawableState state, Resources res, Theme theme) {
         mVectorState = new VectorDrawableState(state);
-        mVectorState.mBasicAnimator = ObjectAnimator.ofFloat(this, "AnimationFraction", 0, 1);
+        mVectorState.mBasicAnimator = ObjectAnimator.ofFloat(this, "AnimationFraction", 0, 0);
 
         if (theme != null && canApplyTheme()) {
             applyTheme(theme);
@@ -213,7 +213,7 @@ public class VectorDrawable extends Drawable {
 
     @Override
     public void jumpToCurrentState() {
-        mVectorState.mBasicAnimator.end();
+        stop();
     }
 
     /**
@@ -318,7 +318,7 @@ public class VectorDrawable extends Drawable {
 
     private void animateBackward() {
         if (!mVectorState.mBasicAnimator.isStarted()) {
-            mVectorState.mBasicAnimator.setFloatValues(.99f, 0);
+            mVectorState.mBasicAnimator.setFloatValues(1, 0);
             start();
         }
     }
@@ -985,7 +985,13 @@ public class VectorDrawable extends Drawable {
 
                 for (int j = 0; j < sp.length; j++) {
                     mSeqMap.add(sp[j].trim());
-                    VectorDrawable.VPath path = groups.get(j).get(sp[j]);
+
+                    final VectorDrawable.VPath path = groups.get(j).get(sp[j]);
+                    if (path == null) {
+                        throw new XmlPullParserException(a.getPositionDescription()
+                                + " missing path with name: " + sp[j]);
+                    }
+
                     path.mAnimated = true;
                     paths[j] = path;
                 }
