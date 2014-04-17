@@ -36,8 +36,9 @@
         android:layout_gravity="bottom"
         />
 
-    <ViewStub android:id="@+id/keyguard_flip_stub"
-        android:layout="@layout/status_bar_flip_button"
+    <include
+        layout="@layout/status_bar_flip_button"
+        android:id="@+id/keyguard_flipper"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_gravity="right|top"
@@ -76,8 +77,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             >
-            <ViewStub android:id="@+id/flip_settings_stub"
-                android:layout="@layout/flip_settings"
+            <include
+                layout="@layout/flip_settings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 />

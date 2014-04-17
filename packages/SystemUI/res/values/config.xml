@@ -99,11 +99,8 @@
 
     <integer name="blinds_pop_duration_ms">10</integer>
 
-    <!-- Disable the separate quick settings panel -->
-    <bool name="config_hasSettingsPanel">true</bool>
-
-    <!-- Enable the "flip settings" panel -->
-    <bool name="config_hasFlipSettingsPanel">true</bool>
+    <!-- The device supports quick settings. -->
+    <bool name="config_hasQuickSettings">true</bool>
 
     <!-- Should "4G" be shown instead of "LTE" when the network is NETWORK_TYPE_LTE? -->
     <bool name="config_show4GForLTE">true</bool>

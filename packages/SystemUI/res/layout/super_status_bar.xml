@@ -39,10 +39,6 @@
             android:layout_width="@dimen/notification_panel_width"
             android:layout_height="wrap_content"
             android:layout_gravity="start|top" />
-        <ViewStub android:id="@+id/quick_settings_stub"
-            android:layout="@layout/quick_settings"
-            android:layout_width="@dimen/notification_panel_width"
-            android:layout_height="match_parent" />
     </com.android.systemui.statusbar.phone.PanelHolder>
 
 </com.android.systemui.statusbar.phone.StatusBarWindowView>

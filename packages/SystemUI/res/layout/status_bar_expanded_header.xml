@@ -84,6 +84,7 @@
         />
 
     <include layout="@layout/status_bar_flip_button"
+        android:id="@+id/header_flipper"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginStart="12dp" />

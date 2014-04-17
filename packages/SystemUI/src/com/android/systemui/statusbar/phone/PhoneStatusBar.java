@@ -220,11 +220,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     // settings
     QuickSettings mQS;
-    boolean mHasSettingsPanel, mHasFlipSettings;
-    SettingsPanelView mSettingsPanel;
+    boolean mHasQuickSettings;
     View mFlipSettingsView;
     QuickSettingsContainerView mSettingsContainer;
-    int mSettingsPanelGravity;
 
     // top bar
     View mNotificationPanelHeader;
@@ -315,9 +313,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mHeaderFlipper.userSetup(userSetup);
             mKeyguardFlipper.userSetup(userSetup);
 
-            if (mSettingsPanel != null) {
-                mSettingsPanel.setEnabled(userSetup);
-            }
             if (userSetup != mUserSetup) {
                 mUserSetup = userSetup;
                 if (!mUserSetup && mStatusBarView != null)
@@ -625,8 +620,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mClearButton.setEnabled(false);
         mDateView = (DateView)mStatusBarWindow.findViewById(R.id.date);
 
-        mHasSettingsPanel = res.getBoolean(R.bool.config_hasSettingsPanel);
-        mHasFlipSettings = res.getBoolean(R.bool.config_hasFlipSettingsPanel);
+        mHasQuickSettings = res.getBoolean(R.bool.config_hasQuickSettings);
 
         mDateTimeView = mNotificationPanelHeader.findViewById(R.id.datetime);
         if (mDateTimeView != null) {
@@ -634,10 +628,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mDateTimeView.setEnabled(true);
         }
 
-        mHeaderFlipper = new FlipperButton(mNotificationPanelHeader
-                .findViewById(R.id.settings_button_holder));
-        ViewStub flipStub = (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_flip_stub);
-        mKeyguardFlipper = new FlipperButton(flipStub.inflate());
+        mHeaderFlipper = new FlipperButton(mStatusBarWindow.findViewById(R.id.header_flipper));
+        mKeyguardFlipper =new FlipperButton(mStatusBarWindow.findViewById(R.id.keyguard_flipper));
 
         if (!mNotificationPanelIsFullScreenWidth) {
             mNotificationPanel.setSystemUiVisibility(
@@ -715,46 +707,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         // Quick Settings (where available, some restrictions apply)
         mNotificationPadding = mContext.getResources()
                 .getDimensionPixelSize(R.dimen.notification_side_padding);
-        if (mHasSettingsPanel) {
-            // first, figure out where quick settings should be inflated
-            final View settings_stub;
-            if (mHasFlipSettings) {
-                // a version of quick settings that flips around behind the notifications
-                settings_stub = mStatusBarWindow.findViewById(R.id.flip_settings_stub);
-                if (settings_stub != null) {
-                    mFlipSettingsView = ((ViewStub)settings_stub).inflate();
-                    mFlipSettingsView.setVisibility(View.GONE);
-                    mFlipSettingsView.setVerticalScrollBarEnabled(false);
-                }
-            } else {
-                // full quick settings panel
-                settings_stub = mStatusBarWindow.findViewById(R.id.quick_settings_stub);
-                if (settings_stub != null) {
-                    mSettingsPanel = (SettingsPanelView) ((ViewStub)settings_stub).inflate();
-                } else {
-                    mSettingsPanel = (SettingsPanelView) mStatusBarWindow.findViewById(R.id.settings_panel);
-                }
-
-                if (mSettingsPanel != null) {
-                    if (!ActivityManager.isHighEndGfx()) {
-                        mSettingsPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
-                                R.color.notification_panel_solid_background)));
-                    }
-                }
-            }
-
-            // wherever you find it, Quick Settings needs a container to survive
+        if (mHasQuickSettings) {
+            // Quick Settings needs a container to survive
             mSettingsContainer = (QuickSettingsContainerView)
                     mStatusBarWindow.findViewById(R.id.quick_settings_container);
+            mFlipSettingsView = mSettingsContainer;
             if (mSettingsContainer != null) {
                 mQS = new QuickSettings(mContext, mSettingsContainer);
                 if (!mNotificationPanelIsFullScreenWidth) {
                     mSettingsContainer.setSystemUiVisibility(
                             View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS
                             | View.STATUS_BAR_DISABLE_SYSTEM_INFO);
-                }
-                if (mSettingsPanel != null) {
-                    mSettingsPanel.setQuickSettings(mQS);
                 }
                 mQS.setService(this);
                 mQS.setBar(mStatusBarView);
@@ -1397,8 +1360,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     + " any=" + any + " clearable=" + clearable);
         }
 
-        if (mHasFlipSettings
-                && mFlipSettingsView != null
+        if (mFlipSettingsView != null
                 && mFlipSettingsView.getVisibility() == View.VISIBLE
                 && mStackScroller.getVisibility() != View.VISIBLE) {
             // the flip settings panel is unequivocally showing; we should not be shown
@@ -1758,7 +1720,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         mNotificationPanel.expand();
-        if (mHasFlipSettings && mStackScroller.getVisibility() != View.VISIBLE) {
+        if (mStackScroller.getVisibility() != View.VISIBLE) {
             flipToNotifications();
         }
 
@@ -1814,14 +1776,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         // Settings are not available in setup
         if (!mUserSetup) return;
 
-        if (mHasFlipSettings) {
-            mNotificationPanel.expand();
-            if (mFlipSettingsView.getVisibility() != View.VISIBLE
-                    || mFlipSettingsView.getTranslationY() < 0) {
-                flipToSettings();
-            }
-        } else if (mSettingsPanel != null) {
-            mSettingsPanel.expand();
+        mNotificationPanel.expand();
+        if (mFlipSettingsView.getVisibility() != View.VISIBLE
+                || mFlipSettingsView.getTranslationY() < 0) {
+            flipToSettings();
         }
 
         if (false) postStartTracing();
@@ -1879,12 +1837,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     public void flipPanels() {
-        if (mHasFlipSettings) {
-            if (mFlipSettingsView.getVisibility() != View.VISIBLE) {
-                flipToSettings();
-            } else {
-                flipToNotifications();
-            }
+        if (mFlipSettingsView.getVisibility() != View.VISIBLE) {
+            flipToSettings();
+        } else {
+            flipToNotifications();
         }
     }
 
@@ -1907,21 +1863,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         // Ensure the panel is fully collapsed (just in case; bug 6765842, 7260868)
         mStatusBarView.collapseAllPanels(/*animate=*/ false);
 
-        if (mHasFlipSettings) {
-            // reset things to their proper state
-            if (mFlipSettingsViewAnim != null) mFlipSettingsViewAnim.cancel();
-            if (mScrollViewAnim != null) mScrollViewAnim.cancel();
-            if (mClearButtonAnim != null) mClearButtonAnim.cancel();
+        // reset things to their proper state
+        if (mFlipSettingsViewAnim != null) mFlipSettingsViewAnim.cancel();
+        if (mScrollViewAnim != null) mScrollViewAnim.cancel();
+        if (mClearButtonAnim != null) mClearButtonAnim.cancel();
 
-            mStackScroller.setVisibility(View.VISIBLE);
-            mNotificationPanel.setVisibility(View.GONE);
-            mFlipSettingsView.setVisibility(View.GONE);
+        mStackScroller.setVisibility(View.VISIBLE);
+        mNotificationPanel.setVisibility(View.GONE);
+        mFlipSettingsView.setVisibility(View.GONE);
 
-            setAreThereNotifications(); // show the clear button
+        setAreThereNotifications(); // show the clear button
 
-            mHeaderFlipper.reset();
-            mKeyguardFlipper.reset();
-        }
+        mHeaderFlipper.reset();
+        mKeyguardFlipper.reset();
 
         mExpandedVisible = false;
         if (mNavigationBarView != null)
@@ -2366,12 +2320,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             pw.print  ("      ");
             mNotificationPanel.dump(fd, pw, args);
         }
-        if (mSettingsPanel != null) {
-            pw.println("    mSettingsPanel=" +
-                mSettingsPanel + " params=" + mSettingsPanel.getLayoutParams().debug(""));
-            pw.print  ("      ");
-            mSettingsPanel.dump(fd, pw, args);
-        }
 
         if (DUMPTRUCK) {
             synchronized (mNotificationData) {
@@ -2474,13 +2422,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         lp.setMarginStart(mNotificationPanelMarginPx);
         mNotificationPanel.setLayoutParams(lp);
 
-        if (mSettingsPanel != null) {
-            lp = (FrameLayout.LayoutParams) mSettingsPanel.getLayoutParams();
-            lp.gravity = mSettingsPanelGravity;
-            lp.setMarginEnd(mNotificationPanelMarginPx);
-            mSettingsPanel.setLayoutParams(lp);
-        }
-
         if (ENABLE_HEADS_UP && mHeadsUpNotificationView != null) {
             mHeadsUpNotificationView.setMargin(mNotificationPanelMarginPx);
             mStackScroller.getLocationOnScreen(mStackScrollerPosition);
@@ -2536,7 +2477,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     private View.OnClickListener mSettingsButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
-            if (mHasSettingsPanel) {
+            if (mHasQuickSettings) {
                 animateExpandSettingsPanel();
             } else {
                 startActivityDismissingKeyguard(
@@ -2733,11 +2674,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mNotificationPanelGravity = res.getInteger(R.integer.notification_panel_layout_gravity);
         if (mNotificationPanelGravity <= 0) {
             mNotificationPanelGravity = Gravity.START | Gravity.TOP;
-        }
-        mSettingsPanelGravity = res.getInteger(R.integer.settings_panel_layout_gravity);
-        Log.d(TAG, "mSettingsPanelGravity = " + mSettingsPanelGravity);
-        if (mSettingsPanelGravity <= 0) {
-            mSettingsPanelGravity = Gravity.END | Gravity.TOP;
         }
 
         mCarrierLabelHeight = res.getDimensionPixelSize(R.dimen.carrier_label_height);
@@ -3039,12 +2975,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
      * @return a ViewGroup that spans the entire panel which contains the quick settings
      */
     public ViewGroup getQuickSettingsOverlayParent() {
-        if (mHasSettingsPanel) {
-            if (mHasFlipSettings) {
-                return mNotificationPanel;
-            } else {
-                return mSettingsPanel;
-            }
+        if (mHasQuickSettings) {
+            return mNotificationPanel;
         } else {
             return null;
         }
@@ -3070,7 +3002,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mSettingsButton = (ImageView) holder.findViewById(R.id.settings_button);
             if (mSettingsButton != null) {
                 mSettingsButton.setOnClickListener(mSettingsButtonListener);
-                if (mHasSettingsPanel) {
+                if (mHasQuickSettings) {
                     // the settings panel is hiding behind this button
                     mSettingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
                     mSettingsButton.setVisibility(View.VISIBLE);
@@ -3080,11 +3012,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     mSettingsButton.setImageResource(R.drawable.ic_notify_settings);
                 }
             }
-            if (mHasFlipSettings) {
-                mNotificationButton = (ImageView) holder.findViewById(R.id.notification_button);
-                if (mNotificationButton != null) {
-                    mNotificationButton.setOnClickListener(mNotificationButtonListener);
-                }
+            mNotificationButton = (ImageView) holder.findViewById(R.id.notification_button);
+            if (mNotificationButton != null) {
+                mNotificationButton.setOnClickListener(mNotificationButtonListener);
             }
         }
 
@@ -3099,7 +3029,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         public void userSetup(boolean userSetup) {
-            if (mSettingsButton != null && mHasFlipSettings) {
+            if (mSettingsButton != null) {
                 mSettingsButton.setVisibility(userSetup ? View.VISIBLE : View.INVISIBLE);
             }
         }
