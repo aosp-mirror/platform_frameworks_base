@@ -3449,6 +3449,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             SwipeDismissLayout layout, float progress, float translate) {
                         WindowManager.LayoutParams newParams = getAttributes();
                         newParams.x = (int) translate;
+                        newParams.alpha = 1 - progress;
                         setAttributes(newParams);
 
                         int flags = 0;
@@ -3464,6 +3465,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     public void onSwipeCancelled(SwipeDismissLayout layout) {
                         WindowManager.LayoutParams newParams = getAttributes();
                         newParams.x = 0;
+                        newParams.alpha = 1;
                         setAttributes(newParams);
                         setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN | FLAG_LAYOUT_NO_LIMITS);
                     }
