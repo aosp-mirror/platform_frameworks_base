@@ -217,7 +217,7 @@ public class Ringtone {
             if (mAudioManager.getStreamVolume(mStreamType) != 0) {
                 mLocalPlayer.start();
             }
-        } else if (mAllowRemote) {
+        } else if (mAllowRemote && (mRemotePlayer != null)) {
             final Uri canonicalUri = mUri.getCanonicalUri();
             try {
                 mRemotePlayer.play(mRemoteToken, canonicalUri, mStreamType);
@@ -239,7 +239,7 @@ public class Ringtone {
     public void stop() {
         if (mLocalPlayer != null) {
             destroyLocalPlayer();
-        } else if (mAllowRemote) {
+        } else if (mAllowRemote && (mRemotePlayer != null)) {
             try {
                 mRemotePlayer.stop(mRemoteToken);
             } catch (RemoteException e) {
@@ -264,7 +264,7 @@ public class Ringtone {
     public boolean isPlaying() {
         if (mLocalPlayer != null) {
             return mLocalPlayer.isPlaying();
-        } else if (mAllowRemote) {
+        } else if (mAllowRemote && (mRemotePlayer != null)) {
             try {
                 return mRemotePlayer.isPlaying(mRemoteToken);
             } catch (RemoteException e) {
