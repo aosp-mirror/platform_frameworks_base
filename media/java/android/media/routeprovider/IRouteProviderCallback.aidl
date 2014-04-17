@@ -13,29 +13,20 @@
  * limitations under the License.
  */
 
-package android.media.session;
+package android.media.routeprovider;
 
-import android.media.Rating;
-import android.content.Intent;
+import android.media.routeprovider.IRouteConnection;
+import android.media.session.RouteEvent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
 /**
+ * System's provider callback interface.
  * @hide
  */
-oneway interface IMediaSessionCallback {
-    void onCommand(String command, in Bundle extras, in ResultReceiver cb);
-    void onMediaButton(in Intent mediaRequestIntent);
-    void onRequestRouteChange(in Bundle route);
-
-    // These callbacks are for the TransportPerformer
-    void onPlay();
-    void onPause();
-    void onStop();
-    void onNext();
-    void onPrevious();
-    void onFastForward();
-    void onRewind();
-    void onSeekTo(long pos);
-    void onRate(in Rating rating);
+oneway interface IRouteProviderCallback {
+    void onRoutesChanged();
+    void onConnectionStateChanged(in IRouteConnection connection, int state);
+    void onConnectionTerminated(in IRouteConnection connection);
+    void onRouteEvent(in RouteEvent event);
 }

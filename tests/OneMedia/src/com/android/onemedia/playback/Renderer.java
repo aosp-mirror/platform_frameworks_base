@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.onemedia.playback;
 
 import android.content.Context;
@@ -77,39 +92,54 @@ public abstract class Renderer {
     }
 
     public boolean onPlay() {
-        throw new UnsupportedOperationException("play is not supported.");
+        // TODO consider making these log warnings instead of crashes (or
+        // Log.wtf)
+        // throw new UnsupportedOperationException("play is not supported.");
+        return false;
     }
 
     public boolean onPause() {
-        throw new UnsupportedOperationException("pause is not supported.");
+        // throw new UnsupportedOperationException("pause is not supported.");
+        return false;
     }
 
     public boolean onNext() {
-        throw new UnsupportedOperationException("next is not supported.");
+        // throw new UnsupportedOperationException("next is not supported.");
+        return false;
     }
 
     public boolean onPrevious() {
-        throw new UnsupportedOperationException("previous is not supported.");
+        // throw new
+        // UnsupportedOperationException("previous is not supported.");
+        return false;
     }
 
     public boolean onStop() {
-        throw new UnsupportedOperationException("stop is not supported.");
+        // throw new UnsupportedOperationException("stop is not supported.");
+        return false;
     }
 
     public boolean onSeekTo(int time) {
-        throw new UnsupportedOperationException("seekTo is not supported.");
+        // throw new UnsupportedOperationException("seekTo is not supported.");
+        return false;
     }
 
     public long getSeekPosition() {
-        throw new UnsupportedOperationException("getSeekPosition is not supported.");
+        // throw new
+        // UnsupportedOperationException("getSeekPosition is not supported.");
+        return -1;
     }
 
     public long getDuration() {
-        throw new UnsupportedOperationException("getDuration is not supported.");
+        // throw new
+        // UnsupportedOperationException("getDuration is not supported.");
+        return -1;
     }
 
     public int getPlayState() {
-        throw new UnsupportedOperationException("getPlayState is not supported.");
+        // throw new
+        // UnsupportedOperationException("getPlayState is not supported.");
+        return 0;
     }
 
     public void onDestroy() {

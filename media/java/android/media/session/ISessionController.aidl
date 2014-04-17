@@ -17,7 +17,7 @@ package android.media.session;
 
 import android.content.Intent;
 import android.media.Rating;
-import android.media.session.IMediaControllerCallback;
+import android.media.session.ISessionControllerCallback;
 import android.media.session.MediaMetadata;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
@@ -28,12 +28,13 @@ import android.view.KeyEvent;
  * Interface to a MediaSession in the system.
  * @hide
  */
-interface IMediaController {
+interface ISessionController {
     void sendCommand(String command, in Bundle extras, in ResultReceiver cb);
     void sendMediaButton(in KeyEvent mediaButton);
-    void registerCallbackListener(in IMediaControllerCallback cb);
-    void unregisterCallbackListener(in IMediaControllerCallback cb);
+    void registerCallbackListener(in ISessionControllerCallback cb);
+    void unregisterCallbackListener(in ISessionControllerCallback cb);
     boolean isTransportControlEnabled();
+    void showRoutePicker();
 
     // These commands are for the TransportController
     void play();

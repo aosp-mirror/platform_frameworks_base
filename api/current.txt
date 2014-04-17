@@ -27,6 +27,7 @@ package android {
     field public static final java.lang.String BIND_NOTIFICATION_LISTENER_SERVICE = "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE";
     field public static final java.lang.String BIND_PRINT_SERVICE = "android.permission.BIND_PRINT_SERVICE";
     field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
+    field public static final java.lang.String BIND_ROUTE_PROVIDER = "android.permission.BIND_ROUTE_PROVIDER";
     field public static final java.lang.String BIND_TEXT_SERVICE = "android.permission.BIND_TEXT_SERVICE";
     field public static final java.lang.String BIND_TRUST_AGENT_SERVICE = "android.permission.BIND_TRUST_AGENT_SERVICE";
     field public static final java.lang.String BIND_TV_INPUT = "android.permission.BIND_TV_INPUT";
@@ -14957,23 +14958,67 @@ package android.media.effect {
 
 }
 
+package android.media.routeprovider {
+
+  public final class RouteConnection {
+    ctor public RouteConnection(android.media.routeprovider.RouteProviderService, android.media.session.RouteInfo);
+    method public android.media.routeprovider.RouteInterfaceHandler addRouteInterface(java.lang.String);
+    method public android.media.routeprovider.RouteInterfaceHandler getRouteInterface(java.lang.String);
+    method public void shutDown();
+  }
+
+  public final class RouteInterfaceHandler {
+    method public void addListener(android.media.routeprovider.RouteInterfaceHandler.CommandListener, android.os.Handler);
+    method public java.lang.String getName();
+    method public void removeListener(android.media.routeprovider.RouteInterfaceHandler.CommandListener);
+    method public void sendEvent(java.lang.String, android.os.Bundle);
+    method public static void sendResult(android.os.ResultReceiver, int, android.os.Bundle);
+  }
+
+  public static abstract class RouteInterfaceHandler.CommandListener {
+    ctor public RouteInterfaceHandler.CommandListener();
+    method public abstract boolean onCommand(android.media.routeprovider.RouteInterfaceHandler, java.lang.String, android.os.Bundle, android.os.ResultReceiver);
+  }
+
+  public final class RoutePlaybackControlsHandler {
+    method public void addListener(android.media.routeprovider.RoutePlaybackControlsHandler.Listener);
+    method public void addListener(android.media.routeprovider.RoutePlaybackControlsHandler.Listener, android.os.Handler);
+    method public static android.media.routeprovider.RoutePlaybackControlsHandler addTo(android.media.routeprovider.RouteConnection);
+    method public void removeListener(android.media.routeprovider.RoutePlaybackControlsHandler.Listener);
+    method public void sendPlaybackChangeEvent(int);
+  }
+
+  public static abstract class RoutePlaybackControlsHandler.Listener extends android.media.routeprovider.RouteInterfaceHandler.CommandListener {
+    ctor public RoutePlaybackControlsHandler.Listener();
+    method public boolean fastForward();
+    method public long getCapabilities();
+    method public long getCurrentPosition();
+    method public final boolean onCommand(android.media.routeprovider.RouteInterfaceHandler, java.lang.String, android.os.Bundle, android.os.ResultReceiver);
+    method public boolean pause();
+    method public void playNow(java.lang.String, android.os.ResultReceiver);
+    method public boolean resume();
+  }
+
+  public abstract class RouteProviderService extends android.app.Service {
+    ctor public RouteProviderService();
+    method public abstract android.media.routeprovider.RouteConnection connect(android.media.session.RouteInfo, android.media.routeprovider.RouteRequest);
+    method public abstract java.util.List<android.media.session.RouteInfo> getMatchingRoutes(java.util.List<android.media.routeprovider.RouteRequest>);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public void updateDiscoveryRequests(java.util.List<android.media.routeprovider.RouteRequest>);
+    field public static final java.lang.String SERVICE_INTERFACE = "com.android.media.session.MediaRouteProvider";
+  }
+
+  public final class RouteRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.media.session.RouteOptions getConnectionOptions();
+    method public android.media.session.SessionInfo getSessionInfo();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+}
+
 package android.media.session {
-
-  public final class MediaController {
-    method public void addCallback(android.media.session.MediaController.Callback);
-    method public void addCallback(android.media.session.MediaController.Callback, android.os.Handler);
-    method public static android.media.session.MediaController fromToken(android.media.session.MediaSessionToken);
-    method public android.media.session.TransportController getTransportController();
-    method public void removeCallback(android.media.session.MediaController.Callback);
-    method public void sendCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
-    method public void sendMediaButton(int);
-  }
-
-  public static abstract class MediaController.Callback {
-    ctor public MediaController.Callback();
-    method public void onEvent(java.lang.String, android.os.Bundle);
-    method public void onRouteChanged(android.os.Bundle);
-  }
 
   public final class MediaMetadata implements android.os.Parcelable {
     method public int describeContents();
@@ -15015,36 +15060,6 @@ package android.media.session {
     method public android.media.session.MediaMetadata.Builder putString(java.lang.String, java.lang.String);
   }
 
-  public final class MediaSession {
-    method public void addCallback(android.media.session.MediaSession.Callback);
-    method public void addCallback(android.media.session.MediaSession.Callback, android.os.Handler);
-    method public android.media.session.MediaSessionToken getSessionToken();
-    method public android.media.session.TransportPerformer getTransportPerformer();
-    method public void publish();
-    method public void release();
-    method public void removeCallback(android.media.session.MediaSession.Callback);
-    method public void sendEvent(java.lang.String, android.os.Bundle);
-    method public android.media.session.TransportPerformer setTransportPerformerEnabled();
-  }
-
-  public static abstract class MediaSession.Callback {
-    ctor public MediaSession.Callback();
-    method public void onCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
-    method public void onMediaButton(android.content.Intent);
-    method public void onRequestRouteChange(android.os.Bundle);
-  }
-
-  public final class MediaSessionManager {
-    method public android.media.session.MediaSession createSession(java.lang.String);
-    method public java.util.List<android.media.session.MediaController> getActiveSessions();
-  }
-
-  public class MediaSessionToken implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
   public final class PlaybackState implements android.os.Parcelable {
     ctor public PlaybackState();
     ctor public PlaybackState(android.media.session.PlaybackState);
@@ -15073,6 +15088,7 @@ package android.media.session {
     field public static final long ACTION_STOP = 1L; // 0x1L
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int PLAYSTATE_BUFFERING = 6; // 0x6
+    field public static final int PLAYSTATE_CONNECTING = 8; // 0x8
     field public static final int PLAYSTATE_ERROR = 7; // 0x7
     field public static final int PLAYSTATE_FAST_FORWARDING = 4; // 0x4
     field public static final int PLAYSTATE_NONE = 0; // 0x0
@@ -15082,11 +15098,44 @@ package android.media.session {
     field public static final int PLAYSTATE_STOPPED = 1; // 0x1
   }
 
+  public final class Route {
+    method public android.media.session.RouteInterface getInterface(java.lang.String);
+    method public android.media.session.RouteOptions getOptions();
+    method public android.media.session.RouteInfo getRouteInfo();
+  }
+
+  public final class RouteInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.util.List<android.media.session.RouteOptions> getConnectionMethods();
+    method public java.lang.String getId();
+    method public java.lang.String getName();
+    method public java.lang.String getProvider();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public static final class RouteInfo.Builder {
+    ctor public RouteInfo.Builder(android.media.session.RouteInfo);
+    ctor public RouteInfo.Builder();
+    method public android.media.session.RouteInfo.Builder addRouteOptions(android.media.session.RouteOptions);
+    method public android.media.session.RouteInfo build();
+    method public android.media.session.RouteInfo.Builder clearRouteOptions();
+    method public int getOptionsSize();
+    method public android.media.session.RouteInfo.Builder setId(java.lang.String);
+    method public android.media.session.RouteInfo.Builder setName(java.lang.String);
+  }
+
   public final class RouteInterface {
     method public void addListener(android.media.session.RouteInterface.EventListener);
     method public void addListener(android.media.session.RouteInterface.EventListener, android.os.Handler);
     method public void removeListener(android.media.session.RouteInterface.EventListener);
-    method public void sendCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
+    method public boolean sendCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
+    field public static final int RESULT_COMMAND_NOT_SUPPORTED = -3; // 0xfffffffd
+    field public static final int RESULT_ERROR = -1; // 0xffffffff
+    field public static final int RESULT_INTERFACE_NOT_SUPPORTED = -2; // 0xfffffffe
+    field public static final int RESULT_NOT_CONNECTED = -5; // 0xfffffffb
+    field public static final int RESULT_ROUTE_IS_STALE = -4; // 0xfffffffc
+    field public static final int RESULT_SUCCESS = 1; // 0x1
   }
 
   public static abstract class RouteInterface.EventListener {
@@ -15094,40 +15143,100 @@ package android.media.session {
     method public abstract void onEvent(java.lang.String, android.os.Bundle);
   }
 
-  public static abstract class RouteInterface.Stub {
-    ctor public RouteInterface.Stub();
-    method public abstract java.lang.String getName();
-    method public abstract void onCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
-    method public final void sendEvent(android.media.session.MediaSession, java.lang.String, android.os.Bundle);
+  public final class RouteOptions implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.os.Bundle getConnectionParams();
+    method public java.util.List<java.lang.String> getInterfaceNames();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public final class RouteTransportControls {
-    method public void addListener(android.media.session.RouteTransportControls.Listener);
-    method public void addListener(android.media.session.RouteTransportControls.Listener, android.os.Handler);
-    method public void fastForward(float);
-    method public static android.media.session.RouteTransportControls from(android.media.session.MediaController);
+  public static final class RouteOptions.Builder {
+    ctor public RouteOptions.Builder();
+    method public android.media.session.RouteOptions.Builder addInterface(java.lang.String);
+    method public android.media.session.RouteOptions build();
+    method public android.media.session.RouteOptions.Builder setParameters(android.os.Bundle);
+  }
+
+  public final class RoutePlaybackControls {
+    method public void addListener(android.media.session.RoutePlaybackControls.Listener);
+    method public void addListener(android.media.session.RoutePlaybackControls.Listener, android.os.Handler);
+    method public void fastForward();
+    method public static android.media.session.RoutePlaybackControls from(android.media.session.Route);
     method public void getCapabilities(android.os.ResultReceiver);
     method public void getCurrentPosition(android.os.ResultReceiver);
     method public void pause();
-    method public void play();
-    method public void removeListener(android.media.session.RouteTransportControls.Listener);
-    field public static final java.lang.String NAME = "android.media.session.RouteTransportControls";
+    method public void playNow(java.lang.String);
+    method public void removeListener(android.media.session.RoutePlaybackControls.Listener);
+    method public void resume();
+    field public static final java.lang.String NAME = "android.media.session.RoutePlaybackControls";
   }
 
-  public static abstract class RouteTransportControls.Listener {
-    ctor public RouteTransportControls.Listener();
-    method public void onMetadataUpdate(android.os.Bundle);
+  public static abstract class RoutePlaybackControls.Listener extends android.media.session.RouteInterface.EventListener {
+    ctor public RoutePlaybackControls.Listener();
+    method public final void onEvent(java.lang.String, android.os.Bundle);
+    method public void onMetadataUpdate(android.media.session.MediaMetadata);
     method public void onPlaybackStateChange(int);
   }
 
-  public static abstract class RouteTransportControls.Stub extends android.media.session.RouteInterface.Stub {
-    ctor public RouteTransportControls.Stub(android.media.session.MediaSession);
-    method public void fastForward(float);
-    method public long getCapabilities();
-    method public long getCurrentPosition();
-    method public java.lang.String getName();
+  public final class Session {
+    method public void addCallback(android.media.session.Session.Callback);
+    method public void addCallback(android.media.session.Session.Callback, android.os.Handler);
+    method public void connect(android.media.session.RouteInfo, android.media.session.RouteOptions);
+    method public void disconnect(android.media.session.RouteInfo);
+    method public android.media.session.SessionToken getSessionToken();
+    method public android.media.session.TransportPerformer getTransportPerformer();
+    method public void publish();
+    method public void release();
+    method public void removeCallback(android.media.session.Session.Callback);
+    method public void sendEvent(java.lang.String, android.os.Bundle);
+    method public void setRouteOptions(java.util.List<android.media.session.RouteOptions>);
+    method public android.media.session.TransportPerformer setTransportPerformerEnabled();
+  }
+
+  public static abstract class Session.Callback {
+    ctor public Session.Callback();
     method public void onCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
-    method public final void updatePlaybackState(int);
+    method public void onMediaButton(android.content.Intent);
+    method public void onRequestRouteChange(android.media.session.RouteInfo);
+    method public void onRouteConnected(android.media.session.Route);
+    method public void onRouteDisconnected(android.media.session.Route, int);
+  }
+
+  public final class SessionController {
+    method public void addCallback(android.media.session.SessionController.Callback);
+    method public void addCallback(android.media.session.SessionController.Callback, android.os.Handler);
+    method public static android.media.session.SessionController fromToken(android.media.session.SessionToken);
+    method public android.media.session.TransportController getTransportController();
+    method public void removeCallback(android.media.session.SessionController.Callback);
+    method public void sendCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
+    method public void sendMediaButton(int);
+    method public void showRoutePicker();
+  }
+
+  public static abstract class SessionController.Callback {
+    ctor public SessionController.Callback();
+    method public void onEvent(java.lang.String, android.os.Bundle);
+    method public void onRouteChanged(android.media.session.RouteInfo);
+  }
+
+  public final class SessionInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.String getId();
+    method public java.lang.String getPackageName();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class SessionManager {
+    method public android.media.session.Session createSession(java.lang.String);
+    method public java.util.List<android.media.session.SessionController> getActiveSessions();
+  }
+
+  public class SessionToken implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public final class TransportController {

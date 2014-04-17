@@ -17,7 +17,7 @@
 package android.media.session;
 
 import android.content.Context;
-import android.media.session.IMediaSessionManager;
+import android.media.session.ISessionManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -35,37 +35,37 @@ import java.util.List;
  * get an instance of this class.
  * <p>
  *
- * @see MediaSession
- * @see MediaController
+ * @see Session
+ * @see SessionController
  */
-public final class MediaSessionManager {
-    private static final String TAG = "MediaSessionManager";
+public final class SessionManager {
+    private static final String TAG = "SessionManager";
 
-    private final IMediaSessionManager mService;
+    private final ISessionManager mService;
 
     private Context mContext;
 
     /**
      * @hide
      */
-    public MediaSessionManager(Context context) {
+    public SessionManager(Context context) {
         // Consider rewriting like DisplayManagerGlobal
         // Decide if we need context
         mContext = context;
         IBinder b = ServiceManager.getService(Context.MEDIA_SESSION_SERVICE);
-        mService = IMediaSessionManager.Stub.asInterface(b);
+        mService = ISessionManager.Stub.asInterface(b);
     }
 
     /**
      * Creates a new session.
      *
      * @param tag A short name for debugging purposes
-     * @return a {@link MediaSession} for the new session
+     * @return a {@link Session} for the new session
      */
-    public MediaSession createSession(String tag) {
+    public Session createSession(String tag) {
         try {
-            MediaSession.CallbackStub cbStub = new MediaSession.CallbackStub();
-            MediaSession session = new MediaSession(mService
+            Session.CallbackStub cbStub = new Session.CallbackStub();
+            Session session = new Session(mService
                     .createSession(mContext.getPackageName(), cbStub, tag), cbStub);
             cbStub.setMediaSession(session);
 
@@ -83,8 +83,8 @@ public final class MediaSessionManager {
      *
      * @return a list of controllers for ongoing sessions
      */
-    public List<MediaController> getActiveSessions() {
+    public List<SessionController> getActiveSessions() {
         // TODO
-        return new ArrayList<MediaController>();
+        return new ArrayList<SessionController>();
     }
 }

@@ -7,6 +7,7 @@
 
     <string name="start_button">Start</string>
     <string name="play_button">Play</string>
+    <string name="route_button">Change route</string>
     <string name="media_content_hint">Content</string>
     <string name="media_next_hint">Next content</string>
     <string name="has_video">Is video</string>

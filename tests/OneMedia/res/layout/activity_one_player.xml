@@ -53,6 +53,12 @@
                 android:layout_weight="1"
                 android:text="@string/play_button" />
     </LinearLayout>
+    <Button
+            android:id="@+id/route_button"
+            style="@style/BottomBarButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/route_button" />
     <TextView
             android:id="@+id/status"
             android:layout_width="match_parent"

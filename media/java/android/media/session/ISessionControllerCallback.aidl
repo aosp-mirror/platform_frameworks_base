@@ -15,27 +15,19 @@
 
 package android.media.session;
 
-import android.media.session.IMediaController;
 import android.media.session.MediaMetadata;
+import android.media.session.RouteInfo;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 
 /**
- * Interface to a MediaSession in the system.
  * @hide
  */
-interface IMediaSession {
-    void sendEvent(String event, in Bundle data);
-    IMediaController getMediaController();
-    void setTransportPerformerEnabled();
-    void setRouteState(in Bundle routeState);
-    void setRoute(in Bundle mediaRouteDescriptor);
-    List<String> getSupportedInterfaces();
-    void publish();
-    void destroy();
+oneway interface ISessionControllerCallback {
+    void onEvent(String event, in Bundle extras);
+    void onRouteChanged(in RouteInfo route);
 
-    // These commands are for the TransportPerformer
-    void setMetadata(in MediaMetadata metadata);
-    void setPlaybackState(in PlaybackState state);
-    void setRatingType(int type);
+    // These callbacks are for the TransportController
+    void onPlaybackStateChanged(in PlaybackState state);
+    void onMetadataChanged(in MediaMetadata metadata);
 }

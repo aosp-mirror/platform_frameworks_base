@@ -34,21 +34,21 @@ import java.util.ArrayList;
  * other commands can be sent to the session. A callback may be registered to
  * receive updates from the session, such as metadata and play state changes.
  * <p>
- * A MediaController can be created through {@link MediaSessionManager} if you
+ * A MediaController can be created through {@link SessionManager} if you
  * hold the "android.permission.MEDIA_CONTENT_CONTROL" permission or directly if
- * you have a {@link MediaSessionToken} from the session owner.
+ * you have a {@link SessionToken} from the session owner.
  * <p>
  * MediaController objects are thread-safe.
  */
-public final class MediaController {
-    private static final String TAG = "MediaController";
+public final class SessionController {
+    private static final String TAG = "SessionController";
 
     private static final int MSG_EVENT = 1;
     private static final int MESSAGE_PLAYBACK_STATE = 2;
     private static final int MESSAGE_METADATA = 3;
     private static final int MSG_ROUTE = 4;
 
-    private final IMediaController mSessionBinder;
+    private final ISessionController mSessionBinder;
 
     private final CallbackStub mCbStub = new CallbackStub(this);
     private final ArrayList<MessageHandler> mCallbacks = new ArrayList<MessageHandler>();
@@ -58,15 +58,15 @@ public final class MediaController {
 
     private TransportController mTransportController;
 
-    private MediaController(IMediaController sessionBinder) {
+    private SessionController(ISessionController sessionBinder) {
         mSessionBinder = sessionBinder;
     }
 
     /**
      * @hide
      */
-    public static MediaController fromBinder(IMediaController sessionBinder) {
-        MediaController controller = new MediaController(sessionBinder);
+    public static SessionController fromBinder(ISessionController sessionBinder) {
+        SessionController controller = new SessionController(sessionBinder);
         try {
             controller.mSessionBinder.registerCallbackListener(controller.mCbStub);
             if (controller.mSessionBinder.isTransportControlEnabled()) {
@@ -87,7 +87,7 @@ public final class MediaController {
      * @param token The session token to use
      * @return A controller for the session or null
      */
-    public static MediaController fromToken(MediaSessionToken token) {
+    public static SessionController fromToken(SessionToken token) {
         return fromBinder(token.getBinder());
     }
 
@@ -181,10 +181,22 @@ public final class MediaController {
         }
     }
 
+    /**
+     * Request that the route picker be shown for this session. This should
+     * generally be called in response to a user action.
+     */
+    public void showRoutePicker() {
+        try {
+            mSessionBinder.showRoutePicker();
+        } catch (RemoteException e) {
+            Log.d(TAG, "Dead object in showRoutePicker", e);
+        }
+    }
+
     /*
      * @hide
      */
-    IMediaController getSessionBinder() {
+    ISessionController getSessionBinder() {
         return mSessionBinder;
     }
 
@@ -247,10 +259,10 @@ public final class MediaController {
         }
     }
 
-    private void postRouteChanged(Bundle routeDescriptor) {
+    private void postRouteChanged(RouteInfo route) {
         synchronized (mLock) {
             for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                mCallbacks.get(i).post(MSG_ROUTE, null, routeDescriptor);
+                mCallbacks.get(i).post(MSG_ROUTE, route, null);
             }
         }
     }
@@ -275,36 +287,36 @@ public final class MediaController {
          *
          * @param route
          */
-        public void onRouteChanged(Bundle route) {
+        public void onRouteChanged(RouteInfo route) {
         }
     }
 
-    private final static class CallbackStub extends IMediaControllerCallback.Stub {
-        private final WeakReference<MediaController> mController;
+    private final static class CallbackStub extends ISessionControllerCallback.Stub {
+        private final WeakReference<SessionController> mController;
 
-        public CallbackStub(MediaController controller) {
-            mController = new WeakReference<MediaController>(controller);
+        public CallbackStub(SessionController controller) {
+            mController = new WeakReference<SessionController>(controller);
         }
 
         @Override
         public void onEvent(String event, Bundle extras) {
-            MediaController controller = mController.get();
+            SessionController controller = mController.get();
             if (controller != null) {
                 controller.postEvent(event, extras);
             }
         }
 
         @Override
-        public void onRouteChanged(Bundle mediaRouteDescriptor) {
-            MediaController controller = mController.get();
+        public void onRouteChanged(RouteInfo route) {
+            SessionController controller = mController.get();
             if (controller != null) {
-                controller.postRouteChanged(mediaRouteDescriptor);
+                controller.postRouteChanged(route);
             }
         }
 
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
-            MediaController controller = mController.get();
+            SessionController controller = mController.get();
             if (controller != null) {
                 TransportController tc = controller.getTransportController();
                 if (tc != null) {
@@ -315,7 +327,7 @@ public final class MediaController {
 
         @Override
         public void onMetadataChanged(MediaMetadata metadata) {
-            MediaController controller = mController.get();
+            SessionController controller = mController.get();
             if (controller != null) {
                 TransportController tc = controller.getTransportController();
                 if (tc != null) {
@@ -327,9 +339,9 @@ public final class MediaController {
     }
 
     private final static class MessageHandler extends Handler {
-        private final MediaController.Callback mCallback;
+        private final SessionController.Callback mCallback;
 
-        public MessageHandler(Looper looper, MediaController.Callback cb) {
+        public MessageHandler(Looper looper, SessionController.Callback cb) {
             super(looper, null, true);
             mCallback = cb;
         }
@@ -341,7 +353,7 @@ public final class MediaController {
                     mCallback.onEvent((String) msg.obj, msg.getData());
                     break;
                 case MSG_ROUTE:
-                    mCallback.onRouteChanged(msg.getData());
+                    mCallback.onRouteChanged((RouteInfo) msg.obj);
             }
         }
 
