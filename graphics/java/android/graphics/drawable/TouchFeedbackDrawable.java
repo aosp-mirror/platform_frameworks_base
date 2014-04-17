@@ -44,6 +44,8 @@ import java.io.IOException;
  * Documentation pending.
  */
 public class TouchFeedbackDrawable extends LayerDrawable {
+    private static final PorterDuffXfermode DST_IN = new PorterDuffXfermode(Mode.DST_IN);
+
     /** The maximum number of ripples supported. */
     private static final int MAX_RIPPLES = 10;
 
@@ -397,7 +399,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         if (mask != null && drewRipples) {
             // TODO: This will also mask the lower layer, which is bad.
             canvas.saveLayer(bounds.left, bounds.top, bounds.right,
-                    bounds.bottom, getMaskingPaint(mState.mTintXfermode), 0);
+                    bounds.bottom, getMaskingPaint(DST_IN), 0);
             mask.draw(canvas);
         }
 
