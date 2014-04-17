@@ -81,4 +81,9 @@
         <item name="android:mirrorForRtl">true</item>
     </style>
 
+    <style name="BouncerSecurityContainer">
+        <item name="android:layout_marginBottom">32dp</item>
+        <item name="android:layout_gravity">center_horizontal|bottom</item>
+    </style>
+
 </resources>
