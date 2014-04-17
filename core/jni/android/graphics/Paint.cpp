@@ -357,6 +357,24 @@ public:
         obj->setPaintOptionsAndroid(paintOpts);
     }
 
+    static jboolean isElegantTextHeight(JNIEnv* env, jobject paint) {
+        NPE_CHECK_RETURN_ZERO(env, paint);
+        SkPaint* obj = GraphicsJNI::getNativePaint(env, paint);
+        SkPaintOptionsAndroid paintOpts = obj->getPaintOptionsAndroid();
+        return paintOpts.getFontVariant() == SkPaintOptionsAndroid::kElegant_Variant;
+    }
+
+    static void setElegantTextHeight(JNIEnv* env, jobject paint, jboolean aa) {
+        NPE_CHECK_RETURN_VOID(env, paint);
+        SkPaint* obj = GraphicsJNI::getNativePaint(env, paint);
+        SkPaintOptionsAndroid::FontVariant variant =
+            aa ? SkPaintOptionsAndroid::kElegant_Variant :
+            SkPaintOptionsAndroid::kDefault_Variant;
+        SkPaintOptionsAndroid paintOpts = obj->getPaintOptionsAndroid();
+        paintOpts.setFontVariant(variant);
+        obj->setPaintOptionsAndroid(paintOpts);
+    }
+
     static jfloat getTextSize(JNIEnv* env, jobject paint) {
         NPE_CHECK_RETURN_ZERO(env, paint);
         return SkScalarToFloat(GraphicsJNI::getNativePaint(env, paint)->getTextSize());
@@ -401,10 +419,30 @@ public:
         return SkScalarToFloat(metrics.fDescent);
     }
 
+    static SkScalar getMetricsInternal(SkPaint *paint, SkPaint::FontMetrics *metrics) {
+        const int kElegantTop = 2500;
+        const int kElegantBottom = -1000;
+        const int kElegantAscent = 1946;
+        const int kElegantDescent = -512;
+        const int kElegantLeading = 0;
+        SkScalar spacing = paint->getFontMetrics(metrics);
+        SkPaintOptionsAndroid paintOpts = paint->getPaintOptionsAndroid();
+        if (paintOpts.getFontVariant() == SkPaintOptionsAndroid::kElegant_Variant) {
+            SkScalar size = paint->getTextSize();
+            metrics->fTop = -size * kElegantTop / 2048;
+            metrics->fBottom = -size * kElegantBottom / 2048;
+            metrics->fAscent = -size * kElegantAscent / 2048;
+            metrics->fDescent = -size * kElegantDescent / 2048;
+            metrics->fLeading = size * kElegantLeading / 2048;
+            spacing = metrics->fDescent - metrics->fAscent + metrics->fLeading;
+        }
+        return spacing;
+    }
+
     static jfloat getFontMetrics(JNIEnv* env, jobject paint, jobject metricsObj) {
         NPE_CHECK_RETURN_ZERO(env, paint);
         SkPaint::FontMetrics metrics;
-        SkScalar             spacing = GraphicsJNI::getNativePaint(env, paint)->getFontMetrics(&metrics);
+        SkScalar spacing = getMetricsInternal(GraphicsJNI::getNativePaint(env, paint), &metrics);
 
         if (metricsObj) {
             SkASSERT(env->IsInstanceOf(metricsObj, gFontMetrics_class));
@@ -421,7 +459,7 @@ public:
         NPE_CHECK_RETURN_ZERO(env, paint);
         SkPaint::FontMetrics metrics;
 
-        GraphicsJNI::getNativePaint(env, paint)->getFontMetrics(&metrics);
+        getMetricsInternal(GraphicsJNI::getNativePaint(env, paint), &metrics);
         int ascent = SkScalarRoundToInt(metrics.fAscent);
         int descent = SkScalarRoundToInt(metrics.fDescent);
         int leading = SkScalarRoundToInt(metrics.fLeading);
@@ -894,6 +932,8 @@ static JNINativeMethod methods[] = {
     {"native_getTextAlign","(J)I", (void*) SkPaintGlue::getTextAlign},
     {"native_setTextAlign","(JI)V", (void*) SkPaintGlue::setTextAlign},
     {"native_setTextLocale","(JLjava/lang/String;)V", (void*) SkPaintGlue::setTextLocale},
+    {"isElegantTextHeight","()Z", (void*) SkPaintGlue::isElegantTextHeight},
+    {"setElegantTextHeight","(Z)V", (void*) SkPaintGlue::setElegantTextHeight},
     {"getTextSize","()F", (void*) SkPaintGlue::getTextSize},
     {"setTextSize","(F)V", (void*) SkPaintGlue::setTextSize},
     {"getTextScaleX","()F", (void*) SkPaintGlue::getTextScaleX},
