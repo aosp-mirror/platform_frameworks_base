@@ -269,4 +269,7 @@
 
     <!-- Camera affordance drag distance -->
     <dimen name="camera_drag_distance">100dp</dimen>
+
+    <dimen name="quick_settings_tmp_scrim_stroke_width">8dp</dimen>
+    <dimen name="quick_settings_tmp_scrim_text_size">30dp</dimen>
 </resources>

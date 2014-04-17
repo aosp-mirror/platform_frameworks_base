@@ -30,11 +30,14 @@ public class NotificationPanelView extends PanelView {
     public static final boolean DEBUG_GESTURES = true;
 
     PhoneStatusBar mStatusBar;
+    private View mHeader;
+    private View mKeyguardStatusView;
+
     private NotificationStackScrollLayout mNotificationStackScroller;
     private int[] mTempLocation = new int[2];
     private int[] mTempChildLocation = new int[2];
     private View mNotificationParent;
-
+    private boolean mTrackingSettings;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -59,6 +62,8 @@ public class NotificationPanelView extends PanelView {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
+        mHeader = findViewById(R.id.header);
+        mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
         mNotificationStackScroller = (NotificationStackScrollLayout)
                 findViewById(R.id.notification_stack_scroller);
         mNotificationParent = findViewById(R.id.notification_container_parent);
@@ -99,9 +104,38 @@ public class NotificationPanelView extends PanelView {
     }
 
     @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        // intercept for quick settings
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            final View target = mStatusBar.isOnKeyguard() ?  mKeyguardStatusView : mHeader;
+            final boolean inTarget = PhoneStatusBar.inBounds(target, event, true);
+            if (inTarget && !isInSettings()) {
+                mTrackingSettings = true;
+                return true;
+            }
+            if (!inTarget && isInSettings()) {
+                mTrackingSettings = true;
+                return true;
+            }
+        }
+        return super.onInterceptTouchEvent(event);
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
         // TODO: Handle doublefinger swipe to notifications again. Look at history for a reference
         // implementation.
+        if (mTrackingSettings) {
+            mStatusBar.onSettingsEvent(event);
+            if (event.getAction() == MotionEvent.ACTION_UP
+                    || event.getAction() == MotionEvent.ACTION_CANCEL) {
+                mTrackingSettings = false;
+            }
+            return true;
+        }
+        if (isInSettings()) {
+            return true;
+        }
         return super.onTouchEvent(event);
     }
 

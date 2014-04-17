@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2012 The Android Open Source Project
+<!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,12 +14,9 @@
      limitations under the License.
 -->
 
-<com.android.systemui.statusbar.phone.QuickSettingsContainerView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/quick_settings_container"
-    android:padding="@dimen/notification_side_padding"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="#5f000000"
-    android:animateLayoutChanges="true"
-    android:columnCount="@integer/quick_settings_num_columns" />
+<resources>
+    <dimen name="status_bar_height">@*android:dimen/status_bar_height</dimen>
+    <dimen name="navigation_bar_height">@*android:dimen/navigation_bar_height</dimen>
+    <drawable name="notification_quantum_bg">@*android:drawable/notification_quantum_bg</drawable>
+</resources>
+

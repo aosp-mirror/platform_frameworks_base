@@ -27,14 +27,14 @@
 
     <include layout="@layout/status_bar"
         android:layout_width="match_parent"
-        android:layout_height="@*android:dimen/status_bar_height" />
+        android:layout_height="@dimen/status_bar_height" />
 
     <com.android.systemui.statusbar.phone.PanelHolder
         android:id="@+id/panel_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/panel_holder_padding_top"
-        android:layout_marginBottom="@*android:dimen/navigation_bar_height">
+        android:layout_marginBottom="@dimen/navigation_bar_height">
         <include layout="@layout/status_bar_expanded"
             android:layout_width="@dimen/notification_panel_width"
             android:layout_height="wrap_content"
