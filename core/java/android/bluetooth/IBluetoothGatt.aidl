@@ -17,6 +17,10 @@
 package android.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothLeAdvertiseScanData;
+import android.bluetooth.BluetoothLeAdvertiser;
+import android.bluetooth.BluetoothLeScanFilter;
+import android.bluetooth.BluetoothLeScanner;
 import android.os.ParcelUuid;
 
 import android.bluetooth.IBluetoothGattCallback;
@@ -33,8 +37,13 @@ interface IBluetoothGatt {
     void startScanWithUuids(in int appIf, in boolean isServer, in ParcelUuid[] ids);
     void startScanWithUuidsScanParam(in int appIf, in boolean isServer,
                     in ParcelUuid[] ids, int scanWindow, int scanInterval);
+    void startScanWithFilters(in int appIf, in boolean isServer,
+                              in BluetoothLeScanner.Settings settings,
+                              in List<BluetoothLeScanFilter> filters);
     void stopScan(in int appIf, in boolean isServer);
-
+    void startMultiAdvertising(in int appIf, in BluetoothLeAdvertiseScanData.AdvertisementData data,
+                               in BluetoothLeAdvertiser.Settings settings);
+    void stopMultiAdvertising(in int appIf);
     void registerClient(in ParcelUuid appId, in IBluetoothGattCallback callback);
     void unregisterClient(in int clientIf);
     void clientConnect(in int clientIf, in String address, in boolean isDirect, in int transport);
