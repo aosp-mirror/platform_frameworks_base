@@ -2134,8 +2134,8 @@ public final class CaptureResult extends CameraMetadata {
      * @see #SYNC_FRAME_NUMBER_UNKNOWN
      * @hide
      */
-    public static final Key<Integer> SYNC_FRAME_NUMBER =
-            new Key<Integer>("android.sync.frameNumber", int.class);
+    public static final Key<Long> SYNC_FRAME_NUMBER =
+            new Key<Long>("android.sync.frameNumber", long.class);
 
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
