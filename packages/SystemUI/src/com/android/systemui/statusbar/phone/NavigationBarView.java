@@ -205,6 +205,15 @@ public class NavigationBarView extends LinearLayout {
                         mContext.startActivityAsUser(
                                 new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE),
                                 UserHandle.CURRENT);
+                        cameraButtonView.animate().x(-cameraButtonView.getWidth())
+                                .setInterpolator(new AccelerateInterpolator(2f)).withEndAction(
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        cameraButtonView.setTranslationX(0);
+                                    }
+                                });
+                        mSkipCancelAnimation = true;
                     }
                     if (realX < mStartX - mScaledTouchSlop) {
                         mTouchSlopReached = true;
