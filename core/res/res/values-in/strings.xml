@@ -135,6 +135,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinkron"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Terlalu banyak <xliff:g id="CONTENT_TYPE">%s</xliff:g> penghapusan."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Penyimpanan tablet penuh. Hapus beberapa file untuk mengosongkan ruang."</string>
+    <!-- no translation found for low_memory (4415914910770005166) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"Penyimpanan di ponsel penuh. Hapus sebagian file untuk mengosongkan ruang."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Jaringan mungkin dipantau"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Oleh pihak ketiga yang tidak dikenal"</string>
@@ -152,6 +154,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Pendering nyala"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Sedang mematikan..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet Anda akan dimatikan."</string>
+    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
+    <skip />
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Ponsel Anda akan dimatikan."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Anda ingin mematikannya?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Reboot ke mode aman"</string>

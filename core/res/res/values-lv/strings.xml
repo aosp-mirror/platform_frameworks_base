@@ -135,6 +135,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinhronizācija"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Pārāk daudz <xliff:g id="CONTENT_TYPE">%s</xliff:g> dzēsto vienumu."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Planšetdatora atmiņa ir pilna. Dzēsiet dažus failus, lai atbrīvotu vietu."</string>
+    <!-- no translation found for low_memory (4415914910770005166) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"Tālruņa atmiņa ir pilna! Dzēsiet dažus failus, lai atbrīvotu vietu."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Iespējams, tīklā veiktās darbības tiek pārraudzītas."</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Nezināma trešā puse"</string>
@@ -152,6 +154,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Zvanītājs ieslēgts"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Notiek izslēgšana..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Planšetdators tiks beidzēts."</string>
+    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
+    <skip />
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Tālrunis tiks izslēgts."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vai vēlaties izslēgt?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Atsāknēšana drošajā režīmā"</string>

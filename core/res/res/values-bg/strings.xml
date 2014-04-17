@@ -135,6 +135,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Синхронизиране"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Изтриванията за <xliff:g id="CONTENT_TYPE">%s</xliff:g> са твърде много."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Хранилището на таблета е пълно. Изтрийте файлове, за да освободите място."</string>
+    <!-- no translation found for low_memory (4415914910770005166) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"Хранилището на телефона е пълно. Изтрийте файлове, за да освободите място."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Мрежата може да се наблюдава"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"От неизвестна трета страна"</string>
@@ -152,6 +154,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Звъненето е включено"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Изключва се..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Таблетът ви ще се изключи."</string>
+    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
+    <skip />
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Телефонът ви ще се изключи."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Искате ли да изключите?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Рестартиране в безопасен режим"</string>

@@ -135,6 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"مزامنة"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"عمليات حذف <xliff:g id="CONTENT_TYPE">%s</xliff:g> كثيرة للغاية."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"سعة تخزين الجهاز اللوحي ممتلئة! احذف بعض الملفات لإخلاء مساحة."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"سعة تخزين المشاهدة ممتلئة! احذف بعض الملفات لتحرير مساحة."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"سعة تخزين الهاتف ممتلئة. احذف بعض الملفات لإخلاء مساحة."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"قد تكون الشبكة مراقبة"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"بواسطة جهة خارجية غير معلومة"</string>
@@ -152,6 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"تشغيل الرنين"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"جارٍ إيقاف التشغيل..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"سيتم إيقاف تشغيل الجهاز اللوحي."</string>
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"سيتم إيقاف المشاهدة."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"سيتم إيقاف تشغيل هاتفك."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"هل تريد إيقاف التشغيل؟"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"إعادة تشغيل في الوضع الآمن"</string>
