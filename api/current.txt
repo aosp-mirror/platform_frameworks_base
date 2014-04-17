@@ -4922,6 +4922,7 @@ package android.app.admin {
     method public void addPersistentPreferredActivity(android.content.ComponentName, android.content.IntentFilter, android.content.ComponentName);
     method public void clearPackagePersistentPreferredActivities(android.content.ComponentName, java.lang.String);
     method public java.util.List<android.content.ComponentName> getActiveAdmins();
+    method public android.os.Bundle getApplicationRestrictions(android.content.ComponentName, java.lang.String);
     method public boolean getCameraDisabled(android.content.ComponentName);
     method public int getCurrentFailedPasswordAttempts();
     method public int getKeyguardDisabledFeatures(android.content.ComponentName);
@@ -4949,6 +4950,7 @@ package android.app.admin {
     method public void lockNow();
     method public void removeActiveAdmin(android.content.ComponentName);
     method public boolean resetPassword(java.lang.String, int);
+    method public void setApplicationRestrictions(android.content.ComponentName, java.lang.String, android.os.Bundle);
     method public void setCameraDisabled(android.content.ComponentName, boolean);
     method public void setKeyguardDisabledFeatures(android.content.ComponentName, int);
     method public void setMaximumFailedPasswordsForWipe(android.content.ComponentName, int);
@@ -6825,6 +6827,7 @@ package android.content {
     field public static final java.lang.String ACTION_AIRPLANE_MODE_CHANGED = "android.intent.action.AIRPLANE_MODE";
     field public static final java.lang.String ACTION_ALL_APPS = "android.intent.action.ALL_APPS";
     field public static final java.lang.String ACTION_ANSWER = "android.intent.action.ANSWER";
+    field public static final java.lang.String ACTION_APPLICATION_RESTRICTIONS_CHANGED = "android.intent.action.APPLICATION_RESTRICTIONS_CHANGED";
     field public static final java.lang.String ACTION_APP_ERROR = "android.intent.action.APP_ERROR";
     field public static final java.lang.String ACTION_ASSIST = "android.intent.action.ASSIST";
     field public static final java.lang.String ACTION_ATTACH_DATA = "android.intent.action.ATTACH_DATA";

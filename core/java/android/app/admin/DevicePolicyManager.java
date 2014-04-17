@@ -26,6 +26,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Process;
 import android.os.RemoteCallback;
@@ -1879,5 +1880,60 @@ public class DevicePolicyManager {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
         }
+    }
+
+    /**
+     * Called by a profile or device owner to set the application restrictions for a given target
+     * application running in the managed profile.
+     *
+     * <p>The provided {@link Bundle} consists of key-value pairs, where the types of values may be
+     * {@link Boolean}, {@link String}, or {@link String}[]. The recommended format for key strings
+     * is "com.example.packagename/example-setting" to avoid naming conflicts with library
+     * components such as {@link android.webkit.WebView}.
+     *
+     * <p>The application restrictions are only made visible to the target application and the
+     * profile or device owner.
+     *
+     * <p>The calling device admin must be a profile or device owner; if it is not, a security
+     * exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName The name of the package to update restricted settings for.
+     * @param settings A {@link Bundle} to be parsed by the receiving application, conveying a new
+     * set of active restrictions.
+     */
+    public void setApplicationRestrictions(ComponentName admin, String packageName,
+            Bundle settings) {
+        if (mService != null) {
+            try {
+                mService.setApplicationRestrictions(admin, packageName, settings);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Called by a profile or device owner to get the application restrictions for a given target
+     * application running in the managed profile.
+     *
+     * <p>The calling device admin must be a profile or device owner; if it is not, a security
+     * exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName The name of the package to fetch restricted settings of.
+     * @return {@link Bundle} of settings corresponding to what was set last time
+     * {@link DevicePolicyManager#setApplicationRestrictions} was called, or an empty {@link Bundle}
+     * if no restrictions have been set.
+     */
+    public Bundle getApplicationRestrictions(ComponentName admin, String packageName) {
+        if (mService != null) {
+            try {
+                return mService.getApplicationRestrictions(admin, packageName);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return null;
     }
 }
