@@ -27,8 +27,11 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -36,6 +39,7 @@ import com.android.systemui.recents.RecentsTaskLoader;
 import com.android.systemui.recents.model.SpaceNode;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.R;
 
 import java.util.ArrayList;
 
@@ -53,11 +57,16 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     // The space partitioning root of this container
     SpaceNode mBSP;
+    // Search bar view
+    View mSearchBar;
     // Recents view callbacks
     RecentsViewCallbacks mCb;
 
+    LayoutInflater mInflater;
+
     public RecentsView(Context context) {
         super(context);
+        mInflater = LayoutInflater.from(context);
         setWillNotDraw(false);
     }
 
@@ -71,12 +80,22 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         mBSP = n;
 
         // Create and add all the stacks for this partition of space.
+        boolean hasTasks = false;
         removeAllViews();
         ArrayList<TaskStack> stacks = mBSP.getStacks();
         for (TaskStack stack : stacks) {
             TaskStackView stackView = new TaskStackView(getContext(), stack);
             stackView.setCallbacks(this);
             addView(stackView);
+            hasTasks |= (stack.getTaskCount() > 0);
+        }
+
+        // Create the search bar (and hide it if we have no recent tasks)
+        if (Constants.DebugFlags.App.EnableSearchButton) {
+            createSearchBar();
+            if (!hasTasks) {
+                mSearchBar.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -85,27 +104,43 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         // Get the first stack view
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
-            TaskStackView stackView = (TaskStackView) getChildAt(i);
-            TaskStack stack = stackView.mStack;
-            ArrayList<Task> tasks = stack.getTasks();
+            View child = getChildAt(i);
+            if (child instanceof TaskStackView) {
+                TaskStackView stackView = (TaskStackView) child;
+                TaskStack stack = stackView.mStack;
+                ArrayList<Task> tasks = stack.getTasks();
 
-            // Get the first task in the stack
-            if (!tasks.isEmpty()) {
-                Task task = tasks.get(tasks.size() - 1);
-                TaskView tv = null;
+                // Get the first task in the stack
+                if (!tasks.isEmpty()) {
+                    Task task = tasks.get(tasks.size() - 1);
+                    TaskView tv = null;
 
-                // Try and use the first child task view as the source of the launch animation
-                if (stackView.getChildCount() > 0) {
-                    TaskView stv = (TaskView) stackView.getChildAt(stackView.getChildCount() - 1);
-                    if (stv.getTask() == task) {
-                        tv = stv;
+                    // Try and use the first child task view as the source of the launch animation
+                    if (stackView.getChildCount() > 0) {
+                        TaskView stv = (TaskView) stackView.getChildAt(stackView.getChildCount() - 1);
+                        if (stv.getTask() == task) {
+                            tv = stv;
+                        }
                     }
+                    onTaskLaunched(stackView, tv, stack, task);
+                    return true;
                 }
-                onTaskLaunched(stackView, tv, stack, task);
-                return true;
             }
         }
         return false;
+    }
+
+    /** Creates and adds the search bar */
+    void createSearchBar() {
+        // Create a temporary search bar
+        mSearchBar = mInflater.inflate(R.layout.recents_search_bar, this, false);
+        mSearchBar.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSearchTriggered();
+            }
+        });
+        addView(mSearchBar);
     }
 
     @Override
@@ -120,16 +155,26 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsStartup,
                 Constants.DebugFlags.App.TimeRecentsStartupKey, "RecentsView.onMeasure");
 
-        // We measure our stack views sans the status bar.  It will handle the nav bar itself.
+        // Get the search bar bounds so that we can account for its height in the children
+        Rect searchBarSpaceBounds = new Rect();
+        Rect searchBarBounds = new Rect();
         RecentsConfiguration config = RecentsConfiguration.getInstance();
+        config.getSearchBarBounds(getMeasuredWidth(), getMeasuredHeight(),
+                searchBarSpaceBounds, searchBarBounds);
+        if (mSearchBar != null) {
+            mSearchBar.measure(MeasureSpec.makeMeasureSpec(searchBarSpaceBounds.width(), widthMode),
+                    MeasureSpec.makeMeasureSpec(searchBarSpaceBounds.height(), heightMode));
+        }
+
+        // We measure our stack views sans the status bar.  It will handle the nav bar itself.
         int childWidth = width - config.systemInsets.right;
-        int childHeight = height - config.systemInsets.top;
+        int childHeight = height - config.systemInsets.top - searchBarSpaceBounds.height();
 
         // Measure each child
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
-            final View child = getChildAt(i);
-            if (child.getVisibility() != GONE) {
+            View child = getChildAt(i);
+            if (child instanceof TaskStackView && child.getVisibility() != GONE) {
                 child.measure(MeasureSpec.makeMeasureSpec(childWidth, widthMode),
                         MeasureSpec.makeMeasureSpec(childHeight, heightMode));
             }
@@ -145,18 +190,30 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsStartup,
                 Constants.DebugFlags.App.TimeRecentsStartupKey, "RecentsView.onLayout");
 
-        // We offset our stack views by the status bar height.  It will handle the nav bar itself.
+        // Get the search bar bounds so that we can account for its height in the children
+        Rect searchBarSpaceBounds = new Rect();
+        Rect searchBarBounds = new Rect();
         RecentsConfiguration config = RecentsConfiguration.getInstance();
-        top += config.systemInsets.top;
+        config.getSearchBarBounds(getMeasuredWidth(), getMeasuredHeight(),
+                searchBarSpaceBounds, searchBarBounds);
+        if (mSearchBar != null) {
+            mSearchBar.layout(config.systemInsets.left + searchBarSpaceBounds.left,
+                    config.systemInsets.top + searchBarSpaceBounds.top,
+                    config.systemInsets.left + mSearchBar.getMeasuredWidth(),
+                    config.systemInsets.top + mSearchBar.getMeasuredHeight());
+        }
+
+        // We offset our stack views by the status bar height.  It will handle the nav bar itself.
+        top += config.systemInsets.top + searchBarSpaceBounds.height();
 
         // Layout each child
         // XXX: Based on the space node for that task view
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
-            final View child = getChildAt(i);
-            if (child.getVisibility() != GONE) {
-                final int width = child.getMeasuredWidth();
-                final int height = child.getMeasuredHeight();
+            View child = getChildAt(i);
+            if (child instanceof TaskStackView && child.getVisibility() != GONE) {
+                int width = child.getMeasuredWidth();
+                int height = child.getMeasuredHeight();
                 child.layout(left, top, left + width, top + height);
             }
         }
@@ -188,9 +245,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             // Get the first stack view
             int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
-                TaskStackView stackView = (TaskStackView) getChildAt(i);
-                if (stackView.closeOpenInfoPanes()) {
-                    return true;
+                View child = getChildAt(i);
+                if (child instanceof TaskStackView) {
+                    TaskStackView stackView = (TaskStackView) child;
+                    if (stackView.closeOpenInfoPanes()) {
+                        return true;
+                    }
                 }
             }
         }
@@ -314,5 +374,25 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         intent.setComponent(intent.resolveActivity(getContext().getPackageManager()));
         TaskStackBuilder.create(getContext())
                 .addNextIntentWithParentStack(intent).startActivities();
+    }
+
+    public void onSearchTriggered() {
+        // Get the search bar source bounds
+        Rect searchBarSpaceBounds = new Rect();
+        Rect searchBarBounds = new Rect();
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        config.getSearchBarBounds(getMeasuredWidth(), getMeasuredHeight(),
+                searchBarSpaceBounds, searchBarBounds);
+
+        // Get the search intent and start it
+        Intent searchIntent = RecentsTaskLoader.getInstance().getSystemServicesProxy()
+                .getGlobalSearchIntent(searchBarBounds);
+        if (searchIntent != null) {
+            try {
+                getContext().startActivity(searchIntent);
+            } catch (ActivityNotFoundException anfe) {
+                Console.logError(getContext(), "Could not start Search activity");
+            }
+        }
     }
 }

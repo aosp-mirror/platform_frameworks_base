@@ -29,6 +29,7 @@ public class Constants {
             public static final boolean EnableTaskFiltering = true;
             public static final boolean EnableTaskStackClipping = false;
             public static final boolean EnableInfoPane = true;
+            public static final boolean EnableSearchButton = false;
 
             // This disables the bitmap and icon caches
             public static final boolean DisableBackgroundCache = false;
@@ -83,6 +84,9 @@ public class Constants {
         public static class TaskStackView {
             public static final int TaskStackOverscrollRange = 150;
             public static final int FilterStartDelay = 25;
+
+            // The amount to inverse scale the movement if we are overscrolling
+            public static final float TouchOverscrollScaleFactor = 3f;
 
             // The padding will be applied to the smallest dimension, and then applied to all sides
             public static final float StackPaddingPct = 0.15f;

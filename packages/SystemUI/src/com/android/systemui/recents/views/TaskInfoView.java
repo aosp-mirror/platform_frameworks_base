@@ -70,10 +70,8 @@ class TaskInfoView extends FrameLayout {
     /** Updates the positions of each of the items to fit in the rect specified */
     void updateContents(Rect visibleRect) {
         // Offset the app info button
-        LayoutParams lp = (LayoutParams) mAppInfoButton.getLayoutParams();
-        lp.topMargin = visibleRect.top +
-                (visibleRect.height() - mAppInfoButton.getMeasuredHeight()) / 2;
-        requestLayout();
+        mAppInfoButton.setTranslationY(visibleRect.top +
+                (visibleRect.height() - mAppInfoButton.getMeasuredHeight()) / 2);
     }
 
     /** Sets the circular clip radius on this panel */
