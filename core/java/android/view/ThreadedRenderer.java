@@ -194,6 +194,8 @@ public class ThreadedRenderer extends HardwareRenderer {
 
         updateRootDisplayList(view, callbacks);
 
+        attachInfo.mIgnoreDirtyState = false;
+
         if (dirty == null) {
             dirty = NULL_RECT;
         }
