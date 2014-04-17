@@ -764,6 +764,11 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ZEN_MODE_SETTINGS = "android.settings.ZEN_MODE_SETTINGS";
 
+    /** {@hide} */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String
+            ACTION_SHOW_REGULATORY_INFO = "android.settings.SHOW_REGULATORY_INFO";
+
     // End of Intent actions for Settings
 
     /**
