@@ -21,8 +21,6 @@ import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
 
-import javax.microedition.khronos.opengles.GL;
-
 /**
  * The Canvas class holds the "draw" calls. To draw something, you need
  * 4 basic components: A Bitmap to hold the pixels, a Canvas to host
@@ -165,29 +163,6 @@ public class Canvas {
             copyNativeCanvasState(oldCanvas, mNativeCanvas);
         }
         finalizer(oldCanvas);
-    }
-
-    /**
-     * Gets the native canvas pointer.
-     *
-     * @return The native pointer.
-     *
-     * @hide
-     */
-    public long getNativeCanvas() {
-        return mNativeCanvas;
-    }
-
-    /**
-     * Returns null.
-     * 
-     * @deprecated This method is not supported and should not be invoked.
-     * 
-     * @hide
-     */
-    @Deprecated
-    protected GL getGL() {
-        return null;
     }
 
     /**
@@ -389,7 +364,14 @@ public class Canvas {
                 paint != null ? paint.mNativePaint : 0,
                 saveFlags);
     }
-    
+
+    /**
+     * Convenience for saveLayer(bounds, paint, {@link #ALL_SAVE_FLAG})
+     */
+    public int saveLayer(RectF bounds, Paint paint) {
+        return saveLayer(bounds, paint, ALL_SAVE_FLAG);
+    }
+
     /**
      * Helper version of saveLayer() that takes 4 values rather than a RectF.
      */
@@ -398,6 +380,13 @@ public class Canvas {
         return native_saveLayer(mNativeCanvas, left, top, right, bottom,
                 paint != null ? paint.mNativePaint : 0,
                 saveFlags);
+    }
+
+    /**
+     * Convenience for saveLayer(left, top, right, bottom, paint, {@link #ALL_SAVE_FLAG})
+     */
+    public int saveLayer(float left, float top, float right, float bottom, Paint paint) {
+        return saveLayer(left, top, right, bottom, paint, ALL_SAVE_FLAG);
     }
 
     /**
@@ -420,7 +409,14 @@ public class Canvas {
         alpha = Math.min(255, Math.max(0, alpha));
         return native_saveLayerAlpha(mNativeCanvas, bounds, alpha, saveFlags);
     }
-    
+
+    /**
+     * Convenience for saveLayerAlpha(bounds, alpha, {@link #ALL_SAVE_FLAG})
+     */
+    public int saveLayerAlpha(RectF bounds, int alpha) {
+        return saveLayerAlpha(bounds, alpha, ALL_SAVE_FLAG);
+    }
+
     /**
      * Helper for saveLayerAlpha() that takes 4 values instead of a RectF.
      */
@@ -428,6 +424,13 @@ public class Canvas {
             int saveFlags) {
         return native_saveLayerAlpha(mNativeCanvas, left, top, right, bottom,
                                      alpha, saveFlags);
+    }
+
+    /**
+     * Helper for saveLayerAlpha(left, top, right, bottom, alpha, {@link #ALL_SAVE_FLAG})
+     */
+    public int saveLayerAlpha(float left, float top, float right, float bottom, int alpha) {
+        return saveLayerAlpha(left, top, right, bottom, alpha, ALL_SAVE_FLAG);
     }
 
     /**
