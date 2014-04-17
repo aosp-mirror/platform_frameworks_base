@@ -19,6 +19,9 @@ package android.net;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 
 /**
  * Class that manages communication between network subsystems and a network scorer.
@@ -40,7 +43,7 @@ import android.content.Context;
  * <p>The system keeps track of a default scorer application; at any time, only this application
  * will receive {@link #ACTION_SCORE_NETWORKS} broadcasts and will be permitted to call
  * {@link #updateScores}. Applications may determine the current default scorer with
- * {@link #getDefaultScorerPackage()} and request to change the default scorer by sending an
+ * {@link #getActiveScorerPackage()} and request to change the default scorer by sending an
  * {@link #ACTION_CHANGE_DEFAULT} broadcast with another scorer.
  *
  * @hide
@@ -81,38 +84,82 @@ public class NetworkScoreManager {
     public static final String EXTRA_NETWORKS_TO_SCORE = "networksToScore";
 
     private final Context mContext;
+    private final INetworkScoreService mService;
 
     /** @hide */
     public NetworkScoreManager(Context context) {
         mContext = context;
+        IBinder iBinder = ServiceManager.getService(Context.NETWORK_SCORE_SERVICE);
+        mService = INetworkScoreService.Stub.asInterface(iBinder);
     }
 
     /**
-     * Obtain the package name of the current default network scorer.
+     * Obtain the package name of the current active network scorer.
      *
-     * At any time, only one scorer application will receive {@link #ACTION_SCORE_NETWORKS}
+     * <p>At any time, only one scorer application will receive {@link #ACTION_SCORE_NETWORKS}
      * broadcasts and be allowed to call {@link #updateScores}. Applications may use this method to
      * determine the current scorer and offer the user the ability to select a different scorer via
      * the {@link #ACTION_CHANGE_DEFAULT} intent.
-     * @return the full package name of the current default scorer, or null if there is no active
+     * @return the full package name of the current active scorer, or null if there is no active
      *     scorer.
      */
-    public String getDefaultScorerPackage() {
-        // TODO: Implement.
-        return null;
+    public String getActiveScorerPackage() {
+        return NetworkScorerAppManager.getActiveScorer(mContext);
     }
 
     /**
      * Update network scores.
      *
-     * This may be called at any time to re-score active networks. Scores will generally be updated
-     * quickly, but if this method is called too frequently, the scores may be held and applied at
-     * a later time.
+     * <p>This may be called at any time to re-score active networks. Scores will generally be
+     * updated quickly, but if this method is called too frequently, the scores may be held and
+     * applied at a later time.
      *
      * @param networks the networks which have been scored by the scorer.
-     * @throws SecurityException if the caller is not the default scorer.
+     * @return whether the update was successful.
+     * @throws SecurityException if the caller is not the active scorer.
      */
-    public void updateScores(ScoredNetwork[] networks) throws SecurityException {
-        // TODO: Implement.
+    public boolean updateScores(ScoredNetwork[] networks) throws SecurityException {
+        try {
+            return mService.updateScores(networks);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Clear network scores.
+     *
+     * <p>Should be called when all scores need to be invalidated, i.e. because the scoring
+     * algorithm has changed and old scores can no longer be compared to future scores.
+     *
+     * <p>Note that scores will be cleared automatically when the active scorer changes, as scores
+     * from one scorer cannot be compared to those from another scorer.
+     *
+     * @return whether the clear was successful.
+     * @throws SecurityException if the caller is not the active scorer or privileged.
+     */
+    public boolean clearScores() throws SecurityException {
+        try {
+            return mService.clearScores();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Set the active scorer to a new package and clear existing scores.
+     *
+     * @return true if the operation succeeded, or false if the new package is not a valid scorer.
+     * @throws SecurityException if the caller does not hold the
+     *      {@link android.Manifest.permission#BROADCAST_SCORE_NETWORKS} permission indicating that
+     *      it can manage scorer applications.
+     * @hide
+     */
+    public boolean setActiveScorer(String packageName) throws SecurityException {
+        try {
+            return mService.setActiveScorer(packageName);
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 }

@@ -1625,6 +1625,7 @@
   <java-symbol type="bool" name="config_powerDecoupleAutoSuspendModeFromDisplay" />
   <java-symbol type="bool" name="config_powerDecoupleInteractiveModeFromDisplay" />
   <java-symbol type="string" name="config_customAdbPublicKeyConfirmationComponent" />
+  <java-symbol type="string" name="config_defaultNetworkScorerPackageName" />
 
   <java-symbol type="layout" name="resolver_list" />
   <java-symbol type="id" name="resolver_list" />

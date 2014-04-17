@@ -19,11 +19,19 @@ package android.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * Information which identifies a specific network.
  *
  * @hide
  */
+// NOTE: Ideally, we would abstract away the details of what identifies a network of a specific
+// type, so that all networks appear the same and can be scored without concern to the network type
+// itself. However, because no such cross-type identifier currently exists in the Android framework,
+// and because systems might obtain information about networks from sources other than Android
+// devices, we need to provide identifying details about each specific network type (wifi, cell,
+// etc.) so that clients can pull out these details depending on the type of network.
 public class NetworkKey implements Parcelable {
 
     /** A wifi network, for which {@link #wifiKey} will be populated. */
@@ -76,6 +84,21 @@ public class NetworkKey implements Parcelable {
             default:
                 throw new IllegalStateException("NetworkKey has unknown type " + type);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        NetworkKey that = (NetworkKey) o;
+
+        return type == that.type && Objects.equals(wifiKey, that.wifiKey);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, wifiKey);
     }
 
     @Override
