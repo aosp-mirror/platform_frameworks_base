@@ -135,6 +135,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sincronizare"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Prea multe ştergeri <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Stocarea pe tabletă este plină. Ștergeţi câteva fişiere pentru a elibera spaţiu."</string>
+    <!-- no translation found for low_memory (4415914910770005166) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"Stocarea pe telefon este plină. Ștergeţi câteva fişiere pentru a elibera spaţiu."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Rețeaua poate fi monitorizată"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"De o terță parte necunoscută"</string>
@@ -152,6 +154,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Sonerie activată"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Se închide..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Computerul dvs. tablet PC se va închide."</string>
+    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
+    <skip />
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefonul dvs. se va închide."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Doriţi să închideţi?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Reporniţi în modul sigur"</string>
@@ -315,6 +319,10 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Permite aplicaţiei să preia conţinutul ferestrei active. Aplicaţiile rău intenţionate pot să preia întregul conţinut al ferestrei şi să examineze integral textul acesteia, cu excepţia parolelor."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"activare temporară a accesibilității"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Permite unei aplicaţii să activeze temporar accesibilitatea pe gadget. Aplicaţiile rău intenţionate o pot activa fără consimţământul utilizatorului."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"preluarea indicativului ferestrei"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Permite unei aplicații să preia indicativul ferestrei. Aplicațiile dăunătoare pot interacționa neautorizat cu fereastra aplicației substituindu-se sistemului."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"preluarea statisticilor de referință"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"Permite unei aplicații să culeagă statistici de referință. Aplicațiile dăunătoare ar putea urmări statisticile de referință ale ferestrelor din alte aplicații."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrare evenimente"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permite unei aplicaţii să înregistreze un filtru de intrare, care filtrează transmiterea în flux a tuturor evenimentelor utilizatorilor înainte ca acestea să fie expediate. Aplicaţiile rău intenţionate pot controla interfaţa de utilizare a sistemului fără intervenţia utilizatorului."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"închidere parţială"</string>
@@ -331,6 +339,10 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Permite aplicaţiei să difuzeze o notificare de primire a unui mesaj SMS. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a deturna primirea mesajelor SMS."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"trimitere mesaj difuzat primit prin WAP-PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Permite aplicaţiei să difuzeze o notificare de primire a unui mesaj WAP PUSH. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a deturna primirea mesajelor MMS sau pentru a înlocui fără a vă înştiinţa conţinutul oricărei pagini web cu variante rău intenţionate."</string>
+    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
+    <skip />
+    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
+    <skip />
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"limitare număr de procese în derulare"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Permite aplicaţiei să controleze numărul maxim de procese care vor rula. Nu este niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"forţează închiderea aplicaţiilor de fundal"</string>
@@ -384,10 +396,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unui serviciu widget. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interacţionare cu administratorul unui dispozitiv"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permite proprietarului să trimită intenţii către un administrator al dispozitivului. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
-    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
-    <skip />
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"se conectează la o intrare TV"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Permite proprietarului să se conecteze la interfața de nivel superior a unei intrări TV. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"adăugarea sau eliminarea unui administrator de dispozitiv"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Permite proprietarului să adauge sau să elimine administratorii activi ai dispozitivului. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"modificare orientare ecran"</string>
@@ -462,6 +472,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Permite aplicaţiei să citească informaţiile personale din profil stocate pe dispozitiv, cum ar fi numele şi informaţiile de contact, ceea ce înseamnă că aplicaţia vă poate identifica şi poate trimite informaţiile dvs. de profil altor utilizatori."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"modifică cartea dvs. de vizită"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Permite aplicaţiei să schimbe sau să adauge conţinut în informaţiile personale din profil stocate pe dispozitivul dvs., cum ar fi numele şi informaţiile dvs. de contact. Aceasta înseamnă că aplicaţia vă poate identifica şi poate trimite informaţiile din profilul dvs. altor persoane."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"senzori (ex.: senzori de ritm cardiac)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Permite aplicației să acceseze datele de la senzorii pe care îi utilizați pentru a măsura funcțiile corpului, cum ar fi ritmul cardiac."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"citeşte fluxul social"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Permite aplicaţiei să acceseze şi să sincronizeze actualizările sociale de la dvs. şi de la prietenii dvs. Daţi dovadă de precauţie când distribuiţi informaţii - cu această permisiune aplicaţia citeşte comunicările realizate între dvs. şi prietenii dvs. în reţelele sociale, indiferent de gradul de confidenţialitate a acestora. Notă: această permisiune nu poate fi aplicată pentru toate reţelele sociale."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"scrie în fluxul social"</string>
@@ -632,6 +644,12 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Schimbaţi starea WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Permite aplicaţiei să conecteze şi să deconecteze tableta la şi de la reţelele WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Permite aplicaţiei să conecteze şi să deconecteze telefonul la şi de la reţelele WiMAX."</string>
+    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
+    <skip />
     <string name="permlab_bluetooth" msgid="6127769336339276828">"conectează dispozitive Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Permite aplicaţiei să vadă configuraţia tabletei Bluetooth, să efectueze şi să accepte conexiuni cu dispozitive împerecheate."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permite aplicaţiei să vadă configuraţia telefonului Bluetooth, să efectueze şi să accepte conexiuni cu dispozitive împerecheate."</string>

@@ -135,6 +135,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Синхронизиране"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Изтриванията за <xliff:g id="CONTENT_TYPE">%s</xliff:g> са твърде много."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Хранилището на таблета е пълно. Изтрийте файлове, за да освободите място."</string>
+    <!-- no translation found for low_memory (4415914910770005166) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"Хранилището на телефона е пълно. Изтрийте файлове, за да освободите място."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Мрежата може да се наблюдава"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"От неизвестна трета страна"</string>
@@ -152,6 +154,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Звъненето е включено"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Изключва се..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Таблетът ви ще се изключи."</string>
+    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
+    <skip />
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Телефонът ви ще се изключи."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Искате ли да изключите?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Рестартиране в безопасен режим"</string>
@@ -315,6 +319,10 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Разрешава на приложението да извлича съдържанието от активния прозорец. Злонамерените приложения могат да извлекат цялото му съдържание и да проследят целия текст в него освен паролите."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"временно активиране на достъпността"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Разрешава на приложението временно да активира достъпността на устройството. Злонамерените приложения може да я активират без съгласието на потребителя."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"извличане на означението за прозорци"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Разрешава на приложението да извлича означението за прозорци. Представяйки се за системата, злонамерените приложения може да извършат неупълномощено взаимодействие с прозореца на приложението."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"извличане на статистически данни за кадрите"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"Разрешава на приложението да събира статистически данни за кадрите. Злонамерените приложения може да наблюдават тези данни за прозорците на други приложения."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"филтриране на събитията"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Разрешава на приложението да регистрира входящ филтър, който филтрира потока на всички потребителски събития преди изпращането им. Злонамерено приложение може да контролира системния потребителски интерфейс без намесата на потребителя."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"частично изключване"</string>
@@ -331,6 +339,10 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Разрешава на приложението да излъчва известие, че е получен SMS. Злонамерените приложения могат да използват това, за да фалшифицират входящите SMS съобщения."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"изпращане на излъчване при получено WAP PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Разрешава на приложението да излъчва известие, че е получено WAP PUSH съобщение. Злонамерените приложения могат да използват това, за да фалшифицират получаването на MMS или скрито да заменят съдържанието на произволна уеб страница със злонамерен вариант."</string>
+    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
+    <skip />
+    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
+    <skip />
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ограничаване на броя изпълнявани процеси"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Разрешава на приложението да контролира максималния брой изпълнявани процеси. Нормалните приложения никога не се нуждаят от това."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"принудително затваряне на приложенията на заден план"</string>
@@ -384,10 +396,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Разрешава на притежателя да се обвърже с интерфейса от най-високото ниво на услуга за приспособления. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"взаимодействие с администратор на устройството"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Разрешава на притежателя да изпраща намерения до администратор на устройството. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
-    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
-    <skip />
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"свързване към вход на телевизор"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Разрешава на притежателя да се свърже към интерфейса от най-високото ниво за вход на телевизор. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"добавяне или премахване на администратор на устройства"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Разрешава на притежателя да добавя или премахва администратори на активни устройства. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"промяна на ориентацията на екрана"</string>
@@ -462,6 +472,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Разрешава на приложението да чете информацията от личния потребителски профил, съхранена на устройството ви, например вашето име и данни за връзка. Това означава, че приложението може да ви идентифицира и да изпраща информацията за потребителския ви профил на други хора."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"промяна на собств. ви карт. с данни за контакт"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Разрешава на приложението да променя или добавя към личния потребителски профил информация, съхранена на устройството ви, като например вашето име и данни за връзка. Това означава, че приложението може да ви идентифицира и да изпраща данните за потребителския ви профил на други хора."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"телесни сензори (като монитори за сърдечния ритъм)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Разрешава на приложението да осъществява достъп до данни от използваните от вас сензори, за да измери какво се случва в тялото ви, като например сърдечен ритъм."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"четене на социалния ви поток"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Разрешава на приложението да осъществява достъп и да синхронизира социални актуализации от вас и приятелите ви. Бъдете внимателни при споделянето на информация – това позволява на приложението да чете съобщения помежду ви в социалните мрежи независимо от поверителността. Забележка: Възможно е ограниченията на това разрешение да не могат да бъдат наложени във всички социални мрежи."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"писане в социалния ви поток"</string>
@@ -632,6 +644,12 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Промяна на състоянието на WiMAX мрежата"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Разрешава на приложението да свързва таблета към WiMAX мрежа и да прекратява връзката му с нея."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Разрешава на приложението да свързва телефона към WiMAX мрежа и да прекратява връзката му с нея."</string>
+    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
+    <skip />
     <string name="permlab_bluetooth" msgid="6127769336339276828">"сдвояване с устройства с Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Разрешава на приложението да вижда конфигурацията на Bluetooth на таблета и да изгражда и приема връзки със сдвоени устройства."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Разрешава на приложението да вижда конфигурацията на Bluetooth на телефона и да изгражда и приема връзки със сдвоени устройства."</string>

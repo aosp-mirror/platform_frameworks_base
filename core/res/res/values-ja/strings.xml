@@ -135,6 +135,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"同期"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"<xliff:g id="CONTENT_TYPE">%s</xliff:g>での削除が多すぎます。"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"タブレットのストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
+    <!-- no translation found for low_memory (4415914910770005166) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"端末のストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ネットワークが監視される場合があります"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"不明な第三者"</string>
@@ -152,6 +154,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"着信音オン"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"シャットダウン中..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"タブレットの電源をOFFにします。"</string>
+    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
+    <skip />
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"携帯電話の電源を切ります。"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"シャットダウンしますか？"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"再起動してセーフモードに変更"</string>
@@ -315,6 +319,10 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"作業中のウィンドウの内容を取得することをアプリに許可します。この許可を悪意のあるアプリに利用されると、ウィンドウの内容全体が取得されてパスワード以外のテキストがすべてチェックされる恐れがあります。"</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"ユーザー補助を一時的に有効にする"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"この端末のユーザー補助を一時的に有効にすることをアプリに許可します。悪意のあるアプリはユーザーの同意を得ずにユーザー補助を有効にする場合があります。"</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"ウィンドウトークンの取得"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"ウィンドウトークンの取得をアプリに許可します。この許可を悪意のあるアプリに利用されると、システムを装ったアプリケーションウィンドウで不正な操作が実行される恐れがあります。"</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"フレーム統計情報の取得"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"フレーム統計情報の収集をアプリに許可します。この許可を悪意のあるアプリに利用されると、他のアプリからウィンドウのフレーム統計情報を監視される恐れがあります。"</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"イベントのフィルタリング"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"すべてのユーザーイベントが送られる前にストリームをフィルタリングする入力フィルタを登録することをアプリに許可します。悪意のあるアプリがユーザーの操作なしでシステムUIを制御する恐れがあります。"</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"部分的にシャットダウンする"</string>
@@ -331,6 +339,10 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"SMSメッセージの受信通知の配信をアプリに許可します。この許可を悪意のあるアプリケーションに利用されると、受信SMSメッセージが偽造される恐れがあります。"</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"WAP-PUSH受信ブロードキャストの送信"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"WAP PUSHメッセージの受信通知を配信することをアプリに許可します。この許可を悪意のあるアプリに利用されると、MMSメッセージの受信確認が偽造されたりウェブページのコンテンツが悪意のあるコンテンツに密かに置き換えられたりする恐れがあります。"</string>
+    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
+    <skip />
+    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
+    <skip />
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"実行中のプロセスの数を制限"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"実行するプロセスの上限数を制御することをアプリに許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"バックグラウンドのアプリの強制終了"</string>
@@ -384,10 +396,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"ウィジェットサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"デバイス管理者との通信"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"デバイス管理者へのintentの送信を所有者に許可します。通常のアプリでは不要です。"</string>
-    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
-    <skip />
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"テレビの入力へのバインド"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"テレビの入力のトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"端末の管理者の追加または削除"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"有効な端末の管理者を追加または削除することを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"画面の向きの変更"</string>
@@ -462,6 +472,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"端末に保存されている個人のプロフィール情報（名前、連絡先情報など）の読み取りをアプリに許可します。これにより、アプリがユーザーの身元を特定できるようになり、プロフィール情報を第三者に転送する可能性があります。"</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"自分の連絡先カードの変更"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"端末に保存されている個人のプロフィール情報（名前、連絡先情報など）の変更と追加をアプリに許可します。これにより、アプリがユーザーの身元を特定できるようになり、プロフィール情報を第三者に転送する可能性があります。"</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"ボディーセンサー（心拍数モニターなど）"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"心拍数など、体内の変化の測定に使用するセンサーからのデータにアクセスすることをアプリに許可します。"</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"ソーシャルストリームを読む"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"あなたや友だちのソーシャル更新情報へのアクセスと同期をアプリに許可します。情報の共有は慎重に行ってください。これを許可すると、あなたと友だちがソーシャルネットワークで行ったやり取りを、機密性に関係なくアプリから読み取ることができるようになります。注: この許可は、一部のソーシャルネットワークでは適用されない場合があります。"</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ソーシャルストリームに書く"</string>
@@ -632,6 +644,12 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX状態の変更"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"タブレットのWiMAXネットワークへの接続と切断をアプリに許可します。"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"携帯端末のWiMAXネットワークへの接続と切断をアプリに許可します。"</string>
+    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
+    <skip />
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetoothデバイスのペアの設定"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"タブレットのBluetooth設定を表示すること、ペアの端末に接続すること/ペアの端末からの接続を受け入れることをアプリに許可します。"</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"携帯端末のBluetooth設定を表示すること、ペアの端末に接続すること/ペアの端末からの接続を受け入れることをアプリに許可します。"</string>

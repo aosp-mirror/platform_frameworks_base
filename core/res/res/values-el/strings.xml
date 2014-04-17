@@ -135,6 +135,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Συγχρονισμός"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Πάρα πολλές <xliff:g id="CONTENT_TYPE">%s</xliff:g> διαγραφές."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Ο αποθηκευτικός χώρος του tablet είναι πλήρης. Διαγράψτε μερικά αρχεία για να δημιουργήσετε ελεύθερο χώρο."</string>
+    <!-- no translation found for low_memory (4415914910770005166) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"Ο αποθηκευτικός χώρος του τηλεφώνου είναι πλήρης. Διαγράψτε μερικά αρχεία για να δημιουργήσετε ελεύθερο χώρο."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Το δίκτυο ενδέχεται να παρακολουθείται"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Από ένα άγνωστο τρίτο μέρος"</string>
@@ -152,6 +154,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ειδοποίηση ήχου ενεργή"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Απενεργοποίηση..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Το tablet σας θα απενεργοποιηθεί."</string>
+    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
+    <skip />
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Το τηλέφωνό σας θα απενεργοποιηθεί."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Θέλετε να γίνει τερματισμός λειτουργίας;"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Επανεκκίνηση στην ασφαλή λειτουργία"</string>
@@ -315,6 +319,10 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Επιτρέπει στην εφαρμογή την ανάκτηση του περιεχομένου του ενεργού παραθύρου. Τυχόν κακόβουλες εφαρμογές ενδέχεται να ανακτήσουν ολόκληρο το περιεχόμενο του παραθύρου και να εξετάσουν ολόκληρο το κείμενό του εκτός από τους κωδικούς πρόσβασης."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"προσωρινή ενεργοποίηση προσβασιμότητας"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Επιτρέπει σε μια εφαρμογή να ενεργοποιήσει την προσβασιμότητα στη συσκευή. Οι κακόβουλες εφαρμογές ενδέχεται να ενεργοποιήσουν την προσβασιμότητα χωρίς τη συγκατάθεση των χρηστών."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"ανάκτηση διακριτικού παραθύρου"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Επιτρέπει σε μια εφαρμογή να ανακτήσει το διακριτικό παραθύρου. Οι κακόβουλες εφαρμογές μπορούν να εκτελούν μη εξουσιοδοτημένη αλληλεπίδραση με το παράθυρο της εφαρμογής, σε απομίμηση του συστήματος."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"ανάκτηση στατιστικών πλαισίου"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"Επιτρέπει σε μια εφαρμογή να συλλέγει στατιστικά στοιχεία πλαισίου. Οι κακόβουλες εφαρμογές μπορούν να παρατηρούν τα στατιστικά στοιχεία πλαισίου των παραθύρων από άλλες εφαρμογές."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"φιλτράρισμα συμβάντων"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Επιτρέπει σε μια εφαρμογή να καταγράφει ένα φίλτρο εισαγωγής, το οποίο φιλτράρει τη ροή όλων των συμβάντων χρήστη πριν την αποστολή τους. Μια κακόβουλη εφαρμογή μπορεί να ελέγξει τη διεπαφή του συστήματος χωρίς την παρέμβαση του χρήστη."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"μερικός τερματισμός λειτουργίας"</string>
@@ -331,6 +339,10 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Επιτρέπει στην εφαρμογή την εκπομπή ειδοποίησης σχετικά με τη λήψη μηνύματος SMS. Τυχόν κακόβουλες εφαρμογές ενδέχεται να χρησιμοποιήσουν αυτήν τη δυνατότητα για τη δημιουργία πλαστών εισερχόμενων μηνυμάτων SMS."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"αποστολή εκπομπής που έχει ληφθεί με WAP-PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Επιτρέπει στην εφαρμογή τη μετάδοση μιας ειδοποίησης ότι έχει ληφθεί κάποιο μήνυμα WAP PUSH. Τυχόν κακόβουλες εφαρμογές ενδέχεται να χρησιμοποιήσουν αυτήν τη δυνατότητα για τη λήψη πλαστών μηνυμάτων MMS ή την εν αγνοία του χρήστη αντικατάσταση του περιεχομένου οποιασδήποτε ιστοσελίδας με κακόβουλες παραλλαγές."</string>
+    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
+    <skip />
+    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
+    <skip />
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"περιορισμός αριθμού εκτελούμενων διαδικασιών"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Επιτρέπει στην εφαρμογή τον έλεγχο του μέγιστου αριθμού διαδικασιών που θα εκτελούνται. Δεν είναι απαραίτητο για συνήθεις εφαρμογές."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"αναγκαστικός τερματισμός εφαρμογών στο παρασκήνιο"</string>
@@ -460,6 +472,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Επιτρέπει στην εφαρμογή την ανάγνωση προσωπικών πληροφοριών προφίλ οι οποίες είναι αποθηκευμένες στη συσκευή σας, όπως το όνομα και τα στοιχεία επικοινωνίας σας. Αυτό σημαίνει ότι η εφαρμογή μπορεί να σας αναγνωρίσει και να στείλει τις πληροφορίες του προφίλ σας σε άλλους."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"τροποποίηση κάρτας επαφής"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Επιτρέπει στην εφαρμογή την αλλαγή ή την προσθήκη προσωπικών πληροφοριών προφίλ οι οποίες είναι αποθηκευμένες στη συσκευή σας, όπως το όνομα και τα στοιχεία επικοινωνίας σας. Αυτό σημαίνει ότι η εφαρμογή μπορεί να σας αναγνωρίσει και να στείλει τις πληροφορίες του προφίλ σας σε άλλα άτομα."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"αισθητήρες λειτουργιών (π.χ. καρδιακό ρυθμό)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Επιτρέπει στην εφαρμογή την πρόσβαση στα δεδομένα από τους αισθητήρες που χρησιμοποιείτε για να παρακολουθείτε τις εσωτερικές λειτουργίες σας, όπως τον καρδιακό ρυθμό."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"διαβάστε τη ροή σας κοινωνικών δικτύων"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Επιτρέπει στην εφαρμογή την πρόσβαση και το συγχρονισμό κοινωνικών ενημερώσεων από εσάς και τους φίλους σας. Θα πρέπει να είστε προσεκτικοί όταν μοιράζεστε πληροφορίες -- αυτό δίνει τη δυνατότητα στην εφαρμογή να διαβάζει τις επικοινωνίες ανάμεσα σε εσάς και τους φίλους σας σε κοινωνικά δίκτυα, ανεξάρτητα από το επίπεδο εμπιστευτικότητας. Σημείωση: αυτή η άδεια ίσως να μην μπορεί να εφαρμοστεί σε όλα τα κοινωνικά δίκτυα."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"γράψτε στη ροή σας κοινωνικών δικτύων"</string>
@@ -630,6 +644,12 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Αλλαγή κατάστασης WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Επιτρέπει στην εφαρμογή τη σύνδεση στο tablet και την αποσύνδεση από αυτό, από δίκτυα WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Επιτρέπει στην εφαρμογή τη σύνδεση στο τηλέφωνο και την αποσύνδεση από αυτό, από δίκτυα WiMAX."</string>
+    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
+    <skip />
     <string name="permlab_bluetooth" msgid="6127769336339276828">"σύζευξη με συσκευές Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Επιτρέπει στην εφαρμογή να προβάλλει τη διαμόρφωση του Bluetooth στο tablet, καθώς και να πραγματοποιεί και να αποδέχεται συνδέσεις με συζευγμένες συσκευές."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Επιτρέπει στην εφαρμογή να προβάλλει τη διαμόρφωση του Bluetooth στο τηλέφωνο, καθώς και να πραγματοποιεί και να αποδέχεται συνδέσεις με συζευγμένες συσκευές."</string>
