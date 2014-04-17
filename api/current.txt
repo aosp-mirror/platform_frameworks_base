@@ -9735,9 +9735,13 @@ package android.graphics {
     method public int save();
     method public int save(int);
     method public int saveLayer(android.graphics.RectF, android.graphics.Paint, int);
+    method public int saveLayer(android.graphics.RectF, android.graphics.Paint);
     method public int saveLayer(float, float, float, float, android.graphics.Paint, int);
+    method public int saveLayer(float, float, float, float, android.graphics.Paint);
     method public int saveLayerAlpha(android.graphics.RectF, int, int);
+    method public int saveLayerAlpha(android.graphics.RectF, int);
     method public int saveLayerAlpha(float, float, float, float, int, int);
+    method public int saveLayerAlpha(float, float, float, float, int);
     method public void scale(float, float);
     method public final void scale(float, float, float, float);
     method public void setBitmap(android.graphics.Bitmap);

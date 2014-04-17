@@ -168,21 +168,10 @@ public class Canvas {
     }
 
     /**
-     * Gets the native canvas pointer.
-     *
-     * @return The native pointer.
-     *
-     * @hide
-     */
-    public long getNativeCanvas() {
-        return mNativeCanvas;
-    }
-
-    /**
      * Returns null.
-     * 
+     *
      * @deprecated This method is not supported and should not be invoked.
-     * 
+     *
      * @hide
      */
     @Deprecated
@@ -233,14 +222,14 @@ public class Canvas {
 
         mBitmap = bitmap;
     }
-    
+
     /**
      * Set the viewport dimensions if this canvas is GL based. If it is not,
      * this method is ignored and no exception is thrown.
      *
      * @param width The width of the viewport
      * @param height The height of the viewport
-     * 
+     *
      * @hide
      */
     public void setViewport(int width, int height) {
@@ -389,7 +378,14 @@ public class Canvas {
                 paint != null ? paint.mNativePaint : 0,
                 saveFlags);
     }
-    
+
+    /**
+     * Convenience for saveLayer(bounds, paint, {@link #ALL_SAVE_FLAG})
+     */
+    public int saveLayer(RectF bounds, Paint paint) {
+        return saveLayer(bounds, paint, ALL_SAVE_FLAG);
+    }
+
     /**
      * Helper version of saveLayer() that takes 4 values rather than a RectF.
      */
@@ -398,6 +394,13 @@ public class Canvas {
         return native_saveLayer(mNativeCanvas, left, top, right, bottom,
                 paint != null ? paint.mNativePaint : 0,
                 saveFlags);
+    }
+
+    /**
+     * Convenience for saveLayer(left, top, right, bottom, paint, {@link #ALL_SAVE_FLAG})
+     */
+    public int saveLayer(float left, float top, float right, float bottom, Paint paint) {
+        return saveLayer(left, top, right, bottom, paint, ALL_SAVE_FLAG);
     }
 
     /**
@@ -420,7 +423,14 @@ public class Canvas {
         alpha = Math.min(255, Math.max(0, alpha));
         return native_saveLayerAlpha(mNativeCanvas, bounds, alpha, saveFlags);
     }
-    
+
+    /**
+     * Convenience for saveLayerAlpha(bounds, alpha, {@link #ALL_SAVE_FLAG})
+     */
+    public int saveLayerAlpha(RectF bounds, int alpha) {
+        return saveLayerAlpha(bounds, alpha, ALL_SAVE_FLAG);
+    }
+
     /**
      * Helper for saveLayerAlpha() that takes 4 values instead of a RectF.
      */
@@ -428,6 +438,13 @@ public class Canvas {
             int saveFlags) {
         return native_saveLayerAlpha(mNativeCanvas, left, top, right, bottom,
                                      alpha, saveFlags);
+    }
+
+    /**
+     * Helper for saveLayerAlpha(left, top, right, bottom, alpha, {@link #ALL_SAVE_FLAG})
+     */
+    public int saveLayerAlpha(float left, float top, float right, float bottom, int alpha) {
+        return saveLayerAlpha(left, top, right, bottom, alpha, ALL_SAVE_FLAG);
     }
 
     /**
