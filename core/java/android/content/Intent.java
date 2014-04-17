@@ -2306,6 +2306,16 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.action.ADVANCED_SETTINGS";
 
     /**
+     *  Broadcast Action: Sent after application restrictions are changed.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.</p>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_APPLICATION_RESTRICTIONS_CHANGED =
+            "android.intent.action.APPLICATION_RESTRICTIONS_CHANGED";
+
+    /**
      * Broadcast Action: An outgoing call is about to be placed.
      *
      * <p>The Intent will have the following extra value:</p>

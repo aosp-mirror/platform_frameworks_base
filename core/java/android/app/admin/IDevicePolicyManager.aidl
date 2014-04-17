@@ -19,6 +19,7 @@ package android.app.admin;
 
 import android.content.ComponentName;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.os.RemoteCallback;
 
 /**
@@ -114,4 +115,7 @@ interface IDevicePolicyManager {
 
     void addPersistentPreferredActivity(in ComponentName admin, in IntentFilter filter, in ComponentName activity);
     void clearPackagePersistentPreferredActivities(in ComponentName admin, String packageName);
+
+    void setApplicationRestrictions(in ComponentName who, in String packageName, in Bundle settings);
+    Bundle getApplicationRestrictions(in ComponentName who, in String packageName);
 }
