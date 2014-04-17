@@ -437,6 +437,14 @@ public final class DisplayManager {
      * The behavior of the virtual display depends on the flags that are provided
      * to this method.  By default, virtual displays are created to be private,
      * non-presentation and unsecure.  Permissions may be required to use certain flags.
+     * </p><p>
+     * As of {@link android.os.Build.VERSION_CODES#KITKAT_WATCH}, the surface may
+     * be attached or detached dynamically using {@link VirtualDisplay#setSurface}.
+     * Previously, the surface had to be non-null when {@link #createVirtualDisplay}
+     * was called and could not be changed for the lifetime of the display.
+     * </p><p>
+     * Detaching the surface that backs a virtual display has a similar effect to
+     * turning off the screen.
      * </p>
      *
      * @param name The name of the virtual display, must be non-empty.
@@ -444,7 +452,7 @@ public final class DisplayManager {
      * @param height The height of the virtual display in pixels, must be greater than 0.
      * @param densityDpi The density of the virtual display in dpi, must be greater than 0.
      * @param surface The surface to which the content of the virtual display should
-     * be rendered, must be non-null.
+     * be rendered, or null if there is none initially.
      * @param flags A combination of virtual display flags:
      * {@link #VIRTUAL_DISPLAY_FLAG_PUBLIC}, {@link #VIRTUAL_DISPLAY_FLAG_PRESENTATION},
      * {@link #VIRTUAL_DISPLAY_FLAG_SECURE}, or {@link #VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY}.

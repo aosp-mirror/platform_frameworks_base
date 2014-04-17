@@ -377,9 +377,6 @@ public final class DisplayManagerGlobal {
             throw new IllegalArgumentException("width, height, and densityDpi must be "
                     + "greater than 0");
         }
-        if (surface == null) {
-            throw new IllegalArgumentException("surface must not be null");
-        }
 
         Binder token = new Binder();
         int displayId;
@@ -404,7 +401,15 @@ public final class DisplayManagerGlobal {
             }
             return null;
         }
-        return new VirtualDisplay(this, display, token);
+        return new VirtualDisplay(this, display, token, surface);
+    }
+
+    public void setVirtualDisplaySurface(IBinder token, Surface surface) {
+        try {
+            mDm.setVirtualDisplaySurface(token, surface);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Failed to set virtual display surface.", ex);
+        }
     }
 
     public void releaseVirtualDisplay(IBinder token) {
