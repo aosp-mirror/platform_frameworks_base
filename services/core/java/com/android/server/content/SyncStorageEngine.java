@@ -2443,8 +2443,8 @@ public class SyncStorageEngine extends Handler {
         if (!mPendingFile.getBaseFile().exists()) {
             if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
                 Log.v(TAG_FILE, "No pending operation file.");
-                return;
             }
+            return;
         }
         try {
             fis = mPendingFile.openRead();
