@@ -378,17 +378,6 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native void nDrawLayer(long renderer, long layer, float x, float y);
 
-    void interrupt() {
-        nInterrupt(mRenderer);
-    }
-    
-    void resume() {
-        nResume(mRenderer);
-    }
-
-    private static native void nInterrupt(long renderer);
-    private static native void nResume(long renderer);
-
     ///////////////////////////////////////////////////////////////////////////
     // Support
     ///////////////////////////////////////////////////////////////////////////

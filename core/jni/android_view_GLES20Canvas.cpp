@@ -893,18 +893,6 @@ static jint android_view_GLES20Canvas_drawDisplayList(JNIEnv* env,
 // Layers
 // ----------------------------------------------------------------------------
 
-static void android_view_GLES20Canvas_interrupt(JNIEnv* env, jobject clazz,
-        jlong rendererPtr) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    renderer->interrupt();
-}
-
-static void android_view_GLES20Canvas_resume(JNIEnv* env, jobject clazz,
-        jlong rendererPtr) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    renderer->resume();
-}
-
 static void android_view_GLES20Canvas_drawLayer(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong layerPtr, jfloat x, jfloat y) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
@@ -1092,9 +1080,6 @@ static JNINativeMethod gMethods[] = {
             (void*) android_view_GLES20Canvas_drawDisplayList },
 
     { "nCreateDisplayListRenderer", "()J",     (void*) android_view_GLES20Canvas_createDisplayListRenderer },
-
-    { "nInterrupt",              "(J)V",       (void*) android_view_GLES20Canvas_interrupt },
-    { "nResume",                 "(J)V",       (void*) android_view_GLES20Canvas_resume },
 
     { "nDrawLayer",              "(JJFF)V",    (void*) android_view_GLES20Canvas_drawLayer },
     { "nCopyLayer",              "(JJ)Z",      (void*) android_view_GLES20Canvas_copyLayer },
