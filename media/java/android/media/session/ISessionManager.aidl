@@ -15,18 +15,14 @@
 
 package android.media.session;
 
-import android.media.session.MediaMetadata;
-import android.media.session.PlaybackState;
+import android.media.session.ISession;
+import android.media.session.ISessionCallback;
 import android.os.Bundle;
 
 /**
+ * Interface to the MediaSessionManagerService
  * @hide
  */
-oneway interface IMediaControllerCallback {
-    void onEvent(String event, in Bundle extras);
-    void onRouteChanged(in Bundle route);
-
-    // These callbacks are for the TransportController
-    void onPlaybackStateChanged(in PlaybackState state);
-    void onMetadataChanged(in MediaMetadata metadata);
+interface ISessionManager {
+    ISession createSession(String packageName, in ISessionCallback cb, String tag);
 }

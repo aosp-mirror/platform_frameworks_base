@@ -17,135 +17,160 @@ package android.media.session;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcelable;
 import android.os.ResultReceiver;
+import android.util.Log;
+
+import java.util.ArrayList;
 
 /**
- * Routes can support multiple interfaces for MediaSessions to interact with. To
- * add a standard interface you should implement that interface's RouteInterface
- * Stub and register it with the session. The set of supported commands is
- * dependent on the specific interface's implementation.
- * <p>
- * A MediaInterface can be registered by calling TODO. Once added an interface
- * will be used by Sessions to decide how they communicate with a session and
- * cannot be removed, so all interfaces that you plan to support should be added
- * when the route is created.
+ * A route can support multiple interfaces for a {@link Session} to
+ * interact with. To use a specific interface with a route a
+ * MediaSessionRouteInterface needs to be retrieved from the route. An
+ * implementation of the specific interface, like
+ * {@link RoutePlaybackControls}, should be used to simplify communication
+ * and reduce errors on that interface.
  *
- * @see RouteTransportControls
+ * @see RoutePlaybackControls for an example
  */
 public final class RouteInterface {
-    private static final String TAG = "MediaInterface";
+    private static final String TAG = "RouteInterface";
 
-    private static final String KEY_RESULT = "result";
+    /**
+     * Error indicating the route is currently not connected.
+     */
+    public static final int RESULT_NOT_CONNECTED = -5;
+    /**
+     * Error indicating the session is no longer using the route this command
+     * was sent to.
+     */
+    public static final int RESULT_ROUTE_IS_STALE = -4;
+    /**
+     * Error indicating that the interface does not support the command.
+     */
+    public static final int RESULT_COMMAND_NOT_SUPPORTED = -3;
+    /**
+     * Error indicating that the route does not support the interface.
+     */
+    public static final int RESULT_INTERFACE_NOT_SUPPORTED = -2;
+    /**
+     * Generic error. Extra information about the error may be included in the
+     * result bundle.
+     */
+    public static final int RESULT_ERROR = -1;
+    /**
+     * The command was successful. Extra information may be included in the
+     * result bundle.
+     */
+    public static final int RESULT_SUCCESS = 1;
 
-    private final MediaController mController;
+    private final Route mRoute;
     private final String mIface;
+    private final Session mSession;
+
+    private final Object mLock = new Object();
+    private final ArrayList<EventHandler> mListeners = new ArrayList<EventHandler>();
 
     /**
      * @hide
      */
-    RouteInterface(MediaController controller, String iface) {
-        mController = controller;
+    RouteInterface(Route route, String iface, Session session) {
+        mRoute = route;
         mIface = iface;
+        mSession = session;
+        mSession.addInterfaceListener(iface, mEventListener);
     }
 
-    public void sendCommand(String command, Bundle params, ResultReceiver cb) {
-        // TODO
+    /**
+     * Send a command using this interface.
+     *
+     * @param command The command to send.
+     * @param extras Any extras to include with the command.
+     * @param cb The callback to receive the result on.
+     * @return true if the command was sent, false otherwise.
+     */
+    public boolean sendCommand(String command, Bundle extras, ResultReceiver cb) {
+        RouteCommand cmd = new RouteCommand(mRoute.getRouteInfo().getId(), mIface,
+                command, extras);
+        return mSession.sendRouteCommand(cmd, cb);
     }
 
+    /**
+     * Add a listener to this interface. Events will be sent on the caller's
+     * thread.
+     *
+     * @param listener The listener to receive events on.
+     */
     public void addListener(EventListener listener) {
         addListener(listener, null);
     }
 
+    /**
+     * Add a listener for this interface. If a handler is specified events will
+     * be performed on the handler's thread, otherwise the caller's thread will
+     * be used.
+     *
+     * @param listener The listener to receive events on
+     * @param handler The handler whose thread to post calls on
+     */
     public void addListener(EventListener listener, Handler handler) {
-        // TODO See MediaController for add/remove pattern
+        if (listener == null) {
+            throw new IllegalArgumentException("listener may not be null");
+        }
+        if (handler == null) {
+            handler = new Handler();
+        }
+        synchronized (mLock) {
+            if (findIndexOfListenerLocked(listener) != -1) {
+                Log.d(TAG, "Listener is already added, ignoring");
+                return;
+            }
+            mListeners.add(new EventHandler(handler.getLooper(), listener));
+        }
     }
 
+    /**
+     * Remove a listener from this interface.
+     *
+     * @param listener The listener to stop receiving events on.
+     */
     public void removeListener(EventListener listener) {
-        // TODO
-    }
-
-    // TODO decide on list of supported types
-    private static Bundle writeResultToBundle(Object v) {
-        Bundle b = new Bundle();
-        if (v == null) {
-            // Don't send anything if null
-        } else if (v instanceof String) {
-            b.putString(KEY_RESULT, (String) v);
-        } else if (v instanceof Integer) {
-            b.putInt(KEY_RESULT, (Integer) v);
-        } else if (v instanceof Bundle) {
-            // Must be before Parcelable
-            b.putBundle(KEY_RESULT, (Bundle) v);
-        } else if (v instanceof Parcelable) {
-            b.putParcelable(KEY_RESULT, (Parcelable) v);
-        } else if (v instanceof Short) {
-            b.putShort(KEY_RESULT, (Short) v);
-        } else if (v instanceof Long) {
-            b.putLong(KEY_RESULT, (Long) v);
-        } else if (v instanceof Float) {
-            b.putFloat(KEY_RESULT, (Float) v);
-        } else if (v instanceof Double) {
-            b.putDouble(KEY_RESULT, (Double) v);
-        } else if (v instanceof Boolean) {
-            b.putBoolean(KEY_RESULT, (Boolean) v);
-        } else if (v instanceof CharSequence) {
-            // Must be after String
-            b.putCharSequence(KEY_RESULT, (CharSequence) v);
-        } else if (v instanceof boolean[]) {
-            b.putBooleanArray(KEY_RESULT, (boolean[]) v);
-        } else if (v instanceof byte[]) {
-            b.putByteArray(KEY_RESULT, (byte[]) v);
-        } else if (v instanceof String[]) {
-            b.putStringArray(KEY_RESULT, (String[]) v);
-        } else if (v instanceof CharSequence[]) {
-            // Must be after String[] and before Object[]
-            b.putCharSequenceArray(KEY_RESULT, (CharSequence[]) v);
-        } else if (v instanceof IBinder) {
-            b.putBinder(KEY_RESULT, (IBinder) v);
-        } else if (v instanceof Parcelable[]) {
-            b.putParcelableArray(KEY_RESULT, (Parcelable[]) v);
-        } else if (v instanceof int[]) {
-            b.putIntArray(KEY_RESULT, (int[]) v);
-        } else if (v instanceof long[]) {
-            b.putLongArray(KEY_RESULT, (long[]) v);
-        } else if (v instanceof Byte) {
-            b.putByte(KEY_RESULT, (Byte) v);
+        if (listener == null) {
+            throw new IllegalArgumentException("listener may not be null");
         }
-        return b;
-    }
-
-    public abstract static class Stub {
-
-        /**
-         * The name of an interface should be a fully qualified name to prevent
-         * namespace collisions. Example: "com.myproject.MyPlaybackInterface"
-         *
-         * @return The name of this interface
-         */
-        public abstract String getName();
-
-        /**
-         * This is called when a command is received that matches the interface
-         * you registered. Commands can come from any app with a MediaController
-         * reference to the session.
-         *
-         * @see MediaController
-         * @see MediaSession
-         * @param command The command or method to invoke.
-         * @param args Any args that were included with the command. May be
-         *            null.
-         * @param cb The callback provided to send a response on. May be null.
-         */
-        public abstract void onCommand(String command, Bundle args, ResultReceiver cb);
-
-        public final void sendEvent(MediaSession session, String event, Bundle extras) {
-            // TODO
+        synchronized (mLock) {
+            int index = findIndexOfListenerLocked(listener);
+            if (index != -1) {
+                mListeners.remove(index);
+            }
         }
     }
+
+    private int findIndexOfListenerLocked(EventListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+        for (int i = mListeners.size() - 1; i >= 0; i--) {
+            EventHandler handler = mListeners.get(i);
+            if (listener == handler.mListener) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private EventListener mEventListener = new EventListener() {
+            @Override
+        public void onEvent(String event, Bundle args) {
+            synchronized (mLock) {
+                for (int i = mListeners.size() - 1; i >= 0; i--) {
+                    mListeners.get(i).postEvent(event, args);
+                }
+            }
+        }
+
+    };
 
     /**
      * An EventListener can be registered by an app with TODO to handle events
@@ -166,9 +191,9 @@ public final class RouteInterface {
 
     private static final class EventHandler extends Handler {
 
-        private final RouteInterface.EventListener mListener;
+        private final EventListener mListener;
 
-        public EventHandler(Looper looper, RouteInterface.EventListener cb) {
+        public EventHandler(Looper looper, EventListener cb) {
             super(looper, null, true);
             mListener = cb;
         }

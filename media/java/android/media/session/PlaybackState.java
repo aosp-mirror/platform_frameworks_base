@@ -15,12 +15,11 @@
  */
 package android.media.session;
 
-import android.media.RemoteControlClient;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Playback state for a {@link MediaSession}. This includes a state like
+ * Playback state for a {@link Session}. This includes a state like
  * {@link PlaybackState#PLAYSTATE_PLAYING}, the current playback position,
  * and the current control capabilities.
  */
@@ -146,6 +145,14 @@ public final class PlaybackState implements Parcelable {
      * @see #setState
      */
     public final static int PLAYSTATE_ERROR = 7;
+
+    /**
+     * State indicating the class doing playback is currently connecting to a
+     * route. Depending on the implementation you may return to the previous
+     * state when the connection finishes or enter {@link #PLAYSTATE_NONE}. If
+     * the connection failed {@link #PLAYSTATE_ERROR} should be used.
+     */
+    public final static int PLAYSTATE_CONNECTING = 8;
 
     private int mState;
     private long mPosition;

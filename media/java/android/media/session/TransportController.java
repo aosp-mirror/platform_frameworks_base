@@ -34,12 +34,12 @@ public final class TransportController {
 
     private final Object mLock = new Object();
     private final ArrayList<MessageHandler> mListeners = new ArrayList<MessageHandler>();
-    private final IMediaController mBinder;
+    private final ISessionController mBinder;
 
     /**
      * @hide
      */
-    public TransportController(IMediaController binder) {
+    public TransportController(ISessionController binder) {
         mBinder = binder;
     }
 

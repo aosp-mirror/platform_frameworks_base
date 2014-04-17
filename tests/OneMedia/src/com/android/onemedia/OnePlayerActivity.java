@@ -37,6 +37,7 @@ public class OnePlayerActivity extends Activity {
 
     private Button mStartButton;
     private Button mPlayButton;
+    private Button mRouteButton;
     private TextView mStatusView;
 
     private EditText mContentText;
@@ -54,6 +55,7 @@ public class OnePlayerActivity extends Activity {
 
         mStartButton = (Button) findViewById(R.id.start_button);
         mPlayButton = (Button) findViewById(R.id.play_button);
+        mRouteButton = (Button) findViewById(R.id.route_button);
         mStatusView = (TextView) findViewById(R.id.status);
         mContentText = (EditText) findViewById(R.id.content);
         mNextContentText = (EditText) findViewById(R.id.next_content);
@@ -61,6 +63,7 @@ public class OnePlayerActivity extends Activity {
 
         mStartButton.setOnClickListener(mButtonListener);
         mPlayButton.setOnClickListener(mButtonListener);
+        mRouteButton.setOnClickListener(mButtonListener);
 
     }
 
@@ -107,6 +110,9 @@ public class OnePlayerActivity extends Activity {
                     Log.d(TAG, "Start button pressed, in state " + mPlaybackState);
                     mPlayer.setContent(mContentText.getText().toString());
                     break;
+                case R.id.route_button:
+                    mPlayer.showRoutePicker();
+                    break;
             }
 
         }
@@ -117,6 +123,7 @@ public class OnePlayerActivity extends Activity {
         public void onPlaybackStateChange(PlaybackState state) {
             mPlaybackState = state.getState();
             boolean enablePlay = false;
+            boolean enableControls = true;
             StringBuilder statusBuilder = new StringBuilder();
             switch (mPlaybackState) {
                 case PlaybackState.PLAYSTATE_PLAYING:
@@ -143,12 +150,17 @@ public class OnePlayerActivity extends Activity {
                 case PlaybackState.PLAYSTATE_NONE:
                     statusBuilder.append("none");
                     break;
+                case PlaybackState.PLAYSTATE_CONNECTING:
+                    statusBuilder.append("connecting");
+                    enableControls = false;
+                    break;
                 default:
                     statusBuilder.append(mPlaybackState);
             }
             statusBuilder.append(" -- At position: ").append(state.getPosition());
             mStatusView.setText(statusBuilder.toString());
             mPlayButton.setEnabled(enablePlay);
+            setControlsEnabled(enableControls);
         }
 
         @Override

@@ -288,11 +288,14 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IRemoteDisplayProvider.aidl \
 	media/java/android/media/IRemoteVolumeObserver.aidl \
 	media/java/android/media/IRingtonePlayer.aidl \
-	media/java/android/media/session/IMediaController.aidl \
-	media/java/android/media/session/IMediaControllerCallback.aidl \
-	media/java/android/media/session/IMediaSession.aidl \
-	media/java/android/media/session/IMediaSessionCallback.aidl \
-	media/java/android/media/session/IMediaSessionManager.aidl \
+        media/java/android/media/routeprovider/IRouteConnection.aidl \
+        media/java/android/media/routeprovider/IRouteProvider.aidl \
+        media/java/android/media/routeprovider/IRouteProviderCallback.aidl \
+        media/java/android/media/session/ISessionController.aidl \
+        media/java/android/media/session/ISessionControllerCallback.aidl \
+        media/java/android/media/session/ISession.aidl \
+        media/java/android/media/session/ISessionCallback.aidl \
+        media/java/android/media/session/ISessionManager.aidl \
 	telecomm/java/com/android/internal/telecomm/ICallService.aidl \
 	telecomm/java/com/android/internal/telecomm/ICallServiceAdapter.aidl \
 	telecomm/java/com/android/internal/telecomm/ICallServiceLookupResponse.aidl \
