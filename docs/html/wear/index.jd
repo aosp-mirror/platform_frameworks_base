@@ -121,13 +121,13 @@ $("#icon-video-close").on("click", function() {
                 </p>
               </div>
               <div class="col-3-wide">
-                <img src="/wear/images/screens/circle_message2.png" alt="Image of a Hangouts message">
+                <img src="/wear/images/screens/circle_message2.png" itemprop="image" alt="" >
                 <p class="wear-small">
                   Get glanceable, actionable information at just the right time throughout the day.
                 </p>
               </div>
               <div class="col-3-wide">
-                <img src="/wear/images/screens/fitness-24.png" alt="Image showing ">
+                <img src="/wear/images/screens/fitness-24.png" alt="">
                 <p class="wear-small">
                   A wide range of sensors is available to your applications, from accelerometers to heart rate monitors.
                 </p>
