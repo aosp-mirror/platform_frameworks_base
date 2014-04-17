@@ -63,5 +63,8 @@ interface IDisplayManager {
             String name, int width, int height, int densityDpi, in Surface surface, int flags);
 
     // No permissions required but must be same Uid as the creator.
+    void setVirtualDisplaySurface(in IBinder token, in Surface surface);
+
+    // No permissions required but must be same Uid as the creator.
     void releaseVirtualDisplay(in IBinder token);
 }
