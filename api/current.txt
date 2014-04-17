@@ -24355,6 +24355,15 @@ package android.renderscript {
     method public void setRed(int, int);
   }
 
+  public final class ScriptIntrinsicResize extends android.renderscript.ScriptIntrinsic {
+    method public static android.renderscript.ScriptIntrinsicResize create(android.renderscript.RenderScript);
+    method public void forEach_bicubic(android.renderscript.Allocation);
+    method public void forEach_bicubic(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
+    method public android.renderscript.Script.FieldID getFieldID_Input();
+    method public android.renderscript.Script.KernelID getKernelID_bicubic();
+    method public void setInput(android.renderscript.Allocation);
+  }
+
   public final class ScriptIntrinsicYuvToRGB extends android.renderscript.ScriptIntrinsic {
     method public static android.renderscript.ScriptIntrinsicYuvToRGB create(android.renderscript.RenderScript, android.renderscript.Element);
     method public void forEach(android.renderscript.Allocation);

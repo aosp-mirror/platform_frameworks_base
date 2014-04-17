@@ -18,7 +18,6 @@ package android.renderscript;
 
 /**
  * Intrinsic for performing a resize of a 2D allocation.
- * @hide
  */
 public final class ScriptIntrinsicResize extends ScriptIntrinsic {
     private Allocation mInput;
