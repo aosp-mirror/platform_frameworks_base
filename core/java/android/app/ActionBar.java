@@ -949,10 +949,6 @@ public abstract class ActionBar {
     }
 
     /** @hide */
-    public void captureSharedElements(Map<String, View> sharedElements) {
-    }
-
-    /** @hide */
     public ActionMode startActionMode(ActionMode.Callback callback) {
         return null;
     }

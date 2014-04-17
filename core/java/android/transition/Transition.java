@@ -1585,7 +1585,7 @@ public abstract class Transition implements Cloneable {
      * hierarchy underneath it.
      */
     void capturePropagationValues(TransitionValues transitionValues) {
-        if (mPropagation != null) {
+        if (mPropagation != null && !transitionValues.values.isEmpty()) {
             String[] propertyNames = mPropagation.getPropagationProperties();
             if (propertyNames == null) {
                 return;

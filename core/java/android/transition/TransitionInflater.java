@@ -309,15 +309,11 @@ public class TransitionInflater {
         if (transitionId >= 0) {
             Transition transition = inflateTransition(transitionId);
             if (transition != null) {
+                if (toScene == null) {
+                    throw new RuntimeException("No toScene for transition ID " + transitionId);
+                }
                 if (fromScene == null) {
-                    if (toScene == null) {
-                        throw new RuntimeException("No matching fromScene or toScene " +
-                                "for transition ID " + transitionId);
-                    } else {
-                        transitionManager.setTransition(toScene, transition);
-                    }
-                } else if (toScene == null) {
-                    transitionManager.setExitTransition(fromScene, transition);
+                    transitionManager.setTransition(toScene, transition);
                 } else {
                     transitionManager.setTransition(fromScene, toScene, transition);
                 }

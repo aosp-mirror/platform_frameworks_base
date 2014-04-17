@@ -462,6 +462,41 @@
              transitions between different window content. -->
         <attr name="windowContentTransitionManager" format="reference" />
 
+        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+             used to move Views into the initial Window's content Scene. Corresponds to
+             {@link android.view.Window#setEnterTransition(android.transition.Transition)}. -->
+        <attr name="windowEnterTransition" format="reference"/>
+
+        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+             used to move Views out of the Window's content Scene when launching a new Activity.
+             Corresponds to
+             {@link android.view.Window#setExitTransition(android.transition.Transition)}. -->
+        <attr name="windowExitTransition" format="reference"/>
+
+        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+             used to move shared elements transferred into the Window's initial content Scene.
+             Corresponds to {@link android.view.Window#setSharedElementEnterTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementEnterTransition" format="reference"/>
+
+        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+             used when starting a new Activity to move shared elements prior to transferring
+             to the called Activity.
+             Corresponds to {@link android.view.Window#setSharedElementExitTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementExitTransition" format="reference"/>
+
+        <!-- Flag indicating whether this Window's transition should overlap with
+             the exiting transition of the calling Activity. Corresponds to
+             {@link android.view.Window#setAllowEnterTransitionOverlap(boolean)}. -->
+        <attr name="windowAllowEnterTransitionOverlap" format="boolean"/>
+
+        <!-- Flag indicating whether this Window's transition should overlap with
+             the exiting transition of the called Activity when the called Activity
+             finishes. Corresponds to
+             {@link android.view.Window#setAllowExitTransitionOverlap(boolean)}. -->
+        <attr name="windowAllowExitTransitionOverlap" format="boolean"/>
+
         <!-- ============ -->
         <!-- Alert Dialog styles -->
         <!-- ============ -->
@@ -1690,6 +1725,41 @@
              or a fraction of the screen size in that dimension. -->
         <attr name="windowFixedHeightMajor" format="dimension|fraction" />
         <attr name="windowOutsetBottom" format="dimension" />
+        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+             used to move Views into the initial Window's content Scene. Corresponds to
+             {@link android.view.Window#setEnterTransition(android.transition.Transition)}. -->
+        <attr name="windowEnterTransition"/>
+
+        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+             used to move Views out of the Window's content Scene when launching a new Activity.
+             Corresponds to
+             {@link android.view.Window#setExitTransition(android.transition.Transition)}. -->
+        <attr name="windowExitTransition"/>
+
+        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+             used to move shared elements transferred into the Window's initial content Scene.
+             Corresponds to {@link android.view.Window#setSharedElementEnterTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementEnterTransition"/>
+
+        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+             used when starting a new Activity to move shared elements prior to transferring
+             to the called Activity.
+             Corresponds to {@link android.view.Window#setSharedElementExitTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementExitTransition"/>
+
+
+        <!-- Flag indicating whether this Window's transition should overlap with
+             the exiting transition of the calling Activity. Corresponds to
+             {@link android.view.Window#setAllowEnterTransitionOverlap(boolean)}. -->
+        <attr name="windowAllowEnterTransitionOverlap"/>
+
+        <!-- Flag indicating whether this Window's transition should overlap with
+             the exiting transition of the called Activity when the called Activity
+             finishes. Corresponds to
+             {@link android.view.Window#setAllowExitTransitionOverlap(boolean)}. -->
+        <attr name="windowAllowExitTransitionOverlap"/>
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
@@ -2383,8 +2453,9 @@
              when doing an Activity transition. Typically, the elements inside a
              ViewGroup are each transitioned from the scene individually. The default
              for a ViewGroup is false unless it has a background. See
-             {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.view.View, String)}
-             for more information. -->
+             {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.view.Window,
+             android.view.View, String)} for more information. Corresponds to
+             {@link android.view.ViewGroup#setTransitionGroup(boolean)}.-->
         <attr name="transitionGroup" format="boolean" />
     </declare-styleable>
 

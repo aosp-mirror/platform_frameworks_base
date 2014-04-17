@@ -109,14 +109,14 @@ public abstract class Visibility extends Transition {
         final VisibilityInfo visInfo = new VisibilityInfo();
         visInfo.visibilityChange = false;
         visInfo.fadeIn = false;
-        if (startValues != null) {
+        if (startValues != null && startValues.values.containsKey(PROPNAME_VISIBILITY)) {
             visInfo.startVisibility = (Integer) startValues.values.get(PROPNAME_VISIBILITY);
             visInfo.startParent = (ViewGroup) startValues.values.get(PROPNAME_PARENT);
         } else {
             visInfo.startVisibility = -1;
             visInfo.startParent = null;
         }
-        if (endValues != null) {
+        if (endValues != null && endValues.values.containsKey(PROPNAME_VISIBILITY)) {
             visInfo.endVisibility = (Integer) endValues.values.get(PROPNAME_VISIBILITY);
             visInfo.endParent = (ViewGroup) endValues.values.get(PROPNAME_PARENT);
         } else {

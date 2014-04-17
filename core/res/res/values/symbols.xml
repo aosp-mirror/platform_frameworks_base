@@ -1839,5 +1839,6 @@
   <java-symbol type="drawable" name="ic_lock_bugreport" />
   <java-symbol type="id" name="icon_frame" />
   <java-symbol type="style" name="Animation.VolumePanel" />
+  <java-symbol type="transition" name="no_transition" />
 
 </resources>

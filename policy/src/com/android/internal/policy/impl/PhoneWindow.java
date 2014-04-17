@@ -22,19 +22,6 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.*;
 
-import android.animation.Animator;
-import android.animation.ObjectAnimator;
-import android.app.ActivityOptions;
-import android.os.Looper;
-import android.transition.Fade;
-import android.transition.Scene;
-import android.transition.Transition;
-import android.transition.TransitionInflater;
-import android.transition.TransitionManager;
-import android.transition.TransitionSet;
-import android.util.ArrayMap;
-import android.view.ViewConfiguration;
-
 import com.android.internal.R;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.StandaloneActionMode;
@@ -51,6 +38,9 @@ import com.android.internal.widget.ActionBarOverlayLayout;
 import com.android.internal.widget.ActionBarView;
 import com.android.internal.widget.SwipeDismissLayout;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -65,11 +55,22 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.transition.ChangeBounds;
+import android.transition.Explode;
+import android.transition.Fade;
+import android.transition.MoveImage;
+import android.transition.Scene;
+import android.transition.Transition;
+import android.transition.TransitionInflater;
+import android.transition.TransitionManager;
+import android.transition.TransitionSet;
 import android.util.AndroidRuntimeException;
+import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -90,6 +91,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewManager;
 import android.view.ViewParent;
@@ -124,16 +126,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private final static String TAG = "PhoneWindow";
 
     private final static boolean SWEEP_OPEN_MENU = false;
-    private static final long MAX_TRANSITION_START_WAIT = 500;
-    private static final long MAX_TRANSITION_FINISH_WAIT = 1000;
-
-    private static final String KEY_SCREEN_X = "shared_element:screenX";
-    private static final String KEY_SCREEN_Y = "shared_element:screenY";
-    private static final String KEY_TRANSLATION_Z = "shared_element:translationZ";
-    private static final String KEY_WIDTH = "shared_element:width";
-    private static final String KEY_HEIGHT = "shared_element:height";
-    private static final String KEY_NAME = "shared_element:name";
-
     /**
      * Simple callback used by the context menu and its submenus. The options
      * menu submenus do not use this (their behavior is more complex).
@@ -252,12 +244,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     };
 
-    private ActivityOptions mActivityOptions;
-    private SceneTransitionListener mSceneTransitionListener;
-    private boolean mAllowEnterOverlap = true;
-    private boolean mAllowExitOverlap = true;
-    private Map<String, String> mSharedElementsMap;
-    private ArrayList<View> mTransitioningViews;
+    private Transition mEnterTransition;
+    private Transition mExitTransition;
+    private Transition mSharedElementEnterTransition;
+    private Transition mSharedElementExitTransition;
+    private Boolean mAllowExitTransitionOverlap;
+    private Boolean mAllowEnterTransitionOverlap;
 
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
@@ -410,9 +402,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private void transitionTo(Scene scene) {
         if (mContentScene == null) {
             scene.enter();
-            if (mActivityOptions != null) {
-                new EnterScene().start();
-            }
         } else {
             mTransitionManager.transitionTo(scene);
         }
@@ -3307,18 +3296,53 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             // Only inflate or create a new TransitionManager if the caller hasn't
             // already set a custom one.
-            if (hasFeature(FEATURE_CONTENT_TRANSITIONS) && mTransitionManager == null) {
-                final int transitionRes = getWindowStyle().getResourceId(
-                        com.android.internal.R.styleable.Window_windowContentTransitionManager, 0);
-                if (transitionRes != 0) {
-                    final TransitionInflater inflater = TransitionInflater.from(getContext());
-                    mTransitionManager = inflater.inflateTransitionManager(transitionRes,
-                            mContentParent);
-                } else {
-                    mTransitionManager = new TransitionManager();
+            if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+                if (mTransitionManager == null) {
+                    final int transitionRes = getWindowStyle().getResourceId(
+                            com.android.internal.R.styleable.Window_windowContentTransitionManager,
+                            0);
+                    if (transitionRes != 0) {
+                        final TransitionInflater inflater = TransitionInflater.from(getContext());
+                        mTransitionManager = inflater.inflateTransitionManager(transitionRes,
+                                mContentParent);
+                    } else {
+                        mTransitionManager = new TransitionManager();
+                    }
+                }
+
+                mEnterTransition = getTransition(mEnterTransition,
+                        com.android.internal.R.styleable.Window_windowEnterTransition);
+                mExitTransition = getTransition(mExitTransition,
+                        com.android.internal.R.styleable.Window_windowExitTransition);
+                mSharedElementEnterTransition = getTransition(mSharedElementEnterTransition,
+                        com.android.internal.R.styleable.Window_windowSharedElementEnterTransition);
+                mSharedElementExitTransition = getTransition(mSharedElementExitTransition,
+                        com.android.internal.R.styleable.Window_windowSharedElementExitTransition);
+                if (mAllowEnterTransitionOverlap == null) {
+                    mAllowEnterTransitionOverlap = getWindowStyle().getBoolean(
+                            com.android.internal.R.styleable.
+                                    Window_windowAllowEnterTransitionOverlap, true);
+                }
+                if (mAllowExitTransitionOverlap == null) {
+                    mAllowExitTransitionOverlap = getWindowStyle().getBoolean(
+                            com.android.internal.R.styleable.
+                                    Window_windowAllowExitTransitionOverlap, true);
                 }
             }
         }
+    }
+
+    private Transition getTransition(Transition currentValue, int id) {
+        if (currentValue != null) {
+            return currentValue;
+        }
+        int transitionId = getWindowStyle().getResourceId(id, -1);
+        Transition transition = null;
+        if (transitionId != -1 && transitionId != com.android.internal.R.transition.no_transition) {
+            TransitionInflater inflater = TransitionInflater.from(getContext());
+            transition = inflater.inflateTransition(transitionId);
+        }
+        return transition;
     }
 
     private Drawable loadImageURI(Uri uri) {
@@ -3647,6 +3671,66 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         TypedArray a = getWindowStyle();
         return a.getBoolean(a.getResourceId(
                 com.android.internal.R.styleable.Window_windowIsTranslucent, 0), false);
+    }
+
+    @Override
+    public void setEnterTransition(Transition enterTransition) {
+        mEnterTransition = enterTransition;
+    }
+
+    @Override
+    public void setExitTransition(Transition exitTransition) {
+        mExitTransition = exitTransition;
+    }
+
+    @Override
+    public void setSharedElementEnterTransition(Transition sharedElementEnterTransition) {
+        mSharedElementEnterTransition = sharedElementEnterTransition;
+    }
+
+    @Override
+    public void setSharedElementExitTransition(Transition sharedElementExitTransition) {
+        mSharedElementExitTransition = sharedElementExitTransition;
+    }
+
+    @Override
+    public Transition getEnterTransition() {
+        return mEnterTransition;
+    }
+
+    @Override
+    public Transition getExitTransition() {
+        return mExitTransition;
+    }
+
+    @Override
+    public Transition getSharedElementEnterTransition() {
+        return mSharedElementEnterTransition;
+    }
+
+    @Override
+    public Transition getSharedElementExitTransition() {
+        return mSharedElementExitTransition;
+    }
+
+    @Override
+    public void setAllowEnterTransitionOverlap(boolean allow) {
+        mAllowEnterTransitionOverlap = allow;
+    }
+
+    @Override
+    public boolean getAllowEnterTransitionOverlap() {
+        return (mAllowEnterTransitionOverlap == null) ? true : mAllowEnterTransitionOverlap;
+    }
+
+    @Override
+    public void setAllowExitTransitionOverlap(boolean allowExitTransitionOverlap) {
+        mAllowExitTransitionOverlap = allowExitTransitionOverlap;
+    }
+
+    @Override
+    public boolean getAllowExitTransitionOverlap() {
+        return (mAllowExitTransitionOverlap == null) ? true : mAllowExitTransitionOverlap;
     }
 
     private static final class DrawableFeatureState {
@@ -4082,670 +4166,4 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     void sendCloseSystemWindows(String reason) {
         PhoneWindowManager.sendCloseSystemWindows(getContext(), reason);
     }
-
-    @Override
-    public void setTransitionOptions(Bundle options, SceneTransitionListener listener) {
-        mSceneTransitionListener = listener;
-        ActivityOptions activityOptions = null;
-        if (options != null) {
-            activityOptions = new ActivityOptions(options);
-            if (activityOptions.getAnimationType() != ActivityOptions.ANIM_SCENE_TRANSITION) {
-                activityOptions = null;
-            }
-        }
-        mActivityOptions = activityOptions;
-    }
-
-    @Override
-    public void setAllowOverlappingEnterTransition(boolean allow) {
-        mAllowEnterOverlap = allow;
-    }
-
-    @Override
-    public void setAllowOverlappingExitTransition(boolean allow) {
-        mAllowExitOverlap = allow;
-    }
-
-    @Override
-    public void mapTransitionTargets(Map<String, String> sharedElementNames) {
-        mSharedElementsMap = sharedElementNames;
-    }
-
-    @Override
-    public void restoreViewVisibilityAfterTransitionToCallee() {
-        if (mTransitioningViews != null) {
-            setViewVisibility(mTransitioningViews, View.VISIBLE);
-        }
-    }
-
-    @Override
-    public void startExitTransitionToCaller(final Runnable onTransitionEnd) {
-        Transition transition;
-        if (mContentScene == null || mTransitionManager == null || mActivityOptions == null
-                || (transition = mTransitionManager.getEnterTransition(mContentScene)) == null) {
-            onTransitionEnd.run();
-            return;
-        }
-        if (mAllowExitOverlap) {
-            TransitionSet transitionSet = new TransitionSet();
-            transitionSet.addTransition(transition);
-            Fade fade = new Fade();
-            transitionSet.addTransition(fade);
-            transition = transitionSet;
-        }
-
-        final ArrayMap<String, View> sharedElements = new ArrayMap<String, View>();
-        mapSharedElements(sharedElements);
-        final Bundle sharedElementArgs = new Bundle();
-        captureTerminalSharedElementState(sharedElements, sharedElementArgs);
-
-        final ArrayList<View> transitioningViews = new ArrayList<View>();
-        mDecor.captureTransitioningViews(transitioningViews);
-        transitioningViews.removeAll(sharedElements.values());
-
-        mSceneTransitionListener.convertToTranslucent();
-        transition = transition.clone();
-        Rect epicenter = calcEpicenter(sharedElements, mActivityOptions.getSharedElementNames());
-        transition.setEpicenterCallback(new FixedEpicenterCallback(epicenter));
-        ExitSceneBack exitScene =
-                new ExitSceneBack(onTransitionEnd, sharedElementArgs, sharedElements.values());
-        exitScene.start(transition);
-        mTransitionManager.beginDelayedTransition(mDecor, transition);
-        setViewVisibility(transitioningViews, View.INVISIBLE);
-    }
-
-    @Override
-    public Bundle startExitTransitionToCallee(Bundle options) {
-        if (mContentScene == null) {
-            return null;
-        }
-        Transition transition = mTransitionManager.getExitTransition(mContentScene);
-        if (transition == null) {
-            return null;
-        }
-
-        ActivityOptions activityOptions = new ActivityOptions(options);
-        ArrayMap<String, View> sharedElements = findSharedElements(activityOptions);
-
-        // Find exiting Views and shared elements
-        ArrayList<View> transitioningViews = captureTransitioningViews(sharedElements.values());
-
-        Transition exitTransition = addTransitionTargets(transition,
-                transitioningViews, true);
-        Transition sharedElementTransition = addTransitionTargets(transition,
-                transitioningViews, false);
-
-        // transitionSet is the total exit transition, including hero animation.
-        TransitionSet transitionSet = new TransitionSet();
-        transitionSet.addTransition(exitTransition);
-        transitionSet.addTransition(sharedElementTransition);
-
-        Rect epicenter = calcEpicenter(sharedElements, activityOptions.getSharedElementNames());
-        FixedEpicenterCallback epicenterCallback = new FixedEpicenterCallback(epicenter);
-        transitionSet.setEpicenterCallback(epicenterCallback);
-
-        updateExitActivityOptions(activityOptions, sharedElements,
-                sharedElementTransition, transitioningViews, exitTransition, epicenterCallback);
-
-        // Start exiting the Views that need to exit
-        TransitionManager.beginDelayedTransition(mDecor, transitionSet);
-        setViewVisibility(transitioningViews, View.INVISIBLE);
-
-        return activityOptions.toBundle();
-    }
-
-    private ArrayList<View> captureTransitioningViews(Collection<View> sharedElements) {
-        mTransitioningViews = new ArrayList<View>();
-        mDecor.captureTransitioningViews(mTransitioningViews);
-        ArrayList<View> transitioningViews = (ArrayList<View>) mTransitioningViews.clone();
-        transitioningViews.removeAll(sharedElements);
-        return transitioningViews;
-    }
-
-    private ArrayMap<String, View> findSharedElements(ActivityOptions activityOptions) {
-        ArrayMap<String, View> sharedElements = new ArrayMap<String, View>();
-        mDecor.findSharedElements(sharedElements);
-        ArrayList<String> localNames = activityOptions.getLocalElementNames();
-        sharedElements.keySet().retainAll(localNames);
-
-        ArrayList<String> targetNames = activityOptions.getSharedElementNames();
-        for (int i = 0; i < localNames.size(); i++) {
-            String localName = localNames.get(i);
-            View sharedElement = sharedElements.remove(localName);
-            String targetName = targetNames.get(i);
-            sharedElements.put(targetName, sharedElement);
-        }
-        return sharedElements;
-    }
-
-    private static void runOnUiThread(Handler handler, Runnable runnable) {
-        if (handler.getLooper() != Looper.myLooper()) {
-            handler.post(runnable);
-        } else {
-            runnable.run();
-        }
-    }
-
-    private void updateExitActivityOptions(ActivityOptions activityOptions,
-            final Map<String, View> sharedElements, Transition sharedElementTransition,
-            final ArrayList<View> transitioningViews, Transition exitTransition,
-            final Transition.EpicenterCallback epicenterCallback) {
-
-        // Schedule capturing of the shared element state
-        final Bundle sharedElementArgs = new Bundle();
-        captureTerminalSharedElementState(sharedElements, sharedElementArgs);
-
-        ActivityOptions.SharedElementSource sharedElementSource
-                = new ActivityOptions.SharedElementSource() {
-            private Handler mHandler = new Handler();
-
-            @Override
-            public Bundle getSharedElementExitState() {
-                return sharedElementArgs;
-            }
-
-            @Override
-            public void acceptedSharedElements(final ArrayList<String> sharedElementNames) {
-                if (sharedElementNames.size() == sharedElements.size()) {
-                    return; // They were all accepted
-                }
-                runOnUiThread(mHandler, new Runnable() {
-                    @Override
-                    public void run() {
-                        Transition transition = mTransitionManager.getExitTransition(mContentScene);
-                        transition = transition.clone();
-                        transition.setEpicenterCallback(epicenterCallback);
-                        TransitionManager.beginDelayedTransition(mDecor, transition);
-                        for (String name : sharedElements.keySet()) {
-                            if (!sharedElementNames.contains(name)) {
-                                sharedElements.get(name).setVisibility(View.INVISIBLE);
-                            }
-                        }
-                        sharedElements.keySet().retainAll(sharedElementNames);
-                    }
-                });
-            }
-
-            @Override
-            public void hideSharedElements() {
-                if (sharedElements != null) {
-                    runOnUiThread(mHandler, new Runnable() {
-                        @Override
-                        public void run() {
-                            setViewVisibility(sharedElements.values(), View.INVISIBLE);
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void restore(final Bundle sharedElementState) {
-                runOnUiThread(mHandler, new Runnable() {
-                    @Override
-                    public void run() {
-                        mTransitioningViews = null;
-                        Transition transition = mTransitionManager.getExitTransition(mContentScene);
-                        transition = transition.clone();
-                        transition.setEpicenterCallback(epicenterCallback);
-                        setSharedElementState(sharedElements, sharedElementState);
-                        setViewVisibility(sharedElements.values(), View.VISIBLE);
-                        if (mSceneTransitionListener != null) {
-                            mSceneTransitionListener.sharedElementStart(transition);
-                            mDecor.getViewTreeObserver().addOnPreDrawListener(
-                                    new ViewTreeObserver.OnPreDrawListener() {
-                                        @Override
-                                        public boolean onPreDraw() {
-                                            mDecor.getViewTreeObserver().removeOnPreDrawListener(this);
-                                            mSceneTransitionListener.sharedElementEnd();
-                                            return true;
-                                        }
-                                    });
-                        }
-                        TransitionManager.beginDelayedTransition(mDecor, transition);
-                        setViewVisibility(transitioningViews, View.VISIBLE);
-                        for (View sharedElement: sharedElements.values()) {
-                            sharedElement.requestLayout();
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void prepareForRestore() {
-                if (mTransitioningViews != null) {
-                    runOnUiThread(mHandler, new Runnable() {
-                        @Override
-                        public void run() {
-                            setViewVisibility(mTransitioningViews, View.INVISIBLE);
-                        }
-                    });
-                }
-            }
-        };
-
-        activityOptions.updateSceneTransitionAnimation(
-                exitTransition, sharedElementTransition, sharedElementSource);
-    }
-
-    private void captureTerminalSharedElementState(final Map<String, View> sharedElements,
-            final Bundle sharedElementArgs) {
-        mDecor.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                mDecor.getViewTreeObserver().removeOnPreDrawListener(this);
-                int[] tempLoc = new int[2];
-                for (String name : sharedElements.keySet()) {
-                    View sharedElement = sharedElements.get(name);
-                    captureSharedElementState(sharedElement, name, sharedElementArgs, tempLoc);
-                }
-                return true;
-            }
-        });
-    }
-
-    private static Transition addTransitionTargets(Transition transition, Collection<View> views,
-            boolean add) {
-        TransitionSet set = new TransitionSet();
-        set.addTransition(transition.clone());
-        for (View view: views) {
-            if (add) {
-                set.addTarget(view);
-            } else {
-                set.excludeTarget(view, true);
-            }
-        }
-        return set;
-    }
-
-    private static void setViewVisibility(Collection<View> views, int visibility) {
-        for (View view : views) {
-            view.setVisibility(visibility);
-        }
-    }
-
-    private static void setSharedElementState(Map<String, View> sharedElements,
-            Bundle sharedElementState) {
-        int[] tempLoc = new int[2];
-        for (Map.Entry<String, View> entry: sharedElements.entrySet()) {
-            setSharedElementState(entry.getValue(), entry.getKey(), sharedElementState, tempLoc);
-        }
-    }
-
-    /**
-     * Sets the captured values from a previous
-     * {@link #captureSharedElementState(android.view.View, String, android.os.Bundle, int[])}
-     * @param view The View to apply placement changes to.
-     * @param name The shared element name given from the source Activity.
-     * @param transitionArgs A <code>Bundle</code> containing all placementinformation for named
-     *                       shared elements in the scene.
-     * @param tempLoc A temporary int[2] for capturing the current location of views.
-     */
-    private static void setSharedElementState(View view, String name, Bundle transitionArgs,
-            int[] tempLoc) {
-        Bundle sharedElementBundle = transitionArgs.getBundle(name);
-        if (sharedElementBundle == null) {
-            return;
-        }
-
-        float z = sharedElementBundle.getFloat(KEY_TRANSLATION_Z);
-        view.setTranslationZ(z);
-
-        int x = sharedElementBundle.getInt(KEY_SCREEN_X);
-        int y = sharedElementBundle.getInt(KEY_SCREEN_Y);
-        int width = sharedElementBundle.getInt(KEY_WIDTH);
-        int height = sharedElementBundle.getInt(KEY_HEIGHT);
-
-        int widthSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY);
-        int heightSpec = View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY);
-        view.measure(widthSpec, heightSpec);
-
-        ViewGroup parent = (ViewGroup) view.getParent();
-        parent.getLocationOnScreen(tempLoc);
-        int left = x - tempLoc[0];
-        int top = y - tempLoc[1];
-        int right = left + width;
-        int bottom = top + height;
-        view.layout(left, top, right, bottom);
-
-        view.requestLayout();
-    }
-
-    /**
-     * Captures placement information for Views with a shared element name for
-     * Activity Transitions.
-     * @param view The View to capture the placement information for.
-     * @param name The shared element name in the target Activity to apply the placement
-     *             information for.
-     * @param transitionArgs Bundle to store shared element placement information.
-     * @param tempLoc A temporary int[2] for capturing the current location of views.
-     * @see #setSharedElementState(android.view.View, String, android.os.Bundle, int[])
-     */
-    private static void captureSharedElementState(View view, String name, Bundle transitionArgs,
-            int[] tempLoc) {
-        Bundle sharedElementBundle = new Bundle();
-        view.getLocationOnScreen(tempLoc);
-        float scaleX = view.getScaleX();
-        sharedElementBundle.putInt(KEY_SCREEN_X, tempLoc[0]);
-        int width = Math.round(view.getWidth() * scaleX);
-        sharedElementBundle.putInt(KEY_WIDTH, width);
-
-        float scaleY = view.getScaleY();
-        sharedElementBundle.putInt(KEY_SCREEN_Y, tempLoc[1]);
-        int height= Math.round(view.getHeight() * scaleY);
-        sharedElementBundle.putInt(KEY_HEIGHT, height);
-
-        sharedElementBundle.putFloat(KEY_TRANSLATION_Z, view.getTranslationZ());
-
-        sharedElementBundle.putString(KEY_NAME, view.getSharedElementName());
-
-        transitionArgs.putBundle(name, sharedElementBundle);
-    }
-
-    private void mapSharedElements(ArrayMap<String, View> sharedElements) {
-        ArrayList<String> sharedElementNames = mActivityOptions.getSharedElementNames();
-        if (sharedElementNames != null) {
-            mDecor.findSharedElements(sharedElements);
-            if (mSharedElementsMap != null) {
-                for (Map.Entry<String, String> entry : mSharedElementsMap.entrySet()) {
-                    View sharedElement = sharedElements.remove(entry.getValue());
-                    if (sharedElement != null) {
-                        sharedElements.put(entry.getKey(), sharedElement);
-                    }
-                }
-            }
-            sharedElements.keySet().retainAll(sharedElementNames);
-        }
-    }
-
-    private static Rect calcEpicenter(ArrayMap<String, View> sharedElements,
-            ArrayList<String> sharedElementNames) {
-        if (sharedElementNames != null) {
-            for (String name: sharedElementNames) {
-                if (name.startsWith("android:")) {
-                    return null;
-                }
-                View view = sharedElements.get(name);
-                if (view != null) {
-                    int[] loc = new int[2];
-                    view.getLocationOnScreen(loc);
-                    int left = loc[0] + Math.round(view.getTranslationX());
-                    int top = loc[1] + Math.round(view.getTranslationY());
-                    int right = left + view.getWidth();
-                    int bottom = top + view.getHeight();
-                    return new Rect(left, top, right, bottom);
-                }
-            }
-        }
-        return null;
-    }
-
-    private class ExitSceneBack extends Transition.TransitionListenerAdapter implements
-            Animator.AnimatorListener {
-        private boolean mExitTransitionComplete;
-        private boolean mBackgroundFadeComplete;
-        private boolean mOnCompleteExecuted;
-        private boolean mSharedElementTransitioned;
-        private Runnable mOnComplete;
-        private Bundle mSharedElementArgs;
-        private Collection<View> mSharedElements;
-
-        public ExitSceneBack(Runnable onComplete, Bundle sharedElementArgs,
-                Collection<View> sharedElements) {
-            mOnComplete = onComplete;
-            mSharedElementArgs = sharedElementArgs;
-            mSharedElements = sharedElements;
-        }
-
-        public void start(Transition exitTransition) {
-            if (mActivityOptions != null) {
-                mActivityOptions.dispatchPrepareRestore();
-            }
-            exitTransition.addListener(this);
-            Drawable background = mDecor.getBackground();
-            if (background != null) {
-                ObjectAnimator animator = ObjectAnimator.ofInt(background, "alpha", 0);
-                animator.addListener(this);
-                animator.start();
-            } else {
-                mBackgroundFadeComplete = true;
-                startCalledActivityEnter();
-            }
-        }
-
-        @Override
-        public void onTransitionEnd(Transition transition) {
-            transition.removeListener(this);
-            mExitTransitionComplete = true;
-            notifyComplete();
-            if (!mAllowExitOverlap) {
-                startCalledActivityEnter();
-            }
-        }
-
-        private void notifyComplete() {
-            if (mExitTransitionComplete && mBackgroundFadeComplete
-                    && mSharedElementTransitioned && !mOnCompleteExecuted) {
-                mOnComplete.run();
-                mSceneTransitionListener.nullPendingTransition();
-                mOnCompleteExecuted = true;
-            }
-        }
-
-        @Override
-        public void onAnimationStart(Animator animation) {
-        }
-
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            mBackgroundFadeComplete = true;
-            if (mAllowExitOverlap) {
-                startCalledActivityEnter();
-            }
-        }
-
-        @Override
-        public void onAnimationCancel(Animator animation) {
-        }
-
-        @Override
-        public void onAnimationRepeat(Animator animation) {
-        }
-
-        private void startCalledActivityEnter() {
-            mActivityOptions.dispatchRestore(mSharedElementArgs);
-            setViewVisibility(mSharedElements, View.INVISIBLE);
-            mSharedElementTransitioned = true;
-            notifyComplete();
-        }
-    }
-
-    /**
-     * Provides code for handling the Activity transition entering scene.
-     * When the first scene is laid out (onPreDraw), it makes views invisible.
-     * It then starts the entering transition by making non-shared elements visible. When
-     * the entering transition is started, the calling Activity is notified that
-     * this Activity is ready to receive the shared element. When the calling Activity notifies
-     * that the shared element is ready, this Activity is notified through the
-     * SceneTransitionListener.
-     *
-     * This class also takes into account fading the background -- either waiting until the
-     * shared element is ready or the calling Activity's exit transition is complete.
-     */
-    private class EnterScene implements ViewTreeObserver.OnPreDrawListener, Runnable,
-            ActivityOptions.ActivityTransitionTarget, Animator.AnimatorListener {
-        private boolean mSharedElementReadyReceived;
-        private boolean mAllDone;
-        private Handler mHandler = new Handler();
-        private boolean mEnterTransitionStarted;
-        private ArrayMap<String, View> mSharedElementTargets = new ArrayMap<String, View>();
-        private ArrayList<View> mEnteringViews = new ArrayList<View>();
-        private Transition.EpicenterCallback mEpicenterCallback;
-
-        public EnterScene() {
-            mSceneTransitionListener.nullPendingTransition();
-            Drawable background = getDecorView().getBackground();
-            if (background != null) {
-                background.setAlpha(0);
-                mDecor.drawableChanged();
-            }
-            mSceneTransitionListener.convertToTranslucent();
-        }
-
-        @Override
-        public boolean onPreDraw() {
-            ViewTreeObserver observer = mDecor.getViewTreeObserver();
-            observer.removeOnPreDrawListener(this);
-            if (!mEnterTransitionStarted && mSceneTransitionListener != null) {
-                mEnterTransitionStarted = true;
-                mDecor.captureTransitioningViews(mEnteringViews);
-                mapSharedElements(mSharedElementTargets);
-                mEnteringViews.removeAll(mSharedElementTargets.values());
-                Rect epicenter = calcEpicenter(mSharedElementTargets,
-                        mActivityOptions.getSharedElementNames());
-                mEpicenterCallback = new FixedEpicenterCallback(epicenter);
-
-                setViewVisibility(mEnteringViews, View.INVISIBLE);
-                setViewVisibility(mSharedElementTargets.values(), View.INVISIBLE);
-                if (mAllowEnterOverlap) {
-                    beginEnterScene();
-                }
-                observer.addOnPreDrawListener(this);
-                return false;
-            } else {
-                mHandler.postDelayed(this, MAX_TRANSITION_START_WAIT);
-                mActivityOptions.dispatchSceneTransitionStarted(this,
-                        new ArrayList<String>(mSharedElementTargets.keySet()));
-                return !mSharedElementReadyReceived;
-            }
-        }
-
-        public void start() {
-            ViewTreeObserver observer = mDecor.getViewTreeObserver();
-            observer.addOnPreDrawListener(this);
-        }
-
-        @Override
-        public void run() {
-            exitTransitionComplete();
-        }
-
-        @Override
-        public void sharedElementTransitionComplete(final Bundle transitionArgs) {
-            if (!mSharedElementReadyReceived) {
-                mSharedElementReadyReceived = true;
-                mHandler.removeCallbacks(this);
-                mHandler.postDelayed(this, MAX_TRANSITION_FINISH_WAIT);
-                if (!mSharedElementTargets.isEmpty()) {
-                    runOnUiThread(mHandler, new Runnable() {
-                        @Override
-                        public void run() {
-                            Transition transition = getTransitionManager().getEnterTransition(
-                                    mContentScene);
-                            if (transition == null) {
-                                transition = TransitionManager.getDefaultTransition();
-                            }
-                            transition = addTransitionTargets(transition,
-                                    mSharedElementTargets.values(),
-                                    true);
-                            transition.setEpicenterCallback(mEpicenterCallback);
-                            if (transitionArgs == null) {
-                                TransitionManager.beginDelayedTransition(mDecor, transition);
-                                setViewVisibility(mSharedElementTargets.values(), View.VISIBLE);
-                            } else {
-                                mSceneTransitionListener.sharedElementStart(transition);
-                                setSharedElementState(mSharedElementTargets, transitionArgs);
-                                setViewVisibility(mSharedElementTargets.values(), View.VISIBLE);
-                                mDecor.getViewTreeObserver().addOnPreDrawListener(
-                                        new ViewTreeObserver.OnPreDrawListener() {
-                                            @Override
-                                            public boolean onPreDraw() {
-                                                mDecor.getViewTreeObserver()
-                                                        .removeOnPreDrawListener(this);
-                                                mSceneTransitionListener.sharedElementEnd();
-                                                mActivityOptions.dispatchSharedElementsReady();
-                                                return true;
-                                            }
-                                        });
-                                TransitionManager.beginDelayedTransition(mDecor, transition);
-                            }
-                        }
-                    });
-                }
-                if (mAllowEnterOverlap) {
-                    fadeInBackground();
-                }
-            }
-        }
-
-        private void fadeInBackground() {
-            Drawable background = getDecorView().getBackground();
-            if (background == null) {
-                mSceneTransitionListener.convertFromTranslucent();
-            } else {
-                ObjectAnimator animator = ObjectAnimator.ofInt(background, "alpha", 255);
-                animator.addListener(this);
-                animator.start();
-            }
-        }
-
-        @Override
-        public void exitTransitionComplete() {
-            if (mAllDone) {
-                return;
-            }
-            mAllDone = true;
-            sharedElementTransitionComplete(null);
-            mHandler.removeCallbacks(this);
-            if (!mAllowEnterOverlap) {
-                runOnUiThread(mHandler, new Runnable() {
-                    @Override
-                    public void run() {
-                        beginEnterScene();
-                        fadeInBackground();
-                    }
-                });
-            }
-        }
-
-        @Override
-        public void onAnimationStart(Animator animation) {
-        }
-
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            mSceneTransitionListener.convertFromTranslucent();
-        }
-
-        @Override
-        public void onAnimationCancel(Animator animation) {
-        }
-
-        @Override
-        public void onAnimationRepeat(Animator animation) {
-        }
-
-        private void beginEnterScene() {
-            Transition transition = getTransitionManager().getEnterTransition(mContentScene);
-            if (transition == null) {
-                transition = TransitionManager.getDefaultTransition();
-            }
-            transition = addTransitionTargets(transition, mEnteringViews, true);
-            transition.setEpicenterCallback(mEpicenterCallback);
-            TransitionManager.beginDelayedTransition(mDecor, transition);
-            setViewVisibility(mEnteringViews, View.VISIBLE);
-        }
-    }
-
-    private static class FixedEpicenterCallback extends Transition.EpicenterCallback {
-        private Rect mEpicenter;
-
-        public FixedEpicenterCallback(Rect epicenter) {
-            mEpicenter = epicenter;
-        }
-
-        @Override
-        public Rect getEpicenter(Transition transition) {
-            return mEpicenter;
-        }
-    };
 }
