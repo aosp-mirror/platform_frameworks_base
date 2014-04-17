@@ -22,7 +22,7 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.tv.TvInputManager.Session;
 import android.tv.TvInputManager.Session.FinishedInputEventCallback;
-import android.tv.TvInputManager.SessionCreateCallback;
+import android.tv.TvInputManager.SessionCallback;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.InputEvent;
@@ -46,7 +46,7 @@ public class TvView extends SurfaceView {
     private boolean mOverlayViewCreated;
     private Rect mOverlayViewFrame;
     private final TvInputManager mTvInputManager;
-    private SessionCreateCallback mSessionCreateCallback;
+    private SessionCallback mSessionCallback;
     private OnUnhandledInputEventListener mOnUnhandledInputEventListener;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
@@ -108,7 +108,7 @@ public class TvView extends SurfaceView {
     }
 
     /**
-     * Binds a TV input to this view. {@link SessionCreateCallback#onSessionCreated} will be
+     * Binds a TV input to this view. {@link SessionCallback#onSessionCreated} will be
      * called to send the result of this binding with {@link TvInputManager.Session}.
      * If a TV input is already bound, the input will be unbound from this view and its session
      * will be released.
@@ -118,7 +118,7 @@ public class TvView extends SurfaceView {
      *        {@link TvInputManager.Session}
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
-    public void bindTvInput(String inputId, SessionCreateCallback callback) {
+    public void bindTvInput(String inputId, SessionCallback callback) {
         if (TextUtils.isEmpty(inputId)) {
             throw new IllegalArgumentException("inputId cannot be null or an empty string");
         }
@@ -130,11 +130,11 @@ public class TvView extends SurfaceView {
         }
         // When bindTvInput is called multiple times before the callback is called,
         // only the callback of the last bindTvInput call will be actually called back.
-        // The previous callbacks will be ignored. For the logic, mSessionCreateCallback
+        // The previous callbacks will be ignored. For the logic, mSessionCallback
         // is newly assigned for every bindTvInput call and compared with
         // MySessionCreateCallback.this.
-        mSessionCreateCallback = new MySessionCreateCallback(callback);
-        mTvInputManager.createSession(inputId, mSessionCreateCallback, mHandler);
+        mSessionCallback = new MySessionCallback(callback);
+        mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
     }
 
     /**
@@ -336,16 +336,16 @@ public class TvView extends SurfaceView {
         boolean onUnhandledInputEvent(InputEvent event);
     }
 
-    private class MySessionCreateCallback implements SessionCreateCallback {
-        final SessionCreateCallback mExternalCallback;
+    private class MySessionCallback extends SessionCallback {
+        final SessionCallback mExternalCallback;
 
-        MySessionCreateCallback(SessionCreateCallback externalCallback) {
+        MySessionCallback(SessionCallback externalCallback) {
             mExternalCallback = externalCallback;
         }
 
         @Override
         public void onSessionCreated(Session session) {
-            if (this != mSessionCreateCallback) {
+            if (this != mSessionCallback) {
                 // This callback is obsolete.
                 session.release();
                 return;
@@ -362,6 +362,14 @@ public class TvView extends SurfaceView {
             }
             if (mExternalCallback != null) {
                 mExternalCallback.onSessionCreated(session);
+            }
+        }
+
+        @Override
+        public void onSessionReleased(Session session) {
+            mSession = null;
+            if (mExternalCallback != null) {
+                mExternalCallback.onSessionReleased(session);
             }
         }
     }

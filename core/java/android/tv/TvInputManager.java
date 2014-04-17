@@ -52,12 +52,12 @@ public final class TvInputManager {
     private final Map<String, List<TvInputListenerRecord>> mTvInputListenerRecordsMap =
             new HashMap<String, List<TvInputListenerRecord>>();
 
-    // A mapping from the sequence number of a session to its SessionCreateCallbackRecord.
-    private final SparseArray<SessionCreateCallbackRecord> mSessionCreateCallbackRecordMap =
-            new SparseArray<SessionCreateCallbackRecord>();
+    // A mapping from the sequence number of a session to its SessionCallbackRecord.
+    private final SparseArray<SessionCallbackRecord> mSessionCallbackRecordMap =
+            new SparseArray<SessionCallbackRecord>();
 
     // A sequence number for the next session to be created. Should be protected by a lock
-    // {@code mSessionCreateCallbackRecordMap}.
+    // {@code mSessionCallbackRecordMap}.
     private int mNextSeq;
 
     private final ITvInputClient mClient;
@@ -67,31 +67,52 @@ public final class TvInputManager {
     /**
      * Interface used to receive the created session.
      */
-    public interface SessionCreateCallback {
+    public abstract static class SessionCallback {
         /**
          * This is called after {@link TvInputManager#createSession} has been processed.
          *
          * @param session A {@link TvInputManager.Session} instance created. This can be
          *            {@code null} if the creation request failed.
          */
-        void onSessionCreated(Session session);
+        public void onSessionCreated(Session session) {
+        }
+
+        /**
+         * This is called when {@link TvInputManager.Session} is released.
+         * This typically happens when the process hosting the session has crashed or been killed.
+         *
+         * @param session A {@link TvInputManager.Session} instance released.
+         */
+        public void onSessionReleased(Session session) {
+        }
     }
 
-    private static final class SessionCreateCallbackRecord {
-        private final SessionCreateCallback mSessionCreateCallback;
+    private static final class SessionCallbackRecord {
+        private final SessionCallback mSessionCallback;
         private final Handler mHandler;
+        private Session mSession;
 
-        public SessionCreateCallbackRecord(SessionCreateCallback sessionCreateCallback,
+        public SessionCallbackRecord(SessionCallback sessionCallback,
                 Handler handler) {
-            mSessionCreateCallback = sessionCreateCallback;
+            mSessionCallback = sessionCallback;
             mHandler = handler;
         }
 
         public void postSessionCreated(final Session session) {
+            mSession = session;
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSessionCreateCallback.onSessionCreated(session);
+                    mSessionCallback.onSessionCreated(session);
+                }
+            });
+        }
+
+        public void postSessionReleased() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onSessionReleased(mSession);
                 }
             });
         }
@@ -145,18 +166,32 @@ public final class TvInputManager {
             @Override
             public void onSessionCreated(String inputId, IBinder token, InputChannel channel,
                     int seq) {
-                synchronized (mSessionCreateCallbackRecordMap) {
-                    SessionCreateCallbackRecord record = mSessionCreateCallbackRecordMap.get(seq);
-                    mSessionCreateCallbackRecordMap.delete(seq);
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
                         Log.e(TAG, "Callback not found for " + token);
                         return;
                     }
                     Session session = null;
                     if (token != null) {
-                        session = new Session(token, channel, mService, mUserId);
+                        session = new Session(token, channel, mService, mUserId, seq,
+                                mSessionCallbackRecordMap);
                     }
                     record.postSessionCreated(session);
+                }
+            }
+
+            @Override
+            public void onSessionReleased(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    mSessionCallbackRecordMap.delete(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq:" + seq);
+                        return;
+                    }
+                    record.mSession.releaseInternal();
+                    record.postSessionReleased();
                 }
             }
 
@@ -298,7 +333,7 @@ public final class TvInputManager {
      * @param handler a {@link Handler} that the session creation will be delivered to.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
-    public void createSession(String inputId, final SessionCreateCallback callback,
+    public void createSession(String inputId, final SessionCallback callback,
             Handler handler) {
         if (inputId == null) {
             throw new IllegalArgumentException("id cannot be null");
@@ -309,10 +344,10 @@ public final class TvInputManager {
         if (handler == null) {
             throw new IllegalArgumentException("handler cannot be null");
         }
-        SessionCreateCallbackRecord record = new SessionCreateCallbackRecord(callback, handler);
-        synchronized (mSessionCreateCallbackRecordMap) {
+        SessionCallbackRecord record = new SessionCallbackRecord(callback, handler);
+        synchronized (mSessionCallbackRecordMap) {
             int seq = mNextSeq++;
-            mSessionCreateCallbackRecordMap.put(seq, record);
+            mSessionCallbackRecordMap.put(seq, record);
             try {
                 mService.createSession(mClient, inputId, seq, mUserId);
             } catch (RemoteException e) {
@@ -331,6 +366,7 @@ public final class TvInputManager {
 
         private final ITvInputManager mService;
         private final int mUserId;
+        private final int mSeq;
 
         // For scheduling input event handling on the main thread. This also serves as a lock to
         // protect pending input events and the input channel.
@@ -338,17 +374,21 @@ public final class TvInputManager {
 
         private final Pool<PendingEvent> mPendingEventPool = new SimplePool<PendingEvent>(20);
         private final SparseArray<PendingEvent> mPendingEvents = new SparseArray<PendingEvent>(20);
+        private final SparseArray<SessionCallbackRecord> mSessionCallbackRecordMap;
 
         private IBinder mToken;
         private TvInputEventSender mSender;
         private InputChannel mChannel;
 
         /** @hide */
-        private Session(IBinder token, InputChannel channel, ITvInputManager service, int userId) {
+        private Session(IBinder token, InputChannel channel, ITvInputManager service, int userId,
+                int seq, SparseArray<SessionCallbackRecord> sessionCallbackRecordMap) {
             mToken = token;
             mChannel = channel;
             mService = service;
             mUserId = userId;
+            mSeq = seq;
+            mSessionCallbackRecordMap = sessionCallbackRecordMap;
         }
 
         /**
@@ -362,22 +402,11 @@ public final class TvInputManager {
             }
             try {
                 mService.releaseSession(mToken, mUserId);
-                mToken = null;
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
 
-            synchronized (mHandler) {
-                if (mChannel != null) {
-                    if (mSender != null) {
-                        flushPendingEventsLocked();
-                        mSender.dispose();
-                        mSender = null;
-                    }
-                    mChannel.dispose();
-                    mChannel = null;
-                }
-            }
+            releaseInternal();
         }
 
         /**
@@ -667,6 +696,24 @@ public final class TvInputManager {
         private void recyclePendingEventLocked(PendingEvent p) {
             p.recycle();
             mPendingEventPool.release(p);
+        }
+
+        private void releaseInternal() {
+            mToken = null;
+            synchronized (mHandler) {
+                if (mChannel != null) {
+                    if (mSender != null) {
+                        flushPendingEventsLocked();
+                        mSender.dispose();
+                        mSender = null;
+                    }
+                    mChannel.dispose();
+                    mChannel = null;
+                }
+            }
+            synchronized (mSessionCallbackRecordMap) {
+                mSessionCallbackRecordMap.remove(mSeq);
+            }
         }
 
         private final class InputEventHandler extends Handler {

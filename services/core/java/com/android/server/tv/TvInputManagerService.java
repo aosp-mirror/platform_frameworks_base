@@ -225,7 +225,7 @@ public final class TvInputManagerService extends SystemService {
         return serviceState;
     }
 
-    private ITvInputSession getSessionLocked(IBinder sessionToken, int callingUid, int userId) {
+    private SessionState getSessionStateLocked(IBinder sessionToken, int callingUid, int userId) {
         UserState userState = getUserStateLocked(userId);
         SessionState sessionState = userState.sessionStateMap.get(sessionToken);
         if (sessionState == null) {
@@ -236,6 +236,11 @@ public final class TvInputManagerService extends SystemService {
             throw new SecurityException("Illegal access to the session with token " + sessionToken
                     + " from uid " + callingUid);
         }
+        return sessionState;
+    }
+
+    private ITvInputSession getSessionLocked(IBinder sessionToken, int callingUid, int userId) {
+        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid, userId);
         ITvInputSession session = sessionState.mSession;
         if (session == null) {
             throw new IllegalStateException("Session not yet created for token " + sessionToken);
@@ -254,6 +259,13 @@ public final class TvInputManagerService extends SystemService {
         ServiceState serviceState = userState.serviceStateMap.get(inputId);
         if (serviceState == null) {
             return;
+        }
+        if (serviceState.mReconnecting) {
+            if (!serviceState.mSessionTokens.isEmpty()) {
+                // wait until all the sessions are removed.
+                return;
+            }
+            serviceState.mReconnecting = false;
         }
         boolean isStateEmpty = serviceState.mClients.isEmpty()
                 && serviceState.mSessionTokens.isEmpty();
@@ -307,9 +319,14 @@ public final class TvInputManagerService extends SystemService {
                     sessionState.mSession = session;
                     if (session == null) {
                         removeSessionStateLocked(sessionToken, userId);
-                        sendSessionTokenToClientLocked(sessionState.mClient, sessionState.mInputId, null,
-                                null, sessionState.mSeq, userId);
+                        sendSessionTokenToClientLocked(sessionState.mClient, sessionState.mInputId,
+                                null, null, sessionState.mSeq, userId);
                     } else {
+                        try {
+                            session.asBinder().linkToDeath(sessionState, 0);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Session is already died.");
+                        }
                         sendSessionTokenToClientLocked(sessionState.mClient, sessionState.mInputId,
                                 sessionToken, channels[0], sessionState.mSeq, userId);
                     }
@@ -337,11 +354,19 @@ public final class TvInputManagerService extends SystemService {
         } catch (RemoteException exception) {
             Slog.e(TAG, "error in onSessionCreated", exception);
         }
+    }
 
-        if (sessionToken == null) {
-            // This means that the session creation failed. We might want to disconnect the service.
-            updateServiceConnectionLocked(inputId, userId);
+    private void releaseSessionLocked(IBinder sessionToken, int callingUid, int userId) {
+        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid, userId);
+        if (sessionState.mSession != null) {
+            try {
+                sessionState.mSession.release();
+            } catch (RemoteException e) {
+                Slog.w(TAG, "session is already disapeared", e);
+            }
+            sessionState.mSession = null;
         }
+        removeSessionStateLocked(sessionToken, userId);
     }
 
     private void removeSessionStateLocked(IBinder sessionToken, int userId) {
@@ -363,6 +388,18 @@ public final class TvInputManagerService extends SystemService {
             serviceState.mSessionTokens.remove(sessionToken);
         }
         updateServiceConnectionLocked(sessionState.mInputId, userId);
+    }
+
+    private void broadcastServiceAvailabilityChangedLocked(ServiceState serviceState) {
+        for (IBinder iBinder : serviceState.mClients) {
+            ITvInputClient client = ITvInputClient.Stub.asInterface(iBinder);
+            try {
+                client.onAvailabilityChanged(
+                        serviceState.mTvInputInfo.getId(), serviceState.mAvailable);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "error in onAvailabilityChanged", e);
+            }
+        }
     }
 
     private final class BinderService extends ITvInputManager.Stub {
@@ -489,22 +526,28 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    // Create a new session token and a session state.
-                    IBinder sessionToken = new Binder();
-                    SessionState sessionState = new SessionState(inputId, client, seq, callingUid);
-                    sessionState.mSession = null;
-
-                    // Add them to the global session state map of the current user.
                     UserState userState = getUserStateLocked(resolvedUserId);
-                    userState.sessionStateMap.put(sessionToken, sessionState);
-
-                    // Also, add them to the session state map of the current service.
                     ServiceState serviceState = userState.serviceStateMap.get(inputId);
                     if (serviceState == null) {
                         serviceState = new ServiceState(
                                 userState.inputMap.get(inputId), resolvedUserId);
                         userState.serviceStateMap.put(inputId, serviceState);
                     }
+                    // Send a null token immediately while reconnecting.
+                    if (serviceState.mReconnecting == true) {
+                        sendSessionTokenToClientLocked(client, inputId, null, null, seq, userId);
+                        return;
+                    }
+
+                    // Create a new session token and a session state.
+                    IBinder sessionToken = new Binder();
+                    SessionState sessionState = new SessionState(
+                            sessionToken, inputId, client, seq, callingUid, resolvedUserId);
+
+                    // Add them to the global session state map of the current user.
+                    userState.sessionStateMap.put(sessionToken, sessionState);
+
+                    // Also, add them to the session state map of the current service.
                     serviceState.mSessionTokens.add(sessionToken);
 
                     if (serviceState.mService != null) {
@@ -527,14 +570,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    // Release the session.
-                    try {
-                        getSessionLocked(sessionToken, callingUid, resolvedUserId).release();
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "error in release", e);
-                    }
-
-                    removeSessionStateLocked(sessionToken, resolvedUserId);
+                    releaseSessionLocked(sessionToken, callingUid, resolvedUserId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -710,34 +746,57 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private final class ServiceState {
+        // TODO: need to implement DeathRecipient for clients.
         private final List<IBinder> mClients = new ArrayList<IBinder>();
         private final List<IBinder> mSessionTokens = new ArrayList<IBinder>();
         private final ServiceConnection mConnection;
+        private final TvInputInfo mTvInputInfo;
 
         private ITvInputService mService;
         private ServiceCallback mCallback;
         private boolean mBound;
         private boolean mAvailable;
+        private boolean mReconnecting;
 
         private ServiceState(TvInputInfo inputInfo, int userId) {
-            this.mConnection = new InputServiceConnection(inputInfo, userId);
+            mTvInputInfo = inputInfo;
+            mConnection = new InputServiceConnection(inputInfo, userId);
         }
     }
 
-    private static final class SessionState {
+    private final class SessionState implements IBinder.DeathRecipient {
         private final String mInputId;
         private final ITvInputClient mClient;
         private final int mSeq;
         private final int mCallingUid;
-
+        private final int mUserId;
+        private final IBinder mToken;
         private ITvInputSession mSession;
         private Uri mLogUri;
 
-        private SessionState(String inputId, ITvInputClient client, int seq, int callingUid) {
-            this.mInputId = inputId;
-            this.mClient = client;
-            this.mSeq = seq;
-            this.mCallingUid = callingUid;
+        private SessionState(IBinder token, String inputId, ITvInputClient client, int seq,
+                int callingUid, int userId) {
+            mToken = token;
+            mInputId = inputId;
+            mClient = client;
+            mSeq = seq;
+            mCallingUid = callingUid;
+            mUserId = userId;
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mLock) {
+                mSession = null;
+                if (mClient != null) {
+                    try {
+                        mClient.onSessionReleased(mSeq);
+                    } catch(RemoteException e) {
+                        Slog.e(TAG, "error in onSessionReleased", e);
+                    }
+                }
+                removeSessionStateLocked(mToken, mUserId);
+            }
         }
     }
 
@@ -781,6 +840,37 @@ public final class TvInputManagerService extends SystemService {
             if (DEBUG) {
                 Slog.d(TAG, "onServiceDisconnected(inputId=" + mTvInputInfo.getId() + ")");
             }
+            if (!mTvInputInfo.getComponent().equals(name)) {
+                throw new IllegalArgumentException("Mismatched ComponentName: "
+                        + mTvInputInfo.getComponent() + " (expected), " + name + " (actual).");
+            }
+            synchronized (mLock) {
+                UserState userState = getUserStateLocked(mUserId);
+                ServiceState serviceState = userState.serviceStateMap.get(mTvInputInfo.getId());
+                if (serviceState != null) {
+                    serviceState.mReconnecting = true;
+                    serviceState.mBound = false;
+                    serviceState.mService = null;
+                    serviceState.mCallback = null;
+
+                    // Send null tokens for not finishing create session events.
+                    for (IBinder sessionToken : serviceState.mSessionTokens) {
+                        SessionState sessionState = userState.sessionStateMap.get(sessionToken);
+                        if (sessionState.mSession == null) {
+                            removeSessionStateLocked(sessionToken, sessionState.mUserId);
+                            sendSessionTokenToClientLocked(sessionState.mClient,
+                                    sessionState.mInputId, null, null, sessionState.mSeq,
+                                    sessionState.mUserId);
+                        }
+                    }
+
+                    if (serviceState.mAvailable) {
+                        serviceState.mAvailable = false;
+                        broadcastServiceAvailabilityChangedLocked(serviceState);
+                    }
+                    updateServiceConnectionLocked(mTvInputInfo.getId(), mUserId);
+                }
+            }
         }
     }
 
@@ -792,18 +882,16 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void onAvailabilityChanged(String inputId, boolean isAvailable)
-                throws RemoteException {
+        public void onAvailabilityChanged(String inputId, boolean isAvailable) {
             if (DEBUG) {
                 Slog.d(TAG, "onAvailabilityChanged(inputId=" + inputId + ", isAvailable="
                         + isAvailable + ")");
             }
             synchronized (mLock) {
                 ServiceState serviceState = getServiceStateLocked(inputId, mUserId);
-                serviceState.mAvailable = isAvailable;
-                for (IBinder iBinder : serviceState.mClients) {
-                    ITvInputClient client = ITvInputClient.Stub.asInterface(iBinder);
-                    client.onAvailabilityChanged(inputId, isAvailable);
+                if (serviceState.mAvailable != isAvailable) {
+                    serviceState.mAvailable = isAvailable;
+                    broadcastServiceAvailabilityChangedLocked(serviceState);
                 }
             }
         }

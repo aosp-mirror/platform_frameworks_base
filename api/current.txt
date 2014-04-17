@@ -29179,7 +29179,7 @@ package android.tv {
   }
 
   public final class TvInputManager {
-    method public void createSession(java.lang.String, android.tv.TvInputManager.SessionCreateCallback, android.os.Handler);
+    method public void createSession(java.lang.String, android.tv.TvInputManager.SessionCallback, android.os.Handler);
     method public boolean getAvailability(java.lang.String);
     method public java.util.List<android.tv.TvInputInfo> getTvInputList();
     method public void registerListener(java.lang.String, android.tv.TvInputManager.TvInputListener, android.os.Handler);
@@ -29192,8 +29192,10 @@ package android.tv {
     method public void tune(android.net.Uri);
   }
 
-  public static abstract interface TvInputManager.SessionCreateCallback {
-    method public abstract void onSessionCreated(android.tv.TvInputManager.Session);
+  public static abstract class TvInputManager.SessionCallback {
+    ctor public TvInputManager.SessionCallback();
+    method public void onSessionCreated(android.tv.TvInputManager.Session);
+    method public void onSessionReleased(android.tv.TvInputManager.Session);
   }
 
   public static abstract class TvInputManager.TvInputListener {
@@ -29230,7 +29232,7 @@ package android.tv {
     ctor public TvView(android.content.Context);
     ctor public TvView(android.content.Context, android.util.AttributeSet);
     ctor public TvView(android.content.Context, android.util.AttributeSet, int);
-    method public void bindTvInput(java.lang.String, android.tv.TvInputManager.SessionCreateCallback);
+    method public void bindTvInput(java.lang.String, android.tv.TvInputManager.SessionCallback);
     method public boolean dispatchUnhandledInputEvent(android.view.InputEvent);
     method public boolean onUnhandledInputEvent(android.view.InputEvent);
     method public void setOnUnhandledInputEventListener(android.tv.TvView.OnUnhandledInputEventListener);
