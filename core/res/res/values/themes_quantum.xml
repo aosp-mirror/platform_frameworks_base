@@ -317,7 +317,7 @@ please see themes_device_defaults.xml.
         <item name="dividerVertical">?attr/listDivider</item>
         <item name="dividerHorizontal">?attr/listDivider</item>
         <item name="buttonBarStyle">@style/Widget.Quantum.ButtonBar</item>
-        <item name="buttonBarButtonStyle">?attr/borderlessButtonStyle</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Quantum.Button.Borderless.Small</item>
         <item name="segmentedButtonStyle">@style/Widget.Quantum.SegmentedButton</item>
 
         <!-- SearchView attributes -->
@@ -662,7 +662,7 @@ please see themes_device_defaults.xml.
         <item name="dividerVertical">?attr/listDivider</item>
         <item name="dividerHorizontal">?attr/listDivider</item>
         <item name="buttonBarStyle">@style/Widget.Quantum.Light.ButtonBar</item>
-        <item name="buttonBarButtonStyle">?attr/borderlessButtonStyle</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Quantum.Light.Button.Borderless.Small</item>
         <item name="segmentedButtonStyle">@style/Widget.Quantum.Light.SegmentedButton</item>
 
         <!-- SearchView attributes -->
