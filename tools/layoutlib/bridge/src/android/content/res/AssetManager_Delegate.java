@@ -29,7 +29,7 @@ public class AssetManager_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static int newTheme(AssetManager manager) {
-        return Resources_Theme_Delegate.getDelegateManager()
+        return (int) Resources_Theme_Delegate.getDelegateManager()
                 .addNewDelegate(new Resources_Theme_Delegate());
     }
 
