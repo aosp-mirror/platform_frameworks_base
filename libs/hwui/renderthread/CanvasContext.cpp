@@ -445,6 +445,10 @@ void CanvasContext::invokeFunctor(Functor* functor) {
     DrawGlInfo dummyInfo;
     memset(&dummyInfo, 0, sizeof(DrawGlInfo));
     (*functor)(mode, &dummyInfo);
+
+    if (mCanvas) {
+        mCanvas->resume();
+    }
 }
 
 bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
