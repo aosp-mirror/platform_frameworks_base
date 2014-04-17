@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<!--
   ~ Copyright (C) 2014 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,20 +14,8 @@
   ~ limitations under the License
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <View android:id="@+id/bouncer_background"
-        android:background="#aa000000"
-        android:clickable="true"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-    <include
-        style="@style/BouncerSecurityContainer"
-        layout="@layout/keyguard_simple_host_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-</FrameLayout>
-
+<resources>
+    <style name="BouncerSecurityContainer">
+        <item name="android:layout_gravity">center</item>
+    </style>
+</resources>
