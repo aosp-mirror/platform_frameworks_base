@@ -138,7 +138,7 @@ public class KeyguardSimPukView extends KeyguardAbsKeyInputView
 
     @Override
     protected int getPasswordTextViewId() {
-        return R.id.pinEntry;
+        return R.id.pukEntry;
     }
 
     @Override
