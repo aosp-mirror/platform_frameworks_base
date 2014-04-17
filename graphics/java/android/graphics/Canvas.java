@@ -1224,7 +1224,13 @@ public class Canvas {
      *                 values. If false, the alpha byte is ignored (assumed to
      *                 be 0xFF for every pixel).
      * @param paint  May be null. The paint used to draw the bitmap
+     *
+     * @deprecated Usage with a {@link #isHardwareAccelerated() hardware accelerated} canvas
+     * requires an internal copy of color buffer contents every time this method is called. Using a
+     * Bitmap avoids this copy, and allows the application to more explicitly control the lifetime
+     * and copies of pixel data.
      */
+    @Deprecated
     public void drawBitmap(int[] colors, int offset, int stride, float x, float y,
             int width, int height, boolean hasAlpha, Paint paint) {
         // check for valid input
@@ -1251,16 +1257,23 @@ public class Canvas {
         native_drawBitmap(mNativeCanvas, colors, offset, stride, x, y, width, height, hasAlpha,
                 paint != null ? paint.mNativePaint : 0);
     }
-    
-    /** Legacy version of drawBitmap(int[] colors, ...) that took ints for x,y
+
+    /**
+     * Legacy version of drawBitmap(int[] colors, ...) that took ints for x,y
+     *
+     * @deprecated Usage with a {@link #isHardwareAccelerated() hardware accelerated} canvas
+     * requires an internal copy of color buffer contents every time this method is called. Using a
+     * Bitmap avoids this copy, and allows the application to more explicitly control the lifetime
+     * and copies of pixel data.
      */
+    @Deprecated
     public void drawBitmap(int[] colors, int offset, int stride, int x, int y,
             int width, int height, boolean hasAlpha, Paint paint) {
         // call through to the common float version
         drawBitmap(colors, offset, stride, (float)x, (float)y, width, height,
                    hasAlpha, paint);
     }
-        
+
     /**
      * Draw the bitmap using the specified matrix.
      *

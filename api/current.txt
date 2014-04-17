@@ -9655,8 +9655,8 @@ package android.graphics {
     method public void drawBitmap(android.graphics.Bitmap, float, float, android.graphics.Paint);
     method public void drawBitmap(android.graphics.Bitmap, android.graphics.Rect, android.graphics.RectF, android.graphics.Paint);
     method public void drawBitmap(android.graphics.Bitmap, android.graphics.Rect, android.graphics.Rect, android.graphics.Paint);
-    method public void drawBitmap(int[], int, int, float, float, int, int, boolean, android.graphics.Paint);
-    method public void drawBitmap(int[], int, int, int, int, int, int, boolean, android.graphics.Paint);
+    method public deprecated void drawBitmap(int[], int, int, float, float, int, int, boolean, android.graphics.Paint);
+    method public deprecated void drawBitmap(int[], int, int, int, int, int, int, boolean, android.graphics.Paint);
     method public void drawBitmap(android.graphics.Bitmap, android.graphics.Matrix, android.graphics.Paint);
     method public void drawBitmapMesh(android.graphics.Bitmap, int, int, float[], int, int[], int, android.graphics.Paint);
     method public void drawCircle(float, float, float, android.graphics.Paint);
