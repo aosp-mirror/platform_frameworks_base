@@ -49,8 +49,10 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IInterface;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
@@ -61,6 +63,7 @@ import android.service.notification.INotificationListener;
 import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationOrderUpdate;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
@@ -76,7 +79,6 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
 import com.android.internal.R;
-import com.android.internal.notification.NotificationScorer;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.EventLogTags;
 import com.android.server.SystemService;
@@ -104,9 +106,12 @@ import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /** {@hide} */
 public class NotificationManagerService extends SystemService {
@@ -118,6 +123,8 @@ public class NotificationManagerService extends SystemService {
     // message codes
     static final int MESSAGE_TIMEOUT = 2;
     static final int MESSAGE_SAVE_POLICY_FILE = 3;
+    static final int MESSAGE_RECONSIDER_RANKING = 4;
+    static final int MESSAGE_SEND_RANKING_UPDATE = 5;
 
     static final int LONG_DELAY = 3500; // 3.5 seconds
     static final int SHORT_DELAY = 2000; // 2 seconds
@@ -147,6 +154,9 @@ public class NotificationManagerService extends SystemService {
 
     final IBinder mForegroundToken = new Binder();
     private WorkerHandler mHandler;
+    private final HandlerThread mRankingThread = new HandlerThread("ranker",
+            Process.THREAD_PRIORITY_BACKGROUND);
+    private Handler mRankingHandler = null;
 
     private Light mNotificationLight;
     Light mAttentionLight;
@@ -171,6 +181,7 @@ public class NotificationManagerService extends SystemService {
     // used as a mutex for access to all active notifications & listeners
     final ArrayList<NotificationRecord> mNotificationList =
             new ArrayList<NotificationRecord>();
+    final NotificationComparator mRankingComparator = new NotificationComparator();
     final ArrayMap<String, NotificationRecord> mNotificationsByKey =
             new ArrayMap<String, NotificationRecord>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<ToastRecord>();
@@ -193,7 +204,7 @@ public class NotificationManagerService extends SystemService {
     private static final String TAG_PACKAGE = "package";
     private static final String ATTR_NAME = "name";
 
-    final ArrayList<NotificationScorer> mScorers = new ArrayList<NotificationScorer>();
+    final ArrayList<NotificationSignalExtractor> mSignalExtractors = new ArrayList<NotificationSignalExtractor>();
 
     private final UserProfiles mUserProfiles = new UserProfiles();
     private NotificationListeners mListeners;
@@ -446,6 +457,7 @@ public class NotificationManagerService extends SystemService {
         final StatusBarNotification sbn;
         final SingleNotificationStats stats = new SingleNotificationStats();
         IBinder statusBarKey;
+        private float mContactAffinity;
 
         NotificationRecord(StatusBarNotification sbn)
         {
@@ -527,6 +539,14 @@ public class NotificationManagerService extends SystemService {
                     this.sbn.getPackageName(), this.sbn.getUser(), this.sbn.getId(),
                     this.sbn.getTag(), this.sbn.getScore(), this.sbn.getKey(),
                     this.sbn.getNotification());
+        }
+
+        public void setContactAffinity(float contactAffinity) {
+            mContactAffinity = contactAffinity;
+        }
+
+        public float getContactAffinity() {
+            return mContactAffinity;
         }
     }
 
@@ -707,7 +727,7 @@ public class NotificationManagerService extends SystemService {
             boolean queryRemove = false;
             boolean packageChanged = false;
             boolean cancelNotifications = true;
-            
+
             if (action.equals(Intent.ACTION_PACKAGE_ADDED)
                     || (queryRemove=action.equals(Intent.ACTION_PACKAGE_REMOVED))
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
@@ -849,6 +869,8 @@ public class NotificationManagerService extends SystemService {
         mVibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
 
         mHandler = new WorkerHandler();
+        mRankingThread.start();
+        mRankingHandler = new RankingWorkerHandler(mRankingThread.getLooper());
         mZenModeHelper = new ZenModeHelper(getContext(), mHandler);
         mZenModeHelper.addCallback(new ZenModeHelper.Callback() {
             @Override
@@ -925,21 +947,22 @@ public class NotificationManagerService extends SystemService {
 
         mSettingsObserver = new SettingsObserver(mHandler);
 
-        // spin up NotificationScorers
-        String[] notificationScorerNames = resources.getStringArray(
-                R.array.config_notificationScorers);
-        for (String scorerName : notificationScorerNames) {
+        // spin up NotificationSignalExtractors
+        String[] extractorNames = resources.getStringArray(
+                R.array.config_notificationSignalExtractors);
+        for (String extractorName : extractorNames) {
             try {
-                Class<?> scorerClass = getContext().getClassLoader().loadClass(scorerName);
-                NotificationScorer scorer = (NotificationScorer) scorerClass.newInstance();
-                scorer.initialize(getContext());
-                mScorers.add(scorer);
+                Class<?> extractorClass = getContext().getClassLoader().loadClass(extractorName);
+                NotificationSignalExtractor extractor =
+                        (NotificationSignalExtractor) extractorClass.newInstance();
+                extractor.initialize(getContext());
+                mSignalExtractors.add(extractor);
             } catch (ClassNotFoundException e) {
-                Slog.w(TAG, "Couldn't find scorer " + scorerName + ".", e);
+                Slog.w(TAG, "Couldn't find extractor " + extractorName + ".", e);
             } catch (InstantiationException e) {
-                Slog.w(TAG, "Couldn't instantiate scorer " + scorerName + ".", e);
+                Slog.w(TAG, "Couldn't instantiate extractor " + extractorName + ".", e);
             } catch (IllegalAccessException e) {
-                Slog.w(TAG, "Problem accessing scorer " + scorerName + ".", e);
+                Slog.w(TAG, "Problem accessing extractor " + extractorName + ".", e);
             }
         }
 
@@ -1150,6 +1173,7 @@ public class NotificationManagerService extends SystemService {
          * System-only API for getting a list of current (i.e. not cleared) notifications.
          *
          * Requires ACCESS_NOTIFICATIONS which is signature|system.
+         * @returns A list of all the notifications, in natural order.
          */
         @Override
         public StatusBarNotification[] getActiveNotifications(String callingPkg) {
@@ -1306,6 +1330,9 @@ public class NotificationManagerService extends SystemService {
          * should be used.
          *
          * @param token The binder for the listener, to check that the caller is allowed
+         * @param keys the notification keys to fetch, or null for all active notifications.
+         * @returns The return value will contain the notifications specified in keys, in that
+         *      order, or if keys is null, all the notifications, in natural order.
          */
         @Override
         public StatusBarNotification[] getActiveNotificationsFromListener(
@@ -1337,7 +1364,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public String[] getActiveNotificationKeysFromListener(INotificationListener token) {
-            return NotificationManagerService.this.getActiveNotificationKeysFromListener(token);
+            return NotificationManagerService.this.getActiveNotificationKeys(token);
         }
 
         @Override
@@ -1409,19 +1436,21 @@ public class NotificationManagerService extends SystemService {
         }
     };
 
-    private String[] getActiveNotificationKeysFromListener(INotificationListener token) {
-        synchronized (mNotificationList) {
-            final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-            final ArrayList<String> keys = new ArrayList<String>();
-            final int N = mNotificationList.size();
-            for (int i=0; i<N; i++) {
-                final StatusBarNotification sbn = mNotificationList.get(i).sbn;
-                if (info.enabledAndUserMatches(sbn.getUserId())) {
-                    keys.add(sbn.getKey());
+    private String[] getActiveNotificationKeys(INotificationListener token) {
+        final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+        final ArrayList<String> keys = new ArrayList<String>();
+        if (info.isEnabledForCurrentProfiles()) {
+            synchronized (mNotificationList) {
+                final int N = mNotificationList.size();
+                for (int i = 0; i < N; i++) {
+                    final StatusBarNotification sbn = mNotificationList.get(i).sbn;
+                    if (info.enabledAndUserMatches(sbn.getUserId())) {
+                        keys.add(sbn.getKey());
+                    }
                 }
             }
-            return keys.toArray(new String[keys.size()]);
         }
+        return keys.toArray(new String[keys.size()]);
     }
 
     void dumpImpl(PrintWriter pw) {
@@ -1578,26 +1607,23 @@ public class NotificationManagerService extends SystemService {
                 // 1. initial score: buckets of 10, around the app
                 int score = notification.priority * NOTIFICATION_PRIORITY_MULTIPLIER; //[-20..20]
 
-                // 2. Consult external heuristics (TBD)
-
-                // 3. Apply local rules
-
-                int initialScore = score;
-                if (!mScorers.isEmpty()) {
-                    if (DBG) Slog.v(TAG, "Initial score is " + score + ".");
-                    for (NotificationScorer scorer : mScorers) {
+                // 2. extract ranking signals from the notification data
+                final StatusBarNotification n = new StatusBarNotification(
+                        pkg, opPkg, id, tag, callingUid, callingPid, score, notification,
+                        user);
+                NotificationRecord r = new NotificationRecord(n);
+                if (!mSignalExtractors.isEmpty()) {
+                    for (NotificationSignalExtractor extractor : mSignalExtractors) {
                         try {
-                            score = scorer.getScore(notification, score);
+                            RankingFuture future = extractor.process(r);
+                            scheduleRankingReconsideration(future);
                         } catch (Throwable t) {
-                            Slog.w(TAG, "Scorer threw on .getScore.", t);
+                            Slog.w(TAG, "NotificationSignalExtractor failed.", t);
                         }
                     }
-                    if (DBG) Slog.v(TAG, "Final score is " + score + ".");
                 }
 
-                // add extra to indicate score modified by NotificationScorer
-                notification.extras.putBoolean(Notification.EXTRA_SCORE_MODIFIED,
-                        score != initialScore);
+                // 3. Apply local rules
 
                 // blocked apps
                 if (ENABLE_BLOCKED_NOTIFICATIONS && !noteNotificationOp(pkg, callingUid)) {
@@ -1606,10 +1632,6 @@ public class NotificationManagerService extends SystemService {
                         Slog.e(TAG, "Suppressing notification from package " + pkg
                                 + " by user request.");
                     }
-                }
-
-                if (DBG) {
-                    Slog.v(TAG, "Assigned score=" + score + " to " + notification);
                 }
 
                 if (score < SCORE_DISPLAY_THRESHOLD) {
@@ -1626,12 +1648,7 @@ public class NotificationManagerService extends SystemService {
                 if (DBG || intercept) Slog.v(TAG,
                         "pkg=" + pkg + " canInterrupt=" + canInterrupt + " intercept=" + intercept);
                 synchronized (mNotificationList) {
-                    final StatusBarNotification n = new StatusBarNotification(
-                            pkg, opPkg, id, tag, callingUid, callingPid, score, notification,
-                            user);
-                    NotificationRecord r = new NotificationRecord(n);
                     NotificationRecord old = null;
-
                     int index = indexOfNotificationLocked(pkg, tag, id, userId);
                     if (index < 0) {
                         mNotificationList.add(r);
@@ -1650,6 +1667,8 @@ public class NotificationManagerService extends SystemService {
                         mNotificationsByKey.remove(old.sbn.getKey());
                     }
                     mNotificationsByKey.put(n.getKey(), r);
+
+                    Collections.sort(mNotificationList, mRankingComparator);
 
                     // Ensure if this is a foreground service that the proper additional
                     // flags are set.
@@ -1948,6 +1967,57 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    private void scheduleRankingReconsideration(RankingFuture future) {
+        if (future != null) {
+            Message m = Message.obtain(mRankingHandler, MESSAGE_RECONSIDER_RANKING, future);
+            long delay = future.getDelay(TimeUnit.MILLISECONDS);
+            mRankingHandler.sendMessageDelayed(m, delay);
+        }
+    }
+
+    private void handleRankingReconsideration(Message message) {
+        if (!(message.obj instanceof RankingFuture)) return;
+
+        RankingFuture future = (RankingFuture) message.obj;
+        future.run();
+        try {
+            NotificationRecord record = future.get();
+            synchronized (mNotificationList) {
+                int before = mNotificationList.indexOf(record);
+                if (before != -1) {
+                    Collections.sort(mNotificationList, mRankingComparator);
+                    int after = mNotificationList.indexOf(record);
+
+                    if (before != after) {
+                        scheduleSendRankingUpdate();
+                    }
+                }
+            }
+        } catch (InterruptedException e) {
+            // we're running the future explicitly, so this should never happen
+        } catch (ExecutionException e) {
+            // we're running the future explicitly, so this should never happen
+        }
+    }
+
+    private void scheduleSendRankingUpdate() {
+        mHandler.removeMessages(MESSAGE_SEND_RANKING_UPDATE);
+        Message m = Message.obtain(mHandler, MESSAGE_SEND_RANKING_UPDATE);
+        mHandler.sendMessage(m);
+    }
+
+    private void handleSendRankingUpdate() {
+        synchronized (mNotificationList) {
+            final int N = mNotificationList.size();
+            ArrayList<StatusBarNotification> sbns =
+                    new ArrayList<StatusBarNotification>(N);
+            for (int i = 0; i < N; i++ ) {
+                sbns.add(mNotificationList.get(i).sbn);
+            }
+            mListeners.notifyOrderUpdateLocked(sbns);
+        }
+    }
+
     private final class WorkerHandler extends Handler
     {
         @Override
@@ -1961,10 +2031,29 @@ public class NotificationManagerService extends SystemService {
                 case MESSAGE_SAVE_POLICY_FILE:
                     handleSavePolicyFile();
                     break;
+                case MESSAGE_SEND_RANKING_UPDATE:
+                    handleSendRankingUpdate();
+                    break;
+            }
+        }
+
+    }
+
+    private final class RankingWorkerHandler extends Handler
+    {
+        public RankingWorkerHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MESSAGE_RECONSIDER_RANKING:
+                    handleRankingReconsideration(msg);
+                    break;
             }
         }
     }
-
 
     // Notifications
     // ============================================================================
@@ -2346,9 +2435,9 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onServiceAdded(ManagedServiceInfo info) {
             final INotificationListener listener = (INotificationListener) info.service;
-            final String[] keys = getActiveNotificationKeysFromListener(listener);
+            final String[] keys = getActiveNotificationKeys(listener);
             try {
-                listener.onListenerConnected(keys);
+                listener.onListenerConnected(new NotificationOrderUpdate(keys));
             } catch (RemoteException e) {
                 // we tried
             }
@@ -2361,12 +2450,18 @@ public class NotificationManagerService extends SystemService {
             // make a copy in case changes are made to the underlying Notification object
             final StatusBarNotification sbnClone = sbn.clone();
             for (final ManagedServiceInfo info : mServices) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        notifyPostedIfUserMatch(info, sbnClone);
+                if (info.isEnabledForCurrentProfiles()) {
+                    final INotificationListener listener = (INotificationListener) info.service;
+                    final String[] keys = getActiveNotificationKeys(listener);
+                    if (keys.length > 0) {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                notifyPostedIfUserMatch(info, sbnClone, keys);
+                            }
+                        });
                     }
-                });
+                }
             }
         }
 
@@ -2378,38 +2473,82 @@ public class NotificationManagerService extends SystemService {
             // NOTE: this copy is lightweight: it doesn't include heavyweight parts of the
             // notification
             final StatusBarNotification sbnLight = sbn.cloneLight();
-            for (ManagedServiceInfo serviceInfo : mServices) {
-                final ManagedServiceInfo info = (ManagedServiceInfo) serviceInfo;
+            for (final ManagedServiceInfo info : mServices) {
+                if (info.isEnabledForCurrentProfiles()) {
+                    final INotificationListener listener = (INotificationListener) info.service;
+                    final String[] keys = getActiveNotificationKeys(listener);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            notifyRemovedIfUserMatch(info, sbnLight, keys);
+                        }
+                    });
+                }
+            }
+        }
+
+        /**
+         * asynchronously notify all listeners about a reordering of notifications
+         * @param sbns an array of {@link StatusBarNotification}s to consider.  This code
+         *             must not rely on mutable members of these objects, such as the
+         *             {@link Notification}.
+         */
+        public void notifyOrderUpdateLocked(final ArrayList<StatusBarNotification> sbns) {
+            for (final ManagedServiceInfo serviceInfo : mServices) {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        notifyRemovedIfUserMatch(info, sbnLight);
+                        notifyOrderUpdateIfUserMatch(serviceInfo, sbns);
                     }
                 });
             }
         }
 
-        private void notifyPostedIfUserMatch(ManagedServiceInfo info, StatusBarNotification sbn) {
+        private void notifyPostedIfUserMatch(final ManagedServiceInfo info,
+                final StatusBarNotification sbn, String[] keys) {
             if (!info.enabledAndUserMatches(sbn.getUserId())) {
                 return;
             }
             final INotificationListener listener = (INotificationListener)info.service;
             try {
-                listener.onNotificationPosted(sbn);
+                listener.onNotificationPosted(sbn, new NotificationOrderUpdate(keys));
             } catch (RemoteException ex) {
                 Log.e(TAG, "unable to notify listener (posted): " + listener, ex);
             }
         }
 
-        private void notifyRemovedIfUserMatch(ManagedServiceInfo info, StatusBarNotification sbn) {
+        private void notifyRemovedIfUserMatch(ManagedServiceInfo info, StatusBarNotification sbn,
+                String[] keys) {
             if (!info.enabledAndUserMatches(sbn.getUserId())) {
                 return;
             }
             final INotificationListener listener = (INotificationListener)info.service;
             try {
-                listener.onNotificationRemoved(sbn);
+                listener.onNotificationRemoved(sbn, new NotificationOrderUpdate(keys));
             } catch (RemoteException ex) {
                 Log.e(TAG, "unable to notify listener (removed): " + listener, ex);
+            }
+        }
+
+        /**
+         * @param sbns an array of {@link StatusBarNotification}s to consider.  This code
+         *             must not rely on mutable members of these objects, such as the
+         *             {@link Notification}.
+         */
+        public void notifyOrderUpdateIfUserMatch(ManagedServiceInfo info,
+                ArrayList<StatusBarNotification> sbns) {
+            ArrayList<String> keys = new ArrayList<String>(sbns.size());
+            for (StatusBarNotification sbn: sbns) {
+                if (info.enabledAndUserMatches(sbn.getUserId())) {
+                    keys.add(sbn.getKey());
+                }
+            }
+            final INotificationListener listener = (INotificationListener)info.service;
+            try {
+                listener.onNotificationOrderUpdate(
+                        new NotificationOrderUpdate(keys.toArray(new String[keys.size()])));
+            } catch (RemoteException ex) {
+                Log.e(TAG, "unable to notify listener (ranking update): " + listener, ex);
             }
         }
     }
