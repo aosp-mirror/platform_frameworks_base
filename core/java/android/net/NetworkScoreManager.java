@@ -40,33 +40,33 @@ import android.os.ServiceManager;
  *     and (eventually) calls {@link #updateScores} with the results.
  * </ul>
  *
- * <p>The system keeps track of a default scorer application; at any time, only this application
+ * <p>The system keeps track of an active scorer application; at any time, only this application
  * will receive {@link #ACTION_SCORE_NETWORKS} broadcasts and will be permitted to call
- * {@link #updateScores}. Applications may determine the current default scorer with
- * {@link #getActiveScorerPackage()} and request to change the default scorer by sending an
- * {@link #ACTION_CHANGE_DEFAULT} broadcast with another scorer.
+ * {@link #updateScores}. Applications may determine the current active scorer with
+ * {@link #getActiveScorerPackage()} and request to change the active scorer by sending an
+ * {@link #ACTION_CHANGE_ACTIVE} broadcast with another scorer.
  *
  * @hide
  */
 public class NetworkScoreManager {
     /**
-     * Activity action: ask the user to change the default network scorer. This will show a dialog
-     * that asks the user whether they want to replace the current default scorer with the one
+     * Activity action: ask the user to change the active network scorer. This will show a dialog
+     * that asks the user whether they want to replace the current active scorer with the one
      * specified in {@link #EXTRA_PACKAGE_NAME}. The activity will finish with RESULT_OK if the
-     * default was changed or RESULT_CANCELED if it failed for any reason.
+     * active scorer was changed or RESULT_CANCELED if it failed for any reason.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_CHANGE_DEFAULT = "android.net.scoring.CHANGE_DEFAULT";
+    public static final String ACTION_CHANGE_ACTIVE = "android.net.scoring.CHANGE_ACTIVE";
 
     /**
-     * Extra used with {@link #ACTION_CHANGE_DEFAULT} to specify the new scorer package. Set with
+     * Extra used with {@link #ACTION_CHANGE_ACTIVE} to specify the new scorer package. Set with
      * {@link android.content.Intent#putExtra(String, String)}.
      */
     public static final String EXTRA_PACKAGE_NAME = "packageName";
 
     /**
      * Broadcast action: new network scores are being requested. This intent will only be delivered
-     * to the current default scorer app. That app is responsible for scoring the networks and
+     * to the current active scorer app. That app is responsible for scoring the networks and
      * calling {@link #updateScores} when complete. The networks to score are specified in
      * {@link #EXTRA_NETWORKS_TO_SCORE}, and will generally consist of all networks which have been
      * configured by the user as well as any open networks.
@@ -99,7 +99,7 @@ public class NetworkScoreManager {
      * <p>At any time, only one scorer application will receive {@link #ACTION_SCORE_NETWORKS}
      * broadcasts and be allowed to call {@link #updateScores}. Applications may use this method to
      * determine the current scorer and offer the user the ability to select a different scorer via
-     * the {@link #ACTION_CHANGE_DEFAULT} intent.
+     * the {@link #ACTION_CHANGE_ACTIVE} intent.
      * @return the full package name of the current active scorer, or null if there is no active
      *     scorer.
      */
