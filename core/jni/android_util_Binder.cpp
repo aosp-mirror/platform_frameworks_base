@@ -23,6 +23,7 @@
 #include "JNIHelp.h"
 
 #include <fcntl.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -334,7 +335,7 @@ public:
         if (b == NULL) {
             b = new JavaBBinder(env, obj);
             mBinder = b;
-            ALOGV("Creating JavaBinder %p (refs %p) for Object %p, weakCount=%d\n",
+            ALOGV("Creating JavaBinder %p (refs %p) for Object %p, weakCount=%" PRId32 "\n",
                  b.get(), b->getWeakRefs(), obj, b->getWeakRefs()->getWeakCount());
         }
 
@@ -697,9 +698,9 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
                     "Not allowed to write file descriptors here");
             break;
         default:
-            ALOGE("Unknown binder error code. 0x%x", err);
+            ALOGE("Unknown binder error code. 0x%" PRIx32, err);
             String8 msg;
-            msg.appendFormat("Unknown binder error code. 0x%x", err);
+            msg.appendFormat("Unknown binder error code. 0x%" PRIx32, err);
             // RemoteException is a checked exception, only throw from certain methods.
             jniThrowException(env, canThrowRemoteException
                     ? "android/os/RemoteException" : "java/lang/RuntimeException", msg.string());
@@ -733,7 +734,7 @@ static void android_os_Binder_restoreCallingIdentity(JNIEnv* env, jobject clazz,
     if (uid > 0 && uid < 999) {
         // In Android currently there are no uids in this range.
         char buf[128];
-        sprintf(buf, "Restoring bad calling ident: 0x%Lx", token);
+        sprintf(buf, "Restoring bad calling ident: 0x%" PRIx64, token);
         jniThrowException(env, "java/lang/IllegalStateException", buf);
         return;
     }
@@ -965,8 +966,8 @@ static bool push_eventlog_string(char** pos, const char* end, const char* str) {
     jint len = strlen(str);
     int space_needed = 1 + sizeof(len) + len;
     if (end - *pos < space_needed) {
-        ALOGW("not enough space for string. remain=%d; needed=%d",
-             (end - *pos), space_needed);
+        ALOGW("not enough space for string. remain=%zd; needed=%d",
+             end - *pos, space_needed);
         return false;
     }
     **pos = EVENT_TYPE_STRING;
@@ -981,8 +982,8 @@ static bool push_eventlog_string(char** pos, const char* end, const char* str) {
 static bool push_eventlog_int(char** pos, const char* end, jint val) {
     int space_needed = 1 + sizeof(val);
     if (end - *pos < space_needed) {
-        ALOGW("not enough space for int.  remain=%d; needed=%d",
-             (end - *pos), space_needed);
+        ALOGW("not enough space for int.  remain=%zd; needed=%d",
+             end - *pos, space_needed);
         return false;
     }
     **pos = EVENT_TYPE_INT;
@@ -1068,7 +1069,7 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
         return JNI_FALSE;
     }
 
-    ALOGV("Java code calling transact on %p in Java object %p with code %d\n",
+    ALOGV("Java code calling transact on %p in Java object %p with code %" PRId32 "\n",
             target, obj, code);
 
 #if ENABLE_BINDER_SAMPLE
