@@ -25,7 +25,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_PACKAGE_NAME := PacProcessor
 LOCAL_CERTIFICATE := platform
 
-LOCAL_REQUIRED_MODULES := libjni_pacprocessor
+LOCAL_JNI_SHARED_LIBRARIES := libjni_pacprocessor
 
 include $(BUILD_PACKAGE)
 
