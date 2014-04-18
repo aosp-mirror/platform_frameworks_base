@@ -28161,12 +28161,19 @@ package android.tv {
     field public static final java.lang.String SERVICE_INTERFACE = "android.tv.TvInputService";
   }
 
-  public abstract class TvInputService.TvInputSessionImpl {
+  public abstract class TvInputService.TvInputSessionImpl implements android.view.KeyEvent.Callback {
     ctor public TvInputService.TvInputSessionImpl();
     method public android.view.View onCreateOverlayView();
+    method public boolean onGenericMotionEvent(android.view.MotionEvent);
+    method public boolean onKeyDown(int, android.view.KeyEvent);
+    method public boolean onKeyLongPress(int, android.view.KeyEvent);
+    method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
+    method public boolean onKeyUp(int, android.view.KeyEvent);
     method public abstract void onRelease();
     method public abstract boolean onSetSurface(android.view.Surface);
     method public abstract void onSetVolume(float);
+    method public boolean onTouchEvent(android.view.MotionEvent);
+    method public boolean onTrackballEvent(android.view.MotionEvent);
     method public abstract boolean onTune(android.net.Uri);
     method public void setOverlayViewEnabled(boolean);
   }
@@ -28176,7 +28183,14 @@ package android.tv {
     ctor public TvView(android.content.Context, android.util.AttributeSet);
     ctor public TvView(android.content.Context, android.util.AttributeSet, int);
     method public void bindTvInput(android.content.ComponentName, android.tv.TvInputManager.SessionCreateCallback);
+    method public boolean dispatchUnhandledInputEvent(android.view.InputEvent);
+    method public boolean onUnhandledInputEvent(android.view.InputEvent);
+    method public void setOnUnhandledInputEventListener(android.tv.TvView.OnUnhandledInputEventListener);
     method public void unbindTvInput();
+  }
+
+  public static abstract interface TvView.OnUnhandledInputEventListener {
+    method public abstract boolean onUnhandledInputEvent(android.view.InputEvent);
   }
 
 }

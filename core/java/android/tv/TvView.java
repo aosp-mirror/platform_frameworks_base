@@ -20,20 +20,24 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.tv.TvInputManager;
 import android.tv.TvInputManager.Session;
+import android.tv.TvInputManager.Session.FinishedInputEventCallback;
 import android.tv.TvInputManager.SessionCreateCallback;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.InputEvent;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.ViewTreeObserver;
 
 /**
  * View playing TV
  */
 public class TvView extends SurfaceView {
+    // STOPSHIP: Turn debugging off.
+    private static final boolean DEBUG = true;
     private static final String TAG = "TvView";
 
     private final Handler mHandler = new Handler();
@@ -41,11 +45,11 @@ public class TvView extends SurfaceView {
     private Surface mSurface;
     private boolean mOverlayViewCreated;
     private Rect mOverlayViewFrame;
-    private boolean mGlobalListenersAdded;
-    private TvInputManager mTvInputManager;
+    private final TvInputManager mTvInputManager;
     private SessionCreateCallback mSessionCreateCallback;
+    private OnUnhandledInputEventListener mOnUnhandledInputEventListener;
 
-    private SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
+    private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             Log.d(TAG, "surfaceChanged(holder=" + holder + ", format=" + format + ", width=" + width
@@ -67,6 +71,25 @@ public class TvView extends SurfaceView {
         public void surfaceDestroyed(SurfaceHolder holder) {
             mSurface = null;
             setSessionSurface(null);
+        }
+    };
+
+    private final FinishedInputEventCallback mFinishedInputEventCallback =
+            new FinishedInputEventCallback() {
+        @Override
+        public void onFinishedInputEvent(Object token, boolean handled) {
+            if (DEBUG) {
+                Log.d(TAG, "onFinishedInputEvent(token=" + token + ", handled=" + handled + ")");
+            }
+            if (handled) {
+                return;
+            }
+            // TODO: Re-order unhandled events.
+            InputEvent event = (InputEvent) token;
+            if (dispatchUnhandledInputEvent(event)) {
+                return;
+            }
+            getViewRootImpl().dispatchUnhandledInputEvent(event);
         }
     };
 
@@ -122,6 +145,98 @@ public class TvView extends SurfaceView {
         if (mSession != null) {
             release();
         }
+    }
+
+    /**
+     * Dispatches an unhandled input event to the next receiver.
+     * <p>
+     * Except system keys, TvView always consumes input events in the normal flow. This is called
+     * asynchronously from where the event is dispatched. It gives the host application a chance to
+     * dispatch the unhandled input events.
+     *
+     * @param event The input event.
+     * @return {@code true} if the event was handled by the view, {@code false} otherwise.
+     */
+    public boolean dispatchUnhandledInputEvent(InputEvent event) {
+        if (mOnUnhandledInputEventListener != null) {
+            if (mOnUnhandledInputEventListener.onUnhandledInputEvent(event)) {
+                return true;
+            }
+        }
+        return onUnhandledInputEvent(event);
+    }
+
+    /**
+     * Called when an unhandled input event was also not handled by the user provided callback. This
+     * is the last chance to handle the unhandled input event in the TvView.
+     *
+     * @param event The input event.
+     * @return If you handled the event, return {@code true}. If you want to allow the event to be
+     *         handled by the next receiver, return {@code false}.
+     */
+    public boolean onUnhandledInputEvent(InputEvent event) {
+        return false;
+    }
+
+    /**
+     * Registers a callback to be invoked when an input event was not handled by the bound TV input.
+     *
+     * @param listener The callback to invoke when the unhandled input event was received.
+     */
+    public void setOnUnhandledInputEventListener(OnUnhandledInputEventListener listener) {
+        mOnUnhandledInputEventListener = listener;
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (super.dispatchKeyEvent(event)) {
+            return true;
+        }
+        if (DEBUG) Log.d(TAG, "dispatchKeyEvent(" + event + ")");
+        if (mSession == null) {
+            return false;
+        }
+        int ret = mSession.dispatchInputEvent(event, event, mFinishedInputEventCallback, mHandler);
+        return ret != Session.DISPATCH_NOT_HANDLED;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (super.dispatchTouchEvent(event)) {
+            return true;
+        }
+        if (DEBUG) Log.d(TAG, "dispatchTouchEvent(" + event + ")");
+        if (mSession == null) {
+            return false;
+        }
+        int ret = mSession.dispatchInputEvent(event, event, mFinishedInputEventCallback, mHandler);
+        return ret != Session.DISPATCH_NOT_HANDLED;
+    }
+
+    @Override
+    public boolean dispatchTrackballEvent(MotionEvent event) {
+        if (super.dispatchTrackballEvent(event)) {
+            return true;
+        }
+        if (DEBUG) Log.d(TAG, "dispatchTrackballEvent(" + event + ")");
+        if (mSession == null) {
+            return false;
+        }
+        int ret = mSession.dispatchInputEvent(event, event, mFinishedInputEventCallback, mHandler);
+        return ret != Session.DISPATCH_NOT_HANDLED;
+    }
+
+    @Override
+    public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        if (super.dispatchGenericMotionEvent(event)) {
+            return true;
+        }
+        if (DEBUG) Log.d(TAG, "dispatchGenericMotionEvent(" + event + ")");
+        if (mSession == null) {
+            return false;
+        }
+        int ret = mSession.dispatchInputEvent(event, event, mFinishedInputEventCallback, mHandler);
+        return ret != Session.DISPATCH_NOT_HANDLED;
     }
 
     @Override
@@ -194,6 +309,23 @@ public class TvView extends SurfaceView {
         getLocationOnScreen(location);
         return new Rect(location[0], location[1],
                 location[0] + getWidth(), location[1] + getHeight());
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when the unhandled input event is received.
+     */
+    public interface OnUnhandledInputEventListener {
+        /**
+         * Called when an input event was not handled by the bound TV input.
+         * <p>
+         * This is called asynchronously from where the event is dispatched. It gives the host
+         * application a chance to handle the unhandled input events.
+         *
+         * @param event The input event.
+         * @return If you handled the event, return {@code true}. If you want to allow the event to
+         *         be handled by the next receiver, return {@code false}.
+         */
+        boolean onUnhandledInputEvent(InputEvent event);
     }
 
     private class MySessionCreateCallback implements SessionCreateCallback {

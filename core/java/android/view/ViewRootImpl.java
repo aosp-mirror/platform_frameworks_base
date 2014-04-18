@@ -3204,8 +3204,11 @@ public final class ViewRootImpl implements ViewParent,
                 doDie();
                 break;
             case MSG_DISPATCH_INPUT_EVENT: {
-                InputEvent event = (InputEvent)msg.obj;
-                enqueueInputEvent(event, null, 0, true);
+                SomeArgs args = (SomeArgs)msg.obj;
+                InputEvent event = (InputEvent)args.arg1;
+                InputEventReceiver receiver = (InputEventReceiver)args.arg2;
+                enqueueInputEvent(event, receiver, 0, true);
+                args.recycle();
             } break;
             case MSG_DISPATCH_KEY_FROM_IME: {
                 if (LOCAL_LOGV) Log.v(
@@ -5787,7 +5790,14 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void dispatchInputEvent(InputEvent event) {
-        Message msg = mHandler.obtainMessage(MSG_DISPATCH_INPUT_EVENT, event);
+        dispatchInputEvent(event, null);
+    }
+
+    public void dispatchInputEvent(InputEvent event, InputEventReceiver receiver) {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = event;
+        args.arg2 = receiver;
+        Message msg = mHandler.obtainMessage(MSG_DISPATCH_INPUT_EVENT, args);
         msg.setAsynchronous(true);
         mHandler.sendMessage(msg);
     }

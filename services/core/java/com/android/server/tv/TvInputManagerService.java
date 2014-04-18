@@ -49,9 +49,9 @@ import android.tv.ITvInputSession;
 import android.tv.ITvInputSessionCallback;
 import android.tv.TvInputInfo;
 import android.tv.TvInputService;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.InputChannel;
 import android.view.Surface;
 
 import com.android.internal.content.PackageMonitor;
@@ -292,6 +292,9 @@ public final class TvInputManagerService extends SystemService {
             Slog.d(TAG, "createSessionInternalLocked(name=" + sessionState.name.getClassName()
                     + ")");
         }
+
+        final InputChannel[] channels = InputChannel.openInputChannelPair(sessionToken.toString());
+
         // Set up a callback to send the session token.
         ITvInputSessionCallback callback = new ITvInputSessionCallback.Stub() {
             @Override
@@ -304,30 +307,32 @@ public final class TvInputManagerService extends SystemService {
                     if (session == null) {
                         removeSessionStateLocked(sessionToken, userId);
                         sendSessionTokenToClientLocked(sessionState.client, sessionState.name, null,
-                                sessionState.seq, userId);
+                                null, sessionState.seq, userId);
                     } else {
                         sendSessionTokenToClientLocked(sessionState.client, sessionState.name,
-                                sessionToken, sessionState.seq, userId);
+                                sessionToken, channels[0], sessionState.seq, userId);
                     }
+                    channels[0].dispose();
                 }
             }
         };
 
         // Create a session. When failed, send a null token immediately.
         try {
-            service.createSession(callback);
+            service.createSession(channels[1], callback);
         } catch (RemoteException e) {
             Slog.e(TAG, "error in createSession", e);
             removeSessionStateLocked(sessionToken, userId);
-            sendSessionTokenToClientLocked(sessionState.client, sessionState.name, null,
+            sendSessionTokenToClientLocked(sessionState.client, sessionState.name, null, null,
                     sessionState.seq, userId);
         }
+        channels[1].dispose();
     }
 
     private void sendSessionTokenToClientLocked(ITvInputClient client, ComponentName name,
-            IBinder sessionToken, int seq, int userId) {
+            IBinder sessionToken, InputChannel channel, int seq, int userId) {
         try {
-            client.onSessionCreated(name, sessionToken, seq);
+            client.onSessionCreated(name, sessionToken, channel, seq);
         } catch (RemoteException exception) {
             Slog.e(TAG, "error in onSessionCreated", exception);
         }
@@ -834,7 +839,7 @@ public final class TvInputManagerService extends SystemService {
                     return;
                 }
                 default: {
-                    Log.w(TAG, "Unhandled message code: " + msg.what);
+                    Slog.w(TAG, "Unhandled message code: " + msg.what);
                     return;
                 }
             }

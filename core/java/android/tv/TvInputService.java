@@ -28,13 +28,21 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.tv.TvInputManager.Session;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.InputChannel;
+import android.view.InputDevice;
+import android.view.InputEvent;
+import android.view.InputEventReceiver;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.SomeArgs;
 
 /**
  * A base class for implementing television input service.
@@ -89,10 +97,17 @@ public abstract class TvInputService extends Service {
             }
 
             @Override
-            public void createSession(ITvInputSessionCallback cb) {
-                if (cb != null) {
-                    mHandler.obtainMessage(ServiceHandler.DO_CREATE_SESSION, cb).sendToTarget();
+            public void createSession(InputChannel channel, ITvInputSessionCallback cb) {
+                if (channel == null) {
+                    Log.w(TAG, "Creating session without input channel");
                 }
+                if (cb == null) {
+                    return;
+                }
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = channel;
+                args.arg2 = cb;
+                mHandler.obtainMessage(ServiceHandler.DO_CREATE_SESSION, args).sendToTarget();
             }
         };
     }
@@ -131,7 +146,8 @@ public abstract class TvInputService extends Service {
     /**
      * Base class for derived classes to implement to provide {@link TvInputManager.Session}.
      */
-    public abstract class TvInputSessionImpl {
+    public abstract class TvInputSessionImpl implements KeyEvent.Callback {
+        private final KeyEvent.DispatcherState mDispatcherState = new KeyEvent.DispatcherState();
         private final WindowManager mWindowManager;
         private WindowManager.LayoutParams mWindowParams;
         private View mOverlayView;
@@ -143,6 +159,13 @@ public abstract class TvInputService extends Service {
             mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         }
 
+        /**
+         * Enables or disables the overlay view. By default, the overlay view is disabled. Must be
+         * called explicitly after the session is created to enable the overlay view.
+         *
+         * @param enable {@code true} if you want to enable the overlay view. {@code false}
+         *            otherwise.
+         */
         public void setOverlayViewEnabled(final boolean enable) {
             mHandler.post(new Runnable() {
                 @Override
@@ -203,6 +226,121 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Default implementation of {@link android.view.KeyEvent.Callback#onKeyDown(int, KeyEvent)
+         * KeyEvent.Callback.onKeyDown()}: always returns false (doesn't handle the event).
+         * <p>
+         * Override this to intercept key down events before they are processed by the application.
+         * If you return true, the application will not process the event itself. If you return
+         * false, the normal application processing will occur as if the TV input had not seen the
+         * event at all.
+         *
+         * @param keyCode The value in event.getKeyCode().
+         * @param event Description of the key event.
+         * @return If you handled the event, return {@code true}. If you want to allow the event to
+         *         be handled by the next receiver, return {@code false}.
+         */
+        @Override
+        public boolean onKeyDown(int keyCode, KeyEvent event) {
+            return false;
+        }
+
+        /**
+         * Default implementation of
+         * {@link android.view.KeyEvent.Callback#onKeyLongPress(int, KeyEvent)
+         * KeyEvent.Callback.onKeyLongPress()}: always returns false (doesn't handle the event).
+         * <p>
+         * Override this to intercept key long press events before they are processed by the
+         * application. If you return true, the application will not process the event itself. If
+         * you return false, the normal application processing will occur as if the TV input had not
+         * seen the event at all.
+         *
+         * @param keyCode The value in event.getKeyCode().
+         * @param event Description of the key event.
+         * @return If you handled the event, return {@code true}. If you want to allow the event to
+         *         be handled by the next receiver, return {@code false}.
+         */
+        @Override
+        public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+            return false;
+        }
+
+        /**
+         * Default implementation of
+         * {@link android.view.KeyEvent.Callback#onKeyMultiple(int, int, KeyEvent)
+         * KeyEvent.Callback.onKeyMultiple()}: always returns false (doesn't handle the event).
+         * <p>
+         * Override this to intercept special key multiple events before they are processed by the
+         * application. If you return true, the application will not itself process the event. If
+         * you return false, the normal application processing will occur as if the TV input had not
+         * seen the event at all.
+         *
+         * @param keyCode The value in event.getKeyCode().
+         * @param count The number of times the action was made.
+         * @param event Description of the key event.
+         * @return If you handled the event, return {@code true}. If you want to allow the event to
+         *         be handled by the next receiver, return {@code false}.
+         */
+        @Override
+        public boolean onKeyMultiple(int keyCode, int count, KeyEvent event) {
+            return false;
+        }
+
+        /**
+         * Default implementation of {@link android.view.KeyEvent.Callback#onKeyUp(int, KeyEvent)
+         * KeyEvent.Callback.onKeyUp()}: always returns false (doesn't handle the event).
+         * <p>
+         * Override this to intercept key up events before they are processed by the application. If
+         * you return true, the application will not itself process the event. If you return false,
+         * the normal application processing will occur as if the TV input had not seen the event at
+         * all.
+         *
+         * @param keyCode The value in event.getKeyCode().
+         * @param event Description of the key event.
+         * @return If you handled the event, return {@code true}. If you want to allow the event to
+         *         be handled by the next receiver, return {@code false}.
+         */
+        @Override
+        public boolean onKeyUp(int keyCode, KeyEvent event) {
+            return false;
+        }
+
+        /**
+         * Implement this method to handle touch screen motion events on the current input session.
+         *
+         * @param event The motion event being received.
+         * @return If you handled the event, return {@code true}. If you want to allow the event to
+         *         be handled by the next receiver, return {@code false}.
+         * @see View#onTouchEvent
+         */
+        public boolean onTouchEvent(MotionEvent event) {
+            return false;
+        }
+
+        /**
+         * Implement this method to handle trackball events on the current input session.
+         *
+         * @param event The motion event being received.
+         * @return If you handled the event, return {@code true}. If you want to allow the event to
+         *         be handled by the next receiver, return {@code false}.
+         * @see View#onTrackballEvent
+         */
+        public boolean onTrackballEvent(MotionEvent event) {
+            return false;
+        }
+
+        /**
+         * Implement this method to handle generic motion events on the current input session.
+         *
+         * @param event The motion event being received.
+         * @return If you handled the event, return {@code true}. If you want to allow the event to
+         *         be handled by the next receiver, return {@code false}.
+         * @see View#onGenericMotionEvent
+         */
+        public boolean onGenericMotionEvent(MotionEvent event) {
+            return false;
+        }
+
+        /**
          * This method is called when the application would like to stop using the current input
          * session.
          */
@@ -212,7 +350,7 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Calls {@link onSetSurface}.
+         * Calls {@link #onSetSurface}.
          */
         void setSurface(Surface surface) {
             onSetSurface(surface);
@@ -220,14 +358,14 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Calls {@link onSetVolume}.
+         * Calls {@link #onSetVolume}.
          */
         void setVolume(float volume) {
             onSetVolume(volume);
         }
 
         /**
-         * Calls {@link onTune}.
+         * Calls {@link #onTune}.
          */
         void tune(Uri channelUri) {
             onTune(channelUri);
@@ -235,8 +373,8 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Creates an overlay view. This calls {@link onCreateOverlayView} to get
-         * a view to attach to the overlay window.
+         * Creates an overlay view. This calls {@link #onCreateOverlayView} to get a view to attach
+         * to the overlay window.
          *
          * @param windowToken A window token of an application.
          * @param frame A position of the overlay view.
@@ -314,6 +452,42 @@ public abstract class TvInputService extends Service {
                 mWindowParams = null;
             }
         }
+
+        /**
+         * Takes care of dispatching incoming input events and tells whether the event was handled.
+         */
+        int dispatchInputEvent(InputEvent event, InputEventReceiver receiver) {
+            if (DEBUG) Log.d(TAG, "dispatchInputEvent(" + event + ")");
+            if (event instanceof KeyEvent) {
+                if (((KeyEvent) event).dispatch(this, mDispatcherState, this)) {
+                    return Session.DISPATCH_HANDLED;
+                }
+            } else if (event instanceof MotionEvent) {
+                MotionEvent motionEvent = (MotionEvent) event;
+                final int source = motionEvent.getSource();
+                if (motionEvent.isTouchEvent()) {
+                    if (onTouchEvent(motionEvent)) {
+                        return Session.DISPATCH_HANDLED;
+                    }
+                } else if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
+                    if (onTrackballEvent(motionEvent)) {
+                        return Session.DISPATCH_HANDLED;
+                    }
+                } else {
+                    if (onGenericMotionEvent(motionEvent)) {
+                        return Session.DISPATCH_HANDLED;
+                    }
+                }
+            }
+            if (mOverlayView == null) {
+                return Session.DISPATCH_NOT_HANDLED;
+            }
+            if (!mOverlayView.hasWindowFocus()) {
+                mOverlayView.getViewRootImpl().windowFocusChanged(true, true);
+            }
+            mOverlayView.getViewRootImpl().dispatchInputEvent(event, receiver);
+            return Session.DISPATCH_IN_PROGRESS;
+        }
     }
 
     private final class ServiceHandler extends Handler {
@@ -324,20 +498,23 @@ public abstract class TvInputService extends Service {
         public final void handleMessage(Message msg) {
             switch (msg.what) {
                 case DO_CREATE_SESSION: {
-                    ITvInputSessionCallback cb = (ITvInputSessionCallback) msg.obj;
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    InputChannel channel = (InputChannel) args.arg1;
+                    ITvInputSessionCallback cb = (ITvInputSessionCallback) args.arg2;
                     try {
                         TvInputSessionImpl sessionImpl = onCreateSession();
                         if (sessionImpl == null) {
                             // Failed to create a session.
                             cb.onSessionCreated(null);
-                            return;
+                        } else {
+                            ITvInputSession stub = new ITvInputSessionWrapper(TvInputService.this,
+                                    sessionImpl, channel);
+                            cb.onSessionCreated(stub);
                         }
-                        ITvInputSession stub = new ITvInputSessionWrapper(TvInputService.this,
-                                sessionImpl);
-                        cb.onSessionCreated(stub);
                     } catch (RemoteException e) {
                         Log.e(TAG, "error in onSessionCreated");
                     }
+                    args.recycle();
                     return;
                 }
                 case DO_BROADCAST_AVAILABILITY_CHANGE: {

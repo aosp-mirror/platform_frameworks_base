@@ -20,9 +20,16 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
+import android.tv.TvInputManager.Session;
 import android.tv.TvInputService.TvInputSessionImpl;
 import android.util.Log;
+import android.view.InputChannel;
+import android.view.InputEvent;
+import android.view.InputEventReceiver;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.Surface;
 
 import com.android.internal.os.HandlerCaller;
@@ -45,50 +52,66 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_RELAYOUT_OVERLAY_VIEW = 6;
     private static final int DO_REMOVE_OVERLAY_VIEW = 7;
 
-    private TvInputSessionImpl mTvInputSession;
     private final HandlerCaller mCaller;
 
-    public ITvInputSessionWrapper(Context context, TvInputSessionImpl session) {
+    private TvInputSessionImpl mTvInputSessionImpl;
+    private InputChannel mChannel;
+    private TvInputEventReceiver mReceiver;
+
+    public ITvInputSessionWrapper(Context context, TvInputSessionImpl sessionImpl,
+            InputChannel channel) {
         mCaller = new HandlerCaller(context, null, this, true /* asyncHandler */);
-        mTvInputSession = session;
+        mTvInputSessionImpl = sessionImpl;
+        mChannel = channel;
+        if (channel != null) {
+            mReceiver = new TvInputEventReceiver(channel, context.getMainLooper());
+        }
     }
 
     @Override
     public void executeMessage(Message msg) {
-        if (mTvInputSession == null) {
+        if (mTvInputSessionImpl == null) {
             return;
         }
 
         switch (msg.what) {
             case DO_RELEASE: {
-                mTvInputSession.release();
-                mTvInputSession = null;
+                mTvInputSessionImpl.release();
+                mTvInputSessionImpl = null;
+                if (mReceiver != null) {
+                    mReceiver.dispose();
+                    mReceiver = null;
+                }
+                if (mChannel != null) {
+                    mChannel.dispose();
+                    mChannel = null;
+                }
                 return;
             }
             case DO_SET_SURFACE: {
-                mTvInputSession.setSurface((Surface) msg.obj);
+                mTvInputSessionImpl.setSurface((Surface) msg.obj);
                 return;
             }
             case DO_SET_VOLUME: {
-                mTvInputSession.setVolume((Float) msg.obj);
+                mTvInputSessionImpl.setVolume((Float) msg.obj);
                 return;
             }
             case DO_TUNE: {
-                mTvInputSession.tune((Uri) msg.obj);
+                mTvInputSessionImpl.tune((Uri) msg.obj);
                 return;
             }
             case DO_CREATE_OVERLAY_VIEW: {
                 SomeArgs args = (SomeArgs) msg.obj;
-                mTvInputSession.createOverlayView((IBinder) args.arg1, (Rect) args.arg2);
+                mTvInputSessionImpl.createOverlayView((IBinder) args.arg1, (Rect) args.arg2);
                 args.recycle();
                 return;
             }
             case DO_RELAYOUT_OVERLAY_VIEW: {
-                mTvInputSession.relayoutOverlayView((Rect) msg.obj);
+                mTvInputSessionImpl.relayoutOverlayView((Rect) msg.obj);
                 return;
             }
             case DO_REMOVE_OVERLAY_VIEW: {
-                mTvInputSession.removeOverlayView(true);
+                mTvInputSessionImpl.removeOverlayView(true);
                 return;
             }
             default: {
@@ -132,5 +155,25 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void removeOverlayView() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_REMOVE_OVERLAY_VIEW));
+    }
+
+    private final class TvInputEventReceiver extends InputEventReceiver {
+        public TvInputEventReceiver(InputChannel inputChannel, Looper looper) {
+            super(inputChannel, looper);
+        }
+
+        @Override
+        public void onInputEvent(InputEvent event) {
+            if (mTvInputSessionImpl == null) {
+                // The session has been finished.
+                finishInputEvent(event, false);
+                return;
+            }
+
+            int handled = mTvInputSessionImpl.dispatchInputEvent(event, this);
+            if (handled != Session.DISPATCH_IN_PROGRESS) {
+                finishInputEvent(event, handled == Session.DISPATCH_HANDLED);
+            }
+        }
     }
 }
