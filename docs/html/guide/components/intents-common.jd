@@ -56,6 +56,7 @@ page.tags="IntentFilter"
   <li><a href="#Music">Music or Video</a>
     <ol>
       <li><a href="#PlayMedia">Play a media file</a></li>
+      <li><a href="#PlaySearch">Play music based on a search query</a></li>
     </ol>
   </li>
   <li><a href="#Phone">Phone</a>
@@ -1287,8 +1288,250 @@ public void playMedia(Uri file) {
 </pre>
 
 
+<h3 id="PlaySearch">Play music based on a search query</h3>
+
+<p>To play music based on a search query, use the
+{@link android.provider.MediaStore#INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH} intent. An app may fire
+this intent in response to the user's voice command to play music. The receiving app for this
+intent performs a search within its inventory to match existing content to the given query and
+starts playing that content.</p>
+
+<p>This intent should include the {@link android.provider.MediaStore#EXTRA_MEDIA_FOCUS} string
+extra, which specifies the inteded search mode. For example, the search mode can specify whether
+the search is for an artist name or song name.</p>
+
+<dl>
+<dt><b>Action</b></dt>
+<dd>{@link android.provider.MediaStore#INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH}</dd>
+
+<dt><b>Data URI Scheme</b></dt>
+<dd>None</dd>
+
+<dt><b>MIME Type</b></dt>
+<dd>None</dd>
+
+<dt><b>Extras</b></dt>
+<dd>
+<dl>
+<dt>{@link android.provider.MediaStore#EXTRA_MEDIA_FOCUS MediaStore.EXTRA_MEDIA_FOCUS} (required)</dt>
+<dd>
+<p>Indicates the search mode (whether the user is looking for a particular artist, album, song,
+playlist, or radio channel). Most search modes take additional extras. For example, if the user
+is interested in listening to a particular song, the intent might have three additional extras:
+the song title, the artist, and the album. This intent supports the following search modes for
+each value of {@link android.provider.MediaStore#EXTRA_MEDIA_FOCUS}:</p>
+<dl>
+<dt><p><em>Any</em> - <code>"vnd.android.cursor.item/*"</p></code></dt>
+<dd>
+<p>Play any music. The receiving app should play some music based on a smart choice, such
+as the last playlist the user listened to.</p>
+<p>Additional extras:</p>
+<ul>
+  <li>{@link android.app.SearchManager#QUERY} (required) - An empty string. This extra is always
+      provided for backward compatibility: existing apps that do not know about search modes can
+      process this intent as an unstructured search.</li>
+</ul>
+</dd>
+<dt><p><em>Unstructured</em> - <code>"vnd.android.cursor.item/*"</code></p></dt>
+<dd>
+<p>Play a particular song, album or genre from an unstructured search query. Apps may generate
+an intent with this search mode when they can't identify the type of content the user wants to
+listen to. Apps should use more specific search modes when possible.</p>
+<p>Additional extras:</p>
+<ul>
+  <li>{@link android.app.SearchManager#QUERY} (required) - A string that contains any combination
+      of: the artist, the album, the song name, or the genre.</li>
+</ul>
+</dd>
+<dt><p><em>Genre</em> -
+{@link android.provider.MediaStore.Audio.Genres#ENTRY_CONTENT_TYPE Audio.Genres.ENTRY_CONTENT_TYPE}</p></dt>
+<dd>
+<p>Play music of a particular genre.</p>
+<p>Additional extras:</p>
+<ul>
+  <li><code>"android.intent.extra.genre"</code> (required) - The genre.</li>
+  <li>{@link android.app.SearchManager#QUERY} (required) - The genre. This extra is always provided
+      for backward compatibility: existing apps that do not know about search modes can process
+      this intent as an unstructured search.</li>
+</ul>
+</dd>
+<dt><p><em>Artist</em> -
+{@link android.provider.MediaStore.Audio.Artists#ENTRY_CONTENT_TYPE Audio.Artists.ENTRY_CONTENT_TYPE}</p></dt>
+<dd>
+<p>Play music from a particular artist.</p>
+<p>Additional extras:</p>
+<ul>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ARTIST} (required) - The artist.</li>
+  <li><code>"android.intent.extra.genre"</code> - The genre.</li>
+  <li>{@link android.app.SearchManager#QUERY} (required) - A string that contains any combination of
+      the artist or the genre. This extra is always provided for backward compatibility:
+      existing apps that do not know about search modes can process this intent as an unstructured
+      search.</li>
+</ul>
+</dd>
+<dt><p><em>Album</em> -
+{@link android.provider.MediaStore.Audio.Albums#ENTRY_CONTENT_TYPE Audio.Albums.ENTRY_CONTENT_TYPE}</p></dt>
+<dd>
+<p>Play music from a particular album.</p>
+<p>Additional extras:</p>
+<ul>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ALBUM} (required) - The album.</li>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ARTIST} - The artist.</li>
+  <li><code>"android.intent.extra.genre"</code> - The genre.</li>
+  <li>{@link android.app.SearchManager#QUERY} (required) - A string that contains any combination of
+      the album or the artist. This extra is always provided for backward
+      compatibility: existing apps that do not know about search modes can process this intent as an
+      unstructured search.</li>
+</ul>
+</dd>
+<dt><p><em>Song</em> - <code>"vnd.android.cursor.item/audio"</code></p></dt>
+<dd>
+<p>Play a particular song.</p>
+<p>Additional extras:</p>
+<ul>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ALBUM} - The album.</li>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ARTIST} - The artist.</li>
+  <li><code>"android.intent.extra.genre"</code> - The genre.</li>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_TITLE} (required) - The song name.</li>
+  <li>{@link android.app.SearchManager#QUERY} (required) - A string that contains any combination of:
+      the album, the artist, the genre, or the title. This extra is always provided for
+      backward compatibility: existing apps that do not know about search modes can process this
+      intent as an unstructured search.</li>
+</ul>
+</dd>
+<dt><p><em>Radio channel</em> - <code>"vnd.android.cursor.item/radio"</code></p></dt>
+<dd>
+<p>Play a particular radio channel or a radio channel that matches some criteria specified
+by additional extras.</p>
+<p>Additional extras:</p>
+<ul>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ALBUM} - The album.</li>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ARTIST} - The artist.</li>
+  <li><code>"android.intent.extra.genre"</code> - The genre.</li>
+  <li><code>"android.intent.extra.radio_channel"</code> - The radio channel.</li>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_TITLE} - The song name that the radio
+      channel is based on.</li>
+  <li>{@link android.app.SearchManager#QUERY} (required) - A string that contains any combination
+      of: the album, the artist, the genre, the radio channel, or the title. This extra is
+      always provided for backward compatibility: existing apps that do not know about search
+      modes can process this intent as an unstructured search.</li>
+</ul>
+</dd>
+<dt><p><em>Playlist</em> - {@link android.provider.MediaStore.Audio.Playlists#ENTRY_CONTENT_TYPE Audio.Playlists.ENTRY_CONTENT_TYPE}</p></dt>
+<dd>
+<p>Play a particular playlist or a playlist that matches some criteria specified
+by additional extras.</p>
+<p>Additional extras:</p>
+<ul>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ALBUM} - The album.</li>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ARTIST} - The artist.</li>
+  <li><code>"android.intent.extra.genre"</code> - The genre.</li>
+  <li><code>"android.intent.extra.playlist"</code> - The playlist.</li>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_TITLE} - The song name that the playlist is
+      based on.</li>
+  <li>{@link android.app.SearchManager#QUERY} (required) - A string that contains any combination
+      of: the album, the artist, the genre, the playlist, or the title. This extra is always
+      provided for backward compatibility: existing apps that do not know about search modes can
+      process this intent as an unstructured search.</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
 
 
+
+<p><b>Example intent:</b></p>
+<p>If the user wants to listen to a radio station that plays songs from a particular artist,
+a search app may generate the following intent:</p>
+<pre>
+public void playSearchRadioByArtist(String artist) {
+    Intent intent = new Intent(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH);
+    intent.putExtra(MediaStore.EXTRA_MEDIA_FOCUS,
+                    "vnd.android.cursor.item/radio");
+    intent.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, artist);
+    intent.putExtra(SearchManager.QUERY, artist);
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}
+</pre>
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+<p>When handling this intent, your activity should check the value of the
+{@link android.provider.MediaStore#EXTRA_MEDIA_FOCUS} extra in the incoming
+{@link android.content.Intent} to determine the search mode. Once your activity has identified
+the search mode, it should read the values of the additional extras for that particular search mode.
+With this information your app can then perform the search within its inventory to play the
+content that matches the search query. For example:</p>
+<pre>
+protected void onCreate(Bundle savedInstanceState) {
+    ...
+    Intent intent = this.getIntent();
+    if (intent.getAction().compareTo(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH) == 0) {
+
+        String mediaFocus = intent.getStringExtra(MediaStore.EXTRA_MEDIA_FOCUS);
+        String query = intent.getStringExtra(SearchManager.QUERY);
+
+        // Some of these extras may not be available depending on the search mode
+        String album = intent.getStringExtra(MediaStore.EXTRA_MEDIA_ALBUM);
+        String artist = intent.getStringExtra(MediaStore.EXTRA_MEDIA_ARTIST);
+        String genre = intent.getStringExtra("android.intent.extra.genre");
+        String playlist = intent.getStringExtra("android.intent.extra.playlist");
+        String rchannel = intent.getStringExtra("android.intent.extra.radio_channel");
+        String title = intent.getStringExtra(MediaStore.EXTRA_MEDIA_TITLE);
+
+        // Determine the search mode and use the corresponding extras
+        if (mediaFocus == null) {
+            // 'Unstructured' search mode (backward compatible)
+            playUnstructuredSearch(query);
+
+        } else if (mediaFocus.compareTo("vnd.android.cursor.item/*") == 0) {
+            if (query.isEmpty()) {
+                // 'Any' search mode
+                playResumeLastPlaylist();
+            } else {
+                // 'Unstructured' search mode
+                playUnstructuredSearch(query);
+            }
+
+        } else if (mediaFocus.compareTo(MediaStore.Audio.Genres.ENTRY_CONTENT_TYPE) == 0) {
+            // 'Genre' search mode
+            playGenre(genre);
+
+        } else if (mediaFocus.compareTo(MediaStore.Audio.Artists.ENTRY_CONTENT_TYPE) == 0) {
+            // 'Artist' search mode
+            playArtist(artist, genre);
+
+        } else if (mediaFocus.compareTo(MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE) == 0) {
+            // 'Album' search mode
+            playAlbum(album, artist);
+
+        } else if (mediaFocus.compareTo("vnd.android.cursor.item/audio") == 0) {
+            // 'Song' search mode
+            playSong(album, artist, genre, title);
+
+        } else if (mediaFocus.compareTo("vnd.android.cursor.item/radio") == 0) {
+            // 'Radio channel' search mode
+            playRadioChannel(album, artist, genre, rchannel, title);
+
+        } else if (mediaFocus.compareTo(MediaStore.Audio.Playlists.ENTRY_CONTENT_TYPE) == 0) {
+            // 'Playlist' search mode
+            playPlaylist(album, artist, genre, playlist, title);
+        }
+    }
+}
+</pre>
 
 
 
