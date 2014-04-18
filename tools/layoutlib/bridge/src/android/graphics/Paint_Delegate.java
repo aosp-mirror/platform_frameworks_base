@@ -428,6 +428,16 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static boolean isElegantTextHeight(Paint thisPaint) {
+        return false;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void setElegantTextHeight(Paint thisPaint, boolean elegant) {
+        // TODO
+    }
+
+    @LayoutlibDelegate
     /*package*/ static float getTextSize(Paint thisPaint) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
