@@ -5970,6 +5970,12 @@ public final class Settings {
         public static final String SHOW_PROCESSES = "show_processes";
 
         /**
+         * If 1 low power mode is enabled.
+         * @hide
+         */
+        public static final String LOW_POWER_MODE = "low_power";
+
+         /**
          * If 1, the activity manager will aggressively finish activities and
          * processes as soon as they are no longer needed.  If 0, the normal
          * extended lifetime is used.
