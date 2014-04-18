@@ -570,6 +570,14 @@ public interface CameraDevice extends AutoCloseable {
     public static abstract class CaptureListener {
 
         /**
+         * This constant is used to indicate that no images were captured for
+         * the request.
+         *
+         * @hide
+         */
+        public static final int NO_FRAMES_CAPTURED = -1;
+
+        /**
          * This method is called when the camera device has started capturing
          * the output image for the request, at the beginning of image exposure.
          *
@@ -693,9 +701,12 @@ public interface CameraDevice extends AutoCloseable {
          *            The CameraDevice sending the callback.
          * @param sequenceId
          *            A sequence ID returned by the {@link #capture} family of functions.
-         * @param frameNumber
+         * @param lastFrameNumber
          *            The last frame number (returned by {@link CaptureResult#getFrameNumber}
          *            or {@link CaptureFailure#getFrameNumber}) in the capture sequence.
+         *            The last frame number may be equal to NO_FRAMES_CAPTURED if no images
+         *            were captured for this sequence. This can happen, for example, when a
+         *            repeating request or burst is cleared right after being set.
          *
          * @see CaptureResult#getFrameNumber()
          * @see CaptureFailure#getFrameNumber()
@@ -703,7 +714,7 @@ public interface CameraDevice extends AutoCloseable {
          * @see CaptureFailure#getSequenceId()
          */
         public void onCaptureSequenceCompleted(CameraDevice camera,
-                int sequenceId, int frameNumber) {
+                int sequenceId, int lastFrameNumber) {
             // default empty implementation
         }
     }
