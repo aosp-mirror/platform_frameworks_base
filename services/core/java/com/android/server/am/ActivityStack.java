@@ -36,6 +36,8 @@ import static com.android.server.am.ActivityStackSupervisor.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_STATES;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
+import static com.android.server.am.ActivityStackSupervisor.ActivityContainer.CONTAINER_STATE_HAS_SURFACE;
+
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
@@ -1028,9 +1030,9 @@ final class ActivityStack {
     private void setVisibile(ActivityRecord r, boolean visible) {
         r.visible = visible;
         mWindowManager.setAppVisibility(r.appToken, visible);
-        final ArrayList<ActivityStack> containers = r.mChildContainers;
+        final ArrayList<ActivityContainer> containers = r.mChildContainers;
         for (int containerNdx = containers.size() - 1; containerNdx >= 0; --containerNdx) {
-            ActivityContainer container = containers.get(containerNdx).mActivityContainer;
+            ActivityContainer container = containers.get(containerNdx);
             container.setVisible(visible);
         }
     }
@@ -1271,7 +1273,8 @@ final class ActivityStack {
         if (ActivityManagerService.DEBUG_LOCKSCREEN) mService.logLockScreen("");
 
         ActivityRecord parent = mActivityContainer.mParentActivity;
-        if (parent != null && parent.state != ActivityState.RESUMED) {
+        if ((parent != null && parent.state != ActivityState.RESUMED) ||
+                mActivityContainer.mContainerState != CONTAINER_STATE_HAS_SURFACE) {
             // Do not resume this stack if its parent is not resumed.
             // TODO: If in a loop, make sure that parent stack resumeTopActivity is called 1st.
             return false;
@@ -2552,6 +2555,20 @@ final class ActivityStack {
         return r;
     }
 
+    void finishAllActivitiesLocked() {
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                if (r.finishing) {
+                    continue;
+                }
+                Slog.d(TAG, "finishAllActivitiesLocked: finishing " + r);
+                finishCurrentActivityLocked(r, FINISH_IMMEDIATELY, false);
+            }
+        }
+    }
+
     final boolean navigateUpToLocked(IBinder token, Intent destIntent, int resultCode,
             Intent resultData) {
         final ActivityRecord srec = ActivityRecord.forToken(token);
@@ -2787,7 +2804,6 @@ final class ActivityStack {
         }
         if (activityRemoved) {
             mStackSupervisor.resumeTopActivitiesLocked();
-
         }
     }
 
