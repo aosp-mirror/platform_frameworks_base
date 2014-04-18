@@ -109,14 +109,18 @@ public final class MediaStore {
      * An intent to perform a search for music media and automatically play content from the
      * result when possible. This can be fired, for example, by the result of a voice recognition
      * command to listen to music.
-     * <p>
-     * Contains the {@link android.app.SearchManager#QUERY} extra, which is a string
-     * that can contain any type of unstructured music search, like the name of an artist,
-     * an album, a song, a genre, or any combination of these.
-     * <p>
-     * Because this intent includes an open-ended unstructured search string, it makes the most
-     * sense for apps that can support large-scale search of music, such as services connected
-     * to an online database of music which can be streamed and played on the device.
+     * <p>This intent always includes the {@link android.provider.MediaStore#EXTRA_MEDIA_FOCUS}
+     * and {@link android.app.SearchManager#QUERY} extras. The
+     * {@link android.provider.MediaStore#EXTRA_MEDIA_FOCUS} extra determines the search mode, and
+     * the value of the {@link android.app.SearchManager#QUERY} extra depends on the search mode.
+     * For more information about the search modes for this intent, see
+     * <a href="{@docRoot}guide/components/intents-common.html#PlaySearch">Play music based
+     * on a search query</a> in <a href="{@docRoot}guide/components/intents-common.html">Common
+     * Intents</a>.</p>
+     *
+     * <p>This intent makes the most sense for apps that can support large-scale search of music,
+     * such as services connected to an online database of music which can be streamed and played
+     * on the device.</p>
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH =
