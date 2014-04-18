@@ -42,6 +42,15 @@ typedef enum Command {
 } Command;
 
 /*
+ * Pseudolocalization methods
+ */
+typedef enum PseudolocalizationMethod {
+    NO_PSEUDOLOCALIZATION = 0,
+    PSEUDO_ACCENTED,
+    PSEUDO_BIDI,
+} PseudolocalizationMethod;
+
+/*
  * Bundle of goodies, including everything specified on the command line.
  */
 class Bundle {
@@ -50,12 +59,12 @@ public:
         : mCmd(kCommandUnknown), mVerbose(false), mAndroidList(false),
           mForce(false), mGrayscaleTolerance(0), mMakePackageDirs(false),
           mUpdate(false), mExtending(false),
-          mRequireLocalization(false), mPseudolocalize(false),
+          mRequireLocalization(false), mPseudolocalize(NO_PSEUDOLOCALIZATION),
           mWantUTF16(false), mValues(false),
           mCompressionMethod(0), mJunkPath(false), mOutputAPKFile(NULL),
           mManifestPackageNameOverride(NULL), mInstrumentationPackageNameOverride(NULL),
           mAutoAddOverlay(false), mGenDependencies(false),
-          mAssetSourceDir(NULL), 
+          mAssetSourceDir(NULL),
           mCrunchedOutputDir(NULL), mProguardFile(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
           mRClassDir(NULL), mResourceIntermediatesDir(NULL), mManifestMinSdkVersion(NULL),
@@ -94,8 +103,8 @@ public:
     void setExtending(bool val) { mExtending = val; }
     bool getRequireLocalization(void) const { return mRequireLocalization; }
     void setRequireLocalization(bool val) { mRequireLocalization = val; }
-    bool getPseudolocalize(void) const { return mPseudolocalize; }
-    void setPseudolocalize(bool val) { mPseudolocalize = val; }
+    short getPseudolocalize(void) const { return mPseudolocalize; }
+    void setPseudolocalize(short val) { mPseudolocalize = val; }
     void setWantUTF16(bool val) { mWantUTF16 = val; }
     bool getValues(void) const { return mValues; }
     void setValues(bool val) { mValues = val; }
@@ -250,7 +259,7 @@ private:
     bool        mUpdate;
     bool        mExtending;
     bool        mRequireLocalization;
-    bool        mPseudolocalize;
+    short       mPseudolocalize;
     bool        mWantUTF16;
     bool        mValues;
     int         mCompressionMethod;
