@@ -966,7 +966,7 @@ static bool push_eventlog_string(char** pos, const char* end, const char* str) {
     jint len = strlen(str);
     int space_needed = 1 + sizeof(len) + len;
     if (end - *pos < space_needed) {
-        ALOGW("not enough space for string. remain=%zd; needed=%d",
+        ALOGW("not enough space for string. remain=%" PRIdPTR "; needed=%d",
              end - *pos, space_needed);
         return false;
     }
@@ -982,7 +982,7 @@ static bool push_eventlog_string(char** pos, const char* end, const char* str) {
 static bool push_eventlog_int(char** pos, const char* end, jint val) {
     int space_needed = 1 + sizeof(val);
     if (end - *pos < space_needed) {
-        ALOGW("not enough space for int.  remain=%zd; needed=%d",
+        ALOGW("not enough space for int.  remain=%" PRIdPTR "; needed=%d",
              end - *pos, space_needed);
         return false;
     }
