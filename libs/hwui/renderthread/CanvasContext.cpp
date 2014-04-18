@@ -91,7 +91,8 @@ public:
     void destroy();
 
     bool isCurrent(EGLSurface surface) { return mCurrentSurface == surface; }
-    void makeCurrent(EGLSurface surface);
+    // Returns true if the current surface changed, false if it was already current
+    bool makeCurrent(EGLSurface surface);
     void beginFrame(EGLSurface surface, EGLint* width, EGLint* height);
     void swapBuffers(EGLSurface surface);
 
@@ -250,8 +251,8 @@ void GlobalContext::destroy() {
     mCurrentSurface = EGL_NO_SURFACE;
 }
 
-void GlobalContext::makeCurrent(EGLSurface surface) {
-    if (isCurrent(surface)) return;
+bool GlobalContext::makeCurrent(EGLSurface surface) {
+    if (isCurrent(surface)) return false;
 
     if (surface == EGL_NO_SURFACE) {
         // If we are setting EGL_NO_SURFACE we don't care about any of the potential
@@ -263,6 +264,7 @@ void GlobalContext::makeCurrent(EGLSurface surface) {
                 (void*)surface, egl_error_str());
     }
     mCurrentSurface = surface;
+    return true;
 }
 
 void GlobalContext::beginFrame(EGLSurface surface, EGLint* width, EGLint* height) {
@@ -281,7 +283,6 @@ void GlobalContext::beginFrame(EGLSurface surface, EGLint* width, EGLint* height
 void GlobalContext::swapBuffers(EGLSurface surface) {
     eglSwapBuffers(mEglDisplay, surface);
     EGLint err = eglGetError();
-    // TODO: Check whether we need to special case EGL_CONTEXT_LOST
     LOG_ALWAYS_FATAL_IF(err != EGL_SUCCESS,
             "Encountered EGL error %d %s during rendering", err, egl_error_str(err));
 }
@@ -344,8 +345,8 @@ void CanvasContext::setSurface(EGLNativeWindowType window) {
 
     if (mEglSurface != EGL_NO_SURFACE) {
         mDirtyRegionsEnabled = mGlobalContext->enableDirtyRegions(mEglSurface);
-        mGlobalContext->makeCurrent(mEglSurface);
         mHaveNewSurface = true;
+        makeCurrent();
     }
 }
 
@@ -357,7 +358,7 @@ void CanvasContext::swapBuffers() {
 void CanvasContext::requireSurface() {
     LOG_ALWAYS_FATAL_IF(mEglSurface == EGL_NO_SURFACE,
             "requireSurface() called but no surface set!");
-    mGlobalContext->makeCurrent(mEglSurface);
+    makeCurrent();
 }
 
 bool CanvasContext::initialize(EGLNativeWindowType window) {
@@ -383,7 +384,9 @@ void CanvasContext::setup(int width, int height) {
 }
 
 void CanvasContext::makeCurrent() {
-    mGlobalContext->makeCurrent(mEglSurface);
+    // TODO: Figure out why this workaround is needed, see b/13913604
+    // In the meantime this matches the behavior of GLRenderer, so it is not a regression
+    mHaveNewSurface |= mGlobalContext->makeCurrent(mEglSurface);
 }
 
 void CanvasContext::processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters,
@@ -475,7 +478,7 @@ Layer* CanvasContext::createTextureLayer() {
 
 void CanvasContext::requireGlContext() {
     if (mEglSurface != EGL_NO_SURFACE) {
-        mGlobalContext->makeCurrent(mEglSurface);
+        makeCurrent();
     } else {
         mGlobalContext->usePBufferSurface();
     }
