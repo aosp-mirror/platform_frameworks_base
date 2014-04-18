@@ -720,6 +720,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static boolean sIgnoreMeasureCache = false;
 
     /**
+     * Ignore the clipBounds of this view for the children.
+     */
+    static boolean sIgnoreClipBoundsForChildren = false;
+
+    /**
      * This view does not want keystrokes. Use with TAKES_FOCUS_MASK when
      * calling setFlags.
      */
@@ -2963,7 +2968,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Current clip bounds. to which all drawing of this view are constrained.
      */
-    private Rect mClipBounds = null;
+    Rect mClipBounds = null;
 
     private boolean mLastIsOpaque;
 
@@ -3510,6 +3515,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Older apps expect onMeasure() to always be called on a layout pass, regardless
             // of whether a layout was requested on that View.
             sIgnoreMeasureCache = targetSdkVersion < KITKAT;
+
+            // Older apps may need this to ignore the clip bounds
+            sIgnoreClipBoundsForChildren = targetSdkVersion < L;
 
             sCompatibilityDone = true;
         }
