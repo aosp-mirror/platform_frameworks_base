@@ -487,7 +487,7 @@ public class Build {
          * new changes in behavior:</p>
          * <ul>
          * <li> {@link android.content.Context#bindService Context.bindService} now
-         * requires an explicit Intent, and will throw an exception if given an explicit
+         * requires an explicit Intent, and will throw an exception if given an implicit
          * Intent.</li>
          * </ul>
          */
