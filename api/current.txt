@@ -12237,6 +12237,16 @@ package android.hardware.camera2 {
     field public static final int SCORE_MIN = 1; // 0x1
   }
 
+  public final class LensShadingMap {
+    method public void copyGainFactors(float[], int);
+    method public int getColumnCount();
+    method public float getGainFactor(int, int, int);
+    method public int getGainFactorCount();
+    method public android.hardware.camera2.RggbChannelVector getGainFactorVector(int, int);
+    method public int getRowCount();
+    field public static final float MINIMUM_GAIN_FACTOR = 1.0f;
+  }
+
   public final class MeteringRectangle {
     ctor public MeteringRectangle(int, int, int, int, int);
     ctor public MeteringRectangle(android.graphics.Point, android.util.Size, int);
@@ -12258,10 +12268,50 @@ package android.hardware.camera2 {
     method public int getNumerator();
   }
 
+  public final class RggbChannelVector {
+    ctor public RggbChannelVector(float, float, float, float);
+    method public void copyTo(float[], int);
+    method public float getBlue();
+    method public float getComponent(int);
+    method public float getGreenEven();
+    method public float getGreenOdd();
+    method public final float getRed();
+    field public static final int BLUE = 3; // 0x3
+    field public static final int COUNT = 4; // 0x4
+    field public static final int GREEN_EVEN = 1; // 0x1
+    field public static final int GREEN_ODD = 2; // 0x2
+    field public static final int RED = 0; // 0x0
+  }
+
   public final class Size {
     ctor public Size(int, int);
     method public final int getHeight();
     method public final int getWidth();
+  }
+
+  public final class StreamConfigurationMap {
+    method public final int[] getOutputFormats();
+    method public long getOutputMinFrameDuration(int, android.util.Size);
+    method public long getOutputMinFrameDuration(java.lang.Class<T>, android.util.Size);
+    method public android.util.Size[] getOutputSizes(java.lang.Class<T>);
+    method public android.util.Size[] getOutputSizes(int);
+    method public long getOutputStallDuration(int, android.util.Size);
+    method public long getOutputStallDuration(java.lang.Class<T>, android.util.Size);
+    method public boolean isOutputSupportedFor(int);
+    method public static boolean isOutputSupportedFor(java.lang.Class<T>);
+    method public boolean isOutputSupportedFor(android.view.Surface);
+  }
+
+  public final class TonemapCurve {
+    method public void copyColorCurve(int, float[], int);
+    method public android.graphics.PointF getPoint(int, int);
+    method public int getPointCount(int);
+    field public static final int CHANNEL_BLUE = 2; // 0x2
+    field public static final int CHANNEL_GREEN = 1; // 0x1
+    field public static final int CHANNEL_RED = 0; // 0x0
+    field public static final float LEVEL_BLACK = 0.0f;
+    field public static final float LEVEL_WHITE = 1.0f;
+    field public static final int POINT_SIZE = 2; // 0x2
   }
 
 }

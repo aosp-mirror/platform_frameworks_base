@@ -253,4 +253,31 @@ public class ImageFormat {
         }
         return -1;
     }
+
+    /**
+     * Determine whether or not this is a public-visible {@code format}.
+     *
+     * <p>In particular, {@code @hide} formats will return {@code false}.</p>
+     *
+     * <p>Any other formats (including UNKNOWN) will return {@code false}.</p>
+     *
+     * @param format an integer format
+     * @return a boolean
+     *
+     * @hide
+     */
+    public static boolean isPublicFormat(int format) {
+        switch (format) {
+            case RGB_565:
+            case NV16:
+            case YUY2:
+            case YV12:
+            case NV21:
+            case YUV_420_888:
+            case RAW_SENSOR:
+                return true;
+        }
+
+        return false;
+    }
 }

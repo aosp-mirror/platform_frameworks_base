@@ -115,7 +115,7 @@ public class PixelFormat
                 info.bytesPerPixel = 1;
                 break;
             default:
-                throw new IllegalArgumentException("unkonwon pixel format " + format);
+                throw new IllegalArgumentException("unknown pixel format " + format);
         }
     }
 
@@ -135,4 +135,29 @@ public class PixelFormat
 
     public int  bytesPerPixel;
     public int  bitsPerPixel;
+
+    /**
+     * Determine whether or not this is a public-visible and non-deprecated {@code format}.
+     *
+     * <p>In particular, {@code @hide} formats will return {@code false}.</p>
+     *
+     * <p>Any other indirect formats (such as {@code TRANSPARENT} or {@code TRANSLUCENT})
+     * will return {@code false}.</p>
+     *
+     * @param format an integer format
+     * @return a boolean
+     *
+     * @hide
+     */
+    public static boolean isPublicFormat(int format) {
+        switch (format) {
+            case RGBA_8888:
+            case RGBX_8888:
+            case RGB_888:
+            case RGB_565:
+                return true;
+        }
+
+        return false;
+    }
 }
