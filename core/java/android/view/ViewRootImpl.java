@@ -1153,7 +1153,15 @@ public final class ViewRootImpl implements ViewParent,
 
     void dispatchApplyInsets(View host) {
         mFitSystemWindowsInsets.set(mAttachInfo.mContentInsets);
-        host.dispatchApplyWindowInsets(new WindowInsets(mFitSystemWindowsInsets));
+        boolean isRound = false;
+        if ((mWindowAttributes.flags & WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN) != 0
+                && mDisplay.getDisplayId() == 0) {
+            // we're fullscreen and not hosted in an ActivityView
+            isRound = mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_windowIsRound);
+        }
+        host.dispatchApplyWindowInsets(new WindowInsets(
+                mFitSystemWindowsInsets, isRound));
     }
 
     private void performTraversals() {

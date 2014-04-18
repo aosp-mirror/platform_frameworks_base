@@ -1417,4 +1417,7 @@
          2 - The device DOES NOT have a permanent menu key; ignore autodetection. -->
     <integer name="config_overrideHasPermanentMenuKey">0</integer>
 
+    <!-- default window inset isRound property -->
+    <bool name="config_windowIsRound">false</bool>
+
 </resources>
