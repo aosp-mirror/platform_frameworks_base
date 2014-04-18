@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.preference.Preference.OnPreferenceChangeInternalListener;
@@ -243,6 +242,7 @@ public class PreferenceGroupAdapter extends BaseAdapter
         if (position == mHighlightedPosition && mHighlightedDrawable != null) {
             result.setBackgroundDrawable(mHighlightedDrawable);
         }
+        result.setTag(preference.getKey());
         return result;
     }
 
