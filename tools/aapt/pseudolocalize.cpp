@@ -78,7 +78,7 @@ pseudolocalize_char(const char16_t c)
     }
 }
 
-static const bool
+static bool
 is_possible_normal_placeholder_end(const char16_t c) {
     switch (c) {
         case 's': return true;
