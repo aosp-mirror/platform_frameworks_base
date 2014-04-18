@@ -55,6 +55,11 @@ public class RuntimeInit {
     private static final native void nativeFinishInit();
     private static final native void nativeSetExitWithoutCleanup(boolean exitWithoutCleanup);
 
+    private static int Clog_e(String tag, String msg, Throwable tr) {
+        return Log.println_native(Log.LOG_ID_CRASH, Log.ERROR, tag,
+                msg + '\n' + Log.getStackTraceString(tr));
+    }
+
     /**
      * Use this to log a message when a thread exits due to an uncaught
      * exception.  The framework catches these for the main threads, so
@@ -68,7 +73,7 @@ public class RuntimeInit {
                 mCrashing = true;
 
                 if (mApplicationObject == null) {
-                    Slog.e(TAG, "*** FATAL EXCEPTION IN SYSTEM PROCESS: " + t.getName(), e);
+                    Clog_e(TAG, "*** FATAL EXCEPTION IN SYSTEM PROCESS: " + t.getName(), e);
                 } else {
                     StringBuilder message = new StringBuilder();
                     message.append("FATAL EXCEPTION: ").append(t.getName()).append("\n");
@@ -77,7 +82,7 @@ public class RuntimeInit {
                         message.append("Process: ").append(processName).append(", ");
                     }
                     message.append("PID: ").append(Process.myPid());
-                    Slog.e(TAG, message.toString(), e);
+                    Clog_e(TAG, message.toString(), e);
                 }
 
                 // Bring up crash dialog, wait for it to be dismissed
@@ -85,9 +90,9 @@ public class RuntimeInit {
                         mApplicationObject, new ApplicationErrorReport.CrashInfo(e));
             } catch (Throwable t2) {
                 try {
-                    Slog.e(TAG, "Error reporting crash", t2);
+                    Clog_e(TAG, "Error reporting crash", t2);
                 } catch (Throwable t3) {
-                    // Even Slog.e() fails!  Oh well.
+                    // Even Clog_e() fails!  Oh well.
                 }
             } finally {
                 // Try everything to make sure this process goes away.
