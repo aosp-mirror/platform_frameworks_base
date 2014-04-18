@@ -24,8 +24,10 @@ ResourceFilter::parse(const char* arg)
 
         String8 part(p, q-p);
 
-        if (part == "zz_ZZ") {
-            mContainsPseudo = true;
+        if (part == "en_XA") {
+            mContainsPseudoAccented = true;
+        } else if (part == "ar_XB") {
+            mContainsPseudoBidi = true;
         }
         int axis;
         AxisValue value;
