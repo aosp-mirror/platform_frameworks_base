@@ -352,6 +352,7 @@ public final class Log {
     /** @hide */ public static final int LOG_ID_RADIO = 1;
     /** @hide */ public static final int LOG_ID_EVENTS = 2;
     /** @hide */ public static final int LOG_ID_SYSTEM = 3;
+    /** @hide */ public static final int LOG_ID_CRASH = 4;
 
     /** @hide */ public static native int println_native(int bufID,
             int priority, String tag, String msg);
