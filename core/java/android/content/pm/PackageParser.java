@@ -609,7 +609,7 @@ public class PackageParser {
         }
 
         try {
-            JarFile jarFile = new JarFile(mArchiveSourcePath);
+            JarFile jarFile = new JarFile(mArchiveSourcePath, true, true);
 
             Certificate[] certs = null;
 
