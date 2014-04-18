@@ -18,6 +18,7 @@ package android.net;
 
 import android.net.LinkQualityInfo;
 import android.net.LinkProperties;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkState;
@@ -41,10 +42,6 @@ interface IConnectivityManager
     // Keep this in sync with framework/native/services/connectivitymanager/ConnectivityManager.h
     void markSocketAsUser(in ParcelFileDescriptor socket, int uid);
 
-    void setNetworkPreference(int pref);
-
-    int getNetworkPreference();
-
     NetworkInfo getActiveNetworkInfo();
     NetworkInfo getActiveNetworkInfoForUid(int uid);
     NetworkInfo getNetworkInfo(int networkType);
@@ -61,10 +58,6 @@ interface IConnectivityManager
 
     NetworkQuotaInfo getActiveNetworkQuotaInfo();
     boolean isActiveNetworkMetered();
-
-    boolean setRadios(boolean onOff);
-
-    boolean setRadio(int networkType, boolean turnOn);
 
     int startUsingNetworkFeature(int networkType, in String feature,
             in IBinder binder);
@@ -147,9 +140,12 @@ interface IConnectivityManager
 
     LinkQualityInfo[] getAllLinkQualityInfo();
 
-    void setProvisioningNotificationVisible(boolean visible, int networkType, in String extraInfo, in String url);
+    void setProvisioningNotificationVisible(boolean visible, int networkType, in String extraInfo,
+            in String url);
 
     void setAirplaneMode(boolean enable);
 
     void registerNetworkFactory(in Messenger messenger);
+
+    void registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp, in NetworkCapabilities nc, int score);
 }

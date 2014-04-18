@@ -20,6 +20,7 @@ import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
+import static android.net.ConnectivityManager.NetworkCallbacks;
 import static android.net.ConnectivityManager.TYPE_BLUETOOTH;
 import static android.net.ConnectivityManager.TYPE_DUMMY;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
@@ -30,6 +31,7 @@ import static android.net.ConnectivityManager.TYPE_PROXY;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.ConnectivityServiceProtocol.NetworkFactoryProtocol;
+import static android.net.ConnectivityServiceProtocol.NetworkMonitorProtocol;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
@@ -67,6 +69,7 @@ import android.net.LinkProperties.CompareResult;
 import android.net.LinkQualityInfo;
 import android.net.MobileDataStateTracker;
 import android.net.Network;
+import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
 import android.net.NetworkConfig;
 import android.net.NetworkInfo;
@@ -82,7 +85,6 @@ import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.SamplingDataTracker;
 import android.net.Uri;
-import android.net.wifi.WifiStateTracker;
 import android.net.wimax.WimaxManagerConstants;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -128,6 +130,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.connectivity.Nat464Xlat;
+import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.PacManager;
 import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
@@ -179,7 +182,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final String TAG = "ConnectivityService";
 
     private static final boolean DBG = true;
-    private static final boolean VDBG = false;
+    private static final boolean VDBG = true; // STOPSHIP
 
     private static final boolean LOGD_RULES = false;
 
@@ -306,12 +309,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final int EVENT_CHANGE_MOBILE_DATA_ENABLED = 2;
 
     /**
-     * used internally to change our network preference setting
-     * arg1 = networkType to prefer
-     */
-    private static final int EVENT_SET_NETWORK_PREFERENCE = 3;
-
-    /**
      * used internally to synchronize inet condition reports
      * arg1 = networkType
      * arg2 = condition (0 bad, 100 good)
@@ -382,10 +379,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private static final int EVENT_REGISTER_NETWORK_FACTORY = 17;
 
+    /**
+     * used internally when registering NetworkAgents
+     * obj = Messenger
+     */
+    private static final int EVENT_REGISTER_NETWORK_AGENT = 18;
+
     /** Handler used for internal events. */
-    private InternalHandler mHandler;
+    final private InternalHandler mHandler;
     /** Handler used for incoming {@link NetworkStateTracker} events. */
-    private NetworkStateTrackerHandler mTrackerHandler;
+    final private NetworkStateTrackerHandler mTrackerHandler;
 
     // list of DeathRecipients used to make sure features are turned off when
     // a process dies
@@ -474,8 +477,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         NetworkCapabilities netCap = new NetworkCapabilities();
         netCap.addNetworkCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
         netCap.addNetworkCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
-        NetworkRequest netRequest = new NetworkRequest(netCap);
-        mNetworkRequests.append(netRequest.requestId, netRequest);
+        mDefaultRequest = new NetworkRequest(netCap, true);
+        mNetworkRequests.append(mDefaultRequest.requestId, mDefaultRequest);
 
         HandlerThread handlerThread = new HandlerThread("ConnectivityServiceThread");
         handlerThread.start();
@@ -624,21 +627,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
-        // Update mNetworkPreference according to user mannually first then overlay config.xml
-        mNetworkPreference = getPersistedNetworkPreference();
-        if (mNetworkPreference == -1) {
-            for (int n : mPriorityList) {
-                if (mNetConfigs[n].isDefault() && ConnectivityManager.isNetworkTypeValid(n)) {
-                    mNetworkPreference = n;
-                    break;
-                }
-            }
-            if (mNetworkPreference == -1) {
-                throw new IllegalStateException(
-                        "You should set at least one default Network in config.xml!");
-            }
-        }
-
         mNetRequestersPids =
                 (List<Integer> [])new ArrayList[ConnectivityManager.MAX_NETWORK_TYPE+1];
         for (int i : mPriorityList) {
@@ -738,6 +726,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     /**
      * Factory that creates {@link NetworkStateTracker} instances using given
      * {@link NetworkConfig}.
+     *
+     * TODO - this is obsolete and will be deleted.  It's replaced by the
+     * registerNetworkFactory call and protocol.
+     * @Deprecated in favor of registerNetworkFactory dynamic bindings
      */
     public interface NetworkFactory {
         public NetworkStateTracker createTracker(int targetNetworkType, NetworkConfig config);
@@ -755,10 +747,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         @Override
         public NetworkStateTracker createTracker(int targetNetworkType, NetworkConfig config) {
             switch (config.radio) {
-                case TYPE_WIFI:
-                    return new WifiStateTracker(targetNetworkType, config.name);
-                case TYPE_MOBILE:
-                    return new MobileDataStateTracker(targetNetworkType, config.name);
                 case TYPE_DUMMY:
                     return new DummyDataStateTracker(targetNetworkType, config.name);
                 case TYPE_BLUETOOTH:
@@ -859,41 +847,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return wimaxStateTracker;
     }
 
-    /**
-     * Sets the preferred network.
-     * @param preference the new preference
-     */
-    public void setNetworkPreference(int preference) {
-        enforceChangePermission();
-
-        mHandler.sendMessage(
-                mHandler.obtainMessage(EVENT_SET_NETWORK_PREFERENCE, preference, 0));
-    }
-
-    public int getNetworkPreference() {
-        enforceAccessPermission();
-        int preference;
-        synchronized(this) {
-            preference = mNetworkPreference;
-        }
-        return preference;
-    }
-
-    private void handleSetNetworkPreference(int preference) {
-        if (ConnectivityManager.isNetworkTypeValid(preference) &&
-                mNetConfigs[preference] != null &&
-                mNetConfigs[preference].isDefault()) {
-            if (mNetworkPreference != preference) {
-                final ContentResolver cr = mContext.getContentResolver();
-                Settings.Global.putInt(cr, Settings.Global.NETWORK_PREFERENCE, preference);
-                synchronized(this) {
-                    mNetworkPreference = preference;
-                }
-                enforcePreference();
-            }
-        }
-    }
-
     private int getConnectivityChangeDelay() {
         final ContentResolver cr = mContext.getContentResolver();
 
@@ -903,41 +856,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 ConnectivityManager.CONNECTIVITY_CHANGE_DELAY_DEFAULT);
         return Settings.Global.getInt(cr, Settings.Global.CONNECTIVITY_CHANGE_DELAY,
                 defaultDelay);
-    }
-
-    private int getPersistedNetworkPreference() {
-        final ContentResolver cr = mContext.getContentResolver();
-
-        final int networkPrefSetting = Settings.Global
-                .getInt(cr, Settings.Global.NETWORK_PREFERENCE, -1);
-
-        return networkPrefSetting;
-    }
-
-    /**
-     * Make the state of network connectivity conform to the preference settings
-     * In this method, we only tear down a non-preferred network. Establishing
-     * a connection to the preferred network is taken care of when we handle
-     * the disconnect event from the non-preferred network
-     * (see {@link #handleDisconnect(NetworkInfo)}).
-     */
-    private void enforcePreference() {
-        if (mNetTrackers[mNetworkPreference].getNetworkInfo().isConnected())
-            return;
-
-        if (!mNetTrackers[mNetworkPreference].isAvailable())
-            return;
-
-        for (int t=0; t <= ConnectivityManager.MAX_RADIO_TYPE; t++) {
-            if (t != mNetworkPreference && mNetTrackers[t] != null &&
-                    mNetTrackers[t].getNetworkInfo().isConnected()) {
-                if (DBG) {
-                    log("tearing down " + mNetTrackers[t].getNetworkInfo() +
-                            " in enforcePreference");
-                }
-                teardown(mNetTrackers[t]);
-            }
-        }
     }
 
     private boolean teardown(NetworkStateTracker netTracker) {
@@ -1190,24 +1108,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
         return false;
-    }
-
-    public boolean setRadios(boolean turnOn) {
-        boolean result = true;
-        enforceChangePermission();
-        for (NetworkStateTracker t : mNetTrackers) {
-            if (t != null) result = t.setRadio(turnOn) && result;
-        }
-        return result;
-    }
-
-    public boolean setRadio(int netType, boolean turnOn) {
-        enforceChangePermission();
-        if (!ConnectivityManager.isNetworkTypeValid(netType)) {
-            return false;
-        }
-        NetworkStateTracker tracker = mNetTrackers[netType];
-        return tracker != null && tracker.setRadio(turnOn);
     }
 
     private INetworkManagementEventObserver mDataActivityObserver = new BaseNetworkObserver() {
@@ -1929,18 +1829,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void handleSetMobileData(boolean enabled) {
-        if (mNetTrackers[ConnectivityManager.TYPE_MOBILE] != null) {
-            if (VDBG) {
-                log(mNetTrackers[ConnectivityManager.TYPE_MOBILE].toString() + enabled);
-            }
-            mNetTrackers[ConnectivityManager.TYPE_MOBILE].setUserDataEnable(enabled);
-        }
-        if (mNetTrackers[ConnectivityManager.TYPE_WIMAX] != null) {
-            if (VDBG) {
-                log(mNetTrackers[ConnectivityManager.TYPE_WIMAX].toString() + enabled);
-            }
-            mNetTrackers[ConnectivityManager.TYPE_WIMAX].setUserDataEnable(enabled);
-        }
+    // TODO - handle this - probably generalize passing in a transport type and send to the
+    // factories?
     }
 
     @Override
@@ -1953,12 +1843,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void handleSetPolicyDataEnable(int networkType, boolean enabled) {
-        if (isNetworkTypeValid(networkType)) {
-            final NetworkStateTracker tracker = mNetTrackers[networkType];
-            if (tracker != null) {
-                tracker.setPolicyDataEnable(enabled);
-            }
-        }
+   // TODO - handle this passing to factories
+//        if (isNetworkTypeValid(networkType)) {
+//            final NetworkStateTracker tracker = mNetTrackers[networkType];
+//            if (tracker != null) {
+//                tracker.setPolicyDataEnable(enabled);
+//            }
+//        }
     }
 
     private void enforceAccessPermission() {
@@ -2226,67 +2117,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    /**
-     * Called when an attempt to fail over to another network has failed.
-     * @param info the {@link NetworkInfo} for the failed network
-     */
-    private void handleConnectionFailure(NetworkInfo info) {
-        mNetTrackers[info.getType()].setTeardownRequested(false);
-
-        String reason = info.getReason();
-        String extraInfo = info.getExtraInfo();
-
-        String reasonText;
-        if (reason == null) {
-            reasonText = ".";
-        } else {
-            reasonText = " (" + reason + ").";
-        }
-        loge("Attempt to connect to " + info.getTypeName() + " failed" + reasonText);
-
-        Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
-        intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, new NetworkInfo(info));
-        intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, info.getType());
-        if (getActiveNetworkInfo() == null) {
-            intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
-        }
-        if (reason != null) {
-            intent.putExtra(ConnectivityManager.EXTRA_REASON, reason);
-        }
-        if (extraInfo != null) {
-            intent.putExtra(ConnectivityManager.EXTRA_EXTRA_INFO, extraInfo);
-        }
-        if (info.isFailover()) {
-            intent.putExtra(ConnectivityManager.EXTRA_IS_FAILOVER, true);
-            info.setFailover(false);
-        }
-
-        if (mNetConfigs[info.getType()].isDefault()) {
-            tryFailover(info.getType());
-            if (mActiveDefaultNetwork != -1) {
-                NetworkInfo switchTo = mNetTrackers[mActiveDefaultNetwork].getNetworkInfo();
-                intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
-            } else {
-                mDefaultInetConditionPublished = 0;
-                intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
-            }
-        }
-
-        intent.putExtra(ConnectivityManager.EXTRA_INET_CONDITION, mDefaultInetConditionPublished);
-
-        final Intent immediateIntent = new Intent(intent);
-        immediateIntent.setAction(CONNECTIVITY_ACTION_IMMEDIATE);
-        sendStickyBroadcast(immediateIntent);
-        sendStickyBroadcast(intent);
-        /*
-         * If the failover network is already connected, then immediately send
-         * out a followup broadcast indicating successful failover
-         */
-        if (mActiveDefaultNetwork != -1) {
-            sendConnectedBroadcast(mNetTrackers[mActiveDefaultNetwork].getNetworkInfo());
-        }
-    }
-
     private void sendStickyBroadcast(Intent intent) {
         synchronized(this) {
             if (!mSystemReady) {
@@ -2478,33 +2308,35 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     /**
-     * Setup data activity tracking for the given network interface.
+     * Setup data activity tracking for the given network.
      *
      * Every {@code setupDataActivityTracking} should be paired with a
      * {@link #removeDataActivityTracking} for cleanup.
      */
-    private void setupDataActivityTracking(int type) {
-        final NetworkStateTracker thisNet = mNetTrackers[type];
-        final String iface = thisNet.getLinkProperties().getInterfaceName();
+    private void setupDataActivityTracking(NetworkAgentInfo networkAgent) {
+        final String iface = networkAgent.linkProperties.getInterfaceName();
 
         final int timeout;
+        int type = ConnectivityManager.TYPE_NONE;
 
-        if (ConnectivityManager.isNetworkTypeMobile(type)) {
+        if (networkAgent.networkCapabilities.hasTransport(
+                NetworkCapabilities.TRANSPORT_CELLULAR)) {
             timeout = Settings.Global.getInt(mContext.getContentResolver(),
                                              Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
                                              5);
-            // Canonicalize mobile network type
             type = ConnectivityManager.TYPE_MOBILE;
-        } else if (ConnectivityManager.TYPE_WIFI == type) {
+        } else if (networkAgent.networkCapabilities.hasTransport(
+                NetworkCapabilities.TRANSPORT_WIFI)) {
             timeout = Settings.Global.getInt(mContext.getContentResolver(),
                                              Settings.Global.DATA_ACTIVITY_TIMEOUT_WIFI,
                                              0);
+            type = ConnectivityManager.TYPE_WIFI;
         } else {
             // do not track any other networks
             timeout = 0;
         }
 
-        if (timeout > 0 && iface != null) {
+        if (timeout > 0 && iface != null && type != ConnectivityManager.TYPE_NONE) {
             try {
                 mNetd.addIdleTimer(iface, timeout, type);
             } catch (Exception e) {
@@ -2517,12 +2349,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     /**
      * Remove data activity tracking when network disconnects.
      */
-    private void removeDataActivityTracking(int type) {
-        final NetworkStateTracker net = mNetTrackers[type];
-        final String iface = net.getLinkProperties().getInterfaceName();
+    private void removeDataActivityTracking(NetworkAgentInfo networkAgent) {
+        final String iface = networkAgent.linkProperties.getInterfaceName();
+        final NetworkCapabilities caps = networkAgent.networkCapabilities;
 
-        if (iface != null && (ConnectivityManager.isNetworkTypeMobile(type) ||
-                              ConnectivityManager.TYPE_WIFI == type)) {
+        if (iface != null && (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                              caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))) {
             try {
                 // the call fails silently if no idletimer setup for this interface
                 mNetd.removeIdleTimer(iface);
@@ -2537,8 +2369,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * concerned with making sure that the list of DNS servers is set up
      * according to which networks are connected, and ensuring that the
      * right routing table entries exist.
+     *
+     * TODO - delete when we're sure all this functionallity is captured.
      */
-    private void handleConnectivityChange(int netType, boolean doReset) {
+    private void handleConnectivityChange(int netType, LinkProperties curLp, boolean doReset) {
         int resetMask = doReset ? NetworkUtils.RESET_ALL_ADDRESSES : 0;
         boolean exempt = ConnectivityManager.isNetworkTypeExempt(netType);
         if (VDBG) {
@@ -2552,7 +2386,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          */
         handleDnsConfigurationChange(netType);
 
-        LinkProperties curLp = mCurrentLinkProperties[netType];
         LinkProperties newLp = null;
 
         if (mNetTrackers[netType].getNetworkInfo().isConnected()) {
@@ -2742,26 +2575,30 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return routesChanged;
     }
 
-   /**
+    /**
      * Reads the network specific MTU size from reources.
      * and set it on it's iface.
      */
-   private void updateMtuSizeSettings(NetworkStateTracker nt) {
-       final String iface = nt.getLinkProperties().getInterfaceName();
-       final int mtu = nt.getLinkProperties().getMtu();
+    private void updateMtu(LinkProperties newLp, LinkProperties oldLp) {
+        final String iface = newLp.getInterfaceName();
+        final int mtu = newLp.getMtu();
+        if (oldLp != null && newLp.isIdenticalMtu(oldLp)) {
+            if (VDBG) log("identical MTU - not setting");
+            return;
+        }
 
-       if (mtu < 68 || mtu > 10000) {
-           loge("Unexpected mtu value: " + mtu + ", " + nt);
-           return;
-       }
+        if (mtu < 68 || mtu > 10000) {
+            loge("Unexpected mtu value: " + mtu + ", " + iface);
+            return;
+        }
 
-       try {
-           if (VDBG) log("Setting MTU size: " + iface + ", " + mtu);
-           mNetd.setMtu(iface, mtu);
-       } catch (Exception e) {
-           Slog.e(TAG, "exception in setMtu()" + e);
-       }
-   }
+        try {
+            if (VDBG) log("Setting MTU size: " + iface + ", " + mtu);
+            mNetd.setMtu(iface, mtu);
+        } catch (Exception e) {
+            Slog.e(TAG, "exception in setMtu()" + e);
+        }
+    }
 
     /**
      * Reads the network specific TCP buffer sizes from SystemProperties
@@ -3053,19 +2890,56 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             NetworkInfo info;
             switch (msg.what) {
                 case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED: {
-                    AsyncChannel ac = (AsyncChannel) msg.obj;
-                    if (mNetworkFactories.contains(ac)) {
-                        if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-                            if (VDBG) log("NetworkFactory connected");
-                            for (int i = 0; i < mNetworkRequests.size(); i++) {
-                                ac.sendMessage(NetworkFactoryProtocol.CMD_REQUEST_NETWORK,
-                                    mNetworkRequests.valueAt(i));
-                            }
-                        } else {
-                            loge("Error connecting NetworkFactory");
-                            mNetworkFactories.remove((AsyncChannel) msg.obj);
-                        }
+                    handleAsyncChannelHalfConnect(msg);
+                    break;
+                }
+                case AsyncChannel.CMD_CHANNEL_DISCONNECT: {
+                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
+                    if (nai != null) nai.asyncChannel.disconnect();
+                    break;
+                }
+                case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
+                    handleAsyncChannelDisconnected(msg);
+                    break;
+                }
+                case NetworkAgent.EVENT_NETWORK_CAPABILITIES_CHANGED: {
+                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
+                    if (nai == null) {
+                        loge("EVENT_NETWORK_CAPABILITIES_CHANGED from unknown NetworkAgent");
+                    } else {
+                        updateCapabilities(nai, (NetworkCapabilities)msg.obj);
                     }
+                    break;
+                }
+                case NetworkAgent.EVENT_NETWORK_PROPERTIES_CHANGED: {
+                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
+                    if (nai == null) {
+                        loge("NetworkAgent not found for EVENT_NETWORK_PROPERTIES_CHANGED");
+                    } else {
+                        LinkProperties oldLp = nai.linkProperties;
+                        nai.linkProperties = (LinkProperties)msg.obj;
+                        updateLinkProperties(nai, oldLp);
+                    }
+                    break;
+                }
+                case NetworkAgent.EVENT_NETWORK_INFO_CHANGED: {
+                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
+                    if (nai == null) {
+                        loge("EVENT_NETWORK_INFO_CHANGED from unknown NetworkAgent");
+                        break;
+                    }
+                    info = (NetworkInfo) msg.obj;
+                    updateNetworkInfo(nai, info);
+                    break;
+                }
+                case NetworkMonitorProtocol.EVENT_NETWORK_VALIDATED: {
+                    NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
+                    handleConnectionValidated(nai);
+                    break;
+                }
+                case NetworkMonitorProtocol.EVENT_NETWORK_LINGER_COMPLETE: {
+                    NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
+                    handleLingerComplete(nai);
                     break;
                 }
                 case NetworkStateTracker.EVENT_STATE_CHANGED: {
@@ -3100,10 +2974,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     EventLogTags.writeConnectivityStateChanged(
                             info.getType(), info.getSubtype(), info.getDetailedState().ordinal());
 
-                    if (info.getDetailedState() ==
-                            NetworkInfo.DetailedState.FAILED) {
-                        handleConnectionFailure(info);
-                    } else if (info.isConnectedToProvisioningNetwork()) {
+                    if (info.isConnectedToProvisioningNetwork()) {
                         /**
                          * TODO: Create ConnectivityManager.TYPE_MOBILE_PROVISIONING
                          * for now its an in between network, its a network that
@@ -3128,18 +2999,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                         mNetTrackers[info.getType()].getNetwork().netId);
                         }
                     } else if (state == NetworkInfo.State.DISCONNECTED) {
-                        handleDisconnect(info);
                     } else if (state == NetworkInfo.State.SUSPENDED) {
-                        // TODO: need to think this over.
-                        // the logic here is, handle SUSPENDED the same as
-                        // DISCONNECTED. The only difference being we are
-                        // broadcasting an intent with NetworkInfo that's
-                        // suspended. This allows the applications an
-                        // opportunity to handle DISCONNECTED and SUSPENDED
-                        // differently, or not.
-                        handleDisconnect(info);
                     } else if (state == NetworkInfo.State.CONNECTED) {
-                        handleConnect(info);
+                    //    handleConnect(info);
                     }
                     if (mLockdownTracker != null) {
                         mLockdownTracker.onNetworkInfoChanged(info);
@@ -3151,7 +3013,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     // TODO: Temporary allowing network configuration
                     //       change not resetting sockets.
                     //       @see bug/4455071
-                    handleConnectivityChange(info.getType(), false);
+                    handleConnectivityChange(info.getType(), mCurrentLinkProperties[info.getType()],
+                            false);
                     break;
                 }
                 case NetworkStateTracker.EVENT_NETWORK_SUBTYPE_CHANGED: {
@@ -3163,6 +3026,66 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
     }
+
+    private void handleAsyncChannelHalfConnect(Message msg) {
+        AsyncChannel ac = (AsyncChannel) msg.obj;
+        if (mNetworkFactories.contains(ac)) {
+            if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
+                if (VDBG) log("NetworkFactory connected");
+                // A network factory has connected.  Send it all current NetworkRequests.
+                for (int i = 0; i < mNetworkRequests.size(); i++) {
+                    NetworkRequest request = mNetworkRequests.valueAt(i);
+                    NetworkAgentInfo nai = mNetworkForRequestId.get(request.requestId);
+                    ac.sendMessage(NetworkFactoryProtocol.CMD_REQUEST_NETWORK,
+                            (nai != null ? nai.currentScore : 0), 0, request);
+                }
+            } else {
+                loge("Error connecting NetworkFactory");
+                mNetworkFactories.remove(ac);
+            }
+        } else if (mNetworkAgentInfos.containsKey(msg.replyTo)) {
+            if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
+                if (VDBG) log("NetworkAgent connected");
+                // A network agent has requested a connection.  Establish the connection.
+                mNetworkAgentInfos.get(msg.replyTo).asyncChannel.
+                        sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
+            } else {
+                loge("Error connecting NetworkAgent");
+                mNetworkAgentInfos.remove(msg.replyTo);
+            }
+        }
+    }
+    private void handleAsyncChannelDisconnected(Message msg) {
+        NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
+        if (nai != null) {
+            if (DBG) log(nai.name() + " got DISCONNECTED");
+            // A network agent has disconnected.
+            // Tell netd to clean up the configuration for this network
+            // (routing rules, DNS, etc).
+            try {
+                mNetd.removeNetwork(nai.network.netId);
+            } catch (Exception e) {
+                loge("Exception removing network: " + e);
+            }
+            notifyNetworkCallbacks(nai, NetworkCallbacks.LOST);
+            mNetworkAgentInfos.remove(nai);
+            // Since we've lost the network, go through all the requests that
+            // it was satisfying and see if any other factory can satisfy them.
+            for (int i = 0; i < nai.networkRequests.size(); i++) {
+                NetworkRequest request = nai.networkRequests.valueAt(i);
+                NetworkAgentInfo currentNetwork = mNetworkForRequestId.get(request.requestId);
+                if (currentNetwork != null && currentNetwork.network.netId == nai.network.netId) {
+                    mNetworkForRequestId.remove(request.requestId);
+                    // TODO Check if any other live network will work
+                    sendUpdatedScoreToFactories(request, 0);
+                }
+            }
+            if (nai.networkRequests.get(mDefaultRequest.requestId) != null) {
+                removeDataActivityTracking(nai);
+            }
+        }
+    }
+
 
     private class InternalHandler extends Handler {
         public InternalHandler(Looper looper) {
@@ -3202,11 +3125,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     int netType = msg.arg1;
                     int sequence = msg.arg2;
                     handleInetConditionHoldEnd(netType, sequence);
-                    break;
-                }
-                case EVENT_SET_NETWORK_PREFERENCE: {
-                    int preference = msg.arg1;
-                    handleSetNetworkPreference(preference);
                     break;
                 }
                 case EVENT_SET_MOBILE_DATA: {
@@ -3264,6 +3182,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
                 case EVENT_REGISTER_NETWORK_FACTORY: {
                     handleRegisterNetworkFactory((Messenger)msg.obj);
+                    break;
+                }
+                case EVENT_REGISTER_NETWORK_AGENT: {
+                    handleRegisterNetworkAgent((NetworkAgentInfo)msg.obj);
                     break;
                 }
             }
@@ -5112,7 +5034,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     public void registerNetworkFactory(Messenger messenger) {
         enforceConnectivityInternalPermission();
-
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_FACTORY, messenger));
     }
 
@@ -5123,5 +5044,335 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         ac.connect(mContext, mTrackerHandler, messenger);
     }
 
+    // NetworkRequest by requestId
     private final SparseArray<NetworkRequest> mNetworkRequests = new SparseArray<NetworkRequest>();
+
+    /**
+     * NetworkAgentInfo supporting a request by requestId.
+     * These have already been vetted (their Capabilities satisfy the request)
+     * and the are the highest scored network available.
+     * the are keyed off the Requests requestId.
+     */
+    private final SparseArray<NetworkAgentInfo> mNetworkForRequestId =
+            new SparseArray<NetworkAgentInfo>();
+
+    // NetworkAgentInfo keyed off its connecting messenger
+    // TODO - eval if we can reduce the number of lists/hashmaps/sparsearrays
+    private final HashMap<Messenger, NetworkAgentInfo> mNetworkAgentInfos =
+            new HashMap<Messenger, NetworkAgentInfo>();
+
+    private final NetworkRequest mDefaultRequest;
+
+    public void registerNetworkAgent(Messenger messenger, NetworkInfo networkInfo,
+            LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
+            int currentScore) {
+        enforceConnectivityInternalPermission();
+
+        NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(), nextNetId(),
+            new NetworkInfo(networkInfo), new LinkProperties(linkProperties),
+            new NetworkCapabilities(networkCapabilities), currentScore);
+
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_AGENT, nai));
+    }
+
+    private void handleRegisterNetworkAgent(NetworkAgentInfo na) {
+        if (VDBG) log("Got NetworkAgent Messenger");
+        mNetworkAgentInfos.put(na.messenger, na);
+        na.asyncChannel.connect(mContext, mTrackerHandler, na.messenger);
+        NetworkInfo networkInfo = na.networkInfo;
+        na.networkInfo = null;
+        updateNetworkInfo(na, networkInfo);
+    }
+
+    private void updateLinkProperties(NetworkAgentInfo networkAgent, LinkProperties oldLp) {
+        LinkProperties newLp = networkAgent.linkProperties;
+        int netId = networkAgent.network.netId;
+
+        updateMtu(newLp, oldLp);
+        // TODO - figure out what to do for clat
+//        for (LinkProperties lp : newLp.getStackedLinks()) {
+//            updateMtu(lp, null);
+//        }
+        updateRoutes(newLp, oldLp, netId);
+        updateDnses(newLp, oldLp, netId);
+    }
+    private void updateRoutes(LinkProperties newLp, LinkProperties oldLp, int netId) {
+        CompareResult<RouteInfo> routeDiff = new CompareResult<RouteInfo>();
+        if (oldLp != null) {
+            routeDiff = oldLp.compareAllRoutes(newLp);
+        } else if (newLp != null) {
+            routeDiff.added = newLp.getAllRoutes();
+        }
+
+        // add routes before removing old in case it helps with continuous connectivity
+
+        // do this twice, adding non-nexthop routes first, then routes they are dependent on
+        for (RouteInfo route : routeDiff.added) {
+            if (route.hasGateway()) continue;
+            try {
+                mNetd.addRoute(netId, route);
+            } catch (Exception e) {
+                loge("Exception in addRoute for non-gateway: " + e);
+            }
+        }
+        for (RouteInfo route : routeDiff.added) {
+            if (route.hasGateway() == false) continue;
+            try {
+                mNetd.addRoute(netId, route);
+            } catch (Exception e) {
+                loge("Exception in addRoute for gateway: " + e);
+            }
+        }
+
+        for (RouteInfo route : routeDiff.removed) {
+            try {
+                mNetd.removeRoute(netId, route);
+            } catch (Exception e) {
+                loge("Exception in removeRoute: " + e);
+            }
+        }
+    }
+    private void updateDnses(LinkProperties newLp, LinkProperties oldLp, int netId) {
+        if (oldLp == null || (newLp.isIdenticalDnses(oldLp) == false)) {
+            Collection<InetAddress> dnses = newLp.getDnses();
+            if (dnses.size() == 0 && mDefaultDns != null) {
+                dnses = new ArrayList();
+                dnses.add(mDefaultDns);
+                if (DBG) {
+                    loge("no dns provided for netId " + netId + ", so using defaults");
+                }
+            }
+            try {
+                mNetd.setDnsServersForNetwork(netId, NetworkUtils.makeStrings(dnses),
+                    newLp.getDomains());
+            } catch (Exception e) {
+                loge("Exception in setDnsServersForNetwork: " + e);
+            }
+            // TODO - setprop "net.dnsX"
+        }
+    }
+
+    private void updateCapabilities(NetworkAgentInfo networkAgent,
+            NetworkCapabilities networkCapabilities) {
+        // TODO - what else here?  Verify still satisfies everybody?
+        // Check if satisfies somebody new?  call callbacks?
+        networkAgent.networkCapabilities = networkCapabilities;
+    }
+
+    private void sendUpdatedScoreToFactories(NetworkRequest networkRequest, int score) {
+        if (VDBG) log("sending new Min Network Score(" + score + "): " + networkRequest.toString());
+        for (AsyncChannel ac : mNetworkFactories) {
+            ac.sendMessage(NetworkFactoryProtocol.CMD_REQUEST_NETWORK, score, 0, networkRequest);
+        }
+    }
+
+    private void callCallbackForRequest(NetworkRequest networkRequest,
+            NetworkAgentInfo networkAgent, int notificationType) {
+        // TODO
+    }
+
+    private void handleLingerComplete(NetworkAgentInfo oldNetwork) {
+        if (oldNetwork == null) {
+            loge("Unknown NetworkAgentInfo in handleLingerComplete");
+            return;
+        }
+        if (DBG) log("handleLingerComplete for " + oldNetwork.name());
+        if (DBG) {
+            if (oldNetwork.networkRequests.size() != 0) {
+                loge("Dead network still had " + oldNetwork.networkRequests.size() + " requests");
+            }
+        }
+        oldNetwork.asyncChannel.disconnect();
+    }
+
+    private void handleConnectionValidated(NetworkAgentInfo newNetwork) {
+        if (newNetwork == null) {
+            loge("Unknown NetworkAgentInfo in handleConnectionValidated");
+            return;
+        }
+        boolean keep = false;
+        boolean isNewDefault = false;
+        if (DBG) log("handleConnectionValidated for "+newNetwork.name());
+        // check if any NetworkRequest wants this NetworkAgent
+        // first check if it satisfies the NetworkCapabilities
+        for (int i = 0; i < mNetworkRequests.size(); i++) {
+            NetworkRequest nr = mNetworkRequests.valueAt(i);
+            if (nr.networkCapabilities.satisfiedByNetworkCapabilities(
+                    newNetwork.networkCapabilities)) {
+                // next check if it's better than any current network we're using for
+                // this request
+                NetworkAgentInfo currentNetwork = mNetworkForRequestId.get(nr.requestId);
+                if (VDBG) {
+                    log("currentScore = " +
+                            (currentNetwork != null ? currentNetwork.currentScore : 0) +
+                            ", newScore = " + newNetwork.currentScore);
+                }
+                if (currentNetwork == null ||
+                        currentNetwork.currentScore < newNetwork.currentScore) {
+                    if (currentNetwork != null) {
+                        currentNetwork.networkRequests.remove(nr.requestId);
+                        currentNetwork.networkListens.add(nr);
+                        if (currentNetwork.networkRequests.size() == 0) {
+                            // TODO tell current Network to go to linger state
+
+                            // fake the linger state:
+                            Message message = Message.obtain();
+                            message.obj = currentNetwork;
+                            message.what = NetworkMonitorProtocol.EVENT_NETWORK_LINGER_COMPLETE;
+                            mTrackerHandler.sendMessage(message);
+
+                            notifyNetworkCallbacks(currentNetwork, NetworkCallbacks.LOSING);
+                        }
+                    }
+                    mNetworkForRequestId.put(nr.requestId, newNetwork);
+                    newNetwork.networkRequests.put(nr.requestId, nr);
+                    keep = true;
+                    // TODO - this could get expensive if we have alot of requests for this
+                    // network.  Think about if there is a way to reduce this.  Push
+                    // netid->request mapping to each factory?
+                    sendUpdatedScoreToFactories(nr, newNetwork.currentScore);
+                    if (mDefaultRequest.requestId == nr.requestId) {
+                        isNewDefault = true;
+                    }
+                }
+            }
+        }
+        if (keep) {
+            if (isNewDefault) {
+                if (VDBG) log("Switching to new default network: " + newNetwork);
+                setupDataActivityTracking(newNetwork);
+                try {
+                    mNetd.setDefaultNetId(newNetwork.network.netId);
+                } catch (Exception e) {
+                    loge("Exception setting default network :" + e);
+                }
+                if (newNetwork.equals(mNetworkForRequestId.get(mDefaultRequest.requestId))) {
+                    handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
+                }
+                synchronized (ConnectivityService.this) {
+                    // have a new default network, release the transition wakelock in
+                    // a second if it's held.  The second pause is to allow apps
+                    // to reconnect over the new network
+                    if (mNetTransitionWakeLock.isHeld()) {
+                        mHandler.sendMessageDelayed(mHandler.obtainMessage(
+                                EVENT_CLEAR_NET_TRANSITION_WAKELOCK,
+                                mNetTransitionWakeLockSerialNumber, 0),
+                                1000);
+                    }
+                }
+
+                // this will cause us to come up initially as unconnected and switching
+                // to connected after our normal pause unless somebody reports us as
+                // really disconnected
+                mDefaultInetConditionPublished = 0;
+                mDefaultConnectionSequence++;
+                mInetConditionChangeInFlight = false;
+                // TODO - read the tcp buffer size config string from somewhere
+                // updateNetworkSettings();
+            }
+            // notify battery stats service about this network
+//            try {
+                // TODO
+                //BatteryStatsService.getService().noteNetworkInterfaceType(iface, netType);
+//            } catch (RemoteException e) { }
+            notifyNetworkCallbacks(newNetwork, NetworkCallbacks.AVAILABLE);
+        } else {
+            if (VDBG) log("Validated network turns out to be unwanted.  Tear it down.");
+            newNetwork.asyncChannel.disconnect();
+        }
+    }
+
+
+    private void updateNetworkInfo(NetworkAgentInfo networkAgent, NetworkInfo newInfo) {
+        NetworkInfo.State state = newInfo.getState();
+        NetworkInfo oldInfo = networkAgent.networkInfo;
+        networkAgent.networkInfo = newInfo;
+
+        if (oldInfo != null && oldInfo.getState() == state) {
+            if (VDBG) log("ignoring duplicate network state non-change");
+            return;
+        }
+        if (DBG) {
+            log(networkAgent.name() + " EVENT_NETWORK_INFO_CHANGED, going from " +
+                    (oldInfo == null ? "null" : oldInfo.getState()) +
+                    " to " + state);
+        }
+        if (state == NetworkInfo.State.CONNECTED) {
+            // TODO - check if we want it (optimization)
+            try {
+                mNetd.createNetwork(networkAgent.network.netId,
+                        networkAgent.linkProperties.getInterfaceName());
+            } catch (Exception e) {
+                loge("Error creating Network " + networkAgent.network.netId);
+            }
+            updateLinkProperties(networkAgent, null);
+            notifyNetworkCallbacks(networkAgent, NetworkCallbacks.PRECHECK);
+            // TODO - kick the network monitor
+
+            // Fake things by sending self a NETWORK_VALIDATED msg
+            Message message = Message.obtain();
+            message.obj = networkAgent;
+            message.what = NetworkMonitorProtocol.EVENT_NETWORK_VALIDATED;
+            mTrackerHandler.sendMessage(message);
+        } else if (state == NetworkInfo.State.DISCONNECTED ||
+                state == NetworkInfo.State.SUSPENDED) {
+            networkAgent.asyncChannel.disconnect();
+        }
+    }
+
+    protected void notifyNetworkCallbacks(NetworkAgentInfo networkAgent, int notifyType) {
+        if (VDBG) log("notifyType " + notifyType + " for " + networkAgent.name());
+        boolean needsBroadcasts = false;
+        for (int i = 0; i < networkAgent.networkRequests.size(); i++) {
+            NetworkRequest request = networkAgent.networkRequests.valueAt(i);
+            if (request == null) continue;
+            if (request.needsBroadcasts) needsBroadcasts = true;
+            callCallbackForRequest(request, networkAgent, notifyType);
+        }
+        for (NetworkRequest request : networkAgent.networkListens) {
+            if (request.needsBroadcasts) needsBroadcasts = true;
+            callCallbackForRequest(request, networkAgent, notifyType);
+        }
+        if (needsBroadcasts) {
+            if (notifyType == NetworkCallbacks.AVAILABLE) {
+                sendConnectedBroadcastDelayed(networkAgent.networkInfo,
+                        getConnectivityChangeDelay());
+            } else if (notifyType == NetworkCallbacks.LOST) {
+                NetworkInfo info = new NetworkInfo(networkAgent.networkInfo);
+                Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
+                intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
+                intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, info.getType());
+                if (info.isFailover()) {
+                    intent.putExtra(ConnectivityManager.EXTRA_IS_FAILOVER, true);
+                    networkAgent.networkInfo.setFailover(false);
+                }
+                if (info.getReason() != null) {
+                    intent.putExtra(ConnectivityManager.EXTRA_REASON, info.getReason());
+                }
+                if (info.getExtraInfo() != null) {
+                    intent.putExtra(ConnectivityManager.EXTRA_EXTRA_INFO, info.getExtraInfo());
+                }
+                NetworkAgentInfo newDefaultAgent = null;
+                if (networkAgent.networkRequests.get(mDefaultRequest.requestId) != null) {
+                    newDefaultAgent = mNetworkForRequestId.get(mDefaultRequest.requestId);
+                    if (newDefaultAgent != null) {
+                        intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO,
+                                newDefaultAgent.networkInfo);
+                    } else {
+                        intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
+                    }
+                }
+                intent.putExtra(ConnectivityManager.EXTRA_INET_CONDITION,
+                        mDefaultInetConditionPublished);
+                final Intent immediateIntent = new Intent(intent);
+                immediateIntent.setAction(CONNECTIVITY_ACTION_IMMEDIATE);
+                sendStickyBroadcast(immediateIntent);
+                sendStickyBroadcastDelayed(intent, getConnectivityChangeDelay());
+                if (newDefaultAgent != null) {
+                    sendConnectedBroadcastDelayed(newDefaultAgent.networkInfo,
+                            getConnectivityChangeDelay());
+                }
+            }
+        }
+    }
 }

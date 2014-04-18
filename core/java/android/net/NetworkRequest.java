@@ -25,23 +25,55 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @hide
  */
 public class NetworkRequest implements Parcelable {
+    /**
+     * The NetworkCapabilities that define this request
+     */
     public final NetworkCapabilities networkCapabilities;
+
+    /**
+     * Identifies the request.  NetworkRequests should only be constructed by
+     * the Framework and given out to applications as tokens to be used to identify
+     * the request.
+     * TODO - make sure this input is checked whenever a NR is passed in a public API
+     */
     public final int requestId;
-    public final boolean legacy;
-    private static final AtomicInteger sRequestId = new AtomicInteger();
 
+    /**
+     * Set for legacy requests and the default.
+     * Causes CONNECTIVITY_ACTION broadcasts to be sent.
+     * @hide
+     */
+    public final boolean needsBroadcasts;
+
+    private static final AtomicInteger sNextRequestId = new AtomicInteger(1);
+
+    /**
+     * @hide
+     */
     public NetworkRequest(NetworkCapabilities nc) {
-        this(nc, false, sRequestId.incrementAndGet());
+        this(nc, false, sNextRequestId.getAndIncrement());
     }
 
-    public NetworkRequest(NetworkCapabilities nc, boolean legacy) {
-        this(nc, legacy, sRequestId.incrementAndGet());
+    /**
+     * @hide
+     */
+    public NetworkRequest(NetworkCapabilities nc, boolean needsBroadcasts) {
+        this(nc, needsBroadcasts, sNextRequestId.getAndIncrement());
     }
 
-    private NetworkRequest(NetworkCapabilities nc, boolean legacy, int rId) {
+    /**
+     * @hide
+     */
+    private NetworkRequest(NetworkCapabilities nc, boolean needsBroadcasts, int rId) {
         requestId = rId;
         networkCapabilities = nc;
-        this.legacy = legacy;
+        this.needsBroadcasts = needsBroadcasts;
+    }
+
+    public NetworkRequest(NetworkRequest that) {
+        networkCapabilities = new NetworkCapabilities(that.networkCapabilities);
+        requestId = that.requestId;
+        needsBroadcasts = that.needsBroadcasts;
     }
 
     // implement the Parcelable interface
@@ -50,16 +82,17 @@ public class NetworkRequest implements Parcelable {
     }
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(networkCapabilities, flags);
-        dest.writeInt(legacy ? 1 : 0);
+        dest.writeInt(needsBroadcasts ? 1 : 0);
         dest.writeInt(requestId);
     }
     public static final Creator<NetworkRequest> CREATOR =
         new Creator<NetworkRequest>() {
             public NetworkRequest createFromParcel(Parcel in) {
                 NetworkCapabilities nc = (NetworkCapabilities)in.readParcelable(null);
-                boolean legacy = (in.readInt() == 1);
+                boolean needsBroadcasts = (in.readInt() == 1);
                 int requestId = in.readInt();
-                return new NetworkRequest(nc, legacy, requestId);
+                NetworkRequest result = new NetworkRequest(nc, needsBroadcasts, requestId);
+                return result;
             }
             public NetworkRequest[] newArray(int size) {
                 return new NetworkRequest[size];
@@ -67,14 +100,14 @@ public class NetworkRequest implements Parcelable {
         };
 
     public String toString() {
-        return "NetworkRequest [ id=" + requestId + ", legacy=" + legacy + ", " +
-                networkCapabilities.toString() + " ]";
+        return "NetworkRequest [ id=" + requestId + ", needsBroadcasts=" + needsBroadcasts +
+                ", " + networkCapabilities.toString() + " ]";
     }
 
     public boolean equals(Object obj) {
         if (obj instanceof NetworkRequest == false) return false;
         NetworkRequest that = (NetworkRequest)obj;
-        return (that.legacy == this.legacy &&
+        return (that.needsBroadcasts == this.needsBroadcasts &&
                 that.requestId == this.requestId &&
                 ((that.networkCapabilities == null && this.networkCapabilities == null) ||
                  (that.networkCapabilities != null &&
@@ -82,6 +115,7 @@ public class NetworkRequest implements Parcelable {
     }
 
     public int hashCode() {
-        return requestId + (legacy ? 1013 : 2026) + (networkCapabilities.hashCode() * 1051);
+        return requestId + (needsBroadcasts ? 1013 : 2026) +
+                (networkCapabilities.hashCode() * 1051);
     }
 }
