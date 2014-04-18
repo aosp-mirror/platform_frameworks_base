@@ -15,20 +15,51 @@
 -->
 <resources>
     <style name="Theme.Micro" parent="Theme.Holo.NoActionBar">
-        <item name="textViewStyle">@android:style/Widget.Micro.TextView</item>
-        <item name="numberPickerStyle">@android:style/Widget.Micro.NumberPicker</item>
-        <item name="windowAnimationStyle">@android:style/Animation.SwipeDismiss</item>
+        <item name="alertDialogTheme">@style/Theme.Micro.Dialog.Alert</item>
+        <item name="alertDialogStyle">@style/AlertDialog.Micro</item>
+        <item name="dialogTheme">@style/Theme.Micro.Dialog</item>
+        <item name="textViewStyle">@style/Widget.Micro.TextView</item>
+
+        <item name="numberPickerStyle">@style/Widget.Micro.NumberPicker</item>
+        <item name="windowAnimationStyle">@style/Animation.SwipeDismiss</item>
         <item name="windowIsFloating">false</item>
         <item name="windowIsTranslucent">true</item>
         <item name="windowSwipeToDismiss">true</item>
 	</style>
 
     <style name="Theme.Micro.Light" parent="Theme.Holo.Light.NoActionBar">
-        <item name="textViewStyle">@android:style/Widget.Micro.TextView</item>
-        <item name="numberPickerStyle">@android:style/Widget.Micro.NumberPicker</item>
-        <item name="windowAnimationStyle">@android:style/Animation.SwipeDismiss</item>
+        <item name="alertDialogTheme">@style/Theme.Micro.Dialog.Alert</item>
+        <item name="alertDialogStyle">@style/AlertDialog.Micro</item>
+        <item name="dialogTheme">@style/Theme.Micro.Dialog</item>
+        <item name="textViewStyle">@style/Widget.Micro.TextView</item>
+        <item name="numberPickerStyle">@style/Widget.Micro.NumberPicker</item>
+        <item name="windowAnimationStyle">@style/Animation.SwipeDismiss</item>
         <item name="windowIsFloating">false</item>
         <item name="windowIsTranslucent">true</item>
         <item name="windowSwipeToDismiss">true</item>
+    </style>
+
+    <style name="Theme.Micro.Dialog" parent="Theme.Holo.Light.Dialog">
+        <item name="windowTitleStyle">@android:style/DialogWindowTitle.Micro</item>
+        <item name="windowIsFloating">false</item>
+        <item name="windowFullscreen">true</item>
+        <item name="textAppearance">@style/TextAppearance.Micro</item>
+        <item name="textAppearanceInverse">@style/TextAppearance.Micro</item>
+    </style>
+
+    <style name="Theme.Micro.Dialog.Alert" parent="Theme.Holo.Light.Dialog.Alert">
+        <item name="windowTitleStyle">@style/DialogWindowTitle.Micro</item>
+        <item name="alertDialogStyle">@style/AlertDialog.Micro</item>
+        <item name="windowIsFloating">false</item>
+    </style>
+
+    <style name="Theme.Micro.Dialog.AppError" parent="Theme.Micro.Dialog">
+        <item name="windowBackground">@null</item>
+        <item name="alertDialogStyle">@style/AlertDialog.Micro</item>
+        <item name="windowOverscan">true</item>
+        <item name="windowCloseOnTouchOutside">false</item>
+        <item name="textSize">20sp</item>
+        <item name="fontFamily">sans-serif-condensed-light</item>
+        <item name="textColor">@color/micro_text_light</item>
     </style>
 </resources>

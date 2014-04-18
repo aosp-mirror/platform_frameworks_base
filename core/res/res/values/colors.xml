@@ -150,6 +150,8 @@
     <color name="link_text_holo_dark">#5c5cff</color>
     <color name="link_text_holo_light">#0000ee</color>
 
+    <color name="micro_text_light">#434343</color>
+
     <!-- Group buttons -->
     <eat-comment />
     <color name="group_button_dialog_pressed_holo_dark">#46c5c1ff</color>
