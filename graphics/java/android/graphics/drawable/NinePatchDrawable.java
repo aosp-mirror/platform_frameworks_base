@@ -241,6 +241,15 @@ public class NinePatchDrawable extends Drawable {
             canvas.scale(-1.0f, 1.0f);
         }
 
+        final int restoreAlpha;
+        if (mNinePatchState.mBaseAlpha != 1.0f) {
+            final Paint p = getPaint();
+            restoreAlpha = p.getAlpha();
+            p.setAlpha((int) (restoreAlpha * mNinePatchState.mBaseAlpha + 0.5f));
+        } else {
+            restoreAlpha = -1;
+        }
+
         mNinePatch.draw(canvas, bounds, mPaint);
 
         if (needsMirroring) {
@@ -249,6 +258,10 @@ public class NinePatchDrawable extends Drawable {
 
         if (clearColorFilter) {
             mPaint.setColorFilter(null);
+        }
+
+        if (restoreAlpha >= 0) {
+            mPaint.setAlpha(restoreAlpha);
         }
     }
 
@@ -491,6 +504,10 @@ public class NinePatchDrawable extends Drawable {
             }
         }
 
+        if (themeAttrs == null || themeAttrs[R.styleable.NinePatchDrawable_alpha] == 0) {
+            ninePatchState.mBaseAlpha = a.getFloat(R.styleable.NinePatchDrawable_alpha, 1.0f);
+        }
+
         // Apply the constant state to the paint.
         initializeWithState(ninePatchState, r);
 
@@ -582,6 +599,10 @@ public class NinePatchDrawable extends Drawable {
                 final int color = tint.getColorForState(getState(), 0);
                 mTintFilter = new PorterDuffColorFilter(color, state.mTintMode);
             }
+        }
+
+        if (a.hasValue(R.styleable.NinePatchDrawable_alpha)) {
+            state.mBaseAlpha = a.getFloat(R.styleable.NinePatchDrawable_alpha, 1.0f);
         }
 
         // Apply the constant state to the paint.
@@ -689,12 +710,13 @@ public class NinePatchDrawable extends Drawable {
         Mode mTintMode = Mode.SRC_IN;
         Rect mPadding;
         Insets mOpticalInsets;
+        float mBaseAlpha = 1.0f;
         boolean mDither;
         int[] mThemeAttrs;
         int mChangingConfigurations;
         int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
         boolean mAutoMirrored;
-        
+
         NinePatchState() {
             // Empty constructor.
         }
@@ -726,6 +748,7 @@ public class NinePatchDrawable extends Drawable {
             mThemeAttrs = state.mThemeAttrs;
             mPadding = state.mPadding;
             mOpticalInsets = state.mOpticalInsets;
+            mBaseAlpha = state.mBaseAlpha;
             mDither = state.mDither;
             mChangingConfigurations = state.mChangingConfigurations;
             mTargetDensity = state.mTargetDensity;

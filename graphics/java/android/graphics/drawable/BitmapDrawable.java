@@ -484,6 +484,15 @@ public class BitmapDrawable extends Drawable {
             copyBounds(mDstRect);
         }
 
+        final int restoreAlpha;
+        if (state.mBaseAlpha != 1.0f) {
+            final Paint p = getPaint();
+            restoreAlpha = p.getAlpha();
+            p.setAlpha((int) (restoreAlpha * state.mBaseAlpha + 0.5f));
+        } else {
+            restoreAlpha = -1;
+        }
+
         final boolean clearColorFilter;
         if (mTintFilter != null && paint.getColorFilter() == null) {
             paint.setColorFilter(mTintFilter);
@@ -536,6 +545,10 @@ public class BitmapDrawable extends Drawable {
 
         if (clearColorFilter) {
             paint.setColorFilter(null);
+        }
+
+        if (restoreAlpha >= 0) {
+            paint.setAlpha(restoreAlpha);
         }
     }
 
@@ -762,6 +775,10 @@ public class BitmapDrawable extends Drawable {
             paint.setDither(dither);
         }
 
+        if (themeAttrs == null || themeAttrs[R.styleable.BitmapDrawable_alpha] == 0) {
+            state.mBaseAlpha = a.getFloat(R.styleable.BitmapDrawable_alpha, 1.0f);
+        }
+
         if (themeAttrs == null || themeAttrs[R.styleable.BitmapDrawable_gravity] == 0) {
             final int gravity = a.getInt(
                     R.styleable.BitmapDrawable_gravity, Gravity.FILL);
@@ -816,6 +833,10 @@ public class BitmapDrawable extends Drawable {
             final boolean dither = a.getBoolean(
                     R.styleable.BitmapDrawable_dither, paint.isDither());
             paint.setDither(dither);
+        }
+
+        if (a.hasValue(R.styleable.BitmapDrawable_alpha)) {
+            state.mBaseAlpha = a.getFloat(R.styleable.BitmapDrawable_alpha, state.mBaseAlpha);
         }
 
         if (a.hasValue(R.styleable.BitmapDrawable_gravity)) {
@@ -933,6 +954,7 @@ public class BitmapDrawable extends Drawable {
         int[] mThemeAttrs;
         int mChangingConfigurations;
         int mGravity = Gravity.FILL;
+        float mBaseAlpha = 1.0f;
         Paint mPaint = new Paint(DEFAULT_PAINT_FLAGS);
         Shader.TileMode mTileModeX = null;
         Shader.TileMode mTileModeY = null;
@@ -954,6 +976,7 @@ public class BitmapDrawable extends Drawable {
             mTileModeX = bitmapState.mTileModeX;
             mTileModeY = bitmapState.mTileModeY;
             mTargetDensity = bitmapState.mTargetDensity;
+            mBaseAlpha = bitmapState.mBaseAlpha;
             mPaint = new Paint(bitmapState.mPaint);
             mRebuildShader = bitmapState.mRebuildShader;
             mAutoMirrored = bitmapState.mAutoMirrored;
