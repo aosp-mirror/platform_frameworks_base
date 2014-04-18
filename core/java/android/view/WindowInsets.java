@@ -51,6 +51,11 @@ public class WindowInsets {
     }
 
     /** @hide */
+    public WindowInsets(Rect systemWindowInsets, boolean isRound) {
+        this(systemWindowInsets, EMPTY_RECT, isRound);
+    }
+
+    /** @hide */
     public WindowInsets(Rect systemWindowInsets, Rect windowDecorInsets, boolean isRound) {
         mSystemWindowInsets = systemWindowInsets;
         mWindowDecorInsets = windowDecorInsets;
