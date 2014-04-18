@@ -148,7 +148,7 @@ public interface WebViewProvider {
 
     public Picture capturePicture();
 
-    public PrintDocumentAdapter createPrintDocumentAdapter();
+    public PrintDocumentAdapter createPrintDocumentAdapter(String documentName);
 
     public float getScale();
 
