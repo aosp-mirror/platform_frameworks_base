@@ -329,6 +329,11 @@ public abstract class PreferenceFragment extends Fragment implements
         if (preferenceScreen != null) {
             preferenceScreen.bind(getListView());
         }
+        onBindPreferences();
+    }
+
+    /** @hide */
+    protected void onBindPreferences() {
     }
 
     /** @hide */
