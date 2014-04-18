@@ -38,6 +38,7 @@ public class NotificationPanelView extends PanelView {
     private int[] mTempChildLocation = new int[2];
     private View mNotificationParent;
     private boolean mTrackingSettings;
+    private float mExpandedHeight = -1;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -173,6 +174,8 @@ public class NotificationPanelView extends PanelView {
      * @param expandedHeight the new expanded height
      */
     private void updateNotificationStackHeight(float expandedHeight) {
+        if (mExpandedHeight == expandedHeight) return;
+        mExpandedHeight = expandedHeight;
         mNotificationStackScroller.setIsExpanded(expandedHeight > 0.0f);
         float childOffset = getRelativeTop(mNotificationStackScroller)
                 - mNotificationParent.getTranslationY();
