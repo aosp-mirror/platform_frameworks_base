@@ -5580,13 +5580,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (end) {
                 Slog.w(TAG, "New history ends before old history!");
             } else if (!out.same(mHistoryReadTmp)) {
-                long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
                 PrintWriter pw = new FastPrintWriter(new LogWriter(android.util.Log.WARN, TAG));
                 pw.println("Histories differ!");
                 pw.println("Old history:");
-                (new HistoryPrinter()).printNextItem(pw, out, now, false, true);
+                (new HistoryPrinter()).printNextItem(pw, out, 0, false, true);
                 pw.println("New history:");
-                (new HistoryPrinter()).printNextItem(pw, mHistoryReadTmp, now, false, true);
+                (new HistoryPrinter()).printNextItem(pw, mHistoryReadTmp, 0, false,
+                        true);
                 pw.flush();
             }
         }
@@ -5664,7 +5664,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             return false;
         }
 
+        final long lastRealtime = out.time;
+        final long lastWalltime = out.currentTime;
         readHistoryDelta(mHistoryBuffer, out);
+        if (out.cmd != HistoryItem.CMD_CURRENT_TIME && lastWalltime != 0) {
+            out.currentTime = lastWalltime + (out.time - lastRealtime);
+        }
         return true;
     }
 
