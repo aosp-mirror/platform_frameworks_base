@@ -27,6 +27,8 @@ LOCAL_CERTIFICATE := platform
 
 LOCAL_JNI_SHARED_LIBRARIES := libjni_pacprocessor
 
+LOCAL_MULTILIB := 32
+
 include $(BUILD_PACKAGE)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))
