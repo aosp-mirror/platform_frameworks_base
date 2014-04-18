@@ -51,6 +51,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     private int mConnState;
     private final Object mStateLock = new Object();
     private Boolean mDeviceBusy = false;
+    private int mTransport;
 
     private static final int CONN_STATE_IDLE = 0;
     private static final int CONN_STATE_CONNECTING = 1;
@@ -135,7 +136,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 }
                 try {
                     mService.clientConnect(mClientIf, mDevice.getAddress(),
-                                           !mAutoConnect); // autoConnect is inverse of "isDirect"
+                                           !mAutoConnect, mTransport); // autoConnect is inverse of "isDirect"
                 } catch (RemoteException e) {
                     Log.e(TAG,"",e);
                 }
@@ -600,10 +601,12 @@ public final class BluetoothGatt implements BluetoothProfile {
             }
         };
 
-    /*package*/ BluetoothGatt(Context context, IBluetoothGatt iGatt, BluetoothDevice device) {
+    /*package*/ BluetoothGatt(Context context, IBluetoothGatt iGatt, BluetoothDevice device,
+                                int transport) {
         mContext = context;
         mService = iGatt;
         mDevice = device;
+        mTransport = transport;
         mServices = new ArrayList<BluetoothGattService>();
 
         mConnState = CONN_STATE_IDLE;
@@ -759,7 +762,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     public boolean connect() {
         try {
             mService.clientConnect(mClientIf, mDevice.getAddress(),
-                                   false); // autoConnect is inverse of "isDirect"
+                                   false, mTransport); // autoConnect is inverse of "isDirect"
             return true;
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
