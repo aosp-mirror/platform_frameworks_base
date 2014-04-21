@@ -3003,7 +3003,9 @@ public final class ActivityThread {
                 int h;
                 if (w < 0) {
                     Resources res = r.activity.getResources();
-                    if (SystemProperties.getBoolean("persist.recents.use_alternate", false)) {
+                    Configuration config = res.getConfiguration();
+                    boolean useAlternateRecents = (config.smallestScreenWidthDp < 600);
+                    if (useAlternateRecents) {
                         int wId = com.android.internal.R.dimen.recents_thumbnail_width;
                         int hId = com.android.internal.R.dimen.recents_thumbnail_height;
                         mThumbnailWidth = w = res.getDimensionPixelSize(wId);

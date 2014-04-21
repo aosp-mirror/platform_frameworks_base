@@ -162,13 +162,10 @@ public class AppTransition implements Dump {
     private final Interpolator mThumbnailFadeoutInterpolator;
 
     private int mCurrentUserId = 0;
-    private boolean mUseAlternateThumbnailAnimation;
 
     AppTransition(Context context, Handler h) {
         mContext = context;
         mH = h;
-        mUseAlternateThumbnailAnimation =
-                SystemProperties.getBoolean("persist.anim.use_alt_thumbnail", false);
         mConfigShortAnimTime = context.getResources().getInteger(
                 com.android.internal.R.integer.config_shortAnimTime);
         mDecelerateInterpolator = AnimationUtils.loadInterpolator(context,
@@ -668,7 +665,7 @@ public class AppTransition implements Dump {
 
     Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
                             int appWidth, int appHeight, int orientation,
-                            Rect containingFrame, Rect contentInsets) {
+                            Rect containingFrame, Rect contentInsets, Configuration configuration) {
         Animation a;
         if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM) {
             a = loadAnimation(mNextAppTransitionPackage, enter ?
@@ -689,7 +686,8 @@ public class AppTransition implements Dump {
                 mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN) {
             mNextAppTransitionScaleUp =
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP);
-            if (mUseAlternateThumbnailAnimation) {
+            boolean useAlternateThumbnailAnimation = (configuration.smallestScreenWidthDp < 600);
+            if (useAlternateThumbnailAnimation) {
                 a = createAlternateThumbnailEnterExitAnimationLocked(
                         getThumbnailTransitionState(enter), appWidth, appHeight, orientation,
                         transit, containingFrame, contentInsets);
