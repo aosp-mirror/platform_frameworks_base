@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sincronización"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Demasiadas eliminaciones de <xliff:g id="CONTENT_TYPE">%s</xliff:g>"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Se ha agotado el espacio de almacenamiento del tablet. Elimina algunos archivos para liberar espacio."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"El almacenamiento del reloj está lleno. Elimina algunos archivos para liberar espacio."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Se ha agotado el espacio de almacenamiento del teléfono. Elimina algunos archivos para liberar espacio."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Es posible que la red esté supervisada"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Por un tercero desconocido"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Timbre activado"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Apagando..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"El tablet se apagará."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"El reloj se apagará."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"El teléfono se apagará."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"¿Seguro que quieres apagar el teléfono?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Reiniciar en modo seguro"</string>
@@ -339,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Permite que la aplicación emita una notificación cuando se haya recibido un mensaje SMS. Las aplicaciones malintencionadas pueden usar este permiso para falsificar mensajes SMS entrantes."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"enviar emisión recibida mediante mensaje WAP PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Permite que la aplicación envíe una notificación cuando se haya recibido un mensaje WAP PUSH. Las aplicaciones malintencionadas pueden usar este permiso para falsificar la recepción de un mensaje MMS o para reemplazar sin aviso el contenido de cualquier página web con variantes malintencionadas."</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"enviar notificaciones sobre la puntuación de las redes"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Permite que la aplicación emita una notificación que la red necesita para recibir una puntuación. Las aplicaciones normales no necesitan nunca este permiso."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"limitar el número de procesos en ejecución"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Permite que la aplicación controle el número máximo de procesos que se ejecutarán. No es necesario nunca para las aplicaciones normales."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"forzar el cierre de aplicaciones en segundo plano"</string>
@@ -394,6 +390,8 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permite enlazar con la interfaz de nivel superior de una pantalla remota. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"enlazar con un servicio de widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permite enlazar con la interfaz de nivel superior de un servicio de widget. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"enlazar con un servicio de proveedor de rutas"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Permite enlazar con proveedores de rutas registrados. No debe ser necesario para las aplicaciones normales."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar con el administrador de un dispositivo"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permite que se envíen intentos a un administrador de dispositivos. Las aplicaciones normales nunca deberían necesitar este permiso."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"enlazar a una entrada de TV"</string>
@@ -644,12 +642,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Cambiar estado de WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Permite que la aplicación conecte el tablet a redes WiMAX y lo desconecte de ellas."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Permite que la aplicación conecte el teléfono a redes WiMAX y lo desconecte de ellas."</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"puntuar redes"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Permite que la aplicación clasifique redes e influya en las redes que el tablet debe preferir."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Permite que la aplicación clasifique una red e influya en las redes que el teléfono debe preferir."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"vincular con dispositivos Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Permite que la aplicación acceda a la configuración de Bluetooth del tablet y que establezca y acepte conexiones con los dispositivos sincronizados."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permite que la aplicación acceda a la configuración de Bluetooth del teléfono y que establezca y acepte conexiones con los dispositivos sincronizados."</string>

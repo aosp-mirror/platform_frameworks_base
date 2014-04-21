@@ -614,6 +614,10 @@
     <skip />
     <!-- no translation found for permdesc_bindRemoteViews (4717987810137692572) -->
     <skip />
+    <!-- no translation found for permlab_bindRouteProvider (4869394607915096847) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRouteProvider (4703804520859960329) -->
+    <skip />
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interacziun cun in administratur dad apparats"</string>
     <!-- no translation found for permdesc_bindDeviceAdmin (569715419543907930) -->
     <skip />

@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Vumelanisa"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Kunokususa <xliff:g id="CONTENT_TYPE">%s</xliff:g> okuningi kakhulu."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Isilondolozi sethebhulethi sigcwele! Susa amanye amafayela ukukhulula isikhala."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Isitoreji sokubuka sigcwele. Susa amanye amafayela ukukhulula isikhala."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Isilondolozi sefoni sigcwele! Susa amanye amafayela ukukhulula isikhala."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Inethiwekhi ingase inganyelwe"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Ngenkampani yangaphandle engaziwa"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Iringa iyasebenza"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Ivala shaqa..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Ithebhulethi yakho izocima."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Ukubuka kwakho kuzocima."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Ifoni yakho izocima."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Ingabe ufuna ukucisha?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Qala kabusha emodini ephephile"</string>
@@ -339,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Ivumela uhlelo lokusebenza ukuthi isakaze isaziso sokuthi umyalezo we-SMS utholakele. Izuhlelo lokusebenza ezinobungozi zingasebenzisa lokhu ukufoja imiyalezo ye-SMS engenayo."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"thumela umsakazo otholwe nge-WAP-PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Ivumela uhlelo lokusebenza ukuthi isakaze isaziso sokuthi umyalezo we-WAP PUSH utholakele. Izuhlelo lokusebenza ezinobungozi zingasebenzisa lokhu ukufoja ukutholakala kwemiyalezo ye-S noma zisuse okuqukethwe kwanoma iliphi ikhasi lewebhu eliqukethe okunobungozi."</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"thumela ukusakaza kwamanethiwekhi ayisikolo"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Ivumela uhlelo lokusebenza ukusakaza isaziso sokuthi amanethiwekhi adinga isikolo. Awadingeki kuzinhlelo zokusebenza ezivamile."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"khawula inani lezinqubo ezisebenzayo"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Ivumela uhlelo lokusebenza ukuthi ilawule isibalo esikhulu sezinto eziqhubekayo eziyosebenza. Ayidingakeli izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"phoqa izinhlelo zokusebenza ezingemuva ukuthi zivaleke"</string>
@@ -394,6 +390,8 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Ivumela umbambi ukuhlanganisa isixhumi esibonakalayo esisezingeni eliphezulu sesibonisi sesilawuli kude. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bophezela kube isevisi yesinqunjana"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Ivumela umbambi ukuhlanganisa uxhumano nomsebenzisi kwezinga eliphezulu lensizakalo yesinqunjwana. Akusoze kwadingeka kwezinhlelo zokusebenza ezivamile."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"bophezela kusevisi yomhlinzeki womzila"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Ivumela isibambi ukubophezela kunoma yimuphi umhlinzeki womzila obhalisiwe. Akufanele kudingeke izinhlelo zokusebenza ezivamile."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"xhumana nomphathi wedivaysi"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Ivumela ummeli ukuthumela okuqukethwe kumphathi wedivaysi. Akusoze kwadingeka kwizinhlelo zokusebenza ezivamile."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"bophezela kokokufaka kwe-TV"</string>
@@ -644,12 +642,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Shintsha isimo se-WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Ivumela uhlelo lokusebenza ukuxhuma ithebhulethi nokunqamula ithebhulethi kumanethiwekhi e-WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Ivumela uhlelo lokusebenza ukuxhuma ifoni nokuyinqamula kumanethiwekhi e-WiMAX."</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"amanethiwekhi ayisikolo"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Ivumela uhlelo lokusebenza ukuthi lilinganise amanethiwekhi futhi lithuthukise ukuthi imaphi amanethiwekhi ithebhulethi okufanele iwakhethe."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Ivumela uhlelo lokusebenza ukuthi lilinganise amanethiwekhi futhi lithuthukise ukuthi imaphi amanethiwekhi ifoni okufanele iwakhethe."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"matanisa namadivayisi e-Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Ivumela uhlelo lokusebenza ukubuka ukucushwa kwe-Bluetooth kuthebhulethi, nokwenza futhi nokwamukela uxhumo namadivayisi amatanisiwe."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Ivumela uhlelo lokusebenza ukubuka ukucushwa kwe-Bluetooth efonini, ukwenza futhi nokwamukela uxhumo namadivayisi amatanisiwe."</string>

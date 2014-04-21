@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synchronizovať"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Príliš veľa odstránených položiek služby <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Ukladací priestor tabletu je plný. Odstráňte niektoré súbory a uvoľnite miesto."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Ukladací priestor hodiniek je plný. Uvoľnite miesto odstránením niektorých súborov."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Pamäť telefónu je plná. Odstráňte niektoré súbory a uvoľnite miesto."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Sieť môže byť monitorovaná"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Neznámou treťou stranou"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Zvonenie je zapnuté"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Prebieha vypínanie..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Váš tablet bude vypnutý."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Hodinky sa vypnú."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Váš telefón bude vypnutý."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Chcete zariadenie vypnúť?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Reštartovať do núdzového režimu"</string>
@@ -339,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Umožňuje aplikácii vysielať oznámenie, že správa SMS bola doručená. Škodlivé aplikácie môžu toto nastavenie použiť na falšovanie prichádzajúcich správ SMS."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"odoslanie vysielania typu WAP-PUSH-received"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Umožňuje aplikácii vysielať oznámenie, že správa WAP PUSH bola doručená. Škodlivé aplikácie môžu použiť toto nastavenie na vytvorenie potvrdenia o doručení správy MMS alebo na utajené nahradenie obsahu akejkoľvek stránky škodlivými variantmi."</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"odoslanie skóre vysielaných sieťami"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Umožňuje aplikácii vysielať upozornenie, že je potrebné zadať skóre sietí. Bežné aplikácie toto povolenie nepotrebujú."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"obmedzenie počtu spustených procesov"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Umožňuje aplikácii kontrolovať maximálny počet spustených procesov. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"vynútiť zavretie aplikácií na pozadí"</string>
@@ -394,6 +390,8 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania vzdialeného displeja. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"viazať sa k službe miniaplikácie"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania služby miniaplikácií. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"viazanie na službu poskytovateľa cesty"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Umožňuje držiteľovi viazať sa na akýchkoľvek registrovaných poskytovateľov cesty. Normálne aplikácie by toto povolenie nemali nikdy nepotrebovať."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"komunikovať so správcom zariadenia"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Umožňuje držiteľovi odosielať informácie správcovi zariadenia. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"viazanie na televízny vstup"</string>
@@ -644,12 +642,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Zmeniť stav siete WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Umožňuje aplikácii pripojiť tablet k sieťam WiMAX a odpojiť ho od nich."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Umožňuje aplikácii pripojiť telefón k sieťam WiMAX a odpojiť ho od nich."</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"zadanie skóre sietí"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Umožňuje aplikácii hodnotiť siete a ovplyvňovať, ktoré siete by mal tablet preferovať."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Umožňuje aplikácii hodnotiť siete a ovplyvňovať, ktoré siete by mal telefón preferovať."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"párovať so zariadeniami Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Umožňuje aplikácii zobraziť informácie o konfigurácii Bluetooth na tablete. Taktiež jej umožňuje nadväzovať a akceptovať spojenia so spárovanými zariadeniami."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Umožňuje aplikácii zobraziť informácie o konfigurácii Bluetooth na telefóne. Taktiež jej umožňuje nadväzovať a akceptovať spojenia so spárovanými zariadeniami."</string>

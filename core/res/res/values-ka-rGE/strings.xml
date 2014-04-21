@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"სინქრონიზაცია"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"<xliff:g id="CONTENT_TYPE">%s</xliff:g>-ის ძალიან ბევრი წაშლილები."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ტაბლეტის მეხსიერება გავსებულია. ადგილის გასათავისუფლებლად წაშალეთ ფაილების ნაწილი."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"საათის მეხსიერება გავსებულია. ადგილის გასათავისუფლებლად წაშალეთ ფაილების ნაწილი."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ტელეფონის მეხსიერება გავსებულია. ადგილის გასათავისუფლებლად წაშალეთ ფაილების ნაწილი."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"შესაძლოა ქსელი მონიტორინგის ქვეშ იმყოფება"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"უცნობი მესამე მხარის მიერ"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"ზარი ჩართულია"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"გამორთვა…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"თქვენი ტაბლეტი გაითიშება."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"თქვენი საათი გაითიშება."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"თქვენი ტელეფონი გაითიშება."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"გსურთ გამორთვა?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"უსაფრთხო რეჟიმის ჩატვირთვა"</string>
@@ -339,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"აპს საშუალებას აძლევს გააგზავნოს შეტყობინება SMS შეტყობინების მიღების თაობაზე. მავნე აპლიკაციებში ეს ფუნქცია შეიძლება გამოყენებული იქნას SMS შეტყობინებების მიღების იმიტაციიისათვის."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"WAP-PUSH-ით მიღებული სამაუწყებლო შეტყობინების გაგზავნა"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"აპს შეეძლება, გაგზავნოს შეტყობინება WAP PUSH შეტყობინების მიღების თაობაზე. მავნე აპებმა ეს შეიძლება გამოიყენონ MMS შეტყობინების მიღების გასაყალბებლად ან ნებისმიერი ვებგვერდის კონტენტის სახიფათო ვარიანტებით ჩუმად ჩასანაცვლებლად."</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"ქსელის შეფასებების მაუწყებლობის გაგზავნა"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"აპს ნებას რთავს გადასცეს შეტყობინება, რომ ქსელები შეფასებას საჭიროებს. ჩვეულებრივ აპებს ეს არასოდეს ჭირდება."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"მიმდინარე პროცესების რაოდენობის ლიმიტი"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"აპს შეეძლება, გააკონტროლოს მიმდინარე პროცესების მაქსიმალური რაოდენობა. ჩვეულებრივ აპებში არასდროს არის საჭირო."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"უკანა ფონის აპის იძულებით დახურვა"</string>
@@ -394,6 +390,8 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"მფლობელს შეეძლება მიებას დისტანციურ მონიტორის ზედა დონის ინტერფეისს. ჩვეულებრივ აპს ეს წესით არასოდეს უნდა დაჭირდეს."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ვიჯეტ სერვისთან დაკავშირება"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"აპს შეეძლება ზედა დონის ინტერფეისის ვიჯეტთან დაკავშირება. არასდროს გამოიყენება ჩვეულებრივ აპებში."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"მარშრუტის სერვისის პროვაიდერთან შეკავშირება"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"საშუალებას აძლევს მფლობელს შეკავშირდეს მარშრუტების ნებისმიერ პროვაიდერთან. ჩვეულებრივ აპებს უმეტეს შემთხვევაში არ დაჭირდება."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"მოწყობილობის ადმინთან ინტერაქცია"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"აპს შეეძლება მოწყობილობის ადმინისტრატორისთვის intent ობიექტების გაგზავნა. არასდროს გამოიყენება ჩვეულებრივ აპებში."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"TV შეყვანასთან მიბმა"</string>
@@ -644,12 +642,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX მდგომარეობის შეცვლა"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"აპს შეეძლება, დაუკავშიროს და გამოაერთოს ტაბლეტი WiMAX ქსელებიდან."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"აპს შეეძლება, დაუკავშიროს და გამოაერთოს ტელეფონი WiMAX ქსელებიდან."</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"ქსელების შეფასება"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"აპს ნებას რთავს შეაფასოს ქსელები და იქონიოს ზეგავლენა, თუ რომელი ქსელი ამჯობინოს ტაბლეტმა."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"აპს ნებას რთავს შეაფასოს ქსელები და იქონიოს ზეგავლენა, თუ რომელი ქსელი ამჯობინოს ტელეფონმა."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth მოწყობილობებთან დაწყვილება"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"აპს შეეძლება, ნახოს Bluetooth-ის კონფიგურაცია ტაბლეტზე, შექმნას და მიიღოს კავშირები დაწყვილებულ მოწყობილობებთან."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"აპს შეეძლება, ნახოს Bluetooth-ის კონფიგურაცია ტელეფონზე და შექმნას და მიიღოს კავშირები დაწყვილებულ მოწყობილობებთან."</string>
