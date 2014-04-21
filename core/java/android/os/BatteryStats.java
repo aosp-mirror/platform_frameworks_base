@@ -2861,29 +2861,21 @@ public abstract class BatteryStats implements Parcelable {
         int oldTemp = -1;
         int oldVolt = -1;
         long lastTime = -1;
+        long firstTime = -1;
 
-        public void printNextItem(PrintWriter pw, HistoryItem rec, long now, boolean checkin,
+        public void printNextItem(PrintWriter pw, HistoryItem rec, long baseTime, boolean checkin,
                 boolean verbose) {
             if (!checkin) {
                 pw.print("  ");
-                if (now >= 0) {
-                    TimeUtils.formatDuration(rec.time-now, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
-                } else {
-                    TimeUtils.formatDuration(rec.time, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
-                }
+                TimeUtils.formatDuration(rec.time - baseTime, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
                 pw.print(" (");
                 pw.print(rec.numReadInts);
                 pw.print(") ");
             } else {
                 if (lastTime < 0) {
-                    if (now >= 0) {
-                        pw.print("@");
-                        pw.print(rec.time-now);
-                    } else {
-                        pw.print(rec.time);
-                    }
+                    pw.print(rec.time - baseTime);
                 } else {
-                    pw.print(rec.time-lastTime);
+                    pw.print(rec.time - lastTime);
                 }
                 lastTime = rec.time;
             }
@@ -3132,10 +3124,27 @@ public abstract class BatteryStats implements Parcelable {
                     pw.println("):");
                     HistoryPrinter hprinter = new HistoryPrinter();
                     long lastTime = -1;
+                    long baseTime = -1;
+                    boolean printed = false;
                     while (getNextHistoryLocked(rec)) {
                         lastTime = rec.time;
+                        if (baseTime < 0) {
+                            baseTime = lastTime;
+                        }
                         if (rec.time >= histStart) {
-                            hprinter.printNextItem(pw, rec, histStart >= 0 ? -1 : now, false,
+                            if (histStart >= 0 && !printed) {
+                                if (rec.cmd == HistoryItem.CMD_CURRENT_TIME) {
+                                    printed = true;
+                                } else if (rec.currentTime != 0) {
+                                    printed = true;
+                                    byte cmd = rec.cmd;
+                                    rec.cmd = HistoryItem.CMD_CURRENT_TIME;
+                                    hprinter.printNextItem(pw, rec, baseTime, false,
+                                            (flags&DUMP_VERBOSE) != 0);
+                                    rec.cmd = cmd;
+                                }
+                            }
+                            hprinter.printNextItem(pw, rec, baseTime, false,
                                     (flags&DUMP_VERBOSE) != 0);
                         }
                     }
@@ -3152,8 +3161,12 @@ public abstract class BatteryStats implements Parcelable {
                 try {
                     pw.println("Old battery History:");
                     HistoryPrinter hprinter = new HistoryPrinter();
+                    long baseTime = -1;
                     while (getNextOldHistoryLocked(rec)) {
-                        hprinter.printNextItem(pw, rec, now, false, (flags&DUMP_VERBOSE) != 0);
+                        if (baseTime < 0) {
+                            baseTime = rec.time;
+                        }
+                        hprinter.printNextItem(pw, rec, baseTime, false, (flags&DUMP_VERBOSE) != 0);
                     }
                     pw.println();
                 } finally {
@@ -3226,20 +3239,42 @@ public abstract class BatteryStats implements Parcelable {
                         pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
                         pw.print(HISTORY_STRING_POOL); pw.print(',');
                         pw.print(i);
-                        pw.print(',');
-                        pw.print(getHistoryTagPoolString(i));
-                        pw.print(',');
+                        pw.print(",");
                         pw.print(getHistoryTagPoolUid(i));
+                        pw.print(",\"");
+                        String str = getHistoryTagPoolString(i);
+                        str = str.replace("\\", "\\\\");
+                        str = str.replace("\"", "\\\"");
+                        pw.print(str);
+                        pw.print("\"");
                         pw.println();
                     }
                     HistoryPrinter hprinter = new HistoryPrinter();
                     long lastTime = -1;
+                    long baseTime = -1;
+                    boolean printed = false;
                     while (getNextHistoryLocked(rec)) {
                         lastTime = rec.time;
+                        if (baseTime < 0) {
+                            baseTime = lastTime;
+                        }
                         if (rec.time >= histStart) {
+                            if (histStart >= 0 && !printed) {
+                                if (rec.cmd == HistoryItem.CMD_CURRENT_TIME) {
+                                    printed = true;
+                                } else if (rec.currentTime != 0) {
+                                    printed = true;
+                                    byte cmd = rec.cmd;
+                                    rec.cmd = HistoryItem.CMD_CURRENT_TIME;
+                                    pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
+                                    pw.print(HISTORY_DATA); pw.print(',');
+                                    hprinter.printNextItem(pw, rec, baseTime, true, false);
+                                    rec.cmd = cmd;
+                                }
+                            }
                             pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
                             pw.print(HISTORY_DATA); pw.print(',');
-                            hprinter.printNextItem(pw, rec, histStart >= 0 ? -1 : now, true, false);
+                            hprinter.printNextItem(pw, rec, baseTime, true, false);
                         }
                     }
                     if (histStart >= 0) {
