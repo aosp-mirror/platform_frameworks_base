@@ -62,18 +62,19 @@ class QuickSettingsContainerView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mScrim = new ScrimView(mContext);
-        addView(mScrim);
-        mScrim.setAlpha(sShowScrim ? 1 : 0);
+        if (sShowScrim) {
+            mScrim = new ScrimView(mContext);
+            addView(mScrim);
+        }
         // TODO: Setup the layout transitions
         LayoutTransition transitions = getLayoutTransition();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mScrim.getAlpha() == 1) {
-            mScrim.animate().alpha(0).setDuration(1000).start();
+        if (mScrim != null) {
             sShowScrim = false;
+            removeView(mScrim);
         }
         return super.onTouchEvent(event);
     }
@@ -144,7 +145,9 @@ class QuickSettingsContainerView extends FrameLayout {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        mScrim.bringToFront();
+        if (mScrim != null) {
+            mScrim.bringToFront();
+        }
         final int N = getChildCount();
         final boolean isLayoutRtl = isLayoutRtl();
         final int width = getWidth();
@@ -206,6 +209,7 @@ class QuickSettingsContainerView extends FrameLayout {
     }
 
     private static final class ScrimView extends View {
+        private static final int SCRIM = 0x4f000000;
         private static final int COLOR = 0xaf4285f4;
 
         private final Paint mLinePaint;
@@ -240,6 +244,7 @@ class QuickSettingsContainerView extends FrameLayout {
             final int h = getMeasuredHeight();
             final int f = mStrokeWidth * 3 / 4;
 
+            canvas.drawColor(SCRIM);
             canvas.drawPath(line(f, h / 2, w - f, h / 2), mLinePaint);
             canvas.drawPath(line(w / 2, f, w / 2, h - f), mLinePaint);
 
