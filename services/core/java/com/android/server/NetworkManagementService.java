@@ -153,7 +153,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     private NativeDaemonConnector mConnector;
 
-    private final Handler mMainHandler = new Handler();
+    private final Handler mFgHandler;
 
     private IBatteryStats mBatteryStats;
 
@@ -202,6 +202,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     private NetworkManagementService(Context context, String socket) {
         mContext = context;
+
+        // make sure this is on the same looper as our NativeDaemonConnector for sync purposes
+        mFgHandler = new Handler(FgThread.get().getLooper());
 
         if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
             return;
@@ -271,14 +274,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     private void notifyInterfaceStatusChanged(String iface, boolean up) {
         final int length = mObservers.beginBroadcast();
-        for (int i = 0; i < length; i++) {
-            try {
-                mObservers.getBroadcastItem(i).interfaceStatusChanged(iface, up);
-            } catch (RemoteException e) {
-            } catch (RuntimeException e) {
+        try {
+            for (int i = 0; i < length; i++) {
+                try {
+                    mObservers.getBroadcastItem(i).interfaceStatusChanged(iface, up);
+                } catch (RemoteException e) {
+                } catch (RuntimeException e) {
+                }
             }
+        } finally {
+            mObservers.finishBroadcast();
         }
-        mObservers.finishBroadcast();
     }
 
     /**
@@ -287,14 +293,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     private void notifyInterfaceLinkStateChanged(String iface, boolean up) {
         final int length = mObservers.beginBroadcast();
-        for (int i = 0; i < length; i++) {
-            try {
-                mObservers.getBroadcastItem(i).interfaceLinkStateChanged(iface, up);
-            } catch (RemoteException e) {
-            } catch (RuntimeException e) {
+        try {
+            for (int i = 0; i < length; i++) {
+                try {
+                    mObservers.getBroadcastItem(i).interfaceLinkStateChanged(iface, up);
+                } catch (RemoteException e) {
+                } catch (RuntimeException e) {
+                }
             }
+        } finally {
+            mObservers.finishBroadcast();
         }
-        mObservers.finishBroadcast();
     }
 
     /**
@@ -302,14 +311,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     private void notifyInterfaceAdded(String iface) {
         final int length = mObservers.beginBroadcast();
-        for (int i = 0; i < length; i++) {
-            try {
-                mObservers.getBroadcastItem(i).interfaceAdded(iface);
-            } catch (RemoteException e) {
-            } catch (RuntimeException e) {
+        try {
+            for (int i = 0; i < length; i++) {
+                try {
+                    mObservers.getBroadcastItem(i).interfaceAdded(iface);
+                } catch (RemoteException e) {
+                } catch (RuntimeException e) {
+                }
             }
+        } finally {
+            mObservers.finishBroadcast();
         }
-        mObservers.finishBroadcast();
     }
 
     /**
@@ -322,14 +334,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mActiveQuotas.remove(iface);
 
         final int length = mObservers.beginBroadcast();
-        for (int i = 0; i < length; i++) {
-            try {
-                mObservers.getBroadcastItem(i).interfaceRemoved(iface);
-            } catch (RemoteException e) {
-            } catch (RuntimeException e) {
+        try {
+            for (int i = 0; i < length; i++) {
+                try {
+                    mObservers.getBroadcastItem(i).interfaceRemoved(iface);
+                } catch (RemoteException e) {
+                } catch (RuntimeException e) {
+                }
             }
+        } finally {
+            mObservers.finishBroadcast();
         }
-        mObservers.finishBroadcast();
     }
 
     /**
@@ -337,14 +352,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     private void notifyLimitReached(String limitName, String iface) {
         final int length = mObservers.beginBroadcast();
-        for (int i = 0; i < length; i++) {
-            try {
-                mObservers.getBroadcastItem(i).limitReached(limitName, iface);
-            } catch (RemoteException e) {
-            } catch (RuntimeException e) {
+        try {
+            for (int i = 0; i < length; i++) {
+                try {
+                    mObservers.getBroadcastItem(i).limitReached(limitName, iface);
+                } catch (RemoteException e) {
+                } catch (RuntimeException e) {
+                }
             }
+        } finally {
+            mObservers.finishBroadcast();
         }
-        mObservers.finishBroadcast();
     }
 
     /**
@@ -357,15 +375,18 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
 
         final int length = mObservers.beginBroadcast();
-        for (int i = 0; i < length; i++) {
-            try {
-                mObservers.getBroadcastItem(i).interfaceClassDataActivityChanged(
-                        Integer.toString(type), active, tsNanos);
-            } catch (RemoteException e) {
-            } catch (RuntimeException e) {
+        try {
+            for (int i = 0; i < length; i++) {
+                try {
+                    mObservers.getBroadcastItem(i).interfaceClassDataActivityChanged(
+                            Integer.toString(type), active, tsNanos);
+                } catch (RemoteException e) {
+                } catch (RuntimeException e) {
+                }
             }
+        } finally {
+            mObservers.finishBroadcast();
         }
-        mObservers.finishBroadcast();
 
         boolean report = false;
         synchronized (mIdleTimerLock) {
@@ -456,14 +477,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     private void notifyAddressUpdated(String iface, LinkAddress address) {
         final int length = mObservers.beginBroadcast();
-        for (int i = 0; i < length; i++) {
-            try {
-                mObservers.getBroadcastItem(i).addressUpdated(iface, address);
-            } catch (RemoteException e) {
-            } catch (RuntimeException e) {
+        try {
+            for (int i = 0; i < length; i++) {
+                try {
+                    mObservers.getBroadcastItem(i).addressUpdated(iface, address);
+                } catch (RemoteException e) {
+                } catch (RuntimeException e) {
+                }
             }
+        } finally {
+            mObservers.finishBroadcast();
         }
-        mObservers.finishBroadcast();
     }
 
     /**
@@ -471,14 +495,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     private void notifyAddressRemoved(String iface, LinkAddress address) {
         final int length = mObservers.beginBroadcast();
-        for (int i = 0; i < length; i++) {
-            try {
-                mObservers.getBroadcastItem(i).addressRemoved(iface, address);
-            } catch (RemoteException e) {
-            } catch (RuntimeException e) {
+        try {
+            for (int i = 0; i < length; i++) {
+                try {
+                    mObservers.getBroadcastItem(i).addressRemoved(iface, address);
+                } catch (RemoteException e) {
+                } catch (RuntimeException e) {
+                }
             }
+        } finally {
+            mObservers.finishBroadcast();
         }
-        mObservers.finishBroadcast();
     }
 
     /**
@@ -486,14 +513,18 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     private void notifyInterfaceDnsServerInfo(String iface, long lifetime, String[] addresses) {
         final int length = mObservers.beginBroadcast();
-        for (int i = 0; i < length; i++) {
-            try {
-                mObservers.getBroadcastItem(i).interfaceDnsServerInfo(iface, lifetime, addresses);
-            } catch (RemoteException e) {
-            } catch (RuntimeException e) {
+        try {
+            for (int i = 0; i < length; i++) {
+                try {
+                    mObservers.getBroadcastItem(i).interfaceDnsServerInfo(iface, lifetime,
+                        addresses);
+                } catch (RemoteException e) {
+                } catch (RuntimeException e) {
+                }
             }
+        } finally {
+            mObservers.finishBroadcast();
         }
-        mObservers.finishBroadcast();
     }
 
     //
@@ -509,7 +540,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 mConnectedSignal.countDown();
                 mConnectedSignal = null;
             } else {
-                mMainHandler.post(new Runnable() {
+                mFgHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         prepareNativeDaemon();
@@ -1270,7 +1301,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             if (ConnectivityManager.isNetworkTypeMobile(type)) {
                 mNetworkActive = false;
             }
-            mMainHandler.post(new Runnable() {
+            mFgHandler.post(new Runnable() {
                 @Override public void run() {
                     notifyInterfaceClassActivity(type, true, SystemClock.elapsedRealtimeNanos());
                 }
@@ -1297,7 +1328,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 throw e.rethrowAsParcelableException();
             }
             mActiveIdleTimers.remove(iface);
-            mMainHandler.post(new Runnable() {
+            mFgHandler.post(new Runnable() {
                 @Override public void run() {
                     notifyInterfaceClassActivity(params.type, false,
                             SystemClock.elapsedRealtimeNanos());
@@ -1880,14 +1911,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private void reportNetworkActive() {
         final int length = mNetworkActivityListeners.beginBroadcast();
-        for (int i = 0; i < length; i++) {
-            try {
-                mNetworkActivityListeners.getBroadcastItem(i).onNetworkActive();
-            } catch (RemoteException e) {
-            } catch (RuntimeException e) {
+        try {
+            for (int i = 0; i < length; i++) {
+                try {
+                    mNetworkActivityListeners.getBroadcastItem(i).onNetworkActive();
+                } catch (RemoteException e) {
+                } catch (RuntimeException e) {
+                }
             }
+        } finally {
+            mNetworkActivityListeners.finishBroadcast();
         }
-        mNetworkActivityListeners.finishBroadcast();
     }
 
     /** {@inheritDoc} */
