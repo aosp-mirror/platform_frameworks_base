@@ -747,6 +747,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     public boolean onSettingsEvent(MotionEvent event) {
+        userActivity();
+        if (mSettingsClosing
+                && mFlipSettingsViewAnim != null && mFlipSettingsViewAnim.isRunning()) {
+            return true;
+        }
         if (mSettingsTracker != null) {
             mSettingsTracker.addMovement(event);
         }
@@ -814,15 +819,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     private void positionSettings(float dy) {
-        final int h = mFlipSettingsView.getMeasuredHeight();
-        final int ph = mNotificationPanel.getMeasuredHeight();
         if (mSettingsClosing) {
+            final int ph = mNotificationPanel.getMeasuredHeight();
             dy = Math.min(Math.max(-ph, dy), 0);
             mFlipSettingsView.setTranslationY(dy);
             mStackScroller.setTranslationY(ph + dy);
         } else {
-            dy = Math.min(Math.max(0, dy), ph);
-            mFlipSettingsView.setTranslationY(-h + dy - mNotificationPadding * 2);
+            final int h = mFlipSettingsView.getBottom();
+            dy = Math.min(Math.max(0, dy), h);
+            mFlipSettingsView.setTranslationY(-h + dy);
             mStackScroller.setTranslationY(dy);
         }
     }
@@ -1733,17 +1738,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mHeaderFlipper.cancel();
         mKeyguardFlipper.cancel();
         if (mClearButtonAnim != null) mClearButtonAnim.cancel();
-
         mStackScroller.setVisibility(View.VISIBLE);
         final int h = mNotificationPanel.getMeasuredHeight();
         final float settingsY = mSettingsTracker != null ? mFlipSettingsView.getTranslationY() : 0;
         final float scrollerY = mSettingsTracker != null ? mStackScroller.getTranslationY() : h;
         mScrollViewAnim = start(
-            startDelay(0,
                 interpolator(mDecelerateInterpolator,
                     ObjectAnimator.ofFloat(mStackScroller, View.TRANSLATION_Y, scrollerY, 0)
                         .setDuration(FLIP_DURATION)
-                    )));
+                    ));
         mFlipSettingsViewAnim = start(
             setVisibilityWhenDone(
                 interpolator(mDecelerateInterpolator,
@@ -3058,25 +3061,27 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mSettingsButtonAnim = start(
                 setVisibilityWhenDone(
                     ObjectAnimator.ofFloat(mSettingsButton, View.ALPHA, 0f)
-                        .setDuration(FLIP_DURATION),
+                        .setDuration(FLIP_DURATION_OUT),
                     mStackScroller, View.INVISIBLE));
             mNotificationButton.setVisibility(View.VISIBLE);
             mNotificationButtonAnim = start(
-                ObjectAnimator.ofFloat(mNotificationButton, View.ALPHA, 1f)
-                    .setDuration(FLIP_DURATION));
+                startDelay(FLIP_DURATION_OUT,
+                    ObjectAnimator.ofFloat(mNotificationButton, View.ALPHA, 1f)
+                        .setDuration(FLIP_DURATION_IN)));
         }
 
         public void flipToNotifications() {
             mNotificationButtonAnim = start(
                 setVisibilityWhenDone(
                     ObjectAnimator.ofFloat(mNotificationButton, View.ALPHA, 0f)
-                        .setDuration(FLIP_DURATION),
+                        .setDuration(FLIP_DURATION_OUT),
                     mNotificationButton, View.INVISIBLE));
 
             mSettingsButton.setVisibility(View.VISIBLE);
             mSettingsButtonAnim = start(
-                ObjectAnimator.ofFloat(mSettingsButton, View.ALPHA, 1f)
-                    .setDuration(FLIP_DURATION));
+                startDelay(FLIP_DURATION_OUT,
+                    ObjectAnimator.ofFloat(mSettingsButton, View.ALPHA, 1f)
+                        .setDuration(FLIP_DURATION_IN)));
         }
 
         public void cancel() {
