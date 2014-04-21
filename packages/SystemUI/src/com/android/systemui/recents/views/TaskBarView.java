@@ -31,7 +31,6 @@ class TaskBarView extends FrameLayout {
     Task mTask;
 
     ImageView mApplicationIcon;
-    ImageView mActivityIcon;
     TextView mActivityDescription;
 
     public TaskBarView(Context context) {
@@ -54,23 +53,22 @@ class TaskBarView extends FrameLayout {
     protected void onFinishInflate() {
         // Initialize the icon and description views
         mApplicationIcon = (ImageView) findViewById(R.id.application_icon);
-        mActivityIcon = (ImageView) findViewById(R.id.activity_icon);
         mActivityDescription = (TextView) findViewById(R.id.activity_description);
     }
 
     /** Binds the bar view to the task */
     void rebindToTask(Task t, boolean animate) {
         mTask = t;
-        if (t.applicationIcon != null) {
+        // If an activity icon is defined, then we use that as the primary icon to show in the bar,
+        // otherwise, we fall back to the application icon
+        if (t.activityIcon != null) {
+            mApplicationIcon.setImageDrawable(t.activityIcon);
+        } else if (t.applicationIcon != null) {
             mApplicationIcon.setImageDrawable(t.applicationIcon);
-            mActivityDescription.setText(t.activityLabel);
-            if (t.activityIcon != null) {
-                mActivityIcon.setImageBitmap(t.activityIcon);
-                mActivityIcon.setVisibility(View.VISIBLE);
-            }
-            if (animate) {
-                // XXX: Investigate how expensive it will be to create a second bitmap and crossfade
-            }
+        }
+        mActivityDescription.setText(t.activityLabel);
+        if (animate) {
+            // XXX: Investigate how expensive it will be to create a second bitmap and crossfade
         }
     }
 
@@ -78,8 +76,6 @@ class TaskBarView extends FrameLayout {
     void unbindFromTask() {
         mTask = null;
         mApplicationIcon.setImageDrawable(null);
-        mActivityIcon.setImageBitmap(null);
-        mActivityIcon.setVisibility(View.INVISIBLE);
         mActivityDescription.setText("");
     }
 }
