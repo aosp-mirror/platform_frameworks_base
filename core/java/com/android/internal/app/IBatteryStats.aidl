@@ -19,6 +19,7 @@ package com.android.internal.app;
 import com.android.internal.os.BatteryStatsImpl;
 
 import android.os.WorkSource;
+import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.SignalStrength;
 
 interface IBatteryStats {
@@ -55,7 +56,7 @@ interface IBatteryStats {
     void noteScreenOff();
     void noteInputEvent();
     void noteUserActivity(int uid, int event);
-    void noteDataConnectionActive(int type, boolean active, long timestampNs);
+    void noteMobileRadioPowerState(int powerState, long timestampNs);
     void notePhoneOn();
     void notePhoneOff();
     void notePhoneSignalStrength(in SignalStrength signalStrength);

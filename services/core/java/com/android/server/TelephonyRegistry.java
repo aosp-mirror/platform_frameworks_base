@@ -393,6 +393,14 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyServiceState()")){
             return;
         }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            mBatteryStats.notePhoneState(state.getState());
+        } catch (RemoteException re) {
+            // Can't do much
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
         synchronized (mRecords) {
             mServiceState = state;
             for (Record r : mRecords) {
@@ -802,15 +810,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     //
 
     private void broadcastServiceStateChanged(ServiceState state) {
-        long ident = Binder.clearCallingIdentity();
-        try {
-            mBatteryStats.notePhoneState(state.getState());
-        } catch (RemoteException re) {
-            // Can't do much
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-
         Intent intent = new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
         Bundle data = new Bundle();
         state.fillInNotifierBundle(data);

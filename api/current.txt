@@ -25441,18 +25441,6 @@ package android.telephony {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public class DataConnectionRealTimeInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getDcPowerState();
-    method public long getTime();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-    field public static int DC_POWER_STATE_HIGH;
-    field public static int DC_POWER_STATE_LOW;
-    field public static int DC_POWER_STATE_MEDIUM;
-    field public static int DC_POWER_STATE_UNKNOWN;
-  }
-
   public class NeighboringCellInfo implements android.os.Parcelable {
     ctor public deprecated NeighboringCellInfo();
     ctor public deprecated NeighboringCellInfo(int, int);

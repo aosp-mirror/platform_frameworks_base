@@ -23,6 +23,7 @@ import android.os.Parcelable;
  * Data connection real time information
  *
  * TODO: How to handle multiple subscriptions?
+ * @hide
  */
 public class DataConnectionRealTimeInfo implements Parcelable {
     private long mTime;             // Time the info was collected since boot in nanos;

@@ -20,6 +20,7 @@ import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -59,6 +60,8 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
     private final PowerManager.WakeLock mWakeLock;
 
+    private final Looper mLooper;
+
     private INativeDaemonConnectorCallbacks mCallbacks;
     private Handler mCallbackHandler;
 
@@ -74,6 +77,13 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
     NativeDaemonConnector(INativeDaemonConnectorCallbacks callbacks, String socket,
             int responseQueueSize, String logTag, int maxLogSize, PowerManager.WakeLock wl) {
+        this(callbacks, socket, responseQueueSize, logTag, maxLogSize, wl,
+                FgThread.get().getLooper());
+    }
+
+    NativeDaemonConnector(INativeDaemonConnectorCallbacks callbacks, String socket,
+            int responseQueueSize, String logTag, int maxLogSize, PowerManager.WakeLock wl,
+            Looper looper) {
         mCallbacks = callbacks;
         mSocket = socket;
         mResponseQueue = new ResponseQueue(responseQueueSize);
@@ -81,6 +91,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
         if (mWakeLock != null) {
             mWakeLock.setReferenceCounted(true);
         }
+        mLooper = looper;
         mSequenceNumber = new AtomicInteger(0);
         TAG = logTag != null ? logTag : "NativeDaemonConnector";
         mLocalLog = new LocalLog(maxLogSize);
@@ -88,7 +99,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
     @Override
     public void run() {
-        mCallbackHandler = new Handler(FgThread.get().getLooper(), this);
+        mCallbackHandler = new Handler(mLooper, this);
 
         while (true) {
             try {

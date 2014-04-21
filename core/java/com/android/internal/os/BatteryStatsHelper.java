@@ -22,6 +22,8 @@ import static android.os.BatteryStats.NETWORK_WIFI_RX_DATA;
 import static android.os.BatteryStats.NETWORK_WIFI_TX_DATA;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
@@ -60,11 +62,14 @@ public class BatteryStatsHelper {
     private static final String TAG = BatteryStatsHelper.class.getSimpleName();
 
     private static BatteryStats sStatsXfer;
+    private static Intent sBatteryBroadcastXfer;
 
     final private Context mContext;
+    final private boolean mCollectBatteryBroadcast;
 
     private IBatteryStats mBatteryInfo;
     private BatteryStats mStats;
+    private Intent mBatteryBroadcast;
     private PowerProfile mPowerProfile;
 
     private final List<BatterySipper> mUsageList = new ArrayList<BatterySipper>();
@@ -85,6 +90,8 @@ public class BatteryStatsHelper {
     long mBatteryUptime;
     long mTypeBatteryRealtime;
     long mTypeBatteryUptime;
+    long mBatteryTimeRemaining;
+    long mChargeTimeRemaining;
 
     private long mStatsPeriod = 0;
     private double mMaxPower = 1;
@@ -102,7 +109,12 @@ public class BatteryStatsHelper {
     private long mAppWifiRunning;
 
     public BatteryStatsHelper(Context context) {
+        this(context, true);
+    }
+
+    public BatteryStatsHelper(Context context, boolean collectBatteryBroadcast) {
         mContext = context;
+        mCollectBatteryBroadcast = collectBatteryBroadcast;
     }
 
     /** Clears the current stats and forces recreating for future use. */
@@ -117,6 +129,13 @@ public class BatteryStatsHelper {
         return mStats;
     }
 
+    public Intent getBatteryBroadcast() {
+        if (mBatteryBroadcast == null && mCollectBatteryBroadcast) {
+            load();
+        }
+        return mBatteryBroadcast;
+    }
+
     public PowerProfile getPowerProfile() {
         return mPowerProfile;
     }
@@ -129,6 +148,7 @@ public class BatteryStatsHelper {
     public void create(Bundle icicle) {
         if (icicle != null) {
             mStats = sStatsXfer;
+            mBatteryBroadcast = sBatteryBroadcastXfer;
         }
         mBatteryInfo = IBatteryStats.Stub.asInterface(
                 ServiceManager.getService(BatteryStats.SERVICE_NAME));
@@ -137,6 +157,7 @@ public class BatteryStatsHelper {
 
     public void storeState() {
         sStatsXfer = mStats;
+        sBatteryBroadcastXfer = mBatteryBroadcast;
     }
 
     public static String makemAh(double power) {
@@ -190,6 +211,8 @@ public class BatteryStatsHelper {
         mBatteryRealtime = mStats.getBatteryRealtime(rawRealtimeUs);
         mTypeBatteryUptime = mStats.computeBatteryUptime(rawUptimeUs, mStatsType);
         mTypeBatteryRealtime = mStats.computeBatteryRealtime(rawRealtimeUs, mStatsType);
+        mBatteryTimeRemaining = mStats.computeBatteryTimeRemaining(rawRealtimeUs);
+        mChargeTimeRemaining = mStats.computeChargeTimeRemaining(rawRealtimeUs);
 
         if (DEBUG) {
             Log.d(TAG, "Raw time: realtime=" + (rawRealtimeUs/1000) + " uptime="
@@ -787,6 +810,10 @@ public class BatteryStatsHelper {
         return mMaxDrainedPower;
     }
 
+    public long getBatteryTimeRemaining() { return mBatteryTimeRemaining; }
+
+    public long getChargeTimeRemaining() { return mChargeTimeRemaining; }
+
     private void load() {
         if (mBatteryInfo == null) {
             return;
@@ -802,6 +829,10 @@ public class BatteryStatsHelper {
             mStats = stats;
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException:", e);
+        }
+        if (mCollectBatteryBroadcast) {
+            mBatteryBroadcast = mContext.registerReceiver(null,
+                    new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         }
     }
 }
