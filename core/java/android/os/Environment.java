@@ -42,6 +42,7 @@ public class Environment {
     private static final String ENV_SECONDARY_STORAGE = "SECONDARY_STORAGE";
     private static final String ENV_ANDROID_ROOT = "ANDROID_ROOT";
     private static final String ENV_OEM_ROOT = "OEM_ROOT";
+    private static final String ENV_VENDOR_ROOT = "VENDOR_ROOT";
 
     /** {@hide} */
     public static final String DIR_ANDROID = "Android";
@@ -57,6 +58,7 @@ public class Environment {
 
     private static final File DIR_ANDROID_ROOT = getDirectory(ENV_ANDROID_ROOT, "/system");
     private static final File DIR_OEM_ROOT = getDirectory(ENV_OEM_ROOT, "/oem");
+    private static final File DIR_VENDOR_ROOT = getDirectory(ENV_VENDOR_ROOT, "/vendor");
     private static final File DIR_MEDIA_STORAGE = getDirectory(ENV_MEDIA_STORAGE, "/data/media");
 
     private static final String CANONCIAL_EMULATED_STORAGE_TARGET = getCanonicalPathOrNull(
@@ -222,6 +224,15 @@ public class Environment {
      */
     public static File getOemDirectory() {
         return DIR_OEM_ROOT;
+    }
+
+    /**
+     * Return root directory of the "vendor" partition that holds vendor-provided
+     * software that should persist across simple reflashing of the "system" partition.
+     * @hide
+     */
+    public static File getVendorDirectory() {
+        return DIR_VENDOR_ROOT;
     }
 
     /**
