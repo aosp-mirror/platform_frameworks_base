@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sincronização"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Demasiadas eliminações de <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"O armazenamento do tablet está cheio. Elimine alguns ficheiros para libertar espaço."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"O armazenamento de visualizações está cheio. Elimine alguns ficheiros para libertar espaço."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"O armazenamento do telemóvel está cheio. Elimine alguns ficheiros para libertar espaço."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"A rede pode ser monitorizada"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Por um terceiro desconhecido"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Campainha ativada"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"A encerrar..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"O seu tablet irá encerrar."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"As suas visualizações vão ser encerradas."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"O seu telefone será encerrado."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Pretende encerrar?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Reiniciar no modo de segurança"</string>
