@@ -315,6 +315,12 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             holder = (index >= 0) ? mCaptureListenerMap.valueAt(index) : null;
             if (holder != null) {
                 mCaptureListenerMap.removeAt(index);
+                if (DEBUG) {
+                    Log.v(TAG, String.format(
+                            "remove holder for requestId %d, "
+                            + "because lastFrame is %d.",
+                            requestId, lastFrameNumber));
+                }
             }
 
             if (holder != null) {
@@ -390,6 +396,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             if (listener != null) {
                 mCaptureListenerMap.put(requestId, new CaptureListenerHolder(listener,
                         requestList, handler, repeating));
+            } else {
+                if (DEBUG) {
+                    Log.d(TAG, "Listen for request " + requestId + " is null");
+                }
             }
 
             long lastFrameNumber = lastFrameNumberRef.getNumber();
@@ -828,7 +838,8 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 CaptureResultExtras resultExtras) throws RemoteException {
             int requestId = resultExtras.getRequestId();
             if (DEBUG) {
-                Log.d(TAG, "Received result for id " + requestId);
+                Log.v(TAG, "Received result frame " + resultExtras.getFrameNumber() + " for id "
+                        + requestId);
             }
             final CaptureListenerHolder holder;
             synchronized (mLock) {
@@ -838,17 +849,26 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             Boolean quirkPartial = result.get(CaptureResult.QUIRKS_PARTIAL_RESULT);
             boolean quirkIsPartialResult = (quirkPartial != null && quirkPartial);
 
+            // Update tracker (increment counter) when it's not a partial result.
+            if (!quirkIsPartialResult) {
+                mFrameNumberTracker.updateTracker(resultExtras.getFrameNumber(), /*error*/false);
+            }
+
             // Check if we have a listener for this
             if (holder == null) {
                 if (DEBUG) {
-                    Log.v(TAG, "holder is null, early return");
+                    Log.d(TAG,
+                            "holder is null, early return at frame "
+                                    + resultExtras.getFrameNumber());
                 }
                 return;
             }
 
             if (isClosed()) {
                 if (DEBUG) {
-                    Log.v(TAG, "camera is closed, early return");
+                    Log.d(TAG,
+                            "camera is closed, early return at frame "
+                                    + resultExtras.getFrameNumber());
                 }
                 return;
             }
@@ -891,7 +911,6 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
             // Fire onCaptureSequenceCompleted
             if (!quirkIsPartialResult) {
-                mFrameNumberTracker.updateTracker(resultExtras.getFrameNumber(), /*error*/false);
                 checkAndFireSequenceComplete();
             }
         }
