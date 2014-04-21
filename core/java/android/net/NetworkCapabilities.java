@@ -233,10 +233,12 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     public NetworkCapabilities(NetworkCapabilities nc) {
-        mNetworkCapabilities = nc.mNetworkCapabilities;
-        mTransportTypes = nc.mTransportTypes;
-        mLinkUpBandwidthKbps = nc.mLinkUpBandwidthKbps;
-        mLinkDownBandwidthKbps = nc.mLinkDownBandwidthKbps;
+        if (nc != null) {
+            mNetworkCapabilities = nc.mNetworkCapabilities;
+            mTransportTypes = nc.mTransportTypes;
+            mLinkUpBandwidthKbps = nc.mLinkUpBandwidthKbps;
+            mLinkDownBandwidthKbps = nc.mLinkDownBandwidthKbps;
+        }
     }
 
     // Parcelable
