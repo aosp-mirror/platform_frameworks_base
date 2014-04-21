@@ -44,6 +44,8 @@ public class RecentsConfiguration {
     public int taskStackMaxDim;
     public int taskViewInfoPaneAnimDuration;
     public int taskViewRoundedCornerRadiusPx;
+    public int searchBarSpaceHeightPx;
+    public int searchBarSpaceEdgeMarginsPx;
 
     public boolean launchedWithThumbnailAnimation;
 
@@ -92,11 +94,34 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_animate_task_view_info_pane_duration);
         taskViewRoundedCornerRadiusPx =
                 res.getDimensionPixelSize(R.dimen.recents_task_view_rounded_corners_radius);
+        searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
+        searchBarSpaceEdgeMarginsPx =
+                res.getDimensionPixelSize(R.dimen.recents_search_bar_space_edge_margins);
     }
 
     /** Updates the system insets */
     public void updateSystemInsets(Rect insets) {
         systemInsets.set(insets);
+    }
+
+    /** Returns the search bar bounds in the specified orientation */
+    public void getSearchBarBounds(int width, int height,
+                                   Rect searchBarSpaceBounds, Rect searchBarBounds) {
+        // Return empty rects if search is not enabled
+        if (!Constants.DebugFlags.App.EnableSearchButton) {
+            searchBarSpaceBounds.set(0, 0, 0, 0);
+            searchBarBounds.set(0, 0, 0, 0);
+            return;
+        }
+
+        // Calculate the search bar bounds, and account for the system insets
+        int edgeMarginPx = searchBarSpaceEdgeMarginsPx;
+        int availableWidth = width - systemInsets.left - systemInsets.right;
+        searchBarSpaceBounds.set(0, 0, availableWidth, 2 * edgeMarginPx + searchBarSpaceHeightPx);
+
+        // Inset from the search bar space to get the search bar bounds
+        searchBarBounds.set(searchBarSpaceBounds);
+        searchBarBounds.inset(edgeMarginPx, edgeMarginPx);
     }
 
     /** Converts from DPs to PXs */
