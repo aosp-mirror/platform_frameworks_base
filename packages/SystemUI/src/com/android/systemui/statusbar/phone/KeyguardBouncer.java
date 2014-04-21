@@ -83,7 +83,7 @@ public class KeyguardBouncer {
     }
 
     public void onScreenTurnedOff() {
-        if (mKeyguardView != null && mRoot.getVisibility() == View.VISIBLE) {
+        if (mKeyguardView != null && mRoot != null && mRoot.getVisibility() == View.VISIBLE) {
             mKeyguardView.onPause();
         }
     }
