@@ -38,13 +38,10 @@ public class PhoneStatusBarView extends PanelBar {
     PhoneStatusBar mBar;
     int mScrimColor;
     int mScrimColorKeyguard;
-    float mSettingsPanelDragzoneFrac;
-    float mSettingsPanelDragzoneMin;
 
-    boolean mFullWidthNotifications;
     PanelView mFadingPanel = null;
     PanelView mLastFullyOpenedPanel = null;
-    PanelView mNotificationPanel, mSettingsPanel;
+    PanelView mNotificationPanel;
     private boolean mShouldFade;
     private final PhoneStatusBarTransitions mBarTransitions;
 
@@ -54,13 +51,6 @@ public class PhoneStatusBarView extends PanelBar {
         Resources res = getContext().getResources();
         mScrimColor = res.getColor(R.color.notification_panel_scrim_color);
         mScrimColorKeyguard = res.getColor(R.color.notification_panel_scrim_color_keyguard);
-        mSettingsPanelDragzoneMin = res.getDimension(R.dimen.settings_panel_dragzone_min);
-        try {
-            mSettingsPanelDragzoneFrac = res.getFraction(R.dimen.settings_panel_dragzone_fraction, 1, 1);
-        } catch (NotFoundException ex) {
-            mSettingsPanelDragzoneFrac = 0f;
-        }
-        mFullWidthNotifications = mSettingsPanelDragzoneFrac <= 0f;
         mBarTransitions = new PhoneStatusBarTransitions(this);
     }
 
@@ -72,15 +62,8 @@ public class PhoneStatusBarView extends PanelBar {
         mBar = bar;
     }
 
-    public boolean hasFullWidthNotifications() {
-        return mFullWidthNotifications;
-    }
-
     @Override
     public void onAttachedToWindow() {
-        for (PanelView pv : mPanels) {
-            pv.setRubberbandingEnabled(!mFullWidthNotifications);
-        }
         mBarTransitions.init();
     }
 
@@ -89,10 +72,7 @@ public class PhoneStatusBarView extends PanelBar {
         super.addPanel(pv);
         if (pv.getId() == R.id.notification_panel) {
             mNotificationPanel = pv;
-        } else if (pv.getId() == R.id.settings_panel){
-            mSettingsPanel = pv;
         }
-        pv.setRubberbandingEnabled(!mFullWidthNotifications);
     }
 
     @Override
@@ -117,34 +97,10 @@ public class PhoneStatusBarView extends PanelBar {
 
     @Override
     public PanelView selectPanelForTouch(MotionEvent touch) {
-        final float x = touch.getX();
-        final boolean isLayoutRtl = isLayoutRtl();
-
-        if (mFullWidthNotifications) {
-            // No double swiping. If either panel is open, nothing else can be pulled down.
-            return ((mSettingsPanel == null ? 0 : mSettingsPanel.getExpandedHeight())
-                        + mNotificationPanel.getExpandedHeight() > 0)
-                    ? null
-                    : mNotificationPanel;
-        }
-
-        // We split the status bar into thirds: the left 2/3 are for notifications, and the
-        // right 1/3 for quick settings. If you pull the status bar down a second time you'll
-        // toggle panels no matter where you pull it down.
-
-        final float w = getMeasuredWidth();
-        float region = (w * mSettingsPanelDragzoneFrac);
-
-        if (DEBUG) {
-            Log.v(TAG, String.format(
-                "w=%.1f frac=%.3f region=%.1f min=%.1f x=%.1f w-x=%.1f",
-                w, mSettingsPanelDragzoneFrac, region, mSettingsPanelDragzoneMin, x, (w-x)));
-        }
-
-        if (region < mSettingsPanelDragzoneMin) region = mSettingsPanelDragzoneMin;
-
-        final boolean showSettings = isLayoutRtl ? (x < region) : (w - region < x);
-        return showSettings ? mSettingsPanel : mNotificationPanel;
+        // No double swiping. If either panel is open, nothing else can be pulled down.
+        return mNotificationPanel.getExpandedHeight() > 0
+                ? null
+                : mNotificationPanel;
     }
 
     @Override

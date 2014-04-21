@@ -46,7 +46,6 @@ public class PanelView extends FrameLayout {
     }
 
     public static final boolean BRAKES = false;
-    private boolean mRubberbandingEnabled = true;
 
     private float mSelfExpandVelocityPx; // classic value: 2000px/s
     private float mSelfCollapseVelocityPx; // classic value: 2000px/s (will be negated to collapse "up")
@@ -68,14 +67,12 @@ public class PanelView extends FrameLayout {
     private float mExpandBrakingDistancePx = 150; // XXX Resource
     private float mBrakingSpeedPx = 150; // XXX Resource
 
-    private View mHandleView;
     private float mPeekHeight;
     private float mInitialOffsetOnTouch;
     private float mExpandedFraction = 0;
     private float mExpandedHeight = 0;
     private boolean mJustPeeked;
     private boolean mClosing;
-    private boolean mRubberbanding;
     private boolean mTracking;
     private int mTrackingPointer;
     private int mTouchSlop;
@@ -214,7 +211,6 @@ public class PanelView extends FrameLayout {
         public void run() {
             if (mTimeAnimator != null && mTimeAnimator.isStarted()) {
                 mTimeAnimator.end();
-                mRubberbanding = false;
                 mClosing = false;
                 onExpandingFinished();
             }
@@ -226,10 +222,6 @@ public class PanelView extends FrameLayout {
     private String mViewName;
     protected float mInitialTouchY;
     protected float mFinalTouchY;
-
-    public void setRubberbandingEnabled(boolean enable) {
-        mRubberbandingEnabled = enable;
-    }
 
     protected void onExpandingFinished() {
     }
@@ -260,12 +252,7 @@ public class PanelView extends FrameLayout {
 
             mTimeAnimator.start();
 
-            mRubberbanding = mRubberbandingEnabled // is it enabled at all?
-                    && mExpandedHeight > getMaxPanelHeight() // are we past the end?
-                    && mVel >= -mFlingGestureMinDistPx; // was this not possibly a "close" gesture?
-            if (mRubberbanding) {
-                mClosing = true;
-            } else if (mVel == 0) {
+            if (mVel == 0) {
                 // if the panel is less than halfway open, close it
                 mClosing = (mFinalTouchY / getMaxPanelHeight()) < 0.5f;
             } else {
@@ -308,10 +295,6 @@ public class PanelView extends FrameLayout {
 
             float h = mExpandedHeight + mVel * dt;
 
-            if (mRubberbanding && h < fh) {
-                h = fh;
-            }
-
             if (DEBUG) logf("tick: new h=%d closing=%s", (int) h, mClosing?"true":"false");
 
             setExpandedHeightInternal(h);
@@ -320,7 +303,7 @@ public class PanelView extends FrameLayout {
 
             if (mVel == 0
                     || (mClosing && mExpandedHeight == 0)
-                    || ((mRubberbanding || !mClosing) && mExpandedHeight == fh)) {
+                    || (!mClosing && mExpandedHeight == fh)) {
                 post(mStopAnimator);
             }
         } else {
@@ -358,8 +341,7 @@ public class PanelView extends FrameLayout {
         mFlingGestureMaxOutputVelocityPx = res.getDimension(R.dimen.fling_gesture_max_output_velocity);
 
         mPeekHeight = res.getDimension(R.dimen.peek_height)
-            + getPaddingBottom() // our window might have a dropshadow
-            - (mHandleView == null ? 0 : mHandleView.getPaddingTop()); // the handle might have a topshadow
+            + getPaddingBottom(); // our window might have a dropshadow
 
         final ViewConfiguration configuration = ViewConfiguration.get(getContext());
         mTouchSlop = configuration.getScaledTouchSlop();
@@ -397,10 +379,6 @@ public class PanelView extends FrameLayout {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mTracking = true;
-                if (mHandleView != null) {
-                    mHandleView.setPressed(true);
-                    postInvalidate(); // catch the press state change
-                }
 
                 mInitialTouchY = y;
                 initVelocityTracker();
@@ -447,10 +425,6 @@ public class PanelView extends FrameLayout {
                 mFinalTouchY = y;
                 mTracking = false;
                 mTrackingPointer = -1;
-                if (mHandleView != null) {
-                    mHandleView.setPressed(false);
-                    postInvalidate(); // catch the press state change
-                }
                 onTrackingStopped();
                 trackMovement(event);
 
@@ -546,11 +520,6 @@ public class PanelView extends FrameLayout {
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                if (mHandleView != null) {
-                    mHandleView.setPressed(true);
-                    // catch the press state change
-                    postInvalidate();
-                }
                 mInitialTouchY = y;
                 initVelocityTracker();
                 trackMovement(event);
@@ -605,7 +574,6 @@ public class PanelView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mHandleView = findViewById(R.id.handle);
 
         loadDimens();
     }
@@ -631,10 +599,6 @@ public class PanelView extends FrameLayout {
         return mViewName;
     }
 
-    public View getHandle() {
-        return mHandleView;
-    }
-
     // Rubberbands the panel to hold its contents.
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -648,7 +612,7 @@ public class PanelView extends FrameLayout {
         if (newHeight != mMaxPanelHeight) {
             mMaxPanelHeight = newHeight;
             // If the user isn't actively poking us, let's rubberband to the content
-            if (!mTracking && !mRubberbanding && !mTimeAnimator.isStarted()
+            if (!mTracking && !mTimeAnimator.isStarted()
                     && mExpandedHeight > 0 && mExpandedHeight != mMaxPanelHeight
                     && mMaxPanelHeight > 0) {
                 mExpandedHeight = mMaxPanelHeight;
@@ -666,7 +630,6 @@ public class PanelView extends FrameLayout {
 
     public void setExpandedHeight(float height) {
         if (DEBUG) logf("setExpandedHeight(%.1f)", height);
-        mRubberbanding = false;
         if (mTimeAnimator.isStarted()) {
             post(mStopAnimator);
         }
@@ -686,7 +649,7 @@ public class PanelView extends FrameLayout {
         float currentMaxPanelHeight = getMaxPanelHeight();
 
         // If the user isn't actively poking us, let's update the height
-        if (!mTracking && !mRubberbanding && !mTimeAnimator.isStarted()
+        if (!mTracking && !mTimeAnimator.isStarted()
                 && mExpandedHeight > 0 && currentMaxPanelHeight != mExpandedHeight) {
             setExpandedHeightInternal(currentMaxPanelHeight);
         }
@@ -708,13 +671,13 @@ public class PanelView extends FrameLayout {
         }
 
         if (h < 0) h = 0;
-        if (!(mRubberbandingEnabled && (mTracking || mRubberbanding)) && h > fh) h = fh;
+        if (h > fh) h = fh;
 
         mExpandedHeight = h;
 
         if (DEBUG) {
-            logf("setExpansion: height=%.1f fh=%.1f tracking=%s rubber=%s", h, fh,
-                    mTracking ? "T" : "f", mRubberbanding ? "T" : "f");
+            logf("setExpansion: height=%.1f fh=%.1f tracking=%s", h, fh,
+                    mTracking ? "T" : "f");
         }
 
         onHeightUpdated(mExpandedHeight);
@@ -793,7 +756,6 @@ public class PanelView extends FrameLayout {
             mClosing = true;
             onExpandingStarted();
             // collapse() should never be a rubberband, even if an animation is already running
-            mRubberbanding = false;
             fling(-mSelfCollapseVelocityPx, /*always=*/ true);
         }
     }
@@ -817,14 +779,13 @@ public class PanelView extends FrameLayout {
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(String.format("[PanelView(%s): expandedHeight=%f maxPanelHeight=%d closing=%s"
-                + " tracking=%s rubberbanding=%s justPeeked=%s peekAnim=%s%s timeAnim=%s%s"
+                + " tracking=%s justPeeked=%s peekAnim=%s%s timeAnim=%s%s"
                 + "]",
                 this.getClass().getSimpleName(),
                 getExpandedHeight(),
                 getMaxPanelHeight(),
                 mClosing?"T":"f",
                 mTracking?"T":"f",
-                mRubberbanding?"T":"f",
                 mJustPeeked?"T":"f",
                 mPeekAnimator, ((mPeekAnimator!=null && mPeekAnimator.isStarted())?" (started)":""),
                 mTimeAnimator, ((mTimeAnimator!=null && mTimeAnimator.isStarted())?" (started)":"")
