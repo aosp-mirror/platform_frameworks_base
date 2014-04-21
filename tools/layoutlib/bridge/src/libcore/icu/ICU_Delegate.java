@@ -247,4 +247,14 @@ public class ICU_Delegate {
 
         return true;
     }
+
+    @LayoutlibDelegate
+    /*package*/ static void setDefaultLocale(String locale) {
+        ICU.setDefaultLocale(locale);
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static String getDefaultLocale() {
+        return ICU.getDefaultLocale();
+    }
 }
