@@ -395,9 +395,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         return false;
     }
 
-    /** Returns whether the current scroll is out of bounds */
+    /** Returns whether the specified scroll is out of bounds */
+    boolean isScrollOutOfBounds(int scroll) {
+        return (scroll < mMinScroll) || (scroll > mMaxScroll);
+    }
     boolean isScrollOutOfBounds() {
-        return (getStackScroll() < 0) || (getStackScroll() > mMaxScroll);
+        return isScrollOutOfBounds(getStackScroll());
     }
 
     /** Updates the min and max virtual scroll bounds */
@@ -556,7 +559,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         int smallestDimension = Math.min(width, height);
         int padding = (int) (Constants.Values.TaskStackView.StackPaddingPct * smallestDimension / 2f);
-        mStackRect.inset(padding, padding);
+        if (Constants.DebugFlags.App.EnableSearchButton) {
+            // Don't need to pad the top since we have some padding on the search bar already
+            mStackRect.left += padding;
+            mStackRect.right -= padding;
+            mStackRect.bottom -= padding;
+        } else {
+            mStackRect.inset(padding, padding);
+        }
         mStackRectSansPeek.set(mStackRect);
         mStackRectSansPeek.top += Constants.Values.TaskStackView.StackPeekHeightPct * mStackRect.height();
 
@@ -1275,7 +1285,12 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     }
                 }
                 if (mIsScrolling) {
-                    mSv.setStackScroll(mSv.getStackScroll() + deltaY);
+                    int curStackScroll = mSv.getStackScroll();
+                    if (mSv.isScrollOutOfBounds(curStackScroll + deltaY)) {
+                        // Scale the touch if we are overscrolling
+                        deltaY /= Constants.Values.TaskStackView.TouchOverscrollScaleFactor;
+                    }
+                    mSv.setStackScroll(curStackScroll + deltaY);
                     if (mSv.isScrollOutOfBounds()) {
                         mVelocityTracker.clear();
                     }

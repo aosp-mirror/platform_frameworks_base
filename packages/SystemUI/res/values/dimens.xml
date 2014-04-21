@@ -236,6 +236,12 @@
     <!-- The amount of space a user has to scroll to dismiss any info panes. -->
     <dimen name="recents_task_stack_scroll_dismiss_info_pane_distance">50dp</dimen>
 
+    <!-- The height of the search bar space. -->
+    <dimen name="recents_search_bar_space_height">40dp</dimen>
+
+    <!-- The search bar edge margins. -->
+    <dimen name="recents_search_bar_space_edge_margins">12dp</dimen>
+
     <!-- Used to calculate the translation animation duration, the expected amount of movement 
          in dps over one second of time. -->
     <dimen name="recents_animation_movement_in_dps_per_second">800dp</dimen>

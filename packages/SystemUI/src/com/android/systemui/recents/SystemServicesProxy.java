@@ -19,6 +19,8 @@ package com.android.systemui.recents;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
+import android.app.SearchManager;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -26,11 +28,15 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +51,7 @@ public class SystemServicesProxy {
     PackageManager mPm;
     IPackageManager mIpm;
     UserManager mUm;
+    SearchManager mSm;
     String mPackage;
 
     Bitmap mDummyIcon;
@@ -55,6 +62,7 @@ public class SystemServicesProxy {
         mPm = context.getPackageManager();
         mUm = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mIpm = AppGlobals.getPackageManager();
+        mSm = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
         mPackage = context.getPackageName();
 
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
@@ -198,5 +206,29 @@ public class SystemServicesProxy {
             icon = mUm.getBadgedDrawableForUser(icon, new UserHandle(userId));
         }
         return icon;
+    }
+
+
+    /**
+     * Composes an intent to launch the global search activity.
+     */
+    public Intent getGlobalSearchIntent(Rect sourceBounds) {
+        if (mSm == null) return null;
+
+        // Try and get the global search activity
+        ComponentName globalSearchActivity = mSm.getGlobalSearchActivity();
+        if (globalSearchActivity == null) return null;
+
+        // Bundle the source of the search
+        Bundle appSearchData = new Bundle();
+        appSearchData.putString("source", mPackage);
+
+        // Compose the intent and Start the search activity
+        Intent intent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setComponent(globalSearchActivity);
+        intent.putExtra(SearchManager.APP_DATA, appSearchData);
+        intent.setSourceBounds(sourceBounds);
+        return intent;
     }
 }
