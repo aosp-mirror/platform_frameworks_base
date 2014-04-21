@@ -52,6 +52,7 @@ import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -64,6 +65,7 @@ import android.provider.Settings;
 import android.service.notification.INotificationListener;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenModeConfig;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -78,6 +80,7 @@ import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.notification.NotificationScorer;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.server.EventLogTags;
 import com.android.server.notification.NotificationUsageStats.SingleNotificationStats;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -87,11 +90,13 @@ import com.android.server.lights.LightsManager;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
@@ -115,6 +120,7 @@ public class NotificationManagerService extends SystemService {
 
     // message codes
     static final int MESSAGE_TIMEOUT = 2;
+    static final int MESSAGE_SAVE_POLICY_FILE = 3;
 
     static final int LONG_DELAY = 3500; // 3.5 seconds
     static final int SHORT_DELAY = 2000; // 2 seconds
@@ -209,15 +215,6 @@ public class NotificationManagerService extends SystemService {
 
     private final NotificationUsageStats mUsageStats = new NotificationUsageStats();
 
-    private int mZenMode;
-    // temporary, until we update apps to provide metadata
-    private static final Set<String> CALL_PACKAGES = new HashSet<String>(Arrays.asList(
-            "com.google.android.dialer",
-            "com.android.phone"
-            ));
-    private static final Set<String> ALARM_PACKAGES = new HashSet<String>(Arrays.asList(
-            "com.google.android.deskclock"
-            ));
     private static final String EXTRA_INTERCEPT = "android.intercept";
 
     // Profiles of the current user.
@@ -421,53 +418,82 @@ public class NotificationManagerService extends SystemService {
 
     Archive mArchive = new Archive();
 
-    private void loadBlockDb() {
-        synchronized(mBlockedPackages) {
-            if (mPolicyFile == null) {
-                File dir = new File("/data/system");
-                mPolicyFile = new AtomicFile(new File(dir, "notification_policy.xml"));
+    private void loadPolicyFile() {
+        synchronized(mPolicyFile) {
+            mBlockedPackages.clear();
 
-                mBlockedPackages.clear();
+            FileInputStream infile = null;
+            try {
+                infile = mPolicyFile.openRead();
+                final XmlPullParser parser = Xml.newPullParser();
+                parser.setInput(infile, null);
 
-                FileInputStream infile = null;
-                try {
-                    infile = mPolicyFile.openRead();
-                    final XmlPullParser parser = Xml.newPullParser();
-                    parser.setInput(infile, null);
-
-                    int type;
-                    String tag;
-                    int version = DB_VERSION;
-                    while ((type = parser.next()) != END_DOCUMENT) {
-                        tag = parser.getName();
-                        if (type == START_TAG) {
-                            if (TAG_BODY.equals(tag)) {
-                                version = Integer.parseInt(
-                                        parser.getAttributeValue(null, ATTR_VERSION));
-                            } else if (TAG_BLOCKED_PKGS.equals(tag)) {
-                                while ((type = parser.next()) != END_DOCUMENT) {
-                                    tag = parser.getName();
-                                    if (TAG_PACKAGE.equals(tag)) {
-                                        mBlockedPackages.add(
-                                                parser.getAttributeValue(null, ATTR_NAME));
-                                    } else if (TAG_BLOCKED_PKGS.equals(tag) && type == END_TAG) {
-                                        break;
-                                    }
+                int type;
+                String tag;
+                int version = DB_VERSION;
+                while ((type = parser.next()) != END_DOCUMENT) {
+                    tag = parser.getName();
+                    if (type == START_TAG) {
+                        if (TAG_BODY.equals(tag)) {
+                            version = Integer.parseInt(
+                                    parser.getAttributeValue(null, ATTR_VERSION));
+                        } else if (TAG_BLOCKED_PKGS.equals(tag)) {
+                            while ((type = parser.next()) != END_DOCUMENT) {
+                                tag = parser.getName();
+                                if (TAG_PACKAGE.equals(tag)) {
+                                    mBlockedPackages.add(
+                                            parser.getAttributeValue(null, ATTR_NAME));
+                                } else if (TAG_BLOCKED_PKGS.equals(tag) && type == END_TAG) {
+                                    break;
                                 }
                             }
                         }
                     }
-                } catch (FileNotFoundException e) {
-                    // No data yet
-                } catch (IOException e) {
-                    Log.wtf(TAG, "Unable to read blocked notifications database", e);
-                } catch (NumberFormatException e) {
-                    Log.wtf(TAG, "Unable to parse blocked notifications database", e);
-                } catch (XmlPullParserException e) {
-                    Log.wtf(TAG, "Unable to parse blocked notifications database", e);
-                } finally {
-                    IoUtils.closeQuietly(infile);
+                    mZenModeHelper.readXml(parser);
                 }
+            } catch (FileNotFoundException e) {
+                // No data yet
+            } catch (IOException e) {
+                Log.wtf(TAG, "Unable to read notification policy", e);
+            } catch (NumberFormatException e) {
+                Log.wtf(TAG, "Unable to parse notification policy", e);
+            } catch (XmlPullParserException e) {
+                Log.wtf(TAG, "Unable to parse notification policy", e);
+            } finally {
+                IoUtils.closeQuietly(infile);
+            }
+        }
+    }
+
+    public void savePolicyFile() {
+        mHandler.removeMessages(MESSAGE_SAVE_POLICY_FILE);
+        mHandler.sendEmptyMessage(MESSAGE_SAVE_POLICY_FILE);
+    }
+
+    private void handleSavePolicyFile() {
+        Slog.d(TAG, "handleSavePolicyFile");
+        synchronized (mPolicyFile) {
+            final FileOutputStream stream;
+            try {
+                stream = mPolicyFile.startWrite();
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to save policy file", e);
+                return;
+            }
+
+            try {
+                final XmlSerializer out = new FastXmlSerializer();
+                out.setOutput(stream, "utf-8");
+                out.startDocument(null, true);
+                out.startTag(null, TAG_BODY);
+                out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
+                mZenModeHelper.writeXml(out);
+                out.endTag(null, TAG_BODY);
+                out.endDocument();
+                mPolicyFile.finishWrite(stream);
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to save policy file, restoring backup", e);
+                mPolicyFile.failWrite(stream);
             }
         }
     }
@@ -1066,10 +1092,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean allowDisable(int what, IBinder token, String pkg) {
-            if (isCall(pkg, null)) {
-                return mZenMode == Settings.Global.ZEN_MODE_OFF;
-            }
-            return true;
+            return mZenModeHelper.allowDisable(what, token, pkg);
         }
 
         @Override
@@ -1194,9 +1217,6 @@ public class NotificationManagerService extends SystemService {
         private final Uri ENABLED_NOTIFICATION_LISTENERS_URI
                 = Settings.Secure.getUriFor(Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
 
-        private final Uri ZEN_MODE
-                = Settings.Global.getUriFor(Settings.Global.ZEN_MODE);
-
         SettingsObserver(Handler handler) {
             super(handler);
         }
@@ -1207,8 +1227,6 @@ public class NotificationManagerService extends SystemService {
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(ENABLED_NOTIFICATION_LISTENERS_URI,
                     false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(ZEN_MODE,
-                    false, this);
             update(null);
         }
 
@@ -1229,13 +1247,11 @@ public class NotificationManagerService extends SystemService {
             if (uri == null || ENABLED_NOTIFICATION_LISTENERS_URI.equals(uri)) {
                 rebindListenerServices();
             }
-            if (ZEN_MODE.equals(uri)) {
-                updateZenMode();
-            }
         }
     }
 
     private SettingsObserver mSettingsObserver;
+    private ZenModeHelper mZenModeHelper;
 
     static long[] getLongArray(Resources r, int resid, int maxlen, long[] def) {
         int[] ar = r.getIntArray(resid);
@@ -1261,6 +1277,15 @@ public class NotificationManagerService extends SystemService {
         mVibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
 
         mHandler = new WorkerHandler();
+        mZenModeHelper = new ZenModeHelper(getContext(), mHandler);
+        mZenModeHelper.setCallback(new ZenModeHelper.Callback() {
+            @Override
+            public void onConfigChanged() {
+                savePolicyFile();
+            }
+        });
+        final File systemDir = new File(Environment.getDataDirectory(), "system");
+        mPolicyFile = new AtomicFile(new File(systemDir, "notification_policy.xml"));
 
         importOldBlockDb();
 
@@ -1297,7 +1322,7 @@ public class NotificationManagerService extends SystemService {
                     Settings.Global.DEVICE_PROVISIONED, 0)) {
             mDisableNotificationAlerts = true;
         }
-        updateZenMode();
+        mZenModeHelper.updateZenMode();
 
         updateCurrentProfilesCache(getContext());
 
@@ -1350,7 +1375,7 @@ public class NotificationManagerService extends SystemService {
      * Read the old XML-based app block database and import those blockages into the AppOps system.
      */
     private void importOldBlockDb() {
-        loadBlockDb();
+        loadPolicyFile();
 
         PackageManager pm = getContext().getPackageManager();
         for (String pkg : mBlockedPackages) {
@@ -1363,9 +1388,6 @@ public class NotificationManagerService extends SystemService {
             }
         }
         mBlockedPackages.clear();
-        if (mPolicyFile != null) {
-            mPolicyFile.delete();
-        }
     }
 
     @Override
@@ -1745,6 +1767,18 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public ZenModeConfig getZenModeConfig() {
+            checkCallerIsSystem();
+            return mZenModeHelper.getConfig();
+        }
+
+        @Override
+        public boolean setZenModeConfig(ZenModeConfig config) {
+            checkCallerIsSystem();
+            return mZenModeHelper.setConfig(config);
+        }
+
+        @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -1825,7 +1859,6 @@ public class NotificationManagerService extends SystemService {
             pw.println("  mSoundNotification=" + mSoundNotification);
             pw.println("  mVibrateNotification=" + mVibrateNotification);
             pw.println("  mDisableNotificationAlerts=" + mDisableNotificationAlerts);
-            pw.println("  mZenMode=" + Settings.Global.zenModeToString(mZenMode));
             pw.println("  mSystemReady=" + mSystemReady);
             pw.println("  mArchive=" + mArchive.toString());
             Iterator<StatusBarNotification> iter = mArchive.descendingIterator();
@@ -1841,6 +1874,8 @@ public class NotificationManagerService extends SystemService {
             pw.println("\n  Usage Stats:");
             mUsageStats.dump(pw, "    ");
 
+            pw.println("\n  Zen Mode:");
+            mZenModeHelper.dump(pw, "    ");
         }
     }
 
@@ -1973,7 +2008,7 @@ public class NotificationManagerService extends SystemService {
                 }
 
                 // Is this notification intercepted by zen mode?
-                final boolean intercept = shouldIntercept(pkg, notification);
+                final boolean intercept = mZenModeHelper.shouldIntercept(pkg, notification);
                 notification.extras.putBoolean(EXTRA_INTERCEPT, intercept);
 
                 // Should this notification make noise, vibe, or use the LED?
@@ -2358,6 +2393,9 @@ public class NotificationManagerService extends SystemService {
                 case MESSAGE_TIMEOUT:
                     handleTimeout((ToastRecord)msg.obj);
                     break;
+                case MESSAGE_SAVE_POLICY_FILE:
+                    handleSavePolicyFile();
+                    break;
             }
         }
     }
@@ -2722,42 +2760,6 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void updateZenMode() {
-        final int mode = Settings.Global.getInt(getContext().getContentResolver(),
-                Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
-        if (mode != mZenMode) {
-            Slog.d(TAG, String.format("updateZenMode: %s -> %s",
-                    Settings.Global.zenModeToString(mZenMode),
-                    Settings.Global.zenModeToString(mode)));
-        }
-        mZenMode = mode;
-
-        final String[] exceptionPackages = null; // none (for now)
-
-        // call restrictions
-        final boolean muteCalls = mZenMode != Settings.Global.ZEN_MODE_OFF;
-        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, AudioManager.STREAM_RING,
-                muteCalls ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
-                exceptionPackages);
-        mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, AudioManager.STREAM_RING,
-                muteCalls ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
-                exceptionPackages);
-
-        // alarm restrictions
-        final boolean muteAlarms = false; // TODO until we save user config
-        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, AudioManager.STREAM_ALARM,
-                muteAlarms ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
-                exceptionPackages);
-        mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, AudioManager.STREAM_ALARM,
-                muteAlarms ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
-                exceptionPackages);
-
-        // restrict vibrations with no hints
-        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, AudioManager.USE_DEFAULT_STREAM_TYPE,
-                (muteAlarms || muteCalls) ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
-                exceptionPackages);
-    }
-
     private void updateCurrentProfilesCache(Context context) {
         UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         if (userManager != null) {
@@ -2787,20 +2789,5 @@ public class NotificationManagerService extends SystemService {
         synchronized (mCurrentProfiles) {
             return mCurrentProfiles.get(userId) != null;
         }
-    }
-
-    private boolean isCall(String pkg, Notification n) {
-        return CALL_PACKAGES.contains(pkg);
-    }
-
-    private boolean isAlarm(String pkg, Notification n) {
-        return ALARM_PACKAGES.contains(pkg);
-    }
-
-    private boolean shouldIntercept(String pkg, Notification n) {
-        if (mZenMode != Settings.Global.ZEN_MODE_OFF) {
-            return !isAlarm(pkg, n);
-        }
-        return false;
     }
 }
