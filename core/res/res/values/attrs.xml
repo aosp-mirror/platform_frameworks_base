@@ -4504,6 +4504,8 @@
                  result to valid color values. Saturate(S + D) -->
             <enum name="add" value="16" />
         </attr>
+        <!-- Specifies the alpha multiplier to apply to the base drawable. -->
+        <attr name="alpha" />
     </declare-styleable>
 
     <!-- Drawable used to draw 9-patches. -->
@@ -4523,6 +4525,8 @@
         <!-- When a tint color is set, specifies its Porter-Duff blending mode. The
              default value is src_in, which treats the drawable as an alpha mask. -->
         <attr name="tintMode" />
+        <!-- Specifies the alpha multiplier to apply to the base drawable. -->
+        <attr name="alpha" />
     </declare-styleable>
 
     <!-- Drawable used to draw a single color. -->

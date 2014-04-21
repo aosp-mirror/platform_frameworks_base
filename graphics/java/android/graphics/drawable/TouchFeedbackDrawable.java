@@ -39,6 +39,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Documentation pending.
@@ -108,6 +109,24 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         }
 
         return false;
+    }
+
+    @Override
+    public boolean setVisible(boolean visible, boolean restart) {
+        if (!visible) {
+            if (mTouchedRipples != null) {
+                mTouchedRipples.clear();
+            }
+
+            if (mActiveRipplesCount > 0) {
+                Arrays.fill(mActiveRipples, null);
+                mActiveRipplesCount = 0;
+                mAnimating = false;
+                unscheduleSelf(mAnimationRunnable);
+            }
+        }
+
+        return super.setVisible(visible, restart);
     }
 
     /**

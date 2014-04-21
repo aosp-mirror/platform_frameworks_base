@@ -238,6 +238,35 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
+    public void setHotspot(int key, float x, float y) {
+        if (mCurrDrawable != null) {
+            mCurrDrawable.setHotspot(key, x, y);
+        }
+    }
+
+    @Override
+    public void removeHotspot(int key) {
+        if (mCurrDrawable != null) {
+            mCurrDrawable.removeHotspot(key);
+        }
+    }
+
+    @Override
+    public void clearHotspots() {
+        if (mCurrDrawable != null) {
+            mCurrDrawable.clearHotspots();
+        }
+    }
+
+    @Override
+    public boolean supportsHotspots() {
+        if (mCurrDrawable != null) {
+            return mCurrDrawable.supportsHotspots();
+        }
+        return false;
+    }
+
+    @Override
     protected boolean onStateChange(int[] state) {
         if (mLastDrawable != null) {
             return mLastDrawable.setState(state);

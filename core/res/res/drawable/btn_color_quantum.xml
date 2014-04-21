@@ -19,7 +19,8 @@
     <selector>
         <item android:state_enabled="false">
             <nine-patch android:src="@drawable/btn_qntm_alpha"
-                android:tint="?attr/colorButtonNormal" />
+                android:tint="?attr/colorButtonNormal"
+                android:alpha="?attr/disabledAlpha" />
         </item>
         <item>
             <nine-patch android:src="@drawable/btn_qntm_alpha"
