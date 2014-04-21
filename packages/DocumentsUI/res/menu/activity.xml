@@ -22,7 +22,7 @@
         android:showAsAction="always" />
     <item
         android:id="@+id/menu_paste"
-        android:title="@string/menu_paste"
+        android:title="@android:string/paste"
         android:icon="@*android:drawable/ic_menu_paste_holo_light"
         android:showAsAction="always" />
     <item

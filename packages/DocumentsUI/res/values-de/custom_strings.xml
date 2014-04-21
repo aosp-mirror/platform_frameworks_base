@@ -24,14 +24,6 @@
     <!-- Title of the Delete confirmation dialog -->
     <string name="dialog_delete_confirm_title">Dateien löschen?</string>
 
-    <!-- Menu item title that copies the selected documents [CHAR LIMIT=24] -->
-    <string name="menu_copy">Kopieren</string>
-    <!-- Menu item title that cuts the selected documents [CHAR LIMIT=24] -->
-    <string name="menu_cut">Ausschneiden</string>
-    <!-- Menu item title that pastes the selected documents [CHAR LIMIT=24] -->
-    <string name="menu_paste">Einfügen</string>
-
-
     <!-- Text shown in a toast when the user copies files -->
     <plurals name="files_copied">
         <item quantity="one">Die Datei wurde in die Zwischenablage gelegt</item>

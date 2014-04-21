@@ -22,11 +22,11 @@
     <item
         android:id="@+id/menu_copy"
         android:icon="@drawable/ic_menu_copy"
-        android:title="@string/menu_copy"
+        android:title="@android:string/copy"
         android:showAsAction="always" />
     <item
         android:id="@+id/menu_cut"
-        android:title="@string/menu_cut"
+        android:title="@android:string/cut"
         android:icon="@drawable/ic_menu_cut_holo_light"
         android:showAsAction="always" />
     <item

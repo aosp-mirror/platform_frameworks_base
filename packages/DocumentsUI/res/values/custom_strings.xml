@@ -24,14 +24,6 @@
     <!-- Title of the Delete confirmation dialog -->
     <string name="dialog_delete_confirm_title">Delete files?</string>
 
-    <!-- Menu item title that copies the selected documents [CHAR LIMIT=24] -->
-    <string name="menu_copy">Copy</string>
-    <!-- Menu item title that cuts the selected documents [CHAR LIMIT=24] -->
-    <string name="menu_cut">Cut</string>
-    <!-- Menu item title that pastes the selected documents [CHAR LIMIT=24] -->
-    <string name="menu_paste">Paste</string>
-
-
     <!-- Text shown in a toast when the user copies files -->
     <plurals name="files_copied">
         <item quantity="one">The file has been put in the clipboard</item>
@@ -54,7 +46,4 @@
         <item quantity="one">This file will be permanently deleted!</item>
         <item quantity="other">This will permanently delete the %d files selected!</item>
     </plurals>
-
-    <string name="ok">OK</string>
-    <string name="cancel">Cancel</string>
 </resources>
