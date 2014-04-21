@@ -18,6 +18,7 @@ package com.android.systemui.recents.model;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 
@@ -69,8 +70,8 @@ public class Task {
 
     public TaskKey key;
     public Drawable applicationIcon;
+    public Drawable activityIcon;
     public String activityLabel;
-    public Bitmap activityIcon;
     public Bitmap thumbnail;
     public boolean isActive;
     public int userId;
@@ -82,7 +83,7 @@ public class Task {
     }
 
     public Task(int id, boolean isActive, Intent intent, String activityTitle,
-                Bitmap activityIcon, int userId) {
+                BitmapDrawable activityIcon, int userId) {
         this.key = new TaskKey(id, intent, userId);
         this.activityLabel = activityTitle;
         this.activityIcon = activityIcon;

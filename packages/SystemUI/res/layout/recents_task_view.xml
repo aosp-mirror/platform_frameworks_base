@@ -63,13 +63,6 @@
             android:maxLines="2"
             android:ellipsize="marquee"
             android:fadingEdge="horizontal" />
-        <ImageView
-            android:id="@+id/activity_icon"
-            android:layout_width="@dimen/recents_task_view_activity_icon_size"
-            android:layout_height="@dimen/recents_task_view_activity_icon_size"
-            android:layout_gravity="center_vertical|end"
-            android:padding="12dp"
-            android:visibility="invisible" />
     </com.android.systemui.recents.views.TaskBarView>
 </com.android.systemui.recents.views.TaskView>
 

@@ -415,7 +415,10 @@ public class RecentsTaskLoader {
             ActivityInfo info = ssp.getActivityInfo(t.baseIntent.getComponent(), t.userId);
             String activityLabel = (t.activityLabel == null ? ssp.getActivityLabel(info) :
                     t.activityLabel.toString());
-            Bitmap activityIcon = t.activityIcon;
+            BitmapDrawable activityIcon = null;
+            if (t.activityIcon != null) {
+                activityIcon = new BitmapDrawable(res, t.activityIcon);
+            }
             boolean isForemostTask = (i == (taskCount - 1));
 
             // Create a new task
