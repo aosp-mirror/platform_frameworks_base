@@ -48,7 +48,8 @@ public class Recents extends SystemUI implements RecentsComponent {
 
     @Override
     public void start() {
-        mUseAlternateRecents = SystemProperties.getBoolean("persist.recents.use_alternate", false);
+        Configuration config = mContext.getResources().getConfiguration();
+        mUseAlternateRecents = (config.smallestScreenWidthDp < 600);
         if (mUseAlternateRecents) {
             if (mAlternateRecents == null) {
                 mAlternateRecents = new AlternateRecentsComponent(mContext);

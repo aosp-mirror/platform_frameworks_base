@@ -3192,7 +3192,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             Animation a = mAppTransition.loadAnimation(lp, transit, enter, width, height,
-                    mCurConfiguration.orientation, containingFrame, contentInsets);
+                    mCurConfiguration.orientation, containingFrame, contentInsets, mCurConfiguration);
             if (a != null) {
                 if (DEBUG_ANIM) {
                     RuntimeException e = null;
@@ -8660,8 +8660,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.deferClearAllDrawn = false;
             }
 
-            boolean useAlternateThumbnailAnimation =
-                            SystemProperties.getBoolean("persist.anim.use_alt_thumbnail", false);
+            boolean useAlternateThumbnailAnimation = (mCurConfiguration.smallestScreenWidthDp < 600);
             AppWindowAnimator appAnimator =
                     topOpeningApp == null ? null : topOpeningApp.mAppAnimator;
             Bitmap nextAppTransitionThumbnail = mAppTransition.getNextAppTransitionThumbnail();
