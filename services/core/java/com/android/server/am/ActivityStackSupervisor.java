@@ -3080,6 +3080,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
 
+        // TODO: Make sure every change to ActivityRecord.visible results in a call to this.
         void setVisible(boolean visible) {
             if (mVisible != visible) {
                 mVisible = visible;
@@ -3090,6 +3091,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
 
+        void setDrawn() {
+        }
+
         @Override
         public String toString() {
             return mIdString + (mActivityDisplay == null ? "N" : "A");
@@ -3098,6 +3102,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     private class VirtualActivityContainer extends ActivityContainer {
         Surface mSurface;
+        boolean mDrawn = false;
 
         VirtualActivityContainer(ActivityRecord parent, IActivityContainerCallback callback) {
             super(getNextStackId());
@@ -3129,7 +3134,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     (VirtualActivityDisplay) mActivityDisplay;
             if (virtualActivityDisplay == null) {
                 virtualActivityDisplay =
-                        new VirtualActivityDisplay(surface, width, height, density);
+                        new VirtualActivityDisplay(width, height, density);
                 mActivityDisplay = virtualActivityDisplay;
                 mActivityDisplays.put(virtualActivityDisplay.mDisplayId, virtualActivityDisplay);
                 attachToDisplayLocked(virtualActivityDisplay);
@@ -3137,23 +3142,40 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
             if (mSurface != null) {
                 mSurface.release();
-                mSurface = null;
             }
 
+            mSurface = surface;
             if (surface != null) {
-                mContainerState = CONTAINER_STATE_HAS_SURFACE;
-                mSurface = surface;
                 mStack.resumeTopActivityLocked(null);
             } else {
                 mContainerState = CONTAINER_STATE_NO_SURFACE;
-                if (mStack.mPausingActivity == null && mStack.mResumedActivity != null) {
-                    mStack.startPausingLocked(false, true);
-                }
+                ((VirtualActivityDisplay) mActivityDisplay).setSurface(null);
+//                if (mStack.mPausingActivity == null && mStack.mResumedActivity != null) {
+//                    mStack.startPausingLocked(false, true);
+//                }
             }
+
+            setSurfaceIfReady();
+
             if (DEBUG_STACK) Slog.d(TAG, "setSurface: " + this + " to display="
                     + virtualActivityDisplay);
+        }
 
-            virtualActivityDisplay.setSurface(surface);
+        @Override
+        void setDrawn() {
+            synchronized (mService) {
+                mDrawn = true;
+                setSurfaceIfReady();
+            }
+        }
+
+        private void setSurfaceIfReady() {
+            if (DEBUG_STACK) Slog.v(TAG, "setSurfaceIfReady: mDrawn=" + mDrawn +
+                    " mContainerState=" + mContainerState + " mSurface=" + mSurface);
+            if (mDrawn && mSurface != null && mContainerState == CONTAINER_STATE_NO_SURFACE) {
+                ((VirtualActivityDisplay) mActivityDisplay).setSurface(mSurface);
+                mContainerState = CONTAINER_STATE_HAS_SURFACE;
+            }
         }
     }
 
@@ -3209,10 +3231,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
     class VirtualActivityDisplay extends ActivityDisplay {
         VirtualDisplay mVirtualDisplay;
 
-        VirtualActivityDisplay(Surface surface, int width, int height, int density) {
+        VirtualActivityDisplay(int width, int height, int density) {
             DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
             mVirtualDisplay = dm.createVirtualDisplay(mService.mContext, VIRTUAL_DISPLAY_BASE_NAME,
-                    width, height, density, surface, DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
+                    width, height, density, null, DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
 
             init(mVirtualDisplay.getDisplay());

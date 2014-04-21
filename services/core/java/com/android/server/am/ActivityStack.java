@@ -1233,6 +1233,7 @@ final class ActivityStack {
      * occurred and the activity will be notified immediately.
      */
     void notifyActivityDrawnLocked(ActivityRecord r) {
+        mActivityContainer.setDrawn();
         if ((r == null)
                 || (mUndrawnActivitiesBelowTopTranslucent.remove(r) &&
                         mUndrawnActivitiesBelowTopTranslucent.isEmpty())) {
@@ -1274,7 +1275,7 @@ final class ActivityStack {
 
         ActivityRecord parent = mActivityContainer.mParentActivity;
         if ((parent != null && parent.state != ActivityState.RESUMED) ||
-                mActivityContainer.mContainerState != CONTAINER_STATE_HAS_SURFACE) {
+                !mActivityContainer.isAttached()) {
             // Do not resume this stack if its parent is not resumed.
             // TODO: If in a loop, make sure that parent stack resumeTopActivity is called 1st.
             return false;

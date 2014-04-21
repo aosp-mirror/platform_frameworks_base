@@ -83,7 +83,7 @@ public class ActivityView extends ViewGroup {
                     ActivityManagerNative.getDefault().createActivityContainer(
                             mActivity.getActivityToken(), new ActivityContainerCallback(this)));
         } catch (RemoteException e) {
-            throw new IllegalStateException("ActivityView: Unable to create ActivityContainer. "
+            throw new RuntimeException("ActivityView: Unable to create ActivityContainer. "
                     + e);
         }
 
@@ -120,6 +120,18 @@ public class ActivityView extends ViewGroup {
             }
         }
         return super.onGenericMotionEvent(event);
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        if (DEBUG) Log.v(TAG, "onAttachedToWindow(): mActivityContainer=" + mActivityContainer +
+                " mSurface=" + mSurface);
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        if (DEBUG) Log.v(TAG, "onDetachedFromWindow(): mActivityContainer=" + mActivityContainer +
+                " mSurface=" + mSurface);
     }
 
     public boolean isAttachedToDisplay() {
@@ -171,7 +183,8 @@ public class ActivityView extends ViewGroup {
     }
 
     public void release() {
-        if (DEBUG) Log.v(TAG, "release()");
+        if (DEBUG) Log.v(TAG, "release() mActivityContainer=" + mActivityContainer +
+                " mSurface=" + mSurface);
         if (mActivityContainer == null) {
             Log.e(TAG, "Duplicate call to release");
             return;
@@ -200,14 +213,13 @@ public class ActivityView extends ViewGroup {
         } catch (RemoteException e) {
             mSurface.release();
             mSurface = null;
-            throw new RuntimeException(
-                    "ActivityView: Unable to create ActivityContainer. " + e);
+            throw new RuntimeException("ActivityView: Unable to create ActivityContainer. " + e);
         }
 
         if (DEBUG) Log.v(TAG, "attachToSurfaceWhenReady: " + (mQueuedIntent != null ||
                 mQueuedPendingIntent != null ? "" : "no") + " queued intent");
         if (mQueuedIntent != null) {
-            startActivity(mQueuedIntent);
+            mActivityContainer.startActivity(mQueuedIntent);
             mQueuedIntent = null;
         } else if (mQueuedPendingIntent != null) {
             mActivityContainer.startActivityIntentSender(mQueuedPendingIntent);
@@ -301,7 +313,7 @@ public class ActivityView extends ViewGroup {
             try {
                 return mIActivityContainer.startActivity(intent);
             } catch (RemoteException e) {
-                throw new IllegalStateException("ActivityView: Unable to startActivity. " + e);
+                throw new RuntimeException("ActivityView: Unable to startActivity. " + e);
             }
         }
 
@@ -309,7 +321,7 @@ public class ActivityView extends ViewGroup {
             try {
                 return mIActivityContainer.startActivityIntentSender(intentSender);
             } catch (RemoteException e) {
-                throw new IllegalStateException(
+                throw new RuntimeException(
                         "ActivityView: Unable to startActivity from IntentSender. " + e);
             }
         }
