@@ -47,6 +47,8 @@ struct JDrm : public BnDrmClient {
     void notify(DrmPlugin::EventType, int extra, const Parcel *obj);
     status_t setListener(const sp<DrmListener>& listener);
 
+    void disconnect();
+
 protected:
     virtual ~JDrm();
 

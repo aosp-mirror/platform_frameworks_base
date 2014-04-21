@@ -297,8 +297,6 @@ JDrm::JDrm(
 }
 
 JDrm::~JDrm() {
-    mDrm.clear();
-
     JNIEnv *env = AndroidRuntime::getJNIEnv();
 
     env->DeleteWeakGlobalRef(mObject);
@@ -360,6 +358,13 @@ void JDrm::notify(DrmPlugin::EventType eventType, int extra, const Parcel *obj) 
     if (listener != NULL) {
         Mutex::Autolock lock(mNotifyLock);
         listener->notify(eventType, extra, obj);
+    }
+}
+
+void JDrm::disconnect() {
+    if (mDrm != NULL) {
+        mDrm->destroyPlugin();
+        mDrm.clear();
     }
 }
 
@@ -527,6 +532,7 @@ static void android_media_MediaDrm_release(JNIEnv *env, jobject thiz) {
     sp<JDrm> drm = setDrm(env, thiz, NULL);
     if (drm != NULL) {
         drm->setListener(NULL);
+        drm->disconnect();
     }
 }
 
