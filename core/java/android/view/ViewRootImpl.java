@@ -3722,7 +3722,8 @@ public final class ViewRootImpl implements ViewParent,
                     if (result == InputMethodManager.DISPATCH_HANDLED) {
                         return FINISH_HANDLED;
                     } else if (result == InputMethodManager.DISPATCH_NOT_HANDLED) {
-                        return FINISH_NOT_HANDLED;
+                        // The IME could not handle it, so skip along to the next InputStage
+                        return FORWARD;
                     } else {
                         return DEFER; // callback will be invoked later
                     }
