@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Taip kod PIN"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Taip PUK SIM dan kod PIN baharu"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"Kod PUK SIM"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Kod PIN SIM baharu"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Sentuh untuk menaip kata laluan"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Taip kata laluan untuk membuka kunci"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Taip PIN untuk membuka kunci"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Kod PIN salah."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"Untuk membuka kunci, tekan Menu, kemudian 0."</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Telah melepasi had cubaan Buka Kunci Wajah"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"Sudah dicas"</string>
+    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Mengecas, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"Sambungkan pengecas anda."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Tekan Menu untuk membuka kunci."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Rangkaian dikunci"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"Tiada kad SIM"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Tiada kad SIM dalam tablet."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Tiada kad SIM dalam telefon."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Masukkan kad SIM."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"Kad SIM tiada atau tidak boleh dibaca. Sila masukkan kad SIM."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Kad SIM tidak boleh digunakan."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Kad SIM anda telah dilumpuhkan secara kekal.\n Hubungi pembekal perkhidmatan wayarles anda untuk mendapatkan kad SIM lain."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"Kad SIM dikunci."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Kad SIM dikunci dengan PUK."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Membuka kunci kad SIM..."</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d dari %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Tambah widget."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Kosong"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Bahagian buka kunci dikembangkan."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Bahagian buka kunci diruntuhkan."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Pemilih pengguna"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Status"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Kawalan media"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Penyusunan semula widget dimulakan."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Penyusunan semula widget tamat."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> dipadamkan."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Kembangkan bahagian buka kunci."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Buka kunci luncur."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Buka kunci corak."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Wajah Buka Kunci"</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Buka kunci pin."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Buka kunci kata laluan."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Kawasan corak."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Kawasan luncur."</string>
+    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Butang lagu sebelumnya"</string>
+    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Butang lagu seterusnya"</string>
+    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Butang jeda"</string>
+    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Butang main"</string>
+    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Butang berhenti"</string>
+    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Menyukai"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Tidak diterima"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Jantung"</string>
+    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Buka kunci untuk meneruskan"</string>
+    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Pelancaran dibatalkan"</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Jatuhkan <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> untuk memadam."</string>
+    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> tidak akan dipadamkan."</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Batal"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Padam"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Selesai"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Perubahan mod"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Masuk"</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"Buka kunci"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"Senyap"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"Bunyi dihidupkan"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Carian"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"Luncurkan ke atas untuk <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_down" msgid="5087739728639014595">"Luncurkan ke bawah untuk <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"Luncurkan ke kiri untuk <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_right" msgid="8034433242579600980">"Luncurkan ke kanan untuk <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Pengguna semasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Panggilan kecemasan"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Lupa Corak"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Corak Salah"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Kata Laluan Salah"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN salah"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Cuba lagi dalam <xliff:g id="NUMBER">%d</xliff:g> saat."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Lukiskan corak anda"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Masukkan PIN SIM"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Masukkan PIN"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Masukkan Kata Laluan"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"Kini SIM dilumpuhkan. Masukkan kod PUK untuk meneruskan. Hubungi pembawa untuk butiran."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Masukkan kod PIN yang diingini"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Sahkan kod PIN yang diingini"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Membuka kunci kad SIM..."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Taipkan PIN yang mengandungi 4 hingga 8 nombor."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Kod PUK mestilah 8 nombor atau lebih."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Masukkan semula kod PIN yang betul. Percubaan berulang akan melumpuhkan SIM secara kekal."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Kod PIN tidak sepadan"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Terlalu banyak percubaan melukis corak"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Untuk membuka kunci, log masuk dengan akaun Google anda."</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Nama Pengguna (E-mel)"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"Kata laluan"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Log masuk"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nama pengguna atau kata laluan tidak sah."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Lupa nama pengguna atau kata laluan anda?\nLawati"<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Menyemak akaun…"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Anda telah menaip PIN anda secara salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Anda telah menaip kata laluan anda secara salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Anda telah tersilap melukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Anda telah mencuba untuk membuka kunci tablet dengan salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, tablet akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Anda telah mencuba untuk membuka kunci telefon dengan salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, telefon akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Anda telah mencuba untuk membuka kunci tablet secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Tablet kini akan ditetapkan semula ke tetapan lalai kilang."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Anda telah mencuba untuk membuka kunci telefon secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Telefon kini akan ditetapkan semula ke tetapan lalai kilang."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Anda telah tersilap melukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci tablet anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Alih keluar"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Kod PIN SIM tidak betul, jadi anda harus menghubungi pembawa anda untuk membuka kunci peranti."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Kod PIN SIM tidak betul. Anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi sebelum anda harus menghubungi pembawa anda untuk membuka kunci peranti."</item>
+    <item quantity="other" msgid="2215723361575359486">"Kod PIN SIM tidak betul, anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM tidak boleh digunakan. Hubungi pembawa anda."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Kod PUK SIM tidak betul, anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi sebelum SIM tidak boleh digunakan secara kekal."</item>
+    <item quantity="other" msgid="5477305226026342036">"Kod PUK SIM tidak betul, anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi sebelum SIM tidak boleh digunakan secara kekal."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Operasi PIN SIM gagal!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operasi PUK SIM gagal!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Kod Diterima!"</string>
+    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Butang lagu sebelumnya"</string>
+    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Butang lagu seterusnya"</string>
+    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Butang jeda"</string>
+    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Butang main"</string>
+    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Butang berhenti"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Tiada perkhidmatan."</string>
+</resources>

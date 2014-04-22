@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Մուտքագրեք PIN կոդը"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Մուտքագրեք SIM PUK-ը և նոր PIN կոդը"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM PUK կոդը"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Նոր SIM PIN կոդը"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Հպեք` գաղտնաբառը մուտքագրելու համար"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Մուտքագրեք գաղտնաբառը ապակողպման համար"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Մուտքագրեք PIN-ը ապակողպման համար"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Սխալ PIN ծածկագիր:"</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"Ապակողպման համար սեղմեք Ցանկ, ապա 0:"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Առավելագույն Դեմքով ապակողպման փորձերը գերազանցված են"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"Լիցքավորված է"</string>
+    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Լիցքավորում, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"Միացրեք ձեր լիցքավորիչը:"</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Ապակողպելու համար սեղմեք Ցանկը:"</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Ցանցը կողպված է"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"SIM քարտ չկա"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Գրասալիկում SIM քարտ չկա:"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Հեռախոսի մեջ SIM քարտ չկա:"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Զետեղեք SIM քարտը:"</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM քարտը բացակայում է կամ չի կարող կարդացվել: Մտցրեք SIM քարտ:"</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Անպիտան SIM քարտ:"</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Ձեր SIM քարտը ընդմիշտ կասեցվել է:\nԿապվեք ձեր բջջային ծառայության մատակարարի հետ նոր SIM քարտ ձեռք բերելու համար:"</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM քարտը կողպված է:"</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM քարտը PUK-ով կողպված է:"</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM քարտը ապակողպվում է..."</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Վիջեթ %2$d of %3$d:"</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Ավելացնել վիջեթ:"</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Դատարկ"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Ապակողպման տարածքն ընդլայնված է:"</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Ապակողպման տարածքը ետ է ծալված:"</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> վիջեթ:"</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Օգտվողի ընտրիչ"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Կարգավիճակ"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Ֆոտոխցիկ"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Մեդիա կարգավորումներ"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Վիջեթների վերադասավորումը մեկնարկել է:"</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Վիջեթի վերադասավորումն ավարտվեց:"</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Վիջեթ <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>-ը ջնջված է:"</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Ընդլայնել ապակողպման տարածությունը:"</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Էջի ապակողպում:"</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Սխեմայով ապակողպում:"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Դեմքով ապակողպում:"</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin-ն ապակողպված է:"</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Գաղտնաբառի ապակողպում:"</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Սխեմայի տարածք:"</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Սահեցման տարածք:"</string>
+    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Նախորդ հետագծի կոճակը"</string>
+    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Հաջորդ հետագծի կոճակը"</string>
+    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Դադարի կոճակ"</string>
+    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Նվագարկման կոճակ"</string>
+    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Կանգի կոճակ"</string>
+    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Լավն է"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Լավը չէ"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Սիրտ"</string>
+    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Շարունակելու համար ապակողպեք"</string>
+    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Գործարկումը չեղարկվեց"</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> վիջեթը ջնջելու համար բաց թողեք այն այստեղ:"</string>
+    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> վիջեթը չի ջնջվի:"</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Չեղարկել"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Ջնջել"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Կատարված է"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Ռեժիմի փոփոխում"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Մուտք"</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"Ապակողպել"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"Ֆոտոխցիկ"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"Լուռ"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"Ձայնը միացնել"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Որոնել"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"Սահեցրեք վերև <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>-ի համար:"</string>
+    <string name="description_direction_down" msgid="5087739728639014595">"Սահեցրեք ցած <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>-ի համար:"</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"Սահեցրեք ձախ` <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>-ի համար:"</string>
+    <string name="description_direction_right" msgid="8034433242579600980">"Սահեցրեք աջ` <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>-ի համար:"</string>
+    <string name="user_switched" msgid="3768006783166984410">"Ներկայիս օգտվողը <xliff:g id="NAME">%1$s</xliff:g>:"</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Արտակարգ իրավիճակի հեռախոսազանգ"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Մոռացել եմ սխեման"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Սխալ սխեմա"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Սխալ գաղտնաբառ"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"Սխալ PIN"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Փորձեք կրկին <xliff:g id="NUMBER">%d</xliff:g> վայրկյանից:"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Հավաքեք ձեր սխեման"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Մուտքագրեք SIM-ի PIN-ը"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Մուտքագրեք PIN-ը"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Մուտքագրեք գաղտնաբառը"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-ը այս պահին անջատված է: Մուտքագրեք PUK կոդը շարունակելու համար: Մանրամասների համար կապվեք օպերատորի հետ:"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Մուտքագրեք ցանկալի PIN ծածկագիրը"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Հաստատեք ցանկալի PIN ծածկագիրը"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Ապակողպում է SIM քարտը ..."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Մուտքագրեք PIN, որը 4-ից 8 թիվ է:"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK կոդը պետք է լինի 8 կամ ավելի թիվ:"</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Վերամուտքագրեք ճիշտ PUK ծածկագիրը: Կրկնվող փորձերը ընդմիշտ կկասեցնեն SIM քարտը:"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN ծածկագրերը չեն համընկնում"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Չափից շատ սխեմայի փորձեր"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Ապակողպելու համար` մուտք գործեք ձեր Google հաշվով:"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Օգտանուն (էլփոստ)"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"Գաղտնաբառը"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Մուտք գործել"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Սխալ օգտանուն կամ գաղտնաբառ:"</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Մոռացե՞լ եք ձեր օգտանունը կամ գաղտնաբառը:\nԱյցելեք "<b>"google.com /accounts/recovery"</b>":"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Հաշիվը ստուգվում է..."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Դուք <xliff:g id="NUMBER_0">%d</xliff:g> անգամ սխալ եք մուտքագրել ձեր PIN-ը: \n\nՓորձեք կրկին <xliff:g id="NUMBER_1">%d</xliff:g> վայրկյանից:"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Դուք սխալ եք մուտքագրել ձեր գաղտնաբառը <xliff:g id="NUMBER_0">%d</xliff:g> անգամ: \n\nՓորձեք կրկին <xliff:g id="NUMBER_1">%d</xliff:g> վայրկյանից:"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Դուք <xliff:g id="NUMBER_0">%d</xliff:g> անգամ սխալ եք հավաքել ձեր ապակողպման սխեման: \n\nՓորձեք կրկին <xliff:g id="NUMBER_1">%d</xliff:g> վայրկյանից:"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Դուք <xliff:g id="NUMBER_0">%d</xliff:g> անգամ սխալ փորձ եք արել գրասալիկն ապակողպելու համար: <xliff:g id="NUMBER_1">%d</xliff:g> անգամից ավել անհաջող փորձերից հետո գրասալիկը կվերակարգավորվի գործարանային լռելյայնի, և օգտվողի բոլոր տվյալները կկորեն:"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Դուք <xliff:g id="NUMBER_0">%d</xliff:g> անգամ սխալ փորձ եք արել հեռախոսն ապակողպելու համար: <xliff:g id="NUMBER_1">%d</xliff:g> անգամից ավել անհաջող փորձերից հետո հեռախոսը կվերակարգավորվի գործարանային լռելյայնի, և օգտվողի բոլոր տվյալները կկորեն:"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Դուք <xliff:g id="NUMBER">%d</xliff:g> անգամ սխալ փորձ եք արել գրասալիկն ապակողպելու համար: Գրասալիկն այժմ կվերակարգավորվի գործարանային լռելյայնի:"</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Դուք <xliff:g id="NUMBER">%d</xliff:g> անգամ սխալ փորձ եք արել հեռախոսն ապակողպելու համար: Հեռախոսն այժմ կվերակարգավորվի գործարանային լռելյայնի:"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Դուք սխալ եք հավաքել ձեր ապակողպման սխեման <xliff:g id="NUMBER_0">%d</xliff:g> անգամ: Եվս <xliff:g id="NUMBER_1">%d</xliff:g> անհաջող փորձից հետո ձեզանից կպահանջվի ապակողպել ձեր գրասալիկը` օգտագործելով էլփոստի հաշիվ:\n\n Փորձեք կրկին <xliff:g id="NUMBER_2">%d</xliff:g> վայրկյանից:"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Դուք <xliff:g id="NUMBER_0">%d</xliff:g> անգամ սխալ եք հավաքել ձեր ապակողպման նմուշը: <xliff:g id="NUMBER_1">%d</xliff:g> անգամից ավել անհաջող փորձերից հետո ձեզ կառաջարկվի ապակողպել ձեր հեռախոսը` օգտագործելով էլփոստի հաշիվ:\n\n Փորձեք կրկին <xliff:g id="NUMBER_2">%d</xliff:g> վայրկյանից:"</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Հեռացնել"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Սխալ SIM PIN կոդի պատճառով պետք է դիմեք ձեր օպերատորին՝ սարքն արգելաբացելու համար:"</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"SIM PIN կոդը սխալ է: Մնաց <xliff:g id="NUMBER">%d</xliff:g> փորձ, որից հետո պետք է դիմեք ձեր օպերատորին՝ սարքն արգելաբացելու համար:"</item>
+    <item quantity="other" msgid="2215723361575359486">"SIM PIN կոդը սխալ է: Մնաց <xliff:g id="NUMBER">%d</xliff:g> փորձ:"</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM-ը հնարավոր չէ օգտագործել: Դիմեք ձեր օպերատորին:"</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"SIM PUK կոդը սխալ է: Մնաց <xliff:g id="NUMBER">%d</xliff:g> փորձ՝ մինչև SIM-ի ընդմիշտ արգելափակումը:"</item>
+    <item quantity="other" msgid="5477305226026342036">"SIM PUK կոդը սխալ է: Մնաց <xliff:g id="NUMBER">%d</xliff:g> փորձ՝ մինչև SIM-ի ընդմիշտ արգելափակումը:"</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN գործողությունը ձախողվեց:"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK գործողությունը ձախողվեց:"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Կոդն ընդունվեց:"</string>
+    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Նախորդ հետագծի կոճակ"</string>
+    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Հաջորդ հետագծի կոճակ"</string>
+    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Դադարի կոճակ"</string>
+    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Նվագարկման կոճակ"</string>
+    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Դադարի կոճակ"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Ծառայություն չկա:"</string>
+</resources>

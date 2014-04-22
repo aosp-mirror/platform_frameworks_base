@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"აკრიფეთ PIN კოდი"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"დაბეჭდეთ SIM-ის PUK კოდი და ახალი PIN კოდი"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM PUK კოდი"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"SIM-ის ახალი PIN-ის კოდი"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384">"შეეხეთ "<font size="17">"-ს პაროლის"</font>" დასაბეჭდად."</string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"განსაბლოკად აკრიფეთ პაროლი"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"განსაბლოკად აკრიფეთ PIN კოდი"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"არასწორი PIN კოდი."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"განბლოკვისათვის დააჭირეთ მენიუს და შემდეგ 0-ს."</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"სახის ამოცნობით განბლოკვის მცდელობამ დაშვებულ რაოდენობას გადააჭარბა"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"დამუხტულია"</string>
+    <string name="keyguard_plugged_in" msgid="8117572000639998388">"მიმდინარეობს დამუხტვა (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"შეაერთეთ დამტენი."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"განბლოკვისთვის დააჭირეთ მენიუს."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"ქსელი ჩაკეტილია"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"SIM ბარათი არ არის"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"ტაბლეტში არ დევს SIM ბარათი."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"არ არის SIM ბარათი ტელეფონში."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"ჩადეთ SIM ბარათი."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM ბარათი არ არის ან არ იკითხება. ჩადეთ SIM ბარათი."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"არამოხმარებადი SIM ბარათი."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"თქვენი SIM ბარათი გამუდმებით გამორთული იყო.\n დაუკავშირდით თქვენი უკაბელო სერვისის პროვაიდერს სხვა SIM ბარათისთვის."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM ბარათი დაბლოკილია."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM ბარათი დაბლოკილია PUK კოდით."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"მიმდინარეობს SIM ბარათის განბლოკვა…"</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. ვიჯეტი %2$d of %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"ვიჯეტის დამატება"</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"ცარიელი"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"განბლოკვის სივრცე გაშლილია."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"განბლოკვის სივრცე ჩაკეცილია."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ვიჯეტი."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"მომხმარებლის ამომრჩეველი"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"სტატუსი"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"კამერა"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"მედიის მართვის ელემენტები"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"დაიწყო ვიჯეტის ხელახლა განლაგება."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"ვიჯეტების გადახარისხება დასრულებულია."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"ვიჯეტი <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> წაიშალა."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"განბლოკვის სივრცის გაშლა."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"გასრიალებით განბლოკვა"</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"განბლოკვა ნიმუშით."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"განბლოკვა სახით"</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"განბლოკვა Pin-ით."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"პაროლის განბლოკვა"</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ნიმუშების სივრცე."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"გადასრიალების სივრცე."</string>
+    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"წინა ჩანაწერის ღილაკი"</string>
+    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"შემდეგი ჩანაწერის ღილაკი"</string>
+    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"პაუზის ღილაკი"</string>
+    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"დაკვრის ღილაკი"</string>
+    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Stop ღილაკი"</string>
+    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"ზევით აწეული ცერი"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"ქვევით დახრილი ცერი"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"გული"</string>
+    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"განბლოკეთ გასაგრძელებლად"</string>
+    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"გამოძახება გაუქმდა"</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"ჩააგდეთ <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> წასაშლელად."</string>
+    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> არ წაიშლება."</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"გაუქმება"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"წაშლა"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"დასრულდა"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"რეჟიმის შეცვლა"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift-"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"შეყვანა"</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"განბლოკვა"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"კამერა"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"უხმო"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"ხმის ჩართვა"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"ძიება"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"გაასრიალეთ ზემოთ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>-თვის."</string>
+    <string name="description_direction_down" msgid="5087739728639014595">"გაასრიალეთ ქვემოთ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>-თვის."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"გაასრიალეთ მარცხნივ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>-თვის."</string>
+    <string name="description_direction_right" msgid="8034433242579600980">"გაასრიალეთ მარჯვნივ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>-თვის."</string>
+    <string name="user_switched" msgid="3768006783166984410">"ამჟამინდელი მომხმარებელი <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"გადაუდებელი დახმარების ზარი"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"დაგავიწყდათ ნიმუში"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"არასწორი ნიმუში"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"არასწორი პაროლი"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"არასწორი PIN"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"კიდევ სცადეთ <xliff:g id="NUMBER">%d</xliff:g> წამში."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"დახატეთ თქვენი ნიმუში."</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PIN-ის შეყვანა"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"შეიყვანეთ PIN"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"პაროლის შეყვანა"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM ამჟამად დეაქტივირებულია. გასაგრძელებლად შეიყვანეთ PUK კოდი. დეტალებისთვის მიმართეთ მობილურ ოპერატორს."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"სასურველი PIN კოდის შეყვანა"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"სასურველი PIN კოდის დადასტურება"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM ბარათის განბლოკვა…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"აკრიფეთ PIN, რომელიც შედგება 4-დან 8 ციფრამდე."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK კოდი უნდა იყოს რვა ან მეტი ციფრისგან შემდგარი."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"ხელახლა შეიყვანეთ სწორი PUK კოდი. რამდენიმე წარუმატებელი მცდელობა გამოიწვევს SIM ბარათის დაბლოკვას."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN კოდები არ ემთხვევა"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"ნახატი ნიმუშის ძალიან ბევრი მცდელობა"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"განბლოკვისთვის გაიარეთ ავტორიზაცია თქვენი Google  ანგარიშით."</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"მომხმარებლის სახელი (ელფოსტა)"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"პაროლი"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"შესვლა"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"არასწორი სახელი, ან პაროლი."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"დაგავიწყდათ მომხმარებლის სახელი და პაროლი?\nეწვიეთ "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"მიმდინარეობს ანგარიშის შემოწმება…"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"თქვენ <xliff:g id="NUMBER_0">%d</xliff:g>-ჯერ არასწორად შეიყვანეთ PIN კოდი. \n\nსცადეთ ხელახლა <xliff:g id="NUMBER_1">%d</xliff:g> წამში."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"თქვენ <xliff:g id="NUMBER_0">%d</xliff:g>-ჯერ არასწორად დაბეჭდეთ თქვენი პაროლი. \n\nხელახლა სცადეთ <xliff:g id="NUMBER_1">%d</xliff:g> წამში."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"თქვენ <xliff:g id="NUMBER_0">%d</xliff:g>-ჯერ დახატეთ განბლოკვის ნიმუში. \n\nსცადეთ ხელახლა <xliff:g id="NUMBER_1">%d</xliff:g> წამში."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"თქვენ არასწორად სცადეთ ტაბლეტის განბლოკვა <xliff:g id="NUMBER_0">%d</xliff:g>-ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი ცდის შემდეგ ტაბლეტზე დაყენდება საწყისი, ქარხნული პარამეტრები და მომხმარებლის ყველა მონაცემი დაიკარგება."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"თქვენ არასწორად სცადეთ ტელეფონის განბლოკვა <xliff:g id="NUMBER_0">%d</xliff:g>-ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი ცდის შემდეგ ტელეფონზე დაყენდება საწყისი, ქარხნული პარამეტრები და მომხმარებლის ყველა მონაცემი დაიკარგება."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"თქვენ არასწორად სცადეთ ტაბლეტის განბლოკვა <xliff:g id="NUMBER">%d</xliff:g>-ჯერ. ტაბლეტზე დაყენდება საწყისი, ქარხნული პარამეტრები და მომხმარებლის ყველა მონაცემი დაიკარგება."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"თქვენ <xliff:g id="NUMBER">%d</xliff:g>-ჯერ არასწორად სცადეთ ტელეფონის განბლოკვა. ამიტომ ტელეფონზე დადგება საწყისი, ქარხნული პარამეტრები."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"თქვენ არასწორად დახატეთ თქვენი განბლოკვის ნიმუში <xliff:g id="NUMBER_0">%d</xliff:g> ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი ცდის შემდეგ მოგთხოვთ ტაბლეტის განბლოკვას ელფოსტის ანგარიშის გამოყენებით.\n\n ხელახლა სცადეთ <xliff:g id="NUMBER_2">%d</xliff:g> წამში."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"თქვენ არასწორად დახატეთ თქვენი განბლოკვის ნიმუში <xliff:g id="NUMBER_0">%d</xliff:g>-ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი ცდის შემდეგ, დაგჭირდებათ თქვენი ტელეფონის განბლოკვა ელფოსტის ანგარიშის გამოყენებით.\n\n ხელახლა სცადეთ <xliff:g id="NUMBER_2">%d</xliff:g> წამში."</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ამოშლა"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM-ის არასწორი PIN კოდი. თქვენ ახლა მოგიწევთ მოწყობილობის განსაბლოკად მიმართოთ ოპერატორს."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"SIM-ის არასწორი PIN კოდი. თქვენ დაგრჩათ <xliff:g id="NUMBER">%d</xliff:g> მცდელობა, სანამ მოგიწევთ თქვენი მოწყობილობის განსაბლოკად ოპერატორთან დაკავშირება."</item>
+    <item quantity="other" msgid="2215723361575359486">"SIM-ის არასწორი PIN კოდი. თქვენ დაგრჩათ <xliff:g id="NUMBER">%d</xliff:g> მცდელობა."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM გამოუსადეგარია. დაუკავშირდით ოპერატორს."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"არასწორი SIM PUK კოდი. თქვენ დაგრჩათ <xliff:g id="NUMBER">%d</xliff:g> მცდელობა, სანამ SIM სამუდამოდ გამოუსადეგარი გახდებოდეს."</item>
+    <item quantity="other" msgid="5477305226026342036">"არასწორი SIM PUK კოდი. თქვენ დაგრჩათ <xliff:g id="NUMBER">%d</xliff:g> მცდელობა, სანამ SIM სამუდამოდ გამოუსადეგარი გახდებოდეს."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN ოპერაცია ჩაიშალა!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK ოპერაცია ჩაიშალა!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"კოდი მიღებულია!"</string>
+    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"წინა ჩანაწერზე გადასვლის ღილაკი"</string>
+    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"შემდეგი ჩანაწერის ღილაკი"</string>
+    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"პაუზის ღილაკი"</string>
+    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"დაკვრის ღილაკი"</string>
+    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"შეჩერების ღილაკი"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"არ არის სერვისი."</string>
+</resources>
