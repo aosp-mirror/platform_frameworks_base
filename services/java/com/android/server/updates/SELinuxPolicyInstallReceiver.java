@@ -18,8 +18,6 @@ package com.android.server.updates;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.FileUtils;
-import android.os.SELinux;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Base64;
