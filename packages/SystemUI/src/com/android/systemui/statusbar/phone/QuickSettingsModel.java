@@ -608,7 +608,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
         mZenModeState.enabled = mode != Settings.Global.ZEN_MODE_OFF;
         mZenModeState.zenMode = mode;
-        mZenModeState.label = ZenModeView.MODE_LABEL;
+        mZenModeState.label = mContext.getString(R.string.zen_mode_title);
         mZenModeState.iconId = R.drawable.stat_sys_zen_limited;
         mZenModeCallback.refreshView(mZenModeTile, mZenModeState);
     }

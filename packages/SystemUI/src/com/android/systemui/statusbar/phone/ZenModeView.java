@@ -42,13 +42,13 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.ZenModeView.Adapter.ExitCondition;
 
 public class ZenModeView extends RelativeLayout {
     private static final String TAG = ZenModeView.class.getSimpleName();
     private static final boolean DEBUG = false;
 
-    public static final String MODE_LABEL = "Limited interruptions";
     public static final int BACKGROUND = 0xff282828;
 
     private static final Typeface CONDENSED =
@@ -91,7 +91,7 @@ public class ZenModeView extends RelativeLayout {
         LayoutParams lp = null;
 
         mModeText = new TextView(mContext);
-        mModeText.setText(MODE_LABEL);
+        mModeText.setText(R.string.zen_mode_title);
         mModeText.setId(android.R.id.title);
         mModeText.setTextColor(GRAY);
         mModeText.setTypeface(CONDENSED);
