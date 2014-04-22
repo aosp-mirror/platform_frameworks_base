@@ -399,6 +399,9 @@
     <!-- status message in phone options dialog for when airplane mode is off -->
     <string name="global_actions_airplane_mode_off_status">Airplane mode is OFF</string>
 
+    <!-- label for item that launches settings in phone options dialog [CHAR LIMIT=15]-->
+    <string name="global_action_settings">Settings</string>
+
     <!-- Text to use when the number in a notification info is too large
          (greater than status_bar_notification_info_maxnum, defined in
          values/config.xml) and must be truncated. May need to be localized
