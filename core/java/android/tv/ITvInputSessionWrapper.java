@@ -17,13 +17,16 @@
 package android.tv;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.net.Uri;
+import android.os.IBinder;
 import android.os.Message;
 import android.tv.TvInputService.TvInputSessionImpl;
 import android.util.Log;
 import android.view.Surface;
 
 import com.android.internal.os.HandlerCaller;
+import com.android.internal.os.SomeArgs;
 
 /**
  * Implements the internal ITvInputSession interface to convert incoming calls on to it back to
@@ -38,6 +41,9 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_SET_SURFACE = 2;
     private static final int DO_SET_VOLUME = 3;
     private static final int DO_TUNE = 4;
+    private static final int DO_CREATE_OVERLAY_VIEW = 5;
+    private static final int DO_RELAYOUT_OVERLAY_VIEW = 6;
+    private static final int DO_REMOVE_OVERLAY_VIEW = 7;
 
     private TvInputSessionImpl mTvInputSession;
     private final HandlerCaller mCaller;
@@ -71,6 +77,20 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSession.tune((Uri) msg.obj);
                 return;
             }
+            case DO_CREATE_OVERLAY_VIEW: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mTvInputSession.createOverlayView((IBinder) args.arg1, (Rect) args.arg2);
+                args.recycle();
+                return;
+            }
+            case DO_RELAYOUT_OVERLAY_VIEW: {
+                mTvInputSession.relayoutOverlayView((Rect) msg.obj);
+                return;
+            }
+            case DO_REMOVE_OVERLAY_VIEW: {
+                mTvInputSession.removeOverlayView(true);
+                return;
+            }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
                 return;
@@ -96,5 +116,21 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void tune(Uri channelUri) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_TUNE, channelUri));
+    }
+
+    @Override
+    public void createOverlayView(IBinder windowToken, Rect frame) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_CREATE_OVERLAY_VIEW, windowToken,
+                frame));
+    }
+
+    @Override
+    public void relayoutOverlayView(Rect frame) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_RELAYOUT_OVERLAY_VIEW, frame));
+    }
+
+    @Override
+    public void removeOverlayView() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_REMOVE_OVERLAY_VIEW));
     }
 }

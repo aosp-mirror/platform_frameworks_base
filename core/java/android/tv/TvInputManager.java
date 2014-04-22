@@ -17,6 +17,7 @@
 package android.tv;
 
 import android.content.ComponentName;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
@@ -24,6 +25,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Surface;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -320,8 +322,8 @@ public final class TvInputManager {
     /** The Session provides the per-session functionality of TV inputs. */
     public static final class Session {
         private final ITvInputManager mService;
-        private final IBinder mToken;
         private final int mUserId;
+        private IBinder mToken;
 
         /** @hide */
         private Session(ComponentName name, IBinder token, ITvInputManager service, int userId) {
@@ -332,10 +334,16 @@ public final class TvInputManager {
 
         /**
          * Releases this session.
+         *
+         * @throws IllegalStateException if the session has been already released.
          */
         public void release() {
+            if (mToken == null) {
+                throw new IllegalStateException("the session has been already released");
+            }
             try {
                 mService.releaseSession(mToken, mUserId);
+                mToken = null;
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
@@ -345,8 +353,12 @@ public final class TvInputManager {
          * Sets the {@link android.view.Surface} for this session.
          *
          * @param surface A {@link android.view.Surface} used to render video.
+         * @throws IllegalStateException if the session has been already released.
          */
-        public void setSurface(Surface surface) {
+        void setSurface(Surface surface) {
+            if (mToken == null) {
+                throw new IllegalStateException("the session has been already released");
+            }
             // surface can be null.
             try {
                 mService.setSurface(mToken, surface, mUserId);
@@ -360,8 +372,12 @@ public final class TvInputManager {
          *
          * @param volume A volume value between 0.0f to 1.0f.
          * @throws IllegalArgumentException if the volume value is out of range.
+         * @throws IllegalStateException if the session has been already released.
          */
         public void setVolume(float volume) {
+            if (mToken == null) {
+                throw new IllegalStateException("the session has been already released");
+            }
             try {
                 if (volume < 0.0f || volume > 1.0f) {
                     throw new IllegalArgumentException("volume should be between 0.0f and 1.0f");
@@ -377,13 +393,87 @@ public final class TvInputManager {
          *
          * @param channelUri The URI of a channel.
          * @throws IllegalArgumentException if the argument is {@code null}.
+         * @throws IllegalStateException if the session has been already released.
          */
         public void tune(Uri channelUri) {
             if (channelUri == null) {
                 throw new IllegalArgumentException("channelUri cannot be null");
             }
+            if (mToken == null) {
+                throw new IllegalStateException("the session has been already released");
+            }
             try {
                 mService.tune(mToken, channelUri, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Creates an overlay view. Once the overlay view is created, {@link #relayoutOverlayView}
+         * should be called whenever the layout of its containing view is changed.
+         * {@link #removeOverlayView()} should be called to remove the overlay view.
+         * Since a session can have only one overlay view, this method should be called only once
+         * or it can be called again after calling {@link #removeOverlayView()}.
+         *
+         * @param view A view playing TV.
+         * @param frame A position of the overlay view.
+         * @throws IllegalArgumentException if any of the arguments is {@code null}.
+         * @throws IllegalStateException if {@code view} is not attached to a window or
+         *         if the session has been already released.
+         */
+        void createOverlayView(View view, Rect frame) {
+            if (view == null) {
+                throw new IllegalArgumentException("view cannot be null");
+            }
+            if (frame == null) {
+                throw new IllegalArgumentException("frame cannot be null");
+            }
+            if (view.getWindowToken() == null) {
+                throw new IllegalStateException("view must be attached to a window");
+            }
+            if (mToken == null) {
+                throw new IllegalStateException("the session has been already released");
+            }
+            try {
+                mService.createOverlayView(mToken, view.getWindowToken(), frame, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Relayouts the current overlay view.
+         *
+         * @param frame A new position of the overlay view.
+         * @throws IllegalArgumentException if the arguments is {@code null}.
+         * @throws IllegalStateException if the session has been already released.
+         */
+        void relayoutOverlayView(Rect frame) {
+            if (frame == null) {
+                throw new IllegalArgumentException("frame cannot be null");
+            }
+            if (mToken == null) {
+                throw new IllegalStateException("the session has been already released");
+            }
+            try {
+                mService.relayoutOverlayView(mToken, frame, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Removes the current overlay view.
+         *
+         * @throws IllegalStateException if the session has been already released.
+         */
+        void removeOverlayView() {
+            if (mToken == null) {
+                throw new IllegalStateException("the session has been already released");
+            }
+            try {
+                mService.removeOverlayView(mToken, mUserId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }

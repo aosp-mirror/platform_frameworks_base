@@ -17,6 +17,7 @@
 package android.tv;
 
 import android.content.ComponentName;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.tv.ITvInputClient;
 import android.tv.TvInputInfo;
@@ -40,4 +41,9 @@ interface ITvInputManager {
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);
     void setVolume(in IBinder sessionToken, float volume, int userId);
     void tune(in IBinder sessionToken, in Uri channelUri, int userId);
+
+    void createOverlayView(in IBinder sessionToken, in IBinder windowToken, in Rect frame,
+            int userId);
+    void relayoutOverlayView(in IBinder sessionToken, in Rect frame, int userId);
+    void removeOverlayView(in IBinder sessionToken, int userId);
 }
