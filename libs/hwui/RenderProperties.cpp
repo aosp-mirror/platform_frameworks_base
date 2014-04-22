@@ -34,7 +34,7 @@
 #define NONZERO_EPSILON .001f
 
 static inline bool is_zero(float value) {
-    return (value >= -NONZERO_EPSILON) || (value <= NONZERO_EPSILON);
+    return (value >= -NONZERO_EPSILON) && (value <= NONZERO_EPSILON);
 }
 
 namespace android {
