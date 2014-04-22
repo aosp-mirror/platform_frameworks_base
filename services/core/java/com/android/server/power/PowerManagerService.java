@@ -168,6 +168,10 @@ public final class PowerManagerService extends com.android.server.SystemService
     // Poll interval in milliseconds for watching boot animation finished.
     private static final int BOOT_ANIMATION_POLL_INTERVAL = 200;
 
+    //powerHint
+    private static final int POWER_HINT_LOW_POWER_MODE = 5;
+    private static boolean mLowPowerModeEnabled;
+
     private final Context mContext;
     private LightsManager mLightsManager;
     private BatteryService mBatteryService;
@@ -530,7 +534,9 @@ public final class PowerManagerService extends com.android.server.SystemService
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_BRIGHTNESS_MODE),
                     false, mSettingsObserver, UserHandle.USER_ALL);
-
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.LOW_POWER_MODE),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
             // Go.
             readConfigurationLocked();
             updateSettingsLocked();
@@ -609,6 +615,14 @@ public final class PowerManagerService extends com.android.server.SystemService
         mScreenBrightnessModeSetting = Settings.System.getIntForUser(resolver,
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT);
+
+        boolean mIsEnabled = Settings.Global.getInt(resolver,
+            Settings.Global.LOW_POWER_MODE, 0) != 0;
+        if (mIsEnabled != mLowPowerModeEnabled) {
+            BinderService bs = new BinderService();
+            bs.powerHint(POWER_HINT_LOW_POWER_MODE, mIsEnabled ? 1 : 0);
+            mLowPowerModeEnabled = mIsEnabled;
+        }
 
         mDirty |= DIRTY_SETTINGS;
     }
