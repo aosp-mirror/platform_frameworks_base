@@ -450,6 +450,27 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (provider == null) {
             Slog.e(TAG,  "no geofence provider found");
         }
+
+        String[] testProviderStrings = resources.getStringArray(
+                com.android.internal.R.array.config_testLocationProviders);
+        for (String testProviderString : testProviderStrings) {
+            String fragments[] = testProviderString.split(",");
+            String name = fragments[0].trim();
+            if (mProvidersByName.get(name) != null) {
+                throw new IllegalArgumentException("Provider \"" + name + "\" already exists");
+            }
+            ProviderProperties properties = new ProviderProperties(
+                    Boolean.parseBoolean(fragments[1]) /* requiresNetwork */,
+                    Boolean.parseBoolean(fragments[2]) /* requiresSatellite */,
+                    Boolean.parseBoolean(fragments[3]) /* requiresCell */,
+                    Boolean.parseBoolean(fragments[4]) /* hasMonetaryCost */,
+                    Boolean.parseBoolean(fragments[5]) /* supportsAltitude */,
+                    Boolean.parseBoolean(fragments[6]) /* supportsSpeed */,
+                    Boolean.parseBoolean(fragments[7]) /* supportsBearing */,
+                    Integer.parseInt(fragments[8]) /* powerRequirement */,
+                    Integer.parseInt(fragments[9]) /* accuracy */);
+            addTestProviderLocked(name, properties);
+        }
     }
 
     /**
@@ -2204,7 +2225,6 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         long identity = Binder.clearCallingIdentity();
         synchronized (mLock) {
-            MockProvider provider = new MockProvider(name, this, properties);
             // remove the real provider if we are replacing GPS or network provider
             if (LocationManager.GPS_PROVIDER.equals(name)
                     || LocationManager.NETWORK_PROVIDER.equals(name)
@@ -2214,16 +2234,21 @@ public class LocationManagerService extends ILocationManager.Stub {
                     removeProviderLocked(p);
                 }
             }
-            if (mProvidersByName.get(name) != null) {
-                throw new IllegalArgumentException("Provider \"" + name + "\" already exists");
-            }
-            addProviderLocked(provider);
-            mMockProviders.put(name, provider);
-            mLastLocation.put(name, null);
-            mLastLocationCoarseInterval.put(name, null);
+            addTestProviderLocked(name, properties);
             updateProvidersLocked();
         }
         Binder.restoreCallingIdentity(identity);
+    }
+
+    private void addTestProviderLocked(String name, ProviderProperties properties) {
+        if (mProvidersByName.get(name) != null) {
+            throw new IllegalArgumentException("Provider \"" + name + "\" already exists");
+        }
+        MockProvider provider = new MockProvider(name, this, properties);
+        addProviderLocked(provider);
+        mMockProviders.put(name, provider);
+        mLastLocation.put(name, null);
+        mLastLocationCoarseInterval.put(name, null);
     }
 
     @Override
