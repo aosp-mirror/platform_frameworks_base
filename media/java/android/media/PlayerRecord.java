@@ -257,18 +257,6 @@ class PlayerRecord implements DeathRecipient {
         return mMediaIntent;
     }
 
-    // FIXME this is only used when comparing with the audio focus owner calling package name,
-    //       accessor to be removed once audio focus and media button owner are dissociated
-    protected String getCallingPackageName() {
-        return mCallingPackageName;
-    }
-
-    // FIXME this is only used when comparing with the audio focus owner calling package name,
-    //       accessor to be removed once audio focus and media button owner are dissociated
-    protected int getCallingUid() {
-        return mCallingUid;
-    }
-
     protected boolean hasMatchingMediaButtonIntent(PendingIntent pi) {
         if (mToken != null) {
             return mMediaIntent.equals(pi);
