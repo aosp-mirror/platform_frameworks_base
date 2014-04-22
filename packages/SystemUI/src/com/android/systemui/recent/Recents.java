@@ -26,6 +26,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
@@ -45,6 +46,7 @@ public class Recents extends SystemUI implements RecentsComponent {
     // Which recents to use
     boolean mUseAlternateRecents;
     AlternateRecentsComponent mAlternateRecents;
+    boolean mBootCompleted = false;
 
     @Override
     public void start() {
@@ -57,6 +59,11 @@ public class Recents extends SystemUI implements RecentsComponent {
         }
 
         putComponent(RecentsComponent.class, this);
+    }
+
+    @Override
+    protected void onBootCompleted() {
+        mBootCompleted = true;
     }
 
     @Override
@@ -197,13 +204,11 @@ public class Recents extends SystemUI implements RecentsComponent {
                                 Intent intent =
                                         new Intent(RecentsActivity.WINDOW_ANIMATION_START_INTENT);
                                 intent.setPackage("com.android.systemui");
-                                mContext.sendBroadcastAsUser(intent,
-                                        new UserHandle(UserHandle.USER_CURRENT));
+                                sendBroadcastSafely(intent);
                             }
                         });
                 intent.putExtra(RecentsActivity.WAITING_FOR_WINDOW_ANIMATION_PARAM, true);
-                mContext.startActivityAsUser(intent, opts.toBundle(), new UserHandle(
-                        UserHandle.USER_CURRENT));
+                startActivitySafely(intent, opts.toBundle());
             }
         } catch (ActivityNotFoundException e) {
             Log.e(TAG, "Failed to launch RecentAppsIntent", e);
@@ -225,7 +230,7 @@ public class Recents extends SystemUI implements RecentsComponent {
             Intent intent = new Intent(RecentsActivity.PRELOAD_INTENT);
             intent.setClassName("com.android.systemui",
                     "com.android.systemui.recent.RecentsPreloadReceiver");
-            mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+            sendBroadcastSafely(intent);
 
             RecentTasksLoader.getInstance(mContext).preloadFirstTask();
         }
@@ -239,7 +244,7 @@ public class Recents extends SystemUI implements RecentsComponent {
             Intent intent = new Intent(RecentsActivity.CANCEL_PRELOAD_INTENT);
             intent.setClassName("com.android.systemui",
                     "com.android.systemui.recent.RecentsPreloadReceiver");
-            mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+            sendBroadcastSafely(intent);
 
             RecentTasksLoader.getInstance(mContext).cancelPreloadingFirstTask();
         }
@@ -252,9 +257,25 @@ public class Recents extends SystemUI implements RecentsComponent {
         } else {
             Intent intent = new Intent(RecentsActivity.CLOSE_RECENTS_INTENT);
             intent.setPackage("com.android.systemui");
-            mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+            sendBroadcastSafely(intent);
 
             RecentTasksLoader.getInstance(mContext).cancelPreloadingFirstTask();
         }
+    }
+
+    /**
+     * Send broadcast only if BOOT_COMPLETED
+     */
+    private void sendBroadcastSafely(Intent intent) {
+        if (!mBootCompleted) return;
+        mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+    }
+
+    /**
+     * Start activity only if BOOT_COMPLETED
+     */
+    private void startActivitySafely(Intent intent, Bundle opts) {
+        if (!mBootCompleted) return;
+        mContext.startActivityAsUser(intent, opts, new UserHandle(UserHandle.USER_CURRENT));
     }
 }
