@@ -23,6 +23,7 @@ import android.app.Notification;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.service.notification.INotificationListener;
+import android.service.notification.ZenModeConfig;
 
 /** {@hide} */
 interface INotificationManager
@@ -49,4 +50,7 @@ interface INotificationManager
 
     StatusBarNotification[] getActiveNotificationsFromListener(in INotificationListener token, in String[] keys);
     String[] getActiveNotificationKeysFromListener(in INotificationListener token);
+
+    ZenModeConfig getZenModeConfig();
+    boolean setZenModeConfig(in ZenModeConfig config);
 }

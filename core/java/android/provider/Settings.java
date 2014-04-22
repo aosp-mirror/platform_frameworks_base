@@ -6120,6 +6120,13 @@ public final class Settings {
         }
 
         /**
+         * Opaque value, changes when persisted zen mode configuration changes.
+         *
+         * @hide
+         */
+        public static final String ZEN_MODE_CONFIG_ETAG = "zen_mode_config_etag";
+
+        /**
          * Defines global heads up toggle.  One of HEADS_UP_OFF, HEADS_UP_ON.
          *
          * @hide

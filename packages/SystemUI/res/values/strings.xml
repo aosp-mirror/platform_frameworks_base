@@ -539,6 +539,9 @@
     <!-- Zen mode: Summary notification content text. [CHAR LIMIT=NONE] -->
     <string name="zen_mode_notification_text">Touch to show</string>
 
+    <!-- Zen mode: Short title. [CHAR LIMIT=40] -->
+    <string name="zen_mode_title">Do not disturb</string>
+
     <!-- Text for overflow card on Keyguard when there is not enough space for all notifications on Keyguard. [CHAR LIMIT=12] -->
     <plurals name="keyguard_more_overflow_text">
         <item quantity="other">%d more</item>
