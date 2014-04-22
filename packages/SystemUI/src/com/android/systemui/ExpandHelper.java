@@ -195,6 +195,12 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         mGravity = Gravity.TOP;
         mScaleAnimation = ObjectAnimator.ofFloat(mScaler, "height", 0f);
         mScaleAnimation.setDuration(EXPAND_DURATION);
+        mScaleAnimation.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mCallback.setUserLockedChild(mCurrView, false);
+            }
+        });
         mPopLimit = mContext.getResources().getDimension(R.dimen.blinds_pop_threshold);
         mPopDuration = mContext.getResources().getInteger(R.integer.blinds_pop_duration_ms);
         mPullGestureMinXSpan = mContext.getResources().getDimension(R.dimen.pull_span_min);
@@ -549,8 +555,9 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             mScaleAnimation.setFloatValues(targetHeight);
             mScaleAnimation.setupStartValues();
             mScaleAnimation.start();
+        } else {
+            mCallback.setUserLockedChild(mCurrView, false);
         }
-        mCallback.setUserLockedChild(mCurrView, false);
 
         mExpanding = false;
         mExpansionStyle = NONE;

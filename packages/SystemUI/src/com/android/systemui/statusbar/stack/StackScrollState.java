@@ -16,9 +16,13 @@
 
 package com.android.systemui.statusbar.stack;
 
+import android.graphics.Outline;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.android.systemui.R;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +38,10 @@ public class StackScrollState {
     private final ViewGroup mHostView;
     private Map<View, ViewState> mStateMap;
     private int mScrollY;
+    private final Rect mClipRect = new Rect();
+    private int mBackgroundRoundedRectCornerRadius;
+    private final Outline mChildOutline = new Outline();
+    private final int mChildDividerHeight;
 
     public int getScrollY() {
         return mScrollY;
@@ -46,6 +54,10 @@ public class StackScrollState {
     public StackScrollState(ViewGroup hostView) {
         mHostView = hostView;
         mStateMap = new HashMap<View, ViewState>();
+        mBackgroundRoundedRectCornerRadius = hostView.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_quantum_rounded_rect_radius);
+        mChildDividerHeight = hostView.getResources().getDimensionPixelSize(R.dimen
+                .notification_divider_height);
     }
 
     public ViewGroup getHostView() {
@@ -83,10 +95,17 @@ public class StackScrollState {
      */
     public void apply() {
         int numChildren = mHostView.getChildCount();
+        float previousNotificationEnd = 0;
+        float previousNotificationStart = 0;
         for (int i = 0; i < numChildren; i++) {
             View child = mHostView.getChildAt(i);
             ViewState state = mStateMap.get(child);
-            if (state != null) {
+            if (state == null) {
+                Log.wtf(CHILD_NOT_FOUND_TAG, "No child state was found when applying this state " +
+                        "to the hostView");
+                continue;
+            }
+            if (!state.gone) {
                 float alpha = child.getAlpha();
                 float yTranslation = child.getTranslationY();
                 float zTranslation = child.getTranslationZ();
@@ -117,7 +136,7 @@ public class StackScrollState {
                 // apply visibility
                 int oldVisibility = child.getVisibility();
                 int newVisibility = becomesInvisible ? View.INVISIBLE : View.VISIBLE;
-                if (newVisibility != oldVisibility && !state.gone) {
+                if (newVisibility != oldVisibility) {
                     child.setVisibility(newVisibility);
                 }
 
@@ -135,11 +154,92 @@ public class StackScrollState {
                 if (height != newHeight) {
                     applyNewHeight(child, newHeight);
                 }
-            } else {
-                Log.wtf(CHILD_NOT_FOUND_TAG, "No child state was found when applying this state " +
-                        "to the hostView");
+
+                // apply clipping and shadow
+                float newNotificationEnd = newYTranslation + newHeight;
+                updateChildClippingAndShadow(child, newHeight,
+                        newNotificationEnd - (previousNotificationEnd - mChildDividerHeight),
+                        newHeight - (previousNotificationStart - newYTranslation));
+
+                previousNotificationStart = newYTranslation;
+                previousNotificationEnd = newNotificationEnd;
             }
         }
+    }
+
+    /**
+     * Updates the shadow outline and the clipping for a view.
+     *
+     * @param child the view to update
+     * @param realHeight the currently applied height of the view
+     * @param clipHeight the desired clip height, the rest of the view will be clipped from the top
+     * @param shadowHeight the desired height of the shadow, the shadow ends on the bottom
+     */
+    private void updateChildClippingAndShadow(View child, int realHeight, float clipHeight,
+            float shadowHeight) {
+        if (realHeight > shadowHeight) {
+            updateChildOutline(child, realHeight, shadowHeight);
+        } else {
+            updateChildOutline(child, realHeight, realHeight);
+        }
+        if (realHeight > clipHeight) {
+            updateChildClip(child, realHeight, clipHeight);
+        } else {
+            child.setClipBounds(null);
+        }
+    }
+
+    /**
+     * Updates the clipping of a view
+     *
+     * @param child the view to update
+     * @param height the currently applied height of the view
+     * @param clipHeight the desired clip height, the rest of the view will be clipped from the top
+     */
+    private void updateChildClip(View child, int height, float clipHeight) {
+        // The children currently have paddings inside themselfs because of the expansion
+        // visualization. In order for the clipping to work correctly we have to set the correct
+        // clip rect on the child.
+        View container = child.findViewById(R.id.container);
+        if (container != null) {
+            int clipInset = (int) (height - clipHeight);
+            mClipRect.set(0,
+                    clipInset,
+                    child.getWidth(),
+                    height);
+            child.setClipBounds(mClipRect);
+        }
+    }
+
+    /**
+     * Updates the outline of a view
+     *
+     * @param child the view to update
+     * @param height the currently applied height of the view
+     * @param outlineHeight the desired height of the outline, the outline ends on the bottom
+     */
+    private void updateChildOutline(View child,
+            int height,
+            float outlineHeight) {
+        // The children currently have paddings inside themselfs because of the expansion
+        // visualization. In order for the shadows to work correctly we have to set the correct
+        // outline on the child.
+        View container = child.findViewById(R.id.container);
+        if (container != null) {
+            int shadowInset = (int) (height - outlineHeight);
+            getOutlineForSize(container.getLeft(),
+                    container.getTop() + shadowInset,
+                    container.getWidth(),
+                    container.getHeight() - shadowInset,
+                    mChildOutline);
+            child.setOutline(mChildOutline);
+        }
+    }
+
+    private void getOutlineForSize(int leftInset, int topInset, int width, int height,
+            Outline result) {
+        result.setRoundRect(leftInset, topInset, leftInset + width, topInset + height,
+                mBackgroundRoundedRectCornerRadius);
     }
 
     private void applyNewHeight(View child, int newHeight) {

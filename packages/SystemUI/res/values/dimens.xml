@@ -250,7 +250,7 @@
     <dimen name="notification_stack_margin_bottom">0dp</dimen>
 
     <!-- Space reserved for the cards behind the top card in the top stack -->
-    <dimen name="top_stack_peek_amount">24dp</dimen>
+    <dimen name="top_stack_peek_amount">12dp</dimen>
 
     <!-- Space reserved for the cards behind the top card in the bottom stack -->
     <dimen name="bottom_stack_peek_amount">18dp</dimen>
