@@ -46,7 +46,7 @@ public class ActivityView extends ViewGroup {
 
     DisplayMetrics mMetrics;
     private final TextureView mTextureView;
-    private IActivityContainer mActivityContainer;
+    private ActivityContainerWrapper mActivityContainer;
     private Activity mActivity;
     private int mWidth;
     private int mHeight;
@@ -55,8 +55,6 @@ public class ActivityView extends ViewGroup {
     // Only one IIntentSender or Intent may be queued at a time. Most recent one wins.
     IIntentSender mQueuedPendingIntent;
     Intent mQueuedIntent;
-
-    private final CloseGuard mGuard = CloseGuard.get();
 
     public ActivityView(Context context) {
         this(context, null);
@@ -81,8 +79,9 @@ public class ActivityView extends ViewGroup {
         }
 
         try {
-            mActivityContainer = ActivityManagerNative.getDefault().createActivityContainer(
-                    mActivity.getActivityToken(), new ActivityContainerCallback(this));
+            mActivityContainer = new ActivityContainerWrapper(
+                    ActivityManagerNative.getDefault().createActivityContainer(
+                            mActivity.getActivityToken(), new ActivityContainerCallback(this)));
         } catch (RemoteException e) {
             throw new IllegalStateException("ActivityView: Unable to create ActivityContainer. "
                     + e);
@@ -96,8 +95,6 @@ public class ActivityView extends ViewGroup {
         mMetrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(mMetrics);
 
-        mGuard.open("release");
-
         if (DEBUG) Log.v(TAG, "ctor()");
     }
 
@@ -107,11 +104,7 @@ public class ActivityView extends ViewGroup {
     }
 
     private boolean injectInputEvent(InputEvent event) {
-        try {
-            return mActivityContainer != null && mActivityContainer.injectEvent(event);
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mActivityContainer != null && mActivityContainer.injectEvent(event);
     }
 
     @Override
@@ -140,23 +133,10 @@ public class ActivityView extends ViewGroup {
         if (DEBUG) Log.v(TAG, "startActivity(): intent=" + intent + " " +
                 (isAttachedToDisplay() ? "" : "not") + " attached");
         if (mSurface != null) {
-            try {
-                mActivityContainer.startActivity(intent);
-            } catch (RemoteException e) {
-                throw new IllegalStateException("ActivityView: Unable to startActivity. " + e);
-            }
+            mActivityContainer.startActivity(intent);
         } else {
             mQueuedIntent = intent;
             mQueuedPendingIntent = null;
-        }
-    }
-
-    private void startActivityIntentSender(IIntentSender iIntentSender) {
-        try {
-            mActivityContainer.startActivityIntentSender(iIntentSender);
-        } catch (RemoteException e) {
-            throw new IllegalStateException(
-                    "ActivityView: Unable to startActivity from IntentSender. " + e);
         }
     }
 
@@ -168,7 +148,7 @@ public class ActivityView extends ViewGroup {
                 (isAttachedToDisplay() ? "" : "not") + " attached");
         final IIntentSender iIntentSender = intentSender.getTarget();
         if (mSurface != null) {
-            startActivityIntentSender(iIntentSender);
+            mActivityContainer.startActivityIntentSender(iIntentSender);
         } else {
             mQueuedPendingIntent = iIntentSender;
             mQueuedIntent = null;
@@ -183,7 +163,7 @@ public class ActivityView extends ViewGroup {
                 + (isAttachedToDisplay() ? "" : "not") + " attached");
         final IIntentSender iIntentSender = pendingIntent.getTarget();
         if (mSurface != null) {
-            startActivityIntentSender(iIntentSender);
+            mActivityContainer.startActivityIntentSender(iIntentSender);
         } else {
             mQueuedPendingIntent = iIntentSender;
             mQueuedIntent = null;
@@ -196,10 +176,7 @@ public class ActivityView extends ViewGroup {
             Log.e(TAG, "Duplicate call to release");
             return;
         }
-        try {
-            mActivityContainer.release();
-        } catch (RemoteException e) {
-        }
+        mActivityContainer.release();
         mActivityContainer = null;
 
         if (mSurface != null) {
@@ -208,20 +185,6 @@ public class ActivityView extends ViewGroup {
         }
 
         mTextureView.setSurfaceTextureListener(null);
-
-        mGuard.close();
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            if (mGuard != null) {
-                mGuard.warnIfOpen();
-                release();
-            }
-        } finally {
-            super.finalize();
-        }
     }
 
     private void attachToSurfaceWhenReady() {
@@ -247,7 +210,7 @@ public class ActivityView extends ViewGroup {
             startActivity(mQueuedIntent);
             mQueuedIntent = null;
         } else if (mQueuedPendingIntent != null) {
-            startActivityIntentSender(mQueuedPendingIntent);
+            mActivityContainer.startActivityIntentSender(mQueuedPendingIntent);
             mQueuedPendingIntent = null;
         }
     }
@@ -311,5 +274,83 @@ public class ActivityView extends ViewGroup {
             if (DEBUG) Log.v(TAG, "setVisible(): container=" + container + " visible=" + visible +
                     " ActivityView=" + mActivityViewWeakReference.get());
         }
+    }
+
+    private static class ActivityContainerWrapper {
+        private final IActivityContainer mIActivityContainer;
+        private final CloseGuard mGuard = CloseGuard.get();
+
+        ActivityContainerWrapper(IActivityContainer container) {
+            mIActivityContainer = container;
+            mGuard.open("release");
+        }
+
+        void attachToDisplay(int displayId) {
+            try {
+                mIActivityContainer.attachToDisplay(displayId);
+            } catch (RemoteException e) {
+            }
+        }
+
+        void setSurface(Surface surface, int width, int height, int density)
+                throws RemoteException {
+            mIActivityContainer.setSurface(surface, width, height, density);
+        }
+
+        int startActivity(Intent intent) {
+            try {
+                return mIActivityContainer.startActivity(intent);
+            } catch (RemoteException e) {
+                throw new IllegalStateException("ActivityView: Unable to startActivity. " + e);
+            }
+        }
+
+        int startActivityIntentSender(IIntentSender intentSender) {
+            try {
+                return mIActivityContainer.startActivityIntentSender(intentSender);
+            } catch (RemoteException e) {
+                throw new IllegalStateException(
+                        "ActivityView: Unable to startActivity from IntentSender. " + e);
+            }
+        }
+
+        int getDisplayId() {
+            try {
+                return mIActivityContainer.getDisplayId();
+            } catch (RemoteException e) {
+                return -1;
+            }
+        }
+
+        boolean injectEvent(InputEvent event) {
+            try {
+                return mIActivityContainer.injectEvent(event);
+            } catch (RemoteException e) {
+                return false;
+            }
+        }
+
+        void release() {
+            if (DEBUG) Log.v(TAG, "ActivityContainerWrapper: release called");
+            try {
+                mIActivityContainer.release();
+                mGuard.close();
+            } catch (RemoteException e) {
+            }
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            if (DEBUG) Log.v(TAG, "ActivityContainerWrapper: finalize called");
+            try {
+                if (mGuard != null) {
+                    mGuard.warnIfOpen();
+                    release();
+                }
+            } finally {
+                super.finalize();
+            }
+        }
+
     }
 }
