@@ -112,6 +112,16 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     }
 
     @Override
+    protected void onBoundsChange(Rect bounds) {
+        super.onBoundsChange(bounds);
+
+        final int N = mActiveRipplesCount;
+        for (int i = 0; i < N; i++) {
+            mActiveRipples[i].onBoundsChanged();
+        }
+    }
+
+    @Override
     public boolean setVisible(boolean visible, boolean restart) {
         if (!visible) {
             if (mTouchedRipples != null) {
@@ -291,7 +301,9 @@ public class TouchFeedbackDrawable extends LayerDrawable {
                 y = bounds.exactCenterY();
             }
 
-            final Ripple newRipple = new Ripple(bounds, padding, x, y, mDensity);
+            // TODO: Clean this up in the API.
+            final boolean pulse = (id != R.attr.state_focused);
+            final Ripple newRipple = new Ripple(bounds, padding, x, y, mDensity, pulse);
             newRipple.animate().enter();
 
             mActiveRipples[mActiveRipplesCount++] = newRipple;

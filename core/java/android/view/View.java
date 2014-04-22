@@ -4737,13 +4737,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private void manageFocusHotspot(boolean focused, View v) {
         if (mBackground != null && mBackground.supportsHotspots()) {
             final Rect r = new Rect();
-            if (v != null) {
+            if (!focused && v != null) {
                 v.getBoundsOnScreen(r);
                 final int[] location = new int[2];
                 getLocationOnScreen(location);
                 r.offset(-location[0], -location[1]);
             } else {
-                r.set(mLeft, mTop, mRight, mBottom);
+                r.set(0, 0, mRight - mLeft, mBottom - mTop);
             }
 
             final float x = r.exactCenterX();
@@ -4858,16 +4858,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
             mPrivateFlags &= ~PFLAG_FOCUSED;
 
-            if (hasFocus()) {
-                manageFocusHotspot(false, focused);
-            }
-
             if (propagate && mParent != null) {
                 mParent.clearChildFocus(this);
             }
 
             onFocusChanged(false, 0, null);
 
+            manageFocusHotspot(false, focused);
             refreshDrawableState();
 
             if (propagate && (!refocus || !rootViewRequestFocus())) {
