@@ -42,6 +42,7 @@ namespace uirenderer {
 
 Font::Font(FontRenderer* state, const Font::FontDescription& desc) :
         mState(state), mDescription(desc) {
+    mDeviceProperties = SkDeviceProperties::Make(SkDeviceProperties::Geometry::MakeDefault(), 1.0f);
 }
 
 Font::FontDescription::FontDescription(const SkPaint* paint, const mat4& matrix) {
@@ -272,7 +273,7 @@ CachedGlyphInfo* Font::getCachedGlyph(SkPaint* paint, glyph_t textUnit, bool pre
     if (cachedGlyph) {
         // Is the glyph still in texture cache?
         if (!cachedGlyph->mIsValid) {
-            SkAutoGlyphCache autoCache(*paint, NULL, &mDescription.mLookupTransform);
+            SkAutoGlyphCache autoCache(*paint, &mDeviceProperties, &mDescription.mLookupTransform);
             const SkGlyph& skiaGlyph = GET_METRICS(autoCache.getCache(), textUnit);
             updateGlyphCache(paint, skiaGlyph, autoCache.getCache(), cachedGlyph, precaching);
         }
@@ -464,7 +465,7 @@ CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, glyph_t glyph, bool precaching
     CachedGlyphInfo* newGlyph = new CachedGlyphInfo();
     mCachedGlyphs.add(glyph, newGlyph);
 
-    SkAutoGlyphCache autoCache(*paint, NULL, &mDescription.mLookupTransform);
+    SkAutoGlyphCache autoCache(*paint, &mDeviceProperties, &mDescription.mLookupTransform);
     const SkGlyph& skiaGlyph = GET_METRICS(autoCache.getCache(), glyph);
     newGlyph->mIsValid = false;
     newGlyph->mGlyphIndex = skiaGlyph.fID;
