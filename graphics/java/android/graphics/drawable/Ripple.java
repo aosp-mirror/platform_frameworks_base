@@ -62,27 +62,31 @@ class Ripple {
 
     /** Whether the center is within the parent bounds. */
     private boolean mInside;
+
+    /** Whether to pulse this ripple. */
+    boolean mPulse;
     
     /** Enter state. A value in [0...1] or -1 if not set. */
-    private float mEnterState = -1;
+    float mEnterState = -1;
 
     /** Exit state. A value in [0...1] or -1 if not set. */
-    private float mExitState = -1;
+    float mExitState = -1;
 
     /** Outside state. A value in [0...1] or -1 if not set. */
-    private float mOutsideState = -1;
+    float mOutsideState = -1;
 
     /** Pulse state. A value in [0...1] or -1 if not set. */
-    private float mPulseState = -1;
+    float mPulseState = -1;
 
     /**
      * Creates a new ripple with the specified parent bounds, padding, initial
      * position, and screen density.
      */
-    public Ripple(Rect bounds, Rect padding, float x, float y, float density) {
+    public Ripple(Rect bounds, Rect padding, float x, float y, float density, boolean pulse) {
         mBounds = bounds;
         mPadding = padding;
         mInside = mBounds.contains((int) x, (int) y);
+        mPulse = pulse;
 
         mX = x;
         mY = y;
@@ -107,6 +111,16 @@ class Ripple {
         mY = y;
 
         final boolean inside = mBounds.contains((int) x, (int) y);
+        if (mInside != inside) {
+            if (mAnimator != null) {
+                mAnimator.outside();
+            }
+            mInside = inside;
+        }
+    }
+
+    public void onBoundsChanged() {
+        final boolean inside = mBounds.contains((int) mX, (int) mY);
         if (mInside != inside) {
             if (mAnimator != null) {
                 mAnimator.outside();
@@ -308,9 +322,11 @@ class Ripple {
                     MathUtils.constrain((currentTime - mOutsideTime) / (float) OUTSIDE_DURATION, 0, 1));
 
             // Pulse is a little more complicated.
-            final long pulseTime = (currentTime - mEnterTime - ENTER_DURATION - PULSE_DELAY);
-            mTarget.mPulseState = pulseTime < 0 ? -1
-                    : (pulseTime % (PULSE_INTERVAL + PULSE_DURATION)) / (float) PULSE_DURATION;
+            if (mTarget.mPulse) {
+                final long pulseTime = (currentTime - mEnterTime - ENTER_DURATION - PULSE_DELAY);
+                mTarget.mPulseState = pulseTime < 0 ? -1
+                        : (pulseTime % (PULSE_INTERVAL + PULSE_DURATION)) / (float) PULSE_DURATION;
+            }
         }
     }
 }
