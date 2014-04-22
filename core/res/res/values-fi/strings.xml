@@ -337,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Sallii sovelluksen lähettää ilmoituksen tekstiviestin vastaanotosta. Haitalliset sovellukset voivat käyttää tätä saapuvien tekstiviestien väärentämiseen."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"lähetä WAP-PUSH-vastaanotettu lähetys"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Antaa sovelluksen lähettää ilmoituksen WAP PUSH -viestin vastaanotosta. Haitalliset sovellukset voivat käyttää tätä MMS-viestien vastaanoton väärentämiseen tai sivujen sisällön korvaamiseen huomaamattomasti haitallisella sisällöllä."</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"lähetä verkkojen pisteet"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Sallii sovelluksen lähettää ilmoituksen verkon pisteytystarpeesta. Ei tarvita tavallisissa sovelluksissa."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"rajoita käynnissä olevien prosessien määrää"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Antaa sovelluksen hallita suoritettavien sovellusten enimmäismäärää. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"pakota taustasovelluksia sulkeutumaan"</string>
@@ -392,6 +390,10 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Antaa sovelluksen sitoutua etänäytön ylemmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"sitoudu widget-palveluun"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Antaa sovelluksen sitoutua widget-palvelun ylemmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
+    <!-- no translation found for permlab_bindRouteProvider (4869394607915096847) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRouteProvider (4703804520859960329) -->
+    <skip />
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"kommunikoi laitteen järjestelmänvalvojan kanssa"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Antaa sovelluksen lähettää aikomuksia laitteen järjestelmänvalvojalle. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"sido TV-tuloon"</string>
@@ -642,12 +644,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Vaihda WiMAX-verkon tilaa"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Antaa sovelluksen muodostaa tablet-laitteella yhteyden WiMAX-verkkoon ja katkaista yhteyden."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Antaa sovelluksen muodostaa puhelimella yhteyden WiMAX-verkkoon ja katkaista yhteyden."</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"pisteytä verkot"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Sallii sovelluksen asettaa verkkoja paremmuusjärjestykseen ja vaikuttaa siihen, mikä verkko tablet-laitteen kannattaa valita."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Sallii sovelluksen asettaa verkkoja paremmuusjärjestykseen ja vaikuttaa siihen, mikä verkko puhelimen kannattaa valita."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"muodosta laitepari Bluetooth-laitteiden kanssa"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Antaa sovelluksen tarkastella tablet-laitteen Bluetooth-asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Antaa sovelluksen tarkastella puhelimen Bluetooth-asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä muihin laitteisiin."</string>

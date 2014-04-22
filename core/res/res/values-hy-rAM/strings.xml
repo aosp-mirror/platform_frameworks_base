@@ -337,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Թույլ է տալիս հավելվածին հաղորդել ծանուցում, որ ստացվել է SMS հաղորդագրություն: Վնասարար հավելվածները կարող են օգտագործել սա` կեղծելու մուտքային SMS հաղորդագրությունները:"</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"ուղարկել ստացված WAP-PUSH-ի  հաղորդում"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Թույլ է տալիս հավելվածին հաղորդել ծանուցում, որ ստացվել է WAP PUSH հաղորդագրություն: Վնասարար հավելվածները կարող են օգտագործել սա` կեղծելու MMS հաղորդագրության ստացումը կամ աննկատ փոխարինելու ցանկացած կայքի բովանդակությունը վնասարար տարբերակներով:"</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"ուղարկել ցանցերի գնահատականի հեռարձակում"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Ծրագրին թույլ է տալիս հեռարձակել ծանուցում, որ ցանցերը պետք է հաշվարկվեն: Նորմալ ծրագրերում երբեք պետք չի գալիս:"</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"սահմանափակել աշխատող գործընթացների թիվը"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Թույլ է տալիս հավելվածին վերահսկել գործընթացների առավելագույն թիվը, որ աշխատելու են: Երբևէ անհրաժեշտ չէ սովորական հավելվածների համար:"</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"ստիպել, որ առաջին պլանի հավելվածները փակվեն"</string>
@@ -392,6 +390,8 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Թույլ է տալիս սեփականատիրոջը միանալ հեռակա էկրանի վերին մակարդակի ինտերֆեյսին: Սովորական ծրագրերի համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"միանալ վիջեթ ծառայությանը"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Թույլ է տալիս սեփականատիրոջը միանալ վիջեթ ծառայության վերին մակարդակի ինտերֆեյսին: Սովորական հավելվածների համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"կապվել երթուղու մատակարարի ծառայությանը"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Թույլ է տալիս տիրոջը կապվել երթուղու մատակարարներից ցանկացածին: Սովորական ծրագրերի համար երբեք անհրաժեշտ չէ:"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"փոխգործակցել սարքի կառավարչի հետ"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Թույլ է տալիս սեփականատիրոջը ուղարկել մտադրություններ սարքի կառավարչին: Սովորական հավելվածների համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"միանալ հեռուստացույցի մուտքին"</string>
@@ -642,12 +642,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Փոխել WiMAX-ի կարգավիճակը"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Թույլ է տալիս հավելվածին գրասալիկը միացնել WiMAX ցանցին և անջատվել այդ ցանցից:"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Թույլ է տալիս հավելվածին հեռախոսը միացնել WiMAX ցանցին և անջատել այդ ցանցից:"</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"ցանցերի գնահատական"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Ծրագրին թույլ է տալիս դասակարգել ցանցերը և ազդել գրասալիկի նախընտրելի ցանցի ընտրության գործընթացի վրա:"</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Ծրագրին թույլ է տալիս դասակարգել ցանցերը և ազդել հեռախոսի նախընտրելի ցանցի ընտրության գործընթացի վրա:"</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"զուգակցվել Bluetooth սարքերի հետ"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Թույլ է տալիս հավելվածին տեսնել Bluetooth-ի կարգավորումը գրասալիկի վրա և կապվել ու կապեր ընդունել զուգակցված սարքերի հետ:"</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Թույլ է տալիս հավելվածին տեսնել Bluetooth-ի կարգավորումը հեռախոսի վրա և կապվել ու կապեր ընդունել զուգակցված սարքերի հետ:"</string>

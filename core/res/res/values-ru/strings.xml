@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Синхр."</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Слишком много удалений <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Память планшетного ПК заполнена. Удалите какие-нибудь файлы, чтобы освободить место."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Память устройства заполнена. Удалите файлы, чтобы освободить место."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Память телефона заполнена. Удалите какие-нибудь файлы, чтобы освободить место."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Сеть может отслеживаться"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"администратором"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Звонок включен"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Выключение..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Планшетный ПК будет отключен."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Устройство будет отключено."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Телефон будет выключен."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Завершить работу?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Переход в безопасный режим"</string>
@@ -339,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Приложение сможет уведомлять о получении SMS. Вредоносные программы смогут таким образом подделывать входящие SMS."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"Отправка уведомлений о доставке SMS с ссылкой на WAP-страницу"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Приложение сможет уведомлять о получении сообщений WAP PUSH. Вредоносные программы смогут таким образом фальсифицировать получение MMS или незаметно подменять содержание любой страницы вредоносными данными."</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"Отправка уведомлений о рейтинге сетей"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Приложение сможет отправлять уведомления о том, что сети необходимо присвоить рейтинг. Это разрешение обычно используется только специальными приложениями."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"Ограничение количества запущенных процессов"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Приложение сможет управлять максимальным количеством процессов, которые могут быть запущены. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"Закрытие фоновых приложений"</string>
@@ -394,6 +390,8 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Приложение сможет подключаться к базовому интерфейсу удаленного дисплея. Это разрешение обычно используется только специальными приложениями."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"Подключение к службе виджетов"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Приложение сможет подключаться к базовому интерфейсу службы виджетов. Это разрешение не используется обычными приложениями."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"Подключение к серверам поставщиков маршрутов"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Приложение сможет подключаться к серверам зарегистрированных поставщиков маршрутов. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"Взаимодействие с администратором устройства"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Приложение сможет отправлять объекты intent администратору устройства. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"Подключение к ТВ-входу"</string>
@@ -644,12 +642,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Изменение статуса WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Приложение сможет подключать устройство к сетям WiMAX и отключать его от них."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Приложение сможет подключать устройство к сетям WiMAX и отключать его от них."</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"Определение рейтинга сетей"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Приложение сможет присваивать сетям рейтинг и решать, к каким из них устройство должно подключаться в первую очередь."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Приложение сможет присваивать сетям рейтинг и решать, к каким из них устройство должно подключаться в первую очередь."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Установление связи с устройствами Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Приложение сможет просматривать конфигурацию Bluetooth на планшетном ПК, а также запрашивать и подтверждать соединение с другими устройствами."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Приложение сможет просматривать конфигурацию Bluetooth на телефоне, а также запрашивать и подтверждать соединение с другими устройствами."</string>

@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"ធ្វើ​សម​កាល​កម្ម"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"មាន​ការ​លុប <xliff:g id="CONTENT_TYPE">%s</xliff:g> ច្រើន​ពេក។"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ឧបករណ៍​ផ្ទុក​នៃ​​កុំព្យូទ័រ​បន្ទះ​ពេញ។ លុប​ឯកសារ​មួយ​ចំនួន​។"</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"ឧបករណ៍​របស់​នាឡិកា​ពេញ។ លុប​ឯកសារ​មួយ​ចំនួន​។"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ឧបករណ៍​ផ្ទុក​ទូរស័ព្ទ​ពេញ! លុប​ឯកសារ​មួយ​ចំនួន​ដើម្បី​បង្កើន​ទំហំ។"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"បណ្ដាញ​អាច​ត្រូវ​បាន​តាមដាន"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"ដោយ​ភាគី​ទីបី​ដែល​មិន​ស្គាល់"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"បើក​កម្មវិធី​រោទ៍"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"កំពុង​បិទ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"កុំព្យូទ័រ​បន្ទះ​របស់​អ្នក​នឹង​បិទ។"</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"នាឡិកា​របស់​អ្នក​នឹង​បិទ។"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"ទូរស័ព្ទ​របស់​អ្នក​នឹង​បិទ។"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"តើ​អ្នក​ចង់​បិទ​?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"ចាប់ផ្ដើម​ឡើងវិញ​ដើម្បី​ចូល​របៀប​សុវត្ថិភាព"</string>
@@ -339,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"ឲ្យ​កម្មវិធី​ប្រកាស​ការ​ជូន​ដំណឹង​​ការ​ទទួល​សារ​ SMS ។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា​​ដើម្បី​​បន្លំ​សារ SMS ចូល។"</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"ផ្ញើ​ការ​ប្រកាស​បាន​ទទួល​ WAP-PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"ឲ្យ​កម្មវិធី​ប្រកាស​ការ​ជូន​ដំណឹង​ថា​បាន​ទទួល​សារ WAP PUSH ។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា​ដើម្បី​​ក្លែង​​បង្កាន់ដៃ​សារ MMS ឬ​ជំនួស​មាតិកា​ទំព័រ​បណ្ដាញ​ណាមួយ​ស្ងាត់​ៗ​​​ដោយ​អ្វី​ដែល​ក្លែងក្លាយ។"</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"ផ្ញើ​ពិន្ទុ​ការ​ប្រកាស​បណ្ដាញ"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"ឲ្យ​កម្មវិធី​ប្រកាស​ការ​ជូនដំណឹង​ដែល​បណ្ដាញ​តម្រូវ​ឲ្យ​ដាក់​ពិន្ទុ។ មិន​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា។"</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"កំណត់​ចំនួន​ដំណើរការ​ដែល​កំពុង​ដំណើរការ"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"ឲ្យ​កម្មវិធី​ពិនិត្យ​ចំនួន​ដំណើរការ​អតិបរមា​ដែល​នឹង​ដំណើរការ។ មិន​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"បង្ខំ​​ឲ្យ​បិទ​កម្មវិធី​ក្នុង​ផ្ទៃ​ខាង​ក្រោយ"</string>
@@ -394,6 +390,8 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​ការ​បង្ហាញ​ពី​ចម្ងាយ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ចង​សេវា​កម្ម​ធាតុ​ក្រាហ្វិក"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​ធាតុ​ក្រាហ្វិក។ មិន​គួរ​​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"ភ្ជាប់​ទៅ​សេវាកម្ម​ក្រុមហ៊ុន​ផ្ដល់​ច្រក"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​ទៅ​ក្រុមហ៊ុន​ផ្ដល់​​ច្រក​ដែល​បាន​ចុះ​ឈ្មោះ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"ទាក់ទង​ជា​មួយ​អ្នកគ្រប់គ្រង​ឧបករណ៍"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"ឲ្យ​ម្ចាស់​ផ្ញើ​គោលបំណង​​ទៅ​អ្នក​គ្រប់គ្រង​ឧបករណ៍។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"ភ្ជាប់​ទៅ​ការ​បញ្ចូល​ទូរទស្សន៍"</string>
@@ -644,12 +642,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"ប្ដូរ​ស្ថានភាព WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"ឲ្យ​កម្មវិធី​តភ្ជាប់​ និង​ផ្ដាច់​កុំព្យូទ័រ​បន្ទះ​ពី​បណ្ដាញ WiMAX ។"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"ឲ្យ​កម្មវិធី​ភ្ជាប់​ទូរស័ព្ទ​ និង​ផ្ដាច់​ពី​បណ្ដាញ WiMAX ។"</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"ដាក់​ពិន្ទុ​បណ្ដាញ"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"ឲ្យ​កម្មវិធី​ចាត់​ថ្នាក់​បណ្ដាញ និង​​មាន​ឥទ្ធិពល​លើ​បណ្ដាញ​ណា​មួយ​ដែល​​កុំព្យូទ័រ​បន្ទះ​ប្រើ។"</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"ឲ្យ​កម្មវិធី​ចាត់​ថ្នាក់​បណ្ដាញ និង​​មាន​ឥទ្ធិពល​លើ​បណ្ដាញ​ណា​មួយ​ដែល​ទូរស័ព្ទ​គួរ​ប្រើ។"</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ប៊្លូធូស"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"ឲ្យ​កម្មវិធី​មើល​ការ​កំណត់​រចនាសម្ព័ន្ធ​​ប៊្លូធូស​លើ​​កុំព្យូទ័រ​បន្ទះ ព្រម​ទាំង​ធ្វើ​ការ​តភ្ជាប់ និង​ទទួល​​ជា​មួយ​ឧបករណ៍​បាន​ផ្គូផ្គង។"</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"ឲ្យ​កម្មវិធី​មើល​​ការ​កំណត់​រចនាសម្ព័ន្ធ​ប៊្លូធូស​ក្នុង​ទូរស័ព្ទ ដើម្បី​ទទួល និង​តភ្ជាប់​ជា​មួយ​ឧបករណ៍​បាន​ផ្គូផ្គង។"</string>

@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sincronizare"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Prea multe ştergeri <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Stocarea pe tabletă este plină. Ștergeţi câteva fişiere pentru a elibera spaţiu."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Spațiul de stocare de pe ceas este plin! Ștergeți câteva fișiere pentru a elibera spațiu."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Stocarea pe telefon este plină. Ștergeţi câteva fişiere pentru a elibera spaţiu."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Rețeaua poate fi monitorizată"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"De o terță parte necunoscută"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Sonerie activată"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Se închide..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Computerul dvs. tablet PC se va închide."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Ceasul dvs. se va închide."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefonul dvs. se va închide."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Doriţi să închideţi?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Reporniţi în modul sigur"</string>
@@ -339,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Permite aplicaţiei să difuzeze o notificare de primire a unui mesaj SMS. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a deturna primirea mesajelor SMS."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"trimitere mesaj difuzat primit prin WAP-PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Permite aplicaţiei să difuzeze o notificare de primire a unui mesaj WAP PUSH. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a deturna primirea mesajelor MMS sau pentru a înlocui fără a vă înştiinţa conţinutul oricărei pagini web cu variante rău intenţionate."</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"trimiteți transmisia cu rețelele punctate"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Permite aplicației să transmită o notificare de care rețelele au nevoie pentru a fi punctate. Nu este necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"limitare număr de procese în derulare"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Permite aplicaţiei să controleze numărul maxim de procese care vor rula. Nu este niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"forţează închiderea aplicaţiilor de fundal"</string>
@@ -394,6 +390,8 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permite proprietarului să se conecteze la interfața de nivel superior a unui ecran la distanță. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"conectare la un serviciu widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unui serviciu widget. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"se conectează la un serviciu de furnizare a traseelor"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Permite titularului să se conecteze la furnizorii de trasee înregistrați. Nu este necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interacţionare cu administratorul unui dispozitiv"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permite proprietarului să trimită intenţii către un administrator al dispozitivului. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"se conectează la o intrare TV"</string>
@@ -644,12 +642,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Schimbaţi starea WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Permite aplicaţiei să conecteze şi să deconecteze tableta la şi de la reţelele WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Permite aplicaţiei să conecteze şi să deconecteze telefonul la şi de la reţelele WiMAX."</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"rețele punctate"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Permite aplicației să clasifice rețelele și să stabilească ce rețele preferă tableta."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Permite aplicației să clasifice rețelele și să stabilească ce rețele preferă telefonul."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"conectează dispozitive Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Permite aplicaţiei să vadă configuraţia tabletei Bluetooth, să efectueze şi să accepte conexiuni cu dispozitive împerecheate."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permite aplicaţiei să vadă configuraţia telefonului Bluetooth, să efectueze şi să accepte conexiuni cu dispozitive împerecheate."</string>

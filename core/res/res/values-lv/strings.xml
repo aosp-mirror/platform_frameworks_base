@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinhronizācija"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Pārāk daudz <xliff:g id="CONTENT_TYPE">%s</xliff:g> dzēsto vienumu."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Planšetdatora atmiņa ir pilna. Dzēsiet dažus failus, lai atbrīvotu vietu."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Pulksteņa atmiņa ir pilna. Dzēsiet dažus failus, lai atbrīvotu vietu."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Tālruņa atmiņa ir pilna! Dzēsiet dažus failus, lai atbrīvotu vietu."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Iespējams, tīklā veiktās darbības tiek pārraudzītas."</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Nezināma trešā puse"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Zvanītājs ieslēgts"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Notiek izslēgšana..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Planšetdators tiks beidzēts."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Pulkstenis tiks izslēgts."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Tālrunis tiks izslēgts."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vai vēlaties izslēgt?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Atsāknēšana drošajā režīmā"</string>
@@ -339,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Ļauj lietotnei pārraidīt paziņojumu par saņemtu īsziņu. Ļaunprātīgas lietotnes to var izmantot, lai viltotu ienākošas īsziņas."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"sūtīt WAP-PUSH-saņemto apraidi"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Ļauj lietotnei pārraidīt paziņojumu par to, ka ir saņemts WAP PUSH ziņojums. Ļaunprātīgas lietotnes to var izmantot, lai viltotu multiziņas saņemšanu vai jebkuras tīmekļa lapas saturu nemanāmi nomainītu ar ļaunprātīgiem variantiem."</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"apraidīt ziņojumu par tīklu vērtēšanu"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Ļauj lietotnei apraidīt paziņojumu, ka tīkli ir jānovērtē. Parastām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ierobežot aktīvo procesu skaitu"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Ļauj lietotnei kontrolēt izpildāmo procesu maksimālo skaitu. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"veikt fonā darbojošos lietotņu piespiedu aizvēršanu"</string>
@@ -394,6 +390,8 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Ļauj īpašniekam izveidot saiti ar attāla displeja augšējā līmeņa saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"saistīt ar logrīka pakalpojumu"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Ļauj īpašniekam izveidot saiti ar logrīka pakalpojuma augšējā līmeņa saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"Saistīšana ar maršruta nodrošinātāja pakalpojumu"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Ļauj īpašniekam saistīt jebkādus reģistrētus maršrutēšanas nodrošinātājus. Parastām lietotnēm šī atļauja nekad nav nepieciešama."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"mijiedarboties ar ierīces administratoru"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Ļauj īpašniekam nosūtīt informāciju par nodomiem ierīces administratoram. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"Izveidot saiti ar TV ieeju"</string>
@@ -644,12 +642,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX statusa mainīšana"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Ļauj lietotnei izveidot un pārtraukt planšetdatora savienojumu ar WiMAX tīkliem."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Ļauj lietotnei izveidot un pārtraukt tālruņa savienojumu ar WiMAX tīkliem."</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"vērtēt tīklus"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Ļauj lietotnei ranžēt tīklus un ietekmēt to, kuriem tīkliem planšetdators dos priekšroku."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Ļauj lietotnei ranžēt tīklus un ietekmēt to, kuriem tīkliem tālrunis dos priekšroku."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"savienot pārī ar Bluetooth ierīcēm"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Ļauj lietotnei skatīt Bluetooth konfigurāciju planšetdatorā, kā arī veidot un pieņemt savienojumus ar pārī savienotām ierīcēm."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Ļauj lietotnei skatīt Bluetooth konfigurāciju tālrunī, kā arī veidot un pieņemt savienojumus ar pārī savienotām ierīcēm."</string>

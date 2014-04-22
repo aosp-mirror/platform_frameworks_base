@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Синхронизиране"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Изтриванията за <xliff:g id="CONTENT_TYPE">%s</xliff:g> са твърде много."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Хранилището на таблета е пълно. Изтрийте файлове, за да освободите място."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Хранилището на часовника е пълно. Изтрийте файлове, за да освободите място."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Хранилището на телефона е пълно. Изтрийте файлове, за да освободите място."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Мрежата може да се наблюдава"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"От неизвестна трета страна"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Звъненето е включено"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Изключва се..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Таблетът ви ще се изключи."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Часовникът ви ще се изключи."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Телефонът ви ще се изключи."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Искате ли да изключите?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Рестартиране в безопасен режим"</string>
@@ -339,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Разрешава на приложението да излъчва известие, че е получен SMS. Злонамерените приложения могат да използват това, за да фалшифицират входящите SMS съобщения."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"изпращане на излъчване при получено WAP PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Разрешава на приложението да излъчва известие, че е получено WAP PUSH съобщение. Злонамерените приложения могат да използват това, за да фалшифицират получаването на MMS или скрито да заменят съдържанието на произволна уеб страница със злонамерен вариант."</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"изпращане на излъчване за оценяване на мрежите"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Разрешава на приложението да излъчи известие, че мрежите трябва да бъдат оценени. Не е необходимо за нормалните приложения."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ограничаване на броя изпълнявани процеси"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Разрешава на приложението да контролира максималния брой изпълнявани процеси. Нормалните приложения никога не се нуждаят от това."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"принудително затваряне на приложенията на заден план"</string>
@@ -394,6 +390,8 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Разрешава на притежателя да се свърже с интерфейса от първо ниво на отдалечен екран. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"обвързване с услуга за приспособления"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Разрешава на притежателя да се обвърже с интерфейса от най-високото ниво на услуга за приспособления. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"свързване с услуга за предоставяне на маршрути"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Разрешава на собственика да се свързва с всички регистрирани доставчици на маршрути. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"взаимодействие с администратор на устройството"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Разрешава на притежателя да изпраща намерения до администратор на устройството. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"свързване към вход на телевизор"</string>
@@ -644,12 +642,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Промяна на състоянието на WiMAX мрежата"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Разрешава на приложението да свързва таблета към WiMAX мрежа и да прекратява връзката му с нея."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Разрешава на приложението да свързва телефона към WiMAX мрежа и да прекратява връзката му с нея."</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"оценяване на мрежите"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Разрешава на приложението да класира мрежите и да повлияе върху това, кои да са предпочитаните за таблета."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Разрешава на приложението да класира мрежите и да повлияе върху това, кои да са предпочитаните за телефона."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"сдвояване с устройства с Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Разрешава на приложението да вижда конфигурацията на Bluetooth на таблета и да изгражда и приема връзки със сдвоени устройства."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Разрешава на приложението да вижда конфигурацията на Bluetooth на телефона и да изгражда и приема връзки със сдвоени устройства."</string>

@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Συγχρονισμός"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Πάρα πολλές <xliff:g id="CONTENT_TYPE">%s</xliff:g> διαγραφές."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Ο αποθηκευτικός χώρος του tablet είναι πλήρης. Διαγράψτε μερικά αρχεία για να δημιουργήσετε ελεύθερο χώρο."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Ο αποθηκευτικός χώρος παρακολούθησης είναι πλήρης! Διαγράψτε μερικά αρχεία για να απελευθερώσετε χώρο."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Ο αποθηκευτικός χώρος του τηλεφώνου είναι πλήρης. Διαγράψτε μερικά αρχεία για να δημιουργήσετε ελεύθερο χώρο."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Το δίκτυο ενδέχεται να παρακολουθείται"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Από ένα άγνωστο τρίτο μέρος"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ειδοποίηση ήχου ενεργή"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Απενεργοποίηση..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Το tablet σας θα απενεργοποιηθεί."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Η παρακολούθησή σας θα τερματιστεί."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Το τηλέφωνό σας θα απενεργοποιηθεί."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Θέλετε να γίνει τερματισμός λειτουργίας;"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Επανεκκίνηση στην ασφαλή λειτουργία"</string>
@@ -339,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Επιτρέπει στην εφαρμογή την εκπομπή ειδοποίησης σχετικά με τη λήψη μηνύματος SMS. Τυχόν κακόβουλες εφαρμογές ενδέχεται να χρησιμοποιήσουν αυτήν τη δυνατότητα για τη δημιουργία πλαστών εισερχόμενων μηνυμάτων SMS."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"αποστολή εκπομπής που έχει ληφθεί με WAP-PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Επιτρέπει στην εφαρμογή τη μετάδοση μιας ειδοποίησης ότι έχει ληφθεί κάποιο μήνυμα WAP PUSH. Τυχόν κακόβουλες εφαρμογές ενδέχεται να χρησιμοποιήσουν αυτήν τη δυνατότητα για τη λήψη πλαστών μηνυμάτων MMS ή την εν αγνοία του χρήστη αντικατάσταση του περιεχομένου οποιασδήποτε ιστοσελίδας με κακόβουλες παραλλαγές."</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"αποστολή μετάδοσης κατάταξης δικτύων"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Επιτρέπει στην εφαρμογή να μεταδίδει μια ειδοποίηση ότι απαιτείται κατάταξη των δικτύων. Δεν απαιτείται ποτέ για τις συνήθεις εφαρμογές."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"περιορισμός αριθμού εκτελούμενων διαδικασιών"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Επιτρέπει στην εφαρμογή τον έλεγχο του μέγιστου αριθμού διαδικασιών που θα εκτελούνται. Δεν είναι απαραίτητο για συνήθεις εφαρμογές."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"αναγκαστικός τερματισμός εφαρμογών στο παρασκήνιο"</string>
@@ -394,6 +390,8 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας απομακρυσμένης οθόνης. Δεν απαιτείται ποτέ για κανονικές εφαρμογές."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"δέσμευση σε υπηρεσία γραφικών στοιχείων"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας γραφικών στοιχείων. Δεν απαιτείται για κανονικές εφαρμογές."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"σύνδεση σε μια υπηρεσία παρόχου δρομολογητή"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Δίνει στον κάτοχο τη δυνατότητα σύνδεσης με οποιονδήποτε εγγεγραμμένο πάροχο δρομολογητή. Δεν απαιτείται ποτέ για κανονικές εφαρμογές."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"επικοινωνία με έναν διαχειριστή συσκευής"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Επιτρέπει στον κάτοχο την αποστολή στόχων σε έναν διαχειριστή συσκευής. Δεν είναι απαραίτητο για συνήθεις εφαρμογές."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"σύνδεση σε μία είσοδο τηλεόρασης"</string>
@@ -644,12 +642,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Αλλαγή κατάστασης WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Επιτρέπει στην εφαρμογή τη σύνδεση στο tablet και την αποσύνδεση από αυτό, από δίκτυα WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Επιτρέπει στην εφαρμογή τη σύνδεση στο τηλέφωνο και την αποσύνδεση από αυτό, από δίκτυα WiMAX."</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"κατάταξη δικτύων"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Επιτρέπει στην εφαρμογή να κατατάσσει τα δίκτυα και να επιλέγει τα προτιμώμενα δίκτυα του tablet."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Επιτρέπει στην εφαρμογή να κατατάσσει τα δίκτυα και να επιλέγει τα προτιμώμενα δίκτυα του τηλεφώνου."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"σύζευξη με συσκευές Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Επιτρέπει στην εφαρμογή να προβάλλει τη διαμόρφωση του Bluetooth στο tablet, καθώς και να πραγματοποιεί και να αποδέχεται συνδέσεις με συζευγμένες συσκευές."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Επιτρέπει στην εφαρμογή να προβάλλει τη διαμόρφωση του Bluetooth στο τηλέφωνο, καθώς και να πραγματοποιεί και να αποδέχεται συνδέσεις με συζευγμένες συσκευές."</string>
@@ -1382,7 +1377,7 @@
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Σφάλμα πάντα ενεργοποιημένου VPN"</string>
     <string name="vpn_lockdown_config" msgid="6415899150671537970">"Αγγίξτε για διαμόρφωση"</string>
     <string name="upload_file" msgid="2897957172366730416">"Επιλογή αρχείου"</string>
-    <string name="no_file_chosen" msgid="6363648562170759465">"Δεν έχει επιλεγεί αρχείο"</string>
+    <string name="no_file_chosen" msgid="6363648562170759465">"Δεν επιλέχθηκε κανένα αρχείο."</string>
     <string name="reset" msgid="2448168080964209908">"Επαναφορά"</string>
     <string name="submit" msgid="1602335572089911941">"Υποβολή"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Η λειτουργία αυτοκινήτου είναι ενεργοποιημένη"</string>

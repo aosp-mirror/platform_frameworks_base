@@ -337,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"ອະນຸຍາດໃຫ້ແອັບຯ ກະຈາຍສັນຍານການແຈ້ງເຕືອນວ່າຂໍ້ຄວາມ SMS ໄດ້ຮັບແລ້ວ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດຈະໃຊ້ສິ່ງນີ້ໃນການປອມແປງຂໍ້ຄວາມ SMS ຂາເຂົ້າ."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"ສົ່ງການກະຈາຍ WAP-PUSH ທີ່ໄດ້ຮັບ"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"ອະນຸຍາດໃຫ້ແອັບຯສົ່ງການແຈ້ງເຕືອນໃນເວລາທີ່ໄດ້ຮັບຂໍ້ມຄວາມ WAP PUSH. ແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດໃຊ້ການກະທຳນີ້ເພື່ອປອມການໄດ້ຮັບຂໍ້ຄວາມ MMS ຫຼືລັກປ່ຽນເນື້ອຫາຂອງໜ້າເວັບຕ່າງໆ ດ້ວຍສິ່ງອັນຕະລາຍທັງຫຼາຍຢ່າງງຽບໆ."</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"​ສົ່ງ​ການ​ກະ​ຈາຍ​​ເຄືອ​ຂ່າຍ​ຄະ​ແນນ"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ກະ​ຈາຍ​ການ​ແຈ້ງ​ເຕືອນທີ່​ເຄືອ​ຂ່າຍ​ຈຳ​ເປັນ​ໃຊ້​ນັບ​​ຄະ​ແນນ. ບໍ່​ເຄີຍ​ໄດ້​ໃຊ້​ໃນ​ແອັບຯ​ທົ່ວ​ໄປ."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ຈຳກັດຈຳນວນຂອງໂປຣເຊສທີ່ເຮັດວຽກຢູ່"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"ອະນຸຍາດໃຫ້ແອັບຯຄວບຄຸມຈຳນວນສູງສຸດ ຂອງໂປຣເຊສທີ່ຈະເຮັດວຽກ. ບໍ່ຄວນຖືກໃຊ້ກັບແອັບພລິເຄຊັນທົ່ວໄປ."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"ບັງຄັບໃຫ້ແອັບຯທີ່ເຮັດວຽກຢູ່ພື້ນຫຼັງປິດໂຕລົງ"</string>
@@ -392,6 +390,8 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"ອະນຸຍາດໃຫ້ຜູ່ຖືຜູກກັບສ່ວນຕິດຕໍ່ລະດັບສູງສຸດ ຂອງການສະແດງຜົນທາງໄກ. ບໍ່ຈຳເປັນສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ເຊື່ອມໂຍງໄປຫາບໍລິການວິດເຈັດ"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"ອະນຸຍາດໃຫ້ຜູ່ຖືຜູກກັບອິນເຕີເຟດລະດັບສູງສຸດ ຂອງບໍລິການວິເຈັດ. ບໍ່ຈຳເປັນສຳລັບແອັບຯທົ່ວໄປ."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"ເຊື່ອມ​ໂຍງ​ກັບ​ການ​ບໍ​ລິ​ການ​ຂອງ​ຜູ່​ໃຫ້​ບໍ​ລິ​ການ​ເສັ້ນ​ທາງ"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"ອະ​ນຸ​ຍາດ​ໃຫ້​ເຈົ້າ​ຂອງ​ສາ​ມາດ​ເຊື່ອມ​ໂຍງກັບ​ທຸກໆ​ຜູ່​ໃຫ້​ບໍ​ລິ​ການເສັ້ນ​ທາງ​ທີ່​ລົງ​ທະ​ບຽນ. ບໍ່​ຄວນ​ຈະ​ໄດ້​ໃຊ້​ໃນ​ແອັບຯ​ທົ່ວ​ໄປ."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"ຕິດຕໍ່ກັບຜູ່ເບິ່ງແຍງອຸປະກອນ"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"ອະນຸຍາດໃຫ້ເຈົ້າຂອງສົ່ງເຈດຕະນາຫາຜູ່ເບິ່ງແຍງລະບົບອຸປະກອນ. ແອັບຯທົ່ວໄປບໍ່ຄວນຈຳເປັນຕ້ອງໃຊ້."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"ຜູກ​ກັບ​ການ​ປ້ອນ​ຂໍ້​ມູນ​ເຂົ້າ​ໂທ​ລະ​ທັດ"</string>
@@ -642,12 +642,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"ປ່ຽນສະຖານະ WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"ອະນຸຍາດໃຫ້ແອັບຯເຊື່ອມຕໍ່ ແລະຕັດການເຊື່ອມຕໍ່ແທັບເລັດຈາກເຄືອຂ່າຍ WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"ອະນຸຍາດໃຫ້ແອັບຯເຊື່ອມຕໍ່ ແລະຕັດການເຊື່ອມຕໍ່ຂອງໂທລະສັບຈາກເຄືອຂ່າຍ WiMax ໄດ້."</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"​ເຄືອ​ຂ່າຍ​ຄະ​ແນນ"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ຈັດ​ລຳ​ດັບ​ເຄືອ​ຂ່າຍ ແລະ ຊ່ວຍ​ຕັດ​ສິນ​ໃຈ​ວ່າ​ເຄືອ​ຂ່າຍ​ໃດ​ທີ່​​ແທັບ​ເລັດ​ຄວນ​ນຳ​ໃຊ້."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ຈັດ​ລຳ​ດັບ​ເຄືອ​ຂ່າຍ ແລະ ຊ່ວຍ​ຕັດ​ສິນ​ໃຈ​ວ່າ​ເຄືອ​ຂ່າຍ​ໃດ​ທີ່​ໂທ​ລະ​ສັບ​ຄວນ​ນຳ​ໃຊ້."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"ຈັບຄູ່ກັບອຸປະກອນ Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"ອະນຸຍາດໃຫ້ແອັບຯເບິ່ງການຕັ້ງຄ່າຂອງ Bluetooth ໃນແທັບເລັດ ຕະຫຼອດຈົນເຊື່ອມຕໍ່ ແລະຍອມຮັບການເຊື່ອມຕໍ່ກັບອຸປະກອນທີ່ຈັບຄູ່ກັນແລ້ວ."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"ອະນຸຍາດໃຫ້ແອັບຯເບິ່ງການຕັ້ງຄ່າຂອງ Bluetooth ໃນໂທລະສັບ, ຮວມທັງໃຫ້ສ້າງ ແລະຮັບການເຊື່ອມຕໍ່ຈາກອຸປະກອນທີ່ຈັບຄູ່ກັນ."</string>

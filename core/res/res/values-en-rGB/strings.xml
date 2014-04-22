@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sync"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Too many <xliff:g id="CONTENT_TYPE">%s</xliff:g> deletions."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Tablet storage is full. Delete some files to free space."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Watch storage is full. Delete some files to free up space."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Phone storage is full. Delete some files to free space."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Network may be monitored"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"By an unknown third party"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringer on"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Shutting down…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Your tablet will shut down."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Your watch will shut down."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Your phone will shut down."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Do you want to shut down?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Reboot to safe mode"</string>
@@ -339,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Allows the app to broadcast a notification that an SMS message has been received. Malicious apps may use this to forge incoming SMS messages."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"send WAP-PUSH-received broadcast"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Allows the app to broadcast a notification that a WAP PUSH message has been received. Malicious apps may use this to forge MMS message receipt or to silently replace the content of any web page with malicious variants."</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"send score networks broadcast"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Allows the app to broadcast a notification that networks need to be scored. Never needed for normal apps."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"limit number of running processes"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Allows the app to control the maximum number of processes that will run. Never needed for normal apps."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"force background apps to close"</string>
@@ -394,6 +390,8 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Allows the holder to bind to the top-level interface of a remote display. Should never be needed for normal apps."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bind to a widget service"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Allows the holder to bind to the top-level interface of a widget service. Should never be needed for normal apps."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"bind to a route provider service"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Allows the holder to bind to any registered route providers. Should never be needed for normal apps."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interact with device admin"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Allows the holder to send intents to a device administrator. Should never be needed for normal apps."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"bind to a TV input"</string>
@@ -644,12 +642,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"change WiMAX state"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Allows the app to connect the tablet to and disconnect the tablet from WiMAX networks."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Allows the app to connect the phone to and disconnect the phone from WiMAX networks."</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"score networks"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Allows the app to rank networks and influence which networks the tablet should prefer."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Allows the app to rank networks and influence which networks the phone should prefer."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"pair with Bluetooth devices"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Allows the app to view the configuration of Bluetooth on the tablet and to make and accept connections with paired devices."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Allows the app to view the configuration of the Bluetooth on the phone and to make and accept connections with paired devices."</string>

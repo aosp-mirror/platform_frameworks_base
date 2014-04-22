@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Penyegerakan"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Terlalu banyak pemadaman <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Storan tablet penuh. Padamkan beberapa fail untuk mengosongkan ruang."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Storan tontonan penuh. Padamkan beberapa fail untuk mengosongkan ruang."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Storan telefon penuh. Padamkan beberapa fail untuk mengosongkan ruang."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Rangkaian mungkin dipantau"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Oleh pihak ketiga yang tidak diketahui"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Pendering dihidupkan"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Mematikan..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet anda akan dimatikan."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Tontonan anda akan dimatikan."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefon anda akan dimatikan."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Adakah anda mahu menutup?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"But semula ke mod selamat"</string>
@@ -339,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Membenarkan apl untuk menyiarkan pemberitahuan bahawa mesej SMS telah diterima. Apl hasad boleh menggunakannya untuk memalsukan mesej SMS masuk."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"hantar siaran WAP-TOLAK-diterima"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Membenarkan apl untuk menyiarkan pemberitahuan bahawa mesej WAP PUSH telah diterima. Apl hasad boleh menggunakannya untuk memalsukan penerimaan mesej MMS atau secara diam-diam menggantikan kandungan mana-mana laman web dengan varian hasad."</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"hantar siaran markah rangkaian"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Membenarkan apl menyiarkan pemberitahuan bahawa rangkaian perlu diberi markah. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"hadkan bilangan proses yang dijalankan"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Membenarkan apl untuk mengawal bilangan maksimum proses yang akan berlangsung. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"memaksa apl latar belakang untuk menutup"</string>
@@ -394,6 +390,10 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi paparan jauh. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"terikat kepada perkhidmatan widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan widget. Tidak sekali-kali diperlukan untuk apl biasa."</string>
+    <!-- no translation found for permlab_bindRouteProvider (4869394607915096847) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRouteProvider (4703804520859960329) -->
+    <skip />
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"berinteraksi dengan pentadbir peranti"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Membenarkan pemegang menghantar tujuan kepada pentadbir peranti. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"ikat kepada input TV"</string>
@@ -644,12 +644,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Tukar keadaan WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Membenarkan apl untuk menyambungkan tablet ke dan menyahsambungkan tablet dari rangkaian WiMaX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Membenarkan apl untuk menyambungkan telefon ke dan menyahsambung telefon dari rangkaian WiMaX."</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"beri markah kepada rangkaian"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Membenarkan apl menilai rangkaian dan mempengaruhi rangkaian yang harus dipilih oleh tablet."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Membenarkan apl menilai rangkaian dan mempengaruhi rangkaian yang harus dipilih oleh telefon."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"berpasangan dengan peranti Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Membenarkan apl melihat konfigurasi Bluetooth pada tablet dan untuk membuat serta menerima sambungan dengan peranti yang dipasangkan."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Membenarkan apl melihat konfigurasi Bluetooth pada telefon dan membuat serta menerima sambungan dengan peranti yang dipasangkan."</string>

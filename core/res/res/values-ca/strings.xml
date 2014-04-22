@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sincronització"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Massa supressions de <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"L\'emmagatzematge de la tauleta és ple. Suprimeix uns quants fitxers per alliberar espai."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"L\'emmagatzematge del rellotge està ple. Suprimeix uns quants fitxers per alliberar espai."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"L\'emmagatzematge del telèfon és ple. Suprimeix uns quants fitxers per alliberar espai."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"És possible que la xarxa estigui supervisada"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Per un tercer desconegut"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Timbre activat"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"S\'està apagant..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"La tauleta s\'apagarà."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"El rellotge s\'apagarà."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"El telèfon s\'apagarà."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vols apagar-lo?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Reinicia en mode segur"</string>
@@ -339,10 +337,8 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Permet que l\'aplicació difongui una notificació en què s\'indiqui que s\'ha rebut un missatge SMS. Les aplicacions malicioses poden fer servir aquesta funció per falsificar els missatges SMS entrants."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"enviar una difusió de tipus WAP-PUSH-received"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Permet que l\'aplicació difongui una notificació que indica que s\'ha rebut un missatge d\'inserció WAP. Les aplicacions malicioses poden utilitzar-ho per falsificar la recepció dels missatges MMS o per substituir silenciosament el contingut d\'una pàgina web per variants malicioses."</string>
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
+    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"enviar l\'emissió de la puntuació de les xarxes"</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Permet que l\'aplicació emeti una notificació necessària perquè les xarxes rebin una puntuació. No es necessita mai per a les aplicacions normals."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"limitar el nombre de processos en execució"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Permet que l\'aplicació controli el nombre màxim de processos que s\'executaran. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"com fer que es tanquin les aplicacions en segon pla"</string>
@@ -394,6 +390,8 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permet que el titular es vinculi a la interfície de nivell superior d\'una pantalla remota. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincula a un servei de widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permet que el titular vinculi a la interfície de nivell superior d\'un servei de widget. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"establir vincles amb un servei d\'aprovisionament de rutes"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Permet que el titular estableixi vincles amb els proveïdors de rutes registrats. No hauria de ser mai necessari per a les aplicacions normals."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar amb un administrador del dispositiu"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permet que el titular enviï intents a un administrador del sistema. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"Vinculació a una entrada de televisor"</string>
@@ -644,12 +642,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Canvia l\'estat de WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Permet que l\'aplicació connecti i desconnecti la tauleta de les xarxes WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Permet que l\'aplicació connecti i desconnecti el telèfon de les xarxes WiMAX."</string>
-    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
-    <skip />
-    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
-    <skip />
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"puntuar les xarxes"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Permet que l\'aplicació classifiqui les xarxes i indiqui quines han de ser les xarxes preferides de la tauleta."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Permet que l\'aplicació classifiqui les xarxes i indiqui quines han de ser les xarxes preferides del telèfon."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"emparella amb dispositius Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Permet que l\'aplicació visualitzi la configuració de Bluetooth de la tauleta i que estableixi i accepti connexions amb dispositius sincronitzats."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permet que una aplicació visualitzi la configuració de Bluetooth del telèfon i que estableixi i accepti connexions amb els dispositius sincronitzats."</string>
