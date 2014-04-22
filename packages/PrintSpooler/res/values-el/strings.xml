@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="4469836075319831821">"Λογισμικό ουράς εκτύπωσης"</string>
+    <string name="advanced_settings_button" msgid="5764225091289415632">"Ρυθμίσεις εκτυπωτή"</string>
+    <string name="print_button" msgid="645164566271246268">"Εκτύπωση"</string>
+    <string name="save_button" msgid="1921310454071758999">"Αποθήκευση"</string>
+    <string name="label_destination" msgid="9132510997381599275">"Προορισμός"</string>
+    <string name="label_copies" msgid="3634531042822968308">"Αντίγραφα"</string>
+    <string name="label_paper_size" msgid="8681895607876809323">"Μέγεθος χαρτιού"</string>
+    <string name="label_color" msgid="1108690305218188969">"Χρώμα"</string>
+    <string name="label_orientation" msgid="2853142581990496477">"Προσανατολισμός"</string>
+    <string name="label_pages" msgid="6300874667546617333">"Σελίδες (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <string name="pages_range_example" msgid="8558694453556945172">"π.χ. 1-5,8,11-13"</string>
+    <string name="print_preview" msgid="8010217796057763343">"Προεπισκόπηση εκτύπωσης"</string>
+    <string name="install_for_print_preview" msgid="6366303997385509332">"Εγκαταστήστε το PDF viewer για προεπισκόπηση"</string>
+    <string name="printing_app_crashed" msgid="854477616686566398">"Διακοπή λειτουργίας εφαρμογής εκτύπωσης"</string>
+    <string name="page_count_unknown" msgid="6058852665954511124">"Σελίδες"</string>
+    <string name="generating_print_job" msgid="3119608742651698916">"Δημιουργία εργασίας εκτύπωσης"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"Αποθήκευση ως PDF"</string>
+    <string name="all_printers" msgid="5018829726861876202">"Όλοι οι εκτυπωτές…"</string>
+    <string name="print_dialog" msgid="32628687461331979">"Πλαίσιο διαλόγου εκτύπωσης"</string>
+    <string name="search" msgid="5421724265322228497">"Αναζήτηση"</string>
+    <string name="all_printers_label" msgid="3178848870161526399">"Όλοι οι εκτυπωτές"</string>
+    <string name="add_print_service_label" msgid="5356702546188981940">"Προσθήκη υπηρεσίας"</string>
+    <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Εμφάνιση πλαισίου αναζήτησης"</string>
+    <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Απόκρυψη πλαισίου αναζήτησης"</string>
+    <string name="print_add_printer" msgid="1088656468360653455">"Προσθήκη εκτυπωτή"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"Επιλογή εκτυπωτή"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"Διαγραφή εκτυπωτή"</string>
+  <plurals name="print_search_result_count_utterance">
+    <item quantity="one" msgid="4484953260685964252">"Βρέθηκε <xliff:g id="COUNT">%1$s</xliff:g> εκτυπωτής"</item>
+    <item quantity="other" msgid="6533817036607128241">"Βρέθηκαν <xliff:g id="COUNT">%1$s</xliff:g> εκτυπωτές"</item>
+  </plurals>
+    <string name="choose_print_service" msgid="3740309762324459694">"Επιλέξτε υπηρεσία εκτύπωσης"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"Αναζήτηση για εκτυπωτές"</string>
+    <string name="print_no_printers" msgid="4869403323900054866">"Δεν βρέθηκαν εκτυπωτές"</string>
+    <string name="printing_notification_title_template" msgid="295903957762447362">"Εκτύπωση <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
+    <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Ακύρωση <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
+    <string name="failed_notification_title_template" msgid="2256217208186530973">"Σφάλμα εκτυπωτή <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
+    <string name="blocked_notification_title_template" msgid="1175435827331588646">"Ο εκτυπωτής απέκλεισε <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
+  <plurals name="composite_notification_title_template">
+    <item quantity="one" msgid="5866624638054847057">"εργασία εκτύπωσης <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
+    <item quantity="other" msgid="8746611264734222865">"εργασίες εκτύπωσης <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
+  </plurals>
+    <string name="cancel" msgid="4373674107267141885">"Ακύρωση"</string>
+    <string name="restart" msgid="2472034227037808749">"Επανεκκίνηση"</string>
+    <string name="no_connection_to_printer" msgid="2159246915977282728">"Δεν υπάρχει σύνδεση με εκτυπωτή"</string>
+    <string name="reason_unknown" msgid="5507940196503246139">"άγνωστο"</string>
+    <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – μη διαθέσιμο"</string>
+    <string name="print_error_default_message" msgid="8568506918983980567">"Δεν ήταν δυνατή η δημιουργία εργασίας εκτύπωσης"</string>
+  <string-array name="color_mode_labels">
+    <item msgid="7602948745415174937">"Ασπρόμαυρο"</item>
+    <item msgid="2762241247228983754">"Χρώμα"</item>
+  </string-array>
+  <string-array name="orientation_labels">
+    <item msgid="4061931020926489228">"Πορτραίτο"</item>
+    <item msgid="3199660090246166812">"Οριζόντια"</item>
+  </string-array>
+  <string-array name="page_options_labels">
+    <item msgid="7421377442011699994">"Όλα"</item>
+    <item msgid="6812869625222503603">"Εύρος"</item>
+  </string-array>
+</resources>
