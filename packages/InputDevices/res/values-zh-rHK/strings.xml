@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="8016145283189546017">"輸入裝置"</string>
+    <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android 鍵盤"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"英文 (英國)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"英文 (美國)"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"英文 (美國)，國際樣式"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"英文 (美國)，Colemak 樣式"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"英文 (美國)，Dvorak 樣式"</string>
+    <string name="keyboard_layout_german_label" msgid="8451565865467909999">"德文"</string>
+    <string name="keyboard_layout_french_label" msgid="813450119589383723">"法文"</string>
+    <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"法文 (加拿大)"</string>
+    <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"俄文"</string>
+    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"俄文，Mac 樣式"</string>
+    <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"西班牙文"</string>
+    <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"法文 (瑞士)"</string>
+    <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"德文（瑞士）"</string>
+    <string name="keyboard_layout_belgian" msgid="2011984572838651558">"比利時文"</string>
+    <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"保加利亞文"</string>
+    <string name="keyboard_layout_italian" msgid="6497079660449781213">"意大利文"</string>
+    <string name="keyboard_layout_danish" msgid="8036432066627127851">"丹麥文"</string>
+    <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"挪威文"</string>
+    <string name="keyboard_layout_swedish" msgid="732959109088479351">"瑞典文"</string>
+    <string name="keyboard_layout_finnish" msgid="5585659438924315466">"芬蘭文"</string>
+    <string name="keyboard_layout_croatian" msgid="4172229471079281138">"克羅地亞文"</string>
+    <string name="keyboard_layout_czech" msgid="1349256901452975343">"捷克文"</string>
+    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"愛沙尼亞文"</string>
+    <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"匈牙利文"</string>
+    <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"冰島文"</string>
+    <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"巴西文"</string>
+    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"葡萄牙文"</string>
+    <string name="keyboard_layout_slovak" msgid="2469379934672837296">"斯洛伐克文"</string>
+    <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"斯洛文尼亞文"</string>
+    <string name="keyboard_layout_turkish" msgid="7736163250907964898">"土耳其文"</string>
+    <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"烏克蘭文"</string>
+</resources>
