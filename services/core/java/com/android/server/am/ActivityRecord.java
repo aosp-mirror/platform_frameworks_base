@@ -139,7 +139,7 @@ final class ActivityRecord {
     boolean forceNewConfig; // force re-create with new config next time
     int launchCount;        // count of launches since last state
     long lastLaunchTime;    // time of last lauch of this activity
-    ArrayList<ActivityStack> mChildContainers = new ArrayList<ActivityStack>();
+    ArrayList<ActivityContainer> mChildContainers = new ArrayList<ActivityContainer>();
 
     String stringName;      // for caching of toString().
 
