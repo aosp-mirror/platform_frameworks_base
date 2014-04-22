@@ -26,6 +26,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
@@ -42,6 +43,7 @@ import android.tv.TvInputInfo;
 import android.tv.TvInputService;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Surface;
 
@@ -116,17 +118,19 @@ public final class TvInputManagerService extends SystemService {
         UserState userState = getUserStateLocked(userId);
         userState.inputList.clear();
 
+        if (DEBUG) Slog.d(TAG, "buildTvInputList");
         PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> services = pm.queryIntentServices(
                 new Intent(TvInputService.SERVICE_INTERFACE), PackageManager.GET_SERVICES);
         for (ResolveInfo ri : services) {
             ServiceInfo si = ri.serviceInfo;
             if (!android.Manifest.permission.BIND_TV_INPUT.equals(si.permission)) {
-                Log.w(TAG, "Skipping TV input " + si.name + ": it does not require the permission "
+                Slog.w(TAG, "Skipping TV input " + si.name + ": it does not require the permission "
                         + android.Manifest.permission.BIND_TV_INPUT);
                 continue;
             }
             TvInputInfo info = new TvInputInfo(ri);
+            if (DEBUG) Slog.d(TAG, "add " + info.getId());
             userState.inputList.add(info);
         }
     }
@@ -161,7 +165,7 @@ public final class TvInputManagerService extends SystemService {
                     try {
                         state.session.release();
                     } catch (RemoteException e) {
-                        Log.e(TAG, "error in release", e);
+                        Slog.e(TAG, "error in release", e);
                     }
                 }
             }
@@ -173,7 +177,7 @@ public final class TvInputManagerService extends SystemService {
                     try {
                         serviceState.service.unregisterCallback(serviceState.callback);
                     } catch (RemoteException e) {
-                        Log.e(TAG, "error in unregisterCallback", e);
+                        Slog.e(TAG, "error in unregisterCallback", e);
                     }
                 }
                 serviceState.clients.clear();
@@ -244,7 +248,7 @@ public final class TvInputManagerService extends SystemService {
                 return;
             }
             if (DEBUG) {
-                Log.i(TAG, "bindServiceAsUser(name=" + name.getClassName() + ", userId=" + userId
+                Slog.d(TAG, "bindServiceAsUser(name=" + name.getClassName() + ", userId=" + userId
                         + ")");
             }
             Intent i = new Intent(TvInputService.SERVICE_INTERFACE).setComponent(name);
@@ -255,7 +259,7 @@ public final class TvInputManagerService extends SystemService {
             // This means that the service is already connected but its state indicates that we have
             // nothing to do with it. Then, disconnect the service.
             if (DEBUG) {
-                Log.i(TAG, "unbindService(name=" + name.getClassName() + ")");
+                Slog.d(TAG, "unbindService(name=" + name.getClassName() + ")");
             }
             mContext.unbindService(serviceState.connection);
             userState.serviceStateMap.remove(name);
@@ -267,7 +271,7 @@ public final class TvInputManagerService extends SystemService {
         final SessionState sessionState =
                 getUserStateLocked(userId).sessionStateMap.get(sessionToken);
         if (DEBUG) {
-            Log.d(TAG, "createSessionInternalLocked(name=" + sessionState.name.getClassName()
+            Slog.d(TAG, "createSessionInternalLocked(name=" + sessionState.name.getClassName()
                     + ")");
         }
         // Set up a callback to send the session token.
@@ -275,7 +279,7 @@ public final class TvInputManagerService extends SystemService {
             @Override
             public void onSessionCreated(ITvInputSession session) {
                 if (DEBUG) {
-                    Log.d(TAG, "onSessionCreated(name=" + sessionState.name.getClassName() + ")");
+                    Slog.d(TAG, "onSessionCreated(name=" + sessionState.name.getClassName() + ")");
                 }
                 synchronized (mLock) {
                     sessionState.session = session;
@@ -295,7 +299,7 @@ public final class TvInputManagerService extends SystemService {
         try {
             service.createSession(callback);
         } catch (RemoteException e) {
-            Log.e(TAG, "error in createSession", e);
+            Slog.e(TAG, "error in createSession", e);
             removeSessionStateLocked(sessionToken, userId);
             sendSessionTokenToClientLocked(sessionState.client, sessionState.name, null,
                     sessionState.seq, userId);
@@ -307,7 +311,7 @@ public final class TvInputManagerService extends SystemService {
         try {
             client.onSessionCreated(name, sessionToken, seq);
         } catch (RemoteException exception) {
-            Log.e(TAG, "error in onSessionCreated", exception);
+            Slog.e(TAG, "error in onSessionCreated", exception);
         }
 
         if (sessionToken == null) {
@@ -396,7 +400,7 @@ public final class TvInputManagerService extends SystemService {
                         try {
                             serviceState.service.registerCallback(serviceState.callback);
                         } catch (RemoteException e) {
-                            Log.e(TAG, "error in registerCallback", e);
+                            Slog.e(TAG, "error in registerCallback", e);
                         }
                     } else {
                         updateServiceConnectionLocked(name, resolvedUserId);
@@ -432,7 +436,7 @@ public final class TvInputManagerService extends SystemService {
                     try {
                         serviceState.service.unregisterCallback(serviceState.callback);
                     } catch (RemoteException e) {
-                        Log.e(TAG, "error in unregisterCallback", e);
+                        Slog.e(TAG, "error in unregisterCallback", e);
                     } finally {
                         serviceState.callback = null;
                         updateServiceConnectionLocked(name, resolvedUserId);
@@ -493,7 +497,7 @@ public final class TvInputManagerService extends SystemService {
                     try {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId).release();
                     } catch (RemoteException e) {
-                        Log.e(TAG, "error in release", e);
+                        Slog.e(TAG, "error in release", e);
                     }
 
                     removeSessionStateLocked(sessionToken, resolvedUserId);
@@ -515,7 +519,7 @@ public final class TvInputManagerService extends SystemService {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId).setSurface(
                                 surface);
                     } catch (RemoteException e) {
-                        Log.e(TAG, "error in setSurface", e);
+                        Slog.e(TAG, "error in setSurface", e);
                     }
                 }
             } finally {
@@ -535,7 +539,7 @@ public final class TvInputManagerService extends SystemService {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId).setVolume(
                                 volume);
                     } catch (RemoteException e) {
-                        Log.e(TAG, "error in setVolume", e);
+                        Slog.e(TAG, "error in setVolume", e);
                     }
                 }
             } finally {
@@ -551,14 +555,72 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    SessionState sessionState = getUserStateLocked(resolvedUserId)
-                            .sessionStateMap.get(sessionToken);
-                    final String serviceName = sessionState.name.getClassName();
                     try {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId).tune(channelUri);
                     } catch (RemoteException e) {
-                        Log.e(TAG, "error in tune", e);
+                        Slog.e(TAG, "error in tune", e);
                         return;
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void createOverlayView(IBinder sessionToken, IBinder windowToken, Rect frame,
+                int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "createOverlayView");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .createOverlayView(windowToken, frame);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in createOverlayView", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void relayoutOverlayView(IBinder sessionToken, Rect frame, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "relayoutOverlayView");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .relayoutOverlayView(frame);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in relayoutOverlayView", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void removeOverlayView(IBinder sessionToken, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "removeOverlayView");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .removeOverlayView();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in removeOverlayView", e);
                     }
                 }
             } finally {
@@ -621,7 +683,7 @@ public final class TvInputManagerService extends SystemService {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DEBUG) {
-                Log.d(TAG, "onServiceConnected(name=" + name.getClassName() + ")");
+                Slog.d(TAG, "onServiceConnected(name=" + name.getClassName() + ")");
             }
             synchronized (mLock) {
                 ServiceState serviceState = getServiceStateLocked(name, mUserId);
@@ -633,7 +695,7 @@ public final class TvInputManagerService extends SystemService {
                     try {
                         serviceState.service.registerCallback(serviceState.callback);
                     } catch (RemoteException e) {
-                        Log.e(TAG, "error in registerCallback", e);
+                        Slog.e(TAG, "error in registerCallback", e);
                     }
                 }
 
@@ -647,7 +709,7 @@ public final class TvInputManagerService extends SystemService {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             if (DEBUG) {
-                Log.d(TAG, "onServiceDisconnected(name=" + name.getClassName() + ")");
+                Slog.d(TAG, "onServiceDisconnected(name=" + name.getClassName() + ")");
             }
         }
     }
@@ -663,7 +725,7 @@ public final class TvInputManagerService extends SystemService {
         public void onAvailabilityChanged(ComponentName name, boolean isAvailable)
                 throws RemoteException {
             if (DEBUG) {
-                Log.d(TAG, "onAvailabilityChanged(name=" + name.getClassName() + ", isAvailable="
+                Slog.d(TAG, "onAvailabilityChanged(name=" + name.getClassName() + ", isAvailable="
                         + isAvailable + ")");
             }
             synchronized (mLock) {

@@ -28263,7 +28263,6 @@ package android.tv {
 
   public static final class TvInputManager.Session {
     method public void release();
-    method public void setSurface(android.view.Surface);
     method public void setVolume(float);
     method public void tune(android.net.Uri);
   }
@@ -28285,12 +28284,22 @@ package android.tv {
     field public static final java.lang.String SERVICE_INTERFACE = "android.tv.TvInputService";
   }
 
-  public static abstract class TvInputService.TvInputSessionImpl {
+  public abstract class TvInputService.TvInputSessionImpl {
     ctor public TvInputService.TvInputSessionImpl();
+    method public android.view.View onCreateOverlayView();
     method public abstract void onRelease();
     method public abstract boolean onSetSurface(android.view.Surface);
     method public abstract void onSetVolume(float);
     method public abstract boolean onTune(android.net.Uri);
+    method public void setOverlayViewEnabled(boolean);
+  }
+
+  public class TvView extends android.view.SurfaceView {
+    ctor public TvView(android.content.Context);
+    ctor public TvView(android.content.Context, android.util.AttributeSet);
+    ctor public TvView(android.content.Context, android.util.AttributeSet, int);
+    method public void bindTvInput(android.content.ComponentName, android.tv.TvInputManager.SessionCreateCallback);
+    method public void unbindTvInput();
   }
 
 }
