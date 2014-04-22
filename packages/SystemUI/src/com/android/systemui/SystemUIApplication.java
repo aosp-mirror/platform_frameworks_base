@@ -17,7 +17,12 @@
 package com.android.systemui;
 
 import android.app.Application;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -49,6 +54,7 @@ public class SystemUIApplication extends Application {
      */
     private final SystemUI[] mServices = new SystemUI[SERVICES.length];
     private boolean mServicesStarted;
+    private boolean mBootCompleted;
     private final Map<Class<?>, Object> mComponents = new HashMap<Class<?>, Object>();
 
     @Override
@@ -58,6 +64,23 @@ public class SystemUIApplication extends Application {
         // application theme in the manifest does only work for activities. Keep this in sync with
         // the theme set there.
         setTheme(R.style.systemui_theme);
+
+        registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (mBootCompleted) return;
+
+                if (DEBUG) Log.v(TAG, "BOOT_COMPLETED received");
+                unregisterReceiver(this);
+                mBootCompleted = true;
+                if (mServicesStarted) {
+                    final int N = mServices.length;
+                    for (int i = 0; i < N; i++) {
+                        mServices[i].onBootCompleted();
+                    }
+                }
+            }
+        }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
     }
 
     /**
@@ -71,6 +94,17 @@ public class SystemUIApplication extends Application {
         if (mServicesStarted) {
             return;
         }
+
+        if (!mBootCompleted) {
+            // check to see if maybe it was already completed long before we began
+            // see ActivityManagerService.finishBooting()
+            if ("1".equals(SystemProperties.get("sys.boot_completed"))) {
+                mBootCompleted = true;
+                if (DEBUG) Log.v(TAG, "BOOT_COMPLETED was already sent");
+            }
+        }
+
+        Log.v(TAG, "Starting SystemUI services.");
         final int N = SERVICES.length;
         for (int i=0; i<N; i++) {
             Class<?> cl = SERVICES[i];
@@ -86,6 +120,10 @@ public class SystemUIApplication extends Application {
             mServices[i].mComponents = mComponents;
             if (DEBUG) Log.d(TAG, "running: " + mServices[i]);
             mServices[i].start();
+
+            if (mBootCompleted) {
+                mServices[i].onBootCompleted();
+            }
         }
         mServicesStarted = true;
     }
