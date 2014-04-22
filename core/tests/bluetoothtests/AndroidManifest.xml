@@ -31,5 +31,8 @@
     <instrumentation android:name="android.bluetooth.BluetoothTestRunner"
             android:targetPackage="com.android.bluetooth.tests"
             android:label="Bluetooth Tests" />
+    <instrumentation android:name="android.bluetooth.BluetoothInstrumentation"
+            android:targetPackage="com.android.bluetooth.tests"
+            android:label="Bluetooth Test Utils" />
 
 </manifest>
