@@ -17,8 +17,6 @@
 package com.android.mediaframeworktest;
 
 import com.android.mediaframeworktest.performance.MediaPlayerPerformance;
-/*Video Editor performance Test cases*/
-import com.android.mediaframeworktest.performance.VideoEditorPerformance;
 import junit.framework.TestSuite;
 
 import android.os.Bundle;
@@ -44,8 +42,6 @@ public class MediaFrameworkPerfTestRunner extends InstrumentationTestRunner {
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
         suite.addTestSuite(MediaPlayerPerformance.class);
-        /* Video Editor performance Test cases */
-        suite.addTestSuite(VideoEditorPerformance.class);
         return suite;
     }
 
