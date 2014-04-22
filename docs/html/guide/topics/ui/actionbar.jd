@@ -1145,7 +1145,7 @@ defined in a resource looks like this:</p>
         &lt;item&gt;Venus&lt;/item&gt;
         &lt;item&gt;Earth&lt;/item&gt;
     &lt;/string-array&gt;
-&lt;/pre&gt;
+&lt;/resources&gt;
 </pre>
 
 <p>The {@link android.widget.ArrayAdapter} returned by {@link
