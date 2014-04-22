@@ -288,6 +288,20 @@ public class UserManagerService extends IUserManager.Stub {
         return users;
     }
 
+    @Override
+    public UserInfo getProfileParent(int userHandle) {
+        checkManageUsersPermission("get the profile parent");
+        synchronized (mPackagesLock) {
+            UserInfo profile = getUserInfoLocked(userHandle);
+            int parentUserId = profile.profileGroupId;
+            if (parentUserId == UserInfo.NO_PROFILE_GROUP_ID) {
+                return null;
+            } else {
+                return getUserInfoLocked(parentUserId);
+            }
+        }
+    }
+
     private boolean isProfileOf(UserInfo user, UserInfo profile) {
         return user.id == profile.id ||
                 (user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
@@ -1015,17 +1029,6 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private int getNextProfileGroupIdLocked() {
-        int maxGroupId = UserInfo.NO_PROFILE_GROUP_ID;
-        for (int i = 0; i < mUsers.size(); i++) {
-            UserInfo ui = mUsers.valueAt(i);
-            if (maxGroupId < ui.profileGroupId) {
-                maxGroupId = ui.profileGroupId;
-            }
-        }
-        return maxGroupId + 1;
-    }
-
     @Override
     public UserInfo createProfileForUser(String name, int flags, int userId) {
         checkManageUsersPermission("Only the system can create users");
@@ -1042,16 +1045,16 @@ public class UserManagerService extends IUserManager.Stub {
         return createUserInternal(name, flags, UserHandle.USER_NULL);
     }
 
-    private UserInfo createUserInternal(String name, int flags, int profileId) {
+    private UserInfo createUserInternal(String name, int flags, int parentId) {
         final long ident = Binder.clearCallingIdentity();
         UserInfo userInfo = null;
         try {
             synchronized (mInstallLock) {
                 synchronized (mPackagesLock) {
-                    UserInfo profile = null;
-                    if (profileId != UserHandle.USER_NULL) {
-                        profile = getUserInfoLocked(profileId);
-                        if (profile == null) return null;
+                    UserInfo parent = null;
+                    if (parentId != UserHandle.USER_NULL) {
+                        parent = getUserInfoLocked(parentId);
+                        if (parent == null) return null;
                     }
                     if (isUserLimitReachedLocked()) return null;
                     int userId = getNextAvailableIdLocked();
@@ -1064,12 +1067,12 @@ public class UserManagerService extends IUserManager.Stub {
                     Environment.getUserSystemDirectory(userInfo.id).mkdirs();
                     mUsers.put(userId, userInfo);
                     writeUserListLocked();
-                    if (profile != null) {
-                        if (profile.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
-                            profile.profileGroupId = getNextProfileGroupIdLocked();
-                            writeUserLocked(profile);
+                    if (parent != null) {
+                        if (parent.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
+                            parent.profileGroupId = parent.id;
+                            writeUserLocked(parent);
                         }
-                        userInfo.profileGroupId = profile.profileGroupId;
+                        userInfo.profileGroupId = parent.profileGroupId;
                     }
                     writeUserLocked(userInfo);
                     mPm.createNewUserLILPw(userId, userPath);
