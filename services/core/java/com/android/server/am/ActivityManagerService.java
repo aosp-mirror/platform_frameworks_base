@@ -7240,6 +7240,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (r == null) {
                 return null;
             }
+            if (callback == null) {
+                throw new IllegalArgumentException("callback must not be null");
+            }
             return mStackSupervisor.createActivityContainer(r, callback);
         }
     }
