@@ -326,7 +326,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                             b, offsetX, offsetY);
                 }
 
-
                 if (task.isActive) {
                     // Bring an active task to the foreground
                     RecentsTaskLoader.getInstance().getSystemServicesProxy()
