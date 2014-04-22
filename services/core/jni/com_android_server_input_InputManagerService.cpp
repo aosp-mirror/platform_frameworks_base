@@ -870,7 +870,7 @@ void NativeInputManager::interceptMotionBeforeQueueing(nsecs_t when, uint32_t& p
     if ((policyFlags & POLICY_FLAG_TRUSTED) && !(policyFlags & POLICY_FLAG_INJECTED)) {
         if (policyFlags & POLICY_FLAG_INTERACTIVE) {
             policyFlags |= POLICY_FLAG_PASS_TO_USER;
-        } else if (policyFlags & (POLICY_FLAG_WAKE | POLICY_FLAG_WAKE_DROPPED)) {
+        } else if (policyFlags & POLICY_FLAG_WAKE) {
             JNIEnv* env = jniEnv();
             jint wmActions = env->CallIntMethod(mServiceObj,
                         gServiceClassInfo.interceptWakeMotionBeforeQueueing,

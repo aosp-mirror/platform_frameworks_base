@@ -23,6 +23,7 @@
 #include <android_runtime/Log.h>
 #include <utils/Log.h>
 #include <input/Input.h>
+#include <ScopedUtfChars.h>
 #include "android_os_Parcel.h"
 #include "android_view_MotionEvent.h"
 #include "android_util_Binder.h"
@@ -724,6 +725,17 @@ static void android_view_MotionEvent_nativeWriteToParcel(JNIEnv* env, jclass cla
     }
 }
 
+static jstring android_view_MotionEvent_nativeAxisToString(JNIEnv* env, jclass clazz,
+        jint axis) {
+    return env->NewStringUTF(MotionEvent::getLabel(static_cast<int32_t>(axis)));
+}
+
+static jint android_view_MotionEvent_nativeAxisFromString(JNIEnv* env, jclass clazz,
+        jstring label) {
+    ScopedUtfChars axisLabel(env, label);
+    return static_cast<jint>(MotionEvent::getAxisFromLabel(axisLabel.c_str()));
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMotionEventMethods[] = {
@@ -840,6 +852,10 @@ static JNINativeMethod gMotionEventMethods[] = {
     { "nativeWriteToParcel",
             "(JLandroid/os/Parcel;)V",
             (void*)android_view_MotionEvent_nativeWriteToParcel },
+    { "nativeAxisToString", "(I)Ljava/lang/String;",
+            (void*)android_view_MotionEvent_nativeAxisToString },
+    { "nativeAxisFromString", "(Ljava/lang/String;)I",
+            (void*)android_view_MotionEvent_nativeAxisFromString },
 };
 
 #define FIND_CLASS(var, className) \
