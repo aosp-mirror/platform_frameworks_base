@@ -19,6 +19,9 @@ package android.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * A curve defining the network score over a range of RSSI values.
  *
@@ -92,6 +95,30 @@ public class RssiCurve implements Parcelable {
         out.writeInt(bucketWidth);
         out.writeInt(rssiBuckets.length);
         out.writeByteArray(rssiBuckets);
+    }
+
+    /**
+     * Determine if two RSSI curves are defined in the same way.
+     *
+     * <p>Note that two curves can be equivalent but defined differently, e.g. if one bucket in one
+     * curve is split into two buckets in another. For the purpose of this method, these curves are
+     * not considered equal to each other.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RssiCurve rssiCurve = (RssiCurve) o;
+
+        return start == rssiCurve.start &&
+                bucketWidth == rssiCurve.bucketWidth &&
+                Arrays.equals(rssiBuckets, rssiCurve.rssiBuckets);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(start, bucketWidth, rssiBuckets);
     }
 
     @Override

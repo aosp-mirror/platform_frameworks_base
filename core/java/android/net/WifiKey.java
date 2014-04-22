@@ -19,6 +19,7 @@ package android.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -84,6 +85,21 @@ public class WifiKey implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(ssid);
         out.writeString(bssid);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        WifiKey wifiKey = (WifiKey) o;
+
+        return Objects.equals(ssid, wifiKey.ssid) && Objects.equals(bssid, wifiKey.bssid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ssid, bssid);
     }
 
     @Override
