@@ -20,6 +20,7 @@ import android.app.StatusBarManager;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -49,6 +50,16 @@ public class StatusBarWindowView extends FrameLayout
         super(context, attrs);
         setMotionEventSplittingEnabled(false);
         setWillNotDraw(!DEBUG);
+    }
+
+    @Override
+    protected boolean fitSystemWindows(Rect insets) {
+        if (getFitsSystemWindows()) {
+            setPadding(insets.left, insets.top, insets.right, insets.bottom);
+        } else {
+            setPadding(0, 0, 0, 0);
+        }
+        return true;
     }
 
     @Override
