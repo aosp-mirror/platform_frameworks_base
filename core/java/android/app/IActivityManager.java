@@ -79,7 +79,7 @@ public interface IActivityManager extends IInterface {
             int flagsMask, int flagsValues, Bundle options) throws RemoteException;
     public boolean startNextMatchingActivity(IBinder callingActivity,
             Intent intent, Bundle options) throws RemoteException;
-    public boolean finishActivity(IBinder token, int code, Intent data)
+    public boolean finishActivity(IBinder token, int code, Intent data, boolean finishTask)
             throws RemoteException;
     public void finishSubActivity(IBinder token, String resultWho, int requestCode) throws RemoteException;
     public boolean finishActivityAffinity(IBinder token) throws RemoteException;

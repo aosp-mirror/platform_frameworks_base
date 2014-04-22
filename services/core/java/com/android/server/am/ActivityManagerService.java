@@ -3417,11 +3417,14 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @param token The Binder token referencing the Activity we want to finish.
      * @param resultCode Result code, if any, from this Activity.
      * @param resultData Result data (Intent), if any, from this Activity.
+     * @param finishTask Whether to finish the task associated with this Activity.  Only applies to
+     *            the root Activity in the task.
      *
      * @return Returns true if the activity successfully finished, or false if it is still running.
      */
     @Override
-    public final boolean finishActivity(IBinder token, int resultCode, Intent resultData) {
+    public final boolean finishActivity(IBinder token, int resultCode, Intent resultData,
+            boolean finishTask) {
         // Refuse possible leaked file descriptors
         if (resultData != null && resultData.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -3432,6 +3435,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (r == null) {
                 return true;
             }
+            // Keep track of the root activity of the task before we finish it
+            TaskRecord tr = r.task;
+            ActivityRecord rootR = tr.getRootActivity();
             if (mController != null) {
                 // Find the first activity that is not finishing.
                 ActivityRecord next = r.task.stack.topRunningActivityLocked(token, 0);
@@ -3451,10 +3457,21 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             final long origId = Binder.clearCallingIdentity();
-            boolean res = r.task.stack.requestFinishActivityLocked(token, resultCode,
-                    resultData, "app-request", true);
-            Binder.restoreCallingIdentity(origId);
-            return res;
+            try {
+                boolean res;
+                if (finishTask && r == rootR) {
+                    // If requested, remove the task that is associated to this activity only if it
+                    // was the root activity in the task.  The result code and data is ignored because
+                    // we don't support returning them across task boundaries.
+                    res = removeTaskByIdLocked(tr.taskId, 0);
+                } else {
+                    res = tr.stack.requestFinishActivityLocked(token, resultCode,
+                            resultData, "app-request", true);
+                }
+                return res;
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
         }
     }
 
@@ -7084,6 +7101,24 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    /**
+     * Removes the task with the specified task id.
+     *
+     * @param taskId Identifier of the task to be removed.
+     * @param flags Additional operational flags.  May be 0 or
+     * {@link ActivityManager#REMOVE_TASK_KILL_PROCESS}.
+     * @return Returns true if the given task was found and removed.
+     */
+    private boolean removeTaskByIdLocked(int taskId, int flags) {
+        TaskRecord tr = recentTaskForIdLocked(taskId);
+        if (tr != null) {
+            tr.removeTaskActivitiesLocked(-1, false);
+            cleanUpRemovedTaskLocked(tr, flags);
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public boolean removeTask(int taskId, int flags) {
         synchronized (this) {
@@ -7091,29 +7126,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                     "removeTask()");
             long ident = Binder.clearCallingIdentity();
             try {
-                TaskRecord tr = recentTaskForIdLocked(taskId);
-                if (tr != null) {
-                    ActivityRecord r = tr.removeTaskActivitiesLocked(-1, false);
-                    if (r != null) {
-                        cleanUpRemovedTaskLocked(tr, flags);
-                        return true;
-                    }
-                    if (tr.mActivities.size() == 0) {
-                        // Caller is just removing a recent task that is
-                        // not actively running.  That is easy!
-                        cleanUpRemovedTaskLocked(tr, flags);
-                        return true;
-                    }
-                    Slog.w(TAG, "removeTask: task " + taskId
-                            + " does not have activities to remove, "
-                            + " but numActivities=" + tr.numActivities
-                            + ": " + tr);
-                }
+                return removeTaskByIdLocked(taskId, flags);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         }
-        return false;
     }
     
     /**

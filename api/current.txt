@@ -3175,6 +3175,7 @@ package android.app {
     method public void finishActivity(int);
     method public void finishActivityFromChild(android.app.Activity, int);
     method public void finishAffinity();
+    method public void finishAndRemoveTask();
     method public void finishFromChild(android.app.Activity);
     method public void finishWithTransition();
     method public android.app.ActionBar getActionBar();

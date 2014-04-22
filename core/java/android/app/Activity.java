@@ -4314,11 +4314,10 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Call this when your activity is done and should be closed.  The
-     * ActivityResult is propagated back to whoever launched you via
-     * onActivityResult().
+     * Finishes the current activity and specifies whether to remove the task associated with this
+     * activity.
      */
-    public void finish() {
+    private void finish(boolean finishTask) {
         if (mParent == null) {
             int resultCode;
             Intent resultData;
@@ -4332,7 +4331,7 @@ public class Activity extends ContextThemeWrapper
                     resultData.prepareToLeaveProcess();
                 }
                 if (ActivityManagerNative.getDefault()
-                    .finishActivity(mToken, resultCode, resultData)) {
+                        .finishActivity(mToken, resultCode, resultData, finishTask)) {
                     mFinished = true;
                 }
             } catch (RemoteException e) {
@@ -4341,6 +4340,15 @@ public class Activity extends ContextThemeWrapper
         } else {
             mParent.finishFromChild(this);
         }
+    }
+
+    /**
+     * Call this when your activity is done and should be closed.  The
+     * ActivityResult is propagated back to whoever launched you via
+     * onActivityResult().
+     */
+    public void finish() {
+        finish(false);
     }
 
     /**
@@ -4439,6 +4447,14 @@ public class Activity extends ContextThemeWrapper
         } catch (RemoteException e) {
             // Empty
         }
+    }
+
+    /**
+     * Call this when your activity is done and should be closed and the task should be completely
+     * removed as a part of finishing the Activity.
+     */
+    public void finishAndRemoveTask() {
+        finish(true);
     }
 
     /**
