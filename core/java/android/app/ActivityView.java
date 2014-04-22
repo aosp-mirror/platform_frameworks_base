@@ -33,15 +33,18 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import dalvik.system.CloseGuard;
+
+import java.lang.ref.WeakReference;
 
 /** @hide */
 public class ActivityView extends ViewGroup {
-    private final String TAG = "ActivityView";
-    private final boolean DEBUG = false;
+    private static final String TAG = "ActivityView";
+    private static final boolean DEBUG = false;
 
+    DisplayMetrics mMetrics;
     private final TextureView mTextureView;
     private IActivityContainer mActivityContainer;
     private Activity mActivity;
@@ -52,6 +55,8 @@ public class ActivityView extends ViewGroup {
     // Only one IIntentSender or Intent may be queued at a time. Most recent one wins.
     IIntentSender mQueuedPendingIntent;
     Intent mQueuedIntent;
+
+    private final CloseGuard mGuard = CloseGuard.get();
 
     public ActivityView(Context context) {
         this(context, null);
@@ -75,60 +80,30 @@ public class ActivityView extends ViewGroup {
             throw new IllegalStateException("The ActivityView's Context is not an Activity.");
         }
 
+        try {
+            mActivityContainer = ActivityManagerNative.getDefault().createActivityContainer(
+                    mActivity.getActivityToken(), new ActivityContainerCallback(this));
+        } catch (RemoteException e) {
+            throw new IllegalStateException("ActivityView: Unable to create ActivityContainer. "
+                    + e);
+        }
+
         mTextureView = new TextureView(context);
         mTextureView.setSurfaceTextureListener(new ActivityViewSurfaceTextureListener());
         addView(mTextureView);
+
+        WindowManager wm = (WindowManager)mActivity.getSystemService(Context.WINDOW_SERVICE);
+        mMetrics = new DisplayMetrics();
+        wm.getDefaultDisplay().getMetrics(mMetrics);
+
+        mGuard.open("release");
+
         if (DEBUG) Log.v(TAG, "ctor()");
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         mTextureView.layout(0, 0, r - l, b - t);
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        if (DEBUG) Log.v(TAG, "onAttachedToWindow()");
-        super.onAttachedToWindow();
-        try {
-            final IBinder token = mActivity.getActivityToken();
-            mActivityContainer = ActivityManagerNative.getDefault().createActivityContainer(token,
-                      new ActivityContainerCallback());
-        } catch (RemoteException e) {
-            throw new IllegalStateException("ActivityView: Unable to create ActivityContainer. "
-                    + e);
-        }
-
-        attachToSurfaceWhenReady();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        if (DEBUG) Log.v(TAG, "onDetachedFromWindow(): mActivityContainer=" + mActivityContainer);
-        super.onDetachedFromWindow();
-        if (mActivityContainer != null) {
-            detach();
-            try {
-                ActivityManagerNative.getDefault().deleteActivityContainer(mActivityContainer);
-            } catch (RemoteException e) {
-            }
-            mActivityContainer = null;
-        }
-    }
-
-    @Override
-    protected void onWindowVisibilityChanged(int visibility) {
-        if (DEBUG) Log.v(TAG, "onWindowVisibilityChanged(): visibility=" + visibility);
-        super.onWindowVisibilityChanged(visibility);
-        switch (visibility) {
-            case  View.VISIBLE:
-                attachToSurfaceWhenReady();
-                break;
-            case  View.INVISIBLE:
-                break;
-            case View.GONE:
-                break;
-        }
     }
 
     private boolean injectInputEvent(InputEvent event) {
@@ -159,6 +134,9 @@ public class ActivityView extends ViewGroup {
     }
 
     public void startActivity(Intent intent) {
+        if (mActivityContainer == null) {
+            throw new IllegalStateException("Attempt to call startActivity after release");
+        }
         if (DEBUG) Log.v(TAG, "startActivity(): intent=" + intent + " " +
                 (isAttachedToDisplay() ? "" : "not") + " attached");
         if (mSurface != null) {
@@ -183,6 +161,9 @@ public class ActivityView extends ViewGroup {
     }
 
     public void startActivity(IntentSender intentSender) {
+        if (mActivityContainer == null) {
+            throw new IllegalStateException("Attempt to call startActivity after release");
+        }
         if (DEBUG) Log.v(TAG, "startActivityIntentSender(): intentSender=" + intentSender + " " +
                 (isAttachedToDisplay() ? "" : "not") + " attached");
         final IIntentSender iIntentSender = intentSender.getTarget();
@@ -195,6 +176,9 @@ public class ActivityView extends ViewGroup {
     }
 
     public void startActivity(PendingIntent pendingIntent) {
+        if (mActivityContainer == null) {
+            throw new IllegalStateException("Attempt to call startActivity after release");
+        }
         if (DEBUG) Log.v(TAG, "startActivityPendingIntent(): PendingIntent=" + pendingIntent + " "
                 + (isAttachedToDisplay() ? "" : "not") + " attached");
         final IIntentSender iIntentSender = pendingIntent.getTarget();
@@ -206,24 +190,54 @@ public class ActivityView extends ViewGroup {
         }
     }
 
+    public void release() {
+        if (DEBUG) Log.v(TAG, "release()");
+        if (mActivityContainer == null) {
+            Log.e(TAG, "Duplicate call to release");
+            return;
+        }
+        try {
+            mActivityContainer.release();
+        } catch (RemoteException e) {
+        }
+        mActivityContainer = null;
+
+        if (mSurface != null) {
+            mSurface.release();
+            mSurface = null;
+        }
+
+        mTextureView.setSurfaceTextureListener(null);
+
+        mGuard.close();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            if (mGuard != null) {
+                mGuard.warnIfOpen();
+                release();
+            }
+        } finally {
+            super.finalize();
+        }
+    }
+
     private void attachToSurfaceWhenReady() {
         final SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
-        if (mActivityContainer == null || surfaceTexture == null || mSurface != null) {
+        if (surfaceTexture == null || mSurface != null) {
             // Either not ready to attach, or already attached.
             return;
         }
 
-        WindowManager wm = (WindowManager)mActivity.getSystemService(Context.WINDOW_SERVICE);
-        DisplayMetrics metrics = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics(metrics);
-
         mSurface = new Surface(surfaceTexture);
         try {
-            mActivityContainer.attachToSurface(mSurface, mWidth, mHeight, metrics.densityDpi);
+            mActivityContainer.setSurface(mSurface, mWidth, mHeight, mMetrics.densityDpi);
         } catch (RemoteException e) {
             mSurface.release();
             mSurface = null;
-            throw new IllegalStateException(
+            throw new RuntimeException(
                     "ActivityView: Unable to create ActivityContainer. " + e);
         }
 
@@ -238,41 +252,43 @@ public class ActivityView extends ViewGroup {
         }
     }
 
-    private void detach() {
-        if (DEBUG) Log.d(TAG, "detach: attached=" + isAttachedToDisplay());
-        if (mSurface != null) {
-            try {
-                mActivityContainer.detachFromDisplay();
-            } catch (RemoteException e) {
-            }
-            mSurface.release();
-            mSurface = null;
-        }
-    }
-
     private class ActivityViewSurfaceTextureListener implements SurfaceTextureListener {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width,
                 int height) {
+            if (mActivityContainer == null) {
+                return;
+            }
             if (DEBUG) Log.d(TAG, "onSurfaceTextureAvailable: width=" + width + " height="
                     + height);
             mWidth = width;
             mHeight = height;
-            if (mActivityContainer != null) {
-                attachToSurfaceWhenReady();
-            }
+            attachToSurfaceWhenReady();
         }
 
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int width,
                 int height) {
+            if (mActivityContainer == null) {
+                return;
+            }
             if (DEBUG) Log.d(TAG, "onSurfaceTextureSizeChanged: w=" + width + " h=" + height);
         }
 
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
+            if (mActivityContainer == null) {
+                return true;
+            }
             if (DEBUG) Log.d(TAG, "onSurfaceTextureDestroyed");
-            detach();
+            mSurface.release();
+            mSurface = null;
+            try {
+                mActivityContainer.setSurface(null, mWidth, mHeight, mMetrics.densityDpi);
+            } catch (RemoteException e) {
+                throw new RuntimeException(
+                        "ActivityView: Unable to set surface of ActivityContainer. " + e);
+            }
             return true;
         }
 
@@ -283,13 +299,17 @@ public class ActivityView extends ViewGroup {
 
     }
 
-    private class ActivityContainerCallback extends IActivityContainerCallback.Stub {
+    private static class ActivityContainerCallback extends IActivityContainerCallback.Stub {
+        private final WeakReference<ActivityView> mActivityViewWeakReference;
+
+        ActivityContainerCallback(ActivityView activityView) {
+            mActivityViewWeakReference = new WeakReference<ActivityView>(activityView);
+        }
+
         @Override
         public void setVisible(IBinder container, boolean visible) {
-            if (DEBUG) Log.v(TAG, "setVisible(): container=" + container + " visible=" + visible);
-            if (visible) {
-            } else {
-            }
+            if (DEBUG) Log.v(TAG, "setVisible(): container=" + container + " visible=" + visible +
+                    " ActivityView=" + mActivityViewWeakReference.get());
         }
     }
 }

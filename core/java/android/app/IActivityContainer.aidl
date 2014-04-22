@@ -26,10 +26,10 @@ import android.view.Surface;
 /** @hide */
 interface IActivityContainer {
     void attachToDisplay(int displayId);
-    void attachToSurface(in Surface surface, int width, int height, int density);
-    void detachFromDisplay();
+    void setSurface(in Surface surface, int width, int height, int density);
     int startActivity(in Intent intent);
     int startActivityIntentSender(in IIntentSender intentSender);
     int getDisplayId();
     boolean injectEvent(in InputEvent event);
+    void release();
 }
