@@ -21,36 +21,24 @@ import android.animation.LayoutTransition.TransitionListener;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
-import android.app.ActivityManagerNative;
 import android.app.StatusBarManager;
-import android.app.admin.DevicePolicyManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
-import android.os.PowerManager;
-import android.os.RemoteException;
-import android.os.UserHandle;
-import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -62,8 +50,6 @@ import com.android.systemui.statusbar.policy.KeyButtonView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-
-import static com.android.systemui.statusbar.phone.KeyguardTouchDelegate.OnKeyguardConnectionListener;
 
 public class NavigationBarView extends LinearLayout {
     final static boolean DEBUG = false;
@@ -98,15 +84,8 @@ public class NavigationBarView extends LinearLayout {
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
     final static int MSG_CHECK_INVALID_LAYOUT = 8686;
 
-    private final float mCameraDragDistance;
-
-    // used to disable the camera icon in navbar when disabled by DPM
-    private boolean mCameraDisabledByDpm;
-
     // performs manual animation in sync with layout transitions
     private final NavTransitionListener mTransitionListener = new NavTransitionListener();
-
-    private final PowerManager mPowerManager;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -157,111 +136,11 @@ public class NavigationBarView extends LinearLayout {
     private final OnClickListener mAccessibilityClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (v.getId() == R.id.camera_button) {
-                KeyguardTouchDelegate.getInstance(getContext()).launchCamera();
-            } else if (v.getId() == R.id.search_light) {
+            if (v.getId() == R.id.search_light) {
                 KeyguardTouchDelegate.getInstance(getContext()).showAssistant();
             }
         }
     };
-
-    private final int mScaledTouchSlop;
-
-    private final OnTouchListener mCameraTouchListener = new OnTouchListener() {
-        private float mStartX;
-        private boolean mTouchSlopReached;
-        private boolean mSkipCancelAnimation;
-
-        @Override
-        public boolean onTouch(final View cameraButtonView, MotionEvent event) {
-            float realX = event.getRawX();
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    // disable search gesture while interacting with camera
-                    mDelegateHelper.setDisabled(true);
-                    mBarTransitions.setContentVisible(false);
-                    mStartX = realX;
-                    mTouchSlopReached = false;
-                    mSkipCancelAnimation = false;
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    if (realX > mStartX) {
-                        realX = mStartX;
-                    }
-                    if (realX < mStartX - mCameraDragDistance) {
-                        ((KeyButtonView) cameraButtonView).setPressed(true);
-                        mPowerManager.userActivity(event.getEventTime(), false);
-                    } else {
-                        ((KeyButtonView) cameraButtonView).setPressed(false);
-                    }
-                    if (realX < mStartX - mScaledTouchSlop) {
-                        mTouchSlopReached = true;
-                    }
-                    cameraButtonView.setTranslationX(Math.max(realX - mStartX,
-                            -mCameraDragDistance));
-                    break;
-                case MotionEvent.ACTION_UP:
-                    if (realX < mStartX - mCameraDragDistance) {
-                        mContext.startActivityAsUser(
-                                new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE),
-                                UserHandle.CURRENT);
-                        cameraButtonView.animate().x(-cameraButtonView.getWidth())
-                                .setInterpolator(new AccelerateInterpolator(2f)).withEndAction(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        cameraButtonView.setTranslationX(0);
-                                    }
-                                });
-                        mSkipCancelAnimation = true;
-                    }
-                    if (realX < mStartX - mScaledTouchSlop) {
-                        mTouchSlopReached = true;
-                    }
-                    if (!mTouchSlopReached) {
-                        mSkipCancelAnimation = true;
-                        cameraButtonView.animate().translationX(-mCameraDragDistance / 2).
-                                        setInterpolator(new DecelerateInterpolator()).withEndAction(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        cameraButtonView.animate().translationX(0).
-                                                setInterpolator(new AccelerateInterpolator());
-                                    }
-                                });
-                    }
-                case MotionEvent.ACTION_CANCEL:
-                    ((KeyButtonView) cameraButtonView).setPressed(false);
-                    mDelegateHelper.setDisabled(false);
-                    mBarTransitions.setContentVisible(true);
-                    if (!mSkipCancelAnimation) {
-                        cameraButtonView.animate().translationX(0)
-                                .setInterpolator(new AccelerateInterpolator(2f));
-                    }
-                    break;
-            }
-            return true;
-        }
-    };
-
-    private final OnKeyguardConnectionListener mKeyguardConnectionListener =
-            new OnKeyguardConnectionListener() {
-                @Override
-                public void onKeyguardServiceConnected(
-                        KeyguardTouchDelegate keyguardTouchDelegate) {
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mCameraDisabledByDpm = isCameraDisabledByDpm();
-                        }
-                    });
-                }
-
-                @Override
-                public void onKeyguardServiceDisconnected(
-                        KeyguardTouchDelegate keyguardTouchDelegate) {
-                }
-            };
 
     private class H extends Handler {
         public void handleMessage(Message m) {
@@ -301,28 +180,6 @@ public class NavigationBarView extends LinearLayout {
         getIcons(res);
 
         mBarTransitions = new NavigationBarTransitions(this);
-
-        KeyguardTouchDelegate.addListener(mKeyguardConnectionListener);
-        mCameraDisabledByDpm = isCameraDisabledByDpm();
-        watchForDevicePolicyChanges();
-        mCameraDragDistance = res.getDimension(R.dimen.camera_drag_distance);
-        mScaledTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
-        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-    }
-
-    private void watchForDevicePolicyChanges() {
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        getContext().registerReceiver(new BroadcastReceiver() {
-            public void onReceive(Context context, Intent intent) {
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mCameraDisabledByDpm = isCameraDisabledByDpm();
-                    }
-                });
-            }
-        }, filter);
     }
 
     public BarTransitions getBarTransitions() {
@@ -379,11 +236,6 @@ public class NavigationBarView extends LinearLayout {
     // for when home is disabled, but search isn't
     public View getSearchLight() {
         return mCurrentView.findViewById(R.id.search_light);
-    }
-
-    // shown when keyguard is visible and camera is available
-    public View getCameraButton() {
-        return mCurrentView.findViewById(R.id.camera_button);
     }
 
     private void getIcons(Resources res) {
@@ -475,9 +327,7 @@ public class NavigationBarView extends LinearLayout {
         getRecentsButton().setVisibility(disableRecent     ? View.INVISIBLE : View.VISIBLE);
 
         final boolean showSearch = disableHome && !disableSearch;
-        final boolean showCamera = showSearch && !mCameraDisabledByDpm;
         setVisibleOrGone(getSearchLight(), showSearch);
-        setVisibleOrGone(getCameraButton(), showCamera);
 
         mBarTransitions.applyBackButtonQuiescentAlpha(mBarTransitions.getMode(), true /*animate*/);
     }
@@ -486,24 +336,6 @@ public class NavigationBarView extends LinearLayout {
         if (view != null) {
             view.setVisibility(visible ? VISIBLE : GONE);
         }
-    }
-
-    private boolean isCameraDisabledByDpm() {
-        final DevicePolicyManager dpm =
-                (DevicePolicyManager) getContext().getSystemService(Context.DEVICE_POLICY_SERVICE);
-        if (dpm != null) {
-            try {
-                final int userId = ActivityManagerNative.getDefault().getCurrentUser().id;
-                final int disabledFlags = dpm.getKeyguardDisabledFeatures(null, userId);
-                final  boolean disabledBecauseKeyguardSecure =
-                        (disabledFlags & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0
-                        && KeyguardTouchDelegate.getInstance(getContext()).isSecure();
-                return dpm.getCameraDisabled(null) || disabledBecauseKeyguardSecure;
-            } catch (RemoteException e) {
-                Log.e(TAG, "Can't get userId", e);
-            }
-        }
-        return false;
     }
 
     public void setSlippery(boolean newSlippery) {
@@ -572,24 +404,11 @@ public class NavigationBarView extends LinearLayout {
         // Add a touch handler or accessibility click listener for camera and search buttons
         // for all view orientations.
         final OnClickListener onClickListener = touchEnabled ? mAccessibilityClickListener : null;
-        final OnTouchListener onTouchListener = touchEnabled ? null : mCameraTouchListener;
-        boolean hasCamera = false;
         for (int i = 0; i < mRotatedViews.length; i++) {
-            final View cameraButton = mRotatedViews[i].findViewById(R.id.camera_button);
             final View searchLight = mRotatedViews[i].findViewById(R.id.search_light);
-            if (cameraButton != null) {
-                hasCamera = true;
-                cameraButton.setOnTouchListener(onTouchListener);
-                cameraButton.setOnClickListener(onClickListener);
-            }
             if (searchLight != null) {
                 searchLight.setOnClickListener(onClickListener);
             }
-        }
-        if (hasCamera) {
-            // Warm up KeyguardTouchDelegate so it's ready by the time the camera button is touched.
-            // This will connect to KeyguardService so that touch events are processed.
-            KeyguardTouchDelegate.getInstance(getContext());
         }
     }
 
@@ -727,7 +546,6 @@ public class NavigationBarView extends LinearLayout {
         dumpButton(pw, "rcnt", getRecentsButton());
         dumpButton(pw, "menu", getMenuButton());
         dumpButton(pw, "srch", getSearchLight());
-        dumpButton(pw, "cmra", getCameraButton());
 
         pw.println("    }");
     }

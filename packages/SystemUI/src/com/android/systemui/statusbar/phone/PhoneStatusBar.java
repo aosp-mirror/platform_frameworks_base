@@ -78,6 +78,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -227,6 +228,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     // top bar
     View mNotificationPanelHeader;
     View mKeyguardStatusView;
+    View mKeyguardBottomArea;
     int mKeyguardMaxNotificationCount;
     View mDateTimeView;
     View mClearButton;
@@ -612,6 +614,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         mNotificationPanelHeader = mStatusBarWindow.findViewById(R.id.header);
         mKeyguardStatusView = mStatusBarWindow.findViewById(R.id.keyguard_status_view);
+        mKeyguardBottomArea = mStatusBarWindow.findViewById(R.id.keyguard_bottom_area);
 
         mClearButton = mStatusBarWindow.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
@@ -2068,7 +2071,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private void checkBarModes() {
         if (mDemoMode) return;
         int sbMode = mStatusBarMode;
-        if (panelsEnabled() && (mInteractingWindows & StatusBarManager.WINDOW_STATUS_BAR) != 0) {
+        if (panelsEnabled() && (mInteractingWindows & StatusBarManager.WINDOW_STATUS_BAR) != 0
+                && !mOnKeyguard) {
             // if panels are expandable, force the status bar opaque on any interaction
             sbMode = MODE_OPAQUE;
         }
@@ -2911,22 +2915,26 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             flipToNotifications();
         }
         mKeyguardStatusView.setVisibility(View.VISIBLE);
+        mKeyguardBottomArea.setVisibility(View.VISIBLE);
         mNotificationPanelHeader.setVisibility(View.GONE);
 
         mKeyguardFlipper.setVisibility(View.VISIBLE);
         mSettingsContainer.setKeyguardShowing(true);
         updateRowStates();
+        checkBarModes();
     }
 
     public void hideKeyguard() {
         mOnKeyguard = false;
         mKeyguardStatusView.setVisibility(View.GONE);
+        mKeyguardBottomArea.setVisibility(View.GONE);
         mNotificationPanelHeader.setVisibility(View.VISIBLE);
 
         mKeyguardFlipper.setVisibility(View.GONE);
         mSettingsContainer.setKeyguardShowing(false);
         updateRowStates();
         instantCollapseNotificationPanel();
+        checkBarModes();
     }
 
     public void userActivity() {
@@ -2955,8 +2963,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     private void instantExpandNotificationsPanel() {
-        mExpandedVisible = true;
-        mNotificationPanel.setExpandedFraction(1);
+        mNotificationPanel.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mNotificationPanel.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        mNotificationPanel.setExpandedFraction(1);
+                    }
+                });
     }
 
     private void instantCollapseNotificationPanel() {
@@ -2972,6 +2986,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     @Override
     protected int getMaxKeyguardNotifications() {
         return mKeyguardMaxNotificationCount;
+    }
+
+    public NavigationBarView getNavigationBarView() {
+        return mNavigationBarView;
     }
 
     /**
