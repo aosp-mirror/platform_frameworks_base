@@ -33,7 +33,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Iterator;
 
-public class NetworkScorerApplicationTest extends InstrumentationTestCase {
+public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
     @Mock private Context mMockContext;
     @Mock private PackageManager mMockPm;
 
@@ -64,7 +64,7 @@ public class NetworkScorerApplicationTest extends InstrumentationTestCase {
         setScorers(package1, package2, package3);
 
         Iterator<String> result =
-                NetworkScorerApplication.getAllValidScorers(mMockContext).iterator();
+                NetworkScorerAppManager.getAllValidScorers(mMockContext).iterator();
 
         assertTrue(result.hasNext());
         assertEquals("package1", result.next());

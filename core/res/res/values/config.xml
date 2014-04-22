@@ -1432,4 +1432,6 @@
     <!-- default window inset isRound property -->
     <bool name="config_windowIsRound">false</bool>
 
+    <!-- Package name for default network scorer app; overridden by product overlays. -->
+    <string name="config_defaultNetworkScorerPackageName"></string>
 </resources>

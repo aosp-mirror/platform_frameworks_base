@@ -19,6 +19,8 @@ package android.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * A network identifier along with a score for the quality of that network.
  *
@@ -77,6 +79,22 @@ public class ScoredNetwork implements Parcelable {
         } else {
             out.writeByte((byte) 0);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ScoredNetwork that = (ScoredNetwork) o;
+
+        return Objects.equals(networkKey, that.networkKey) &&
+                Objects.equals(rssiCurve, that.rssiCurve);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(networkKey, rssiCurve);
     }
 
     @Override

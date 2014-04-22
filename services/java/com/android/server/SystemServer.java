@@ -311,6 +311,7 @@ public final class SystemServer {
         NetworkStatsService networkStats = null;
         NetworkPolicyManagerService networkPolicy = null;
         ConnectivityService connectivity = null;
+        NetworkScoreService networkScore = null;
         NsdService serviceDiscovery= null;
         IPackageManager pm = null;
         WindowManagerService wm = null;
@@ -640,6 +641,14 @@ public final class SystemServer {
                     networkPolicy.bindConnectivityManager(connectivity);
                 } catch (Throwable e) {
                     reportWtf("starting Connectivity Service", e);
+                }
+
+                try {
+                    Slog.i(TAG, "Network Score Service");
+                    networkScore = new NetworkScoreService(context);
+                    ServiceManager.addService(Context.NETWORK_SCORE_SERVICE, networkScore);
+                } catch (Throwable e) {
+                    reportWtf("starting Network Score Service", e);
                 }
 
                 try {
@@ -1021,6 +1030,7 @@ public final class SystemServer {
         final NetworkStatsService networkStatsF = networkStats;
         final NetworkPolicyManagerService networkPolicyF = networkPolicy;
         final ConnectivityService connectivityF = connectivity;
+        final NetworkScoreService networkScoreF = networkScore;
         final DockObserver dockF = dock;
         final WallpaperManagerService wallpaperF = wallpaper;
         final InputMethodManagerService immF = imm;
@@ -1067,6 +1077,11 @@ public final class SystemServer {
                     if (batteryF != null) batteryF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making Battery Service ready", e);
+                }
+                try {
+                    if (networkScoreF != null) networkScoreF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Network Score Service ready", e);
                 }
                 try {
                     if (networkManagementF != null) networkManagementF.systemReady();

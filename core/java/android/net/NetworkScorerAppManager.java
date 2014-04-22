@@ -26,6 +26,7 @@ import android.content.pm.ResolveInfo;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,13 +37,14 @@ import java.util.List;
  *
  * @hide
  */
-public final class NetworkScorerApplication {
+public final class NetworkScorerAppManager {
+    private static final String TAG = "NetworkScorerAppManager";
 
     private static final Intent SCORE_INTENT =
             new Intent(NetworkScoreManager.ACTION_SCORE_NETWORKS);
 
     /** This class cannot be instantiated. */
-    private NetworkScorerApplication() {}
+    private NetworkScorerAppManager() {}
 
     /**
      * Returns the list of available scorer app package names.
@@ -111,30 +113,38 @@ public final class NetworkScorerApplication {
      * @param context the context of the calling application
      * @param packageName the packageName of the new scorer to use. If null, scoring will be
      *     disabled. Otherwise, the scorer will only be set if it is a valid scorer application.
+     * @return true if the scorer was changed, or false if the package is not a valid scorer.
      */
-    public static void setActiveScorer(Context context, String packageName) {
+    public static boolean setActiveScorer(Context context, String packageName) {
         String oldPackageName = Settings.Global.getString(context.getContentResolver(),
                 Settings.Global.NETWORK_SCORER_APP);
         if (TextUtils.equals(oldPackageName, packageName)) {
             // No change.
-            return;
+            return true;
         }
+
+        Log.i(TAG, "Changing network scorer from " + oldPackageName + " to " + packageName);
 
         if (packageName == null) {
             Settings.Global.putString(context.getContentResolver(), Global.NETWORK_SCORER_APP,
                     null);
+            return true;
         } else {
             // We only make the change if the new package is valid.
             Collection<String> applications = getAllValidScorers(context);
             if (isPackageValidScorer(applications, packageName)) {
                 Settings.Global.putString(context.getContentResolver(),
                         Settings.Global.NETWORK_SCORER_APP, packageName);
+                return true;
+            } else {
+                Log.w(TAG, "Requested network scorer is not valid: " + packageName);
+                return false;
             }
         }
     }
 
     /** Determine whether the application with the given UID is the enabled scorer. */
-    public static boolean isCallerDefaultScorer(Context context, int callingUid) {
+    public static boolean isCallerActiveScorer(Context context, int callingUid) {
         String defaultApp = getActiveScorer(context);
         if (defaultApp == null) {
             return false;
