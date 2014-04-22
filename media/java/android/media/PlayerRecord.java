@@ -58,6 +58,9 @@ class PlayerRecord implements DeathRecipient {
 
     private int mRccId = RemoteControlClient.RCSE_ID_UNREGISTERED;
 
+    /**
+     * A non-null token implies this record tracks a "live" player whose death is being monitored.
+     */
     private IBinder mToken;
     private String mCallingPackageName;
     private int mCallingUid;
@@ -267,7 +270,19 @@ class PlayerRecord implements DeathRecipient {
     }
 
     protected boolean hasMatchingMediaButtonIntent(PendingIntent pi) {
-        return mMediaIntent.equals(pi);
+        if (mToken != null) {
+            return mMediaIntent.equals(pi);
+        } else {
+            if (mReceiverComponent != null) {
+                return mReceiverComponent.equals(pi.getIntent().getComponent());
+            } else {
+                return false;
+            }
+        }
+    }
+
+    protected boolean isPlaybackActive() {
+        return MediaFocusControl.isPlaystateActive(mPlaybackState.mState);
     }
 
     //---------------------------------------------
