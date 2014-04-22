@@ -28,7 +28,6 @@ import com.android.internal.util.XmlUtils;
 import libcore.io.IoUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
