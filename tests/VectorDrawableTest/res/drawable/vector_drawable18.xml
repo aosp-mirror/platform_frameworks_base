@@ -1,4 +1,5 @@
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!--
+ Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,31 +16,30 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <size
-            android:width="64dp"
-            android:height="64dp"/>
+        android:height="64dp"
+        android:width="64dp" />
 
-    <viewport android:viewportWidth="500"
-          android:viewportHeight="400"/>
-
-    <group>
-        <path
-                android:name="arrow"
-                android:pathData="M100,200 C100,100 250,100 250,200 S400,300 400,200"
-                android:stroke="#FFFFFF00"
-                android:strokeWidth="10"/>
-    </group>
+    <viewport
+        android:viewportHeight="400"
+        android:viewportWidth="500" />
 
     <group>
         <path
-                android:name="house"
-                android:pathData="M100,200 C100,100 250,100 250,200 S400,300 400,200"
-                android:strokeWidth="10"
-                android:rotation="360"
-                android:pivotX="250"
-                android:pivotY="200"/>
+            android:name="arrow"
+            android:pathData="M100,200 C100,100 250,100 250,200 S400,300 400,200"
+            android:stroke="#FFFFFF00"
+            android:strokeWidth="10" />
+    </group>
+    <group>
+        <path
+            android:name="house"
+            android:pathData="M100,200 C100,100 250,100 250,200 S400,300 400,200"
+            android:pivotX="250"
+            android:pivotY="200"
+            android:rotation="360"
+            android:strokeWidth="10" />
     </group>
 
-    <animation android:sequence="arrow,house"/>
-
+    <animation android:sequence="arrow,house" />
 
 </vector>
