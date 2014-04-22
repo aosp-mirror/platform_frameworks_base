@@ -54,6 +54,7 @@ public class ExpandableNotificationRow extends FrameLayout
     private boolean mMaxHeightNeedsUpdate;
     private NotificationActivator mActivator;
     private LatestItemView.OnActivatedListener mOnActivatedListener;
+    private boolean mSelfInitiatedLayout;
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -162,6 +163,11 @@ public class ExpandableNotificationRow extends FrameLayout
     }
 
     private void updateMaxExpandHeight() {
+
+        // We don't want this method to trigger a layout of the whole view hierarchy,
+        // as the layout parameters in the end are the same which they were in the beginning.
+        // Otherwise a loop may occur if this method is called on the layout of a parent.
+        mSelfInitiatedLayout = true;
         ViewGroup.LayoutParams lp = getLayoutParams();
         int oldHeight = lp.height;
         lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -171,6 +177,14 @@ public class ExpandableNotificationRow extends FrameLayout
         lp.height = oldHeight;
         setLayoutParams(lp);
         mMaxExpandHeight = getMeasuredHeight();
+        mSelfInitiatedLayout = false;
+    }
+
+    @Override
+    public void requestLayout() {
+        if (!mSelfInitiatedLayout) {
+            super.requestLayout();
+        }
     }
 
     /**
@@ -256,5 +270,12 @@ public class ExpandableNotificationRow extends FrameLayout
      */
     public void setBackgroundResourceIds(int bgResId, int dimmedBgResId) {
         mLatestItemView.setBackgroundResourceIds(bgResId, dimmedBgResId);
+    }
+
+    /**
+     * @return the potential height this view could expand in addition.
+     */
+    public int getExpandPotential() {
+        return getMaximumAllowedExpandHeight() - getHeight();
     }
 }
