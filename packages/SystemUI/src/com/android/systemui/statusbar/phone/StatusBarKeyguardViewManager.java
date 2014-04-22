@@ -56,6 +56,7 @@ public class StatusBarKeyguardViewManager {
     private boolean mScreenOn = false;
     private KeyguardBouncer mBouncer;
     private boolean mShowing;
+    private boolean mOccluded;
 
     public StatusBarKeyguardViewManager(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils) {
@@ -152,7 +153,9 @@ public class StatusBarKeyguardViewManager {
     }
 
     public void setOccluded(boolean occluded) {
+        mOccluded = occluded;
         mStatusBarWindowManager.setKeyguardOccluded(occluded);
+        updateBackButtonState();
     }
 
     /**
@@ -164,6 +167,7 @@ public class StatusBarKeyguardViewManager {
         mStatusBarWindowManager.setKeyguardShowing(false);
         mBouncer.hide();
         mViewMediatorCallback.keyguardGone();
+        updateBackButtonState();
     }
 
     /**
@@ -204,6 +208,11 @@ public class StatusBarKeyguardViewManager {
             mContainer.setSystemUiVisibility(vis & ~View.STATUS_BAR_DISABLE_BACK);
         } else {
             mContainer.setSystemUiVisibility(vis | View.STATUS_BAR_DISABLE_BACK);
+        }
+        if (!(mShowing && !mOccluded) || mBouncer.isShowing()) {
+            mPhoneStatusBar.getNavigationBarView().setVisibility(View.VISIBLE);
+        } else {
+            mPhoneStatusBar.getNavigationBarView().setVisibility(View.GONE);
         }
     }
 

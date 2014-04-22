@@ -90,4 +90,8 @@
                     />
         </FrameLayout>
     </LinearLayout>
+
+    <include
+        layout="@layout/keyguard_bottom_area"
+        android:visibility="gone" />
 </com.android.systemui.statusbar.phone.NotificationPanelView><!-- end of sliding panel -->
