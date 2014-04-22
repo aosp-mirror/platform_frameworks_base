@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"I-sync"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Masyadong maraming pagtanggal ng <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Puno na ang storage ng tablet. Magtanggal ng ilang file upang magbakante ng espasyo."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Puno na ang storage ng relo. Magtanggal ng ilang file upang magbakante ng espasyo."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Puno na ang storage ng telepono. Magtanggal ng ilang file upang magbakante ng espasyo."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Maaaring sinusubaybayan ang network"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Ng isang di-kilalang third party"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"I-on ang ringer"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Nagsa-shut down…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Mag-shut down ang iyong tablet."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Magsa-shut down ang iyong relo."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Magsa-shut down ang iyong telepono."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Nais mo bang mag-shut down?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Mag-reboot sa safe mode"</string>

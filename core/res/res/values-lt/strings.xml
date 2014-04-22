@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinchronizuoti"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Per daug <xliff:g id="CONTENT_TYPE">%s</xliff:g> trynimo."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Planšetinio kompiuterio atmintis pilna. Kad atlaisvintumėte vietos, ištrinkite kelis failus."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Laikrodžio saugykla pilna. Ištrinkite kelis failus, kad atlaisvintumėte vietos."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Telefono atmintis pilna. Ištrinkite kai kuriuos failus, kad atlaisvintumėte vietos."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Tinklas gali būti stebimas"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Nežinoma trečioji šalis"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Skambutis įjungtas"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Išsijungia..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Planšetinio kompiuterio veikimas bus sustabdytas."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Laikrodis išsijungs."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefonas bus išjungtas."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Ar norite išjungti?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Iš naujo įkelti operacinę sistemą saugos režimu"</string>

@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"同期"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"<xliff:g id="CONTENT_TYPE">%s</xliff:g>での削除が多すぎます。"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"タブレットのストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"ウォッチのストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"端末のストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ネットワークが監視される場合があります"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"不明な第三者"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"着信音オン"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"シャットダウン中..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"タブレットの電源をOFFにします。"</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"ウォッチの電源をOFFにします。"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"携帯電話の電源を切ります。"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"シャットダウンしますか？"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"再起動してセーフモードに変更"</string>

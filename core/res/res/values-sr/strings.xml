@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Синхронизација"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Превише <xliff:g id="CONTENT_TYPE">%s</xliff:g> избрисаних ставки."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Меморија таблета је пуна! Избришите неке датотеке да бисте ослободили простор."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Меморија сата је пуна. Избришите неке датотеке да бисте ослободили простор."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Складиште телефона је пуно! Избришите неке датотеке како бисте ослободили простор."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Мрежа се можда надгледа"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Од стране непознате треће стране"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Звоно је укључено"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Искључивање…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Таблет ће се искључити."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Сат ће се угасити."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Телефон ће се искључити."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Да ли желите да искључите телефон?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Поново покрени систем у безбедном режиму"</string>

@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synkroniser"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"For mange <xliff:g id="CONTENT_TYPE">%s</xliff:g> sletninger"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Din tablets lager er fuldt. Slet nogle filer for at frigøre plads."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Urets lager er fuldt. Slet nogle filer for at frigøre plads."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Telefonens lager er fuldt. Slet nogle filer for at frigøre plads."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Netværket kan være overvåget"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Af en ukendt tredjepart"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringeren er aktiveret"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Lukker ned..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din tablet slukkes nu."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Dit ur lukkes ned."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Din telefon slukkes nu."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vil du slukke?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Genstart i sikker tilstand"</string>

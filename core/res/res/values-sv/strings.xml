@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synkronisera"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"För många <xliff:g id="CONTENT_TYPE">%s</xliff:g>-borttagningar."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Pekdatorns lagringsutrymme är fullt. Ta bort några filer för att frigöra utrymme."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Klockans lagringsutrymme är fullt. Ta bort några filer för att frigöra utrymme."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Mobilens lagringsutrymme är fullt. Ta bort några filer för att frigöra utrymme."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Nätverket kan vara övervakat"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Av en okänd tredje part"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringsignal på"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutar…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din surfplatta stängs av."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Klockan stängs av."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Din telefon stängs av."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vill du stänga av?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Starta om i felsäkert läge"</string>

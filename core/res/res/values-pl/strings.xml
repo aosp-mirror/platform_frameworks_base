@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synchronizuj"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Zbyt wiele usuwanych <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Pamięć tabletu jest pełna. Usuń niektóre pliki, aby zwolnić miejsce."</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Pamięć w zegarku jest pełna. Usuń niektóre pliki, by zwolnić miejsce."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Pamięć telefonu jest pełna. Usuń niektóre pliki, aby zwolnić miejsce."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Sieć może być monitorowana"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Przez nieznany podmiot zewnętrzny"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Dzwonek włączony"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Wyłączanie..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet zostanie wyłączony."</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Zegarek zostanie wyłączony."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefon zostanie wyłączony"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Czy chcesz wyłączyć?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Uruchom w trybie awaryjnym"</string>

@@ -135,8 +135,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"ซิงค์"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"มีการลบ <xliff:g id="CONTENT_TYPE">%s</xliff:g> มากเกินไป"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ที่จัดเก็บข้อมูลของแท็บเล็ตเต็ม ลบไฟล์บางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
-    <!-- no translation found for low_memory (4415914910770005166) -->
-    <skip />
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"ที่เก็บข้อมูลนาฬิกาเต็ม โปรดลบไฟล์บางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ที่เก็บข้อมูลโทรศัพท์เต็ม ลบบางไฟล์เพื่อเพิ่มที่ว่าง"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"เครือข่ายอาจได้รับการตรวจสอบ"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"โดยบุคคลที่สามที่ไม่รู้จัก"</string>
@@ -154,8 +153,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"เปิดเสียง"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"กำลังปิดระบบ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"แท็บเล็ตของคุณจะปิดการทำงาน"</string>
-    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
-    <skip />
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"นาฬิกาจะปิดการทำงาน"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"โทรศัพท์ของคุณจะปิดเครื่อง"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"คุณต้องการปิดการทำงานหรือไม่"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"รีบูตเข้าสู่โหมดปลอดภัย"</string>
