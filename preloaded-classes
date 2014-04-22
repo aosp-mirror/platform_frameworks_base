@@ -601,8 +601,6 @@ android.media.RemoteDisplay
 android.media.ResampleInputStream
 android.media.SoundPool
 android.media.ToneGenerator
-android.media.videoeditor.MediaArtistNativeHelper
-android.media.videoeditor.VideoEditorProfile
 android.mtp.MtpDatabase
 android.mtp.MtpDevice
 android.mtp.MtpDeviceInfo
