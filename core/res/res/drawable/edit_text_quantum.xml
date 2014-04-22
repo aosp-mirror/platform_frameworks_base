@@ -14,29 +14,26 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_window_focused="false" android:state_enabled="true">
-        <nine-patch android:src="@drawable/textfield_default_qntm_alpha"
-            android:tint="?attr/colorControlNormal" />
-    </item>
-    <item android:state_window_focused="false" android:state_enabled="false">
-        <nine-patch android:src="@drawable/textfield_default_qntm_alpha"
-            android:tint="?attr/colorControlNormal" />
-    </item>
-    <item android:state_enabled="true" android:state_focused="true">
-        <nine-patch android:src="@drawable/textfield_activated_qntm_alpha"
-            android:tint="?attr/colorControlActivated" />
-    </item>
-    <item android:state_enabled="true" android:state_activated="true">
-        <nine-patch android:src="@drawable/textfield_activated_qntm_alpha"
-            android:tint="?attr/colorControlActivated" />
-    </item>
-    <item android:state_enabled="true">
-        <nine-patch android:src="@drawable/textfield_default_qntm_alpha"
-            android:tint="?attr/colorControlNormal" />
-    </item>
+<touch-feedback xmlns:android="http://schemas.android.com/apk/res/android"
+    android:tint="?attr/colorControlActivated">
     <item>
-        <nine-patch android:src="@drawable/textfield_default_qntm_alpha"
-            android:tint="?attr/colorControlNormal" />
+        <selector>
+            <item android:state_window_focused="false">
+                <nine-patch android:src="@drawable/textfield_default_qntm_alpha"
+                    android:tint="?attr/colorControlNormal" />
+            </item>
+            <item android:state_enabled="false">
+                <nine-patch android:src="@drawable/textfield_default_qntm_alpha"
+                    android:tint="?attr/colorControlNormal" />
+            </item>
+            <item android:state_focused="false" android:state_activated="false">
+                <nine-patch android:src="@drawable/textfield_default_qntm_alpha"
+                    android:tint="?attr/colorControlNormal" />
+            </item>
+            <item>
+                <nine-patch android:src="@drawable/textfield_activated_qntm_alpha"
+                    android:tint="?attr/colorControlNormal" />
+            </item>
+        </selector>
     </item>
-</selector>
+</touch-feedback>
