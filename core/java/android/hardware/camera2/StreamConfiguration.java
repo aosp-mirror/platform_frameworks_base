@@ -20,7 +20,7 @@ import static com.android.internal.util.Preconditions.*;
 import static android.hardware.camera2.StreamConfigurationMap.checkArgumentFormatInternal;
 
 import android.graphics.ImageFormat;
-import android.hardware.camera2.impl.HashCodeHelpers;
+import android.hardware.camera2.utils.HashCodeHelpers;
 import android.util.Size;
 
 /**
@@ -57,7 +57,7 @@ public final class StreamConfiguration {
             final int format, final int width, final int height, final boolean input) {
         mFormat = checkArgumentFormatInternal(format);
         mWidth = checkArgumentPositive(width, "width must be positive");
-        mHeight = checkArgumentPositive(width, "height must be positive");
+        mHeight = checkArgumentPositive(height, "height must be positive");
         mInput = input;
     }
 

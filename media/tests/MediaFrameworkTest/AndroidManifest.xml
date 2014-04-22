@@ -76,4 +76,8 @@
          android:label="MediaFramework integration tests InstrumentationRunner">
      </instrumentation>
 
+     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
+         android:targetPackage="com.android.mediaframeworktest"
+         android:label="media framework tests"/>
+
 </manifest>

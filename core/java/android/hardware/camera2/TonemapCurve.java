@@ -19,7 +19,7 @@ package android.hardware.camera2;
 import static com.android.internal.util.Preconditions.*;
 
 import android.graphics.PointF;
-import android.hardware.camera2.impl.HashCodeHelpers;
+import android.hardware.camera2.utils.HashCodeHelpers;
 
 import java.util.Arrays;
 

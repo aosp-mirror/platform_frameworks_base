@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.hardware.camera2.impl;
+package android.hardware.camera2.utils;
 
 /**
  * Provide hashing functions using the Modified Bernstein hash

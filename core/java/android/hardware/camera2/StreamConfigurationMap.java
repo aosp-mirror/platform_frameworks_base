@@ -18,7 +18,7 @@ package android.hardware.camera2;
 
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
-import android.hardware.camera2.impl.HashCodeHelpers;
+import android.hardware.camera2.utils.HashCodeHelpers;
 import android.view.Surface;
 import android.util.Size;
 
