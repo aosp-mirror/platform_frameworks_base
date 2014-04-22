@@ -72,7 +72,7 @@
     <!-- decay duration (from size_max -> size), in ms -->
     <integer name="navigation_bar_deadzone_hold">333</integer>
     <integer name="navigation_bar_deadzone_decay">333</integer>
-    
+
     <bool name="config_dead_zone_flash">false</bool>
 
     <!-- Min alpha % that recent items will fade to while being dismissed -->
@@ -124,6 +124,9 @@
     <integer name="recents_animate_task_view_info_pane_duration">150</integer>
     <!-- The minimum alpha for the dim applied to cards that go deeper into the stack. -->
     <integer name="recents_max_task_stack_view_dim">96</integer>
+
+    <!-- Whether to enable KeyguardService or not -->
+    <bool name="config_enableKeyguardService">true</bool>
 
     <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
      card. -->
