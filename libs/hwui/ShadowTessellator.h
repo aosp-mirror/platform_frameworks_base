@@ -62,6 +62,8 @@ namespace uirenderer {
 
 #define SHADOW_MIN_CASTER_Z 0.001f
 
+#define MINIMAL_DELTA_THETA (M_PI / 180 / 1000)
+
 class ShadowTessellator {
 public:
     static VertexBufferMode tessellateAmbientShadow(bool isCasterOpaque,
