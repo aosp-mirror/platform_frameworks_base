@@ -22,6 +22,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
+import android.app.admin.DevicePolicyManager;
 import android.app.IStopUserCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -437,7 +438,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public void setUserRestrictions(Bundle restrictions, int userId) {
-        checkManageUsersPermission("setUserRestrictions");
+        checkProfileOwnerOrManageUsersPermission("setUserRestrictions");
         if (restrictions == null) return;
 
         synchronized (mPackagesLock) {
@@ -463,14 +464,51 @@ public class UserManagerService extends IUserManager.Stub {
      * @param message used as message if SecurityException is thrown
      * @throws SecurityException if the caller is not system or root
      */
-    private static final void checkManageUsersPermission(String message) {
+    private final void checkManageUsersPermission(String message) {
         final int uid = Binder.getCallingUid();
-        if (uid != Process.SYSTEM_UID && uid != 0
-                && ActivityManager.checkComponentPermission(
-                        android.Manifest.permission.MANAGE_USERS,
-                        uid, -1, true) != PackageManager.PERMISSION_GRANTED) {
+
+        if (missingManageUsersPermission(uid)) {
             throw new SecurityException("You need MANAGE_USERS permission to: " + message);
         }
+    }
+
+    /**
+     * Enforces that only the system UID, root's UID, apps that have the
+     * {@link android.Manifest.permission#MANAGE_USERS MANAGE_USERS}
+     * permission, the profile owner, or the device owner can make certain calls to the
+     * UserManager.
+     *
+     * @param message used as message if SecurityException is thrown
+     * @throws SecurityException if the caller is not system, root, or device
+     * owner
+     */
+    private final void checkProfileOwnerOrManageUsersPermission(String message) {
+        final int uid = Binder.getCallingUid();
+        boolean isProfileOwner = false;
+        if (mContext != null && mContext.getPackageManager() != null) {
+            String[] pkgs = mContext.getPackageManager().getPackagesForUid(uid);
+            DevicePolicyManager dpm =
+                    (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            if (dpm != null) {
+                for (String pkg : pkgs) {
+                    if (dpm.isDeviceOwnerApp(pkg) || dpm.isProfileOwnerApp(pkg)) {
+                        isProfileOwner = true;
+                    }
+                }
+            }
+        }
+
+        if (missingManageUsersPermission(uid) && !isProfileOwner) {
+            throw new SecurityException(
+                    "You need MANAGE_USERS permission or device owner privileges to: " + message);
+        }
+    }
+
+    private boolean missingManageUsersPermission(int uid) {
+        return uid != Process.SYSTEM_UID && uid != 0
+                && ActivityManager.checkComponentPermission(
+                        android.Manifest.permission.MANAGE_USERS,
+                        uid, -1, true) != PackageManager.PERMISSION_GRANTED;
     }
 
     private void writeBitmapLocked(UserInfo info, Bitmap bitmap) {
@@ -1175,7 +1213,8 @@ public class UserManagerService extends IUserManager.Stub {
     public Bundle getApplicationRestrictionsForUser(String packageName, int userId) {
         if (UserHandle.getCallingUserId() != userId
                 || !UserHandle.isSameApp(Binder.getCallingUid(), getUidForPackage(packageName))) {
-            checkManageUsersPermission("Only system can get restrictions for other users/apps");
+            checkProfileOwnerOrManageUsersPermission(
+                    "Only system or device owner can get restrictions for other users/apps");
         }
         synchronized (mPackagesLock) {
             // Read the restrictions from XML
@@ -1188,7 +1227,8 @@ public class UserManagerService extends IUserManager.Stub {
             int userId) {
         if (UserHandle.getCallingUserId() != userId
                 || !UserHandle.isSameApp(Binder.getCallingUid(), getUidForPackage(packageName))) {
-            checkManageUsersPermission("Only system can set restrictions for other users/apps");
+            checkProfileOwnerOrManageUsersPermission(
+                    "Only system or device owner can set restrictions for other users/apps");
         }
         synchronized (mPackagesLock) {
             // Write the restrictions to XML
@@ -1290,7 +1330,8 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public void removeRestrictions() {
-        checkManageUsersPermission("Only system can remove restrictions");
+        checkProfileOwnerOrManageUsersPermission(
+                "Only system or device owner can remove restrictions");
         final int userHandle = UserHandle.getCallingUserId();
         removeRestrictionsForUser(userHandle, true);
     }
