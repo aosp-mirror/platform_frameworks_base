@@ -17,9 +17,9 @@
 #include "jni.h"
 #include "GraphicsJNI.h"
 #include <android_runtime/AndroidRuntime.h>
+#include "AndroidPicture.h"
 
 #include "SkCanvas.h"
-#include "SkPicture.h"
 #include "SkStream.h"
 #include "SkTemplates.h"
 #include "CreateJavaOutputStreamAdaptor.h"
@@ -29,45 +29,41 @@ namespace android {
 class SkPictureGlue {
 public:
     static jlong newPicture(JNIEnv* env, jobject, jlong srcHandle) {
-        const SkPicture* src = reinterpret_cast<SkPicture*>(srcHandle);
-        if (src) {
-            return reinterpret_cast<jlong>(new SkPicture(*src));
-        } else {
-            return reinterpret_cast<jlong>(new SkPicture);
-        }
+        const AndroidPicture* src = reinterpret_cast<AndroidPicture*>(srcHandle);
+        return reinterpret_cast<jlong>(new AndroidPicture(src));
     }
 
     static jlong deserialize(JNIEnv* env, jobject, jobject jstream,
                              jbyteArray jstorage) {
-        SkPicture* picture = NULL;
+        AndroidPicture* picture = NULL;
         SkStream* strm = CreateJavaInputStreamAdaptor(env, jstream, jstorage);
         if (strm) {
-            picture = SkPicture::CreateFromStream(strm);
+            picture = AndroidPicture::CreateFromStream(strm);
             delete strm;
         }
         return reinterpret_cast<jlong>(picture);
     }
 
     static void killPicture(JNIEnv* env, jobject, jlong pictureHandle) {
-        SkPicture* picture = reinterpret_cast<SkPicture*>(pictureHandle);
+        AndroidPicture* picture = reinterpret_cast<AndroidPicture*>(pictureHandle);
         SkASSERT(picture);
-        picture->unref();
+        delete picture;
     }
 
     static void draw(JNIEnv* env, jobject, jlong canvasHandle,
                             jlong pictureHandle) {
         SkCanvas* canvas = GraphicsJNI::getNativeCanvas(canvasHandle);
-        SkPicture* picture = reinterpret_cast<SkPicture*>(pictureHandle);
+        AndroidPicture* picture = reinterpret_cast<AndroidPicture*>(pictureHandle);
         SkASSERT(canvas);
         SkASSERT(picture);
         picture->draw(canvas);
     }
 
     static jboolean serialize(JNIEnv* env, jobject, jlong pictureHandle,
-                          jobject jstream, jbyteArray jstorage) {
-        SkPicture* picture = reinterpret_cast<SkPicture*>(pictureHandle);
+                              jobject jstream, jbyteArray jstorage) {
+        AndroidPicture* picture = reinterpret_cast<AndroidPicture*>(pictureHandle);
         SkWStream* strm = CreateJavaOutputStreamAdaptor(env, jstream, jstorage);
-        
+
         if (NULL != strm) {
             picture->serialize(strm);
             delete strm;
@@ -78,19 +74,21 @@ public:
 
     static jint getWidth(JNIEnv* env, jobject jpic) {
         NPE_CHECK_RETURN_ZERO(env, jpic);
-        int width = GraphicsJNI::getNativePicture(env, jpic)->width();
+        AndroidPicture* pict = GraphicsJNI::getNativePicture(env, jpic);
+        int width = pict->width();
         return static_cast<jint>(width);
     }
 
     static jint getHeight(JNIEnv* env, jobject jpic) {
         NPE_CHECK_RETURN_ZERO(env, jpic);
-        int height = GraphicsJNI::getNativePicture(env, jpic)->height();
+        AndroidPicture* pict = GraphicsJNI::getNativePicture(env, jpic);
+        int height = pict->height();
         return static_cast<jint>(height);
     }
 
     static jlong beginRecording(JNIEnv* env, jobject, jlong pictHandle,
-                                    jint w, jint h) {
-        SkPicture* pict = reinterpret_cast<SkPicture*>(pictHandle);
+                                jint w, jint h) {
+        AndroidPicture* pict = reinterpret_cast<AndroidPicture*>(pictHandle);
         // beginRecording does not ref its return value, it just returns it.
         SkCanvas* canvas = pict->beginRecording(w, h);
         // the java side will wrap this guy in a Canvas.java, which will call
@@ -101,7 +99,7 @@ public:
     }
 
     static void endRecording(JNIEnv* env, jobject, jlong pictHandle) {
-        SkPicture* pict = reinterpret_cast<SkPicture*>(pictHandle);
+        AndroidPicture* pict = reinterpret_cast<AndroidPicture*>(pictHandle);
         pict->endRecording();
     }
 };

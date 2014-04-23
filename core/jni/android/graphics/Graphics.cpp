@@ -3,6 +3,7 @@
 #include "jni.h"
 #include "JNIHelp.h"
 #include "GraphicsJNI.h"
+#include "AndroidPicture.h"
 
 #include "SkCanvas.h"
 #include "SkDevice.h"
@@ -345,13 +346,13 @@ android::TypefaceImpl* GraphicsJNI::getNativeTypeface(JNIEnv* env, jobject paint
     return p;
 }
 
-SkPicture* GraphicsJNI::getNativePicture(JNIEnv* env, jobject picture)
+AndroidPicture* GraphicsJNI::getNativePicture(JNIEnv* env, jobject picture)
 {
     SkASSERT(env);
     SkASSERT(picture);
     SkASSERT(env->IsInstanceOf(picture, gPicture_class));
     jlong pictureHandle = env->GetLongField(picture, gPicture_nativeInstanceID);
-    SkPicture* p = reinterpret_cast<SkPicture*>(pictureHandle);
+    AndroidPicture* p = reinterpret_cast<AndroidPicture*>(pictureHandle);
     SkASSERT(p);
     return p;
 }
