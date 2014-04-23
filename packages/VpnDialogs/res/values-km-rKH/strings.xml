@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> ព្យាយាម​បង្កើត​ការ​តភ្ជាប់ VPN ។"</string>
+    <string name="warning" msgid="5470743576660160079">"ដោយ​បន្ត អ្នក​កំពុង​ផ្ដល់​សិទ្ធិ​ឲ្យ​កម្មវិធី​ទប់ស្កាត់​ចរាចរណ៍​បណ្ដាញ។ "<b>"កុំ​ទទួល​ លុះ​ត្រា​តែ​អ្នក​ទុក​ចិត្ត​កម្មវិធី។"</b>" បើ​មិន​ដូច្នេះ​ទេ អ្នក​ដំណើរការ​ប្រឈម​នឹង​គ្រោះថ្នាក់ ដោយ​ទិន្នន័យ​របស់​អ្នក​បាន​សម្របសម្រួល​ដោយ​កម្មវិធី​ព្យាបាទ។"</string>
+    <string name="accept" msgid="2889226408765810173">"ខ្ញុំ​ទុកចិត្ត​​​កម្មវិធី​នេះ​។"</string>
+    <string name="legacy_title" msgid="192936250066580964">"បា​ន​ភ្ជាប់ VPN"</string>
+    <string name="configure" msgid="4905518375574791375">"កំណត់​រចនាសម្ព័ន្ធ"</string>
+    <string name="disconnect" msgid="971412338304200056">"ផ្ដាច់"</string>
+    <string name="session" msgid="6470628549473641030">"សម័យ៖"</string>
+    <string name="duration" msgid="3584782459928719435">"ថិរវេលា៖"</string>
+    <string name="data_transmitted" msgid="7988167672982199061">"បាន​ផ្ញើ៖"</string>
+    <string name="data_received" msgid="4062776929376067820">"បាន​ទទួល៖"</string>
+    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> បៃ / <xliff:g id="NUMBER_1">%2$s</xliff:g> កញ្ចប់​ព័ត៌មាន"</string>
+</resources>
