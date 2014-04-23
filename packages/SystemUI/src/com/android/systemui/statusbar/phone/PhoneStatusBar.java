@@ -25,7 +25,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OU
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
-import static com.android.systemui.statusbar.stack.NotificationStackScrollLayout.OnChildLocationsChangedListener;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -77,7 +76,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewPropertyAnimator;
-import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
@@ -147,6 +145,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     private static final int NOTIFICATION_PRIORITY_MULTIPLIER = 10; // see NotificationManagerService
     private static final int HIDE_ICONS_BELOW_SCORE = Notification.PRIORITY_LOW * NOTIFICATION_PRIORITY_MULTIPLIER;
+
+    /**
+     * Default value of {@link android.provider.Settings.Global#LOCK_SCREEN_SHOW_NOTIFICATIONS}.
+     */
+    private static final boolean ALLOW_NOTIFICATIONS_DEFAULT = false;
 
     private static final int STATUS_OR_NAV_TRANSIENT =
             View.STATUS_BAR_TRANSIENT | View.NAVIGATION_BAR_TRANSIENT;
@@ -1452,8 +1455,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) ? "ALERTS" : "alerts");
         flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) ? "* " : " ");
-        flagdbg.append(((state & StatusBarManager.DISABLE_PRIVATE_NOTIFICATIONS) != 0) ? "PRIVATE" : "private");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_PRIVATE_NOTIFICATIONS) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "SYSTEM_INFO" : "system_info");
         flagdbg.append(((diff  & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_BACK) != 0) ? "BACK" : "back");
@@ -1538,15 +1539,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     .setDuration(175)
                     .start();
             }
-        } else if ((diff & StatusBarManager.DISABLE_PRIVATE_NOTIFICATIONS) != 0) {
-            if ((state & StatusBarManager.DISABLE_PRIVATE_NOTIFICATIONS) != 0) {
-                // we are outside a secure keyguard, so we need to switch to "public" mode
-                setLockscreenPublicMode(true);
-            } else {
-                // user has authenticated the device; full notifications may be shown
-                setLockscreenPublicMode(false);
-            }
-            updateNotificationIcons();
         }
     }
 
@@ -2910,31 +2902,44 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     public void showKeyguard() {
         mOnKeyguard = true;
+        updateKeyguardState();
         instantExpandNotificationsPanel();
-        if (isFlippedToSettings()) {
-            flipToNotifications();
-        }
-        mKeyguardStatusView.setVisibility(View.VISIBLE);
-        mKeyguardBottomArea.setVisibility(View.VISIBLE);
-        mNotificationPanelHeader.setVisibility(View.GONE);
-
-        mKeyguardFlipper.setVisibility(View.VISIBLE);
-        mSettingsContainer.setKeyguardShowing(true);
-        updateRowStates();
-        checkBarModes();
     }
 
     public void hideKeyguard() {
         mOnKeyguard = false;
-        mKeyguardStatusView.setVisibility(View.GONE);
-        mKeyguardBottomArea.setVisibility(View.GONE);
-        mNotificationPanelHeader.setVisibility(View.VISIBLE);
-
-        mKeyguardFlipper.setVisibility(View.GONE);
-        mSettingsContainer.setKeyguardShowing(false);
-        updateRowStates();
+        updateKeyguardState();
         instantCollapseNotificationPanel();
+    }
+
+    private void updatePublicMode() {
+        setLockscreenPublicMode(mOnKeyguard && mStatusBarKeyguardViewManager.isSecure());
+    }
+
+    private void updateKeyguardState() {
+        if (mOnKeyguard) {
+            if (isFlippedToSettings()) {
+                flipToNotifications();
+            }
+            mKeyguardStatusView.setVisibility(View.VISIBLE);
+            mKeyguardBottomArea.setVisibility(View.VISIBLE);
+            mNotificationPanelHeader.setVisibility(View.GONE);
+
+            mKeyguardFlipper.setVisibility(View.VISIBLE);
+            mSettingsContainer.setKeyguardShowing(true);
+        } else {
+            mKeyguardStatusView.setVisibility(View.GONE);
+            mKeyguardBottomArea.setVisibility(View.GONE);
+            mNotificationPanelHeader.setVisibility(View.VISIBLE);
+
+            mKeyguardFlipper.setVisibility(View.GONE);
+            mSettingsContainer.setKeyguardShowing(false);
+        }
+
+        updatePublicMode();
+        updateRowStates();
         checkBarModes();
+        updateNotificationIcons();
     }
 
     public void userActivity() {
