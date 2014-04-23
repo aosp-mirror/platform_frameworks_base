@@ -26,16 +26,7 @@
 #include <SkPathOps.h>
 
 #include "Matrix.h"
-
-/**
- * Convenience value to check for float values that are close enough to zero to be considered
- * zero.
- */
-#define NONZERO_EPSILON .001f
-
-static inline bool is_zero(float value) {
-    return (value >= -NONZERO_EPSILON) && (value <= NONZERO_EPSILON);
-}
+#include "utils/MathUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -151,7 +142,7 @@ void RenderProperties::updateMatrix() {
         }
         SkMatrix* transform = mComputedFields.mTransformMatrix;
         transform->reset();
-        if (is_zero(getRotationX()) && is_zero(getRotationY())) {
+        if (MathUtils::isZero(getRotationX()) && MathUtils::isZero(getRotationY())) {
             transform->setTranslate(getTranslationX(), getTranslationY());
             transform->preRotate(getRotation(), getPivotX(), getPivotY());
             transform->preScale(getScaleX(), getScaleY(), getPivotX(), getPivotY());
