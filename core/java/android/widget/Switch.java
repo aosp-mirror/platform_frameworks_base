@@ -799,7 +799,7 @@ public class Switch extends CompoundButton {
         thumbDrawable.setBounds(thumbLeft, switchTop, thumbRight, switchBottom);
 
         final Drawable background = getBackground();
-        if (background.supportsHotspots()) {
+        if (background != null && background.supportsHotspots()) {
             background.setHotspotBounds(thumbLeft, switchTop, thumbRight, switchBottom);
         }
 
