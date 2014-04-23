@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_title" msgid="827563724209303345">"Full backup"</string>
+    <string name="restore_confirm_title" msgid="5469365809567486602">"Full restoration"</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"A full backup of all data to a connected desktop computer has been requested. Do you want to allow this to happen?\n\nIf you did not request the backup yourself, do not allow the operation to proceed."</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"Back up my data"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"Do not back up"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"A full restore of all data from a connected desktop computer has been requested. Do you want to allow this to happen?\n\nIf you did not request the restore yourself, do not allow the operation to proceed. This will replace any data currently on the device!"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"Restore my data"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"Do not restore"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"Please enter your current backup password below:"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"Please enter your device encryption password below."</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"Please enter your device encryption password below. This will also be used to encrypt the backup archive."</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"Please enter a password to use for encrypting the full backup data. If this is left blank, your current backup password will be used:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"If you wish to encrypt the full backup data, enter a password below:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"If the restore data is encrypted, please enter the password below:"</string>
+    <string name="toast_backup_started" msgid="550354281452756121">"Backup starting..."</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"Backup finished"</string>
+    <string name="toast_restore_started" msgid="7881679218971277385">"Restoration starting..."</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"Restoration ended"</string>
+    <string name="toast_timeout" msgid="5276598587087626877">"Operation timed out"</string>
+</resources>
