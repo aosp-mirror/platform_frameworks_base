@@ -26,6 +26,7 @@
 #include "Debug.h"
 #include "DisplayListOp.h"
 #include "DisplayListLogBuffer.h"
+#include "utils/MathUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -217,7 +218,9 @@ void RenderNode::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform)
         mat4 anim(*properties().getAnimationMatrix());
         matrix.multiply(anim);
     }
-    if (properties().hasTransformMatrix()) {
+
+    bool applyTranslationZ = true3dTransform && !MathUtils::isZero(properties().getTranslationZ());
+    if (properties().hasTransformMatrix() || applyTranslationZ) {
         if (properties().isTransformTranslateOnly()) {
             matrix.translate(properties().getTranslationX(), properties().getTranslationY(),
                     true3dTransform ? properties().getTranslationZ() : 0.0f);
@@ -391,7 +394,7 @@ void RenderNode::buildZSortedChildList(Vector<ZDrawDisplayListOpPair>& zTranslat
         RenderNode* child = childOp->mDisplayList;
         float childZ = child->properties().getTranslationZ();
 
-        if (childZ != 0.0f) {
+        if (!MathUtils::isZero(childZ)) {
             zTranslatedNodes.add(ZDrawDisplayListOpPair(childZ, childOp));
             childOp->mSkipInOrderDraw = true;
         } else if (!child->properties().getProjectBackwards()) {
