@@ -313,6 +313,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         
         if (mActiveRipplesCount >= MAX_RIPPLES) {
             Log.e(LOG_TAG, "Max ripple count exceeded", new RuntimeException());
+            return;
         }
 
         final Ripple ripple = mTouchedRipples.get(id);
