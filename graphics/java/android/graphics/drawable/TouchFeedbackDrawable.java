@@ -25,12 +25,13 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff.Mode;
-import android.graphics.drawable.Ripple.RippleAnimator;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.drawable.Ripple.RippleAnimator;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.R;
@@ -45,6 +46,7 @@ import java.util.Arrays;
  * Documentation pending.
  */
 public class TouchFeedbackDrawable extends LayerDrawable {
+    private static final String LOG_TAG = TouchFeedbackDrawable.class.getSimpleName();
     private static final PorterDuffXfermode DST_IN = new PorterDuffXfermode(Mode.DST_IN);
 
     /** The maximum number of ripples supported. */
@@ -307,6 +309,10 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         if (mTouchedRipples == null) {
             mTouchedRipples = new SparseArray<Ripple>();
             mActiveRipples = new Ripple[MAX_RIPPLES];
+        }
+        
+        if (mActiveRipplesCount >= MAX_RIPPLES) {
+            Log.e(LOG_TAG, "Max ripple count exceeded", new RuntimeException());
         }
 
         final Ripple ripple = mTouchedRipples.get(id);

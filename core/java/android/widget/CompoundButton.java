@@ -285,7 +285,7 @@ public abstract class CompoundButton extends Button implements Checkable {
             buttonDrawable.setBounds(left, top, right, bottom);
 
             final Drawable background = getBackground();
-            if (background.supportsHotspots()) {
+            if (background != null && background.supportsHotspots()) {
                 background.setHotspotBounds(left, top, right, bottom);
             }
         }
