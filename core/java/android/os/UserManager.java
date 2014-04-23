@@ -91,7 +91,6 @@ public class UserManager {
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
-
     public static final String DISALLOW_SHARE_LOCATION = "no_share_location";
 
     /**
@@ -144,6 +143,96 @@ public class UserManager {
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_REMOVE_USER = "no_remove_user";
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from enabling or
+     * accessing debugging features. The default value is <code>false</code>.
+     * <p/>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_DEBUGGING_FEATURES = "no_debugging_features";
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from configuring VPN.
+     * The default value is <code>false</code>.
+     * <p/>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_VPN = "no_config_vpn";
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from configuring Tethering
+     * & portable hotspots. The default value is <code>false</code>.
+     * <p/>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_TETHERING = "no_config_tethering";
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from factory resetting
+     * from Settings.
+     * The default value is <code>false</code>.
+     * <p>
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_FACTORY_RESET = "no_factory_reset";
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from adding new users and
+     * profiles. The default value is <code>false</code>.
+     * <p>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_ADD_USER = "no_add_user";
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from disabling application
+     * verification. The default value is <code>false</code>.
+     * <p>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String ENSURE_VERIFY_APPS = "ensure_verify_apps";
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from configuring cell
+     * broadcasts. The default value is <code>false</code>.
+     * <p>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_CELL_BROADCASTS = "no_config_cell_broadcasts";
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from configuring mobile
+     * networks. The default value is <code>false</code>.
+     * <p>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_MOBILE_NETWORKS = "no_config_mobile_networks";
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from configuring
+     * applications in Settings. The default value is <code>false</code>.
+     * <p>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_APPS = "no_config_apps";
 
     /** @hide */
     public static final int PIN_VERIFICATION_FAILED_INCORRECT = -3;
