@@ -29,6 +29,7 @@ import static libcore.io.OsConstants.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.InterruptedIOException;
 import java.net.InetSocketAddress;
 import java.net.InetUnixAddress;
 
@@ -178,7 +179,7 @@ final class NativeCrashListener extends Thread {
     }
 
     static int readExactly(FileDescriptor fd, byte[] buffer, int offset, int numBytes)
-            throws ErrnoException {
+            throws ErrnoException, InterruptedIOException {
         int totalRead = 0;
         while (numBytes > 0) {
             int n = Libcore.os.read(fd, buffer, offset + totalRead, numBytes);
