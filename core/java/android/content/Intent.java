@@ -45,6 +45,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 import com.android.internal.util.XmlUtils;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -604,6 +605,15 @@ import java.util.Set;
  * of all possible flags.
  */
 public class Intent implements Parcelable, Cloneable {
+    private static final String ATTR_ACTION = "action";
+    private static final String TAG_CATEGORIES = "categories";
+    private static final String ATTR_CATEGORY = "category";
+    private static final String TAG_EXTRA = "extra";
+    private static final String ATTR_TYPE = "type";
+    private static final String ATTR_COMPONENT = "component";
+    private static final String ATTR_DATA = "data";
+    private static final String ATTR_FLAGS = "flags";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent activity actions (see action variable).
@@ -7348,7 +7358,7 @@ public class Intent implements Parcelable, Cloneable {
             }
 
             String nodeName = parser.getName();
-            if (nodeName.equals("category")) {
+            if (nodeName.equals(TAG_CATEGORIES)) {
                 sa = resources.obtainAttributes(attrs,
                         com.android.internal.R.styleable.IntentCategory);
                 String cat = sa.getString(com.android.internal.R.styleable.IntentCategory_name);
@@ -7359,15 +7369,85 @@ public class Intent implements Parcelable, Cloneable {
                 }
                 XmlUtils.skipCurrentTag(parser);
 
-            } else if (nodeName.equals("extra")) {
+            } else if (nodeName.equals(TAG_EXTRA)) {
                 if (intent.mExtras == null) {
                     intent.mExtras = new Bundle();
                 }
-                resources.parseBundleExtra("extra", attrs, intent.mExtras);
+                resources.parseBundleExtra(TAG_EXTRA, attrs, intent.mExtras);
                 XmlUtils.skipCurrentTag(parser);
 
             } else {
                 XmlUtils.skipCurrentTag(parser);
+            }
+        }
+
+        return intent;
+    }
+
+    /** @hide */
+    public void saveToXml(XmlSerializer out) throws IOException {
+        if (mAction != null) {
+            out.attribute(null, ATTR_ACTION, mAction);
+        }
+        if (mData != null) {
+            out.attribute(null, ATTR_DATA, mData.toString());
+        }
+        if (mType != null) {
+            out.attribute(null, ATTR_TYPE, mType);
+        }
+        if (mComponent != null) {
+            out.attribute(null, ATTR_COMPONENT, mComponent.flattenToShortString());
+        }
+        out.attribute(null, ATTR_FLAGS, Integer.toHexString(getFlags()));
+
+        if (mCategories != null) {
+            out.startTag(null, TAG_CATEGORIES);
+            for (int categoryNdx = mCategories.size() - 1; categoryNdx >= 0; --categoryNdx) {
+                out.attribute(null, ATTR_CATEGORY, mCategories.valueAt(categoryNdx));
+            }
+        }
+    }
+
+    /** @hide */
+    public static Intent restoreFromXml(XmlPullParser in) throws IOException,
+            XmlPullParserException {
+        Intent intent = new Intent();
+        final int outerDepth = in.getDepth();
+
+        int attrCount = in.getAttributeCount();
+        for (int attrNdx = attrCount - 1; attrNdx >= 0; --attrNdx) {
+            final String attrName = in.getAttributeName(attrNdx);
+            final String attrValue = in.getAttributeValue(attrNdx);
+            if (ATTR_ACTION.equals(attrName)) {
+                intent.setAction(attrValue);
+            } else if (ATTR_DATA.equals(attrName)) {
+                intent.setData(Uri.parse(attrValue));
+            } else if (ATTR_TYPE.equals(attrName)) {
+                intent.setType(attrValue);
+            } else if (ATTR_COMPONENT.equals(attrName)) {
+                intent.setComponent(ComponentName.unflattenFromString(attrValue));
+            } else if (ATTR_FLAGS.equals(attrName)) {
+                intent.setFlags(Integer.valueOf(attrValue, 16));
+            } else {
+                Log.e("Intent", "restoreFromXml: unknown attribute=" + attrName);
+            }
+        }
+
+        int event;
+        String name;
+        while (((event = in.next()) != XmlPullParser.END_DOCUMENT) &&
+                (event != XmlPullParser.END_TAG || in.getDepth() < outerDepth)) {
+            if (event == XmlPullParser.START_TAG) {
+                name = in.getName();
+                if (TAG_CATEGORIES.equals(name)) {
+                    attrCount = in.getAttributeCount();
+                    for (int attrNdx = attrCount - 1; attrNdx >= 0; --attrNdx) {
+                        intent.addCategory(in.getAttributeValue(attrNdx));
+                    }
+                } else {
+                    Log.w("Intent", "restoreFromXml: unknown name=" + name);
+                    XmlUtils.skipCurrentTag(in);
+                }
             }
         }
 
