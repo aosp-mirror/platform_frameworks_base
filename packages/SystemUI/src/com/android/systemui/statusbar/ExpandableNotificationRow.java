@@ -172,7 +172,7 @@ public class ExpandableNotificationRow extends FrameLayout
         int oldHeight = lp.height;
         lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         setLayoutParams(lp);
-        measure(View.MeasureSpec.makeMeasureSpec(getMeasuredWidth(), View.MeasureSpec.EXACTLY),
+        measure(View.MeasureSpec.makeMeasureSpec(getWidth(), View.MeasureSpec.EXACTLY),
                 View.MeasureSpec.makeMeasureSpec(mRowMaxHeight, View.MeasureSpec.AT_MOST));
         lp.height = oldHeight;
         setLayoutParams(lp);
