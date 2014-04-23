@@ -263,7 +263,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             if (data.readInt() != 0) {
                 resultData = Intent.CREATOR.createFromParcel(data);
             }
-            boolean res = finishActivity(token, resultCode, resultData);
+            boolean finishTask = (data.readInt() != 0);
+            boolean res = finishActivity(token, resultCode, resultData, finishTask);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
@@ -2342,7 +2343,7 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         return result != 0;
     }
-    public boolean finishActivity(IBinder token, int resultCode, Intent resultData)
+    public boolean finishActivity(IBinder token, int resultCode, Intent resultData, boolean finishTask)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -2355,6 +2356,7 @@ class ActivityManagerProxy implements IActivityManager
         } else {
             data.writeInt(0);
         }
+        data.writeInt(finishTask ? 1 : 0);
         mRemote.transact(FINISH_ACTIVITY_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean res = reply.readInt() != 0;

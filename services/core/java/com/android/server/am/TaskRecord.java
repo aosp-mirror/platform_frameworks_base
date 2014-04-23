@@ -139,6 +139,18 @@ final class TaskRecord extends ThumbnailHolder {
         }
     }
 
+    /** Returns the first non-finishing activity from the root. */
+    ActivityRecord getRootActivity() {
+        for (int i = 0; i < mActivities.size(); i++) {
+            final ActivityRecord r = mActivities.get(i);
+            if (r.finishing) {
+                continue;
+            }
+            return r;
+        }
+        return null;
+    }
+
     ActivityRecord getTopActivity() {
         for (int i = mActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord r = mActivities.get(i);
@@ -305,7 +317,7 @@ final class TaskRecord extends ThumbnailHolder {
     }
 
     public ActivityManager.TaskThumbnails getTaskThumbnailsLocked() {
-        TaskAccessInfo info = getTaskAccessInfoLocked(true);
+        TaskAccessInfo info = getTaskAccessInfoLocked();
         final ActivityRecord resumedActivity = stack.mResumedActivity;
         if (resumedActivity != null && resumedActivity.thumbHolder == this) {
             info.mainThumbnail = stack.screenshotActivities(resumedActivity);
@@ -325,7 +337,7 @@ final class TaskRecord extends ThumbnailHolder {
         }
         // Return the information about the task, to figure out the top
         // thumbnail to return.
-        TaskAccessInfo info = getTaskAccessInfoLocked(true);
+        TaskAccessInfo info = getTaskAccessInfoLocked();
         if (info.numSubThumbbails <= 0) {
             return info.mainThumbnail != null ? info.mainThumbnail : lastThumbnail;
         }
@@ -334,7 +346,7 @@ final class TaskRecord extends ThumbnailHolder {
 
     public ActivityRecord removeTaskActivitiesLocked(int subTaskIndex,
             boolean taskRequired) {
-        TaskAccessInfo info = getTaskAccessInfoLocked(false);
+        TaskAccessInfo info = getTaskAccessInfoLocked();
         if (info.root == null) {
             if (taskRequired) {
                 Slog.w(TAG, "removeTaskLocked: unknown taskId " + taskId);
@@ -369,7 +381,7 @@ final class TaskRecord extends ThumbnailHolder {
         return mTaskType == ActivityRecord.APPLICATION_ACTIVITY_TYPE;
     }
 
-    public TaskAccessInfo getTaskAccessInfoLocked(boolean inclThumbs) {
+    public TaskAccessInfo getTaskAccessInfoLocked() {
         final TaskAccessInfo thumbs = new TaskAccessInfo();
         // How many different sub-thumbnails?
         final int NA = mActivities.size();
