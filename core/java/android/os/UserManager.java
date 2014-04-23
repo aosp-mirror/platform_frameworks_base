@@ -300,7 +300,8 @@ public class UserManager {
 
     /**
      * Sets all the user-wide restrictions for this user.
-     * Requires the MANAGE_USERS permission.
+     * Requires the {@link android.Manifest.permission#MANAGE_USERS} permission or profile/device owner
+     * privileges.
      * @param restrictions the Bundle containing all the restrictions.
      */
     public void setUserRestrictions(Bundle restrictions) {
@@ -309,7 +310,8 @@ public class UserManager {
 
     /**
      * Sets all the user-wide restrictions for the specified user.
-     * Requires the MANAGE_USERS permission.
+     * Requires the {@link android.Manifest.permission#MANAGE_USERS} permission or profile/device owner
+     * privileges.
      * @param restrictions the Bundle containing all the restrictions.
      * @param userHandle the UserHandle of the user for whom to set the restrictions.
      */
@@ -323,7 +325,8 @@ public class UserManager {
 
     /**
      * Sets the value of a specific restriction.
-     * Requires the MANAGE_USERS permission.
+     * Requires the {@link android.Manifest.permission#MANAGE_USERS} permission or profile/device owner
+     * privileges.
      * @param key the key of the restriction
      * @param value the value for the restriction
      */
@@ -336,7 +339,8 @@ public class UserManager {
     /**
      * @hide
      * Sets the value of a specific restriction on a specific user.
-     * Requires the {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * Requires the {@link android.Manifest.permission#MANAGE_USERS} permission or profile/device owner
+     * privileges.
      * @param key the key of the restriction
      * @param value the value for the restriction
      * @param userHandle the user whose restriction is to be changed.
@@ -548,7 +552,7 @@ public class UserManager {
     /**
      * Returns information for all users on this device. Requires
      * {@link android.Manifest.permission#MANAGE_USERS} permission.
-     * 
+     *
      * @param excludeDying specify if the list should exclude users being
      *            removed.
      * @return the list of users that were created.
