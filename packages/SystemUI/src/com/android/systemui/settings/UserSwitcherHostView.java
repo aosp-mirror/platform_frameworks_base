@@ -38,6 +38,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A quick and dirty view to show a user switcher.
@@ -118,7 +119,12 @@ public class UserSwitcherHostView extends FrameLayout implements ListView.OnItem
 
     public void refreshUsers() {
         mUserInfo.clear();
-        mUserInfo.addAll(mUserManager.getUsers(true));
+        List<UserInfo> users = mUserManager.getUsers(true);
+        for (UserInfo user : users) {
+            if (!user.isManagedProfile()) {
+                mUserInfo.add(user);
+            }
+        }
         mAdapter.notifyDataSetChanged();
     }
 
