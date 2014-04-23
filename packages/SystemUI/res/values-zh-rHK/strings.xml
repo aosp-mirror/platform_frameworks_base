@@ -208,6 +208,7 @@
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"色彩校準模式"</string>
     <string name="recents_empty_message" msgid="2269156590813544104">"近期"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"應用程式資料"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"搜尋"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"網絡可能會\n受到監控"</string>
     <string name="description_target_search" msgid="3091587249776033139">"搜尋"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"向上滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
@@ -217,6 +218,7 @@
     <item quantity="other" msgid="7388721375827338153">"已隱藏 %d 則通知"</item>
   </plurals>
     <string name="zen_mode_notification_text" msgid="8336623711388065713">"輕觸即可顯示"</string>
+    <string name="zen_mode_title" msgid="8793432092004749188">"請勿騷擾"</string>
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"還有 %d 個"</item>
   </plurals>

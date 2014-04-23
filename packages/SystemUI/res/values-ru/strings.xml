@@ -178,9 +178,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Режим полета"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for quick_settings_battery_charged_label (8865413079414246081) -->
-    <skip />
+    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"100%%"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth выкл."</string>
@@ -210,6 +208,7 @@
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Коррекция цвета"</string>
     <string name="recents_empty_message" msgid="2269156590813544104">"НЕДАВНИЕ СООБЩЕНИЯ"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Сведения о приложении"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"поиск"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Действия в сети\nмогут отслеживаться"</string>
     <string name="description_target_search" msgid="3091587249776033139">"Поиск"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Проведите вверх, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -219,6 +218,8 @@
     <item quantity="other" msgid="7388721375827338153">"Скрыто оповещений: %d"</item>
   </plurals>
     <string name="zen_mode_notification_text" msgid="8336623711388065713">"Нажмите, чтобы открыть"</string>
+    <!-- no translation found for zen_mode_title (8793432092004749188) -->
+    <skip />
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"Ещё %d"</item>
   </plurals>
