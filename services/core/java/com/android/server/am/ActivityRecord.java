@@ -16,14 +16,15 @@
 
 package com.android.server.am;
 
+import android.app.ActivityManager.TaskDescription;
 import android.os.PersistableBundle;
 import android.os.Trace;
 import com.android.internal.app.ResolverActivity;
+import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ResultInfo;
 import android.content.ComponentName;
@@ -48,7 +49,11 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.view.IApplicationToken;
 import android.view.WindowManager;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -61,6 +66,19 @@ final class ActivityRecord {
     static final String TAG = ActivityManagerService.TAG;
     static final boolean DEBUG_SAVED_STATE = ActivityStackSupervisor.DEBUG_SAVED_STATE;
     final public static String RECENTS_PACKAGE_NAME = "com.android.systemui.recent";
+
+    private static final String TAG_ACTIVITY = "activity";
+    private static final String ATTR_ID = "id";
+    private static final String TAG_INTENT = "intent";
+    private static final String ATTR_USERID = "user_id";
+    private static final String TAG_PERSISTABLEBUNDLE = "persistable_bundle";
+    private static final String ATTR_LAUNCHEDFROMUID = "launched_from_uid";
+    private static final String ATTR_LAUNCHEDFROMPACKAGE = "launched_from_package";
+    private static final String ATTR_RESOLVEDTYPE = "resolved_type";
+    private static final String ATTR_COMPONENTSPECIFIED = "component_specified";
+    private static final String ATTR_TASKDESCRIPTIONLABEL = "task_description_label";
+    private static final String ATTR_TASKDESCRIPTIONCOLOR = "task_description_color";
+    private static final String ACTIVITY_ICON_SUFFIX = "_activity_icon_";
 
     final ActivityManagerService service; // owner
     final IApplicationToken.Stub appToken; // window manager token
@@ -97,6 +115,7 @@ final class ActivityRecord {
     int windowFlags;        // custom window flags for preview window.
     TaskRecord task;        // the task this is in.
     ThumbnailHolder thumbHolder; // where our thumbnails should go.
+    long createTime = System.currentTimeMillis();
     long displayStartTime;  // when we started launching this activity
     long fullyDrawnStartTime; // when we started launching this activity
     long startTime;         // last time this activity was started
@@ -149,7 +168,7 @@ final class ActivityRecord {
     boolean mStartingWindowShown = false;
     ActivityContainer mInitialActivityContainer;
 
-    ActivityManager.TaskDescription taskDescription; // the recents information for this activity
+    TaskDescription taskDescription; // the recents information for this activity
 
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
@@ -490,14 +509,6 @@ final class ActivityRecord {
                         (newTask == null ? null : newTask.stack));
             }
         }
-        if (inHistory && !finishing) {
-            if (task != null) {
-                task.numActivities--;
-            }
-            if (newTask != null) {
-                newTask.numActivities++;
-            }
-        }
         if (newThumbHolder == null) {
             newThumbHolder = newTask;
         }
@@ -527,9 +538,6 @@ final class ActivityRecord {
     void putInHistory() {
         if (!inHistory) {
             inHistory = true;
-            if (task != null && !finishing) {
-                task.numActivities++;
-            }
         }
     }
 
@@ -537,7 +545,6 @@ final class ActivityRecord {
         if (inHistory) {
             inHistory = false;
             if (task != null && !finishing) {
-                task.numActivities--;
                 task = null;
             }
             clearOptionsLocked();
@@ -560,12 +567,13 @@ final class ActivityRecord {
         return mActivityType == APPLICATION_ACTIVITY_TYPE;
     }
 
+    boolean isPersistable() {
+        return (info.flags & ActivityInfo.FLAG_PERSISTABLE) != 0;
+    }
+
     void makeFinishing() {
         if (!finishing) {
             finishing = true;
-            if (task != null && inHistory) {
-                task.numActivities--;
-            }
             if (stopped) {
                 clearOptionsLocked();
             }
@@ -767,6 +775,9 @@ final class ActivityRecord {
                         "Setting thumbnail of " + this + " holder " + thumbHolder
                         + " to " + newThumbnail);
                 thumbHolder.lastThumbnail = newThumbnail;
+                if (isPersistable()) {
+                    mStackSupervisor.mService.notifyTaskPersisterLocked(task, false);
+                }
             }
             thumbHolder.lastDescription = description;
         }
@@ -1042,7 +1053,132 @@ final class ActivityRecord {
         return null;
     }
 
-    private String activityTypeToString(int type) {
+    void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
+        out.attribute(null, ATTR_ID, String.valueOf(createTime));
+        out.attribute(null, ATTR_LAUNCHEDFROMUID, String.valueOf(launchedFromUid));
+        if (launchedFromPackage != null) {
+            out.attribute(null, ATTR_LAUNCHEDFROMPACKAGE, launchedFromPackage);
+        }
+        if (resolvedType != null) {
+            out.attribute(null, ATTR_RESOLVEDTYPE, resolvedType);
+        }
+        out.attribute(null, ATTR_COMPONENTSPECIFIED, String.valueOf(componentSpecified));
+        out.attribute(null, ATTR_USERID, String.valueOf(userId));
+        if (taskDescription != null) {
+            final String label = taskDescription.getLabel();
+            if (label != null) {
+                out.attribute(null, ATTR_TASKDESCRIPTIONLABEL, label);
+            }
+            final int colorPrimary = taskDescription.getPrimaryColor();
+            if (colorPrimary != 0) {
+                out.attribute(null, ATTR_TASKDESCRIPTIONCOLOR, Integer.toHexString(colorPrimary));
+            }
+            final Bitmap icon = taskDescription.getIcon();
+            if (icon != null) {
+                TaskPersister.saveImage(icon, String.valueOf(task.taskId) + ACTIVITY_ICON_SUFFIX +
+                        createTime);
+            }
+        }
+
+        out.startTag(null, TAG_INTENT);
+        intent.saveToXml(out);
+        out.endTag(null, TAG_INTENT);
+
+        if (isPersistable() && persistentState != null) {
+            out.startTag(null, TAG_PERSISTABLEBUNDLE);
+            persistentState.saveToXml(out);
+            out.endTag(null, TAG_PERSISTABLEBUNDLE);
+        }
+    }
+
+    static ActivityRecord restoreFromXml(XmlPullParser in, int taskId,
+            ActivityStackSupervisor stackSupervisor) throws IOException, XmlPullParserException {
+        Intent intent = null;
+        PersistableBundle persistentState = null;
+        int launchedFromUid = 0;
+        String launchedFromPackage = null;
+        String resolvedType = null;
+        boolean componentSpecified = false;
+        int userId = 0;
+        String activityLabel = null;
+        int activityColor = 0;
+        long createTime = -1;
+        final int outerDepth = in.getDepth();
+
+        for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
+            final String attrName = in.getAttributeName(attrNdx);
+            final String attrValue = in.getAttributeValue(attrNdx);
+            if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "ActivityRecord: attribute name=" +
+                    attrName + " value=" + attrValue);
+            if (ATTR_ID.equals(attrName)) {
+                createTime = Long.valueOf(attrValue);
+            } else if (ATTR_LAUNCHEDFROMUID.equals(attrName)) {
+                launchedFromUid = Integer.valueOf(attrValue);
+            } else if (ATTR_LAUNCHEDFROMPACKAGE.equals(attrName)) {
+                launchedFromPackage = attrValue;
+            } else if (ATTR_RESOLVEDTYPE.equals(attrName)) {
+                resolvedType = attrValue;
+            } else if (ATTR_COMPONENTSPECIFIED.equals(attrName)) {
+                componentSpecified = Boolean.valueOf(attrValue);
+            } else if (ATTR_USERID.equals(attrName)) {
+                userId = Integer.valueOf(attrValue);
+            } else if (ATTR_TASKDESCRIPTIONLABEL.equals(attrName)) {
+                activityLabel = attrValue;
+            } else if (ATTR_TASKDESCRIPTIONCOLOR.equals(attrName)) {
+                activityColor = (int) Long.parseLong(attrValue, 16);
+            } else {
+                Log.d(TAG, "Unknown ActivityRecord attribute=" + attrName);
+            }
+        }
+
+        int event;
+        while (((event = in.next()) != XmlPullParser.END_DOCUMENT) &&
+                (event != XmlPullParser.END_TAG || in.getDepth() < outerDepth)) {
+            if (event == XmlPullParser.START_TAG) {
+                final String name = in.getName();
+                if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG,
+                        "ActivityRecord: START_TAG name=" + name);
+                if (TAG_INTENT.equals(name)) {
+                    intent = Intent.restoreFromXml(in);
+                    if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG,
+                            "ActivityRecord: intent=" + intent);
+                } else if (TAG_PERSISTABLEBUNDLE.equals(name)) {
+                    persistentState = PersistableBundle.restoreFromXml(in);
+                    if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG,
+                            "ActivityRecord: persistentState=" + persistentState);
+                } else {
+                    Slog.w(TAG, "restoreActivity: unexpected name=" + name);
+                    XmlUtils.skipCurrentTag(in);
+                }
+            }
+        }
+
+        if (intent == null) {
+            Slog.e(TAG, "restoreActivity error intent=" + intent);
+            return null;
+        }
+
+        final ActivityManagerService service = stackSupervisor.mService;
+        final ActivityInfo aInfo = stackSupervisor.resolveActivity(intent, resolvedType, 0, null,
+                null, userId);
+        final ActivityRecord r = new ActivityRecord(service, /*caller*/null, launchedFromUid,
+                launchedFromPackage, intent, resolvedType, aInfo, service.getConfiguration(),
+                null, null, 0, componentSpecified, stackSupervisor, null, null);
+
+        r.persistentState = persistentState;
+
+        Bitmap icon = null;
+        if (createTime >= 0) {
+            icon = TaskPersister.restoreImage(String.valueOf(taskId) + ACTIVITY_ICON_SUFFIX +
+                    createTime);
+        }
+        r.taskDescription = new TaskDescription(activityLabel, icon, activityColor);
+        r.createTime = createTime;
+
+        return r;
+    }
+
+    private static String activityTypeToString(int type) {
         switch (type) {
             case APPLICATION_ACTIVITY_TYPE: return "APPLICATION_ACTIVITY_TYPE";
             case HOME_ACTIVITY_TYPE: return "HOME_ACTIVITY_TYPE";

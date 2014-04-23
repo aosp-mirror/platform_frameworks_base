@@ -27,15 +27,39 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.Slog;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.util.XmlUtils;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
 final class TaskRecord extends ThumbnailHolder {
+    private static final String TAG_TASK = "task";
+    private static final String ATTR_TASKID = "task_id";
+    private static final String TAG_INTENT = "intent";
+    private static final String TAG_AFFINITYINTENT = "affinity_intent";
+    private static final String ATTR_REALACTIVITY = "real_activity";
+    private static final String ATTR_ORIGACTIVITY = "orig_activity";
+    private static final String TAG_ACTIVITY = "activity";
+    private static final String ATTR_AFFINITY = "affinity";
+    private static final String ATTR_ROOTHASRESET = "root_has_reset";
+    private static final String ATTR_ASKEDCOMPATMODE = "asked_compat_mode";
+    private static final String ATTR_USERID = "user_id";
+    private static final String ATTR_TASKTYPE = "task_type";
+    private static final String ATTR_ONTOPOFHOME = "on_top_of_home";
+    private static final String ATTR_LASTDESCRIPTION = "last_description";
+    private static final String ATTR_LASTTIMEMOVED = "last_time_moved";
+
+    private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
+
     final int taskId;       // Unique identifier for this task.
     final String affinity;  // The affinity name for this task, or null.
     final IVoiceInteractionSession voiceSession;    // Voice interaction session driving task
@@ -62,25 +86,63 @@ final class TaskRecord extends ThumbnailHolder {
             new ActivityManager.TaskDescription();
 
     /** List of all activities in the task arranged in history order */
-    final ArrayList<ActivityRecord> mActivities = new ArrayList<ActivityRecord>();
+    final ArrayList<ActivityRecord> mActivities;
 
     /** Current stack */
     ActivityStack stack;
 
     /** Takes on same set of values as ActivityRecord.mActivityType */
-    private int mTaskType;
+    int taskType;
 
+    /** Takes on same value as first root activity */
+    boolean isPersistable = false;
+
+    /** Only used for persistable tasks, otherwise 0. The last time this task was moved. Used for
+     * determining the order when restoring. Sign indicates whether last task movement was to front
+     * (positive) or back (negative). Absolute value indicates time. */
+    long mLastTimeMoved = System.currentTimeMillis();
+
+    /** True if persistable, has changed, and has not yet been persisted */
+    boolean needsPersisting = false;
     /** Launch the home activity when leaving this task. Will be false for tasks that are not on
      * Display.DEFAULT_DISPLAY. */
     boolean mOnTopOfHome = false;
 
-    TaskRecord(int _taskId, ActivityInfo info, Intent _intent,
+    final ActivityManagerService mService;
+
+    TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
+        mService = service;
         taskId = _taskId;
         affinity = info.taskAffinity;
         voiceSession = _voiceSession;
         voiceInteractor = _voiceInteractor;
         setIntent(_intent, info);
+        mActivities = new ArrayList<ActivityRecord>();
+    }
+
+    TaskRecord(ActivityManagerService service, int _taskId, Intent _intent, Intent _affinityIntent,
+            String _affinity, ComponentName _realActivity, ComponentName _origActivity,
+            boolean _rootWasReset, boolean _askedCompatMode, int _taskType, boolean _onTopOfHome,
+            int _userId, String _lastDescription, ArrayList<ActivityRecord> activities,
+            long lastTimeMoved) {
+        mService = service;
+        taskId = _taskId;
+        intent = _intent;
+        affinityIntent = _affinityIntent;
+        affinity = _affinity;
+        voiceSession = null;
+        voiceInteractor = null;
+        realActivity = _realActivity;
+        origActivity = _origActivity;
+        rootWasReset = _rootWasReset;
+        askedCompatMode = _askedCompatMode;
+        taskType = _taskType;
+        mOnTopOfHome = _onTopOfHome;
+        userId = _userId;
+        lastDescription = _lastDescription;
+        mActivities = activities;
+        mLastTimeMoved = lastTimeMoved;
     }
 
     void touchActiveTime() {
@@ -237,12 +299,16 @@ final class TaskRecord extends ThumbnailHolder {
         }
         // Only set this based on the first activity
         if (mActivities.isEmpty()) {
-            mTaskType = r.mActivityType;
+            taskType = r.mActivityType;
+            isPersistable = r.isPersistable();
         } else {
             // Otherwise make all added activities match this one.
-            r.mActivityType = mTaskType;
+            r.mActivityType = taskType;
         }
         mActivities.add(index, r);
+        if (r.isPersistable()) {
+            mService.notifyTaskPersisterLocked(this, false);
+        }
     }
 
     /** @return true if this was the last activity in the task */
@@ -250,6 +316,9 @@ final class TaskRecord extends ThumbnailHolder {
         if (mActivities.remove(r) && r.fullscreen) {
             // Was previously in list.
             numFullscreen--;
+        }
+        if (r.isPersistable()) {
+            mService.notifyTaskPersisterLocked(this, false);
         }
         return mActivities.size() == 0;
     }
@@ -270,7 +339,14 @@ final class TaskRecord extends ThumbnailHolder {
             if (r.finishing) {
                 continue;
             }
-            if (stack.finishActivityLocked(r, Activity.RESULT_CANCELED, null, "clear", false)) {
+            if (stack == null) {
+                // Task was restored from persistent storage.
+                r.takeFromHistory();
+                mActivities.remove(activityNdx);
+                --activityNdx;
+                --numActivities;
+            } else if (stack.finishActivityLocked(r, Activity.RESULT_CANCELED, null, "clear",
+                    false)) {
                 --activityNdx;
                 --numActivities;
             }
@@ -354,11 +430,13 @@ final class TaskRecord extends ThumbnailHolder {
     }
 
     public Bitmap getTaskTopThumbnailLocked() {
-        final ActivityRecord resumedActivity = stack.mResumedActivity;
-        if (resumedActivity != null && resumedActivity.task == this) {
-            // This task is the current resumed task, we just need to take
-            // a screenshot of it and return that.
-            return stack.screenshotActivities(resumedActivity);
+        if (stack != null) {
+            final ActivityRecord resumedActivity = stack.mResumedActivity;
+            if (resumedActivity != null && resumedActivity.task == this) {
+                // This task is the current resumed task, we just need to take
+                // a screenshot of it and return that.
+                return stack.screenshotActivities(resumedActivity);
+            }
         }
         // Return the information about the task, to figure out the top
         // thumbnail to return.
@@ -399,11 +477,11 @@ final class TaskRecord extends ThumbnailHolder {
     }
 
     boolean isHomeTask() {
-        return mTaskType == ActivityRecord.HOME_ACTIVITY_TYPE;
+        return taskType == ActivityRecord.HOME_ACTIVITY_TYPE;
     }
 
     boolean isApplicationTask() {
-        return mTaskType == ActivityRecord.APPLICATION_ACTIVITY_TYPE;
+        return taskType == ActivityRecord.APPLICATION_ACTIVITY_TYPE;
     }
 
     public TaskAccessInfo getTaskAccessInfoLocked() {
@@ -493,7 +571,7 @@ final class TaskRecord extends ThumbnailHolder {
         int activityNdx;
         final int numActivities = mActivities.size();
         for (activityNdx = Math.min(numActivities, 1); activityNdx < numActivities;
-             ++activityNdx) {
+                ++activityNdx) {
             final ActivityRecord r = mActivities.get(activityNdx);
             if (r.intent != null &&
                     (r.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
@@ -528,12 +606,155 @@ final class TaskRecord extends ThumbnailHolder {
         }
     }
 
+    void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
+        Slog.i(TAG, "Saving task=" + this);
+
+        out.attribute(null, ATTR_TASKID, String.valueOf(taskId));
+        if (realActivity != null) {
+            out.attribute(null, ATTR_REALACTIVITY, realActivity.flattenToShortString());
+        }
+        if (origActivity != null) {
+            out.attribute(null, ATTR_ORIGACTIVITY, origActivity.flattenToShortString());
+        }
+        if (affinity != null) {
+            out.attribute(null, ATTR_AFFINITY, affinity);
+        }
+        out.attribute(null, ATTR_ROOTHASRESET, String.valueOf(rootWasReset));
+        out.attribute(null, ATTR_ASKEDCOMPATMODE, String.valueOf(askedCompatMode));
+        out.attribute(null, ATTR_USERID, String.valueOf(userId));
+        out.attribute(null, ATTR_TASKTYPE, String.valueOf(taskType));
+        out.attribute(null, ATTR_ONTOPOFHOME, String.valueOf(mOnTopOfHome));
+        out.attribute(null, ATTR_LASTTIMEMOVED, String.valueOf(mLastTimeMoved));
+        if (lastDescription != null) {
+            out.attribute(null, ATTR_LASTDESCRIPTION, lastDescription.toString());
+        }
+
+        if (affinityIntent != null) {
+            out.startTag(null, TAG_AFFINITYINTENT);
+            affinityIntent.saveToXml(out);
+            out.endTag(null, TAG_AFFINITYINTENT);
+        }
+
+        out.startTag(null, TAG_INTENT);
+        intent.saveToXml(out);
+        out.endTag(null, TAG_INTENT);
+
+        final ArrayList<ActivityRecord> activities = mActivities;
+        final int numActivities = activities.size();
+        for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
+            final ActivityRecord r = activities.get(activityNdx);
+            if (!r.isPersistable() || (r.intent.getFlags() & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) ==
+                    Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) {
+                break;
+            }
+            out.startTag(null, TAG_ACTIVITY);
+            r.saveToXml(out);
+            out.endTag(null, TAG_ACTIVITY);
+        }
+
+        final Bitmap thumbnail = getTaskTopThumbnailLocked();
+        if (thumbnail != null) {
+            TaskPersister.saveImage(thumbnail, String.valueOf(taskId) + TASK_THUMBNAIL_SUFFIX);
+        }
+    }
+
+    static TaskRecord restoreFromXml(XmlPullParser in, ActivityStackSupervisor stackSupervisor)
+            throws IOException, XmlPullParserException {
+        Intent intent = null;
+        Intent affinityIntent = null;
+        ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
+        ComponentName realActivity = null;
+        ComponentName origActivity = null;
+        String affinity = null;
+        boolean rootHasReset = false;
+        boolean askedCompatMode = false;
+        int taskType = ActivityRecord.APPLICATION_ACTIVITY_TYPE;
+        boolean onTopOfHome = true;
+        int userId = 0;
+        String lastDescription = null;
+        long lastTimeOnTop = 0;
+        int taskId = -1;
+        final int outerDepth = in.getDepth();
+
+        for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
+            final String attrName = in.getAttributeName(attrNdx);
+            final String attrValue = in.getAttributeValue(attrNdx);
+            if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: attribute name=" +
+                    attrName + " value=" + attrValue);
+            if (ATTR_TASKID.equals(attrName)) {
+                taskId = Integer.valueOf(attrValue);
+            } else if (ATTR_REALACTIVITY.equals(attrName)) {
+                realActivity = ComponentName.unflattenFromString(attrValue);
+            } else if (ATTR_ORIGACTIVITY.equals(attrName)) {
+                origActivity = ComponentName.unflattenFromString(attrValue);
+            } else if (ATTR_AFFINITY.equals(attrName)) {
+                affinity = attrValue;
+            } else if (ATTR_ROOTHASRESET.equals(attrName)) {
+                rootHasReset = Boolean.valueOf(attrValue);
+            } else if (ATTR_ASKEDCOMPATMODE.equals(attrName)) {
+                askedCompatMode = Boolean.valueOf(attrValue);
+            } else if (ATTR_USERID.equals(attrName)) {
+                userId = Integer.valueOf(attrValue);
+            } else if (ATTR_TASKTYPE.equals(attrName)) {
+                taskType = Integer.valueOf(attrValue);
+            } else if (ATTR_ONTOPOFHOME.equals(attrName)) {
+                onTopOfHome = Boolean.valueOf(attrValue);
+            } else if (ATTR_LASTDESCRIPTION.equals(attrName)) {
+                lastDescription = attrValue;
+            } else if (ATTR_LASTTIMEMOVED.equals(attrName)) {
+                lastTimeOnTop = Long.valueOf(attrValue);
+            } else {
+                Slog.w(TAG, "TaskRecord: Unknown attribute=" + attrName);
+            }
+        }
+
+        int event;
+        while (((event = in.next()) != XmlPullParser.END_DOCUMENT) &&
+                (event != XmlPullParser.END_TAG || in.getDepth() < outerDepth)) {
+            if (event == XmlPullParser.START_TAG) {
+                final String name = in.getName();
+                if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: START_TAG name=" +
+                        name);
+                if (TAG_AFFINITYINTENT.equals(name)) {
+                    affinityIntent = Intent.restoreFromXml(in);
+                } else if (TAG_INTENT.equals(name)) {
+                    intent = Intent.restoreFromXml(in);
+                } else if (TAG_ACTIVITY.equals(name)) {
+                    ActivityRecord activity =
+                            ActivityRecord.restoreFromXml(in, taskId, stackSupervisor);
+                    if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: activity=" +
+                            activity);
+                    if (activity != null) {
+                        activities.add(activity);
+                    }
+                } else {
+                    Slog.e(TAG, "restoreTask: Unexpected name=" + name);
+                    XmlUtils.skipCurrentTag(in);
+                }
+            }
+        }
+
+        final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
+                affinityIntent, affinity, realActivity, origActivity, rootHasReset,
+                askedCompatMode, taskType, onTopOfHome, userId, lastDescription, activities,
+                lastTimeOnTop);
+
+        for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
+            final ActivityRecord r = activities.get(activityNdx);
+            r.thumbHolder = r.task = task;
+        }
+
+        task.lastThumbnail = TaskPersister.restoreImage(taskId + TASK_THUMBNAIL_SUFFIX);
+
+        Slog.i(TAG, "Restored task=" + task);
+        return task;
+    }
+
     void dump(PrintWriter pw, String prefix) {
-        if (numActivities != 0 || rootWasReset || userId != 0 || numFullscreen != 0) {
-            pw.print(prefix); pw.print("numActivities="); pw.print(numActivities);
-                    pw.print(" rootWasReset="); pw.print(rootWasReset);
+        if (rootWasReset || userId != 0 || numFullscreen != 0) {
+            pw.print(prefix); pw.print(" rootWasReset="); pw.print(rootWasReset);
                     pw.print(" userId="); pw.print(userId);
-                    pw.print(" mTaskType="); pw.print(mTaskType);
+                    pw.print(" taskType="); pw.print(taskType);
                     pw.print(" numFullscreen="); pw.print(numFullscreen);
                     pw.print(" mOnTopOfHome="); pw.println(mOnTopOfHome);
         }

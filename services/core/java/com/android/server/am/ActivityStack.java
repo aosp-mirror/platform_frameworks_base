@@ -863,7 +863,10 @@ final class ActivityStack {
         final ActivityRecord r = isInStackLocked(token);
         if (r != null) {
             mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
-            r.persistentState = persistentState;
+            if (persistentState != null) {
+                r.persistentState = persistentState;
+                mService.notifyTaskPersisterLocked(r.task, false);
+            }
             if (mPausingActivity == r) {
                 if (DEBUG_STATES) Slog.v(TAG, "Moving to PAUSED: " + r
                         + (timeout ? " (due to timeout)" : " (pause complete)"));
@@ -885,7 +888,10 @@ final class ActivityStack {
             mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
             return;
         }
-        r.persistentState = persistentState;
+        if (persistentState != null) {
+            r.persistentState = persistentState;
+            mService.notifyTaskPersisterLocked(r.task, false);
+        }
         if (DEBUG_SAVED_STATE) Slog.i(TAG, "Saving icicle of " + r + ": " + icicle);
         if (icicle != null) {
             // If icicle is null, this is happening due to a timeout, so we
@@ -1821,6 +1827,7 @@ final class ActivityStack {
             ++stackNdx;
         }
         mTaskHistory.add(stackNdx, task);
+        updateTaskMovement(task, true);
     }
 
     final void startActivityLocked(ActivityRecord r, boolean newTask,
@@ -3138,6 +3145,18 @@ final class ActivityStack {
         mWindowManager.prepareAppTransition(transit, false);
     }
 
+    void updateTaskMovement(TaskRecord task, boolean toFront) {
+        if (task.isPersistable) {
+            task.mLastTimeMoved = System.currentTimeMillis();
+            // Sign is used to keep tasks sorted when persisted. Tasks sent to the bottom most
+            // recently will be most negative, tasks sent to the bottom before that will be less
+            // negative. Similarly for recent tasks moved to the top which will be most positive.
+            if (!toFront) {
+                task.mLastTimeMoved *= -1;
+            }
+        }
+    }
+
     void moveHomeTaskToTop() {
         final int top = mTaskHistory.size() - 1;
         for (int taskNdx = top; taskNdx >= 0; --taskNdx) {
@@ -3146,6 +3165,7 @@ final class ActivityStack {
                 if (DEBUG_TASKS || DEBUG_STACK) Slog.d(TAG, "moveHomeTaskToTop: moving " + task);
                 mTaskHistory.remove(taskNdx);
                 mTaskHistory.add(top, task);
+                updateTaskMovement(task, true);
                 mWindowManager.moveTaskToTop(task.taskId);
                 return;
             }
@@ -3247,10 +3267,10 @@ final class ActivityStack {
 
         mTaskHistory.remove(tr);
         mTaskHistory.add(0, tr);
+        updateTaskMovement(tr, false);
 
         // There is an assumption that moving a task to the back moves it behind the home activity.
         // We make sure here that some activity in the stack will launch home.
-        ActivityRecord lastActivity = null;
         int numTasks = mTaskHistory.size();
         for (int taskNdx = numTasks - 1; taskNdx >= 1; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
@@ -3727,6 +3747,7 @@ final class ActivityStack {
             mTaskHistory.get(taskNdx + 1).mOnTopOfHome = true;
         }
         mTaskHistory.remove(task);
+        updateTaskMovement(task, true);
 
         if (task.mActivities.isEmpty()) {
             final boolean isVoiceSession = task.voiceSession != null;
@@ -3758,7 +3779,8 @@ final class ActivityStack {
     TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             boolean toTop) {
-        TaskRecord task = new TaskRecord(taskId, info, intent, voiceSession, voiceInteractor);
+        TaskRecord task = new TaskRecord(mService, taskId, info, intent, voiceSession,
+                voiceInteractor);
         addTask(task, toTop, false);
         return task;
     }
@@ -3773,6 +3795,7 @@ final class ActivityStack {
             insertTaskAtTop(task);
         } else {
             mTaskHistory.add(0, task);
+            updateTaskMovement(task, false);
         }
         if (!moving && task.voiceSession != null) {
             try {
