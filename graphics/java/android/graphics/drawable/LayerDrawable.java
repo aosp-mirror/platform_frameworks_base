@@ -290,6 +290,26 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
         return false;
     }
+    
+    /**
+     * @hide
+     */
+    @Override
+    public boolean isProjected() {
+        if (super.isProjected()) {
+            return true;
+        }
+
+        final ChildDrawable[] layers = mLayerState.mChildren;
+        final int N = mLayerState.mNum;
+        for (int i = 0; i < N; i++) {
+            if (layers[i].mDrawable.isProjected()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /**
      * Add a new layer to this drawable. The new layer is identified by an id.

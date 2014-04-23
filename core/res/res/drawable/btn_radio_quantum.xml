@@ -15,16 +15,18 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_checked="true" android:state_enabled="true" android:state_pressed="true">
-        <bitmap android:src="@drawable/btn_radio_on_pressed_qntm_alpha"
-            android:tint="?attr/colorControlActivated" />
+    <item android:state_enabled="false" android:state_checked="true">
+        <bitmap android:src="@drawable/btn_radio_on_qntm_alpha"
+            android:tint="?attr/colorControlNormal"
+            android:alpha="?attr/disabledAlpha" />
+    </item>
+    <item android:state_enabled="false">
+        <bitmap android:src="@drawable/btn_radio_off_qntm_alpha"
+            android:tint="?attr/colorControlNormal"
+            android:alpha="?attr/disabledAlpha" />
     </item>
     <item android:state_checked="true">
         <bitmap android:src="@drawable/btn_radio_on_qntm_alpha"
-            android:tint="?attr/colorControlActivated" />
-    </item>
-    <item android:state_enabled="true" android:state_pressed="true">
-        <bitmap android:src="@drawable/btn_radio_off_pressed_qntm_alpha"
             android:tint="?attr/colorControlActivated" />
     </item>
     <item>
