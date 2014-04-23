@@ -314,7 +314,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         final int right = left + thumbWidth;
 
         final Drawable background = getBackground();
-        if (background.supportsHotspots()) {
+        if (background != null && background.supportsHotspots()) {
             final Rect bounds = mThumb.getBounds();
             final int offsetX = mPaddingLeft - mThumbOffset;
             final int offsetY = mPaddingTop;
