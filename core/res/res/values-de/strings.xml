@@ -173,6 +173,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Flugmodus"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Flugmodus ist AN."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Flugmodus ist AUS."</string>
+    <string name="global_action_settings" msgid="1756531602592545966">"Einstellungen"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Abgesicherter Modus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-System"</string>
@@ -316,13 +317,13 @@
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"Bildschirminhalt abrufen"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Ermöglicht der App, den Inhalt des aktiven Fensters abzurufen. Schädliche Apps können so den gesamten Fensterinhalt abrufen und mit Ausnahme von Passwörtern den gesamten Text auswerten."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"Bedienungshilfen vorübergehend aktivieren"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Ermöglicht einer App, die Bedienungshilfen auf dem Gerät vorübergehend zu aktivieren. Schädliche Apps können Bedienungshilfen ohne die Zustimmung des Nutzers aktivieren."</string>
+    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Ermöglicht der App, die Bedienungshilfen auf dem Gerät vorübergehend zu aktivieren. Schädliche Apps können Bedienungshilfen ohne die Zustimmung des Nutzers aktivieren."</string>
     <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"Fenstertoken abrufen"</string>
     <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Berechtigt eine App zum Abruf des Fenstertokens. Bösartige Apps können sich als System ausgeben und unautorisiert mit dem App-Fenster interagieren."</string>
     <string name="permlab_frameStats" msgid="7056374987314361639">"Framestatistiken abrufen"</string>
     <string name="permdesc_frameStats" msgid="4758001089491284919">"Berechtigt eine App zur Erfassung von Framestatistiken. Bösartige Apps können möglicherweise die Framestatistiken für Fenster von anderen Apps beobachten."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"Ereignisse filtern"</string>
-    <string name="permdesc_filter_events" msgid="8006236315888347680">"Ermöglicht einer App, einen Eingabefilter zu registrieren, der den Stream aller Nutzerereignisse vor ihrem Versand filtert. Eine schädliche App kann die System-UI ohne Eingriff des Nutzers kontrollieren."</string>
+    <string name="permdesc_filter_events" msgid="8006236315888347680">"Ermöglicht der App, einen Eingabefilter zu registrieren, der den Stream aller Nutzerereignisse vor ihrem Versand filtert. Eine schädliche App kann die System-UI ohne Eingriff des Nutzers kontrollieren."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"Partielles Herunterfahren"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Versetzt den Aktivitätsmanager in einen heruntergefahrenen Zustand. Führt kein vollständiges Herunterfahren aus."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"App-Wechsel verhindern"</string>
@@ -338,7 +339,7 @@
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"Von WAP-PUSH empfangenen Broadcast senden"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Ermöglicht der App, eine Benachrichtigung zu senden, dass eine WAP PUSH-Nachricht empfangen wurde. Schädliche Apps können so den Empfang von MMS vortäuschen oder unbemerkt den Inhalt einer beliebigen Webseite durch schädliche Inhalte ersetzen."</string>
     <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"Netzwerkbewertungen senden"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Ermöglicht der App, Benachrichtigungen zu senden, dass Netzwerke bewertet werden müssen. Für normale Apps sollte dies nie erforderlich sein."</string>
+    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Ermöglicht der App, Benachrichtigungen zu senden, dass Netzwerke bewertet werden müssen. Für normale Apps ist dies nie erforderlich."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"Anzahl der laufenden Prozesse beschränken"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Ermöglicht der App, die maximale Anzahl an aktiven Prozessen zu steuern. Wird nie für normale Apps benötigt."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"Apps im Hintergrund schließen"</string>
@@ -1333,7 +1334,7 @@
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"Inhalte kopieren"</string>
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Ermöglicht der App das Aufrufen des Standard-Containerdienstes zum Kopieren von Inhalten. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Medienausgabe umleiten"</string>
-    <string name="permdesc_route_media_output" msgid="4932818749547244346">"Ermöglicht einer App, die Medienausgabe auf andere externe Geräte umzuleiten."</string>
+    <string name="permdesc_route_media_output" msgid="4932818749547244346">"Ermöglicht der App, die Medienausgabe auf andere externe Geräte umzuleiten."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Zugriff auf mit Keyguard geschützten Speicher"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Ermöglicht einer App den Zugriff auf mit Keyguard geschützten Speicher"</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Anzeige und Ausblenden des Keyguard steuern"</string>
