@@ -179,6 +179,10 @@ public class StatusBarKeyguardViewManager {
         }
     }
 
+    public boolean isSecure() {
+        return mBouncer.isSecure();
+    }
+
     /**
      * @return Whether the keyguard is showing
      */

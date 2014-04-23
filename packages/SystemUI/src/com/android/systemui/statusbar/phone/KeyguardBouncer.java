@@ -143,6 +143,10 @@ public class KeyguardBouncer {
         return false;
     }
 
+    public boolean isSecure() {
+        return mKeyguardView == null || mKeyguardView.getSecurityMode() != SecurityMode.None;
+    }
+
     public boolean onMenuPressed() {
         ensureView();
         if (mKeyguardView.handleMenuKey()) {
