@@ -223,6 +223,7 @@ public final class Parcel {
     private static final int VAL_SPARSEBOOLEANARRAY = 22;
     private static final int VAL_BOOLEANARRAY = 23;
     private static final int VAL_CHARSEQUENCEARRAY = 24;
+    private static final int VAL_PERSISTABLEBUNDLE = 25;
 
     // The initial int32 in a Binder call's reply Parcel header:
     private static final int EX_SECURITY = -1;
@@ -629,6 +630,19 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final void writeBundle(Bundle val) {
+        if (val == null) {
+            writeInt(-1);
+            return;
+        }
+
+        val.writeToParcel(this, 0);
+    }
+
+    /**
+     * Flatten a PersistableBundle into the parcel at the current dataPosition(),
+     * growing dataCapacity() if needed.
+     */
+    public final void writePersistableBundle(PersistableBundle val) {
         if (val == null) {
             writeInt(-1);
             return;
@@ -1256,6 +1270,9 @@ public final class Parcel {
         } else if (v instanceof Byte) {
             writeInt(VAL_BYTE);
             writeInt((Byte) v);
+        } else if (v instanceof PersistableBundle) {
+            writeInt(VAL_PERSISTABLEBUNDLE);
+            writePersistableBundle((PersistableBundle) v);
         } else {
             Class<?> clazz = v.getClass();
             if (clazz.isArray() && clazz.getComponentType() == Object.class) {
@@ -1626,6 +1643,35 @@ public final class Parcel {
         }
         
         final Bundle bundle = new Bundle(this, length);
+        if (loader != null) {
+            bundle.setClassLoader(loader);
+        }
+        return bundle;
+    }
+
+    /**
+     * Read and return a new Bundle object from the parcel at the current
+     * dataPosition().  Returns null if the previously written Bundle object was
+     * null.
+     */
+    public final PersistableBundle readPersistableBundle() {
+        return readPersistableBundle(null);
+    }
+
+    /**
+     * Read and return a new Bundle object from the parcel at the current
+     * dataPosition(), using the given class loader to initialize the class
+     * loader of the Bundle for later retrieval of Parcelable objects.
+     * Returns null if the previously written Bundle object was null.
+     */
+    public final PersistableBundle readPersistableBundle(ClassLoader loader) {
+        int length = readInt();
+        if (length < 0) {
+            if (Bundle.DEBUG) Log.d(TAG, "null bundle: length=" + length);
+            return null;
+        }
+
+        final PersistableBundle bundle = new PersistableBundle(this, length);
         if (loader != null) {
             bundle.setClassLoader(loader);
         }
@@ -2081,6 +2127,9 @@ public final class Parcel {
 
         case VAL_BUNDLE:
             return readBundle(loader); // loading will be deferred
+
+        case VAL_PERSISTABLEBUNDLE:
+            return readPersistableBundle(loader);
 
         default:
             int off = dataPosition() - 4;
