@@ -25,6 +25,7 @@ import android.view.accessibility.AccessibilityEvent;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.GestureRecorder;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 public class NotificationPanelView extends PanelView implements
@@ -76,7 +77,7 @@ public class NotificationPanelView extends PanelView implements
         super.onLayout(changed, left, top, right, bottom);
         int keyguardBottomMargin =
                 ((MarginLayoutParams) mKeyguardStatusView.getLayoutParams()).bottomMargin;
-        mNotificationStackScroller.setTopPadding(mStatusBar.isOnKeyguard()
+        mNotificationStackScroller.setTopPadding(mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 ? mKeyguardStatusView.getBottom() + keyguardBottomMargin
                 : mHeader.getBottom() + mNotificationTopPadding);
     }
@@ -107,14 +108,18 @@ public class NotificationPanelView extends PanelView implements
     public boolean onInterceptTouchEvent(MotionEvent event) {
         // intercept for quick settings
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            final View target = mStatusBar.isOnKeyguard() ?  mKeyguardStatusView : mHeader;
+            final View target = mStatusBar.getBarState() == StatusBarState.KEYGUARD
+                    ? mKeyguardStatusView
+                    : mHeader;
             final boolean inTarget = PhoneStatusBar.inBounds(target, event, true);
             if (inTarget && !isInSettings()) {
                 mTrackingSettings = true;
+                requestDisallowInterceptTouchEvent(true);
                 return true;
             }
             if (!inTarget && isInSettings()) {
                 mTrackingSettings = true;
+                requestDisallowInterceptTouchEvent(true);
                 return true;
             }
         }

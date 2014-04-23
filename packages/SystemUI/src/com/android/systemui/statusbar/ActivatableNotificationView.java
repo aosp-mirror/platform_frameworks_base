@@ -88,14 +88,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 if (mDownY > getActualHeight()) {
                     return false;
                 }
-
-                // Call the listener tentatively directly, even if we don't know whether the user
-                // will stay within the touch slop, as the listener is implemented as a scale
-                // animation, which is cancellable without jarring effects when swiping away
-                // notifications.
-                if (mOnActivatedListener != null) {
-                    mOnActivatedListener.onActivated(this);
-                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (!isWithinTouchSlop(event)) {
@@ -109,8 +101,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                         makeActive(event.getX(), event.getY());
                         postDelayed(mTapTimeoutRunnable, DOUBLETAP_TIMEOUT_MS);
                     } else {
-                        performClick();
                         makeInactive();
+                        performClick();
                     }
                 } else {
                     makeInactive();
@@ -128,6 +120,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private void makeActive(float x, float y) {
         mCustomBackground.setHotspot(0, x, y);
         mActivated = true;
+        if (mOnActivatedListener != null) {
+            mOnActivatedListener.onActivated(this);
+        }
     }
 
     /**

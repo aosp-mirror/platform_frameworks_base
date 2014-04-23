@@ -96,13 +96,17 @@ import com.android.systemui.R;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.DragDownHelper;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.InterceptedNotifications;
+import com.android.systemui.statusbar.NotificationActivatable;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.NotificationOverflowContainer;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.DateView;
@@ -120,7 +124,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
+public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
+        DragDownHelper.OnDragDownListener {
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = false;
@@ -233,6 +238,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     View mNotificationPanelHeader;
     View mKeyguardStatusView;
     View mKeyguardBottomArea;
+    boolean mLeaveOpenOnKeyguardHide;
     KeyguardIndicationTextView mKeyguardIndicationTextView;
 
     // TODO: Fetch phrase from search/hotword provider.
@@ -470,6 +476,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     };
 
+    private final View.OnClickListener mOverflowClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            goToLockedShade(null);
+        }
+    };
+
     @Override
     public void setZenMode(int mode) {
         super.setZenMode(mode);
@@ -619,6 +632,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                         R.layout.status_bar_notification_keyguard_overflow, mStackScroller, false);
         mKeyguardIconOverflowContainer.setOnActivatedListener(this);
         mKeyguardCarrierLabel = mStatusBarWindow.findViewById(R.id.keyguard_carrier_text);
+        mKeyguardIconOverflowContainer.setOnClickListener(mOverflowClickListener);
         mStackScroller.addView(mKeyguardIconOverflowContainer);
 
         mExpandedContents = mStackScroller;
@@ -784,7 +798,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         } else if (mSettingsTracker != null && (event.getAction() == MotionEvent.ACTION_UP
                 || event.getAction() == MotionEvent.ACTION_CANCEL)) {
             final float dy = event.getY() - mSettingsDownY;
-            final FlipperButton flipper = mOnKeyguard ? mKeyguardFlipper : mHeaderFlipper;
+            final FlipperButton flipper = mState == StatusBarState.KEYGUARD
+                    ? mKeyguardFlipper
+                    : mHeaderFlipper;
             final boolean inButton = flipper.inHolderBounds(event);
             final boolean qsTap = mSettingsClosing && Math.abs(dy) < slop;
             if (!qsTap && !inButton) {
@@ -1192,7 +1208,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
 
             if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0
-                    && !mNotificationPanel.isTracking() && !mOnKeyguard) {
+                    && !mNotificationPanel.isTracking() && mState != StatusBarState.KEYGUARD) {
                 animateCollapsePanels();
             }
         }
@@ -1346,7 +1362,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             && mStackScroller.getHeight() < (mNotificationPanel.getHeight()
                     - mCarrierLabelHeight - mNotificationHeaderHeight)
             && mStackScroller.getVisibility() == View.VISIBLE
-            && !mOnKeyguard;
+            && mState != StatusBarState.KEYGUARD;
 
         if (force || mCarrierLabelVisible != makeVisible) {
             mCarrierLabelVisible = makeVisible;
@@ -2097,7 +2113,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (mDemoMode) return;
         int sbMode = mStatusBarMode;
         if (panelsEnabled() && (mInteractingWindows & StatusBarManager.WINDOW_STATUS_BAR) != 0
-                && !mOnKeyguard) {
+                && mState != StatusBarState.KEYGUARD) {
             // if panels are expandable, force the status bar opaque on any interaction
             sbMode = MODE_OPAQUE;
         }
@@ -2957,28 +2973,37 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     }
 
-    public boolean isOnKeyguard() {
-        return mOnKeyguard;
+    /**
+     * @return The {@link StatusBarState} the status bar is in.
+     */
+    public int getBarState() {
+        return mState;
     }
 
     public void showKeyguard() {
-        mOnKeyguard = true;
+        setBarState(StatusBarState.KEYGUARD);
         updateKeyguardState();
         instantExpandNotificationsPanel();
+        mLeaveOpenOnKeyguardHide = false;
     }
 
     public void hideKeyguard() {
-        mOnKeyguard = false;
+        setBarState(StatusBarState.SHADE);
+        if (mLeaveOpenOnKeyguardHide) {
+            mLeaveOpenOnKeyguardHide = false;
+        } else {
+            instantCollapseNotificationPanel();
+        }
         updateKeyguardState();
-        instantCollapseNotificationPanel();
     }
 
     private void updatePublicMode() {
-        setLockscreenPublicMode(mOnKeyguard && mStatusBarKeyguardViewManager.isSecure());
+        setLockscreenPublicMode(mState == StatusBarState.KEYGUARD
+                && mStatusBarKeyguardViewManager.isSecure());
     }
 
     private void updateKeyguardState() {
-        if (mOnKeyguard) {
+        if (mState == StatusBarState.KEYGUARD) {
             if (isFlippedToSettings()) {
                 flipToNotifications(false /*animate*/);
             }
@@ -3010,17 +3035,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     public void userActivity() {
-        if (mOnKeyguard) {
+        if (mState == StatusBarState.KEYGUARD) {
             mKeyguardViewMediatorCallback.userActivity();
         }
     }
 
     public boolean onMenuPressed() {
-        return mOnKeyguard && mStatusBarKeyguardViewManager.onMenuPressed();
+        return mState == StatusBarState.KEYGUARD && mStatusBarKeyguardViewManager.onMenuPressed();
     }
 
     public boolean onBackPressed() {
-        if (mOnKeyguard) {
+        if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             return mStatusBarKeyguardViewManager.onBackPressed();
         } else {
             animateCollapsePanels();
@@ -3029,7 +3054,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     private void showBouncer() {
-        if (mOnKeyguard) {
+        if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             mStatusBarKeyguardViewManager.dismiss();
         }
     }
@@ -3065,6 +3090,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         super.onActivated(view);
     }
 
+    /**
+     * @param state The {@link StatusBarState} to set.
+     */
+    public void setBarState(int state) {
+        mState = state;
+        mStatusBarWindowManager.setStatusBarState(state);
+    }
+
     @Override
     public void onReset(View view) {
         super.onReset(view);
@@ -3072,13 +3105,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     public void onTrackingStarted() {
-        if (mOnKeyguard) {
+        if (mState == StatusBarState.KEYGUARD) {
             mKeyguardIndicationTextView.switchIndication(R.string.keyguard_unlock);
         }
     }
 
     public void onTrackingStopped() {
-        if (mOnKeyguard) {
+        if (mState == StatusBarState.KEYGUARD) {
             mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
         }
     }
@@ -3090,6 +3123,56 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     public NavigationBarView getNavigationBarView() {
         return mNavigationBarView;
+    }
+
+    // ---------------------- DragDownHelper.OnDragDownListener ------------------------------------
+
+    @Override
+    public void onDraggedDown(View startingChild) {
+        goToLockedShade(startingChild);
+    }
+
+    @Override
+    public void onReset() {
+        onReset(null);
+    }
+
+    public void onHover(View child) {
+        if (child instanceof NotificationActivatable) {
+            NotificationActivatable activatable = (NotificationActivatable) child;
+            activatable.getActivator().activate();
+            activatable.getActivator().addHotspot();
+        }
+    }
+
+    public void onThresholdReached() {
+        // TODO: Add visual hint that threshold is reached.
+    }
+
+    /**
+     * If secure with redaction: Show bouncer, go to unlocked shade.
+     *
+     * <p>If secure without redaction: Go to {@link StatusBarState#SHADE_LOCKED}.</p>
+     *
+     * <p>Otherwise go directly to unlocked shade.</p>
+     *
+     * @param expandView The view to expand after going to the shade.
+     */
+    public void goToLockedShade(View expandView) {
+        if (expandView instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) expandView;
+            row.setUserExpanded(true);
+        }
+        if (isLockscreenPublicMode() && !userAllowsPrivateNotificationsInPublic(mCurrentUserId)) {
+            mLeaveOpenOnKeyguardHide = true;
+            showBouncer();
+        } else if (mStatusBarKeyguardViewManager.isSecure()) {
+            setBarState(StatusBarState.SHADE_LOCKED);
+            updateKeyguardState();
+        } else {
+            mLeaveOpenOnKeyguardHide = true;
+            mStatusBarKeyguardViewManager.dismiss();
+        }
     }
 
     /**

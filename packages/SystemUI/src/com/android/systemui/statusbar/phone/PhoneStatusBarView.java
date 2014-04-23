@@ -29,6 +29,7 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.StatusBarState;
 
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
@@ -187,7 +188,9 @@ public class PhoneStatusBarView extends PanelBar {
         if (panel == mFadingPanel && mScrimColor != 0 && ActivityManager.isHighEndGfx()
                 && mBar.mStatusBarWindow != null) {
             if (mShouldFade) {
-                int scrimColor = mBar.isOnKeyguard() ? mScrimColorKeyguard : mScrimColor;
+                int scrimColor = mBar.getBarState() == StatusBarState.KEYGUARD
+                        ? mScrimColorKeyguard
+                        : mScrimColor;
                 frac = mPanelExpandedFractionSum; // don't judge me
                 // let's start this 20% of the way down the screen
                 frac = frac * 1.2f - 0.2f;
