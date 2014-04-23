@@ -485,11 +485,18 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.CompoundButton" parent="Widget.CompoundButton"/>
-    <style name="Widget.Quantum.CompoundButton.CheckBox" parent="Widget.CompoundButton.CheckBox"/>
-    <style name="Widget.Quantum.CompoundButton.RadioButton" parent="Widget.CompoundButton.RadioButton"/>
+
+    <style name="Widget.Quantum.CompoundButton.CheckBox" parent="Widget.CompoundButton.CheckBox">
+        <item name="background">?attr/selectableItemBackground</item>
+    </style>
+
+    <style name="Widget.Quantum.CompoundButton.RadioButton" parent="Widget.CompoundButton.RadioButton">
+        <item name="background">?attr/selectableItemBackground</item>
+    </style>
 
     <style name="Widget.Quantum.CompoundButton.Star" parent="Widget.CompoundButton.Star">
         <item name="button">@drawable/btn_star_quantum</item>
+        <item name="background">?attr/selectableItemBackground</item>
     </style>
 
     <style name="Widget.Quantum.CompoundButton.Switch">
@@ -501,6 +508,7 @@ please see styles_device_defaults.xml.
         <item name="thumbTextPadding">12dip</item>
         <item name="switchMinWidth">72dip</item>
         <item name="switchPadding">16dip</item>
+        <item name="background">?attr/selectableItemBackground</item>
     </style>
 
     <style name="Widget.Quantum.EditText" parent="Widget.EditText"/>
@@ -619,6 +627,7 @@ please see styles_device_defaults.xml.
         <item name="paddingStart">16dip</item>
         <item name="paddingEnd">16dip</item>
         <item name="mirrorForRtl">true</item>
+        <item name="background">?attr/selectableItemBackground</item>
     </style>
 
     <style name="Widget.Quantum.RatingBar" parent="Widget.RatingBar">
@@ -846,7 +855,15 @@ please see styles_device_defaults.xml.
         <item name="popupBackground">?attr/colorBackground</item>
     </style>
 
+    <style name="Widget.Quantum.Light.CompoundButton" parent="Widget.Quantum.CompoundButton"/>
     <style name="Widget.Quantum.Light.CompoundButton.CheckBox" parent="Widget.Quantum.CompoundButton.CheckBox"/>
+    <style name="Widget.Quantum.Light.CompoundButton.RadioButton" parent="Widget.Quantum.CompoundButton.RadioButton"/>
+    <style name="Widget.Quantum.Light.CompoundButton.Star" parent="Widget.Quantum.CompoundButton.Star"/>
+
+    <style name="Widget.Quantum.Light.CompoundButton.Switch" parent="Widget.Quantum.CompoundButton.Switch">
+        <item name="switchTextAppearance">@style/TextAppearance.Quantum.Light.Widget.Switch</item>
+    </style>
+
     <style name="Widget.Quantum.Light.ListView.DropDown" parent="Widget.Quantum.ListView.DropDown"/>
     <style name="Widget.Quantum.Light.EditText" parent="Widget.Quantum.EditText"/>
     <style name="Widget.Quantum.Light.ExpandableListView" parent="Widget.Quantum.ExpandableListView"/>
@@ -916,7 +933,6 @@ please see styles_device_defaults.xml.
         <item name="maxHeight">16dip</item>
     </style>
 
-    <style name="Widget.Quantum.Light.CompoundButton.RadioButton" parent="Widget.Quantum.CompoundButton.RadioButton"/>
     <style name="Widget.Quantum.Light.ScrollView" parent="Widget.Quantum.ScrollView"/>
     <style name="Widget.Quantum.Light.HorizontalScrollView" parent="Widget.Quantum.HorizontalScrollView"/>
 
@@ -932,7 +948,6 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.Light.Spinner.DropDown" parent="Widget.Quantum.Spinner.DropDown"/>
     <style name="Widget.Quantum.Light.Spinner.DropDown.ActionBar" parent="Widget.Quantum.Spinner.DropDown.ActionBar"/>
-    <style name="Widget.Quantum.Light.CompoundButton.Star" parent="Widget.Quantum.CompoundButton.Star"/>
     <style name="Widget.Quantum.Light.TabWidget" parent="Widget.Quantum.TabWidget"/>
     <style name="Widget.Quantum.Light.WebTextView" parent="Widget.Quantum.WebTextView"/>
     <style name="Widget.Quantum.Light.WebView" parent="Widget.Quantum.WebView"/>
@@ -987,10 +1002,6 @@ please see styles_device_defaults.xml.
         <item name="background">?attr/colorPrimary</item>
         <item name="backgroundStacked">?attr/colorPrimary</item>
         <item name="backgroundSplit">?attr/colorPrimary</item>
-    </style>
-
-    <style name="Widget.Quantum.Light.CompoundButton.Switch" parent="Widget.Quantum.CompoundButton.Switch">
-        <item name="switchTextAppearance">@style/TextAppearance.Quantum.Light.Widget.Switch</item>
     </style>
 
     <style name="Widget.Quantum.Light.FastScroll" parent="Widget.Quantum.FastScroll"/>

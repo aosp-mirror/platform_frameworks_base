@@ -261,15 +261,13 @@ public abstract class CompoundButton extends Button implements Checkable {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
         final Drawable buttonDrawable = mButtonDrawable;
         if (buttonDrawable != null) {
             final int verticalGravity = getGravity() & Gravity.VERTICAL_GRAVITY_MASK;
             final int drawableHeight = buttonDrawable.getIntrinsicHeight();
             final int drawableWidth = buttonDrawable.getIntrinsicWidth();
 
-            int top = 0;
+            final int top;
             switch (verticalGravity) {
                 case Gravity.BOTTOM:
                     top = getHeight() - drawableHeight;
@@ -277,12 +275,24 @@ public abstract class CompoundButton extends Button implements Checkable {
                 case Gravity.CENTER_VERTICAL:
                     top = (getHeight() - drawableHeight) / 2;
                     break;
+                default:
+                    top = 0;
             }
-            int bottom = top + drawableHeight;
-            int left = isLayoutRtl() ? getWidth() - drawableWidth : 0;
-            int right = isLayoutRtl() ? getWidth() : drawableWidth;
+            final int bottom = top + drawableHeight;
+            final int left = isLayoutRtl() ? getWidth() - drawableWidth : 0;
+            final int right = isLayoutRtl() ? getWidth() : drawableWidth;
 
             buttonDrawable.setBounds(left, top, right, bottom);
+
+            final Drawable background = getBackground();
+            if (background.supportsHotspots()) {
+                background.setHotspotBounds(left, top, right, bottom);
+            }
+        }
+
+        super.onDraw(canvas);
+
+        if (buttonDrawable != null) {
             buttonDrawable.draw(canvas);
         }
     }

@@ -773,8 +773,6 @@ public class Switch extends CompoundButton {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
         final Rect tempRect = mTempRect;
         final Drawable trackDrawable = mTrackDrawable;
         final Drawable thumbDrawable = mThumbDrawable;
@@ -785,16 +783,12 @@ public class Switch extends CompoundButton {
         final int switchRight = mSwitchRight;
         final int switchBottom = mSwitchBottom;
         trackDrawable.setBounds(switchLeft, switchTop, switchRight, switchBottom);
-        trackDrawable.draw(canvas);
-
-        final int saveCount = canvas.save();
-
         trackDrawable.getPadding(tempRect);
+
         final int switchInnerLeft = switchLeft + tempRect.left;
         final int switchInnerTop = switchTop + tempRect.top;
         final int switchInnerRight = switchRight - tempRect.right;
         final int switchInnerBottom = switchBottom - tempRect.bottom;
-        canvas.clipRect(switchInnerLeft, switchTop, switchInnerRight, switchBottom);
 
         // Relies on mTempRect, MUST be called first!
         final int thumbPos = getThumbOffset();
@@ -803,6 +797,18 @@ public class Switch extends CompoundButton {
         int thumbLeft = switchInnerLeft - tempRect.left + thumbPos;
         int thumbRight = switchInnerLeft + thumbPos + mThumbWidth + tempRect.right;
         thumbDrawable.setBounds(thumbLeft, switchTop, thumbRight, switchBottom);
+
+        final Drawable background = getBackground();
+        if (background.supportsHotspots()) {
+            background.setHotspotBounds(thumbLeft, switchTop, thumbRight, switchBottom);
+        }
+
+        super.onDraw(canvas);
+
+        trackDrawable.draw(canvas);
+
+        final int saveCount = canvas.save();
+        canvas.clipRect(switchInnerLeft, switchTop, switchInnerRight, switchBottom);
         thumbDrawable.draw(canvas);
 
         final int drawableState[] = getDrawableState();
