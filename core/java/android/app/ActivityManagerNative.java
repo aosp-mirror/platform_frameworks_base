@@ -40,6 +40,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -454,7 +455,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case ACTIVITY_PAUSED_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
-            activityPaused(token);
+            PersistableBundle persistentState = data.readPersistableBundle();
+            activityPaused(token, persistentState);
             reply.writeNoException();
             return true;
         }
@@ -463,10 +465,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
             Bundle map = data.readBundle();
-            Bitmap thumbnail = data.readInt() != 0
-                ? Bitmap.CREATOR.createFromParcel(data) : null;
+            PersistableBundle persistentState = data.readPersistableBundle();
             CharSequence description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(data);
-            activityStopped(token, map, thumbnail, description);
+            activityStopped(token, map, persistentState, description);
             reply.writeNoException();
             return true;
         }
@@ -2583,31 +2584,27 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
-    public void activityPaused(IBinder token) throws RemoteException
+    public void activityPaused(IBinder token, PersistableBundle persistentState) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
+        data.writePersistableBundle(persistentState);
         mRemote.transact(ACTIVITY_PAUSED_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
     }
     public void activityStopped(IBinder token, Bundle state,
-            Bitmap thumbnail, CharSequence description) throws RemoteException
+            PersistableBundle persistentState, CharSequence description) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
         data.writeBundle(state);
-        if (thumbnail != null) {
-            data.writeInt(1);
-            thumbnail.writeToParcel(data, 0);
-        } else {
-            data.writeInt(0);
-        }
+        data.writePersistableBundle(persistentState);
         TextUtils.writeToParcel(description, data, 0);
         mRemote.transact(ACTIVITY_STOPPED_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
         reply.readException();

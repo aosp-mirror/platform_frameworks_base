@@ -28,6 +28,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -58,8 +59,8 @@ public interface IApplicationThread extends IInterface {
     void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
             ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
             IVoiceInteractor voiceInteractor, int procState, Bundle state,
-            List<ResultInfo> pendingResults, List<Intent> pendingNewIntents, boolean notResumed,
-            boolean isForward,
+            PersistableBundle persistentState, List<ResultInfo> pendingResults,
+            List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
             String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler,
             Bundle resumeArgs)
             throws RemoteException;

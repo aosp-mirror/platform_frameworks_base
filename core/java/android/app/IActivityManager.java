@@ -45,6 +45,7 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.service.voice.IVoiceInteractionSession;
@@ -104,9 +105,9 @@ public interface IActivityManager extends IInterface {
     public void activityResumed(IBinder token) throws RemoteException;
     public void activityIdle(IBinder token, Configuration config,
             boolean stopProfiling) throws RemoteException;
-    public void activityPaused(IBinder token) throws RemoteException;
+    public void activityPaused(IBinder token, PersistableBundle persistentState) throws RemoteException;
     public void activityStopped(IBinder token, Bundle state,
-            Bitmap thumbnail, CharSequence description) throws RemoteException;
+            PersistableBundle persistentState, CharSequence description) throws RemoteException;
     public void activitySlept(IBinder token) throws RemoteException;
     public void activityDestroyed(IBinder token) throws RemoteException;
     public String getCallingPackage(IBinder token) throws RemoteException;

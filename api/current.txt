@@ -3256,6 +3256,7 @@ package android.app {
     method public boolean onContextItemSelected(android.view.MenuItem);
     method public void onContextMenuClosed(android.view.Menu);
     method protected void onCreate(android.os.Bundle);
+    method protected void onCreate(android.os.Bundle, android.os.PersistableBundle);
     method public void onCreateContextMenu(android.view.ContextMenu, android.view.View, android.view.ContextMenu.ContextMenuInfo);
     method public java.lang.CharSequence onCreateDescription();
     method protected deprecated android.app.Dialog onCreateDialog(int);
@@ -3286,6 +3287,7 @@ package android.app {
     method public void onPanelClosed(int, android.view.Menu);
     method protected void onPause();
     method protected void onPostCreate(android.os.Bundle);
+    method protected void onPostCreate(android.os.Bundle, android.os.PersistableBundle);
     method protected void onPostResume();
     method protected deprecated void onPrepareDialog(int, android.app.Dialog);
     method protected deprecated void onPrepareDialog(int, android.app.Dialog, android.os.Bundle);
@@ -3295,9 +3297,11 @@ package android.app {
     method public void onProvideAssistData(android.os.Bundle);
     method protected void onRestart();
     method protected void onRestoreInstanceState(android.os.Bundle);
+    method protected void onRestoreInstanceState(android.os.Bundle, android.os.PersistableBundle);
     method protected void onResume();
     method public deprecated java.lang.Object onRetainNonConfigurationInstance();
     method protected void onSaveInstanceState(android.os.Bundle);
+    method protected void onSaveInstanceState(android.os.Bundle, android.os.PersistableBundle);
     method public boolean onSearchRequested();
     method protected void onStart();
     method protected void onStop();
@@ -4191,14 +4195,18 @@ package android.app {
     method public android.app.Instrumentation.ActivityMonitor addMonitor(android.content.IntentFilter, android.app.Instrumentation.ActivityResult, boolean);
     method public android.app.Instrumentation.ActivityMonitor addMonitor(java.lang.String, android.app.Instrumentation.ActivityResult, boolean);
     method public void callActivityOnCreate(android.app.Activity, android.os.Bundle);
+    method public void callActivityOnCreate(android.app.Activity, android.os.Bundle, android.os.PersistableBundle);
     method public void callActivityOnDestroy(android.app.Activity);
     method public void callActivityOnNewIntent(android.app.Activity, android.content.Intent);
     method public void callActivityOnPause(android.app.Activity);
     method public void callActivityOnPostCreate(android.app.Activity, android.os.Bundle);
+    method public void callActivityOnPostCreate(android.app.Activity, android.os.Bundle, android.os.PersistableBundle);
     method public void callActivityOnRestart(android.app.Activity);
     method public void callActivityOnRestoreInstanceState(android.app.Activity, android.os.Bundle);
+    method public void callActivityOnRestoreInstanceState(android.app.Activity, android.os.Bundle, android.os.PersistableBundle);
     method public void callActivityOnResume(android.app.Activity);
     method public void callActivityOnSaveInstanceState(android.app.Activity, android.os.Bundle);
+    method public void callActivityOnSaveInstanceState(android.app.Activity, android.os.Bundle, android.os.PersistableBundle);
     method public void callActivityOnStart(android.app.Activity);
     method public void callActivityOnStop(android.app.Activity);
     method public void callActivityOnUserLeaving(android.app.Activity);
