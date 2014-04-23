@@ -280,18 +280,11 @@ public final class TransportPerformer {
         /**
          * Report that audio focus has changed on the app. This only happens if
          * you have indicated you have started playing with
-         * {@link #setPlaybackState}. TODO figure out route focus apis/handling.
+         * {@link #setPlaybackState}.
          *
-         * @param focusChange The type of focus change, TBD. The default
-         *            implementation will deliver a call to {@link #onPause}
-         *            when focus is lost.
+         * @param focusChange The type of focus change, TBD.
          */
         public void onRouteFocusChange(int focusChange) {
-            switch (focusChange) {
-                case AudioManager.AUDIOFOCUS_LOSS:
-                    onPause();
-                    break;
-            }
         }
     }
 

@@ -16,12 +16,15 @@
 package android.media.session;
 
 import android.graphics.Bitmap;
+import android.media.MediaMetadataEditor;
+import android.media.MediaMetadataRetriever;
 import android.media.Rating;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.SparseArray;
 
 /**
  * Contains metadata about an item, such as the title, artist, etc.
@@ -40,7 +43,8 @@ public final class MediaMetadata implements Parcelable {
     public static final String METADATA_KEY_ARTIST = "android.media.metadata.ARTIST";
 
     /**
-     * The duration of the media in ms. A duration of 0 is the default.
+     * The duration of the media in ms. A negative duration indicates that the
+     * duration is unknown (or infinite).
      */
     public static final String METADATA_KEY_DURATION = "android.media.metadata.DURATION";
 
@@ -65,12 +69,17 @@ public final class MediaMetadata implements Parcelable {
     public static final String METADATA_KEY_COMPOSER = "android.media.metadata.COMPOSER";
 
     /**
+     * The compilation status of the media.
+     */
+    public static final String METADATA_KEY_COMPILATION = "android.media.metadata.COMPILATION";
+
+    /**
      * The date the media was created or published as TODO determine format.
      */
     public static final String METADATA_KEY_DATE = "android.media.metadata.DATE";
 
     /**
-     * The year the media was created or published as a numeric String.
+     * The year the media was created or published as a long.
      */
     public static final String METADATA_KEY_YEAR = "android.media.metadata.YEAR";
 
@@ -151,8 +160,9 @@ public final class MediaMetadata implements Parcelable {
         METADATA_KEYS_TYPE.put(METADATA_KEY_AUTHOR, METADATA_TYPE_STRING);
         METADATA_KEYS_TYPE.put(METADATA_KEY_WRITER, METADATA_TYPE_STRING);
         METADATA_KEYS_TYPE.put(METADATA_KEY_COMPOSER, METADATA_TYPE_STRING);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_COMPILATION, METADATA_TYPE_STRING);
         METADATA_KEYS_TYPE.put(METADATA_KEY_DATE, METADATA_TYPE_STRING);
-        METADATA_KEYS_TYPE.put(METADATA_KEY_YEAR, METADATA_TYPE_STRING);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_YEAR, METADATA_TYPE_LONG);
         METADATA_KEYS_TYPE.put(METADATA_KEY_GENRE, METADATA_TYPE_STRING);
         METADATA_KEYS_TYPE.put(METADATA_KEY_TRACK_NUMBER, METADATA_TYPE_LONG);
         METADATA_KEYS_TYPE.put(METADATA_KEY_NUM_TRACKS, METADATA_TYPE_LONG);
@@ -165,6 +175,36 @@ public final class MediaMetadata implements Parcelable {
         METADATA_KEYS_TYPE.put(METADATA_KEY_USER_RATING, METADATA_TYPE_RATING);
         METADATA_KEYS_TYPE.put(METADATA_KEY_RATING, METADATA_TYPE_RATING);
     }
+
+    private static final SparseArray<String> EDITOR_KEY_MAPPING;
+
+    static {
+        EDITOR_KEY_MAPPING = new SparseArray<String>();
+        EDITOR_KEY_MAPPING.put(MediaMetadataEditor.BITMAP_KEY_ARTWORK, METADATA_KEY_ART);
+        EDITOR_KEY_MAPPING.put(MediaMetadataEditor.RATING_KEY_BY_OTHERS, METADATA_KEY_RATING);
+        EDITOR_KEY_MAPPING.put(MediaMetadataEditor.RATING_KEY_BY_USER, METADATA_KEY_USER_RATING);
+        EDITOR_KEY_MAPPING.put(MediaMetadataRetriever.METADATA_KEY_ALBUM, METADATA_KEY_ALBUM);
+        EDITOR_KEY_MAPPING.put(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST,
+                METADATA_KEY_ALBUM_ARTIST);
+        EDITOR_KEY_MAPPING.put(MediaMetadataRetriever.METADATA_KEY_ARTIST, METADATA_KEY_ARTIST);
+        EDITOR_KEY_MAPPING.put(MediaMetadataRetriever.METADATA_KEY_AUTHOR, METADATA_KEY_AUTHOR);
+        EDITOR_KEY_MAPPING.put(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER,
+                METADATA_KEY_TRACK_NUMBER);
+        EDITOR_KEY_MAPPING.put(MediaMetadataRetriever.METADATA_KEY_COMPOSER, METADATA_KEY_COMPOSER);
+        EDITOR_KEY_MAPPING.put(MediaMetadataRetriever.METADATA_KEY_COMPILATION,
+                METADATA_KEY_COMPILATION);
+        EDITOR_KEY_MAPPING.put(MediaMetadataRetriever.METADATA_KEY_DATE, METADATA_KEY_DATE);
+        EDITOR_KEY_MAPPING.put(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER,
+                METADATA_KEY_DISC_NUMBER);
+        EDITOR_KEY_MAPPING.put(MediaMetadataRetriever.METADATA_KEY_DURATION, METADATA_KEY_DURATION);
+        EDITOR_KEY_MAPPING.put(MediaMetadataRetriever.METADATA_KEY_GENRE, METADATA_KEY_GENRE);
+        EDITOR_KEY_MAPPING.put(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS,
+                METADATA_KEY_NUM_TRACKS);
+        EDITOR_KEY_MAPPING.put(MediaMetadataRetriever.METADATA_KEY_TITLE, METADATA_KEY_TITLE);
+        EDITOR_KEY_MAPPING.put(MediaMetadataRetriever.METADATA_KEY_WRITER, METADATA_KEY_WRITER);
+        EDITOR_KEY_MAPPING.put(MediaMetadataRetriever.METADATA_KEY_YEAR, METADATA_KEY_YEAR);
+    }
+
     private final Bundle mBundle;
 
     private MediaMetadata(Bundle bundle) {
@@ -173,6 +213,16 @@ public final class MediaMetadata implements Parcelable {
 
     private MediaMetadata(Parcel in) {
         mBundle = in.readBundle();
+    }
+
+    /**
+     * Returns true if the given key is contained in the metadata
+     *
+     * @param key a String key
+     * @return true if the key exists in this metadata, false otherwise
+     */
+    public boolean containsKey(String key) {
+        return mBundle.containsKey(key);
     }
 
     /**
@@ -195,7 +245,7 @@ public final class MediaMetadata implements Parcelable {
      * @return a long value
      */
     public long getLong(String key) {
-        return mBundle.getLong(key);
+        return mBundle.getLong(key, 0);
     }
 
     /**
@@ -242,6 +292,18 @@ public final class MediaMetadata implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeBundle(mBundle);
+    }
+
+    /**
+     * Helper for getting the String key used by {@link MediaMetadata} from the
+     * integer key that {@link MediaMetadataEditor} uses.
+     *
+     * @param editorKey The key used by the editor
+     * @return The key used by this class or null if no mapping exists
+     * @hide
+     */
+    public static String getKeyFromMetadataEditorKey(int editorKey) {
+        return EDITOR_KEY_MAPPING.get(editorKey, null);
     }
 
     public static final Parcelable.Creator<MediaMetadata> CREATOR
@@ -295,10 +357,9 @@ public final class MediaMetadata implements Parcelable {
          * <li>{@link #METADATA_KEY_WRITER}</li>
          * <li>{@link #METADATA_KEY_COMPOSER}</li>
          * <li>{@link #METADATA_KEY_DATE}</li>
-         * <li>{@link #METADATA_KEY_YEAR}</li>
          * <li>{@link #METADATA_KEY_GENRE}</li>
-         * <li>{@link #METADATA_KEY_ALBUM_ARTIST}</li>li>
-         * <li>{@link #METADATA_KEY_ART_URI}</li>li>
+         * <li>{@link #METADATA_KEY_ALBUM_ARTIST}</li>
+         * <li>{@link #METADATA_KEY_ART_URI}</li>
          * <li>{@link #METADATA_KEY_ALBUM_ART_URI}</li>
          * </ul>
          *
@@ -326,6 +387,7 @@ public final class MediaMetadata implements Parcelable {
          * <li>{@link #METADATA_KEY_TRACK_NUMBER}</li>
          * <li>{@link #METADATA_KEY_NUM_TRACKS}</li>
          * <li>{@link #METADATA_KEY_DISC_NUMBER}</li>
+         * <li>{@link #METADATA_KEY_YEAR}</li>
          * </ul>
          *
          * @param key The key for referencing this value

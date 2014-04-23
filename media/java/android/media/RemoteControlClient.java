@@ -24,6 +24,11 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.media.session.MediaMetadata;
+import android.media.session.MediaSessionLegacyHelper;
+import android.media.session.PlaybackState;
+import android.media.session.Session;
+import android.media.session.TransportPerformer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -336,6 +341,8 @@ public class RemoteControlClient
      */
     public final static int FLAG_INFORMATION_REQUEST_ALBUM_ART = 1 << 3;
 
+    private Session mSession;
+
     /**
      * Class constructor.
      * @param mediaButtonIntent The intent that will be sent for the media button events sent
@@ -382,6 +389,22 @@ public class RemoteControlClient
         mRcMediaIntent = mediaButtonIntent;
 
         mEventHandler = new EventHandler(this, looper);
+    }
+
+    /**
+     * @hide
+     */
+    public void registerWithSession(MediaSessionLegacyHelper helper) {
+        helper.addRccListener(mRcMediaIntent, mTransportListener);
+        mSession = helper.getSession(mRcMediaIntent);
+    }
+
+    /**
+     * @hide
+     */
+    public void unregisterWithSession(MediaSessionLegacyHelper helper) {
+        helper.removeRccListener(mRcMediaIntent);
+        mSession = null;
     }
 
     /**
@@ -438,6 +461,15 @@ public class RemoteControlClient
         public synchronized MetadataEditor putString(int key, String value)
                 throws IllegalArgumentException {
             super.putString(key, value);
+            if (mMetadataBuilder != null) {
+                // MediaMetadata supports all the same fields as MetadataEditor
+                String metadataKey = MediaMetadata.getKeyFromMetadataEditorKey(key);
+                // But just in case, don't add things we don't understand
+                if (metadataKey != null) {
+                    mMetadataBuilder.putString(metadataKey, value);
+                }
+            }
+
             return this;
         }
 
@@ -459,6 +491,14 @@ public class RemoteControlClient
         public synchronized MetadataEditor putLong(int key, long value)
                 throws IllegalArgumentException {
             super.putLong(key, value);
+            if (mMetadataBuilder != null) {
+                // MediaMetadata supports all the same fields as MetadataEditor
+                String metadataKey = MediaMetadata.getKeyFromMetadataEditorKey(key);
+                // But just in case, don't add things we don't understand
+                if (metadataKey != null) {
+                    mMetadataBuilder.putLong(metadataKey, value);
+                }
+            }
             return this;
         }
 
@@ -476,6 +516,14 @@ public class RemoteControlClient
         public synchronized MetadataEditor putBitmap(int key, Bitmap bitmap)
                 throws IllegalArgumentException {
             super.putBitmap(key, bitmap);
+            if (mMetadataBuilder != null) {
+                // MediaMetadata supports all the same fields as MetadataEditor
+                String metadataKey = MediaMetadata.getKeyFromMetadataEditorKey(key);
+                // But just in case, don't add things we don't understand
+                if (metadataKey != null) {
+                    mMetadataBuilder.putBitmap(metadataKey, bitmap);
+                }
+            }
             return this;
         }
 
@@ -501,7 +549,7 @@ public class RemoteControlClient
                 Log.e(TAG, "Can't apply a previously applied MetadataEditor");
                 return;
             }
-            synchronized(mCacheLock) {
+            synchronized (mCacheLock) {
                 // assign the edited data
                 mMetadata = new Bundle(mEditorMetadata);
                 // add the information about editable keys
@@ -520,6 +568,11 @@ public class RemoteControlClient
                 } else if (mArtworkChanged) {
                     // send to remote control display if conditions are met
                     sendArtwork_syncCacheLock(null, 0, 0);
+                }
+
+                // USE_SESSIONS
+                if (mSession != null && mMetadataBuilder != null) {
+                    mSession.getTransportPerformer().setMetadata(mMetadataBuilder.build());
                 }
                 mApplied = true;
             }
@@ -545,6 +598,12 @@ public class RemoteControlClient
             editor.mEditorArtwork = mOriginalArtwork;
             editor.mMetadataChanged = false;
             editor.mArtworkChanged = false;
+        }
+        // USE_SESSIONS
+        if (startEmpty || mMediaMetadata == null) {
+            editor.mMetadataBuilder = new MediaMetadata.Builder();
+        } else {
+            editor.mMetadataBuilder = new MediaMetadata.Builder(mMediaMetadata);
         }
         return editor;
     }
@@ -624,6 +683,15 @@ public class RemoteControlClient
 
                 // handle automatic playback position refreshes
                 initiateCheckForDrift_syncCacheLock();
+
+                // USE_SESSIONS
+                if (mSession != null) {
+                    int pbState = PlaybackState.getStateFromRccState(state);
+                    mSessionPlaybackState.setState(pbState, hasPosition ?
+                            mPlaybackPositionMs : PlaybackState.PLAYBACK_POSITION_UNKNOWN,
+                            playbackSpeed);
+                    mSession.getTransportPerformer().setPlaybackState(mSessionPlaybackState);
+                }
             }
         }
     }
@@ -704,6 +772,13 @@ public class RemoteControlClient
 
             // send to remote control display if conditions are met
             sendTransportControlInfo_syncCacheLock(null);
+
+            // USE_SESSIONS
+            if (mSession != null) {
+                mSessionPlaybackState.setActions(PlaybackState
+                        .getActionsFromRccControlFlags(transportControlFlags));
+                mSession.getTransportPerformer().setPlaybackState(mSessionPlaybackState);
+            }
         }
     }
 
@@ -1038,6 +1113,16 @@ public class RemoteControlClient
     private boolean mNeedsPositionSync = false;
 
     /**
+     * Cache for the current playback state using Session APIs.
+     */
+    private final PlaybackState mSessionPlaybackState = new PlaybackState();
+
+    /**
+     * Cache for metadata using Session APIs. This is re-initialized in apply().
+     */
+    private MediaMetadata mMediaMetadata;
+
+    /**
      * A class to encapsulate all the information about a remote control display.
      * A RemoteControlClient's metadata and state may be displayed on multiple IRemoteControlDisplay
      */
@@ -1219,6 +1304,26 @@ public class RemoteControlClient
         return mRcseId;
     }
 
+    // USE_SESSIONS
+    private TransportPerformer.Listener mTransportListener = new TransportPerformer.Listener() {
+
+        @Override
+        public void onSeekTo(long pos) {
+            RemoteControlClient.this.onSeekTo(mCurrentClientGenId, pos);
+        }
+
+        @Override
+        public void onRate(Rating rating) {
+            if ((mTransportControlFlags & FLAG_KEY_MEDIA_RATING) != 0) {
+                if (mEventHandler != null) {
+                    mEventHandler.sendMessage(mEventHandler.obtainMessage(
+                            MSG_UPDATE_METADATA, mCurrentClientGenId,
+                            MetadataEditor.RATING_KEY_BY_USER, rating));
+                }
+            }
+        }
+    };
+
     private EventHandler mEventHandler;
     private final static int MSG_REQUEST_PLAYBACK_STATE = 1;
     private final static int MSG_REQUEST_METADATA = 2;
@@ -1325,7 +1430,7 @@ public class RemoteControlClient
             // target == null implies all displays must be updated
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
-                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                final DisplayInfoForClient di = displayIterator.next();
                 if (di.mEnabled) {
                     try {
                         di.mRcDisplay.setPlaybackState(mInternalClientGenId,
@@ -1353,7 +1458,7 @@ public class RemoteControlClient
             // target == null implies all displays must be updated
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
-                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                final DisplayInfoForClient di = displayIterator.next();
                 if (di.mEnabled) {
                     try {
                         di.mRcDisplay.setMetadata(mInternalClientGenId, mMetadata);
@@ -1381,7 +1486,7 @@ public class RemoteControlClient
             // target == null implies all displays must be updated
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
-                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                final DisplayInfoForClient di = displayIterator.next();
                 if (di.mEnabled) {
                     try {
                         di.mRcDisplay.setTransportControlInfo(mInternalClientGenId,
@@ -1407,7 +1512,7 @@ public class RemoteControlClient
             // target == null implies all displays must be updated
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
-                if (!sendArtworkToDisplay((DisplayInfoForClient) displayIterator.next())) {
+                if (!sendArtworkToDisplay(displayIterator.next())) {
                     displayIterator.remove();
                 }
             }
@@ -1453,7 +1558,7 @@ public class RemoteControlClient
             // target == null implies all displays must be updated
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
-                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                final DisplayInfoForClient di = displayIterator.next();
                 try {
                     if (di.mEnabled) {
                         if ((di.mArtworkExpectedWidth > 0) && (di.mArtworkExpectedHeight > 0)) {
@@ -1537,7 +1642,7 @@ public class RemoteControlClient
             boolean displayKnown = false;
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext() && !displayKnown) {
-                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                final DisplayInfoForClient di = displayIterator.next();
                 displayKnown = di.mRcDisplay.asBinder().equals(rcd.asBinder());
                 if (displayKnown) {
                     // this display was known but the change in artwork size will cause the
@@ -1562,7 +1667,7 @@ public class RemoteControlClient
         synchronized(mCacheLock) {
             Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
-                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                final DisplayInfoForClient di = displayIterator.next();
                 if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
                     displayIterator.remove();
                     break;
@@ -1573,7 +1678,7 @@ public class RemoteControlClient
             boolean newNeedsPositionSync = false;
             displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
-                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                final DisplayInfoForClient di = displayIterator.next();
                 if (di.mWantsPositionSync) {
                     newNeedsPositionSync = true;
                     break;
@@ -1592,7 +1697,7 @@ public class RemoteControlClient
         synchronized(mCacheLock) {
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
-                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                final DisplayInfoForClient di = displayIterator.next();
                 if (di.mRcDisplay.asBinder().equals(rcd.asBinder()) &&
                         ((di.mArtworkExpectedWidth != w) || (di.mArtworkExpectedHeight != h))) {
                     di.mArtworkExpectedWidth = w;
@@ -1617,7 +1722,7 @@ public class RemoteControlClient
             // go through the list of RCDs and for each entry, check both whether this is the RCD
             //  that gets upated, and whether the list has one entry that wants position sync
             while (displayIterator.hasNext()) {
-                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                final DisplayInfoForClient di = displayIterator.next();
                 if (di.mEnabled) {
                     if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
                         di.mWantsPositionSync = wantsSync;
@@ -1640,7 +1745,7 @@ public class RemoteControlClient
         synchronized(mCacheLock) {
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
-                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                final DisplayInfoForClient di = displayIterator.next();
                 if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
                     di.mEnabled = enable;
                 }

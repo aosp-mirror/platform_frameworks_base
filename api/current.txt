@@ -15029,6 +15029,7 @@ package android.media.routeprovider {
 package android.media.session {
 
   public final class MediaMetadata implements android.os.Parcelable {
+    method public boolean containsKey(java.lang.String);
     method public int describeContents();
     method public android.graphics.Bitmap getBitmap(java.lang.String);
     method public long getLong(java.lang.String);
@@ -15044,6 +15045,7 @@ package android.media.session {
     field public static final java.lang.String METADATA_KEY_ARTIST = "android.media.metadata.ARTIST";
     field public static final java.lang.String METADATA_KEY_ART_URI = "android.media.metadata.ART_URI";
     field public static final java.lang.String METADATA_KEY_AUTHOR = "android.media.metadata.AUTHOR";
+    field public static final java.lang.String METADATA_KEY_COMPILATION = "android.media.metadata.COMPILATION";
     field public static final java.lang.String METADATA_KEY_COMPOSER = "android.media.metadata.COMPOSER";
     field public static final java.lang.String METADATA_KEY_DATE = "android.media.metadata.DATE";
     field public static final java.lang.String METADATA_KEY_DISC_NUMBER = "android.media.metadata.DISC_NUMBER";
@@ -15076,25 +15078,25 @@ package android.media.session {
     method public long getBufferPosition();
     method public java.lang.String getErrorMessage();
     method public long getPosition();
-    method public float getSpeed();
+    method public float getRate();
     method public int getState();
     method public void setActions(long);
     method public void setBufferPosition(long);
     method public void setErrorMessage(java.lang.String);
-    method public void setPosition(long);
-    method public void setSpeed(float);
-    method public void setState(int);
+    method public void setState(int, long, float);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final long ACTION_FASTFORWARD = 64L; // 0x40L
     field public static final long ACTION_NEXT_ITEM = 32L; // 0x20L
     field public static final long ACTION_PAUSE = 2L; // 0x2L
     field public static final long ACTION_PLAY = 4L; // 0x4L
+    field public static final long ACTION_PLAY_PAUSE = 512L; // 0x200L
     field public static final long ACTION_PREVIOUS_ITEM = 16L; // 0x10L
     field public static final long ACTION_RATING = 128L; // 0x80L
     field public static final long ACTION_REWIND = 8L; // 0x8L
     field public static final long ACTION_SEEK_TO = 256L; // 0x100L
     field public static final long ACTION_STOP = 1L; // 0x1L
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final long PLAYBACK_POSITION_UNKNOWN = -1L; // 0xffffffffffffffffL
     field public static final int PLAYSTATE_BUFFERING = 6; // 0x6
     field public static final int PLAYSTATE_CONNECTING = 8; // 0x8
     field public static final int PLAYSTATE_ERROR = 7; // 0x7
@@ -15103,6 +15105,8 @@ package android.media.session {
     field public static final int PLAYSTATE_PAUSED = 2; // 0x2
     field public static final int PLAYSTATE_PLAYING = 3; // 0x3
     field public static final int PLAYSTATE_REWINDING = 5; // 0x5
+    field public static final int PLAYSTATE_SKIPPING_BACKWARDS = 9; // 0x9
+    field public static final int PLAYSTATE_SKIPPING_FORWARDS = 10; // 0xa
     field public static final int PLAYSTATE_STOPPED = 1; // 0x1
   }
 
