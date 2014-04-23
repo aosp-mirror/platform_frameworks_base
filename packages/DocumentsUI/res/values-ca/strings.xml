@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="2783841764617238354">"Documents"</string>
+    <string name="title_open" msgid="4353228937663917801">"Obre des de"</string>
+    <string name="title_save" msgid="2433679664882857999">"Desa a"</string>
+    <string name="menu_create_dir" msgid="5947289605844398389">"Crea una carpeta"</string>
+    <string name="menu_grid" msgid="6878021334497835259">"Visualització de quadrícula"</string>
+    <string name="menu_list" msgid="7279285939892417279">"Visualització de llista"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"Ordena per"</string>
+    <string name="menu_search" msgid="3816712084502856974">"Cerca"</string>
+    <string name="menu_settings" msgid="6008033148948428823">"Configuració"</string>
+    <string name="menu_open" msgid="432922957274920903">"Obre"</string>
+    <string name="menu_save" msgid="2394743337684426338">"Desa"</string>
+    <string name="menu_share" msgid="3075149983979628146">"Comparteix"</string>
+    <string name="menu_delete" msgid="8138799623850614177">"Suprimeix"</string>
+    <string name="mode_selected_count" msgid="459111894725594625">"Seleccionats: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
+    <string name="sort_name" msgid="9183560467917256779">"Per nom"</string>
+    <string name="sort_date" msgid="586080032956151448">"Per data de modificació"</string>
+    <string name="sort_size" msgid="3350681319735474741">"Per mida"</string>
+    <string name="drawer_open" msgid="4545466532430226949">"Mostra les arrels"</string>
+    <string name="drawer_close" msgid="7602734368552123318">"Amaga les arrels"</string>
+    <string name="save_error" msgid="6167009778003223664">"No s\'ha pogut desar el document."</string>
+    <string name="create_error" msgid="3735649141335444215">"No s\'ha pogut crear la carpeta"</string>
+    <string name="query_error" msgid="1222448261663503501">"No s\'han pogut consultar els documents"</string>
+    <string name="root_recent" msgid="4470053704320518133">"Recent"</string>
+    <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> lliures"</string>
+    <string name="root_type_service" msgid="2178854894416775409">"Serveis d\'emmagatzematge"</string>
+    <string name="root_type_shortcut" msgid="3318760609471618093">"Dreceres"</string>
+    <string name="root_type_device" msgid="7121342474653483538">"Dispositius"</string>
+    <string name="root_type_apps" msgid="8838065367985945189">"Més aplicacions"</string>
+    <string name="pref_advanced_devices" msgid="903257239609301276">"Mostra els dispositius avançats"</string>
+    <string name="pref_file_size" msgid="2826879315743961459">"Mostra la mida del fitxer"</string>
+    <string name="pref_device_size" msgid="3542106883278997222">"Mostra la mida del dispositiu"</string>
+    <string name="empty" msgid="7858882803708117596">"Sense elements"</string>
+    <string name="toast_no_application" msgid="1339885974067891667">"No es pot obrir el fitxer."</string>
+    <string name="toast_failed_delete" msgid="2180678019407244069">"No es poden suprimir alguns documents."</string>
+    <string name="share_via" msgid="8966594246261344259">"Comparteix mitjançant"</string>
+</resources>
