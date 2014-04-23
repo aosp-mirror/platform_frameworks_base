@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="8016145283189546017">"Peranti Input"</string>
+    <string name="keyboard_layouts_label" msgid="6688773268302087545">"Papan kekunci Android"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Bahasa Inggeris (UK)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"Bahasa Inggeris (AS)"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Bahasa Inggeris (AS), gaya A/bangsa"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Bahasa Inggeris (AS), gaya Colemak"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"Bahasa Inggeris (AS), gaya Dvorak"</string>
+    <string name="keyboard_layout_german_label" msgid="8451565865467909999">"Bahasa Jerman"</string>
+    <string name="keyboard_layout_french_label" msgid="813450119589383723">"Bahasa Perancis"</string>
+    <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"Bahasa Perancis (Kanada)"</string>
+    <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"Bahasa Rusia"</string>
+    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"Bahasa Rusia, gaya Mac"</string>
+    <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"Bahasa Sepanyol"</string>
+    <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"Perancis Switzerland"</string>
+    <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"Jerman Switzerland"</string>
+    <string name="keyboard_layout_belgian" msgid="2011984572838651558">"Bahasa Belgium"</string>
+    <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"Bahasa Bulgaria"</string>
+    <string name="keyboard_layout_italian" msgid="6497079660449781213">"Bahasa Itali"</string>
+    <string name="keyboard_layout_danish" msgid="8036432066627127851">"Bahasa Denmark"</string>
+    <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"Bahasa Norway"</string>
+    <string name="keyboard_layout_swedish" msgid="732959109088479351">"Bahasa Sweden"</string>
+    <string name="keyboard_layout_finnish" msgid="5585659438924315466">"Bahasa Finland"</string>
+    <string name="keyboard_layout_croatian" msgid="4172229471079281138">"Bahasa Croatia"</string>
+    <string name="keyboard_layout_czech" msgid="1349256901452975343">"Bahasa Czech"</string>
+    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"Bahasa Estonia"</string>
+    <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"Bahasa Hungary"</string>
+    <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"Bahasa Iceland"</string>
+    <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"Bahasa Brazil"</string>
+    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"Bahasa Portugis"</string>
+    <string name="keyboard_layout_slovak" msgid="2469379934672837296">"Bahasa Slovakia"</string>
+    <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"Bahasa Slovenia"</string>
+    <string name="keyboard_layout_turkish" msgid="7736163250907964898">"Bahasa Turki"</string>
+    <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"Bahasa Ukraine"</string>
+</resources>
