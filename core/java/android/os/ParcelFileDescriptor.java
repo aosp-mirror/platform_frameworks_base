@@ -42,6 +42,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.DatagramSocket;
 import java.net.Socket;
 import java.nio.ByteOrder;
@@ -698,6 +699,9 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
             } catch (ErrnoException e) {
                 // Reporting status is best-effort
                 Log.w(TAG, "Failed to report status: " + e);
+            } catch (InterruptedIOException e) {
+                // Reporting status is best-effort
+                Log.w(TAG, "Failed to report status: " + e);
             }
 
         } finally {
@@ -728,6 +732,9 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
                 Log.d(TAG, "Failed to read status; assuming dead: " + e);
                 return new Status(Status.DEAD);
             }
+        } catch (InterruptedIOException e) {
+            Log.d(TAG, "Failed to read status; assuming dead: " + e);
+            return new Status(Status.DEAD);
         }
     }
 
