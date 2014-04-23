@@ -61,6 +61,7 @@ import com.android.server.clipboard.ClipboardService;
 import com.android.server.content.ContentService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
+import com.android.server.hdmi.HdmiControlService;
 import com.android.server.input.InputManagerService;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LightsService;
@@ -916,6 +917,12 @@ public final class SystemServer {
                 mSystemServiceManager.startService(HDMI_CEC_SERVICE_CLASS);
             } catch (Throwable e) {
                 reportWtf("starting HdmiCec Service", e);
+            }
+
+            try {
+                mSystemServiceManager.startService(HdmiControlService.class);
+            } catch (Throwable e) {
+                reportWtf("starting HdmiControlService", e);
             }
 
             try {
