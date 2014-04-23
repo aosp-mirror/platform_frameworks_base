@@ -95,6 +95,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
     }
 
+    static boolean shouldBlank(int state) {
+        return state == Display.STATE_OFF;
+    }
+
+    static boolean shouldUnblank(int state) {
+        return state == Display.STATE_ON || state == Display.STATE_DOZING;
+    }
+
     private final class LocalDisplayDevice extends DisplayDevice {
         private final int mBuiltInDisplayId;
         private final SurfaceControl.PhysicalDisplayInfo mPhys;
@@ -180,9 +188,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         @Override
         public void requestDisplayStateLocked(int state) {
             if (mState != state) {
-                if (state == Display.STATE_OFF && mState != Display.STATE_OFF) {
+                if (shouldBlank(state) && !shouldBlank(mState)) {
                     SurfaceControl.blankDisplay(getDisplayTokenLocked());
-                } else if (state != Display.STATE_OFF && mState == Display.STATE_OFF) {
+                } else if (shouldUnblank(state) && !shouldUnblank(mState)) {
                     SurfaceControl.unblankDisplay(getDisplayTokenLocked());
                 }
                 mState = state;
