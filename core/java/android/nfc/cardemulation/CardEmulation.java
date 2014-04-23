@@ -168,6 +168,10 @@ public final class CardEmulation {
         if (manager == null) {
             // Get card emu service
             INfcCardEmulation service = adapter.getCardEmulationService();
+            if (service == null) {
+                Log.e(TAG, "This device does not implement the INfcCardEmulation interface.");
+                throw new UnsupportedOperationException();
+            }
             manager = new CardEmulation(context, service);
             sCardEmus.put(context, manager);
         }
@@ -267,6 +271,109 @@ public final class CardEmulation {
         } else {
             // All other categories are in "only ask if conflict" mode
             return SELECTION_MODE_ASK_IF_CONFLICT;
+        }
+    }
+
+    /**
+     * Registers a group of AIDs for the specified service.
+     *
+     * <p>If an AID group for that category was previously
+     * registered for this service (either statically
+     * through the manifest, or dynamically by using this API),
+     * that AID group will be replaced with this one.
+     *
+     * <p>Note that you can only register AIDs for a service that
+     * is running under the same UID as you are. Typically
+     * this means you need to call this from the same
+     * package as the service itself, though UIDs can also
+     * be shared between packages using shared UIDs.
+     *
+     * @param service The component name of the service
+     * @param aidGroup The group of AIDs to be registered
+     * @return whether the registration was successful.
+     */
+    public boolean registerAidGroupForService(ComponentName service, AidGroup aidGroup) {
+        try {
+            return sService.registerAidGroupForService(UserHandle.myUserId(), service, aidGroup);
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.registerAidGroupForService(UserHandle.myUserId(), service,
+                        aidGroup);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Retrieves the currently registered AID group for the specified
+     * category for a service.
+     *
+     * <p>Note that this will only return AID groups that were dynamically
+     * registered using {@link #registerAidGroupForService(ComponentName, AidGroup)}
+     * method. It will *not* return AID groups that were statically registered
+     * in the manifest.
+     *
+     * @param service The component name of the service
+     * @param category The category of the AID group to be returned, e.g. {@link #CATEGORY_PAYMENT}
+     * @return The AID group, or null if it couldn't be found
+     */
+    public AidGroup getAidGroupForService(ComponentName service, String category) {
+        try {
+            return sService.getAidGroupForService(UserHandle.myUserId(), service, category);
+        } catch (RemoteException e) {
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return null;
+            }
+            try {
+                return sService.getAidGroupForService(UserHandle.myUserId(), service, category);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Removes a registered AID group for the specified category for the
+     * service provided.
+     *
+     * <p>Note that this will only remove AID groups that were dynamically
+     * registered using the {@link #registerAidGroupForService(ComponentName, AidGroup)}
+     * method. It will *not* remove AID groups that were statically registered in
+     * the manifest. If a dynamically registered AID group is removed using
+     * this method, and a statically registered AID group for the same category
+     * exists in the manifest, that AID group will become active again.
+     *
+     * @param service The component name of the service
+     * @param category The category of the AID group to be removed, e.g. {@link #CATEGORY_PAYMENT}
+     * @return whether the group was successfully removed.
+     */
+    public boolean removeAidGroupForService(ComponentName service, String category) {
+        try {
+            return sService.removeAidGroupForService(UserHandle.myUserId(), service, category);
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.removeAidGroupForService(UserHandle.myUserId(), service, category);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
         }
     }
 
