@@ -193,14 +193,7 @@ final class ServiceRecord extends Binder {
                         pw.println(si.neededGrants);
             }
             if (si.uriPermissions != null) {
-                if (si.uriPermissions.readUriPermissions != null) {
-                    pw.print(prefix); pw.print("  readUriPermissions=");
-                            pw.println(si.uriPermissions.readUriPermissions);
-                }
-                if (si.uriPermissions.writeUriPermissions != null) {
-                    pw.print(prefix); pw.print("  writeUriPermissions=");
-                            pw.println(si.uriPermissions.writeUriPermissions);
-                }
+                si.uriPermissions.dump(pw, prefix);
             }
         }
     }

@@ -240,6 +240,7 @@ public class Am extends BaseCommand {
                 "        (to embed a comma into a string escape it using \"\\,\")\n" +
                 "    [-n <COMPONENT>] [-f <FLAGS>]\n" +
                 "    [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
+                "    [--grant-persistable-uri-permission] [--grant-prefix-uri-permission]\n" +
                 "    [--debug-log-resolution] [--exclude-stopped-packages]\n" +
                 "    [--include-stopped-packages]\n" +
                 "    [--activity-brought-to-front] [--activity-clear-top]\n" +
@@ -455,6 +456,10 @@ public class Am extends BaseCommand {
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             } else if (opt.equals("--grant-write-uri-permission")) {
                 intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            } else if (opt.equals("--grant-persistable-uri-permission")) {
+                intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+            } else if (opt.equals("--grant-prefix-uri-permission")) {
+                intent.addFlags(Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
             } else if (opt.equals("--exclude-stopped-packages")) {
                 intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
             } else if (opt.equals("--include-stopped-packages")) {

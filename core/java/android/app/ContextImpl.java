@@ -1865,17 +1865,26 @@ class ContextImpl extends Context {
     }
 
     private String uriModeFlagToString(int uriModeFlags) {
-        switch (uriModeFlags) {
-            case Intent.FLAG_GRANT_READ_URI_PERMISSION |
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION:
-                return "read and write";
-            case Intent.FLAG_GRANT_READ_URI_PERMISSION:
-                return "read";
-            case Intent.FLAG_GRANT_WRITE_URI_PERMISSION:
-                return "write";
+        StringBuilder builder = new StringBuilder();
+        if ((uriModeFlags & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
+            builder.append("read and ");
         }
-        throw new IllegalArgumentException(
-                "Unknown permission mode flags: " + uriModeFlags);
+        if ((uriModeFlags & Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
+            builder.append("write and ");
+        }
+        if ((uriModeFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0) {
+            builder.append("persistable and ");
+        }
+        if ((uriModeFlags & Intent.FLAG_GRANT_PREFIX_URI_PERMISSION) != 0) {
+            builder.append("prefix and ");
+        }
+
+        if (builder.length() > 5) {
+            builder.setLength(builder.length() - 5);
+            return builder.toString();
+        } else {
+            throw new IllegalArgumentException("Unknown permission mode flags: " + uriModeFlags);
+        }
     }
 
     private void enforceForUri(

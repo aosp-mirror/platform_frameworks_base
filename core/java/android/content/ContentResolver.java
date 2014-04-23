@@ -1641,7 +1641,7 @@ public abstract class ContentResolver {
      *
      * @see #getPersistedUriPermissions()
      */
-    public void takePersistableUriPermission(Uri uri, int modeFlags) {
+    public void takePersistableUriPermission(Uri uri, @Intent.AccessUriMode int modeFlags) {
         try {
             ActivityManagerNative.getDefault().takePersistableUriPermission(uri, modeFlags);
         } catch (RemoteException e) {
@@ -1656,7 +1656,7 @@ public abstract class ContentResolver {
      *
      * @see #getPersistedUriPermissions()
      */
-    public void releasePersistableUriPermission(Uri uri, int modeFlags) {
+    public void releasePersistableUriPermission(Uri uri, @Intent.AccessUriMode int modeFlags) {
         try {
             ActivityManagerNative.getDefault().releasePersistableUriPermission(uri, modeFlags);
         } catch (RemoteException e) {

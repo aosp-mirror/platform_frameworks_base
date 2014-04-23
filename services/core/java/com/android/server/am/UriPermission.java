@@ -17,15 +17,16 @@
 package com.android.server.am;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Log;
+import android.util.Slog;
 
+import com.android.server.am.ActivityManagerService.GrantUri;
 import com.google.android.collect.Sets;
 
 import java.io.PrintWriter;
 import java.util.Comparator;
-import java.util.HashSet;
 
 /**
  * Description of a permission granted to an app to access a particular URI.
@@ -50,7 +51,7 @@ final class UriPermission {
     /** Cached UID of {@link #targetPkg}; should not be persisted */
     final int targetUid;
 
-    final Uri uri;
+    final GrantUri uri;
 
     /**
      * Allowed modes. All permission enforcement should use this field. Must
@@ -61,12 +62,13 @@ final class UriPermission {
      */
     int modeFlags = 0;
 
-    /** Allowed modes with explicit owner. */
+    /** Allowed modes with active owner. */
     int ownedModeFlags = 0;
     /** Allowed modes without explicit owner. */
     int globalModeFlags = 0;
     /** Allowed modes that have been offered for possible persisting. */
     int persistableModeFlags = 0;
+
     /** Allowed modes that should be persisted across device boots. */
     int persistedModeFlags = 0;
 
@@ -78,12 +80,12 @@ final class UriPermission {
 
     private static final long INVALID_TIME = Long.MIN_VALUE;
 
-    private HashSet<UriPermissionOwner> mReadOwners;
-    private HashSet<UriPermissionOwner> mWriteOwners;
+    private ArraySet<UriPermissionOwner> mReadOwners;
+    private ArraySet<UriPermissionOwner> mWriteOwners;
 
     private String stringName;
 
-    UriPermission(String sourcePkg, String targetPkg, int targetUid, Uri uri) {
+    UriPermission(String sourcePkg, String targetPkg, int targetUid, GrantUri uri) {
         this.userHandle = UserHandle.getUserId(targetUid);
         this.sourcePkg = sourcePkg;
         this.targetPkg = targetPkg;
@@ -100,6 +102,9 @@ final class UriPermission {
      * global or owner grants.
      */
     void initPersistedModes(int modeFlags, long createdTime) {
+        modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
         persistableModeFlags = modeFlags;
         persistedModeFlags = modeFlags;
         persistedCreateTime = createdTime;
@@ -107,7 +112,11 @@ final class UriPermission {
         updateModeFlags();
     }
 
-    void grantModes(int modeFlags, boolean persistable, UriPermissionOwner owner) {
+    void grantModes(int modeFlags, UriPermissionOwner owner) {
+        final boolean persistable = (modeFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0;
+        modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
         if (persistable) {
             persistableModeFlags |= modeFlags;
         }
@@ -130,10 +139,14 @@ final class UriPermission {
      * @return if mode changes should trigger persisting.
      */
     boolean takePersistableModes(int modeFlags) {
+        modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
         if ((modeFlags & persistableModeFlags) != modeFlags) {
-            throw new SecurityException("Requested flags 0x"
+            Slog.w(TAG, "Requested flags 0x"
                     + Integer.toHexString(modeFlags) + ", but only 0x"
                     + Integer.toHexString(persistableModeFlags) + " are allowed");
+            return false;
         }
 
         final int before = persistedModeFlags;
@@ -148,6 +161,9 @@ final class UriPermission {
     }
 
     boolean releasePersistableModes(int modeFlags) {
+        modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
         final int before = persistedModeFlags;
 
         persistableModeFlags &= ~modeFlags;
@@ -164,7 +180,11 @@ final class UriPermission {
     /**
      * @return if mode changes should trigger persisting.
      */
-    boolean clearModes(int modeFlags, boolean persistable) {
+    boolean revokeModes(int modeFlags) {
+        final boolean persistable = (modeFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0;
+        modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
         final int before = persistedModeFlags;
 
         if ((modeFlags & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
@@ -208,6 +228,8 @@ final class UriPermission {
      * Return strength of this permission grant for the given flags.
      */
     public int getStrength(int modeFlags) {
+        modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         if ((persistableModeFlags & modeFlags) == modeFlags) {
             return STRENGTH_PERSISTABLE;
         } else if ((globalModeFlags & modeFlags) == modeFlags) {
@@ -221,7 +243,7 @@ final class UriPermission {
 
     private void addReadOwner(UriPermissionOwner owner) {
         if (mReadOwners == null) {
-            mReadOwners = Sets.newHashSet();
+            mReadOwners = Sets.newArraySet();
             ownedModeFlags |= Intent.FLAG_GRANT_READ_URI_PERMISSION;
             updateModeFlags();
         }
@@ -246,7 +268,7 @@ final class UriPermission {
 
     private void addWriteOwner(UriPermissionOwner owner) {
         if (mWriteOwners == null) {
-            mWriteOwners = Sets.newHashSet();
+            mWriteOwners = Sets.newArraySet();
             ownedModeFlags |= Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
             updateModeFlags();
         }
@@ -333,7 +355,7 @@ final class UriPermission {
         final int userHandle;
         final String sourcePkg;
         final String targetPkg;
-        final Uri uri;
+        final GrantUri uri;
         final int persistedModeFlags;
         final long persistedCreateTime;
 
@@ -352,6 +374,6 @@ final class UriPermission {
     }
 
     public android.content.UriPermission buildPersistedPublicApiObject() {
-        return new android.content.UriPermission(uri, persistedModeFlags, persistedCreateTime);
+        return new android.content.UriPermission(uri.uri, persistedModeFlags, persistedCreateTime);
     }
 }

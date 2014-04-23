@@ -7075,6 +7075,7 @@ package android.content {
     field public static final int FLAG_EXCLUDE_STOPPED_PACKAGES = 16; // 0x10
     field public static final int FLAG_FROM_BACKGROUND = 4; // 0x4
     field public static final int FLAG_GRANT_PERSISTABLE_URI_PERMISSION = 64; // 0x40
+    field public static final int FLAG_GRANT_PREFIX_URI_PERMISSION = 128; // 0x80
     field public static final int FLAG_GRANT_READ_URI_PERMISSION = 1; // 0x1
     field public static final int FLAG_GRANT_WRITE_URI_PERMISSION = 2; // 0x2
     field public static final int FLAG_INCLUDE_STOPPED_PACKAGES = 32; // 0x20

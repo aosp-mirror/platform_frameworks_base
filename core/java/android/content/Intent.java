@@ -18,6 +18,7 @@ package android.content;
 
 import android.content.pm.ApplicationInfo;
 import android.util.ArraySet;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -864,8 +865,9 @@ public class Intent implements Parcelable, Cloneable {
         }
 
         // Migrate any clip data and flags from target.
-        int permFlags = target.getFlags()
-                & (FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION);
+        int permFlags = target.getFlags() & (FLAG_GRANT_READ_URI_PERMISSION
+                | FLAG_GRANT_WRITE_URI_PERMISSION | FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                | FLAG_GRANT_PREFIX_URI_PERMISSION);
         if (permFlags != 0) {
             ClipData targetClipData = target.getClipData();
             if (targetClipData == null && target.getData() != null) {
@@ -3425,10 +3427,28 @@ public class Intent implements Parcelable, Cloneable {
     // Intent flags (see mFlags variable).
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {FLAG_GRANT_READ_URI_PERMISSION, FLAG_GRANT_WRITE_URI_PERMISSION})
+    @IntDef(flag = true, value = {
+            FLAG_GRANT_READ_URI_PERMISSION, FLAG_GRANT_WRITE_URI_PERMISSION,
+            FLAG_GRANT_PERSISTABLE_URI_PERMISSION, FLAG_GRANT_PREFIX_URI_PERMISSION })
     @Retention(RetentionPolicy.SOURCE)
     public @interface GrantUriMode {}
+
+    /** @hide */
+    @IntDef(flag = true, value = {
+            FLAG_GRANT_READ_URI_PERMISSION, FLAG_GRANT_WRITE_URI_PERMISSION })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AccessUriMode {}
+
+    /**
+     * Test if given mode flags specify an access mode, which must be at least
+     * read and/or write.
+     *
+     * @hide
+     */
+    public static boolean isAccessUriMode(int modeFlags) {
+        return (modeFlags & (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION)) != 0;
+    }
 
     /**
      * If set, the recipient of this Intent will be granted permission to
@@ -3489,6 +3509,17 @@ public class Intent implements Parcelable, Cloneable {
      * @see ContentResolver#getOutgoingPersistedUriPermissions()
      */
     public static final int FLAG_GRANT_PERSISTABLE_URI_PERMISSION = 0x00000040;
+
+    /**
+     * When combined with {@link #FLAG_GRANT_READ_URI_PERMISSION} and/or
+     * {@link #FLAG_GRANT_WRITE_URI_PERMISSION}, the URI permission grant
+     * applies to any URI that is a prefix match against the original granted
+     * URI. (Without this flag, the URI must match exactly for access to be
+     * granted.) Another URI is considered a prefix match only when scheme,
+     * authority, and all path segments defined by the prefix are an exact
+     * match.
+     */
+    public static final int FLAG_GRANT_PREFIX_URI_PERMISSION = 0x00000080;
 
     /**
      * If set, the new activity is not kept in the history stack.  As soon as
@@ -3810,9 +3841,9 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * @hide Flags that can't be changed with PendingIntent.
      */
-    public static final int IMMUTABLE_FLAGS =
-            FLAG_GRANT_READ_URI_PERMISSION
-            | FLAG_GRANT_WRITE_URI_PERMISSION;
+    public static final int IMMUTABLE_FLAGS = FLAG_GRANT_READ_URI_PERMISSION
+            | FLAG_GRANT_WRITE_URI_PERMISSION | FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+            | FLAG_GRANT_PREFIX_URI_PERMISSION;
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -6350,6 +6381,8 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #FLAG_GRANT_READ_URI_PERMISSION
      * @see #FLAG_GRANT_WRITE_URI_PERMISSION
+     * @see #FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+     * @see #FLAG_GRANT_PREFIX_URI_PERMISSION
      * @see #FLAG_DEBUG_LOG_RESOLUTION
      * @see #FLAG_FROM_BACKGROUND
      * @see #FLAG_ACTIVITY_BROUGHT_TO_FRONT
@@ -7381,9 +7414,10 @@ public class Intent implements Parcelable, Cloneable {
                     // Since we migrated in child, we need to promote ClipData
                     // and flags to ourselves to grant.
                     setClipData(target.getClipData());
-                    addFlags(target.getFlags()
-                            & (FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION
-                                    | FLAG_GRANT_PERSISTABLE_URI_PERMISSION));
+                    addFlags(target.getFlags() & (FLAG_GRANT_READ_URI_PERMISSION
+                            | FLAG_GRANT_WRITE_URI_PERMISSION
+                            | FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                            | FLAG_GRANT_PREFIX_URI_PERMISSION));
                     return true;
                 } else {
                     return false;
