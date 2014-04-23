@@ -61,8 +61,6 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"Permitir siempre desde esta computadora"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom para ocupar la pantalla"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Estirar p/ ocupar la pantalla"</string>
-    <string name="compat_mode_help_header" msgid="7969493989397529910">"Zoom de compatibilidad"</string>
-    <string name="compat_mode_help_body" msgid="4946726776359270040">"Cuando una aplicación fue diseñada para una pantalla más pequeña, aparece un control de zoom junto al reloj."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Guardando captura de pantalla"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Guardando la captura de pantalla..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"La captura de pantalla se está guardando."</string>
@@ -78,6 +76,8 @@
     <string name="accessibility_home" msgid="8217216074895377641">"Página principal"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menú"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"Aplicaciones recientes"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"Buscar"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"Cámara"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Botón Cambiar método de entrada"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botón de zoom de compatibilidad"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom de pantalla más pequeña a más grande"</string>
@@ -155,6 +155,7 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Batería <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Modo avión <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"Ubicación <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarma: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Datos de 2G-3G inhabilitados"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Datos de 4G inhabilitados"</string>
@@ -166,12 +167,13 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi conectado"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Buscando GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"La ubicación se estableció por GPS"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"Solicitudes de ubicación activas"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Eliminar todas las notificaciones"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Información de la aplicación"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"La pantalla girará automáticamente."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"La pantalla está bloqueada en modo horizontal."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"La pantalla está bloqueada en modo vertical."</string>
-    <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
+    <string name="dessert_case" msgid="1295161776223959221">"Caja para postres"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Activar protector"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Modo avión"</string>
@@ -184,10 +186,8 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Girar automáticamente"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Rotación bloqueada"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Método de introducción"</string>
-    <!-- no translation found for quick_settings_location_label (5011327048748762257) -->
-    <skip />
-    <!-- no translation found for quick_settings_location_off_label (7464544086507331459) -->
-    <skip />
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"Ubicación"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Ubicación desactivada"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Dispositivo multimedia"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Solo emergencia"</string>
@@ -198,12 +198,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Sin conexión"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Sin red"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi desactivada"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Pantalla Wi-Fi"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Pantalla inalámbrica"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Pantalla de Cast"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brillo"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMÁTICO"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"Las notificaciones aparecen aquí."</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Desliza el dedo hacia abajo para acceder al contenido.\nVuelve a deslizar el dedo hacia abajo para acceder a los controles del sistema."</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Desliza el dedo desde el borde de la pantalla para mostrar la barra."</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Desliza el dedo desde el borde de la pantalla para mostrar la barra del sistema."</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Es posible que la red\nesté supervisada."</string>
 </resources>

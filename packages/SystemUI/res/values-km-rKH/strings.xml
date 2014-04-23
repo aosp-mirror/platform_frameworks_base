@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0 
+ *
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="7164937344850004466">"ចំណុច​ប្រទាក់​ប្រព័ន្ធ"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"សម្អាត"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"យក​ចេញ​ពី​បញ្ជី"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ព័ត៌មាន​កម្មវិធី"</string>
+    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"គ្មាន​កម្មវិធី​ថ្មីៗ"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"បដិសេធ​កម្មវិធី​ថ្មីៗ"</string>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="5854176083865845541">"កម្មវិធី​ថ្មី ១"</item>
+    <item quantity="other" msgid="1040784359794890744">"កម្មវិធី​ថ្មីៗ %d"</item>
+  </plurals>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"គ្មាន​ការ​ជូន​ដំណឹង"</string>
+    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"បន្ត"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ការ​ជូន​ដំណឹង"</string>
+    <string name="battery_low_title" msgid="2783104807551211639">"ភ្ជាប់​ឧបករណ៍​បញ្ចូល​ថ្ម"</string>
+    <string name="battery_low_subtitle" msgid="1752040062087829196">"ជិត​អស់​ថ្ម​ហើយ។"</string>
+    <string name="battery_low_percent_format" msgid="1077244949318261761">"នៅ​សល់ <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"មិន​គាំទ្រ​ការ​បញ្ចូល​តាម​យូអេសប៊ី។\nប្រើ​តែ​ឧបករណ៍​បញ្ចូល​ថ្ម​ដែល​បាន​ផ្ដល់។"</string>
+    <string name="battery_low_why" msgid="7279169609518386372">"ការ​ប្រើ​ថ្ម"</string>
+    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ការ​កំណត់"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"វ៉ាយហ្វាយ"</string>
+    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"ពេល​ជិះ​យន្តហោះ"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"បង្វិល​អេក្រង់​ស្វ័យ​ប្រវត្តិ"</string>
+    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ស្ងាត់"</string>
+    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"ស្វ័យប្រវត្តិ"</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"ការ​ជូន​ដំណឹង"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"បាន​ភ្ជាប់​ប៊្លូធូស"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"រៀបចំ​វិធីសាស្ត្រ​បញ្ចូល"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ក្ដារ​ចុច​ពិតប្រាកដ"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"ឲ្យ​កម្មវិធី <xliff:g id="APPLICATION">%1$s</xliff:g> ចូល​ដំណើរការ​ឧបករណ៍​យូអេសប៊ី?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"ឲ្យ​កម្មវិធី <xliff:g id="APPLICATION">%1$s</xliff:g> ចូល​ដំណើរការ​ឧបករណ៍​យូអេសប៊ី?"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"បើក <xliff:g id="ACTIVITY">%1$s</xliff:g> ពេល​បាន​ភ្ជាប់​ឧបករណ៍​យូអេសប៊ី​នេះ?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"បើក <xliff:g id="ACTIVITY">%1$s</xliff:g> ពេល​បាន​ភ្ជាប់​ឧបករណ៍​យូអេសប៊ី?"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"គ្មាន​កម្មវិធី​បាន​ដំឡើង​ដំណើរការ​ជា​មួយ​ឧបករណ៍​យូអេសប៊ី។ ស្វែងយល់​បន្ថែម​អំពី​ឧបករណ៍​នេះ​នៅ <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"ឧបករណ៍​យូអេសប៊ី"</string>
+    <string name="label_view" msgid="6304565553218192990">"មើល"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"ប្រើ​តាម​លំនាំដើម​សម្រាប់​ឧបករណ៍​យូអេសប៊ី​នេះ"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"ប្រើ​តាម​លំនាំដើម​សម្រាប់​ខ្សែ​យូអេសប៊ី​នេះ"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"អនុញ្ញាត​ការ​កែ​កំហុស​យូអេសប៊ី?"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"ស្នាម​ម្រាម​ដៃ​ RSA របស់​កុំព្យូទ័រ​គឺ៖ \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="303335496705863070">"អនុញ្ញាត​ជា​និច្ច​សម្រាប់​កុំព្យូទ័រ​នេះ"</string>
+    <string name="compat_mode_on" msgid="6623839244840638213">"ពង្រីក​​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
+    <string name="compat_mode_off" msgid="4434467572461327898">"ទាញ​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់…"</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"រូបថត​អេក្រង់​កំពុង​ត្រូវ​បាន​រក្សាទុក។"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"បាន​ចាប់​យក​រូបថត​អេក្រង់។"</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"ប៉ះ ​ដើម្បី​មើល​រូបថត​អេក្រង់​របស់​អ្នក​។"</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"មិន​អាច​ចាប់​យក​រូប​ថត​អេក្រង់​។"</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"មិន​អាច​រក្សាទុក​រូបថត​អេក្រង់​។ ឧបករណ៍​ផ្ទុក​អាច​កំពុង​ប្រើ​​។"</string>
+    <string name="usb_preference_title" msgid="6551050377388882787">"ជម្រើស​ផ្ទេរ​ឯកសារ​តាម​យូអេសប៊ី"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"ភ្ជាប់​ជា​កម្មវិធី​ចាក់​មេឌៀ (MTP)"</string>
+    <string name="use_ptp_button_title" msgid="7517127540301625751">"ភ្ជាប់​ជា​ម៉ាស៊ីន​ថត (PTP)"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"ដំឡើង​កម្មវិធី​ផ្ទេរ​ឯកសារ Android សម្រាប់ Mac"</string>
+    <string name="accessibility_back" msgid="567011538994429120">"ថយក្រោយ"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"គេហ​ទំព័រ"</string>
+    <string name="accessibility_menu" msgid="316839303324695949">"ម៉ឺនុយ"</string>
+    <string name="accessibility_recent" msgid="8571350598987952883">"កម្មវិធី​ថ្មីៗ"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"ស្វែងរក"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"ម៉ាស៊ីន​ថត"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ប្ដូរ​ប៊ូតុង​វិធីសាស្ត្រ​បញ្ចូល។"</string>
+    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ប៊ូតុង​ពង្រីក​ត្រូវ​គ្នា។"</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ពង្រីក/បង្រួម​​អេក្រង់​ពី​​ទៅធំ"</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"បាន​តភ្ជាប់​ប៊្លូធូស។"</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"បាន​ផ្ដាច់​​ប៊្លូធូស។"</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"គ្មាន​ថ្ម។"</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"ថ្ម​មួយ​កាំ។"</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"ថ្ម​ពីរ​កាំ។"</string>
+    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"ថ្ម​ទាំង​បី​​កាំ​។"</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"ថ្ម​ពេញ​ហើយ។"</string>
+    <string name="accessibility_no_phone" msgid="4894708937052611281">"គ្មាន​ទូរស័ព្ទ។"</string>
+    <string name="accessibility_phone_one_bar" msgid="687699278132664115">"សេវា​ទូរស័ព្ទ​មួយ​កាំ។"</string>
+    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"សេវា​ទូរស័ព្ទ​ពីរ​កាំ។"</string>
+    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"សេវា​ទូរស័ព្ទ​បី​កាំ​។"</string>
+    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"សេវា​ទូរស័ព្ទ​ពេញ។"</string>
+    <string name="accessibility_no_data" msgid="4791966295096867555">"គ្មាន​ទិន្នន័យ​។"</string>
+    <string name="accessibility_data_one_bar" msgid="1415625833238273628">"ទិន្នន័យ​មួយ​​កាំ។"</string>
+    <string name="accessibility_data_two_bars" msgid="6166018492360432091">"ទិន្នន័យ​ពីរ​​កាំ។"</string>
+    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"ទិន្នន័យ​បី​កាំ។"</string>
+    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"សញ្ញា​ទិន្នន័យ​ពេញ។"</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"បិទ​វ៉ាយហ្វាយ។"</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"បាន​ផ្ដាច់​វ៉ាយហ្វាយ។"</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"សញ្ញា​វ៉ាយហ្វាយ​មួយ​កាំ។"</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"សេវា​វ៉ាយហ្វាយ​ពីរ​កាំ។"</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"វ៉ាយហ្វាយ​បី​កាំ។"</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"សញ្ញា​វ៉ាយហ្វាយ​ពេញ។"</string>
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"គ្មាន WiMAX ។"</string>
+    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX មួយ​កាំ។"</string>
+    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX ពីរ​កាំ។"</string>
+    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX បី​កាំ។"</string>
+    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"សញ្ញា WiMAX ពេញ។"</string>
+    <string name="accessibility_no_signal" msgid="7064645320782585167">"គ្មាន​សញ្ញា។"</string>
+    <string name="accessibility_not_connected" msgid="6395326276213402883">"មិន​បាន​តភ្ជាប់​។"</string>
+    <string name="accessibility_zero_bars" msgid="3806060224467027887">"សូន្យ​កាំ។"</string>
+    <string name="accessibility_one_bar" msgid="1685730113192081895">"មួយ​កាំ។"</string>
+    <string name="accessibility_two_bars" msgid="6437363648385206679">"ពីរ​កាំ។"</string>
+    <string name="accessibility_three_bars" msgid="2648241415119396648">"បី​កាំ។"</string>
+    <string name="accessibility_signal_full" msgid="9122922886519676839">"សញ្ញា​ពេញ​​។"</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"បើក។"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"បិទ"</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"បាន​តភ្ជាប់។"</string>
+    <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
+    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
+    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
+    <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
+    <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
+    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"រ៉ូ​មីង"</string>
+    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"វ៉ាយហ្វាយ"</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"គ្មាន​ស៊ីម​កាត។"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ការ​ភ្ជាប់​ប៊្លូធូស។"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"របៀប​​ពេលជិះ​យន្តហោះ"</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"ថ្ម <xliff:g id="NUMBER">%d</xliff:g> ភាគរយ។"</string>
+    <string name="accessibility_settings_button" msgid="799583911231893380">"ការ​កំណត់​ប្រព័ន្ធ​។"</string>
+    <string name="accessibility_notifications_button" msgid="4498000369779421892">"ការ​ជូន​ដំណឹង។"</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"សម្អាត​ការ​ជូន​ដំណឹង។"</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"បាន​បើក GPS ។"</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"ទទួល​​ GPS ។"</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"បាន​បើក​ម៉ាស៊ីន​អង្គុលីលេខ"</string>
+    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"កម្មវិធី​រោទ៍​ញ័រ។"</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"កម្មវិធី​រោទ៍​ស្ងាត់។"</string>
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> បដិសេធ។"</string>
+    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"បាន​បដិសេធ​ការ​ជូនដំណឹង"</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"ពណ៌​ការ​ជូន​ដំណឹង"</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ការ​កំណត់​រហ័ស។"</string>
+    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"កម្មវិធី​ថ្មី​ៗ។"</string>
+    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"អ្នក​ប្រើ <xliff:g id="USER">%s</xliff:g> ។"</string>
+    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"ចល័ត <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"ថ្ម <xliff:g id="STATE">%s</xliff:g> ។"</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"របៀបពេល​ជិះ​យន្ត​ហោះ <xliff:g id="STATE">%s</xliff:g> ។"</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"ប៊្លូធូស <xliff:g id="STATE">%s</xliff:g> ។"</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"ទីតាំង <xliff:g id="STATE">%s</xliff:g> ។"</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"កំណត់​សំឡេង​រោទ៍​សម្រាប់ <xliff:g id="TIME">%s</xliff:g> ។"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"បាន​បិទ​ទិន្នន័យ 2G-3G"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"បាន​បិទ​ទិន្នន័យ 4G"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"បាន​បិទ​ទិន្នន័យ​ចល័ត"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"បាន​បិទ​ទិន្នន័យ"</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"អ្នក​បាន​ដល់​ដែន​កំណត់​ប្រើ​ទិន្នន័យ​បាន​បញ្ជាក់។\n\nបើ​អ្នក​បើក​ទិន្នន័យ​ឡើងវិញ អ្នក​អាច​ត្រូវ​បាន​ប្ដូរ​ដោយ​ប្រតិបត្តិ​ករ។"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"បើក​​ទិន្នន័យ​ឡើងវិញ"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"គ្មាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"បាន​ភ្ជាប់​វ៉ាយហ្វាយ"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"ស្វែងរក GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"ទីតាំង​​​​​កំណត់​ដោយ GPS"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"សំណើ​ទីតាំង​សកម្ម"</string>
+    <string name="accessibility_clear_all" msgid="5235938559247164925">"សម្អាត​ការ​ជូន​ដំណឹង​ទាំងអស់។"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"ព័ត៌មាន​កម្មវិធី"</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"នឹង​បង្វិល​អេក្រង់​ស្វ័យ​ប្រវត្តិ។"</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"អេក្រង់​ជាប់​សោ​ក្នុង​ទិស​ផ្ដេក។"</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"បា​ន​ចាក់​សោ​អេក្រង់​​ក្នុង​ទិស​បញ្ឈរ។"</string>
+    <string name="dessert_case" msgid="1295161776223959221">"ករណី Dessert"</string>
+    <string name="start_dreams" msgid="7219575858348719790">"ស្រមើ​ស្រមៃ"</string>
+    <string name="ethernet_label" msgid="7967563676324087464">"អ៊ីសឺរណិត"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"របៀបពេល​​ជិះ​យន្តហោះ"</string>
+    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"បញ្ចូល​ថ្ម <xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"បាន​បញ្ចូល​ពេញ"</string>
+    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ប៊្លូធូស"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ប៊្លូធូស (ឧបករណ៍ <xliff:g id="NUMBER">%d</xliff:g>)"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"​ប៊្លូធូស​បាន​បិទ"</string>
+    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ពន្លឺ"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"បង្វិល​​ស្វ័យ​ប្រវត្តិ"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"បាន​ចាក់​សោ​ការ​បង្វិល"</string>
+    <string name="quick_settings_ime_label" msgid="7073463064369468429">"វិធីសាស្ត្រ​បញ្ចូល"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"ទី​តាំង"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"ទីតាំង​បាន​បិទ"</string>
+    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"ឧបករណ៍​មេឌៀ"</string>
+    <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"សម្រាប់​តែ​ការ​ហៅ​ពេល​អាសន្ន"</string>
+    <string name="quick_settings_settings_label" msgid="5326556592578065401">"ការ​កំណត់"</string>
+    <string name="quick_settings_time_label" msgid="4635969182239736408">"ពេលវេលា"</string>
+    <string name="quick_settings_user_label" msgid="5238995632130897840">"ខ្ញុំ"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"វ៉ាយហ្វាយ"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"មិន​បាន​តភ្ជាប់"</string>
+    <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"គ្មាន​បណ្ដាញ"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"វ៉ាយហ្វាយ​បានបិទ"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"ចាត់​ថ្នាក់​អេក្រង់"</string>
+    <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ពន្លឺ"</string>
+    <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ស្វ័យប្រវត្តិ"</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"បណ្ដាញ​អាច​\nត្រូវ​បាន​ត្រួតពិនិត្យ"</string>
+</resources>
