@@ -280,6 +280,7 @@ class QuickSettings {
         addUserTiles(mContainerView, inflater);
         addSystemTiles(mContainerView, inflater);
         addTemporaryTiles(mContainerView, inflater);
+        addAccessibilityTiles(mContainerView);
 
         queryForUserInformation();
         queryForSslCaCerts();
@@ -309,6 +310,34 @@ class QuickSettings {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
         collapsePanels();
+    }
+
+    private void addAccessibilityTiles(ViewGroup parent) {
+        if (!DEBUG_GONE_TILES && !SHOW_ACCESSIBILITY_TILES) return;
+
+        // Color inversion tile
+        final SystemSettingTile inversionTile = new SystemSettingTile(mContext);
+        inversionTile.setUri(Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
+                SystemSettingTile.TYPE_SECURE);
+        inversionTile.setFragment("Settings$AccessibilityInversionSettingsActivity");
+        mModel.addInversionTile(inversionTile, inversionTile.getRefreshCallback());
+        parent.addView(inversionTile);
+
+        // Contrast enhancement tile
+        final SystemSettingTile contrastTile = new SystemSettingTile(mContext);
+        contrastTile.setUri(Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_ENABLED,
+                SystemSettingTile.TYPE_SECURE);
+        contrastTile.setFragment("Settings$AccessibilityContrastSettingsActivity");
+        mModel.addContrastTile(contrastTile, contrastTile.getRefreshCallback());
+        parent.addView(contrastTile);
+
+        // Color space adjustment tile
+        final SystemSettingTile colorSpaceTile = new SystemSettingTile(mContext);
+        colorSpaceTile.setUri(Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
+                SystemSettingTile.TYPE_SECURE);
+        colorSpaceTile.setFragment("Settings$AccessibilityDaltonizerSettingsActivity");
+        mModel.addColorSpaceTile(colorSpaceTile, colorSpaceTile.getRefreshCallback());
+        parent.addView(colorSpaceTile);
     }
 
     private void addUserTiles(final ViewGroup parent, final LayoutInflater inflater) {
@@ -384,35 +413,6 @@ class QuickSettings {
                 new QuickSettingsModel.BasicRefreshCallback(settingsTile));
         parent.addView(settingsTile);
         mDynamicSpannedTiles.add(settingsTile);
-
-        if (SHOW_ACCESSIBILITY_TILES) {
-            // Color inversion tile
-            final SystemSettingTile inversionTile = new SystemSettingTile(mContext);
-            inversionTile.setUri(Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
-                    SystemSettingTile.TYPE_SECURE);
-            inversionTile.setFragment("Settings$AccessibilityInversionSettingsActivity");
-            mModel.addInversionTile(inversionTile, inversionTile.getRefreshCallback());
-            parent.addView(inversionTile);
-            mDynamicSpannedTiles.add(inversionTile);
-
-            // Contrast enhancement tile
-            final SystemSettingTile contrastTile = new SystemSettingTile(mContext);
-            contrastTile.setUri(Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_ENABLED,
-                    SystemSettingTile.TYPE_SECURE);
-            contrastTile.setFragment("Settings$AccessibilityContrastSettingsActivity");
-            mModel.addContrastTile(contrastTile, contrastTile.getRefreshCallback());
-            parent.addView(contrastTile);
-            mDynamicSpannedTiles.add(contrastTile);
-
-            // Color space adjustment tile
-            final SystemSettingTile colorSpaceTile = new SystemSettingTile(mContext);
-            colorSpaceTile.setUri(Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
-                    SystemSettingTile.TYPE_SECURE);
-            colorSpaceTile.setFragment("Settings$AccessibilityDaltonizerSettingsActivity");
-            mModel.addColorSpaceTile(colorSpaceTile, colorSpaceTile.getRefreshCallback());
-            parent.addView(colorSpaceTile);
-            mDynamicSpannedTiles.add(colorSpaceTile);
-        }
     }
 
     private void addSystemTiles(ViewGroup parent, LayoutInflater inflater) {
@@ -574,49 +574,6 @@ class QuickSettings {
         });
         parent.addView(batteryTile);
 
-        // Airplane Mode
-        final QuickSettingsBasicTile airplaneTile
-                = new QuickSettingsBasicTile(mContext);
-        mModel.addAirplaneModeTile(airplaneTile, new QuickSettingsModel.RefreshCallback() {
-            @Override
-            public void refreshView(QuickSettingsTileView unused, State state) {
-                airplaneTile.setImageResource(state.iconId);
-
-                String airplaneState = mContext.getString(
-                        (state.enabled) ? R.string.accessibility_desc_on
-                                : R.string.accessibility_desc_off);
-                airplaneTile.setContentDescription(
-                        mContext.getString(R.string.accessibility_quick_settings_airplane, airplaneState));
-                airplaneTile.setText(state.label);
-            }
-        });
-        parent.addView(airplaneTile);
-
-        // Zen Mode
-        final QuickSettingsBasicTile zenModeTile = new QuickSettingsBasicTile(mContext);
-        zenModeTile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showZenModeDialog();
-            }
-        });
-        mModel.addZenModeTile(zenModeTile, new QuickSettingsModel.RefreshCallback() {
-            @Override
-            public void refreshView(QuickSettingsTileView unused, State state) {
-                zenModeTile.setImageResource(state.iconId);
-                // TODO cut new assets
-                zenModeTile.getImageView().setAlpha(state.enabled ? 1 : .2f);
-                zenModeTile.getImageView().setScaleX(1.5f);
-                zenModeTile.getImageView().setScaleY(1.5f);
-                // for landscape version
-                zenModeTile.getTextView().setMaxLines(2);
-                zenModeTile.getTextView().setEllipsize(TruncateAt.END);
-                // TODO content description
-                zenModeTile.setText(state.label);
-            }
-        });
-        parent.addView(zenModeTile);
-
         // Bluetooth
         if (mModel.deviceSupportsBluetooth()
                 || DEBUG_GONE_TILES) {
@@ -710,6 +667,50 @@ class QuickSettings {
             }
         });
         parent.addView(locationTile);
+
+        // Airplane Mode
+        final QuickSettingsBasicTile airplaneTile
+                = new QuickSettingsBasicTile(mContext);
+        mModel.addAirplaneModeTile(airplaneTile, new QuickSettingsModel.RefreshCallback() {
+            @Override
+            public void refreshView(QuickSettingsTileView unused, State state) {
+                airplaneTile.setImageResource(state.iconId);
+
+                String airplaneState = mContext.getString(
+                        (state.enabled) ? R.string.accessibility_desc_on
+                                : R.string.accessibility_desc_off);
+                airplaneTile.setContentDescription(
+                        mContext.getString(R.string.accessibility_quick_settings_airplane,
+                                airplaneState));
+                airplaneTile.setText(state.label);
+            }
+        });
+        parent.addView(airplaneTile);
+
+        // Zen Mode
+        final QuickSettingsBasicTile zenModeTile = new QuickSettingsBasicTile(mContext);
+        zenModeTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showZenModeDialog();
+            }
+        });
+        mModel.addZenModeTile(zenModeTile, new QuickSettingsModel.RefreshCallback() {
+            @Override
+            public void refreshView(QuickSettingsTileView unused, State state) {
+                zenModeTile.setImageResource(state.iconId);
+                // TODO cut new assets
+                zenModeTile.getImageView().setAlpha(state.enabled ? 1 : .2f);
+                zenModeTile.getImageView().setScaleX(1.5f);
+                zenModeTile.getImageView().setScaleY(1.5f);
+                // for landscape version
+                zenModeTile.getTextView().setMaxLines(2);
+                zenModeTile.getTextView().setEllipsize(TruncateAt.END);
+                // TODO content description
+                zenModeTile.setText(state.label);
+            }
+        });
+        parent.addView(zenModeTile);
     }
 
     private void addTemporaryTiles(final ViewGroup parent, final LayoutInflater inflater) {
