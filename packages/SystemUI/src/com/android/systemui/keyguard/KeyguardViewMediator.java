@@ -157,24 +157,6 @@ public class KeyguardViewMediator extends SystemUI {
     private static final int KEYGUARD_DONE_DRAWING_TIMEOUT_MS = 2000;
 
     /**
-     * Allow the user to expand the status bar when the keyguard is engaged
-     * (without a pattern or password).
-     */
-    private static final boolean ENABLE_INSECURE_STATUS_BAR_EXPAND = true;
-
-    /**
-     * Allow the user to expand the status bar when a SECURE keyguard is engaged
-     * and {@link android.provider.Settings.Global#LOCK_SCREEN_SHOW_NOTIFICATIONS} is set
-     * (private notifications will be masked).
-     */
-    private static final boolean ENABLE_SECURE_STATUS_BAR_EXPAND = true;
-
-    /**
-     * Default value of {@link android.provider.Settings.Global#LOCK_SCREEN_SHOW_NOTIFICATIONS}.
-     */
-    private static final boolean ALLOW_NOTIFICATIONS_DEFAULT = false;
-
-    /**
      * Secure setting whether analytics are collected on the keyguard.
      */
     private static final String KEYGUARD_ANALYTICS_SETTING = "keyguard_analytics";
@@ -275,11 +257,6 @@ public class KeyguardViewMediator extends SystemUI {
     private int mLockSoundId;
     private int mUnlockSoundId;
     private int mLockSoundStreamId;
-
-    /**
-     * Tracks value of {@link android.provider.Settings.Global#LOCK_SCREEN_SHOW_NOTIFICATIONS}.
-     */
-    private boolean mAllowNotificationsWhenSecure;
 
     /**
      * The volume applied to the lock/unlock sounds.
@@ -895,13 +872,6 @@ public class KeyguardViewMediator extends SystemUI {
             return;
         }
 
-        // note whether notification access should be allowed
-        mAllowNotificationsWhenSecure = ENABLE_SECURE_STATUS_BAR_EXPAND
-                && 0 != Settings.Global.getInt(
-                        mContext.getContentResolver(),
-                        Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS,
-                        ALLOW_NOTIFICATIONS_DEFAULT ? 1 : 0);
-
         // if the keyguard is already showing, don't bother
         if (mStatusBarKeyguardViewManager.isShowing()) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
@@ -1271,11 +1241,6 @@ public class KeyguardViewMediator extends SystemUI {
                 // (like recents). Temporary enable/disable (e.g. the "back" button) are
                 // done in KeyguardHostView.
                 flags |= StatusBarManager.DISABLE_RECENT;
-                if (isSecure()) {
-                    // showing secure lockscreen; disable ticker and switch private notifications
-                    // to show their public versions, if available.
-                    flags |= StatusBarManager.DISABLE_PRIVATE_NOTIFICATIONS;
-                }
                 if (!isAssistantAvailable()) {
                     flags |= StatusBarManager.DISABLE_SEARCH;
                 }

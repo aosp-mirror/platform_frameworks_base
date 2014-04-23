@@ -41,8 +41,6 @@ public class StatusBarManager {
     @Deprecated
     public static final int DISABLE_NOTIFICATION_TICKER
             = View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER;
-    public static final int DISABLE_PRIVATE_NOTIFICATIONS
-            = View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER;
     public static final int DISABLE_SYSTEM_INFO = View.STATUS_BAR_DISABLE_SYSTEM_INFO;
     public static final int DISABLE_HOME = View.STATUS_BAR_DISABLE_HOME;
     public static final int DISABLE_RECENT = View.STATUS_BAR_DISABLE_RECENT;
