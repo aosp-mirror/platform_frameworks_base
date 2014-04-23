@@ -5821,6 +5821,13 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    public void dispatchUnhandledInputEvent(InputEvent event) {
+        if (event instanceof KeyEvent) {
+            dispatchUnhandledKey((KeyEvent) event);
+            return;
+        }
+    }
+
     public void dispatchAppVisibility(boolean visible) {
         Message msg = mHandler.obtainMessage(MSG_DISPATCH_APP_VISIBILITY);
         msg.arg1 = visible ? 1 : 0;
