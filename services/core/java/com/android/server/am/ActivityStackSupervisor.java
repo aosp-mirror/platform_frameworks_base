@@ -2999,7 +2999,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    class ActivityContainer extends IActivityContainer.Stub {
+    class ActivityContainer extends android.app.IActivityContainer.Stub {
         final int mStackId;
         IActivityContainerCallback mCallback = null;
         final ActivityStack mStack;
