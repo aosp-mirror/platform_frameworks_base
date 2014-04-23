@@ -1514,43 +1514,46 @@ public final class ViewRootImpl implements ViewParent,
                         mResizeBuffer.prepare(mWidth, mHeight, false);
                         RenderNode layerRenderNode = mResizeBuffer.startRecording();
                         HardwareCanvas layerCanvas = layerRenderNode.start(mWidth, mHeight);
-                        final int restoreCount = layerCanvas.save();
+                        try {
+                            final int restoreCount = layerCanvas.save();
 
-                        int yoff;
-                        final boolean scrolling = mScroller != null
-                                && mScroller.computeScrollOffset();
-                        if (scrolling) {
-                            yoff = mScroller.getCurrY();
-                            mScroller.abortAnimation();
-                        } else {
-                            yoff = mScrollY;
+                            int yoff;
+                            final boolean scrolling = mScroller != null
+                                    && mScroller.computeScrollOffset();
+                            if (scrolling) {
+                                yoff = mScroller.getCurrY();
+                                mScroller.abortAnimation();
+                            } else {
+                                yoff = mScrollY;
+                            }
+
+                            layerCanvas.translate(0, -yoff);
+                            if (mTranslator != null) {
+                                mTranslator.translateCanvas(layerCanvas);
+                            }
+
+                            RenderNode renderNode = mView.mRenderNode;
+                            if (renderNode != null && renderNode.isValid()) {
+                                layerCanvas.drawDisplayList(renderNode, null,
+                                        RenderNode.FLAG_CLIP_CHILDREN);
+                            } else {
+                                mView.draw(layerCanvas);
+                            }
+
+                            drawAccessibilityFocusedDrawableIfNeeded(layerCanvas);
+
+                            mResizeBufferStartTime = SystemClock.uptimeMillis();
+                            mResizeBufferDuration = mView.getResources().getInteger(
+                                    com.android.internal.R.integer.config_mediumAnimTime);
+
+                            layerCanvas.restoreToCount(restoreCount);
+                            layerRenderNode.end(layerCanvas);
+                            layerRenderNode.setCaching(true);
+                            layerRenderNode.setLeftTopRightBottom(0, 0, mWidth, mHeight);
+                            mTempRect.set(0, 0, mWidth, mHeight);
+                        } finally {
+                            mResizeBuffer.endRecording(mTempRect);
                         }
-
-                        layerCanvas.translate(0, -yoff);
-                        if (mTranslator != null) {
-                            mTranslator.translateCanvas(layerCanvas);
-                        }
-
-                        RenderNode renderNode = mView.mRenderNode;
-                        if (renderNode != null && renderNode.isValid()) {
-                            layerCanvas.drawDisplayList(renderNode, null,
-                                    RenderNode.FLAG_CLIP_CHILDREN);
-                        } else {
-                            mView.draw(layerCanvas);
-                        }
-
-                        drawAccessibilityFocusedDrawableIfNeeded(layerCanvas);
-
-                        mResizeBufferStartTime = SystemClock.uptimeMillis();
-                        mResizeBufferDuration = mView.getResources().getInteger(
-                                com.android.internal.R.integer.config_mediumAnimTime);
-
-                        layerCanvas.restoreToCount(restoreCount);
-                        layerRenderNode.end(layerCanvas);
-                        layerRenderNode.setCaching(true);
-                        layerRenderNode.setLeftTopRightBottom(0, 0, mWidth, mHeight);
-                        mTempRect.set(0, 0, mWidth, mHeight);
-                        mResizeBuffer.endRecording(mTempRect);
                         mAttachInfo.mHardwareRenderer.flushLayerUpdates();
                     }
                     mAttachInfo.mContentInsets.set(mPendingContentInsets);
@@ -2949,7 +2952,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
     }
-    
+
     /**
      * Return true if child is an ancestor of parent, (or equal to the parent).
      */
