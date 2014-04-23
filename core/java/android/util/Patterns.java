@@ -130,7 +130,10 @@ public class Patterns {
     private static final String IRI
         = "[" + GOOD_IRI_CHAR + "]([" + GOOD_IRI_CHAR + "\\-]{0,61}[" + GOOD_IRI_CHAR + "]){0,1}";
 
-    private static final String HOST_NAME = IRI + "(?:\\." + IRI + ")+";
+    private static final String GOOD_GTLD_CHAR =
+        "a-zA-Z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF";
+    private static final String GTLD = "[" + GOOD_GTLD_CHAR + "]{2,63}";
+    private static final String HOST_NAME = "(" + IRI + "\\.)+" + GTLD;
 
     public static final Pattern DOMAIN_NAME
         = Pattern.compile("(" + HOST_NAME + "|" + IP_ADDRESS + ")");
