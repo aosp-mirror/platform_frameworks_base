@@ -218,6 +218,8 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modus d\'aviun"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Il modus d\'aviun è activà"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Il modus d\'aviun è deactivà."</string>
+    <!-- no translation found for global_action_settings (1756531602592545966) -->
+    <skip />
     <!-- no translation found for status_bar_notification_info_overflow (5301981741705354993) -->
     <skip />
     <string name="safeMode" msgid="2788228061547930246">"Modus segirà"</string>
