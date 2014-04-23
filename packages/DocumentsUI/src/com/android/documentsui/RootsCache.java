@@ -104,7 +104,8 @@ public class RootsCache {
         mRecentsRoot.authority = null;
         mRecentsRoot.rootId = null;
         mRecentsRoot.icon = R.drawable.ic_root_recent;
-        mRecentsRoot.flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_CREATE;
+        mRecentsRoot.flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_CREATE
+                | Root.FLAG_SUPPORTS_DIR_SELECTION;
         mRecentsRoot.title = mContext.getString(R.string.root_recent);
         mRecentsRoot.availableBytes = -1;
 
@@ -349,12 +350,15 @@ public class RootsCache {
         final List<RootInfo> matching = Lists.newArrayList();
         for (RootInfo root : roots) {
             final boolean supportsCreate = (root.flags & Root.FLAG_SUPPORTS_CREATE) != 0;
+            final boolean supportsDir = (root.flags & Root.FLAG_SUPPORTS_DIR_SELECTION) != 0;
             final boolean advanced = (root.flags & Root.FLAG_ADVANCED) != 0;
             final boolean localOnly = (root.flags & Root.FLAG_LOCAL_ONLY) != 0;
             final boolean empty = (root.flags & Root.FLAG_EMPTY) != 0;
 
             // Exclude read-only devices when creating
             if (state.action == State.ACTION_CREATE && !supportsCreate) continue;
+            // Exclude roots that don't support directory picking
+            if (state.action == State.ACTION_PICK_DIRECTORY && !supportsDir) continue;
             // Exclude advanced devices when not requested
             if (!state.showAdvanced && advanced) continue;
             // Exclude non-local devices when local only

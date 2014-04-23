@@ -370,8 +370,8 @@ public class FileUtils {
      * attacks.
      */
     public static boolean contains(File dir, File file) {
-        String dirPath = dir.getPath();
-        String filePath = file.getPath();
+        String dirPath = dir.getAbsolutePath();
+        String filePath = file.getAbsolutePath();
 
         if (dirPath.equals(filePath)) {
             return true;

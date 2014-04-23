@@ -2700,9 +2700,11 @@ public class Intent implements Parcelable, Cloneable {
      * take the persistable permissions using
      * {@link ContentResolver#takePersistableUriPermission(Uri, int)}.
      * <p>
-     * Callers can restrict document selection to a specific kind of data, such
-     * as photos, by setting one or more MIME types in
-     * {@link #EXTRA_MIME_TYPES}.
+     * Callers must indicate the acceptable document MIME types through
+     * {@link #setType(String)}. For example, to select photos, use
+     * {@code image/*}. If multiple disjoint MIME types are acceptable, define
+     * them in {@link #EXTRA_MIME_TYPES} and {@link #setType(String)} to
+     * {@literal *}/*.
      * <p>
      * If the caller can handle multiple returned items (the user performing
      * multiple selection), then you can specify {@link #EXTRA_ALLOW_MULTIPLE}
@@ -2712,9 +2714,10 @@ public class Intent implements Parcelable, Cloneable {
      * returned URIs can be opened with
      * {@link ContentResolver#openFileDescriptor(Uri, String)}.
      * <p>
-     * Output: The URI of the item that was picked. This must be a
-     * {@code content://} URI so that any receiver can access it. If multiple
-     * documents were selected, they are returned in {@link #getClipData()}.
+     * Output: The URI of the item that was picked, returned in
+     * {@link #getData()}. This must be a {@code content://} URI so that any
+     * receiver can access it. If multiple documents were selected, they are
+     * returned in {@link #getClipData()}.
      *
      * @see DocumentsContract
      * @see #ACTION_CREATE_DOCUMENT
@@ -2755,6 +2758,24 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CREATE_DOCUMENT = "android.intent.action.CREATE_DOCUMENT";
+
+    /**
+     * Activity Action: Allow the user to pick a directory. When invoked, the
+     * system will display the various {@link DocumentsProvider} instances
+     * installed on the device, letting the user navigate through them. Apps can
+     * fully manage documents within the returned directory.
+     * <p>
+     * To gain access to descendant (child, grandchild, etc) documents, use
+     * {@link DocumentsContract#buildDocumentViaUri(Uri, String)} and
+     * {@link DocumentsContract#buildChildDocumentsViaUri(Uri, String)} using
+     * the returned directory URI.
+     * <p>
+     * Output: The URI representing the selected directory.
+     *
+     * @see DocumentsContract
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PICK_DIRECTORY = "android.intent.action.PICK_DIRECTORY";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -3334,6 +3355,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #ACTION_GET_CONTENT
      * @see #ACTION_OPEN_DOCUMENT
      * @see #ACTION_CREATE_DOCUMENT
+     * @see #ACTION_PICK_DIRECTORY
      */
     public static final String EXTRA_LOCAL_ONLY =
             "android.intent.extra.LOCAL_ONLY";
