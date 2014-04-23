@@ -15,16 +15,18 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_checked="true" android:state_pressed="true">
+    <item android:state_enabled="false" android:state_checked="true">
         <nine-patch android:src="@drawable/switch_on_qntm_alpha"
-            android:tint="?attr/colorControlActivated" />
+            android:tint="?attr/colorControlNormal"
+            android:alpha="?attr/disabledAlpha" />
+    </item>
+    <item android:state_enabled="false">
+        <nine-patch android:src="@drawable/switch_off_qntm_alpha"
+            android:tint="?attr/colorControlNormal"
+            android:alpha="?attr/disabledAlpha" />
     </item>
     <item android:state_checked="true">
         <nine-patch android:src="@drawable/switch_on_qntm_alpha"
-            android:tint="?attr/colorControlActivated" />
-    </item>
-    <item android:state_pressed="true">
-        <nine-patch android:src="@drawable/switch_off_qntm_alpha"
             android:tint="?attr/colorControlActivated" />
     </item>
     <item>

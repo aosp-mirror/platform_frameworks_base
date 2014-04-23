@@ -139,8 +139,8 @@ class Ripple {
     public boolean draw(Canvas c, Paint p) {
         final Rect bounds = mBounds;
         final Rect padding = mPadding;
-        final float dX = Math.max(mX, bounds.right - mX);
-        final float dY = Math.max(mY, bounds.bottom - mY);
+        final float dX = Math.max(mX - bounds.left, bounds.right - mX);
+        final float dY = Math.max(mY - bounds.top, bounds.bottom - mY);
         final int maxRadius = (int) Math.ceil(Math.sqrt(dX * dX + dY * dY));
 
         final float enterState = mEnterState;

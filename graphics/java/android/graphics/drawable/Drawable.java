@@ -518,9 +518,16 @@ public abstract class Drawable {
     public void removeHotspot(int key) {}
 
     /**
-     * Removes all hotspots from the drawable.
+     * Immediately removes all hotspots from the drawable.
      */
     public void clearHotspots() {}
+    
+    /**
+     * Sets the bounds to which hotspots are constrained.
+     *
+     * @hide until we finalize these APIs
+     */
+    public void setHotspotBounds(int left, int top, int right, int bottom) {}
 
     /**
      * Whether this drawable requests projection.

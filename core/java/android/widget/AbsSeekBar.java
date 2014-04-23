@@ -29,6 +29,8 @@ import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import com.android.internal.R;
+
 public abstract class AbsSeekBar extends ProgressBar {
     private Drawable mThumb;
     private int mThumbOffset;
@@ -289,28 +291,39 @@ public abstract class AbsSeekBar extends ProgressBar {
      */
     private void setThumbPos(int w, Drawable thumb, float scale, int gap) {
         int available = w - mPaddingLeft - mPaddingRight;
-        int thumbWidth = thumb.getIntrinsicWidth();
-        int thumbHeight = thumb.getIntrinsicHeight();
+        final int thumbWidth = thumb.getIntrinsicWidth();
+        final int thumbHeight = thumb.getIntrinsicHeight();
         available -= thumbWidth;
 
         // The extra space for the thumb to move on the track
         available += mThumbOffset * 2;
 
-        int thumbPos = (int) (scale * available + 0.5f);
+        final int thumbPos = (int) (scale * available + 0.5f);
 
-        int topBound, bottomBound;
+        final int top, bottom;
         if (gap == Integer.MIN_VALUE) {
-            Rect oldBounds = thumb.getBounds();
-            topBound = oldBounds.top;
-            bottomBound = oldBounds.bottom;
+            final Rect oldBounds = thumb.getBounds();
+            top = oldBounds.top;
+            bottom = oldBounds.bottom;
         } else {
-            topBound = gap;
-            bottomBound = gap + thumbHeight;
+            top = gap;
+            bottom = gap + thumbHeight;
         }
-        
-        // Canvas will be translated, so 0,0 is where we start drawing
+
         final int left = (isLayoutRtl() && mMirrorForRtl) ? available - thumbPos : thumbPos;
-        thumb.setBounds(left, topBound, left + thumbWidth, bottomBound);
+        final int right = left + thumbWidth;
+
+        final Drawable background = getBackground();
+        if (background.supportsHotspots()) {
+            final Rect bounds = mThumb.getBounds();
+            final int offsetX = mPaddingLeft - mThumbOffset;
+            final int offsetY = mPaddingTop;
+            background.setHotspotBounds(left + offsetX, bounds.top + offsetY,
+                    right + offsetX, bounds.bottom + offsetY);
+        }
+
+        // Canvas will be translated, so 0,0 is where we start drawing
+        thumb.setBounds(left, top, right, bottom);
     }
 
     /**
@@ -328,6 +341,7 @@ public abstract class AbsSeekBar extends ProgressBar {
     @Override
     protected synchronized void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
         if (mThumb != null) {
             canvas.save();
             // Translate the padding. For the x, we need to allow the thumb to
@@ -424,10 +438,24 @@ public abstract class AbsSeekBar extends ProgressBar {
         return true;
     }
 
+    private void setHotspot(int id, float x, float y) {
+        final Drawable bg = getBackground();
+        if (bg != null && bg.supportsHotspots()) {
+            bg.setHotspot(id, x, y);
+        }
+    }
+
+    private void clearHotspot(int id) {
+        final Drawable bg = getBackground();
+        if (bg != null && bg.supportsHotspots()) {
+            bg.removeHotspot(id);
+        }
+    }
+
     private void trackTouchEvent(MotionEvent event) {
         final int width = getWidth();
         final int available = width - mPaddingLeft - mPaddingRight;
-        int x = (int)event.getX();
+        final int x = (int) event.getX();
         float scale;
         float progress = 0;
         if (isLayoutRtl() && mMirrorForRtl) {
@@ -451,7 +479,8 @@ public abstract class AbsSeekBar extends ProgressBar {
         }
         final int max = getMax();
         progress += scale * max;
-        
+
+        setHotspot(R.attr.state_pressed, x, (int) event.getY());
         setProgress((int) progress, true);
     }
 
@@ -477,6 +506,7 @@ public abstract class AbsSeekBar extends ProgressBar {
      * canceled.
      */
     void onStopTrackingTouch() {
+        clearHotspot(R.attr.state_pressed);
         mIsDragging = false;
     }
 
