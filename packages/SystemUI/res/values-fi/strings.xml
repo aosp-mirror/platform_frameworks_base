@@ -38,7 +38,7 @@
     <string name="invalid_charger" msgid="4549105996740522523">"USB-latausta ei tueta.\nKäytä laitteen mukana tullutta laturia."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Akun käyttö"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Asetukset"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wifi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Lentokonetila"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Kierrä näyttöä automaattisesti"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ÄÄNET."</string>
@@ -61,8 +61,6 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"Salli aina tällä tietokoneella"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoomaa koko näyttöön"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Venytä koko näyttöön"</string>
-    <string name="compat_mode_help_header" msgid="7969493989397529910">"Yhteensopivuuszoomaus"</string>
-    <string name="compat_mode_help_body" msgid="4946726776359270040">"Jos sovellus on suunniteltu pienemmälle näytölle, kellon viereen tulee näkyviin zoomaussäädin."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Tallennetaan kuvakaappausta..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Tallennetaan kuvakaappausta..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Kuvakaappausta tallennetaan."</string>
@@ -78,6 +76,8 @@
     <string name="accessibility_home" msgid="8217216074895377641">"Aloituspainike"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Valikko"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"Viimeaikaiset sovellukset"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"Haku"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Syöttötavan vaihtopainike."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Yhteensopivuuszoomaus-painike."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoomaa pienemmältä suuremmalle ruudulle."</string>
@@ -98,11 +98,11 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Datasignaali - kaksi palkkia."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Datasignaali - kolme palkkia"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Vahva kuuluvuus."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi pois käytöstä."</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi pois käytöstä."</string>
     <string name="accessibility_no_wifi" msgid="1425476551827924474">"Ei wifi-yhteyttä."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wifi-signaali – yksi palkki."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wifi-signaali – kaksi palkkia."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wifi-signaali – kolme palkkia."</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi-signaali – yksi palkki."</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi-signaali – kaksi palkkia."</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi-signaali – kolme palkkia."</string>
     <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Vahva wifi-signaali."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Ei WiMAX-yhteyttä."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX: yksi palkki."</string>
@@ -129,7 +129,7 @@
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Roaming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
-    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wifi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Ei SIM-korttia."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Internetyhteyden jakaminen Bluetoothin kautta."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Lentokonetila."</string>
@@ -153,6 +153,7 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Akku: <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Lentokonetila <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth: <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"Sijainti <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Hälytys asetettu, aika: <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G-tiedonsiirto pois käytöstä"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G-tiedonsiirto pois käytöstä"</string>
@@ -161,15 +162,16 @@
     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Tiedonsiirtoraja saavutettu.\n\nJos otat tiedonsiirron uudelleen käyttöön, operaattorisi voi veloittaa sinua."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Ota tiedonsiirto käyttöön"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ei internetyhteyttä"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wifi yhdistetty"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi yhdistetty"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Haetaan GPS-yhteyttä"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Sijainti määritetty GPS:n avulla"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"Sijaintipyynnöt aktiiviset"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Tyhjennä kaikki ilmoitukset."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Sovelluksen tiedot"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ruutu kääntyy automaattisesti."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Ruutu on lukittu vaakasuuntaan."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Ruutu on lukittu pystysuuntaan."</string>
-    <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
+    <string name="dessert_case" msgid="1295161776223959221">"Jälkiruokavitriini"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Unelmat"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Lentokonetila"</string>
@@ -190,16 +192,12 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Asetukset"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Aika"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Minä"</string>
-    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wifi"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Ei yhteyttä"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ei verkkoa"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wifi-yhteys pois käytöstä"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Wifi-näyttö"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Langaton näyttö"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi-yhteys pois käytöstä"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Lähetysnäyttö"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Kirkkaus"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"Ilmoitukset näkyvät tässä"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Näet ilmoitukset liu\'uttamalla sormea alas ruudulla.\nVoit palauttaa järjestelmän ohjaimet näkyviin liu\'uttamalla sormea alas uudelleen."</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Tuo palkki näkyviin liu\'uttamalla ruudun reunasta"</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Tuo järjestelmäpalkki näkyviin liu\'uttamalla ruudun reunasta"</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Verkkoa saatetaan\nvalvoa"</string>
 </resources>

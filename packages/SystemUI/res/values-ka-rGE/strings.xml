@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0 
+ *
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="7164937344850004466">"სისტემის UI"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"გასუფთავება"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"სიიდან ამოშლა"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"აპის შესახებ"</string>
+    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"ბოლოს გამოყენებული აპების სია ცარიელია"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ბოლო აპების გაუქმება"</string>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="5854176083865845541">"1 ბოლო აპი"</item>
+    <item quantity="other" msgid="1040784359794890744">"%d ბოლო აპი"</item>
+  </plurals>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"შეტყობინებები არ არის."</string>
+    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"მიმდინარე"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"შეტყობინებები"</string>
+    <string name="battery_low_title" msgid="2783104807551211639">"შეაერთეთ დამტენი."</string>
+    <string name="battery_low_subtitle" msgid="1752040062087829196">"ბატარეა ჯდება."</string>
+    <string name="battery_low_percent_format" msgid="1077244949318261761">"დარჩენილია <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"USB-ით დატენვა არ არის მხარდაჭერილი.\nგამოიყენეთ მხოლოდ ელექტრო-დამტენი."</string>
+    <string name="battery_low_why" msgid="7279169609518386372">"ელემენტის გამოყენება"</string>
+    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"პარამეტრები"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"თვითმფრინავის რეჟიმი"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"ავტოროტაციის ეკრანი"</string>
+    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"დადუმება"</string>
+    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"ავტო."</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"შეტყობინებები"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth მიერთებულია."</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"შეყვანის მეთოდების დაყენება"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ფიზიკური კლავიატურა"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"გსურთ, მისცეთ აპლიკაციას „<xliff:g id="APPLICATION">%1$s</xliff:g>“ USB მეხსიერებასთან წვდომის უფლება?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"გსურთ, მისცეთ აპლიკაციას „<xliff:g id="APPLICATION">%1$s</xliff:g>“ USB აქსესუართან წვდომის უფლება?"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"გსურთ <xliff:g id="ACTIVITY">%1$s</xliff:g> , როდესაც ეს USB მოწყობილობა შეერთებულია?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"გსურთ <xliff:g id="ACTIVITY">%1$s</xliff:g> , როდესაც ეს USB მოწყობილობა შეერთებულია?"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"არცერთი დაყენებული აპი არ მუშაობს ამ USB აქსესუართან. შეიტყვეთ მეტი ამ აქსესუარის შესახებ <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"USB აქსესუარი"</string>
+    <string name="label_view" msgid="6304565553218192990">"ნახვა"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"ამ USB მოწყობილობის ნაგულისხმევად გამოყენება"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"ავტომატურად გამოიყენე ამ USB აქსესუარისთვის."</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"გააქტიურდეს USB გამართვა?"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"კომპიუტერის RSA გასაღების თითის ანაბეჭდია:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="303335496705863070">"ყოველთვის დართე ნება ამ კომპიუტერიდან."</string>
+    <string name="compat_mode_on" msgid="6623839244840638213">"მასშტაბი შეცვალეთ ეკრანის შესავსებად."</string>
+    <string name="compat_mode_off" msgid="4434467572461327898">"გაწიეთ ეკრანის შესავსებად."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"სკრინშოტის შენახვა…"</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"ეკრანის სურათის შენახვა…"</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"ეკრანის სურათი შენახულია."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"სკრინშოტი გადაღებულია."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"შეეხეთ ეკრანის სურათის სანახავად."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"ვერ მოხერხდა ეკრანის ანაბეჭდის გადაღება."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"ეკრანის სურათი ვერ შეინახა. შესაძლოა, მეხსიერება უკვე დაკავებულია."</string>
+    <string name="usb_preference_title" msgid="6551050377388882787">"USB ფაილის ტრანსფერის პარამეტრები"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"მედია-საკრავად (MTP) ჩართვა"</string>
+    <string name="use_ptp_button_title" msgid="7517127540301625751">"მიუერთეთ როგორც კამერა (PTP)"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Android File Transfer აპის დაყენება Mac-თვის"</string>
+    <string name="accessibility_back" msgid="567011538994429120">"უკან"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"საწყისი"</string>
+    <string name="accessibility_menu" msgid="316839303324695949">"მენიუ"</string>
+    <string name="accessibility_recent" msgid="8571350598987952883">"ბოლოს გამოყენებული აპები"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"ძიება"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"კამერა"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"შეყვანის მეთოდის გადართვის ღილაკი."</string>
+    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"თავსებადი მასშტაბირების ღილაკი."</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"შეცვალეთ პატარა ეკრანი უფრო დიდით."</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth დაკავშირებულია."</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth კავშირი გაწყვეტილია."</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"ბატარეა დამჯდარია."</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"ბატარეია ერთ ზოლზეა."</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"ელემენტი ორ ზოლზე."</string>
+    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"ელემენტი სამ ზოლზე."</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"ელემენტი სავსეა."</string>
+    <string name="accessibility_no_phone" msgid="4894708937052611281">"ტელეფონი არ არის."</string>
+    <string name="accessibility_phone_one_bar" msgid="687699278132664115">"ტელეფონის სიგნალი ერთ ზოლზეა."</string>
+    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"ტელეფონის სიგნალი ორ ზოლზეა."</string>
+    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"ტელეფონის სიგნალი სამ ზოლზეა."</string>
+    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"ტელეფონის სიგნალი სრულია."</string>
+    <string name="accessibility_no_data" msgid="4791966295096867555">"მონაცემები არ არის."</string>
+    <string name="accessibility_data_one_bar" msgid="1415625833238273628">"თარიღი ზოლზე."</string>
+    <string name="accessibility_data_two_bars" msgid="6166018492360432091">"მონაცემების გადაცემა: ორი ზოლი"</string>
+    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"მონაცემების გადაცემა: სამი ზოლი"</string>
+    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"მონაცემთა გადაცემის საიმედო სიგნალი."</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi გამორთულია."</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi არ არის დაკავშირებული."</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wifi სიგნალი ერთ ზოლზეა."</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wifi სიგნალი ორ ზოლზეა."</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wifi სამი ზოლი."</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wifi სიგნალი სრულია."</string>
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX არ არის."</string>
+    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX ერთი სვეტი."</string>
+    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX-ის ორი ზოლი."</string>
+    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX-ის სამი ზოლი."</string>
+    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"WiMAX სიგნალი სრულია."</string>
+    <string name="accessibility_no_signal" msgid="7064645320782585167">"სიგნალი არ არის."</string>
+    <string name="accessibility_not_connected" msgid="6395326276213402883">"არ არის დაკავშირებული."</string>
+    <string name="accessibility_zero_bars" msgid="3806060224467027887">"სიგნალი ნულ ზოლზეა."</string>
+    <string name="accessibility_one_bar" msgid="1685730113192081895">"ერთი ზოლი."</string>
+    <string name="accessibility_two_bars" msgid="6437363648385206679">"ორი სვეტი."</string>
+    <string name="accessibility_three_bars" msgid="2648241415119396648">"სამი ზოლი."</string>
+    <string name="accessibility_signal_full" msgid="9122922886519676839">"სრული სიგნალი."</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"ჩართული"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"გამორთულია."</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"დაკავშირებულია."</string>
+    <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
+    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
+    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
+    <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5გბ"</string>
+    <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
+    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"როუმინგი"</string>
+    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM არ არის."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-ის ჩართვა"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"თვითმფრინავის რეჟიმი"</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"ბატარეა: <xliff:g id="NUMBER">%d</xliff:g> პროცენტი."</string>
+    <string name="accessibility_settings_button" msgid="799583911231893380">"სისტემის პარამეტრები."</string>
+    <string name="accessibility_notifications_button" msgid="4498000369779421892">"შეტყობინებები"</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"შეტყობინებების გასუფთავება."</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS გააქტიურდა."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS-ის დადგენა."</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"ტელეტაიპი ჩართულია."</string>
+    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"ვიბრაციის რეჟიმი."</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"უხმო რეჟიმი."</string>
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> ამოშლილია სიიდან."</string>
+    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"შეტყობინება წაიშალა."</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"შეტყობინებების ფარდა"</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"სწრაფი პარამეტრები"</string>
+    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"ბოლო აპები."</string>
+    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"მომხმარებელი: <xliff:g id="USER">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"მობილურის <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"ელემენტი: <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"თვითმფრინავის რეჟიმი <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"მდებარეობა <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"მაღვიძარა დაყენებულია: <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G ინტერნეტი გაითიშა."</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G მონაცემები გათიშულია"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"მობილური ინტერნეტი გაითიშა."</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"ინტერნეტი გაითიშა."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"თქვენ მიაღწიეთ ინტერნეტის გამოყენების განსაზღვრულ ლიმიტს.\n\nთუ გააქტიურებთ ინტერნეტს, შესაძლოა მობილური ოპერატორისთვის დამატებითი თანხის გადახდა მოგიწიოთ."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"მონაცემების ხელახლა ჩართვა"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ინტერნეტ კავშირი არ არის"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi დაკავშირებულია"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS-ის ძებნა"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS-ით დადგენილი მდებარეობა"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"მდებარეობის მოთხოვნები აქტიურია"</string>
+    <string name="accessibility_clear_all" msgid="5235938559247164925">"ყველა შეტყობინების წაშლა"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"აპის შესახებ"</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ეკრანი შეტრიალდება ავტომატურად."</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ეკრანი დაბლოკილია თარაზულ ორიენტაციაში"</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ეკრანი დაბლოკილია პორტრეტის ორიენტაციაში."</string>
+    <string name="dessert_case" msgid="1295161776223959221">"სადესერტო ყუთი"</string>
+    <string name="start_dreams" msgid="7219575858348719790">"Daydream"</string>
+    <string name="ethernet_label" msgid="7967563676324087464">"ეთერნეტი"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"თვითმფრინავის რეჟიმი"</string>
+    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"დამუხტვა, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"დამუხტულია"</string>
+    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> მოწყობილობა)"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth გამორთულია"</string>
+    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"სიკაშკაშე"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"ავტო მობრუნება"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"როტაციის ჩაკეტვა"</string>
+    <string name="quick_settings_ime_label" msgid="7073463064369468429">"შეყვანის მეთოდი"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"მდებარეობა"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"მდებარეობა გამორთულია"</string>
+    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"მედია მოწყობილობა"</string>
+    <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"მხოლოდ გადაუდებელი დახმარების ზარებისთვის"</string>
+    <string name="quick_settings_settings_label" msgid="5326556592578065401">"პარამეტრები"</string>
+    <string name="quick_settings_time_label" msgid="4635969182239736408">"დრო"</string>
+    <string name="quick_settings_user_label" msgid="5238995632130897840">"მე"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"არ არის დაკავშირებული."</string>
+    <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ქსელი არ არის"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi გამორთულია"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Cast Screen"</string>
+    <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"განათება"</string>
+    <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ავტომატურად"</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"შესაძლოა ქსელზე\nმონიტორინგი ხორციელდებოდეს"</string>
+</resources>

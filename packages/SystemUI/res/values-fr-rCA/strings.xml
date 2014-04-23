@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0 
+ *
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="7164937344850004466">"IU système"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Effacer"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Supprimer de la liste"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informations sur l\'application"</string>
+    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Aucune application récente"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Masquer les applications récentes"</string>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="5854176083865845541">"1 application récente"</item>
+    <item quantity="other" msgid="1040784359794890744">"%d applications récentes"</item>
+  </plurals>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Aucune notification"</string>
+    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"En cours"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifications"</string>
+    <string name="battery_low_title" msgid="2783104807551211639">"Brancher le chargeur"</string>
+    <string name="battery_low_subtitle" msgid="1752040062087829196">"Le niveau de la batterie est faible."</string>
+    <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> restant(s)"</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"Chargement USB non compatible.\nVous devez utiliser le chargeur fourni."</string>
+    <string name="battery_low_why" msgid="7279169609518386372">"Utilisation de la batterie"</string>
+    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Paramètres"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Mode Avion"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Rotation auto de l\'écran"</string>
+    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"MUET"</string>
+    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTOMATIQUE"</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"Notifications"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"Connexion Bluetooth partagée"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Configurer les modes de saisie"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Clavier physique"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Autoriser l\'application <xliff:g id="APPLICATION">%1$s</xliff:g> à accéder au périphérique USB?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Autoriser l\'application <xliff:g id="APPLICATION">%1$s</xliff:g> à accéder à l\'accessoire USB?"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Ouvrir <xliff:g id="ACTIVITY">%1$s</xliff:g> lors de la connexion de ce périphérique USB?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Ouvrir <xliff:g id="ACTIVITY">%1$s</xliff:g> lors de la connexion de cet accessoire USB?"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Aucune application installée compatible avec accessoire USB. En savoir plus sur <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"Accessoire USB"</string>
+    <string name="label_view" msgid="6304565553218192990">"Afficher"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"Utiliser par défaut pour ce périphérique USB"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"Utiliser par défaut pour cet accessoire USB"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"Autoriser le débogage USB?"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"Empreinte numérique de la clé RSA de l\'ordinateur : \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="303335496705863070">"Toujours autoriser sur cet ordinateur"</string>
+    <string name="compat_mode_on" msgid="6623839244840638213">"Zoomer pour remplir l\'écran"</string>
+    <string name="compat_mode_off" msgid="4434467572461327898">"Étirer pour remplir l\'écran"</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Enregistrement capture écran…"</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Enregistrement capture écran…"</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Enregistrement de la capture d\'écran en cours…"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Capture d\'écran réussie"</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Appuyez pour afficher votre capture d\'écran."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Impossible de réaliser une capture d\'écran"</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Impossible enregistrer capture d\'écran. Périphérique de stockage peut-être en cours d\'utilisation."</string>
+    <string name="usb_preference_title" msgid="6551050377388882787">"Options transfert fichiers USB"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"Installer comme un lecteur multimédia (MTP)"</string>
+    <string name="use_ptp_button_title" msgid="7517127540301625751">"Installer comme un appareil photo (PTP)"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Installer application Android File Transfer (Mac)"</string>
+    <string name="accessibility_back" msgid="567011538994429120">"Précédent"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Domicile"</string>
+    <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
+    <string name="accessibility_recent" msgid="8571350598987952883">"Applications récentes"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"Rechercher"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"Appareil photo"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Bouton \"Changer le mode de saisie\""</string>
+    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Bouton \"Zoom de compatibilité\""</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom de compatibilité avec la taille de l\'écran"</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth connecté"</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth déconnecté"</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"Batterie vide"</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Niveau de batterie : faible"</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Niveau de batterie : moyen"</string>
+    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Niveau de batterie : bon"</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"Batterie pleine"</string>
+    <string name="accessibility_no_phone" msgid="4894708937052611281">"Aucun signal"</string>
+    <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Signal : faible"</string>
+    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Signal : moyen"</string>
+    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Signal : bon"</string>
+    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Signal excellent"</string>
+    <string name="accessibility_no_data" msgid="4791966295096867555">"Aucun signal"</string>
+    <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Signal faible"</string>
+    <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Signal moyen"</string>
+    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Signal bon"</string>
+    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Signal excellent"</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi désactivé"</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi déconnecté"</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Signal Wi-Fi faible"</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Signal Wi-Fi moyen"</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Signal Wi-Fi bon"</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Signal Wi-Fi excellent"</string>
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"Aucun signal WiMAX"</string>
+    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Signal WiMAX : faible"</string>
+    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Signal WiMAX : moyen"</string>
+    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"Signal WiMAX : bon"</string>
+    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"Signal WiMAX : excellent"</string>
+    <string name="accessibility_no_signal" msgid="7064645320782585167">"Aucun signal"</string>
+    <string name="accessibility_not_connected" msgid="6395326276213402883">"Non connecté"</string>
+    <string name="accessibility_zero_bars" msgid="3806060224467027887">"Aucun signal"</string>
+    <string name="accessibility_one_bar" msgid="1685730113192081895">"Signal faible"</string>
+    <string name="accessibility_two_bars" msgid="6437363648385206679">"Moyen"</string>
+    <string name="accessibility_three_bars" msgid="2648241415119396648">"Bon"</string>
+    <string name="accessibility_signal_full" msgid="9122922886519676839">"Signal excellent"</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Activé"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"Désactivé"</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"Connecté"</string>
+    <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
+    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1x"</string>
+    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"3G+"</string>
+    <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3G+"</string>
+    <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
+    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Itinérance"</string>
+    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"Aucune carte SIM"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Partage de connexion Bluetooth"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode Avion"</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
+    <skip />
+    <string name="accessibility_settings_button" msgid="799583911231893380">"Paramètres système"</string>
+    <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notifications"</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Supprimer la notification"</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS activé"</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Acquisition de données GPS"</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Téléscripteur activé"</string>
+    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Sonnerie en mode vibreur"</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Sonnerie en mode silencieux"</string>
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Application \"<xliff:g id="APP">%s</xliff:g>\" ignorée."</string>
+    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notification masquée"</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Volet des notifications"</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Paramètres rapides"</string>
+    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"Applications récentes"</string>
+    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Utilisateur : <xliff:g id="USER">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>, <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Signal mobile : <xliff:g id="SIGNAL">%1$s</xliff:g>, <xliff:g id="TYPE">%2$s</xliff:g>, <xliff:g id="NETWORK">%3$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Batterie : <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Mode Avion : <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth : <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"Localisation <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarme réglée sur <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Données 2G-3G  désactivées"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Données 4G désactivées"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Données mobiles désactivées"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Données désactivées"</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Vous avez atteint le plafond de consommation de données spécifié.\n\nSi vous utilisez des données supplémentaires, celles-ci pourront être facturées par l\'opérateur."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Réactiver connexion données"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Aucune connexion Internet"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Connecté au Wi-Fi"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Recherche de GPS..."</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Position définie par GPS"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"Demandes de localisation actives"</string>
+    <string name="accessibility_clear_all" msgid="5235938559247164925">"Supprimer toutes les notifications"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informations sur l\'application"</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"L\'écran pivote automatiquement."</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"L\'écran est verrouillé en mode paysage."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"L\'écran est verrouillé en mode portrait."</string>
+    <string name="dessert_case" msgid="1295161776223959221">"Vitrine des desserts"</string>
+    <string name="start_dreams" msgid="7219575858348719790">"Écran de veille"</string>
+    <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Mode Avion"</string>
+    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"En charge (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Chargée"</string>
+    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> appareils)"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"BLUETOOTH DÉSACTIVÉ"</string>
+    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Luminosité"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Rotation automatique"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Rotation verrouillée"</string>
+    <string name="quick_settings_ime_label" msgid="7073463064369468429">"Mode de saisie"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"Position"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Localisation désactivée"</string>
+    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Appareil multimédia"</string>
+    <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Appels d\'urgence uniquement"</string>
+    <string name="quick_settings_settings_label" msgid="5326556592578065401">"Paramètres"</string>
+    <string name="quick_settings_time_label" msgid="4635969182239736408">"Heures"</string>
+    <string name="quick_settings_user_label" msgid="5238995632130897840">"Moi"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Non connecté"</string>
+    <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Aucun réseau"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi désactivé"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Écran distant"</string>
+    <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminosité"</string>
+    <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATIQUE"</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Le réseau peut\nêtre surveillé."</string>
+</resources>
