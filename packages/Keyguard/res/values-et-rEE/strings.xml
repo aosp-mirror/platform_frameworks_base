@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Sisestage PIN-kood"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Sisestage SIM-i PUK- ja uus PIN-kood"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM-i PUK-kood"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Uus SIM-i PIN-kood"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Puudutage parooli sisestamiseks"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Avamiseks sisestage parool"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Avamiseks sisestage PIN-kood"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Vale PIN-kood."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"Avamiseks vajutage menüüklahvi, seejärel klahvi 0."</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Maksimaalne teenusega Face Unlock avamise katsete arv on ületatud"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"Laetud"</string>
+    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Laadimine, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"Ühendage laadija."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Avamiseks vajutage menüüklahvi."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Võrk on suletud"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"SIM-kaarti pole"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Tahvelarvutis pole SIM-kaarti."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Telefonis pole SIM-kaarti."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Sisestage SIM-kaart."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM-kaart puudub või on loetamatu. Sisestage SIM-kaart."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Kasutamiskõlbmatu SIM-kaart."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"SIM-kaart on jäädavalt keelatud.\n Uue SIM-kaardi saamiseks võtke ühendust oma mobiilsideoperaatoriga."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM-kaart on lukus."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM-kaart on PUK-lukus."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM-kaardi avamine ..."</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Vidin %2$d/%3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Vidina lisamine."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Tühi"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Avamisala on laiendatud."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Avamisala on ahendatud."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"Vidin <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Kasutaja valija"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Olek"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kaamera"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Meedia juhtnupud"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Vidina ümberkorraldamine algas."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Vidina ümberkorraldamine lõppes."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Vidin <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> on kustutatud."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Avamisala laiendamine."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Lohistamisega avamine."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Mustriga avamine."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Näoga avamine."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN-koodiga avamine."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Parooliga avamine."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Mustri ala."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Lohistamisala."</string>
+    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Nupp Eelmine lugu"</string>
+    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Nupp Järgmine lugu"</string>
+    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Nupp Peata"</string>
+    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Nupp Esita"</string>
+    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Nupp Peata"</string>
+    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Meeldib"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Ei meeldi"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Süda"</string>
+    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Jätkamiseks tühistage lukustus"</string>
+    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Käivitamine on tühistatud"</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Kustutamiseks laske vidin <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> lahti."</string>
+    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"Vidinat <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ei kustutata."</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Tühista"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Kustuta"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Valmis"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Režiimi muutmine"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Tõstuklahv"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Sisestusklahv"</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"Luku avamine"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"Kaamera"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"Hääletu"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"Heli on sees"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Otsing"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"Lohistage üles: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_down" msgid="5087739728639014595">"Lohistage alla: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"Lohistage vasakule: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_right" msgid="8034433242579600980">"Lohistage paremale: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Praegune kasutaja <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Hädaabikõne"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Unustasin mustri"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Vale muster"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Vale parool"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"Vale PIN-kood"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Proovige uuesti <xliff:g id="NUMBER">%d</xliff:g> sekundi pärast."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Joonistage oma muster"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Sisestage SIM-i PIN-kood"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Sisestage PIN-kood"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Sisestage parool"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM on nüüd keelatud. Jätkamiseks sisestage PUK-kood. Üksikasju küsige operaatorilt."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Sisestage soovitud PIN-kood"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Kinnitage soovitud PIN-kood"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM-kaardi avamine ..."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Sisestage 4–8-numbriline PIN-kood."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK-koodi pikkus peab olema vähemalt 8 numbrit."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Sisestage uuesti õige PUK-kood. Korduvkatsete korral keelatakse SIM jäädavalt."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-koodid ei ole vastavuses"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Liiga palju mustrikatseid"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Avamiseks logige sisse oma Google\'i kontoga."</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Kasutajanimi (e-post)"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"Parool"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Logi sisse"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Vale kasutajanimi või parool."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Kas unustasite kasutajanime või parooli?\nKülastage aadressi "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Konto kontrollimine ..."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Olete PIN-koodi <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti sisestanud.\n\nProovige <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast uuesti."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Olete parooli <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti sisestanud. \n\nProovige uuesti <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti.\n\nProovige <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast uuesti."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Olete üritanud <xliff:g id="NUMBER_0">%d</xliff:g> korda tahvelarvutit valesti avada. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset lähtestatakse tahvelarvuti tehase vaikeseadetele ja kõik kasutajaandmed lähevad kaotsi."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Olete üritanud <xliff:g id="NUMBER_0">%d</xliff:g> korda telefoni valesti avada. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset lähtestatakse telefon tehase vaikeseadetele ja kõik kasutajaandmed lähevad kaotsi."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Olete püüdnud tahvelarvutit <xliff:g id="NUMBER">%d</xliff:g> korda valesti avada. Tahvelarvuti lähtestatakse nüüd tehase vaikeseadetele."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Olete püüdnud telefoni <xliff:g id="NUMBER">%d</xliff:g> korda valesti avada. Telefon lähtestatakse nüüd tehase vaikeseadetele."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil tahvelarvuti avada meilikontoga.\n\n Proovige uuesti <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil telefon avada meilikontoga.\n\n Proovige uuesti <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast."</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eemalda"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Vale SIM-i PIN-kood, seadme avamiseks peate nüüd ühendust võtma oma operaatoriga."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Vale SIM-i PIN-kood, teil on jäänud veel <xliff:g id="NUMBER">%d</xliff:g> katse, enne kui peate seadme avamiseks operaatoriga ühendust võtma."</item>
+    <item quantity="other" msgid="2215723361575359486">"Vale SIM-i PIN-kood, teil on jäänud veel <xliff:g id="NUMBER">%d</xliff:g> katset."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM ei ole kasutatav. Võtke ühendust operaatoriga."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Vale SIM-i PUK-kood, teil on jäänud veel <xliff:g id="NUMBER">%d</xliff:g> katse, enne kui SIM püsivalt lukustatakse."</item>
+    <item quantity="other" msgid="5477305226026342036">"Vale SIM-i PUK-kood, teil on jäänud veel <xliff:g id="NUMBER">%d</xliff:g> katset, enne kui SIM püsivalt lukustatakse."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM-i PIN-koodi toiming ebaõnnestus."</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM-i PUK-koodi toiming ebaõnnestus."</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Kood on õige."</string>
+    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Nupp Eelmine lugu"</string>
+    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Nupp Järgmine lugu"</string>
+    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Nupp Peata"</string>
+    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Nupp Esita"</string>
+    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Nupp Peata"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Teenus puudub."</string>
+</resources>
