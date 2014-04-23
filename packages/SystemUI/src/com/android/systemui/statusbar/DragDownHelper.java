@@ -16,23 +16,30 @@
 
 package com.android.systemui.statusbar;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.util.ArraySet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
-
-import java.util.HashSet;
 
 /**
  * A utility class to enable the downward swipe on the lockscreen to go to the full shade and expand
  * the notification where the drag started.
  */
 public class DragDownHelper implements Gefingerpoken {
+
+    private static final float RUBBERBAND_FACTOR_EXPANDABLE = 0.5f;
+    private static final float RUBBERBAND_FACTOR_STATIC = 0.15f;
+
+    private static final int SPRING_BACK_ANIMATION_LENGTH_MS = 375;
 
     private int mMinDragDistance;
     private ExpandHelper.Callback mCallback;
@@ -43,14 +50,16 @@ public class DragDownHelper implements Gefingerpoken {
     private OnDragDownListener mOnDragDownListener;
     private View mHost;
     private final int[] mTemp2 = new int[2];
-    private final ArraySet<View> mHoveredChildren = new ArraySet<View>();
     private boolean mDraggedFarEnough;
-    private View mStartingChild;
+    private ExpandableView mStartingChild;
+    private Interpolator mInterpolator;
 
     public DragDownHelper(Context context, View host, ExpandHelper.Callback callback,
             OnDragDownListener onDragDownListener) {
         mMinDragDistance = context.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_drag_down_min_distance);
+        mInterpolator =
+                AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mCallback = callback;
         mOnDragDownListener = onDragDownListener;
@@ -64,7 +73,6 @@ public class DragDownHelper implements Gefingerpoken {
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                mHoveredChildren.clear();
                 mDraggedFarEnough = false;
                 mDraggingDown = false;
                 mStartingChild = null;
@@ -76,6 +84,7 @@ public class DragDownHelper implements Gefingerpoken {
                 final float h = y - mInitialTouchY;
                 if (h > mTouchSlop && h > Math.abs(x - mInitialTouchX)) {
                     mDraggingDown = true;
+                    captureStartingChild(mInitialTouchX, mInitialTouchY);
                     mInitialTouchY = y;
                     mInitialTouchX = x;
                     return true;
@@ -96,9 +105,9 @@ public class DragDownHelper implements Gefingerpoken {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_MOVE:
                 final float h = y - mInitialTouchY;
-                View child = findView(x, y);
-                if (child != null) {
-                    hoverChild(findView(x, y));
+                captureStartingChild(mInitialTouchX, mInitialTouchY);
+                if (mStartingChild != null) {
+                    handleExpansion(h, mStartingChild);
                 }
                 if (h > mMinDragDistance) {
                     if (!mDraggedFarEnough) {
@@ -114,6 +123,9 @@ public class DragDownHelper implements Gefingerpoken {
                 return true;
             case MotionEvent.ACTION_UP:
                 if (mDraggedFarEnough) {
+                    if (mStartingChild != null) {
+                        mCallback.setUserLockedChild(mStartingChild, false);
+                    }
                     mOnDragDownListener.onDraggedDown(mStartingChild);
                 } else {
                     stopDragging();
@@ -127,22 +139,58 @@ public class DragDownHelper implements Gefingerpoken {
         return false;
     }
 
+    private void captureStartingChild(float x, float y) {
+        if (mStartingChild == null) {
+            mStartingChild = findView(x, y);
+            if (mStartingChild != null) {
+                mCallback.setUserLockedChild(mStartingChild, true);
+            }
+        }
+    }
+
+    private void handleExpansion(float heightDelta, ExpandableView child) {
+        if (heightDelta < 0) {
+            heightDelta = 0;
+        }
+        boolean expandable = child.isContentExpandable();
+        float rubberbandFactor = expandable
+                ? RUBBERBAND_FACTOR_EXPANDABLE
+                : RUBBERBAND_FACTOR_STATIC;
+        float rubberband = heightDelta * rubberbandFactor;
+        if (expandable && (rubberband + child.getMinHeight()) > child.getMaxHeight()) {
+            float overshoot = (rubberband + child.getMinHeight()) - child.getMaxHeight();
+            overshoot *= (1 - RUBBERBAND_FACTOR_STATIC);
+            rubberband -= overshoot;
+        }
+        child.setActualHeight((int) (child.getMinHeight() + rubberband));
+    }
+
+    private void cancelExpansion(final ExpandableView child) {
+        if (child.getActualHeight() == child.getMinHeight()) {
+            return;
+        }
+        ObjectAnimator anim = ObjectAnimator.ofInt(child, "actualHeight",
+                child.getActualHeight(), child.getMinHeight());
+        anim.setInterpolator(mInterpolator);
+        anim.setDuration(SPRING_BACK_ANIMATION_LENGTH_MS);
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mCallback.setUserLockedChild(child, false);
+            }
+        });
+        anim.start();
+    }
+
     private void stopDragging() {
+        if (mStartingChild != null) {
+            cancelExpansion(mStartingChild);
+        }
         mDraggingDown = false;
         mOnDragDownListener.onReset();
     }
 
-    private void hoverChild(View child) {
-        if (mHoveredChildren.isEmpty()) {
-            mStartingChild = child;
-        }
-        if (!mHoveredChildren.contains(child)) {
-            mOnDragDownListener.onHover(child);
-            mHoveredChildren.add(child);
-        }
-    }
-
-    private View findView(float x, float y) {
+    private ExpandableView findView(float x, float y) {
         mHost.getLocationOnScreen(mTemp2);
         x += mTemp2[0];
         y += mTemp2[1];
@@ -150,7 +198,6 @@ public class DragDownHelper implements Gefingerpoken {
     }
 
     public interface OnDragDownListener {
-        void onHover(View child);
         void onDraggedDown(View startingChild);
         void onReset();
         void onThresholdReached();

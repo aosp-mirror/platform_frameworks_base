@@ -147,7 +147,8 @@ public class StatusBarWindowManager {
     }
 
     private void applyInputFeatures(State state) {
-        if (state.isKeyguardShowingAndNotOccluded()) {
+        if (state.isKeyguardShowingAndNotOccluded()
+                && state.statusBarState == StatusBarState.KEYGUARD) {
             mLp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
         } else {
             mLp.inputFeatures &= ~WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;

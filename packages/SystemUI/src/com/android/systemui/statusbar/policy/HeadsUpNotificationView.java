@@ -32,6 +32,7 @@ import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationData;
 
 public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.Callback, ExpandHelper.Callback {
@@ -185,12 +186,12 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     // ExpandHelper.Callback methods
 
     @Override
-    public View getChildAtRawPosition(float x, float y) {
+    public ExpandableView getChildAtRawPosition(float x, float y) {
         return getChildAtPosition(x, y);
     }
 
     @Override
-    public View getChildAtPosition(float x, float y) {
+    public ExpandableView getChildAtPosition(float x, float y) {
         return mHeadsUp == null ? null : mHeadsUp.row;
     }
 

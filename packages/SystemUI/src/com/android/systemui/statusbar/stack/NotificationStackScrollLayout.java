@@ -159,6 +159,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mScroller = new OverScroller(getContext());
         setFocusable(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
+        setClipChildren(false);
         final ViewConfiguration configuration = ViewConfiguration.get(context);
         mTouchSlop = configuration.getScaledTouchSlop();
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
@@ -383,13 +384,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         return getChildAtPosition(ev.getX(), ev.getY());
     }
 
-    public View getChildAtRawPosition(float touchX, float touchY) {
+    public ExpandableView getChildAtRawPosition(float touchX, float touchY) {
         int[] location = new int[2];
         getLocationOnScreen(location);
         return getChildAtPosition(touchX - location[0], touchY - location[1]);
     }
 
-    public View getChildAtPosition(float touchX, float touchY) {
+    public ExpandableView getChildAtPosition(float touchX, float touchY) {
         // find the view under the pointer, accounting for GONE views
         final int count = getChildCount();
         for (int childIdx = 0; childIdx < count; childIdx++) {

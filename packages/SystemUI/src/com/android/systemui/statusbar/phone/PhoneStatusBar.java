@@ -100,7 +100,6 @@ import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.InterceptedNotifications;
-import com.android.systemui.statusbar.NotificationActivatable;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.NotificationOverflowContainer;
@@ -3134,19 +3133,29 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void onReset() {
-        onReset(null);
-    }
-
-    public void onHover(View child) {
-        if (child instanceof NotificationActivatable) {
-            NotificationActivatable activatable = (NotificationActivatable) child;
-            activatable.getActivator().activate();
-            activatable.getActivator().addHotspot();
+        int n = mNotificationData.size();
+        for (int i = 0; i < n; i++) {
+            NotificationData.Entry entry = mNotificationData.get(i);
+            if (entry.row.getVisibility() != View.GONE) {
+                entry.row.setDimmed(true /* dimmed */, true /* fade */);
+            }
+        }
+        if (mKeyguardIconOverflowContainer.getVisibility() != View.GONE) {
+            mKeyguardIconOverflowContainer.setDimmed(true /* dimmed */, true /* fade */);
         }
     }
 
     public void onThresholdReached() {
-        // TODO: Add visual hint that threshold is reached.
+        int n = mNotificationData.size();
+        for (int i = 0; i < n; i++) {
+            NotificationData.Entry entry = mNotificationData.get(i);
+            if (entry.row.getVisibility() != View.GONE) {
+                entry.row.setDimmed(false /* dimmed */, true /* fade */);
+            }
+        }
+        if (mKeyguardIconOverflowContainer.getVisibility() != View.GONE) {
+            mKeyguardIconOverflowContainer.setDimmed(false /* dimmed */, true /* fade */);
+        }
     }
 
     /**

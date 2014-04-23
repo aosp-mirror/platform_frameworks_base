@@ -18,22 +18,14 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
 import android.util.Slog;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 
 import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.KeyguardHostView;
-import com.android.keyguard.KeyguardSimpleHostView;
-import com.android.keyguard.R;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.keyguard.KeyguardViewMediator;
 
 /**
  * Manages creating, showing, hiding and resetting the keyguard within the status bar. Calls back
@@ -82,7 +74,7 @@ public class StatusBarKeyguardViewManager {
         mShowing = true;
         mStatusBarWindowManager.setKeyguardShowing(true);
         showBouncerOrKeyguard();
-        updateBackButtonState();
+        updateStates();
     }
 
     /**
@@ -102,9 +94,9 @@ public class StatusBarKeyguardViewManager {
         }
     }
 
-    public void showBouncer() {
+    private void showBouncer() {
         mBouncer.show();
-        updateBackButtonState();
+        updateStates();
     }
 
     /**
@@ -112,7 +104,7 @@ public class StatusBarKeyguardViewManager {
      */
     public void reset() {
         showBouncerOrKeyguard();
-        updateBackButtonState();
+        updateStates();
     }
 
     public void onScreenTurnedOff() {
@@ -155,7 +147,7 @@ public class StatusBarKeyguardViewManager {
     public void setOccluded(boolean occluded) {
         mOccluded = occluded;
         mStatusBarWindowManager.setKeyguardOccluded(occluded);
-        updateBackButtonState();
+        updateStates();
     }
 
     /**
@@ -167,7 +159,7 @@ public class StatusBarKeyguardViewManager {
         mStatusBarWindowManager.setKeyguardShowing(false);
         mBouncer.hide();
         mViewMediatorCallback.keyguardGone();
-        updateBackButtonState();
+        updateStates();
     }
 
     /**
@@ -199,13 +191,13 @@ public class StatusBarKeyguardViewManager {
         if (mBouncer.isShowing()) {
             mBouncer.hide();
             mPhoneStatusBar.showKeyguard();
-            updateBackButtonState();
+            updateStates();
             return true;
         }
         return false;
     }
 
-    private void updateBackButtonState() {
+    private void updateStates() {
         int vis = mContainer.getSystemUiVisibility();
         boolean bouncerDismissable = mBouncer.isShowing() && !mBouncer.needsFullscreenBouncer();
         if (bouncerDismissable || !mShowing) {
@@ -218,6 +210,7 @@ public class StatusBarKeyguardViewManager {
         } else {
             mPhoneStatusBar.getNavigationBarView().setVisibility(View.GONE);
         }
+        mPhoneStatusBar.setBouncerShowing(mBouncer.isShowing());
     }
 
     public boolean onMenuPressed() {

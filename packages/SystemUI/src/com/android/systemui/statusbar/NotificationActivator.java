@@ -30,7 +30,7 @@ import com.android.systemui.R;
  */
 public class NotificationActivator {
 
-    private static final int ANIMATION_LENGTH_MS = 220;
+    public static final int ANIMATION_LENGTH_MS = 220;
     private static final float INVERSE_ALPHA = 0.9f;
     private static final float DIMMED_SCALE = 0.95f;
 
@@ -118,20 +118,34 @@ public class NotificationActivator {
         if (mTargetView.getAlpha() != 1.0f) {
             mTargetView.animate().withLayer().alpha(1);
         }
-        mHotspotView.getBackground().removeHotspot(0);
         mState = STATE_DIMMED;
     }
 
-    public void setDimmed(boolean dimmed) {
+    public void setDimmed(boolean dimmed, boolean fade) {
         if (dimmed) {
             mTargetView.animate().cancel();
-            mTargetView.setScaleX(DIMMED_SCALE);
-            mTargetView.setScaleY(DIMMED_SCALE);
+            if (fade) {
+                mTargetView.animate()
+                        .setInterpolator(mFastOutSlowInInterpolator)
+                        .scaleX(DIMMED_SCALE)
+                        .scaleY(DIMMED_SCALE);
+            } else {
+                mTargetView.setScaleX(DIMMED_SCALE);
+                mTargetView.setScaleY(DIMMED_SCALE);
+            }
             mState = STATE_DIMMED;
         } else {
             mTargetView.animate().cancel();
-            mTargetView.setScaleX(1);
-            mTargetView.setScaleY(1);
+            if (fade) {
+                mTargetView.animate()
+                        .setInterpolator(mFastOutSlowInInterpolator)
+                        .scaleX(1)
+                        .scaleY(1);
+            } else {
+                mTargetView.animate().cancel();
+                mTargetView.setScaleX(1);
+                mTargetView.setScaleY(1);
+            }
             mState = STATE_NORMAL;
         }
     }

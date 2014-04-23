@@ -25,8 +25,7 @@ import com.android.systemui.R;
 /**
  * Container view for overflowing notification icons on Keyguard.
  */
-public class NotificationOverflowContainer extends ActivatableNotificationView implements
-        NotificationActivatable {
+public class NotificationOverflowContainer extends ActivatableNotificationView {
 
     private NotificationOverflowIconsView mIconsView;
     private NotificationActivator mActivator;
@@ -46,11 +45,6 @@ public class NotificationOverflowContainer extends ActivatableNotificationView i
     }
 
     @Override
-    public int getMaxHeight() {
-        return getHeight();
-    }
-
-    @Override
     public void setClipTopAmount(int clipTopAmount) {
         // noop
     }
@@ -62,16 +56,19 @@ public class NotificationOverflowContainer extends ActivatableNotificationView i
         mIconsView.setMoreText((TextView) findViewById(R.id.more_text));
 
         mActivator = new NotificationActivator(this, this);
-        mActivator.setDimmed(true);
-        setLocked(true);
-        setDimmed(true);
+        setDimmed(true, false);
+    }
+
+    @Override
+    public void setDimmed(boolean dimmed, boolean fade) {
+        super.setDimmed(dimmed, fade);
+        mActivator.setDimmed(dimmed, fade);
     }
 
     public NotificationOverflowIconsView getIconsView() {
         return mIconsView;
     }
 
-    @Override
     public NotificationActivator getActivator() {
         return mActivator;
     }
