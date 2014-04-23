@@ -144,6 +144,7 @@ public class LauncherAppsService extends ILauncherApps.Stub {
 
         final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        mainIntent.setPackage(packageName);
         long ident = Binder.clearCallingIdentity();
         try {
             List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(mainIntent, 0,
