@@ -14897,8 +14897,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final int width = bounds.width();
         final int height = bounds.height();
         final HardwareCanvas canvas = displayList.start(width, height);
-        drawable.draw(canvas);
-        displayList.end(canvas);
+        try {
+            drawable.draw(canvas);
+        } finally {
+            displayList.end(canvas);
+        }
 
         // Set up drawable properties that are view-independent.
         displayList.setLeftTopRightBottom(bounds.left, bounds.top, bounds.right, bounds.bottom);
