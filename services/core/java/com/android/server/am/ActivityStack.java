@@ -735,7 +735,9 @@ final class ActivityStack {
         int w = mThumbnailWidth;
         int h = mThumbnailHeight;
         if (w < 0) {
-            if (SystemProperties.getBoolean("persist.recents.use_alternate", false)) {
+            Configuration config = res.getConfiguration();
+            boolean useAlternateRecents = (config.smallestScreenWidthDp < 600);
+            if (useAlternateRecents) {
                 mThumbnailWidth = w =
                    res.getDimensionPixelSize(com.android.internal.R.dimen.recents_thumbnail_width);
                 mThumbnailHeight = h =
