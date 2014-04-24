@@ -3000,6 +3000,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     class ActivityContainer extends android.app.IActivityContainer.Stub {
+        final static int FORCE_NEW_TASK_FLAGS = Intent.FLAG_ACTIVITY_NEW_TASK |
+                Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
         final int mStackId;
         IActivityContainerCallback mCallback = null;
         final ActivityStack mStack;
@@ -3096,6 +3098,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             int userId = mService.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), mCurrentUser, false, true, "ActivityContainer", null);
             // TODO: Switch to user app stacks here.
+            intent.addFlags(FORCE_NEW_TASK_FLAGS);
             String mimeType = intent.getType();
             if (mimeType == null && intent.getData() != null
                     && "content".equals(intent.getData().getScheme())) {
@@ -3114,7 +3117,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
 
             return ((PendingIntentRecord)intentSender).sendInner(0, null, null, null, null, null,
-                    null, 0, 0, 0, null, this);
+                    null, 0, FORCE_NEW_TASK_FLAGS, FORCE_NEW_TASK_FLAGS, null, this);
         }
 
         @Override
