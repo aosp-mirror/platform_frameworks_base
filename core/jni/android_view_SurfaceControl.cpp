@@ -508,7 +508,7 @@ static jboolean nativeGetAnimationFrameStats(JNIEnv* env, jclass clazz, jobject 
     nsecs_t presentedTimesNanoSrc[frameCount];
 
     for (size_t i = 0; i < frameCount; i++) {
-        nsecs_t presentedTimeNano = stats.desiredPresentTimesNano[i];
+        nsecs_t presentedTimeNano = stats.actualPresentTimesNano[i];
         if (presentedTimeNano == INT64_MAX) {
             presentedTimeNano = gWindowContentFrameStatsClassInfo.UNDEFINED_TIME_NANO;
         }
