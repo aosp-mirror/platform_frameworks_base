@@ -18,9 +18,8 @@ package com.android.server.hdmi;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Message;
+import android.os.Looper;
 import android.util.Slog;
 
 import com.android.server.SystemService;
@@ -37,14 +36,6 @@ public final class HdmiControlService extends SystemService {
     // and sparse call it shares a thread to handle IO operations.
     private final HandlerThread mIoThread = new HandlerThread("Hdmi Control Io Thread");
 
-    // Main handler class to handle incoming message from each controller.
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            // TODO: Add handler for each message type.
-        }
-    };
-
     @Nullable
     private HdmiCecController mCecController;
 
@@ -57,14 +48,33 @@ public final class HdmiControlService extends SystemService {
 
     @Override
     public void onStart() {
-        mCecController = HdmiCecController.create(mIoThread.getLooper(), mHandler);
+        mCecController = HdmiCecController.create(this);
         if (mCecController == null) {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
         }
 
-        mMhlController = HdmiMhlController.create(mIoThread.getLooper(), mHandler);
+        mMhlController = HdmiMhlController.create(this);
         if (mMhlController == null) {
             Slog.i(TAG, "Device does not support MHL-control.");
         }
+    }
+
+    /**
+     * Returns {@link Looper} for IO operation.
+     *
+     * <p>Declared as package-private.
+     */
+    Looper getIoLooper() {
+        return mIoThread.getLooper();
+    }
+
+    /**
+     * Returns {@link Looper} of main thread. Use this {@link Looper} instance
+     * for tasks that are running on main service thread.
+     *
+     * <p>Declared as package-private.
+     */
+    Looper getServiceLooper() {
+        return Looper.myLooper();
     }
 }
