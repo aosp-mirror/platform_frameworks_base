@@ -50,6 +50,7 @@ import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -147,8 +148,7 @@ public class PackageParser {
     private String[] mSeparateProcesses;
     private boolean mOnlyCoreApps;
     private static final int SDK_VERSION = Build.VERSION.SDK_INT;
-    private static final String SDK_CODENAME = "REL".equals(Build.VERSION.CODENAME)
-            ? null : Build.VERSION.CODENAME;
+    private static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
 
     private int mParseError = PackageManager.INSTALL_SUCCEEDED;
 
@@ -1200,10 +1200,18 @@ public class PackageParser {
                     sa.recycle();
 
                     if (minCode != null) {
-                        if (!minCode.equals(SDK_CODENAME)) {
-                            if (SDK_CODENAME != null) {
+                        boolean allowedCodename = false;
+                        for (String codename : SDK_CODENAMES) {
+                            if (minCode.equals(codename)) {
+                                allowedCodename = true;
+                                break;
+                            }
+                        }
+                        if (!allowedCodename) {
+                            if (SDK_CODENAMES.length > 0) {
                                 outError[0] = "Requires development platform " + minCode
-                                        + " (current platform is " + SDK_CODENAME + ")";
+                                        + " (current platform is any of "
+                                        + Arrays.toString(SDK_CODENAMES) + ")";
                             } else {
                                 outError[0] = "Requires development platform " + minCode
                                         + " but this is a release platform.";
@@ -1219,10 +1227,18 @@ public class PackageParser {
                     }
                     
                     if (targetCode != null) {
-                        if (!targetCode.equals(SDK_CODENAME)) {
-                            if (SDK_CODENAME != null) {
+                        boolean allowedCodename = false;
+                        for (String codename : SDK_CODENAMES) {
+                            if (targetCode.equals(codename)) {
+                                allowedCodename = true;
+                                break;
+                            }
+                        }
+                        if (!allowedCodename) {
+                            if (SDK_CODENAMES.length > 0) {
                                 outError[0] = "Requires development platform " + targetCode
-                                        + " (current platform is " + SDK_CODENAME + ")";
+                                        + " (current platform is any of "
+                                        + Arrays.toString(SDK_CODENAMES) + ")";
                             } else {
                                 outError[0] = "Requires development platform " + targetCode
                                         + " but this is a release platform.";

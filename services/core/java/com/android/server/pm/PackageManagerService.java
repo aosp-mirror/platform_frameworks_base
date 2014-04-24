@@ -278,8 +278,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     final PackageHandler mHandler;
 
     final int mSdkVersion = Build.VERSION.SDK_INT;
-    final String mSdkCodename = "REL".equals(Build.VERSION.CODENAME)
-            ? null : Build.VERSION.CODENAME;
 
     final Context mContext;
     final boolean mFactoryTest;
