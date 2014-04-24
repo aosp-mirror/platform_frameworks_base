@@ -89,6 +89,28 @@ import libcore.io.IoUtils;
 final class Settings {
     private static final String TAG = "PackageSettings";
 
+    /**
+     * Current version of the package database. Set it to the latest version in
+     * the {@link DatabaseVersion} class below to ensure the database upgrade
+     * doesn't happen repeatedly.
+     * <p>
+     * Note that care should be taken to make sure all database upgrades are
+     * idempotent.
+     */
+    private static final int CURRENT_DATABASE_VERSION = DatabaseVersion.FIRST_VERSION;
+
+    /**
+     * This class contains constants that can be referred to from upgrade code.
+     * Insert constant values here that describe the upgrade reason. The version
+     * code must be monotonically increasing.
+     */
+    public static class DatabaseVersion {
+        /**
+         * The initial version of the database.
+         */
+        public static final int FIRST_VERSION = 1;
+    }
+
     private static final boolean DEBUG_STOPPED = false;
     private static final boolean DEBUG_MU = false;
 
@@ -132,6 +154,14 @@ final class Settings {
     // used to grant newer permissions one time during a system upgrade.
     int mInternalSdkPlatform;
     int mExternalSdkPlatform;
+
+    /**
+     * The current database version for apps on internal storage. This is
+     * used to upgrade the format of the packages.xml database not necessarily
+     * tied to an SDK version.
+     */
+    int mInternalDatabaseVersion;
+    int mExternalDatabaseVersion;
 
     Boolean mReadExternalStorageEnforced;
 
@@ -825,6 +855,40 @@ final class Settings {
         }
     }
 
+    /**
+     * Returns whether the current database has is older than {@code version}
+     * for apps on internal storage.
+     */
+    public boolean isInternalDatabaseVersionOlderThan(int version) {
+        return mInternalDatabaseVersion < version;
+    }
+
+    /**
+     * Returns whether the current database has is older than {@code version}
+     * for apps on external storage.
+     */
+    public boolean isExternalDatabaseVersionOlderThan(int version) {
+        return mExternalDatabaseVersion < version;
+    }
+
+    /**
+     * Updates the database version for apps on internal storage. Called after
+     * call the updates to the database format are done for apps on internal
+     * storage after the initial start-up scan.
+     */
+    public void updateInternalDatabaseVersion() {
+        mInternalDatabaseVersion = CURRENT_DATABASE_VERSION;
+    }
+
+    /**
+     * Updates the database version for apps on internal storage. Called after
+     * call the updates to the database format are done for apps on internal
+     * storage after the initial start-up scan.
+     */
+    public void updateExternalDatabaseVersion() {
+        mExternalDatabaseVersion = CURRENT_DATABASE_VERSION;
+    }
+
     private void readPreferredActivitiesLPw(XmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
@@ -1355,6 +1419,11 @@ final class Settings {
             serializer.attribute(null, "external", Integer.toString(mExternalSdkPlatform));
             serializer.endTag(null, "last-platform-version");
 
+            serializer.startTag(null, "database-version");
+            serializer.attribute(null, "internal", Integer.toString(mInternalDatabaseVersion));
+            serializer.attribute(null, "external", Integer.toString(mExternalDatabaseVersion));
+            serializer.endTag(null, "database-version");
+
             if (mVerifierDeviceIdentity != null) {
                 serializer.startTag(null, "verifier");
                 serializer.attribute(null, "device", mVerifierDeviceIdentity.toString());
@@ -1829,6 +1898,19 @@ final class Settings {
                             mExternalSdkPlatform = Integer.parseInt(external);
                         }
                     } catch (NumberFormatException e) {
+                    }
+                } else if (tagName.equals("database-version")) {
+                    mInternalDatabaseVersion = mExternalDatabaseVersion = 0;
+                    try {
+                        String internalDbVersionString = parser.getAttributeValue(null, "internal");
+                        if (internalDbVersionString != null) {
+                            mInternalDatabaseVersion = Integer.parseInt(internalDbVersionString);
+                        }
+                        String externalDbVersionString = parser.getAttributeValue(null, "external");
+                        if (externalDbVersionString != null) {
+                            mExternalDatabaseVersion = Integer.parseInt(externalDbVersionString);
+                        }
+                    } catch (NumberFormatException ignored) {
                     }
                 } else if (tagName.equals("verifier")) {
                     final String deviceIdentity = parser.getAttributeValue(null, "device");

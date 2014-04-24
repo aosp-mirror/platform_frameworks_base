@@ -1532,6 +1532,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mSettings.readDefaultPreferredAppsLPw(this, 0);
             }
 
+            // All the changes are done during package scanning.
+            mSettings.updateInternalDatabaseVersion();
+
             // can downgrade to reader
             mSettings.writeLPr();
 
@@ -11056,6 +11059,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         public static final int DUMP_KEYSETS = 1 << 11;
 
+        public static final int DUMP_VERSION = 1 << 12;
+
         public static final int OPTION_SHOW_FILTERS = 1 << 0;
 
         private int mTypes;
@@ -11154,6 +11159,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pw.println("    s[hared-users]: dump shared user IDs");
                 pw.println("    m[essages]: print collected runtime messages");
                 pw.println("    v[erifiers]: print package verifier info");
+                pw.println("    version: print database version info");
                 pw.println("    <package.name>: info about given package");
                 pw.println("    k[eysets]: print known keysets");
                 return;
@@ -11202,6 +11208,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 dumpState.setDump(DumpState.DUMP_MESSAGES);
             } else if ("v".equals(cmd) || "verifiers".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_VERIFIERS);
+            } else if ("version".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_VERSION);
             } else if ("k".equals(cmd) || "keysets".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_KEYSETS);
             }
@@ -11213,6 +11221,24 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // reader
         synchronized (mPackages) {
+            if (dumpState.isDumping(DumpState.DUMP_VERSION) && packageName == null) {
+                if (!checkin) {
+                    if (dumpState.onTitlePrinted())
+                        pw.println();
+                    pw.println("Database versions:");
+                    pw.print("  SDK Version:");
+                    pw.print(" internal=");
+                    pw.print(mSettings.mInternalSdkPlatform);
+                    pw.print(" external=");
+                    pw.println(mSettings.mExternalSdkPlatform);
+                    pw.print("  DB Version:");
+                    pw.print(" internal=");
+                    pw.print(mSettings.mInternalDatabaseVersion);
+                    pw.print(" external=");
+                    pw.println(mSettings.mExternalDatabaseVersion);
+                }
+            }
+
             if (dumpState.isDumping(DumpState.DUMP_VERIFIERS) && packageName == null) {
                 if (!checkin) {
                     if (dumpState.onTitlePrinted())
@@ -11743,6 +11769,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     | (regrantPermissions
                             ? (UPDATE_PERMISSIONS_REPLACE_PKG|UPDATE_PERMISSIONS_REPLACE_ALL)
                             : 0));
+
+            mSettings.updateExternalDatabaseVersion();
+
             // can downgrade to reader
             // Persist settings
             mSettings.writeLPr();
