@@ -123,9 +123,12 @@ int ASensorEventQueue_hasEvents(ASensorEventQueue* queue)
 ssize_t ASensorEventQueue_getEvents(ASensorEventQueue* queue,
                 ASensorEvent* events, size_t count)
 {
-    return static_cast<SensorEventQueue*>(queue)->read(events, count);
+    ssize_t actual = static_cast<SensorEventQueue*>(queue)->read(events, count);
+    if (actual > 0) {
+        static_cast<SensorEventQueue*>(queue)->sendAck(events, actual);
+    }
+    return actual;
 }
-
 
 /*****************************************************************************/
 
