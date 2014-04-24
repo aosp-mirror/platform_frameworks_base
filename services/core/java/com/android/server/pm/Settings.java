@@ -97,7 +97,7 @@ final class Settings {
      * Note that care should be taken to make sure all database upgrades are
      * idempotent.
      */
-    private static final int CURRENT_DATABASE_VERSION = DatabaseVersion.FIRST_VERSION;
+    private static final int CURRENT_DATABASE_VERSION = DatabaseVersion.SIGNATURE_END_ENTITY;
 
     /**
      * This class contains constants that can be referred to from upgrade code.
@@ -109,6 +109,12 @@ final class Settings {
          * The initial version of the database.
          */
         public static final int FIRST_VERSION = 1;
+
+        /**
+         * Migrating the Signature array from the entire certificate chain to
+         * just the signing certificate.
+         */
+        public static final int SIGNATURE_END_ENTITY = 2;
     }
 
     private static final boolean DEBUG_STOPPED = false;

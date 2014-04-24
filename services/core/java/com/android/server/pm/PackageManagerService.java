@@ -145,6 +145,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -163,6 +165,7 @@ import java.util.Set;
 import libcore.io.IoUtils;
 
 import com.android.internal.R;
+import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
 /**
@@ -2718,6 +2721,59 @@ public class PackageManagerService extends IPackageManager.Stub {
         return PackageManager.SIGNATURE_NO_MATCH;
     }
 
+    /**
+     * If the database version for this type of package (internal storage or
+     * external storage) is less than the version where package signatures
+     * were updated, return true.
+     */
+    private boolean isCompatSignatureUpdateNeeded(PackageParser.Package scannedPkg) {
+        return (isExternal(scannedPkg) && mSettings.isExternalDatabaseVersionOlderThan(
+                DatabaseVersion.SIGNATURE_END_ENTITY))
+                || (!isExternal(scannedPkg) && mSettings.isInternalDatabaseVersionOlderThan(
+                        DatabaseVersion.SIGNATURE_END_ENTITY));
+    }
+
+    /**
+     * Used for backward compatibility to make sure any packages with
+     * certificate chains get upgraded to the new style. {@code existingSigs}
+     * will be in the old format (since they were stored on disk from before the
+     * system upgrade) and {@code scannedSigs} will be in the newer format.
+     */
+    private int compareSignaturesCompat(PackageSignatures existingSigs,
+            PackageParser.Package scannedPkg) {
+        if (!isCompatSignatureUpdateNeeded(scannedPkg)) {
+            return PackageManager.SIGNATURE_NO_MATCH;
+        }
+
+        HashSet<Signature> existingSet = new HashSet<Signature>();
+        for (Signature sig : existingSigs.mSignatures) {
+            existingSet.add(sig);
+        }
+        HashSet<Signature> scannedCompatSet = new HashSet<Signature>();
+        for (Signature sig : scannedPkg.mSignatures) {
+            try {
+                Signature[] chainSignatures = sig.getChainSignatures();
+                for (Signature chainSig : chainSignatures) {
+                    scannedCompatSet.add(chainSig);
+                }
+            } catch (CertificateEncodingException e) {
+                scannedCompatSet.add(sig);
+            }
+        }
+        /*
+         * Make sure the expanded scanned set contains all signatures in the
+         * existing one.
+         */
+        if (scannedCompatSet.equals(existingSet)) {
+            // Migrate the old signatures to the new scheme.
+            existingSigs.assignSignatures(scannedPkg.mSignatures);
+            // The new KeySets will be re-added later in the scanning process.
+            mSettings.mKeySetManager.removeAppKeySetData(scannedPkg.packageName);
+            return PackageManager.SIGNATURE_MATCH;
+        }
+        return PackageManager.SIGNATURE_NO_MATCH;
+    }
+
     public String[] getPackagesForUid(int uid) {
         uid = UserHandle.getAppId(uid);
         // reader
@@ -3801,7 +3857,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             PackageParser.Package pkg, File srcFile, int parseFlags) {
         if (ps != null
                 && ps.codePath.equals(srcFile)
-                && ps.timeStamp == srcFile.lastModified()) {
+                && ps.timeStamp == srcFile.lastModified()
+                && !isCompatSignatureUpdateNeeded(pkg)) {
             if (ps.signatures.mSignatures != null
                     && ps.signatures.mSignatures.length != 0) {
                 // Optimization: reuse the existing cached certificates
@@ -4051,22 +4108,32 @@ public class PackageManagerService extends IPackageManager.Stub {
         return processName;
     }
 
-    private boolean verifySignaturesLP(PackageSetting pkgSetting,
-            PackageParser.Package pkg) {
+    private boolean verifySignaturesLP(PackageSetting pkgSetting, PackageParser.Package pkg) {
         if (pkgSetting.signatures.mSignatures != null) {
             // Already existing package. Make sure signatures match
-            if (compareSignatures(pkgSetting.signatures.mSignatures, pkg.mSignatures) !=
-                PackageManager.SIGNATURE_MATCH) {
-                    Slog.e(TAG, "Package " + pkg.packageName
-                            + " signatures do not match the previously installed version; ignoring!");
-                    mLastScanError = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
-                    return false;
-                }
+            boolean match = compareSignatures(pkgSetting.signatures.mSignatures, pkg.mSignatures)
+                    == PackageManager.SIGNATURE_MATCH;
+            if (!match) {
+                match = compareSignaturesCompat(pkgSetting.signatures, pkg)
+                        == PackageManager.SIGNATURE_MATCH;
+            }
+            if (!match) {
+                Slog.e(TAG, "Package " + pkg.packageName
+                        + " signatures do not match the previously installed version; ignoring!");
+                mLastScanError = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
+                return false;
+            }
         }
         // Check for shared user signatures
         if (pkgSetting.sharedUser != null && pkgSetting.sharedUser.signatures.mSignatures != null) {
-            if (compareSignatures(pkgSetting.sharedUser.signatures.mSignatures,
-                    pkg.mSignatures) != PackageManager.SIGNATURE_MATCH) {
+            // Already existing package. Make sure signatures match
+            boolean match = compareSignatures(pkgSetting.sharedUser.signatures.mSignatures,
+                    pkg.mSignatures) == PackageManager.SIGNATURE_MATCH;
+            if (!match) {
+                match = compareSignaturesCompat(pkgSetting.sharedUser.signatures, pkg)
+                        == PackageManager.SIGNATURE_MATCH;
+            }
+            if (!match) {
                 Slog.e(TAG, "Package " + pkg.packageName
                         + " has no signatures that match those in shared user "
                         + pkgSetting.sharedUser.name + "; ignoring!");

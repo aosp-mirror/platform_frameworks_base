@@ -459,7 +459,7 @@ public class PackageParser {
         return pi;
     }
 
-    private Certificate[] loadCertificates(StrictJarFile jarFile, ZipEntry je,
+    private Certificate[][] loadCertificates(StrictJarFile jarFile, ZipEntry je,
             byte[] readBuffer) {
         try {
             // We must read the stream for the JarEntry to retrieve
@@ -469,7 +469,7 @@ public class PackageParser {
                 // not using
             }
             is.close();
-            return je != null ? jarFile.getCertificates(je) : null;
+            return je != null ? jarFile.getCertificateChains(je) : null;
         } catch (IOException e) {
             Slog.w(TAG, "Exception reading " + je.getName() + " in " + jarFile, e);
         } catch (RuntimeException e) {
@@ -632,7 +632,7 @@ public class PackageParser {
         try {
             StrictJarFile jarFile = new StrictJarFile(mArchiveSourcePath);
 
-            Certificate[] certs = null;
+            Certificate[][] certs = null;
 
             if ((flags&PARSE_IS_SYSTEM) != 0) {
                 // If this package comes from the system image, then we
@@ -656,8 +656,8 @@ public class PackageParser {
                         final int N = certs.length;
                         for (int i=0; i<N; i++) {
                             Slog.i(TAG, "  Public key: "
-                                    + certs[i].getPublicKey().getEncoded()
-                                    + " " + certs[i].getPublicKey());
+                                    + certs[i][0].getPublicKey().getEncoded()
+                                    + " " + certs[i][0].getPublicKey());
                         }
                     }
                 }
@@ -677,7 +677,7 @@ public class PackageParser {
                                 ManifestDigest.fromInputStream(jarFile.getInputStream(je));
                     }
 
-                    final Certificate[] localCerts = loadCertificates(jarFile, je, readBuffer);
+                    final Certificate[][] localCerts = loadCertificates(jarFile, je, readBuffer);
                     if (DEBUG_JAR) {
                         Slog.i(TAG, "File " + mArchiveSourcePath + " entry " + je.getName()
                                 + ": certs=" + certs + " ("
@@ -726,8 +726,7 @@ public class PackageParser {
                 final int N = certs.length;
                 pkg.mSignatures = new Signature[certs.length];
                 for (int i=0; i<N; i++) {
-                    pkg.mSignatures[i] = new Signature(
-                            certs[i].getEncoded());
+                    pkg.mSignatures[i] = new Signature(certs[i]);
                 }
             } else {
                 Slog.e(TAG, "Package " + pkg.packageName
@@ -739,7 +738,7 @@ public class PackageParser {
             // Add the signing KeySet to the system
             pkg.mSigningKeys = new HashSet<PublicKey>();
             for (int i=0; i < certs.length; i++) {
-                pkg.mSigningKeys.add(certs[i].getPublicKey());
+                pkg.mSigningKeys.add(certs[i][0].getPublicKey());
             }
 
         } catch (CertificateEncodingException e) {
