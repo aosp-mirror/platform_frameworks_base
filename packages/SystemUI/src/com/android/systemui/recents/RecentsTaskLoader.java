@@ -413,6 +413,8 @@ public class RecentsTaskLoader {
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = tasks.get(i);
             ActivityInfo info = ssp.getActivityInfo(t.baseIntent.getComponent(), t.userId);
+            if (info == null) continue;
+
             String activityLabel = (t.activityLabel == null ? ssp.getActivityLabel(info) :
                     t.activityLabel.toString());
             BitmapDrawable activityIcon = null;
