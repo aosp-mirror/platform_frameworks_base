@@ -2900,9 +2900,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             // Check if this is the profile owner who is calling
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            Slog.d(LOG_TAG, "Enabling the profile for: " + UserHandle.getCallingUserId());
-            long id = Binder.clearCallingIdentity();
+            int userId = UserHandle.getCallingUserId();
+            Slog.d(LOG_TAG, "Enabling the profile for: " + userId);
 
+            mDeviceOwner.setProfileEnabled(userId);
+            mDeviceOwner.writeOwnerFile();
+
+            long id = Binder.clearCallingIdentity();
             try {
                 Intent intent = new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED);
                 intent.putExtra(Intent.EXTRA_USER, new UserHandle(UserHandle.getCallingUserId()));
@@ -2942,6 +2946,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean isProfileEnabled(int userHandle) {
+        if (!mHasFeature) {
+            // If device policy management is not enabled, then the userHandle cannot belong to a
+            // managed profile. All other profiles are considered enabled.
+            return true;
+        }
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
+
+        synchronized (this) {
+            if (mDeviceOwner != null) {
+                 return mDeviceOwner.isProfileEnabled(userHandle);
+            }
+        }
+        return true;
     }
 
     private boolean isDeviceProvisioned() {
