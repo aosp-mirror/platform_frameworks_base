@@ -17,6 +17,11 @@ package com.android.multidexlegacytestapp;
 
 import android.test.ActivityInstrumentationTestCase2;
 
+/**
+ * Run the tests with: <code>adb shell am instrument -w
+ com.android.multidexlegacytestapp/android.test.InstrumentationTestRunner
+</code>
+ */
 public class Test extends ActivityInstrumentationTestCase2<MainActivity> {
     public Test() {
         super(MainActivity.class);
@@ -24,5 +29,24 @@ public class Test extends ActivityInstrumentationTestCase2<MainActivity> {
 
     public void testAllClassesAvailable() {
         assertEquals(3366, getActivity().getValue());
+    }
+
+    public void testAnnotation() {
+        assertEquals(ReferencedByAnnotation.B,
+                ((AnnotationWithEnum) TestApplication.annotation).value());
+        assertEquals(ReferencedByAnnotation.B,
+                ((AnnotationWithEnum) TestApplication.getAnnotationWithEnum()).value());
+        // Just to verify that it doesn't crash
+        getActivity().getAnnotation2Value();
+
+        assertEquals(ReferencedByClassInAnnotation.class,
+                ((AnnotationWithClass) TestApplication.annotation3).value());
+        // Just to verify that it doesn't crash
+        ReferencedByClassInAnnotation.A.get();
+    }
+
+    public void testInterface() {
+        assertEquals(InterfaceWithEnum.class,
+                TestApplication.interfaceClass);
     }
 }
