@@ -16,7 +16,9 @@
 
 package com.android.server.media;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.routeprovider.RouteRequest;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
@@ -30,13 +32,17 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.server.SystemService;
+import com.android.server.Watchdog;
+import com.android.server.Watchdog.Monitor;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
  * System implementation of MediaSessionManager
  */
-public class MediaSessionService extends SystemService {
+public class MediaSessionService extends SystemService implements Monitor {
     private static final String TAG = "MediaSessionService";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -69,6 +75,7 @@ public class MediaSessionService extends SystemService {
     public void onStart() {
         publishBinderService(Context.MEDIA_SESSION_SERVICE, mSessionManagerImpl);
         mRouteProviderWatcher.start();
+        Watchdog.getInstance().addMonitor(this);
     }
 
     /**
@@ -114,14 +121,21 @@ public class MediaSessionService extends SystemService {
         }
     }
 
+    @Override
+    public void monitor() {
+        synchronized (mLock) {
+            // Check for deadlock
+        }
+    }
+
     void sessionDied(MediaSessionRecord session) {
-        synchronized (mSessions) {
+        synchronized (mLock) {
             destroySessionLocked(session);
         }
     }
 
     void destroySession(MediaSessionRecord session) {
-        synchronized (mSessions) {
+        synchronized (mLock) {
             destroySessionLocked(session);
         }
     }
@@ -160,9 +174,7 @@ public class MediaSessionService extends SystemService {
         } catch (RemoteException e) {
             throw new RuntimeException("Media Session owner died prematurely.", e);
         }
-        synchronized (mSessions) {
-            mSessions.add(session);
-        }
+        mSessions.add(session);
         if (DEBUG) {
             Log.d(TAG, "Created session for package " + packageName + " with tag " + tag);
         }
@@ -257,6 +269,36 @@ public class MediaSessionService extends SystemService {
                 return createSessionInternal(pid, packageName, cb, tag).getSessionBinder();
             } finally {
                 Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
+            if (getContext().checkCallingOrSelfPermission(Manifest.permission.DUMP)
+                    != PackageManager.PERMISSION_GRANTED) {
+                pw.println("Permission Denial: can't dump MediaSessionService from from pid="
+                        + Binder.getCallingPid()
+                        + ", uid=" + Binder.getCallingUid());
+                return;
+            }
+
+            pw.println("MEDIA SESSION SERVICE (dumpsys media_session)");
+            pw.println();
+
+            synchronized (mLock) {
+                int count = mSessions.size();
+                pw.println("Sessions - have " + count + " states:");
+                for (int i = 0; i < count; i++) {
+                    MediaSessionRecord record = mSessions.get(i);
+                    pw.println();
+                    record.dump(pw, "");
+                }
+                pw.println("Providers:");
+                count = mProviders.size();
+                for (int i = 0; i < count; i++) {
+                    MediaRouteProviderProxy provider = mProviders.get(i);
+                    provider.dump(pw, "");
+                }
             }
         }
     }

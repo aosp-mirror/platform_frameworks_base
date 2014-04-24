@@ -20,6 +20,8 @@ import android.media.session.SessionInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.PrintWriter;
+
 /**
  * A request to connect or discover routes with certain capabilities.
  * <p>
@@ -67,6 +69,17 @@ public final class RouteRequest implements Parcelable {
      */
     public RouteOptions getConnectionOptions() {
         return mOptions;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder bob = new StringBuilder();
+        bob.append("RouteRequest {");
+        bob.append("active=").append(mActive);
+        bob.append(", info=").append(mSessionInfo.toString());
+        bob.append(", options=").append(mOptions.toString());
+        bob.append("}");
+        return bob.toString();
     }
 
     @Override

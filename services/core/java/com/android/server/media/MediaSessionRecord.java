@@ -46,6 +46,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.view.KeyEvent;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -224,6 +225,27 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     @Override
     public void binderDied() {
         mService.sessionDied(this);
+    }
+
+    public void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + mTag + " " + this);
+
+        final String indent = prefix + "  ";
+        pw.println(indent + "pid=" + mPid);
+        pw.println(indent + "info=" + mSessionInfo.toString());
+        pw.println(indent + "published=" + mIsPublished);
+        pw.println(indent + "transport controls enabled=" + mTransportPerformerEnabled);
+        pw.println(indent + "rating type=" + mRatingType);
+        pw.println(indent + "controllers: " + mControllerCallbacks.size());
+        pw.println(indent + "route requests {");
+        int size = mRequests.size();
+        for (int i = 0; i < size; i++) {
+            pw.println(indent + "  " + mRequests.get(i).toString());
+        }
+        pw.println(indent + "}");
+        pw.println(indent + "route=" + (mRoute == null ? null : mRoute.toString()));
+        pw.println(indent + "connection=" + (mConnection == null ? null : mConnection.toString()));
+        pw.println(indent + "params=" + (mRequest == null ? null : mRequest.toString()));
     }
 
     private void onDestroy() {

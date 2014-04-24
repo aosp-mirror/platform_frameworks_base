@@ -906,7 +906,6 @@ public final class SystemServer {
             }
 
             try {
-                Slog.i(TAG, "MediaSessionService");
                 mSystemServiceManager.startService(MediaSessionService.class);
             } catch (Throwable e) {
                 reportWtf("starting MediaSessionService", e);
