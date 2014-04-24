@@ -509,12 +509,11 @@ public:
     }
 
     static void drawRoundRect(JNIEnv* env, jobject, jlong canvasHandle,
-                              jobject jrect, jfloat rx, jfloat ry,
-                              jlong paintHandle) {
+            jfloat left, jfloat top, jfloat right, jfloat bottom, jfloat rx, jfloat ry,
+            jlong paintHandle) {
         SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
-        SkRect rect;
-        GraphicsJNI::jrectf_to_rect(env, jrect, &rect);
+        SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
         canvas->drawRoundRect(rect, rx, ry, *paint);
     }
 
@@ -1176,7 +1175,7 @@ static JNINativeMethod gCanvasMethods[] = {
     {"native_drawCircle","(JFFFJ)V", (void*) SkCanvasGlue::drawCircle},
     {"native_drawArc","(JLandroid/graphics/RectF;FFZJ)V",
         (void*) SkCanvasGlue::drawArc},
-    {"native_drawRoundRect","(JLandroid/graphics/RectF;FFJ)V",
+    {"native_drawRoundRect","(JFFFFFFJ)V",
         (void*) SkCanvasGlue::drawRoundRect},
     {"native_drawPath","(JJJ)V", (void*) SkCanvasGlue::drawPath},
     {"native_drawBitmap","(JJFFJIII)V",

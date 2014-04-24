@@ -9710,6 +9710,7 @@ package android.graphics {
     method public void drawRect(android.graphics.Rect, android.graphics.Paint);
     method public void drawRect(float, float, float, float, android.graphics.Paint);
     method public void drawRoundRect(android.graphics.RectF, float, float, android.graphics.Paint);
+    method public void drawRoundRect(float, float, float, float, float, float, android.graphics.Paint);
     method public void drawText(char[], int, int, float, float, android.graphics.Paint);
     method public void drawText(java.lang.String, float, float, android.graphics.Paint);
     method public void drawText(java.lang.String, int, int, float, float, android.graphics.Paint);
