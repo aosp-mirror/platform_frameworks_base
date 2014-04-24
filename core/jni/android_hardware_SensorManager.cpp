@@ -160,7 +160,6 @@ private:
         ASensorEvent buffer[16];
         while ((n = q->read(buffer, 16)) > 0) {
             for (int i=0 ; i<n ; i++) {
-
                 if (buffer[i].type == SENSOR_TYPE_STEP_COUNTER) {
                     // step-counter returns a uint64, but the java API only deals with floats
                     float value = float(buffer[i].u64.step_counter);
@@ -183,17 +182,17 @@ private:
                                         buffer[i].vector.status,
                                         buffer[i].timestamp);
                 }
-
                 if (env->ExceptionCheck()) {
+                    mSensorQueue->sendAck(buffer, n);
                     ALOGE("Exception dispatching input event.");
                     return 1;
                 }
             }
+            mSensorQueue->sendAck(buffer, n);
         }
         if (n<0 && n != -EAGAIN) {
             // FIXME: error receiving events, what to do in this case?
         }
-
         return 1;
     }
 };
