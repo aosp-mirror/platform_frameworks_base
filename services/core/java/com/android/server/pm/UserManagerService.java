@@ -24,6 +24,7 @@ import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.admin.DevicePolicyManager;
 import android.app.IStopUserCallback;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -258,17 +259,43 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public List<UserInfo> getProfiles(int userId) {
+    public List<UserInfo> getProfiles(int userId, boolean enabledOnly) {
         if (userId != UserHandle.getCallingUserId()) {
             checkManageUsersPermission("getting profiles related to user " + userId);
         }
         synchronized (mPackagesLock) {
+            // Getting the service here is not good for testing purposes. However, this service
+            // is not available when UserManagerService starts up so we need a lazy load.
+
+            DevicePolicyManager dpm = null;
+            if (enabledOnly) {
+                dpm = (DevicePolicyManager)
+                        mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            }
+
             UserInfo user = getUserInfoLocked(userId);
             ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
             for (int i = 0; i < mUsers.size(); i++) {
                 UserInfo profile = mUsers.valueAt(i);
                 if (!isProfileOf(user, profile)) {
                     continue;
+                }
+
+                if (enabledOnly && profile.isManagedProfile()) {
+                    if (dpm != null) {
+                        if(!dpm.isProfileEnabled(profile.id)) {
+                            continue;
+                        }
+                    } else {
+                        Log.w(LOG_TAG,
+                                "Attempting to reach DevicePolicyManager before it was started");
+                        // TODO: There might be system apps that need to call this. Make sure that
+                        // DevicePolicyManagerService is ready at that time (otherwise, any default
+                        // value is a bad one).
+                        throw new IllegalArgumentException(String.format(
+                                "Attempting to get enabled profiles for %d before "
+                                + "DevicePolicyManagerService has been started.", userId));
+                    }
                 }
                 users.add(profile);
             }

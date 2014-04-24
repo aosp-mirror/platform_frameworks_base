@@ -16369,7 +16369,8 @@ public final class ActivityManagerService extends ActivityManagerNative
      * background.
      */
     private void updateCurrentProfileIdsLocked() {
-        final List<UserInfo> profiles = getUserManagerLocked().getProfiles(mCurrentUserId);
+        final List<UserInfo> profiles = getUserManagerLocked().getProfiles(
+                mCurrentUserId, false /* enabledOnly */);
         int[] currentProfileIds = new int[profiles.size()]; // profiles will not be null
         for (int i = 0; i < currentProfileIds.length; i++) {
             currentProfileIds[i] = profiles.get(i).id;
@@ -16379,7 +16380,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private Set getProfileIdsLocked(int userId) {
         Set userIds = new HashSet<Integer>();
-        final List<UserInfo> profiles = getUserManagerLocked().getProfiles(userId);
+        final List<UserInfo> profiles = getUserManagerLocked().getProfiles(
+                userId, false /* enabledOnly */);
         for (UserInfo user : profiles) {
             userIds.add(Integer.valueOf(user.id));
         }
@@ -16678,7 +16680,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     void startProfilesLocked() {
         if (DEBUG_MU) Slog.i(TAG_MU, "startProfilesLocked");
-        List<UserInfo> profiles = getUserManagerLocked().getProfiles(mCurrentUserId);
+        List<UserInfo> profiles = getUserManagerLocked().getProfiles(
+                mCurrentUserId, false /* enabledOnly */);
         List<UserInfo> toStart = new ArrayList<UserInfo>(profiles.size());
         for (UserInfo user : profiles) {
             if ((user.flags & UserInfo.FLAG_INITIALIZED) == UserInfo.FLAG_INITIALIZED
