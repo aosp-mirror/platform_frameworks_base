@@ -31,4 +31,14 @@
         android:scaleType="center"
         android:contentDescription="@string/accessibility_camera_button"
         systemui:glowBackground="@drawable/ic_sysbar_highlight_land" />
+
+    <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
+        android:id="@+id/keyguard_indication_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="100dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:textStyle="italic"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
 </com.android.systemui.statusbar.phone.KeyguardBottomAreaView>
