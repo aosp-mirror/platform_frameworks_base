@@ -118,14 +118,22 @@ public class Build {
          */
         public static final String CODENAME = getString("ro.build.version.codename");
 
+        private static final String[] ALL_CODENAMES
+                = getString("ro.build.version.all_codenames").split(",");
+
         /**
-         * The SDK version to use when accessing resources.
-         * Use the current SDK version code.  If we are a development build,
-         * also allow the previous SDK version + 1.
          * @hide
          */
-        public static final int RESOURCES_SDK_INT = SDK_INT
-                + ("REL".equals(CODENAME) ? 0 : 1);
+        public static final String[] ACTIVE_CODENAMES = "REL".equals(ALL_CODENAMES[0])
+                ? new String[0] : ALL_CODENAMES;
+
+        /**
+         * The SDK version to use when accessing resources.
+         * Use the current SDK version code.  For every active development codename
+         * we are operating under, we bump the assumed resource platform version by 1.
+         * @hide
+         */
+        public static final int RESOURCES_SDK_INT = SDK_INT + ACTIVE_CODENAMES.length;
     }
 
     /**
