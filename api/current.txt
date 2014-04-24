@@ -701,7 +701,6 @@ package android {
     field public static final int l_resource_pad25 = 16843768; // 0x10103f8
     field public static final int l_resource_pad26 = 16843767; // 0x10103f7
     field public static final int l_resource_pad27 = 16843766; // 0x10103f6
-    field public static final int l_resource_pad28 = 16843765; // 0x10103f5
     field public static final int l_resource_pad3 = 16843790; // 0x101040e
     field public static final int l_resource_pad4 = 16843789; // 0x101040d
     field public static final int l_resource_pad5 = 16843788; // 0x101040c
@@ -25652,18 +25651,6 @@ package android.telephony {
     method public int hashCode();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public class DataConnectionRealTimeInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getDcPowerState();
-    method public long getTime();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-    field public static int DC_POWER_STATE_HIGH;
-    field public static int DC_POWER_STATE_LOW;
-    field public static int DC_POWER_STATE_MEDIUM;
-    field public static int DC_POWER_STATE_UNKNOWN;
   }
 
   public class DisconnectCause {

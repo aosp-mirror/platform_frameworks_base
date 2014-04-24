@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -199,7 +200,67 @@ public class PhoneStateListener {
      */
     public static final int LISTEN_DATA_CONNECTION_REAL_TIME_INFO           = 0x00002000;
 
+    private final Handler mHandler;
+
     public PhoneStateListener() {
+        this(Looper.myLooper());
+    }
+
+    /** @hide */
+    public PhoneStateListener(Looper looper) {
+        mHandler = new Handler(looper) {
+            public void handleMessage(Message msg) {
+                //Rlog.d("TelephonyRegistry", "what=0x" + Integer.toHexString(msg.what)
+                // + " msg=" + msg);
+                switch (msg.what) {
+                    case LISTEN_SERVICE_STATE:
+                        PhoneStateListener.this.onServiceStateChanged((ServiceState)msg.obj);
+                        break;
+                    case LISTEN_SIGNAL_STRENGTH:
+                        PhoneStateListener.this.onSignalStrengthChanged(msg.arg1);
+                        break;
+                    case LISTEN_MESSAGE_WAITING_INDICATOR:
+                        PhoneStateListener.this.onMessageWaitingIndicatorChanged(msg.arg1 != 0);
+                        break;
+                    case LISTEN_CALL_FORWARDING_INDICATOR:
+                        PhoneStateListener.this.onCallForwardingIndicatorChanged(msg.arg1 != 0);
+                        break;
+                    case LISTEN_CELL_LOCATION:
+                        PhoneStateListener.this.onCellLocationChanged((CellLocation)msg.obj);
+                        break;
+                    case LISTEN_CALL_STATE:
+                        PhoneStateListener.this.onCallStateChanged(msg.arg1, (String)msg.obj);
+                        break;
+                    case LISTEN_DATA_CONNECTION_STATE:
+                        PhoneStateListener.this.onDataConnectionStateChanged(msg.arg1, msg.arg2);
+                        PhoneStateListener.this.onDataConnectionStateChanged(msg.arg1);
+                        break;
+                    case LISTEN_DATA_ACTIVITY:
+                        PhoneStateListener.this.onDataActivity(msg.arg1);
+                        break;
+                    case LISTEN_SIGNAL_STRENGTHS:
+                        PhoneStateListener.this.onSignalStrengthsChanged((SignalStrength)msg.obj);
+                        break;
+                    case LISTEN_OTASP_CHANGED:
+                        PhoneStateListener.this.onOtaspChanged(msg.arg1);
+                        break;
+                    case LISTEN_CELL_INFO:
+                        PhoneStateListener.this.onCellInfoChanged((List<CellInfo>)msg.obj);
+                        break;
+                    case LISTEN_PRECISE_CALL_STATE:
+                        PhoneStateListener.this.onPreciseCallStateChanged((PreciseCallState)msg.obj);
+                        break;
+                    case LISTEN_PRECISE_DATA_CONNECTION_STATE:
+                        PhoneStateListener.this.onPreciseDataConnectionStateChanged(
+                                (PreciseDataConnectionState)msg.obj);
+                        break;
+                    case LISTEN_DATA_CONNECTION_REAL_TIME_INFO:
+                        PhoneStateListener.this.onDataConnectionRealTimeInfoChanged(
+                                (DataConnectionRealTimeInfo)msg.obj);
+                        break;
+                }
+            }
+        };
     }
 
     /**
@@ -422,58 +483,6 @@ public class PhoneStateListener {
                 DataConnectionRealTimeInfo dcRtInfo) {
             Message.obtain(mHandler, LISTEN_DATA_CONNECTION_REAL_TIME_INFO, 0, 0,
                     dcRtInfo).sendToTarget();
-        }
-    };
-
-    Handler mHandler = new Handler() {
-        public void handleMessage(Message msg) {
-            //Rlog.d("TelephonyRegistry", "what=0x" + Integer.toHexString(msg.what) + " msg=" + msg);
-            switch (msg.what) {
-                case LISTEN_SERVICE_STATE:
-                    PhoneStateListener.this.onServiceStateChanged((ServiceState)msg.obj);
-                    break;
-                case LISTEN_SIGNAL_STRENGTH:
-                    PhoneStateListener.this.onSignalStrengthChanged(msg.arg1);
-                    break;
-                case LISTEN_MESSAGE_WAITING_INDICATOR:
-                    PhoneStateListener.this.onMessageWaitingIndicatorChanged(msg.arg1 != 0);
-                    break;
-                case LISTEN_CALL_FORWARDING_INDICATOR:
-                    PhoneStateListener.this.onCallForwardingIndicatorChanged(msg.arg1 != 0);
-                    break;
-                case LISTEN_CELL_LOCATION:
-                    PhoneStateListener.this.onCellLocationChanged((CellLocation)msg.obj);
-                    break;
-                case LISTEN_CALL_STATE:
-                    PhoneStateListener.this.onCallStateChanged(msg.arg1, (String)msg.obj);
-                    break;
-                case LISTEN_DATA_CONNECTION_STATE:
-                    PhoneStateListener.this.onDataConnectionStateChanged(msg.arg1, msg.arg2);
-                    PhoneStateListener.this.onDataConnectionStateChanged(msg.arg1);
-                    break;
-                case LISTEN_DATA_ACTIVITY:
-                    PhoneStateListener.this.onDataActivity(msg.arg1);
-                    break;
-                case LISTEN_SIGNAL_STRENGTHS:
-                    PhoneStateListener.this.onSignalStrengthsChanged((SignalStrength)msg.obj);
-                    break;
-                case LISTEN_OTASP_CHANGED:
-                    PhoneStateListener.this.onOtaspChanged(msg.arg1);
-                    break;
-                case LISTEN_CELL_INFO:
-                    PhoneStateListener.this.onCellInfoChanged((List<CellInfo>)msg.obj);
-                    break;
-                case LISTEN_PRECISE_CALL_STATE:
-                    PhoneStateListener.this.onPreciseCallStateChanged((PreciseCallState)msg.obj);
-                    break;
-                case LISTEN_PRECISE_DATA_CONNECTION_STATE:
-                    PhoneStateListener.this.onPreciseDataConnectionStateChanged((PreciseDataConnectionState)msg.obj);
-                    break;
-                case LISTEN_DATA_CONNECTION_REAL_TIME_INFO:
-                    PhoneStateListener.this.onDataConnectionRealTimeInfoChanged(
-                            (DataConnectionRealTimeInfo)msg.obj);
-                    break;
-            }
         }
     };
 }

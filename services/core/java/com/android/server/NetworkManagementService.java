@@ -58,6 +58,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.telephony.DataConnectionRealTimeInfo;
+import android.telephony.PhoneStateListener;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -143,21 +145,25 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int InterfaceDnsServerInfo    = 615;
     }
 
+    static final int DAEMON_MSG_MOBILE_CONN_REAL_TIME_INFO = 1;
+
     /**
      * Binder context for this service
      */
-    private Context mContext;
+    private final Context mContext;
 
     /**
      * connector object for communicating with netd
      */
-    private NativeDaemonConnector mConnector;
+    private final NativeDaemonConnector mConnector;
 
     private final Handler mFgHandler;
+    private final Handler mDaemonHandler;
+    private final PhoneStateListener mPhoneStateListener;
 
     private IBatteryStats mBatteryStats;
 
-    private Thread mThread;
+    private final Thread mThread;
     private CountDownLatch mConnectedSignal = new CountDownLatch(1);
 
     private final RemoteCallbackList<INetworkManagementEventObserver> mObservers =
@@ -191,6 +197,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private volatile boolean mBandwidthControlEnabled;
     private volatile boolean mFirewallEnabled;
 
+    private boolean mMobileActivityFromRadio = false;
+    private int mLastPowerStateFromRadio = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
+
     private final RemoteCallbackList<INetworkActivityListener> mNetworkActivityListeners =
             new RemoteCallbackList<INetworkActivityListener>();
     private boolean mNetworkActive;
@@ -207,19 +216,34 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mFgHandler = new Handler(FgThread.get().getLooper());
 
         if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
+            mConnector = null;
+            mThread = null;
+            mDaemonHandler = null;
+            mPhoneStateListener = null;
             return;
         }
 
-        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         // Don't need this wake lock, since we now have a time stamp for when
         // the network actually went inactive.  (It might be nice to still do this,
         // but I don't want to do it through the power manager because that pollutes the
         // battery stats history with pointless noise.)
+        //PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock wl = null; //pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, NETD_TAG);
 
         mConnector = new NativeDaemonConnector(
-                new NetdCallbackReceiver(), socket, 10, NETD_TAG, 160, wl);
+                new NetdCallbackReceiver(), socket, 10, NETD_TAG, 160, wl,
+                FgThread.get().getLooper());
         mThread = new Thread(mConnector, NETD_TAG);
+
+        mDaemonHandler = new Handler(FgThread.get().getLooper());
+        mPhoneStateListener = new PhoneStateListener(mDaemonHandler.getLooper()) {
+            public void onDataConnectionRealTimeInfoChanged(
+                    DataConnectionRealTimeInfo dcRtInfo) {
+                // Disabled for now, until we are getting good data.
+                //notifyInterfaceClassActivity(ConnectivityManager.TYPE_MOBILE,
+                //        dcRtInfo.getDcPowerState(), dcRtInfo.getTime(), true);
+            }
+        };
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
@@ -368,36 +392,62 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /**
      * Notify our observers of a change in the data activity state of the interface
      */
-    private void notifyInterfaceClassActivity(int type, boolean active, long tsNanos) {
-        try {
-            getBatteryStats().noteDataConnectionActive(type, active, tsNanos);
-        } catch (RemoteException e) {
-        }
-
-        final int length = mObservers.beginBroadcast();
-        try {
-            for (int i = 0; i < length; i++) {
+    private void notifyInterfaceClassActivity(int type, int powerState, long tsNanos,
+            boolean fromRadio) {
+        final boolean isMobile = ConnectivityManager.isNetworkTypeMobile(type);
+        if (isMobile) {
+            if (!fromRadio) {
+                if (mMobileActivityFromRadio) {
+                    // If this call is not coming from a report from the radio itself, but we
+                    // have previously received reports from the radio, then we will take the
+                    // power state to just be whatever the radio last reported.
+                    powerState = mLastPowerStateFromRadio;
+                }
+            } else {
+                mMobileActivityFromRadio = true;
+            }
+            if (mLastPowerStateFromRadio != powerState) {
+                mLastPowerStateFromRadio = powerState;
                 try {
-                    mObservers.getBroadcastItem(i).interfaceClassDataActivityChanged(
-                            Integer.toString(type), active, tsNanos);
+                    getBatteryStats().noteMobileRadioPowerState(powerState, tsNanos);
                 } catch (RemoteException e) {
-                } catch (RuntimeException e) {
                 }
             }
-        } finally {
-            mObservers.finishBroadcast();
+        }
+
+        boolean isActive = powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM
+                || powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH;
+
+        if (!isMobile || fromRadio || !mMobileActivityFromRadio) {
+            // Report the change in data activity.  We don't do this if this is a change
+            // on the mobile network, that is not coming from the radio itself, and we
+            // have previously seen change reports from the radio.  In that case only
+            // the radio is the authority for the current state.
+            final int length = mObservers.beginBroadcast();
+            try {
+                for (int i = 0; i < length; i++) {
+                    try {
+                        mObservers.getBroadcastItem(i).interfaceClassDataActivityChanged(
+                                Integer.toString(type), isActive, tsNanos);
+                    } catch (RemoteException e) {
+                    } catch (RuntimeException e) {
+                    }
+                }
+            } finally {
+                mObservers.finishBroadcast();
+            }
         }
 
         boolean report = false;
         synchronized (mIdleTimerLock) {
             if (mActiveIdleTimers.isEmpty()) {
-                // If there are no idle times, we are not monitoring activity, so we
+                // If there are no idle timers, we are not monitoring activity, so we
                 // are always considered active.
-                active = true;
+                isActive = true;
             }
-            if (mNetworkActive != active) {
-                mNetworkActive = active;
-                report = active;
+            if (mNetworkActive != isActive) {
+                mNetworkActive = isActive;
+                report = isActive;
             }
         }
         if (report) {
@@ -611,10 +661,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                         try {
                             timestampNanos = Long.parseLong(cooked[4]);
                         } catch(NumberFormatException ne) {}
+                    } else {
+                        timestampNanos = SystemClock.elapsedRealtimeNanos();
                     }
                     boolean isActive = cooked[2].equals("active");
                     notifyInterfaceClassActivity(Integer.parseInt(cooked[3]),
-                            isActive, timestampNanos);
+                            isActive ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
+                            : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW, timestampNanos, false);
                     return true;
                     // break;
             case NetdResponseCode.InterfaceAddressChange:
@@ -1301,9 +1354,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             if (ConnectivityManager.isNetworkTypeMobile(type)) {
                 mNetworkActive = false;
             }
-            mFgHandler.post(new Runnable() {
+            mDaemonHandler.post(new Runnable() {
                 @Override public void run() {
-                    notifyInterfaceClassActivity(type, true, SystemClock.elapsedRealtimeNanos());
+                    notifyInterfaceClassActivity(type,
+                            DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH,
+                            SystemClock.elapsedRealtimeNanos(), false);
                 }
             });
         }
@@ -1328,10 +1383,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 throw e.rethrowAsParcelableException();
             }
             mActiveIdleTimers.remove(iface);
-            mFgHandler.post(new Runnable() {
+            mDaemonHandler.post(new Runnable() {
                 @Override public void run() {
-                    notifyInterfaceClassActivity(params.type, false,
-                            SystemClock.elapsedRealtimeNanos());
+                    notifyInterfaceClassActivity(params.type,
+                            DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
+                            SystemClock.elapsedRealtimeNanos(), false);
                 }
             });
         }
@@ -1941,6 +1997,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         pw.println();
 
         pw.print("Bandwidth control enabled: "); pw.println(mBandwidthControlEnabled);
+        pw.print("mMobileActivityFromRadio="); pw.print(mMobileActivityFromRadio);
+                pw.print(" mLastPowerStateFromRadio="); pw.println(mLastPowerStateFromRadio);
+        pw.print("mNetworkActive="); pw.println(mNetworkActive);
 
         synchronized (mQuotaLock) {
             pw.print("Active quota ifaces: "); pw.println(mActiveQuotas.toString());

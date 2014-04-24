@@ -130,8 +130,8 @@ public abstract class BatteryStats implements Parcelable {
     // NOTE: Update this list if you add/change any stats above.
     // These characters are supposed to represent "total", "last", "current", 
     // and "unplugged". They were shortened for efficiency sake.
-    private static final String[] STAT_NAMES = { "t", "l", "c", "u" };
-    
+    private static final String[] STAT_NAMES = { "l", "c", "u" };
+
     /**
      * Bump the version on this if the checkin format changes.
      */
@@ -186,7 +186,7 @@ public abstract class BatteryStats implements Parcelable {
          * Returns the count associated with this Counter for the
          * selected type of statistics.
          *
-         * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT
+         * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT
          */
         public abstract int getCountLocked(int which);
 
@@ -205,7 +205,7 @@ public abstract class BatteryStats implements Parcelable {
          * Returns the count associated with this Counter for the
          * selected type of statistics.
          *
-         * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT
+         * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT
          */
         public abstract long getCountLocked(int which);
 
@@ -224,7 +224,7 @@ public abstract class BatteryStats implements Parcelable {
          * Returns the count associated with this Timer for the
          * selected type of statistics.
          *
-         * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT
+         * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT
          */
         public abstract int getCountLocked(int which);
 
@@ -233,7 +233,7 @@ public abstract class BatteryStats implements Parcelable {
          * selected type of statistics.
          *
          * @param elapsedRealtimeUs current elapsed realtime of system in microseconds
-         * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT
+         * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT
          * @return a time in microseconds
          */
         public abstract long getTotalTimeLocked(long elapsedRealtimeUs, int which);
@@ -385,27 +385,27 @@ public abstract class BatteryStats implements Parcelable {
             /**
              * Returns the total time (in 1/100 sec) spent executing in user code.
              *
-             * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+             * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
              */
             public abstract long getUserTime(int which);
 
             /**
              * Returns the total time (in 1/100 sec) spent executing in system code.
              *
-             * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+             * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
              */
             public abstract long getSystemTime(int which);
 
             /**
              * Returns the number of times the process has been started.
              *
-             * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+             * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
              */
             public abstract int getStarts(int which);
 
             /**
              * Returns the cpu time spent in microseconds while the process was in the foreground.
-             * @param which one of STATS_TOTAL, STATS_LAST, STATS_CURRENT or STATS_UNPLUGGED
+             * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
              * @return foreground cpu time in microseconds
              */
             public abstract long getForegroundTime(int which);
@@ -414,7 +414,7 @@ public abstract class BatteryStats implements Parcelable {
              * Returns the approximate cpu time spent in microseconds, at a certain CPU speed.
              * @param speedStep the index of the CPU speed. This is not the actual speed of the
              * CPU.
-             * @param which one of STATS_TOTAL, STATS_LAST, STATS_CURRENT or STATS_UNPLUGGED
+             * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
              * @see BatteryStats#getCpuSpeedSteps()
              */
             public abstract long getTimeAtCpuSpeedStep(int speedStep, int which);
@@ -433,7 +433,7 @@ public abstract class BatteryStats implements Parcelable {
              * Returns the number of times this package has done something that could wake up the
              * device from sleep.
              *
-             * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+             * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
              */
             public abstract int getWakeups(int which);
 
@@ -451,7 +451,7 @@ public abstract class BatteryStats implements Parcelable {
                  * Returns the amount of time spent started.
                  *
                  * @param batteryUptime elapsed uptime on battery in microseconds.
-                 * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+                 * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
                  * @return
                  */
                 public abstract long getStartTime(long batteryUptime, int which);
@@ -459,14 +459,14 @@ public abstract class BatteryStats implements Parcelable {
                 /**
                  * Returns the total number of times startService() has been called.
                  *
-                 * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+                 * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
                  */
                 public abstract int getStarts(int which);
 
                 /**
                  * Returns the total number times the service has been launched.
                  *
-                 * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+                 * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
                  */
                 public abstract int getLaunches(int which);
             }
@@ -1285,7 +1285,7 @@ public abstract class BatteryStats implements Parcelable {
      * Returns the total, last, or current battery uptime in microseconds.
      *
      * @param curTime the elapsed realtime in microseconds.
-     * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+     * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
      */
     public abstract long computeBatteryUptime(long curTime, int which);
 
@@ -1293,7 +1293,7 @@ public abstract class BatteryStats implements Parcelable {
      * Returns the total, last, or current battery realtime in microseconds.
      *
      * @param curTime the current elapsed realtime in microseconds.
-     * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+     * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
      */
     public abstract long computeBatteryRealtime(long curTime, int which);
 
@@ -1301,7 +1301,7 @@ public abstract class BatteryStats implements Parcelable {
      * Returns the total, last, or current battery screen off uptime in microseconds.
      *
      * @param curTime the elapsed realtime in microseconds.
-     * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+     * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
      */
     public abstract long computeBatteryScreenOffUptime(long curTime, int which);
 
@@ -1309,7 +1309,7 @@ public abstract class BatteryStats implements Parcelable {
      * Returns the total, last, or current battery screen off realtime in microseconds.
      *
      * @param curTime the current elapsed realtime in microseconds.
-     * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+     * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
      */
     public abstract long computeBatteryScreenOffRealtime(long curTime, int which);
 
@@ -1317,18 +1317,38 @@ public abstract class BatteryStats implements Parcelable {
      * Returns the total, last, or current uptime in microseconds.
      *
      * @param curTime the current elapsed realtime in microseconds.
-     * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+     * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
      */
     public abstract long computeUptime(long curTime, int which);
 
     /**
      * Returns the total, last, or current realtime in microseconds.
-     * *
+     *
      * @param curTime the current elapsed realtime in microseconds.
-     * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+     * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
      */
     public abstract long computeRealtime(long curTime, int which);
-    
+
+    /**
+     * Compute an approximation for how much run time (in microseconds) is remaining on
+     * the battery.  Returns -1 if no time can be computed: either there is not
+     * enough current data to make a decision, or the battery is currently
+     * charging.
+     *
+     * @param curTime The current elepsed realtime in microseconds.
+     */
+    public abstract long computeBatteryTimeRemaining(long curTime);
+
+    /**
+     * Compute an approximation for how much time (in microseconds) remains until the battery
+     * is fully charged.  Returns -1 if no time can be computed: either there is not
+     * enough current data to make a decision, or the battery is currently
+     * discharging.
+     *
+     * @param curTime The current elepsed realtime in microseconds.
+     */
+    public abstract long computeChargeTimeRemaining(long curTime);
+
     public abstract Map<String, ? extends LongCounter> getWakeupReasonStats();
 
     public abstract Map<String, ? extends Timer> getKernelWakelockStats();
@@ -1430,7 +1450,7 @@ public abstract class BatteryStats implements Parcelable {
      * @param timer a Timer object contining the wakelock times.
      * @param elapsedRealtimeUs the current on-battery time in microseconds.
      * @param name the name of the wakelock.
-     * @param which which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+     * @param which which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
      * @param linePrefix a String to be prepended to each line of output.
      * @return the line prefix
      */
@@ -1464,7 +1484,7 @@ public abstract class BatteryStats implements Parcelable {
      * @param timer a Timer object contining the wakelock times.
      * @param elapsedRealtimeUs the current time in microseconds.
      * @param name the name of the wakelock.
-     * @param which which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+     * @param which which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
      * @param linePrefix a String to be prepended to each line of output.
      * @return the line prefix
      */
@@ -1682,7 +1702,7 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
         
-        BatteryStatsHelper helper = new BatteryStatsHelper(context);
+        BatteryStatsHelper helper = new BatteryStatsHelper(context, false);
         helper.create(this);
         helper.refreshStats(which, UserHandle.USER_ALL);
         List<BatterySipper> sippers = helper.getUsageList();
@@ -1929,6 +1949,8 @@ public abstract class BatteryStats implements Parcelable {
         final long whichBatteryScreenOffUptime = computeBatteryScreenOffUptime(rawUptime, which);
         final long whichBatteryScreenOffRealtime = computeBatteryScreenOffRealtime(rawRealtime,
                 which);
+        final long batteryTimeRemaining = computeBatteryTimeRemaining(rawRealtime);
+        final long chargeTimeRemaining = computeChargeTimeRemaining(rawRealtime);
 
         StringBuilder sb = new StringBuilder(128);
         
@@ -1963,7 +1985,20 @@ public abstract class BatteryStats implements Parcelable {
                 sb.append("realtime, ");
                 formatTimeMs(sb, totalUptime / 1000);
                 sb.append("uptime");
-        pw.println(sb.toString());
+        if (batteryTimeRemaining >= 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+                    sb.append("  Battery time remaining: ");
+                    formatTimeMs(sb, batteryTimeRemaining / 1000);
+            pw.println(sb.toString());
+        }
+        if (chargeTimeRemaining >= 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+                    sb.append("  Charge time remaining: ");
+                    formatTimeMs(sb, chargeTimeRemaining / 1000);
+            pw.println(sb.toString());
+        }
         pw.print("  Start clock time: ");
         pw.println(DateFormat.format("yyyy-MM-dd-HH-mm-ss", getStartClockTime()).toString());
 
@@ -2268,7 +2303,7 @@ public abstract class BatteryStats implements Parcelable {
             pw.println();
         }
 
-        BatteryStatsHelper helper = new BatteryStatsHelper(context);
+        BatteryStatsHelper helper = new BatteryStatsHelper(context, false);
         helper.create(this);
         helper.refreshStats(which, UserHandle.USER_ALL);
         List<BatterySipper> sippers = helper.getUsageList();

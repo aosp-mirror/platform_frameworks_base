@@ -38,6 +38,7 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.WorkSource;
+import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -87,7 +88,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 101 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 103 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -284,7 +285,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mBluetoothState = -1;
     final StopwatchTimer[] mBluetoothStateTimer = new StopwatchTimer[NUM_BLUETOOTH_STATES];
 
-    boolean mMobileRadioActive;
+    int mMobileRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
     StopwatchTimer mMobileRadioActiveTimer;
     StopwatchTimer mMobileRadioActivePerAppTimer;
     LongSamplingCounter mMobileRadioActiveAdjustedTime;
@@ -306,7 +307,9 @@ public final class BatteryStatsImpl extends BatteryStats {
      */
     int mDischargeStartLevel;
     int mDischargeUnplugLevel;
+    int mDischargePlugLevel;
     int mDischargeCurrentLevel;
+    int mCurrentBatteryLevel;
     int mLowDischargeAmountSinceCharge;
     int mHighDischargeAmountSinceCharge;
     int mDischargeScreenOnUnplugLevel;
@@ -2736,40 +2739,41 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void noteDataConnectionActive(int type, boolean active, long timestampNs) {
-        if (ConnectivityManager.isNetworkTypeMobile(type)) {
-            final long elapsedRealtime = SystemClock.elapsedRealtime();
-            final long uptime = SystemClock.uptimeMillis();
-            if (mMobileRadioActive != active) {
-                long realElapsedRealtimeMs;
-                if (active) {
+    public void noteMobileRadioPowerState(int powerState, long timestampNs) {
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        if (mMobileRadioPowerState != powerState) {
+            long realElapsedRealtimeMs;
+            final boolean active =
+                    powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM
+                            || powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH;
+            if (active) {
+                realElapsedRealtimeMs = elapsedRealtime;
+                mHistoryCur.states |= HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG;
+            } else {
+                realElapsedRealtimeMs = timestampNs / (1000*1000);
+                long lastUpdateTimeMs = mMobileRadioActiveTimer.getLastUpdateTimeMs();
+                if (realElapsedRealtimeMs < lastUpdateTimeMs) {
+                    Slog.wtf(TAG, "Data connection inactive timestamp " + realElapsedRealtimeMs
+                            + " is before start time " + lastUpdateTimeMs);
                     realElapsedRealtimeMs = elapsedRealtime;
-                    mHistoryCur.states |= HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG;
-                } else {
-                    realElapsedRealtimeMs = timestampNs / (1000*1000);
-                    long lastUpdateTimeMs = mMobileRadioActiveTimer.getLastUpdateTimeMs();
-                    if (realElapsedRealtimeMs < lastUpdateTimeMs) {
-                        Slog.wtf(TAG, "Data connection inactive timestamp " + realElapsedRealtimeMs
-                                + " is before start time " + lastUpdateTimeMs);
-                        realElapsedRealtimeMs = elapsedRealtime;
-                    } else if (realElapsedRealtimeMs < elapsedRealtime) {
-                        mMobileRadioActiveAdjustedTime.addCountLocked(elapsedRealtime
-                                - realElapsedRealtimeMs);
-                    }
-                    mHistoryCur.states &= ~HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG;
+                } else if (realElapsedRealtimeMs < elapsedRealtime) {
+                    mMobileRadioActiveAdjustedTime.addCountLocked(elapsedRealtime
+                            - realElapsedRealtimeMs);
                 }
-                if (DEBUG_HISTORY) Slog.v(TAG, "Mobile network active " + active + " to: "
-                        + Integer.toHexString(mHistoryCur.states));
-                addHistoryRecordLocked(elapsedRealtime, uptime);
-                mMobileRadioActive = active;
-                if (active) {
-                    mMobileRadioActiveTimer.startRunningLocked(elapsedRealtime);
-                    mMobileRadioActivePerAppTimer.startRunningLocked(elapsedRealtime);
-                } else {
-                    mMobileRadioActiveTimer.stopRunningLocked(realElapsedRealtimeMs);
-                    updateNetworkActivityLocked(NET_UPDATE_MOBILE, realElapsedRealtimeMs);
-                    mMobileRadioActivePerAppTimer.stopRunningLocked(realElapsedRealtimeMs);
-                }
+                mHistoryCur.states &= ~HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG;
+            }
+            if (DEBUG_HISTORY) Slog.v(TAG, "Mobile network active " + active + " to: "
+                    + Integer.toHexString(mHistoryCur.states));
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+            mMobileRadioPowerState = powerState;
+            if (active) {
+                mMobileRadioActiveTimer.startRunningLocked(elapsedRealtime);
+                mMobileRadioActivePerAppTimer.startRunningLocked(elapsedRealtime);
+            } else {
+                mMobileRadioActiveTimer.stopRunningLocked(realElapsedRealtimeMs);
+                updateNetworkActivityLocked(NET_UPDATE_MOBILE, realElapsedRealtimeMs);
+                mMobileRadioActivePerAppTimer.stopRunningLocked(realElapsedRealtimeMs);
             }
         }
     }
@@ -5520,7 +5524,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         initTimes(uptime, realtime);
         mDischargeStartLevel = 0;
         mDischargeUnplugLevel = 0;
+        mDischargePlugLevel = -1;
         mDischargeCurrentLevel = 0;
+        mCurrentBatteryLevel = 0;
         initDischarge();
         clearHistoryLocked();
     }
@@ -5726,7 +5732,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mDischargeStartLevel = mHistoryCur.batteryLevel;
         pullPendingStateUpdatesLocked();
         addHistoryRecordLocked(mSecRealtime, mSecUptime);
-        mDischargeCurrentLevel = mDischargeUnplugLevel = mHistoryCur.batteryLevel;
+        mDischargeCurrentLevel = mDischargeUnplugLevel = mDischargePlugLevel
+                = mCurrentBatteryLevel = mHistoryCur.batteryLevel;
         mOnBatteryTimeBase.reset(uptime, realtime);
         mOnBatteryScreenOffTimeBase.reset(uptime, realtime);
         if ((mHistoryCur.states&HistoryItem.STATE_BATTERY_PLUGGED_FLAG) == 0) {
@@ -5907,7 +5914,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "Battery plugged to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(mSecRealtime, mSecUptime);
-            mDischargeCurrentLevel = level;
+            mDischargeCurrentLevel = mDischargePlugLevel = level;
             if (level < mDischargeUnplugLevel) {
                 mLowDischargeAmountSinceCharge += mDischargeUnplugLevel-level-1;
                 mHighDischargeAmountSinceCharge += mDischargeUnplugLevel-level;
@@ -5970,6 +5977,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                     mRecordingHistory = true;
                     startRecordingHistory(elapsedRealtime, uptime, true);
                 }
+            }
+            mCurrentBatteryLevel = level;
+            if (mDischargePlugLevel < 0) {
+                mDischargePlugLevel = level;
             }
             if (onBattery != mOnBattery) {
                 mHistoryCur.batteryLevel = (byte)level;
@@ -6222,6 +6233,42 @@ public final class BatteryStatsImpl extends BatteryStats {
     @Override
     public long computeBatteryScreenOffRealtime(long curTime, int which) {
         return mOnBatteryScreenOffTimeBase.computeRealtime(curTime, which);
+    }
+
+    @Override
+    public long computeBatteryTimeRemaining(long curTime) {
+        if (!mOnBattery) {
+            return -1;
+        }
+        int discharge = (getLowDischargeAmountSinceCharge()+getHighDischargeAmountSinceCharge())/2;
+        if (discharge < 2) {
+            return -1;
+        }
+        long duration = computeBatteryRealtime(curTime, STATS_SINCE_CHARGED);
+        if (duration < 1000*1000) {
+            return -1;
+        }
+        long usPerLevel = duration/discharge;
+        return usPerLevel * mCurrentBatteryLevel;
+    }
+
+    @Override
+    public long computeChargeTimeRemaining(long curTime) {
+        if (true || mOnBattery) {
+            // Not yet working.
+            return -1;
+        }
+        int curLevel = mCurrentBatteryLevel;
+        int plugLevel = mDischargePlugLevel;
+        if (plugLevel < 0 || curLevel < (plugLevel+1)) {
+            return -1;
+        }
+        long duration = computeBatteryRealtime(curTime, STATS_SINCE_UNPLUGGED);
+        if (duration < 1000*1000) {
+            return -1;
+        }
+        long usPerLevel = duration/(curLevel-plugLevel);
+        return usPerLevel * (100-curLevel);
     }
 
     long getBatteryUptimeLocked() {
@@ -6722,7 +6769,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         mOnBatteryTimeBase.readSummaryFromParcel(in);
         mOnBatteryScreenOffTimeBase.readSummaryFromParcel(in);
         mDischargeUnplugLevel = in.readInt();
+        mDischargePlugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
+        mCurrentBatteryLevel = in.readInt();
         mLowDischargeAmountSinceCharge = in.readInt();
         mHighDischargeAmountSinceCharge = in.readInt();
         mDischargeAmountScreenOnSinceCharge = in.readInt();
@@ -6749,7 +6798,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mNetworkByteActivityCounters[i].readSummaryFromParcelLocked(in);
             mNetworkPacketActivityCounters[i].readSummaryFromParcelLocked(in);
         }
-        mMobileRadioActive = false;
+        mMobileRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
         mMobileRadioActiveTimer.readSummaryFromParcelLocked(in);
         mMobileRadioActivePerAppTimer.readSummaryFromParcelLocked(in);
         mMobileRadioActiveAdjustedTime.readSummaryFromParcelLocked(in);
@@ -6974,7 +7023,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         mOnBatteryTimeBase.writeSummaryToParcel(out, NOW_SYS, NOWREAL_SYS);
         mOnBatteryScreenOffTimeBase.writeSummaryToParcel(out, NOW_SYS, NOWREAL_SYS);
         out.writeInt(mDischargeUnplugLevel);
+        out.writeInt(mDischargePlugLevel);
         out.writeInt(mDischargeCurrentLevel);
+        out.writeInt(mCurrentBatteryLevel);
         out.writeInt(getLowDischargeAmountSinceCharge());
         out.writeInt(getHighDischargeAmountSinceCharge());
         out.writeInt(getDischargeAmountScreenOnSinceCharge());
@@ -7262,7 +7313,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mNetworkByteActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase, in);
             mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase, in);
         }
-        mMobileRadioActive = false;
+        mMobileRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
         mMobileRadioActiveTimer = new StopwatchTimer(null, -400, null, mOnBatteryTimeBase, in);
         mMobileRadioActivePerAppTimer = new StopwatchTimer(null, -401, null, mOnBatteryTimeBase,
                 in);
@@ -7284,7 +7335,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                     null, mOnBatteryTimeBase, in);
         }
         mDischargeUnplugLevel = in.readInt();
+        mDischargePlugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
+        mCurrentBatteryLevel = in.readInt();
         mLowDischargeAmountSinceCharge = in.readInt();
         mHighDischargeAmountSinceCharge = in.readInt();
         mDischargeAmountScreenOn = in.readInt();
@@ -7402,7 +7455,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             mBluetoothStateTimer[i].writeToParcel(out, uSecRealtime);
         }
         out.writeInt(mDischargeUnplugLevel);
+        out.writeInt(mDischargePlugLevel);
         out.writeInt(mDischargeCurrentLevel);
+        out.writeInt(mCurrentBatteryLevel);
         out.writeInt(mLowDischargeAmountSinceCharge);
         out.writeInt(mHighDischargeAmountSinceCharge);
         out.writeInt(mDischargeAmountScreenOn);
@@ -7499,6 +7554,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 pr.println("*** Data connection type #" + i + ":");
                 mPhoneDataConnectionsTimer[i].logState(pr, "  ");
             }
+            pr.println("*** mMobileRadioPowerState=" + mMobileRadioPowerState);
             pr.println("*** Mobile network active timer:");
             mMobileRadioActiveTimer.logState(pr, "  ");
             pr.println("*** Mobile network active adjusted timer:");

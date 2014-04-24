@@ -32,6 +32,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
@@ -248,10 +249,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
-    public void noteDataConnectionActive(int type, boolean active, long timestampNs) {
+    public void noteMobileRadioPowerState(int powerState, long timestampNs) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteDataConnectionActive(type, active, timestampNs);
+            mStats.noteMobileRadioPowerState(powerState, timestampNs);
         }
     }
 
