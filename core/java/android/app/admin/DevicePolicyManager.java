@@ -33,6 +33,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.service.trust.TrustAgentService;
 import android.util.Log;
 
 import com.android.org.conscrypt.TrustedCertificateStore;
@@ -1267,7 +1268,8 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_FEATURES_NONE = 0;
 
     /**
-     * Disable all keyguard widgets
+     * Disable all keyguard widgets. Has no effect.
+     * @deprecated
      */
     public static final int KEYGUARD_DISABLE_WIDGETS_ALL = 1 << 0;
 
@@ -1275,6 +1277,22 @@ public class DevicePolicyManager {
      * Disable the camera on secure keyguard screens (e.g. PIN/Pattern/Password)
      */
     public static final int KEYGUARD_DISABLE_SECURE_CAMERA = 1 << 1;
+
+    /**
+     * Disable showing all notifications on secure keyguard screens (e.g. PIN/Pattern/Password)
+     */
+    public static final int KEYGUARD_DISABLE_SECURE_NOTIFICATIONS = 1 << 2;
+
+    /**
+     * Only allow redacted notifications on secure keyguard screens (e.g. PIN/Pattern/Password)
+     */
+    public static final int KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS = 1 << 3;
+
+    /**
+     * Ignore {@link TrustAgentService} state on secure keyguard screens
+     * (e.g. PIN/Pattern/Password).
+     */
+    public static final int KEYGUARD_DISABLE_TRUST_AGENTS = 1 << 4;
 
     /**
      * Disable all current and future keyguard customizations.
@@ -1496,7 +1514,8 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param which {@link #KEYGUARD_DISABLE_FEATURES_NONE} (default),
      * {@link #KEYGUARD_DISABLE_WIDGETS_ALL}, {@link #KEYGUARD_DISABLE_SECURE_CAMERA},
-     * {@link #KEYGUARD_DISABLE_FEATURES_ALL}
+     * {@link #KEYGUARD_DISABLE_SECURE_NOTIFICATIONS}, {@link #KEYGUARD_DISABLE_TRUST_AGENTS},
+     * {@link #KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS}, {@link #KEYGUARD_DISABLE_FEATURES_ALL}
      */
     public void setKeyguardDisabledFeatures(ComponentName admin, int which) {
         if (mService != null) {
