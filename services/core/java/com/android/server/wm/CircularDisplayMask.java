@@ -22,7 +22,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
@@ -40,6 +39,7 @@ class CircularDisplayMask {
     private int mLastDH;
     private boolean mDrawNeeded;
     private Paint mPaint;
+    private int mRotation;
 
     public CircularDisplayMask(Display display, SurfaceSession session, int zOrder) {
         SurfaceControl ctrl = null;
@@ -78,7 +78,26 @@ class CircularDisplayMask {
         if (c == null) {
             return;
         }
-        c.drawCircle(160, 160, 160, mPaint);
+        int cx = 160;
+        int cy = 160;
+        switch (mRotation) {
+            case Surface.ROTATION_0:
+            case Surface.ROTATION_90:
+                // chin bottom or right
+                cx = 160;
+                cy = 160;
+                break;
+            case Surface.ROTATION_180:
+                // chin top
+                cx = 160;
+                cy = 145;
+                break;
+            case Surface.ROTATION_270:
+                cx = 145;
+                cy = 160;
+                break;
+        }
+        c.drawCircle(cx, cy, 160, mPaint);
 
         mSurface.unlockCanvasAndPost(c);
     }
@@ -97,7 +116,7 @@ class CircularDisplayMask {
         }
     }
 
-    void positionSurface(int dw, int dh) {
+    void positionSurface(int dw, int dh, int rotation) {
         if (mLastDW == dw && mLastDH == dh) {
             return;
         }
@@ -105,6 +124,7 @@ class CircularDisplayMask {
         mLastDH = dh;
         mSurfaceControl.setSize(dw, dh);
         mDrawNeeded = true;
+        mRotation = rotation;
     }
 
 }
