@@ -30,15 +30,16 @@
 #include "android_util_Binder.h"
 #include "JNIHelp.h"
 
-#include <sys/errno.h>
-#include <sys/resource.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <grp.h>
+#include <inttypes.h>
 #include <pwd.h>
 #include <signal.h>
+#include <sys/errno.h>
+#include <sys/resource.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #define POLICY_DEBUG 0
@@ -159,7 +160,7 @@ jint android_os_Process_getGidForName(JNIEnv* env, jobject clazz, jstring name)
 
 void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int tid, jint grp)
 {
-    ALOGV("%s tid=%d grp=%d", __func__, tid, grp);
+    ALOGV("%s tid=%d grp=%" PRId32, __func__, tid, grp);
     SchedPolicy sp = (SchedPolicy) grp;
     int res = set_sched_policy(tid, sp);
     if (res != NO_ERROR) {
@@ -169,7 +170,7 @@ void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int tid, jint
 
 void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
 {
-    ALOGV("%s pid=%d grp=%d", __func__, pid, grp);
+    ALOGV("%s pid=%d grp=%" PRId32, __func__, pid, grp);
     DIR *d;
     FILE *fp;
     char proc_path[255];
@@ -322,7 +323,7 @@ void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
         }
     }
 
-    //ALOGI("Setting priority of %d: %d, getpriority returns %d\n",
+    //ALOGI("Setting priority of %" PRId32 ": %" PRId32 ", getpriority returns %d\n",
     //     pid, pri, getpriority(PRIO_PROCESS, pid));
 }
 
@@ -340,7 +341,7 @@ jint android_os_Process_getThreadPriority(JNIEnv* env, jobject clazz,
     if (errno != 0) {
         signalExceptionForPriorityError(env, errno);
     }
-    //ALOGI("Returning priority of %d: %d\n", pid, pri);
+    //ALOGI("Returning priority of %" PRId32 ": %" PRId32 "\n", pid, pri);
     return pri;
 }
 
@@ -379,7 +380,7 @@ jboolean android_os_Process_setSwappiness(JNIEnv *env, jobject clazz,
 
     int fd = open(text, O_WRONLY);
     if (fd >= 0) {
-        sprintf(text, "%d", pid);
+        sprintf(text, "%" PRId32, pid);
         write(fd, text, strlen(text));
         close(fd);
     }
@@ -420,7 +421,7 @@ jint android_os_Process_setGid(JNIEnv* env, jobject clazz, jint uid)
 
 static int pid_compare(const void* v1, const void* v2)
 {
-    //ALOGI("Compare %d vs %d\n", *((const jint*)v1), *((const jint*)v2));
+    //ALOGI("Compare %" PRId32 " vs %" PRId32 "\n", *((const jint*)v1), *((const jint*)v2));
     return *((const jint*)v1) - *((const jint*)v2);
 }
 
@@ -534,7 +535,7 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
         return;
     }
 
-    //ALOGI("Clearing %d sizes", count);
+    //ALOGI("Clearing %" PRId32 " sizes", count);
     for (i=0; i<count; i++) {
         sizesArray[i] = 0;
     }
@@ -573,7 +574,7 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
                     }
                     char* end;
                     sizesArray[i] = strtoll(num, &end, 10);
-                    //ALOGI("Field %s = %d", field.string(), sizesArray[i]);
+                    //ALOGI("Field %s = %" PRId64, field.string(), sizesArray[i]);
                     foundCount++;
                     break;
                 }
@@ -775,7 +776,7 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
             }
         }
 
-        //ALOGI("Field %d: %d-%d dest=%d mode=0x%x\n", i, start, end, di, mode);
+        //ALOGI("Field %" PRId32 ": %" PRId32 "-%" PRId32 " dest=%" PRId32 " mode=0x%" PRIx32 "\n", i, start, end, di, mode);
 
         if ((mode&(PROC_OUT_FLOAT|PROC_OUT_LONG|PROC_OUT_STRING)) != 0) {
             char c = buffer[end];
@@ -874,7 +875,7 @@ void android_os_Process_setApplicationObject(JNIEnv* env, jobject clazz,
 void android_os_Process_sendSignal(JNIEnv* env, jobject clazz, jint pid, jint sig)
 {
     if (pid > 0) {
-        ALOGI("Sending signal. PID: %d SIG: %d", pid, sig);
+        ALOGI("Sending signal. PID: %" PRId32 " SIG: %" PRId32, pid, sig);
         kill(pid, sig);
     }
 }
@@ -904,7 +905,7 @@ static jlong android_os_Process_getPss(JNIEnv* env, jobject clazz, jint pid)
 {
     char filename[64];
 
-    snprintf(filename, sizeof(filename), "/proc/%d/smaps", pid);
+    snprintf(filename, sizeof(filename), "/proc/%" PRId32 "/smaps", pid);
 
     FILE * file = fopen(filename, "r");
     if (!file) {
@@ -916,7 +917,7 @@ static jlong android_os_Process_getPss(JNIEnv* env, jobject clazz, jint pid)
     jlong pss = 0;
     while (fgets(line, sizeof(line), file)) {
         jlong v;
-        if (sscanf(line, "Pss: %lld kB", &v) == 1) {
+        if (sscanf(line, "Pss: %" SCNd64 " kB", &v) == 1) {
             pss += v;
         }
     }
