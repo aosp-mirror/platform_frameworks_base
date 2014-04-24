@@ -1957,4 +1957,48 @@ public class DevicePolicyManager {
         }
         return null;
     }
+
+    /**
+     * Called by a profile or device owner to set a user restriction specified
+     * by the key.
+     * <p>
+     * The calling device admin must be a profile or device owner; if it is not,
+     * a security exception will be thrown.
+     * 
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated
+     *            with.
+     * @param key The key of the restriction. See the constants in
+     *            {@link android.os.UserManager} for the list of keys.
+     */
+    public void addUserRestriction(ComponentName admin, String key) {
+        if (mService != null) {
+            try {
+                mService.setUserRestriction(admin, key, true);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Called by a profile or device owner to clear a user restriction specified
+     * by the key.
+     * <p>
+     * The calling device admin must be a profile or device owner; if it is not,
+     * a security exception will be thrown.
+     * 
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated
+     *            with.
+     * @param key The key of the restriction. See the constants in
+     *            {@link android.os.UserManager} for the list of keys.
+     */
+    public void clearUserRestriction(ComponentName admin, String key) {
+        if (mService != null) {
+            try {
+                mService.setUserRestriction(admin, key, false);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
 }
