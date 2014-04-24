@@ -20,6 +20,7 @@
 <!-- This contains emergency call button and carrier as shared by pin/pattern/password screens -->
 <com.android.keyguard.EmergencyCarrierArea
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -35,7 +36,8 @@
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/kg_status_line_font_size"
-        android:textColor="?android:attr/textColorSecondary" />
+        android:textColor="?android:attr/textColorSecondary"
+        androidprv:allCaps="@bool/kg_use_all_caps" />
 
     <LinearLayout
         android:layout_width="match_parent"

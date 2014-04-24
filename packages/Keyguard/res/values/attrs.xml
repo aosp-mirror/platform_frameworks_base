@@ -133,4 +133,8 @@
         <attr name="digit" format="integer" />
         <attr name="textView" format="reference" />
     </declare-styleable>
+
+    <declare-styleable name="CarrierText">
+        <attr name="allCaps" format="boolean" />
+    </declare-styleable>
 </resources>
