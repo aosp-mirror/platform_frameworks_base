@@ -160,6 +160,18 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
+    public void onTrackingStarted(PanelView panel) {
+        super.onTrackingStarted(panel);
+        mBar.onTrackingStarted();
+    }
+
+    @Override
+    public void onTrackingStopped(PanelView panel) {
+        super.onTrackingStopped(panel);
+        mBar.onTrackingStopped();
+    }
+
+    @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
         return mBar.interceptTouchEvent(event) || super.onInterceptTouchEvent(event);
     }

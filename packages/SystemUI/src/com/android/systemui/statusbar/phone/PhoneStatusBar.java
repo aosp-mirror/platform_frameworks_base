@@ -232,6 +232,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     View mNotificationPanelHeader;
     View mKeyguardStatusView;
     View mKeyguardBottomArea;
+    KeyguardIndicationTextView mKeyguardIndicationTextView;
+
+    // TODO: Fetch phrase from search/hotword provider.
+    String mKeyguardHotwordPhrase = "";
     int mKeyguardMaxNotificationCount;
     View mDateTimeView;
     View mClearButton;
@@ -618,7 +622,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mNotificationPanelHeader = mStatusBarWindow.findViewById(R.id.header);
         mKeyguardStatusView = mStatusBarWindow.findViewById(R.id.keyguard_status_view);
         mKeyguardBottomArea = mStatusBarWindow.findViewById(R.id.keyguard_bottom_area);
-
+        mKeyguardIndicationTextView = (KeyguardIndicationTextView) mStatusBarWindow.findViewById(
+                R.id.keyguard_indication_text);
         mClearButton = mStatusBarWindow.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
         mClearButton.setAlpha(0f);
@@ -2923,6 +2928,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
             mKeyguardStatusView.setVisibility(View.VISIBLE);
             mKeyguardBottomArea.setVisibility(View.VISIBLE);
+            mKeyguardIndicationTextView.setVisibility(View.VISIBLE);
+            mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
             mNotificationPanelHeader.setVisibility(View.GONE);
 
             mKeyguardFlipper.setVisibility(View.VISIBLE);
@@ -2930,6 +2937,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         } else {
             mKeyguardStatusView.setVisibility(View.GONE);
             mKeyguardBottomArea.setVisibility(View.GONE);
+            mKeyguardIndicationTextView.setVisibility(View.GONE);
             mNotificationPanelHeader.setVisibility(View.VISIBLE);
 
             mKeyguardFlipper.setVisibility(View.GONE);
@@ -2985,7 +2993,26 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     @Override
     public void onActivated(View view) {
         userActivity();
+        mKeyguardIndicationTextView.switchIndication(R.string.notification_tap_again);
         super.onActivated(view);
+    }
+
+    @Override
+    public void onReset(View view) {
+        super.onReset(view);
+        mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
+    }
+
+    public void onTrackingStarted() {
+        if (mOnKeyguard) {
+            mKeyguardIndicationTextView.switchIndication(R.string.keyguard_unlock);
+        }
+    }
+
+    public void onTrackingStopped() {
+        if (mOnKeyguard) {
+            mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
+        }
     }
 
     @Override
