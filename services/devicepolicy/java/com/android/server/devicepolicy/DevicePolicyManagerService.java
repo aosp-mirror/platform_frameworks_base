@@ -2828,7 +2828,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return null;
         }
         synchronized (this) {
-            if (mDeviceOwner != null) {
+            if (mDeviceOwner != null && mDeviceOwner.hasDeviceOwner()) {
                 return mDeviceOwner.getDeviceOwnerPackageName();
             }
         }
