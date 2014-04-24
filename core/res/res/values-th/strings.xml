@@ -173,6 +173,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"โหมดใช้งานบนเครื่องบิน"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"เปิดโหมดใช้งานบนเครื่องบิน"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"โหมดใช้งานบนเครื่องบินปิดทำงานอยู่"</string>
+    <string name="global_action_settings" msgid="1756531602592545966">"การตั้งค่า"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"โหมดปลอดภัย"</string>
     <string name="android_system_label" msgid="6577375335728551336">"ระบบ Android"</string>
@@ -331,8 +332,8 @@
     <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"ช่วยให้เจ้าของสามารถดึงข้อมูลส่วนตัวเกี่ยวกับแอปพลิเคชันปัจจุบันในส่วนหน้าของหน้าจอ"</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"ตรวจสอบและควบคุมแอปพลิเคชันทั้งหมดที่เปิดใช้งาน"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"อนุญาตให้แอปพลิเคชันตรวจสอบและควบคุมวิธีการที่ระบบเปิดกิจกรรมต่างๆ แอปพลิเคชันที่เป็นอันตรายอาจทำอันตรายแก่ระบบได้อย่างสิ้นเชิง การอนุญาตนี้จำเป็นสำหรับการพัฒนาเท่านั้น ไม่ใช้สำหรับแอปพลิเคชันทั่วไปโดยเด็ดขาด"</string>
-    <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"ส่งการกระจายข้อมูลว่ามีการนำแพคเกจออก"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"อนุญาตให้แอปพลิเคชันกระจายข้อมูลการแจ้งเตือนว่าแพคเกจของแอปพลิเคชันหนึ่งๆ ได้ถูกนำออกไปแล้ว แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ยุติแอปพลิเคชันอื่นๆ ที่กำลังทำงานอยู่"</string>
+    <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"ส่งการกระจายข้อมูลว่ามีการนำแพ็กเกจออก"</string>
+    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"อนุญาตให้แอปพลิเคชันกระจายข้อมูลการแจ้งเตือนว่าแพ็กเกจของแอปพลิเคชันหนึ่งๆ ได้ถูกนำออกไปแล้ว แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ยุติแอปพลิเคชันอื่นๆ ที่กำลังทำงานอยู่"</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"ส่งการกระจายข้อมูลว่าได้รับ SMS"</string>
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"อนุญาตให้แอปพลิเคชันกระจายข้อมูลการแจ้งเตือนว่าได้รับข้อความ SMS แล้ว แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ปลอมข้อความ SMS ที่เข้ามา"</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"ส่งการกระจายข้อมูลว่าได้รับ WAP-PUSH"</string>
@@ -410,7 +411,7 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"อนุญาตให้แอปพลิเคชันทำให้ส่วนหนึ่งของตัวเองคงอยู่ถาวรในหน่วยความจำ ซึ่งจะจำกัดพื้นที่หน่วยความจำที่ใช้งานได้ของแอปพลิเคชันอื่นๆ และทำให้แท็บเล็ตทำงานช้าลง"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"อนุญาตให้แอปพลิเคชันทำให้ส่วนหนึ่งของตัวเองคงอยู่ถาวรในหน่วยความจำ ซึ่งจะจำกัดพื้นที่หน่วยความจำที่ใช้งานได้ของแอปพลิเคชันอื่นๆ และทำให้โทรศัพท์ทำงานช้าลง"</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"ลบแอปพลิเคชัน"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"อนุญาตให้แอปพลิเคชันลบแพคเกจ Android แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ลบแอปพลิเคชันที่สำคัญ"</string>
+    <string name="permdesc_deletePackages" msgid="7411480275167205081">"อนุญาตให้แอปพลิเคชันลบแพ็กเกจ Android แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ลบแอปพลิเคชันที่สำคัญ"</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"ลบข้อมูลของแอปพลิเคชันอื่น"</string>
     <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"อนุญาตให้แอปพลิเคชันล้างข้อมูลผู้ใช้"</string>
     <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"ลบแคชของแอปพลิเคชันอื่น"</string>
@@ -418,7 +419,7 @@
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"วัดพื้นที่เก็บข้อมูลของแอปพลิเคชัน"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"อนุญาตให้แอปพลิเคชันเรียกดูรหัส ข้อมูล และขนาดแคชของตน"</string>
     <string name="permlab_installPackages" msgid="2199128482820306924">"ติดตั้งแอปพลิเคชันโดยตรง"</string>
-    <string name="permdesc_installPackages" msgid="5628530972548071284">"อนุญาตให้แอปพลิเคชันติดตั้งแพคเกจ Android ใหม่หรือที่อัปเดต แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ในการเพิ่มแอปพลิเคชันใหม่ๆ ด้วยสิทธิ์ที่สูงนี้ได้ตามต้องการ"</string>
+    <string name="permdesc_installPackages" msgid="5628530972548071284">"อนุญาตให้แอปพลิเคชันติดตั้งแพ็กเกจ Android ใหม่หรือที่อัปเดต แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ในการเพิ่มแอปพลิเคชันใหม่ๆ ด้วยสิทธิ์ที่สูงนี้ได้ตามต้องการ"</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"ลบข้อมูลแคชของแอปพลิเคชันทั้งหมด"</string>
     <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"อนุญาตให้แอปพลิเคชันสร้างพื้นที่ว่างในที่จัดเก็บข้อมูลของแท็บเล็ต โดยลบไฟล์ในไดเรกทอรีแคชของแอปพลิเคชันอื่นๆ ซึ่งอาจทำให้แอปพลิเคชันอื่นเริ่มทำงานช้ากว่าเดิมเนื่องจากต้องดึงข้อมูลของตนซ้ำ"</string>
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"อนุญาตให้แอปพลิเคชันสร้างพื้นที่ว่างในที่จัดเก็บข้อมูลของโทรศัพท์ โดยลบไฟล์ในไดเรกทอรีแคชของแอปพลิเคชันอื่นๆ ซึ่งอาจทำให้แอปพลิเคชันอื่นเริ่มทำงานช้ากว่าเดิมเนื่องจากต้องดึงข้อมูลของตนซ้ำ"</string>
@@ -944,7 +945,7 @@
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"การทดสอบจากโรงงานล้มเหลว"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"การทำงาน FACTORY_TEST ได้รับการสนับสนุนเฉพาะสำหรับแพ็คเก็จที่ติดตั้งใน /system/app เท่านั้น"</string>
-    <string name="factorytest_no_action" msgid="872991874799998561">"ไม่พบแพคเกจที่มีการทำงาน FACTORY_TEST"</string>
+    <string name="factorytest_no_action" msgid="872991874799998561">"ไม่พบแพ็กเกจที่มีการทำงาน FACTORY_TEST"</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"รีบูต"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"หน้าเว็บที่ \"<xliff:g id="TITLE">%s</xliff:g>\" ระบุว่า:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
@@ -983,10 +984,10 @@
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"อนุญาตให้แอปพลิเคชันเพิ่มข้อความลงในกล่องข้อความเสียงของคุณ"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"แก้ไขการอนุญาตเกี่ยวกับการระบุตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"อนุญาตให้แอปพลิเคชันแก้ไขการอนุญาตตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์ แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ในการส่งข้อมูลตำแหน่งไปยังเว็บไซต์ต่างๆ ได้ตามต้องการ"</string>
-    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ยืนยันแพคเกจ"</string>
-    <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"อนุญาตให้แอปพลิเคชันยืนยันว่าแพคเกจสามารถติดตั้งได้หรือไม่"</string>
-    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"เชื่อมโยงกับการยืนยันแพคเกจ"</string>
-    <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"อนุญาตให้ผู้ใช้ส่งคำขอให้มีการยืนยันแพคเกจ ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
+    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ยืนยันแพ็กเกจ"</string>
+    <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"อนุญาตให้แอปพลิเคชันยืนยันว่าแพ็กเกจสามารถติดตั้งได้หรือไม่"</string>
+    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"เชื่อมโยงกับการยืนยันแพ็กเกจ"</string>
+    <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"อนุญาตให้ผู้ใช้ส่งคำขอให้มีการยืนยันแพ็กเกจ ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"เข้าถึงพอร์ตอนุกรม"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"อนุญาตให้ผู้ถือสามารถเข้าถึงพอร์ตอนุกรมโดยใช้ SerialManager API"</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"เข้าถึงผู้ให้บริการเนื้อหาจากภายนอก"</string>

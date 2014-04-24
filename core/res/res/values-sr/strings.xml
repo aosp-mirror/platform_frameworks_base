@@ -173,6 +173,8 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Режим рада у авиону"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Режим рада у авиону је УКЉУЧЕН"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Режим рада у авиону је ИСКЉУЧЕН"</string>
+    <!-- no translation found for global_action_settings (1756531602592545966) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безбедни режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android систем"</string>
@@ -899,7 +901,7 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Откључавање налога"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Превише покушаја уноса шаблона"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Да бисте откључали, пријавите се помоћу Google налога."</string>
-    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Корисничко име (адреса е-поште)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Корисничко име (имејл адреса)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Лозинка"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Пријави ме"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Неважеће корисничко име или лозинка."</string>
@@ -1556,7 +1558,7 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN кодови се не подударају"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Превише покушаја уноса шаблона"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Да бисте откључали, пријавите се помоћу Google налога."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"Корисничко име (адреса е-поште)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Корисничко име (имејл адреса)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Лозинка"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Пријави ме"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Неважеће корисничко име или лозинка."</string>
