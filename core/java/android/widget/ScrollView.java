@@ -138,6 +138,12 @@ public class ScrollView extends FrameLayout {
     private int mActivePointerId = INVALID_POINTER;
 
     /**
+     * Used during scrolling to retrieve the new offset within the window.
+     */
+    private final int[] mScrollOffset = new int[2];
+    private final int[] mScrollConsumed = new int[2];
+
+    /**
      * The StrictMode "critical time span" objects to catch animation
      * stutters.  Non-null when a time-sensitive animation is
      * in-flight.  Must call finish() on them when done animating.
@@ -505,7 +511,7 @@ public class ScrollView extends FrameLayout {
 
                 final int y = (int) ev.getY(pointerIndex);
                 final int yDiff = Math.abs(y - mLastMotionY);
-                if (yDiff > mTouchSlop) {
+                if (yDiff > mTouchSlop && (getNestedScrollAxes() & SCROLL_AXIS_VERTICAL) == 0) {
                     mIsBeingDragged = true;
                     mLastMotionY = y;
                     initVelocityTrackerIfNotExists();
@@ -606,6 +612,7 @@ public class ScrollView extends FrameLayout {
                 // Remember where the motion event started
                 mLastMotionY = (int) ev.getY();
                 mActivePointerId = ev.getPointerId(0);
+                startNestedScroll(SCROLL_AXIS_VERTICAL);
                 break;
             }
             case MotionEvent.ACTION_MOVE:
@@ -617,6 +624,9 @@ public class ScrollView extends FrameLayout {
 
                 final int y = (int) ev.getY(activePointerIndex);
                 int deltaY = mLastMotionY - y;
+                if (dispatchNestedPreScroll(0, deltaY, mScrollConsumed, mScrollOffset)) {
+                    deltaY -= mScrollConsumed[1] + mScrollOffset[1];
+                }
                 if (!mIsBeingDragged && Math.abs(deltaY) > mTouchSlop) {
                     final ViewParent parent = getParent();
                     if (parent != null) {
@@ -633,22 +643,25 @@ public class ScrollView extends FrameLayout {
                     // Scroll to follow the motion event
                     mLastMotionY = y;
 
-                    final int oldX = mScrollX;
                     final int oldY = mScrollY;
                     final int range = getScrollRange();
                     final int overscrollMode = getOverScrollMode();
-                    final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
+                    boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
                             (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0);
 
                     // Calling overScrollBy will call onOverScrolled, which
                     // calls onScrollChanged if applicable.
-                    if (overScrollBy(0, deltaY, 0, mScrollY,
-                            0, range, 0, mOverscrollDistance, true)) {
+                    if (overScrollBy(0, deltaY, 0, mScrollY, 0, range, 0, mOverscrollDistance, true)
+                            && !hasNestedScrollingParent()) {
                         // Break our velocity if we hit a scroll barrier.
                         mVelocityTracker.clear();
                     }
 
-                    if (canOverscroll) {
+                    final int scrolledDeltaY = mScrollY - oldY;
+                    final int unconsumedY = deltaY - scrolledDeltaY;
+                    if (dispatchNestedScroll(0, scrolledDeltaY, 0, unconsumedY, mScrollOffset)) {
+                        mLastMotionY -= mScrollOffset[1];
+                    } else if (canOverscroll) {
                         final int pulledToY = oldY + deltaY;
                         if (pulledToY < 0) {
                             mEdgeGlowTop.onPull((float) deltaY / getHeight());
@@ -674,15 +687,11 @@ public class ScrollView extends FrameLayout {
                     velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                     int initialVelocity = (int) velocityTracker.getYVelocity(mActivePointerId);
 
-                    if (getChildCount() > 0) {
-                        if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
-                            fling(-initialVelocity);
-                        } else {
-                            if (mScroller.springBack(mScrollX, mScrollY, 0, 0, 0,
-                                    getScrollRange())) {
-                                postInvalidateOnAnimation();
-                            }
-                        }
+                    if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
+                        flingWithNestedDispatch(-initialVelocity);
+                    } else if (mScroller.springBack(mScrollX, mScrollY, 0, 0, 0,
+                            getScrollRange())) {
+                        postInvalidateOnAnimation();
                     }
 
                     mActivePointerId = INVALID_POINTER;
@@ -1553,6 +1562,15 @@ public class ScrollView extends FrameLayout {
         }
     }
 
+    private void flingWithNestedDispatch(int velocityY) {
+        if (mScrollY == 0 && velocityY < 0 ||
+                mScrollY == getScrollRange() && velocityY > 0) {
+            dispatchNestedFling(0, velocityY);
+        } else {
+            fling(velocityY);
+        }
+    }
+
     private void endDrag() {
         mIsBeingDragged = false;
 
@@ -1600,6 +1618,34 @@ public class ScrollView extends FrameLayout {
             mEdgeGlowBottom = null;
         }
         super.setOverScrollMode(mode);
+    }
+
+    @Override
+    public boolean onStartNestedScroll(View child, View target, int nestedScrollAxes) {
+        return (nestedScrollAxes & SCROLL_AXIS_VERTICAL) != 0;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void onStopNestedScroll(View target) {
+        super.onStopNestedScroll(target);
+    }
+
+    @Override
+    public void onNestedScroll(View target, int dxConsumed, int dyConsumed,
+            int dxUnconsumed, int dyUnconsumed) {
+        scrollBy(0, dyUnconsumed);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public boolean onNestedFling(View target, float velocityX, float velocityY) {
+        flingWithNestedDispatch((int) velocityY);
+        return true;
     }
 
     @Override

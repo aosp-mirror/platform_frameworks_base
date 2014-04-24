@@ -1801,6 +1801,7 @@
   <java-symbol type="attr" name="amPmSelectedBackgroundColor" />
   <java-symbol type="attr" name="numbersSelectorColor" />
   <java-symbol type="attr" name="timePickerHeaderTimeLabelTextAppearance" />
+  <java-symbol type="attr" name="nestedScrollingEnabled" />
   <java-symbol type="style" name="TextAppearance.Holo.TimePicker.TimeLabel" />
   <java-symbol type="layout" name="time_picker_holo" />
   <java-symbol type="layout" name="time_header_label" />

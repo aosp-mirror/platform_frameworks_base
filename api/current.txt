@@ -826,6 +826,7 @@ package android {
     field public static final int name = 16842755; // 0x1010003
     field public static final int navigationMode = 16843471; // 0x10102cf
     field public static final int negativeButtonText = 16843254; // 0x10101f6
+    field public static final int nestedScrollingEnabled = 16843843; // 0x1010443
     field public static final int nextFocusDown = 16842980; // 0x10100e4
     field public static final int nextFocusForward = 16843580; // 0x101033c
     field public static final int nextFocusLeft = 16842977; // 0x10100e1
@@ -1286,8 +1287,8 @@ package android {
     field public static final int windowActionBar = 16843469; // 0x10102cd
     field public static final int windowActionBarOverlay = 16843492; // 0x10102e4
     field public static final int windowActionModeOverlay = 16843485; // 0x10102dd
-    field public static final int windowAllowEnterTransitionOverlap = 16843848; // 0x1010448
-    field public static final int windowAllowExitTransitionOverlap = 16843847; // 0x1010447
+    field public static final int windowAllowEnterTransitionOverlap = 16843849; // 0x1010449
+    field public static final int windowAllowExitTransitionOverlap = 16843848; // 0x1010448
     field public static final int windowAnimationStyle = 16842926; // 0x10100ae
     field public static final int windowBackground = 16842836; // 0x1010054
     field public static final int windowCloseOnTouchOutside = 16843611; // 0x101035b
@@ -1297,9 +1298,9 @@ package android {
     field public static final int windowDisablePreview = 16843298; // 0x1010222
     field public static final int windowEnableSplitTouch = 16843543; // 0x1010317
     field public static final int windowEnterAnimation = 16842932; // 0x10100b4
-    field public static final int windowEnterTransition = 16843843; // 0x1010443
+    field public static final int windowEnterTransition = 16843844; // 0x1010444
     field public static final int windowExitAnimation = 16842933; // 0x10100b5
-    field public static final int windowExitTransition = 16843844; // 0x1010444
+    field public static final int windowExitTransition = 16843845; // 0x1010445
     field public static final int windowFrame = 16842837; // 0x1010055
     field public static final int windowFullscreen = 16843277; // 0x101020d
     field public static final int windowHideAnimation = 16842935; // 0x10100b7
@@ -1310,8 +1311,8 @@ package android {
     field public static final int windowNoDisplay = 16843294; // 0x101021e
     field public static final int windowNoTitle = 16842838; // 0x1010056
     field public static final int windowOverscan = 16843727; // 0x10103cf
-    field public static final int windowSharedElementEnterTransition = 16843845; // 0x1010445
-    field public static final int windowSharedElementExitTransition = 16843846; // 0x1010446
+    field public static final int windowSharedElementEnterTransition = 16843846; // 0x1010446
+    field public static final int windowSharedElementExitTransition = 16843847; // 0x1010447
     field public static final int windowShowAnimation = 16842934; // 0x10100b6
     field public static final int windowShowWallpaper = 16843410; // 0x1010292
     field public static final int windowSoftInputMode = 16843307; // 0x101022b
@@ -30273,6 +30274,9 @@ package android.view {
     method public boolean dispatchKeyEvent(android.view.KeyEvent);
     method public boolean dispatchKeyEventPreIme(android.view.KeyEvent);
     method public boolean dispatchKeyShortcutEvent(android.view.KeyEvent);
+    method public boolean dispatchNestedFling(float, float);
+    method public boolean dispatchNestedPreScroll(int, int, int[], int[]);
+    method public boolean dispatchNestedScroll(int, int, int, int, int[]);
     method public boolean dispatchPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     method protected void dispatchRestoreInstanceState(android.util.SparseArray<android.os.Parcelable>);
     method protected void dispatchSaveInstanceState(android.util.SparseArray<android.os.Parcelable>);
@@ -30422,6 +30426,7 @@ package android.view {
     method public float getY();
     method public boolean hasFocus();
     method public boolean hasFocusable();
+    method public boolean hasNestedScrollingParent();
     method public boolean hasOnClickListeners();
     method public boolean hasOverlappingRendering();
     method public boolean hasTransientState();
@@ -30457,6 +30462,7 @@ package android.view {
     method public boolean isLayoutDirectionResolved();
     method public boolean isLayoutRequested();
     method public boolean isLongClickable();
+    method public boolean isNestedScrollingEnabled();
     method public boolean isOpaque();
     method protected boolean isPaddingOffsetRequired();
     method public boolean isPaddingRelative();
@@ -30608,6 +30614,7 @@ package android.view {
     method protected final void setMeasuredDimension(int, int);
     method public void setMinimumHeight(int);
     method public void setMinimumWidth(int);
+    method public void setNestedScrollingEnabled(boolean);
     method public void setNextFocusDownId(int);
     method public void setNextFocusForwardId(int);
     method public void setNextFocusLeftId(int);
@@ -30672,6 +30679,8 @@ package android.view {
     method public android.view.ActionMode startActionMode(android.view.ActionMode.Callback);
     method public void startAnimation(android.view.animation.Animation);
     method public final boolean startDrag(android.content.ClipData, android.view.View.DragShadowBuilder, java.lang.Object, int);
+    method public boolean startNestedScroll(int);
+    method public void stopNestedScroll();
     method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
     method public void unscheduleDrawable(android.graphics.drawable.Drawable);
     method protected boolean verifyDrawable(android.graphics.drawable.Drawable);
@@ -30760,6 +30769,9 @@ package android.view {
     field public static final int SCROLLBAR_POSITION_DEFAULT = 0; // 0x0
     field public static final int SCROLLBAR_POSITION_LEFT = 1; // 0x1
     field public static final int SCROLLBAR_POSITION_RIGHT = 2; // 0x2
+    field public static final int SCROLL_AXIS_HORIZONTAL = 1; // 0x1
+    field public static final int SCROLL_AXIS_NONE = 0; // 0x0
+    field public static final int SCROLL_AXIS_VERTICAL = 2; // 0x2
     field protected static final int[] SELECTED_STATE_SET;
     field protected static final int[] SELECTED_WINDOW_FOCUSED_STATE_SET;
     field public static final int SOUND_EFFECTS_ENABLED = 134217728; // 0x8000000
@@ -31029,6 +31041,7 @@ package android.view {
     method public android.view.animation.Animation.AnimationListener getLayoutAnimationListener();
     method public int getLayoutMode();
     method public android.animation.LayoutTransition getLayoutTransition();
+    method public int getNestedScrollAxes();
     method public int getPersistentDrawingCache();
     method public int indexOfChild(android.view.View);
     method public final void invalidateChild(android.view.View, android.graphics.Rect);
@@ -31049,8 +31062,14 @@ package android.view {
     method public boolean onInterceptHoverEvent(android.view.MotionEvent);
     method public boolean onInterceptTouchEvent(android.view.MotionEvent);
     method protected abstract void onLayout(boolean, int, int, int, int);
+    method public boolean onNestedFling(android.view.View, float, float);
+    method public void onNestedPreScroll(android.view.View, int, int, int[]);
+    method public void onNestedScroll(android.view.View, int, int, int, int);
+    method public void onNestedScrollAccepted(android.view.View, android.view.View, int);
     method protected boolean onRequestFocusInDescendants(int, android.graphics.Rect);
     method public boolean onRequestSendAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
+    method public boolean onStartNestedScroll(android.view.View, android.view.View, int);
+    method public void onStopNestedScroll(android.view.View);
     method public void recomputeViewAttributes(android.view.View);
     method public void removeAllViews();
     method public void removeAllViewsInLayout();
@@ -31181,6 +31200,12 @@ package android.view {
     method public abstract boolean isTextAlignmentResolved();
     method public abstract boolean isTextDirectionResolved();
     method public abstract void notifySubtreeAccessibilityStateChanged(android.view.View, android.view.View, int);
+    method public abstract boolean onNestedFling(android.view.View, float, float);
+    method public abstract void onNestedPreScroll(android.view.View, int, int, int[]);
+    method public abstract void onNestedScroll(android.view.View, int, int, int, int);
+    method public abstract void onNestedScrollAccepted(android.view.View, android.view.View, int);
+    method public abstract boolean onStartNestedScroll(android.view.View, android.view.View, int);
+    method public abstract void onStopNestedScroll(android.view.View);
     method public abstract void recomputeViewAttributes(android.view.View);
     method public abstract void requestChildFocus(android.view.View, android.view.View);
     method public abstract boolean requestChildRectangleOnScreen(android.view.View, android.graphics.Rect, boolean);
