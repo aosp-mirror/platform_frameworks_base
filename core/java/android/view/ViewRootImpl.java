@@ -234,6 +234,7 @@ public final class ViewRootImpl implements ViewParent,
 
     InputStage mFirstInputStage;
     InputStage mFirstPostImeInputStage;
+    InputStage mSyntheticInputStage;
 
     boolean mWindowAttributesChanged = false;
     int mWindowAttributesChangesFlag = 0;
@@ -599,8 +600,8 @@ public final class ViewRootImpl implements ViewParent,
 
                 // Set up the input pipeline.
                 CharSequence counterSuffix = attrs.getTitle();
-                InputStage syntheticInputStage = new SyntheticInputStage();
-                InputStage viewPostImeStage = new ViewPostImeInputStage(syntheticInputStage);
+                mSyntheticInputStage = new SyntheticInputStage();
+                InputStage viewPostImeStage = new ViewPostImeInputStage(mSyntheticInputStage);
                 InputStage nativePostImeStage = new NativePostImeInputStage(viewPostImeStage,
                         "aq:native-post-ime:" + counterSuffix);
                 InputStage earlyPostImeStage = new EarlyPostImeInputStage(nativePostImeStage);
@@ -2996,6 +2997,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_INVALIDATE_WORLD = 23;
     private final static int MSG_WINDOW_MOVED = 24;
     private final static int MSG_FLUSH_LAYER_UPDATES = 25;
+    private final static int MSG_SYNTHESIZE_INPUT_EVENT = 26;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -3045,6 +3047,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_WINDOW_MOVED";
                 case MSG_FLUSH_LAYER_UPDATES:
                     return "MSG_FLUSH_LAYER_UPDATES";
+                case MSG_SYNTHESIZE_INPUT_EVENT:
+                    return "MSG_SYNTHESIZE_INPUT_EVENT";
             }
             return super.getMessageName(message);
         }
@@ -3204,6 +3208,10 @@ public final class ViewRootImpl implements ViewParent,
                 InputEvent event = (InputEvent)msg.obj;
                 enqueueInputEvent(event, null, 0, true);
             } break;
+            case MSG_SYNTHESIZE_INPUT_EVENT: {
+                InputEvent event = (InputEvent)msg.obj;
+                enqueueInputEvent(event, null, QueuedInputEvent.FLAG_UNHANDLED, true);
+            } break;
             case MSG_DISPATCH_KEY_FROM_IME: {
                 if (LOCAL_LOGV) Log.v(
                     TAG, "Dispatching key "
@@ -3213,7 +3221,8 @@ public final class ViewRootImpl implements ViewParent,
                     // The IME is trying to say this event is from the
                     // system!  Bad bad bad!
                     //noinspection UnusedAssignment
-                    event = KeyEvent.changeFlags(event, event.getFlags() & ~KeyEvent.FLAG_FROM_SYSTEM);
+                    event = KeyEvent.changeFlags(event, event.getFlags() &
+                            ~KeyEvent.FLAG_FROM_SYSTEM);
                 }
                 enqueueInputEvent(event, null, QueuedInputEvent.FLAG_DELIVER_POST_IME, true);
             } break;
@@ -4009,6 +4018,7 @@ public final class ViewRootImpl implements ViewParent,
         private final SyntheticJoystickHandler mJoystick = new SyntheticJoystickHandler();
         private final SyntheticTouchNavigationHandler mTouchNavigation =
                 new SyntheticTouchNavigationHandler();
+        private final SyntheticKeyboardHandler mKeyboard = new SyntheticKeyboardHandler();
 
         public SyntheticInputStage() {
             super(null);
@@ -4031,7 +4041,11 @@ public final class ViewRootImpl implements ViewParent,
                     mTouchNavigation.process(event);
                     return FINISH_HANDLED;
                 }
+            } else if ((q.mFlags & QueuedInputEvent.FLAG_UNHANDLED) != 0) {
+                mKeyboard.process((KeyEvent)q.mEvent);
+                return FINISH_HANDLED;
             }
+
             return FORWARD;
         }
 
@@ -4868,6 +4882,33 @@ public final class ViewRootImpl implements ViewParent,
         };
     }
 
+    final class SyntheticKeyboardHandler {
+        public void process(KeyEvent event) {
+            if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) != 0) {
+                return;
+            }
+
+            final KeyCharacterMap kcm = event.getKeyCharacterMap();
+            final int keyCode = event.getKeyCode();
+            final int metaState = event.getMetaState();
+
+            // Check for fallback actions specified by the key character map.
+            KeyCharacterMap.FallbackAction fallbackAction =
+                    kcm.getFallbackAction(keyCode, metaState);
+            if (fallbackAction != null) {
+                final int flags = event.getFlags() | KeyEvent.FLAG_FALLBACK;
+                KeyEvent fallbackEvent = KeyEvent.obtain(
+                        event.getDownTime(), event.getEventTime(),
+                        event.getAction(), fallbackAction.keyCode,
+                        event.getRepeatCount(), fallbackAction.metaState,
+                        event.getDeviceId(), event.getScanCode(),
+                        flags, event.getSource(), null);
+                fallbackAction.recycle();
+                enqueueInputEvent(fallbackEvent);
+            }
+        }
+    }
+
     /**
      * Returns true if the key is used for keyboard navigation.
      * @param keyEvent The key event.
@@ -5447,6 +5488,7 @@ public final class ViewRootImpl implements ViewParent,
         public static final int FLAG_FINISHED = 1 << 2;
         public static final int FLAG_FINISHED_HANDLED = 1 << 3;
         public static final int FLAG_RESYNTHESIZED = 1 << 4;
+        public static final int FLAG_UNHANDLED = 1 << 5;
 
         public QueuedInputEvent mNext;
 
@@ -5460,6 +5502,14 @@ public final class ViewRootImpl implements ViewParent,
             }
             return mEvent instanceof MotionEvent
                     && mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER);
+        }
+
+        public boolean shouldSendToSynthesizer() {
+            if ((mFlags & FLAG_UNHANDLED) != 0) {
+                return true;
+            }
+
+            return false;
         }
     }
 
@@ -5564,7 +5614,13 @@ public final class ViewRootImpl implements ViewParent,
             mInputEventConsistencyVerifier.onInputEvent(q.mEvent, 0);
         }
 
-        InputStage stage = q.shouldSkipIme() ? mFirstPostImeInputStage : mFirstInputStage;
+        InputStage stage;
+        if (q.shouldSendToSynthesizer()) {
+            stage = mSyntheticInputStage;
+        } else {
+            stage = q.shouldSkipIme() ? mFirstPostImeInputStage : mFirstInputStage;
+        }
+
         if (stage != null) {
             stage.deliver(q);
         } else {
@@ -5789,43 +5845,29 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
+    public void synthesizeInputEvent(InputEvent event) {
+        Message msg = mHandler.obtainMessage(MSG_SYNTHESIZE_INPUT_EVENT, event);
+        msg.setAsynchronous(true);
+        mHandler.sendMessage(msg);
+    }
+
     public void dispatchKeyFromIme(KeyEvent event) {
         Message msg = mHandler.obtainMessage(MSG_DISPATCH_KEY_FROM_IME, event);
         msg.setAsynchronous(true);
         mHandler.sendMessage(msg);
     }
 
-    public void dispatchUnhandledKey(KeyEvent event) {
-        if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
-            // Some fallback keys are decided by the ViewRoot as they might have special
-            // properties (e.g. are locale aware). These take precedence over fallbacks defined by
-            // the kcm.
-            final KeyCharacterMap kcm = event.getKeyCharacterMap();
-            final int keyCode = event.getKeyCode();
-            final int metaState = event.getMetaState();
-
-            // Check for fallback actions specified by the key character map.
-            KeyCharacterMap.FallbackAction fallbackAction =
-                    kcm.getFallbackAction(keyCode, metaState);
-            if (fallbackAction != null) {
-                final int flags = event.getFlags() | KeyEvent.FLAG_FALLBACK;
-                KeyEvent fallbackEvent = KeyEvent.obtain(
-                        event.getDownTime(), event.getEventTime(),
-                        event.getAction(), fallbackAction.keyCode,
-                        event.getRepeatCount(), fallbackAction.metaState,
-                        event.getDeviceId(), event.getScanCode(),
-                        flags, event.getSource(), null);
-                fallbackAction.recycle();
-                dispatchInputEvent(fallbackEvent);
-            }
-        }
-    }
-
+    /**
+     * Reinject unhandled {@link InputEvent}s in order to synthesize fallbacks events.
+     *
+     * Note that it is the responsibility of the caller of this API to recycle the InputEvent it
+     * passes in.
+     */
     public void dispatchUnhandledInputEvent(InputEvent event) {
-        if (event instanceof KeyEvent) {
-            dispatchUnhandledKey((KeyEvent) event);
-            return;
+        if (event instanceof MotionEvent) {
+            event = MotionEvent.obtain((MotionEvent) event);
         }
+        synthesizeInputEvent(event);
     }
 
     public void dispatchAppVisibility(boolean visible) {
