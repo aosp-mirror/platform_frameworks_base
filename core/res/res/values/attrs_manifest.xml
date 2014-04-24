@@ -746,7 +746,14 @@
              selected a new global font size. -->
         <flag name="fontScale" value="0x40000000" />
     </attr>
-    
+
+    <!-- Indicate that the activity can be launched as the embedded child of another
+         activity. Particularly in the case where the child lives in a container
+         such as a Display owned by another activity.
+
+         <p>The default value of this attribute is <code>false</code>. -->
+    <attr name="allowEmbedded" format="boolean" />
+
     <!-- Descriptive text for the associated data. -->
     <attr name="description" format="reference" />
     
@@ -1541,6 +1548,7 @@
              primary user.  Can only be used with receivers. -->
         <attr name="primaryUserOnly" format="boolean" />
         <attr name="persistable" />
+        <attr name="allowEmbedded" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new

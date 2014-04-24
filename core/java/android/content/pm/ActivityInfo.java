@@ -198,7 +198,7 @@ public class ActivityInfo extends ComponentInfo
     /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the primary user.  Only works with broadcast receivers.  Set from the
-     * {@link android.R.attr#primaryUserOnly} attribute.
+     * android.R.attr#primaryUserOnly attribute.
      */
     public static final int FLAG_PRIMARY_USER_ONLY = 0x20000000;
     /**
@@ -209,6 +209,13 @@ public class ActivityInfo extends ComponentInfo
      * components; it is not applied to activities.
      */
     public static final int FLAG_SINGLE_USER = 0x40000000;
+    /**
+     * @hide Bit in {@link #flags}: If set, this activity may be launched into an
+     * owned ActivityContainer such as that within an ActivityView. If not set and
+     * this activity is launched into such a container a SecurityExcception will be
+     * thrown. Set from the {@link android.R.attr#allowEmbedded} attribute.
+     */
+    public static final int FLAG_ALLOW_EMBEDDED = 0x80000000;
     /**
      * Options that have been set in the activity declaration in the
      * manifest.

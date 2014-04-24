@@ -2452,6 +2452,12 @@ public class PackageParser {
             a.info.flags |= ActivityInfo.FLAG_PERSISTABLE;
         }
 
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestActivity_allowEmbedded,
+                false)) {
+            a.info.flags |= ActivityInfo.FLAG_ALLOW_EMBEDDED;
+        }
+
         if (!receiver) {
             if (sa.getBoolean(
                     com.android.internal.R.styleable.AndroidManifestActivity_hardwareAccelerated,

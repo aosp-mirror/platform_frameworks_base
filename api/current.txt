@@ -284,6 +284,7 @@ package android {
     field public static final int allContactsName = 16843468; // 0x10102cc
     field public static final int allowBackup = 16843392; // 0x1010280
     field public static final int allowClearUserData = 16842757; // 0x1010005
+    field public static final int allowEmbedded = 16843765; // 0x10103f5
     field public static final int allowParallelSyncs = 16843570; // 0x1010332
     field public static final int allowSingleTap = 16843353; // 0x1010259
     field public static final int allowTaskReparenting = 16843268; // 0x1010204
