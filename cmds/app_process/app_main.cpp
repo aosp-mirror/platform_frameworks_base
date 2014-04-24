@@ -219,7 +219,7 @@ int main(int argc, char* const argv[])
 
         char prop[PROP_VALUE_MAX];
         if (property_get(ABI_LIST_PROPERTY, prop, NULL) == 0) {
-            LOG_ALWAYS_FATAL("app_process: Unable to deterimine ABI list from property %s.",
+            LOG_ALWAYS_FATAL("app_process: Unable to determine ABI list from property %s.",
                 ABI_LIST_PROPERTY);
             return 11;
         }
