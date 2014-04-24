@@ -40,7 +40,8 @@ public:
             float geomFactor, VertexBuffer& shadowVertexBuffer);
 
 private:
-    static void calculateRayDirections(int rays, Vector2* dir);
+    static void calculateRayDirections(const int rays, const Vector3* vertices,
+            const int vertexCount, const Vector3& centroid3d, Vector2* dir);
 
     static void calculateIntersection(const Vector3* poly, int nbVertices,
             const Vector3& start, const Vector2& dir, int& outEdgeIndex,
