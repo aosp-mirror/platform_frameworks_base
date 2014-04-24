@@ -139,8 +139,7 @@ public class GradientDrawable extends Drawable {
 
     private final Path mPath = new Path();
     private final RectF mRect = new RectF();
-    private Outline mOutline;
-    
+
     private Paint mLayerPaint;    // internal, used if we use saveLayer()
     private boolean mRectIsDirty;   // internal state
     private boolean mMutated;
@@ -573,15 +572,11 @@ public class GradientDrawable extends Drawable {
                 mStrokePaint.setColorFilter(mColorFilter);
             }
         }
-        
+
         switch (st.mShape) {
             case RECTANGLE:
                 if (st.mRadiusArray != null) {
-                    if (mPathIsDirty || mRectIsDirty) {
-                        mPath.reset();
-                        mPath.addRoundRect(mRect, st.mRadiusArray, Path.Direction.CW);
-                        mPathIsDirty = mRectIsDirty = false;
-                    }
+                    buildPathIfDirty();
                     canvas.drawPath(mPath, mFillPaint);
                     if (haveStroke) {
                         canvas.drawPath(mPath, mStrokePaint);
@@ -638,7 +633,16 @@ public class GradientDrawable extends Drawable {
             }
         }
     }
-    
+
+    private void buildPathIfDirty() {
+        final GradientState st = mGradientState;
+        if (mPathIsDirty || mRectIsDirty) {
+            mPath.reset();
+            mPath.addRoundRect(mRect, st.mRadiusArray, Path.Direction.CW);
+            mPathIsDirty = mRectIsDirty = false;
+        }
+    }
+
     private Path buildRing(GradientState st) {
         if (mRingPath != null && (!st.mUseLevelForShape || !mPathIsDirty)) return mRingPath;
         mPathIsDirty = false;
@@ -1428,42 +1432,39 @@ public class GradientDrawable extends Drawable {
     }
 
     @Override
-    public Outline getOutline() {
+    public boolean getOutline(Outline outline) {
         final GradientState st = mGradientState;
         final Rect bounds = getBounds();
 
         switch (st.mShape) {
             case RECTANGLE:
                 if (st.mRadiusArray != null) {
-                    return null;
+                    buildPathIfDirty();
+                    outline.setConvexPath(mPath);
+                    return true;
                 }
+
                 float rad = 0;
                 if (st.mRadius > 0.0f) {
                     // clamp the radius based on width & height, matching behavior in draw()
                     rad = Math.min(st.mRadius,
                             Math.min(bounds.width(), bounds.height()) * 0.5f);
                 }
-                if (mOutline == null) {
-                    mOutline = new Outline();
-                }
-                mOutline.setRoundRect(bounds.left, bounds.top,
+                outline.setRoundRect(bounds.left, bounds.top,
                         bounds.right, bounds.bottom, rad);
-                return mOutline;
+                return true;
             case LINE: {
                 float halfStrokeWidth = mStrokePaint.getStrokeWidth() * 0.5f;
                 float centerY = bounds.centerY();
                 int top = (int) Math.floor(centerY - halfStrokeWidth);
                 int bottom = (int) Math.ceil(centerY + halfStrokeWidth);
 
-                if (mOutline == null) {
-                    mOutline = new Outline();
-                }
-                mOutline.setRoundRect(bounds.left, top, bounds.right, bottom, 0);
-                return mOutline;
+                outline.setRect(bounds.left, top, bounds.right, bottom);
+                return true;
             }
             default:
                 // TODO: investigate
-                return null;
+                return false;
         }
     }
 

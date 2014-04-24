@@ -10021,11 +10021,16 @@ package android.graphics {
     method public void setPaint(android.graphics.Paint);
   }
 
-  public class Outline {
+  public final class Outline {
     ctor public Outline();
-    method public final boolean isValid();
+    ctor public Outline(android.graphics.Outline);
+    method public boolean isValid();
     method public void set(android.graphics.Outline);
+    method public void setConvexPath(android.graphics.Path);
+    method public void setRect(int, int, int, int);
+    method public void setRect(android.graphics.Rect);
     method public void setRoundRect(int, int, int, int, float);
+    method public void setRoundRect(android.graphics.Rect, float);
   }
 
   public class Paint {
@@ -10748,7 +10753,7 @@ package android.graphics.drawable {
     method public int getMinimumHeight();
     method public int getMinimumWidth();
     method public abstract int getOpacity();
-    method public android.graphics.Outline getOutline();
+    method public boolean getOutline(android.graphics.Outline);
     method public boolean getPadding(android.graphics.Rect);
     method public int[] getState();
     method public android.graphics.Region getTransparentRegion();

@@ -27,7 +27,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.Interpolator;
@@ -2376,24 +2375,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int PFLAG3_CALLED_SUPER = 0x10;
 
     /**
-     * Flag indicating that an view will be clipped to its outline.
-     */
-    static final int PFLAG3_CLIP_TO_OUTLINE = 0x20;
-
-    /**
      * Flag indicating that a view's outline has been specifically defined.
      */
-    static final int PFLAG3_OUTLINE_DEFINED = 0x40;
+    static final int PFLAG3_OUTLINE_DEFINED = 0x20;
 
     /**
      * Flag indicating that we're in the process of applying window insets.
      */
-    static final int PFLAG3_APPLYING_INSETS = 0x80;
+    static final int PFLAG3_APPLYING_INSETS = 0x40;
 
     /**
      * Flag indicating that we're in the process of fitting system windows using the old method.
      */
-    static final int PFLAG3_FITTING_SYSTEM_WINDOWS = 0x100;
+    static final int PFLAG3_FITTING_SYSTEM_WINDOWS = 0x80;
 
     /* End of masks for mPrivateFlags3 */
 
@@ -3237,9 +3231,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Stores the outline of the view, passed down to the DisplayList level for
-     * defining shadow shape and clipping.
-     *
-     * TODO: once RenderNode is long-lived, remove this and rely on native copy.
+     * defining shadow shape.
      */
     private Outline mOutline;
 
@@ -10519,16 +10511,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Sets the outline of the view, which defines the shape of the shadow it
-     * casts, and can used for clipping.
+     * casts.
      * <p>
      * If the outline is not set or is null, shadows will be cast from the
-     * bounds of the View, and clipToOutline will be ignored.
+     * bounds of the View.
      *
      * @param outline The new outline of the view.
      *         Must be {@link android.graphics.Outline#isValid() valid.}
-     *
-     * @see #getClipToOutline()
-     * @see #setClipToOutline(boolean)
      */
     public void setOutline(@Nullable Outline outline) {
         if (outline != null && !outline.isValid()) {
@@ -10542,46 +10531,32 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             // always copy the path since caller may reuse
             if (mOutline == null) {
-                mOutline = new Outline();
+                mOutline = new Outline(outline);
             }
-            mOutline.set(outline);
         }
         mRenderNode.setOutline(mOutline);
     }
 
-    /**
-     * Returns whether the outline of the View will be used for clipping.
-     *
-     * @see #setOutline(Outline)
-     */
-    public final boolean getClipToOutline() {
-        return ((mPrivateFlags3 & PFLAG3_CLIP_TO_OUTLINE) != 0);
-    }
+    // TODO: remove
+    public final boolean getClipToOutline() { return false; }
+    public void setClipToOutline(boolean clipToOutline) {}
 
-    /**
-     * Sets whether the outline of the View will be used for clipping.
-     * <p>
-     * The current implementation of outline clipping uses
-     * {@link Canvas#clipPath(Path) path clipping},
-     * and thus does not support anti-aliasing, and is expensive in terms of
-     * graphics performance. Therefore, it is strongly recommended that this
-     * property only be set temporarily, as in an animation. For the same
-     * reasons, there is no parallel XML attribute for this property.
-     * <p>
-     * If the outline of the view is not set or is empty, no clipping will be
-     * performed.
-     *
-     * @see #setOutline(Outline)
-     */
-    public void setClipToOutline(boolean clipToOutline) {
-        // TODO : Add a fast invalidation here.
-        if (getClipToOutline() != clipToOutline) {
-            if (clipToOutline) {
-                mPrivateFlags3 |= PFLAG3_CLIP_TO_OUTLINE;
+    private void queryOutlineFromBackgroundIfUndefined() {
+        if ((mPrivateFlags3 & PFLAG3_OUTLINE_DEFINED) == 0) {
+            // Outline not currently defined, query from background
+            if (mOutline == null) {
+                mOutline = new Outline();
             } else {
-                mPrivateFlags3 &= ~PFLAG3_CLIP_TO_OUTLINE;
+                mOutline.markInvalid();
             }
-            mRenderNode.setClipToOutline(clipToOutline);
+            if (mBackground.getOutline(mOutline)) {
+                if (!mOutline.isValid()) {
+                    throw new IllegalStateException("Background drawable failed to build outline");
+                }
+                mRenderNode.setOutline(mOutline);
+            } else {
+                mRenderNode.setOutline(null);
+            }
         }
     }
 
@@ -14839,11 +14814,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mBackgroundSizeChanged) {
             background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
             mBackgroundSizeChanged = false;
-            if ((mPrivateFlags3 & PFLAG3_OUTLINE_DEFINED) == 0) {
-                // Outline not currently define, query from background
-                mOutline = background.getOutline();
-                mRenderNode.setOutline(mOutline);
-            }
+            queryOutlineFromBackgroundIfUndefined();
         }
 
         // Attempt to use a display list if requested.
@@ -15245,7 +15216,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param drawable the drawable to invalidate
      */
     @Override
-    public void invalidateDrawable(Drawable drawable) {
+    public void invalidateDrawable(@NonNull Drawable drawable) {
         if (verifyDrawable(drawable)) {
             final Rect dirty = drawable.getDirtyBounds();
             final int scrollX = mScrollX;
@@ -15253,6 +15224,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             invalidate(dirty.left + scrollX, dirty.top + scrollY,
                     dirty.right + scrollX, dirty.bottom + scrollY);
+
+            if (drawable == mBackground) {
+                queryOutlineFromBackgroundIfUndefined();
+            }
         }
     }
 
