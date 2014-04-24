@@ -62,7 +62,7 @@ VertexBufferMode AmbientShadow::createAmbientShadow(bool isCasterOpaque,
     dir.setCapacity(rays);
     float rayDist[rays];
     float rayHeight[rays];
-    calculateRayDirections(rays, dir.editArray());
+    calculateRayDirections(rays, vertices, vertexCount, centroid3d, dir.editArray());
 
     // Calculate the length and height of the points along the edge.
     //
@@ -149,14 +149,91 @@ VertexBufferMode AmbientShadow::createAmbientShadow(bool isCasterOpaque,
  * Generate an array of rays' direction vectors.
  *
  * @param rays The number of rays shooting out from the centroid.
+ * @param vertices Vertices of the polygon.
+ * @param vertexCount The number of vertices.
+ * @param centroid3d The centroid of the polygon.
  * @param dir Return the array of ray vectors.
  */
-void AmbientShadow::calculateRayDirections(int rays, Vector2* dir) {
-    float deltaAngle = 2 * M_PI / rays;
+void AmbientShadow::calculateRayDirections(const int rays, const Vector3* vertices,
+        const int vertexCount, const Vector3& centroid3d, Vector2* dir) {
+    // If we don't have enough rays, then fall back to the uniform distribution.
+    if (vertexCount * 2 > rays) {
+        float deltaAngle = 2 * M_PI / rays;
+        for (int i = 0; i < rays; i++) {
+            dir[i].x = sinf(deltaAngle * i);
+            dir[i].y = cosf(deltaAngle * i);
+        }
+        return;
+    }
+
+    // If we have enough rays, then we assign each vertices a ray, and distribute
+    // the rest uniformly.
+    float rayThetas[rays];
+
+    const int uniformRayCount = rays - vertexCount;
+    const float deltaAngle = 2 * M_PI / uniformRayCount;
+
+    // We have to generate all the vertices' theta anyway and we also need to
+    // find the minimal, so let's precompute it first.
+    // Since the incoming polygon is clockwise, we can find the dip to identify
+    // the minimal theta.
+    float polyThetas[vertexCount];
+    int minimalPolyThetaIndex = 0;
+    for (int i = 0; i < vertexCount; i++) {
+        polyThetas[i] = atan2(vertices[i].y - centroid3d.y,
+                vertices[i].x - centroid3d.x);
+        if (i > 0 && polyThetas[i] < polyThetas[i - 1]) {
+            minimalPolyThetaIndex = i;
+        }
+    }
+
+    int polyThetaIndex = minimalPolyThetaIndex;
+    float polyTheta = polyThetas[minimalPolyThetaIndex];
+    int uniformThetaIndex = 0;
+    float uniformTheta = - M_PI;
+    for (int i = 0; i < rays; i++) {
+        // Compare both thetas and pick the smaller one and move on.
+        bool hasThetaCollision = abs(polyTheta - uniformTheta) < MINIMAL_DELTA_THETA;
+        if (polyTheta < uniformTheta || hasThetaCollision) {
+            if (hasThetaCollision) {
+                // Shift the uniformTheta to middle way between current polyTheta
+                // and next uniform theta. The next uniform theta can wrap around
+                // to exactly PI safely here.
+                // Note that neither polyTheta nor uniformTheta can be FLT_MAX
+                // due to the hasThetaCollision is true.
+                uniformTheta = (polyTheta +  deltaAngle * (uniformThetaIndex + 1) - M_PI) / 2;
+#if DEBUG_SHADOW
+                ALOGD("Shifted uniformTheta to %f", uniformTheta);
+#endif
+            }
+            rayThetas[i] = polyTheta;
+            polyThetaIndex = (polyThetaIndex + 1) % vertexCount;
+            if (polyThetaIndex != minimalPolyThetaIndex) {
+                polyTheta = polyThetas[polyThetaIndex];
+            } else {
+                // out of poly points.
+                polyTheta = FLT_MAX;
+            }
+        } else {
+            rayThetas[i] = uniformTheta;
+            uniformThetaIndex++;
+            if (uniformThetaIndex < uniformRayCount) {
+                uniformTheta = deltaAngle * uniformThetaIndex - M_PI;
+            } else {
+                // out of uniform points.
+                uniformTheta = FLT_MAX;
+            }
+        }
+    }
 
     for (int i = 0; i < rays; i++) {
-        dir[i].x = sinf(deltaAngle * i);
-        dir[i].y = cosf(deltaAngle * i);
+#if DEBUG_SHADOW
+        ALOGD("No. %d : %f", i, rayThetas[i] * 180 / M_PI);
+#endif
+        // TODO: Fix the intersection precision problem and remvoe the delta added
+        // here.
+        dir[i].x = sinf(rayThetas[i] + MINIMAL_DELTA_THETA);
+        dir[i].y = cosf(rayThetas[i] + MINIMAL_DELTA_THETA);
     }
 }
 
