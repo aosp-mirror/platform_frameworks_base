@@ -256,9 +256,43 @@ public class TransitionSet extends Transition {
     @Override
     protected void createAnimators(ViewGroup sceneRoot, TransitionValuesMaps startValues,
             TransitionValuesMaps endValues) {
+        startValues = removeExcludes(startValues);
+        endValues = removeExcludes(endValues);
         for (Transition childTransition : mTransitions) {
             childTransition.createAnimators(sceneRoot, startValues, endValues);
         }
+    }
+
+    private TransitionValuesMaps removeExcludes(TransitionValuesMaps values) {
+        if (mTargetIds.isEmpty() && mTargetIdExcludes == null && mTargetTypeExcludes == null
+                && mTargets.isEmpty()) {
+            return values;
+        }
+        TransitionValuesMaps included = new TransitionValuesMaps();
+        int numValues = values.viewValues.size();
+        for (int i = 0; i < numValues; i++) {
+            View view = values.viewValues.keyAt(i);
+            if (isValidTarget(view, view.getId())) {
+                included.viewValues.put(view, values.viewValues.valueAt(i));
+            }
+        }
+        numValues = values.idValues.size();
+        for (int i = 0; i < numValues; i++) {
+            int id = values.idValues.keyAt(i);
+            TransitionValues transitionValues = values.idValues.valueAt(i);
+            if (isValidTarget(transitionValues.view, id)) {
+                included.idValues.put(id, transitionValues);
+            }
+        }
+        numValues = values.itemIdValues.size();
+        for (int i = 0; i < numValues; i++) {
+            long id = values.itemIdValues.keyAt(i);
+            TransitionValues transitionValues = values.itemIdValues.valueAt(i);
+            if (isValidTarget(transitionValues.view, id)) {
+                included.itemIdValues.put(id, transitionValues);
+            }
+        }
+        return included;
     }
 
     /**
