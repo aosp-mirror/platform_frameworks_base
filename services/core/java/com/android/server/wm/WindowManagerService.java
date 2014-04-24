@@ -290,8 +290,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final String DENSITY_OVERRIDE = "ro.config.density_override";
     private static final String SIZE_OVERRIDE = "ro.config.size_override";
 
-    private static final String SCREEN_CIRCULAR = "ro.display.circular";
-
     private static final int MAX_SCREENSHOT_RETRIES = 3;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
@@ -5552,7 +5550,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void showCircularDisplayMaskIfNeeded() {
-        if (SystemProperties.getBoolean(SCREEN_CIRCULAR, false)) {
+        // we're fullscreen and not hosted in an ActivityView
+        if (mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_windowIsRound)) {
             mH.sendMessage(mH.obtainMessage(H.SHOW_DISPLAY_MASK));
         }
     }
@@ -9077,7 +9077,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mStrictModeFlash.positionSurface(defaultDw, defaultDh);
             }
             if (mCircularDisplayMask != null) {
-                mCircularDisplayMask.positionSurface(defaultDw, defaultDh);
+                mCircularDisplayMask.positionSurface(defaultDw, defaultDh, mRotation);
             }
 
             boolean focusDisplayed = false;
