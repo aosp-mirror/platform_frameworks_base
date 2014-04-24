@@ -723,6 +723,13 @@ public final class Settings {
             = "android.settings.NOTIFICATION_LISTENER_SETTINGS";
 
     /**
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CONDITION_PROVIDER_SETTINGS
+            = "android.settings.ACTION_CONDITION_PROVIDER_SETTINGS";
+
+    /**
      * Activity Action: Show settings for video captioning.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard
@@ -4509,6 +4516,11 @@ public final class Settings {
          * @hide
          */
         public static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
+
+        /**
+         * @hide
+         */
+        public static final String ENABLED_CONDITION_PROVIDERS = "enabled_condition_providers";
 
         /** @hide */
         public static final String BAR_SERVICE_COMPONENT = "bar_service_component";

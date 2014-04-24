@@ -2048,6 +2048,11 @@
     <string name="permdesc_bindNotificationListenerService">Allows the holder to bind to the top-level interface of a notification listener service. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindConditionProviderService">bind to a condition provider service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindConditionProviderService">Allows the holder to bind to the top-level interface of a condition provider service. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_invokeCarrierSetup">invoke the carrier-provided configuration app</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_invokeCarrierSetup">Allows the holder to invoke the carrier-provided configuration app. Should never be needed for normal apps.</string>
@@ -3797,6 +3802,8 @@
     <!-- Label to show for a service that is running because it is observing
          the user's notifications. -->
     <string name="notification_listener_binding_label">Notification listener</string>
+    <!-- Label to show for a service that is running because it is providing conditions. -->
+    <string name="condition_provider_service_binding_label">Condition provider</string>
 
     <!-- Do Not Translate: Alternate eri.xml -->
     <string name="alternate_eri_file">/data/eri.xml</string>
