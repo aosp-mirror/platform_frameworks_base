@@ -1,4 +1,5 @@
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!--
+ Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,40 +16,39 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <size
-            android:width="64dp"
-            android:height="64dp"/>
+        android:height="64dp"
+        android:width="64dp" />
 
-    <viewport android:viewportWidth="800"
-          android:viewportHeight="500"/>
+    <viewport
+        android:viewportHeight="500"
+        android:viewportWidth="800" />
 
     <group>
         <path
-                android:name="pie1"
-                android:pathData="M200,450 l 50,-25
+            android:name="pie1"
+            android:pathData="M200,450 l 50,-25
            a25,25 -30 0,1 100,-50 l 50,-25
            a25,50 -30 0,1 100,-50 l 50,-25
            a25,75 -30 0,1 100,-50 l 50,-25
            a25,100 -30 0,1 100,-50 l 50,-25"
-                android:stroke="#FF00FF00"
-                android:strokeWidth="10"/>
+            android:stroke="#FF00FF00"
+            android:strokeWidth="10" />
     </group>
-
     <group>
         <path
-                android:name="pie2"
-                android:pathData="M200,350 l 50,-25
+            android:name="pie2"
+            android:pathData="M200,350 l 50,-25
            a25,12 -30 0,1 100,-50 l 50,-25
            a25,25 -30 0,1 100,-50 l 50,-25
            a25,37 -30 0,1 100,-50 l 50,-25
            a25,50 -30 0,1 100,-50 l 50,-25"
-                android:stroke="#FF00FF00"
-                android:strokeWidth="10"
-                android:rotation="20"
-                android:pivotX="90"
-                android:pivotY="100"/>
-
+            android:pivotX="90"
+            android:pivotY="100"
+            android:rotation="20"
+            android:stroke="#FF00FF00"
+            android:strokeWidth="10" />
     </group>
-    <animation android:sequence="pie1,pie2"/>
 
+    <animation android:sequence="pie1,pie2" />
 
 </vector>
