@@ -704,11 +704,11 @@ void OpenGLRenderer::onSnapshotRestored(const Snapshot& removed, const Snapshot&
 ///////////////////////////////////////////////////////////////////////////////
 
 int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
-        const SkPaint* paint, int flags) {
+        const SkPaint* paint, int flags, const SkPath* convexMask) {
     const int count = saveSnapshot(flags);
 
     if (!currentSnapshot()->isIgnored()) {
-        createLayer(left, top, right, bottom, paint, flags);
+        createLayer(left, top, right, bottom, paint, flags, convexMask);
     }
 
     return count;
@@ -782,7 +782,6 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
     return count;
 }
 
-
 /**
  * Layers are viewed by Skia are slightly different than layers in image editing
  * programs (for instance.) When a layer is created, previously created layers
@@ -835,7 +834,7 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
  *     something actually gets drawn are the layers regions cleared.
  */
 bool OpenGLRenderer::createLayer(float left, float top, float right, float bottom,
-        const SkPaint* paint, int flags) {
+        const SkPaint* paint, int flags, const SkPath* convexMask) {
     LAYER_LOGD("Requesting layer %.2fx%.2f", right - left, bottom - top);
     LAYER_LOGD("Layer cache size = %d", mCaches.layerCache.getSize());
 
@@ -865,6 +864,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
 
     layer->setBlend(true);
     layer->setDirty(false);
+    layer->setConvexMask(convexMask); // note: the mask must be cleared before returning to the cache
 
     // Save the layer in the snapshot
     mSnapshot->flags |= Snapshot::kFlagIsLayer;
@@ -1013,6 +1013,7 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
     dirtyClip();
 
     // Failing to add the layer to the cache should happen only if the layer is too large
+    layer->setConvexMask(NULL);
     if (!mCaches.layerCache.put(layer)) {
         LAYER_LOGD("Deleting layer");
         Caches::getInstance().resourceCache.decrementRefcount(layer);
@@ -1122,6 +1123,38 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
 #define DRAW_DOUBLE_STENCIL(DRAW_COMMAND) DRAW_DOUBLE_STENCIL_IF(true, DRAW_COMMAND)
 
 void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
+    if (CC_UNLIKELY(layer->region.isEmpty())) return; // nothing to draw
+
+    if (layer->getConvexMask()) {
+        save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
+
+        // clip to the area of the layer the mask can be larger
+        clipRect(rect.left, rect.top, rect.right, rect.bottom, SkRegion::kIntersect_Op);
+
+        SkPaint paint;
+        paint.setAntiAlias(true);
+        paint.setColor(SkColorSetARGB(int(getLayerAlpha(layer) * 255), 0, 0, 0));
+
+        SkiaShader* oldShader = mDrawModifiers.mShader;
+
+        // create LayerShader to map SaveLayer content into subsequent draw
+        SkMatrix shaderMatrix;
+        shaderMatrix.setTranslate(rect.left, rect.bottom);
+        shaderMatrix.preScale(1, -1);
+        SkiaLayerShader layerShader(layer, &shaderMatrix);
+        mDrawModifiers.mShader = &layerShader;
+
+        // Since the drawing primitive is defined in local drawing space,
+        // we don't need to modify the draw matrix
+        const SkPath* maskPath = layer->getConvexMask();
+        DRAW_DOUBLE_STENCIL(drawConvexPath(*maskPath, &paint));
+
+        mDrawModifiers.mShader = oldShader;
+        restore();
+
+        return;
+    }
+
     if (layer->region.isRect()) {
         layer->setRegionAsRect();
 
@@ -1131,88 +1164,87 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         return;
     }
 
-    if (CC_LIKELY(!layer->region.isEmpty())) {
-        size_t count;
-        const android::Rect* rects;
-        Region safeRegion;
-        if (CC_LIKELY(hasRectToRectTransform())) {
-            rects = layer->region.getArray(&count);
-        } else {
-            safeRegion = Region::createTJunctionFreeRegion(layer->region);
-            rects = safeRegion.getArray(&count);
-        }
+    // standard Region based draw
+    size_t count;
+    const android::Rect* rects;
+    Region safeRegion;
+    if (CC_LIKELY(hasRectToRectTransform())) {
+        rects = layer->region.getArray(&count);
+    } else {
+        safeRegion = Region::createTJunctionFreeRegion(layer->region);
+        rects = safeRegion.getArray(&count);
+    }
 
-        const float alpha = getLayerAlpha(layer);
-        const float texX = 1.0f / float(layer->getWidth());
-        const float texY = 1.0f / float(layer->getHeight());
-        const float height = rect.getHeight();
+    const float alpha = getLayerAlpha(layer);
+    const float texX = 1.0f / float(layer->getWidth());
+    const float texY = 1.0f / float(layer->getHeight());
+    const float height = rect.getHeight();
 
-        setupDraw();
+    setupDraw();
 
-        // We must get (and therefore bind) the region mesh buffer
-        // after we setup drawing in case we need to mess with the
-        // stencil buffer in setupDraw()
-        TextureVertex* mesh = mCaches.getRegionMesh();
-        uint32_t numQuads = 0;
+    // We must get (and therefore bind) the region mesh buffer
+    // after we setup drawing in case we need to mess with the
+    // stencil buffer in setupDraw()
+    TextureVertex* mesh = mCaches.getRegionMesh();
+    uint32_t numQuads = 0;
 
-        setupDrawWithTexture();
-        setupDrawColor(alpha, alpha, alpha, alpha);
-        setupDrawColorFilter(layer->getColorFilter());
-        setupDrawBlending(layer);
-        setupDrawProgram();
-        setupDrawDirtyRegionsDisabled();
-        setupDrawPureColorUniforms();
-        setupDrawColorFilterUniforms(layer->getColorFilter());
-        setupDrawTexture(layer->getTexture());
-        if (currentTransform()->isPureTranslate()) {
-            const float x = (int) floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
-            const float y = (int) floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
+    setupDrawWithTexture();
+    setupDrawColor(alpha, alpha, alpha, alpha);
+    setupDrawColorFilter(layer->getColorFilter());
+    setupDrawBlending(layer);
+    setupDrawProgram();
+    setupDrawDirtyRegionsDisabled();
+    setupDrawPureColorUniforms();
+    setupDrawColorFilterUniforms(layer->getColorFilter());
+    setupDrawTexture(layer->getTexture());
+    if (currentTransform()->isPureTranslate()) {
+        const float x = (int) floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
+        const float y = (int) floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
 
-            layer->setFilter(GL_NEAREST);
-            setupDrawModelView(kModelViewMode_Translate, false,
-                    x, y, x + rect.getWidth(), y + rect.getHeight(), true);
-        } else {
-            layer->setFilter(GL_LINEAR);
-            setupDrawModelView(kModelViewMode_Translate, false,
-                    rect.left, rect.top, rect.right, rect.bottom);
-        }
-        setupDrawMeshIndices(&mesh[0].x, &mesh[0].u);
+        layer->setFilter(GL_NEAREST);
+        setupDrawModelView(kModelViewMode_Translate, false,
+                x, y, x + rect.getWidth(), y + rect.getHeight(), true);
+    } else {
+        layer->setFilter(GL_LINEAR);
+        setupDrawModelView(kModelViewMode_Translate, false,
+                rect.left, rect.top, rect.right, rect.bottom);
+    }
+    setupDrawMeshIndices(&mesh[0].x, &mesh[0].u);
 
-        for (size_t i = 0; i < count; i++) {
-            const android::Rect* r = &rects[i];
+    for (size_t i = 0; i < count; i++) {
+        const android::Rect* r = &rects[i];
 
-            const float u1 = r->left * texX;
-            const float v1 = (height - r->top) * texY;
-            const float u2 = r->right * texX;
-            const float v2 = (height - r->bottom) * texY;
+        const float u1 = r->left * texX;
+        const float v1 = (height - r->top) * texY;
+        const float u2 = r->right * texX;
+        const float v2 = (height - r->bottom) * texY;
 
-            // TODO: Reject quads outside of the clip
-            TextureVertex::set(mesh++, r->left, r->top, u1, v1);
-            TextureVertex::set(mesh++, r->right, r->top, u2, v1);
-            TextureVertex::set(mesh++, r->left, r->bottom, u1, v2);
-            TextureVertex::set(mesh++, r->right, r->bottom, u2, v2);
+        // TODO: Reject quads outside of the clip
+        TextureVertex::set(mesh++, r->left, r->top, u1, v1);
+        TextureVertex::set(mesh++, r->right, r->top, u2, v1);
+        TextureVertex::set(mesh++, r->left, r->bottom, u1, v2);
+        TextureVertex::set(mesh++, r->right, r->bottom, u2, v2);
 
-            numQuads++;
+        numQuads++;
 
-            if (numQuads >= gMaxNumberOfQuads) {
-                DRAW_DOUBLE_STENCIL(glDrawElements(GL_TRIANGLES, numQuads * 6,
-                                GL_UNSIGNED_SHORT, NULL));
-                numQuads = 0;
-                mesh = mCaches.getRegionMesh();
-            }
-        }
-
-        if (numQuads > 0) {
+        if (numQuads >= gMaxNumberOfQuads) {
             DRAW_DOUBLE_STENCIL(glDrawElements(GL_TRIANGLES, numQuads * 6,
                             GL_UNSIGNED_SHORT, NULL));
+            numQuads = 0;
+            mesh = mCaches.getRegionMesh();
         }
+    }
+
+    if (numQuads > 0) {
+        DRAW_DOUBLE_STENCIL(glDrawElements(GL_TRIANGLES, numQuads * 6,
+                        GL_UNSIGNED_SHORT, NULL));
+    }
 
 #if DEBUG_LAYERS_AS_REGIONS
-        drawRegionRectsDebug(layer->region);
+    drawRegionRectsDebug(layer->region);
 #endif
 
-        layer->region.clear();
-    }
+    layer->region.clear();
 }
 
 #if DEBUG_LAYERS_AS_REGIONS
@@ -2926,7 +2958,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
     if (layer->isTextureLayer()) {
         transform = &layer->getTransform();
         if (!transform->isIdentity()) {
-            save(0);
+            save(SkCanvas::kMatrix_SaveFlag);
             concatMatrix(*transform);
         }
     }

@@ -435,8 +435,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
                 // first. This will merge SRC_OVER (directly) onto the canvas.
                 if (!projected && rippleRestoreCount < 0) {
                     rippleRestoreCount = canvas.saveLayer(bounds.left, bounds.top,
-                            bounds.right, bounds.bottom, null, 0);
-                    canvas.clipRect(bounds);
+                            bounds.right, bounds.bottom, null);
                 }
 
                 drewRipples |= ripple.draw(canvas, getRipplePaint());
@@ -454,7 +453,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         if (drewRipples && !projected && rippleRestoreCount >= 0) {
             final PorterDuffXfermode xfermode = mState.getTintXfermode();
             canvas.saveLayer(bounds.left, bounds.top,
-                    bounds.right, bounds.bottom, getMaskingPaint(xfermode), 0);
+                    bounds.right, bounds.bottom, getMaskingPaint(xfermode));
         }
 
         Drawable mask = null;
@@ -472,7 +471,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         if (mask != null && drewRipples) {
             // TODO: This will also mask the lower layer, which is bad.
             canvas.saveLayer(bounds.left, bounds.top, bounds.right,
-                    bounds.bottom, getMaskingPaint(DST_IN), 0);
+                    bounds.bottom, getMaskingPaint(DST_IN));
             mask.draw(canvas);
         }
 

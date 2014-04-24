@@ -75,7 +75,8 @@ public:
     void concatMatrix(const Matrix4& matrix); // internal only convenience method
 
     // Clip
-    const Rect& getClipBounds() const { return mSnapshot->getLocalClip(); }
+    virtual const Rect& getLocalClipBounds() const { return mSnapshot->getLocalClip(); }
+
     virtual bool quickRejectConservative(float left, float top, float right, float bottom) const;
 
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
@@ -83,6 +84,8 @@ public:
     virtual bool clipRegion(const SkRegion* region, SkRegion::Op op);
 
 protected:
+    const Rect& getRenderTargetClipBounds() const { return mSnapshot->getRenderTargetClip(); }
+
     int getWidth() { return mWidth; }
     int getHeight() { return mHeight; }
 

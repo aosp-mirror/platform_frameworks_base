@@ -318,12 +318,19 @@ private:
 class SaveLayerOp : public StateOp {
 public:
     SaveLayerOp(float left, float top, float right, float bottom, int alpha, int flags)
-            : mArea(left, top, right, bottom), mPaint(&mCachedPaint), mFlags(flags) {
+            : mArea(left, top, right, bottom)
+            , mPaint(&mCachedPaint)
+            , mFlags(flags)
+            , mConvexMask(NULL) {
         mCachedPaint.setAlpha(alpha);
     }
 
     SaveLayerOp(float left, float top, float right, float bottom, const SkPaint* paint, int flags)
-            : mArea(left, top, right, bottom), mPaint(paint), mFlags(flags) {}
+            : mArea(left, top, right, bottom)
+            , mPaint(paint)
+            , mFlags(flags)
+            , mConvexMask(NULL)
+    {}
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
             bool useQuickReject) {
@@ -338,7 +345,8 @@ public:
     }
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
-        renderer.saveLayer(mArea.left, mArea.top, mArea.right, mArea.bottom, mPaint, mFlags);
+        renderer.saveLayer(mArea.left, mArea.top, mArea.right, mArea.bottom,
+                mPaint, mFlags, mConvexMask);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -349,6 +357,11 @@ public:
     virtual const char* name() { return isSaveLayerAlpha() ? "SaveLayerAlpha" : "SaveLayer"; }
 
     int getFlags() { return mFlags; }
+
+    // Called to make SaveLayerOp clip to the provided mask when drawing back/restored
+    void setMask(const SkPath* convexMask) {
+        mConvexMask = convexMask;
+    }
 
 private:
     bool isSaveLayerAlpha() const {
@@ -361,6 +374,10 @@ private:
     const SkPaint* mPaint;
     SkPaint mCachedPaint;
     int mFlags;
+
+    // Convex path, points at data in RenderNode, valid for the duration of the frame only
+    // Only used for masking the SaveLayer which wraps projected RenderNodes
+    const SkPath* mConvexMask;
 };
 
 class TranslateOp : public StateOp {

@@ -161,7 +161,14 @@ public:
     ANDROID_API void flushLayerUpdates();
 
     ANDROID_API virtual int saveLayer(float left, float top, float right, float bottom,
-            const SkPaint* paint, int flags);
+            const SkPaint* paint, int flags) {
+        return saveLayer(left, top, right, bottom, paint, flags, NULL);
+    }
+
+    // Specialized saveLayer implementation, which will pass the convexMask to an FBO layer, if
+    // created, which will in turn clip to that mask when drawn back/restored.
+    int saveLayer(float left, float top, float right, float bottom,
+            const SkPaint* paint, int flags, const SkPath* convexMask);
 
     int saveLayerDeferred(float left, float top, float right, float bottom,
             const SkPaint* paint, int flags);
@@ -523,11 +530,12 @@ private:
      * @param alpha The translucency of the layer
      * @param mode The blending mode of the layer
      * @param flags The layer save flags
+     * @param mask A mask to use when drawing the layer back, may be empty
      *
      * @return True if the layer was successfully created, false otherwise
      */
     bool createLayer(float left, float top, float right, float bottom,
-            const SkPaint* paint, int flags);
+            const SkPaint* paint, int flags, const SkPath* convexMask);
 
     /**
      * Creates a new layer stored in the specified snapshot as an FBO.

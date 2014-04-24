@@ -108,7 +108,12 @@ public:
      * Returns the current clip in local coordinates. The clip rect is
      * transformed by the inverse transform matrix.
      */
-    ANDROID_API const Rect& getLocalClip();
+    const Rect& getLocalClip();
+
+    /**
+     * Returns the current clip in render target coordinates.
+     */
+    const Rect& getRenderTargetClip() { return *clipRect; }
 
     /**
      * Resets the clip to the specified rect.
@@ -238,7 +243,7 @@ private:
 
     mat4 mTransformRoot;
     Rect mClipRectRoot;
-    Rect mLocalClip;
+    Rect mLocalClip; // don't use directly, call getLocalClip() which initializes this
 
     SkRegion mClipRegionRoot;
 

@@ -30,6 +30,8 @@ namespace uirenderer {
 #define RECT_STRING "%7.2f %7.2f %7.2f %7.2f"
 #define RECT_ARGS(r) \
     (r).left, (r).top, (r).right, (r).bottom
+#define SK_RECT_ARGS(r) \
+    (r).left(), (r).top(), (r).right(), (r).bottom()
 
 ///////////////////////////////////////////////////////////////////////////////
 // Structs

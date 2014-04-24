@@ -29,7 +29,10 @@
 namespace android {
 namespace uirenderer {
 
-DisplayListData::DisplayListData() : projectionReceiveIndex(-1), functorCount(0), hasDrawOps(false) {
+DisplayListData::DisplayListData()
+        : projectionReceiveIndex(-1)
+        , functorCount(0)
+        , hasDrawOps(false) {
 }
 
 DisplayListData::~DisplayListData() {
