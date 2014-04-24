@@ -165,7 +165,7 @@
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Daten erneut aktivieren"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Keine Internetverbindung"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"WLAN verbunden"</string>
-    <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS wird gesucht"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS wird gesucht..."</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Standort durch GPS festgelegt"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Standortanfragen aktiv"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Alle Benachrichtigungen löschen"</string>
@@ -208,6 +208,7 @@
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Farbkorrekturmodus"</string>
     <string name="recents_empty_message" msgid="2269156590813544104">"Letzte"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"App-Info"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"Suche"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Netzwerk wird\neventuell überwacht."</string>
     <string name="description_target_search" msgid="3091587249776033139">"Suche"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Zum <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach oben schieben"</string>
@@ -217,6 +218,7 @@
     <item quantity="other" msgid="7388721375827338153">"%d Benachrichtigungen ausgeblendet"</item>
   </plurals>
     <string name="zen_mode_notification_text" msgid="8336623711388065713">"Zum Ansehen tippen"</string>
+    <string name="zen_mode_title" msgid="8793432092004749188">"Nicht stören"</string>
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"%d mehr"</item>
   </plurals>

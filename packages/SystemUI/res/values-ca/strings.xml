@@ -208,6 +208,7 @@
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Mode de correcció de color"</string>
     <string name="recents_empty_message" msgid="2269156590813544104">"RECENTS"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informació de l\'aplicació"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"cerca"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"És possible que la xarxa\nestigui controlada"</string>
     <string name="description_target_search" msgid="3091587249776033139">"Cerca"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Fes lliscar el dit cap amunt per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -217,6 +218,7 @@
     <item quantity="other" msgid="7388721375827338153">"%d notificacions ocultes"</item>
   </plurals>
     <string name="zen_mode_notification_text" msgid="8336623711388065713">"Toca per mostrar-ho."</string>
+    <string name="zen_mode_title" msgid="8793432092004749188">"No molesteu"</string>
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"%d més"</item>
   </plurals>
