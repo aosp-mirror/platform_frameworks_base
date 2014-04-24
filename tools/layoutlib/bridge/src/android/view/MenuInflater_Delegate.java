@@ -23,7 +23,6 @@ import com.android.internal.view.menu.BridgeMenuItemImpl;
 import com.android.internal.view.menu.MenuView;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
-import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.util.AttributeSet;
@@ -45,7 +44,7 @@ import android.util.AttributeSet;
 public class MenuInflater_Delegate {
 
     @LayoutlibDelegate
-    /*package*/ static void emptyMethod(MenuInflater thisInflater, MenuItem menuItem,
+    /*package*/ static void registerMenu(MenuInflater thisInflater, MenuItem menuItem,
             AttributeSet attrs) {
         if (menuItem instanceof BridgeMenuItemImpl) {
             Context context = thisInflater.getContext();
@@ -67,9 +66,9 @@ public class MenuInflater_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void emptyMethod(MenuInflater thisInflater, SubMenu subMenu,
+    /*package*/ static void registerMenu(MenuInflater thisInflater, SubMenu subMenu,
             AttributeSet parser) {
-        emptyMethod(thisInflater, subMenu.getItem(), parser);
+        registerMenu(thisInflater, subMenu.getItem(), parser);
     }
 
 }
