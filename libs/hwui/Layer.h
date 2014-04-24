@@ -227,6 +227,14 @@ public:
 
     ANDROID_API void setColorFilter(SkColorFilter* filter);
 
+    inline void setConvexMask(const SkPath* convexMask) {
+        this->convexMask = convexMask;
+    }
+
+    inline const SkPath* getConvexMask() {
+        return convexMask;
+    }
+
     void bindStencilRenderBuffer() const;
 
     void bindTexture() const;
@@ -377,6 +385,13 @@ private:
      * display list.
      */
     DeferredDisplayList* deferredList;
+
+    /**
+     * This convex path should be used to mask the layer's draw to the screen.
+     *
+     * Data not owned/managed by layer object.
+     */
+    const SkPath* convexMask;
 
 }; // struct Layer
 

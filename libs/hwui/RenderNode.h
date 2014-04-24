@@ -172,6 +172,7 @@ private:
     void applyViewPropertyTransforms(mat4& matrix, bool true3dTransform = false);
 
     void computeOrderingImpl(DrawDisplayListOp* opState,
+            const SkPath* outlineOfProjectionSurface,
             Vector<DrawDisplayListOp*>* compositedChildrenOfProjectionSurface,
             const mat4* transformFromProjectionSurface);
 

@@ -48,6 +48,7 @@ Layer::Layer(const uint32_t layerWidth, const uint32_t layerHeight):
     hasDrawnSinceUpdate = false;
     forceFilter = false;
     deferredList = NULL;
+    convexMask = NULL;
     caches.resourceCache.incrementRefcount(this);
 }
 

@@ -77,7 +77,7 @@ void RenderNode::setStagingDisplayList(DisplayListData* data) {
  */
 void RenderNode::output(uint32_t level) {
     ALOGD("%*sStart display list (%p, %s, render=%d)", (level - 1) * 2, "", this,
-            mName.string(), isRenderable());
+            getName(), isRenderable());
     ALOGD("%*s%s %d", level * 2, "", "Save",
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
@@ -87,7 +87,7 @@ void RenderNode::output(uint32_t level) {
         mDisplayListData->displayListOps[i]->output(level, flags);
     }
 
-    ALOGD("%*sDone (%p, %s)", (level - 1) * 2, "", this, mName.string());
+    ALOGD("%*sDone (%p, %s)", (level - 1) * 2, "", this, getName());
 }
 
 void RenderNode::prepareTree(TreeInfo& info) {
@@ -263,12 +263,13 @@ void RenderNode::computeOrdering() {
     for (unsigned int i = 0; i < mDisplayListData->children().size(); i++) {
         DrawDisplayListOp* childOp = mDisplayListData->children()[i];
         childOp->mDisplayList->computeOrderingImpl(childOp,
-                &mProjectedNodes, &mat4::identity());
+                properties().getOutline().getPath(), &mProjectedNodes, &mat4::identity());
     }
 }
 
 void RenderNode::computeOrderingImpl(
         DrawDisplayListOp* opState,
+        const SkPath* outlineOfProjectionSurface,
         Vector<DrawDisplayListOp*>* compositedChildrenOfProjectionSurface,
         const mat4* transformFromProjectionSurface) {
     mProjectedNodes.clear();
@@ -296,6 +297,7 @@ void RenderNode::computeOrderingImpl(
             DrawDisplayListOp* childOp = mDisplayListData->children()[i];
             RenderNode* child = childOp->mDisplayList;
 
+            const SkPath* projectionOutline = NULL;
             Vector<DrawDisplayListOp*>* projectionChildren = NULL;
             const mat4* projectionTransform = NULL;
             if (isProjectionReceiver && !child->properties().getProjectBackwards()) {
@@ -304,6 +306,7 @@ void RenderNode::computeOrderingImpl(
                 // Note that if a direct descendent is projecting backwards, we pass it's
                 // grandparent projection collection, since it shouldn't project onto it's
                 // parent, where it will already be drawing.
+                projectionOutline = properties().getOutline().getPath();
                 projectionChildren = &mProjectedNodes;
                 projectionTransform = &mat4::identity();
             } else {
@@ -311,10 +314,12 @@ void RenderNode::computeOrderingImpl(
                     applyViewPropertyTransforms(localTransformFromProjectionSurface);
                     haveAppliedPropertiesToProjection = true;
                 }
+                projectionOutline = outlineOfProjectionSurface;
                 projectionChildren = compositedChildrenOfProjectionSurface;
                 projectionTransform = &localTransformFromProjectionSurface;
             }
-            child->computeOrderingImpl(childOp, projectionChildren, projectionTransform);
+            child->computeOrderingImpl(childOp,
+                    projectionOutline, projectionChildren, projectionTransform);
         }
     }
 }
@@ -354,7 +359,7 @@ public:
         : mReplayStruct(replayStruct), mLevel(level) {}
     inline void operator()(DisplayListOp* operation, int saveCount, bool clipToBounds) {
 #if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
-        properties().getReplayStruct().mRenderer.eventMark(operation->name());
+        mReplayStruct.mRenderer.eventMark(operation->name());
 #endif
         operation->replay(mReplayStruct, saveCount, mLevel, clipToBounds);
     }
@@ -364,8 +369,6 @@ public:
     }
     inline void endMark() {
         mReplayStruct.mRenderer.endMark();
-        DISPLAY_LIST_LOGD("%*sDone (%p, %s), returning %d", level * 2, "", this, mName.string(),
-                mReplayStruct.mDrawGlStatus);
     }
     inline int level() { return mLevel; }
     inline int replayFlags() { return mReplayStruct.mReplayFlags; }
@@ -470,6 +473,10 @@ void RenderNode::issueOperationsOf3dChildren(const Vector<ZDrawDisplayListOpPair
         endIndex = size;
         shadowIndex = drawIndex; // potentially draw shadow for each pos Z child
     }
+
+    DISPLAY_LIST_LOGD("%*s%d %s 3d children:", (handler.level() + 1) * 2, "",
+            endIndex - drawIndex, mode == kNegativeZChildren ? "negative" : "positive");
+
     float lastCasterZ = 0.0f;
     while (shadowIndex < endIndex || drawIndex < endIndex) {
         if (shadowIndex < endIndex) {
@@ -506,6 +513,42 @@ void RenderNode::issueOperationsOf3dChildren(const Vector<ZDrawDisplayListOpPair
 
 template <class T>
 void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T& handler) {
+    DISPLAY_LIST_LOGD("%*s%d projected children:", (handler.level() + 1) * 2, "", mProjectedNodes.size());
+    const SkPath* projectionReceiverOutline = properties().getOutline().getPath();
+    bool maskProjecteesWithPath = projectionReceiverOutline != NULL
+            && !projectionReceiverOutline->isRect(NULL);
+    int restoreTo = renderer.getSaveCount();
+
+    // If the projection reciever has an outline, we mask each of the projected rendernodes to it
+    // Either with clipRect, or special saveLayer masking
+    LinearAllocator& alloc = handler.allocator();
+    if (projectionReceiverOutline != NULL) {
+        const SkRect& outlineBounds = projectionReceiverOutline->getBounds();
+        if (projectionReceiverOutline->isRect(NULL)) {
+            // mask to the rect outline simply with clipRect
+            handler(new (alloc) SaveOp(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag),
+                    PROPERTY_SAVECOUNT, properties().getClipToBounds());
+            ClipRectOp* clipOp = new (alloc) ClipRectOp(
+                    outlineBounds.left(), outlineBounds.top(),
+                    outlineBounds.right(), outlineBounds.bottom(), SkRegion::kIntersect_Op);
+            handler(clipOp, PROPERTY_SAVECOUNT, properties().getClipToBounds());
+        } else {
+            // wrap the projected RenderNodes with a SaveLayer that will mask to the outline
+            SaveLayerOp* op = new (alloc) SaveLayerOp(
+                    outlineBounds.left(), outlineBounds.top(),
+                    outlineBounds.right(), outlineBounds.bottom(),
+                    255, SkCanvas::kARGB_ClipLayer_SaveFlag);
+            op->setMask(projectionReceiverOutline);
+            handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
+
+            /* TODO: add optimizations here to take advantage of placement/size of projected
+             * children (which may shrink saveLayer area significantly). This is dependent on
+             * passing actual drawing/dirtying bounds of projected content down to native.
+             */
+        }
+    }
+
+    // draw projected nodes
     for (size_t i = 0; i < mProjectedNodes.size(); i++) {
         DrawDisplayListOp* childOp = mProjectedNodes[i];
 
@@ -516,6 +559,11 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
         handler(childOp, renderer.getSaveCount() - 1, properties().getClipToBounds());
         childOp->mSkipInOrderDraw = true;
         renderer.restoreToCount(restoreTo);
+    }
+
+    if (projectionReceiverOutline != NULL) {
+        handler(new (alloc) RestoreToCountOp(restoreTo),
+                PROPERTY_SAVECOUNT, properties().getClipToBounds());
     }
 }
 
@@ -532,17 +580,17 @@ template <class T>
 void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
     const int level = handler.level();
     if (mDisplayListData->isEmpty() || properties().getAlpha() <= 0) {
-        DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, mName.string());
+        DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, getName());
         return;
     }
 
-    handler.startMark(mName.string());
+    handler.startMark(getName());
 
 #if DEBUG_DISPLAY_LIST
-    Rect* clipRect = renderer.getClipRect();
-    DISPLAY_LIST_LOGD("%*sStart display list (%p, %s), clipRect: %.0f, %.0f, %.0f, %.0f",
-            level * 2, "", this, mName.string(), clipRect->left, clipRect->top,
-            clipRect->right, clipRect->bottom);
+    const Rect& clipRect = renderer.getLocalClipBounds();
+    DISPLAY_LIST_LOGD("%*sStart display list (%p, %s), localClipBounds: %.0f, %.0f, %.0f, %.0f",
+            level * 2, "", this, getName(),
+            clipRect.left, clipRect.top, clipRect.right, clipRect.bottom);
 #endif
 
     LinearAllocator& alloc = handler.allocator();
@@ -590,6 +638,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
             PROPERTY_SAVECOUNT, properties().getClipToBounds());
     renderer.setOverrideLayerAlpha(1.0f);
 
+    DISPLAY_LIST_LOGD("%*sDone (%p, %s)", level * 2, "", this, getName());
     handler.endMark();
 }
 

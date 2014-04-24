@@ -58,7 +58,7 @@ public:
     };
 
     ANDROID_API SkiaShader(Type type, SkShader* key, SkShader::TileMode tileX,
-            SkShader::TileMode tileY, SkMatrix* matrix, bool blend);
+            SkShader::TileMode tileY, const SkMatrix* matrix, bool blend);
     virtual ~SkiaShader();
 
     virtual SkiaShader* copy() = 0;
@@ -88,7 +88,7 @@ public:
         return mGenerationId;
     }
 
-    void setMatrix(SkMatrix* matrix) {
+    void setMatrix(const SkMatrix* matrix) {
         updateLocalMatrix(matrix);
         mGenerationId++;
     }
@@ -132,6 +132,24 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // Implementations
 ///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A shader that draws a layer.
+ */
+struct SkiaLayerShader: public SkiaShader {
+    SkiaLayerShader(Layer* layer, const SkMatrix* matrix);
+    SkiaShader* copy();
+
+    void describe(ProgramDescription& description, const Extensions& extensions);
+    void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
+            GLuint* textureUnit);
+
+private:
+    SkiaLayerShader() {
+    }
+
+    Layer* mLayer;
+}; // struct SkiaLayerShader
 
 /**
  * A shader that draws a bitmap.
