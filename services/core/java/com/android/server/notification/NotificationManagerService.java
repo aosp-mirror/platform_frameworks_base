@@ -22,7 +22,6 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
-import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
@@ -36,12 +35,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
@@ -51,7 +46,6 @@ import android.media.AudioManager;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -63,7 +57,6 @@ import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.INotificationListener;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.telephony.TelephonyManager;
@@ -82,11 +75,14 @@ import com.android.internal.R;
 import com.android.internal.notification.NotificationScorer;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.EventLogTags;
-import com.android.server.notification.NotificationUsageStats.SingleNotificationStats;
-import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.SystemService;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
+import com.android.server.notification.NotificationListeners.NotificationListenerInfo;
+import com.android.server.notification.NotificationUsageStats.SingleNotificationStats;
+import com.android.server.statusbar.StatusBarManagerInternal;
+
+import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -107,9 +103,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
-
-import libcore.io.IoUtils;
 
 /** {@hide} */
 public class NotificationManagerService extends SystemService {
@@ -142,8 +135,6 @@ public class NotificationManagerService extends SystemService {
 
     static final boolean ENABLE_BLOCKED_NOTIFICATIONS = true;
     static final boolean ENABLE_BLOCKED_TOASTS = true;
-
-    static final String ENABLED_NOTIFICATION_LISTENERS_SEPARATOR = ":";
 
     private IActivityManager mAm;
     AudioManager mAudioManager;
@@ -185,19 +176,6 @@ public class NotificationManagerService extends SystemService {
 
     private AppOpsManager mAppOps;
 
-    // contains connections to all connected listeners, including app services
-    // and system listeners
-    private ArrayList<NotificationListenerInfo> mListeners
-            = new ArrayList<NotificationListenerInfo>();
-    // things that will be put into mListeners as soon as they're ready
-    private ArrayList<String> mServicesBinding = new ArrayList<String>();
-    // lists the component names of all enabled (and therefore connected) listener
-    // app services for current profiles.
-    private HashSet<ComponentName> mEnabledListenersForCurrentProfiles
-            = new HashSet<ComponentName>();
-    // Just the packages from mEnabledListenersForCurrentProfiles
-    private HashSet<String> mEnabledListenerPackageNames = new HashSet<String>();
-
     // Notification control database. For now just contains disabled packages.
     private AtomicFile mPolicyFile;
     private HashSet<String> mBlockedPackages = new HashSet<String>();
@@ -213,12 +191,12 @@ public class NotificationManagerService extends SystemService {
 
     final ArrayList<NotificationScorer> mScorers = new ArrayList<NotificationScorer>();
 
+    private NotificationListeners mListeners;
+    private final UserProfiles mUserProfiles = new UserProfiles();
+
     private final NotificationUsageStats mUsageStats = new NotificationUsageStats();
 
     private static final String EXTRA_INTERCEPT = "android.intercept";
-
-    // Profiles of the current user.
-    final protected SparseArray<UserInfo> mCurrentProfiles = new SparseArray<UserInfo>();
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
@@ -233,85 +211,6 @@ public class NotificationManagerService extends SystemService {
     private static final int REASON_NOMAN_CANCEL_ALL = 9;
     private static final int REASON_LISTENER_CANCEL = 10;
     private static final int REASON_LISTENER_CANCEL_ALL = 11;
-
-    private class NotificationListenerInfo implements IBinder.DeathRecipient {
-        INotificationListener listener;
-        ComponentName component;
-        int userid;
-        boolean isSystem;
-        ServiceConnection connection;
-        int targetSdkVersion;
-
-        public NotificationListenerInfo(INotificationListener listener, ComponentName component,
-                int userid, boolean isSystem, int targetSdkVersion) {
-            this.listener = listener;
-            this.component = component;
-            this.userid = userid;
-            this.isSystem = isSystem;
-            this.connection = null;
-            this.targetSdkVersion = targetSdkVersion;
-        }
-
-        public NotificationListenerInfo(INotificationListener listener, ComponentName component,
-                int userid, ServiceConnection connection, int targetSdkVersion) {
-            this.listener = listener;
-            this.component = component;
-            this.userid = userid;
-            this.isSystem = false;
-            this.connection = connection;
-            this.targetSdkVersion = targetSdkVersion;
-        }
-
-        boolean enabledAndUserMatches(StatusBarNotification sbn) {
-            final int nid = sbn.getUserId();
-            if (!isEnabledForCurrentProfiles()) {
-                return false;
-            }
-            if (this.userid == UserHandle.USER_ALL) return true;
-            if (nid == UserHandle.USER_ALL || nid == this.userid) return true;
-            return supportsProfiles() && isCurrentProfile(nid);
-        }
-
-        boolean supportsProfiles() {
-            return targetSdkVersion >= Build.VERSION_CODES.L;
-        }
-
-        public void notifyPostedIfUserMatch(StatusBarNotification sbn) {
-            if (!enabledAndUserMatches(sbn)) {
-                return;
-            }
-            try {
-                listener.onNotificationPosted(sbn);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "unable to notify listener (posted): " + listener, ex);
-            }
-        }
-
-        public void notifyRemovedIfUserMatch(StatusBarNotification sbn) {
-            if (!enabledAndUserMatches(sbn)) return;
-            try {
-                listener.onNotificationRemoved(sbn);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "unable to notify listener (removed): " + listener, ex);
-            }
-        }
-
-        @Override
-        public void binderDied() {
-            // Remove the listener, but don't unbind from the service. The system will bring the
-            // service back up, and the onServiceConnected handler will readd the listener with the
-            // new binding. If this isn't a bound service, and is just a registered
-            // INotificationListener, just removing it from the list is all we need to do anyway.
-            removeListenerImpl(this.listener, this.userid);
-        }
-
-        /** convenience method for looking in mEnabledListenersForCurrentProfiles */
-        public boolean isEnabledForCurrentProfiles() {
-            if (this.isSystem) return true;
-            if (this.connection == null) return false;
-            return mEnabledListenersForCurrentProfiles.contains(this.component);
-        }
-    }
 
     private static class Archive {
         static final int BUFFER_SIZE = 250;
@@ -537,328 +436,6 @@ public class NotificationManagerService extends SystemService {
     }
 
 
-    /**
-     * Remove notification access for any services that no longer exist.
-     */
-    void disableNonexistentListeners() {
-        int[] userIds = getCurrentProfileIds();
-        final int N = userIds.length;
-        for (int i = 0 ; i < N; ++i) {
-            disableNonexistentListeners(userIds[i]);
-        }
-    }
-
-    void disableNonexistentListeners(int userId) {
-        String flatIn = Settings.Secure.getStringForUser(
-                getContext().getContentResolver(),
-                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-                userId);
-        if (!TextUtils.isEmpty(flatIn)) {
-            if (DBG) Slog.v(TAG, "flat before: " + flatIn);
-            PackageManager pm = getContext().getPackageManager();
-            List<ResolveInfo> installedServices = pm.queryIntentServicesAsUser(
-                    new Intent(NotificationListenerService.SERVICE_INTERFACE),
-                    PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,
-                    userId);
-
-            Set<ComponentName> installed = new HashSet<ComponentName>();
-            for (int i = 0, count = installedServices.size(); i < count; i++) {
-                ResolveInfo resolveInfo = installedServices.get(i);
-                ServiceInfo info = resolveInfo.serviceInfo;
-
-                if (!android.Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE.equals(
-                                info.permission)) {
-                    Slog.w(TAG, "Skipping notification listener service "
-                            + info.packageName + "/" + info.name
-                            + ": it does not require the permission "
-                            + android.Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE);
-                    continue;
-                }
-                installed.add(new ComponentName(info.packageName, info.name));
-            }
-
-            String flatOut = "";
-            if (!installed.isEmpty()) {
-                String[] enabled = flatIn.split(ENABLED_NOTIFICATION_LISTENERS_SEPARATOR);
-                ArrayList<String> remaining = new ArrayList<String>(enabled.length);
-                for (int i = 0; i < enabled.length; i++) {
-                    ComponentName enabledComponent = ComponentName.unflattenFromString(enabled[i]);
-                    if (installed.contains(enabledComponent)) {
-                        remaining.add(enabled[i]);
-                    }
-                }
-                flatOut = TextUtils.join(ENABLED_NOTIFICATION_LISTENERS_SEPARATOR, remaining);
-            }
-            if (DBG) Slog.v(TAG, "flat after: " + flatOut);
-            if (!flatIn.equals(flatOut)) {
-                Settings.Secure.putStringForUser(getContext().getContentResolver(),
-                        Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-                        flatOut, userId);
-            }
-        }
-    }
-
-    /**
-     * Called whenever packages change, the user switches, or ENABLED_NOTIFICATION_LISTENERS
-     * is altered. (For example in response to USER_SWITCHED in our broadcast receiver)
-     */
-    void rebindListenerServices() {
-        final int[] userIds = getCurrentProfileIds();
-        final int nUserIds = userIds.length;
-
-        final SparseArray<String> flat = new SparseArray<String>();
-
-        for (int i = 0; i < nUserIds; ++i) {
-            flat.put(userIds[i], Settings.Secure.getStringForUser(
-                    getContext().getContentResolver(),
-                    Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-                    userIds[i]));
-        }
-
-        NotificationListenerInfo[] toRemove = new NotificationListenerInfo[mListeners.size()];
-        final SparseArray<ArrayList<ComponentName>> toAdd
-                = new SparseArray<ArrayList<ComponentName>>();
-
-        synchronized (mNotificationList) {
-            // unbind and remove all existing listeners
-            toRemove = mListeners.toArray(toRemove);
-
-            final HashSet<ComponentName> newEnabled = new HashSet<ComponentName>();
-            final HashSet<String> newPackages = new HashSet<String>();
-
-            for (int i = 0; i < nUserIds; ++i) {
-                final ArrayList<ComponentName> add = new ArrayList<ComponentName>();
-                toAdd.put(userIds[i], add);
-
-                // decode the list of components
-                String toDecode = flat.get(userIds[i]);
-                if (toDecode != null) {
-                    String[] components = toDecode.split(ENABLED_NOTIFICATION_LISTENERS_SEPARATOR);
-                    for (int j = 0; j < components.length; j++) {
-                        final ComponentName component
-                                = ComponentName.unflattenFromString(components[j]);
-                        if (component != null) {
-                            newEnabled.add(component);
-                            add.add(component);
-                            newPackages.add(component.getPackageName());
-                        }
-                    }
-
-                }
-            }
-            mEnabledListenersForCurrentProfiles = newEnabled;
-            mEnabledListenerPackageNames = newPackages;
-        }
-
-        for (NotificationListenerInfo info : toRemove) {
-            final ComponentName component = info.component;
-            final int oldUser = info.userid;
-            Slog.v(TAG, "disabling notification listener for user "
-                    + oldUser + ": " + component);
-            unregisterListenerService(component, info.userid);
-        }
-
-        for (int i = 0; i < nUserIds; ++i) {
-            final ArrayList<ComponentName> add = toAdd.get(userIds[i]);
-            final int N = add.size();
-            for (int j = 0; j < N; j++) {
-                final ComponentName component = add.get(j);
-                Slog.v(TAG, "enabling notification listener for user " + userIds[i] + ": "
-                        + component);
-                registerListenerService(component, userIds[i]);
-            }
-        }
-    }
-
-
-    /**
-     * Version of registerListener that takes the name of a
-     * {@link android.service.notification.NotificationListenerService} to bind to.
-     *
-     * This is the mechanism by which third parties may subscribe to notifications.
-     */
-    private void registerListenerService(final ComponentName name, final int userid) {
-        checkCallerIsSystem();
-
-        if (DBG) Slog.v(TAG, "registerListenerService: " + name + " u=" + userid);
-
-        synchronized (mNotificationList) {
-            final String servicesBindingTag = name.toString() + "/" + userid;
-            if (mServicesBinding.contains(servicesBindingTag)) {
-                // stop registering this thing already! we're working on it
-                return;
-            }
-            mServicesBinding.add(servicesBindingTag);
-
-            final int N = mListeners.size();
-            for (int i=N-1; i>=0; i--) {
-                final NotificationListenerInfo info = mListeners.get(i);
-                if (name.equals(info.component)
-                        && info.userid == userid) {
-                    // cut old connections
-                    if (DBG) Slog.v(TAG, "    disconnecting old listener: " + info.listener);
-                    mListeners.remove(i);
-                    if (info.connection != null) {
-                        getContext().unbindService(info.connection);
-                    }
-                }
-            }
-
-            Intent intent = new Intent(NotificationListenerService.SERVICE_INTERFACE);
-            intent.setComponent(name);
-
-            intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
-                    R.string.notification_listener_binding_label);
-
-            final PendingIntent pendingIntent = PendingIntent.getActivity(
-                    getContext(), 0, new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS), 0);
-            intent.putExtra(Intent.EXTRA_CLIENT_INTENT, pendingIntent);
-
-            ApplicationInfo appInfo = null;
-            try {
-                appInfo = getContext().getPackageManager().getApplicationInfo(
-                        name.getPackageName(), 0);
-            } catch (NameNotFoundException e) {
-                // Ignore if the package doesn't exist we won't be able to bind to the service.
-            }
-            final int targetSdkVersion =
-                    appInfo != null ? appInfo.targetSdkVersion : Build.VERSION_CODES.BASE;
-
-            try {
-                if (DBG) Slog.v(TAG, "binding: " + intent);
-                if (!getContext().bindServiceAsUser(intent,
-                        new ServiceConnection() {
-                            INotificationListener mListener;
-
-                            @Override
-                            public void onServiceConnected(ComponentName name, IBinder service) {
-                                boolean added = false;
-                                synchronized (mNotificationList) {
-                                    mServicesBinding.remove(servicesBindingTag);
-                                    try {
-                                        mListener = INotificationListener.Stub.asInterface(service);
-                                        NotificationListenerInfo info
-                                                = new NotificationListenerInfo(
-                                                        mListener, name, userid, this,
-                                                        targetSdkVersion);
-                                        service.linkToDeath(info, 0);
-                                        added = mListeners.add(info);
-                                    } catch (RemoteException e) {
-                                        // already dead
-                                    }
-                                }
-                                if (added) {
-                                    final String[] keys =
-                                            getActiveNotificationKeysFromListener(mListener);
-                                    try {
-                                        mListener.onListenerConnected(keys);
-                                    } catch (RemoteException e) {
-                                        // we tried
-                                    }
-                                }
-                            }
-
-                            @Override
-                            public void onServiceDisconnected(ComponentName name) {
-                                Slog.v(TAG, "notification listener connection lost: " + name);
-                            }
-                        },
-                        Context.BIND_AUTO_CREATE,
-                        new UserHandle(userid)))
-                {
-                    mServicesBinding.remove(servicesBindingTag);
-                    Slog.w(TAG, "Unable to bind listener service: " + intent);
-                    return;
-                }
-            } catch (SecurityException ex) {
-                Slog.e(TAG, "Unable to bind listener service: " + intent, ex);
-                return;
-            }
-        }
-    }
-
-
-    /**
-     * Remove a listener service for the given user by ComponentName
-     */
-    private void unregisterListenerService(ComponentName name, int userid) {
-        checkCallerIsSystem();
-
-        synchronized (mNotificationList) {
-            final int N = mListeners.size();
-            for (int i=N-1; i>=0; i--) {
-                final NotificationListenerInfo info = mListeners.get(i);
-                if (name.equals(info.component)
-                        && info.userid == userid) {
-                    mListeners.remove(i);
-                    if (info.connection != null) {
-                        try {
-                            getContext().unbindService(info.connection);
-                        } catch (IllegalArgumentException ex) {
-                            // something happened to the service: we think we have a connection
-                            // but it's bogus.
-                            Slog.e(TAG, "Listener " + name + " could not be unbound: " + ex);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * asynchronously notify all listeners about a new notification
-     */
-    void notifyPostedLocked(NotificationRecord n) {
-        // make a copy in case changes are made to the underlying Notification object
-        final StatusBarNotification sbn = n.sbn.clone();
-        for (final NotificationListenerInfo info : mListeners) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    info.notifyPostedIfUserMatch(sbn);
-                }});
-        }
-    }
-
-    /**
-     * asynchronously notify all listeners about a removed notification
-     */
-    void notifyRemovedLocked(NotificationRecord n) {
-        // make a copy in case changes are made to the underlying Notification object
-        // NOTE: this copy is lightweight: it doesn't include heavyweight parts of the notification
-        final StatusBarNotification sbn_light = n.sbn.cloneLight();
-
-        for (final NotificationListenerInfo info : mListeners) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    info.notifyRemovedIfUserMatch(sbn_light);
-                }});
-        }
-    }
-
-    // -- APIs to support listeners clicking/clearing notifications --
-
-    private void checkNullListener(INotificationListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("Listener must not be null");
-        }
-    }
-
-    private NotificationListenerInfo checkListenerTokenLocked(INotificationListener listener) {
-        checkNullListener(listener);
-        final IBinder token = listener.asBinder();
-        final int N = mListeners.size();
-        for (int i=0; i<N; i++) {
-            final NotificationListenerInfo info = mListeners.get(i);
-            if (info.listener.asBinder() == token) return info;
-        }
-        throw new SecurityException("Disallowed call from unknown listener: " + listener);
-    }
-
-
-
-    // -- end of listener APIs --
 
     public static final class NotificationRecord
     {
@@ -1159,28 +736,15 @@ public class NotificationManagerService extends SystemService {
                     pkgList = new String[]{pkgName};
                 }
 
-                boolean anyListenersInvolved = false;
                 if (pkgList != null && (pkgList.length > 0)) {
                     for (String pkgName : pkgList) {
                         if (cancelNotifications) {
                             cancelAllNotificationsInt(MY_UID, MY_PID, pkgName, 0, 0, !queryRestart,
                                     UserHandle.USER_ALL, REASON_PACKAGE_CHANGED, null);
                         }
-                        if (mEnabledListenerPackageNames.contains(pkgName)) {
-                            anyListenersInvolved = true;
-                        }
                     }
                 }
-
-                if (anyListenersInvolved) {
-                    // if we're not replacing a package, clean up orphaned bits
-                    if (!queryReplace) {
-                        disableNonexistentListeners();
-                    }
-                    // make sure we're still bound to any of our
-                    // listeners who may have just upgraded
-                    rebindListenerServices();
-                }
+                mListeners.onPackagesChanged(queryReplace, pkgList);
             } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 // Keep track of screen on/off state, but do not turn off the notification light
                 // until user passes through the lock screen or views the notification.
@@ -1203,9 +767,9 @@ public class NotificationManagerService extends SystemService {
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
                 // reload per-user settings
                 mSettingsObserver.update(null);
-                updateCurrentProfilesCache(context);
+                mUserProfiles.updateCache(context);
             } else if (action.equals(Intent.ACTION_USER_ADDED)) {
-                updateCurrentProfilesCache(context);
+                mUserProfiles.updateCache(context);
             }
         }
     };
@@ -1214,9 +778,6 @@ public class NotificationManagerService extends SystemService {
         private final Uri NOTIFICATION_LIGHT_PULSE_URI
                 = Settings.System.getUriFor(Settings.System.NOTIFICATION_LIGHT_PULSE);
 
-        private final Uri ENABLED_NOTIFICATION_LISTENERS_URI
-                = Settings.Secure.getUriFor(Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
-
         SettingsObserver(Handler handler) {
             super(handler);
         }
@@ -1224,8 +785,6 @@ public class NotificationManagerService extends SystemService {
         void observe() {
             ContentResolver resolver = getContext().getContentResolver();
             resolver.registerContentObserver(NOTIFICATION_LIGHT_PULSE_URI,
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(ENABLED_NOTIFICATION_LISTENERS_URI,
                     false, this, UserHandle.USER_ALL);
             update(null);
         }
@@ -1243,9 +802,6 @@ public class NotificationManagerService extends SystemService {
                     mNotificationPulseEnabled = pulseEnabled;
                     updateNotificationPulse();
                 }
-            }
-            if (uri == null || ENABLED_NOTIFICATION_LISTENERS_URI.equals(uri)) {
-                rebindListenerServices();
             }
         }
     }
@@ -1289,6 +845,18 @@ public class NotificationManagerService extends SystemService {
 
         importOldBlockDb();
 
+        mListeners = new NotificationListeners(getContext(),
+                mHandler, mNotificationList, mUserProfiles) {
+            @Override
+            public void onServiceAdded(INotificationListener listener) {
+                final String[] keys = getActiveNotificationKeysFromListener(listener);
+                try {
+                    listener.onListenerConnected(keys);
+                } catch (RemoteException e) {
+                    // we tried
+                }
+            }
+        };
         mStatusBar = getLocalService(StatusBarManagerInternal.class);
         mStatusBar.setNotificationDelegate(mNotificationDelegate);
 
@@ -1324,7 +892,7 @@ public class NotificationManagerService extends SystemService {
         }
         mZenModeHelper.updateZenMode();
 
-        updateCurrentProfilesCache(getContext());
+        mUserProfiles.updateCache(getContext());
 
         // register for various Intents
         IntentFilter filter = new IntentFilter();
@@ -1403,6 +971,7 @@ public class NotificationManagerService extends SystemService {
             // This observer will force an update when observe is called, causing us to
             // bind to listener services.
             mSettingsObserver.observe();
+            mListeners.onBootPhaseAppsCanStart();
         }
     }
 
@@ -1436,7 +1005,8 @@ public class NotificationManagerService extends SystemService {
                 return ;
             }
 
-            final boolean isSystemToast = isCallerSystem() || ("android".equals(pkg));
+            final boolean isSystemToast =
+                    NotificationUtil.isCallerSystem() || ("android".equals(pkg));
 
             if (ENABLE_BLOCKED_TOASTS && !noteNotificationOp(pkg, Binder.getCallingUid())) {
                 if (!isSystemToast) {
@@ -1527,7 +1097,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void cancelNotificationWithTag(String pkg, String tag, int id, int userId) {
-            checkCallerIsSystemOrSameApp(pkg);
+            NotificationUtil.checkCallerIsSystemOrSameApp(pkg);
             userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), userId, true, false, "cancelNotificationWithTag", pkg);
             // Don't allow client applications to cancel foreground service notis.
@@ -1539,7 +1109,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void cancelAllNotifications(String pkg, int userId) {
-            checkCallerIsSystemOrSameApp(pkg);
+            NotificationUtil.checkCallerIsSystemOrSameApp(pkg);
 
             userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), userId, true, false, "cancelAllNotifications", pkg);
@@ -1553,7 +1123,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled) {
-            checkCallerIsSystem();
+            NotificationUtil.checkCallerIsSystem();
 
             setNotificationsEnabledForPackageImpl(pkg, uid, enabled);
         }
@@ -1563,7 +1133,7 @@ public class NotificationManagerService extends SystemService {
          */
         @Override
         public boolean areNotificationsEnabledForPackage(String pkg, int uid) {
-            checkCallerIsSystem();
+            NotificationUtil.checkCallerIsSystem();
             return (mAppOps.checkOpNoThrow(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg)
                     == AppOpsManager.MODE_ALLOWED);
         }
@@ -1631,9 +1201,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void registerListener(final INotificationListener listener,
                 final ComponentName component, final int userid) {
-            checkCallerIsSystem();
-            checkNullListener(listener);
-            registerListenerImpl(listener, component, userid);
+            NotificationUtil.checkCallerIsSystem();
+            mListeners.registerListener(listener, component, userid);
         }
 
         /**
@@ -1641,10 +1210,7 @@ public class NotificationManagerService extends SystemService {
          */
         @Override
         public void unregisterListener(INotificationListener listener, int userid) {
-            checkNullListener(listener);
-            // no need to check permissions; if your listener binder is in the list,
-            // that's proof that you had permission to add it in the first place
-            unregisterListenerImpl(listener, userid);
+            mListeners.unregisterListener(listener, userid);
         }
 
         /**
@@ -1661,14 +1227,15 @@ public class NotificationManagerService extends SystemService {
             long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationList) {
-                    final NotificationListenerInfo info = checkListenerTokenLocked(token);
+                    final NotificationListenerInfo info =
+                            mListeners.checkListenerTokenLocked(token);
                     if (keys != null) {
                         final int N = keys.length;
                         for (int i = 0; i < N; i++) {
                             NotificationRecord r = mNotificationsByKey.get(keys[i]);
                             final int userId = r.sbn.getUserId();
                             if (userId != info.userid && userId != UserHandle.USER_ALL &&
-                                    !isCurrentProfile(userId)) {
+                                    !mUserProfiles.isCurrentProfile(userId)) {
                                 throw new SecurityException("Disallowed call from listener: "
                                         + info.listener);
                             }
@@ -1711,7 +1278,8 @@ public class NotificationManagerService extends SystemService {
             long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationList) {
-                    final NotificationListenerInfo info = checkListenerTokenLocked(token);
+                    final NotificationListenerInfo info =
+                            mListeners.checkListenerTokenLocked(token);
                     if (info.supportsProfiles()) {
                         Log.e(TAG, "Ignoring deprecated cancelNotification(pkg, tag, id) "
                                 + "from " + info.component
@@ -1737,7 +1305,7 @@ public class NotificationManagerService extends SystemService {
         public StatusBarNotification[] getActiveNotificationsFromListener(
                 INotificationListener token, String[] keys) {
             synchronized (mNotificationList) {
-                final NotificationListenerInfo info = checkListenerTokenLocked(token);
+                final NotificationListenerInfo info = mListeners.checkListenerTokenLocked(token);
                 final ArrayList<StatusBarNotification> list
                         = new ArrayList<StatusBarNotification>();
                 if (keys == null) {
@@ -1768,13 +1336,13 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public ZenModeConfig getZenModeConfig() {
-            checkCallerIsSystem();
+            NotificationUtil.checkCallerIsSystem();
             return mZenModeHelper.getConfig();
         }
 
         @Override
         public boolean setZenModeConfig(ZenModeConfig config) {
-            checkCallerIsSystem();
+            NotificationUtil.checkCallerIsSystem();
             return mZenModeHelper.setConfig(config);
         }
 
@@ -1794,7 +1362,7 @@ public class NotificationManagerService extends SystemService {
 
     private String[] getActiveNotificationKeysFromListener(INotificationListener token) {
         synchronized (mNotificationList) {
-            final NotificationListenerInfo info = checkListenerTokenLocked(token);
+            final NotificationListenerInfo info = mListeners.checkListenerTokenLocked(token);
             final ArrayList<String> keys = new ArrayList<String>();
             final int N = mNotificationList.size();
             for (int i=0; i<N; i++) {
@@ -1810,18 +1378,7 @@ public class NotificationManagerService extends SystemService {
     void dumpImpl(PrintWriter pw) {
         pw.println("Current Notification Manager state:");
 
-        pw.println("  Listeners (" + mEnabledListenersForCurrentProfiles.size()
-                + ") enabled for current profiles:");
-        for (ComponentName cmpt : mEnabledListenersForCurrentProfiles) {
-            pw.println("    " + cmpt);
-        }
-
-        pw.println("  Live listeners (" + mListeners.size() + "):");
-        for (NotificationListenerInfo info : mListeners) {
-            pw.println("    " + info.component
-                    + " (user " + info.userid + "): " + info.listener
-                    + (info.isSystem?" SYSTEM":""));
-        }
+        mListeners.dump(pw);
 
         int N;
 
@@ -1898,8 +1455,9 @@ public class NotificationManagerService extends SystemService {
             Slog.v(TAG, "enqueueNotificationInternal: pkg=" + pkg + " id=" + id
                     + " notification=" + notification);
         }
-        checkCallerIsSystemOrSameApp(pkg);
-        final boolean isSystemNotification = isUidSystem(callingUid) || ("android".equals(pkg));
+        NotificationUtil.checkCallerIsSystemOrSameApp(pkg);
+        final boolean isSystemNotification =
+                NotificationUtil.isUidSystem(callingUid) || ("android".equals(pkg));
 
         final int userId = ActivityManager.handleIncomingUser(callingPid,
                 callingUid, incomingUserId, true, false, "enqueueNotification", pkg);
@@ -2081,7 +1639,7 @@ public class NotificationManagerService extends SystemService {
                             sendAccessibilityEvent(notification, pkg);
                         }
 
-                        notifyPostedLocked(r);
+                        mListeners.notifyPostedLocked(r.sbn);
                     } else {
                         Slog.e(TAG, "Not posting notification with icon==0: " + notification);
                         if (old != null && old.statusBarKey != null) {
@@ -2092,7 +1650,7 @@ public class NotificationManagerService extends SystemService {
                                 Binder.restoreCallingIdentity(identity);
                             }
 
-                            notifyRemovedLocked(r);
+                            mListeners.notifyRemovedLocked(r.sbn);
                         }
                         // ATTENTION: in a future release we will bail out here
                         // so that we do not play sounds, show lights, etc. for invalid
@@ -2107,7 +1665,7 @@ public class NotificationManagerService extends SystemService {
                                 && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0 ))
                             && (r.getUserId() == UserHandle.USER_ALL ||
                                 (r.getUserId() == userId && r.getUserId() == currentUser) ||
-                                isCurrentProfile(r.getUserId()))
+                                mUserProfiles.isCurrentProfile(r.getUserId()))
                             && canInterrupt
                             && mSystemReady
                             && mAudioManager != null) {
@@ -2236,52 +1794,6 @@ public class NotificationManagerService extends SystemService {
         });
 
         idOut[0] = id;
-    }
-
-     void registerListenerImpl(final INotificationListener listener,
-            final ComponentName component, final int userid) {
-        synchronized (mNotificationList) {
-            try {
-                NotificationListenerInfo info
-                        = new NotificationListenerInfo(listener, component, userid,
-                        /*isSystem*/ true, Build.VERSION_CODES.L);
-                listener.asBinder().linkToDeath(info, 0);
-                mListeners.add(info);
-            } catch (RemoteException e) {
-                // already dead
-            }
-        }
-    }
-
-    /**
-     * Removes a listener from the list and unbinds from its service.
-     */
-    void unregisterListenerImpl(final INotificationListener listener, final int userid) {
-        NotificationListenerInfo info = removeListenerImpl(listener, userid);
-        if (info != null && info.connection != null) {
-            getContext().unbindService(info.connection);
-        }
-    }
-
-    /**
-     * Removes a listener from the list but does not unbind from the listener's service.
-     *
-     * @return the removed listener.
-     */
-    NotificationListenerInfo removeListenerImpl(
-            final INotificationListener listener, final int userid) {
-        NotificationListenerInfo listenerInfo = null;
-        synchronized (mNotificationList) {
-            final int N = mListeners.size();
-            for (int i=N-1; i>=0; i--) {
-                final NotificationListenerInfo info = mListeners.get(i);
-                if (info.listener.asBinder() == listener.asBinder()
-                        && info.userid == userid) {
-                    listenerInfo = mListeners.remove(i);
-                }
-            }
-        }
-        return listenerInfo;
     }
 
     void showNextToastLocked() {
@@ -2449,7 +1961,7 @@ public class NotificationManagerService extends SystemService {
                 Binder.restoreCallingIdentity(identity);
             }
             r.statusBarKey = null;
-            notifyRemovedLocked(r);
+            mListeners.notifyRemovedLocked(r.sbn);
         }
 
         // sound
@@ -2578,7 +2090,7 @@ public class NotificationManagerService extends SystemService {
      */
     private boolean notificationMatchesCurrentProfiles(NotificationRecord r, int userId) {
         return notificationMatchesUserId(r, userId)
-                || isCurrentProfile(r.getUserId());
+                || mUserProfiles.isCurrentProfile(r.getUserId());
     }
 
     /**
@@ -2625,44 +2137,6 @@ public class NotificationManagerService extends SystemService {
                 updateLightsLocked();
             }
             return canceledSomething;
-        }
-    }
-
-
-
-    // Return true if the UID is a system or phone UID and therefore should not have
-    // any notifications or toasts blocked.
-    boolean isUidSystem(int uid) {
-        final int appid = UserHandle.getAppId(uid);
-        return (appid == Process.SYSTEM_UID || appid == Process.PHONE_UID || uid == 0);
-    }
-
-    // same as isUidSystem(int, int) for the Binder caller's UID.
-    boolean isCallerSystem() {
-        return isUidSystem(Binder.getCallingUid());
-    }
-
-    void checkCallerIsSystem() {
-        if (isCallerSystem()) {
-            return;
-        }
-        throw new SecurityException("Disallowed call for uid " + Binder.getCallingUid());
-    }
-
-    void checkCallerIsSystemOrSameApp(String pkg) {
-        if (isCallerSystem()) {
-            return;
-        }
-        final int uid = Binder.getCallingUid();
-        try {
-            ApplicationInfo ai = AppGlobals.getPackageManager().getApplicationInfo(
-                    pkg, 0, UserHandle.getCallingUserId());
-            if (!UserHandle.isSameApp(ai.uid, uid)) {
-                throw new SecurityException("Calling uid " + uid + " gave package"
-                        + pkg + " which is owned by uid " + ai.uid);
-            }
-        } catch (RemoteException re) {
-            throw new SecurityException("Unknown package " + pkg + "\n" + re);
         }
     }
 
@@ -2760,34 +2234,39 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void updateCurrentProfilesCache(Context context) {
-        UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
-        if (userManager != null) {
-            int currentUserId = ActivityManager.getCurrentUser();
-            List<UserInfo> profiles = userManager.getProfiles(currentUserId);
-            synchronized (mCurrentProfiles) {
-                mCurrentProfiles.clear();
-                for (UserInfo user : profiles) {
-                    mCurrentProfiles.put(user.id, user);
+    public static class UserProfiles {
+        // Profiles of the current user.
+        private final SparseArray<UserInfo> mCurrentProfiles = new SparseArray<UserInfo>();
+
+        private void updateCache(Context context) {
+            UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+            if (userManager != null) {
+                int currentUserId = ActivityManager.getCurrentUser();
+                List<UserInfo> profiles = userManager.getProfiles(currentUserId);
+                synchronized (mCurrentProfiles) {
+                    mCurrentProfiles.clear();
+                    for (UserInfo user : profiles) {
+                        mCurrentProfiles.put(user.id, user);
+                    }
                 }
             }
         }
-    }
 
-    private int[] getCurrentProfileIds() {
-        synchronized (mCurrentProfiles) {
-            int[] users = new int[mCurrentProfiles.size()];
-            final int N = mCurrentProfiles.size();
-            for (int i = 0; i < N; ++i) {
-                users[i] = mCurrentProfiles.keyAt(i);
+        public int[] getCurrentProfileIds() {
+            synchronized (mCurrentProfiles) {
+                int[] users = new int[mCurrentProfiles.size()];
+                final int N = mCurrentProfiles.size();
+                for (int i = 0; i < N; ++i) {
+                    users[i] = mCurrentProfiles.keyAt(i);
+                }
+                return users;
             }
-            return users;
         }
-    }
 
-    private boolean isCurrentProfile(int userId) {
-        synchronized (mCurrentProfiles) {
-            return mCurrentProfiles.get(userId) != null;
+        public boolean isCurrentProfile(int userId) {
+            synchronized (mCurrentProfiles) {
+                return mCurrentProfiles.get(userId) != null;
+            }
         }
     }
 }
