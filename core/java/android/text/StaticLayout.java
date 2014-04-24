@@ -654,7 +654,7 @@ public class StaticLayout extends Layout {
 
         int extra;
 
-        if (needMultiply) {
+        if (needMultiply && end != bufEnd) {
             double ex = (below - above) * (spacingmult - 1) + spacingadd;
             if (ex >= 0) {
                 extra = (int)(ex + EXTRA_ROUNDING);
