@@ -110,11 +110,11 @@ public class DeviceOwner {
     }
 
     String getDeviceOwnerPackageName() {
-        return mDeviceOwner.packageName;
+        return mDeviceOwner != null ? mDeviceOwner.packageName : null;
     }
 
     String getDeviceOwnerName() {
-        return mDeviceOwner.name;
+        return mDeviceOwner != null ? mDeviceOwner.name : null;
     }
 
     void setDeviceOwner(String packageName, String ownerName) {
