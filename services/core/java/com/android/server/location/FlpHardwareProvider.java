@@ -60,6 +60,10 @@ public class FlpHardwareProvider {
     private static final int FLP_RESULT_ID_UNKNOWN = -5;
     private static final int FLP_RESULT_INVALID_GEOFENCE_TRANSITION = -6;
 
+    // FlpHal monitor status codes, they must be equal to the ones in fused_location.h
+    private static final int FLP_GEOFENCE_MONITOR_STATUS_UNAVAILABLE = 1<<0;
+    private static final int FLP_GEOFENCE_MONITOR_STATUS_AVAILABLE = 1<<1;
+
     public static FlpHardwareProvider getInstance(Context context) {
         if (sSingletonInstance == null) {
             sSingletonInstance = new FlpHardwareProvider(context);
@@ -141,6 +145,8 @@ public class FlpHardwareProvider {
             int transition,
             long timestamp,
             int sourcesUsed) {
+        // the transition Id does not require translation because the values in fused_location.h
+        // and GeofenceHardware are in sync
         getGeofenceHardwareSink().reportGeofenceTransition(
                 geofenceId,
                 updateLocationInformation(location),
@@ -157,9 +163,23 @@ public class FlpHardwareProvider {
             updatedLocation = updateLocationInformation(location);
         }
 
+        int monitorStatus;
+        switch (status) {
+            case FLP_GEOFENCE_MONITOR_STATUS_UNAVAILABLE:
+                monitorStatus = GeofenceHardware.MONITOR_CURRENTLY_UNAVAILABLE;
+                break;
+            case FLP_GEOFENCE_MONITOR_STATUS_AVAILABLE:
+                monitorStatus = GeofenceHardware.MONITOR_CURRENTLY_AVAILABLE;
+                break;
+            default:
+                Log.e(TAG, "Invalid FlpHal Geofence monitor status: " + status);
+                monitorStatus = GeofenceHardware.MONITOR_CURRENTLY_UNAVAILABLE;
+                break;
+        }
+
         getGeofenceHardwareSink().reportGeofenceMonitorStatus(
                 GeofenceHardware.MONITORING_TYPE_FUSED_HARDWARE,
-                status,
+                monitorStatus,
                 updatedLocation,
                 source);
     }

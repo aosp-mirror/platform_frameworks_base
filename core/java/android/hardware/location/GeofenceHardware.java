@@ -79,7 +79,7 @@ public final class GeofenceHardware {
      */
     public static final int MONITOR_UNSUPPORTED = 2;
 
-    // The following constants need to match geofence flags in gps.h
+    // The following constants need to match geofence flags in gps.h and fused_location.h
     /**
      * The constant to indicate that the user has entered the geofence.
      */
@@ -92,7 +92,7 @@ public final class GeofenceHardware {
 
     /**
      * The constant to indicate that the user is uncertain with respect to a
-     * geofence.                                                  nn
+     * geofence.
      */
     public static final int GEOFENCE_UNCERTAIN = 1<<2L;
 
