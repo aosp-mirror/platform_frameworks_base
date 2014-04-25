@@ -119,4 +119,6 @@ interface IDevicePolicyManager {
 
     void setApplicationRestrictions(in ComponentName who, in String packageName, in Bundle settings);
     Bundle getApplicationRestrictions(in ComponentName who, in String packageName);
+
+    void setUserRestriction(in ComponentName who, in String key, boolean enable);
 }
