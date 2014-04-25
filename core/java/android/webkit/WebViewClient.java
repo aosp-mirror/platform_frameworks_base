@@ -204,6 +204,30 @@ public class WebViewClient {
         handler.cancel();
     }
 
+   /**
+     * Notify the host application to handle a SSL client certificate
+     * request. The host application is responsible for showing the UI
+     * if desired and providing the keys. There are three ways to
+     * respond: proceed(), cancel() or ignore(). Webview remembers the
+     * response if proceed() or cancel() is called and does not
+     * call onReceivedClientCertRequest() again for the same host and port
+     * pair. Webview does not remember the response if ignore() is called.
+     *
+     * This method is called on the UI thread. During the callback, the
+     * connection is suspended.
+     *
+     * The default behavior is to cancel, returning no client certificate.
+     *
+     * @param view The WebView that is initiating the callback
+     * @param request An instance of a {@link ClientCertRequest}
+     *
+     * TODO(sgurun) unhide
+     * @hide
+     */
+    public void onReceivedClientCertRequest(WebView view, ClientCertRequest request) {
+        request.cancel();
+    }
+
     /**
      * Notifies the host application that the WebView received an HTTP
      * authentication request. The host application can use the supplied
