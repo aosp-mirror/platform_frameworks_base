@@ -121,6 +121,14 @@ public class LauncherActivityInfo {
     }
 
     /**
+     * Returns the name for the acitivty from  android:name in the manifest.
+     * @return the name from android:name for the acitivity.
+     */
+    public String getName() {
+        return mActivityInfo.name;
+    }
+
+    /**
      * Returns the activity icon with badging appropriate for the profile.
      * @param density Optional density for the icon, or 0 to use the default density.
      * @return A badged icon for the activity.

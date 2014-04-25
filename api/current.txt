@@ -7735,6 +7735,7 @@ package android.content.pm {
     method public long getFirstInstallTime();
     method public android.graphics.drawable.Drawable getIcon(int);
     method public java.lang.CharSequence getLabel();
+    method public java.lang.String getName();
     method public android.os.UserHandle getUser();
   }
 
