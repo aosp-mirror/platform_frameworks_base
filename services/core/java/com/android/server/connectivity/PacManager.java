@@ -24,7 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.net.ProxyProperties;
+import android.net.ProxyInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -157,14 +157,14 @@ public class PacManager {
      * @param proxy Proxy information that is about to be broadcast.
      * @return Returns true when the broadcast should not be sent
      */
-    public synchronized boolean setCurrentProxyScriptUrl(ProxyProperties proxy) {
-        if (!TextUtils.isEmpty(proxy.getPacFileUrl())) {
+    public synchronized boolean setCurrentProxyScriptUrl(ProxyInfo proxy) {
+        if (proxy.getPacFileUrl() != null) {
             if (proxy.getPacFileUrl().equals(mPacUrl) && (proxy.getPort() > 0)) {
                 // Allow to send broadcast, nothing to do.
                 return false;
             }
             synchronized (mProxyLock) {
-                mPacUrl = proxy.getPacFileUrl();
+                mPacUrl = proxy.getPacFileUrl().toString();
             }
             mCurrentDelay = DELAY_1;
             mHasSentBroadcast = false;
@@ -268,7 +268,7 @@ public class PacManager {
         // Already bound no need to bind again.
         if ((mProxyConnection != null) && (mConnection != null)) {
             if (mLastPort != -1) {
-                sendPacBroadcast(new ProxyProperties(mPacUrl, mLastPort));
+                sendPacBroadcast(new ProxyInfo(mPacUrl, mLastPort));
             } else {
                 Log.e(TAG, "Received invalid port from Local Proxy,"
                         + " PAC will not be operational");
@@ -362,7 +362,7 @@ public class PacManager {
         mLastPort = -1;
     }
 
-    private void sendPacBroadcast(ProxyProperties proxy) {
+    private void sendPacBroadcast(ProxyInfo proxy) {
         mConnectivityHandler.sendMessage(mConnectivityHandler.obtainMessage(mProxyMessage, proxy));
     }
 
@@ -371,7 +371,7 @@ public class PacManager {
             return;
         }
         if (!mHasSentBroadcast) {
-            sendPacBroadcast(new ProxyProperties(mPacUrl, mLastPort));
+            sendPacBroadcast(new ProxyInfo(mPacUrl, mLastPort));
             mHasSentBroadcast = true;
         }
     }

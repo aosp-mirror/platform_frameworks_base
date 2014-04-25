@@ -17,5 +17,5 @@
 
 package android.net;
 
-parcelable ProxyProperties;
+parcelable ProxyInfo;
 

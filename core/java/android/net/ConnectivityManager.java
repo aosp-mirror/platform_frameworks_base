@@ -1307,14 +1307,13 @@ public class ConnectivityManager {
      * doing something unusual like general internal filtering this may be useful.  On
      * a private network where the proxy is not accessible, you may break HTTP using this.
      *
-     * @param p The a {@link ProxyProperties} object defining the new global
+     * @param p The a {@link ProxyInfo} object defining the new global
      *        HTTP proxy.  A {@code null} value will clear the global HTTP proxy.
      *
      * <p>This method requires the call to hold the permission
      * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}.
-     * {@hide}
      */
-    public void setGlobalProxy(ProxyProperties p) {
+    public void setGlobalProxy(ProxyInfo p) {
         try {
             mService.setGlobalProxy(p);
         } catch (RemoteException e) {
@@ -1324,14 +1323,13 @@ public class ConnectivityManager {
     /**
      * Retrieve any network-independent global HTTP proxy.
      *
-     * @return {@link ProxyProperties} for the current global HTTP proxy or {@code null}
+     * @return {@link ProxyInfo} for the current global HTTP proxy or {@code null}
      *        if no global HTTP proxy is set.
      *
      * <p>This method requires the call to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
-     * {@hide}
      */
-    public ProxyProperties getGlobalProxy() {
+    public ProxyInfo getGlobalProxy() {
         try {
             return mService.getGlobalProxy();
         } catch (RemoteException e) {
@@ -1343,14 +1341,14 @@ public class ConnectivityManager {
      * Get the HTTP proxy settings for the current default network.  Note that
      * if a global proxy is set, it will override any per-network setting.
      *
-     * @return the {@link ProxyProperties} for the current HTTP proxy, or {@code null} if no
+     * @return the {@link ProxyInfo} for the current HTTP proxy, or {@code null} if no
      *        HTTP proxy is active.
      *
      * <p>This method requires the call to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
-    public ProxyProperties getProxy() {
+    public ProxyInfo getProxy() {
         try {
             return mService.getProxy();
         } catch (RemoteException e) {
