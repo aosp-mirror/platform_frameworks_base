@@ -3057,6 +3057,40 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     null, 0, FORCE_NEW_TASK_FLAGS, FORCE_NEW_TASK_FLAGS, null, this);
         }
 
+        private void checkEmbeddedAllowedInner(Intent intent, String resolvedType) {
+            int userId = mService.handleIncomingUser(Binder.getCallingPid(),
+                    Binder.getCallingUid(), mCurrentUser, false, true, "ActivityContainer", null);
+            if (resolvedType == null) {
+                resolvedType = intent.getType();
+                if (resolvedType == null && intent.getData() != null
+                        && "content".equals(intent.getData().getScheme())) {
+                    resolvedType = mService.getProviderMimeType(intent.getData(), userId);
+                }
+            }
+            ActivityInfo aInfo = resolveActivity(intent, resolvedType, 0, null, null, userId);
+            if ((aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
+                throw new SecurityException(
+                        "Attempt to embed activity that has not set allowEmbedded=\"true\"");
+            }
+        }
+
+        /** Throw a SecurityException if allowEmbedded is not true */
+        @Override
+        public final void checkEmbeddedAllowed(Intent intent) {
+            checkEmbeddedAllowedInner(intent, null);
+        }
+
+        /** Throw a SecurityException if allowEmbedded is not true */
+        @Override
+        public final void checkEmbeddedAllowedIntentSender(IIntentSender intentSender) {
+            if (!(intentSender instanceof PendingIntentRecord)) {
+                throw new IllegalArgumentException("Bad PendingIntent object");
+            }
+            PendingIntentRecord pendingIntent = (PendingIntentRecord) intentSender;
+            checkEmbeddedAllowedInner(pendingIntent.key.requestIntent,
+                    pendingIntent.key.requestResolvedType);
+        }
+
         @Override
         public IBinder asBinder() {
             return this;
