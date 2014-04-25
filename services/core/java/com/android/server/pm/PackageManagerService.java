@@ -199,8 +199,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final int BLUETOOTH_UID = Process.BLUETOOTH_UID;
     private static final int SHELL_UID = Process.SHELL_UID;
 
-    private static final boolean GET_CERTIFICATES = true;
-
     // Cap the size of permission trees that 3rd party apps can define
     private static final int MAX_PERMISSION_TREE_FOOTPRINT = 32768;     // characters of text
 
@@ -3783,27 +3781,25 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private boolean collectCertificatesLI(PackageParser pp, PackageSetting ps,
             PackageParser.Package pkg, File srcFile, int parseFlags) {
-        if (GET_CERTIFICATES) {
-            if (ps != null
-                    && ps.codePath.equals(srcFile)
-                    && ps.timeStamp == srcFile.lastModified()) {
-                if (ps.signatures.mSignatures != null
-                        && ps.signatures.mSignatures.length != 0) {
-                    // Optimization: reuse the existing cached certificates
-                    // if the package appears to be unchanged.
-                    pkg.mSignatures = ps.signatures.mSignatures;
-                    return true;
-                }
-                
-                Slog.w(TAG, "PackageSetting for " + ps.name + " is missing signatures.  Collecting certs again to recover them.");
-            } else {
-                Log.i(TAG, srcFile.toString() + " changed; collecting certs");
+        if (ps != null
+                && ps.codePath.equals(srcFile)
+                && ps.timeStamp == srcFile.lastModified()) {
+            if (ps.signatures.mSignatures != null
+                    && ps.signatures.mSignatures.length != 0) {
+                // Optimization: reuse the existing cached certificates
+                // if the package appears to be unchanged.
+                pkg.mSignatures = ps.signatures.mSignatures;
+                return true;
             }
-            
-            if (!pp.collectCertificates(pkg, parseFlags)) {
-                mLastScanError = pp.getParseError();
-                return false;
-            }
+
+            Slog.w(TAG, "PackageSetting for " + ps.name + " is missing signatures.  Collecting certs again to recover them.");
+        } else {
+            Log.i(TAG, srcFile.toString() + " changed; collecting certs");
+        }
+
+        if (!pp.collectCertificates(pkg, parseFlags)) {
+            mLastScanError = pp.getParseError();
+            return false;
         }
         return true;
     }
@@ -9452,7 +9448,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
         }
-        if (GET_CERTIFICATES && !pp.collectCertificates(pkg, parseFlags)) {
+        if (!pp.collectCertificates(pkg, parseFlags)) {
             res.returnCode = pp.getParseError();
             return;
         }
