@@ -19,6 +19,8 @@ package android.content.pm;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Bitmap.Config;
@@ -37,6 +39,8 @@ import android.util.Log;
  */
 public class LauncherActivityInfo {
     private static final boolean DEBUG = false;
+    private static final String TAG = "LauncherActivityInfo";
+
     private final PackageManager mPm;
     private final UserManager mUm;
 
@@ -134,20 +138,29 @@ public class LauncherActivityInfo {
      * @return A badged icon for the activity.
      */
     public Drawable getBadgedIcon(int density) {
-        // TODO: Handle density
-        if (mUser.equals(android.os.Process.myUserHandle())) {
-            return mActivityInfo.loadIcon(mPm);
-        }
-        Drawable originalIcon = mActivityInfo.loadIcon(mPm);
-        if (originalIcon == null) {
-            if (DEBUG) {
-                Log.w("LauncherActivityInfo", "Couldn't find icon for activity");
+        int iconRes = mActivityInfo.getIconResource();
+        Resources resources = null;
+        Drawable originalIcon = null;
+        try {
+            resources = mPm.getResourcesForApplication(mActivityInfo.applicationInfo);
+            try {
+                if (density != 0) {
+                    originalIcon = resources.getDrawableForDensity(iconRes, density);
+                }
+            } catch (Resources.NotFoundException e) {
             }
-            originalIcon = mPm.getDefaultActivityIcon();
+        } catch (NameNotFoundException nnfe) {
         }
+
+        if (originalIcon == null) {
+            originalIcon = mActivityInfo.loadIcon(mPm);
+        }
+
         if (originalIcon instanceof BitmapDrawable) {
             return mUm.getBadgedDrawableForUser(
                     originalIcon, mUser);
+        } else {
+            Log.e(TAG, "Unable to create badged icon for " + mActivityInfo);
         }
         return originalIcon;
     }
