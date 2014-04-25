@@ -50,6 +50,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.AtomicFile;
 import android.util.AttributeSet;
+import android.util.MutableInt;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -85,8 +86,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import libcore.util.MutableInt;
 
 class AppWidgetServiceImpl {
 
