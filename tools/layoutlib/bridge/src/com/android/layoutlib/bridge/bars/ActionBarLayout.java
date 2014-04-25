@@ -23,8 +23,10 @@ import com.android.ide.common.rendering.api.ActionBarCallback.HomeButtonStyle;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.SessionParams;
+import com.android.ide.common.rendering.api.SystemViewCookie;
 import com.android.internal.R;
 import com.android.internal.app.WindowDecorActionBar;
+import com.android.internal.util.Predicate;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuItemImpl;
 import com.android.internal.widget.ActionBarAccessor;
@@ -55,6 +57,8 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
+
+import static com.android.ide.common.rendering.api.SystemViewCookie.ACTION_BAR_OVERFLOW;
 
 /**
  * A layout representing the action bar.
@@ -164,10 +168,33 @@ public class ActionBarLayout extends LinearLayout {
             }
 
             // Set action bar to be split, if needed.
-            mActionBarView.setSplitView((ActionBarContainer) findViewById(R.id.split_action_bar));
+            ActionBarContainer splitView = (ActionBarContainer) findViewById(R.id.split_action_bar);
+            mActionBarView.setSplitView(splitView);
             mActionBarView.setSplitActionBar(mSplit);
 
             inflateMenus();
+
+            // Find if the Overflow Menu Button (the three dots) exists. If yes,
+            // add the view cookie.
+            Predicate<View> overflowMenuButtonTest = new Predicate<View>() {
+                @Override
+                public boolean apply(View view) {
+                    return view.getClass().getName()
+                            .equals("android.widget.ActionMenuPresenter$OverflowMenuButton");
+                }
+            };
+            View overflowMenu = null;
+            if (mSplit) {
+                if (splitView != null) {
+                    overflowMenu = splitView.findViewByPredicate(overflowMenuButtonTest);
+                }
+            }
+            else {
+                overflowMenu = mActionBarView.findViewByPredicate(overflowMenuButtonTest);
+            }
+            if (overflowMenu != null) {
+                mBridgeContext.addViewKey(overflowMenu, new SystemViewCookie(ACTION_BAR_OVERFLOW));
+            }
         }
     }
 
