@@ -1,4 +1,5 @@
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!--
+ Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,68 +16,64 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <size
-            android:width="64dp"
-            android:height="64dp"/>
+        android:height="64dp"
+        android:width="64dp" />
 
-
-    <viewport android:viewportWidth="600"
-          android:viewportHeight="400"/>
-
-    <group>
-        <path
-                android:name="pie1"
-                android:pathData="M300,200 h-150 a150,150 0 1,0 150,-150 z"
-                android:fill="#ffffffff"
-                android:stroke="#FF00FF00"
-                android:strokeWidth="1"/>
-
-        <path
-                android:name="half"
-                android:pathData="M275,175 v-150 a150,150 0 0,0 -150,150 z"
-                android:fill="#FFFF0000"
-                android:stroke="#FF0000FF"
-                android:strokeWidth="5"
-                android:rotation="0"
-                android:pivotX="300"
-                android:pivotY="200"/>
-    </group>
+    <viewport
+        android:viewportHeight="400"
+        android:viewportWidth="600" />
 
     <group>
         <path
-                android:name="pie2"
-                android:pathData="M300,200 h-150 a150,150 0 1,0 150,-150 z"
-                android:fill="#ffff0000"
-                android:stroke="#FF00FF00"
-                android:strokeWidth="10"
-                android:rotation="360"
-                android:pivotX="300"
-                android:pivotY="200"/>
-
+            android:name="pie1"
+            android:fill="#ffffffff"
+            android:pathData="M300,200 h-150 a150,150 0 1,0 150,-150 z"
+            android:stroke="#FF00FF00"
+            android:strokeWidth="1" />
         <path
-                android:name="half"
-                android:pathData="M275,175 v-150 a150,150 0 0,0 -150,150 z"
-                android:fill="#FFFFFF00"
-                android:stroke="#FF0000FF"
-                android:strokeWidth="5"
-                android:rotation="-360"
-                android:pivotX="300"
-                android:pivotY="200"/>
+            android:name="half"
+            android:fill="#FFFF0000"
+            android:pathData="M275,175 v-150 a150,150 0 0,0 -150,150 z"
+            android:pivotX="300"
+            android:pivotY="200"
+            android:rotation="0"
+            android:stroke="#FF0000FF"
+            android:strokeWidth="5" />
     </group>
-    <animation android:sequence="pie1,pie2"
-               android:durations="1000"
-               android:startOffset="500"
-               android:repeatCount="2"
-               android:repeatStyle="forward"
-               android:animate="easeInOut"
-            />
-    <animation android:sequence="half,half"
-               android:durations="1000"
-               android:startOffset="500"
-               android:repeatCount="5"
-               android:repeatStyle="forward"
-               android:animate="easeInOut"
-            />
+    <group>
+        <path
+            android:name="pie2"
+            android:fill="#ffff0000"
+            android:pathData="M300,200 h-150 a150,150 0 1,0 150,-150 z"
+            android:pivotX="300"
+            android:pivotY="200"
+            android:rotation="360"
+            android:stroke="#FF00FF00"
+            android:strokeWidth="10" />
+        <path
+            android:name="half"
+            android:fill="#FFFFFF00"
+            android:pathData="M275,175 v-150 a150,150 0 0,0 -150,150 z"
+            android:pivotX="300"
+            android:pivotY="200"
+            android:rotation="-360"
+            android:stroke="#FF0000FF"
+            android:strokeWidth="5" />
+    </group>
 
-
+    <animation
+        android:animate="easeInOut"
+        android:durations="1000"
+        android:repeatCount="2"
+        android:repeatStyle="forward"
+        android:sequence="pie1,pie2"
+        android:startOffset="500" />
+    <animation
+        android:animate="easeInOut"
+        android:durations="1000"
+        android:repeatCount="5"
+        android:repeatStyle="forward"
+        android:sequence="half,half"
+        android:startOffset="500" />
 
 </vector>
