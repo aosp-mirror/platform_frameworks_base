@@ -33,6 +33,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings.Global;
+import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.util.Slog;
 
@@ -199,6 +200,10 @@ public class ZenModeHelper {
         updateAlarms();
         updateZenMode();
         return true;
+    }
+
+    public void notifyCondition(Condition condition) {
+        Slog.d(TAG, "notifyCondition " + condition);
     }
 
     private boolean isCall(String pkg, Notification n) {
