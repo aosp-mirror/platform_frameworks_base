@@ -95,8 +95,9 @@ public class FusedBatchOptions implements Parcelable {
     }
 
     public static final class BatchFlags {
-        public static int WAKEUP_ON_FIFO_FULL = 1<<0;
-        public static int CALLBACK_ON_LOCATION_FIX = 1<<1;
+        // follow the definitions to the letter in fused_location.h
+        public static int WAKEUP_ON_FIFO_FULL = 0x0000001;
+        public static int CALLBACK_ON_LOCATION_FIX =0x0000002;
     }
 
     /*
