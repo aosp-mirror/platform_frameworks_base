@@ -846,7 +846,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             currentPage.setPivotX(0);
             currentPage.setPivotX(currentPage.getMeasuredWidth() / 2);
         }
-        if (!(currentPage.getScaleX() < 1f || currentPage.getScaleY() < 1f)) {
+        if (currentPage != null && (!(currentPage.getScaleX() < 1f || currentPage.getScaleY() < 1f))) {
             mZoomInOutAnim = new AnimatorSet();
             mZoomInOutAnim.playTogether(
                     ObjectAnimator.ofFloat(currentPage, "scaleX", BOUNCER_SCALE_FACTOR),
