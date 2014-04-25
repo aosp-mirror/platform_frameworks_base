@@ -485,7 +485,7 @@ public class WebView extends AbsoluteLayout
      * @param privateBrowsing whether this WebView will be initialized in
      *                        private mode
      *
-     * @deprecated Private browsing is no longer supported directly via 
+     * @deprecated Private browsing is no longer supported directly via
      * WebView and will be removed in a future release. Prefer using
      * {@link WebSettings}, {@link WebViewDatabase}, {@link CookieManager}
      * and {@link WebStorage} for fine-grained control of privacy data.
@@ -1473,6 +1473,23 @@ public class WebView extends AbsoluteLayout
         checkThread();
         if (DebugFlags.TRACE_API) Log.d(LOGTAG, "clearSslPreferences");
         mProvider.clearSslPreferences();
+    }
+
+    /**
+     * Clears the client certificate preferences table stored in response
+     * to proceeding/cancelling client cert requests. Note that webview
+     * automatically clears these preferences when it receives a
+     * {@link KeyChain.ACTION_STORAGE_CHANGED}
+     *
+     * @param resultCallback A callback to be invoked when client certs are cleared.
+     *
+     * TODO(sgurun) unhide
+     * @hide
+     */
+    public void clearClientCertPreferences(ValueCallback<Void> resultCallback) {
+        checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "clearClientCertPreferences");
+        mProvider.clearClientCertPreferences(resultCallback);
     }
 
     /**
