@@ -22,6 +22,7 @@ import android.transition.TransitionManager;
 import android.util.ArrayMap;
 import android.util.SuperNotCalledException;
 import android.widget.Toolbar;
+import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.WindowDecorActionBar;
 import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.policy.PolicyManager;
@@ -726,6 +727,8 @@ public class Activity extends ContextThemeWrapper
     /*package*/ ActionBar mActionBar = null;
     private boolean mEnableDefaultActionBarUp;
 
+    private VoiceInteractor mVoiceInteractor;
+
     private CharSequence mTitle;
     private int mTitleColor = 0;
 
@@ -1131,6 +1134,23 @@ public class Activity extends ContextThemeWrapper
         if (win != null) win.makeActive();
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(true);
         mCalled = true;
+    }
+
+    /**
+     * Check whether this activity is running as part of a voice interaction with the user.
+     * If true, it should perform its interaction with the user through the
+     * {@link VoiceInteractor} returned by {@link #getVoiceInteractor}.
+     */
+    public boolean isVoiceInteraction() {
+        return mVoiceInteractor != null;
+    }
+
+    /**
+     * Retrieve the active {@link VoiceInteractor} that the user is going through to
+     * interact with this activity.
+     */
+    public VoiceInteractor getVoiceInteractor() {
+        return mVoiceInteractor;
     }
 
     /**
@@ -5397,7 +5417,7 @@ public class Activity extends ContextThemeWrapper
             NonConfigurationInstances lastNonConfigurationInstances,
             Configuration config) {
         attach(context, aThread, instr, token, ident, application, intent, info, title, parent, id,
-                lastNonConfigurationInstances, config, null);
+                lastNonConfigurationInstances, config, null, null);
     }
 
     final void attach(Context context, ActivityThread aThread,
@@ -5405,7 +5425,7 @@ public class Activity extends ContextThemeWrapper
             Application application, Intent intent, ActivityInfo info,
             CharSequence title, Activity parent, String id,
             NonConfigurationInstances lastNonConfigurationInstances,
-            Configuration config, Bundle options) {
+            Configuration config, Bundle options, IVoiceInteractor voiceInteractor) {
         attachBaseContext(context);
 
         mFragments.attachActivity(this, mContainer, null);
@@ -5433,6 +5453,8 @@ public class Activity extends ContextThemeWrapper
         mParent = parent;
         mEmbeddedID = id;
         mLastNonConfigurationInstances = lastNonConfigurationInstances;
+        mVoiceInteractor = voiceInteractor != null
+                ? new VoiceInteractor(this, voiceInteractor, Looper.myLooper()) : null;
 
         mWindow.setWindowManager(
                 (WindowManager)context.getSystemService(Context.WINDOW_SERVICE),

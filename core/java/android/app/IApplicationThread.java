@@ -31,6 +31,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.IInterface;
+import android.service.voice.IVoiceInteractionSession;
+import com.android.internal.app.IVoiceInteractor;
 
 import java.io.FileDescriptor;
 import java.util.List;
@@ -55,8 +57,9 @@ public interface IApplicationThread extends IInterface {
     void scheduleSendResult(IBinder token, List<ResultInfo> results) throws RemoteException;
     void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
             ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
-            int procState, Bundle state, List<ResultInfo> pendingResults,
-            List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
+            IVoiceInteractor voiceInteractor, int procState, Bundle state,
+            List<ResultInfo> pendingResults, List<Intent> pendingNewIntents, boolean notResumed,
+            boolean isForward,
             String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler,
             Bundle resumeArgs)
             throws RemoteException;

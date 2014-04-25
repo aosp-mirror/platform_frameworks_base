@@ -47,6 +47,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.StrictMode;
+import android.service.voice.IVoiceInteractionSession;
+import com.android.internal.app.IVoiceInteractor;
 
 import java.util.List;
 
@@ -77,6 +79,10 @@ public interface IActivityManager extends IInterface {
             IntentSender intent, Intent fillInIntent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode,
             int flagsMask, int flagsValues, Bundle options) throws RemoteException;
+    public int startVoiceActivity(String callingPackage, int callingPid, int callingUid,
+            Intent intent, String resolvedType, IVoiceInteractionSession session,
+            IVoiceInteractor interactor, int flags, String profileFile,
+            ParcelFileDescriptor profileFd, Bundle options, int userId) throws RemoteException;
     public boolean startNextMatchingActivity(IBinder callingActivity,
             Intent intent, Bundle options) throws RemoteException;
     public boolean finishActivity(IBinder token, int code, Intent data, boolean finishTask)
@@ -733,4 +739,5 @@ public interface IActivityManager extends IInterface {
     int STOP_LOCK_TASK_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+215;
     int IS_IN_LOCK_TASK_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+216;
     int SET_ACTIVITY_LABEL_ICON_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+217;
+    int START_VOICE_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+218;
 }

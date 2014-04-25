@@ -1428,7 +1428,7 @@ public class Instrumentation {
     }
 
     /**
-     * Like {@link #execStartActivity(Context, IBinder, IBinder, Activity, Intent, int)},
+     * Like {@link #execStartActivity},
      * but accepts an array of activities to be started.  Note that active
      * {@link ActivityMonitor} objects only match against the first activity in
      * the array.
@@ -1442,7 +1442,7 @@ public class Instrumentation {
     }
 
     /**
-     * Like {@link #execStartActivity(Context, IBinder, IBinder, Activity, Intent, int)},
+     * Like {@link #execStartActivity},
      * but accepts an array of activities to be started.  Note that active
      * {@link ActivityMonitor} objects only match against the first activity in
      * the array.
@@ -1545,8 +1545,7 @@ public class Instrumentation {
     }
 
     /**
-     * Like {@link #execStartActivity(Context, IBinder, IBinder, Activity, Intent, int)},
-     * but for starting as a particular user.
+     * Like {@link #execStartActivity}, but for starting as a particular user.
      *
      * @param who The Context from which the activity is being started.
      * @param contextThread The main thread of the Context from which the activity
@@ -1616,7 +1615,8 @@ public class Instrumentation {
         mUiAutomationConnection = uiAutomationConnection;
     }
 
-    /*package*/ static void checkStartActivityResult(int res, Object intent) {
+    /** @hide */
+    public static void checkStartActivityResult(int res, Object intent) {
         if (res >= ActivityManager.START_SUCCESS) {
             return;
         }
@@ -1640,6 +1640,9 @@ public class Instrumentation {
             case ActivityManager.START_NOT_ACTIVITY:
                 throw new IllegalArgumentException(
                         "PendingIntent is not an activity");
+            case ActivityManager.START_NOT_VOICE_COMPATIBLE:
+                throw new SecurityException(
+                        "Starting under voice control not allowed for: " + intent);
             default:
                 throw new AndroidRuntimeException("Unknown error code "
                         + res + " when starting " + intent);

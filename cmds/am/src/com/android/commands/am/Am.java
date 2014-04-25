@@ -749,6 +749,11 @@ public class Am extends BaseCommand {
                             "Error: Activity not started, you do not "
                             + "have permission to access it.");
                     break;
+                case ActivityManager.START_NOT_VOICE_COMPATIBLE:
+                    out.println(
+                            "Error: Activity not started, voice control not allowed for: "
+                                    + intent);
+                    break;
                 default:
                     out.println(
                             "Error: Activity not started, unknown error code " + res);

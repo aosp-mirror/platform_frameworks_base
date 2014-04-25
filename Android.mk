@@ -197,6 +197,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/dreams/IDreamService.aidl \
 	core/java/android/service/trust/ITrustAgentService.aidl \
 	core/java/android/service/trust/ITrustAgentServiceCallback.aidl \
+	core/java/android/service/voice/IVoiceInteractionService.aidl \
+	core/java/android/service/voice/IVoiceInteractionSession.aidl \
 	core/java/android/service/wallpaper/IWallpaperConnection.aidl \
 	core/java/android/service/wallpaper/IWallpaperEngine.aidl \
 	core/java/android/service/wallpaper/IWallpaperService.aidl \
@@ -230,6 +232,10 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/app/IBatteryStats.aidl \
 	core/java/com/android/internal/app/IProcessStats.aidl \
 	core/java/com/android/internal/app/IUsageStats.aidl \
+	core/java/com/android/internal/app/IVoiceInteractionManagerService.aidl \
+	core/java/com/android/internal/app/IVoiceInteractor.aidl \
+	core/java/com/android/internal/app/IVoiceInteractorCallback.aidl \
+	core/java/com/android/internal/app/IVoiceInteractorRequest.aidl \
 	core/java/com/android/internal/app/IMediaContainerService.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetService.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetHost.aidl \

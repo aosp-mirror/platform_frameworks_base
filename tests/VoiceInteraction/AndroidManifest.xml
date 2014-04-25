@@ -1,0 +1,27 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.test.voiceinteraction">
+
+    <application>
+        <activity android:name="VoiceInteractionMain" android:label="Voice Interaction">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <service android:name="MainInteractionService"
+                android:permission="android.permission.BIND_VOICE_INTERACTION"
+                android:process=":interactor">
+            <intent-filter>
+                <action android:name="android.service.voice.VoiceInteractionService" />
+            </intent-filter>
+        </service>
+        <activity android:name="TestInteractionActivity" android:label="Voice Interaction Target">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.VOICE" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

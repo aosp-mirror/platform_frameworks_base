@@ -94,6 +94,7 @@ import android.view.WindowManagerGlobal;
 import android.renderscript.RenderScript;
 import android.security.AndroidKeyStoreProvider;
 
+import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SamplingProfilerIntegration;
@@ -265,6 +266,7 @@ public final class ActivityThread {
         IBinder token;
         int ident;
         Intent intent;
+        IVoiceInteractor voiceInteractor;
         Bundle state;
         Activity activity;
         Window window;
@@ -603,6 +605,7 @@ public final class ActivityThread {
         // activity itself back to the activity manager. (matters more with ipc)
         public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
                 ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
+                IVoiceInteractor voiceInteractor,
                 int procState, Bundle state, List<ResultInfo> pendingResults,
                 List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
                 String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler,
@@ -615,6 +618,7 @@ public final class ActivityThread {
             r.token = token;
             r.ident = ident;
             r.intent = intent;
+            r.voiceInteractor = voiceInteractor;
             r.activityInfo = info;
             r.compatInfo = compatInfo;
             r.state = state;
@@ -2197,7 +2201,8 @@ public final class ActivityThread {
                         + r.activityInfo.name + " with config " + config);
                 activity.attach(appContext, this, getInstrumentation(), r.token,
                         r.ident, app, r.intent, r.activityInfo, title, r.parent,
-                        r.embeddedID, r.lastNonConfigurationInstances, config, options);
+                        r.embeddedID, r.lastNonConfigurationInstances, config, options,
+                        r.voiceInteractor);
 
                 if (customIntent != null) {
                     activity.mIntent = customIntent;

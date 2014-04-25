@@ -633,7 +633,7 @@ final class ActivityRecord {
         // case we will deliver it if this is the current top activity on its
         // stack.
         boolean unsent = true;
-        if ((state == ActivityState.RESUMED || (service.mSleeping
+        if ((state == ActivityState.RESUMED || (service.isSleeping()
                         && task.stack.topRunningActivityLocked(null) == this))
                 && app != null && app.thread != null) {
             try {

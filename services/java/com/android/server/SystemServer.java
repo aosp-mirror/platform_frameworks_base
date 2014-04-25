@@ -115,6 +115,8 @@ public final class SystemServer {
             "com.android.server.devicepolicy.DevicePolicyManagerService$Lifecycle";
     private static final String APPWIDGET_SERVICE_CLASS =
             "com.android.server.appwidget.AppWidgetService";
+    private static final String VOICE_RECOGNITION_MANAGER_SERVICE_CLASS =
+            "com.android.server.voiceinteraction.VoiceInteractionManagerService";
     private static final String PRINT_MANAGER_SERVICE_CLASS =
             "com.android.server.print.PrintManagerService";
     private static final String USB_SERVICE_CLASS =
@@ -291,6 +293,7 @@ public final class SystemServer {
         // Activity manager runs the show.
         mActivityManagerService = mSystemServiceManager.startService(
                 ActivityManagerService.Lifecycle.class).getService();
+        mActivityManagerService.setSystemServiceManager(mSystemServiceManager);
     }
 
     private void startCoreServices() {
@@ -826,6 +829,15 @@ public final class SystemServer {
                     recognition = new RecognitionManagerService(context);
                 } catch (Throwable e) {
                     reportWtf("starting Recognition Service", e);
+                }
+
+                try {
+                    if (pm.hasSystemFeature(PackageManager.FEATURE_VOICE_RECOGNIZERS)) {
+                        Slog.i(TAG, "Voice Recognition Service");
+                        mSystemServiceManager.startService(VOICE_RECOGNITION_MANAGER_SERVICE_CLASS);
+                    }
+                } catch (Throwable e) {
+                    reportWtf("starting Voice Recognition Service", e);
                 }
             }
 
