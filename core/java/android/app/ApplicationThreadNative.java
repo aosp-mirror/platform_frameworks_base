@@ -33,6 +33,7 @@ import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import com.android.internal.app.IVoiceInteractor;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -136,6 +137,8 @@ public abstract class ApplicationThreadNative extends Binder
             ActivityInfo info = ActivityInfo.CREATOR.createFromParcel(data);
             Configuration curConfig = Configuration.CREATOR.createFromParcel(data);
             CompatibilityInfo compatInfo = CompatibilityInfo.CREATOR.createFromParcel(data);
+            IVoiceInteractor voiceInteractor = IVoiceInteractor.Stub.asInterface(
+                    data.readStrongBinder());
             int procState = data.readInt();
             Bundle state = data.readBundle();
             List<ResultInfo> ri = data.createTypedArrayList(ResultInfo.CREATOR);
@@ -147,7 +150,8 @@ public abstract class ApplicationThreadNative extends Binder
                     ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
             boolean autoStopProfiler = data.readInt() != 0;
             Bundle resumeArgs = data.readBundle();
-            scheduleLaunchActivity(intent, b, ident, info, curConfig, compatInfo, procState, state,
+            scheduleLaunchActivity(intent, b, ident, info, curConfig, compatInfo,
+                    voiceInteractor, procState, state,
                     ri, pi, notResumed, isForward, profileName, profileFd, autoStopProfiler,
                     resumeArgs);
             return true;
@@ -735,6 +739,7 @@ class ApplicationThreadProxy implements IApplicationThread {
 
     public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
             ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
+            IVoiceInteractor voiceInteractor,
             int procState, Bundle state, List<ResultInfo> pendingResults,
             List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
             String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler,
@@ -748,6 +753,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         info.writeToParcel(data, 0);
         curConfig.writeToParcel(data, 0);
         compatInfo.writeToParcel(data, 0);
+        data.writeStrongBinder(voiceInteractor != null ? voiceInteractor.asBinder() : null);
         data.writeInt(procState);
         data.writeBundle(state);
         data.writeTypedList(pendingResults);

@@ -3311,6 +3311,12 @@ public final class Settings {
                 "input_method_selector_visibility";
 
         /**
+         * The currently selected voice interaction service flattened ComponentName.
+         * @hide
+         */
+        public static final String VOICE_INTERACTION_SERVICE = "voice_interaction_service";
+
+        /**
          * bluetooth HCI snoop log configuration
          * @hide
          */

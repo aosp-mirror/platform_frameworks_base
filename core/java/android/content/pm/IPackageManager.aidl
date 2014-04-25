@@ -74,6 +74,9 @@ interface IPackageManager {
 
     ActivityInfo getActivityInfo(in ComponentName className, int flags, int userId);
 
+    boolean activitySupportsIntent(in ComponentName className, in Intent intent,
+            String resolvedType);
+
     ActivityInfo getReceiverInfo(in ComponentName className, int flags, int userId);
 
     ServiceInfo getServiceInfo(in ComponentName className, int flags, int userId);

@@ -2160,6 +2160,24 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
+    public boolean activitySupportsIntent(ComponentName component, Intent intent,
+            String resolvedType) {
+        synchronized (mPackages) {
+            PackageParser.Activity a = mActivities.mActivities.get(component);
+            if (a == null) {
+                return false;
+            }
+            for (int i=0; i<a.intents.size(); i++) {
+                if (a.intents.get(i).match(intent.getAction(), resolvedType, intent.getScheme(),
+                        intent.getData(), intent.getCategories(), TAG) >= 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    @Override
     public ActivityInfo getReceiverInfo(ComponentName component, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, "get receiver info");

@@ -131,6 +131,58 @@ public class SystemServiceManager {
         }
     }
 
+    public void startUser(final int userHandle) {
+        final int serviceLen = mServices.size();
+        for (int i = 0; i < serviceLen; i++) {
+            final SystemService service = mServices.get(i);
+            try {
+                service.onStartUser(userHandle);
+            } catch (Exception ex) {
+                Slog.wtf(TAG, "Failure reporting start of user " + userHandle
+                        + " to service " + service.getClass().getName(), ex);
+            }
+        }
+    }
+
+    public void switchUser(final int userHandle) {
+        final int serviceLen = mServices.size();
+        for (int i = 0; i < serviceLen; i++) {
+            final SystemService service = mServices.get(i);
+            try {
+                service.onSwitchUser(userHandle);
+            } catch (Exception ex) {
+                Slog.wtf(TAG, "Failure reporting switch of user " + userHandle
+                        + " to service " + service.getClass().getName(), ex);
+            }
+        }
+    }
+
+    public void stopUser(final int userHandle) {
+        final int serviceLen = mServices.size();
+        for (int i = 0; i < serviceLen; i++) {
+            final SystemService service = mServices.get(i);
+            try {
+                service.onStopUser(userHandle);
+            } catch (Exception ex) {
+                Slog.wtf(TAG, "Failure reporting stop of user " + userHandle
+                        + " to service " + service.getClass().getName(), ex);
+            }
+        }
+    }
+
+    public void cleanupUser(final int userHandle) {
+        final int serviceLen = mServices.size();
+        for (int i = 0; i < serviceLen; i++) {
+            final SystemService service = mServices.get(i);
+            try {
+                service.onCleanupUser(userHandle);
+            } catch (Exception ex) {
+                Slog.wtf(TAG, "Failure reporting cleanup of user " + userHandle
+                        + " to service " + service.getClass().getName(), ex);
+            }
+        }
+    }
+
     /** Sets the safe mode flag for services to query. */
     public void setSafeMode(boolean safeMode) {
         mSafeMode = safeMode;

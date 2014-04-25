@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.START_ANY_ACTIVITY;
-import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -77,6 +76,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.service.voice.IVoiceInteractionSession;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -87,6 +87,7 @@ import android.view.DisplayInfo;
 import android.view.InputEvent;
 import android.view.Surface;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
+import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.TransferPipe;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
@@ -687,13 +688,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     void startHomeActivity(Intent intent, ActivityInfo aInfo) {
         moveHomeToTop();
-        startActivityLocked(null, intent, null, aInfo, null, null, 0, 0, 0, null, 0,
+        startActivityLocked(null, intent, null, aInfo, null, null, null, null, 0, 0, 0, null, 0,
                 null, false, null, null);
     }
 
     final int startActivityMayWait(IApplicationThread caller, int callingUid,
-            String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags, String profileFile,
+            String callingPackage, Intent intent, String resolvedType,
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+            IBinder resultTo, String resultWho, int requestCode, int startFlags, String profileFile,
             ParcelFileDescriptor profileFd, WaitResult outResult, Configuration config,
             Bundle options, int userId, IActivityContainer iContainer) {
         // Refuse possible leaked file descriptors
@@ -802,7 +804,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
 
-            int res = startActivityLocked(caller, intent, resolvedType, aInfo, resultTo, resultWho,
+            int res = startActivityLocked(caller, intent, resolvedType, aInfo,
+                    voiceSession, voiceInteractor, resultTo, resultWho,
                     requestCode, callingPid, callingUid, callingPackage, startFlags, options,
                     componentSpecified, null, container);
 
@@ -918,7 +921,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         theseOptions = null;
                     }
                     int res = startActivityLocked(caller, intent, resolvedTypes[i],
-                            aInfo, resultTo, null, -1, callingPid, callingUid, callingPackage,
+                            aInfo, null, null, resultTo, null, -1, callingPid, callingUid, callingPackage,
                             0, theseOptions, componentSpecified, outActivity, null);
                     if (res < 0) {
                         return res;
@@ -1034,8 +1037,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info,
                     new Configuration(mService.mConfiguration), r.compat,
-                    app.repProcState, r.icicle, results, newIntents, !andResume,
-                    mService.isNextTransitionForward(), profileFile, profileFd,
+                    r.task.voiceInteractor, app.repProcState, r.icicle, results, newIntents,
+                    !andResume, mService.isNextTransitionForward(), profileFile, profileFd,
                     profileAutoStop, options);
 
             if ((app.info.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
@@ -1143,8 +1146,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     final int startActivityLocked(IApplicationThread caller,
-            Intent intent, String resolvedType, ActivityInfo aInfo, IBinder resultTo,
-            String resultWho, int requestCode,
+            Intent intent, String resolvedType, ActivityInfo aInfo,
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+            IBinder resultTo, String resultWho, int requestCode,
             int callingPid, int callingUid, String callingPackage, int startFlags, Bundle options,
             boolean componentSpecified, ActivityRecord[] outActivity, ActivityContainer container) {
         int err = ActivityManager.START_SUCCESS;
@@ -1187,7 +1191,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
         ActivityStack resultStack = resultRecord == null ? null : resultRecord.task.stack;
 
-        int launchFlags = intent.getFlags();
+        final int launchFlags = intent.getFlags();
 
         if ((launchFlags&Intent.FLAG_ACTIVITY_FORWARD_RESULT) != 0
                 && sourceRecord != null) {
@@ -1230,6 +1234,38 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // We couldn't find the specific class specified in the Intent.
             // Also the end of the line.
             err = ActivityManager.START_CLASS_NOT_FOUND;
+        }
+
+        if (err == ActivityManager.START_SUCCESS && sourceRecord != null
+                && sourceRecord.task.voiceSession != null) {
+            // If this activity is being launched as part of a voice session, we need
+            // to ensure that it is safe to do so.  If the upcoming activity will also
+            // be part of the voice session, we can only launch it if it has explicitly
+            // said it supports the VOICE category, or it is a part of the calling app.
+            if ((launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) == 0
+                    && sourceRecord.info.applicationInfo.uid != aInfo.applicationInfo.uid) {
+                try {
+                    if (!AppGlobals.getPackageManager().activitySupportsIntent(intent.getComponent(),
+                            intent, resolvedType)) {
+                        err = ActivityManager.START_NOT_VOICE_COMPATIBLE;
+                    }
+                } catch (RemoteException e) {
+                    err = ActivityManager.START_NOT_VOICE_COMPATIBLE;
+                }
+            }
+        }
+
+        if (err == ActivityManager.START_SUCCESS && voiceSession != null) {
+            // If the caller is starting a new voice session, just make sure the target
+            // is actually allowing it to run this way.
+            try {
+                if (!AppGlobals.getPackageManager().activitySupportsIntent(intent.getComponent(),
+                        intent, resolvedType)) {
+                    err = ActivityManager.START_NOT_VOICE_COMPATIBLE;
+                }
+            } catch (RemoteException e) {
+                err = ActivityManager.START_NOT_VOICE_COMPATIBLE;
+            }
         }
 
         if (err != ActivityManager.START_SUCCESS) {
@@ -1305,8 +1341,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         final ActivityStack stack = getFocusedStack();
-        if (stack.mResumedActivity == null
-                || stack.mResumedActivity.info.applicationInfo.uid != callingUid) {
+        if (voiceSession == null && (stack.mResumedActivity == null
+                || stack.mResumedActivity.info.applicationInfo.uid != callingUid)) {
             if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid, "Activity start")) {
                 PendingActivityLaunch pal =
                         new PendingActivityLaunch(r, sourceRecord, startFlags, stack);
@@ -1330,7 +1366,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         mService.doPendingActivityLaunchesLocked(false);
 
-        err = startActivityUncheckedLocked(r, sourceRecord, startFlags, true, options);
+        err = startActivityUncheckedLocked(r, sourceRecord, voiceSession, voiceInteractor,
+                startFlags, true, options);
 
         if (allPausedActivitiesComplete()) {
             // If someone asked to have the keyguard dismissed on the next
@@ -1410,8 +1447,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     final int startActivityUncheckedLocked(ActivityRecord r,
-            ActivityRecord sourceRecord, int startFlags, boolean doResume,
-            Bundle options) {
+            ActivityRecord sourceRecord,
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor, int startFlags,
+            boolean doResume, Bundle options) {
         final Intent intent = r.intent;
         final int callingUid = r.launchedFromUid;
 
@@ -1755,7 +1793,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 r.setTask(targetStack.createTaskRecord(getNextTaskId(),
                         newTaskInfo != null ? newTaskInfo : r.info,
                         newTaskIntent != null ? newTaskIntent : intent,
-                        true), null, true);
+                        voiceSession, voiceInteractor, true), null, true);
                 if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r + " in new task " +
                         r.task);
             } else {
@@ -1833,7 +1871,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             targetStack.moveToFront();
             ActivityRecord prev = targetStack.topActivity();
             r.setTask(prev != null ? prev.task
-                    : targetStack.createTaskRecord(getNextTaskId(), r.info, intent, true),
+                    : targetStack.createTaskRecord(getNextTaskId(), r.info, intent, null, null, true),
                     null, true);
             mWindowManager.moveTaskToTop(r.task.taskId);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
@@ -3104,7 +3142,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     && "content".equals(intent.getData().getScheme())) {
                 mimeType = mService.getProviderMimeType(intent.getData(), userId);
             }
-            return startActivityMayWait(null, -1, null, intent, mimeType, null, null, 0, 0, null,
+            return startActivityMayWait(null, -1, null, intent, mimeType, null, null, null, null, 0, 0, null,
                     null, null, null, null, userId, this);
         }
 

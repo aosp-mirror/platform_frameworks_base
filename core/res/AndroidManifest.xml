@@ -2056,6 +2056,13 @@
         android:description="@string/permdesc_bindWallpaper"
         android:protectionLevel="signature|system" />
 
+    <!-- Must be required by a {@link android.service.voice.VoiceInteractionService},
+         to ensure that only the system can bind to it. -->
+    <permission android:name="android.permission.BIND_VOICE_INTERACTION"
+        android:label="@string/permlab_bindVoiceInteraction"
+        android:description="@string/permdesc_bindVoiceInteraction"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by a {@link com.android.media.remotedisplay.RemoteDisplayProvider},
          to ensure that only the system can bind to it.
          @hide -->

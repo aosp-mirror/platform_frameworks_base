@@ -43,9 +43,11 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
+import android.service.voice.IVoiceInteractionSession;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Singleton;
+import com.android.internal.app.IVoiceInteractor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -237,6 +239,33 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int result = startActivityIntentSender(app, intent,
                     fillInIntent, resolvedType, resultTo, resultWho,
                     requestCode, flagsMask, flagsValues, options);
+            reply.writeNoException();
+            reply.writeInt(result);
+            return true;
+        }
+
+        case START_VOICE_ACTIVITY_TRANSACTION:
+        {
+            data.enforceInterface(IActivityManager.descriptor);
+            String callingPackage = data.readString();
+            int callingPid = data.readInt();
+            int callingUid = data.readInt();
+            Intent intent = Intent.CREATOR.createFromParcel(data);
+            String resolvedType = data.readString();
+            IVoiceInteractionSession session = IVoiceInteractionSession.Stub.asInterface(
+                    data.readStrongBinder());
+            IVoiceInteractor interactor = IVoiceInteractor.Stub.asInterface(
+                    data.readStrongBinder());
+            int startFlags = data.readInt();
+            String profileFile = data.readString();
+            ParcelFileDescriptor profileFd = data.readInt() != 0
+                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
+            Bundle options = data.readInt() != 0
+                    ? Bundle.CREATOR.createFromParcel(data) : null;
+            int userId = data.readInt();
+            int result = startVoiceActivity(callingPackage, callingPid, callingUid,
+                    intent, resolvedType, session, interactor, startFlags,
+                    profileFile, profileFd, options, userId);
             reply.writeNoException();
             reply.writeInt(result);
             return true;
@@ -2317,6 +2346,42 @@ class ActivityManagerProxy implements IActivityManager
             data.writeInt(0);
         }
         mRemote.transact(START_ACTIVITY_INTENT_SENDER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int result = reply.readInt();
+        reply.recycle();
+        data.recycle();
+        return result;
+    }
+    public int startVoiceActivity(String callingPackage, int callingPid, int callingUid,
+            Intent intent, String resolvedType, IVoiceInteractionSession session,
+            IVoiceInteractor interactor, int startFlags, String profileFile,
+            ParcelFileDescriptor profileFd, Bundle options, int userId) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(callingPackage);
+        data.writeInt(callingPid);
+        data.writeInt(callingUid);
+        intent.writeToParcel(data, 0);
+        data.writeString(resolvedType);
+        data.writeStrongBinder(session.asBinder());
+        data.writeStrongBinder(interactor.asBinder());
+        data.writeInt(startFlags);
+        data.writeString(profileFile);
+        if (profileFd != null) {
+            data.writeInt(1);
+            profileFd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        } else {
+            data.writeInt(0);
+        }
+        if (options != null) {
+            data.writeInt(1);
+            options.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
+        data.writeInt(userId);
+        mRemote.transact(START_VOICE_ACTIVITY_TRANSACTION, data, reply, 0);
         reply.readException();
         int result = reply.readInt();
         reply.recycle();
