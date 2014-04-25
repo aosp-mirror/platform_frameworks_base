@@ -407,6 +407,8 @@ enum {
     ICON_ATTR = 0x01010002,
     NAME_ATTR = 0x01010003,
     PERMISSION_ATTR = 0x01010006,
+    EXPORTED_ATTR = 0x01010010,
+    GRANT_URI_PERMISSIONS_ATTR = 0x0101001b,
     RESOURCE_ATTR = 0x01010025,
     DEBUGGABLE_ATTR = 0x0101000f,
     VALUE_ATTR = 0x01010024,
@@ -580,6 +582,10 @@ Vector<String8> getNfcAidCategories(AssetManager& assets, String8 xmlPath, bool 
     }
     aidAsset->close();
     return categories;
+}
+
+static void printComponentPresence(const char* componentName) {
+    printf("provides-component:'%s'\n", componentName);
 }
 
 /*
@@ -793,19 +799,27 @@ int doDump(Bundle* bundle)
             bool withinSupportsInput = false;
             bool withinReceiver = false;
             bool withinService = false;
+            bool withinProvider = false;
             bool withinIntentFilter = false;
             bool hasMainActivity = false;
             bool hasOtherActivities = false;
             bool hasOtherReceivers = false;
             bool hasOtherServices = false;
+            bool hasIntentFilter = false;
+
             bool hasWallpaperService = false;
             bool hasImeService = false;
             bool hasAccessibilityService = false;
             bool hasPrintService = false;
             bool hasWidgetReceivers = false;
             bool hasDeviceAdminReceiver = false;
-            bool hasIntentFilter = false;
             bool hasPaymentService = false;
+            bool hasDocumentsProvider = false;
+            bool hasCameraActivity = false;
+            bool hasCameraSecureActivity = false;
+            bool hasLauncher = false;
+            bool hasNotificationListenerService = false;
+
             bool actMainActivity = false;
             bool actWidgetReceivers = false;
             bool actDeviceAdminEnabled = false;
@@ -815,6 +829,11 @@ int doDump(Bundle* bundle)
             bool actPrintService = false;
             bool actHostApduService = false;
             bool actOffHostApduService = false;
+            bool actDocumentsProvider = false;
+            bool actNotificationListenerService = false;
+            bool actCamera = false;
+            bool actCameraSecure = false;
+            bool catLauncher = false;
             bool hasMetaHostPaymentCategory = false;
             bool hasMetaOffHostPaymentCategory = false;
 
@@ -825,6 +844,8 @@ int doDump(Bundle* bundle)
             bool hasBindAccessibilityServicePermission = false;
             bool hasBindPrintServicePermission = false;
             bool hasBindNfcServicePermission = false;
+            bool hasRequiredSafAttributes = false;
+            bool hasBindNotificationListenerServicePermission = false;
 
             // These two implement the implicit permissions that are granted
             // to pre-1.6 applications.
@@ -962,13 +983,17 @@ int doDump(Bundle* bundle)
                         withinActivity = false;
                         withinService = false;
                         withinReceiver = false;
+                        withinProvider = false;
                         hasIntentFilter = false;
                         isMainActivity = isLauncherActivity = isLeanbackLauncherActivity = false;
                     } else if (depth < 4) {
                         if (withinIntentFilter) {
                             if (withinActivity) {
                                 hasMainActivity |= actMainActivity;
-                                hasOtherActivities |= !actMainActivity;
+                                hasLauncher |= catLauncher;
+                                hasCameraActivity |= actCamera;
+                                hasCameraSecureActivity |= actCameraSecure;
+                                hasOtherActivities |= !actMainActivity && !actCamera && !actCameraSecure;
                             } else if (withinReceiver) {
                                 hasWidgetReceivers |= actWidgetReceivers;
                                 hasDeviceAdminReceiver |= (actDeviceAdminEnabled &&
@@ -980,9 +1005,14 @@ int doDump(Bundle* bundle)
                                 hasAccessibilityService |= (actAccessibilityService &&
                                         hasBindAccessibilityServicePermission);
                                 hasPrintService |= (actPrintService && hasBindPrintServicePermission);
+                                hasNotificationListenerService |= actNotificationListenerService &&
+                                        hasBindNotificationListenerServicePermission;
                                 hasOtherServices |= (!actImeService && !actWallpaperService &&
                                         !actAccessibilityService && !actPrintService &&
-                                        !actHostApduService && !actOffHostApduService);
+                                        !actHostApduService && !actOffHostApduService &&
+                                        !actNotificationListenerService);
+                            } else if (withinProvider) {
+                                hasDocumentsProvider |= actDocumentsProvider && hasRequiredSafAttributes;
                             }
                         }
                         withinIntentFilter = false;
@@ -1348,6 +1378,7 @@ int doDump(Bundle* bundle)
                     withinActivity = false;
                     withinReceiver = false;
                     withinService = false;
+                    withinProvider = false;
                     hasIntentFilter = false;
                     hasMetaHostPaymentCategory = false;
                     hasMetaOffHostPaymentCategory = false;
@@ -1356,6 +1387,8 @@ int doDump(Bundle* bundle)
                     hasBindAccessibilityServicePermission = false;
                     hasBindPrintServicePermission = false;
                     hasBindNfcServicePermission = false;
+                    hasRequiredSafAttributes = false;
+                    hasBindNotificationListenerServicePermission = false;
                     if (withinApplication) {
                         if(tag == "activity") {
                             withinActivity = true;
@@ -1451,11 +1484,41 @@ int doDump(Bundle* bundle)
                                     hasBindPrintServicePermission = true;
                                 } else if (permission == "android.permission.BIND_NFC_SERVICE") {
                                     hasBindNfcServicePermission = true;
+                                } else if (permission == "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE") {
+                                    hasBindNotificationListenerServicePermission = true;
                                 }
                             } else {
                                 fprintf(stderr, "ERROR getting 'android:permission' attribute for"
                                         " service '%s': %s\n", serviceName.string(), error.string());
                             }
+                        } else if (tag == "provider") {
+                            withinProvider = true;
+
+                            bool exported = getResolvedIntegerAttribute(&res, tree, EXPORTED_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:exported' attribute for provider:"
+                                        " %s\n", error.string());
+                                goto bail;
+                            }
+
+                            bool grantUriPermissions = getResolvedIntegerAttribute(&res, tree,
+                                    GRANT_URI_PERMISSIONS_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:grantUriPermissions' attribute for provider:"
+                                        " %s\n", error.string());
+                                goto bail;
+                            }
+
+                            String8 permission = getResolvedAttribute(&res, tree, PERMISSION_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:permission' attribute for provider:"
+                                        " %s\n", error.string());
+                                goto bail;
+                            }
+
+                            hasRequiredSafAttributes |= exported && grantUriPermissions &&
+                                permission == "android.permission.MANAGE_DOCUMENTS";
+
                         } else if (bundle->getIncludeMetaData() && tag == "meta-data") {
                             String8 metaDataName = getResolvedAttribute(&res, tree, NAME_ATTR, &error);
                             if (error != "") {
@@ -1504,6 +1567,11 @@ int doDump(Bundle* bundle)
                         actDeviceAdminEnabled = false;
                         actHostApduService = false;
                         actOffHostApduService = false;
+                        actDocumentsProvider = false;
+                        actNotificationListenerService = false;
+                        actCamera = false;
+                        actCameraSecure = false;
+                        catLauncher = false;
                     } else if (withinService && tag == "meta-data") {
                         String8 name = getAttribute(tree, NAME_ATTR, &error);
                         if (error != "") {
@@ -1559,6 +1627,11 @@ int doDump(Bundle* bundle)
                             if (action == "android.intent.action.MAIN") {
                                 isMainActivity = true;
                                 actMainActivity = true;
+                            } else if (action == "android.media.action.STILL_IMAGE_CAMERA" ||
+                                    action == "android.media.action.VIDEO_CAMERA") {
+                                actCamera = true;
+                            } else if (action == "android.media.action.STILL_IMAGE_CAMERA_SECURE") {
+                                actCameraSecure = true;
                             }
                         } else if (withinReceiver) {
                             if (action == "android.appwidget.action.APPWIDGET_UPDATE") {
@@ -1579,6 +1652,12 @@ int doDump(Bundle* bundle)
                                 actHostApduService = true;
                             } else if (action == "android.nfc.cardemulation.action.OFF_HOST_APDU_SERVICE") {
                                 actOffHostApduService = true;
+                            } else if (action == "android.service.notification.NotificationListenerService") {
+                                actNotificationListenerService = true;
+                            }
+                        } else if (withinProvider) {
+                            if (action == "android.content.action.DOCUMENTS_PROVIDER") {
+                                actDocumentsProvider = true;
                             }
                         }
                         if (action == "android.intent.action.SEARCH") {
@@ -1598,6 +1677,8 @@ int doDump(Bundle* bundle)
                                 isLauncherActivity = true;
                             } else if (category == "android.intent.category.LEANBACK_LAUNCHER") {
                                 isLeanbackLauncherActivity = true;
+                            } else if (category == "android.intent.category.HOME") {
+                                catLauncher = true;
                             }
                         }
                     }
@@ -1775,37 +1856,53 @@ int doDump(Bundle* bundle)
                 }
             }
 
-            if (hasMainActivity) {
-                printf("main\n");
-            }
             if (hasWidgetReceivers) {
-                printf("app-widget\n");
+                printComponentPresence("app-widget");
             }
             if (hasDeviceAdminReceiver) {
-                printf("device-admin\n");
+                printComponentPresence("device-admin");
             }
             if (hasImeService) {
-                printf("ime\n");
+                printComponentPresence("ime");
             }
             if (hasWallpaperService) {
-                printf("wallpaper\n");
+                printComponentPresence("wallpaper");
             }
             if (hasAccessibilityService) {
-                printf("accessibility\n");
+                printComponentPresence("accessibility");
             }
             if (hasPrintService) {
-                printf("print\n");
+                printComponentPresence("print-service");
             }
             if (hasPaymentService) {
-                printf("payment\n");
+                printComponentPresence("payment");
+            }
+            if (isSearchable) {
+                printComponentPresence("search");
+            }
+            if (hasDocumentsProvider) {
+                printComponentPresence("document-provider");
+            }
+            if (hasLauncher) {
+                printComponentPresence("launcher");
+            }
+            if (hasNotificationListenerService) {
+                printComponentPresence("notification-listener");
+            }
+            if (hasCameraActivity) {
+                printComponentPresence("camera");
+            }
+            if (hasCameraSecureActivity) {
+                printComponentPresence("camera-secure");
+            }
+
+            if (hasMainActivity) {
+                printf("main\n");
             }
             if (hasOtherActivities) {
                 printf("other-activities\n");
             }
-            if (isSearchable) {
-                printf("search\n");
-            }
-            if (hasOtherReceivers) {
+             if (hasOtherReceivers) {
                 printf("other-receivers\n");
             }
             if (hasOtherServices) {
