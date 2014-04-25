@@ -492,7 +492,8 @@ public class UserManager {
         ArrayList<UserHandle> profiles = new ArrayList<UserHandle>();
         List<UserInfo> users = new ArrayList<UserInfo>();
         try {
-            users = mService.getProfiles(UserHandle.myUserId(), true /* enabledOnly */);
+            // TODO: Switch enabledOnly to true once client apps are updated
+            users = mService.getProfiles(UserHandle.myUserId(), false /* enabledOnly */);
         } catch (RemoteException re) {
             Log.w(TAG, "Could not get user list", re);
             return null;
