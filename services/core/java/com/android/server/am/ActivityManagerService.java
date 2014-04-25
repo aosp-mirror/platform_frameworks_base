@@ -44,6 +44,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.ProcessStats;
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessCpuTracker;
@@ -1833,6 +1834,78 @@ public final class ActivityManagerService extends ActivityManagerNative
                 } while (true);
             }
             }
+        }
+    };
+
+    /**
+     * Monitor for package changes and update our internal state.
+     */
+    private final PackageMonitor mPackageMonitor = new PackageMonitor() {
+        @Override
+        public void onPackageRemoved(String packageName, int uid) {
+            // Remove all tasks with activities in the specified package from the list of recent tasks
+            synchronized (ActivityManagerService.this) {
+                for (int i = mRecentTasks.size() - 1; i >= 0; i--) {
+                    TaskRecord tr = mRecentTasks.get(i);
+                    ComponentName cn = tr.intent.getComponent();
+                    if (cn != null && cn.getPackageName().equals(packageName)) {
+                        // If the package name matches, remove the task and kill the process
+                        removeTaskByIdLocked(tr.taskId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean onPackageChanged(String packageName, int uid, String[] components) {
+            final PackageManager pm = mContext.getPackageManager();
+            final ArrayList<TaskRecord> recentTasks = new ArrayList<TaskRecord>();
+            final ArrayList<TaskRecord> tasksToRemove = new ArrayList<TaskRecord>();
+            // Copy the list of recent tasks so that we don't hold onto the lock on
+            // ActivityManagerService for long periods while checking if components exist.
+            synchronized (ActivityManagerService.this) {
+                recentTasks.addAll(mRecentTasks);
+            }
+            // Check the recent tasks and filter out all tasks with components that no longer exist.
+            Intent tmpI = new Intent();
+            for (int i = recentTasks.size() - 1; i >= 0; i--) {
+                TaskRecord tr = recentTasks.get(i);
+                ComponentName cn = tr.intent.getComponent();
+                if (cn != null && cn.getPackageName().equals(packageName)) {
+                    try {
+                        // Add the task to the list to remove if the component no longer exists
+                        tmpI.setComponent(cn);
+                        if (pm.queryIntentActivities(tmpI, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
+                            tasksToRemove.add(tr);
+                        }
+                    } catch (Exception e) {}
+                }
+            }
+            // Prune all the tasks with removed components from the list of recent tasks
+            synchronized (ActivityManagerService.this) {
+                for (int i = tasksToRemove.size() - 1; i >= 0; i--) {
+                    TaskRecord tr = tasksToRemove.get(i);
+                    // Remove the task but don't kill the process
+                    removeTaskByIdLocked(tr.taskId, 0);
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
+            // Force stop the specified packages
+            if (packages != null) {
+                for (String pkg : packages) {
+                    synchronized (ActivityManagerService.this) {
+                        if (forceStopPackageLocked(pkg, -1, false, false, false, false, false, 0,
+                                "finished booting")) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
         }
     };
 
@@ -5267,26 +5340,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     final void finishBooting() {
-        IntentFilter pkgFilter = new IntentFilter();
-        pkgFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
-        pkgFilter.addDataScheme("package");
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String[] pkgs = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
-                if (pkgs != null) {
-                    for (String pkg : pkgs) {
-                        synchronized (ActivityManagerService.this) {
-                            if (forceStopPackageLocked(pkg, -1, false, false, false, false, false, 0,
-                                    "finished booting")) {
-                                setResultCode(Activity.RESULT_OK);
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-        }, pkgFilter);
+        // Register receivers to handle package update events
+        mPackageMonitor.register(mContext, Looper.getMainLooper(), false);
 
         synchronized (this) {
             // Ensure that any processes we had put on hold are now started
