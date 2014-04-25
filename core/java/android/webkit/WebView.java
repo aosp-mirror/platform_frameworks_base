@@ -1482,6 +1482,7 @@ public class WebView extends AbsoluteLayout
      * {@link KeyChain.ACTION_STORAGE_CHANGED}
      *
      * @param resultCallback A callback to be invoked when client certs are cleared.
+     *                       The embedder can pass null if not interested in the callback.
      *
      * TODO(sgurun) unhide
      * @hide
