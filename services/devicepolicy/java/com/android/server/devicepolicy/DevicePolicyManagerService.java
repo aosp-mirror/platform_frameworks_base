@@ -3118,4 +3118,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
+
+    @Override
+    public void setUserRestriction(ComponentName who, String key, boolean enabled) {
+        final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
+
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            UserManager um = UserManager.get(mContext);
+            long id = Binder.clearCallingIdentity();
+            try {
+                um.setUserRestriction(key, enabled, userHandle);
+            } finally {
+                restoreCallingIdentity(id);
+            }
+        }
+    }
 }

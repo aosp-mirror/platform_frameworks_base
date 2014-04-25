@@ -22,7 +22,6 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
-import android.app.admin.DevicePolicyManager;
 import android.app.IStopUserCallback;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -263,44 +262,56 @@ public class UserManagerService extends IUserManager.Stub {
         if (userId != UserHandle.getCallingUserId()) {
             checkManageUsersPermission("getting profiles related to user " + userId);
         }
-        synchronized (mPackagesLock) {
-            // Getting the service here is not good for testing purposes. However, this service
-            // is not available when UserManagerService starts up so we need a lazy load.
-
-            DevicePolicyManager dpm = null;
-            if (enabledOnly) {
-                dpm = (DevicePolicyManager)
-                        mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mPackagesLock) {
+                return getProfilesLocked(userId, enabledOnly);
             }
-
-            UserInfo user = getUserInfoLocked(userId);
-            ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
-            for (int i = 0; i < mUsers.size(); i++) {
-                UserInfo profile = mUsers.valueAt(i);
-                if (!isProfileOf(user, profile)) {
-                    continue;
-                }
-
-                if (enabledOnly && profile.isManagedProfile()) {
-                    if (dpm != null) {
-                        if(!dpm.isProfileEnabled(profile.id)) {
-                            continue;
-                        }
-                    } else {
-                        Log.w(LOG_TAG,
-                                "Attempting to reach DevicePolicyManager before it was started");
-                        // TODO: There might be system apps that need to call this. Make sure that
-                        // DevicePolicyManagerService is ready at that time (otherwise, any default
-                        // value is a bad one).
-                        throw new IllegalArgumentException(String.format(
-                                "Attempting to get enabled profiles for %d before "
-                                + "DevicePolicyManagerService has been started.", userId));
-                    }
-                }
-                users.add(profile);
-            }
-            return users;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    /** Assume permissions already checked and caller's identity cleared */
+    private List<UserInfo> getProfilesLocked(int userId, boolean enabledOnly) {
+        // Getting the service here is not good for testing purposes.
+        // However, this service is not available when UserManagerService starts
+        // up so we need a lazy load.
+
+        DevicePolicyManager dpm = null;
+        if (enabledOnly) {
+            dpm = (DevicePolicyManager)
+                    mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        }
+
+        UserInfo user = getUserInfoLocked(userId);
+        ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
+        for (int i = 0; i < mUsers.size(); i++) {
+            UserInfo profile = mUsers.valueAt(i);
+            if (!isProfileOf(user, profile)) {
+                continue;
+            }
+
+            if (enabledOnly && profile.isManagedProfile()) {
+                if (dpm != null) {
+                    if (!dpm.isProfileEnabled(profile.id)) {
+                        continue;
+                    }
+                } else {
+                    Log.w(LOG_TAG,
+                            "Attempting to reach DevicePolicyManager before it is started");
+                    // TODO: There might be system apps that need to call this.
+                    // Make sure that DevicePolicyManagerService is ready at that
+                    // time (otherwise, any default value is a bad one).
+                    throw new IllegalArgumentException(String.format(
+                            "Attempting to get enabled profiles for %d before "
+                                    + "DevicePolicyManagerService has been started.",
+                            userId));
+                }
+            }
+            users.add(profile);
+        }
+        return users;
     }
 
     private boolean isProfileOf(UserInfo user, UserInfo profile) {
@@ -459,13 +470,13 @@ public class UserManagerService extends IUserManager.Stub {
 
         synchronized (mPackagesLock) {
             Bundle restrictions = mUserRestrictions.get(userId);
-            return restrictions != null ? restrictions : Bundle.EMPTY;
+            return restrictions != null ? new Bundle(restrictions) : new Bundle();
         }
     }
 
     @Override
     public void setUserRestrictions(Bundle restrictions, int userId) {
-        checkProfileOwnerOrManageUsersPermission("setUserRestrictions");
+        checkManageUsersPermission("setUserRestrictions");
         if (restrictions == null) return;
 
         synchronized (mPackagesLock) {
@@ -491,51 +502,14 @@ public class UserManagerService extends IUserManager.Stub {
      * @param message used as message if SecurityException is thrown
      * @throws SecurityException if the caller is not system or root
      */
-    private final void checkManageUsersPermission(String message) {
+    private static final void checkManageUsersPermission(String message) {
         final int uid = Binder.getCallingUid();
-
-        if (missingManageUsersPermission(uid)) {
-            throw new SecurityException("You need MANAGE_USERS permission to: " + message);
-        }
-    }
-
-    /**
-     * Enforces that only the system UID, root's UID, apps that have the
-     * {@link android.Manifest.permission#MANAGE_USERS MANAGE_USERS}
-     * permission, the profile owner, or the device owner can make certain calls to the
-     * UserManager.
-     *
-     * @param message used as message if SecurityException is thrown
-     * @throws SecurityException if the caller is not system, root, or device
-     * owner
-     */
-    private final void checkProfileOwnerOrManageUsersPermission(String message) {
-        final int uid = Binder.getCallingUid();
-        boolean isProfileOwner = false;
-        if (mContext != null && mContext.getPackageManager() != null) {
-            String[] pkgs = mContext.getPackageManager().getPackagesForUid(uid);
-            DevicePolicyManager dpm =
-                    (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-            if (dpm != null) {
-                for (String pkg : pkgs) {
-                    if (dpm.isDeviceOwnerApp(pkg) || dpm.isProfileOwnerApp(pkg)) {
-                        isProfileOwner = true;
-                    }
-                }
-            }
-        }
-
-        if (missingManageUsersPermission(uid) && !isProfileOwner) {
-            throw new SecurityException(
-                    "You need MANAGE_USERS permission or device owner privileges to: " + message);
-        }
-    }
-
-    private boolean missingManageUsersPermission(int uid) {
-        return uid != Process.SYSTEM_UID && uid != 0
+        if (uid != Process.SYSTEM_UID && uid != 0
                 && ActivityManager.checkComponentPermission(
                         android.Manifest.permission.MANAGE_USERS,
-                        uid, -1, true) != PackageManager.PERMISSION_GRANTED;
+                        uid, -1, true) != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need MANAGE_USERS permission to: " + message);
+        }
     }
 
     private void writeBitmapLocked(UserInfo info, Bitmap bitmap) {
@@ -1240,8 +1214,7 @@ public class UserManagerService extends IUserManager.Stub {
     public Bundle getApplicationRestrictionsForUser(String packageName, int userId) {
         if (UserHandle.getCallingUserId() != userId
                 || !UserHandle.isSameApp(Binder.getCallingUid(), getUidForPackage(packageName))) {
-            checkProfileOwnerOrManageUsersPermission(
-                    "Only system or device owner can get restrictions for other users/apps");
+            checkManageUsersPermission("Only system can get restrictions for other users/apps");
         }
         synchronized (mPackagesLock) {
             // Read the restrictions from XML
@@ -1254,8 +1227,7 @@ public class UserManagerService extends IUserManager.Stub {
             int userId) {
         if (UserHandle.getCallingUserId() != userId
                 || !UserHandle.isSameApp(Binder.getCallingUid(), getUidForPackage(packageName))) {
-            checkProfileOwnerOrManageUsersPermission(
-                    "Only system or device owner can set restrictions for other users/apps");
+            checkManageUsersPermission("Only system can set restrictions for other users/apps");
         }
         synchronized (mPackagesLock) {
             // Write the restrictions to XML
@@ -1357,8 +1329,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public void removeRestrictions() {
-        checkProfileOwnerOrManageUsersPermission(
-                "Only system or device owner can remove restrictions");
+        checkManageUsersPermission("Only system can remove restrictions");
         final int userHandle = UserHandle.getCallingUserId();
         removeRestrictionsForUser(userHandle, true);
     }
