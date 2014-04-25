@@ -147,6 +147,7 @@ public class ActivityView extends ViewGroup {
         if (mSurface != null) {
             mActivityContainer.startActivity(intent);
         } else {
+            mActivityContainer.checkEmbeddedAllowed(intent);
             mQueuedIntent = intent;
             mQueuedPendingIntent = null;
         }
@@ -162,6 +163,7 @@ public class ActivityView extends ViewGroup {
         if (mSurface != null) {
             mActivityContainer.startActivityIntentSender(iIntentSender);
         } else {
+            mActivityContainer.checkEmbeddedAllowedIntentSender(iIntentSender);
             mQueuedPendingIntent = iIntentSender;
             mQueuedIntent = null;
         }
@@ -177,6 +179,7 @@ public class ActivityView extends ViewGroup {
         if (mSurface != null) {
             mActivityContainer.startActivityIntentSender(iIntentSender);
         } else {
+            mActivityContainer.checkEmbeddedAllowedIntentSender(iIntentSender);
             mQueuedPendingIntent = iIntentSender;
             mQueuedIntent = null;
         }
@@ -320,6 +323,24 @@ public class ActivityView extends ViewGroup {
         int startActivityIntentSender(IIntentSender intentSender) {
             try {
                 return mIActivityContainer.startActivityIntentSender(intentSender);
+            } catch (RemoteException e) {
+                throw new RuntimeException(
+                        "ActivityView: Unable to startActivity from IntentSender. " + e);
+            }
+        }
+
+        void checkEmbeddedAllowed(Intent intent) {
+            try {
+                mIActivityContainer.checkEmbeddedAllowed(intent);
+            } catch (RemoteException e) {
+                throw new RuntimeException(
+                        "ActivityView: Unable to startActivity from Intent. " + e);
+            }
+        }
+
+        void checkEmbeddedAllowedIntentSender(IIntentSender intentSender) {
+            try {
+                mIActivityContainer.checkEmbeddedAllowedIntentSender(intentSender);
             } catch (RemoteException e) {
                 throw new RuntimeException(
                         "ActivityView: Unable to startActivity from IntentSender. " + e);
