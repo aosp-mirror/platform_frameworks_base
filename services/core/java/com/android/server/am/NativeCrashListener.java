@@ -17,14 +17,13 @@
 package com.android.server.am;
 
 import android.app.ApplicationErrorReport.CrashInfo;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.StructTimeval;
+import android.system.StructUcred;
 import android.util.Slog;
 
-import libcore.io.ErrnoException;
-import libcore.io.Libcore;
-import libcore.io.StructTimeval;
-import libcore.io.StructUcred;
-
-import static libcore.io.OsConstants.*;
+import static android.system.OsConstants.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -77,7 +76,7 @@ final class NativeCrashListener extends Thread {
             try {
                 CrashInfo ci = new CrashInfo();
                 ci.exceptionClassName = "Native crash";
-                ci.exceptionMessage = Libcore.os.strsignal(mSignal);
+                ci.exceptionMessage = Os.strsignal(mSignal);
                 ci.throwFileName = "unknown";
                 ci.throwClassName = "unknown";
                 ci.throwMethodName = "unknown";
@@ -117,22 +116,22 @@ final class NativeCrashListener extends Thread {
         }
 
         try {
-            FileDescriptor serverFd = Libcore.os.socket(AF_UNIX, SOCK_STREAM, 0);
+            FileDescriptor serverFd = Os.socket(AF_UNIX, SOCK_STREAM, 0);
             final InetUnixAddress sockAddr = new InetUnixAddress(DEBUGGERD_SOCKET_PATH);
-            Libcore.os.bind(serverFd, sockAddr, 0);
-            Libcore.os.listen(serverFd, 1);
+            Os.bind(serverFd, sockAddr, 0);
+            Os.listen(serverFd, 1);
 
             while (true) {
                 InetSocketAddress peer = new InetSocketAddress();
                 FileDescriptor peerFd = null;
                 try {
                     if (MORE_DEBUG) Slog.v(TAG, "Waiting for debuggerd connection");
-                    peerFd = Libcore.os.accept(serverFd, peer);
+                    peerFd = Os.accept(serverFd, peer);
                     if (MORE_DEBUG) Slog.v(TAG, "Got debuggerd socket " + peerFd);
                     if (peerFd != null) {
                         // Only the superuser is allowed to talk to us over this socket
                         StructUcred credentials =
-                                Libcore.os.getsockoptUcred(peerFd, SOL_SOCKET, SO_PEERCRED);
+                                Os.getsockoptUcred(peerFd, SOL_SOCKET, SO_PEERCRED);
                         if (credentials.uid == 0) {
                             // the reporting thread may take responsibility for
                             // acking the debugger; make sure we play along.
@@ -146,7 +145,7 @@ final class NativeCrashListener extends Thread {
                     // byte written is irrelevant.
                     if (peerFd != null) {
                         try {
-                            Libcore.os.write(peerFd, ackSignal, 0, 1);
+                            Os.write(peerFd, ackSignal, 0, 1);
                         } catch (Exception e) {
                             /* we don't care about failures here */
                             if (MORE_DEBUG) {
@@ -154,7 +153,7 @@ final class NativeCrashListener extends Thread {
                             }
                         }
                         try {
-                            Libcore.os.close(peerFd);
+                            Os.close(peerFd);
                         } catch (ErrnoException e) {
                             if (MORE_DEBUG) {
                                 Slog.d(TAG, "Exception closing socket: " + e.getMessage());
@@ -182,7 +181,7 @@ final class NativeCrashListener extends Thread {
             throws ErrnoException, InterruptedIOException {
         int totalRead = 0;
         while (numBytes > 0) {
-            int n = Libcore.os.read(fd, buffer, offset + totalRead, numBytes);
+            int n = Os.read(fd, buffer, offset + totalRead, numBytes);
             if (n <= 0) {
                 if (DEBUG) {
                     Slog.w(TAG, "Needed " + numBytes + " but saw " + n);
@@ -203,8 +202,8 @@ final class NativeCrashListener extends Thread {
 
         try {
             StructTimeval timeout = StructTimeval.fromMillis(SOCKET_TIMEOUT_MILLIS);
-            Libcore.os.setsockoptTimeval(fd, SOL_SOCKET, SO_RCVTIMEO, timeout);
-            Libcore.os.setsockoptTimeval(fd, SOL_SOCKET, SO_SNDTIMEO, timeout);
+            Os.setsockoptTimeval(fd, SOL_SOCKET, SO_RCVTIMEO, timeout);
+            Os.setsockoptTimeval(fd, SOL_SOCKET, SO_SNDTIMEO, timeout);
 
             // first, the pid and signal number
             int headerBytes = readExactly(fd, buf, 0, 8);
@@ -238,7 +237,7 @@ final class NativeCrashListener extends Thread {
                     int bytes;
                     do {
                         // get some data
-                        bytes = Libcore.os.read(fd, buf, 0, buf.length);
+                        bytes = Os.read(fd, buf, 0, buf.length);
                         if (bytes > 0) {
                             if (MORE_DEBUG) {
                                 String s = new String(buf, 0, bytes, "UTF-8");
