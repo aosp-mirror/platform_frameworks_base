@@ -2462,7 +2462,7 @@ struct NamespaceAttributePair {
 
 status_t
 writeProguardForXml(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile,
-        const char* startTag, const KeyedVector<String8, Vector<NamespaceAttributePair> >* tagAttrPairs)
+        const Vector<String8>& startTags, const KeyedVector<String8, Vector<NamespaceAttributePair> >* tagAttrPairs)
 {
     status_t err;
     ResXMLTree tree;
@@ -2476,15 +2476,18 @@ writeProguardForXml(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile,
 
     tree.restart();
 
-    if (startTag != NULL) {
+    if (!startTags.isEmpty()) {
         bool haveStart = false;
         while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
             if (code != ResXMLTree::START_TAG) {
                 continue;
             }
             String8 tag(tree.getElementName(&len));
-            if (tag == startTag) {
-                haveStart = true;
+            const size_t numStartTags = startTags.size();
+            for (size_t i = 0; i < numStartTags; i++) {
+                if (tag == startTags[i]) {
+                    haveStart = true;
+                }
             }
             break;
         }
@@ -2571,15 +2574,17 @@ writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
     for (size_t k=0; k<K; k++) {
         const sp<AaptDir>& d = dirs.itemAt(k);
         const String8& dirName = d->getLeaf();
+        Vector<String8> startTags;
         const char* startTag = NULL;
         const KeyedVector<String8, Vector<NamespaceAttributePair> >* tagAttrPairs = NULL;
         if ((dirName == String8("layout")) || (strncmp(dirName.string(), "layout-", 7) == 0)) {
             tagAttrPairs = &kLayoutTagAttrPairs;
         } else if ((dirName == String8("xml")) || (strncmp(dirName.string(), "xml-", 4) == 0)) {
-            startTag = "PreferenceScreen";
+            startTags.add(String8("PreferenceScreen"));
+            startTags.add(String8("preference-headers"));
             tagAttrPairs = &kXmlTagAttrPairs;
         } else if ((dirName == String8("menu")) || (strncmp(dirName.string(), "menu-", 5) == 0)) {
-            startTag = "menu";
+            startTags.add(String8("menu"));
             tagAttrPairs = NULL;
         } else {
             continue;
@@ -2592,7 +2597,7 @@ writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
             const DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> >& files = group->getFiles();
             const size_t M = files.size();
             for (size_t j=0; j<M; j++) {
-                err = writeProguardForXml(keep, files.valueAt(j), startTag, tagAttrPairs);
+                err = writeProguardForXml(keep, files.valueAt(j), startTags, tagAttrPairs);
                 if (err < 0) {
                     return err;
                 }
