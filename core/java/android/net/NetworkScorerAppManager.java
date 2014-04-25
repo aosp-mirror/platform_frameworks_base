@@ -97,8 +97,7 @@ public final class NetworkScorerAppManager {
     public static String getActiveScorer(Context context) {
         String scorerPackage = Settings.Global.getString(context.getContentResolver(),
                 Global.NETWORK_SCORER_APP);
-        Collection<String> applications = getAllValidScorers(context);
-        if (isPackageValidScorer(applications, scorerPackage)) {
+        if (isPackageValidScorer(context, scorerPackage)) {
             return scorerPackage;
         } else {
             return null;
@@ -131,8 +130,7 @@ public final class NetworkScorerAppManager {
             return true;
         } else {
             // We only make the change if the new package is valid.
-            Collection<String> applications = getAllValidScorers(context);
-            if (isPackageValidScorer(applications, packageName)) {
+            if (isPackageValidScorer(context, packageName)) {
                 Settings.Global.putString(context.getContentResolver(),
                         Settings.Global.NETWORK_SCORER_APP, packageName);
                 return true;
@@ -159,8 +157,8 @@ public final class NetworkScorerAppManager {
     }
 
     /** Returns true if the given package is a valid scorer. */
-    private static boolean isPackageValidScorer(Collection<String> scorerPackageNames,
-            String packageName) {
-        return packageName != null && scorerPackageNames.contains(packageName);
+    public static boolean isPackageValidScorer(Context context, String packageName) {
+        Collection<String> applications = getAllValidScorers(context);
+        return packageName != null && applications.contains(packageName);
     }
 }
