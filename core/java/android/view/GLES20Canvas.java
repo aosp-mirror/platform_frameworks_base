@@ -1117,11 +1117,11 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     @Override
-    public void drawRoundRect(RectF rect, float rx, float ry, Paint paint) {
+    public void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
+            Paint paint) {
         int modifiers = setupModifiers(paint, MODIFIER_SHADER);
         try {
-            nDrawRoundRect(mRenderer, rect.left, rect.top, rect.right, rect.bottom,
-                    rx, ry, paint.mNativePaint);
+            nDrawRoundRect(mRenderer, left, top, right, bottom, rx, ry, paint.mNativePaint);
         } finally {
             if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
         }

@@ -1075,11 +1075,20 @@ public class Canvas {
      * @param paint The paint used to draw the roundRect
      */
     public void drawRoundRect(RectF rect, float rx, float ry, Paint paint) {
-        if (rect == null) {
-            throw new NullPointerException();
-        }
-        native_drawRoundRect(mNativeCanvas, rect, rx, ry,
-                             paint.mNativePaint);
+        drawRoundRect(rect.left, rect.top, rect.right, rect.bottom, rx, ry, paint);
+    }
+
+    /**
+     * Draw the specified round-rect using the specified paint. The roundrect
+     * will be filled or framed based on the Style in the paint.
+     *
+     * @param rx    The x-radius of the oval used to round the corners
+     * @param ry    The y-radius of the oval used to round the corners
+     * @param paint The paint used to draw the roundRect
+     */
+    public void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
+            Paint paint) {
+        native_drawRoundRect(mNativeCanvas, left, top, right, bottom, rx, ry, paint.mNativePaint);
     }
 
     /**
@@ -1816,8 +1825,8 @@ public class Canvas {
                                               boolean useCenter,
                                               long nativePaint);
     private static native void native_drawRoundRect(long nativeCanvas,
-                                                    RectF rect, float rx,
-                                                    float ry, long nativePaint);
+            float left, float top, float right, float bottom,
+            float rx, float ry, long nativePaint);
     private static native void native_drawPath(long nativeCanvas,
                                                long nativePath,
                                                long nativePaint);
