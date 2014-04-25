@@ -2627,6 +2627,15 @@
         android:description="@string/permdesc_bindNotificationListenerService"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by an {@link
+         android.service.notification.ConditionProviderService},
+         to ensure that only the system can bind to it.
+         @hide -->
+    <permission android:name="android.permission.BIND_CONDITION_PROVIDER_SERVICE"
+        android:label="@string/permlab_bindConditionProviderService"
+        android:description="@string/permdesc_bindConditionProviderService"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to call into a carrier setup flow. It is up to the
          carrier setup application to enforce that this permission is required
          @hide This is not a third-party API (intended for OEMs and system apps). -->

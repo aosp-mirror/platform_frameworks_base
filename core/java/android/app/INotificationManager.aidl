@@ -22,6 +22,8 @@ import android.service.notification.StatusBarNotification;
 import android.app.Notification;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.service.notification.Condition;
+import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
 import android.service.notification.ZenModeConfig;
 
@@ -53,4 +55,5 @@ interface INotificationManager
 
     ZenModeConfig getZenModeConfig();
     boolean setZenModeConfig(in ZenModeConfig config);
+    void notifyCondition(in IConditionProvider provider, in Condition condition);
 }
