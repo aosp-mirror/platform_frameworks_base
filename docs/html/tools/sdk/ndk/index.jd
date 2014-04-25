@@ -245,8 +245,8 @@ This is the Android Software Development Kit License Agreement
   but it always increases your app complexity. In general, you should only use the NDK
   if it is essential to your app&mdash;never because you simply prefer to program in C/C++.</p>
 
-  <p>Typical good candidates for the NDK are self-contained, CPU-intensive operations that don't
-  allocate much memory, such as signal processing, physics simulation, and so on. When examining
+  <p>Typical good candidates for the NDK are CPU-intensive workloads such as game engines,
+  signal processing, physics simulation, and so on. When examining
   whether or not you should develop in native code, think about your requirements and see if the
   Android framework APIs provide the functionality that you need.</p>
 
