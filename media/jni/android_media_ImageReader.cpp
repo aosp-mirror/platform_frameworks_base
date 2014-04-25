@@ -274,16 +274,10 @@ static int Image_getPixelFormat(JNIEnv* env, int format)
 
     fid = env->GetStaticFieldID(imageFormatClazz, "JPEG", "I");
     jpegFormat = env->GetStaticIntField(imageFormatClazz, fid);
-    fid = env->GetStaticFieldID(imageFormatClazz, "RAW_SENSOR", "I");
-    rawSensorFormat = env->GetStaticIntField(imageFormatClazz, fid);
 
-    // Translate the JPEG to BLOB for camera purpose, an add more if more mismatch is found.
+    // Translate the JPEG to BLOB for camera purpose.
     if (format == jpegFormat) {
         format = HAL_PIXEL_FORMAT_BLOB;
-    }
-    // Same thing for RAW_SENSOR format
-    if (format == rawSensorFormat) {
-        format = HAL_PIXEL_FORMAT_RAW_SENSOR;
     }
 
     return format;
