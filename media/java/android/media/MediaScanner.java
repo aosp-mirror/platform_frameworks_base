@@ -1280,6 +1280,14 @@ public class MediaScanner
         mMediaProvider = null;
     }
 
+    private void releaseResources() {
+        // release the DrmManagerClient resources
+        if (mDrmManagerClient != null) {
+            mDrmManagerClient.release();
+            mDrmManagerClient = null;
+        }
+    }
+
     private void initialize(String volumeName) {
         mMediaProvider = mContext.getContentResolver().acquireProvider("media");
 
@@ -1340,6 +1348,8 @@ public class MediaScanner
             Log.e(TAG, "UnsupportedOperationException in MediaScanner.scan()", e);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in MediaScanner.scan()", e);
+        } finally {
+            releaseResources();
         }
     }
 
@@ -1363,6 +1373,8 @@ public class MediaScanner
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in MediaScanner.scanFile()", e);
             return null;
+        } finally {
+            releaseResources();
         }
     }
 
@@ -1477,6 +1489,7 @@ public class MediaScanner
             if (fileList != null) {
                 fileList.close();
             }
+            releaseResources();
         }
     }
 
