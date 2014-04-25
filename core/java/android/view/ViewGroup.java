@@ -2342,6 +2342,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (disallowIntercept) {
             mGroupFlags |= FLAG_DISALLOW_INTERCEPT;
+            stopNestedScroll();
         } else {
             mGroupFlags &= ~FLAG_DISALLOW_INTERCEPT;
         }

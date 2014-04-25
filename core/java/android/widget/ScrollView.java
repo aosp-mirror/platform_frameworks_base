@@ -553,6 +553,7 @@ public class ScrollView extends FrameLayout {
                 if (mIsBeingDragged && mScrollStrictSpan == null) {
                     mScrollStrictSpan = StrictMode.enterCriticalSpan("ScrollView-scroll");
                 }
+                startNestedScroll(SCROLL_AXIS_VERTICAL);
                 break;
             }
 
@@ -565,6 +566,7 @@ public class ScrollView extends FrameLayout {
                 if (mScroller.springBack(mScrollX, mScrollY, 0, 0, 0, getScrollRange())) {
                     postInvalidateOnAnimation();
                 }
+                stopNestedScroll();
                 break;
             case MotionEvent.ACTION_POINTER_UP:
                 onSecondaryPointerUp(ev);

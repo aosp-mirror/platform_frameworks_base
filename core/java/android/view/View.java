@@ -18004,7 +18004,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * <p>If <code>startNestedScroll</code> returns true, a cooperative parent was found.
      * If it returns false the caller may ignore the rest of this contract until the next scroll.
-     * </p>
+     * Calling startNestedScroll while a nested scroll is already in progress will return true.</p>
      *
      * <p>At each incremental step of the scroll the caller should invoke
      * {@link #dispatchNestedPreScroll(int, int, int[], int[]) dispatchNestedPreScroll}
@@ -18028,6 +18028,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #dispatchNestedScroll(int, int, int, int, int[])
      */
     public boolean startNestedScroll(int axes) {
+        if (hasNestedScrollingParent()) {
+            // Already in progress
+            return true;
+        }
         if (isNestedScrollingEnabled()) {
             ViewParent p = getParent();
             View child = this;
