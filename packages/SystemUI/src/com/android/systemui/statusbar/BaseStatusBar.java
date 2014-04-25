@@ -71,7 +71,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.util.LegacyNotificationUtil;
-import com.android.internal.widget.SizeAdaptiveLayout;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SearchPanelView;
@@ -1078,6 +1077,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                     mKeyguardIconOverflowContainer.getIconsView().addNotification(entry);
                 }
             } else {
+                if (entry.row.getVisibility() == View.GONE) {
+                    // notify the scroller of a child addition
+                    mStackScroller.generateAddAnimation(entry.row);
+                }
                 entry.row.setVisibility(View.VISIBLE);
                 visibleNotifications++;
             }
