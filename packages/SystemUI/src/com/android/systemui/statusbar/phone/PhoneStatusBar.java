@@ -375,6 +375,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private InterceptedNotifications mIntercepted;
     private VelocityTracker mSettingsTracker;
     private float mSettingsDownY;
+    private boolean mSettingsStarted;
     private boolean mSettingsCancelled;
     private boolean mSettingsClosing;
     private int mNotificationPadding;
@@ -766,16 +767,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (mSettingsTracker != null) {
             mSettingsTracker.addMovement(event);
         }
-
+        final int slop = ViewConfiguration.get(mContext).getScaledTouchSlop();
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             mSettingsTracker = VelocityTracker.obtain();
             mSettingsDownY = event.getY();
             mSettingsCancelled = false;
+            mSettingsStarted = false;
             mSettingsClosing = mFlipSettingsView.getVisibility() == View.VISIBLE;
-            mFlipSettingsView.setVisibility(View.VISIBLE);
-            mStackScroller.setVisibility(View.VISIBLE);
-            positionSettings(0);
-            if (!mSettingsClosing) {
+            if (mSettingsClosing) {
+                mStackScroller.setVisibility(View.VISIBLE);
+            } else {
                 mFlipSettingsView.setTranslationY(-mNotificationPanel.getMeasuredHeight());
             }
             dispatchSettingsEvent(event);
@@ -784,8 +785,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             final float dy = event.getY() - mSettingsDownY;
             final FlipperButton flipper = mOnKeyguard ? mKeyguardFlipper : mHeaderFlipper;
             final boolean inButton = flipper.inHolderBounds(event);
-            final int slop = ViewConfiguration.get(mContext).getScaledTouchSlop();
-            final boolean qsTap = mSettingsClosing &&  Math.abs(dy) < slop;
+            final boolean qsTap = mSettingsClosing && Math.abs(dy) < slop;
             if (!qsTap && !inButton) {
                 mSettingsTracker.computeCurrentVelocity(1000);
                 final float vy = mSettingsTracker.getYVelocity();
@@ -801,10 +801,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             dispatchSettingsEvent(event);
         } else if (mSettingsTracker != null && event.getAction() == MotionEvent.ACTION_MOVE) {
             final float dy = event.getY() - mSettingsDownY;
-            positionSettings(dy);
             if (mSettingsClosing) {
-                final boolean qsTap =
-                        Math.abs(dy) < ViewConfiguration.get(mContext).getScaledTouchSlop();
+                positionSettings(dy);
+                final boolean qsTap = Math.abs(dy) < slop;
                 if (!mSettingsCancelled && !qsTap) {
                     MotionEvent cancelEvent = MotionEvent.obtainNoHistory(event);
                     cancelEvent.setAction(MotionEvent.ACTION_CANCEL);
@@ -812,6 +811,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     mSettingsCancelled = true;
                 }
             } else {
+                if (!mSettingsStarted && dy > slop) {
+                    mSettingsStarted = true;
+                    mFlipSettingsView.setVisibility(View.VISIBLE);
+                    mStackScroller.setVisibility(View.VISIBLE);
+                }
+                if (mSettingsStarted) {
+                    positionSettings(dy);
+                }
                 dispatchSettingsEvent(event);
             }
         }
