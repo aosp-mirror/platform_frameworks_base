@@ -633,7 +633,11 @@ public class StaticLayout extends Layout {
             bottom = fm.bottom;
         }
 
-        if (j == 0) {
+        boolean firstLine = (j == 0);
+        boolean currentLineIsTheLastVisibleOne = (j + 1 == mMaximumVisibleLineCount);
+        boolean lastLine = currentLineIsTheLastVisibleOne || (end == bufEnd);
+
+        if (firstLine) {
             if (trackPad) {
                 mTopPadding = top - above;
             }
@@ -642,7 +646,10 @@ public class StaticLayout extends Layout {
                 above = top;
             }
         }
-        if (end == bufEnd) {
+
+        int extra;
+
+        if (lastLine) {
             if (trackPad) {
                 mBottomPadding = bottom - below;
             }
@@ -652,9 +659,8 @@ public class StaticLayout extends Layout {
             }
         }
 
-        int extra;
 
-        if (needMultiply && end != bufEnd) {
+        if (needMultiply && !lastLine) {
             double ex = (below - above) * (spacingmult - 1) + spacingadd;
             if (ex >= 0) {
                 extra = (int)(ex + EXTRA_ROUNDING);
@@ -691,8 +697,6 @@ public class StaticLayout extends Layout {
         if (ellipsize != null) {
             // If there is only one line, then do any type of ellipsis except when it is MARQUEE
             // if there are multiple lines, just allow END ellipsis on the last line
-            boolean firstLine = (j == 0);
-            boolean currentLineIsTheLastVisibleOne = (j + 1 == mMaximumVisibleLineCount);
             boolean forceEllipsis = moreChars && (mLineCount + 1 == mMaximumVisibleLineCount);
 
             boolean doEllipsis =
