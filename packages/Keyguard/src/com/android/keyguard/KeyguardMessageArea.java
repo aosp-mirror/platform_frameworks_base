@@ -27,10 +27,9 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.MutableInt;
 import android.view.View;
 import android.widget.TextView;
-
-import libcore.util.MutableInt;
 
 import java.lang.ref.WeakReference;
 
