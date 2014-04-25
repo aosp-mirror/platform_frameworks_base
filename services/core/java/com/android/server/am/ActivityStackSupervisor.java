@@ -705,10 +705,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 profileFile, profileFd, userId);
 
         ActivityContainer container = (ActivityContainer)iContainer;
-        if (container != null && (aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
-            throw new SecurityException(
-                    "Activities launched in ActivityContainers must set allowEmbedded=\"true\"");
-        }
         synchronized (mService) {
             int callingPid;
             if (callingUid >= 0) {
