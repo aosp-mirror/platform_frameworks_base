@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff.Mode;
@@ -493,6 +494,16 @@ public class ShapeDrawable extends Drawable {
             }
         }
         invalidateSelf();
+    }
+
+    @Override
+    public boolean getOutline(Outline outline) {
+        if (mShapeState.mShape == null) {
+            // don't publish outline without a shape
+            return false;
+        }
+
+        return mShapeState.mShape.getOutline(outline);
     }
 
     @Override

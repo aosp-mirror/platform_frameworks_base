@@ -10601,7 +10601,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (mOutline == null) {
                 mOutline = new Outline();
             } else {
-                mOutline.markInvalid();
+                //invalidate outline, to ensure background calculates it
+                mOutline.set(null);
             }
             if (mBackground.getOutline(mOutline)) {
                 if (!mOutline.isValid()) {
