@@ -50,10 +50,17 @@ public:
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         return obj->isIdentity() ? JNI_TRUE : JNI_FALSE;
     }
+
+    static jboolean isAffine(JNIEnv* env, jobject clazz, jlong objHandle) {
+        SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
+        return obj->asAffine(NULL) ? JNI_TRUE : JNI_FALSE;
+    }
+
     static jboolean rectStaysRect(JNIEnv* env, jobject clazz, jlong objHandle) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         return obj->rectStaysRect() ? JNI_TRUE : JNI_FALSE;
     }
+
     static void reset(JNIEnv* env, jobject clazz, jlong objHandle) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->reset();
@@ -302,6 +309,7 @@ static JNINativeMethod methods[] = {
     {"finalizer", "(J)V", (void*) SkMatrixGlue::finalizer},
     {"native_create","(J)J", (void*) SkMatrixGlue::create},
     {"native_isIdentity","(J)Z", (void*) SkMatrixGlue::isIdentity},
+    {"native_isAffine","(J)Z", (void*) SkMatrixGlue::isAffine},
     {"native_rectStaysRect","(J)Z", (void*) SkMatrixGlue::rectStaysRect},
     {"native_reset","(J)V", (void*) SkMatrixGlue::reset},
     {"native_set","(JJ)V", (void*) SkMatrixGlue::set},

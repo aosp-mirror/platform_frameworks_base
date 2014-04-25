@@ -10113,6 +10113,7 @@ package android.graphics {
     ctor public Matrix(android.graphics.Matrix);
     method public void getValues(float[]);
     method public boolean invert(android.graphics.Matrix);
+    method public boolean isAffine();
     method public boolean isIdentity();
     method public void mapPoints(float[], int, float[], int, int);
     method public void mapPoints(float[], float[]);
@@ -11350,6 +11351,24 @@ package android.graphics.pdf {
     ctor public PdfDocument.PageInfo.Builder(int, int, int);
     method public android.graphics.pdf.PdfDocument.PageInfo create();
     method public android.graphics.pdf.PdfDocument.PageInfo.Builder setContentRect(android.graphics.Rect);
+  }
+
+  public final class PdfRenderer implements java.lang.AutoCloseable {
+    ctor public PdfRenderer(android.os.ParcelFileDescriptor) throws java.io.IOException;
+    method public void close();
+    method public void closePage(android.graphics.pdf.PdfRenderer.Page);
+    method public int getPageCount();
+    method public android.graphics.pdf.PdfRenderer.Page openPage(int);
+    method public boolean shouldScaleForPrinting();
+  }
+
+  public final class PdfRenderer.Page {
+    method public int getHeight();
+    method public int getIndex();
+    method public int getWidth();
+    method public void render(android.graphics.Bitmap, android.graphics.Rect, android.graphics.Matrix, int);
+    field public static final int RENDER_MODE_FOR_DISPLAY = 1; // 0x1
+    field public static final int RENDER_MODE_FOR_PRINT = 2; // 0x2
   }
 
 }

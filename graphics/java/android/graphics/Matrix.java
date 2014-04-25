@@ -245,6 +245,16 @@ public class Matrix {
     }
 
     /**
+     * Gets whether this matrix is affine. An affine matrix preserves
+     * straight lines and has no perspective.
+     *
+     * @return Whether the matrix is affine.
+     */
+    public boolean isAffine() {
+        return native_isAffine(native_instance);
+    }
+
+    /**
      * Returns true if will map a rectangle to another rectangle. This can be
      * true if the matrix is identity, scale-only, or rotates a multiple of 90
      * degrees.
@@ -828,6 +838,7 @@ public class Matrix {
 
     private static native long native_create(long native_src_or_zero);
     private static native boolean native_isIdentity(long native_object);
+    private static native boolean native_isAffine(long native_object);
     private static native boolean native_rectStaysRect(long native_object);
     private static native void native_reset(long native_object);
     private static native void native_set(long native_object,
