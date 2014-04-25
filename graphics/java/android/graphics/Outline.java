@@ -16,18 +16,19 @@
 
 package android.graphics;
 
+import android.graphics.drawable.Drawable;
 import android.view.View;
 
 /**
  * Defines an area of content.
  *
- * Can be used with a View or Drawable to drive the shape of shadows cast by a
+ * Can be used with a View, or computed by a Drawable, to drive the shape of shadows cast by a
  * View, and allowing Views to clip inner content.
  *
  * @see View#setOutline(Outline)
- * @see View#setClipToOutline(boolean)
+ * @see Drawable#getOutline(Outline)
  */
-public class Outline {
+public final class Outline {
     /** @hide */
     public Rect mRect;
 
@@ -44,19 +45,26 @@ public class Outline {
     public Outline() {}
 
     /**
+     * Constructs an Outline with a copy of the data in src.
+     */
+    public Outline(Outline src) {
+        set(src);
+    }
+
+    /** @hide */
+    public void markInvalid() {
+        mRadius = 0;
+        mRect = null;
+        mPath = null;
+    }
+
+    /**
      * Returns whether the Outline is valid for use with a View.
      * <p>
      * Outlines are invalid when constructed until a setter method is called.
      */
-    public final boolean isValid() {
+    public boolean isValid() {
         return mRect != null || mPath != null;
-    }
-
-    /**
-     * @hide
-     */
-    public final boolean canClip() {
-        return mPath == null;
     }
 
     /**
@@ -81,9 +89,20 @@ public class Outline {
 
     /**
      * Sets the Outline to the rounded rect defined by the input rect, and corner radius.
-     * <p>
-     * Outlines produced by this method support
-     * {@link View#setClipToOutline(boolean) View clipping.}
+     */
+    public void setRect(int left, int top, int right, int bottom) {
+        setRoundRect(left, top, right, bottom, 0.0f);
+    }
+
+    /**
+     * Convenience for {@link #setRect(int, int, int, int)}
+     */
+    public void setRect(Rect rect) {
+        setRect(rect.left, rect.top, rect.right, rect.bottom);
+    }
+
+    /**
+     * Sets the Outline to the rounded rect defined by the input rect, and corner radius.
      */
     public void setRoundRect(int left, int top, int right, int bottom, float radius) {
         if (mRect == null) mRect = new Rect();
@@ -93,9 +112,16 @@ public class Outline {
     }
 
     /**
+     * Convenience for {@link #setRoundRect(int, int, int, int, float)}
+     * @param rect
+     * @param radius
+     */
+    public void setRoundRect(Rect rect, float radius) {
+        setRoundRect(rect.left, rect.top, rect.right, rect.bottom, radius);
+    }
+
+    /**
      * Sets the Constructs an Outline from a {@link android.graphics.Path#isConvex() convex path}.
-     *
-     * @hide
      */
     public void setConvexPath(Path convexPath) {
         if (!convexPath.isConvex()) {

@@ -864,22 +864,21 @@ public abstract class Drawable {
     }
 
     /**
-     * Returns the outline for this drawable if defined, null if not.
+     * Called to get the drawable to populate the Outline.
      * <p>
-     * This method will be called by a View on its background Drawable after
-     * bounds change, if the View's Outline isn't set explicitly. This allows
-     * the background Drawable to provide the shape of the shadow casting
-     * portion of the View. It can also serve to clip the area of the View if
-     * if {@link View#setClipToOutline(boolean)} is set on the View.
-     * <p>
-     * The Outline queried by the View will not be modified, and is treated as
-     * a static shape that only needs to be requeried when the drawable's bounds
-     * change.
+     * This method will be called by a View on its background Drawable after bounds change, or its
+     * Drawable is invalidated, if the View's Outline isn't set explicitly. This allows the
+     * background Drawable to define the shape of the shadow cast by the View.
      *
-     * @see View#setOutline(android.view.Outline)
-     * @see View#setClipToOutline(boolean)
+     * The default behavior defines the outline to be the bounding rectangle. Subclasses that wish
+     * to convey a different shape must override this method.
+     *
+     * @see View#setOutline(android.graphics.Outline)
      */
-    public Outline getOutline() { return null; }
+    public boolean getOutline(Outline outline) {
+        outline.setRect(getBounds());
+        return true;
+    }
 
     /**
      * Make this drawable mutable. This operation cannot be reversed. A mutable
