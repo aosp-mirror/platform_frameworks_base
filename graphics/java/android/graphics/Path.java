@@ -499,11 +499,7 @@ public class Path {
      * @param dir  The direction to wind the rectangle's contour
      */
     public void addRect(RectF rect, Direction dir) {
-        if (rect == null) {
-            throw new NullPointerException("need rect parameter");
-        }
-        detectSimplePath(rect.left, rect.top, rect.right, rect.bottom, dir);
-        native_addRect(mNativePath, rect, dir.nativeInt);
+        addRect(rect.left, rect.top, rect.right, rect.bottom, dir);
     }
 
     /**
@@ -527,11 +523,17 @@ public class Path {
      * @param dir  The direction to wind the oval's contour
      */
     public void addOval(RectF oval, Direction dir) {
-        if (oval == null) {
-            throw new NullPointerException("need oval parameter");
-        }
+        addOval(oval.left, oval.top, oval.right, oval.bottom, dir);
+    }
+
+    /**
+     * Add a closed oval contour to the path
+     *
+     * @param dir The direction to wind the oval's contour
+     */
+    public void addOval(float left, float top, float right, float bottom, Direction dir) {
         isSimplePath = false;
-        native_addOval(mNativePath, oval, dir.nativeInt);
+        native_addOval(mNativePath, left, top, right, bottom, dir.nativeInt);
     }
 
     /**
@@ -756,10 +758,10 @@ public class Path {
     private static native void native_arcTo(long nPath, RectF oval,
                     float startAngle, float sweepAngle, boolean forceMoveTo);
     private static native void native_close(long nPath);
-    private static native void native_addRect(long nPath, RectF rect, int dir);
     private static native void native_addRect(long nPath, float left, float top,
                                             float right, float bottom, int dir);
-    private static native void native_addOval(long nPath, RectF oval, int dir);
+    private static native void native_addOval(long nPath, float left, float top,
+            float right, float bottom, int dir);
     private static native void native_addCircle(long nPath, float x, float y, float radius, int dir);
     private static native void native_addArc(long nPath, RectF oval,
                                             float startAngle, float sweepAngle);

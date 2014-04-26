@@ -16,14 +16,16 @@
 
 package android.graphics;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
 /**
- * Defines an area of content.
+ * Defines a simple shape, used for bounding graphical regions.
  *
  * Can be used with a View, or computed by a Drawable, to drive the shape of shadows cast by a
- * View, and allowing Views to clip inner content.
+ * View.
  *
  * @see View#setOutline(Outline)
  * @see Drawable#getOutline(Outline)
@@ -47,7 +49,7 @@ public final class Outline {
     /**
      * Constructs an Outline with a copy of the data in src.
      */
-    public Outline(Outline src) {
+    public Outline(@Nullable Outline src) {
         set(src);
     }
 
@@ -69,22 +71,30 @@ public final class Outline {
 
     /**
      * Replace the contents of this Outline with the contents of src.
+     *
+     * @param src Source outline to copy from.
      */
-    public void set(Outline src) {
-        if (src.mPath != null) {
-            if (mPath == null) {
-                mPath = new Path();
-            }
-            mPath.set(src.mPath);
+    public void set(@Nullable Outline src) {
+        if (src == null) {
+            mRadius = 0;
             mRect = null;
-        }
-        if (src.mRect != null) {
-            if (mRect == null) {
-                mRect = new Rect();
+            mPath = null;
+        } else {
+            if (src.mPath != null) {
+                if (mPath == null) {
+                    mPath = new Path();
+                }
+                mPath.set(src.mPath);
+                mRect = null;
             }
-            mRect.set(src.mRect);
+            if (src.mRect != null) {
+                if (mRect == null) {
+                    mRect = new Rect();
+                }
+                mRect.set(src.mRect);
+            }
+            mRadius = src.mRadius;
         }
-        mRadius = src.mRadius;
     }
 
     /**
@@ -97,12 +107,14 @@ public final class Outline {
     /**
      * Convenience for {@link #setRect(int, int, int, int)}
      */
-    public void setRect(Rect rect) {
+    public void setRect(@NonNull Rect rect) {
         setRect(rect.left, rect.top, rect.right, rect.bottom);
     }
 
     /**
      * Sets the Outline to the rounded rect defined by the input rect, and corner radius.
+     *
+     * Passing a zero radius is equivalent to calling {@link #setRect(int, int, int, int)}
      */
     public void setRoundRect(int left, int top, int right, int bottom, float radius) {
         if (mRect == null) mRect = new Rect();
@@ -113,17 +125,32 @@ public final class Outline {
 
     /**
      * Convenience for {@link #setRoundRect(int, int, int, int, float)}
-     * @param rect
-     * @param radius
      */
-    public void setRoundRect(Rect rect, float radius) {
+    public void setRoundRect(@NonNull Rect rect, float radius) {
         setRoundRect(rect.left, rect.top, rect.right, rect.bottom, radius);
+    }
+
+    /**
+     * Sets the outline to the oval defined by input rect.
+     */
+    public void setOval(int left, int top, int right, int bottom) {
+        mRect = null;
+        if (mPath == null) mPath = new Path();
+        mPath.reset();
+        mPath.addOval(left, top, right, bottom, Path.Direction.CW);
+    }
+
+    /**
+     * Convenience for {@link #setOval(int, int, int, int)}
+     */
+    public void setOval(@NonNull Rect rect) {
+        setOval(rect.left, rect.top, rect.right, rect.bottom);
     }
 
     /**
      * Sets the Constructs an Outline from a {@link android.graphics.Path#isConvex() convex path}.
      */
-    public void setConvexPath(Path convexPath) {
+    public void setConvexPath(@NonNull Path convexPath) {
         if (!convexPath.isConvex()) {
             throw new IllegalArgumentException("path must be convex");
         }

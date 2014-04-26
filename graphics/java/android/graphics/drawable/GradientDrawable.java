@@ -866,7 +866,7 @@ public class GradientDrawable extends Drawable {
                 float x0, x1, y0, y1;
 
                 if (st.mGradient == LINEAR_GRADIENT) {
-                    final float level = st.mUseLevel ? getLevel() / 10000.0f : 1.0f;                    
+                    final float level = st.mUseLevel ? getLevel() / 10000.0f : 1.0f;
                     switch (st.mOrientation) {
                     case TOP_BOTTOM:
                         x0 = r.left;            y0 = r.top;
@@ -1450,10 +1450,12 @@ public class GradientDrawable extends Drawable {
                     rad = Math.min(st.mRadius,
                             Math.min(bounds.width(), bounds.height()) * 0.5f);
                 }
-                outline.setRoundRect(bounds.left, bounds.top,
-                        bounds.right, bounds.bottom, rad);
+                outline.setRoundRect(bounds, rad);
                 return true;
-            case LINE: {
+            case OVAL:
+                outline.setOval(bounds);
+                return true;
+            case LINE:
                 float halfStrokeWidth = mStrokePaint.getStrokeWidth() * 0.5f;
                 float centerY = bounds.centerY();
                 int top = (int) Math.floor(centerY - halfStrokeWidth);
@@ -1461,7 +1463,6 @@ public class GradientDrawable extends Drawable {
 
                 outline.setRect(bounds.left, top, bounds.right, bottom);
                 return true;
-            }
             default:
                 // TODO: investigate
                 return false;
