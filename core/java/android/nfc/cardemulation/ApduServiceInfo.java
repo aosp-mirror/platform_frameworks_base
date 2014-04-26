@@ -290,6 +290,20 @@ public final class ApduServiceInfo implements Parcelable {
         return groups;
     }
 
+    /**
+     * Returns the category to which this service has attributed the AID that is passed in,
+     * or null if we don't know this AID.
+     */
+    public String getCategoryForAid(String aid) {
+        ArrayList<AidGroup> groups = getAidGroups();
+        for (AidGroup group : groups) {
+            if (group.aids.contains(aid)) {
+                return group.category;
+            }
+        }
+        return null;
+    }
+
     public boolean hasCategory(String category) {
         return (mStaticAidGroups.containsKey(category) || mDynamicAidGroups.containsKey(category));
     }

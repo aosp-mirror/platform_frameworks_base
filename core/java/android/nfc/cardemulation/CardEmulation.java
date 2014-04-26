@@ -18,6 +18,7 @@ package android.nfc.cardemulation;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.Activity;
 import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,6 +29,7 @@ import android.nfc.NfcAdapter;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -248,6 +250,33 @@ public final class CardEmulation {
     }
 
     /**
+     * Returns whether the user has allowed AIDs registered in the
+     * specified category to be handled by a service that is preferred
+     * by the foreground application, instead of by a pre-configured default.
+     *
+     * Foreground applications can set such preferences using the
+     * {@link #setPreferredService(Activity, ComponentName)} method.
+     *
+     * @param category The category, e.g. {@link #CATEGORY_PAYMENT}
+     * @return whether AIDs in the category can be handled by a service
+     *         specified by the foreground app.
+     */
+    public boolean categoryAllowsForegroundPreference(String category) {
+        if (CATEGORY_PAYMENT.equals(category)) {
+            boolean preferForeground = false;
+            try {
+                preferForeground = Settings.Secure.getInt(mContext.getContentResolver(),
+                        Settings.Secure.NFC_PAYMENT_FOREGROUND) != 0;
+            } catch (SettingNotFoundException e) {
+            }
+            return preferForeground;
+        } else {
+            // Allowed for all other categories
+            return true;
+        }
+    }
+
+    /**
      * Returns the service selection mode for the passed in category.
      * Valid return values are:
      * <p>{@link #SELECTION_MODE_PREFER_DEFAULT} the user has requested a default
@@ -269,7 +298,6 @@ public final class CardEmulation {
                 return SELECTION_MODE_ALWAYS_ASK;
             }
         } else {
-            // All other categories are in "only ask if conflict" mode
             return SELECTION_MODE_ASK_IF_CONFLICT;
         }
     }
@@ -283,7 +311,7 @@ public final class CardEmulation {
      * that AID group will be replaced with this one.
      *
      * <p>Note that you can only register AIDs for a service that
-     * is running under the same UID as you are. Typically
+     * is running under the same UID as the caller of this API. Typically
      * this means you need to call this from the same
      * package as the service itself, though UIDs can also
      * be shared between packages using shared UIDs.
@@ -352,7 +380,7 @@ public final class CardEmulation {
      * method. It will *not* remove AID groups that were statically registered in
      * the manifest. If a dynamically registered AID group is removed using
      * this method, and a statically registered AID group for the same category
-     * exists in the manifest, that AID group will become active again.
+     * exists in the manifest, the static AID group will become active again.
      *
      * @param service The component name of the service
      * @param category The category of the AID group to be removed, e.g. {@link #CATEGORY_PAYMENT}
@@ -370,6 +398,96 @@ public final class CardEmulation {
             }
             try {
                 return sService.removeAidGroupForService(UserHandle.myUserId(), service, category);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Allows a foreground application to specify which card emulation service
+     * should be preferred while a specific Activity is in the foreground.
+     *
+     * <p>The specified Activity must currently be in resumed state. A good
+     * paradigm is to call this method in your {@link Activity#onResume}, and to call
+     * {@link #unsetPreferredService(Activity)} in your {@link Activity#onPause}.
+     *
+     * <p>This method call will fail in two specific scenarios:
+     * <ul>
+     * <li> If the service registers one or more AIDs in the {@link #CATEGORY_PAYMENT}
+     * category, but the user has indicated that foreground apps are not allowed
+     * to override the default payment service.
+     * <li> If the service registers one or more AIDs in the {@link #CATEGORY_OTHER}
+     * category that are also handled by the default payment service, and the
+     * user has indicated that foreground apps are not allowed to override the
+     * default payment service.
+     * </ul>
+     *
+     * <p> Use {@link #categoryAllowsForegroundPreference(String)} to determine
+     * whether foreground apps can override the default payment service.
+     *
+     * <p>Note that this preference is not persisted by the OS, and hence must be
+     * called every time the Activity is resumed.
+     *
+     * @param activity The activity which prefers this service to be invoked
+     * @param service The service to be preferred while this activity is in the foreground
+     * @return whether the registration was successful
+     */
+    public boolean setPreferredService(Activity activity, ComponentName service) {
+        // Verify the activity is in the foreground before calling into NfcService
+        if (activity == null || service == null) {
+            throw new NullPointerException("activity or service or category is null");
+        }
+        if (!activity.isResumed()) {
+            throw new IllegalArgumentException("Activity must be resumed.");
+        }
+        try {
+            return sService.setPreferredService(service);
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.setPreferredService(service);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Unsets the preferred service for the specified Activity.
+     *
+     * <p>Note that the specified Activity must still be in resumed
+     * state at the time of this call. A good place to call this method
+     * is in your {@link Activity#onPause} implementation.
+     *
+     * @param activity The activity which the service was registered for
+     * @return true when successful
+     */
+    public boolean unsetPreferredService(Activity activity) {
+        if (activity == null) {
+            throw new NullPointerException("activity is null");
+        }
+        if (!activity.isResumed()) {
+            throw new IllegalArgumentException("Activity must be resumed.");
+        }
+        try {
+            return sService.unsetPreferredService();
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.unsetPreferredService();
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to reach CardEmulationService.");
                 return false;

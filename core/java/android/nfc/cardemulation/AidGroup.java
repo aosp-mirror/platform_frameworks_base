@@ -12,10 +12,15 @@ import android.os.Parcelable;
 import android.util.Log;
 
 /**
- * The AidGroup class represents a group of ISO/IEC 7816-4
- * Application Identifiers (AIDs) for a specific application
- * category, along with a description resource describing
- * the group.
+ * The AidGroup class represents a group of Application Identifiers (AIDs).
+ *
+ * <p>An instance of this object can be used with
+ * {@link CardEmulation#registerAidGroupForService(android.content.ComponentName, AidGroup)}
+ * to tell the OS which AIDs are handled by your HCE- or SE-based service.
+ *
+ * <p>The format of AIDs is defined in the ISO/IEC 7816-4 specification. This class
+ * requires the AIDs to be input as a hexadecimal string, with an even amount of
+ * hexadecimal characters, e.g. "F014811481".
  */
 public final class AidGroup implements Parcelable {
     /**
@@ -33,7 +38,7 @@ public final class AidGroup implements Parcelable {
      * Creates a new AidGroup object.
      *
      * @param aids The list of AIDs present in the group
-     * @param category The category of this group
+     * @param category The category of this group, e.g. {@link CardEmulation#CATEGORY_PAYMENT}
      */
     public AidGroup(ArrayList<String> aids, String category) {
         if (aids == null || aids.size() == 0) {
@@ -42,11 +47,12 @@ public final class AidGroup implements Parcelable {
         if (aids.size() > MAX_NUM_AIDS) {
             throw new IllegalArgumentException("Too many AIDs in AID group.");
         }
-        if (!isValidCategory(category)) {
-            throw new IllegalArgumentException("Category specified is not valid.");
+        if (isValidCategory(category)) {
+            this.category = category;
+        } else {
+            this.category = CardEmulation.CATEGORY_OTHER;
         }
         this.aids = aids;
-        this.category = category;
         this.description = null;
     }
 
@@ -158,7 +164,7 @@ public final class AidGroup implements Parcelable {
         }
     }
 
-    boolean isValidCategory(String category) {
+    static boolean isValidCategory(String category) {
         return CardEmulation.CATEGORY_PAYMENT.equals(category) ||
                 CardEmulation.CATEGORY_OTHER.equals(category);
     }
