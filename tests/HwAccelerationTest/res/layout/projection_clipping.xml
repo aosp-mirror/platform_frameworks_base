@@ -6,7 +6,7 @@
     <FrameLayout
         android:translationX="50dp"
         android:translationY="50dp"
-        android:translationZ="30dp"
+        android:elevation="30dp"
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:background="@drawable/round_rect_background">

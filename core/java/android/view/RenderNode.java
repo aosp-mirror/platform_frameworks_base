@@ -443,6 +443,14 @@ public class RenderNode {
         return nHasOverlappingRendering(mNativeRenderNode);
     }
 
+    public void setElevation(float lift) {
+        nSetElevation(mNativeRenderNode, lift);
+    }
+
+    public float getElevation() {
+        return nGetElevation(mNativeRenderNode);
+    }
+
     /**
      * Sets the translation value for the display list on the X axis.
      *
@@ -854,6 +862,7 @@ public class RenderNode {
     private static native void nSetAlpha(long renderNode, float alpha);
     private static native void nSetHasOverlappingRendering(long renderNode,
             boolean hasOverlappingRendering);
+    private static native void nSetElevation(long renderNode, float lift);
     private static native void nSetTranslationX(long renderNode, float translationX);
     private static native void nSetTranslationY(long renderNode, float translationY);
     private static native void nSetTranslationZ(long renderNode, float translationZ);
@@ -874,6 +883,7 @@ public class RenderNode {
     private static native float nGetCameraDistance(long renderNode);
     private static native float nGetScaleX(long renderNode);
     private static native float nGetScaleY(long renderNode);
+    private static native float nGetElevation(long renderNode);
     private static native float nGetTranslationX(long renderNode);
     private static native float nGetTranslationY(long renderNode);
     private static native float nGetTranslationZ(long renderNode);

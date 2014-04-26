@@ -164,6 +164,12 @@ static void android_view_RenderNode_setHasOverlappingRendering(JNIEnv* env,
     renderNode->mutateStagingProperties().setHasOverlappingRendering(hasOverlappingRendering);
 }
 
+static void android_view_RenderNode_setElevation(JNIEnv* env,
+        jobject clazz, jlong renderNodePtr, float elevation) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().setElevation(elevation);
+}
+
 static void android_view_RenderNode_setTranslationX(JNIEnv* env,
         jobject clazz, jlong renderNodePtr, float tx) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
@@ -331,6 +337,12 @@ static jfloat android_view_RenderNode_getScaleY(JNIEnv* env,
     return renderNode->stagingProperties().getScaleY();
 }
 
+static jfloat android_view_RenderNode_getElevation(JNIEnv* env,
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getElevation();
+}
+
 static jfloat android_view_RenderNode_getTranslationX(JNIEnv* env,
         jobject clazz, jlong renderNodePtr) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
@@ -457,6 +469,7 @@ static JNINativeMethod gMethods[] = {
     { "nSetAlpha",             "(JF)V",  (void*) android_view_RenderNode_setAlpha },
     { "nSetHasOverlappingRendering", "(JZ)V",
             (void*) android_view_RenderNode_setHasOverlappingRendering },
+    { "nSetElevation",         "(JF)V",  (void*) android_view_RenderNode_setElevation },
     { "nSetTranslationX",      "(JF)V",  (void*) android_view_RenderNode_setTranslationX },
     { "nSetTranslationY",      "(JF)V",  (void*) android_view_RenderNode_setTranslationY },
     { "nSetTranslationZ",      "(JF)V",  (void*) android_view_RenderNode_setTranslationZ },
@@ -485,6 +498,7 @@ static JNINativeMethod gMethods[] = {
     { "nGetCameraDistance",       "(J)F",  (void*) android_view_RenderNode_getCameraDistance },
     { "nGetScaleX",               "(J)F",  (void*) android_view_RenderNode_getScaleX },
     { "nGetScaleY",               "(J)F",  (void*) android_view_RenderNode_getScaleY },
+    { "nGetElevation",            "(J)F",  (void*) android_view_RenderNode_getElevation },
     { "nGetTranslationX",         "(J)F",  (void*) android_view_RenderNode_getTranslationX },
     { "nGetTranslationY",         "(J)F",  (void*) android_view_RenderNode_getTranslationY },
     { "nGetTranslationZ",         "(J)F",  (void*) android_view_RenderNode_getTranslationZ },

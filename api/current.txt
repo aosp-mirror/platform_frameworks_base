@@ -491,6 +491,7 @@ package android {
     field public static final int editTextStyle = 16842862; // 0x101006e
     field public static final deprecated int editable = 16843115; // 0x101016b
     field public static final int editorExtras = 16843300; // 0x1010224
+    field public static final int elevation = 16843851; // 0x101044b
     field public static final int ellipsize = 16842923; // 0x10100ab
     field public static final int ems = 16843096; // 0x1010158
     field public static final int enabled = 16842766; // 0x101000e
@@ -30121,6 +30122,7 @@ package android.view {
     method public int getDrawingCacheQuality();
     method public void getDrawingRect(android.graphics.Rect);
     method public long getDrawingTime();
+    method public float getElevation();
     method public boolean getFilterTouchesWhenObscured();
     method public boolean getFitsSystemWindows();
     method public java.util.ArrayList<android.view.View> getFocusables(int);
@@ -30219,6 +30221,7 @@ package android.view {
     method public void getWindowVisibleDisplayFrame(android.graphics.Rect);
     method public float getX();
     method public float getY();
+    method public float getZ();
     method public boolean hasFocus();
     method public boolean hasFocusable();
     method public boolean hasNestedScrollingParent();
@@ -30385,6 +30388,7 @@ package android.view {
     method public void setDrawingCacheEnabled(boolean);
     method public void setDrawingCacheQuality(int);
     method public void setDuplicateParentStateEnabled(boolean);
+    method public void setElevation(float);
     method public void setEnabled(boolean);
     method public void setFadingEdgeLength(int);
     method public void setFilterTouchesWhenObscured(boolean);
@@ -30470,6 +30474,7 @@ package android.view {
     method public void setWillNotDraw(boolean);
     method public void setX(float);
     method public void setY(float);
+    method public void setZ(float);
     method public boolean showContextMenu();
     method public android.view.ActionMode startActionMode(android.view.ActionMode.Callback);
     method public void startAnimation(android.view.animation.Animation);
@@ -31049,6 +31054,8 @@ package android.view {
     method public android.view.ViewPropertyAnimator xBy(float);
     method public android.view.ViewPropertyAnimator y(float);
     method public android.view.ViewPropertyAnimator yBy(float);
+    method public android.view.ViewPropertyAnimator z(float);
+    method public android.view.ViewPropertyAnimator zBy(float);
   }
 
   public final class ViewStub extends android.view.View {

@@ -144,10 +144,11 @@ public class ViewPropertyAnimator {
     private static final int ROTATION_Y     = 0x0080;
     private static final int X              = 0x0100;
     private static final int Y              = 0x0200;
-    private static final int ALPHA          = 0x0400;
+    private static final int Z              = 0x0400;
+    private static final int ALPHA          = 0x0800;
 
     private static final int TRANSFORM_MASK = TRANSLATION_X | TRANSLATION_Y | TRANSLATION_Z |
-            SCALE_X | SCALE_Y | ROTATION | ROTATION_X | ROTATION_Y | X | Y;
+            SCALE_X | SCALE_Y | ROTATION | ROTATION_X | ROTATION_Y | X | Y | Z;
 
     /**
      * The mechanism by which the user can request several properties that are then animated
@@ -466,6 +467,32 @@ public class ViewPropertyAnimator {
      */
     public ViewPropertyAnimator yBy(float value) {
         animatePropertyBy(Y, value);
+        return this;
+    }
+
+    /**
+     * This method will cause the View's <code>z</code> property to be animated to the
+     * specified value. Animations already running on the property will be canceled.
+     *
+     * @param value The value to be animated to.
+     * @see View#setZ(float)
+     * @return This object, allowing calls to methods in this class to be chained.
+     */
+    public ViewPropertyAnimator z(float value) {
+        animateProperty(Z, value);
+        return this;
+    }
+
+    /**
+     * This method will cause the View's <code>z</code> property to be animated by the
+     * specified value. Animations already running on the property will be canceled.
+     *
+     * @param value The amount to be animated by, as an offset from the current value.
+     * @see View#setZ(float)
+     * @return This object, allowing calls to methods in this class to be chained.
+     */
+    public ViewPropertyAnimator zBy(float value) {
+        animatePropertyBy(Z, value);
         return this;
     }
 
@@ -957,6 +984,9 @@ public class ViewPropertyAnimator {
             case Y:
                 renderNode.setTranslationY(value - mView.mTop);
                 break;
+            case Z:
+                renderNode.setTranslationZ(value - renderNode.getElevation());
+                break;
             case ALPHA:
                 info.mAlpha = value;
                 renderNode.setAlpha(value);
@@ -993,6 +1023,8 @@ public class ViewPropertyAnimator {
                 return mView.mLeft + node.getTranslationX();
             case Y:
                 return mView.mTop + node.getTranslationY();
+            case Z:
+                return node.getElevation() + node.getTranslationZ();
             case ALPHA:
                 return mView.mTransformationInfo.mAlpha;
         }
