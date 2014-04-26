@@ -30,28 +30,30 @@ public class TestInteractionActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.test_interaction);
         if (!isVoiceInteraction()) {
             Log.w(TAG, "Not running as a voice interaction!");
             finish();
             return;
         }
 
+        setContentView(R.layout.test_interaction);
+
         mInteractor = getVoiceInteractor();
-        mInteractor.startConfirmation(new VoiceInteractor.Callback() {
+        VoiceInteractor.ConfirmationRequest req = new VoiceInteractor.ConfirmationRequest(
+                "This is a confirmation", null) {
             @Override
-            public void onConfirmationResult(VoiceInteractor.Request request, boolean confirmed,
-                    Bundle result) {
-                Log.i(TAG, "Confirmation result: confirmed=" + confirmed + " result=" + result);
-                finish();
+            public void onCancel() {
+                Log.i(TAG, "Canceled!");
+                getActivity().finish();
             }
 
             @Override
-            public void onCancel(VoiceInteractor.Request request) {
-                Log.i(TAG, "Canceled!");
-                finish();
+            public void onConfirmationResult(boolean confirmed, Bundle result) {
+                Log.i(TAG, "Confirmation result: confirmed=" + confirmed + " result=" + result);
+                getActivity().finish();
             }
-        }, "This is a confirmation", null);
+        };
+        mInteractor.submitRequest(req);
     }
 
     @Override

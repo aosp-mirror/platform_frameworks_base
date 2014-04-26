@@ -22,6 +22,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.Log;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.IVoiceInteractorCallback;
@@ -39,50 +40,85 @@ public class VoiceInteractor {
     static final boolean DEBUG = true;
 
     final Context mContext;
+    final Activity mActivity;
     final IVoiceInteractor mInteractor;
     final HandlerCaller mHandlerCaller;
     final HandlerCaller.Callback mHandlerCallerCallback = new HandlerCaller.Callback() {
         @Override
         public void executeMessage(Message msg) {
             SomeArgs args = (SomeArgs)msg.obj;
+            Request request;
             switch (msg.what) {
                 case MSG_CONFIRMATION_RESULT:
+                    request = pullRequest((IVoiceInteractorRequest)args.arg1, true);
                     if (DEBUG) Log.d(TAG, "onConfirmResult: req="
-                            + ((IVoiceInteractorRequest)args.arg2).asBinder()
-                            + " confirmed=" + msg.arg1 + " result=" + args.arg3);
-                    ((Callback)args.arg1).onConfirmationResult(
-                            findRequest((IVoiceInteractorRequest)args.arg2),
-                            msg.arg1 != 0, (Bundle)args.arg3);
+                            + ((IVoiceInteractorRequest)args.arg1).asBinder() + "/" + request
+                            + " confirmed=" + msg.arg1 + " result=" + args.arg2);
+                    if (request != null) {
+                        ((ConfirmationRequest)request).onConfirmationResult(msg.arg1 != 0,
+                                (Bundle) args.arg2);
+                        request.clear();
+                    }
                     break;
                 case MSG_COMMAND_RESULT:
+                    request = pullRequest((IVoiceInteractorRequest)args.arg1, msg.arg1 != 0);
                     if (DEBUG) Log.d(TAG, "onCommandResult: req="
-                            + ((IVoiceInteractorRequest)args.arg2).asBinder()
+                            + ((IVoiceInteractorRequest)args.arg1).asBinder() + "/" + request
                             + " result=" + args.arg2);
-                    ((Callback)args.arg1).onCommandResult(
-                            findRequest((IVoiceInteractorRequest) args.arg2),
-                            (Bundle) args.arg3);
+                    if (request != null) {
+                        ((CommandRequest)request).onCommandResult((Bundle) args.arg2);
+                        if (msg.arg1 != 0) {
+                            request.clear();
+                        }
+                    }
                     break;
                 case MSG_CANCEL_RESULT:
+                    request = pullRequest((IVoiceInteractorRequest)args.arg1, true);
                     if (DEBUG) Log.d(TAG, "onCancelResult: req="
-                            + ((IVoiceInteractorRequest)args.arg2).asBinder());
-                    ((Callback)args.arg1).onCancel(
-                            findRequest((IVoiceInteractorRequest) args.arg2));
+                            + ((IVoiceInteractorRequest)args.arg1).asBinder() + "/" + request);
+                    if (request != null) {
+                        request.onCancel();
+                        request.clear();
+                    }
                     break;
             }
         }
     };
 
-    final WeakHashMap<IBinder, Request> mActiveRequests = new WeakHashMap<IBinder, Request>();
+    final IVoiceInteractorCallback.Stub mCallback = new IVoiceInteractorCallback.Stub() {
+        @Override
+        public void deliverConfirmationResult(IVoiceInteractorRequest request, boolean confirmed,
+                Bundle result) {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIOO(
+                    MSG_CONFIRMATION_RESULT, confirmed ? 1 : 0, request, result));
+        }
+
+        @Override
+        public void deliverCommandResult(IVoiceInteractorRequest request, boolean complete,
+                Bundle result) {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIOO(
+                    MSG_COMMAND_RESULT, complete ? 1 : 0, request, result));
+        }
+
+        @Override
+        public void deliverCancel(IVoiceInteractorRequest request) throws RemoteException {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(
+                    MSG_CANCEL_RESULT, request));
+        }
+    };
+
+    final ArrayMap<IBinder, Request> mActiveRequests = new ArrayMap<IBinder, Request>();
 
     static final int MSG_CONFIRMATION_RESULT = 1;
     static final int MSG_COMMAND_RESULT = 2;
     static final int MSG_CANCEL_RESULT = 3;
 
-    public static class Request {
-        final IVoiceInteractorRequest mRequestInterface;
+    public static abstract class Request {
+        IVoiceInteractorRequest mRequestInterface;
+        Context mContext;
+        Activity mActivity;
 
-        Request(IVoiceInteractorRequest requestInterface) {
-            mRequestInterface = requestInterface;
+        public Request() {
         }
 
         public void cancel() {
@@ -92,126 +128,130 @@ public class VoiceInteractor {
                 Log.w(TAG, "Voice interactor has died", e);
             }
         }
+
+        public Context getContext() {
+            return mContext;
+        }
+
+        public Activity getActivity() {
+            return mActivity;
+        }
+
+        public void onCancel() {
+        }
+
+        void clear() {
+            mRequestInterface = null;
+            mContext = null;
+            mActivity = null;
+        }
+
+        abstract IVoiceInteractorRequest submit(IVoiceInteractor interactor,
+                String packageName, IVoiceInteractorCallback callback) throws RemoteException;
     }
 
-    public static class Callback {
-        VoiceInteractor mInteractor;
+    public static class ConfirmationRequest extends Request {
+        final CharSequence mPrompt;
+        final Bundle mExtras;
 
-        final IVoiceInteractorCallback.Stub mWrapper = new IVoiceInteractorCallback.Stub() {
-            @Override
-            public void deliverConfirmationResult(IVoiceInteractorRequest request, boolean confirmed,
-                    Bundle result) {
-                mInteractor.mHandlerCaller.sendMessage(mInteractor.mHandlerCaller.obtainMessageIOOO(
-                        MSG_CONFIRMATION_RESULT, confirmed ? 1 : 0, Callback.this, request,
-                        result));
-            }
-
-            @Override
-            public void deliverCommandResult(IVoiceInteractorRequest request, Bundle result) {
-                mInteractor.mHandlerCaller.sendMessage(mInteractor.mHandlerCaller.obtainMessageOOO(
-                        MSG_COMMAND_RESULT, Callback.this, request, result));
-            }
-
-            @Override
-            public void deliverCancel(IVoiceInteractorRequest request) throws RemoteException {
-                mInteractor.mHandlerCaller.sendMessage(mInteractor.mHandlerCaller.obtainMessageOO(
-                        MSG_CANCEL_RESULT, Callback.this, request));
-            }
-        };
-
-        public void onConfirmationResult(Request request, boolean confirmed, Bundle result) {
+        /**
+         * Confirms an operation with the user via the trusted system
+         * VoiceInteractionService.  This allows an Activity to complete an unsafe operation that
+         * would require the user to touch the screen when voice interaction mode is not enabled.
+         * The result of the confirmation will be returned through an asynchronous call to
+         * either {@link #onConfirmationResult(boolean, android.os.Bundle)} or
+         * {@link #onCancel()}.
+         *
+         * <p>In some cases this may be a simple yes / no confirmation or the confirmation could
+         * include context information about how the action will be completed
+         * (e.g. booking a cab might include details about how long until the cab arrives)
+         * so the user can give a confirmation.
+         * @param prompt Optional confirmation text to read to the user as the action being
+         * confirmed.
+         * @param extras Additional optional information.
+         */
+        public ConfirmationRequest(CharSequence prompt, Bundle extras) {
+            mPrompt = prompt;
+            mExtras = extras;
         }
 
-        public void onCommandResult(Request request, Bundle result) {
+        public void onConfirmationResult(boolean confirmed, Bundle result) {
         }
 
-        public void onCancel(Request request) {
+        IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
+                IVoiceInteractorCallback callback) throws RemoteException {
+            return interactor.startConfirmation(packageName, callback, mPrompt.toString(), mExtras);
         }
-    }
+   }
 
-    VoiceInteractor(Context context, IVoiceInteractor interactor, Looper looper) {
+    public static class CommandRequest extends Request {
+        final String mCommand;
+        final Bundle mArgs;
+
+        /**
+         * Execute a command using the trusted system VoiceInteractionService.
+         * This allows an Activity to request additional information from the user needed to
+         * complete an action (e.g. booking a table might have several possible times that the
+         * user could select from or an app might need the user to agree to a terms of service).
+         * The result of the confirmation will be returned through an asynchronous call to
+         * either {@link #onCommandResult(android.os.Bundle)} or
+         * {@link #onCancel()}.
+         *
+         * <p>The command is a string that describes the generic operation to be performed.
+         * The command will determine how the properties in extras are interpreted and the set of
+         * available commands is expected to grow over time.  An example might be
+         * "com.google.voice.commands.REQUEST_NUMBER_BAGS" to request the number of bags as part of
+         * airline check-in.  (This is not an actual working example.)
+         *
+         * @param command The desired command to perform.
+         * @param args Additional arguments to control execution of the command.
+         */
+        public CommandRequest(String command, Bundle args) {
+            mCommand = command;
+            mArgs = args;
+        }
+
+        public void onCommandResult(Bundle result) {
+        }
+
+        IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
+                IVoiceInteractorCallback callback) throws RemoteException {
+            return interactor.startConfirmation(packageName, callback, mCommand, mArgs);
+        }
+   }
+
+    VoiceInteractor(Context context, Activity activity, IVoiceInteractor interactor,
+            Looper looper) {
         mContext = context;
+        mActivity = activity;
         mInteractor = interactor;
         mHandlerCaller = new HandlerCaller(context, looper, mHandlerCallerCallback, true);
     }
 
-    Request storeRequest(IVoiceInteractorRequest request) {
-        synchronized (mActiveRequests) {
-            Request req = new Request(request);
-            mActiveRequests.put(request.asBinder(), req);
-            return req;
-        }
-    }
-
-    Request findRequest(IVoiceInteractorRequest request) {
+    Request pullRequest(IVoiceInteractorRequest request, boolean complete) {
         synchronized (mActiveRequests) {
             Request req = mActiveRequests.get(request.asBinder());
-            if (req == null) {
-                throw new IllegalStateException("Received callback without active request: "
-                        + request);
+            if (req != null && complete) {
+                mActiveRequests.remove(request.asBinder());
             }
             return req;
         }
     }
 
-    /**
-     * Asynchronously confirms an operation with the user via the trusted system
-     * VoiceinteractionService.  This allows an Activity to complete an unsafe operation that
-     * would require the user to touch the screen when voice interaction mode is not enabled.
-     * The result of the confirmation will be returned by calling the
-     * {@link Callback#onConfirmationResult Callback.onConfirmationResult} method.
-     *
-     * In some cases this may be a simple yes / no confirmation or the confirmation could
-     * include context information about how the action will be completed
-     * (e.g. booking a cab might include details about how long until the cab arrives) so the user
-     * can give informed consent.
-     * @param callback Required callback target for interaction results.
-     * @param prompt Optional confirmation text to read to the user as the action being confirmed.
-     * @param extras Additional optional information.
-     * @return Returns a new {@link Request} object representing this operation.
-     */
-    public Request startConfirmation(Callback callback, String prompt, Bundle extras) {
+    public boolean submitRequest(Request request) {
         try {
-            callback.mInteractor = this;
-            Request req = storeRequest(mInteractor.startConfirmation(
-                    mContext.getOpPackageName(), callback.mWrapper, prompt, extras));
-            if (DEBUG) Log.d(TAG, "startConfirmation: req=" + req.mRequestInterface.asBinder()
-                    + " prompt=" + prompt + " extras=" + extras);
-            return req;
+            IVoiceInteractorRequest ireq = request.submit(mInteractor,
+                    mContext.getOpPackageName(), mCallback);
+            request.mRequestInterface = ireq;
+            request.mContext = mContext;
+            request.mActivity = mActivity;
+            synchronized (mActiveRequests) {
+                mActiveRequests.put(ireq.asBinder(), request);
+            }
+            return true;
         } catch (RemoteException e) {
-            throw new RuntimeException("Voice interactor has died", e);
-        }
-    }
-
-    /**
-     * Asynchronously executes a command using the trusted system VoiceinteractionService.
-     * This allows an Activity to request additional information from the user needed to
-     * complete an action (e.g. booking a table might have several possible times that the
-     * user could select from or an app might need the user to agree to a terms of service).
-     *
-     * The command is a string that describes the generic operation to be performed.
-     * The command will determine how the properties in extras are interpreted and the set of
-     * available commands is expected to grow over time.  An example might be
-     * "com.google.voice.commands.REQUEST_NUMBER_BAGS" to request the number of bags as part of
-     * airline check-in.  (This is not an actual working example.)
-     * The result of the command will be returned by calling the
-     * {@link Callback#onCommandResult Callback.onCommandResult} method.
-     *
-     * @param callback Required callback target for interaction results.
-     * @param command
-     * @param extras
-     * @return Returns a new {@link Request} object representing this operation.
-     */
-    public Request startCommand(Callback callback, String command, Bundle extras) {
-        try {
-            callback.mInteractor = this;
-            Request req = storeRequest(mInteractor.startCommand(
-                    mContext.getOpPackageName(), callback.mWrapper, command, extras));
-            if (DEBUG) Log.d(TAG, "startCommand: req=" + req.mRequestInterface.asBinder()
-                    + " command=" + command + " extras=" + extras);
-            return req;
-        } catch (RemoteException e) {
-            throw new RuntimeException("Voice interactor has died", e);
+            Log.w(TAG, "Remove voice interactor service died", e);
+            return false;
         }
     }
 

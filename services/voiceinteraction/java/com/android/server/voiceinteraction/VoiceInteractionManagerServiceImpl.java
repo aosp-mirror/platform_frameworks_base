@@ -16,6 +16,7 @@
 
 package com.android.server.voiceinteraction;
 
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.content.ComponentName;
@@ -24,18 +25,27 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
+import android.service.voice.IVoiceInteractionSessionService;
 import android.service.voice.VoiceInteractionService;
+import android.service.voice.VoiceInteractionServiceInfo;
 import android.util.Slog;
 import com.android.internal.app.IVoiceInteractor;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 class VoiceInteractionManagerServiceImpl {
     final static String TAG = "VoiceInteractionServiceManager";
+
+    final boolean mValid;
 
     final Context mContext;
     final Handler mHandler;
@@ -43,10 +53,12 @@ class VoiceInteractionManagerServiceImpl {
     final int mUser;
     final ComponentName mComponent;
     final IActivityManager mAm;
+    final VoiceInteractionServiceInfo mInfo;
+    final ComponentName mSessionComponentName;
     boolean mBound = false;
     IVoiceInteractionService mService;
-    IVoiceInteractionSession mActiveSession;
-    IVoiceInteractor mActiveInteractor;
+
+    SessionConnection mActiveSession;
 
     final ServiceConnection mConnection = new ServiceConnection() {
         @Override
@@ -62,6 +74,72 @@ class VoiceInteractionManagerServiceImpl {
         }
     };
 
+    final class SessionConnection implements ServiceConnection {
+        final IBinder mToken = new Binder();
+        final Intent mIntent;
+        final String mResolvedType;
+        final Bundle mArgs;
+        boolean mBound;
+        IVoiceInteractionSessionService mService;
+        IVoiceInteractionSession mSession;
+        IVoiceInteractor mInteractor;
+
+        SessionConnection(Intent intent, String resolvedType, Bundle args) {
+            mIntent = intent;
+            mResolvedType = resolvedType;
+            mArgs = args;
+            Intent serviceIntent = new Intent(VoiceInteractionService.SERVICE_INTERFACE);
+            serviceIntent.setComponent(mSessionComponentName);
+            mBound = mContext.bindServiceAsUser(serviceIntent, this,
+                    Context.BIND_AUTO_CREATE, new UserHandle(mUser));
+            if (!mBound) {
+                Slog.w(TAG, "Failed binding to voice interaction session service " + mComponent);
+            }
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            synchronized (mLock) {
+                mService = IVoiceInteractionSessionService.Stub.asInterface(service);
+                if (mActiveSession == this) {
+                    try {
+                        mService.newSession(mToken, mArgs);
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Failed making new session", e);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+        }
+
+        public void cancel() {
+            if (mBound) {
+                mContext.unbindService(this);
+                mBound = false;
+                mService = null;
+                mSession = null;
+                mInteractor = null;
+            }
+        }
+
+        public void dump(String prefix, PrintWriter pw) {
+            pw.print(prefix); pw.print("mToken="); pw.println(mToken);
+            pw.print(prefix); pw.print("mIntent="); pw.println(mIntent);
+                    pw.print(" mResolvedType="); pw.println(mResolvedType);
+            pw.print(prefix); pw.print("mArgs="); pw.println(mArgs);
+            pw.print(prefix); pw.print("mBound="); pw.println(mBound);
+            if (mBound) {
+                pw.print(prefix); pw.print("mService="); pw.println(mService);
+                pw.print(prefix); pw.print("mSession="); pw.println(mSession);
+                pw.print(prefix); pw.print("mInteractor="); pw.println(mInteractor);
+            }
+        }
+    };
+
     VoiceInteractionManagerServiceImpl(Context context, Handler handler, Object lock,
             int userHandle, ComponentName service) {
         mContext = context;
@@ -70,50 +148,85 @@ class VoiceInteractionManagerServiceImpl {
         mUser = userHandle;
         mComponent = service;
         mAm = ActivityManagerNative.getDefault();
+        VoiceInteractionServiceInfo info;
+        try {
+            info = new VoiceInteractionServiceInfo(context.getPackageManager(), service);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.w(TAG, "Voice interaction service not found: " + service);
+            mInfo = null;
+            mSessionComponentName = null;
+            mValid = false;
+            return;
+        }
+        mInfo = info;
+        if (mInfo.getParseError() != null) {
+            Slog.w(TAG, "Bad voice interaction service: " + mInfo.getParseError());
+            mSessionComponentName = null;
+            mValid = false;
+            return;
+        }
+        mValid = true;
+        mSessionComponentName = new ComponentName(service.getPackageName(),
+                mInfo.getSessionService());
     }
 
-    public int startVoiceActivityLocked(int callingPid, int callingUid, Intent intent,
-            String resolvedType, IVoiceInteractionSession session, IVoiceInteractor interactor) {
-        if (session == null) {
-            throw new NullPointerException("session is null");
-        }
-        if (interactor == null) {
-            throw new NullPointerException("interactor is null");
-        }
+    public void startVoiceActivityLocked(int callingPid, int callingUid, Intent intent,
+            String resolvedType, Bundle args) {
         if (mActiveSession != null) {
-            // XXX cancel current session.
+            mActiveSession.cancel();
+            mActiveSession = null;
         }
+        mActiveSession = new SessionConnection(intent, resolvedType, args);
         intent.addCategory(Intent.CATEGORY_VOICE);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        mActiveSession = session;
-        mActiveInteractor = interactor;
+    }
+
+    public int deliverNewSessionLocked(int callingPid, int callingUid, IBinder token,
+            IVoiceInteractionSession session, IVoiceInteractor interactor) {
         try {
+            if (mActiveSession == null || token != mActiveSession.mToken) {
+                Slog.w(TAG, "deliverNewSession does not match active session");
+                return ActivityManager.START_CANCELED;
+            }
+            mActiveSession.mSession = session;
+            mActiveSession.mInteractor = interactor;
             return mAm.startVoiceActivity(mComponent.getPackageName(), callingPid, callingUid,
-                    intent, resolvedType, mActiveSession, mActiveInteractor,
+                    mActiveSession.mIntent, mActiveSession.mResolvedType,
+                    mActiveSession.mSession, mActiveSession.mInteractor,
                     0, null, null, null, mUser);
         } catch (RemoteException e) {
             throw new IllegalStateException("Unexpected remote error", e);
         }
     }
 
+    public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (!mValid) {
+            pw.print("  NOT VALID: ");
+            if (mInfo == null) {
+                pw.println("no info");
+            } else {
+                pw.println(mInfo.getParseError());
+            }
+            return;
+        }
+        pw.print("  mComponent="); pw.println(mComponent.flattenToShortString());
+        pw.print("  Session service="); pw.println(mInfo.getSessionService());
+        pw.print("  Settings activity="); pw.println(mInfo.getSettingsActivity());
+        pw.print("  mBound="); pw.print(mBound);  pw.print(" mService="); pw.println(mService);
+        if (mActiveSession != null) {
+            pw.println("  Active session:");
+            mActiveSession.dump("    ", pw);
+        }
+    }
+
     void startLocked() {
         Intent intent = new Intent(VoiceInteractionService.SERVICE_INTERFACE);
         intent.setComponent(mComponent);
-        try {
-            ServiceInfo si = mContext.getPackageManager().getServiceInfo(mComponent, 0);
-            if (!android.Manifest.permission.BIND_VOICE_INTERACTION.equals(si.permission)) {
-                Slog.w(TAG, "Not using voice interaction service " + mComponent
-                        + ": does not require permission "
-                        + android.Manifest.permission.BIND_VOICE_INTERACTION);
-                return;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.w(TAG, "Unable to find voice interaction service: " + mComponent, e);
-            return;
-        }
-        mContext.bindServiceAsUser(intent, mConnection,
+        mBound = mContext.bindServiceAsUser(intent, mConnection,
                 Context.BIND_AUTO_CREATE, new UserHandle(mUser));
-        mBound = true;
+        if (!mBound) {
+            Slog.w(TAG, "Failed binding to voice interaction service " + mComponent);
+        }
     }
 
     void shutdownLocked() {
