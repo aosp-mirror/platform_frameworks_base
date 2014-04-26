@@ -10056,6 +10056,8 @@ package android.graphics {
     method public boolean isValid();
     method public void set(android.graphics.Outline);
     method public void setConvexPath(android.graphics.Path);
+    method public void setOval(int, int, int, int);
+    method public void setOval(android.graphics.Rect);
     method public void setRect(int, int, int, int);
     method public void setRect(android.graphics.Rect);
     method public void setRoundRect(int, int, int, int, float);
@@ -10228,6 +10230,7 @@ package android.graphics {
     method public void addArc(android.graphics.RectF, float, float);
     method public void addCircle(float, float, float, android.graphics.Path.Direction);
     method public void addOval(android.graphics.RectF, android.graphics.Path.Direction);
+    method public void addOval(float, float, float, float, android.graphics.Path.Direction);
     method public void addPath(android.graphics.Path, float, float);
     method public void addPath(android.graphics.Path);
     method public void addPath(android.graphics.Path, android.graphics.Matrix);
@@ -11155,6 +11158,7 @@ package android.graphics.drawable.shapes {
     method public android.graphics.drawable.shapes.Shape clone() throws java.lang.CloneNotSupportedException;
     method public abstract void draw(android.graphics.Canvas, android.graphics.Paint);
     method public final float getHeight();
+    method public boolean getOutline(android.graphics.Outline);
     method public final float getWidth();
     method public boolean hasAlpha();
     method protected void onResize(float, float);

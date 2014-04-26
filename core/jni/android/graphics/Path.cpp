@@ -163,42 +163,35 @@ public:
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->close();
     }
- 
-    static void addRect__RectFI(JNIEnv* env, jobject clazz, jlong objHandle, jobject jrect, jint dirHandle) {
-        SkRect rect;
-        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
-        GraphicsJNI::jrectf_to_rect(env, jrect, &rect);
-        obj->addRect(rect, dir);
-    }
- 
-    static void addRect__FFFFI(JNIEnv* env, jobject clazz, jlong objHandle, jfloat left, jfloat top, jfloat right, jfloat bottom, jint dirHandle) {
+
+    static void addRect(JNIEnv* env, jobject clazz, jlong objHandle,
+            jfloat left, jfloat top, jfloat right, jfloat bottom, jint dirHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
         obj->addRect(left, top, right, bottom, dir);
     }
- 
-    static void addOval(JNIEnv* env, jobject clazz, jlong objHandle, jobject oval, jint dirHandle) {
+
+    static void addOval(JNIEnv* env, jobject clazz, jlong objHandle,
+            jfloat left, jfloat top, jfloat right, jfloat bottom, jint dirHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
-        SkRect oval_;
-        GraphicsJNI::jrectf_to_rect(env, oval, &oval_);
-        obj->addOval(oval_, dir);
+        SkRect oval = SkRect::MakeLTRB(left, top, right, bottom);
+        obj->addOval(oval, dir);
     }
- 
+
     static void addCircle(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x, jfloat y, jfloat radius, jint dirHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
         obj->addCircle(x, y, radius, dir);
     }
- 
+
     static void addArc(JNIEnv* env, jobject clazz, jlong objHandle, jobject oval, jfloat startAngle, jfloat sweepAngle) {
         SkRect oval_;
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         GraphicsJNI::jrectf_to_rect(env, oval, &oval_);
         obj->addArc(oval_, startAngle, sweepAngle);
     }
- 
+
     static void addRoundRectXY(JNIEnv* env, jobject clazz, jlong objHandle, jobject jrect,
             jfloat rx, jfloat ry, jint dirHandle) {
         SkRect rect;
@@ -496,9 +489,8 @@ static JNINativeMethod methods[] = {
     {"native_rCubicTo","(JFFFFFF)V", (void*) SkPathGlue::rCubicTo},
     {"native_arcTo","(JLandroid/graphics/RectF;FFZ)V", (void*) SkPathGlue::arcTo},
     {"native_close","(J)V", (void*) SkPathGlue::close},
-    {"native_addRect","(JLandroid/graphics/RectF;I)V", (void*) SkPathGlue::addRect__RectFI},
-    {"native_addRect","(JFFFFI)V", (void*) SkPathGlue::addRect__FFFFI},
-    {"native_addOval","(JLandroid/graphics/RectF;I)V", (void*) SkPathGlue::addOval},
+    {"native_addRect","(JFFFFI)V", (void*) SkPathGlue::addRect},
+    {"native_addOval","(JFFFFI)V", (void*) SkPathGlue::addOval},
     {"native_addCircle","(JFFFI)V", (void*) SkPathGlue::addCircle},
     {"native_addArc","(JLandroid/graphics/RectF;FF)V", (void*) SkPathGlue::addArc},
     {"native_addRoundRect","(JLandroid/graphics/RectF;FFI)V", (void*) SkPathGlue::addRoundRectXY},
