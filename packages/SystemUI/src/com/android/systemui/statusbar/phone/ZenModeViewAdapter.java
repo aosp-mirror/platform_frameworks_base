@@ -16,14 +16,22 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.INotificationManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.Settings;
+import android.service.notification.Condition;
+import android.service.notification.IConditionListener;
+import android.util.ArrayMap;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,8 +42,10 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
     private final ContentResolver mResolver;
     private final Handler mHandler = new Handler();
     private final SettingsObserver mObserver;
-    private final List<ExitCondition> mExits = Arrays.asList(
-            newExit("Until you turn this off", "Until", "You turn this off"));
+    private final List<ExitCondition> mExits = new ArrayList<ExitCondition>(Arrays.asList(
+            newExit("Until you turn this off", "Until", "You turn this off", null)));
+    private final INotificationManager mNoMan;
+    private final ArrayMap<Uri, Condition> mConditions = new ArrayMap<Uri, Condition>();
 
     private Callbacks mCallbacks;
     private int mExitIndex;
@@ -45,6 +55,13 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
         mContext = context;
         mResolver = mContext.getContentResolver();
         mObserver = new SettingsObserver(mHandler);
+        mNoMan = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        try {
+            mNoMan.requestZenModeConditions(mListener, true /*requested*/);
+        } catch (RemoteException e) {
+            // noop
+        }
         mObserver.init();
         init();
     }
@@ -74,6 +91,15 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
         if (mExitIndex != 0) {
             mExitIndex = 0;
             dispatchChanged();
+        }
+    }
+
+    @Override
+    public void dispose() {
+        try {
+            mNoMan.requestZenModeConditions(mListener, false /*requested*/);
+        } catch (RemoteException e) {
+            // noop
         }
     }
 
@@ -117,13 +143,20 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
         }
         mExitIndex = i;
         dispatchChanged();
+        final Uri conditionUri = (Uri) ec.tag;
+        try {
+            mNoMan.setZenModeCondition(conditionUri);
+        } catch (RemoteException e) {
+            // noop
+        }
     }
 
-    private static ExitCondition newExit(String summary, String line1, String line2) {
+    private static ExitCondition newExit(String summary, String line1, String line2, Object tag) {
         final ExitCondition rt = new ExitCondition();
         rt.summary = summary;
         rt.line1 = line1;
         rt.line2 = line2;
+        rt.tag = tag;
         return rt;
     }
 
@@ -168,4 +201,21 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
             return v != Settings.Global.ZEN_MODE_OFF;
         }
     }
+
+    private final IConditionListener mListener = new IConditionListener.Stub() {
+        @Override
+        public void onConditionsReceived(Condition[] conditions) {
+            if (conditions == null || conditions.length == 0) return;
+            for (Condition c : conditions) {
+                mConditions.put(c.id, c);
+            }
+            for (int i = mExits.size() - 1; i > 0; i--) {
+                mExits.remove(i);
+            }
+            for (Condition c : mConditions.values()) {
+                mExits.add(newExit(c.caption, "", "", c.id));
+            }
+            dispatchChanged();
+        }
+    };
 }

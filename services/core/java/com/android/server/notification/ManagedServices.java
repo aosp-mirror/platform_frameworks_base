@@ -46,6 +46,7 @@ import android.util.SparseArray;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -66,7 +67,7 @@ abstract public class ManagedServices {
     private static final String ENABLED_SERVICES_SEPARATOR = ":";
 
     private final Context mContext;
-    private final Object mMutex;
+    protected final Object mMutex;
     private final UserProfiles mUserProfiles;
     private final SettingsObserver mSettingsObserver;
     private final Config mConfig;
@@ -102,6 +103,8 @@ abstract public class ManagedServices {
 
     abstract protected void onServiceAdded(IInterface service);
 
+    protected void onServiceRemovedLocked(ManagedServiceInfo removed) { }
+
     private ManagedServiceInfo newServiceInfo(IInterface service,
             ComponentName component, int userid, boolean isSystem, ServiceConnection connection,
             int targetSdkVersion) {
@@ -114,21 +117,24 @@ abstract public class ManagedServices {
     }
 
     public void dump(PrintWriter pw) {
-        pw.println("  All " + getCaption() + "s (" + mEnabledServicesForCurrentProfiles.size()
+        pw.println("    All " + getCaption() + "s (" + mEnabledServicesForCurrentProfiles.size()
                 + ") enabled for current profiles:");
         for (ComponentName cmpt : mEnabledServicesForCurrentProfiles) {
-            pw.println("    " + cmpt);
+            pw.println("      " + cmpt);
         }
 
-        pw.println("  Live " + getCaption() + "s (" + mServices.size() + "):");
+        pw.println("    Live " + getCaption() + "s (" + mServices.size() + "):");
         for (ManagedServiceInfo info : mServices) {
-            pw.println("    " + info.component
+            pw.println("      " + info.component
                     + " (user " + info.userid + "): " + info.service
                     + (info.isSystem?" SYSTEM":""));
         }
     }
 
     public void onPackagesChanged(boolean queryReplace, String[] pkgList) {
+        if (DEBUG) Slog.d(TAG, "onPackagesChanged queryReplace=" + queryReplace
+                + " pkgList=" + (pkgList == null ? null : Arrays.asList(pkgList))
+                + " mEnabledServicesPackageNames=" + mEnabledServicesPackageNames);
         boolean anyServicesInvolved = false;
         if (pkgList != null && (pkgList.length > 0)) {
             for (String pkgName : pkgList) {
@@ -195,7 +201,7 @@ abstract public class ManagedServices {
                     new Intent(mConfig.serviceInterface),
                     PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,
                     userId);
-
+            if (DEBUG) Slog.v(TAG, mConfig.serviceInterface + " services: " + installedServices);
             Set<ComponentName> installed = new ArraySet<ComponentName>();
             for (int i = 0, count = installedServices.size(); i < count; i++) {
                 ResolveInfo resolveInfo = installedServices.get(i);
@@ -327,7 +333,7 @@ abstract public class ManagedServices {
                     // cut old connections
                     if (DEBUG) Slog.v(TAG, "    disconnecting old " + getCaption() + ": "
                             + info.service);
-                    mServices.remove(i);
+                    removeServiceLocked(i);
                     if (info.connection != null) {
                         mContext.unbindService(info.connection);
                     }
@@ -408,7 +414,7 @@ abstract public class ManagedServices {
                 final ManagedServiceInfo info = mServices.get(i);
                 if (name.equals(info.component)
                         && info.userid == userid) {
-                    mServices.remove(i);
+                    removeServiceLocked(i);
                     if (info.connection != null) {
                         try {
                             mContext.unbindService(info.connection);
@@ -429,6 +435,7 @@ abstract public class ManagedServices {
      * @return the removed service.
      */
     private ManagedServiceInfo removeServiceImpl(IInterface service, final int userid) {
+        if (DEBUG) Slog.d(TAG, "removeServiceImpl service=" + service + " u=" + userid);
         ManagedServiceInfo serviceInfo = null;
         synchronized (mMutex) {
             final int N = mServices.size();
@@ -436,11 +443,18 @@ abstract public class ManagedServices {
                 final ManagedServiceInfo info = mServices.get(i);
                 if (info.service.asBinder() == service.asBinder()
                         && info.userid == userid) {
-                    serviceInfo = mServices.remove(i);
+                    if (DEBUG) Slog.d(TAG, "Removing active service " + info.component);
+                    serviceInfo = removeServiceLocked(i);
                 }
             }
         }
         return serviceInfo;
+    }
+
+    private ManagedServiceInfo removeServiceLocked(int i) {
+        final ManagedServiceInfo info = mServices.remove(i);
+        onServiceRemovedLocked(info);
+        return info;
     }
 
     private void checkNotNull(IInterface service) {
@@ -517,6 +531,18 @@ abstract public class ManagedServices {
             this.targetSdkVersion = targetSdkVersion;
         }
 
+        @Override
+        public String toString() {
+            return new StringBuilder("ManagedServiceInfo[")
+                    .append("component=").append(component)
+                    .append(",userid=").append(userid)
+                    .append(",isSystem=").append(isSystem)
+                    .append(",targetSdkVersion=").append(targetSdkVersion)
+                    .append(",connection=").append(connection == null ? null : "<connection>")
+                    .append(",service=").append(service)
+                    .append(']').toString();
+        }
+
         public boolean enabledAndUserMatches(int nid) {
             if (!isEnabledForCurrentProfiles()) {
                 return false;
@@ -532,6 +558,7 @@ abstract public class ManagedServices {
 
         @Override
         public void binderDied() {
+            if (DEBUG) Slog.d(TAG, "binderDied");
             // Remove the service, but don't unbind from the service. The system will bring the
             // service back up, and the onServiceConnected handler will readd the service with the
             // new binding. If this isn't a bound service, and is just a registered

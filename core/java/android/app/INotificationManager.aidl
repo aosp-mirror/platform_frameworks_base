@@ -18,13 +18,15 @@
 package android.app;
 
 import android.app.ITransientNotification;
-import android.service.notification.StatusBarNotification;
 import android.app.Notification;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.net.Uri;
 import android.service.notification.Condition;
+import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
+import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 
 /** {@hide} */
@@ -55,5 +57,7 @@ interface INotificationManager
 
     ZenModeConfig getZenModeConfig();
     boolean setZenModeConfig(in ZenModeConfig config);
-    void notifyCondition(in IConditionProvider provider, in Condition condition);
+    oneway void notifyConditions(String pkg, in IConditionProvider provider, in Condition[] conditions);
+    oneway void requestZenModeConditions(in IConditionListener callback, boolean requested);
+    oneway void setZenModeCondition(in Uri conditionId);
 }

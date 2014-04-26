@@ -16,6 +16,7 @@
 
 package android.service.notification;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,18 +30,25 @@ import java.util.Objects;
  */
 public class Condition implements Parcelable {
 
+    public static final String SCHEME = "condition";
+
+    public static final int STATE_FALSE = 0;
+    public static final int STATE_TRUE = 1;
+    public static final int STATE_UNKNOWN = 2;
+    public static final int STATE_ERROR = 3;
+
     public static final int FLAG_RELEVANT_NOW = 1 << 0;
     public static final int FLAG_RELEVANT_ALWAYS = 1 << 1;
 
     public final Uri id;
     public String caption;
-    public boolean state;
+    public int state;
     public int flags;
 
-
-    public Condition(Uri id, String caption, boolean state, int flags) {
+    public Condition(Uri id, String caption, int state, int flags) {
         if (id == null) throw new IllegalArgumentException("id is required");
         if (caption == null) throw new IllegalArgumentException("caption is required");
+        if (!isValidState(state)) throw new IllegalArgumentException("state is invalid: " + state);
         this.id = id;
         this.caption = caption;
         this.state = state;
@@ -48,17 +56,21 @@ public class Condition implements Parcelable {
     }
 
     private Condition(Parcel source) {
-        id = Uri.CREATOR.createFromParcel(source);
-        caption = source.readString();
-        state = source.readInt() == 1;
-        flags = source.readInt();
+        this((Uri)source.readParcelable(Condition.class.getClassLoader()),
+                source.readString(),
+                source.readInt(),
+                source.readInt());
+    }
+
+    private static boolean isValidState(int state) {
+        return state >= STATE_FALSE && state <= STATE_ERROR;
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(id, 0);
         dest.writeString(caption);
-        dest.writeInt(state ? 1 : 0);
+        dest.writeInt(state);
         dest.writeInt(flags);
     }
 
@@ -67,9 +79,17 @@ public class Condition implements Parcelable {
         return new StringBuilder(Condition.class.getSimpleName()).append('[')
             .append("id=").append(id)
             .append(",caption=").append(caption)
-            .append(",state=").append(state)
+            .append(",state=").append(stateToString(state))
             .append(",flags=").append(flags)
             .append(']').toString();
+    }
+
+    public static String stateToString(int state) {
+        if (state == STATE_FALSE) return "STATE_FALSE";
+        if (state == STATE_TRUE) return "STATE_TRUE";
+        if (state == STATE_UNKNOWN) return "STATE_UNKNOWN";
+        if (state == STATE_ERROR) return "STATE_ERROR";
+        throw new IllegalArgumentException("state is invalid: " + state);
     }
 
     @Override
@@ -102,6 +122,14 @@ public class Condition implements Parcelable {
         } finally {
             parcel.recycle();
         }
+    }
+
+    public static Uri.Builder newId(Context context) {
+        return new Uri.Builder().scheme(SCHEME).authority(context.getPackageName());
+    }
+
+    public static boolean isValidId(Uri id, String pkg) {
+        return id != null && id.getScheme().equals(SCHEME) && id.getAuthority().equals(pkg);
     }
 
     public static final Parcelable.Creator<Condition> CREATOR
