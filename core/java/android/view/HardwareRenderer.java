@@ -453,7 +453,7 @@ public abstract class HardwareRenderer {
      *                          has invoked. If false, the functor may be invoked
      *                          asynchronously.
      */
-    public abstract void invokeFunctor(long functor, boolean waitForCompletion);
+    abstract void invokeFunctor(long functor, boolean waitForCompletion);
 
     /**
      * Initializes the hardware renderer for the specified surface and setup the
