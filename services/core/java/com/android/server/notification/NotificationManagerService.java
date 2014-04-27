@@ -840,7 +840,7 @@ public class NotificationManagerService extends SystemService {
 
         mHandler = new WorkerHandler();
         mZenModeHelper = new ZenModeHelper(getContext(), mHandler);
-        mZenModeHelper.setCallback(new ZenModeHelper.Callback() {
+        mZenModeHelper.addCallback(new ZenModeHelper.Callback() {
             @Override
             public void onConfigChanged() {
                 savePolicyFile();

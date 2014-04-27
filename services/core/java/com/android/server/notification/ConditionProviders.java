@@ -23,6 +23,7 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.RemoteException;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.ConditionProviderService;
 import android.service.notification.IConditionListener;
@@ -51,6 +52,7 @@ public class ConditionProviders extends ManagedServices {
             UserProfiles userProfiles, ZenModeHelper zenModeHelper) {
         super(context, handler, new Object(), userProfiles);
         mZenModeHelper = zenModeHelper;
+        mZenModeHelper.addCallback(new ZenModeHelperCallback());
     }
 
     @Override
@@ -232,6 +234,23 @@ public class ConditionProviders extends ManagedServices {
                 provider.onRequestConditions(flags);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Error requesting conditions from " + info.component, e);
+            }
+        }
+    }
+
+    private class ZenModeHelperCallback extends ZenModeHelper.Callback {
+        @Override
+        void onZenModeChanged() {
+            final int mode = mZenModeHelper.getZenMode();
+            if (mode == Global.ZEN_MODE_OFF) {
+                synchronized (mMutex) {
+                    if (mCurrentConditionId != null) {
+                        if (DEBUG) Slog.d(TAG, "Zen mode off, forcing unsubscribe from "
+                                + mCurrentConditionId);
+                        unsubscribeLocked(mCurrentConditionId);
+                        mCurrentConditionId = null;
+                    }
+                }
             }
         }
     }

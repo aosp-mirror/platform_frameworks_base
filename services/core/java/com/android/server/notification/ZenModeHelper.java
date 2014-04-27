@@ -46,6 +46,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -69,8 +70,8 @@ public class ZenModeHelper {
     private final SettingsObserver mSettingsObserver;
     private final AppOpsManager mAppOps;
     private final ZenModeConfig mDefaultConfig;
+    private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
 
-    private Callback mCallback;
     private int mZenMode;
     private ZenModeConfig mConfig;
 
@@ -115,8 +116,8 @@ public class ZenModeHelper {
         return new ZenModeConfig();
     }
 
-    public void setCallback(Callback callback) {
-        mCallback = callback;
+    public void addCallback(Callback callback) {
+        mCallbacks.add(callback);
     }
 
     public boolean shouldIntercept(String pkg, Notification n) {
@@ -130,6 +131,10 @@ public class ZenModeHelper {
             return true;
         }
         return false;
+    }
+
+    public int getZenMode() {
+        return mZenMode;
     }
 
     public void setZenMode(int zenModeValue) {
@@ -161,6 +166,7 @@ public class ZenModeHelper {
         mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, AudioManager.USE_DEFAULT_STREAM_TYPE,
                 zen ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
                 exceptionPackages);
+        dispatchOnZenModeChanged();
     }
 
     public boolean allowDisable(int what, IBinder token, String pkg) {
@@ -197,12 +203,24 @@ public class ZenModeHelper {
         if (config.equals(mConfig)) return true;
         mConfig = config;
         Slog.d(TAG, "mConfig=" + mConfig);
-        if (mCallback != null) mCallback.onConfigChanged();
+        dispatchOnConfigChanged();
         final String val = Integer.toString(mConfig.hashCode());
         Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_CONFIG_ETAG, val);
         updateAlarms();
         updateZenMode();
         return true;
+    }
+
+    private void dispatchOnConfigChanged() {
+        for (Callback callback : mCallbacks) {
+            callback.onConfigChanged();
+        }
+    }
+
+    private void dispatchOnZenModeChanged() {
+        for (Callback callback : mCallbacks) {
+            callback.onZenModeChanged();
+        }
     }
 
     private boolean isCall(String pkg, Notification n) {
@@ -310,7 +328,8 @@ public class ZenModeHelper {
         }
     }
 
-    public interface Callback {
-        void onConfigChanged();
+    public static class Callback {
+        void onConfigChanged() {}
+        void onZenModeChanged() {}
     }
 }
