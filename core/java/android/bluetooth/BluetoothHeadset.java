@@ -886,6 +886,50 @@ public final class BluetoothHeadset implements BluetoothProfile {
         return false;
     }
 
+    /**
+     * enable WBS codec setting.
+     *
+     * @return true if successful
+     *         false if there was some error such as
+     *               there is no connected headset
+     * @hide
+     */
+    public boolean enableWBS() {
+        if (mService != null && isEnabled()) {
+            try {
+                return mService.enableWBS();
+            } catch (RemoteException e) {
+                Log.e(TAG, e.toString());
+            }
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return false;
+    }
+
+    /**
+     * disable WBS codec settting. It set NBS codec.
+     *
+     * @return true if successful
+     *         false if there was some error such as
+     *               there is no connected headset
+     * @hide
+     */
+    public boolean disableWBS() {
+        if (mService != null && isEnabled()) {
+            try {
+                return mService.disableWBS();
+            } catch (RemoteException e) {
+                Log.e(TAG, e.toString());
+            }
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return false;
+    }
+
     private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");
