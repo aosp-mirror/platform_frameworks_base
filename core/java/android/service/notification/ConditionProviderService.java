@@ -56,11 +56,10 @@ public abstract class ConditionProviderService extends Service {
     public static final String SERVICE_INTERFACE
             = "android.service.notification.ConditionProviderService";
 
-
-    abstract public Condition[] queryConditions(int relevance);
-    abstract public Condition[] getConditions(Uri[] conditionIds);
-    abstract public boolean subscribe(Uri conditionId);
-    abstract public boolean unsubscribe(Uri conditionId);
+    abstract public void onConnected();
+    abstract public void onRequestConditions(int relevance);
+    abstract public void onSubscribe(Uri conditionId);
+    abstract public void onUnsubscribe(Uri conditionId);
 
     private final INotificationManager getNotificationInterface() {
         if (mNoMan == null) {
@@ -70,10 +69,10 @@ public abstract class ConditionProviderService extends Service {
         return mNoMan;
     }
 
-    public final void notifyCondition(Condition condition) {
+    public final void notifyConditions(Condition[] conditions) {
         if (!isBound()) return;
         try {
-            getNotificationInterface().notifyCondition(mProvider, condition);
+            getNotificationInterface().notifyConditions(getPackageName(), mProvider, conditions);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
@@ -99,42 +98,38 @@ public abstract class ConditionProviderService extends Service {
         private final ConditionProviderService mService = ConditionProviderService.this;
 
         @Override
-        public Condition[] queryConditions(int relevance) {
+        public void onConnected() {
             try {
-                return mService.queryConditions(relevance);
+                mService.onConnected();
             } catch (Throwable t) {
-                Log.w(TAG, "Error running queryConditions", t);
-                return null;
+                Log.w(TAG, "Error running onConnected", t);
             }
         }
 
         @Override
-        public Condition[] getConditions(Uri[] conditionIds) {
+        public void onRequestConditions(int relevance) {
             try {
-                return mService.getConditions(conditionIds);
+                mService.onRequestConditions(relevance);
             } catch (Throwable t) {
-                Log.w(TAG, "Error running getConditions", t);
-                return null;
+                Log.w(TAG, "Error running onRequestConditions", t);
             }
         }
 
         @Override
-        public boolean subscribe(Uri conditionId) {
+        public void onSubscribe(Uri conditionId) {
             try {
-                return mService.subscribe(conditionId);
+                mService.onSubscribe(conditionId);
             } catch (Throwable t) {
-                Log.w(TAG, "Error running subscribe", t);
-                return false;
+                Log.w(TAG, "Error running onSubscribe", t);
             }
         }
 
         @Override
-        public boolean unsubscribe(Uri conditionId) {
+        public void onUnsubscribe(Uri conditionId) {
             try {
-                return mService.unsubscribe(conditionId);
+                mService.onUnsubscribe(conditionId);
             } catch (Throwable t) {
-                Log.w(TAG, "Error running unsubscribe", t);
-                return false;
+                Log.w(TAG, "Error running onUnsubscribe", t);
             }
         }
     }

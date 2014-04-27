@@ -20,9 +20,6 @@ import android.net.Uri;
 import android.service.notification.Condition;
 
 /** @hide */
-oneway interface IConditionProvider {
-    void onConnected();
-    void onRequestConditions(int relevance);
-    void onSubscribe(in Uri conditionId);
-    void onUnsubscribe(in Uri conditionId);
+oneway interface IConditionListener {
+    void onConditionsReceived(in Condition[] conditions);
 }

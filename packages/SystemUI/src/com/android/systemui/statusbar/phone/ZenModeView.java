@@ -212,6 +212,13 @@ public class ZenModeView extends RelativeLayout {
         }
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        if (mAdapter != null) {
+            mAdapter.dispose();
+        }
+    }
+
     public void setAutoActivate(boolean value) {
         mAutoActivate = value;
     }
@@ -396,6 +403,7 @@ public class ZenModeView extends RelativeLayout {
         void setMode(boolean mode);
         void select(ExitCondition ec);
         void init();
+        void dispose();
         void setCallbacks(Callbacks callbacks);
         ExitCondition getExitCondition(int d);
         int getExitConditionCount();
@@ -406,6 +414,7 @@ public class ZenModeView extends RelativeLayout {
             public String line1;
             public String line2;
             public String action;
+            public Object tag;
         }
 
         public interface Callbacks {

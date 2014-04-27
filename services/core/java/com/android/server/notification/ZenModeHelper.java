@@ -33,7 +33,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings.Global;
-import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.util.Slog;
 
@@ -133,6 +132,10 @@ public class ZenModeHelper {
         return false;
     }
 
+    public void setZenMode(int zenModeValue) {
+        Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, zenModeValue);
+    }
+
     public void updateZenMode() {
         final int mode = Global.getInt(mContext.getContentResolver(),
                 Global.ZEN_MODE, Global.ZEN_MODE_OFF);
@@ -200,10 +203,6 @@ public class ZenModeHelper {
         updateAlarms();
         updateZenMode();
         return true;
-    }
-
-    public void notifyCondition(Condition condition) {
-        Slog.d(TAG, "notifyCondition " + condition);
     }
 
     private boolean isCall(String pkg, Notification n) {
@@ -305,7 +304,7 @@ public class ZenModeHelper {
             if (skip) {
                 Slog.d(TAG, "Skipping zen mode update for the weekend");
             } else {
-                Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, zenModeValue);
+                ZenModeHelper.this.setZenMode(zenModeValue);
             }
             updateAlarms();
         }

@@ -58,6 +58,7 @@ import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.INotificationListener;
+import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -706,7 +707,7 @@ public class NotificationManagerService extends SystemService {
                 String pkgList[] = null;
                 boolean queryReplace = queryRemove &&
                         intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
-                if (DBG) Slog.i(TAG, "queryReplace=" + queryReplace);
+                if (DBG) Slog.i(TAG, "action=" + action + " queryReplace=" + queryReplace);
                 if (action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                 } else if (queryRestart) {
@@ -852,7 +853,7 @@ public class NotificationManagerService extends SystemService {
 
         mListeners = new NotificationListeners();
         mConditionProviders = new ConditionProviders(getContext(),
-                mHandler, mNotificationList, mUserProfiles);
+                mHandler, mUserProfiles, mZenModeHelper);
         mStatusBar = getLocalService(StatusBarManagerInternal.class);
         mStatusBar.setNotificationDelegate(mNotificationDelegate);
 
@@ -1341,9 +1342,34 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void notifyCondition(IConditionProvider provider, Condition condition) {
-            // TODO check token
-            mZenModeHelper.notifyCondition(condition);
+        public void notifyConditions(String pkg, IConditionProvider provider,
+                Condition[] conditions) {
+            final ManagedServiceInfo info = mConditionProviders.checkServiceToken(provider);
+            checkCallerIsSystemOrSameApp(pkg);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mConditionProviders.notifyConditions(pkg, info, conditions);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void requestZenModeConditions(IConditionListener callback, boolean requested) {
+            enforceSystemOrSystemUI("INotificationManager.requestZenModeConditions");
+            mConditionProviders.requestZenModeConditions(callback, requested);
+        }
+
+        @Override
+        public void setZenModeCondition(Uri conditionId) {
+            enforceSystemOrSystemUI("INotificationManager.setZenModeCondition");
+            mConditionProviders.setZenModeCondition(conditionId);
+        }
+
+        private void enforceSystemOrSystemUI(String message) {
+            if (isCallerSystem()) return;
+            getContext().enforceCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
+                    message);
         }
 
         @Override
@@ -1377,9 +1403,6 @@ public class NotificationManagerService extends SystemService {
 
     void dumpImpl(PrintWriter pw) {
         pw.println("Current Notification Manager state:");
-
-        mListeners.dump(pw);
-        mConditionProviders.dump(pw);
 
         int N;
 
@@ -1434,6 +1457,12 @@ public class NotificationManagerService extends SystemService {
 
             pw.println("\n  Zen Mode:");
             mZenModeHelper.dump(pw, "    ");
+
+            pw.println("\n  Notification listeners:");
+            mListeners.dump(pw);
+
+            pw.println("\n  Condition providers:");
+            mConditionProviders.dump(pw);
         }
     }
 
