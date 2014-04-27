@@ -69,8 +69,13 @@ public abstract class ConditionProviderService extends Service {
         return mNoMan;
     }
 
-    public final void notifyConditions(Condition[] conditions) {
-        if (!isBound()) return;
+    public final void notifyCondition(Condition condition) {
+        if (condition == null) return;
+        notifyConditions(new Condition[]{ condition });
+    }
+
+    public final void notifyConditions(Condition... conditions) {
+        if (!isBound() || conditions == null) return;
         try {
             getNotificationInterface().notifyConditions(getPackageName(), mProvider, conditions);
         } catch (android.os.RemoteException ex) {
