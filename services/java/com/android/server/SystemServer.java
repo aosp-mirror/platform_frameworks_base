@@ -59,6 +59,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.clipboard.ClipboardService;
 import com.android.server.content.ContentService;
+import com.android.server.devicepolicy.DevicePolicyManagerService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.input.InputManagerService;
@@ -107,8 +108,6 @@ public final class SystemServer {
      */
     private static final String BACKUP_MANAGER_SERVICE_CLASS =
             "com.android.server.backup.BackupManagerService$Lifecycle";
-    private static final String DEVICE_POLICY_MANAGER_SERVICE_CLASS =
-            "com.android.server.devicepolicy.DevicePolicyManagerService$Lifecycle";
     private static final String APPWIDGET_SERVICE_CLASS =
             "com.android.server.appwidget.AppWidgetService";
     private static final String PRINT_MANAGER_SERVICE_CLASS =
@@ -538,9 +537,9 @@ public final class SystemServer {
                 }
 
                 try {
-                    if (pm.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN)) {
-                        mSystemServiceManager.startService(DEVICE_POLICY_MANAGER_SERVICE_CLASS);
-                    }
+                    // Always start the Device Policy Manager, so that the API is compatible with
+                    // API8.
+                    mSystemServiceManager.startService(DevicePolicyManagerService.Lifecycle.class);
                 } catch (Throwable e) {
                     reportWtf("starting DevicePolicyService", e);
                 }
