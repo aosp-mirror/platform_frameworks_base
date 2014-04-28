@@ -47,7 +47,7 @@ import android.os.storage.StorageResultCode;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.system.ErrnoException;
-import android.system.Os
+import android.system.Os;
 import android.system.StructStat;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
