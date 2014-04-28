@@ -45,6 +45,15 @@
         android:layout_marginTop="@dimen/status_bar_height"
         android:visibility="gone" />
 
+    <com.android.keyguard.CarrierText
+        android:id="@+id/keyguard_carrier_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginLeft="8dp"
+        android:ellipsize="marquee"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
