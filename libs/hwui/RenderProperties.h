@@ -105,6 +105,17 @@ public:
         return mPrimitiveFields.mHasOverlappingRendering;
     }
 
+    void setElevation(float elevation) {
+        if (elevation != mPrimitiveFields.mElevation) {
+            mPrimitiveFields.mElevation = elevation;
+            // mMatrixOrPivotDirty not set, since matrix doesn't respect Z
+        }
+    }
+
+    float getElevation() const {
+        return mPrimitiveFields.mElevation;
+    }
+
     void setTranslationX(float translationX) {
         if (translationX != mPrimitiveFields.mTranslationX) {
             mPrimitiveFields.mTranslationX = translationX;
@@ -130,12 +141,16 @@ public:
     void setTranslationZ(float translationZ) {
         if (translationZ != mPrimitiveFields.mTranslationZ) {
             mPrimitiveFields.mTranslationZ = translationZ;
-            mPrimitiveFields.mMatrixOrPivotDirty = true;
+            // mMatrixOrPivotDirty not set, since matrix doesn't respect Z
         }
     }
 
     float getTranslationZ() const {
         return mPrimitiveFields.mTranslationZ;
+    }
+
+    float getZ() const {
+        return getElevation() + getTranslationZ();
     }
 
     void setRotation(float rotation) {
@@ -302,7 +317,8 @@ public:
     }
 
     void setLeftTopRightBottom(int left, int top, int right, int bottom) {
-        if (left != mPrimitiveFields.mLeft || top != mPrimitiveFields.mTop || right != mPrimitiveFields.mRight || bottom != mPrimitiveFields.mBottom) {
+        if (left != mPrimitiveFields.mLeft || top != mPrimitiveFields.mTop
+                || right != mPrimitiveFields.mRight || bottom != mPrimitiveFields.mBottom) {
             mPrimitiveFields.mLeft = left;
             mPrimitiveFields.mTop = top;
             mPrimitiveFields.mRight = right;
@@ -429,6 +445,7 @@ private:
         bool mProjectionReceiver;
         float mAlpha;
         bool mHasOverlappingRendering;
+        float mElevation;
         float mTranslationX, mTranslationY, mTranslationZ;
         float mRotation, mRotationX, mRotationY;
         float mScaleX, mScaleY;

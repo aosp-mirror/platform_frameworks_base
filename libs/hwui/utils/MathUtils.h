@@ -29,6 +29,10 @@ public:
     inline static bool isZero(float value) {
         return (value >= -gNonZeroEpsilon) && (value <= gNonZeroEpsilon);
     }
+
+    inline static bool isPositive(float value) {
+        return value >= gNonZeroEpsilon;
+    }
 }; // class MathUtils
 
 } /* namespace uirenderer */

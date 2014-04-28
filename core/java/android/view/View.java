@@ -3649,6 +3649,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         float tx = 0;
         float ty = 0;
         float tz = 0;
+        float elevation = 0;
         float rotation = 0;
         float rotationX = 0;
         float rotationY = 0;
@@ -3730,6 +3731,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case com.android.internal.R.styleable.View_translationZ:
                     tz = a.getDimensionPixelOffset(attr, 0);
+                    transformSet = true;
+                    break;
+                case com.android.internal.R.styleable.View_elevation:
+                    elevation = a.getDimensionPixelOffset(attr, 0);
                     transformSet = true;
                     break;
                 case com.android.internal.R.styleable.View_rotation:
@@ -4080,6 +4085,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             setTranslationX(tx);
             setTranslationY(ty);
             setTranslationZ(tz);
+            setElevation(elevation);
             setRotation(rotation);
             setRotationX(rotationX);
             setRotationY(rotationY);
@@ -10435,6 +10441,48 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         setTranslationY(y - mTop);
     }
 
+    /**
+     * The visual z position of this view, in pixels. This is equivalent to the
+     * {@link #setTranslationZ(float) translationZ} property plus the current
+     * {@link #getElevation() elevation} property.
+     *
+     * @return The visual z position of this view, in pixels.
+     */
+    @ViewDebug.ExportedProperty(category = "drawing")
+    public float getZ() {
+        return getElevation() + getTranslationZ();
+    }
+
+    /**
+     * Sets the visual z position of this view, in pixels. This is equivalent to setting the
+     * {@link #setTranslationZ(float) translationZ} property to be the difference between
+     * the x value passed in and the current {@link #getElevation() elevation} property.
+     *
+     * @param z The visual z position of this view, in pixels.
+     */
+    public void setZ(float z) {
+        setTranslationZ(z - getElevation());
+    }
+
+    @ViewDebug.ExportedProperty(category = "drawing")
+    public float getElevation() {
+        return mRenderNode.getElevation();
+    }
+
+    /**
+     * Sets the base depth location of this view.
+     *
+     * @attr ref android.R.styleable#View_elevation
+     */
+    public void setElevation(float elevation) {
+        if (elevation != getElevation()) {
+            invalidateViewProperty(true, false);
+            mRenderNode.setElevation(elevation);
+            invalidateViewProperty(false, true);
+
+            invalidateParentIfNeededAndWasQuickRejected();
+        }
+    }
 
     /**
      * The horizontal location of this view relative to its {@link #getLeft() left} position.
@@ -10502,9 +10550,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * The depth location of this view relative to its parent.
+     * The depth location of this view relative to its {@link #getElevation() elevation}.
      *
-     * @return The depth of this view relative to its parent.
+     * @return The depth of this view relative to its elevation.
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getTranslationZ() {
@@ -10512,7 +10560,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Sets the depth location of this view relative to its parent.
+     * Sets the depth location of this view relative to its {@link #getElevation() elevation}.
      *
      * @attr ref android.R.styleable#View_translationZ
      */
@@ -11184,7 +11232,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             // Damage the entire IsolatedZVolume recieving this view's shadow.
-            if (isHardwareAccelerated() && getTranslationZ() != 0) {
+            if (isHardwareAccelerated() && getZ() != 0) {
                 damageShadowReceiver();
             }
         }
@@ -11260,7 +11308,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             damageInParent();
         }
-        if (isHardwareAccelerated() && invalidateParent && getTranslationZ() != 0) {
+        if (isHardwareAccelerated() && invalidateParent && getZ() != 0) {
             damageShadowReceiver();
         }
     }

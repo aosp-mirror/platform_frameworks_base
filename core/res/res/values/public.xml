@@ -2163,6 +2163,7 @@
   <public type="attr" name="windowAllowEnterTransitionOverlap" />
   <public type="attr" name="sessionService" />
   <public type="attr" name="switchStyle" />
+  <public type="attr" name="elevation" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
