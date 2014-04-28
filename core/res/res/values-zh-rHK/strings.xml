@@ -387,6 +387,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"允許應用程式繫結至 VPN 服務的頂層介面 (不建議一般應用程式使用)。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"繫結至桌布"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"允許應用程式繫結至桌布的頂層介面 (不建議一般應用程式使用)。"</string>
+    <!-- no translation found for permlab_bindVoiceInteraction (5334852580713715068) -->
+    <skip />
+    <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
+    <skip />
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"繫結至遠端螢幕"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"允許應用程式繫結至遠端屏螢的頂層介面 (不建議一般應用程式使用)。"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"繫結至小工具服務"</string>
@@ -699,6 +703,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"允許應用程式擷取、檢查及清除通知 (包括由其他應用程式發佈的通知)。"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"繫結至通知接聽器服務"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"允許應用程式繫結至通知接聽器服務的頂層介面 (不建議一般應用程式使用)。"</string>
+    <!-- no translation found for permlab_bindConditionProviderService (1180107672332704641) -->
+    <skip />
+    <!-- no translation found for permdesc_bindConditionProviderService (1680513931165058425) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"調用流動網絡供應商提供的設定應用程式"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"允許應用程式調用流動網絡供應商提供的設定應用程式 (不建議一般應用程式使用)。"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"監聽對網絡狀況的觀察"</string>
@@ -981,7 +989,7 @@
     <string name="permlab_setAlarm" msgid="1379294556362091814">"設定鬧鐘"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"允許應用程式在安裝的鬧鐘應用程式中設定鬧鐘，某些鬧鐘應用程式可能沒有這項功能。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"新增留言"</string>
-    <string name="permdesc_addVoicemail" msgid="6604508651428252437">"允許應用程式將訊息加到您的留言信箱收件匣。"</string>
+    <string name="permdesc_addVoicemail" msgid="6604508651428252437">"允許應用程式將訊息加到您的留言信箱收件箱。"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"修改瀏覽器地理資訊的權限"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"允許應用程式修改瀏覽器的地理資訊權限。惡意應用程式可能會藉此允許將您的位置資訊任意傳送給某些網站。"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"驗證套件"</string>
@@ -1369,6 +1377,8 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"桌布"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"變更桌布"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"通知接聽器"</string>
+    <!-- no translation found for condition_provider_service_binding_label (1321343352906524564) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPN 已啟用。"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> 已啟用 VPN"</string>
     <string name="vpn_text" msgid="3011306607126450322">"輕觸即可管理網絡。"</string>

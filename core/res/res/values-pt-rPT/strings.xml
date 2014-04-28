@@ -387,6 +387,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Permite que o titular se vincule à interface de nível superior de um serviço de VPN. Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"vincular a uma imagem de fundo"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permite ao titular vincular-se à interface de nível superior de uma imagem de fundo. Nunca deverá ser necessário para aplicações normais."</string>
+    <!-- no translation found for permlab_bindVoiceInteraction (5334852580713715068) -->
+    <skip />
+    <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
+    <skip />
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"associar a um ecrã remoto"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permite ao detentor associar a interface de nível superior a um ecrã remoto. Nunca deve ser necessário para aplicações normais."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincular a um serviço de widget"</string>
@@ -699,6 +703,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permite que a aplicação obtenha, examine e limpe notificações, incluindo as que foram publicadas por outras aplicações."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vincular a um serviço de escuta de notificações"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite que o titular vincule a interface de nível superior de um serviço de escuta de notificações. Nunca deverá ser necessário para aplicações normais."</string>
+    <!-- no translation found for permlab_bindConditionProviderService (1180107672332704641) -->
+    <skip />
+    <!-- no translation found for permdesc_bindConditionProviderService (1680513931165058425) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invocar a aplicação de configuração fornecida pela operadora"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite que o titular invoque a aplicação de configuração fornecida pela operadora. Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ouvir observações sobre as condições da rede"</string>
@@ -1369,6 +1377,8 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Imagem de fundo"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Alterar imagem de fundo"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Serviço de escuta de notificações"</string>
+    <!-- no translation found for condition_provider_service_binding_label (1321343352906524564) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPN ativada"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"A VPN foi ativada pelo <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Toque para gerir a rede."</string>
