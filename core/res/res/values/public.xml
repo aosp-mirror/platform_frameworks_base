@@ -2162,6 +2162,7 @@
   <public type="attr" name="windowAllowExitTransitionOverlap" />
   <public type="attr" name="windowAllowEnterTransitionOverlap" />
   <public type="attr" name="sessionService" />
+  <public type="attr" name="switchStyle" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 

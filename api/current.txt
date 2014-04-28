@@ -1105,6 +1105,7 @@ package android {
     field public static final int switchMinWidth = 16843632; // 0x1010370
     field public static final int switchPadding = 16843633; // 0x1010371
     field public static final int switchPreferenceStyle = 16843629; // 0x101036d
+    field public static final int switchStyle = 16843851; // 0x101044b
     field public static final int switchTextAppearance = 16843630; // 0x101036e
     field public static final int switchTextOff = 16843628; // 0x101036c
     field public static final int switchTextOn = 16843627; // 0x101036b

@@ -233,7 +233,6 @@
   <java-symbol type="attr" name="searchDialogTheme" />
   <java-symbol type="attr" name="searchViewSearchIcon" />
   <java-symbol type="attr" name="stackViewStyle" />
-  <java-symbol type="attr" name="switchStyle" />
   <java-symbol type="attr" name="textAppearanceAutoCorrectionSuggestion" />
   <java-symbol type="attr" name="textAppearanceEasyCorrectSuggestion" />
   <java-symbol type="attr" name="textAppearanceMisspelledSuggestion" />
