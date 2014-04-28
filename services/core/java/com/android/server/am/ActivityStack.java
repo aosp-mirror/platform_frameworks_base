@@ -2329,7 +2329,10 @@ final class ActivityStack {
                     mStackSupervisor.moveHomeToTop();
                 }
             }
-            mService.setFocusedActivityLocked(mStackSupervisor.topRunningActivityLocked());
+            ActivityRecord top = mStackSupervisor.topRunningActivityLocked();
+            if (top != null) {
+                mService.setFocusedActivityLocked(top);
+            }
         }
     }
 
