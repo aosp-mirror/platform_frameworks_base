@@ -157,7 +157,14 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         mCameraId = cameraId;
         mDeviceListener = listener;
         mDeviceHandler = handler;
-        TAG = String.format("CameraDevice-%s-JV", mCameraId);
+
+        final int MAX_TAG_LEN = 23;
+        String tag = String.format("CameraDevice-JV-%s", mCameraId);
+        if (tag.length() > MAX_TAG_LEN) {
+            tag = tag.substring(0, MAX_TAG_LEN);
+        }
+        TAG = tag;
+
         DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     }
 
