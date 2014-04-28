@@ -314,8 +314,8 @@ public class Notification implements Parcelable
 
     /**
      * Bit to be bitwise-ored into the {@link #flags} field that should be
-     * set if you want the sound and/or vibration play each time the
-     * notification is sent, even if it has not been canceled before that.
+     * set if you would only like the sound, vibrate and ticker to be played
+     * if the notification was not already showing.
      */
     public static final int FLAG_ONLY_ALERT_ONCE    = 0x00000008;
 
