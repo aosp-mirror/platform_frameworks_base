@@ -16,24 +16,24 @@
 
 package android.os;
 
-import static libcore.io.OsConstants.AF_UNIX;
-import static libcore.io.OsConstants.SEEK_SET;
-import static libcore.io.OsConstants.SOCK_STREAM;
-import static libcore.io.OsConstants.S_ISLNK;
-import static libcore.io.OsConstants.S_ISREG;
+import static android.system.OsConstants.AF_UNIX;
+import static android.system.OsConstants.SEEK_SET;
+import static android.system.OsConstants.SOCK_STREAM;
+import static android.system.OsConstants.S_ISLNK;
+import static android.system.OsConstants.S_ISREG;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
+import android.system.StructStat;
 import android.util.Log;
 
 import dalvik.system.CloseGuard;
 
-import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
-import libcore.io.Libcore;
 import libcore.io.Memory;
-import libcore.io.OsConstants;
-import libcore.io.StructStat;
 
 import java.io.Closeable;
 import java.io.File;
@@ -261,7 +261,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      */
     public static ParcelFileDescriptor dup(FileDescriptor orig) throws IOException {
         try {
-            final FileDescriptor fd = Libcore.os.dup(orig);
+            final FileDescriptor fd = Os.dup(orig);
             return new ParcelFileDescriptor(fd);
         } catch (ErrnoException e) {
             throw e.rethrowAsIOException();
@@ -297,7 +297,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         original.setInt$(fd);
 
         try {
-            final FileDescriptor dup = Libcore.os.dup(original);
+            final FileDescriptor dup = Os.dup(original);
             return new ParcelFileDescriptor(dup);
         } catch (ErrnoException e) {
             throw e.rethrowAsIOException();
@@ -359,7 +359,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      */
     public static ParcelFileDescriptor[] createPipe() throws IOException {
         try {
-            final FileDescriptor[] fds = Libcore.os.pipe();
+            final FileDescriptor[] fds = Os.pipe();
             return new ParcelFileDescriptor[] {
                     new ParcelFileDescriptor(fds[0]),
                     new ParcelFileDescriptor(fds[1]) };
@@ -381,7 +381,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     public static ParcelFileDescriptor[] createReliablePipe() throws IOException {
         try {
             final FileDescriptor[] comm = createCommSocketPair();
-            final FileDescriptor[] fds = Libcore.os.pipe();
+            final FileDescriptor[] fds = Os.pipe();
             return new ParcelFileDescriptor[] {
                     new ParcelFileDescriptor(fds[0], comm[0]),
                     new ParcelFileDescriptor(fds[1], comm[1]) };
@@ -398,7 +398,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         try {
             final FileDescriptor fd0 = new FileDescriptor();
             final FileDescriptor fd1 = new FileDescriptor();
-            Libcore.os.socketpair(AF_UNIX, SOCK_STREAM, 0, fd0, fd1);
+            Os.socketpair(AF_UNIX, SOCK_STREAM, 0, fd0, fd1);
             return new ParcelFileDescriptor[] {
                     new ParcelFileDescriptor(fd0),
                     new ParcelFileDescriptor(fd1) };
@@ -421,7 +421,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
             final FileDescriptor[] comm = createCommSocketPair();
             final FileDescriptor fd0 = new FileDescriptor();
             final FileDescriptor fd1 = new FileDescriptor();
-            Libcore.os.socketpair(AF_UNIX, SOCK_STREAM, 0, fd0, fd1);
+            Os.socketpair(AF_UNIX, SOCK_STREAM, 0, fd0, fd1);
             return new ParcelFileDescriptor[] {
                     new ParcelFileDescriptor(fd0, comm[0]),
                     new ParcelFileDescriptor(fd1, comm[1]) };
@@ -434,7 +434,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         try {
             final FileDescriptor comm1 = new FileDescriptor();
             final FileDescriptor comm2 = new FileDescriptor();
-            Libcore.os.socketpair(AF_UNIX, SOCK_STREAM, 0, comm1, comm2);
+            Os.socketpair(AF_UNIX, SOCK_STREAM, 0, comm1, comm2);
             IoUtils.setBlocking(comm1, false);
             IoUtils.setBlocking(comm2, false);
             return new FileDescriptor[] { comm1, comm2 };
@@ -520,7 +520,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
             return mWrapped.getStatSize();
         } else {
             try {
-                final StructStat st = Libcore.os.fstat(mFd);
+                final StructStat st = Os.fstat(mFd);
                 if (S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)) {
                     return st.st_size;
                 } else {
@@ -543,7 +543,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
             return mWrapped.seekTo(pos);
         } else {
             try {
-                return Libcore.os.lseek(mFd, pos, SEEK_SET);
+                return Os.lseek(mFd, pos, SEEK_SET);
             } catch (ErrnoException e) {
                 throw e.rethrowAsIOException();
             }
@@ -695,7 +695,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
                     writePtr += len;
                 }
 
-                Libcore.os.write(mCommFd, buf, 0, writePtr);
+                Os.write(mCommFd, buf, 0, writePtr);
             } catch (ErrnoException e) {
                 // Reporting status is best-effort
                 Log.w(TAG, "Failed to report status: " + e);
@@ -712,7 +712,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
 
     private static Status readCommStatus(FileDescriptor comm, byte[] buf) {
         try {
-            final int n = Libcore.os.read(comm, buf, 0, buf.length);
+            final int n = Os.read(comm, buf, 0, buf.length);
             if (n == 0) {
                 // EOF means they're dead
                 return new Status(Status.DEAD);

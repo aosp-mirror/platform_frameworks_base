@@ -16,13 +16,13 @@
 
 package android.os;
 
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 import android.util.Log;
 import android.util.Slog;
 
-import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
-import libcore.io.Libcore;
-import libcore.io.OsConstants;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -87,7 +87,7 @@ public class FileUtils {
      */
     public static int setPermissions(String path, int mode, int uid, int gid) {
         try {
-            Libcore.os.chmod(path, mode);
+            Os.chmod(path, mode);
         } catch (ErrnoException e) {
             Slog.w(TAG, "Failed to chmod(" + path + "): " + e);
             return e.errno;
@@ -95,7 +95,7 @@ public class FileUtils {
 
         if (uid >= 0 || gid >= 0) {
             try {
-                Libcore.os.chown(path, uid, gid);
+                Os.chown(path, uid, gid);
             } catch (ErrnoException e) {
                 Slog.w(TAG, "Failed to chown(" + path + "): " + e);
                 return e.errno;
@@ -115,7 +115,7 @@ public class FileUtils {
      */
     public static int setPermissions(FileDescriptor fd, int mode, int uid, int gid) {
         try {
-            Libcore.os.fchmod(fd, mode);
+            Os.fchmod(fd, mode);
         } catch (ErrnoException e) {
             Slog.w(TAG, "Failed to fchmod(): " + e);
             return e.errno;
@@ -123,7 +123,7 @@ public class FileUtils {
 
         if (uid >= 0 || gid >= 0) {
             try {
-                Libcore.os.fchown(fd, uid, gid);
+                Os.fchown(fd, uid, gid);
             } catch (ErrnoException e) {
                 Slog.w(TAG, "Failed to fchown(): " + e);
                 return e.errno;
@@ -138,7 +138,7 @@ public class FileUtils {
      */
     public static int getUid(String path) {
         try {
-            return Libcore.os.stat(path).st_uid;
+            return Os.stat(path).st_uid;
         } catch (ErrnoException e) {
             return -1;
         }

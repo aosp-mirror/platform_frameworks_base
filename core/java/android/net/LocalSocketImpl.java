@@ -22,9 +22,9 @@ import java.io.InputStream;
 import java.io.FileDescriptor;
 import java.net.SocketOptions;
 
-import libcore.io.ErrnoException;
-import libcore.io.Libcore;
-import libcore.io.OsConstants;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 
 /**
  * Socket implementation used for android.net.LocalSocket and
@@ -248,7 +248,7 @@ class LocalSocketImpl
                     throw new IllegalStateException("unknown sockType");
             }
             try {
-                fd = Libcore.os.socket(OsConstants.AF_UNIX, osType, 0);
+                fd = Os.socket(OsConstants.AF_UNIX, osType, 0);
                 mFdCreatedInternally = true;
             } catch (ErrnoException e) {
                 e.rethrowAsIOException();
@@ -268,7 +268,7 @@ class LocalSocketImpl
                 return;
             }
             try {
-                Libcore.os.close(fd);
+                Os.close(fd);
             } catch (ErrnoException e) {
                 e.rethrowAsIOException();
             }

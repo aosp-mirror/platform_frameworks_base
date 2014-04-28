@@ -23,13 +23,13 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+import static android.system.OsConstants.S_IRWXU;
+import static android.system.OsConstants.S_IRGRP;
+import static android.system.OsConstants.S_IXGRP;
+import static android.system.OsConstants.S_IROTH;
+import static android.system.OsConstants.S_IXOTH;
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.ArrayUtils.removeInt;
-import static libcore.io.OsConstants.S_IRWXU;
-import static libcore.io.OsConstants.S_IRGRP;
-import static libcore.io.OsConstants.S_IXGRP;
-import static libcore.io.OsConstants.S_IROTH;
-import static libcore.io.OsConstants.S_IXOTH;
 
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
@@ -119,6 +119,9 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.security.KeyStore;
 import android.security.SystemKeyStore;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.StructStat;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -157,10 +160,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
-import libcore.io.Libcore;
-import libcore.io.StructStat;
 
 import com.android.internal.R;
 import com.android.server.storage.DeviceStorageMonitorInternal;
@@ -4566,7 +4566,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (dataPath.exists()) {
                 int currentUid = 0;
                 try {
-                    StructStat stat = Libcore.os.stat(dataPath.getPath());
+                    StructStat stat = Os.stat(dataPath.getPath());
                     currentUid = stat.st_uid;
                 } catch (ErrnoException e) {
                     Slog.e(TAG, "Couldn't stat path " + dataPath.getPath(), e);
@@ -5290,8 +5290,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             try {
-                Libcore.os.chmod(nativeLibraryDir.getPath(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH
-                        | S_IXOTH);
+                Os.chmod(nativeLibraryDir.getPath(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
             } catch (ErrnoException e) {
                 throw new IOException("Cannot chmod native library directory "
                         + nativeLibraryDir.getPath(), e);

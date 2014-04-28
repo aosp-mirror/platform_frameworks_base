@@ -20,15 +20,14 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.ParcelFileDescriptor;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import libcore.io.ErrnoException;
-import libcore.io.Libcore;
 
 /**
  * Global constant definitions et cetera related to the full-backup-to-fd
@@ -150,7 +149,7 @@ public class FullBackup {
             try {
                 // explicitly prevent emplacement of files accessible by outside apps
                 mode &= 0700;
-                Libcore.os.chmod(outFile.getPath(), (int)mode);
+                Os.chmod(outFile.getPath(), (int)mode);
             } catch (ErrnoException e) {
                 e.rethrowAsIOException();
             }

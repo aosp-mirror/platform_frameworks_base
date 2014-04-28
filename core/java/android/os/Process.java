@@ -18,6 +18,7 @@ package android.os;
 
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
+import android.system.Os;
 import android.util.Log;
 import com.android.internal.os.Zygote;
 import java.io.BufferedWriter;
@@ -28,7 +29,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import libcore.io.Libcore;
 
 /*package*/ class ZygoteStartFailedEx extends Exception {
     /**
@@ -741,7 +741,7 @@ public class Process {
      * {@link #killProcess} and {@link #sendSignal}.
      */
     public static final int myPid() {
-        return Libcore.os.getpid();
+        return Os.getpid();
     }
 
     /**
@@ -749,7 +749,7 @@ public class Process {
      * @hide
      */
     public static final int myPpid() {
-        return Libcore.os.getppid();
+        return Os.getppid();
     }
 
     /**
@@ -757,7 +757,7 @@ public class Process {
      * {@link #setThreadPriority(int, int)}.
      */
     public static final int myTid() {
-        return Libcore.os.gettid();
+        return Os.gettid();
     }
 
     /**
@@ -767,7 +767,7 @@ public class Process {
      * a uid identifies a specific app sandbox in a specific user.
      */
     public static final int myUid() {
-        return Libcore.os.getuid();
+        return Os.getuid();
     }
 
     /**
