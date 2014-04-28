@@ -21,11 +21,11 @@ import static android.drm.DrmManagerClient.INVALID_SESSION;
 import static libcore.io.OsConstants.SEEK_SET;
 
 import android.os.ParcelFileDescriptor;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Log;
 
-import libcore.io.ErrnoException;
 import libcore.io.IoBridge;
-import libcore.io.Libcore;
 import libcore.io.Streams;
 
 import java.io.FileDescriptor;
@@ -69,7 +69,7 @@ public class DrmOutputStream extends OutputStream {
         final DrmConvertedStatus status = mClient.closeConvertSession(mSessionId);
         if (status.statusCode == STATUS_OK) {
             try {
-                Libcore.os.lseek(mFd, status.offset, SEEK_SET);
+                Os.lseek(mFd, status.offset, SEEK_SET);
             } catch (ErrnoException e) {
                 e.rethrowAsIOException();
             }

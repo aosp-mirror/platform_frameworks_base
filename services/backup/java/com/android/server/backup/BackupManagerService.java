@@ -74,6 +74,8 @@ import android.os.WorkSource;
 import android.os.Environment.UserEnvironment;
 import android.os.storage.IMountService;
 import android.provider.Settings;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -141,9 +143,6 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import libcore.io.ErrnoException;
-import libcore.io.Libcore;
 
 public class BackupManagerService extends IBackupManager.Stub {
 
@@ -2471,7 +2470,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 // operations any more during this pass).
                 Slog.w(TAG, "Unable to save widget state for " + pkgName);
                 try {
-                    Libcore.os.ftruncate(fd, filepos);
+                    Os.ftruncate(fd, filepos);
                 } catch (ErrnoException ee) {
                     Slog.w(TAG, "Unable to roll back!");
                 }
