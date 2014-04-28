@@ -16,7 +16,7 @@
 
 package android.content.pm;
 
-import static libcore.io.OsConstants.*;
+import static android.system.OsConstants.*;
 
 import com.android.frameworks.coretests.R;
 import com.android.internal.content.PackageHelper;
@@ -46,6 +46,9 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageResultCode;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.system.ErrnoException;
+import android.system.Os
+import android.system.StructStat;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -59,10 +62,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import libcore.io.ErrnoException;
-import libcore.io.Libcore;
-import libcore.io.StructStat;
 
 public class PackageManagerTests extends AndroidTestCase {
     private static final boolean localLOGV = true;
@@ -501,7 +500,7 @@ public class PackageManagerTests extends AndroidTestCase {
         final StructStat stat;
 
         try {
-            stat = Libcore.os.lstat(path);
+            stat = Os.lstat(path);
         } catch (ErrnoException e) {
             throw new AssertionError(reason + "\n" + "Got: " + path + " does not exist");
         }

@@ -29,6 +29,10 @@ import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
+import android.system.StructStat;
 import android.util.Log;
 
 import java.io.File;
@@ -37,11 +41,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
-
-import libcore.io.ErrnoException;
-import libcore.io.Libcore;
-import libcore.io.OsConstants;
-import libcore.io.StructStat;
 
 /**
  * Provides the central interface between an
@@ -191,7 +190,7 @@ public abstract class BackupAgent extends ContextWrapper {
      * the key supplied as part of the entity.  Writing an entity with a negative
      * data size instructs the transport to delete whatever entity currently exists
      * under that key from the remote data set.
-     * 
+     *
      * @param oldState An open, read-only ParcelFileDescriptor pointing to the
      *            last backup state provided by the application. May be
      *            <code>null</code>, in which case no prior state is being
@@ -222,7 +221,7 @@ public abstract class BackupAgent extends ContextWrapper {
      * onRestore() throws an exception, the OS will assume that the
      * application's data may now be in an incoherent state, and will clear it
      * before proceeding.
-     * 
+     *
      * @param data A structured wrapper around an open, read-only
      *            file descriptor pointing to a full snapshot of the
      *            application's data.  The application should consume every
@@ -412,7 +411,7 @@ public abstract class BackupAgent extends ContextWrapper {
                     }
 
                     // If it's a directory, enqueue its contents for scanning.
-                    StructStat stat = Libcore.os.lstat(filePath);
+                    StructStat stat = Os.lstat(filePath);
                     if (OsConstants.S_ISLNK(stat.st_mode)) {
                         if (DEBUG) Log.i(TAG, "Symlink (skipping)!: " + file);
                         continue;
