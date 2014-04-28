@@ -174,10 +174,10 @@ bool SpotShadow::ccw(double ax, double ay, double bx, double by,
 int SpotShadow::intersection(const Vector2* poly1, int poly1Length,
         Vector2* poly2, int poly2Length) {
 #if DEBUG_SHADOW
-    if (!isClockwise(poly1, poly1Length)) {
+    if (!ShadowTessellator::isClockwise(poly1, poly1Length)) {
         ALOGW("Poly1 is not clockwise! Intersection is wrong!");
     }
-    if (!isClockwise(poly2, poly2Length)) {
+    if (!ShadowTessellator::isClockwise(poly2, poly2Length)) {
         ALOGW("Poly2 is not clockwise! Intersection is wrong!");
     }
 #endif
@@ -407,30 +407,9 @@ void SpotShadow::makeClockwise(Vector2* polygon, int len) {
     if (polygon == 0  || len == 0) {
         return;
     }
-    if (!isClockwise(polygon, len)) {
+    if (!ShadowTessellator::isClockwise(polygon, len)) {
         reverse(polygon, len);
     }
-}
-
-/**
- * Test whether the polygon is order in clockwise.
- *
- * @param polygon the polygon as a Vector2 array
- * @param len the number of points of the polygon
- */
-bool SpotShadow::isClockwise(const Vector2* polygon, int len) {
-    double sum = 0;
-    double p1x = polygon[len - 1].x;
-    double p1y = polygon[len - 1].y;
-    for (int i = 0; i < len; i++) {
-
-        double p2x = polygon[i].x;
-        double p2y = polygon[i].y;
-        sum += p1x * p2y - p2x * p1y;
-        p1x = p2x;
-        p1y = p2y;
-    }
-    return sum < 0;
 }
 
 /**
