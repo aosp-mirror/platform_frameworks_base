@@ -2718,8 +2718,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         mHeadsUpNotificationDecay = res.getInteger(R.integer.heads_up_notification_decay);
-        mRowMinHeight =  res.getDimensionPixelSize(R.dimen.notification_row_min_height);
-        mRowMaxHeight =  res.getDimensionPixelSize(R.dimen.notification_row_max_height);
+        mRowMinHeight =  res.getDimensionPixelSize(R.dimen.notification_min_height);
+        mRowMaxHeight =  res.getDimensionPixelSize(R.dimen.notification_max_height);
 
         mKeyguardMaxNotificationCount = res.getInteger(R.integer.keyguard_max_notification_count);
 

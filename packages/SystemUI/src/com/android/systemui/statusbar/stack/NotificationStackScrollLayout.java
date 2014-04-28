@@ -145,13 +145,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         mSidePaddings = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_side_padding);
         mCollapsedSize = context.getResources()
-                .getDimensionPixelSize(R.dimen.notification_row_min_height);
+                .getDimensionPixelSize(R.dimen.notification_min_height);
         mBottomStackPeekSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.bottom_stack_peek_amount);
         mEmptyMarginBottom = context.getResources().getDimensionPixelSize(
                 R.dimen.notification_stack_margin_bottom);
-        // currently the padding is in the elements themself
-        mPaddingBetweenElements = 0;
+        mPaddingBetweenElements = context.getResources()
+                .getDimensionPixelSize(R.dimen.notification_padding);
         mStackScrollAlgorithm = new StackScrollAlgorithm(context);
     }
 

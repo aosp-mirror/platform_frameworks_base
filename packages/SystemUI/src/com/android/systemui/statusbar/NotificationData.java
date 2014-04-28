@@ -33,7 +33,6 @@ public class NotificationData {
         public StatusBarNotification notification;
         public StatusBarIconView icon;
         public ExpandableNotificationRow row; // the outer expanded view
-        public View content; // takes the click events and sends the PendingIntent
         public View expanded; // the inflated RemoteViews
         public View expandedPublic; // for insecure lockscreens
         public ImageView largeIcon;

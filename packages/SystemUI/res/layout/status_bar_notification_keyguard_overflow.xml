@@ -19,34 +19,27 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:focusable="true"
+    android:clickable="true"
+    android:background="@*android:drawable/notification_quantum_bg_dim"
     >
-    <com.android.systemui.statusbar.LatestItemView
-        android:id="@+id/container"
+    <TextView
+        android:id="@+id/more_text"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginTop="@dimen/notification_divider_height"
-        android:focusable="true"
-        android:clickable="true"
-        android:background="@*android:drawable/notification_quantum_bg_dim"
-        >
-        <TextView
-            android:id="@+id/more_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:gravity="center_horizontal"
-            android:textColor="@color/keyguard_overflow_content_color"
-            android:textAllCaps="true"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            />
-        <com.android.systemui.statusbar.NotificationOverflowIconsView
-            android:id="@+id/overflow_icons_view"
-            android:layout_gravity="end|center_vertical"
-            android:gravity="end"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            />
-    </com.android.systemui.statusbar.LatestItemView>
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:gravity="center_horizontal"
+        android:textColor="@color/keyguard_overflow_content_color"
+        android:textAllCaps="true"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        />
+    <com.android.systemui.statusbar.NotificationOverflowIconsView
+        android:id="@+id/overflow_icons_view"
+        android:layout_gravity="end|center_vertical"
+        android:gravity="end"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        />
 </com.android.systemui.statusbar.NotificationOverflowContainer>
