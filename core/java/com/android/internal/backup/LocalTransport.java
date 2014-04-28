@@ -26,6 +26,9 @@ import android.content.pm.PackageInfo;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.SELinux;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.StructStat;
 import android.util.Log;
 
 import com.android.org.bouncycastle.util.encoders.Base64;
@@ -37,10 +40,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import libcore.io.ErrnoException;
-import libcore.io.Libcore;
-import libcore.io.StructStat;
-import static libcore.io.OsConstants.*;
+import static android.system.OsConstants.*;
 
 /**
  * Backup transport for stashing stuff into a known location on disk, and
@@ -109,7 +109,7 @@ public class LocalTransport extends IBackupTransport.Stub {
     public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor data) {
         if (DEBUG) {
             try {
-            StructStat ss = Libcore.os.fstat(data.getFileDescriptor());
+            StructStat ss = Os.fstat(data.getFileDescriptor());
             Log.v(TAG, "performBackup() pkg=" + packageInfo.packageName
                     + " size=" + ss.st_size);
             } catch (ErrnoException e) {
@@ -152,7 +152,7 @@ public class LocalTransport extends IBackupTransport.Stub {
                     changeSet.readEntityData(buf, 0, dataSize);
                     if (DEBUG) {
                         try {
-                            long cur = Libcore.os.lseek(data.getFileDescriptor(), 0, SEEK_CUR);
+                            long cur = Os.lseek(data.getFileDescriptor(), 0, SEEK_CUR);
                             Log.v(TAG, "  read entity data; new pos=" + cur);
                         }
                         catch (ErrnoException e) {
