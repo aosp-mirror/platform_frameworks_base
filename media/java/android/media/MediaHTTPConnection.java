@@ -28,8 +28,11 @@ import java.net.CookieManager;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.NoRouteToHostException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static android.media.MediaPlayer.MEDIA_ERROR_UNSUPPORTED;
 
 /** @hide */
 public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
@@ -42,6 +45,12 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     private HttpURLConnection mConnection = null;
     private long mTotalSize = -1;
     private InputStream mInputStream = null;
+
+    private boolean mAllowCrossDomainRedirect = true;
+
+    // from com.squareup.okhttp.internal.http
+    private final static int HTTP_TEMP_REDIRECT = 307;
+    private final static int MAX_REDIRECTS = 20;
 
     public MediaHTTPConnection() {
         if (CookieHandler.getDefault() == null) {
@@ -59,6 +68,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
 
         try {
             disconnect();
+            mAllowCrossDomainRedirect = true;
             mURL = new URL(uri);
             mHeaders = convertHeaderStringToMap(headers);
         } catch (MalformedURLException e) {
@@ -66,6 +76,25 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
         }
 
         return native_getIMemory();
+    }
+
+    private boolean parseBoolean(String val) {
+        try {
+            return Long.parseLong(val) != 0;
+        } catch (NumberFormatException e) {
+            return "true".equalsIgnoreCase(val) ||
+                "yes".equalsIgnoreCase(val);
+        }
+    }
+
+    /* returns true iff header is internal */
+    private boolean filterOutInternalHeaders(String key, String val) {
+        if ("android-allow-cross-domain-redirect".equalsIgnoreCase(key)) {
+            mAllowCrossDomainRedirect = parseBoolean(val);
+        } else {
+            return false;
+        }
+        return true;
     }
 
     private Map<String, String> convertHeaderStringToMap(String headers) {
@@ -78,7 +107,9 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
                 String key = pair.substring(0, colonPos);
                 String val = pair.substring(colonPos + 1);
 
-                map.put(key, val);
+                if (!filterOutInternalHeaders(key, val)) {
+                    map.put(key, val);
+                }
             }
         }
 
@@ -107,23 +138,74 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
         teardownConnection();
 
         try {
-            mConnection = (HttpURLConnection)mURL.openConnection();
+            int response;
+            int redirectCount = 0;
 
-            if (mHeaders != null) {
-                for (Map.Entry<String, String> entry : mHeaders.entrySet()) {
+            URL url = mURL;
+            while (true) {
+                mConnection = (HttpURLConnection)url.openConnection();
+                // handle redirects ourselves if we do not allow cross-domain redirect
+                mConnection.setInstanceFollowRedirects(mAllowCrossDomainRedirect);
+
+                if (mHeaders != null) {
+                    for (Map.Entry<String, String> entry : mHeaders.entrySet()) {
+                        mConnection.setRequestProperty(
+                                entry.getKey(), entry.getValue());
+                    }
+                }
+
+                if (offset > 0) {
                     mConnection.setRequestProperty(
-                            entry.getKey(), entry.getValue());
+                            "Range", "bytes=" + offset + "-");
+                }
+
+                response = mConnection.getResponseCode();
+                if (response != HttpURLConnection.HTTP_MULT_CHOICE &&
+                        response != HttpURLConnection.HTTP_MOVED_PERM &&
+                        response != HttpURLConnection.HTTP_MOVED_TEMP &&
+                        response != HttpURLConnection.HTTP_SEE_OTHER &&
+                        response != HTTP_TEMP_REDIRECT) {
+                    // not a redirect, or redirect handled by HttpURLConnection
+                    break;
+                }
+
+                if (++redirectCount > MAX_REDIRECTS) {
+                    throw new NoRouteToHostException("Too many redirects: " + redirectCount);
+                }
+
+                String method = mConnection.getRequestMethod();
+                if (response == HTTP_TEMP_REDIRECT &&
+                        !method.equals("GET") && !method.equals("HEAD")) {
+                    // "If the 307 status code is received in response to a
+                    // request other than GET or HEAD, the user agent MUST NOT
+                    // automatically redirect the request"
+                    throw new NoRouteToHostException("Invalid redirect");
+                }
+                String location = mConnection.getHeaderField("Location");
+                if (location == null) {
+                    throw new NoRouteToHostException("Invalid redirect");
+                }
+                url = new URL(mURL /* TRICKY: don't use url! */, location);
+                if (!url.getProtocol().equals("https") &&
+                        !url.getProtocol().equals("http")) {
+                    throw new NoRouteToHostException("Unsupported protocol redirect");
+                }
+                boolean sameHost = mURL.getHost().equals(url.getHost());
+                if (!sameHost) {
+                    throw new NoRouteToHostException("Cross-domain redirects are disallowed");
+                }
+
+                if (response != HTTP_TEMP_REDIRECT) {
+                    // update effective URL, unless it is a Temporary Redirect
+                    mURL = url;
                 }
             }
 
-            if (offset > 0) {
-                mConnection.setRequestProperty(
-                        "Range", "bytes=" + offset + "-");
+            if (mAllowCrossDomainRedirect) {
+                // remember the current, potentially redirected URL if redirects
+                // were handled by HttpURLConnection
+                mURL = mConnection.getURL();
             }
-
-            int response = mConnection.getResponseCode();
-            // remember the current, possibly redirected URL
-            mURL = mConnection.getURL();
 
             if (response == HttpURLConnection.HTTP_PARTIAL) {
                 // Partial content, we cannot just use getContentLength
@@ -207,6 +289,9 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
             }
 
             return n;
+        } catch (NoRouteToHostException e) {
+            Log.w(TAG, "readAt " + offset + " / " + size + " => " + e);
+            return MEDIA_ERROR_UNSUPPORTED;
         } catch (IOException e) {
             if (VERBOSE) {
                 Log.d(TAG, "readAt " + offset + " / " + size + " => -1");
