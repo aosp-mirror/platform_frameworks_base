@@ -219,7 +219,7 @@ public class DdmHandleHeap extends ChunkHandler {
 
         if (false)
             Log.d("ddm-heap", "Heap GC request");
-        System.gc();
+        Runtime.getRuntime().gc();
 
         return null;        // empty response
     }
