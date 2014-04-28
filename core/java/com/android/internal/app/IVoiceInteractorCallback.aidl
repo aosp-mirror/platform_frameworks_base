@@ -26,6 +26,6 @@ import com.android.internal.app.IVoiceInteractorRequest;
 oneway interface IVoiceInteractorCallback {
     void deliverConfirmationResult(IVoiceInteractorRequest request, boolean confirmed,
             in Bundle result);
-    void deliverCommandResult(IVoiceInteractorRequest request, in Bundle result);
+    void deliverCommandResult(IVoiceInteractorRequest request, boolean complete, in Bundle result);
     void deliverCancel(IVoiceInteractorRequest request);
 }

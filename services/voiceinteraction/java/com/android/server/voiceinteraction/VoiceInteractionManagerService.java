@@ -16,14 +16,18 @@
 
 package com.android.server.voiceinteraction;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionService;
@@ -134,9 +138,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public int startVoiceActivity(Intent intent, String resolvedType,
-                IVoiceInteractionService service,
-                IVoiceInteractionSession session, IVoiceInteractor interactor) {
+        public void startVoiceActivity(Intent intent, String resolvedType,
+                IVoiceInteractionService service, Bundle args) {
             synchronized (this) {
                 if (mImpl == null || service.asBinder() != mImpl.mService.asBinder()) {
                     throw new SecurityException(
@@ -146,8 +149,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.startVoiceActivityLocked(callingPid, callingUid,
-                            intent, resolvedType, session, interactor);
+                    mImpl.startVoiceActivityLocked(callingPid, callingUid,
+                            intent, resolvedType, args);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -155,8 +158,43 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
+        public int deliverNewSession(IBinder token, IVoiceInteractionSession session,
+                IVoiceInteractor interactor) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "deliverNewSession without running voice interaction service");
+                    return ActivityManager.START_CANCELED;
+                }
+                final int callingPid = Binder.getCallingPid();
+                final int callingUid = Binder.getCallingUid();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    return mImpl.deliverNewSessionLocked(callingPid, callingUid, token, session,
+                            interactor);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+
+        }
+
+        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+            if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
+                    != PackageManager.PERMISSION_GRANTED) {
+                pw.println("Permission Denial: can't dump PowerManager from from pid="
+                        + Binder.getCallingPid()
+                        + ", uid=" + Binder.getCallingUid());
+                return;
+            }
+            synchronized (this) {
+                pw.println("VOICE INTERACTION MANAGER (dumpsys voiceinteraction)\n");
+                if (mImpl == null) {
+                    pw.println("  (No active implementation)");
+                    return;
+                }
+                mImpl.dumpLocked(fd, pw, args);
+            }
         }
 
         class SettingsObserver extends ContentObserver {

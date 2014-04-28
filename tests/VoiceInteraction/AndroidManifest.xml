@@ -12,9 +12,15 @@
         <service android:name="MainInteractionService"
                 android:permission="android.permission.BIND_VOICE_INTERACTION"
                 android:process=":interactor">
+            <meta-data android:name="android.voice_interaction"
+                       android:resource="@xml/interaction_service" />
             <intent-filter>
                 <action android:name="android.service.voice.VoiceInteractionService" />
             </intent-filter>
+        </service>
+        <service android:name="MainInteractionSessionService"
+                android:permission="android.permission.BIND_VOICE_INTERACTION"
+                android:process=":session">
         </service>
         <activity android:name="TestInteractionActivity" android:label="Voice Interaction Target">
             <intent-filter>
