@@ -957,6 +957,14 @@ final class ActivityStack {
         next.idle = false;
         next.results = null;
         next.newIntents = null;
+
+        if (next.isHomeActivity() && next.isNotResolverActivity()) {
+            ProcessRecord app = next.task.mActivities.get(0).app;
+            if (app != null && app != mService.mHomeProcess) {
+                mService.mHomeProcess = app;
+            }
+        }
+
         if (next.nowVisible) {
             // We won't get a call to reportActivityVisibleLocked() so dismiss lockscreen now.
             mStackSupervisor.dismissKeyguard();
