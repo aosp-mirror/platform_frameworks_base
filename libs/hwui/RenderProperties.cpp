@@ -37,6 +37,7 @@ RenderProperties::PrimitiveFields::PrimitiveFields()
         , mProjectionReceiver(false)
         , mAlpha(1)
         , mHasOverlappingRendering(true)
+        , mElevation(0)
         , mTranslationX(0), mTranslationY(0), mTranslationZ(0)
         , mRotation(0), mRotationX(0), mRotationY(0)
         , mScaleX(1), mScaleY(1)
@@ -100,7 +101,7 @@ void RenderProperties::debugOutputProperties(const int level) const {
     if (hasTransformMatrix()) {
         if (isTransformTranslateOnly()) {
             ALOGD("%*sTranslate %.2f, %.2f, %.2f",
-                    level * 2, "", mPrimitiveFields.mTranslationX, mPrimitiveFields.mTranslationY, mPrimitiveFields.mTranslationZ);
+                    level * 2, "", getTranslationX(), getTranslationY(), getZ());
         } else {
             ALOGD("%*sConcatMatrix %p: " SK_MATRIX_STRING,
                     level * 2, "", mComputedFields.mTransformMatrix, SK_MATRIX_ARGS(mComputedFields.mTransformMatrix));

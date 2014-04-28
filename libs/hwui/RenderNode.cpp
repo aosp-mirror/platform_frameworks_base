@@ -219,11 +219,11 @@ void RenderNode::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform)
         matrix.multiply(anim);
     }
 
-    bool applyTranslationZ = true3dTransform && !MathUtils::isZero(properties().getTranslationZ());
+    bool applyTranslationZ = true3dTransform && !MathUtils::isZero(properties().getZ());
     if (properties().hasTransformMatrix() || applyTranslationZ) {
         if (properties().isTransformTranslateOnly()) {
             matrix.translate(properties().getTranslationX(), properties().getTranslationY(),
-                    true3dTransform ? properties().getTranslationZ() : 0.0f);
+                    true3dTransform ? properties().getZ() : 0.0f);
         } else {
             if (!true3dTransform) {
                 matrix.multiply(*properties().getTransformMatrix());
@@ -232,7 +232,7 @@ void RenderNode::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform)
                 true3dMat.loadTranslate(
                         properties().getPivotX() + properties().getTranslationX(),
                         properties().getPivotY() + properties().getTranslationY(),
-                        properties().getTranslationZ());
+                        properties().getZ());
                 true3dMat.rotate(properties().getRotationX(), 1, 0, 0);
                 true3dMat.rotate(properties().getRotationY(), 0, 1, 0);
                 true3dMat.rotate(properties().getRotation(), 0, 0, 1);
@@ -344,7 +344,9 @@ private:
 
 void RenderNode::deferNodeTree(DeferStateStruct& deferStruct) {
     DeferOperationHandler handler(deferStruct, 0);
-    if (properties().getTranslationZ() > 0.0f) issueDrawShadowOperation(Matrix4::identity(), handler);
+    if (MathUtils::isPositive(properties().getZ())) {
+        issueDrawShadowOperation(Matrix4::identity(), handler);
+    }
     issueOperations<DeferOperationHandler>(deferStruct.mRenderer, handler);
 }
 
@@ -380,7 +382,9 @@ private:
 
 void RenderNode::replayNodeTree(ReplayStateStruct& replayStruct) {
     ReplayOperationHandler handler(replayStruct, 0);
-    if (properties().getTranslationZ() > 0.0f) issueDrawShadowOperation(Matrix4::identity(), handler);
+    if (MathUtils::isPositive(properties().getZ())) {
+        issueDrawShadowOperation(Matrix4::identity(), handler);
+    }
     issueOperations<ReplayOperationHandler>(replayStruct.mRenderer, handler);
 }
 
@@ -395,7 +399,7 @@ void RenderNode::buildZSortedChildList(Vector<ZDrawDisplayListOpPair>& zTranslat
     for (unsigned int i = 0; i < mDisplayListData->children().size(); i++) {
         DrawDisplayListOp* childOp = mDisplayListData->children()[i];
         RenderNode* child = childOp->mDisplayList;
-        float childZ = child->properties().getTranslationZ();
+        float childZ = child->properties().getZ();
 
         if (!MathUtils::isZero(childZ)) {
             zTranslatedNodes.add(ZDrawDisplayListOpPair(childZ, childOp));
