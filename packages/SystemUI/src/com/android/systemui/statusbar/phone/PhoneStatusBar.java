@@ -1622,9 +1622,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         return (mDisabled & StatusBarManager.DISABLE_EXPAND) == 0;
     }
 
-    void makeExpandedVisible() {
+    void makeExpandedVisible(boolean force) {
         if (SPEW) Log.d(TAG, "Make expanded visible: expanded visible=" + mExpandedVisible);
-        if (mExpandedVisible || !panelsEnabled()) {
+        if (!force && (mExpandedVisible || !panelsEnabled())) {
             return;
         }
 
@@ -3003,8 +3003,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     private void instantExpandNotificationsPanel() {
 
-        // Make our window larger.
-        mStatusBarWindowManager.setStatusBarExpanded(true);
+        // Make our window larger and the panel visible.
+        makeExpandedVisible(true);
+        mNotificationPanel.setVisibility(View.VISIBLE);
 
         // Wait for window manager to pickup the change, so we know the maximum height of the panel
         // then.
