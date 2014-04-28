@@ -1859,24 +1859,28 @@ public final class ActivityManagerService extends ActivityManagerNative
         @Override
         public boolean onPackageChanged(String packageName, int uid, String[] components) {
             final PackageManager pm = mContext.getPackageManager();
-            final ArrayList<TaskRecord> recentTasks = new ArrayList<TaskRecord>();
-            final ArrayList<TaskRecord> tasksToRemove = new ArrayList<TaskRecord>();
+            final ArrayList<Pair<Intent, Integer>> recentTaskIntents =
+                    new ArrayList<Pair<Intent, Integer>>();
+            final ArrayList<Integer> tasksToRemove = new ArrayList<Integer>();
             // Copy the list of recent tasks so that we don't hold onto the lock on
             // ActivityManagerService for long periods while checking if components exist.
             synchronized (ActivityManagerService.this) {
-                recentTasks.addAll(mRecentTasks);
+                for (int i = mRecentTasks.size() - 1; i >= 0; i--) {
+                    TaskRecord tr = mRecentTasks.get(i);
+                    recentTaskIntents.add(new Pair<Intent, Integer>(tr.intent, tr.taskId));
+                }
             }
             // Check the recent tasks and filter out all tasks with components that no longer exist.
             Intent tmpI = new Intent();
-            for (int i = recentTasks.size() - 1; i >= 0; i--) {
-                TaskRecord tr = recentTasks.get(i);
-                ComponentName cn = tr.intent.getComponent();
+            for (int i = recentTaskIntents.size() - 1; i >= 0; i--) {
+                Pair<Intent, Integer> p = recentTaskIntents.get(i);
+                ComponentName cn = p.first.getComponent();
                 if (cn != null && cn.getPackageName().equals(packageName)) {
                     try {
                         // Add the task to the list to remove if the component no longer exists
                         tmpI.setComponent(cn);
                         if (pm.queryIntentActivities(tmpI, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
-                            tasksToRemove.add(tr);
+                            tasksToRemove.add(p.second);
                         }
                     } catch (Exception e) {}
                 }
@@ -1884,9 +1888,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Prune all the tasks with removed components from the list of recent tasks
             synchronized (ActivityManagerService.this) {
                 for (int i = tasksToRemove.size() - 1; i >= 0; i--) {
-                    TaskRecord tr = tasksToRemove.get(i);
-                    // Remove the task but don't kill the process
-                    removeTaskByIdLocked(tr.taskId, 0);
+                    // Remove the task but don't kill the process (since other components in that
+                    // package may still be running and in the background)
+                    removeTaskByIdLocked(tasksToRemove.get(i), 0);
                 }
             }
             return true;
