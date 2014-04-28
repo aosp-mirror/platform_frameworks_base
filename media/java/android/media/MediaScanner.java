@@ -44,6 +44,8 @@ import android.provider.Settings;
 import android.sax.Element;
 import android.sax.ElementListener;
 import android.sax.RootElement;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Xml;
@@ -58,9 +60,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
-
-import libcore.io.ErrnoException;
-import libcore.io.Libcore;
 
 /**
  * Internal service helper that no-one should use directly.
@@ -1129,7 +1128,7 @@ public class MediaScanner
                         if (path != null && path.startsWith("/")) {
                             boolean exists = false;
                             try {
-                                exists = Libcore.os.access(path, libcore.io.OsConstants.F_OK);
+                                exists = Os.access(path, android.system.OsConstants.F_OK);
                             } catch (ErrnoException e1) {
                             }
                             if (!exists && !MtpConstants.isAbstractObject(format)) {

@@ -17,7 +17,7 @@
 package android.provider;
 
 import static android.net.TrafficStats.KB_IN_BYTES;
-import static libcore.io.OsConstants.SEEK_SET;
+import static android.system.OsConstants.SEEK_SET;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -38,11 +38,11 @@ import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.os.RemoteException;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Log;
 
-import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
-import libcore.io.Libcore;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -699,7 +699,7 @@ public final class DocumentsContract {
             // optimal decode path; otherwise fall back to buffering.
             BufferedInputStream is = null;
             try {
-                Libcore.os.lseek(fd, offset, SEEK_SET);
+                Os.lseek(fd, offset, SEEK_SET);
             } catch (ErrnoException e) {
                 is = new BufferedInputStream(new FileInputStream(fd), THUMBNAIL_BUFFER_SIZE);
                 is.mark(THUMBNAIL_BUFFER_SIZE);
@@ -725,7 +725,7 @@ public final class DocumentsContract {
                 bitmap = BitmapFactory.decodeStream(is, null, opts);
             } else {
                 try {
-                    Libcore.os.lseek(fd, offset, SEEK_SET);
+                    Os.lseek(fd, offset, SEEK_SET);
                 } catch (ErrnoException e) {
                     e.rethrowAsIOException();
                 }

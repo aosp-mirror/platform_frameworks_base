@@ -20,6 +20,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Base64;
 import android.util.Slog;
 
@@ -28,9 +30,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
-import libcore.io.Libcore;
 
 public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
 
@@ -110,16 +110,16 @@ public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
         File update = new File(updateDir.getParentFile(), "update");
         File tmp = new File(updateDir.getParentFile(), "tmp");
         if (current.exists()) {
-            Libcore.os.symlink(updateDir.getPath(), update.getPath());
-            Libcore.os.rename(update.getPath(), current.getPath());
+            Os.symlink(updateDir.getPath(), update.getPath());
+            Os.rename(update.getPath(), current.getPath());
         } else {
-            Libcore.os.symlink(updateDir.getPath(), current.getPath());
+            Os.symlink(updateDir.getPath(), current.getPath());
         }
         contexts.mkdirs();
         backupContexts(contexts);
         copyUpdate(contexts);
-        Libcore.os.symlink(contexts.getPath(), tmp.getPath());
-        Libcore.os.rename(tmp.getPath(), current.getPath());
+        Os.symlink(contexts.getPath(), tmp.getPath());
+        Os.rename(tmp.getPath(), current.getPath());
         SystemProperties.set("selinux.reload_policy", "1");
     }
 

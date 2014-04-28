@@ -24,13 +24,13 @@ import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.UnknownHostException;
 
-import static libcore.io.OsConstants.IFA_F_DADFAILED;
-import static libcore.io.OsConstants.IFA_F_DEPRECATED;
-import static libcore.io.OsConstants.IFA_F_TENTATIVE;
-import static libcore.io.OsConstants.RT_SCOPE_HOST;
-import static libcore.io.OsConstants.RT_SCOPE_LINK;
-import static libcore.io.OsConstants.RT_SCOPE_SITE;
-import static libcore.io.OsConstants.RT_SCOPE_UNIVERSE;
+import static android.system.OsConstants.IFA_F_DADFAILED;
+import static android.system.OsConstants.IFA_F_DEPRECATED;
+import static android.system.OsConstants.IFA_F_TENTATIVE;
+import static android.system.OsConstants.RT_SCOPE_HOST;
+import static android.system.OsConstants.RT_SCOPE_LINK;
+import static android.system.OsConstants.RT_SCOPE_SITE;
+import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
 
 /**
  * Identifies an IP address on a network link.
