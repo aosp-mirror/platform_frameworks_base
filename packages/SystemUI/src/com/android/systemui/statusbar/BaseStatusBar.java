@@ -83,7 +83,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public abstract class BaseStatusBar extends SystemUI implements
-        CommandQueue.Callbacks, LatestItemView.OnActivatedListener {
+        CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
@@ -760,20 +760,19 @@ public abstract class BaseStatusBar extends SystemUI implements
         // NB: the large icon is now handled entirely by the template
 
         // bind the click event to the content area
-        ViewGroup content = (ViewGroup)row.findViewById(R.id.container);
         SizeAdaptiveLayout expanded = (SizeAdaptiveLayout)row.findViewById(R.id.expanded);
         SizeAdaptiveLayout expandedPublic
                 = (SizeAdaptiveLayout)row.findViewById(R.id.expandedPublic);
 
-        content.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+        row.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
 
         PendingIntent contentIntent = sbn.getNotification().contentIntent;
         if (contentIntent != null) {
             final View.OnClickListener listener = makeClicker(contentIntent,
                     sbn.getPackageName(), sbn.getTag(), sbn.getId(), isHeadsUp, sbn.getUserId());
-            content.setOnClickListener(listener);
+            row.setOnClickListener(listener);
         } else {
-            content.setOnClickListener(null);
+            row.setOnClickListener(null);
         }
 
         // set up the adaptive layout
@@ -883,7 +882,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         entry.row = row;
         entry.row.setHeightRange(mRowMinHeight, mRowMaxHeight);
         entry.row.setOnActivatedListener(this);
-        entry.content = content;
         entry.expanded = contentViewLocal;
         entry.expandedPublic = publicViewLocal;
         entry.setBigContentView(bigContentViewLocal);
@@ -1350,9 +1348,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             final View.OnClickListener listener = makeClicker(contentIntent,
                     notification.getPackageName(), notification.getTag(), notification.getId(),
                     isHeadsUp, notification.getUserId());
-            entry.content.setOnClickListener(listener);
+            entry.row.setOnClickListener(listener);
         } else {
-            entry.content.setOnClickListener(null);
+            entry.row.setOnClickListener(null);
         }
     }
 

@@ -18,8 +18,6 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
@@ -27,28 +25,13 @@ import com.android.systemui.R;
 /**
  * Container view for overflowing notification icons on Keyguard.
  */
-public class NotificationOverflowContainer extends FrameLayout
-        implements LatestItemView.OnActivatedListener {
+public class NotificationOverflowContainer extends ActivatableNotificationView {
 
     private NotificationOverflowIconsView mIconsView;
-    private LatestItemView.OnActivatedListener mOnActivatedListener;
     private NotificationActivator mActivator;
-
-    public NotificationOverflowContainer(Context context) {
-        super(context);
-    }
 
     public NotificationOverflowContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    public NotificationOverflowContainer(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
-    public NotificationOverflowContainer(Context context, AttributeSet attrs, int defStyleAttr,
-            int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     @Override
@@ -57,33 +40,13 @@ public class NotificationOverflowContainer extends FrameLayout
         mIconsView = (NotificationOverflowIconsView) findViewById(R.id.overflow_icons_view);
         mIconsView.setMoreText((TextView) findViewById(R.id.more_text));
 
-        LatestItemView latestItemView = (LatestItemView) findViewById(R.id.container);
         mActivator = new NotificationActivator(this);
         mActivator.setDimmed(true);
-        latestItemView.setOnActivatedListener(this);
-        latestItemView.setLocked(true);
+        setLocked(true);
     }
 
     public NotificationOverflowIconsView getIconsView() {
         return mIconsView;
-    }
-
-    public void setOnActivatedListener(LatestItemView.OnActivatedListener onActivatedListener) {
-        mOnActivatedListener = onActivatedListener;
-    }
-
-    @Override
-    public void onActivated(View view) {
-        if (mOnActivatedListener != null) {
-            mOnActivatedListener.onActivated(this);
-        }
-    }
-
-    @Override
-    public void onReset(View view) {
-        if (mOnActivatedListener != null) {
-            mOnActivatedListener.onReset(this);
-        }
     }
 
     public NotificationActivator getActivator() {

@@ -135,8 +135,8 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
         mEdgeSwipeHelper = new EdgeSwipeHelper(touchSlop);
 
-        int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
-        int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
+        int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
+        int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_max_height);
         mExpandHelper = new ExpandHelper(getContext(), this, minHeight, maxHeight);
 
         mContentHolder = (ViewGroup) findViewById(R.id.content_holder);

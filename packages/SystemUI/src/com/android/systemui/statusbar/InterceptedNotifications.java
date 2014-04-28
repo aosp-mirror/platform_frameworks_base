@@ -107,7 +107,7 @@ public class InterceptedNotifications {
            mBar.updateNotification(mSynKey, sbn);
         }
         final NotificationData.Entry entry = mBar.mNotificationData.findByKey(mSynKey);
-        entry.content.setOnClickListener(mSynClickListener);
+        entry.row.setOnClickListener(mSynClickListener);
     }
 
     private final View.OnClickListener mSynClickListener = new View.OnClickListener() {

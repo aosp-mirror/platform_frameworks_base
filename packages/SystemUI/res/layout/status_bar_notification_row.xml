@@ -2,17 +2,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:focusable="true"
+    android:clickable="true"
+    android:background="@*android:drawable/notification_quantum_bg"
     >
 
-    <View
-        android:id="@+id/top_glow"
-        android:alpha="0"
-        android:visibility="invisible"
+    <com.android.internal.widget.SizeAdaptiveLayout android:id="@+id/expanded"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content" />
+
+    <com.android.internal.widget.SizeAdaptiveLayout android:id="@+id/expandedPublic"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_divider_height"
-        android:layout_gravity="top|center_horizontal"
-        android:background="@drawable/top_divider_glow"
-        />
+        android:layout_height="wrap_content" />
 
     <Button
         android:id="@+id/veto"
@@ -23,35 +24,6 @@
         android:background="@null"
         android:paddingEnd="8dp"
         android:paddingStart="8dp"
-        />
-
-    <com.android.systemui.statusbar.LatestItemView android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/notification_divider_height"
-        android:layout_marginTop="@dimen/notification_divider_height"
-        android:focusable="true"
-        android:clickable="true"
-        android:background="@*android:drawable/notification_quantum_bg"
-        >
-
-        <com.android.internal.widget.SizeAdaptiveLayout android:id="@+id/expanded"
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content" />
-
-        <com.android.internal.widget.SizeAdaptiveLayout android:id="@+id/expandedPublic"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </com.android.systemui.statusbar.LatestItemView>
-
-    <View
-        android:id="@+id/bottom_glow"
-        android:alpha="0"
-        android:visibility="invisible"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_divider_height"
-        android:layout_gravity="bottom|center_horizontal"
-        android:background="@drawable/bottom_divider_glow"
         />
 
     <TextView

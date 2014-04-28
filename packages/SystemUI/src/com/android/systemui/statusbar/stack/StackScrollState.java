@@ -197,18 +197,12 @@ public class StackScrollState {
      * @param clipHeight the desired clip height, the rest of the view will be clipped from the top
      */
     private void updateChildClip(View child, int height, float clipHeight) {
-        // The children currently have paddings inside themselfs because of the expansion
-        // visualization. In order for the clipping to work correctly we have to set the correct
-        // clip rect on the child.
-        View container = child.findViewById(R.id.container);
-        if (container != null) {
-            int clipInset = (int) (height - clipHeight);
-            mClipRect.set(0,
-                    clipInset,
-                    child.getWidth(),
-                    height);
-            child.setClipBounds(mClipRect);
-        }
+        int clipInset = (int) (height - clipHeight);
+        mClipRect.set(0,
+                clipInset,
+                child.getWidth(),
+                height);
+        child.setClipBounds(mClipRect);
     }
 
     /**
@@ -218,22 +212,15 @@ public class StackScrollState {
      * @param height the currently applied height of the view
      * @param outlineHeight the desired height of the outline, the outline ends on the bottom
      */
-    private void updateChildOutline(View child,
-            int height,
-            float outlineHeight) {
-        // The children currently have paddings inside themselfs because of the expansion
-        // visualization. In order for the shadows to work correctly we have to set the correct
-        // outline on the child.
-        View container = child.findViewById(R.id.container);
-        if (container != null) {
-            int shadowInset = (int) (height - outlineHeight);
-            getOutlineForSize(container.getLeft(),
-                    container.getTop() + shadowInset,
-                    container.getWidth(),
-                    container.getHeight() - shadowInset,
-                    mChildOutline);
-            child.setOutline(mChildOutline);
-        }
+    private void updateChildOutline(View child, int height,
+        float outlineHeight) {
+        int shadowInset = (int) (height - outlineHeight);
+        getOutlineForSize(child.getLeft(),
+                child.getTop() + shadowInset,
+                child.getWidth(),
+                child.getHeight() - shadowInset,
+                mChildOutline);
+        child.setOutline(mChildOutline);
     }
 
     private void getOutlineForSize(int leftInset, int topInset, int width, int height,

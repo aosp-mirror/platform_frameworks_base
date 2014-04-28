@@ -82,12 +82,6 @@
     <!-- Height of a medium notification in the status bar -->
     <dimen name="notification_mid_height">128dp</dimen>
 
-    <!-- Height of a small notification in the status bar plus glow, padding, etc -->
-    <dimen name="notification_row_min_height">68dp</dimen>
-
-    <!-- Height of a large notification in the status bar plus glow, padding, etc -->
-    <dimen name="notification_row_max_height">260dp</dimen>
-
     <!-- size at which Notification icons will be drawn in the status bar -->
     <dimen name="status_bar_icon_drawing_size">18dip</dimen>
 
@@ -260,6 +254,9 @@
 
     <!-- Z distance between notifications if they are in the stack -->
     <dimen name="z_distance_between_notifications">2dp</dimen>
+
+    <!-- The padding between the individual notification cards. -->
+    <dimen name="notification_padding">3dp</dimen>
 
     <!-- Width of the zen mode interstitial dialog. -->
     <dimen name="zen_mode_dialog_width">320dp</dimen>
