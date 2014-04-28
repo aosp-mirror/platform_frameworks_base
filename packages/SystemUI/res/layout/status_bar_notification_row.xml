@@ -4,14 +4,13 @@
     android:layout_height="wrap_content"
     android:focusable="true"
     android:clickable="true"
-    android:background="@*android:drawable/notification_quantum_bg"
     >
 
-    <com.android.internal.widget.SizeAdaptiveLayout android:id="@+id/expanded"
+    <com.android.systemui.statusbar.NotificationContentView android:id="@+id/expanded"
        android:layout_width="match_parent"
        android:layout_height="wrap_content" />
 
-    <com.android.internal.widget.SizeAdaptiveLayout android:id="@+id/expandedPublic"
+    <com.android.systemui.statusbar.NotificationContentView android:id="@+id/expandedPublic"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
