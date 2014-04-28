@@ -317,6 +317,10 @@ public final class InputMethodManager {
     int mCursorSelEnd;
     int mCursorCandStart;
     int mCursorCandEnd;
+    /**
+     * The buffer to retrieve the view location in screen coordinates in {@link #updateCursor}.
+     */
+    private final int[] mViewTopLeft = new int[2];
 
     // -----------------------------------------------------------
     
@@ -1487,9 +1491,23 @@ public final class InputMethodManager {
             return false;
         }
         synchronized (mH) {
-            return mCursorAnchorMonitorMode ==
-                    InputMethodService.CURSOR_ANCHOR_MONITOR_MODE_CURSOR_RECT;
+            return (mCursorAnchorMonitorMode &
+                    InputMethodService.CURSOR_ANCHOR_MONITOR_MODE_CURSOR_RECT) != 0;
         }
+    }
+
+    /**
+     * Returns true if the current input method wants to receive the cursor rectangle in
+     * screen coordinates rather than local coordinates in the attached view.
+     *
+     * @hide
+     */
+    public boolean usesScreenCoordinatesForCursorLocked() {
+        // {@link InputMethodService#CURSOR_ANCHOR_MONITOR_MODE_CURSOR_RECT} also means
+        // that {@link InputMethodService#onUpdateCursor} should provide the cursor rectangle
+        // in screen coordinates rather than local coordinates.
+        return (mCursorAnchorMonitorMode &
+                InputMethodService.CURSOR_ANCHOR_MONITOR_MODE_CURSOR_RECT) != 0;
     }
 
     /**
@@ -1518,15 +1536,18 @@ public final class InputMethodManager {
                     || mCurrentTextBoxAttribute == null || mCurMethod == null) {
                 return;
             }
-            
             mTmpCursorRect.set(left, top, right, bottom);
             if (!mCursorRect.equals(mTmpCursorRect)) {
                 if (DEBUG) Log.d(TAG, "updateCursor");
 
                 try {
                     if (DEBUG) Log.v(TAG, "CURSOR CHANGE: " + mCurMethod);
-                    mCurMethod.updateCursor(mTmpCursorRect);
                     mCursorRect.set(mTmpCursorRect);
+                    if (usesScreenCoordinatesForCursorLocked()) {
+                        view.getLocationOnScreen(mViewTopLeft);
+                        mTmpCursorRect.offset(mViewTopLeft[0], mViewTopLeft[1]);
+                    }
+                    mCurMethod.updateCursor(mTmpCursorRect);
                 } catch (RemoteException e) {
                     Log.w(TAG, "IME died: " + mCurId, e);
                 }
