@@ -737,8 +737,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             return false;
         }
 
-        Log.v(TAG, "publicNotification: "
-                + sbn.getNotification().publicVersion);
+        if (DEBUG) {
+            Log.v(TAG, "publicNotification: " + sbn.getNotification().publicVersion);
+        }
 
         Notification publicNotification = sbn.getNotification().publicVersion;
 
