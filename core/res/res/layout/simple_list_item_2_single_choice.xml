@@ -21,7 +21,8 @@
     android:gravity="center_vertical"
     android:paddingStart="16dip"
     android:paddingEnd="12dip"
-    android:minHeight="?android:attr/listPreferredItemHeightSmall">
+    android:minHeight="?attr/listPreferredItemHeightSmall"
+    android:background="@color/transparent">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -33,8 +34,8 @@
         <TextView android:id="@android:id/text1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceListItem"
-            android:textColor="?android:attr/textColorAlertDialogListItem"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:textColor="?attr/textColorAlertDialogListItem"
             android:gravity="center_vertical|start"
             android:singleLine="true"
             android:ellipsize="marquee" />
@@ -42,8 +43,8 @@
         <TextView android:id="@android:id/text2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceListItemSecondary"
-            android:textColor="?android:attr/textColorAlertDialogListItem"
+            android:textAppearance="?attr/textAppearanceListItemSecondary"
+            android:textColor="?attr/textColorAlertDialogListItem"
             android:gravity="center_vertical|start"
             android:singleLine="true"
             android:ellipsize="marquee" />

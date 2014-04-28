@@ -543,7 +543,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * The last CheckForTap runnable we posted, if any
      */
-    private Runnable mPendingCheckForTap;
+    private CheckForTap mPendingCheckForTap;
 
     /**
      * The last CheckForKeyLongPress runnable we posted, if any
@@ -2126,7 +2126,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
+
         mInLayout = true;
+
         final int childCount = getChildCount();
         if (changed) {
             for (int i = 0; i < childCount; i++) {
@@ -3185,7 +3187,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         return INVALID_ROW_ID;
     }
 
-    final class CheckForTap implements Runnable {
+    private final class CheckForTap implements Runnable {
+        float x;
+        float y;
+
         @Override
         public void run() {
             if (mTouchMode == TOUCH_MODE_DOWN) {
@@ -3205,13 +3210,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         final boolean longClickable = isLongClickable();
 
                         if (mSelector != null) {
-                            Drawable d = mSelector.getCurrent();
+                            final Drawable d = mSelector.getCurrent();
                             if (d != null && d instanceof TransitionDrawable) {
                                 if (longClickable) {
                                     ((TransitionDrawable) d).startTransition(longPressTimeout);
                                 } else {
                                     ((TransitionDrawable) d).resetTransition();
                                 }
+                            }
+                            if (d.supportsHotspots()) {
+                                d.setHotspot(R.attr.state_pressed, x, y);
                             }
                         }
 
@@ -3596,6 +3604,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         mPendingCheckForTap = new CheckForTap();
                     }
 
+                    mPendingCheckForTap.x = ev.getX();
+                    mPendingCheckForTap.y = ev.getY();
                     postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
                 }
             }
@@ -3705,6 +3715,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                 if (d != null && d instanceof TransitionDrawable) {
                                     ((TransitionDrawable) d).resetTransition();
                                 }
+                                if (mSelector.supportsHotspots()) {
+                                    mSelector.setHotspot(R.attr.state_pressed, x, ev.getY());
+                                }
                             }
                             if (mTouchModeReset != null) {
                                 removeCallbacks(mTouchModeReset);
@@ -3716,6 +3729,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     mTouchMode = TOUCH_MODE_REST;
                                     child.setPressed(false);
                                     setPressed(false);
+                                    if (mSelector != null && mSelector.supportsHotspots()) {
+                                        mSelector.removeHotspot(R.attr.state_pressed);
+                                    }
                                     if (!mDataChanged && !mIsDetaching && isAttachedToWindow()) {
                                         performClick.run();
                                     }

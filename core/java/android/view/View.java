@@ -12761,6 +12761,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mPrivateFlags &= ~PFLAG_CANCEL_NEXT_UP_EVENT;
         mPrivateFlags3 &= ~PFLAG3_IS_LAID_OUT;
 
+        if (mBackground != null) {
+            mBackground.clearHotspots();
+        }
+
         removeUnsetPressCallback();
         removeLongPressCallback();
         removePerformClickCallback();
