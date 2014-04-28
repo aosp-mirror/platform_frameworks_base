@@ -256,6 +256,16 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
         }
     }
 
+    /**
+     * Assigns the drawable that is to be drawn on top of the assigned contact photo.
+     *
+     * @param overlay Drawable to be drawn over the assigned contact photo. Must have a non-zero
+     *         instrinsic width and height.
+     */
+    public void setOverlay(Drawable overlay) {
+        mOverlay = overlay;
+    }
+
     private void onContactUriChanged() {
         setEnabled(isAssigned());
     }
