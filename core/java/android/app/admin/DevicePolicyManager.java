@@ -1269,7 +1269,6 @@ public class DevicePolicyManager {
 
     /**
      * Disable all keyguard widgets. Has no effect.
-     * @deprecated
      */
     public static final int KEYGUARD_DISABLE_WIDGETS_ALL = 1 << 0;
 
@@ -1983,7 +1982,7 @@ public class DevicePolicyManager {
      * <p>
      * The calling device admin must be a profile or device owner; if it is not,
      * a security exception will be thrown.
-     * 
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated
      *            with.
      * @param key The key of the restriction. See the constants in
@@ -2005,7 +2004,7 @@ public class DevicePolicyManager {
      * <p>
      * The calling device admin must be a profile or device owner; if it is not,
      * a security exception will be thrown.
-     * 
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated
      *            with.
      * @param key The key of the restriction. See the constants in
