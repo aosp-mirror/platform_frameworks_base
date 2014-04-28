@@ -29,6 +29,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.AudioService;
+import android.os.Build;
 import android.os.Environment;
 import android.os.FactoryTest;
 import android.os.Handler;
@@ -200,6 +201,10 @@ public final class SystemServer {
         // The system server has to run all of the time, so it needs to be
         // as efficient as possible with its memory usage.
         VMRuntime.getRuntime().setTargetHeapUtilization(0.8f);
+
+        // Some devices rely on runtime fingerprint generation, so make sure
+        // we've defined it before booting further.
+        Build.ensureFingerprintProperty();
 
         // Within the system server, it is an error to access Environment paths without
         // explicitly specifying a user.
