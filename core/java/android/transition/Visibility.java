@@ -347,10 +347,11 @@ public abstract class Visibility extends Transition {
         }
 
         if (viewToKeep != null) {
+            int originalVisibility = viewToKeep.getVisibility();
             viewToKeep.setVisibility(View.VISIBLE);
             Animator animator = onDisappear(sceneRoot, viewToKeep, startValues, endValues);
             if (animator == null) {
-                viewToKeep.setVisibility(finalVisibility);
+                viewToKeep.setVisibility(originalVisibility);
             } else {
                 final View finalViewToKeep = viewToKeep;
                 animator.addListener(new AnimatorListenerAdapter() {

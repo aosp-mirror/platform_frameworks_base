@@ -105,7 +105,7 @@ public class Fade extends Visibility {
         if (DBG) {
             Log.d(LOG_TAG, "Created animator " + anim);
         }
-        FadeAnimatorListener listener = new FadeAnimatorListener(view, endAlpha);
+        FadeAnimatorListener listener = new FadeAnimatorListener(view);
         anim.addListener(listener);
         anim.addPauseListener(listener);
         return anim;
@@ -138,13 +138,11 @@ public class Fade extends Visibility {
 
     private static class FadeAnimatorListener extends AnimatorListenerAdapter {
         private final View mView;
-        private final float mEndAlpha;
         private boolean mCanceled = false;
-        private float mPausedAlpha;
+        private float mPausedAlpha = -1;
 
-        public FadeAnimatorListener(View view, float endAlpha) {
+        public FadeAnimatorListener(View view) {
             mView = view;
-            mEndAlpha = endAlpha;
         }
 
         @Override
@@ -158,14 +156,14 @@ public class Fade extends Visibility {
         @Override
         public void onAnimationEnd(Animator animator) {
             if (!mCanceled) {
-                mView.setTransitionAlpha(mEndAlpha);
+                mView.setTransitionAlpha(1);
             }
         }
 
         @Override
         public void onAnimationPause(Animator animator) {
             mPausedAlpha = mView.getTransitionAlpha();
-            mView.setTransitionAlpha(mEndAlpha);
+            mView.setTransitionAlpha(1);
         }
 
         @Override
