@@ -255,7 +255,8 @@ public class InputMethodService extends AbstractInputMethodService {
     public static final int CURSOR_ANCHOR_MONITOR_MODE_NONE = 0x0;
 
     /**
-     * The IME expects that {@link #onUpdateCursor(Rect)} is called back.
+     * The IME will receive {@link #onUpdateCursor(Rect)} called back with the current
+     * cursor rectangle in screen coordinates.
      */
     public static final int CURSOR_ANCHOR_MONITOR_MODE_CURSOR_RECT = 0x1;
 
@@ -1703,9 +1704,11 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
-     * Called when the application has reported a new location of its text
-     * cursor.  This is only called if explicitly requested by the input method.
-     * The default implementation does nothing.
+     * Called when the application has reported a new location of its text cursor.  This is only
+     * called if explicitly requested by the input method.  The default implementation does nothing.
+     * @param newCursor The new cursor position, in screen coordinates if the input method calls
+     * {@link #setCursorAnchorMonitorMode} with {@link #CURSOR_ANCHOR_MONITOR_MODE_CURSOR_RECT}.
+     * Otherwise, this is in local coordinates.
      */
     public void onUpdateCursor(Rect newCursor) {
         // Intentionally empty
