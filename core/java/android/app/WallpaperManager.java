@@ -283,13 +283,15 @@ public class WallpaperManager {
         }
 
         private Bitmap getCurrentWallpaperLocked(Context context) {
+            if (mService == null) {
+                Log.w(TAG, "WallpaperService not running");
+                return null;
+            }
+
             try {
                 Bundle params = new Bundle();
                 ParcelFileDescriptor fd = mService.getWallpaper(this, params);
                 if (fd != null) {
-                    int width = params.getInt("width", 0);
-                    int height = params.getInt("height", 0);
-
                     try {
                         BitmapFactory.Options options = new BitmapFactory.Options();
                         return BitmapFactory.decodeFileDescriptor(
@@ -311,28 +313,21 @@ public class WallpaperManager {
         }
         
         private Bitmap getDefaultWallpaperLocked(Context context) {
-            try {
-                InputStream is = context.getResources().openRawResource(
-                        com.android.internal.R.drawable.default_wallpaper);
-                if (is != null) {
-                    int width = mService.getWidthHint();
-                    int height = mService.getHeightHint();
-
+            InputStream is = context.getResources().openRawResource(
+                    com.android.internal.R.drawable.default_wallpaper);
+            if (is != null) {
+                try {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    return BitmapFactory.decodeStream(is, null, options);
+                } catch (OutOfMemoryError e) {
+                    Log.w(TAG, "Can't decode stream", e);
+                } finally {
                     try {
-                        BitmapFactory.Options options = new BitmapFactory.Options();
-                        return BitmapFactory.decodeStream(is, null, options);
-                    } catch (OutOfMemoryError e) {
-                        Log.w(TAG, "Can't decode stream", e);
-                    } finally {
-                        try {
-                            is.close();
-                        } catch (IOException e) {
-                            // Ignore
-                        }
+                        is.close();
+                    } catch (IOException e) {
+                        // Ignore
                     }
                 }
-            } catch (RemoteException e) {
-                // Ignore
             }
             return null;
         }
