@@ -542,9 +542,13 @@ public class StackScrollAlgorithm {
                                 public void onLayoutChange(View v, int left, int top, int right,
                                         int bottom, int oldLeft, int oldTop, int oldRight,
                                         int oldBottom) {
-                                    mFirstChildMaxHeight = getMaxAllowedChildHeight(
-                                            mFirstChildWhileExpanding);
-                                    mFirstChildWhileExpanding.removeOnLayoutChangeListener(this);
+                                    if (mFirstChildWhileExpanding != null) {
+                                        mFirstChildMaxHeight = getMaxAllowedChildHeight(
+                                                mFirstChildWhileExpanding);
+                                    } else {
+                                        mFirstChildMaxHeight = 0;
+                                    }
+                                    v.removeOnLayoutChangeListener(this);
                                 }
                             });
                 } else {
