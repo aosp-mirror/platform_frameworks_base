@@ -48,6 +48,7 @@ import java.util.Arrays;
 public class TouchFeedbackDrawable extends LayerDrawable {
     private static final String LOG_TAG = TouchFeedbackDrawable.class.getSimpleName();
     private static final PorterDuffXfermode DST_IN = new PorterDuffXfermode(Mode.DST_IN);
+    private static final PorterDuffXfermode SRC_OVER = new PorterDuffXfermode(Mode.SRC_OVER);
 
     /** The maximum number of ripples supported. */
     private static final int MAX_RIPPLES = 10;
@@ -105,6 +106,26 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     protected boolean onStateChange(int[] stateSet) {
         super.onStateChange(stateSet);
 
+        // TODO: Implicitly tie states to ripple IDs. For now, just clear
+        // focused and pressed if they aren't in the state set.
+        boolean hasFocused = false;
+        boolean hasPressed = false;
+        for (int i = 0; i < stateSet.length; i++) {
+            if (stateSet[i] == R.attr.state_pressed) {
+                hasPressed = true;
+            } else if (stateSet[i] == R.attr.state_focused) {
+                hasFocused = true;
+            }
+        }
+
+        if (!hasPressed) {
+            removeHotspot(R.attr.state_pressed);
+        }
+
+        if (!hasFocused) {
+            removeHotspot(R.attr.state_focused);
+        }
+
         if (mRipplePaint != null && mState.mTint != null) {
             final ColorStateList stateList = mState.mTint;
             final int newColor = stateList.getColorForState(stateSet, 0);
@@ -122,7 +143,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     @Override
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
-        
+
         if (!mOverrideBounds) {
             mHotspotBounds.set(bounds);
         }
@@ -217,6 +238,27 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         super.inflate(r, parser, attrs, theme);
 
         setTargetDensity(r.getDisplayMetrics());
+
+        // Find the mask
+        final int N = getNumberOfLayers();
+        for (int i = 0; i < N; i++) {
+            if (mLayerState.mChildren[i].mId == R.id.mask) {
+                mState.mMask = mLayerState.mChildren[i].mDrawable;
+            }
+        }
+    }
+
+    @Override
+    public boolean setDrawableByLayerId(int id, Drawable drawable) {
+        if (super.setDrawableByLayerId(id, drawable)) {
+            if (id == R.id.mask) {
+                mState.mMask = drawable;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -310,7 +352,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
             mTouchedRipples = new SparseArray<Ripple>();
             mActiveRipples = new Ripple[MAX_RIPPLES];
         }
-        
+
         if (mActiveRipplesCount >= MAX_RIPPLES) {
             Log.e(LOG_TAG, "Max ripple count exceeded", new RuntimeException());
             return;
@@ -415,99 +457,139 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
     @Override
     public void draw(Canvas canvas) {
-        final boolean projected = getNumberOfLayers() == 0;
+        final int N = mLayerState.mNum;
+        final Rect bounds = getBounds();
+        final ChildDrawable[] array = mLayerState.mChildren;
+        final boolean maskOnly = mState.mMask != null && N == 1;
+
+        int restoreToCount = drawRippleLayer(canvas, bounds, maskOnly);
+
+        if (restoreToCount >= 0) { 
+            // We have a ripple layer that contains ripples. If we also have an
+            // explicit mask drawable, apply it now using DST_IN blending.
+            if (mState.mMask != null) {
+                canvas.saveLayer(bounds.left, bounds.top, bounds.right,
+                        bounds.bottom, getMaskingPaint(DST_IN));
+                mState.mMask.draw(canvas);
+                canvas.restoreToCount(restoreToCount);
+                restoreToCount = -1;
+            }
+
+            // If there's more content, we need an extra masking layer to merge
+            // the ripples over the content.
+            if (!maskOnly) {
+                final PorterDuffXfermode xfermode = mState.getTintXfermodeInverse();
+                final int count = canvas.saveLayer(bounds.left, bounds.top,
+                        bounds.right, bounds.bottom, getMaskingPaint(xfermode));
+                if (restoreToCount < 0) {
+                    restoreToCount = count;
+                }
+            }
+        }
+
+        // Draw everything except the mask.
+        for (int i = 0; i < N; i++) {
+            if (array[i].mId != R.id.mask) {
+                array[i].mDrawable.draw(canvas);
+            }
+        }
+
+        // Composite the layers if needed.
+        if (restoreToCount >= 0) {
+            canvas.restoreToCount(restoreToCount);
+        }
+    }
+
+    private int drawRippleLayer(Canvas canvas, Rect bounds, boolean maskOnly) {
         final Ripple[] activeRipples = mActiveRipples;
         final int ripplesCount = mActiveRipplesCount;
-        final Rect bounds = getBounds();
+
+        Paint ripplePaint = null;
+        boolean drewRipples = false;
+        int restoreToCount = -1;
+        int activeRipplesCount = 0;
 
         // Draw ripples.
-        boolean drewRipples = false;
-        int rippleRestoreCount = -1;
-        int activeRipplesCount = 0;
         for (int i = 0; i < ripplesCount; i++) {
             final Ripple ripple = activeRipples[i];
             final RippleAnimator animator = ripple.animate();
             animator.update();
+
+            // Mark and skip inactive ripples.
             if (!animator.isRunning()) {
                 activeRipples[i] = null;
-            } else {
-                // If we're masking the ripple layer, make sure we have a layer
-                // first. This will merge SRC_OVER (directly) onto the canvas.
-                if (!projected && rippleRestoreCount < 0) {
-                    rippleRestoreCount = canvas.saveLayer(bounds.left, bounds.top,
-                            bounds.right, bounds.bottom, null);
+                continue;
+            }
+
+            // If we're masking the ripple layer, make sure we have a layer
+            // first. This will merge SRC_OVER (directly) onto the canvas.
+            if (restoreToCount < 0) {
+                // Separate the ripple color and alpha channel. The alpha will be
+                // applied when we merge the ripples down to the canvas.
+                final int rippleColor;
+                if (mState.mTint != null) {
+                    rippleColor = mState.mTint.getColorForState(getState(), Color.TRANSPARENT);
+                } else {
+                    rippleColor = Color.TRANSPARENT;
+                }
+                final int rippleAlpha = Color.alpha(rippleColor);
+
+                // If we're projecting or we only have a mask, we want to treat the
+                // underlying canvas as our content and merge the ripple layer down
+                // using the tint xfermode.
+                final boolean projected = isProjected();
+                final PorterDuffXfermode xfermode;
+                if (projected || maskOnly) {
+                    xfermode = mState.getTintXfermode();
+                } else {
+                    xfermode = SRC_OVER;
                 }
 
-                drewRipples |= ripple.draw(canvas, getRipplePaint());
-
-                activeRipples[activeRipplesCount] = activeRipples[i];
-                activeRipplesCount++;
+                final Paint layerPaint = getMaskingPaint(xfermode);
+                layerPaint.setAlpha(rippleAlpha);
+                final Rect layerBounds = projected ? getDirtyBounds() : bounds;
+                restoreToCount = canvas.saveLayer(layerBounds.left, layerBounds.top,
+                        layerBounds.right, layerBounds.bottom, layerPaint);
+                layerPaint.setAlpha(255);
             }
+
+            if (mRipplePaint == null) {
+                mRipplePaint = new Paint();
+                mRipplePaint.setAntiAlias(true);
+            }
+
+            drewRipples |= ripple.draw(canvas, mRipplePaint);
+
+            activeRipples[activeRipplesCount] = activeRipples[i];
+            activeRipplesCount++;
         }
+
         mActiveRipplesCount = activeRipplesCount;
 
-        // TODO: Use the masking layer first, if there is one.
-
-        // If we have ripples and content, we need a masking layer. This will
-        // merge DST_ATOP onto (effectively under) the ripple layer.
-        if (drewRipples && !projected && rippleRestoreCount >= 0) {
-            final PorterDuffXfermode xfermode = mState.getTintXfermode();
-            canvas.saveLayer(bounds.left, bounds.top,
-                    bounds.right, bounds.bottom, getMaskingPaint(xfermode));
+        // If we created a layer with no content, merge it immediately.
+        if (restoreToCount >= 0 && !drewRipples) {
+            canvas.restoreToCount(restoreToCount);
+            restoreToCount = -1;
         }
 
-        Drawable mask = null;
-        final ChildDrawable[] array = mLayerState.mChildren;
-        final int N = mLayerState.mNum;
-        for (int i = 0; i < N; i++) {
-            if (array[i].mId != R.id.mask) {
-                array[i].mDrawable.draw(canvas);
-            } else {
-                mask = array[i].mDrawable;
-            }
-        }
-
-        // If we have ripples, mask them.
-        if (mask != null && drewRipples) {
-            // TODO: This will also mask the lower layer, which is bad.
-            canvas.saveLayer(bounds.left, bounds.top, bounds.right,
-                    bounds.bottom, getMaskingPaint(DST_IN));
-            mask.draw(canvas);
-        }
-
-        // Composite the layers if needed.
-        if (rippleRestoreCount >= 0) {
-            canvas.restoreToCount(rippleRestoreCount);
-        }
+        return restoreToCount;
     }
 
-    private Paint getRipplePaint() {
-        if (mRipplePaint == null) {
-            mRipplePaint = new Paint();
-            mRipplePaint.setAntiAlias(true);
-
-            if (mState.mTint != null) {
-                final int color = mState.mTint.getColorForState(getState(), Color.TRANSPARENT);
-                mRipplePaint.setColor(color);
-            }
-        }
-        return mRipplePaint;
-    }
-
-    private Paint getMaskingPaint(PorterDuffXfermode mode) {
+    private Paint getMaskingPaint(PorterDuffXfermode xfermode) {
         if (mMaskingPaint == null) {
             mMaskingPaint = new Paint();
         }
-        mMaskingPaint.setXfermode(mode);
+        mMaskingPaint.setXfermode(xfermode);
         return mMaskingPaint;
     }
 
     @Override
     public Rect getDirtyBounds() {
-        final Rect dirtyBounds = mDirtyBounds;
         final Rect drawingBounds = mDrawingBounds;
+        final Rect dirtyBounds = mDirtyBounds;
         dirtyBounds.set(drawingBounds);
         drawingBounds.setEmpty();
+
         final Rect rippleBounds = mTempRect;
         final Ripple[] activeRipples = mActiveRipples;
         final int N = mActiveRipplesCount;
@@ -530,6 +612,8 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         int[] mTouchThemeAttrs;
         ColorStateList mTint;
         PorterDuffXfermode mTintXfermode;
+        PorterDuffXfermode mTintXfermodeInverse;
+        Drawable mMask;
         boolean mPinned;
 
         public TouchFeedbackState(
@@ -540,17 +624,24 @@ public class TouchFeedbackDrawable extends LayerDrawable {
                 mTouchThemeAttrs = orig.mTouchThemeAttrs;
                 mTint = orig.mTint;
                 mTintXfermode = orig.mTintXfermode;
+                mTintXfermodeInverse = orig.mTintXfermodeInverse;
                 mPinned = orig.mPinned;
+                mMask = orig.mMask;
             }
         }
-        
+
         public void setTintMode(Mode mode) {
             final Mode invertedMode = TouchFeedbackState.invertPorterDuffMode(mode);
-            mTintXfermode = new PorterDuffXfermode(invertedMode);
+            mTintXfermodeInverse = new PorterDuffXfermode(invertedMode);
+            mTintXfermode = new PorterDuffXfermode(mode);
         }
-        
+
         public PorterDuffXfermode getTintXfermode() {
             return mTintXfermode;
+        }
+
+        public PorterDuffXfermode getTintXfermodeInverse() {
+            return mTintXfermodeInverse;
         }
 
         @Override
