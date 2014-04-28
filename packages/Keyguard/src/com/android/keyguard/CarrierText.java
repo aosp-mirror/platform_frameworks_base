@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.text.method.SingleLineTransformationMethod;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -81,7 +82,14 @@ public class CarrierText extends TextView {
     public CarrierText(Context context, AttributeSet attrs) {
         super(context, attrs);
         mLockPatternUtils = new LockPatternUtils(mContext);
-        boolean useAllCaps = mContext.getResources().getBoolean(R.bool.kg_use_all_caps);
+        boolean useAllCaps;
+        TypedArray a = context.getTheme().obtainStyledAttributes(
+                attrs, R.styleable.CarrierText, 0, 0);
+        try {
+            useAllCaps = a.getBoolean(R.styleable.CarrierText_allCaps, false);
+        } finally {
+            a.recycle();
+        }
         setTransformationMethod(new CarrierTextTransformationMethod(mContext, useAllCaps));
     }
 

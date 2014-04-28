@@ -247,6 +247,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private int mCarrierLabelHeight;
     private TextView mEmergencyCallLabel;
     private int mNotificationHeaderHeight;
+    private View mKeyguardCarrierLabel;
 
     private boolean mShowCarrierInPanel = false;
 
@@ -616,6 +617,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 (NotificationOverflowContainer) LayoutInflater.from(mContext).inflate(
                         R.layout.status_bar_notification_keyguard_overflow, mStackScroller, false);
         mKeyguardIconOverflowContainer.setOnActivatedListener(this);
+        mKeyguardCarrierLabel = mStatusBarWindow.findViewById(R.id.keyguard_carrier_text);
         mStackScroller.addView(mKeyguardIconOverflowContainer);
 
         mExpandedContents = mStackScroller;
@@ -1344,7 +1346,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             !(emergencyCallsShownElsewhere && mNetworkController.isEmergencyOnly())
             && mStackScroller.getHeight() < (mNotificationPanel.getHeight()
                     - mCarrierLabelHeight - mNotificationHeaderHeight)
-            && mStackScroller.getVisibility() == View.VISIBLE;
+            && mStackScroller.getVisibility() == View.VISIBLE
+            && !mOnKeyguard;
 
         if (force || mCarrierLabelVisible != makeVisible) {
             mCarrierLabelVisible = makeVisible;
@@ -2956,6 +2959,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mKeyguardBottomArea.setVisibility(View.VISIBLE);
             mKeyguardIndicationTextView.setVisibility(View.VISIBLE);
             mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
+            mKeyguardCarrierLabel.setVisibility(View.VISIBLE);
             mNotificationPanelHeader.setVisibility(View.GONE);
 
             mKeyguardFlipper.setVisibility(View.VISIBLE);
@@ -2964,6 +2968,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mKeyguardStatusView.setVisibility(View.GONE);
             mKeyguardBottomArea.setVisibility(View.GONE);
             mKeyguardIndicationTextView.setVisibility(View.GONE);
+            mKeyguardCarrierLabel.setVisibility(View.GONE);
             mNotificationPanelHeader.setVisibility(View.VISIBLE);
 
             mKeyguardFlipper.setVisibility(View.GONE);
@@ -2974,6 +2979,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         updateRowStates();
         checkBarModes();
         updateNotificationIcons();
+        updateCarrierLabelVisibility(false);
     }
 
     public void userActivity() {
