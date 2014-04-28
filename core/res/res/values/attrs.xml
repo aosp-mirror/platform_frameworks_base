@@ -6279,6 +6279,7 @@
          its {@link android.service.voice.VoiceInteractionService#SERVICE_META_DATA} meta-data entry.
          Described here are the attributes that can be included in that tag. -->
     <declare-styleable name="VoiceInteractionService">
+        <attr name="sessionService" format="string" />
         <attr name="settingsActivity" />
     </declare-styleable>
 

@@ -1009,6 +1009,7 @@ package android {
     field public static final int selectedDateVerticalBar = 16843591; // 0x1010347
     field public static final int selectedWeekBackgroundColor = 16843586; // 0x1010342
     field public static final int sequence = 16843815; // 0x1010427
+    field public static final int sessionService = 16843850; // 0x101044a
     field public static final int settingsActivity = 16843301; // 0x1010225
     field public static final int shadowColor = 16843105; // 0x1010161
     field public static final int shadowDx = 16843106; // 0x1010162
@@ -1663,10 +1664,14 @@ package android {
     field public static final int decelerate_cubic = 17563651; // 0x10c0003
     field public static final int decelerate_quad = 17563649; // 0x10c0001
     field public static final int decelerate_quint = 17563653; // 0x10c0005
-    field public static final int fast_out_linear_in = 17563663; // 0x10c000f
-    field public static final int fast_out_slow_in = 17563661; // 0x10c000d
+    field public static final int fast_out_linear_in = 17563667; // 0x10c0013
+    field public static final int fast_out_slow_in = 17563665; // 0x10c0011
+    field public static final int l_resource_pad1 = 17563664; // 0x10c0010
+    field public static final int l_resource_pad2 = 17563663; // 0x10c000f
+    field public static final int l_resource_pad3 = 17563662; // 0x10c000e
+    field public static final int l_resource_pad4 = 17563661; // 0x10c000d
     field public static final int linear = 17563659; // 0x10c000b
-    field public static final int linear_out_slow_in = 17563662; // 0x10c000e
+    field public static final int linear_out_slow_in = 17563666; // 0x10c0012
     field public static final int overshoot = 17563656; // 0x10c0008
   }
 
@@ -4842,20 +4847,26 @@ package android.app {
   }
 
   public class VoiceInteractor {
-    method public android.app.VoiceInteractor.Request startCommand(android.app.VoiceInteractor.Callback, java.lang.String, android.os.Bundle);
-    method public android.app.VoiceInteractor.Request startConfirmation(android.app.VoiceInteractor.Callback, java.lang.String, android.os.Bundle);
+    method public boolean submitRequest(android.app.VoiceInteractor.Request);
     method public boolean[] supportsCommands(java.lang.String[]);
   }
 
-  public static class VoiceInteractor.Callback {
-    ctor public VoiceInteractor.Callback();
-    method public void onCancel(android.app.VoiceInteractor.Request);
-    method public void onCommandResult(android.app.VoiceInteractor.Request, android.os.Bundle);
-    method public void onConfirmationResult(android.app.VoiceInteractor.Request, boolean, android.os.Bundle);
+  public static class VoiceInteractor.CommandRequest extends android.app.VoiceInteractor.Request {
+    ctor public VoiceInteractor.CommandRequest(java.lang.String, android.os.Bundle);
+    method public void onCommandResult(android.os.Bundle);
   }
 
-  public static class VoiceInteractor.Request {
+  public static class VoiceInteractor.ConfirmationRequest extends android.app.VoiceInteractor.Request {
+    ctor public VoiceInteractor.ConfirmationRequest(java.lang.CharSequence, android.os.Bundle);
+    method public void onConfirmationResult(boolean, android.os.Bundle);
+  }
+
+  public static abstract class VoiceInteractor.Request {
+    ctor public VoiceInteractor.Request();
     method public void cancel();
+    method public android.app.Activity getActivity();
+    method public android.content.Context getContext();
+    method public void onCancel();
   }
 
   public final class WallpaperInfo implements android.os.Parcelable {
@@ -24919,7 +24930,7 @@ package android.service.voice {
   public class VoiceInteractionService extends android.app.Service {
     ctor public VoiceInteractionService();
     method public android.os.IBinder onBind(android.content.Intent);
-    method public void startVoiceActivity(android.content.Intent, android.service.voice.VoiceInteractionSession);
+    method public void startVoiceActivity(android.content.Intent, android.os.Bundle);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.voice.VoiceInteractionService";
     field public static final java.lang.String SERVICE_META_DATA = "android.voice_interaction";
   }
@@ -24938,8 +24949,14 @@ package android.service.voice {
 
   public static class VoiceInteractionSession.Request {
     method public void sendCancelResult();
-    method public void sendCommandResult(android.os.Bundle);
+    method public void sendCommandResult(boolean, android.os.Bundle);
     method public void sendConfirmResult(boolean, android.os.Bundle);
+  }
+
+  public abstract class VoiceInteractionSessionService extends android.app.Service {
+    ctor public VoiceInteractionSessionService();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract android.service.voice.VoiceInteractionSession onNewSession(android.os.Bundle);
   }
 
 }

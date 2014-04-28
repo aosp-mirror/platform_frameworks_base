@@ -96,11 +96,11 @@ public abstract class VoiceInteractionSession {
             }
         }
 
-        public void sendCommandResult(Bundle result) {
+        public void sendCommandResult(boolean complete, Bundle result) {
             try {
                 if (DEBUG) Log.d(TAG, "sendCommandResult: req=" + mInterface
                         + " result=" + result);
-                mCallback.deliverCommandResult(mInterface, result);
+                mCallback.deliverCommandResult(mInterface, complete, result);
             } catch (RemoteException e) {
             }
         }

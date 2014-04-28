@@ -21,6 +21,7 @@ import android.app.Instrumentation;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -50,12 +51,11 @@ public class VoiceInteractionService extends Service {
 
     IVoiceInteractionManagerService mSystemService;
 
-    public void startVoiceActivity(Intent intent, VoiceInteractionSession session) {
+    public void startVoiceActivity(Intent intent, Bundle sessionArgs) {
         try {
-            int res = mSystemService.startVoiceActivity(intent,
+            mSystemService.startVoiceActivity(intent,
                     intent.resolveType(getContentResolver()),
-                    mInterface, session.mSession, session.mInteractor);
-            Instrumentation.checkStartActivityResult(res, intent);
+                    mInterface, sessionArgs);
         } catch (RemoteException e) {
         }
     }

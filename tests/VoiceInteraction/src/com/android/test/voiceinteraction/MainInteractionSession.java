@@ -24,8 +24,11 @@ import android.util.Log;
 public class MainInteractionSession extends VoiceInteractionSession {
     static final String TAG = "MainInteractionSession";
 
-    MainInteractionSession(Context context) {
+    final Bundle mArgs;
+
+    MainInteractionSession(Context context, Bundle args) {
         super(context);
+        mArgs = args;
     }
 
     @Override
@@ -42,7 +45,7 @@ public class MainInteractionSession extends VoiceInteractionSession {
     @Override
     public void onCommand(Caller caller, Request request, String command, Bundle extras) {
         Log.i(TAG, "onCommand: command=" + command + " extras=" + extras);
-        request.sendCommandResult(null);
+        request.sendCommandResult(true, null);
     }
 
     @Override

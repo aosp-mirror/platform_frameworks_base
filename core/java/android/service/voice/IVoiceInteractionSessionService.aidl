@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.internal.app;
+package android.service.voice;
 
-import android.content.Intent;
 import android.os.Bundle;
 
-import com.android.internal.app.IVoiceInteractor;
-import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
 
-interface IVoiceInteractionManagerService {
-    void startVoiceActivity(in Intent intent, String resolvedType, IVoiceInteractionService service,
-            in Bundle sessionArgs);
-    int deliverNewSession(IBinder token, IVoiceInteractionSession session,
-            IVoiceInteractor interactor);
+/**
+ * @hide
+ */
+oneway interface IVoiceInteractionSessionService {
+    void newSession(IBinder token, in Bundle args);
 }

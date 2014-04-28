@@ -5454,7 +5454,7 @@ public class Activity extends ContextThemeWrapper
         mEmbeddedID = id;
         mLastNonConfigurationInstances = lastNonConfigurationInstances;
         mVoiceInteractor = voiceInteractor != null
-                ? new VoiceInteractor(this, voiceInteractor, Looper.myLooper()) : null;
+                ? new VoiceInteractor(this, this, voiceInteractor, Looper.myLooper()) : null;
 
         mWindow.setWindowManager(
                 (WindowManager)context.getSystemService(Context.WINDOW_SERVICE),

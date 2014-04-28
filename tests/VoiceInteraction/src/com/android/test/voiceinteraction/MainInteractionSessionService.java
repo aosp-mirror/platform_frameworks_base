@@ -16,23 +16,13 @@
 
 package com.android.test.voiceinteraction;
 
-import android.content.Intent;
-import android.service.voice.VoiceInteractionService;
-import android.util.Log;
+import android.os.Bundle;
+import android.service.voice.VoiceInteractionSession;
+import android.service.voice.VoiceInteractionSessionService;
 
-public class MainInteractionService extends VoiceInteractionService {
-    static final String TAG = "MainInteractionService";
-
+public class MainInteractionSessionService extends VoiceInteractionSessionService {
     @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.i(TAG, "Creating " + this);
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        startVoiceActivity(new Intent(this, TestInteractionActivity.class), null);
-        stopSelf(startId);
-        return START_NOT_STICKY;
+    public VoiceInteractionSession onNewSession(Bundle args) {
+        return new MainInteractionSession(this, args);
     }
 }
