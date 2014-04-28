@@ -222,4 +222,6 @@
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"%d mehr"</item>
   </plurals>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Zum Öffnen erneut tippen"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Zum Entsperren nach oben wischen"</string>
 </resources>

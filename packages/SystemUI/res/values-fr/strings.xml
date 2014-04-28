@@ -218,9 +218,10 @@
     <item quantity="other" msgid="7388721375827338153">"%d notifications masquées"</item>
   </plurals>
     <string name="zen_mode_notification_text" msgid="8336623711388065713">"Appuyer pour afficher"</string>
-    <!-- no translation found for zen_mode_title (8793432092004749188) -->
-    <skip />
+    <string name="zen_mode_title" msgid="8793432092004749188">"Ne pas déranger"</string>
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"+ %d autres"</item>
   </plurals>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Appuyer à nouveau pour ouvrir"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Faire glisser pour déverrouiller"</string>
 </resources>

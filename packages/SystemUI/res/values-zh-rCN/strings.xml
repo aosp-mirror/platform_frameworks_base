@@ -218,9 +218,10 @@
     <item quantity="other" msgid="7388721375827338153">"隐藏了%d条通知"</item>
   </plurals>
     <string name="zen_mode_notification_text" msgid="8336623711388065713">"触摸即可显示"</string>
-    <!-- no translation found for zen_mode_title (8793432092004749188) -->
-    <skip />
+    <string name="zen_mode_title" msgid="8793432092004749188">"勿扰"</string>
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"还有%d条"</item>
   </plurals>
+    <string name="notification_tap_again" msgid="7590196980943943842">"再次点按即可打开"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"向上滑动即可解锁"</string>
 </resources>

@@ -216,9 +216,10 @@
     <item quantity="other" msgid="7388721375827338153">"알림 %d개 숨김"</item>
   </plurals>
     <string name="zen_mode_notification_text" msgid="8336623711388065713">"표시하려면 터치"</string>
-    <!-- no translation found for zen_mode_title (8793432092004749188) -->
-    <skip />
+    <string name="zen_mode_title" msgid="8793432092004749188">"알림 일시중지"</string>
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"%d개 더보기"</item>
   </plurals>
+    <string name="notification_tap_again" msgid="7590196980943943842">"다시 탭하여 열기"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"위로 스와이프하여 잠금 해제"</string>
 </resources>

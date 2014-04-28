@@ -218,9 +218,10 @@
     <item quantity="other" msgid="7388721375827338153">"Skryté upozornenia: %d"</item>
   </plurals>
     <string name="zen_mode_notification_text" msgid="8336623711388065713">"Upozornenie zobrazíte dotykom"</string>
-    <!-- no translation found for zen_mode_title (8793432092004749188) -->
-    <skip />
+    <string name="zen_mode_title" msgid="8793432092004749188">"Nerušiť"</string>
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"%d ďalších"</item>
   </plurals>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Upozornenie otvoríte opätovným klepnutím"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Zariadenie odomknete prejdením prstom nahor"</string>
 </resources>
