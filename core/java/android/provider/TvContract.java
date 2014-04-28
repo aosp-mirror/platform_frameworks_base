@@ -16,8 +16,12 @@
 
 package android.provider;
 
+import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.net.Uri;
+
+import java.util.List;
 
 /**
  * <p>
@@ -42,6 +46,35 @@ public final class TvContract {
     /** The authority for the TV provider. */
     public static final String AUTHORITY = "com.android.tv";
 
+    private static final String PATH_CHANNEL = "channel";
+    private static final String PATH_PROGRAM = "program";
+    private static final String PATH_INPUT = "input";
+
+    /**
+     * An optional query, update or delete URI parameter that allows the caller to specify start
+     * time (in milliseconds since the epoch) to filter programs.
+     *
+     * @hide
+     */
+    public static final String PARAM_START_TIME = "start_time";
+
+    /**
+     * An optional query, update or delete URI parameter that allows the caller to specify end time
+     * (in milliseconds since the epoch) to filter programs.
+     *
+     * @hide
+     */
+    public static final String PARAM_END_TIME = "end_time";
+
+    /**
+     * A query, update or delete URI parameter that allows the caller to operate on all or
+     * browsable-only channels. If set to "true", the rows that contain non-browsable channels are
+     * not affected.
+     *
+     * @hide
+     */
+    public static final String PARAM_BROWSABLE_ONLY = "browable_only";
+
     /**
      * Builds a URI that points to a specific channel.
      *
@@ -49,6 +82,32 @@ public final class TvContract {
      */
     public static final Uri buildChannelUri(long channelId) {
         return ContentUris.withAppendedId(Channels.CONTENT_URI, channelId);
+    }
+
+    /**
+     * Builds a URI that points to all browsable channels from a given TV input.
+     *
+     * @param name {@link ComponentName} of the {@link android.tv.TvInputService} that implements
+     *            the given TV input.
+     */
+    public static final Uri buildChannelsUriForInput(ComponentName name) {
+        return buildChannelsUriForInput(name, true);
+    }
+
+    /**
+     * Builds a URI that points to all or browsable-only channels from a given TV input.
+     *
+     * @param name {@link ComponentName} of the {@link android.tv.TvInputService} that implements
+     *            the given TV input.
+     * @param browsableOnly If set to {@code true} the URI points to only browsable channels. If set
+     *            to {@code false} the URI points to all channels regardless of whether they are
+     *            browsable or not.
+     */
+    public static final Uri buildChannelsUriForInput(ComponentName name, boolean browsableOnly) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY)
+                .appendPath(PATH_INPUT).appendPath(name.getPackageName())
+                .appendPath(name.getClassName()).appendPath(PATH_CHANNEL)
+                .appendQueryParameter(PARAM_BROWSABLE_ONLY, String.valueOf(browsableOnly)).build();
     }
 
     /**
@@ -61,6 +120,37 @@ public final class TvContract {
     }
 
     /**
+     * Builds a URI that points to all programs on a given channel.
+     *
+     * @param channelUri The URI of the channel to return programs for.
+     */
+    public static final Uri buildProgramsUriForChannel(Uri channelUri) {
+        if (!PATH_CHANNEL.equals(channelUri.getPathSegments().get(0))) {
+            throw new IllegalArgumentException("Not a channel: " + channelUri);
+        }
+        String channelId = String.valueOf(ContentUris.parseId(channelUri));
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY)
+                .appendPath(PATH_CHANNEL).appendPath(channelId).appendPath(PATH_PROGRAM).build();
+    }
+
+    /**
+     * Builds a URI that points to programs on a specific channel whose schedules overlap with the
+     * given time frame.
+     *
+     * @param channelUri The URI of the channel to return programs for.
+     * @param startTime The start time used to filter programs. The returned programs should have
+     *            {@link Programs#END_TIME_UTC_MILLIS} that is greater than this time.
+     * @param endTime The end time used to filter programs. The returned programs should have
+     *            {@link Programs#START_TIME_UTC_MILLIS} that is less than this time.
+     */
+    public static final Uri buildProgramsUriForChannel(Uri channelUri, long startTime,
+            long endTime) {
+        Uri uri = buildProgramsUriForChannel(channelUri);
+        return uri.buildUpon().appendQueryParameter(PARAM_START_TIME, String.valueOf(startTime))
+                .appendQueryParameter(PARAM_END_TIME, String.valueOf(endTime)).build();
+    }
+
+    /**
      * Builds a URI that points to a specific program the user watched.
      *
      * @param watchedProgramId The ID of the watched program to point to.
@@ -69,6 +159,61 @@ public final class TvContract {
     public static final Uri buildWatchedProgramUri(long watchedProgramId) {
         return ContentUris.withAppendedId(WatchedPrograms.CONTENT_URI, watchedProgramId);
     }
+
+    /**
+     * Extracts the {@link Channels#PACKAGE_NAME} from a given URI.
+     *
+     * @param channelsUri A URI constructed by {@link #buildChannelsUriForInput(ComponentName)} or
+     *            {@link #buildChannelsUriForInput(ComponentName, boolean)}.
+     * @hide
+     */
+    public static final String getPackageName(Uri channelsUri) {
+        final List<String> paths = channelsUri.getPathSegments();
+        if (paths.size() < 4) {
+            throw new IllegalArgumentException("Not channels: " + channelsUri);
+        }
+        if (!PATH_INPUT.equals(paths.get(0)) || !PATH_CHANNEL.equals(paths.get(3))) {
+            throw new IllegalArgumentException("Not channels: " + channelsUri);
+        }
+        return paths.get(1);
+    }
+
+    /**
+     * Extracts the {@link Channels#SERVICE_NAME} from a given URI.
+     *
+     * @param channelsUri A URI constructed by {@link #buildChannelsUriForInput(ComponentName)} or
+     *            {@link #buildChannelsUriForInput(ComponentName, boolean)}.
+     * @hide
+     */
+    public static final String getServiceName(Uri channelsUri) {
+        final List<String> paths = channelsUri.getPathSegments();
+        if (paths.size() < 4) {
+            throw new IllegalArgumentException("Not channels: " + channelsUri);
+        }
+        if (!PATH_INPUT.equals(paths.get(0)) || !PATH_CHANNEL.equals(paths.get(3))) {
+            throw new IllegalArgumentException("Not channels: " + channelsUri);
+        }
+        return paths.get(2);
+    }
+
+    /**
+     * Extracts the {@link Channels#_ID} from a given URI.
+     *
+     * @param programsUri A URI constructed by {@link #buildProgramsUriForChannel(Uri)} or
+     *            {@link #buildProgramsUriForChannel(Uri, long, long)}.
+     * @hide
+     */
+    public static final String getChannelId(Uri programsUri) {
+        final List<String> paths = programsUri.getPathSegments();
+        if (paths.size() < 3) {
+            throw new IllegalArgumentException("Not programs: " + programsUri);
+        }
+        if (!PATH_CHANNEL.equals(paths.get(0)) || !PATH_PROGRAM.equals(paths.get(2))) {
+            throw new IllegalArgumentException("Not programs: " + programsUri);
+        }
+        return paths.get(1);
+    }
+
 
     private TvContract() {}
 
@@ -93,7 +238,8 @@ public final class TvContract {
     public static final class Channels implements BaseTvColumns {
 
         /** The content:// style URI for this table. */
-        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/channel");
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/"
+                + PATH_CHANNEL);
 
         /** The MIME type of a directory of TV channels. */
         public static final String CONTENT_TYPE =
@@ -276,7 +422,8 @@ public final class TvContract {
     public static final class Programs implements BaseTvColumns {
 
         /** The content:// style URI for this table. */
-        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/program");
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/"
+                + PATH_PROGRAM);
 
         /** The MIME type of a directory of TV programs. */
         public static final String CONTENT_TYPE =
