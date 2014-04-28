@@ -1019,16 +1019,16 @@ please see styles_device_defaults.xml.
     <!-- Dialog styles -->
 
     <style name="AlertDialog.Quantum" parent="AlertDialog">
-        <item name="fullDark">?attr/colorBackground</item>
-        <item name="topDark">?attr/colorBackground</item>
-        <item name="centerDark">?attr/colorBackground</item>
-        <item name="bottomDark">?attr/colorBackground</item>
-        <item name="fullBright">?attr/colorBackground</item>
-        <item name="topBright">?attr/colorBackground</item>
-        <item name="centerBright">?attr/colorBackground</item>
-        <item name="bottomBright">?attr/colorBackground</item>
-        <item name="bottomMedium">?attr/colorBackground</item>
-        <item name="centerMedium">?attr/colorBackground</item>
+        <item name="fullDark">@color/transparent</item>
+        <item name="topDark">@color/transparent</item>
+        <item name="centerDark">@color/transparent</item>
+        <item name="bottomDark">@color/transparent</item>
+        <item name="fullBright">@color/transparent</item>
+        <item name="topBright">@color/transparent</item>
+        <item name="centerBright">@color/transparent</item>
+        <item name="bottomBright">@color/transparent</item>
+        <item name="bottomMedium">@color/transparent</item>
+        <item name="centerMedium">@color/transparent</item>
         <item name="layout">@layout/alert_dialog_quantum</item>
         <item name="listLayout">@layout/select_dialog_quantum</item>
         <item name="progressLayout">@layout/progress_dialog_quantum</item>
