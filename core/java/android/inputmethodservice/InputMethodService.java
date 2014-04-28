@@ -255,8 +255,9 @@ public class InputMethodService extends AbstractInputMethodService {
     public static final int CURSOR_ANCHOR_MONITOR_MODE_NONE = 0x0;
 
     /**
-     * The IME will receive {@link #onUpdateCursor(Rect)} called back with the current
-     * cursor rectangle in screen coordinates.
+     * Passing this flag into a call to {@link #setCursorAnchorMonitorMode(int)} will result in
+     * the cursor rectangle being provided in screen coordinates to subsequent
+     * {@link #onUpdateCursor(Rect)} callbacks.
      */
     public static final int CURSOR_ANCHOR_MONITOR_MODE_CURSOR_RECT = 0x1;
 
