@@ -421,11 +421,8 @@ public class NsdService extends INsdManager.Stub {
                 }
 
                 /* This goes in response as msg.arg2 */
-                int clientId = -1;
-                int keyId = clientInfo.mClientIds.indexOfValue(id);
-                if (keyId != -1) {
-                    clientId = clientInfo.mClientIds.keyAt(keyId);
-                } else {
+                int clientId = clientInfo.getClientId(id);
+                if (clientId < 0) {
                     // This can happen because of race conditions. For example,
                     // SERVICE_FOUND may race with STOP_SERVICE_DISCOVERY,
                     // and we may get in this situation.
@@ -904,5 +901,18 @@ public class NsdService extends INsdManager.Stub {
             mClientRequests.clear();
         }
 
+        // mClientIds is a sparse array of listener id -> mDnsClient id.  For a given mDnsClient id,
+        // return the corresponding listener id.  mDnsClient id is also called a global id.
+        private int getClientId(final int globalId) {
+            // This doesn't use mClientIds.indexOfValue because indexOfValue uses == (not .equals)
+            // while also coercing the int primitives to Integer objects.
+            for (int i = 0, nSize = mClientIds.size(); i < nSize; i++) {
+                int mDnsId = mClientIds.valueAt(i);
+                if (globalId == mDnsId) {
+                    return mClientIds.keyAt(i);
+                }
+            }
+            return -1;
+        }
     }
 }
