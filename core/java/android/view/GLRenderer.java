@@ -555,7 +555,7 @@ public class GLRenderer extends HardwareRenderer {
     }
 
     @Override
-    public void invokeFunctor(long functor, boolean waitForCompletion) {
+    void invokeFunctor(long functor, boolean waitForCompletion) {
         boolean needsContext = !isEnabled() || checkRenderContext() == SURFACE_STATE_ERROR;
         boolean hasContext = !needsContext;
 

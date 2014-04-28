@@ -678,6 +678,14 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    public boolean invokeFunctor(long functor, boolean waitForCompletion) {
+        if (mAttachInfo.mHardwareRenderer == null || !mAttachInfo.mHardwareRenderer.isEnabled()) {
+            return false;
+        }
+        mAttachInfo.mHardwareRenderer.invokeFunctor(functor, waitForCompletion);
+        return true;
+    }
+
     private void enableHardwareAcceleration(WindowManager.LayoutParams attrs) {
         mAttachInfo.mHardwareAccelerated = false;
         mAttachInfo.mHardwareAccelerationRequested = false;

@@ -217,7 +217,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    public void invokeFunctor(long functor, boolean waitForCompletion) {
+    void invokeFunctor(long functor, boolean waitForCompletion) {
         nInvokeFunctor(mNativeProxy, functor, waitForCompletion);
     }
 
