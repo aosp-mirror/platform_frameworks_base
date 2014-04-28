@@ -501,10 +501,32 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     }
 
     private int drawRippleLayer(Canvas canvas, Rect bounds, boolean maskOnly) {
-        final Ripple[] activeRipples = mActiveRipples;
         final int ripplesCount = mActiveRipplesCount;
+        if (ripplesCount == 0) {
+            return -1;
+        }
 
-        Paint ripplePaint = null;
+        final Ripple[] activeRipples = mActiveRipples;
+        final boolean projected = isProjected();
+        final Rect layerBounds = projected ? getDirtyBounds() : bounds;
+
+        // Separate the ripple color and alpha channel. The alpha will be
+        // applied when we merge the ripples down to the canvas.
+        final int rippleColor;
+        if (mState.mTint != null) {
+            rippleColor = mState.mTint.getColorForState(getState(), Color.TRANSPARENT);
+        } else {
+            rippleColor = Color.TRANSPARENT;
+        }
+        final int rippleAlpha = Color.alpha(rippleColor);
+
+        if (mRipplePaint == null) {
+            mRipplePaint = new Paint();
+            mRipplePaint.setAntiAlias(true);
+        }
+        final Paint ripplePaint = mRipplePaint;
+        ripplePaint.setColor(rippleColor);
+
         boolean drewRipples = false;
         int restoreToCount = -1;
         int activeRipplesCount = 0;
@@ -524,20 +546,9 @@ public class TouchFeedbackDrawable extends LayerDrawable {
             // If we're masking the ripple layer, make sure we have a layer
             // first. This will merge SRC_OVER (directly) onto the canvas.
             if (restoreToCount < 0) {
-                // Separate the ripple color and alpha channel. The alpha will be
-                // applied when we merge the ripples down to the canvas.
-                final int rippleColor;
-                if (mState.mTint != null) {
-                    rippleColor = mState.mTint.getColorForState(getState(), Color.TRANSPARENT);
-                } else {
-                    rippleColor = Color.TRANSPARENT;
-                }
-                final int rippleAlpha = Color.alpha(rippleColor);
-
                 // If we're projecting or we only have a mask, we want to treat the
                 // underlying canvas as our content and merge the ripple layer down
                 // using the tint xfermode.
-                final boolean projected = isProjected();
                 final PorterDuffXfermode xfermode;
                 if (projected || maskOnly) {
                     xfermode = mState.getTintXfermode();
@@ -547,18 +558,12 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
                 final Paint layerPaint = getMaskingPaint(xfermode);
                 layerPaint.setAlpha(rippleAlpha);
-                final Rect layerBounds = projected ? getDirtyBounds() : bounds;
                 restoreToCount = canvas.saveLayer(layerBounds.left, layerBounds.top,
                         layerBounds.right, layerBounds.bottom, layerPaint);
                 layerPaint.setAlpha(255);
             }
 
-            if (mRipplePaint == null) {
-                mRipplePaint = new Paint();
-                mRipplePaint.setAntiAlias(true);
-            }
-
-            drewRipples |= ripple.draw(canvas, mRipplePaint);
+            drewRipples |= ripple.draw(canvas, ripplePaint);
 
             activeRipples[activeRipplesCount] = activeRipples[i];
             activeRipplesCount++;
