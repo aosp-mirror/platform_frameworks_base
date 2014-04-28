@@ -32,13 +32,13 @@ import android.os.Parcel;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import static libcore.io.OsConstants.IFA_F_DEPRECATED;
-import static libcore.io.OsConstants.IFA_F_PERMANENT;
-import static libcore.io.OsConstants.IFA_F_TENTATIVE;
-import static libcore.io.OsConstants.RT_SCOPE_HOST;
-import static libcore.io.OsConstants.RT_SCOPE_LINK;
-import static libcore.io.OsConstants.RT_SCOPE_SITE;
-import static libcore.io.OsConstants.RT_SCOPE_UNIVERSE;
+import static android.system.OsConstants.IFA_F_DEPRECATED;
+import static android.system.OsConstants.IFA_F_PERMANENT;
+import static android.system.OsConstants.IFA_F_TENTATIVE;
+import static android.system.OsConstants.RT_SCOPE_HOST;
+import static android.system.OsConstants.RT_SCOPE_LINK;
+import static android.system.OsConstants.RT_SCOPE_SITE;
+import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
 
 /**
  * Tests for {@link LinkAddress}.

@@ -19,6 +19,9 @@ package android.app;
 import android.content.SharedPreferences;
 import android.os.FileUtils;
 import android.os.Looper;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.StructStat;
 import android.util.Log;
 
 import com.google.android.collect.Maps;
@@ -43,10 +46,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CountDownLatch;
 
-import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
-import libcore.io.Libcore;
-import libcore.io.StructStat;
 
 final class SharedPreferencesImpl implements SharedPreferences {
     private static final String TAG = "SharedPreferencesImpl";
@@ -110,7 +110,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         Map map = null;
         StructStat stat = null;
         try {
-            stat = Libcore.os.stat(mFile.getPath());
+            stat = Os.stat(mFile.getPath());
             if (mFile.canRead()) {
                 BufferedInputStream str = null;
                 try {
@@ -172,7 +172,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
              * violation, but we explicitly want this one.
              */
             BlockGuard.getThreadPolicy().onReadFromDisk();
-            stat = Libcore.os.stat(mFile.getPath());
+            stat = Os.stat(mFile.getPath());
         } catch (ErrnoException e) {
             return true;
         }
@@ -599,7 +599,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             str.close();
             ContextImpl.setFilePermissionsFromMode(mFile.getPath(), mMode, 0);
             try {
-                final StructStat stat = Libcore.os.stat(mFile.getPath());
+                final StructStat stat = Os.stat(mFile.getPath());
                 synchronized (this) {
                     mStatTimestamp = stat.st_mtime;
                     mStatSize = stat.st_size;

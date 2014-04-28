@@ -41,6 +41,9 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
 import android.provider.Settings;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.StructStatVfs;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 
@@ -66,11 +69,8 @@ import javax.crypto.CipherInputStream;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 
-import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
-import libcore.io.Libcore;
 import libcore.io.Streams;
-import libcore.io.StructStatVfs;
 
 /*
  * This service copies a downloaded apk to a file passed in as
@@ -245,7 +245,7 @@ public class DefaultContainerService extends IntentService {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
             try {
-                final StructStatVfs stat = Libcore.os.statvfs(path);
+                final StructStatVfs stat = Os.statvfs(path);
                 final long totalSize = stat.f_blocks * stat.f_bsize;
                 final long availSize = stat.f_bavail * stat.f_bsize;
                 return new long[] { totalSize, availSize };
@@ -379,7 +379,7 @@ public class DefaultContainerService extends IntentService {
         }
 
         try {
-            Libcore.os.chmod(resFile.getAbsolutePath(), 0640);
+            Os.chmod(resFile.getAbsolutePath(), 0640);
         } catch (ErrnoException e) {
             Slog.e(TAG, "Could not chown APK: " + e.getMessage());
             PackageHelper.destroySdDir(newCid);
@@ -401,7 +401,7 @@ public class DefaultContainerService extends IntentService {
             }
 
             try {
-                Libcore.os.chmod(publicZipFile.getAbsolutePath(), 0644);
+                Os.chmod(publicZipFile.getAbsolutePath(), 0644);
             } catch (ErrnoException e) {
                 Slog.e(TAG, "Could not chown public resource file: " + e.getMessage());
                 PackageHelper.destroySdDir(newCid);
