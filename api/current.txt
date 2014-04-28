@@ -34819,6 +34819,7 @@ package android.widget {
     method public void setExcludeMimes(java.lang.String[]);
     method public void setImageToDefault();
     method public void setMode(int);
+    method public void setOverlay(android.graphics.drawable.Drawable);
     field protected java.lang.String[] mExcludeMimes;
   }
 
