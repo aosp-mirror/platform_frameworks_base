@@ -18,13 +18,12 @@ package android.net;
 
 import android.net.LinkProperties;
 import android.net.RouteInfo;
+import android.system.OsConstants;
 import android.test.suitebuilder.annotation.SmallTest;
 import junit.framework.TestCase;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
-
-import libcore.io.OsConstants;
 
 public class LinkPropertiesTest extends TestCase {
     private static InetAddress ADDRV4 = NetworkUtils.numericToInetAddress("75.208.6.1");
