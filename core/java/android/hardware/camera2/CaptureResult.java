@@ -33,6 +33,8 @@ import android.util.Rational;
  * capture. The result also includes additional metadata about the state of the
  * camera device during the capture.</p>
  *
+ * <p>{@link CameraCharacteristics} objects are immutable.</p>
+ *
  */
 public final class CaptureResult extends CameraMetadata {
 
@@ -56,6 +58,14 @@ public final class CaptureResult extends CameraMetadata {
         mResults = results;
         mRequest = parent;
         mSequenceId = sequenceId;
+    }
+
+    /**
+     * Returns a copy of the underlying {@link CameraMetadataNative}.
+     * @hide
+     */
+    public CameraMetadataNative getNativeCopy() {
+        return new CameraMetadataNative(mResults);
     }
 
     @Override

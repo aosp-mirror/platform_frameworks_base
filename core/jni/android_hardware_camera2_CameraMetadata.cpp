@@ -30,6 +30,7 @@
 #include "JNIHelp.h"
 #include "android_os_Parcel.h"
 #include "android_runtime/AndroidRuntime.h"
+#include "android_runtime/android_hardware_camera2_CameraMetadata.h"
 
 #include <binder/IServiceManager.h>
 #include <camera/CameraMetadata.h>
@@ -56,6 +57,31 @@ struct fields_t {
 };
 
 static fields_t fields;
+
+namespace android {
+
+status_t CameraMetadata_getNativeMetadata(JNIEnv* env, jobject thiz,
+        /*out*/CameraMetadata* metadata) {
+    if (!thiz) {
+        ALOGE("%s: Invalid java metadata object.", __FUNCTION__);
+        return BAD_VALUE;
+    }
+
+    if (!metadata) {
+        ALOGE("%s: Invalid output metadata object.", __FUNCTION__);
+        return BAD_VALUE;
+    }
+    CameraMetadata* nativePtr = reinterpret_cast<CameraMetadata*>(env->GetLongField(thiz,
+            fields.metadata_ptr));
+    if (nativePtr == NULL) {
+        ALOGE("%s: Invalid native pointer in java metadata object.", __FUNCTION__);
+        return BAD_VALUE;
+    }
+    *metadata = *nativePtr;
+    return OK;
+}
+
+} /*namespace android*/
 
 namespace {
 struct Helpers {

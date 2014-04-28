@@ -228,6 +228,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libz \
 	libaudioutils \
 	libpdfrenderer \
+	libimg_utils \
 
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui

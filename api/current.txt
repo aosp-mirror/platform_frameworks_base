@@ -13707,16 +13707,17 @@ package android.media {
     ctor public DeniedByServerException(java.lang.String);
   }
 
-  public final class DngCreator {
+  public final class DngCreator implements java.lang.AutoCloseable {
     ctor public DngCreator(android.hardware.camera2.CameraCharacteristics, android.hardware.camera2.CaptureResult);
+    method public void close();
     method public android.media.DngCreator setDescription(java.lang.String);
     method public android.media.DngCreator setLocation(android.location.Location);
     method public android.media.DngCreator setOrientation(int);
     method public android.media.DngCreator setThumbnail(android.graphics.Bitmap);
     method public android.media.DngCreator setThumbnail(android.media.Image);
-    method public void writeByteBuffer(java.io.OutputStream, java.nio.ByteBuffer, int, long) throws java.io.IOException;
+    method public void writeByteBuffer(java.io.OutputStream, android.util.Size, java.nio.ByteBuffer, long) throws java.io.IOException;
     method public void writeImage(java.io.OutputStream, android.media.Image) throws java.io.IOException;
-    method public void writeInputStream(java.io.OutputStream, java.io.InputStream, int, long) throws java.io.IOException;
+    method public void writeInputStream(java.io.OutputStream, android.util.Size, java.io.InputStream, long) throws java.io.IOException;
   }
 
   public class ExifInterface {

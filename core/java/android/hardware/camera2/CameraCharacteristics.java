@@ -30,6 +30,8 @@ import java.util.List;
  * through the {@link CameraManager CameraManager}
  * interface in addition to through the CameraDevice interface.</p>
  *
+ * <p>{@link CameraCharacteristics} objects are immutable.</p>
+ *
  * @see CameraDevice
  * @see CameraManager
  */
@@ -45,6 +47,14 @@ public final class CameraCharacteristics extends CameraMetadata {
      */
     public CameraCharacteristics(CameraMetadataNative properties) {
         mProperties = properties;
+    }
+
+    /**
+     * Returns a copy of the underlying {@link CameraMetadataNative}.
+     * @hide
+     */
+    public CameraMetadataNative getNativeCopy() {
+        return new CameraMetadataNative(mProperties);
     }
 
     @Override

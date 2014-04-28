@@ -17,9 +17,12 @@
 package android.media;
 
 import android.graphics.Bitmap;
+import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.impl.CameraMetadataNative;
 import android.location.Location;
+import android.util.Size;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,7 +53,7 @@ import java.nio.ByteBuffer;
  * Adobe DNG 1.4.0.0 specification</a>.
  * </p>
  */
-public final class DngCreator {
+public final class DngCreator implements AutoCloseable {
 
     /**
      * Create a new DNG object.
@@ -68,7 +71,12 @@ public final class DngCreator {
      *          {@link android.hardware.camera2.CameraCharacteristics}.
      * @param metadata a metadata object to generate tags from.
      */
-    public DngCreator(CameraCharacteristics characteristics, CaptureResult metadata) {/*TODO*/}
+    public DngCreator(CameraCharacteristics characteristics, CaptureResult metadata) {
+        if (characteristics == null || metadata == null) {
+            throw new NullPointerException("Null argument to DngCreator constructor");
+        }
+        nativeInit(characteristics.getNativeCopy(), metadata.getNativeCopy());
+    }
 
     /**
      * Set the orientation value to write.
@@ -92,6 +100,13 @@ public final class DngCreator {
      * @return this {@link #DngCreator} object.
      */
     public DngCreator setOrientation(int orientation) {
+
+        if (orientation < ExifInterface.ORIENTATION_UNDEFINED ||
+                orientation > ExifInterface.ORIENTATION_ROTATE_270) {
+            throw new IllegalArgumentException("Orientation " + orientation +
+                    " is not a valid EXIF orientation value");
+        }
+        nativeSetOrientation(orientation);
         return this;
     }
 
@@ -111,6 +126,20 @@ public final class DngCreator {
      * @return this {@link #DngCreator} object.
      */
     public DngCreator setThumbnail(Bitmap pixels) {
+        if (pixels == null) {
+            throw new NullPointerException("Null argument to setThumbnail");
+        }
+
+        Bitmap.Config config = pixels.getConfig();
+
+        if (config != Bitmap.Config.ARGB_8888) {
+            pixels = pixels.copy(Bitmap.Config.ARGB_8888, false);
+            if (pixels == null) {
+                throw new IllegalArgumentException("Unsupported Bitmap format " + config);
+            }
+            nativeSetThumbnailBitmap(pixels);
+        }
+
         return this;
     }
 
@@ -130,6 +159,21 @@ public final class DngCreator {
      * @return this {@link #DngCreator} object.
      */
     public DngCreator setThumbnail(Image pixels) {
+        if (pixels == null) {
+            throw new NullPointerException("Null argument to setThumbnail");
+        }
+
+        int format = pixels.getFormat();
+        if (format != ImageFormat.YUV_420_888) {
+            throw new IllegalArgumentException("Unsupported image format " + format);
+        }
+
+        Image.Plane[] planes = pixels.getPlanes();
+        nativeSetThumbnailImage(pixels.getWidth(), pixels.getHeight(), planes[0].getBuffer(),
+                planes[0].getRowStride(), planes[0].getPixelStride(), planes[1].getBuffer(),
+                planes[1].getRowStride(), planes[1].getPixelStride(), planes[1].getBuffer(),
+                planes[1].getRowStride(), planes[1].getPixelStride());
+
         return this;
     }
 
@@ -150,7 +194,10 @@ public final class DngCreator {
      * @throws java.lang.IllegalArgumentException if the given location object doesn't
      *          contain enough information to set location metadata.
      */
-    public DngCreator setLocation(Location location) { return this; }
+    public DngCreator setLocation(Location location) {
+        /*TODO*/
+        return this;
+    }
 
     /**
      * Set the user description string to write.
@@ -163,6 +210,7 @@ public final class DngCreator {
      * @return this {@link #DngCreator} object.
      */
     public DngCreator setDescription(String description) {
+        /*TODO*/
         return this;
     }
 
@@ -172,32 +220,33 @@ public final class DngCreator {
      *
      * <p>
      * Raw pixel data must have 16 bits per pixel, and the input must contain at least
-     * {@code offset + 2 * (stride * (height - 1) + width * height)} bytes.  The width and height of
+     * {@code offset + 2 * width * height)} bytes.  The width and height of
      * the input are taken from the width and height set in the {@link DngCreator} metadata tags,
      * and will typically be equal to the width and height of
-     * {@link android.hardware.camera2.CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE}.
-     * If insufficient metadata is set to write a well-formatted DNG file, and
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE}.
+     * The pixel layout in the input is determined from the reported color filter arrangement (CFA)
+     * set in {@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT}.  If insufficient
+     * metadata is available to write a well-formatted DNG file, an
      * {@link java.lang.IllegalStateException} will be thrown.
      * </p>
      *
-     * <p>
-     * When reading from the pixel input, {@code stride} pixels will be skipped
-     * after each row (excluding the last).
-     * </p>
-     *
      * @param dngOutput an {@link java.io.OutputStream} to write the DNG file to.
+     * @param size the {@link Size} of the image to write, in pixels.
      * @param pixels an {@link java.io.InputStream} of pixel data to write.
-     * @param stride the stride of the raw image in pixels.
      * @param offset the offset of the raw image in bytes.  This indicates how many bytes will
      *               be skipped in the input before any pixel data is read.
      *
      * @throws IOException if an error was encountered in the input or output stream.
      * @throws java.lang.IllegalStateException if not enough metadata information has been
      *          set to write a well-formatted DNG file.
+     * @throws java.lang.IllegalArgumentException if the size passed in does not match the
      */
-    public void writeInputStream(OutputStream dngOutput, InputStream pixels, int stride,
-                                 long offset) throws IOException {
-        /*TODO*/
+    public void writeInputStream(OutputStream dngOutput, Size size, InputStream pixels, long offset)
+            throws IOException {
+        if (dngOutput == null || pixels == null) {
+            throw new NullPointerException("Null argument to writeImage");
+        }
+        nativeWriteInputStream(dngOutput, pixels, offset);
     }
 
     /**
@@ -206,22 +255,18 @@ public final class DngCreator {
      *
      * <p>
      * Raw pixel data must have 16 bits per pixel, and the input must contain at least
-     * {@code offset + 2 * (stride * (height - 1) + width * height)} bytes.  The width and height of
+     * {@code offset + 2 * width * height)} bytes.  The width and height of
      * the input are taken from the width and height set in the {@link DngCreator} metadata tags,
      * and will typically be equal to the width and height of
-     * {@link android.hardware.camera2.CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE}.
-     * If insufficient metadata is set to write a well-formatted DNG file, and
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE}.
+     * The pixel layout in the input is determined from the reported color filter arrangement (CFA)
+     * set in {@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT}.  If insufficient
+     * metadata is available to write a well-formatted DNG file, an
      * {@link java.lang.IllegalStateException} will be thrown.
-     * </p>
-     *
-     * <p>
-     * When reading from the pixel input, {@code stride} pixels will be skipped
-     * after each row (excluding the last).
      * </p>
      *
      * @param dngOutput an {@link java.io.OutputStream} to write the DNG file to.
      * @param pixels an {@link java.nio.ByteBuffer} of pixel data to write.
-     * @param stride the stride of the raw image in pixels.
      * @param offset the offset of the raw image in bytes.  This indicates how many bytes will
      *               be skipped in the input before any pixel data is read.
      *
@@ -229,8 +274,13 @@ public final class DngCreator {
      * @throws java.lang.IllegalStateException if not enough metadata information has been
      *          set to write a well-formatted DNG file.
      */
-    public void writeByteBuffer(OutputStream dngOutput, ByteBuffer pixels, int stride,
-                                long offset) throws IOException {/*TODO*/}
+    public void writeByteBuffer(OutputStream dngOutput, Size size, ByteBuffer pixels, long offset)
+            throws IOException {
+        if (dngOutput == null || pixels == null) {
+            throw new NullPointerException("Null argument to writeImage");
+        }
+        nativeWriteByteBuffer(dngOutput, pixels, offset);
+    }
 
     /**
      * Write the pixel data to a DNG file with the currently configured metadata.
@@ -249,6 +299,70 @@ public final class DngCreator {
      * @throws java.lang.IllegalStateException if not enough metadata information has been
      *          set to write a well-formatted DNG file.
      */
-    public void writeImage(OutputStream dngOutput, Image pixels) throws IOException {/*TODO*/}
+    public void writeImage(OutputStream dngOutput, Image pixels) throws IOException {
+        if (dngOutput == null || pixels == null) {
+            throw new NullPointerException("Null argument to writeImage");
+        }
 
+        int format = pixels.getFormat();
+        if (format != ImageFormat.RAW_SENSOR) {
+            throw new IllegalArgumentException("Unsupported image format " + format);
+        }
+
+        Image.Plane[] planes = pixels.getPlanes();
+        nativeWriteImage(dngOutput, pixels.getWidth(), pixels.getHeight(), planes[0].getBuffer(),
+                planes[0].getRowStride(), planes[0].getPixelStride());
+    }
+
+    @Override
+    public void close() {
+        nativeDestroy();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            close();
+        } finally {
+            super.finalize();
+        }
+    }
+
+    /**
+     * This field is used by native code, do not access or modify.
+     */
+    private long mNativeContext;
+
+    private static native void nativeClassInit();
+
+    private synchronized native void nativeInit(CameraMetadataNative nativeCharacteristics,
+                                                CameraMetadataNative nativeResult);
+
+    private synchronized native void nativeDestroy();
+
+    private synchronized native void nativeSetOrientation(int orientation);
+
+    private synchronized native void nativeSetThumbnailBitmap(Bitmap bitmap);
+
+    private synchronized native void nativeSetThumbnailImage(int width, int height,
+                                                             ByteBuffer yBuffer, int yRowStride,
+                                                             int yPixStride, ByteBuffer uBuffer,
+                                                             int uRowStride, int uPixStride,
+                                                             ByteBuffer vBuffer, int vRowStride,
+                                                             int vPixStride);
+
+    private synchronized native void nativeWriteImage(OutputStream out, int width, int height,
+                                                      ByteBuffer rawBuffer, int rowStride,
+                                                      int pixStride) throws IOException;
+
+    private synchronized native void nativeWriteByteBuffer(OutputStream out, ByteBuffer rawBuffer,
+                                                           long offset) throws IOException;
+
+    private synchronized native void nativeWriteInputStream(OutputStream out, InputStream rawStream,
+                                                            long offset) throws IOException;
+
+    static {
+        System.loadLibrary("media_jni");
+        nativeClassInit();
+    }
 }
