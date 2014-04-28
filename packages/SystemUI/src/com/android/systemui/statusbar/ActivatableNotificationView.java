@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
 package com.android.systemui.statusbar;
@@ -21,12 +21,15 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
 
-public class LatestItemView extends FrameLayout {
+/**
+ * Base class for both {@link ExpandableNotificationRow} and {@link NotificationOverflowContainer}
+ * to implement dimming/activating on Keyguard for the double-tap gesture
+ */
+public class ActivatableNotificationView extends FrameLayout {
 
     private static final long DOUBLETAP_TIMEOUT_MS = 1000;
 
@@ -48,10 +51,11 @@ public class LatestItemView extends FrameLayout {
 
     private OnActivatedListener mOnActivatedListener;
 
-    public LatestItemView(Context context, AttributeSet attrs) {
+    public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
+
 
     private final Runnable mTapTimeoutRunnable = new Runnable() {
         @Override
@@ -63,20 +67,6 @@ public class LatestItemView extends FrameLayout {
     @Override
     public void setOnClickListener(OnClickListener l) {
         super.setOnClickListener(l);
-    }
-
-    @Override
-    public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
-        if (super.onRequestSendAccessibilityEvent(child, event)) {
-            // Add a record for the entire layout since its content is somehow small.
-            // The event comes from a leaf view that is interacted with.
-            AccessibilityEvent record = AccessibilityEvent.obtain();
-            onInitializeAccessibilityEvent(record);
-            dispatchPopulateAccessibilityEvent(record);
-            event.appendRecord(record);
-            return true;
-        }
-        return false;
     }
 
     @Override

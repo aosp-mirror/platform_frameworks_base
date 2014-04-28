@@ -19,7 +19,6 @@ package com.android.systemui;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.media.AudioManager;
@@ -81,8 +80,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     private boolean mHasPopped;
     private View mEventSource;
     private View mCurrView;
-    private View mCurrViewTopGlow;
-    private View mCurrViewBottomGlow;
     private float mOldHeight;
     private float mNaturalHeight;
     private float mInitialTouchFocusY;
@@ -99,9 +96,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     private ScaleGestureDetector mSGD;
     private ViewScaler mScaler;
     private ObjectAnimator mScaleAnimation;
-    private AnimatorSet mGlowAnimationSet;
-    private ObjectAnimator mGlowTopAnimation;
-    private ObjectAnimator mGlowBottomAnimation;
     private Vibrator mVibrator;
 
     private int mSmallSize;
@@ -223,14 +217,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             }
         };
 
-        mGlowTopAnimation = ObjectAnimator.ofFloat(null, "alpha", 0f);
-        mGlowTopAnimation.addListener(glowVisibilityController);
-        mGlowBottomAnimation = ObjectAnimator.ofFloat(null, "alpha", 0f);
-        mGlowBottomAnimation.addListener(glowVisibilityController);
-        mGlowAnimationSet = new AnimatorSet();
-        mGlowAnimationSet.play(mGlowTopAnimation).with(mGlowBottomAnimation);
-        mGlowAnimationSet.setDuration(GLOW_DURATION);
-
         final ViewConfiguration configuration = ViewConfiguration.get(mContext);
         mTouchSlop = configuration.getScaledTouchSlop();
 
@@ -251,7 +237,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         float newHeight = clamp(target);
         mScaler.setHeight(newHeight);
 
-        setGlow(calculateGlow(target, newHeight));
         mLastFocusY = mSGD.getFocusY();
         mLastSpanY = mSGD.getCurrentSpan();
     }
@@ -320,37 +305,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         float strength = 1f / (1f + (float) Math.pow(Math.E, -1 * ((8f * stretch) - 5f)));
         if (DEBUG_GLOW) Log.d(TAG, "stretch: " + stretch + " strength: " + strength);
         return (GLOW_BASE + strength * (1f - GLOW_BASE));
-    }
-
-    public void setGlow(float glow) {
-        if (!mGlowAnimationSet.isRunning() || glow == 0f) {
-            if (mGlowAnimationSet.isRunning()) {
-                mGlowAnimationSet.end();
-            }
-            if (mCurrViewTopGlow != null && mCurrViewBottomGlow != null) {
-                if (glow == 0f || mCurrViewTopGlow.getAlpha() == 0f) {
-                    // animate glow in and out
-                    mGlowTopAnimation.setTarget(mCurrViewTopGlow);
-                    mGlowBottomAnimation.setTarget(mCurrViewBottomGlow);
-                    mGlowTopAnimation.setFloatValues(glow);
-                    mGlowBottomAnimation.setFloatValues(glow);
-                    mGlowAnimationSet.setupStartValues();
-                    mGlowAnimationSet.start();
-                } else {
-                    // set it explicitly in reponse to touches.
-                    mCurrViewTopGlow.setAlpha(glow);
-                    mCurrViewBottomGlow.setAlpha(glow);
-                    handleGlowVisibility();
-                }
-            }
-        }
-    }
-
-    private void handleGlowVisibility() {
-        mCurrViewTopGlow.setVisibility(mCurrViewTopGlow.getAlpha() <= 0.0f ?
-                View.INVISIBLE : View.VISIBLE);
-        mCurrViewBottomGlow.setVisibility(mCurrViewBottomGlow.getAlpha() <= 0.0f ?
-                View.INVISIBLE : View.VISIBLE);
     }
 
     @Override
@@ -466,9 +420,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
                     if (mHasPopped) {
                         mScaler.setHeight(newHeight);
-                        setGlow(GLOW_BASE);
-                    } else {
-                        setGlow(calculateGlow(4f * pull, 0f));
                     }
 
                     final int x = (int) mSGD.getFocusX();
@@ -517,7 +468,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         if (DEBUG) Log.d(TAG, "scale type " + expandType + " beginning on view: " + v);
         mCallback.setUserLockedChild(v, true);
         setView(v);
-        setGlow(GLOW_BASE);
         mScaler.setView(v);
         mOldHeight = mScaler.getHeight();
         if (mCallback.canChildBeExpanded(v)) {
@@ -549,7 +499,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         if (mScaleAnimation.isRunning()) {
             mScaleAnimation.cancel();
         }
-        setGlow(0f);
         mCallback.setUserExpandedChild(mCurrView, h == mNaturalHeight);
         if (targetHeight != currentHeight) {
             mScaleAnimation.setFloatValues(targetHeight);
@@ -571,23 +520,11 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
     private void clearView() {
         mCurrView = null;
-        mCurrViewTopGlow = null;
-        mCurrViewBottomGlow = null;
+
     }
 
     private void setView(View v) {
         mCurrView = v;
-        if (v instanceof ViewGroup) {
-            ViewGroup g = (ViewGroup) v;
-            mCurrViewTopGlow = g.findViewById(R.id.top_glow);
-            mCurrViewBottomGlow = g.findViewById(R.id.bottom_glow);
-            if (DEBUG) {
-                String debugLog = "Looking for glows: " +
-                        (mCurrViewTopGlow != null ? "found top " : "didn't find top") +
-                        (mCurrViewBottomGlow != null ? "found bottom " : "didn't find bottom");
-                Log.v(TAG,  debugLog);
-            }
-        }
     }
 
     @Override

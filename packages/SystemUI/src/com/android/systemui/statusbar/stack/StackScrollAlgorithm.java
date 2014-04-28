@@ -62,11 +62,10 @@ public class StackScrollAlgorithm {
     }
 
     private void initConstants(Context context) {
-
-        // currently the padding is in the elements themself
-        mPaddingBetweenElements = 0;
+        mPaddingBetweenElements = context.getResources()
+                .getDimensionPixelSize(R.dimen.notification_padding);
         mCollapsedSize = context.getResources()
-                .getDimensionPixelSize(R.dimen.notification_row_min_height);
+                .getDimensionPixelSize(R.dimen.notification_min_height);
         mTopStackPeekSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.top_stack_peek_amount);
         mBottomStackPeekSize = context.getResources()
@@ -323,7 +322,8 @@ public class StackScrollAlgorithm {
         // the offset starting at the transitionPosition of the bottom stack
         float offset = mBottomStackIndentationFunctor.getValue(algorithmState.partialInBottom);
         algorithmState.itemsInBottomStack += algorithmState.partialInBottom;
-        childViewState.yTranslation = transitioningPositionStart + offset - childHeight;
+        childViewState.yTranslation = transitioningPositionStart + offset - childHeight
+                - mPaddingBetweenElements;
 
         // We want at least to be at the end of the top stack when collapsing
         clampPositionToTopStackEnd(childViewState, childHeight);
@@ -339,7 +339,8 @@ public class StackScrollAlgorithm {
         if (algorithmState.itemsInBottomStack < MAX_ITEMS_IN_BOTTOM_STACK) {
             // We are visually entering the bottom stack
             currentYPosition = transitioningPositionStart
-                    + mBottomStackIndentationFunctor.getValue(algorithmState.itemsInBottomStack);
+                    + mBottomStackIndentationFunctor.getValue(algorithmState.itemsInBottomStack)
+                    - mPaddingBetweenElements;
             childViewState.location = StackScrollState.ViewState.LOCATION_BOTTOM_STACK_PEEKING;
         } else {
             // we are fully inside the stack
