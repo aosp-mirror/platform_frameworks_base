@@ -480,7 +480,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.AbsListView" parent="Widget.AbsListView"/>
 
     <style name="Widget.Quantum.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
-        <item name="dropDownSelector">@drawable/list_selector_holo_dark</item>
+        <item name="dropDownSelector">@drawable/list_selector_quantum</item>
         <item name="popupBackground">?attr/colorBackground</item>
     </style>
 
@@ -654,7 +654,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.Spinner" parent="Widget.Spinner.DropDown">
         <item name="background">@drawable/spinner_background_quantum</item>
-        <item name="dropDownSelector">@drawable/list_selector_holo_dark</item>
+        <item name="dropDownSelector">@drawable/list_selector_quantum</item>
         <item name="popupBackground">?attr/colorBackground</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
@@ -713,7 +713,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.QuickContactBadgeSmall.WindowLarge" parent="Widget.QuickContactBadgeSmall.WindowLarge"/>
 
     <style name="Widget.Quantum.ListPopupWindow" parent="Widget.ListPopupWindow">
-        <item name="dropDownSelector">@drawable/list_selector_holo_dark</item>
+        <item name="dropDownSelector">@drawable/list_selector_quantum</item>
         <item name="popupBackground">?attr/colorBackground</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
@@ -851,7 +851,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.AbsListView" parent="Widget.Quantum.AbsListView"/>
 
     <style name="Widget.Quantum.Light.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
-        <item name="dropDownSelector">@drawable/list_selector_holo_light</item>
+        <item name="dropDownSelector">@drawable/list_selector_quantum</item>
         <item name="popupBackground">?attr/colorBackground</item>
     </style>
 
@@ -938,7 +938,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.Light.Spinner" parent="Widget.Quantum.Spinner">
         <item name="background">@drawable/spinner_background_quantum</item>
-        <item name="dropDownSelector">@drawable/list_selector_holo_light</item>
+        <item name="dropDownSelector">@drawable/list_selector_quantum</item>
         <item name="popupBackground">?attr/colorBackground</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
@@ -962,7 +962,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.QuickContactBadgeSmall.WindowLarge" parent="Widget.Quantum.QuickContactBadgeSmall.WindowLarge"/>
 
     <style name="Widget.Quantum.Light.ListPopupWindow" parent="Widget.ListPopupWindow">
-        <item name="dropDownSelector">@drawable/list_selector_holo_light</item>
+        <item name="dropDownSelector">@drawable/list_selector_quantum</item>
         <item name="popupBackground">?attr/colorBackground</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
