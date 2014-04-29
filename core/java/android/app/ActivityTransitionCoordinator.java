@@ -15,6 +15,12 @@
  */
 package android.app;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,8 +32,10 @@ import android.util.ArrayMap;
 import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroupOverlay;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.widget.ImageView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -129,6 +137,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     private static final String KEY_WIDTH = "shared_element:width";
     private static final String KEY_HEIGHT = "shared_element:height";
     private static final String KEY_NAME = "shared_element:name";
+    private static final String KEY_BITMAP = "shared_element:bitmap";
 
     /**
      * Sent by the exiting coordinator (either EnterTransitionCoordinator
@@ -305,16 +314,23 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         setSharedElements();
         reconcileSharedElements(sharedElementNames);
         mEnteringViews.removeAll(mSharedElements);
-        setSharedElementState(state);
+        final ArrayList<View> accepted = new ArrayList<View>();
+        final ArrayList<View> rejected = new ArrayList<View>();
+        createSharedElementImages(accepted, rejected, sharedElementNames, state);
+        setSharedElementState(state, accepted);
+        handleRejected(rejected);
+
         if (getViewsTransition() != null) {
             setViewVisibility(mEnteringViews, View.INVISIBLE);
         }
         setViewVisibility(mSharedElements, View.VISIBLE);
         Transition transition = beginTransition(mEnteringViews, true, allowOverlappingTransitions(),
                 true);
+
         if (allowOverlappingTransitions()) {
             onStartEnterTransition(transition, mEnteringViews);
         }
+
         mRemoteResultReceiver.send(MSG_HIDE_SHARED_ELEMENTS, null);
     }
 
@@ -513,35 +529,59 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     }
 
     private void reconcileSharedElements(ArrayList<String> sharedElementNames) {
-        Rect epicenter = null;
-        for (int i = mTargetSharedNames.size() - 1; i >= 0; i--) {
-            if (!sharedElementNames.contains(mTargetSharedNames.get(i))) {
-                mTargetSharedNames.remove(i);
-                mSharedElements.remove(i);
+        // keep only those that are in sharedElementNames.
+        int numSharedElements = sharedElementNames.size();
+        int targetIndex = 0;
+        for (int i = 0; i < numSharedElements; i++) {
+            String name = sharedElementNames.get(i);
+            int index = mTargetSharedNames.indexOf(name);
+            if (index >= 0) {
+                // Swap the items at the indexes if necessary.
+                if (index != targetIndex) {
+                    View temp = mSharedElements.get(index);
+                    mSharedElements.set(index, mSharedElements.get(targetIndex));
+                    mSharedElements.set(targetIndex, temp);
+                    mTargetSharedNames.set(index, mTargetSharedNames.get(targetIndex));
+                    mTargetSharedNames.set(targetIndex, name);
+                }
+                targetIndex++;
             }
         }
-        if (!mSharedElements.isEmpty()) {
+        for (int i = mSharedElements.size() - 1; i >= targetIndex; i--) {
+            mSharedElements.remove(i);
+            mTargetSharedNames.remove(i);
+        }
+        Rect epicenter = null;
+        if (!mTargetSharedNames.isEmpty()
+                && mTargetSharedNames.get(0).equals(sharedElementNames.get(0))) {
             epicenter = calcEpicenter(mSharedElements.get(0));
         }
         mEpicenterCallback.setEpicenter(epicenter);
     }
 
-    private void setSharedElementState(Bundle sharedElementState) {
+    private void setSharedElementState(Bundle sharedElementState,
+            final ArrayList<View> acceptedOverlayViews) {
+        final int[] tempLoc = new int[2];
         if (sharedElementState != null) {
-            int[] tempLoc = new int[2];
             for (int i = 0; i < mSharedElements.size(); i++) {
                 View sharedElement = mSharedElements.get(i);
+                View parent = (View) sharedElement.getParent();
+                parent.getLocationOnScreen(tempLoc);
                 String name = mTargetSharedNames.get(i);
                 setSharedElementState(sharedElement, name, sharedElementState, tempLoc);
+                sharedElement.requestLayout();
             }
         }
-        mListener.onCaptureSharedElementStart();
+        mListener.onCaptureSharedElementStart(mTargetSharedNames, mSharedElements,
+                acceptedOverlayViews);
+
         getDecor().getViewTreeObserver().addOnPreDrawListener(
                 new ViewTreeObserver.OnPreDrawListener() {
                     @Override
                     public boolean onPreDraw() {
                         getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
-                        mListener.onCaptureSharedElementEnd();
+                        mListener.onCaptureSharedElementEnd(mTargetSharedNames, mSharedElements,
+                                acceptedOverlayViews);
                         return true;
                     }
                 }
@@ -555,10 +595,10 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
      * @param name The shared element name given from the source Activity.
      * @param transitionArgs A <code>Bundle</code> containing all placementinformation for named
      *                       shared elements in the scene.
-     * @param tempLoc A temporary int[2] for capturing the current location of views.
+     * @param parentLoc The x and y coordinates of the parent's screen position.
      */
     private static void setSharedElementState(View view, String name, Bundle transitionArgs,
-            int[] tempLoc) {
+            int[] parentLoc) {
         Bundle sharedElementBundle = transitionArgs.getBundle(name);
         if (sharedElementBundle == null) {
             return;
@@ -576,15 +616,11 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         int heightSpec = View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY);
         view.measure(widthSpec, heightSpec);
 
-        ViewGroup parent = (ViewGroup) view.getParent();
-        parent.getLocationOnScreen(tempLoc);
-        int left = x - tempLoc[0];
-        int top = y - tempLoc[1];
+        int left = x - parentLoc[0];
+        int top = y - parentLoc[1];
         int right = left + width;
         int bottom = top + height;
         view.layout(left, top, right, bottom);
-
-        view.requestLayout();
     }
 
     /**
@@ -614,6 +650,11 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         sharedElementBundle.putFloat(KEY_TRANSLATION_Z, view.getTranslationZ());
 
         sharedElementBundle.putString(KEY_NAME, view.getSharedElementName());
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+        sharedElementBundle.putParcelable(KEY_BITMAP, bitmap);
 
         transitionArgs.putBundle(name, sharedElementBundle);
     }
@@ -721,6 +762,61 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             }
         }
         return transition;
+    }
+
+    private void handleRejected(final ArrayList<View> rejected) {
+        int numRejected = rejected.size();
+        if (numRejected == 0) {
+            return;
+        }
+        boolean rejectionHandled = mListener.handleRejectedSharedElements(rejected);
+        if (rejectionHandled) {
+            return;
+        }
+
+        ViewGroupOverlay overlay = getDecor().getOverlay();
+        ObjectAnimator animator = null;
+        for (int i = 0; i < numRejected; i++) {
+            View view = rejected.get(i);
+            overlay.add(view);
+            animator = ObjectAnimator.ofFloat(view, View.ALPHA, 1, 0);
+            animator.start();
+        }
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                ViewGroupOverlay overlay = getDecor().getOverlay();
+                for (int i = rejected.size() - 1; i >= 0; i--) {
+                    overlay.remove(rejected.get(i));
+                }
+            }
+        });
+    }
+
+    private void createSharedElementImages(ArrayList<View> accepted, ArrayList<View> rejected,
+            ArrayList<String> sharedElementNames, Bundle state) {
+        int numSharedElements = sharedElementNames.size();
+        Context context = getWindow().getContext();
+        int[] parentLoc = new int[2];
+        getDecor().getLocationOnScreen(parentLoc);
+        for (int i = 0; i < numSharedElements; i++) {
+            String name = sharedElementNames.get(i);
+            Bundle sharedElementBundle = state.getBundle(name);
+            if (sharedElementBundle != null) {
+                Bitmap bitmap = sharedElementBundle.getParcelable(KEY_BITMAP);
+                ImageView imageView = new ImageView(context);
+                imageView.setId(com.android.internal.R.id.shared_element);
+                imageView.setScaleType(ImageView.ScaleType.CENTER);
+                imageView.setImageBitmap(bitmap);
+                imageView.setSharedElementName(name);
+                setSharedElementState(imageView, name, state, parentLoc);
+                if (mTargetSharedNames.contains(name)) {
+                    accepted.add(imageView);
+                } else {
+                    rejected.add(imageView);
+                }
+            }
+        }
     }
 
     private static class FixedEpicenterCallback extends Transition.EpicenterCallback {

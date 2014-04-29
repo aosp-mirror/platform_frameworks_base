@@ -649,13 +649,31 @@ public class ActivityOptions {
 
         /**
          * Called when the start state for shared elements is captured on enter.
+         *
+         * @param sharedElementNames The names of the shared elements that were accepted into
+         *                           the View hierarchy.
+         * @param sharedElements The shared elements that are part of the View hierarchy.
+         * @param sharedElementSnapshots The Views containing snap shots of the shared element
+         *                               from the launching Window. These elements will not
+         *                               be part of the scene, but will be positioned relative
+         *                               to the Window decor View.
          */
-        public void onCaptureSharedElementStart() {}
+        public void onCaptureSharedElementStart(List<String> sharedElementNames,
+                List<View> sharedElements, List<View> sharedElementSnapshots) {}
 
         /**
          * Called when the end state for shared elements is captured on enter.
+         *
+         * @param sharedElementNames The names of the shared elements that were accepted into
+         *                           the View hierarchy.
+         * @param sharedElements The shared elements that are part of the View hierarchy.
+         * @param sharedElementSnapshots The Views containing snap shots of the shared element
+         *                               from the launching Window. These elements will not
+         *                               be part of the scene, but will be positioned relative
+         *                               to the Window decor View.
          */
-        public void onCaptureSharedElementEnd() {}
+        public void onCaptureSharedElementEnd(List<String> sharedElementNames,
+                List<View> sharedElements, List<View> sharedElementSnapshots) {}
 
         /**
          * Called when the enter Transition has been started.
@@ -700,6 +718,22 @@ public class ActivityOptions {
          * call.
          */
         public Pair<View, String>[] getSharedElementsMapping() { return null; }
+
+        /**
+         * Returns <code>true</code> if the ActivityTransitionListener will handle removing
+         * rejected shared elements from the scene. If <code>false</code> is returned, a default
+         * animation will be used to remove the rejected shared elements from the scene.
+         *
+         * @param rejectedSharedElements Views containing visual information of shared elements
+         *                               that are not part of the entering scene. These Views
+         *                               are positioned relative to the Window decor View.
+         * @return <code>false</code> if the default animation should be used to remove the
+         * rejected shared elements from the scene or <code>true</code> if the listener provides
+         * custom handling.
+         */
+        public boolean handleRejectedSharedElements(List<View> rejectedSharedElements) {
+            return false;
+        }
     }
 
     private static class SharedElementMappingListener extends ActivityTransitionListener {
