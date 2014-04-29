@@ -23671,7 +23671,11 @@ package android.provider {
 
   public final class TvContract {
     method public static final android.net.Uri buildChannelUri(long);
+    method public static final android.net.Uri buildChannelsUriForInput(android.content.ComponentName);
+    method public static final android.net.Uri buildChannelsUriForInput(android.content.ComponentName, boolean);
     method public static final android.net.Uri buildProgramUri(long);
+    method public static final android.net.Uri buildProgramsUriForChannel(android.net.Uri);
+    method public static final android.net.Uri buildProgramsUriForChannel(android.net.Uri, long, long);
     field public static final java.lang.String AUTHORITY = "com.android.tv";
   }
 
