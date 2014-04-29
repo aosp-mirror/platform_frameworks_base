@@ -17,13 +17,17 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiCec;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Slog;
+import android.util.SparseArray;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Manages HDMI-CEC command and behaviors. It converts user's command into CEC command
@@ -62,6 +66,11 @@ class HdmiCecController {
     // Stores the pointer to the native implementation of the service that
     // interacts with HAL.
     private long mNativePtr;
+
+    // Map-like container of all cec devices. A logical address of device is
+    // used as key of container.
+    private final SparseArray<HdmiCecDeviceInfo> mDeviceInfos =
+            new SparseArray<HdmiCecDeviceInfo>();
 
     // Private constructor.  Use HdmiCecController.create().
     private HdmiCecController() {
@@ -134,6 +143,69 @@ class HdmiCecController {
                     break;
             }
         }
+    }
+
+    /**
+     * Add a new {@link HdmiCecDeviceInfo}. It returns old device info which has the same
+     * logical address as new device info's.
+     *
+     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     *
+     * @param deviceInfo a new {@link HdmiCecDeviceInfo} to be added.
+     * @return {@code null} if it is new device. Otherwise, returns old {@HdmiCecDeviceInfo}
+     *         that has the same logical address as new one has.
+     */
+    HdmiCecDeviceInfo addDeviceInfo(HdmiCecDeviceInfo deviceInfo) {
+        HdmiCecDeviceInfo oldDeviceInfo = getDeviceInfo(deviceInfo.getLogicalAddress());
+        if (oldDeviceInfo != null) {
+            removeDeviceInfo(deviceInfo.getLogicalAddress());
+        }
+        mDeviceInfos.append(deviceInfo.getLogicalAddress(), deviceInfo);
+        return oldDeviceInfo;
+    }
+
+    /**
+     * Remove a device info corresponding to the given {@code logicalAddress}.
+     * It returns removed {@link HdmiCecDeviceInfo} if exists.
+     *
+     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     *
+     * @param logicalAddress logical address of device to be removed
+     * @return removed {@link HdmiCecDeviceInfo} it exists. Otherwise, returns {@code null}
+     */
+    HdmiCecDeviceInfo removeDeviceInfo(int logicalAddress) {
+        HdmiCecDeviceInfo deviceInfo = mDeviceInfos.get(logicalAddress);
+        if (deviceInfo != null) {
+            mDeviceInfos.remove(logicalAddress);
+        }
+        return deviceInfo;
+    }
+
+    /**
+     * Return a list of all {@HdmiCecDeviceInfo}.
+     *
+     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     */
+    List<HdmiCecDeviceInfo> getDeviceInfoList() {
+        List<HdmiCecDeviceInfo> deviceInfoList = new ArrayList<HdmiCecDeviceInfo>(
+                mDeviceInfos.size());
+        for (int i = 0; i < mDeviceInfos.size(); ++i) {
+            deviceInfoList.add(mDeviceInfos.valueAt(i));
+        }
+        return deviceInfoList;
+    }
+
+    /**
+     * Return a {@link HdmiCecDeviceInfo} corresponding to the given {@code logicalAddress}.
+     *
+     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     *
+     * @param logicalAddress logical address to be retrieved
+     * @return {@link HdmiCecDeviceInfo} matched with the given {@code logicalAddress}.
+     *         Returns null if no logical address matched
+     */
+    HdmiCecDeviceInfo getDeviceInfo(int logicalAddress) {
+        return mDeviceInfos.get(logicalAddress);
     }
 
     private void init(HdmiControlService service, long nativePtr) {
