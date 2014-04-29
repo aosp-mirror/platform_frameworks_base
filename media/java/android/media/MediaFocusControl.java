@@ -1250,8 +1250,6 @@ public class MediaFocusControl implements OnFinished {
                 }
                 if (prse.hasMatchingMediaButtonIntent(mediaIntent)) {
                     inStackIndex = index;
-                    // found it, ok to stop here
-                    break;
                 }
             }
 
@@ -1272,7 +1270,11 @@ public class MediaFocusControl implements OnFinished {
                         mPRStack.push(prse);
                     } else {
                         // and put it after the ones with active playback
-                        mPRStack.add(lastPlayingIndex, prse);
+                        if (inStackIndex > lastPlayingIndex) {
+                            mPRStack.add(lastPlayingIndex, prse);
+                        } else {
+                            mPRStack.add(lastPlayingIndex - 1, prse);
+                        }
                     }
                 }
             }
@@ -2151,12 +2153,12 @@ public class MediaFocusControl implements OnFinished {
                 // of this RemoteControlClient (note that it may not be in the stack)
                 for (int index = mPRStack.size()-1; index >= 0; index--) {
                     prse = mPRStack.elementAt(index);
-                    if (prse.isPlaybackActive()) {
-                        lastPlayingIndex = index;
-                    }
                     if (prse.getRccId() == rccId) {
                         inStackIndex = index;
                         prse.mPlaybackState = newState;
+                    }
+                    if (prse.isPlaybackActive()) {
+                        lastPlayingIndex = index;
                     }
                 }
 
@@ -2177,7 +2179,11 @@ public class MediaFocusControl implements OnFinished {
                             mPRStack.push(prse);
                         } else {
                             // and put it after the ones with active playback
-                            mPRStack.add(lastPlayingIndex, prse);
+                            if (inStackIndex > lastPlayingIndex) {
+                                mPRStack.add(lastPlayingIndex, prse);
+                            } else {
+                                mPRStack.add(lastPlayingIndex - 1, prse);
+                            }
                         }
                     }
 
