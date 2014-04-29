@@ -17,12 +17,12 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.android.internal.widget.SizeAdaptiveLayout;
 import com.android.systemui.R;
 
 public class ExpandableNotificationRow extends ActivatableNotificationView {
@@ -45,12 +45,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * user expansion.
      */
     private boolean mIsSystemExpanded;
-    private SizeAdaptiveLayout mPublicLayout;
-    private SizeAdaptiveLayout mPrivateLayout;
+    private NotificationContentView mPublicLayout;
+    private NotificationContentView mPrivateLayout;
     private int mMaxExpandHeight;
-    private boolean mMaxHeightNeedsUpdate;
     private NotificationActivator mActivator;
-    private boolean mSelfInitiatedLayout;
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -59,8 +57,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mPublicLayout = (SizeAdaptiveLayout) findViewById(R.id.expandedPublic);
-        mPrivateLayout = (SizeAdaptiveLayout) findViewById(R.id.expanded);
+        mPublicLayout = (NotificationContentView) findViewById(R.id.expandedPublic);
+        mPrivateLayout = (NotificationContentView) findViewById(R.id.expanded);
 
         mActivator = new NotificationActivator(this);
     }
@@ -82,7 +80,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void setHeightRange(int rowMinHeight, int rowMaxHeight) {
         mRowMinHeight = rowMinHeight;
         mRowMaxHeight = rowMaxHeight;
-        mMaxHeightNeedsUpdate = true;
     }
 
     public boolean isExpandable() {
@@ -145,13 +142,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @param expand should the layout be in the expanded state
      */
     public void applyExpansionToLayout(boolean expand) {
-        ViewGroup.LayoutParams lp = getLayoutParams();
         if (expand && mExpandable) {
-            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            setActualHeight(mMaxExpandHeight);
         } else {
-            lp.height = mRowMinHeight;
+            setActualHeight(mRowMinHeight);
         }
-        setLayoutParams(lp);
     }
 
     /**
@@ -161,6 +156,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @return the maximum allowed expansion height of this view.
      */
     public int getMaximumAllowedExpandHeight() {
+        if (isUserLocked()) {
+            return getActualHeight();
+        }
         boolean inExpansionState = isExpanded();
         if (!inExpansionState) {
             // not expanded, so we return the collapsed size
@@ -168,31 +166,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
 
         return mShowingPublic ? mRowMinHeight : getMaxExpandHeight();
-    }
-
-    private void updateMaxExpandHeight() {
-
-        // We don't want this method to trigger a layout of the whole view hierarchy,
-        // as the layout parameters in the end are the same which they were in the beginning.
-        // Otherwise a loop may occur if this method is called on the layout of a parent.
-        mSelfInitiatedLayout = true;
-        ViewGroup.LayoutParams lp = getLayoutParams();
-        int oldHeight = lp.height;
-        lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        setLayoutParams(lp);
-        measure(View.MeasureSpec.makeMeasureSpec(getWidth(), View.MeasureSpec.EXACTLY),
-                View.MeasureSpec.makeMeasureSpec(mRowMaxHeight, View.MeasureSpec.AT_MOST));
-        lp.height = oldHeight;
-        setLayoutParams(lp);
-        mMaxExpandHeight = getMeasuredHeight();
-        mSelfInitiatedLayout = false;
-    }
-
-    @Override
-    public void requestLayout() {
-        if (!mSelfInitiatedLayout) {
-            super.requestLayout();
-        }
     }
 
     /**
@@ -210,7 +183,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        mMaxHeightNeedsUpdate = true;
+        boolean updateExpandHeight = mMaxExpandHeight == 0;
+        mMaxExpandHeight = mPrivateLayout.getMaxHeight();
+        if (updateExpandHeight) {
+            applyExpansionToLayout(isExpanded());
+        }
     }
 
     public void setShowingPublic(boolean show) {
@@ -233,10 +210,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public int getMaxExpandHeight() {
-        if (mMaxHeightNeedsUpdate) {
-            updateMaxExpandHeight();
-            mMaxHeightNeedsUpdate = false;
-        }
         return mMaxExpandHeight;
     }
 
@@ -248,6 +221,28 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @return the potential height this view could expand in addition.
      */
     public int getExpandPotential() {
-        return getMaximumAllowedExpandHeight() - getHeight();
+        return getMaximumAllowedExpandHeight() - getActualHeight();
+    }
+
+    @Override
+    public void setActualHeight(int height) {
+        mPrivateLayout.setActualHeight(height);
+        invalidate();
+        super.setActualHeight(height);
+    }
+
+    @Override
+    public int getMaxHeight() {
+        return mPrivateLayout.getMaxHeight();
+    }
+
+    @Override
+    public void setClipTopAmount(int clipTopAmount) {
+        super.setClipTopAmount(clipTopAmount);
+        mPrivateLayout.setClipTopAmount(clipTopAmount);
+    }
+
+    public void notifyContentUpdated() {
+        mPrivateLayout.notifyContentUpdated();
     }
 }

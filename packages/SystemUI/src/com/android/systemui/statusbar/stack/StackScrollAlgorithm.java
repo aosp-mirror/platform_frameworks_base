@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.ExpandableView;
 
 import java.util.ArrayList;
 
@@ -53,7 +54,7 @@ public class StackScrollAlgorithm {
     private boolean mIsExpansionChanging;
     private int mFirstChildMaxHeight;
     private boolean mIsExpanded;
-    private View mFirstChildWhileExpanding;
+    private ExpandableView mFirstChildWhileExpanding;
     private boolean mExpandedOnStart;
     private int mTopStackTotalSize;
 
@@ -82,7 +83,7 @@ public class StackScrollAlgorithm {
         mBottomStackIndentationFunctor = new PiecewiseLinearIndentationFunctor(
                 MAX_ITEMS_IN_BOTTOM_STACK,
                 mBottomStackPeekSize,
-                mCollapsedSize + mPaddingBetweenElements + mBottomStackPeekSize,
+                mCollapsedSize + mBottomStackPeekSize + mPaddingBetweenElements,
                 0.5f);
     }
 
@@ -101,10 +102,9 @@ public class StackScrollAlgorithm {
         algorithmState.scrolledPixelsTop = 0;
         algorithmState.itemsInBottomStack = 0.0f;
         algorithmState.partialInBottom = 0.0f;
+        algorithmState.scrollY = resultState.getScrollY() + mCollapsedSize;
 
         updateVisibleChildren(resultState, algorithmState);
-
-        algorithmState.scrollY = getAlgorithmScrollPosition(resultState, algorithmState);
 
         // Phase 1:
         findNumberOfItemsInTopStackAndUpdateState(resultState, algorithmState);
@@ -117,42 +117,6 @@ public class StackScrollAlgorithm {
     }
 
     /**
-     * Calculates the scroll offset of the algorithm, based on the resultState.
-     *
-     * @param resultState the state to base the calculation on
-     * @param algorithmState The state in which the current pass of the algorithm is currently in
-     * @return the scroll offset used for the algorithm
-     */
-    private int getAlgorithmScrollPosition(StackScrollState resultState,
-            StackScrollAlgorithmState algorithmState) {
-
-        int resultScroll = resultState.getScrollY() + mCollapsedSize;
-
-        // If the first child was collapsed in an earlier pass, we have to decrease the scroll
-        // position to get into the same state again.
-        if (algorithmState.visibleChildren.size() > 0) {
-            View firstView = algorithmState.visibleChildren.get(0);
-            if (firstView instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow firstRow = (ExpandableNotificationRow) firstView;
-                if (firstRow.isUserLocked()) {
-                    // User is currently modifying this height.
-                    return resultScroll;
-                }
-                int scrolledInAmount = 0;
-                // If the child size was not decreased due to scrolling, we don't substract it,
-                if (!mIsExpansionChanging) {
-                    scrolledInAmount = firstRow.getExpandPotential();
-                } else if (mExpandedOnStart && mFirstChildWhileExpanding == firstView) {
-                    scrolledInAmount = firstRow.getMaximumAllowedExpandHeight() -
-                            mFirstChildMaxHeight;
-                }
-                resultScroll -= scrolledInAmount;
-            }
-        }
-        return resultScroll;
-    }
-
-    /**
      * Update the visible children on the state.
      */
     private void updateVisibleChildren(StackScrollState resultState,
@@ -162,7 +126,7 @@ public class StackScrollAlgorithm {
         state.visibleChildren.clear();
         state.visibleChildren.ensureCapacity(childCount);
         for (int i = 0; i < childCount; i++) {
-            View v = hostView.getChildAt(i);
+            ExpandableView v = (ExpandableView) hostView.getChildAt(i);
             if (v.getVisibility() != View.GONE) {
                 state.visibleChildren.add(v);
             }
@@ -194,10 +158,10 @@ public class StackScrollAlgorithm {
         int childCount = algorithmState.visibleChildren.size();
         int numberOfElementsCompletelyIn = (int) algorithmState.itemsInTopStack;
         for (int i = 0; i < childCount; i++) {
-            View child = algorithmState.visibleChildren.get(i);
+            ExpandableView child = algorithmState.visibleChildren.get(i);
             StackScrollState.ViewState childViewState = resultState.getViewStateForView(child);
             childViewState.location = StackScrollState.ViewState.LOCATION_UNKNOWN;
-            int childHeight = child.getHeight();
+            int childHeight = getMaxAllowedChildHeight(child);
             float yPositionInScrollViewAfterElement = yPositionInScrollView
                     + childHeight
                     + mPaddingBetweenElements;
@@ -291,7 +255,7 @@ public class StackScrollAlgorithm {
 
     /**
      * Clamp the yTranslation of the child up such that its end is at lest on the end of the top
-     * stack.
+     * stack.get
      *
      * @param childViewState the view state of the child
      * @param childHeight the height of this child
@@ -306,8 +270,11 @@ public class StackScrollAlgorithm {
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             return row.getMaximumAllowedExpandHeight();
+        } else if (child instanceof ExpandableView) {
+            ExpandableView expandableView = (ExpandableView) child;
+            return expandableView.getActualHeight();
         }
-        return child.getHeight();
+        return child == null? mCollapsedSize : child.getHeight();
     }
 
     private void updateStateForChildTransitioningInBottom(StackScrollAlgorithmState algorithmState,
@@ -419,9 +386,9 @@ public class StackScrollAlgorithm {
 
         // find the number of elements in the top stack.
         for (int i = 0; i < childCount; i++) {
-            View child = algorithmState.visibleChildren.get(i);
+            ExpandableView child = algorithmState.visibleChildren.get(i);
             StackScrollState.ViewState childViewState = resultState.getViewStateForView(child);
-            int childHeight = child.getHeight();
+            int childHeight = getMaxAllowedChildHeight(child);
             float yPositionInScrollViewAfterElement = yPositionInScrollView
                     + childHeight
                     + mPaddingBetweenElements;
@@ -524,13 +491,13 @@ public class StackScrollAlgorithm {
     }
 
     private void updateFirstChildHeightWhileExpanding(ViewGroup hostView) {
-        mFirstChildWhileExpanding = findFirstVisibleChild(hostView);
+        mFirstChildWhileExpanding = (ExpandableView) findFirstVisibleChild(hostView);
         if (mFirstChildWhileExpanding != null) {
             if (mExpandedOnStart) {
 
                 // We are collapsing the shade, so the first child can get as most as high as the
                 // current height.
-                mFirstChildMaxHeight = mFirstChildWhileExpanding.getHeight();
+                mFirstChildMaxHeight = mFirstChildWhileExpanding.getActualHeight();
             } else {
 
                 // We are expanding the shade, expand it to its full height.
@@ -627,7 +594,7 @@ public class StackScrollAlgorithm {
         /**
          * The children from the host view which are not gone.
          */
-        public final ArrayList<View> visibleChildren = new ArrayList<View>();
+        public final ArrayList<ExpandableView> visibleChildren = new ArrayList<ExpandableView>();
     }
 
 }

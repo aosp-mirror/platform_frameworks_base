@@ -760,9 +760,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         // NB: the large icon is now handled entirely by the template
 
         // bind the click event to the content area
-        SizeAdaptiveLayout expanded = (SizeAdaptiveLayout)row.findViewById(R.id.expanded);
-        SizeAdaptiveLayout expandedPublic
-                = (SizeAdaptiveLayout)row.findViewById(R.id.expandedPublic);
+        NotificationContentView expanded =
+                (NotificationContentView) row.findViewById(R.id.expanded);
+        NotificationContentView expandedPublic =
+                (NotificationContentView) row.findViewById(R.id.expandedPublic);
 
         row.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
 
@@ -794,19 +795,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         if (contentViewLocal != null) {
             contentViewLocal.setIsRootNamespace(true);
-            SizeAdaptiveLayout.LayoutParams params =
-                    new SizeAdaptiveLayout.LayoutParams(contentViewLocal.getLayoutParams());
-            params.minHeight = minHeight;
-            params.maxHeight = minHeight;
-            expanded.addView(contentViewLocal, params);
+            expanded.setContractedChild(contentViewLocal);
         }
         if (bigContentViewLocal != null) {
             bigContentViewLocal.setIsRootNamespace(true);
-            SizeAdaptiveLayout.LayoutParams params =
-                    new SizeAdaptiveLayout.LayoutParams(bigContentViewLocal.getLayoutParams());
-            params.minHeight = minHeight+1;
-            params.maxHeight = maxHeight;
-            expanded.addView(bigContentViewLocal, params);
+            expanded.setExpandedChild(bigContentViewLocal);
         }
 
         PackageManager pm = mContext.getPackageManager();
@@ -820,11 +813,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
                 if (publicViewLocal != null) {
                     publicViewLocal.setIsRootNamespace(true);
-                    SizeAdaptiveLayout.LayoutParams params =
-                            new SizeAdaptiveLayout.LayoutParams(publicViewLocal.getLayoutParams());
-                    params.minHeight = minHeight;
-                    params.maxHeight = minHeight;
-                    expandedPublic.addView(publicViewLocal, params);
+                    expandedPublic.setContractedChild(publicViewLocal);
                 }
             }
             catch (RuntimeException e) {
@@ -1352,6 +1341,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         } else {
             entry.row.setOnClickListener(null);
         }
+        entry.row.notifyContentUpdated();
     }
 
     protected void notifyHeadsUpScreenOn(boolean screenOn) {

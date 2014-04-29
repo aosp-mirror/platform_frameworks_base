@@ -31,8 +31,9 @@ import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup;
 
+import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 
 public class ExpandHelper implements Gefingerpoken, OnClickListener {
@@ -115,9 +116,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             float focusY = detector.getFocusY();
 
             final View underFocus = findView(focusX, focusY);
-            if (underFocus != null) {
-                startExpanding(underFocus, STRETCH);
-            }
+            startExpanding(underFocus, STRETCH);
             return mExpanding;
         }
 
@@ -133,41 +132,21 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     };
 
     private class ViewScaler {
-        View mView;
+        ExpandableView mView;
 
         public ViewScaler() {}
-        public void setView(View v) {
+        public void setView(ExpandableView v) {
             mView = v;
         }
         public void setHeight(float h) {
             if (DEBUG_SCALE) Log.v(TAG, "SetHeight: setting to " + h);
-            ViewGroup.LayoutParams lp = mView.getLayoutParams();
-            lp.height = (int)h;
-            mView.setLayoutParams(lp);
-            mView.requestLayout();
+            mView.setActualHeight((int) h);
         }
         public float getHeight() {
-            int height = mView.getLayoutParams().height;
-            if (height < 0) {
-                height = mView.getMeasuredHeight();
-            }
-            return height;
+            return mView.getActualHeight();
         }
         public int getNaturalHeight(int maximum) {
-            ViewGroup.LayoutParams lp = mView.getLayoutParams();
-            if (DEBUG_SCALE) Log.v(TAG, "Inspecting a child of type: " +
-                    mView.getClass().getName());
-            int oldHeight = lp.height;
-            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-            mView.setLayoutParams(lp);
-            mView.measure(
-                    View.MeasureSpec.makeMeasureSpec(mView.getMeasuredWidth(),
-                                                     View.MeasureSpec.EXACTLY),
-                    View.MeasureSpec.makeMeasureSpec(maximum,
-                                                     View.MeasureSpec.AT_MOST));
-            lp.height = oldHeight;
-            mView.setLayoutParams(lp);
-            return mView.getMeasuredHeight();
+            return Math.min(maximum, mView.getMaxHeight());
         }
     }
 
@@ -189,12 +168,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         mGravity = Gravity.TOP;
         mScaleAnimation = ObjectAnimator.ofFloat(mScaler, "height", 0f);
         mScaleAnimation.setDuration(EXPAND_DURATION);
-        mScaleAnimation.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mCallback.setUserLockedChild(mCurrView, false);
-            }
-        });
         mPopLimit = mContext.getResources().getDimension(R.dimen.blinds_pop_threshold);
         mPopDuration = mContext.getResources().getInteger(R.integer.blinds_pop_duration_ms);
         mPullGestureMinXSpan = mContext.getResources().getDimension(R.dimen.pull_span_min);
@@ -341,9 +314,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                 if (DEBUG_SCALE) Log.v(TAG, "got pull gesture (xspan=" + xspan + "px)");
 
                 final View underFocus = findView(x, y);
-                if (underFocus != null) {
-                    startExpanding(underFocus, PULL);
-                }
+                startExpanding(underFocus, PULL);
                 return true;
             }
             if (mScrollAdapter != null && !mScrollAdapter.isScrolledToTop()) {
@@ -358,8 +329,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                         if (DEBUG) Log.v(TAG, "got venetian gesture (dy=" + yDiff + "px)");
                         mLastMotionY = y;
                         final View underFocus = findView(x, y);
-                        if (underFocus != null) {
-                            startExpanding(underFocus, BLINDS);
+                        if (startExpanding(underFocus, BLINDS)) {
                             mInitialTouchY = mLastMotionY;
                             mHasPopped = false;
                         }
@@ -459,16 +429,22 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         return true;
     }
 
-    private void startExpanding(View v, int expandType) {
+    /**
+     * @return True if the view is expandable, false otherwise.
+     */
+    private boolean startExpanding(View v, int expandType) {
+        if (!(v instanceof ExpandableNotificationRow)) {
+            return false;
+        }
         mExpansionStyle = expandType;
-        if (mExpanding &&  v == mCurrView) {
-            return;
+        if (mExpanding && v == mCurrView) {
+            return true;
         }
         mExpanding = true;
         if (DEBUG) Log.d(TAG, "scale type " + expandType + " beginning on view: " + v);
         mCallback.setUserLockedChild(v, true);
         setView(v);
-        mScaler.setView(v);
+        mScaler.setView((ExpandableView) v);
         mOldHeight = mScaler.getHeight();
         if (mCallback.canChildBeExpanded(v)) {
             if (DEBUG) Log.d(TAG, "working on an expandable child");
@@ -480,6 +456,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         if (DEBUG) Log.d(TAG, "got mOldHeight: " + mOldHeight +
                     " mNaturalHeight: " + mNaturalHeight);
         v.getParent().requestDisallowInterceptTouchEvent(true);
+        return true;
     }
 
     private void finishExpanding(boolean force) {
@@ -499,10 +476,18 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         if (mScaleAnimation.isRunning()) {
             mScaleAnimation.cancel();
         }
-        mCallback.setUserExpandedChild(mCurrView, h == mNaturalHeight);
+        mCallback.setUserExpandedChild(mCurrView, targetHeight == mNaturalHeight);
         if (targetHeight != currentHeight) {
             mScaleAnimation.setFloatValues(targetHeight);
             mScaleAnimation.setupStartValues();
+            final View scaledView = mCurrView;
+            mScaleAnimation.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mCallback.setUserLockedChild(scaledView, false);
+                    mScaleAnimation.removeListener(this);
+                }
+            });
             mScaleAnimation.start();
         } else {
             mCallback.setUserLockedChild(mCurrView, false);
