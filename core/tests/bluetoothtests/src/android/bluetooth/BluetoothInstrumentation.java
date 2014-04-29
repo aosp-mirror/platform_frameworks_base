@@ -25,6 +25,7 @@ public class BluetoothInstrumentation extends Instrumentation {
     private BluetoothTestUtils mUtils = null;
     private BluetoothAdapter mAdapter = null;
     private Bundle mArgs = null;
+    private Bundle mSuccessResult = null;
 
     private BluetoothTestUtils getBluetoothTestUtils() {
         if (mUtils == null) {
@@ -46,6 +47,9 @@ public class BluetoothInstrumentation extends Instrumentation {
     public void onCreate(Bundle arguments) {
         super.onCreate(arguments);
         mArgs = arguments;
+        // create the default result response, but only use it in success code path
+        mSuccessResult = new Bundle();
+        mSuccessResult.putString("result", "SUCCESS");
         start();
     }
 
@@ -67,24 +71,23 @@ public class BluetoothInstrumentation extends Instrumentation {
 
     public void enable() {
         getBluetoothTestUtils().enable(getBluetoothAdapter());
-        finish(null);
+        finish(mSuccessResult);
     }
 
     public void disable() {
         getBluetoothTestUtils().disable(getBluetoothAdapter());
-        finish(null);
+        finish(mSuccessResult);
     }
 
     public void unpairAll() {
         getBluetoothTestUtils().unpairAll(getBluetoothAdapter());
-        finish(null);
+        finish(mSuccessResult);
     }
 
     public void getName() {
         String name = getBluetoothAdapter().getName();
-        Bundle bundle = new Bundle();
-        bundle.putString("name", name);
-        finish(bundle);
+        mSuccessResult.putString("name", name);
+        finish(mSuccessResult);
     }
 
     public void finish(Bundle result) {
