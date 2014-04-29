@@ -18,9 +18,11 @@
 
 #include "RenderThread.h"
 
+#include <gui/DisplayEventReceiver.h>
+#include <utils/Log.h>
+
 #include "CanvasContext.h"
 #include "RenderProxy.h"
-#include <utils/Log.h>
 
 namespace android {
 using namespace uirenderer::renderthread;
@@ -28,6 +30,14 @@ ANDROID_SINGLETON_STATIC_INSTANCE(RenderThread);
 
 namespace uirenderer {
 namespace renderthread {
+
+// Number of events to read at a time from the DisplayEventReceiver pipe.
+// The value should be large enough that we can quickly drain the pipe
+// using just a few large reads.
+static const size_t EVENT_BUFFER_SIZE = 100;
+
+// Slight delay to give the UI time to push us a new frame before we replay
+static const int DISPATCH_FRAME_CALLBACKS_DELAY = 0;
 
 TaskQueue::TaskQueue() : mHead(0), mTail(0) {}
 
@@ -103,8 +113,25 @@ void TaskQueue::remove(RenderTask* task) {
     }
 }
 
+class DispatchFrameCallbacks : public RenderTask {
+private:
+    RenderThread* mRenderThread;
+public:
+    DispatchFrameCallbacks(RenderThread* rt) : mRenderThread(rt) {}
+
+    virtual void run() {
+        mRenderThread->dispatchFrameCallbacks();
+    }
+};
+
 RenderThread::RenderThread() : Thread(true), Singleton<RenderThread>()
-        , mNextWakeup(LLONG_MAX) {
+        , mNextWakeup(LLONG_MAX)
+        , mDisplayEventReceiver(0)
+        , mVsyncRequested(false)
+        , mFrameCallbackTaskPending(false)
+        , mFrameCallbackTask(0)
+        , mFrameTime(0) {
+    mFrameCallbackTask = new DispatchFrameCallbacks(this);
     mLooper = new Looper(false);
     run("RenderThread");
 }
@@ -112,10 +139,86 @@ RenderThread::RenderThread() : Thread(true), Singleton<RenderThread>()
 RenderThread::~RenderThread() {
 }
 
+void RenderThread::initializeDisplayEventReceiver() {
+    LOG_ALWAYS_FATAL_IF(mDisplayEventReceiver, "Initializing a second DisplayEventReceiver?");
+    mDisplayEventReceiver = new DisplayEventReceiver();
+    status_t status = mDisplayEventReceiver->initCheck();
+    LOG_ALWAYS_FATAL_IF(status != NO_ERROR, "Initialization of DisplayEventReceiver "
+            "failed with status: %d", status);
+
+    // Register the FD
+    mLooper->addFd(mDisplayEventReceiver->getFd(), 0,
+            Looper::EVENT_INPUT, RenderThread::displayEventReceiverCallback, this);
+}
+
+int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {
+    if (events & (Looper::EVENT_ERROR | Looper::EVENT_HANGUP)) {
+        ALOGE("Display event receiver pipe was closed or an error occurred.  "
+                "events=0x%x", events);
+        return 0; // remove the callback
+    }
+
+    if (!(events & Looper::EVENT_INPUT)) {
+        ALOGW("Received spurious callback for unhandled poll event.  "
+                "events=0x%x", events);
+        return 1; // keep the callback
+    }
+
+    reinterpret_cast<RenderThread*>(data)->drainDisplayEventQueue();
+
+    return 1; // keep the callback
+}
+
+static nsecs_t latestVsyncEvent(DisplayEventReceiver* receiver) {
+    DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
+    nsecs_t latest = 0;
+    ssize_t n;
+    while ((n = receiver->getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
+        for (ssize_t i = 0; i < n; i++) {
+            const DisplayEventReceiver::Event& ev = buf[i];
+            switch (ev.header.type) {
+            case DisplayEventReceiver::DISPLAY_EVENT_VSYNC:
+                latest = ev.header.timestamp;
+                break;
+            }
+        }
+    }
+    if (n < 0) {
+        ALOGW("Failed to get events from display event receiver, status=%d", status_t(n));
+    }
+    return latest;
+}
+
+void RenderThread::drainDisplayEventQueue() {
+    nsecs_t vsyncEvent = latestVsyncEvent(mDisplayEventReceiver);
+    if (vsyncEvent > 0) {
+        mVsyncRequested = false;
+        mFrameTime = vsyncEvent;
+        if (!mFrameCallbackTaskPending) {
+            mFrameCallbackTaskPending = true;
+            //queueDelayed(mFrameCallbackTask, DISPATCH_FRAME_CALLBACKS_DELAY);
+            queue(mFrameCallbackTask);
+        }
+    }
+}
+
+void RenderThread::dispatchFrameCallbacks() {
+    mFrameCallbackTaskPending = false;
+
+    std::set<IFrameCallback*> callbacks;
+    mFrameCallbacks.swap(callbacks);
+
+    for (std::set<IFrameCallback*>::iterator it = callbacks.begin(); it != callbacks.end(); it++) {
+        (*it)->doFrame(mFrameTime);
+    }
+}
+
 bool RenderThread::threadLoop() {
+    initializeDisplayEventReceiver();
+
     int timeoutMillis = -1;
     for (;;) {
-        int result = mLooper->pollAll(timeoutMillis);
+        int result = mLooper->pollOnce(timeoutMillis);
         LOG_ALWAYS_FATAL_IF(result == Looper::POLL_ERROR,
                 "RenderThread Looper POLL_ERROR!");
 
@@ -157,6 +260,20 @@ void RenderThread::queueDelayed(RenderTask* task, int delayMs) {
 void RenderThread::remove(RenderTask* task) {
     AutoMutex _lock(mLock);
     mQueue.remove(task);
+}
+
+void RenderThread::postFrameCallback(IFrameCallback* callback) {
+    mFrameCallbacks.insert(callback);
+    if (!mVsyncRequested) {
+        mVsyncRequested = true;
+        status_t status = mDisplayEventReceiver->requestNextVsync();
+        LOG_ALWAYS_FATAL_IF(status != NO_ERROR,
+                "requestNextVsync failed with status: %d", status);
+    }
+}
+
+void RenderThread::removeFrameCallback(IFrameCallback* callback) {
+    mFrameCallbacks.erase(callback);
 }
 
 RenderTask* RenderThread::nextTask(nsecs_t* nextWakeup) {

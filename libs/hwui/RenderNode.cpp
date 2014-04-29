@@ -18,6 +18,8 @@
 
 #include "RenderNode.h"
 
+#include <algorithm>
+
 #include <SkCanvas.h>
 #include <algorithm>
 
@@ -54,7 +56,8 @@ RenderNode::RenderNode()
         : mNeedsPropertiesSync(false)
         , mNeedsDisplayListDataSync(false)
         , mDisplayListData(0)
-        , mStagingDisplayListData(0) {
+        , mStagingDisplayListData(0)
+        , mNeedsAnimatorsSync(false) {
 }
 
 RenderNode::~RenderNode() {
@@ -97,14 +100,31 @@ void RenderNode::prepareTree(TreeInfo& info) {
 }
 
 void RenderNode::prepareTreeImpl(TreeInfo& info) {
-    pushStagingChanges(info);
+    if (info.performStagingPush) {
+        pushStagingChanges(info);
+    }
+    if (info.evaluateAnimations) {
+        evaluateAnimations(info);
+    }
     prepareSubTree(info, mDisplayListData);
+}
+
+static bool is_finished(const sp<RenderPropertyAnimator>& animator) {
+    return animator->isFinished();
 }
 
 void RenderNode::pushStagingChanges(TreeInfo& info) {
     if (mNeedsPropertiesSync) {
         mNeedsPropertiesSync = false;
         mProperties = mStagingProperties;
+    }
+    if (mNeedsAnimatorsSync) {
+        mAnimators.reserve(mStagingAnimators.size());
+        std::vector< sp<RenderPropertyAnimator> >::iterator it;
+        // hint: this means copy_if_not()
+        it = std::remove_copy_if(mStagingAnimators.begin(), mStagingAnimators.end(),
+                mAnimators.begin(), is_finished);
+        mAnimators.resize(std::distance(mAnimators.begin(), it));
     }
     if (mNeedsDisplayListDataSync) {
         mNeedsDisplayListDataSync = false;
@@ -117,6 +137,34 @@ void RenderNode::pushStagingChanges(TreeInfo& info) {
         mDisplayListData = mStagingDisplayListData;
         mStagingDisplayListData = 0;
     }
+}
+
+class AnimateFunctor {
+public:
+    AnimateFunctor(RenderProperties* target, TreeInfo& info)
+            : mTarget(target), mInfo(info) {}
+
+    bool operator() (sp<RenderPropertyAnimator>& animator) {
+        bool finished = animator->animate(mTarget, mInfo);
+        if (finished && mInfo.animationListener) {
+            mInfo.animationListener->onAnimationFinished(animator);
+        }
+        return finished;
+    }
+private:
+    RenderProperties* mTarget;
+    TreeInfo& mInfo;
+};
+
+void RenderNode::evaluateAnimations(TreeInfo& info) {
+    if (!mAnimators.size()) return;
+
+    AnimateFunctor functor(&mProperties, info);
+    std::vector< sp<RenderPropertyAnimator> >::iterator newEnd;
+    newEnd = std::remove_if(mAnimators.begin(), mAnimators.end(), functor);
+    mAnimators.erase(newEnd, mAnimators.end());
+    mProperties.updateMatrix();
+    info.hasAnimations |= mAnimators.size();
 }
 
 void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {

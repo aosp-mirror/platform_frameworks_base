@@ -16,7 +16,9 @@
 #ifndef RENDERNODEPROPERTIES_H
 #define RENDERNODEPROPERTIES_H
 
+#include <algorithm>
 #include <stddef.h>
+#include <vector>
 #include <cutils/compiler.h>
 #include <androidfw/ResourceTypes.h>
 
@@ -24,6 +26,7 @@
 #include <SkMatrix.h>
 #include <SkRegion.h>
 
+#include "Animator.h"
 #include "Rect.h"
 #include "RevealClip.h"
 #include "Outline.h"
@@ -147,6 +150,31 @@ public:
 
     float getTranslationZ() const {
         return mPrimitiveFields.mTranslationZ;
+    }
+
+    // Animation helper
+    void setX(float value) {
+        setTranslationX(value - getLeft());
+    }
+
+    // Animation helper
+    float getX() const {
+        return getLeft() + getTranslationX();
+    }
+
+    // Animation helper
+    void setY(float value) {
+        setTranslationY(value - getTop());
+    }
+
+    // Animation helper
+    float getY() const {
+        return getTop() + getTranslationY();
+    }
+
+    // Animation helper
+    void setZ(float value) {
+        setTranslationZ(value - getElevation());
     }
 
     float getZ() const {
@@ -457,7 +485,6 @@ private:
         bool mCaching;
     } mPrimitiveFields;
 
-    // mCameraDistance isn't in mPrimitiveFields as it has a complex setter
     SkMatrix* mStaticMatrix;
     SkMatrix* mAnimationMatrix;
 

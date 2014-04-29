@@ -308,18 +308,20 @@ bool GlobalContext::enableDirtyRegions(EGLSurface surface) {
     return value == EGL_BUFFER_PRESERVED;
 }
 
-CanvasContext::CanvasContext(bool translucent)
+CanvasContext::CanvasContext(bool translucent, RenderNode* rootRenderNode)
         : mRenderThread(RenderThread::getInstance())
         , mEglSurface(EGL_NO_SURFACE)
         , mDirtyRegionsEnabled(false)
         , mOpaque(!translucent)
         , mCanvas(0)
-        , mHaveNewSurface(false) {
+        , mHaveNewSurface(false)
+        , mRootRenderNode(rootRenderNode) {
     mGlobalContext = GlobalContext::get();
 }
 
 CanvasContext::~CanvasContext() {
     destroyCanvasAndSurface();
+    mRenderThread.removeFrameCallback(this);
 }
 
 void CanvasContext::destroyCanvasAndSurface() {
@@ -403,7 +405,16 @@ void CanvasContext::processLayerUpdates(const Vector<DeferredLayerUpdater*>* lay
     }
 }
 
-void CanvasContext::drawDisplayList(RenderNode* displayList, Rect* dirty) {
+void CanvasContext::prepareTree(TreeInfo& info) {
+    mRootRenderNode->prepareTree(info);
+
+    if (info.hasAnimations && !info.hasFunctors) {
+        // TODO: Functors
+        mRenderThread.postFrameCallback(this);
+    }
+}
+
+void CanvasContext::draw(Rect* dirty) {
     LOG_ALWAYS_FATAL_IF(!mCanvas || mEglSurface == EGL_NO_SURFACE,
             "drawDisplayList called on a context with no canvas or surface!");
 
@@ -417,7 +428,7 @@ void CanvasContext::drawDisplayList(RenderNode* displayList, Rect* dirty) {
     }
 
     status_t status;
-    if (dirty) {
+    if (dirty && !dirty->isEmpty()) {
         status = mCanvas->prepareDirty(dirty->left, dirty->top,
                 dirty->right, dirty->bottom, mOpaque);
     } else {
@@ -425,7 +436,7 @@ void CanvasContext::drawDisplayList(RenderNode* displayList, Rect* dirty) {
     }
 
     Rect outBounds;
-    status |= mCanvas->drawDisplayList(displayList, outBounds);
+    status |= mCanvas->drawDisplayList(mRootRenderNode.get(), outBounds);
 
     // TODO: Draw debug info
     // TODO: Performance tracking
@@ -435,6 +446,20 @@ void CanvasContext::drawDisplayList(RenderNode* displayList, Rect* dirty) {
     if (status & DrawGlInfo::kStatusDrew) {
         swapBuffers();
     }
+}
+
+// Called by choreographer to do an RT-driven animation
+void CanvasContext::doFrame(nsecs_t frameTimeNanos) {
+    ATRACE_CALL();
+
+    TreeInfo info;
+    info.evaluateAnimations = true;
+    info.frameTimeMs = nanoseconds_to_milliseconds(frameTimeNanos);
+    info.performStagingPush = false;
+    info.prepareTextures = false;
+
+    prepareTree(info);
+    draw(NULL);
 }
 
 void CanvasContext::invokeFunctor(Functor* functor) {

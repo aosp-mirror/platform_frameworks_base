@@ -20,6 +20,9 @@ import android.annotation.NonNull;
 import android.graphics.Matrix;
 import android.graphics.Outline;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <p>A display list records a series of graphics related operations and can replay
  * them later. Display lists are usually built by recording operations on a
@@ -176,8 +179,21 @@ public class RenderNode {
     private boolean mValid;
     private final long mNativeRenderNode;
 
+    // We need to keep a strong reference to all running animators to ensure that
+    // they can call removeAnimator when they have finished, as the native-side
+    // object can only hold a WeakReference<> to avoid leaking memory due to
+    // cyclic references.
+    private List<RenderNodeAnimator> mActiveAnimators;
+
     private RenderNode(String name) {
         mNativeRenderNode = nCreate(name);
+    }
+
+    /**
+     * @see RenderNode#adopt(long)
+     */
+    private RenderNode(long nativePtr) {
+        mNativeRenderNode = nativePtr;
     }
 
     /**
@@ -193,6 +209,17 @@ public class RenderNode {
     public static RenderNode create(String name) {
         return new RenderNode(name);
     }
+
+    /**
+     * Adopts an existing native render node.
+     *
+     * Note: This will *NOT* incRef() on the native object, however it will
+     * decRef() when it is destroyed. The caller should have already incRef'd it
+     */
+    public static RenderNode adopt(long nativePtr) {
+        return new RenderNode(nativePtr);
+    }
+
 
     /**
      * Starts recording a display list for the render node. All
@@ -822,6 +849,23 @@ public class RenderNode {
     }
 
     ///////////////////////////////////////////////////////////////////////////
+    // Animations
+    ///////////////////////////////////////////////////////////////////////////
+
+    public void addAnimator(RenderNodeAnimator animator) {
+        if (mActiveAnimators == null) {
+            mActiveAnimators = new ArrayList<RenderNodeAnimator>();
+        }
+        mActiveAnimators.add(animator);
+        nAddAnimator(mNativeRenderNode, animator.getNativeAnimator());
+    }
+
+    public void removeAnimator(RenderNodeAnimator animator) {
+        nRemoveAnimator(mNativeRenderNode, animator.getNativeAnimator());
+        mActiveAnimators.remove(animator);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
     // Native methods
     ///////////////////////////////////////////////////////////////////////////
 
@@ -894,6 +938,13 @@ public class RenderNode {
     private static native float nGetPivotX(long renderNode);
     private static native float nGetPivotY(long renderNode);
     private static native void nOutput(long renderNode);
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Animations
+    ///////////////////////////////////////////////////////////////////////////
+
+    private static native void nAddAnimator(long renderNode, long animatorPtr);
+    private static native void nRemoveAnimator(long renderNode, long animatorPtr);
 
     ///////////////////////////////////////////////////////////////////////////
     // Finalization

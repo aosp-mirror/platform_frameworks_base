@@ -16,6 +16,8 @@
 
 #define LOG_TAG "ThreadedRenderer"
 
+#include <algorithm>
+
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
@@ -24,6 +26,8 @@
 #include <android_runtime/android_view_Surface.h>
 #include <system/window.h>
 
+#include "android_view_RenderNodeAnimator.h"
+#include <RenderNode.h>
 #include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
 #include <renderthread/RenderThread.h>
@@ -63,15 +67,75 @@ private:
     jobject mRunnable;
 };
 
+class InvokeAnimationListeners : public MessageHandler {
+public:
+    InvokeAnimationListeners(std::vector< sp<RenderNodeAnimator> >& animators) {
+        mAnimators.swap(animators);
+    }
+
+    static void callOnFinished(const sp<RenderNodeAnimator>& animator) {
+        animator->callOnFinished();
+    }
+
+    virtual void handleMessage(const Message& message) {
+        std::for_each(mAnimators.begin(), mAnimators.end(), callOnFinished);
+        mAnimators.clear();
+    }
+
+private:
+    std::vector< sp<RenderNodeAnimator> > mAnimators;
+};
+
+class RootRenderNode : public RenderNode, public AnimationListener {
+public:
+    RootRenderNode() : RenderNode() {
+        mLooper = Looper::getForThread();
+        LOG_ALWAYS_FATAL_IF(!mLooper.get(),
+                "Must create RootRenderNode on a thread with a looper!");
+    }
+
+    virtual ~RootRenderNode() {}
+
+    void onAnimationFinished(const sp<RenderPropertyAnimator>& animator) {
+        mFinishedAnimators.push_back(
+                reinterpret_cast<RenderNodeAnimator*>(animator.get()));
+    }
+
+    virtual void prepareTree(TreeInfo& info) {
+        info.animationListener = this;
+        RenderNode::prepareTree(info);
+        info.animationListener = NULL;
+
+        // post all the finished stuff
+        if (mFinishedAnimators.size()) {
+            sp<InvokeAnimationListeners> message
+                    = new InvokeAnimationListeners(mFinishedAnimators);
+            mLooper->sendMessage(message, 0);
+        }
+    }
+
+private:
+    sp<Looper> mLooper;
+    std::vector< sp<RenderNodeAnimator> > mFinishedAnimators;
+};
+
 static void android_view_ThreadedRenderer_postToRenderThread(JNIEnv* env, jobject clazz,
         jobject jrunnable) {
     RenderTask* task = new JavaTask(env, jrunnable);
     RenderThread::getInstance().queue(task);
 }
 
+static jlong android_view_ThreadedRenderer_createRootRenderNode(JNIEnv* env, jobject clazz) {
+    RootRenderNode* node = new RootRenderNode();
+    node->incStrong(0);
+    node->setName("RootRenderNode");
+    return reinterpret_cast<jlong>(node);
+}
+
 static jlong android_view_ThreadedRenderer_createProxy(JNIEnv* env, jobject clazz,
-        jboolean translucent) {
-    return (jlong) new RenderProxy(translucent);
+        jboolean translucent, jlong rootRenderNodePtr) {
+    RenderNode* rootRenderNode = reinterpret_cast<RenderNode*>(rootRenderNodePtr);
+    return (jlong) new RenderProxy(translucent, rootRenderNode);
 }
 
 static void android_view_ThreadedRenderer_deleteProxy(JNIEnv* env, jobject clazz,
@@ -113,12 +177,11 @@ static void android_view_ThreadedRenderer_setup(JNIEnv* env, jobject clazz,
     proxy->setup(width, height);
 }
 
-static void android_view_ThreadedRenderer_drawDisplayList(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jlong displayListPtr, jint dirtyLeft, jint dirtyTop,
+static void android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jint dirtyLeft, jint dirtyTop,
         jint dirtyRight, jint dirtyBottom) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
-    proxy->drawDisplayList(displayList, dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
+    proxy->syncAndDrawFrame(dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
 }
 
 static void android_view_ThreadedRenderer_destroyCanvasAndSurface(JNIEnv* env, jobject clazz,
@@ -187,13 +250,14 @@ const char* const kClassPathName = "android/view/ThreadedRenderer";
 static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
     { "postToRenderThread", "(Ljava/lang/Runnable;)V",   (void*) android_view_ThreadedRenderer_postToRenderThread },
-    { "nCreateProxy", "(Z)J", (void*) android_view_ThreadedRenderer_createProxy },
+    { "nCreateRootRenderNode", "()J", (void*) android_view_ThreadedRenderer_createRootRenderNode },
+    { "nCreateProxy", "(ZJ)J", (void*) android_view_ThreadedRenderer_createProxy },
     { "nDeleteProxy", "(J)V", (void*) android_view_ThreadedRenderer_deleteProxy },
     { "nInitialize", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_initialize },
     { "nUpdateSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_updateSurface },
     { "nPauseSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_pauseSurface },
     { "nSetup", "(JII)V", (void*) android_view_ThreadedRenderer_setup },
-    { "nDrawDisplayList", "(JJIIII)V", (void*) android_view_ThreadedRenderer_drawDisplayList },
+    { "nSyncAndDrawFrame", "(JIIII)V", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
     { "nDestroyCanvasAndSurface", "(J)V", (void*) android_view_ThreadedRenderer_destroyCanvasAndSurface },
     { "nInvokeFunctor", "(JJZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
     { "nRunWithGlContext", "(JLjava/lang/Runnable;)V", (void*) android_view_ThreadedRenderer_runWithGlContext },
