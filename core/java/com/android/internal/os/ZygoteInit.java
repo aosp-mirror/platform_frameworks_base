@@ -16,8 +16,8 @@
 
 package com.android.internal.os;
 
-import static libcore.io.OsConstants.S_IRWXG;
-import static libcore.io.OsConstants.S_IRWXO;
+import static android.system.OsConstants.S_IRWXG;
+import static android.system.OsConstants.S_IRWXO;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
