@@ -18864,6 +18864,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     };
 
     /**
+     * A Property wrapper around the <code>z</code> functionality handled by the
+     * {@link View#setZ(float)} and {@link View#getZ()} methods.
+     */
+    public static final Property<View, Float> Z = new FloatProperty<View>("z") {
+        @Override
+        public void setValue(View object, float value) {
+            object.setZ(value);
+        }
+
+        @Override
+        public Float get(View object) {
+            return object.getZ();
+        }
+    };
+
+    /**
      * A Property wrapper around the <code>rotation</code> functionality handled by the
      * {@link View#setRotation(float)} and {@link View#getRotation()} methods.
      */
