@@ -30608,6 +30608,7 @@ package android.view {
     field protected static final int[] WINDOW_FOCUSED_STATE_SET;
     field public static final android.util.Property X;
     field public static final android.util.Property Y;
+    field public static final android.util.Property Z;
   }
 
   public static class View.AccessibilityDelegate {
