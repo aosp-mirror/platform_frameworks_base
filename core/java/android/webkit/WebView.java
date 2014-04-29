@@ -701,7 +701,7 @@ public class WebView extends AbsoluteLayout
      */
     @Deprecated
     public static void enablePlatformNotifications() {
-        getFactory().getStatics().setPlatformNotificationsEnabled(true);
+        // noop
     }
 
     /**
@@ -713,7 +713,7 @@ public class WebView extends AbsoluteLayout
      */
     @Deprecated
     public static void disablePlatformNotifications() {
-        getFactory().getStatics().setPlatformNotificationsEnabled(false);
+        // noop
     }
 
     /**
@@ -1610,6 +1610,8 @@ public class WebView extends AbsoluteLayout
      * @return the address, or if no address is found, null
      */
     public static String findAddress(String addr) {
+        // TODO: Rewrite this in Java so it is not needed to start up chromium
+        // Could also be deprecated
         return getFactory().getStatics().findAddress(addr);
     }
 
