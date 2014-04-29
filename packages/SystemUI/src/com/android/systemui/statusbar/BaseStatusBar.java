@@ -71,7 +71,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.util.LegacyNotificationUtil;
-import com.android.internal.widget.SizeAdaptiveLayout;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SearchPanelView;
@@ -1061,11 +1060,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         for (int i = n-1; i >= 0; i--) {
             NotificationData.Entry entry = mNotificationData.get(i);
             if (mOnKeyguard) {
-                entry.row.setSystemExpanded(false);
+                entry.row.setExpansionDisabled(true);
             } else {
+                entry.row.setExpansionDisabled(false);
                 if (!entry.row.isUserLocked()) {
                     boolean top = (i == n-1);
-                    entry.row.setSystemExpanded(top || entry.row.isUserExpanded());
+                    entry.row.setSystemExpanded(top);
                 }
             }
             entry.row.setDimmed(mOnKeyguard);
@@ -1278,8 +1278,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             final boolean userChangedExpansion = oldEntry.row.hasUserChangedExpansion();
             if (userChangedExpansion) {
                 boolean userExpanded = oldEntry.row.isUserExpanded();
-                newEntry.row.applyExpansionToLayout(userExpanded);
                 newEntry.row.setUserExpanded(userExpanded);
+                newEntry.row.applyExpansionToLayout();
             }
         }
 
