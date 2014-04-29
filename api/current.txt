@@ -28245,6 +28245,18 @@ package android.transition {
     method public void setResizeClip(boolean);
   }
 
+  public class ChangeClipBounds extends android.transition.Transition {
+    ctor public ChangeClipBounds();
+    method public void captureEndValues(android.transition.TransitionValues);
+    method public void captureStartValues(android.transition.TransitionValues);
+  }
+
+  public class ChangeTransform extends android.transition.Transition {
+    ctor public ChangeTransform();
+    method public void captureEndValues(android.transition.TransitionValues);
+    method public void captureStartValues(android.transition.TransitionValues);
+  }
+
   public class CircularPropagation extends android.transition.VisibilityPropagation {
     ctor public CircularPropagation();
     method public long getStartDelay(android.view.ViewGroup, android.transition.Transition, android.transition.TransitionValues, android.transition.TransitionValues);
