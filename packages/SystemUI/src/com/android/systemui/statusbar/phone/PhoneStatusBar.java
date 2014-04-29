@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
@@ -2211,12 +2212,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     @Override
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
-        boolean altBack = (backDisposition == InputMethodService.BACK_DISPOSITION_WILL_DISMISS)
-            || ((vis & InputMethodService.IME_VISIBLE) != 0);
+        boolean imeShown = (vis & InputMethodService.IME_VISIBLE) != 0;
+        int flags = mNavigationIconHints;
+        if ((backDisposition == InputMethodService.BACK_DISPOSITION_WILL_DISMISS) || imeShown) {
+            flags |= NAVIGATION_HINT_BACK_ALT;
+        } else {
+            flags &= ~NAVIGATION_HINT_BACK_ALT;
+        }
+        if (imeShown) {
+            flags |= NAVIGATION_HINT_IME_SHOWN;
+        } else {
+            flags &= ~NAVIGATION_HINT_IME_SHOWN;
+        }
 
-        setNavigationIconHints(
-                altBack ? (mNavigationIconHints | NAVIGATION_HINT_BACK_ALT)
-                        : (mNavigationIconHints & ~NAVIGATION_HINT_BACK_ALT));
+        setNavigationIconHints(flags);
         if (mQS != null) mQS.setImeWindowStatus(vis > 0);
     }
 

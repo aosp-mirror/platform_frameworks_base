@@ -43,7 +43,7 @@
 
             <!-- navigation controls -->
             <View
-                android:layout_width="40dp"
+                android:layout_width="@dimen/navigation_extra_key_width"
                 android:layout_height="match_parent"
                 android:layout_weight="0"
                 android:visibility="invisible"
@@ -88,16 +88,29 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 android:contentDescription="@string/accessibility_recent"
                 />
-            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
-                android:layout_width="@dimen/navigation_menu_key_width"
+            <FrameLayout
+                android:layout_width="@dimen/navigation_extra_key_width"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_sysbar_menu"
-                systemui:keyCode="82"
-                android:layout_weight="0"
-                android:visibility="invisible"
-                android:contentDescription="@string/accessibility_menu"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight"
-                />
+                android:layout_weight="0" >
+                <com.android.systemui.statusbar.policy.KeyButtonView
+                    android:id="@+id/menu"
+                    android:layout_width="@dimen/navigation_extra_key_width"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/accessibility_menu"
+                    android:src="@drawable/ic_sysbar_menu"
+                    android:visibility="invisible"
+                    systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                    systemui:keyCode="82" />
+                <com.android.systemui.statusbar.policy.KeyButtonView
+                    android:id="@+id/ime_switcher"
+                    android:layout_width="@dimen/navigation_extra_key_width"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/accessibility_ime_switch_button"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_ime_switcher_default"
+                    android:visibility="invisible"
+                    systemui:glowBackground="@drawable/ic_sysbar_highlight" />
+            </FrameLayout>
         </LinearLayout>
 
         <!-- lights out layout to match exactly -->
@@ -187,16 +200,29 @@
             >
             
             <!-- navigation controls -->
-            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
-                android:layout_height="40dp"
-                android:layout_width="match_parent"
-                android:src="@drawable/ic_sysbar_menu_land"
-                systemui:keyCode="82"
-                android:layout_weight="0"
-                android:visibility="invisible"
-                android:contentDescription="@string/accessibility_menu"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
-                />
+            <FrameLayout
+                android:layout_width="@dimen/navigation_extra_key_width"
+                android:layout_height="match_parent"
+                android:layout_weight="0" >
+                <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
+                    android:layout_height="@dimen/navigation_extra_key_width"
+                    android:layout_width="match_parent"
+                    android:src="@drawable/ic_sysbar_menu_land"
+                    systemui:keyCode="82"
+                    android:layout_weight="0"
+                    android:visibility="invisible"
+                    android:contentDescription="@string/accessibility_menu"
+                    systemui:glowBackground="@drawable/ic_sysbar_highlight_land" />
+                <com.android.systemui.statusbar.policy.KeyButtonView
+                    android:id="@+id/ime_switcher"
+                    android:layout_height="@dimen/navigation_extra_key_width"
+                    android:layout_width="match_parent"
+                    android:contentDescription="@string/accessibility_ime_switch_button"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_ime_switcher_default"
+                    android:visibility="invisible"
+                    systemui:glowBackground="@drawable/ic_sysbar_highlight" />
+            </FrameLayout>
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
                 android:layout_height="80dp"
                 android:layout_width="match_parent"
