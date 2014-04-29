@@ -98,6 +98,27 @@ public class RssiCurve implements Parcelable {
     }
 
     /**
+     * Lookup the score for a given RSSI value.
+     *
+     * @param rssi The RSSI to lookup. If the RSSI falls below the start of the curve, the score at
+     *         the start of the curve will be returned. If it falls after the end of the curve, the
+     *         score at the end of the curve will be returned.
+     * @return the score for the given RSSI.
+     */
+    public byte lookupScore(int rssi) {
+        int index = (rssi - start) / bucketWidth;
+
+        // Snap the index to the closest bucket if it falls outside the curve.
+        if (index < 0) {
+            index = 0;
+        } else if (index > rssiBuckets.length - 1) {
+            index = rssiBuckets.length - 1;
+        }
+
+        return rssiBuckets[index];
+    }
+
+    /**
      * Determine if two RSSI curves are defined in the same way.
      *
      * <p>Note that two curves can be equivalent but defined differently, e.g. if one bucket in one
