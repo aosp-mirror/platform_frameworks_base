@@ -46,7 +46,6 @@ import java.util.Random;
 import junit.framework.Assert;
 
 import libcore.io.IoUtils;
-import libcore.io.Libcore;
 
 /**
  * Tests for {@link FileRotator}.
