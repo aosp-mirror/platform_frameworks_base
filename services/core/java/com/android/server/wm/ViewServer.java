@@ -314,7 +314,7 @@ class ViewServer implements Runnable {
                         out.flush();
                     }
                     if (needFocusedWindowUpdate) {
-                        out.write("FOCUS UPDATE\n");
+                        out.write("ACTION_FOCUS UPDATE\n");
                         out.flush();
                     }
                 }
