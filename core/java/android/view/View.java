@@ -10585,8 +10585,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             // always copy the path since caller may reuse
             if (mOutline == null) {
-                mOutline = new Outline(outline);
+                mOutline = new Outline();
             }
+            mOutline.set(outline);
         }
         mRenderNode.setOutline(mOutline);
     }
