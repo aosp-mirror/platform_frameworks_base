@@ -66,13 +66,12 @@ import java.util.List;
  *
  * {@sample development/samples/ApiDemos/res/transition/changebounds.xml ChangeBounds}
  *
- * <p>{@link android.transition.Explode} transition:</p>
+ * <p>This TransitionSet contains {@link android.transition.Explode} for visibility,
+ * {@link android.transition.ChangeBounds}, {@link android.transition.ChangeTransform},
+ * and {@link android.transition.ChangeClipBounds} for non-<code>ImageView</code>s and
+ * {@link android.transition.MoveImage} for <code>ImageView</code>s:</p>
  *
- * {@sample development/samples/ApiDemos/res/transition/explode.xml Explode}
- *
- * <p>{@link android.transition.MoveImage} transition:</p>
- *
- * {@sample development/samples/ApiDemos/res/transition/move_image.xml MoveImage}
+ * {@sample development/samples/ApiDemos/res/transition/explode_move_together.xml MultipleTransform}
  *
  * <p>Note that attributes for the transition are not required, just as they are
  * optional when declared in code; Transitions created from XML resources will use

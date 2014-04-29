@@ -170,13 +170,20 @@ public class MoveImage extends Transition {
 
         drawable = drawable.getConstantState().newDrawable();
         final MatrixClippedDrawable matrixClippedDrawable = new MatrixClippedDrawable(drawable);
+        final ImageView overlayImage = new ImageView(imageView.getContext());
+        final ViewGroupOverlay overlay = sceneRoot.getOverlay();
+        overlay.add(overlayImage);
+        overlayImage.setLeft(0);
+        overlayImage.setTop(0);
+        overlayImage.setRight(sceneRoot.getWidth());
+        overlayImage.setBottom(sceneRoot.getBottom());
+        overlayImage.setScaleType(ImageView.ScaleType.MATRIX);
+        overlayImage.setImageDrawable(matrixClippedDrawable);
         matrixClippedDrawable.setMatrix(startMatrix);
         matrixClippedDrawable.setBounds(startBounds);
         matrixClippedDrawable.setClipRect(startClip);
 
         imageView.setVisibility(View.INVISIBLE);
-        final ViewGroupOverlay overlay = sceneRoot.getOverlay();
-        overlay.add(matrixClippedDrawable);
         ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(matrixClippedDrawable,
                 changes.toArray(new PropertyValuesHolder[changes.size()]));
 
@@ -184,19 +191,24 @@ public class MoveImage extends Transition {
             @Override
             public void onAnimationEnd(Animator animation) {
                 imageView.setVisibility(View.VISIBLE);
-                overlay.remove(matrixClippedDrawable);
+                overlay.remove(overlayImage);
             }
 
             @Override
             public void onAnimationPause(Animator animation) {
                 imageView.setVisibility(View.VISIBLE);
-                overlay.remove(matrixClippedDrawable);
+                overlayImage.setVisibility(View.INVISIBLE);
             }
 
             @Override
             public void onAnimationResume(Animator animation) {
                 imageView.setVisibility(View.INVISIBLE);
-                overlay.add(matrixClippedDrawable);
+                overlayImage.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                onAnimationEnd(animation);
             }
         };
 
