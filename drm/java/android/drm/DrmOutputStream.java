@@ -18,7 +18,7 @@ package android.drm;
 
 import static android.drm.DrmConvertedStatus.STATUS_OK;
 import static android.drm.DrmManagerClient.INVALID_SESSION;
-import static libcore.io.OsConstants.SEEK_SET;
+import static android.system.OsConstants.SEEK_SET;
 
 import android.os.ParcelFileDescriptor;
 import android.system.ErrnoException;
