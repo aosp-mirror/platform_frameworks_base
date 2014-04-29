@@ -89,7 +89,8 @@ import java.util.List;
  * transition uses a fadingMode of {@link Fade#OUT} instead of the default
  * out-in behavior. Finally, note the use of the <code>targets</code> sub-tag, which
  * takes a set of {@link android.R.styleable#TransitionTarget target} tags, each
- * of which lists a specific <code>targetId</code> which this transition acts upon.
+ * of which lists a specific <code>targetId</code>, <code>excludeId</code>, or
+ * <code>excludeClass</code>, which this transition acts upon.
  * Use of targets is optional, but can be used to either limit the time spent checking
  * attributes on unchanging views, or limiting the types of animations run on specific views.
  * In this case, we know that only the <code>grayscaleContainer</code> will be

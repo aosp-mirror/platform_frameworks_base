@@ -501,7 +501,9 @@ package android {
     field public static final int entries = 16842930; // 0x10100b2
     field public static final int entryValues = 16843256; // 0x10101f8
     field public static final int eventsInterceptionEnabled = 16843389; // 0x101027d
+    field public static final int excludeClass = 16843854; // 0x101044e
     field public static final int excludeFromRecents = 16842775; // 0x1010017
+    field public static final int excludeId = 16843853; // 0x101044d
     field public static final int exitFadeDuration = 16843533; // 0x101030d
     field public static final int expandableListPreferredChildIndicatorLeft = 16842834; // 0x1010052
     field public static final int expandableListPreferredChildIndicatorRight = 16842835; // 0x1010053

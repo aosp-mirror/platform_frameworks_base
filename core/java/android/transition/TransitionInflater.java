@@ -210,7 +210,6 @@ public class TransitionInflater {
         int type;
         int depth = parser.getDepth();
 
-        ArrayList<Integer> targetIds = new ArrayList<Integer>();
         while (((type=parser.next()) != XmlPullParser.END_TAG || parser.getDepth() > depth)
                 && type != XmlPullParser.END_DOCUMENT) {
 
@@ -225,16 +224,27 @@ public class TransitionInflater {
                 int id = a.getResourceId(
                         com.android.internal.R.styleable.TransitionTarget_targetId, -1);
                 if (id >= 0) {
-                    targetIds.add(id);
+                    transition.addTarget(id);
+                } else {
+                    id = a.getResourceId(
+                            com.android.internal.R.styleable.TransitionTarget_excludeId, -1);
+                    if (id >= 0) {
+                        transition.excludeTarget(id, true);
+                    } else {
+                        String className = a.getString(
+                                com.android.internal.R.styleable.TransitionTarget_excludeClass);
+                        if (className != null) {
+                            try {
+                                Class clazz = Class.forName(className);
+                                transition.excludeTarget(clazz, true);
+                            } catch (ClassNotFoundException e) {
+                                throw new RuntimeException("Could not create " + className, e);
+                            }
+                        }
+                    }
                 }
             } else {
                 throw new RuntimeException("Unknown scene name: " + parser.getName());
-            }
-        }
-        int numTargets = targetIds.size();
-        if (numTargets > 0) {
-            for (int i = 0; i < numTargets; ++i) {
-                transition.addTarget(targetIds.get(i));
             }
         }
     }

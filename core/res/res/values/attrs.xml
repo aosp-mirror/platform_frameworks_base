@@ -5025,6 +5025,10 @@
     <declare-styleable name="TransitionTarget">
         <!-- The id of a target on which this transition will animate changes. -->
         <attr name="targetId" format="reference" />
+        <!-- The id of a target to exclude from this transition. -->
+        <attr name="excludeId" format="reference" />
+        <!-- The fully-qualified name of the Class to exclude from this transition. -->
+        <attr name="excludeClass" format="string" />
     </declare-styleable>
 
     <!-- Use <code>set</code> as the root tag of the XML resource that
