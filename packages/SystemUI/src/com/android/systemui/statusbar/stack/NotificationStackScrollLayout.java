@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.animation.AnimationUtils;
 import android.widget.OverScroller;
 
 import com.android.systemui.ExpandHelper;
@@ -40,6 +41,8 @@ import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
+
+import java.util.ArrayList;
 
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
@@ -90,10 +93,28 @@ public class NotificationStackScrollLayout extends ViewGroup
     /**
      * The current State this Layout is in
      */
-    private final StackScrollState mCurrentStackScrollState = new StackScrollState(this);
+    private StackScrollState mCurrentStackScrollState = new StackScrollState(this);
+    private ArrayList<View> mChildrenToAddAnimated = new ArrayList<View>();
+    private ArrayList<View> mChildrenToRemoveAnimated = new ArrayList<View>();
+    private ArrayList<ChildHierarchyChangeEvent> mAnimationEvents
+            = new ArrayList<ChildHierarchyChangeEvent>();
+    private ArrayList<View> mSwipedOutViews = new ArrayList<View>();
+    private final StackStateAnimator mStateAnimator = new StackStateAnimator(this);
 
     private OnChildLocationsChangedListener mListener;
     private ExpandableView.OnHeightChangedListener mOnHeightChangedListener;
+    private boolean mChildHierarchyDirty;
+    private boolean mIsExpanded = true;
+    private ViewTreeObserver.OnPreDrawListener mAfterLayoutPreDrawListener
+            = new ViewTreeObserver.OnPreDrawListener() {
+        @Override
+        public boolean onPreDraw() {
+            updateScrollPositionIfNecessary();
+            updateChildren();
+            getViewTreeObserver().removeOnPreDrawListener(this);
+            return true;
+        }
+    };
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -184,16 +205,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         setMaxLayoutHeight(getHeight() - mEmptyMarginBottom);
         updateContentHeight();
-        getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                updateScrollPositionIfNecessary();
-                updateChildren();
-                getViewTreeObserver().removeOnPreDrawListener(this);
-                return true;
-            }
-        });
-
+        getViewTreeObserver().addOnPreDrawListener(mAfterLayoutPreDrawListener);
     }
 
     public void setChildLocationsChangedListener(OnChildLocationsChangedListener listener) {
@@ -228,22 +240,20 @@ public class NotificationStackScrollLayout extends ViewGroup
      * modifications to {@link #mOwnScrollY} are performed to reflect it in the view layout.
      */
     private void updateChildren() {
-        if (!isCurrentlyAnimating()) {
-            mCurrentStackScrollState.setScrollY(mOwnScrollY);
-            mStackScrollAlgorithm.getStackScrollState(mCurrentStackScrollState);
-            mListenForHeightChanges = false;
-            mCurrentStackScrollState.apply();
-            mListenForHeightChanges = true;
+        mCurrentStackScrollState.setScrollY(mOwnScrollY);
+        mStackScrollAlgorithm.getStackScrollState(mCurrentStackScrollState);
+        if (!isCurrentlyAnimating() && !mChildHierarchyDirty) {
+            applyCurrentState();
             if (mListener != null) {
                 mListener.onChildLocationsChanged(this);
             }
         } else {
-            // TODO: handle animation
+            startAnimationToState(mCurrentStackScrollState);
         }
     }
 
     private boolean isCurrentlyAnimating() {
-        return false;
+        return mStateAnimator.isRunning();
     }
 
     private void updateScrollPositionIfNecessary() {
@@ -288,6 +298,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             veto.performClick();
         }
         setSwipingInProgress(false);
+        mSwipedOutViews.add(v);
     }
 
     public void onBeginDrag(View v) {
@@ -734,6 +745,50 @@ public class NotificationStackScrollLayout extends ViewGroup
         ((ExpandableView) child).setOnHeightChangedListener(null);
         mCurrentStackScrollState.removeViewStateForView(child);
         mStackScrollAlgorithm.notifyChildrenChanged(this);
+        updateScrollStateForRemovedChild(child);
+        if (mIsExpanded) {
+
+            // Generate Animations
+            mChildrenToRemoveAnimated.add(child);
+            mChildHierarchyDirty = true;
+        }
+    }
+
+    /**
+     * Updates the scroll position when a child was removed
+     *
+     * @param removedChild the removed child
+     */
+    private void updateScrollStateForRemovedChild(View removedChild) {
+        int startingPosition = getPositionInLinearLayout(removedChild);
+        int childHeight = removedChild.getHeight() + mPaddingBetweenElements;
+        int endPosition = startingPosition + childHeight;
+        if (endPosition <= mOwnScrollY) {
+            // This child is fully scrolled of the top, so we have to deduct its height from the
+            // scrollPosition
+            mOwnScrollY -= childHeight;
+        } else if (startingPosition < mOwnScrollY) {
+            // This child is currently being scrolled into, set the scroll position to the start of
+            // this child
+            mOwnScrollY = startingPosition;
+        }
+    }
+
+    private int getPositionInLinearLayout(View requestedChild) {
+        int position = 0;
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (child == requestedChild) {
+                return position;
+            }
+            if (child.getVisibility() != View.GONE) {
+                position += child.getHeight();
+                if (i < getChildCount()-1) {
+                    position += mPaddingBetweenElements;
+                }
+            }
+        }
+        return 0;
     }
 
     @Override
@@ -741,6 +796,64 @@ public class NotificationStackScrollLayout extends ViewGroup
         super.onViewAdded(child);
         mStackScrollAlgorithm.notifyChildrenChanged(this);
         ((ExpandableView) child).setOnHeightChangedListener(this);
+        if (child.getVisibility() != View.GONE) {
+            generateAddAnimation(child);
+        }
+    }
+
+    public void generateAddAnimation(View child) {
+        if (mIsExpanded) {
+
+            // Generate Animations
+            mChildrenToAddAnimated.add(child);
+            mChildHierarchyDirty = true;
+        }
+    }
+
+    /**
+     * Change the position of child to a new location
+     *
+     * @param child the view to change the position for
+     * @param newIndex the new index
+     */
+    public void changeViewPosition(View child, int newIndex) {
+        if (child != null && child.getParent() == this) {
+            // TODO: handle this
+        }
+    }
+
+    private void startAnimationToState(StackScrollState finalState) {
+        if (mChildHierarchyDirty) {
+            generateChildHierarchyEvents();
+            mChildHierarchyDirty = false;
+        }
+        mStateAnimator.startAnimationForEvents(mAnimationEvents, finalState);
+    }
+
+    private void generateChildHierarchyEvents() {
+        generateChildAdditionEvents();
+        generateChildRemovalEvents();
+        mChildHierarchyDirty = false;
+    }
+
+    private void generateChildRemovalEvents() {
+        for (View  child : mChildrenToRemoveAnimated) {
+            boolean childWasSwipedOut = mSwipedOutViews.contains(child);
+            int animationType = childWasSwipedOut
+                    ? ChildHierarchyChangeEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT
+                    : ChildHierarchyChangeEvent.ANIMATION_TYPE_REMOVE;
+            mAnimationEvents.add(new ChildHierarchyChangeEvent(child, animationType));
+        }
+        mSwipedOutViews.clear();
+        mChildrenToRemoveAnimated.clear();
+    }
+
+    private void generateChildAdditionEvents() {
+        for (View  child : mChildrenToAddAnimated) {
+            mAnimationEvents.add(new ChildHierarchyChangeEvent(child,
+                    ChildHierarchyChangeEvent.ANIMATION_TYPE_ADD));
+        }
+        mChildrenToAddAnimated.clear();
     }
 
     private boolean onInterceptTouchEventScroll(MotionEvent ev) {
@@ -895,6 +1008,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void setIsExpanded(boolean isExpanded) {
+        mIsExpanded = isExpanded;
         mStackScrollAlgorithm.setIsExpanded(isExpanded);
         if (!isExpanded) {
             mOwnScrollY = 0;
@@ -903,7 +1017,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public void onHeightChanged(ExpandableView view) {
-        if (mListenForHeightChanges) {
+        if (mListenForHeightChanges && !isCurrentlyAnimating()) {
             updateContentHeight();
             updateScrollPositionIfNecessary();
             if (mOnHeightChangedListener != null) {
@@ -918,10 +1032,38 @@ public class NotificationStackScrollLayout extends ViewGroup
         this.mOnHeightChangedListener = mOnHeightChangedListener;
     }
 
+    public void onChildAnimationFinished() {
+        applyCurrentState();
+        mAnimationEvents.clear();
+    }
+
+    private void applyCurrentState() {
+        mListenForHeightChanges = false;
+        mCurrentStackScrollState.apply();
+        mListenForHeightChanges = true;
+    }
+
     /**
      * A listener that is notified when some child locations might have changed.
      */
     public interface OnChildLocationsChangedListener {
         public void onChildLocationsChanged(NotificationStackScrollLayout stackScrollLayout);
     }
+
+    static class ChildHierarchyChangeEvent {
+
+        static int ANIMATION_TYPE_ADD = 1;
+        static int ANIMATION_TYPE_REMOVE = 2;
+        static int ANIMATION_TYPE_REMOVE_SWIPED_OUT = 3;
+        final long eventStartTime;
+        final View changingView;
+        final int animationType;
+
+        ChildHierarchyChangeEvent(View view, int type) {
+            eventStartTime = AnimationUtils.currentAnimationTimeMillis();
+            changingView = view;
+            animationType = type;
+        }
+    }
+
 }

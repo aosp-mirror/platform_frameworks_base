@@ -72,11 +72,10 @@ public class StackScrollState {
             }
             // initialize with the default values of the view
             viewState.height = child.getActualHeight();
-            viewState.alpha = 1;
             viewState.gone = child.getVisibility() == View.GONE;
+            viewState.alpha = 1;
         }
     }
-
 
     public ViewState getViewStateForView(View requestedView) {
         return mStateMap.get(requestedView);
