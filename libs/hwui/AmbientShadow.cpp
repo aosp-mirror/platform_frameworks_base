@@ -147,6 +147,8 @@ VertexBufferMode AmbientShadow::createAmbientShadow(bool isCasterOpaque,
 
 /**
  * Generate an array of rays' direction vectors.
+ * To make sure the vertices generated are clockwise, the directions are from PI
+ * to -PI.
  *
  * @param rays The number of rays shooting out from the centroid.
  * @param vertices Vertices of the polygon.
@@ -160,8 +162,8 @@ void AmbientShadow::calculateRayDirections(const int rays, const Vector3* vertic
     if (vertexCount * 2 > rays) {
         float deltaAngle = 2 * M_PI / rays;
         for (int i = 0; i < rays; i++) {
-            dir[i].x = sinf(deltaAngle * i);
-            dir[i].y = cosf(deltaAngle * i);
+            dir[i].x = cosf(M_PI - deltaAngle * i);
+            dir[i].y = sinf(M_PI - deltaAngle * i);
         }
         return;
     }
@@ -178,50 +180,52 @@ void AmbientShadow::calculateRayDirections(const int rays, const Vector3* vertic
     // Since the incoming polygon is clockwise, we can find the dip to identify
     // the minimal theta.
     float polyThetas[vertexCount];
-    int minimalPolyThetaIndex = 0;
+    int maxPolyThetaIndex = 0;
     for (int i = 0; i < vertexCount; i++) {
         polyThetas[i] = atan2(vertices[i].y - centroid3d.y,
                 vertices[i].x - centroid3d.x);
-        if (i > 0 && polyThetas[i] < polyThetas[i - 1]) {
-            minimalPolyThetaIndex = i;
+        if (i > 0 && polyThetas[i] > polyThetas[i - 1]) {
+            maxPolyThetaIndex = i;
         }
     }
 
-    int polyThetaIndex = minimalPolyThetaIndex;
-    float polyTheta = polyThetas[minimalPolyThetaIndex];
+    // Both poly's thetas and uniform thetas are in decrease order(clockwise)
+    // from PI to -PI.
+    int polyThetaIndex = maxPolyThetaIndex;
+    float polyTheta = polyThetas[maxPolyThetaIndex];
     int uniformThetaIndex = 0;
-    float uniformTheta = - M_PI;
+    float uniformTheta = M_PI;
     for (int i = 0; i < rays; i++) {
         // Compare both thetas and pick the smaller one and move on.
         bool hasThetaCollision = abs(polyTheta - uniformTheta) < MINIMAL_DELTA_THETA;
-        if (polyTheta < uniformTheta || hasThetaCollision) {
+        if (polyTheta > uniformTheta || hasThetaCollision) {
             if (hasThetaCollision) {
                 // Shift the uniformTheta to middle way between current polyTheta
                 // and next uniform theta. The next uniform theta can wrap around
                 // to exactly PI safely here.
                 // Note that neither polyTheta nor uniformTheta can be FLT_MAX
                 // due to the hasThetaCollision is true.
-                uniformTheta = (polyTheta +  deltaAngle * (uniformThetaIndex + 1) - M_PI) / 2;
+                uniformTheta = (polyTheta +  M_PI - deltaAngle * (uniformThetaIndex + 1)) / 2;
 #if DEBUG_SHADOW
                 ALOGD("Shifted uniformTheta to %f", uniformTheta);
 #endif
             }
             rayThetas[i] = polyTheta;
             polyThetaIndex = (polyThetaIndex + 1) % vertexCount;
-            if (polyThetaIndex != minimalPolyThetaIndex) {
+            if (polyThetaIndex != maxPolyThetaIndex) {
                 polyTheta = polyThetas[polyThetaIndex];
             } else {
                 // out of poly points.
-                polyTheta = FLT_MAX;
+                polyTheta = - FLT_MAX;
             }
         } else {
             rayThetas[i] = uniformTheta;
             uniformThetaIndex++;
             if (uniformThetaIndex < uniformRayCount) {
-                uniformTheta = deltaAngle * uniformThetaIndex - M_PI;
+                uniformTheta = M_PI - deltaAngle * uniformThetaIndex;
             } else {
                 // out of uniform points.
-                uniformTheta = FLT_MAX;
+                uniformTheta = - FLT_MAX;
             }
         }
     }
@@ -232,8 +236,8 @@ void AmbientShadow::calculateRayDirections(const int rays, const Vector3* vertic
 #endif
         // TODO: Fix the intersection precision problem and remvoe the delta added
         // here.
-        dir[i].x = sinf(rayThetas[i] + MINIMAL_DELTA_THETA);
-        dir[i].y = cosf(rayThetas[i] + MINIMAL_DELTA_THETA);
+        dir[i].x = cosf(rayThetas[i] + MINIMAL_DELTA_THETA);
+        dir[i].y = sinf(rayThetas[i] + MINIMAL_DELTA_THETA);
     }
 }
 
@@ -308,13 +312,12 @@ void AmbientShadow::calculateNormal(int rays, int currentRayIndex,
     Vector2 p1 = dir[preIndex] * rayDist[preIndex];
     Vector2 p2 = dir[postIndex] * rayDist[postIndex];
 
-    // Now the V (deltaX, deltaY) is the vector going CW around the poly.
+    // Now the rays are going CW around the poly.
     Vector2 delta = p2 - p1;
     if (delta.length() != 0) {
         delta.normalize();
-        // Calculate the normal , which is CCW 90 rotate to the V.
-        // 90 degrees CCW about z-axis: (x, y, z) -> (-y, x, z)
-        normal.x = -delta.y;
+        // Calculate the normal , which is CCW 90 rotate to the delta.
+        normal.x = - delta.y;
         normal.y = delta.x;
     }
 }
