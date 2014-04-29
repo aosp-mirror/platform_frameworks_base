@@ -102,7 +102,7 @@ public class AlertController {
 
     private ScrollView mScrollView;
     
-    private int mIconId = -1;
+    private int mIconId = 0;
     
     private Drawable mIcon;
     
@@ -337,25 +337,39 @@ public class AlertController {
     }
 
     /**
-     * Set resId to 0 if you don't want an icon.
-     * @param resId the resourceId of the drawable to use as the icon or 0
-     * if you don't want an icon.
+     * Specifies the icon to display next to the alert title.
+     *
+     * @param resId the resource identifier of the drawable to use as the icon,
+     *            or 0 for no icon
      */
     public void setIcon(int resId) {
+        mIcon = null;
         mIconId = resId;
+
         if (mIconView != null) {
-            if (resId > 0) {
+            if (resId != 0) {
                 mIconView.setImageResource(mIconId);
-            } else if (resId == 0) {
+            } else {
                 mIconView.setVisibility(View.GONE);
             }
         }
     }
-    
+
+    /**
+     * Specifies the icon to display next to the alert title.
+     *
+     * @param icon the drawable to use as the icon or null for no icon
+     */
     public void setIcon(Drawable icon) {
         mIcon = icon;
-        if ((mIconView != null) && (mIcon != null)) {
-            mIconView.setImageDrawable(icon);
+        mIconId = 0;
+
+        if (mIconView != null) {
+            if (icon != null) {
+                mIconView.setImageDrawable(icon);
+            } else {
+                mIconView.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -485,28 +499,24 @@ public class AlertController {
             View titleTemplate = mWindow.findViewById(R.id.title_template);
             titleTemplate.setVisibility(View.GONE);
         } else {
-            final boolean hasTextTitle = !TextUtils.isEmpty(mTitle);
-            
             mIconView = (ImageView) mWindow.findViewById(R.id.icon);
-            if (hasTextTitle) {
-                /* Display the title if a title is supplied, else hide it */
-                mTitleView = (TextView) mWindow.findViewById(R.id.alertTitle);
 
+            final boolean hasTextTitle = !TextUtils.isEmpty(mTitle);
+            if (hasTextTitle) {
+                // Display the title if a title is supplied, else hide it.
+                mTitleView = (TextView) mWindow.findViewById(R.id.alertTitle);
                 mTitleView.setText(mTitle);
-                
-                /* Do this last so that if the user has supplied any
-                 * icons we use them instead of the default ones. If the
-                 * user has specified 0 then make it disappear.
-                 */
-                if (mIconId > 0) {
+
+                // Do this last so that if the user has supplied any icons we
+                // use them instead of the default ones. If the user has
+                // specified 0 then make it disappear.
+                if (mIconId != 0) {
                     mIconView.setImageResource(mIconId);
                 } else if (mIcon != null) {
                     mIconView.setImageDrawable(mIcon);
-                } else if (mIconId == 0) {
-                    
-                    /* Apply the padding from the icon to ensure the
-                     * title is aligned correctly.
-                     */
+                } else {
+                    // Apply the padding from the icon to ensure the title is
+                    // aligned correctly.
                     mTitleView.setPadding(mIconView.getPaddingLeft(),
                             mIconView.getPaddingTop(),
                             mIconView.getPaddingRight(),
@@ -514,9 +524,8 @@ public class AlertController {
                     mIconView.setVisibility(View.GONE);
                 }
             } else {
-                
                 // Hide the title template
-                View titleTemplate = mWindow.findViewById(R.id.title_template);
+                final View titleTemplate = mWindow.findViewById(R.id.title_template);
                 titleTemplate.setVisibility(View.GONE);
                 mIconView.setVisibility(View.GONE);
                 topPanel.setVisibility(View.GONE);
