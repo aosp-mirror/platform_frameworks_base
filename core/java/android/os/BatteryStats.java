@@ -173,6 +173,8 @@ public abstract class BatteryStats implements Parcelable {
     private static final String BLUETOOTH_STATE_COUNT_DATA = "bsc";
     private static final String POWER_USE_SUMMARY_DATA = "pws";
     private static final String POWER_USE_ITEM_DATA = "pwi";
+    private static final String DISCHARGE_STEP_DATA = "dsd";
+    private static final String CHARGE_STEP_DATA = "csd";
 
     private final StringBuilder mFormatBuilder = new StringBuilder(32);
     private final Formatter mFormatter = new Formatter(mFormatBuilder);
@@ -1340,6 +1342,18 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long computeBatteryTimeRemaining(long curTime);
 
     /**
+     * Return the historical number of discharge steps we currently have.
+     */
+    public abstract int getNumDischargeStepDurations();
+
+    /**
+     * Return the array of discharge step durations; the number of valid
+     * items in it is returned by {@link #getNumDischargeStepDurations()}.
+     * These values are in milliseconds.
+     */
+    public abstract long[] getDischargeStepDurationsArray();
+
+    /**
      * Compute an approximation for how much time (in microseconds) remains until the battery
      * is fully charged.  Returns -1 if no time can be computed: either there is not
      * enough current data to make a decision, or the battery is currently
@@ -1348,6 +1362,18 @@ public abstract class BatteryStats implements Parcelable {
      * @param curTime The current elepsed realtime in microseconds.
      */
     public abstract long computeChargeTimeRemaining(long curTime);
+
+    /**
+     * Return the historical number of charge steps we currently have.
+     */
+    public abstract int getNumChargeStepDurations();
+
+    /**
+     * Return the array of charge step durations; the number of valid
+     * items in it is returned by {@link #getNumChargeStepDurations()}.
+     * These values are in milliseconds.
+     */
+    public abstract long[] getChargeStepDurationsArray();
 
     public abstract Map<String, ? extends LongCounter> getWakeupReasonStats();
 
@@ -3120,6 +3146,28 @@ public abstract class BatteryStats implements Parcelable {
         pw.print(suffix);
     }
 
+    private static boolean dumpDurationSteps(PrintWriter pw, String header, long[] steps,
+            int count, boolean checkin) {
+        if (count <= 0) {
+            return false;
+        }
+        if (!checkin) {
+            pw.println(header);
+        }
+        String[] lineArgs = new String[1];
+        for (int i=0; i<count; i++) {
+            if (checkin) {
+                lineArgs[0] = Long.toString(steps[i]);
+                dumpLine(pw, 0 /* uid */, "i" /* category */, header, (Object[])lineArgs);
+            } else {
+                pw.print("  #"); pw.print(i); pw.print(": ");
+                TimeUtils.formatDuration(steps[i], pw);
+                pw.println();
+            }
+        }
+        return true;
+    }
+
     public static final int DUMP_UNPLUGGED_ONLY = 1<<0;
     public static final int DUMP_CHARGED_ONLY = 1<<1;
     public static final int DUMP_HISTORY_ONLY = 1<<2;
@@ -3239,7 +3287,27 @@ public abstract class BatteryStats implements Parcelable {
                 }
             }
             if (didPid) {
-                pw.println("");
+                pw.println();
+            }
+            if (dumpDurationSteps(pw, "Discharge step durations:", getDischargeStepDurationsArray(),
+                    getNumDischargeStepDurations(), false)) {
+                long timeRemaining = computeBatteryTimeRemaining(SystemClock.elapsedRealtime());
+                if (timeRemaining >= 0) {
+                    pw.print("  Estimated discharge time remaining: ");
+                    TimeUtils.formatDuration(timeRemaining / 1000, pw);
+                    pw.println();
+                }
+                pw.println();
+            }
+            if (dumpDurationSteps(pw, "Charge step durations:", getChargeStepDurationsArray(),
+                    getNumChargeStepDurations(), false)) {
+                long timeRemaining = computeChargeTimeRemaining(SystemClock.elapsedRealtime());
+                if (timeRemaining >= 0) {
+                    pw.print("  Estimated charge time remaining: ");
+                    TimeUtils.formatDuration(timeRemaining / 1000, pw);
+                    pw.println();
+                }
+                pw.println();
             }
         }
 
@@ -3248,7 +3316,7 @@ public abstract class BatteryStats implements Parcelable {
             pw.println("  System starts: " + getStartCount()
                     + ", currently on battery: " + getIsOnBattery());
             dumpLocked(context, pw, "", STATS_SINCE_CHARGED, reqUid);
-            pw.println("");
+            pw.println();
         }
         if (!filtering || (flags&DUMP_UNPLUGGED_ONLY) != 0) {
             pw.println("Statistics since last unplugged:");
@@ -3351,6 +3419,12 @@ public abstract class BatteryStats implements Parcelable {
                     }
                 }
             }
+        }
+        if (!filtering) {
+            dumpDurationSteps(pw, DISCHARGE_STEP_DATA, getDischargeStepDurationsArray(),
+                    getNumDischargeStepDurations(), true);
+            dumpDurationSteps(pw, CHARGE_STEP_DATA, getChargeStepDurationsArray(),
+                    getNumChargeStepDurations(), true);
         }
         if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
             dumpCheckinLocked(context, pw, STATS_SINCE_CHARGED, -1);

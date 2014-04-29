@@ -6358,6 +6358,14 @@ public final class BatteryStatsImpl extends BatteryStats {
         return (msPerLevel * mCurrentBatteryLevel) * 1000;
     }
 
+    public int getNumDischargeStepDurations() {
+        return mNumDischargeStepDurations;
+    }
+
+    public long[] getDischargeStepDurationsArray() {
+        return mDischargeStepDurations;
+    }
+
     @Override
     public long computeChargeTimeRemaining(long curTime) {
         if (mOnBattery) {
@@ -6385,6 +6393,14 @@ public final class BatteryStatsImpl extends BatteryStats {
             return -1;
         }
         return (msPerLevel * (100-mCurrentBatteryLevel)) * 1000;
+    }
+
+    public int getNumChargeStepDurations() {
+        return mNumChargeStepDurations;
+    }
+
+    public long[] getChargeStepDurationsArray() {
+        return mChargeStepDurations;
     }
 
     long getBatteryUptimeLocked() {
@@ -7704,25 +7720,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
                 pr.println("*** Bluetooth active type #" + i + ":");
                 mBluetoothStateTimer[i].logState(pr, "  ");
-            }
-            StringBuilder sb = new StringBuilder(128);
-            if (mNumDischargeStepDurations > 0) {
-                pr.println("*** Discharge step durations:");
-                for (int i=0; i<mNumDischargeStepDurations; i++) {
-                    sb.setLength(0);
-                    sb.append("  #"); sb.append(i); sb.append(": ");
-                            formatTimeMs(sb, mDischargeStepDurations[i]);
-                    pr.println(sb.toString());
-                }
-            }
-            if (mNumChargeStepDurations > 0) {
-                pr.println("*** Charge step durations:");
-                for (int i=0; i<mNumChargeStepDurations; i++) {
-                    sb.setLength(0);
-                    sb.append("  #"); sb.append(i); sb.append(": ");
-                            formatTimeMs(sb, mChargeStepDurations[i]);
-                    pr.println(sb.toString());
-                }
             }
         }
         super.dumpLocked(context, pw, flags, reqUid, histStart);

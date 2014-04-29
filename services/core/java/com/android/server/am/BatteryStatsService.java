@@ -110,6 +110,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         return data;
     }
     
+    public long computeBatteryTimeRemaining() {
+        synchronized (mStats) {
+            long time = mStats.computeBatteryTimeRemaining(SystemClock.elapsedRealtime());
+            return time >= 0 ? (time/1000) : time;
+        }
+    }
+
+    public long computeChargeTimeRemaining() {
+        synchronized (mStats) {
+            long time = mStats.computeChargeTimeRemaining(SystemClock.elapsedRealtime());
+            return time >= 0 ? (time/1000) : time;
+        }
+    }
+
     public void addIsolatedUid(int isolatedUid, int appUid) {
         enforceCallingPermission();
         synchronized (mStats) {
