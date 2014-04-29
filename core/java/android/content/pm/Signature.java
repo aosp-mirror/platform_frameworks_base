@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.lang.ref.SoftReference;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.Arrays;
@@ -38,12 +39,28 @@ public class Signature implements Parcelable {
     private int mHashCode;
     private boolean mHaveHashCode;
     private SoftReference<String> mStringRef;
+    private Certificate[] mCertificateChain;
 
     /**
      * Create Signature from an existing raw byte array.
      */
     public Signature(byte[] signature) {
         mSignature = signature.clone();
+        mCertificateChain = null;
+    }
+
+    /**
+     * Create signature from a certificate chain. Used for backward
+     * compatibility.
+     *
+     * @throws CertificateEncodingException
+     * @hide
+     */
+    public Signature(Certificate[] certificateChain) throws CertificateEncodingException {
+        mSignature = certificateChain[0].getEncoded();
+        if (certificateChain.length > 1) {
+            mCertificateChain = Arrays.copyOfRange(certificateChain, 1, certificateChain.length);
+        }
     }
 
     private static final int parseHexDigit(int nibble) {
@@ -154,6 +171,29 @@ public class Signature implements Parcelable {
         final ByteArrayInputStream bais = new ByteArrayInputStream(mSignature);
         final Certificate cert = certFactory.generateCertificate(bais);
         return cert.getPublicKey();
+    }
+
+    /**
+     * Used for compatibility code that needs to check the certificate chain
+     * during upgrades.
+     *
+     * @throws CertificateEncodingException
+     * @hide
+     */
+    public Signature[] getChainSignatures() throws CertificateEncodingException {
+        if (mCertificateChain == null) {
+            return new Signature[] { this };
+        }
+
+        Signature[] chain = new Signature[1 + mCertificateChain.length];
+        chain[0] = this;
+
+        int i = 1;
+        for (Certificate c : mCertificateChain) {
+            chain[i++] = new Signature(c.getEncoded());
+        }
+
+        return chain;
     }
 
     @Override
