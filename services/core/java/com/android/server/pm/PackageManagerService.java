@@ -1329,24 +1329,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (didDexOpt) {
-                File dalvikCacheDir = new File(dataDir, "dalvik-cache");
-
-                // If we had to do a dexopt of one of the previous
-                // things, then something on the system has changed.
-                // Consider this significant, and wipe away all other
-                // existing dexopt files to ensure we don't leave any
-                // dangling around.
-                String[] files = dalvikCacheDir.list();
-                if (files != null) {
-                    for (int i=0; i<files.length; i++) {
-                        String fn = files[i];
-                        if (fn.startsWith("data@app@")
-                                || fn.startsWith("data@app-private@")) {
-                            Slog.i(TAG, "Pruning dalvik file: " + fn);
-                            (new File(dalvikCacheDir, fn)).delete();
-                        }
-                    }
-                }
+                pruneDexFiles(new File(dataDir, "dalvik-cache"));
             }
 
             // Collect vendor overlay packages.
@@ -1577,6 +1560,37 @@ public class PackageManagerService extends IPackageManager.Stub {
             mRequiredVerifierPackage = getRequiredVerifierLPr();
         } // synchronized (mPackages)
         } // synchronized (mInstallLock)
+    }
+
+    private static void pruneDexFiles(File cacheDir) {
+        // If we had to do a dexopt of one of the previous
+        // things, then something on the system has changed.
+        // Consider this significant, and wipe away all other
+        // existing dexopt files to ensure we don't leave any
+        // dangling around.
+        //
+        // Additionally, delete all dex files from the root directory
+        // since there shouldn't be any there anyway.
+        File[] files = cacheDir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (!file.isDirectory()) {
+                    Slog.i(TAG, "Pruning dalvik file: " + file.getAbsolutePath());
+                    file.delete();
+                } else {
+                    File[] subDirList = file.listFiles();
+                    if (subDirList != null) {
+                        for (File subDirFile : subDirList) {
+                            final String fn = subDirFile.getName();
+                            if (fn.startsWith("data@app@") || fn.startsWith("data@app-private@")) {
+                                Slog.i(TAG, "Pruning dalvik file: " + fn);
+                                subDirFile.delete();
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public boolean isFirstBoot() {
