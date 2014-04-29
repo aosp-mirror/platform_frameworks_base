@@ -51,15 +51,16 @@ namespace renderthread {
     MethodInvokeRenderTask* task = new MethodInvokeRenderTask((RunnableMethod) Bridge_ ## method); \
     ARGS(method) *args = (ARGS(method) *) task->payload()
 
-CREATE_BRIDGE1(createContext, bool translucent) {
-    return new CanvasContext(args->translucent);
+CREATE_BRIDGE2(createContext, bool translucent, RenderNode* rootRenderNode) {
+    return new CanvasContext(args->translucent, args->rootRenderNode);
 }
 
-RenderProxy::RenderProxy(bool translucent)
+RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode)
         : mRenderThread(RenderThread::getInstance())
         , mContext(0) {
     SETUP_TASK(createContext);
     args->translucent = translucent;
+    args->rootRenderNode = rootRenderNode;
     mContext = (CanvasContext*) postAndWait(task);
     mDrawFrameTask.setContext(mContext);
 }
@@ -133,9 +134,8 @@ void RenderProxy::setup(int width, int height) {
     post(task);
 }
 
-void RenderProxy::drawDisplayList(RenderNode* displayList,
+void RenderProxy::syncAndDrawFrame(
         int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom) {
-    mDrawFrameTask.setRenderNode(displayList);
     mDrawFrameTask.setDirty(dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
     mDrawFrameTask.drawFrame(&mRenderThread);
 }

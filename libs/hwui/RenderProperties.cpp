@@ -51,7 +51,8 @@ RenderProperties::PrimitiveFields::PrimitiveFields()
 
 RenderProperties::ComputedFields::ComputedFields()
         : mTransformMatrix(NULL)
-        , mClipPath(NULL) {
+        , mClipPath(NULL)
+        , mClipPathOp(SkRegion::kIntersect_Op) {
 }
 
 RenderProperties::ComputedFields::~ComputedFields() {

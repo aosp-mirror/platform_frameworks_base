@@ -133,19 +133,19 @@ public class ViewPropertyAnimator {
      * Constants used to associate a property being requested and the mechanism used to set
      * the property (this class calls directly into View to set the properties in question).
      */
-    private static final int NONE           = 0x0000;
-    private static final int TRANSLATION_X  = 0x0001;
-    private static final int TRANSLATION_Y  = 0x0002;
-    private static final int TRANSLATION_Z  = 0x0004;
-    private static final int SCALE_X        = 0x0008;
-    private static final int SCALE_Y        = 0x0010;
-    private static final int ROTATION       = 0x0020;
-    private static final int ROTATION_X     = 0x0040;
-    private static final int ROTATION_Y     = 0x0080;
-    private static final int X              = 0x0100;
-    private static final int Y              = 0x0200;
-    private static final int Z              = 0x0400;
-    private static final int ALPHA          = 0x0800;
+    static final int NONE           = 0x0000;
+    static final int TRANSLATION_X  = 0x0001;
+    static final int TRANSLATION_Y  = 0x0002;
+    static final int TRANSLATION_Z  = 0x0004;
+    static final int SCALE_X        = 0x0008;
+    static final int SCALE_Y        = 0x0010;
+    static final int ROTATION       = 0x0020;
+    static final int ROTATION_X     = 0x0040;
+    static final int ROTATION_Y     = 0x0080;
+    static final int X              = 0x0100;
+    static final int Y              = 0x0200;
+    static final int Z              = 0x0400;
+    static final int ALPHA          = 0x0800;
 
     private static final int TRANSFORM_MASK = TRANSLATION_X | TRANSLATION_Y | TRANSLATION_Z |
             SCALE_X | SCALE_Y | ROTATION | ROTATION_X | ROTATION_Y | X | Y | Z;

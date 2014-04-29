@@ -53,7 +53,6 @@ public:
     void addLayer(DeferredLayerUpdater* layer);
     void removeLayer(DeferredLayerUpdater* layer);
 
-    void setRenderNode(RenderNode* renderNode);
     void setDirty(int left, int top, int right, int bottom);
     void drawFrame(RenderThread* renderThread);
 
@@ -63,7 +62,6 @@ private:
     void postAndWait(RenderThread* renderThread);
     bool syncFrameState();
     void unblockUiThread();
-    static void drawRenderNode(CanvasContext* context, RenderNode* renderNode, Rect* dirty);
 
     Mutex mLock;
     Condition mSignal;
@@ -73,7 +71,6 @@ private:
     /*********************************************
      *  Single frame data
      *********************************************/
-    sp<RenderNode> mRenderNode;
     Rect mDirty;
 
     /*********************************************

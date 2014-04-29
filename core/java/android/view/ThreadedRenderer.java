@@ -50,7 +50,7 @@ import java.io.PrintWriter;
 public class ThreadedRenderer extends HardwareRenderer {
     private static final String LOGTAG = "ThreadedRenderer";
 
-    private static final Rect NULL_RECT = new Rect(-1, -1, -1, -1);
+    private static final Rect NULL_RECT = new Rect();
 
     private int mWidth, mHeight;
     private long mNativeProxy;
@@ -58,9 +58,10 @@ public class ThreadedRenderer extends HardwareRenderer {
     private RenderNode mRootNode;
 
     ThreadedRenderer(boolean translucent) {
-        mNativeProxy = nCreateProxy(translucent);
-        mRootNode = RenderNode.create("RootNode");
+        long rootNodePtr = nCreateRootRenderNode();
+        mRootNode = RenderNode.adopt(rootNodePtr);
         mRootNode.setClipToBounds(false);
+        mNativeProxy = nCreateProxy(translucent, rootNodePtr);
     }
 
     @Override
@@ -202,8 +203,7 @@ public class ThreadedRenderer extends HardwareRenderer {
         if (dirty == null) {
             dirty = NULL_RECT;
         }
-        nDrawDisplayList(mNativeProxy, mRootNode.getNativeDisplayList(),
-                dirty.left, dirty.top, dirty.right, dirty.bottom);
+        nSyncAndDrawFrame(mNativeProxy, dirty.left, dirty.top, dirty.right, dirty.bottom);
     }
 
     @Override
@@ -293,7 +293,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     /** @hide */
     public static native void postToRenderThread(Runnable runnable);
 
-    private static native long nCreateProxy(boolean translucent);
+    private static native long nCreateRootRenderNode();
+    private static native long nCreateProxy(boolean translucent, long rootRenderNode);
     private static native void nDeleteProxy(long nativeProxy);
 
     private static native boolean nInitialize(long nativeProxy, Surface window);
@@ -302,7 +303,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nSetup(long nativeProxy, int width, int height);
     private static native void nSetDisplayListData(long nativeProxy, long displayList,
             long newData);
-    private static native void nDrawDisplayList(long nativeProxy, long displayList,
+    private static native void nSyncAndDrawFrame(long nativeProxy,
             int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
     private static native void nRunWithGlContext(long nativeProxy, Runnable runnable);
     private static native void nDestroyCanvasAndSurface(long nativeProxy);

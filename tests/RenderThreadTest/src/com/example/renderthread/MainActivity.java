@@ -1,17 +1,13 @@
 
 package com.example.renderthread;
 
-import android.animation.TimeInterpolator;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
-import android.view.RenderNode;
 import android.view.HardwareRenderer;
-import android.view.ThreadedRenderer;
+import android.view.RenderNodeAnimator;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
@@ -23,6 +19,8 @@ import java.util.Map;
 
 public class MainActivity extends Activity implements OnItemClickListener {
 
+    static final int TRANSLATION_Y = 1;
+    static final int DELTA_TYPE_DELTA = 1;
     static final int DURATION = 400;
 
     static final String KEY_NAME = "name";
@@ -66,82 +64,21 @@ public class MainActivity extends Activity implements OnItemClickListener {
         }
     }
 
-    private static class DisplayListAnimator {
-        private static final TimeInterpolator sDefaultInterpolator =
-                new AccelerateDecelerateInterpolator();
-
-        RenderNode mDisplayList;
-        float mFromValue;
-        float mDelta;
-        long mDuration = DURATION * 2;
-        long mStartTime;
-
-        DisplayListAnimator(View view, float translateXBy) {
-            mDelta = translateXBy;
-            mFromValue = view.getTranslationY();
-            mDisplayList = view.getDisplayList();
-        }
-
-        boolean animate(long currentTime) {
-            if (mStartTime == 0) mStartTime = currentTime;
-
-            float fraction = (float)(currentTime - mStartTime) / mDuration;
-            if (fraction > 1) {
-                return false;
-            }
-            fraction = sDefaultInterpolator.getInterpolation(fraction);
-            float translation = mFromValue + (mDelta * fraction);
-            mDisplayList.setTranslationY(translation);
-            return fraction < 1f;
-        }
-    }
-
-    private static class AnimationExecutor implements Runnable {
-        DisplayListAnimator[] mAnimations;
-        ThreadedRenderer mRenderer;
-
-        AnimationExecutor(ThreadedRenderer renderer, DisplayListAnimator[] animations) {
-            mRenderer = renderer;
-            mAnimations = animations;
-            ThreadedRenderer.postToRenderThread(this);
-        }
-
-        @Override
-        public void run() {
-            boolean hasMore = false;
-            long now = SystemClock.uptimeMillis();
-            for (DisplayListAnimator animator : mAnimations) {
-                hasMore |= animator.animate(now);
-            }
-            mRenderer.repeatLastDraw();
-            if (hasMore) {
-                ThreadedRenderer.postToRenderThread(this);
-            }
-        }
-
-    }
-
     @Override
     public void onItemClick(final AdapterView<?> adapterView, View clickedView,
             int clickedPosition, long clickedId) {
         int topPosition = adapterView.getFirstVisiblePosition();
         int dy = adapterView.getHeight();
-        final DisplayListAnimator[] animators = new DisplayListAnimator[adapterView.getChildCount()];
         for (int i = 0; i < adapterView.getChildCount(); i++) {
             int pos = topPosition + i;
             View child = adapterView.getChildAt(i);
             float delta = (pos - clickedPosition) * 1.1f;
             if (delta == 0) delta = -1;
-            animators[i] = new DisplayListAnimator(child, dy * delta);
+            RenderNodeAnimator animator = new RenderNodeAnimator(
+                    TRANSLATION_Y, DELTA_TYPE_DELTA, dy * delta);
+            animator.setDuration(DURATION);
+            animator.start(child);
         }
-        adapterView.invalidate();
-        adapterView.post(new Runnable() {
-
-            @Override
-            public void run() {
-                new AnimationExecutor((ThreadedRenderer) adapterView.getHardwareRenderer(), animators);
-            }
-        });
         //mHandler.postDelayed(mLaunchActivity, (long) (DURATION * .4));
         mLaunchActivity.run();
     }
