@@ -775,6 +775,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 0) != 0;
     }
 
+    boolean isUserSetupComplete() {
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
+    }
+
     private void handleLongPressOnHome() {
         if (mLongPressOnHomeBehavior != LONG_PRESS_HOME_NOTHING) {
             mHomeConsumed = true;
@@ -4294,6 +4299,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void requestTransientBars(WindowState swipeTarget) {
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
+            if (!isUserSetupComplete()) {
+                // Swipe-up for navigation bar is disabled during setup
+                return;
+            }
             boolean sb = mStatusBarController.checkShowTransientBarLw();
             boolean nb = mNavigationBarController.checkShowTransientBarLw();
             if (sb || nb) {
@@ -5270,7 +5279,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean newImmersiveMode = isImmersiveMode(vis);
         if (win != null && oldImmersiveMode != newImmersiveMode) {
             final String pkg = win.getOwningPackage();
-            mImmersiveModeConfirmation.immersiveModeChanged(pkg, newImmersiveMode);
+            mImmersiveModeConfirmation.immersiveModeChanged(pkg, newImmersiveMode,
+                    isUserSetupComplete());
         }
 
         vis = mNavigationBarController.updateVisibilityLw(transientNavBarAllowed, oldVis, vis);
