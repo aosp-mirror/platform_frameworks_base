@@ -17,12 +17,11 @@ header.hide=1
   Google. Identify locations with <b>custom markers</b>, augment the map data
   with <b>image overlays</b>, embed <b>one or more maps</b> as fragments,
   and much more.</p>
-  <p>The <a
+  <p>Explore the <a
 href="{@docRoot}reference/com/google/android/gms/maps/package-summary.html"
->Google Maps Android API reference</a> is available here on developer.android.com, but for more
-information about adding maps to your app, visit:</p>
-  <p><a class="external-link"
-href="https://developers.google.com/maps/documentation/android/">developers.google.com/maps</a></p>
+>Google Maps Android API reference</a> or visit <a class="external-link"
+href="https://developers.google.com/maps/documentation/android/">developers.google.com/maps</a>
+for more information about adding maps to your app.</p>
 </div>
 </div>
 
@@ -60,8 +59,8 @@ href="https://developers.google.com/maps/documentation/android/">developers.goog
     <h3 style="clear:left">Getting Started</h3>
     <h4>1. Get the Google Play services SDK</h4>
     <p>The Google Maps Android APIs are part of the Google Play services platform.</p>
-    <p>To use Google Maps, <a href="{@docRoot}google/play-services/setup.html">set up</a>
-      the Google Play services SDK. Then see the <a class="external-link"
+    <p>To use Google Maps, <a href="{@docRoot}google/play-services/setup.html">set up
+      the Google Play services SDK</a>. Then see the <a class="external-link"
       href="https://developers.google.com/maps/documentation/android/start#installing_the_google_maps_android_v2_api">
       Getting Started guide</a> to get your API key for Maps and set up your app.
     </p>

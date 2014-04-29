@@ -21,6 +21,7 @@
 #include <androidfw/Asset.h>
 #include <androidfw/ResourceTypes.h>
 #include <netinet/in.h>
+#include <stdio.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 
@@ -126,12 +127,18 @@ static void scaleNinePatchChunk(android::Res_png_9patch* chunk, float scale) {
 static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStreamRewindable* stream,
         int sampleSize, bool ditherImage) {
 
+    SkImageInfo bitmapInfo;
+    if (!bitmap->asImageInfo(&bitmapInfo)) {
+        ALOGW("bitmap has unknown configuration so no memory has been allocated");
+        return NULL;
+    }
+
     SkImageRef* pr;
     // only use ashmem for large images, since mmaps come at a price
     if (bitmap->getSize() >= 32 * 1024) {
-        pr = new SkImageRef_ashmem(stream, bitmap->config(), sampleSize);
+        pr = new SkImageRef_ashmem(bitmapInfo, stream, sampleSize);
     } else {
-        pr = new SkImageRef_GlobalPool(stream, bitmap->config(), sampleSize);
+        pr = new SkImageRef_GlobalPool(bitmapInfo, stream, sampleSize);
     }
     pr->setDitherImage(ditherImage);
     bitmap->setPixelRef(pr)->unref();
@@ -159,7 +166,7 @@ public:
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
         // accounts for scale in final allocation, using eventual size and config
         const int bytesPerPixel = SkBitmap::ComputeBytesPerPixel(
-                configForScaledOutput(bitmap->getConfig()));
+                configForScaledOutput(bitmap->config()));
         const int requestedSize = bytesPerPixel *
                 int(bitmap->width() * mScale + 0.5f) *
                 int(bitmap->height() * mScale + 0.5f);
@@ -193,8 +200,15 @@ public:
             return false;
         }
 
+        SkImageInfo bitmapInfo;
+        if (!bitmap->asImageInfo(&bitmapInfo)) {
+            ALOGW("unable to reuse a bitmap as the target has an unknown bitmap configuration");
+            return false;
+        }
+
         // Create a new pixelref with the new ctable that wraps the previous pixelref
-        SkPixelRef* pr = new AndroidPixelRef(*static_cast<AndroidPixelRef*>(mPixelRef), ctable);
+        SkPixelRef* pr = new AndroidPixelRef(*static_cast<AndroidPixelRef*>(mPixelRef),
+                bitmapInfo, bitmap->rowBytes(), ctable);
 
         bitmap->setPixelRef(pr)->unref();
         // since we're already allocated, we lockPixels right away
@@ -403,8 +417,11 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
         // TODO: avoid copying when scaled size equals decodingBitmap size
         SkBitmap::Config config = configForScaledOutput(decodingBitmap.config());
-        outputBitmap->setConfig(config, scaledWidth, scaledHeight);
-        outputBitmap->setIsOpaque(decodingBitmap.isOpaque());
+        // FIXME: If the alphaType is kUnpremul and the image has alpha, the
+        // colors may not be correct, since Skia does not yet support drawing
+        // to/from unpremultiplied bitmaps.
+        outputBitmap->setConfig(config, scaledWidth, scaledHeight, 0,
+                                decodingBitmap.alphaType());
         if (!outputBitmap->allocPixels(outputAllocator, NULL)) {
             return nullObjectReturn("allocation failed for scaled bitmap");
         }
@@ -416,7 +433,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         }
 
         SkPaint paint;
-        paint.setFilterBitmap(true);
+        paint.setFilterLevel(SkPaint::kLow_FilterLevel);
 
         SkCanvas canvas(*outputBitmap);
         canvas.scale(sx, sy);
@@ -472,6 +489,12 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
             bitmapCreateFlags, ninePatchChunk, layoutBounds, -1);
 }
 
+// Need to buffer enough input to be able to rewind as much as might be read by a decoder
+// trying to determine the stream's format. Currently the most is 64, read by
+// SkImageDecoder_libwebp.
+// FIXME: Get this number from SkImageDecoder
+#define BYTES_TO_BUFFER 64
+
 static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteArray storage,
         jobject padding, jobject options) {
 
@@ -479,11 +502,8 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteA
     SkAutoTUnref<SkStream> stream(CreateJavaInputStreamAdaptor(env, is, storage));
 
     if (stream.get()) {
-        // Need to buffer enough input to be able to rewind as much as might be read by a decoder
-        // trying to determine the stream's format. Currently the most is 64, read by
-        // SkImageDecoder_libwebp.
-        // FIXME: Get this number from SkImageDecoder
-        SkAutoTUnref<SkStreamRewindable> bufferedStream(SkFrontBufferedStream::Create(stream, 64));
+        SkAutoTUnref<SkStreamRewindable> bufferedStream(
+                SkFrontBufferedStream::Create(stream, BYTES_TO_BUFFER));
         SkASSERT(bufferedStream.get() != NULL);
         // for now we don't allow purgeable with java inputstreams
         bitmap = doDecode(env, bufferedStream, padding, options, false, false);
@@ -504,27 +524,48 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
         return nullObjectReturn("fstat return -1");
     }
 
-    bool isPurgeable = optionsPurgeable(env, bitmapFactoryOptions);
-    bool isShareable = optionsShareable(env, bitmapFactoryOptions);
-    bool weOwnTheFD = false;
-    if (isPurgeable && isShareable) {
-        int newFD = ::dup(descriptor);
-        if (-1 != newFD) {
-            weOwnTheFD = true;
-            descriptor = newFD;
+    // Restore the descriptor's offset on exiting this function.
+    AutoFDSeek autoRestore(descriptor);
+
+    FILE* file = fdopen(descriptor, "r");
+    if (file == NULL) {
+        return nullObjectReturn("Could not open file");
+    }
+
+    SkAutoTUnref<SkFILEStream> fileStream(new SkFILEStream(file,
+                         SkFILEStream::kCallerRetains_Ownership));
+
+    SkAutoTUnref<SkStreamRewindable> stream;
+
+    // Retain the old behavior of allowing purgeable if both purgeable and
+    // shareable are set to true.
+    bool isPurgeable = optionsPurgeable(env, bitmapFactoryOptions)
+                       && optionsShareable(env, bitmapFactoryOptions);
+    if (isPurgeable) {
+        // Copy the stream, so the image can be decoded multiple times without
+        // continuing to modify the original file descriptor.
+        // Copy beginning from the current position.
+        const size_t fileSize = fileStream->getLength() - fileStream->getPosition();
+        void* buffer = sk_malloc_flags(fileSize, 0);
+        if (buffer == NULL) {
+            return nullObjectReturn("Could not make a copy for ashmem");
         }
+
+        SkAutoTUnref<SkData> data(SkData::NewFromMalloc(buffer, fileSize));
+
+        if (fileStream->read(buffer, fileSize) != fileSize) {
+            return nullObjectReturn("Could not read the file.");
+        }
+
+        stream.reset(new SkMemoryStream(data));
+    } else {
+        // Use a buffered stream. Although an SkFILEStream can be rewound, this
+        // ensures that SkImageDecoder::Factory never rewinds beyond the
+        // current position of the file descriptor.
+        stream.reset(SkFrontBufferedStream::Create(fileStream, BYTES_TO_BUFFER));
     }
 
-    SkAutoTUnref<SkData> data(SkData::NewFromFD(descriptor));
-    if (data.get() == NULL) {
-        return nullObjectReturn("NewFromFD failed in nativeDecodeFileDescriptor");
-    }
-    SkAutoTUnref<SkMemoryStream> stream(new SkMemoryStream(data));
-
-    /* Allow purgeable iff we own the FD, i.e., in the puregeable and
-       shareable case.
-    */
-    return doDecode(env, stream, padding, bitmapFactoryOptions, weOwnTheFD);
+    return doDecode(env, stream, padding, bitmapFactoryOptions, isPurgeable);
 }
 
 static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
@@ -543,7 +584,9 @@ static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
     } else {
         // since we know we'll be done with the asset when we return, we can
         // just use a simple wrapper
-        stream = new AssetStreamAdaptor(asset);
+        stream = new AssetStreamAdaptor(asset,
+                                        AssetStreamAdaptor::kNo_OwnAsset,
+                                        AssetStreamAdaptor::kNo_HasMemoryBase);
     }
     SkAutoUnref aur(stream);
     return doDecode(env, stream, padding, options, forcePurgeable, forcePurgeable);

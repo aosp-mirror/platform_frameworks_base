@@ -23,7 +23,7 @@ parent.link=manifest-intro.html
 -->
 
 <dt>description:</dt>
-<dd>Defines the path and required permissions for a specific subset of data
+<dd itemprop="description">Defines the path and required permissions for a specific subset of data
 within a content provider. This element can be
 specified multiple times to supply multiple paths.
 

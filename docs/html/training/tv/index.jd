@@ -17,6 +17,14 @@ startpage=true
 
 </div>
 </div>
+
+<a class="notice-developers-video wide" href="http://www.youtube.com/watch?v=zsRnRLh-O34">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Design for Large Displays - Part 1</p>
+</div>
+</a>
+
 <p> 
   Smart TVs powered by Android bring your favorite Android apps to the best screen in your house. 
   Thousands of apps in the Google Play Store are already optimized for TVs. This class shows how 

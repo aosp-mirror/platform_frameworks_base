@@ -26,8 +26,8 @@ trainingnavtop=true
 <h2>Try it out</h2>
 
 <div class="download-box">
-  <a href="{@docRoot}shareables/training/BitmapFun.zip" class="button">Download the sample</a>
-  <p class="filename">BitmapFun.zip</p>
+  <a href="{@docRoot}downloads/samples/DisplayingBitmaps.zip" class="button">Download the sample</a>
+  <p class="filename">DisplayingBitmaps.zip</p>
 </div>
 
 </div>

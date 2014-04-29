@@ -45,6 +45,7 @@ import android.net.LinkProperties;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.net.NetworkInfo;
+import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.os.Binder;
@@ -77,6 +78,7 @@ import com.android.server.net.BaseNetworkObserver;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
@@ -282,13 +284,12 @@ public class Vpn extends BaseNetworkStateTracker {
     }
 
     /**
-     * Protect a socket from routing changes by binding it to the given
-     * interface. The socket is NOT closed by this method.
+     * Protect a socket from VPN rules by binding it to the main routing table.
+     * The socket is NOT closed by this method.
      *
      * @param socket The socket to be bound.
-     * @param interfaze The name of the interface.
      */
-    public void protect(ParcelFileDescriptor socket, String interfaze) throws Exception {
+    public void protect(ParcelFileDescriptor socket) throws Exception {
 
         PackageManager pm = mContext.getPackageManager();
         int appUid = pm.getPackageUid(mPackage, mUserId);
@@ -302,8 +303,6 @@ public class Vpn extends BaseNetworkStateTracker {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-        // bind the socket to the interface
-        jniProtect(socket.getFd(), interfaze);
 
     }
 
@@ -353,6 +352,12 @@ public class Vpn extends BaseNetworkStateTracker {
             Binder.restoreCallingIdentity(token);
         }
 
+        // Save the old config in case we need to go back.
+        VpnConfig oldConfig = mConfig;
+        String oldInterface = mInterface;
+        Connection oldConnection = mConnection;
+        SparseBooleanArray oldUsers = mVpnUsers;
+
         // Configure the interface. Abort if any of these steps fails.
         ParcelFileDescriptor tun = ParcelFileDescriptor.adoptFd(jniCreate(config.mtu));
         try {
@@ -372,12 +377,7 @@ public class Vpn extends BaseNetworkStateTracker {
                         new UserHandle(mUserId))) {
                 throw new IllegalStateException("Cannot bind " + config.user);
             }
-            if (mConnection != null) {
-                mContext.unbindService(mConnection);
-            }
-            if (mInterface != null && !mInterface.equals(interfaze)) {
-                jniReset(mInterface);
-            }
+
             mConnection = connection;
             mInterface = interfaze;
 
@@ -386,53 +386,89 @@ public class Vpn extends BaseNetworkStateTracker {
             config.interfaze = mInterface;
             config.startTime = SystemClock.elapsedRealtime();
             mConfig = config;
+
             // Set up forwarding and DNS rules.
             mVpnUsers = new SparseBooleanArray();
             token = Binder.clearCallingIdentity();
             try {
                 mCallback.setMarkedForwarding(mInterface);
-                mCallback.setRoutes(interfaze, config.routes);
+                mCallback.setRoutes(mInterface, config.routes);
                 mCallback.override(mInterface, config.dnsServers, config.searchDomains);
                 addVpnUserLocked(mUserId);
-
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-
-        } catch (RuntimeException e) {
-            updateState(DetailedState.FAILED, "establish");
-            IoUtils.closeQuietly(tun);
-            // make sure marked forwarding is cleared if it was set
-            try {
-                mCallback.clearMarkedForwarding(mInterface);
-            } catch (Exception ingored) {
-                // ignored
-            }
-            throw e;
-        }
-        Log.i(TAG, "Established by " + config.user + " on " + mInterface);
-
-
-        // If we are owner assign all Restricted Users to this VPN
-        if (mUserId == UserHandle.USER_OWNER) {
-            token = Binder.clearCallingIdentity();
-            try {
-                for (UserInfo user : mgr.getUsers()) {
-                    if (user.isRestricted()) {
-                        try {
-                            addVpnUserLocked(user.id);
-                        } catch (Exception e) {
-                            Log.wtf(TAG, "Failed to add user " + user.id + " to owner's VPN");
+                // If we are owner assign all Restricted Users to this VPN
+                if (mUserId == UserHandle.USER_OWNER) {
+                    for (UserInfo user : mgr.getUsers()) {
+                        if (user.isRestricted()) {
+                            try {
+                                addVpnUserLocked(user.id);
+                            } catch (Exception e) {
+                                Log.wtf(TAG, "Failed to add user " + user.id + " to owner's VPN");
+                            }
                         }
                     }
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+
+            if (oldConnection != null) {
+                mContext.unbindService(oldConnection);
+            }
+            if (oldInterface != null && !oldInterface.equals(interfaze)) {
+                // Remove the old tun's user forwarding rules
+                // The new tun's user rules have already been added so they will take over
+                // as rules are deleted. This prevents data leakage as the rules are moved over.
+                token = Binder.clearCallingIdentity();
+                try {
+                        final int size = oldUsers.size();
+                        final boolean forwardDns = (oldConfig.dnsServers != null &&
+                                oldConfig.dnsServers.size() != 0);
+                        for (int i = 0; i < size; i++) {
+                            int user = oldUsers.keyAt(i);
+                            mCallback.clearUserForwarding(oldInterface, user, forwardDns);
+                        }
+                        mCallback.clearMarkedForwarding(oldInterface);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+                jniReset(oldInterface);
+            }
+        } catch (RuntimeException e) {
+            updateState(DetailedState.FAILED, "establish");
+            IoUtils.closeQuietly(tun);
+            // make sure marked forwarding is cleared if it was set
+            token = Binder.clearCallingIdentity();
+            try {
+                mCallback.clearMarkedForwarding(mInterface);
+            } catch (Exception ingored) {
+                // ignored
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            // restore old state
+            mConfig = oldConfig;
+            mConnection = oldConnection;
+            mVpnUsers = oldUsers;
+            mInterface = oldInterface;
+            throw e;
         }
+        Log.i(TAG, "Established by " + config.user + " on " + mInterface);
+
         // TODO: ensure that contract class eventually marks as connected
         updateState(DetailedState.AUTHENTICATING, "establish");
         return tun;
+    }
+
+    /**
+     * Check if a given address is covered by the VPN's routing rules.
+     */
+    public boolean isAddressCovered(InetAddress address) {
+        synchronized (Vpn.this) {
+            if (!isRunningLocked()) {
+                return false;
+            }
+            return RouteInfo.selectBestRoute(mConfig.routes, address) != null;
+        }
     }
 
     private boolean isRunningLocked() {
@@ -670,7 +706,6 @@ public class Vpn extends BaseNetworkStateTracker {
     private native int jniSetRoutes(String interfaze, String routes);
     private native void jniReset(String interfaze);
     private native int jniCheck(String interfaze);
-    private native void jniProtect(int socket, String interfaze);
 
     private static RouteInfo findIPv4DefaultRoute(LinkProperties prop) {
         for (RouteInfo route : prop.getAllRoutes()) {

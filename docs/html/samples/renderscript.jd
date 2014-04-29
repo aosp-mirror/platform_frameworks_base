@@ -1,0 +1,11 @@
+page.title=Renderscript
+@jd:body
+
+
+<div id="samples" class="renderscript">
+</div>
+
+
+<script>
+  $(document).ready(showSamples);
+</script>

@@ -24,7 +24,7 @@ parent.link=manifest-intro.html
 <dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Lets you specify the screen sizes your application supports and enable <a
+<dd itemprop="description">Lets you specify the screen sizes your application supports and enable <a
 href="{@docRoot}guide/practices/screen-compat-mode.html">screen compatibility mode</a> for screens
 larger than what your application supports. It's important that you always use this element in your
 application to specify the screen sizes your application supports.

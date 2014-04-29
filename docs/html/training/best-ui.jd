@@ -1,0 +1,11 @@
+page.title=Best Practices for User Interface
+page.trainingcourse=true
+
+@jd:body
+
+
+
+<p>These classes teach you how to build a user interface using Android layouts for all types of
+devices. Android provides a flexible framework for UI design that allows your app to display
+different layouts for different devices, create custom UI widgets, and even control aspects
+of the system UI outside your app's window.</p>

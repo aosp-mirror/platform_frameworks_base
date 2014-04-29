@@ -241,9 +241,13 @@ Intent intent = new Intent(Intent.ACTION_SEND);
 // Always use string resources for UI text.
 // This says something like "Share this photo with"
 String title = getResources().getString(R.string.chooser_title);
-// Create and start the chooser
+// Create intent to show chooser
 Intent chooser = Intent.createChooser(intent, title);
-startActivity(chooser);
+
+// Verify the intent will resolve to at least one activity
+if (intent.resolveActivity(getPackageManager()) != null) {
+    startActivity(chooser);
+}
 </pre>
 
 <p>This displays a dialog with a list of apps that respond to the intent passed to the {@link

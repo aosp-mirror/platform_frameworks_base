@@ -27,7 +27,7 @@ easier to update the doc when the change is made... Nov 2013, this still seems u
 <dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Indicates what hardware and software features the application requires.
+<dd itemprop="description">Indicates what hardware and software features the application requires.
 For example, an application might specify that it requires a physical keyboard
 or a particular navigation device, like a trackball.  The specification is
 used to avoid installing the application on devices where it will not work.

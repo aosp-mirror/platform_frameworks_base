@@ -23,7 +23,7 @@ parent.link=manifest-intro.html
 <br/><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>An alias for an activity, named by the {@code targetActivity} 
+<dd itemprop="description">An alias for an activity, named by the {@code targetActivity}
 attribute.  The target must be in the same application as the
 alias and it must be declared before the alias in the manifest.
 

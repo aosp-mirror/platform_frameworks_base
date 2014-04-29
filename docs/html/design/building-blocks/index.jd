@@ -18,7 +18,8 @@ footer.hide=1
 
 <div id="landing-graphic-container">
   <div id="text-overlay">
-    Your inventory of ready-to-use elements for creating outstanding apps.
+    <span itemprop="description">Your inventory of ready-to-use elements for creating
+    outstanding apps.</span>
     <br><br>
     <a href="{@docRoot}design/building-blocks/tabs.html" class="landing-page-link">Tabs</a>
   </div>

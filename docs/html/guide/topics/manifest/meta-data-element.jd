@@ -12,11 +12,13 @@ parent.link=manifest-intro.html
 <dt>contained in:</dt>
 <dd><code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
 <br/><code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>
-<br/><code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
 <br/><code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code></dd>
+<br/><code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
 
 <dt>description:</dt>
-<dd>A name-value pair for an item of additional, arbitrary data that can 
+<dd itemprop="description">A name-value pair for an item of additional, arbitrary data that can
 be supplied to the parent component.  A component element can contain any 
 number of {@code &lt;meta-data&gt;} subelements.  The values from all of
 them are collected in a single {@link android.os.Bundle} object and made 

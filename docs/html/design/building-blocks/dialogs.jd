@@ -9,7 +9,7 @@ page.tags="dialog","alert","popup","toast"
   </div>
 </a>
 
-<p>Dialogs prompt the user for decisions or additional information required by the app to continue a
+<p itemprop="description">Dialogs prompt the user for decisions or additional information required by the app to continue a
 task. Such requests can range from simple Cancel/OK decisions to more complex layouts asking the
 user to adjust settings or enter text.</p>
 

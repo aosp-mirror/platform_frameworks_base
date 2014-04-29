@@ -119,7 +119,7 @@ mediaPlayer.start(); // no need to call prepare(); create() does that for you
 
 <p>In this case, a "raw" resource is a file that the system does not
 try to parse in any particular way. However, the content of this resource should not
-be raw audio. It should be a properly encoded and formatted media file in one 
+be raw audio. It should be a properly encoded and formatted media file in one
 of the supported formats.</p>
 
 <p>And here is how you might play from a URI available locally in the system
@@ -207,7 +207,7 @@ call {@link android.media.MediaPlayer#stop stop()}, however, notice that you
 cannot call {@link android.media.MediaPlayer#start start()} again until you
 prepare the {@link android.media.MediaPlayer} again.</p>
 
-<p>Always keep <a href='{@docRoot}images/mediaplayer_state_diagram.gif'>the state diagram</a> 
+<p>Always keep <a href='{@docRoot}images/mediaplayer_state_diagram.gif'>the state diagram</a>
 in mind when writing code that interacts with a
 {@link android.media.MediaPlayer} object, because calling its methods from the wrong state is a
 common cause of bugs.</p>
@@ -238,7 +238,7 @@ mediaPlayer = null;
 <p>As an example, consider the problems that could happen if you
 forgot to release the {@link android.media.MediaPlayer} when your activity is stopped, but create a
 new one when the activity starts again. As you may know, when the user changes the
-screen orientation (or changes the device configuration in another way), 
+screen orientation (or changes the device configuration in another way),
 the system handles that by restarting the activity (by default), so you might quickly
 consume all of the system resources as the user
 rotates the device back and forth between portrait and landscape, because at each
@@ -287,7 +287,7 @@ For example:</p>
 
 <pre>
 public class MyService extends Service implements MediaPlayer.OnPreparedListener {
-    private static final ACTION_PLAY = "com.example.action.PLAY";
+    private static final String ACTION_PLAY = "com.example.action.PLAY";
     MediaPlayer mMediaPlayer = null;
 
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -346,7 +346,7 @@ and you must reset it before you can use it again.
 <p>When designing applications that play media
 in the background, the device may go to sleep
 while your service is running. Because the Android system tries to conserve
-battery while the device is sleeping, the system tries to shut off any 
+battery while the device is sleeping, the system tries to shut off any
 of the phone's features that are
 not necessary, including the CPU and the WiFi hardware.
 However, if your service is playing or streaming music, you want to prevent
@@ -473,7 +473,7 @@ the user might not hear the notification tone due to the loud music. Starting wi
 Android 2.2, the platform offers a way for applications to negotiate their
 use of the device's audio output. This mechanism is called Audio Focus.</p>
 
-<p>When your application needs to output audio such as music or a notification, 
+<p>When your application needs to output audio such as music or a notification,
 you should always request audio focus. Once it has focus, it can use the sound output freely, but it
 should
 always listen for focus changes. If it is notified that it has lost the audio
@@ -691,7 +691,7 @@ adding the following to your manifest:</p>
 intent. You should then implement this class:</p>
 
 <pre>
-public class MusicIntentReceiver implements android.content.BroadcastReceiver {
+public class MusicIntentReceiver extends android.content.BroadcastReceiver {
    &#64;Override
    public void onReceive(Context ctx, Intent intent) {
       if (intent.getAction().equals(

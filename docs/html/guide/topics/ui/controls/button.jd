@@ -113,7 +113,7 @@ android.view.View} that was clicked)</li>
 
 <h3 id="ClickListener">Using an OnClickListener</h3>
 
-<p>You can also declare the click event handler pragmatically rather than in an XML layout. This
+<p>You can also declare the click event handler programmatically rather than in an XML layout. This
 might be necessary if you instantiate the {@link android.widget.Button} at runtime or you need to
 declare the click behavior in a {@link android.app.Fragment} subclass.</p>
 

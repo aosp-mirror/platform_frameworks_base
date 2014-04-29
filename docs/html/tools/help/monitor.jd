@@ -15,13 +15,14 @@ page.title=Device Monitor
 
 <p>Android Device Monitor is a stand-alone tool that provides a graphical user interface for
 several Android application debugging and analysis tools. The Monitor tool does not
-require installation of a integrated development environment, such as Eclipse, and encapsulates the
+require installation of an integrated development environment, such as Eclipse, and encapsulates the
 following tools:</p>
 
 <ul>
   <li><a href="{@docRoot}tools/debugging/ddms.html">DDMS</a></li>
   <li><a href="gltracer.html">Tracer for OpenGL ES</a></li>
   <li><a href="hierarchy-viewer.html">Hierarchy Viewer</a></li>
+  <li><a href="systrace.html">Systrace</a></li>
   <li><a href="traceview.html">Traceview</a></li>
   <li>Pixel Perfect magnification viewer</li>
 </ul>

@@ -244,7 +244,7 @@ href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targe
 
 <p>If you want to emulate an NFC card that is using these protocols in your app, create a service component based on the {@link android.nfc.cardemulation.HostApduService} class. Whereas if your app instead uses a secure element for card emulation, you need to create a service based on the {@link android.nfc.cardemulation.OffHostApduService} class, which will not directly be involved in the transactions but is necessary to register the AIDs that should be handled by the secure element.</p>
 
-<p>For more information, read the <a href="">NFC Card Emulation</a> guide.</p>
+<p>For more information, read the <a href="{@docRoot}guide/topics/connectivity/nfc/hce.html">NFC Card Emulation</a> guide.</p>
 
 
 <h3 id="ReaderMode">NFC reader mode</h3>

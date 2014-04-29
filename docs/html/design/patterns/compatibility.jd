@@ -1,5 +1,6 @@
 page.title=Backwards Compatibility
 page.tags="support"
+page.metaDescription=Notes on how Android 4.x adapts UI designed for older hardware and OS versions.
 @jd:body
 
 <a class="notice-developers" href="{@docRoot}training/basics/supporting-devices/index.html">

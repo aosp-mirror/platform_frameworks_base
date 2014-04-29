@@ -1,5 +1,6 @@
 page.title=Content License
 fullpage=1
+excludeFromSuggestions=true
 @jd:body
 
 <div class="wrap" style="width:940px;">

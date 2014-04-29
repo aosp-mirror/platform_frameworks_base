@@ -16,8 +16,8 @@ next.link=videobasics.html
     <ol>
       <li><a href="#TaskManifest">Request Camera Permission</a></li>
       <li><a href="#TaskCaptureIntent">Take a Photo with the Camera App</a></li>
-      <li><a href="#TaskPhotoView">View the Photo</a></li>
-      <li><a href="#TaskPath">Save the Photo</a></li>
+      <li><a href="#TaskPhotoView">Get the Thumbnail</a></li>
+      <li><a href="#TaskPath">Save the Full-size Photo</a></li>
       <li><a href="#TaskGallery">Add the Photo to a Gallery</a></li>
       <li><a href="#TaskScalePhoto">Decode a Scaled Image</a></li>
     </ol>
@@ -25,7 +25,7 @@ next.link=videobasics.html
     <h2>You should also read</h2>
     <ul>
       <li><a href="{@docRoot}guide/topics/media/camera.html">Camera</a></li>
-      <li><a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent 
+      <li><a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent
       Filters</a></li>
     </ul>
 
@@ -60,22 +60,23 @@ that your application depends on having a camera, put a <a
 href="{@docRoot}guide/topics/manifest/uses-feature-element.html"> {@code
 &lt;uses-feature&gt;}</a> tag in your manifest file:</p>
 
-<pre>
+<pre style="clear:right">
 &lt;manifest ... >
-    &lt;uses-feature android:name="android.hardware.camera" /&gt;
+    &lt;uses-feature android:name="android.hardware.camera"
+                  android:required="true" /&gt;
     ...
-&lt;/manifest ... >
+&lt;/manifest>
 </pre>
 
-<p>If your application uses, but does not require a camera in order to function, add {@code
-android:required="false"} to the tag. In doing so, Google Play will allow devices without a
+<p>If your application uses, but does not require a camera in order to function, instead set {@code
+android:required} to {@code false}. In doing so, Google Play will allow devices without a
 camera to download your application. It's then your responsibility to check for the availability
 of the camera at runtime by calling {@link
 android.content.pm.PackageManager#hasSystemFeature hasSystemFeature(PackageManager.FEATURE_CAMERA)}.
 If a camera is not available, you should then disable your camera features.</p>
 
 
-<h2 id="TaskCaptureIntent">Take a Photo with the Camera App</h2> 
+<h2 id="TaskCaptureIntent">Take a Photo with the Camera App</h2>
 
 <p>The Android way of delegating actions to other applications is to invoke an {@link
 android.content.Intent} that describes what you want done. This process involves three pieces: The
@@ -85,30 +86,27 @@ and some code to handle the image data when focus returns to your activity.</p>
 <p>Here's a function that invokes an intent to capture a photo.</p>
 
 <pre>
-private void dispatchTakePictureIntent(int actionCode) {
+static final int REQUEST_IMAGE_CAPTURE = 1;
+
+private void dispatchTakePictureIntent() {
     Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-    startActivityForResult(takePictureIntent, actionCode);
+    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+    }
 }
 </pre>
 
-
-<p>Congratulations: with this code, your application has gained the ability to
-make another camera application do its bidding! Of course, if no compatible
-application is ready to catch the intent, then your app will fall down like a
-botched stage dive. Here is a function to check whether an app can handle your intent:</p>
-
-<pre>
-public static boolean isIntentAvailable(Context context, String action) {
-    final PackageManager packageManager = context.getPackageManager();
-    final Intent intent = new Intent(action);
-    List&lt;ResolveInfo> list =
-            packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-    return list.size() > 0;
-}
-</pre>
+<p>Notice that the {@link android.app.Activity#startActivityForResult
+startActivityForResult()} method is protected by a condition that calls
+{@link android.content.Intent#resolveActivity resolveActivity()}, which returns the
+first activity component that can handle the intent. Performing this check
+is important because if you call {@link android.app.Activity#startActivityForResult
+startActivityForResult()} using an intent that no app can handle,
+your app will crash. So as long as the result is not null, it's safe to use the intent. </p>
 
 
-<h2 id="TaskPhotoView">View the Photo</h2>
+
+<h2 id="TaskPhotoView">Get the Thumbnail</h2>
 
 <p>If the simple feat of taking a photo is not the culmination of your app's
 ambition, then you probably want to get the image back from the camera
@@ -120,10 +118,13 @@ android.graphics.Bitmap} in the extras, under the key {@code "data"}. The follow
 this image and displays it in an {@link android.widget.ImageView}.</p>
 
 <pre>
-private void handleSmallCameraPhoto(Intent intent) {
-    Bundle extras = intent.getExtras();
-    mImageBitmap = (Bitmap) extras.get("data");
-    mImageView.setImageBitmap(mImageBitmap);
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+        Bundle extras = data.getExtras();
+        Bitmap imageBitmap = (Bitmap) extras.get("data");
+        mImageView.setImageBitmap(imageBitmap);
+    }
 }
 </pre>
 
@@ -132,72 +133,104 @@ icon, but not a lot more. Dealing with a full-sized image takes a bit more
 work.</p>
 
 
-<h2 id="TaskPath">Save the Photo</h2> 
+<h2 id="TaskPath">Save the Full-size Photo</h2>
 
 <p>The Android Camera application saves a full-size photo if you give it a file to
-save into. You must provide a path that includes the storage volume,
-folder, and file name.</p>
+save into. You must provide a fully qualified file name where the camera app should
+save the photo.</p>
 
-<p>There is an easy way to get the path for photos, but it works only on Android 2.2 (API level 8)
-and later:</p>
-
-<pre> 
-storageDir = new File(
-    Environment.getExternalStoragePublicDirectory(
-        Environment.DIRECTORY_PICTURES
-    ), 
-    getAlbumName()
-);		
-</pre> 
-
-<p>For earlier API levels, you have to provide the name of the photo
-directory yourself.</p>
-
-<pre> 
-storageDir = new File (
-    Environment.getExternalStorageDirectory()
-        + PICTURES_DIR
-        + getAlbumName()
-);
-</pre> 
-
-<p class="note"><strong>Note:</strong> The path component {@code PICTURES_DIR} is
-just {@code Pictures/}, the standard location for shared photos on the external/shared
-storage.</p>
-
-
-<h3 id="TaskFileName">Set the file name</h3> 
-
-<p>As shown in the previous section, the file location for an image should be
-driven by the device environment. What you need to do yourself is choose a
-collision-resistant file-naming scheme. You may wish also to save the path in a
-member variable for later use. Here's an example solution:</p>
-
-<pre> 
-private File createImageFile() throws IOException {
-    // Create an image file name
-    String timeStamp = 
-        new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-    String imageFileName = JPEG_FILE_PREFIX + timeStamp + "_";
-    File image = File.createTempFile(
-        imageFileName, 
-        JPEG_FILE_SUFFIX, 
-        getAlbumDir()
-    );
-    mCurrentPhotoPath = image.getAbsolutePath();
-    return image;
-}
-</pre> 
-
-
-<h3 id="TaskIntentFileName">Append the file name onto the Intent</h3>
-
-<p>Once you have a place to save your image, pass that location to the camera
-application via the {@link android.content.Intent}.</p>
+<p>Generally, any photos that the user captures with the device camera should be saved on
+the device in the public external storage so they are accessible by all apps.
+The proper directory for shared photos is provided by {@link
+android.os.Environment#getExternalStoragePublicDirectory getExternalStoragePublicDirectory()},
+with the {@link android.os.Environment#DIRECTORY_PICTURES} argument. Because the directory
+provided by this method is shared among all apps, reading and writing to it requires the
+{@link android.Manifest.permission#READ_EXTERNAL_STORAGE} and
+{@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permissions, respectively.
+The write permission implicitly allows reading, so if you need to write to the external
+storage then you need to request only one permission:</p>
 
 <pre>
-File f = createImageFile();
-takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+&lt;manifest ...>
+    &lt;uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    ...
+&lt;/manifest>
+</pre>
+
+<p>However, if you'd like the photos to remain private to your app only, you can instead use the
+directory provided by {@link android.content.Context#getExternalFilesDir getExternalFilesDir()}.
+On Android 4.3 and lower, writing to this directory also requires the
+{@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission. Beginning with
+Android 4.4, the permission is no longer required because the directory is not accessible
+by other apps, so you can declare the permission should be requested only on the lower versions
+of Android by adding the <a
+href="{@docRoot}guide/topics/manifest/uses-permission-element.html#maxSdk">{@code maxSdkVersion}</a>
+attribute:</p>
+<pre>
+&lt;manifest ...>
+    &lt;uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+                     android:maxSdkVersion="18" />
+    ...
+&lt;/manifest>
+</pre>
+
+<p class="note"><strong>Note:</strong> Files you save in the directories provided by
+{@link android.content.Context#getExternalFilesDir getExternalFilesDir()} are deleted
+when the user uninstalls your app.</p>
+
+<p>Once you decide the directory for the file, you need to create a
+collision-resistant file name. You may wish also to save the path in a
+member variable for later use. Here's an example solution in a method that returns
+a unique file name for a new photo using a date-time stamp:</p>
+
+<pre>
+String mCurrentPhotoPath;
+
+private File createImageFile() throws IOException {
+    // Create an image file name
+    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+    String imageFileName = "JPEG_" + timeStamp + "_";
+    File storageDir = Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_PICTURES);
+    File image = File.createTempFile(
+        imageFileName,  /* prefix */
+        ".jpg",         /* suffix */
+        storageDir      /* directory */
+    );
+
+    // Save a file: path for use with ACTION_VIEW intents
+    mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+    return image;
+}
+</pre>
+
+
+<p>With this method available to create a file for the photo, you can now
+create and invoke the {@link android.content.Intent} like this:</p>
+
+<pre>
+static final int REQUEST_TAKE_PHOTO = 1;
+
+private void dispatchTakePictureIntent() {
+    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    // Ensure that there's a camera activity to handle the intent
+    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+        // Create the File where the photo should go
+        File photoFile = null;
+        try {
+            photoFile = createImageFile();
+        } catch (IOException ex) {
+            // Error occurred while creating the File
+            ...
+        }
+        // Continue only if the File was successfully created
+        if (photoFile != null) {
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                    Uri.fromFile(photoFile));
+            startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+        }
+    }
+}
 </pre>
 
 
@@ -206,6 +239,10 @@ takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
 <p>When you create a photo through an intent, you should know where your image is located, because
 you said where to save it in the first place.  For everyone else, perhaps the easiest way to make
 your photo accessible is to make it accessible from the system's Media Provider.</p>
+
+<p class="note"><strong>Note:</strong> If you saved your photo to the directory provided by
+{@link android.content.Context#getExternalFilesDir getExternalFilesDir()}, the media
+scanner cannot access the files because they are private to your app.</p>
 
 <p>The following example method demonstrates how to invoke the system's media scanner to add your
 photo to the Media Provider's database, making it available in the Android Gallery application
@@ -236,22 +273,22 @@ private void setPic() {
     // Get the dimensions of the View
     int targetW = mImageView.getWidth();
     int targetH = mImageView.getHeight();
-  
+
     // Get the dimensions of the bitmap
     BitmapFactory.Options bmOptions = new BitmapFactory.Options();
     bmOptions.inJustDecodeBounds = true;
     BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
     int photoW = bmOptions.outWidth;
     int photoH = bmOptions.outHeight;
-  
+
     // Determine how much to scale down the image
     int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-  
+
     // Decode the image file into a Bitmap sized to fill the View
     bmOptions.inJustDecodeBounds = false;
     bmOptions.inSampleSize = scaleFactor;
     bmOptions.inPurgeable = true;
-  
+
     Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
     mImageView.setImageBitmap(bitmap);
 }

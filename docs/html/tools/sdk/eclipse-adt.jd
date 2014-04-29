@@ -57,6 +57,159 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>ADT 22.6.2</a> <em>(March 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Indigo (Version 3.7.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r22.6.2</a>.
+        If you haven't already installed SDK Tools r22.6.2 into your SDK, use the
+        Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>Fixed a problem where Eclipse was non-responsive for a few seconds after opening
+          an XML file. (<a href="http://b.android.com/67084">Issue 67084</a>)</li>
+      <li>Fixed a problem where the SDK Manager threw a <code>NullPointerException</code> after
+          removing a virtual device that was created using the Android Wear
+          system image. (<a href="http://b.android.com/67588">Issue 67588</a>)</li>
+      <li>Fixed a problem where the layout preview for large screens in Eclipse showed the
+          resources from the <code>drawable-*</code> directories instead of those from the
+          <code>drawable-large-*</code> directories.</li>
+      <li>Fixed a problem with Nexus 5 Android virtual devices created from the command line
+          where the SD card file system was read-only.</li>
+      <li>Changed the URL for the Android Developer Tools Update Site from HTTP to HTTPS.</li>
+    </ul>
+  </dd>
+</dl>
+</div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>ADT 22.6.1</a> <em>(March 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Indigo (Version 3.7.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r22.6.1</a>.
+        If you haven't already installed SDK Tools r22.6.1 into your SDK, use the
+        Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>Fixed a problem where the Android Virtual Device Manager could not create new
+          virtual devices. (<a href="http://b.android.com/66661">Issue 66661</a>)</li>
+      <li><p>Fixed a problem with virtual devices created using ADT 22.3 or earlier.</p>
+          <p>If you created an Android Virtual Device using ADT 22.3 or earlier, the
+          AVD may be listed as <em>broken</em> in the AVD Manager in 22.6.1. To fix
+          this problem, select the virtual device on the AVD Manager and click
+          <strong>Repair</strong>.</p>
+      </li>
+      <li>Fixed a problem with the command line tools when creating virtual devices.
+          (<a href="http://b.android.com/66740">Issue 66740</a>)</li>
+      <li>Fixed a problem with the command line <code>lint</code> script.</li>
+    </ul>
+  </dd>
+
+  <dt>Known Issues:</dt>
+  <dd>
+    <p>When you create an Android virtual device using the Nexus 5 device definition,
+       you must enable the <em>Use Host GPU</em> option, otherwise the virtual device
+       will not start.</p>
+  </dd>
+</dl>
+</div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>ADT 22.6.0</a> <em>(March 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Indigo (Version 3.7.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r22.6</a>.
+        If you haven't already installed SDK Tools r22.6 into your SDK, use the
+        Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li><p>Added support for Java 7 language features like multi-catch, try-with-resources,
+            and the diamond operator. These features require version 19 or higher
+            of the Build Tools. Try-with-resources requires <code>minSdkVersion</code>
+            19; the rest of the new language features require
+            <code>minSdkVersion</code> 8 or higher.</p>
+          <p>To use the new language features after installing ADT 22.6.0, ensure
+            that you run Eclipse on JDK 7 and change your application project settings
+            to use JDK 7.</p>
+      </li>
+      <li>Added new lint checks:
+        <ul>
+          <li>Security:
+            <ul>
+              <li>Look for code potentially affected by a <code>SecureRandom</code>
+                  vulnerability.</li>
+              <li>Check that calls to <code>checkPermission</code> use the return
+                  value.</li>
+            </ul>
+          </li>
+          <li>Check that production builds do not use mock location providers.</li>
+        </ul>
+      </li>
+      <li>Updated the New Project templates to include the
+          <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">
+          v7 appcompat Support Library</a>.</li>
+      <li>Updated the Android tools libraries to include the rendering sandbox,
+          improvements for converting resource XML string declarations to layout
+          strings, and other updates.</li>
+      <li>Improved the Gradle export wizard. Note that the new importer in Android
+          Studio is the preferred way to migrate existing projects to Gradle.</li>
+      <li>Fixed a deadlock during startup.</li>
+      <li>Fixed an issue with RenderScript support. Using RenderScript support mode
+          now requires version 19.0.3 of the Build Tools.</li>
+    </ul>
+  </dd>
+
+</dl>
+</div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>ADT 22.3.0</a> <em>(October 2013)</em>
   </p>
 

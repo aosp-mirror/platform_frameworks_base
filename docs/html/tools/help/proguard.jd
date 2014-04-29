@@ -25,11 +25,14 @@ parent.link=index.html
       <h2>See also</h2>
 
       <ol>
-        <li><a href="http://proguard.sourceforge.net/manual/introduction.html">ProGuard
-        Manual &raquo;</a></li>
-
-        <li><a href="http://proguard.sourceforge.net/manual/retrace/introduction.html">ProGuard
-        ReTrace Manual &raquo;</a></li>
+        <li>
+          <a href="http://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/introduction.html">ProGuard
+          Manual &raquo;</a>
+        </li>
+        <li>
+          <a href="http://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/retrace/introduction.html">ProGuard
+          ReTrace Manual &raquo;</a>
+        </li>
       </ol>
     </div>
   </div>
@@ -146,14 +149,14 @@ proguard.config=/path/to/proguard.cfg
 </pre>
 
   <p>There are many options and considerations when using the <code>-keep</code> option, so it is
-  highly recommended that you read the <a href="http://proguard.sourceforge.net/manual/introduction.html">ProGuard
-  Manual</a> for more information about customizing your configuration file. The <a href=
-  "http://proguard.sourceforge.net/manual/usage.html#keepoverview">Overview of Keep options</a> and
-  <a href="http://proguard.sourceforge.net/index.html#/manual/examples.html">Examples section</a>
-  are particularly helpful. The <a href=
-  "http://proguard.sourceforge.net/manual/troubleshooting.html">Troubleshooting</a> section of the
-  ProGuard Manual outlines other common problems you might encounter when your code gets stripped
-  away.</p>
+  highly recommended that you read the 
+  <a href="http://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/introduction.html">ProGuard
+  Manual</a> for more information about customizing your configuration file. The 
+  <em>Overview of Keep options</em> and <em>Examples</em> sections are particularly helpful. 
+  The <a href=
+  "http://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/troubleshooting.html">Troubleshooting
+  </a> section of the ProGuard Manual outlines other common problems you might encounter 
+  when your code gets stripped away.</p>
 
   <h2 id="decoding">Decoding Obfuscated Stack Traces</h2>
 

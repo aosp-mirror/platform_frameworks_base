@@ -72,7 +72,7 @@ public final class LoadedApk {
     private static final String TAG = "LoadedApk";
 
     private final ActivityThread mActivityThread;
-    private final ApplicationInfo mApplicationInfo;
+    private ApplicationInfo mApplicationInfo;
     final String mPackageName;
     private final String mAppDir;
     private final String mResDir;
@@ -111,8 +111,7 @@ public final class LoadedApk {
      * so MUST NOT call back out to the activity manager.
      */
     public LoadedApk(ActivityThread activityThread, ApplicationInfo aInfo,
-            CompatibilityInfo compatInfo,
-            ActivityThread mainThread, ClassLoader baseLoader,
+            CompatibilityInfo compatInfo, ClassLoader baseLoader,
             boolean securityViolation, boolean includeCode) {
         mActivityThread = activityThread;
         mApplicationInfo = aInfo;
@@ -134,31 +133,17 @@ public final class LoadedApk {
         mSecurityViolation = securityViolation;
         mIncludeCode = includeCode;
         mDisplayAdjustments.setCompatibilityInfo(compatInfo);
-
-        if (mAppDir == null) {
-            if (ActivityThread.mSystemContext == null) {
-                ActivityThread.mSystemContext =
-                    ContextImpl.createSystemContext(mainThread);
-                ResourcesManager resourcesManager = ResourcesManager.getInstance();
-                ActivityThread.mSystemContext.getResources().updateConfiguration(
-                        resourcesManager.getConfiguration(),
-                        resourcesManager.getDisplayMetricsLocked(
-                                 Display.DEFAULT_DISPLAY, mDisplayAdjustments), compatInfo);
-                //Slog.i(TAG, "Created system resources "
-                //        + mSystemContext.getResources() + ": "
-                //        + mSystemContext.getResources().getConfiguration());
-            }
-            mClassLoader = ActivityThread.mSystemContext.getClassLoader();
-            mResources = ActivityThread.mSystemContext.getResources();
-        }
     }
 
-    public LoadedApk(ActivityThread activityThread, String name,
-            Context systemContext, ApplicationInfo info, CompatibilityInfo compatInfo) {
+    /**
+     * Create information about the system package.
+     * Must call {@link #installSystemApplicationInfo} later.
+     */
+    LoadedApk(ActivityThread activityThread) {
         mActivityThread = activityThread;
-        mApplicationInfo = info != null ? info : new ApplicationInfo();
-        mApplicationInfo.packageName = name;
-        mPackageName = name;
+        mApplicationInfo = new ApplicationInfo();
+        mApplicationInfo.packageName = "android";
+        mPackageName = "android";
         mAppDir = null;
         mResDir = null;
         mOverlayDirs = null;
@@ -169,9 +154,16 @@ public final class LoadedApk {
         mBaseClassLoader = null;
         mSecurityViolation = false;
         mIncludeCode = true;
-        mClassLoader = systemContext.getClassLoader();
-        mResources = systemContext.getResources();
-        mDisplayAdjustments.setCompatibilityInfo(compatInfo);
+        mClassLoader = ClassLoader.getSystemClassLoader();
+        mResources = Resources.getSystem();
+    }
+
+    /**
+     * Sets application info about the system package.
+     */
+    void installSystemApplicationInfo(ApplicationInfo info) {
+        assert info.packageName.equals("android");
+        mApplicationInfo = info;
     }
 
     public String getPackageName() {
@@ -513,8 +505,7 @@ public final class LoadedApk {
 
         try {
             java.lang.ClassLoader cl = getClassLoader();
-            ContextImpl appContext = new ContextImpl();
-            appContext.init(this, null, mActivityThread);
+            ContextImpl appContext = ContextImpl.createAppContext(mActivityThread, this);
             app = mActivityThread.mInstrumentation.newApplication(
                     cl, appClass, appContext);
             appContext.setOuterContext(app);

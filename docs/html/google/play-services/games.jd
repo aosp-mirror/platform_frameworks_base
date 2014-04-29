@@ -17,9 +17,10 @@ header.hide=1
   Let players sign in using their Google+ identities and share their gaming experience with
   friends.
   </p>
-  <p>Visit <a class="external-link"
-    href="https://developers.google.com/games/services/">developers.google.com/games/services</a>
-    for more information about integrating game services into your app.
+  <p>Explore the <a href="{@docRoot}reference/com/google/android/gms/games/package-summary.html">Google
+Play Games Android API reference</a> or visit <a class="external-link" href=
+"https://developers.google.com/games/services/">developers.google.com/games/services</a> for more
+information about integrating game services into your app.
 </p>
 </div>
 </div>
@@ -49,12 +50,13 @@ header.hide=1
     class="external-link" href="https://developers.google.com/games/services/android/cloudsave">Save
     game data to the cloud</a></p>
 
-    <h4>Create real-time multiplayer games</h4>
-    <p>Make your game more dynamic by letting multiple players compete or cooperate simultaneously.
-    You can use Google Play game services to invite game participants or auto-match players
-    anonymously, and exchange data between game clients. <br /><a class="external-link"
-    href="https://developers.google.com/games/services/android/multiplayer">Develop real-time
-    multiplayer games</a></p>
+    <h4>Create real-time and turn-based multiplayer games</h4>
+    <p>Make your game more dynamic with simultaneous or asynchronous gameplay.
+    Use the multiplayer APIs to send match invitations, auto-match players
+    anonymously, and exchange data between game clients. <br />Develop <a class="external-link"
+    href="https://developers.google.com/games/services/android/multiplayer">real-time
+    multiplayer</a> and <a class="external-link"
+    href="https://developers.google.com/games/services/android/turnbasedMultiplayer">turn-based multiplayer</a> games</p>
   </div>
 
 
@@ -62,8 +64,8 @@ header.hide=1
     <h3 style="clear:left">Getting Started</h3>
     <h4>1. Get the Google Play services SDK</h4>
     <p>Google Play game services is part of the Google Play services platform.</p>
-    <p>To use game services, <a href="{@docRoot}google/play-services/setup.html">set up</a>
-      the Google Play services SDK. Then, see the <a class="external-link"
+    <p>To use game services, <a href="{@docRoot}google/play-services/setup.html">set up
+      the Google Play services SDK</a>. Then, see the <a class="external-link"
       href="https://developers.google.com/games/services/android/quickstart">
       Getting Started guide</a> to set up your app.
     </p>

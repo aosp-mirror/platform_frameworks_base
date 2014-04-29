@@ -563,7 +563,7 @@ public class ImageView extends View {
     }
 
     /** Return the view's optional matrix. This is applied to the
-        view's drawable when it is drawn. If there is not matrix,
+        view's drawable when it is drawn. If there is no matrix,
         this method will return an identity matrix.
         Do not change this matrix in place but make a copy.
         If you want a different matrix applied to the drawable,

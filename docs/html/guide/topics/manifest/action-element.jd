@@ -12,7 +12,7 @@ parent.link=manifest-intro.html
 
 <p>
 <dt>description:</dt>
-<dd>Adds an action to an intent filter. 
+<dd itemprop="description">Adds an action to an intent filter.
 An <code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> element must contain 
 one or more {@code &lt;action&gt;} elements.  If it doesn't contain any, no
 Intent objects will get through the filter.  See 

@@ -395,6 +395,8 @@ public class ConnectivityManager {
 
     private final IConnectivityManager mService;
 
+    private final String mPackageName;
+
     /**
      * Tests if a given integer represents a valid network type.
      * @param networkType the type to be tested
@@ -802,7 +804,7 @@ public class ConnectivityManager {
     public boolean requestRouteToHostAddress(int networkType, InetAddress hostAddress) {
         byte[] address = hostAddress.getAddress();
         try {
-            return mService.requestRouteToHostAddress(networkType, address);
+            return mService.requestRouteToHostAddress(networkType, address, mPackageName);
         } catch (RemoteException e) {
             return false;
         }
@@ -898,8 +900,9 @@ public class ConnectivityManager {
     /**
      * {@hide}
      */
-    public ConnectivityManager(IConnectivityManager service) {
+    public ConnectivityManager(IConnectivityManager service, String packageName) {
         mService = checkNotNull(service, "missing IConnectivityManager");
+        mPackageName = checkNotNull(packageName, "missing package name");
     }
 
     /** {@hide} */

@@ -1,0 +1,141 @@
+page.title=Google Drive Android API
+page.tags="storage","files","cloud"
+header.hide=1
+
+@jd:body
+
+    <div class="landing-banner">
+      <div class="col-6">
+        <img src="{@docRoot}images/google/gps-drive.png" alt="">
+      </div>
+
+      <div class="col-6">
+        <h1 itemprop="name" style="margin-bottom:0;">
+          Google Drive Android API
+        </h1>
+
+        <p itemprop="description">
+          Give your users access to their files, wherever they are, on any device.
+          The Google Drive Android API makes it easier than ever to use Drive to
+          store and sync user’s files between their mobile devices and the cloud.
+          Simply use Drive like local file storage and the API will handle the
+          syncing for you.
+        </p>
+
+        <p>
+          Explore the <a href=
+          "{@docRoot}reference/com/google/android/gms/drive/package-summary.html">Google
+          Drive Android API reference</a> or visit <a href=
+          "http://developers.google.com/drive/android">developers.google.com/drive/android</a>
+          for more information about integrating Google Drive into your app.
+        </p>
+      </div>
+    </div>
+
+    <div class="landing-docs">
+      <div class="col-6 normal-links">
+        <h3 style="clear:left">
+          Key Developer Features
+        </h3>
+
+        <h4>
+          Automatic syncing
+        </h4>
+
+        <p>
+          The Google Drive Android API uses the local device storage to create,
+          edit, and open files, then syncs them automatically when the device
+          is connected to the Internet. If a user requests a file that isn’t
+          already cached on the device, the Drive service downloads the file
+          the next time the device connects.<br>
+          <a href="http://developers.google.com/drive/android/files" class=
+          "external-link">Open a file</a>
+        </p>
+
+        <h4>
+          User interface components
+        </h4>
+
+        <p>
+          Building your own user interface for selecting or creating files is a
+          thing of the past. The Drive API includes activity builders for two
+          of the most common user activities: opening files and creating
+          files.<br>
+          <a href="http://developers.google.com/drive/android/create-file"
+          class="external-link">Create a file</a>
+        </p>
+
+        <h4>
+          Easily search for files
+        </h4>
+
+        <p>
+          The query builder allows you to easily construct a query by joining
+          together multiple parameters and filtering based on metadata. This
+          allows you to easily display only relevant files, such as files
+          shared with the user or files with a specific MIME type.<br>
+          <a class="external-link" href=
+          "http://developers.google.com/drive/android/queries">Query for a
+          file</a>
+        </p>
+      </div>
+
+      <div class="col-6 normal-links">
+        <h3 style="clear:left">
+          Getting Started
+        </h3>
+
+        <h4>
+          1. Get the Google Play services SDK
+        </h4>
+
+        <p>
+          The Google Drive Android API is part of the Google Play services
+          platform.
+        </p>
+
+        <p>
+          To get started, <a href=
+          "{@docRoot}google/play-services/setup.html">set up the Google Play
+          services SDK</a>.
+        </p>
+
+        <h4>
+          2. Run the sample
+        </h4>
+
+        <p>
+          Once you’ve set up the Google Play services SDK, you can run the
+          Google Drive sample located in
+          <code>&lt;android-sdk&gt;/extras/google-play-services/samples/drive</code>.
+          However, before you can run the sample, you need to register your app
+          in the Google Developers Console.
+        </p>
+
+        <p>
+          See <a class="external-link" href=
+          "http://developers.google.com/drive/android/get-started">Getting
+          Started guide</a> to learn how to get up and running with the Google
+          Drive Android API.
+        </p>
+
+        <h4>
+          3. Read the documentation
+        </h4>
+
+        <p>
+          For quick access while developing your Android apps, the <a href=
+          "{@docRoot}reference/com/google/android/gms/drive/package-summary.html">
+          Google Drive API reference</a> is available here on
+          developer.android.com.
+        </p>
+
+        <p>
+          Detailed documentation for the Google Drive Android API is available
+          with the rest of the Google Drive Platform documentation at <a class=
+          "external-link" href=
+          "https://developers.google.com/drive/android">developers.google.com/drive</a>.
+        </p>
+      </div>
+    </div>
+    

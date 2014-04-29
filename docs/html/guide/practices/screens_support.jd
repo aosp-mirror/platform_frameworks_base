@@ -25,8 +25,7 @@ page.title=Supporting Multiple Screens
         <li><a href="#qualifiers">Using configuration qualifiers</a></li>
         <li><a href="#DesigningResources">Designing alternative layouts and drawables</a></li>
       </ol></li>
-    <li><a href="#DeclaringTabletLayouts">Declaring Tablet Layouts for Android 3.2</a> <span
-class="new">new!</span>
+    <li><a href="#DeclaringTabletLayouts">Declaring Tablet Layouts for Android 3.2</a>
       <ol>
         <li><a href="#NewQualifiers">Using new size qualifiers</a></li>
         <li><a href="#ConfigurationExamples">Configuration examples</a></li>

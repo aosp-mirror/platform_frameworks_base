@@ -152,11 +152,21 @@ class WifiController extends StateMachine {
             addState(mStaDisabledWithScanState, mDefaultState);
             addState(mApEnabledState, mDefaultState);
             addState(mEcmState, mDefaultState);
-        if (mSettingsStore.isScanAlwaysAvailable()) {
+
+        boolean isAirplaneModeOn = mSettingsStore.isAirplaneModeOn();
+        boolean isWifiEnabled = mSettingsStore.isWifiToggleEnabled();
+        boolean isScanningAlwaysAvailable = mSettingsStore.isScanAlwaysAvailable();
+
+        log("isAirplaneModeOn = " + isAirplaneModeOn +
+                ", isWifiEnabled = " + isWifiEnabled +
+                ", isScanningAvailable = " + isScanningAlwaysAvailable);
+
+        if (isWifiEnabled && isScanningAlwaysAvailable) {
             setInitialState(mStaDisabledWithScanState);
         } else {
             setInitialState(mApStaDisabledState);
         }
+
         setLogRecSize(100);
         setLogOnlyTransitions(false);
 

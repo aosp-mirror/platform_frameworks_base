@@ -17,7 +17,7 @@ parent.link=manifest-intro.html
 <dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Declares a security permission that can be used to limit access 
+<dd itemprop="description">Declares a security permission that can be used to limit access
 to specific components or features of this or other applications.  
 See the <a href="{@docRoot}guide/topics/manifest/manifest-intro.html#perms">Permissions</a>
 section in the introduction,

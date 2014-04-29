@@ -18,12 +18,26 @@ startpage=true
 <h2>Try it out</h2>
 
 <div class="download-box">
-  <a href="{@docRoot}shareables/training/BitmapFun.zip" class="button">Download the sample</a>
-  <p class="filename">BitmapFun.zip</p>
+  <a href="{@docRoot}downloads/samples/DisplayingBitmaps.zip" class="button">Download the sample</a>
+  <p class="filename">DisplayingBitmaps.zip</p>
 </div>
 
 </div>
 </div>
+
+<a class="notice-developers-video wide" href="http://www.youtube.com/watch?v=rsQet4nBVi8">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Bitmap Allocation</p>
+</div>
+</a>
+
+<a class="notice-developers-video wide" href="http://www.youtube.com/watch?v=pMRnGDR6Cu0">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Making Apps Beautiful - Part 4 - Performance Tuning</p>
+</div>
+</a>
 
 <p>Learn how to use common techniques to process and load {@link
 android.graphics.Bitmap} objects in a way that keeps your user interface (UI) components responsive

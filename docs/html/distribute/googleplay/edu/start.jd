@@ -84,11 +84,16 @@ tablets &mdash; a good starting point is the <a
 href="{@docRoot}distribute/googleplay/quality/tablet.html">Tablet App Quality
 Guidelines</a>. </p>
 
-<p>Throughout design and development, it's important to have a suitable device
-on which to prototype and test your user experience. It's highly recommended
-that you acquire one or more tablet devices and set up your testing environment
-as early as possible. The recommended hardware device that replicates the Google
-Play for Education environment is the Nexus 7, which is available from <a href="https://play.google.com/store/devices/details?id=nexus_7_16gb" target="_android">Google Play</a> and other stores.</p>
+<p>
+  Throughout design and development, it's important to have suitable devices
+  on which to prototype and test your user experience. It's highly recommended
+  that you acquire 7-inch and 10-inch tablet devices and set up
+  your testing environment as early as possible. The recommended 7-inch
+  hardware device that replicates the Google Play for Education environment is
+  the Nexus 7, which is available from <a href=
+  "https://play.google.com/store/devices/details?id=nexus_7_16gb" target=
+  "_android">Google Play</a> and other stores.
+</p>
 
 <p>Proper testing and quality assurance are key aspects of delivering a great
 app for teachers and students. Make sure you set up a <a

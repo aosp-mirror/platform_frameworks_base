@@ -22,7 +22,8 @@ footer.hide=1
 
 <div id="landing-graphic-container">
   <div id="text-overlay">
-    Welcome to <strong>Android Design</strong>, your place for learning how to design exceptional Android apps.
+    <span itemprop="description">Welcome to <strong>Android Design</strong>, your place for
+    learning how to design exceptional Android apps.</span>
     <br><br>
     Want to know what <strong>Android 4.4 KitKat</strong> has for designers? See <a href="{@docRoot}design/patterns/new.html">New in Android</a>.<br><br>
     <a href="/design/get-started/creative-vision.html" class="landing-page-link">Creative Vision</a>

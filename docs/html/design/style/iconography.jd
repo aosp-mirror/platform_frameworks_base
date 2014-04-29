@@ -1,5 +1,7 @@
 page.title=Iconography
 page.tags="icons"
+meta.tags="icons, googleplay, listing, branding"
+page.titleFriendly=Guidelines for creating your app's icons
 @jd:body
 
 <img src="{@docRoot}design/media/iconography_overview.png">
@@ -8,7 +10,7 @@ page.tags="icons"
 <p>An icon is a graphic that takes up a small portion of screen real estate and provides a quick,
 intuitive representation of an action, a status, or an app.</p>
 
-<p>When you design icons for your app, it's important to keep in mind that your
+<p >When you design icons for your app, it's important to keep in mind that your
 app may be installed on a variety of devices that offer a range of
 pixel densities, as mentioned in
 <a href="{@docRoot}design/style/devices-displays.html">Devices

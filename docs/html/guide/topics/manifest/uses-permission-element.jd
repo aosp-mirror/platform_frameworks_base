@@ -42,7 +42,7 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions-feat
 <dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Requests a permission that the application must be granted in 
+<dd itemprop="description">Requests a permission that the application must be granted in
 order for it to operate correctly.  Permissions are granted by the user when the 
 application is installed, not while it's running.
 

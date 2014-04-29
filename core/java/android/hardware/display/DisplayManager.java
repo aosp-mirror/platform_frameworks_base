@@ -297,16 +297,31 @@ public final class DisplayManager {
     }
 
     /**
-     * Initiates a fresh scan of availble Wifi displays.
+     * Starts scanning for available Wifi displays.
      * The results are sent as a {@link #ACTION_WIFI_DISPLAY_STATUS_CHANGED} broadcast.
+     * <p>
+     * Calls to this method nest and must be matched by an equal number of calls to
+     * {@link #stopWifiDisplayScan()}.
+     * </p><p>
+     * Requires {@link android.Manifest.permission#CONFIGURE_WIFI_DISPLAY}.
+     * </p>
+     *
+     * @hide
+     */
+    public void startWifiDisplayScan() {
+        mGlobal.startWifiDisplayScan();
+    }
+
+    /**
+     * Stops scanning for available Wifi displays.
      * <p>
      * Requires {@link android.Manifest.permission#CONFIGURE_WIFI_DISPLAY}.
      * </p>
      *
      * @hide
      */
-    public void scanWifiDisplays() {
-        mGlobal.scanWifiDisplays();
+    public void stopWifiDisplayScan() {
+        mGlobal.stopWifiDisplayScan();
     }
 
     /**

@@ -233,15 +233,33 @@ save files. This can be a removable storage media (such as an SD card) or an int
 (non-removable) storage. Files saved to the external storage are world-readable and can
 be modified by the user when they enable USB mass storage to transfer files on a computer.</p>
 
-<p>It's possible that a device using a partition of the
-internal storage for the external storage may also offer an SD card slot. In this case,
-the SD card is <em>not</em> part of the external storage and your app cannot access it (the extra
-storage is intended only for user-provided media that the system scans).</p>
-
 <p class="caution"><strong>Caution:</strong> External storage can become unavailable if the user mounts the
 external storage on a computer or removes the media, and there's no security enforced upon files you
 save to the external storage. All applications can read and write files placed on the external
 storage and the user can remove them.</p>
+
+<h3 id="ExternalPermissions">Getting access to external storage</h3>
+
+<p>In order to read or write files on the external storage, your app must acquire the
+{@link android.Manifest.permission#READ_EXTERNAL_STORAGE}
+or {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} system
+permissions. For example:</p>
+<pre>
+&lt;manifest ...>
+    &lt;uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    ...
+&lt;/manifest>
+</pre>
+
+<p>If you need to both read and write files, then you need to request only the
+{@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission, because it
+implicitly requires read access as well.</p>
+
+<p class="note"><strong>Note:</strong> Beginning with Android 4.4, these permissions are not
+required if you're reading or writing only files that are private to your app. For more
+information, see the section below about
+<a href="#AccessingExtFiles">saving files that are app-private</a>.</p>
+
 
 
 <h3 id="MediaAvail">Checking media availability</h3>
@@ -249,122 +267,163 @@ storage and the user can remove them.</p>
 <p>Before you do any work with the external storage, you should always call {@link
 android.os.Environment#getExternalStorageState()} to check whether the media is available. The
 media might be mounted to a computer, missing, read-only, or in some other state. For example,
-here's how you can check the availability:</p>
+here are a couple methods you can use to check the availability:</p>
 
 <pre>
-boolean mExternalStorageAvailable = false;
-boolean mExternalStorageWriteable = false;
-String state = Environment.getExternalStorageState();
+/* Checks if external storage is available for read and write */
+public boolean isExternalStorageWritable() {
+    String state = Environment.getExternalStorageState();
+    if (Environment.MEDIA_MOUNTED.equals(state)) {
+        return true;
+    }
+    return false;
+}
 
-if (Environment.MEDIA_MOUNTED.equals(state)) {
-    // We can read and write the media
-    mExternalStorageAvailable = mExternalStorageWriteable = true;
-} else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-    // We can only read the media
-    mExternalStorageAvailable = true;
-    mExternalStorageWriteable = false;
-} else {
-    // Something else is wrong. It may be one of many other states, but all we need
-    //  to know is we can neither read nor write
-    mExternalStorageAvailable = mExternalStorageWriteable = false;
+/* Checks if external storage is available to at least read */
+public boolean isExternalStorageReadable() {
+    String state = Environment.getExternalStorageState();
+    if (Environment.MEDIA_MOUNTED.equals(state) ||
+        Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+        return true;
+    }
+    return false;
 }
 </pre>
 
-<p>This example checks whether the external storage is available to read and write. The
-{@link android.os.Environment#getExternalStorageState()} method returns other states that you
+<p>The {@link android.os.Environment#getExternalStorageState()} method returns other states that you
 might want to check, such as whether the media is being shared (connected to a computer), is missing
 entirely, has been removed badly, etc. You can use these to notify the user with more information
 when your application needs to access the media.</p>
 
 
-<h3 id="AccessingExtFiles">Accessing files on external storage</h3>
+<h3 id="SavingSharedFiles">Saving files that can be shared with other apps</h3>
 
-<p>If you're using API Level 8 or greater, use {@link
-android.content.Context#getExternalFilesDir(String) getExternalFilesDir()} to open a {@link
-java.io.File} that represents the external storage directory where you should save your
-files. This method takes a <code>type</code> parameter that specifies the type of subdirectory you
-want, such as {@link android.os.Environment#DIRECTORY_MUSIC} and
-{@link android.os.Environment#DIRECTORY_RINGTONES} (pass <code>null</code> to receive
-the root of your application's file directory). This method will create the
-appropriate directory if necessary. By specifying the type of directory, you
-ensure that the Android's media scanner will properly categorize your files in the system (for
-example, ringtones are identified as ringtones and not music). If the user uninstalls your
-application, this directory and all its contents will be deleted.</p>
-
-<p>If you're using API Level 7 or lower, use {@link
-android.os.Environment#getExternalStorageDirectory()}, to open a {@link
-java.io.File} representing the root of the external storage. You should then write your data in the
-following directory:</p>
-<pre class="no-pretty-print classic">
-/Android/data/<em>&lt;package_name&gt;</em>/files/
-</pre>
-<p>The {@code <em>&lt;package_name&gt;</em>} is your Java-style package name, such as "{@code
-com.example.android.app}". If the user's device is running API Level 8 or greater and they
-uninstall your application, this directory and all its contents will be deleted.</p>
-
-
-<div class="sidebox-wrapper" style="margin-top:3em">
+<div class="sidebox-wrapper" >
 <div class="sidebox">
 
 <h4>Hiding your files from the Media Scanner</h4>
 
 <p>Include an empty file named {@code .nomedia} in your external files directory (note the dot
-prefix in the filename). This will prevent Android's media scanner from reading your media
-files and including them in apps like Gallery or Music.</p>
+prefix in the filename). This prevents media scanner from reading your media
+files and providing them to other apps through the {@link android.provider.MediaStore}
+content provider. However, if your files are truly private to your app, you should
+<a href="#AccessingExtFiles">save them in an app-private directory</a>.</p>
 
 </div>
 </div>
 
+<p>Generally, new files that the user may acquire through your app should be saved to a "public"
+location on the device where other apps can access them and the user can easily copy them from the
+device. When doing so, you should use to one of the shared public directories, such as {@code
+Music/}, {@code Pictures/}, and {@code Ringtones/}.</p>
 
-<h3 id="SavingSharedFiles">Saving files that should be shared</h3>
-
-<p>If you want to save files that are not specific to your application and that should <em>not</em>
-be deleted when your application is uninstalled, save them to one of the public directories on the
-external storage. These directories lay at the root of the external storage, such as {@code
-Music/}, {@code Pictures/}, {@code Ringtones/}, and others.</p>
-
-<p>In API Level 8 or greater, use {@link
+<p>To get a {@link java.io.File} representing the appropriate public directory, call {@link
 android.os.Environment#getExternalStoragePublicDirectory(String)
-getExternalStoragePublicDirectory()}, passing it the type of public directory you want, such as
+getExternalStoragePublicDirectory()}, passing it the type of directory you want, such as
 {@link android.os.Environment#DIRECTORY_MUSIC}, {@link android.os.Environment#DIRECTORY_PICTURES},
-{@link android.os.Environment#DIRECTORY_RINGTONES}, or others. This method will create the
-appropriate directory if necessary.</p>
+{@link android.os.Environment#DIRECTORY_RINGTONES}, or others. By saving your files to the
+corresponding media-type directory,
+the system's media scanner can properly categorize your files in the system (for
+instance, ringtones appear in system settings as ringtones, not as music).</p>
 
-<p>If you're using API Level 7 or lower, use {@link
-android.os.Environment#getExternalStorageDirectory()} to open a {@link java.io.File} that represents
-the root of the external storage, then save your shared files in one of the following
-directories:</p>
 
-<ul class="nolist"></li>
-  <li><code>Music/</code> - Media scanner classifies all media found here as user music.</li>
-  <li><code>Podcasts/</code> - Media scanner classifies all media found here as a podcast.</li>
-  <li><code>Ringtones/ </code> - Media scanner classifies all media found here as a ringtone.</li>
-  <li><code>Alarms/</code> - Media scanner classifies all media found here as an alarm sound.</li>
-  <li><code>Notifications/</code> - Media scanner classifies all media found here as a notification
-sound.</li>
-  <li><code>Pictures/</code> - All photos (excluding those taken with the camera).</li>
-  <li><code>Movies/</code> - All movies (excluding those taken with the camcorder).</li>
-  <li><code>Download/</code> - Miscellaneous downloads.</li>
-</ul>
+<p>For example, here's a method that creates a directory for a new photo album in
+the public pictures directory:</p>
+
+<pre>
+public File getAlbumStorageDir(String albumName) {
+    // Get the directory for the user's public pictures directory.
+    File file = new File(Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_PICTURES), albumName);
+    if (!file.mkdirs()) {
+        Log.e(LOG_TAG, "Directory not created");
+    }
+    return file;
+}
+</pre>
+
+
+
+<h3 id="AccessingExtFiles">Saving files that are app-private</h3>
+
+<p>If you are handling files that are not intended for other apps to use
+(such as graphic textures or sound effects used by only your app), you should use
+a private storage directory on the external storage by calling {@link
+android.content.Context#getExternalFilesDir(String) getExternalFilesDir()}.
+This method also takes a <code>type</code> argument to specify the type of subdirectory
+(such as {@link android.os.Environment#DIRECTORY_MOVIES}). If you don't need a specific
+media directory, pass <code>null</code> to receive
+the root directory of your app's private directory.</p>
+
+<p>Beginning with Android 4.4, reading or writing files in your app's private
+directories does not require the {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}
+or {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE}
+permissions. So you can declare the permission should be requested only on the lower versions
+of Android by adding the <a
+href="{@docRoot}guide/topics/manifest/uses-permission-element.html#maxSdk">{@code maxSdkVersion}</a>
+attribute:</p>
+<pre>
+&lt;manifest ...>
+    &lt;uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+                     android:maxSdkVersion="18" />
+    ...
+&lt;/manifest>
+</pre>
+
+<p class="note"><strong>Note:</strong>
+When the user uninstalls your application, this directory and all its contents are deleted.
+Also, the system media scanner does not read files in these directories, so they are not accessible
+from the {@link android.provider.MediaStore} content provider. As such, you <b>should not
+use these directories</b> for media that ultimately belongs to the user, such as photos
+captured or edited with your app, or music the user has purchased with your app&mdash;those
+files should be <a href="#SavingSharedFiles">saved in the public directories</a>.</p>
+
+<p>Sometimes, a device that has allocated a partition of the
+internal memory for use as the external storage may also offer an SD card slot.
+When such a device is running Android 4.3 and lower, the {@link
+android.content.Context#getExternalFilesDir(String) getExternalFilesDir()} method provides
+access to only the internal partition and your app cannot read or write to the SD card.
+Beginning with Android 4.4, however, you can access both locations by calling
+{@link android.content.Context#getExternalFilesDirs getExternalFilesDirs()},
+which returns a {@link
+java.io.File} array with entries each location. The first entry in the array is considered
+the primary external storage and you should use that location unless it's full or
+unavailable. If you'd like to access both possible locations while also supporting Android
+4.3 and lower, use the <a href="{@docRoot}tools/support-library/index.html">support library's</a>
+static method, {@link android.support.v4.content.ContextCompat#getExternalFilesDirs
+ContextCompat.getExternalFilesDirs()}. This also returns a {@link
+java.io.File} array, but always includes only one entry on Android 4.3 and lower.</p>
+
+<p class="caution"><strong>Caution</strong> Although the directories provided by {@link
+android.content.Context#getExternalFilesDir(String) getExternalFilesDir()} and {@link
+android.content.Context#getExternalFilesDirs getExternalFilesDirs()} are not accessible by the
+{@link android.provider.MediaStore} content provider, other apps with the {@link
+android.Manifest.permission#READ_EXTERNAL_STORAGE} permission can access all files on the external
+storage, including these. If you need to completely restrict access for your files, you should
+instead write your files to the <a href="#filesInternal">internal storage</a>.</p>
+
+
+
 
 
 <h3 id="ExternalCache">Saving cache files</h3>
 
-<p>If you're using API Level 8 or greater, use {@link
-android.content.Context#getExternalCacheDir()} to open a {@link java.io.File} that represents the
-external storage directory where you should save cache files. If the user uninstalls your
-application, these files will be automatically deleted. However, during the life of your
-application, you should manage these cache files and remove those that aren't needed in order to
-preserve file space.</p>
+<p>To open a {@link java.io.File} that represents the
+external storage directory where you should save cache files, call {@link
+android.content.Context#getExternalCacheDir()}. If the user uninstalls your
+application, these files will be automatically deleted.</p>
 
-<p>If you're using API Level 7 or lower, use {@link
-android.os.Environment#getExternalStorageDirectory()} to open a {@link java.io.File} that represents
-the root of the external storage, then write your cache data in the following directory:</p>
-<pre class="no-pretty-print classic">
-/Android/data/<em>&lt;package_name&gt;</em>/cache/
-</pre>
-<p>The {@code <em>&lt;package_name&gt;</em>} is your Java-style package name, such as "{@code
-com.example.android.app}".</p>
+<p>Similar to {@link android.support.v4.content.ContextCompat#getExternalFilesDirs
+ContextCompat.getExternalFilesDirs()}, mentioned above, you can also access a cache directory on
+a secondary external storage (if available) by calling
+{@link android.support.v4.content.ContextCompat#getExternalCacheDirs
+ContextCompat.getExternalCacheDirs()}.</p>
+
+<p class="note"><strong>Tip:</strong>
+To preserve file space and maintain your app's performance,
+it's important that you carefully manage your cache files and remove those that aren't
+needed anymore throughout your app's lifecycle.</p>
+
 
 
 

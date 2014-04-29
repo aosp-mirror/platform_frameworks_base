@@ -49,7 +49,7 @@ public class Build {
     /** The manufacturer of the product/hardware. */
     public static final String MANUFACTURER = getString("ro.product.manufacturer");
 
-    /** The brand (e.g., carrier) the software is customized for, if any. */
+    /** The consumer-visible brand with which the product/hardware will be associated, if any. */
     public static final String BRAND = getString("ro.product.brand");
 
     /** The end-user-visible name for the end product. */

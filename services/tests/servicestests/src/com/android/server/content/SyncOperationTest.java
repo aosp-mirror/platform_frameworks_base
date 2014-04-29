@@ -136,10 +136,11 @@ public class SyncOperationTest extends AndroidTestCase {
                 "authority1", b1, soon + 100, soonFlex + 100, unimportant, unimportant, true);
 
         assertTrue(op1.compareTo(op2) == -1);
-        assertTrue("less than not transitive.", op2.compareTo(op1) == 1);
-        assertTrue(op1.compareTo(op3) == 1);
-        assertTrue("greater than not transitive. ", op3.compareTo(op1) == -1);
-        assertTrue("overlapping intervals not the same.", op1.compareTo(op4) == 0);
-        assertTrue("equality not transitive.", op4.compareTo(op1) == 0);
+        assertTrue("Less than not transitive.", op2.compareTo(op1) == 1);
+        assertEquals("Expedited not smaller than non-expedited.", -1, op1.compareTo(op3));
+        assertEquals("Greater than not transitive for expedited. ", 1, op3.compareTo(op1));
+        assertTrue("overlapping intervals not compared based on start interval.",
+                op1.compareTo(op4) == -1);
+        assertTrue("overlapping interval comparison not transitive.", op4.compareTo(op1) == 1);
     }
 }

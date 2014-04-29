@@ -555,11 +555,12 @@ public final class BluetoothGatt implements BluetoothProfile {
             }
 
             /**
-             * Listen command status callback
+             * Advertise state change callback
              * @hide
              */
-            public void onListen(int status) {
-                if (DBG) Log.d(TAG, "onListen() - status=" + status);
+            public void onAdvertiseStateChange(int state, int status) {
+                if (DBG) Log.d(TAG, "onAdvertiseStateChange() - state = "
+                        + state + " status=" + status);
             }
         };
 
@@ -691,71 +692,6 @@ public final class BluetoothGatt implements BluetoothProfile {
         // the connection will continue after successful callback registration
         mAutoConnect = autoConnect;
         return true;
-    }
-
-   /**
-     * Starts or stops sending of advertisement packages to listen for connection
-     * requests from a central devices.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
-     * @param start Start or stop advertising
-     */
-    /*package*/ void listen(boolean start) {
-        if (mContext == null || !mContext.getResources().
-            getBoolean(com.android.internal.R.bool.config_bluetooth_le_peripheral_mode_supported)) {
-            throw new UnsupportedOperationException("BluetoothGatt#listen is blocked");
-        }
-        if (DBG) Log.d(TAG, "listen() - start: " + start);
-        if (mService == null || mClientIf == 0) return;
-
-        try {
-            mService.clientListen(mClientIf, start);
-        } catch (RemoteException e) {
-            Log.e(TAG,"",e);
-        }
-    }
-
-    /**
-     * Sets the advertising data contained in the adv. response packet.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
-     * @param advData true to set adv. data, false to set scan response
-     * @param includeName Inlucde the name in the adv. response
-     * @param includeTxPower Include TX power value
-     * @param minInterval Minimum desired scan interval (optional)
-     * @param maxInterval Maximum desired scan interval (optional)
-     * @param appearance The appearance flags for the device (optional)
-     * @param manufacturerData Manufacturer specific data including company ID (optional)
-     */
-    /*package*/ void setAdvData(boolean advData, boolean includeName, boolean includeTxPower,
-                           Integer minInterval, Integer maxInterval,
-                           Integer appearance, Byte[] manufacturerData) {
-        if (mContext == null || !mContext.getResources().
-            getBoolean(com.android.internal.R.bool.config_bluetooth_le_peripheral_mode_supported)) {
-            throw new UnsupportedOperationException("BluetoothGatt#setAdvData is blocked");
-        }
-        if (DBG) Log.d(TAG, "setAdvData()");
-        if (mService == null || mClientIf == 0) return;
-
-        byte[] data = new byte[0];
-        if (manufacturerData != null) {
-            data = new byte[manufacturerData.length];
-            for(int i = 0; i != manufacturerData.length; ++i) {
-                data[i] = manufacturerData[i];
-            }
-        }
-
-        try {
-            mService.setAdvData(mClientIf, !advData,
-                includeName, includeTxPower,
-                minInterval != null ? minInterval : 0,
-                maxInterval != null ? maxInterval : 0,
-                appearance != null ? appearance : 0, data);
-        } catch (RemoteException e) {
-            Log.e(TAG,"",e);
-        }
     }
 
     /**

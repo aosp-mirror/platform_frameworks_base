@@ -1210,35 +1210,38 @@ public class CalendarView extends FrameLayout {
             child = (WeekView) view.getChildAt(offset);
         }
 
-        // Find out which month we're moving into
-        int month;
-        if (mIsScrollingUp) {
-            month = child.getMonthOfFirstWeekDay();
-        } else {
-            month = child.getMonthOfLastWeekDay();
-        }
-
-        // And how it relates to our current highlighted month
-        int monthDiff;
-        if (mCurrentMonthDisplayed == 11 && month == 0) {
-            monthDiff = 1;
-        } else if (mCurrentMonthDisplayed == 0 && month == 11) {
-            monthDiff = -1;
-        } else {
-            monthDiff = month - mCurrentMonthDisplayed;
-        }
-
-        // Only switch months if we're scrolling away from the currently
-        // selected month
-        if ((!mIsScrollingUp && monthDiff > 0) || (mIsScrollingUp && monthDiff < 0)) {
-            Calendar firstDay = child.getFirstDay();
+        if (child != null) {
+            // Find out which month we're moving into
+            int month;
             if (mIsScrollingUp) {
-                firstDay.add(Calendar.DAY_OF_MONTH, -DAYS_PER_WEEK);
+                month = child.getMonthOfFirstWeekDay();
             } else {
-                firstDay.add(Calendar.DAY_OF_MONTH, DAYS_PER_WEEK);
+                month = child.getMonthOfLastWeekDay();
             }
-            setMonthDisplayed(firstDay);
+
+            // And how it relates to our current highlighted month
+            int monthDiff;
+            if (mCurrentMonthDisplayed == 11 && month == 0) {
+                monthDiff = 1;
+            } else if (mCurrentMonthDisplayed == 0 && month == 11) {
+                monthDiff = -1;
+            } else {
+                monthDiff = month - mCurrentMonthDisplayed;
+            }
+
+            // Only switch months if we're scrolling away from the currently
+            // selected month
+            if ((!mIsScrollingUp && monthDiff > 0) || (mIsScrollingUp && monthDiff < 0)) {
+                Calendar firstDay = child.getFirstDay();
+                if (mIsScrollingUp) {
+                    firstDay.add(Calendar.DAY_OF_MONTH, -DAYS_PER_WEEK);
+                } else {
+                    firstDay.add(Calendar.DAY_OF_MONTH, DAYS_PER_WEEK);
+                }
+                setMonthDisplayed(firstDay);
+            }
         }
+
         mPreviousScrollPosition = currScroll;
         mPreviousScrollState = mCurrentScrollState;
     }

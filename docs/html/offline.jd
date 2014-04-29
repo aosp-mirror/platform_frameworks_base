@@ -1,5 +1,6 @@
 home=true
 page.title=Welcome
+excludeFromSuggestions=true
 @jd:body
 
 <style type="text/css">

@@ -63,21 +63,22 @@ following files for the code implementation:</p>
     contains a text view to display some text:
 
 <pre>
-&lt;com.example.android.animationsdemo.ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/content"
+&lt;!-- fragment_screen_slide_page.xml --&gt;
+&lt;ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="&#64;+id/content"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"&gt;
+    android:layout_height="match_parent" &gt;
 
-        &lt;TextView style="?android:textAppearanceMedium"
-            android:padding="16dp"
-            android:lineSpacingMultiplier="1.2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/lorem_ipsum" /&gt;
-
-&lt;/com.example.android.animationsdemo.ScrollView&gt;
+    &lt;TextView style="?android:textAppearanceMedium"
+        android:padding="16dp"
+        android:lineSpacingMultiplier="1.2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/lorem_ipsum" /&gt;
+&lt;/ScrollView&gt;
 </pre>
+
+  <p>Define also a string for the contents of the fragment.</p>
 
 <h2 id="fragment">Create the Fragment</h2>
 <p>Create a {@link android.support.v4.app.Fragment} class that returns the layout
@@ -87,6 +88,8 @@ that you just created in the {@link android.app.Fragment#onCreateView onCreateVi
 
 
 <pre>
+import android.support.v4.app.Fragment;
+...
 public class ScreenSlidePageFragment extends Fragment {
 
     &#64;Override
@@ -111,6 +114,7 @@ fragment class that you created earlier.
 <p>To begin, create a layout that contains a {@link android.support.v4.view.ViewPager}:</p>
 
 <pre>
+&lt;!-- activity_screen_slide.xml --&gt;
 &lt;android.support.v4.view.ViewPager
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/pager"
@@ -133,6 +137,9 @@ fragment class that you created earlier.
 </ul>
 
 <pre>
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+...
 public class ScreenSlidePagerActivity extends FragmentActivity {
     /**
      * The number of pages (wizard steps) to show in this demo.
@@ -153,11 +160,11 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
     &#64;Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_screen_slide_pager);
+        setContentView(R.layout.activity_screen_slide);
 
         // Instantiate a ViewPager and a PagerAdapter.
         mPager = (ViewPager) findViewById(R.id.pager);
-        mPagerAdapter = new ScreenSlidePagerAdapter(getFragmentManager());
+        mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         mPager.setAdapter(mPagerAdapter);
     }
 
@@ -224,9 +231,9 @@ call {@link android.support.v4.view.ViewPager#setPageTransformer setPageTransfor
   <code>ZoomOutPageTransformer</code>, you can set your custom animations
   like this:</p>
 <pre>
-ViewPager pager = (ViewPager) findViewById(R.id.pager);
+ViewPager mPager = (ViewPager) findViewById(R.id.pager);
 ...
-pager.setPageTransformer(true, new ZoomOutPageTransformer());
+mPager.setPageTransformer(true, new ZoomOutPageTransformer());
 </pre>
 
 
@@ -257,8 +264,8 @@ sections for examples and videos of a {@link android.support.v4.view.ViewPager.P
 
 <pre>
 public class ZoomOutPageTransformer implements ViewPager.PageTransformer {
-    private static float MIN_SCALE = 0.85f;
-    private static float MIN_ALPHA = 0.5f;
+    private static final float MIN_SCALE = 0.85f;
+    private static final float MIN_ALPHA = 0.5f;
 
     public void transformPage(View view, float position) {
         int pageWidth = view.getWidth();
@@ -332,7 +339,7 @@ in a working page transformer:
 <pre>
 
 public class DepthPageTransformer implements ViewPager.PageTransformer {
-    private static float MIN_SCALE = 0.75f;
+    private static final float MIN_SCALE = 0.75f;
 
     public void transformPage(View view, float position) {
         int pageWidth = view.getWidth();

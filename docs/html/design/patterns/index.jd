@@ -18,7 +18,8 @@ footer.hide=1
 
 <div id="landing-graphic-container">
   <div id="text-overlay">
-    Design apps that behave in a consistent, predictable fashion.
+    <span itemprop="description">Design apps that behave in a consistent, predictable
+    fashion.</span>
     <br><br>
     <a href="{@docRoot}design/patterns/new.html" class="landing-page-link">New in Android</a>
   </div>

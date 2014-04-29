@@ -82,7 +82,7 @@ import android.util.StringBuilderPrinter;
 import com.android.internal.backup.BackupConstants;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.backup.IObbBackupService;
-import com.android.internal.backup.LocalTransport;
+import com.android.server.EventLogTags;
 import com.android.server.PackageManagerBackupAgent.Metadata;
 
 import java.io.BufferedInputStream;
@@ -140,11 +140,16 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final boolean DEBUG = true;
     private static final boolean MORE_DEBUG = false;
 
+    // Historical and current algorithm names
+    static final String PBKDF_CURRENT = "PBKDF2WithHmacSHA1";
+    static final String PBKDF_FALLBACK = "PBKDF2WithHmacSHA1And8bit";
+
     // Name and current contents version of the full-backup manifest file
     static final String BACKUP_MANIFEST_FILENAME = "_manifest";
     static final int BACKUP_MANIFEST_VERSION = 1;
     static final String BACKUP_FILE_HEADER_MAGIC = "ANDROID BACKUP\n";
-    static final int BACKUP_FILE_VERSION = 1;
+    static final int BACKUP_FILE_VERSION = 2;
+    static final int BACKUP_PW_FILE_VERSION = 2;
     static final boolean COMPRESS_FULL_BACKUPS = true; // should be true in production
 
     static final String SHARED_BACKUP_AGENT_PACKAGE = "com.android.sharedstoragebackup";
@@ -161,6 +166,9 @@ class BackupManagerService extends IBackupManager.Stub {
     // the first backup pass.
     private static final long FIRST_BACKUP_INTERVAL = 12 * AlarmManager.INTERVAL_HOUR;
 
+    // Retry interval for clear/init when the transport is unavailable
+    private static final long TRANSPORT_RETRY_INTERVAL = 1 * AlarmManager.INTERVAL_HOUR;
+
     private static final String RUN_BACKUP_ACTION = "android.app.backup.intent.RUN";
     private static final String RUN_INITIALIZE_ACTION = "android.app.backup.intent.INIT";
     private static final String RUN_CLEAR_ACTION = "android.app.backup.intent.CLEAR";
@@ -174,6 +182,8 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final int MSG_RESTORE_TIMEOUT = 8;
     private static final int MSG_FULL_CONFIRMATION_TIMEOUT = 9;
     private static final int MSG_RUN_FULL_RESTORE = 10;
+    private static final int MSG_RETRY_INIT = 11;
+    private static final int MSG_RETRY_CLEAR = 12;
 
     // backup task state machine tick
     static final int MSG_BACKUP_RESTORE_STEP = 20;
@@ -306,6 +316,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     class RestoreParams {
         public IBackupTransport transport;
+        public String dirName;
         public IRestoreObserver observer;
         public long token;
         public PackageInfo pkgInfo;
@@ -313,9 +324,10 @@ class BackupManagerService extends IBackupManager.Stub {
         public boolean needFullBackup;
         public String[] filterSet;
 
-        RestoreParams(IBackupTransport _transport, IRestoreObserver _obs,
+        RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
                 long _token, PackageInfo _pkg, int _pmToken, boolean _needFullBackup) {
             transport = _transport;
+            dirName = _dirName;
             observer = _obs;
             token = _token;
             pkgInfo = _pkg;
@@ -324,9 +336,10 @@ class BackupManagerService extends IBackupManager.Stub {
             filterSet = null;
         }
 
-        RestoreParams(IBackupTransport _transport, IRestoreObserver _obs, long _token,
-                boolean _needFullBackup) {
+        RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
+                long _token, boolean _needFullBackup) {
             transport = _transport;
+            dirName = _dirName;
             observer = _obs;
             token = _token;
             pkgInfo = null;
@@ -335,9 +348,10 @@ class BackupManagerService extends IBackupManager.Stub {
             filterSet = null;
         }
 
-        RestoreParams(IBackupTransport _transport, IRestoreObserver _obs, long _token,
-                String[] _filterSet, boolean _needFullBackup) {
+        RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
+                long _token, String[] _filterSet, boolean _needFullBackup) {
             transport = _transport;
+            dirName = _dirName;
             observer = _obs;
             token = _token;
             pkgInfo = null;
@@ -354,6 +368,16 @@ class BackupManagerService extends IBackupManager.Stub {
         ClearParams(IBackupTransport _transport, PackageInfo _info) {
             transport = _transport;
             packageInfo = _info;
+        }
+    }
+
+    class ClearRetryParams {
+        public String transportName;
+        public String packageName;
+
+        ClearRetryParams(String transport, String pkg) {
+            transportName = transport;
+            packageName = pkg;
         }
     }
 
@@ -431,6 +455,8 @@ class BackupManagerService extends IBackupManager.Stub {
     private final SecureRandom mRng = new SecureRandom();
     private String mPasswordHash;
     private File mPasswordHashFile;
+    private int mPasswordVersion;
+    private File mPasswordVersionFile;
     private byte[] mPasswordSalt;
 
     // Configuration of PBKDF2 that we use for generating pw hashes and intermediate keys
@@ -516,13 +542,28 @@ class BackupManagerService extends IBackupManager.Stub {
                 // When it completes successfully, that old journal file will be
                 // deleted.  If we crash prior to that, the old journal is parsed
                 // at next boot and the journaled requests fulfilled.
+                boolean staged = true;
                 if (queue.size() > 0) {
                     // Spin up a backup state sequence and set it running
-                    PerformBackupTask pbt = new PerformBackupTask(transport, queue, oldJournal);
-                    Message pbtMessage = obtainMessage(MSG_BACKUP_RESTORE_STEP, pbt);
-                    sendMessage(pbtMessage);
+                    try {
+                        String dirName = transport.transportDirName();
+                        PerformBackupTask pbt = new PerformBackupTask(transport, dirName,
+                                queue, oldJournal);
+                        Message pbtMessage = obtainMessage(MSG_BACKUP_RESTORE_STEP, pbt);
+                        sendMessage(pbtMessage);
+                    } catch (RemoteException e) {
+                        // unable to ask the transport its dir name -- transient failure, since
+                        // the above check succeeded.  Try again next time.
+                        Slog.e(TAG, "Transport became unavailable attempting backup");
+                        staged = false;
+                    }
                 } else {
                     Slog.v(TAG, "Backup requested but nothing pending");
+                    staged = false;
+                }
+
+                if (!staged) {
+                    // if we didn't actually hand off the wakelock, rewind until next time
                     synchronized (mQueueLock) {
                         mBackupRunning = false;
                     }
@@ -572,7 +613,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 RestoreParams params = (RestoreParams)msg.obj;
                 Slog.d(TAG, "MSG_RUN_RESTORE observer=" + params.observer);
                 PerformRestoreTask task = new PerformRestoreTask(
-                        params.transport, params.observer,
+                        params.transport, params.dirName, params.observer,
                         params.token, params.pkgInfo, params.pmToken,
                         params.needFullBackup, params.filterSet);
                 Message restoreMsg = obtainMessage(MSG_BACKUP_RESTORE_STEP, task);
@@ -599,6 +640,14 @@ class BackupManagerService extends IBackupManager.Stub {
                 break;
             }
 
+            case MSG_RETRY_CLEAR:
+            {
+                // reenqueues if the transport remains unavailable
+                ClearRetryParams params = (ClearRetryParams)msg.obj;
+                clearBackupData(params.transportName, params.packageName);
+                break;
+            }
+
             case MSG_RUN_INITIALIZE:
             {
                 HashSet<String> queue;
@@ -610,6 +659,16 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
 
                 (new PerformInitializeTask(queue)).run();
+                break;
+            }
+
+            case MSG_RETRY_INIT:
+            {
+                synchronized (mQueueLock) {
+                    recordInitPendingLocked(msg.arg1 != 0, (String)msg.obj);
+                    mAlarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+                            mRunInitIntent);
+                }
                 break;
             }
 
@@ -757,6 +816,27 @@ class BackupManagerService extends IBackupManager.Stub {
             Slog.e(TAG, "SELinux restorecon failed on " + mBaseStateDir);
         }
         mDataDir = Environment.getDownloadCacheDirectory();
+
+        mPasswordVersion = 1;       // unless we hear otherwise
+        mPasswordVersionFile = new File(mBaseStateDir, "pwversion");
+        if (mPasswordVersionFile.exists()) {
+            FileInputStream fin = null;
+            DataInputStream in = null;
+            try {
+                fin = new FileInputStream(mPasswordVersionFile);
+                in = new DataInputStream(fin);
+                mPasswordVersion = in.readInt();
+            } catch (IOException e) {
+                Slog.e(TAG, "Unable to read backup pw version");
+            } finally {
+                try {
+                    if (in != null) in.close();
+                    if (fin != null) fin.close();
+                } catch (IOException e) {
+                    Slog.w(TAG, "Error closing pw version files");
+                }
+            }
+        }
 
         mPasswordHashFile = new File(mBaseStateDir, "pwhash");
         if (mPasswordHashFile.exists()) {
@@ -1058,13 +1138,13 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
-    private SecretKey buildPasswordKey(String pw, byte[] salt, int rounds) {
-        return buildCharArrayKey(pw.toCharArray(), salt, rounds);
+    private SecretKey buildPasswordKey(String algorithm, String pw, byte[] salt, int rounds) {
+        return buildCharArrayKey(algorithm, pw.toCharArray(), salt, rounds);
     }
 
-    private SecretKey buildCharArrayKey(char[] pwArray, byte[] salt, int rounds) {
+    private SecretKey buildCharArrayKey(String algorithm, char[] pwArray, byte[] salt, int rounds) {
         try {
-            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(algorithm);
             KeySpec ks = new PBEKeySpec(pwArray, salt, rounds, PBKDF2_KEY_SIZE);
             return keyFactory.generateSecret(ks);
         } catch (InvalidKeySpecException e) {
@@ -1075,8 +1155,8 @@ class BackupManagerService extends IBackupManager.Stub {
         return null;
     }
 
-    private String buildPasswordHash(String pw, byte[] salt, int rounds) {
-        SecretKey key = buildPasswordKey(pw, salt, rounds);
+    private String buildPasswordHash(String algorithm, String pw, byte[] salt, int rounds) {
+        SecretKey key = buildPasswordKey(algorithm, pw, salt, rounds);
         if (key != null) {
             return byteArrayToHex(key.getEncoded());
         }
@@ -1104,13 +1184,13 @@ class BackupManagerService extends IBackupManager.Stub {
         return result;
     }
 
-    private byte[] makeKeyChecksum(byte[] pwBytes, byte[] salt, int rounds) {
+    private byte[] makeKeyChecksum(String algorithm, byte[] pwBytes, byte[] salt, int rounds) {
         char[] mkAsChar = new char[pwBytes.length];
         for (int i = 0; i < pwBytes.length; i++) {
             mkAsChar[i] = (char) pwBytes[i];
         }
 
-        Key checksum = buildCharArrayKey(mkAsChar, salt, rounds);
+        Key checksum = buildCharArrayKey(algorithm, mkAsChar, salt, rounds);
         return checksum.getEncoded();
     }
 
@@ -1122,7 +1202,7 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     // Backup password management
-    boolean passwordMatchesSaved(String candidatePw, int rounds) {
+    boolean passwordMatchesSaved(String algorithm, String candidatePw, int rounds) {
         // First, on an encrypted device we require matching the device pw
         final boolean isEncrypted;
         try {
@@ -1165,7 +1245,7 @@ class BackupManagerService extends IBackupManager.Stub {
         } else {
             // hash the stated current pw and compare to the stored one
             if (candidatePw != null && candidatePw.length() > 0) {
-                String currentPwHash = buildPasswordHash(candidatePw, mPasswordSalt, rounds);
+                String currentPwHash = buildPasswordHash(algorithm, candidatePw, mPasswordSalt, rounds);
                 if (mPasswordHash.equalsIgnoreCase(currentPwHash)) {
                     // candidate hash matches the stored hash -- the password matches
                     return true;
@@ -1180,9 +1260,35 @@ class BackupManagerService extends IBackupManager.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupPassword");
 
-        // If the supplied pw doesn't hash to the the saved one, fail
-        if (!passwordMatchesSaved(currentPw, PBKDF2_HASH_ROUNDS)) {
+        // When processing v1 passwords we may need to try two different PBKDF2 checksum regimes
+        final boolean pbkdf2Fallback = (mPasswordVersion < BACKUP_PW_FILE_VERSION);
+
+        // If the supplied pw doesn't hash to the the saved one, fail.  The password
+        // might be caught in the legacy crypto mismatch; verify that too.
+        if (!passwordMatchesSaved(PBKDF_CURRENT, currentPw, PBKDF2_HASH_ROUNDS)
+                && !(pbkdf2Fallback && passwordMatchesSaved(PBKDF_FALLBACK,
+                        currentPw, PBKDF2_HASH_ROUNDS))) {
             return false;
+        }
+
+        // Snap up to current on the pw file version
+        mPasswordVersion = BACKUP_PW_FILE_VERSION;
+        FileOutputStream pwFout = null;
+        DataOutputStream pwOut = null;
+        try {
+            pwFout = new FileOutputStream(mPasswordVersionFile);
+            pwOut = new DataOutputStream(pwFout);
+            pwOut.writeInt(mPasswordVersion);
+        } catch (IOException e) {
+            Slog.e(TAG, "Unable to write backup pw version; password not changed");
+            return false;
+        } finally {
+            try {
+                if (pwOut != null) pwOut.close();
+                if (pwFout != null) pwFout.close();
+            } catch (IOException e) {
+                Slog.w(TAG, "Unable to close pw version record");
+            }
         }
 
         // Clearing the password is okay
@@ -1202,7 +1308,7 @@ class BackupManagerService extends IBackupManager.Stub {
         try {
             // Okay, build the hash of the new backup password
             byte[] salt = randomBytes(PBKDF2_SALT_SIZE);
-            String newPwHash = buildPasswordHash(newPw, salt, PBKDF2_HASH_ROUNDS);
+            String newPwHash = buildPasswordHash(PBKDF_CURRENT, newPw, salt, PBKDF2_HASH_ROUNDS);
 
             OutputStream pwf = null, buffer = null;
             DataOutputStream out = null;
@@ -1245,34 +1351,65 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    private boolean backupPasswordMatches(String currentPw) {
+        if (hasBackupPassword()) {
+            final boolean pbkdf2Fallback = (mPasswordVersion < BACKUP_PW_FILE_VERSION);
+            if (!passwordMatchesSaved(PBKDF_CURRENT, currentPw, PBKDF2_HASH_ROUNDS)
+                    && !(pbkdf2Fallback && passwordMatchesSaved(PBKDF_FALLBACK,
+                            currentPw, PBKDF2_HASH_ROUNDS))) {
+                if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
+                return false;
+            }
+        }
+        return true;
+    }
+
     // Maintain persistent state around whether need to do an initialize operation.
     // Must be called with the queue lock held.
     void recordInitPendingLocked(boolean isPending, String transportName) {
         if (DEBUG) Slog.i(TAG, "recordInitPendingLocked: " + isPending
                 + " on transport " + transportName);
+        mBackupHandler.removeMessages(MSG_RETRY_INIT);
+
         try {
             IBackupTransport transport = getTransport(transportName);
-            String transportDirName = transport.transportDirName();
-            File stateDir = new File(mBaseStateDir, transportDirName);
-            File initPendingFile = new File(stateDir, INIT_SENTINEL_FILE_NAME);
+            if (transport != null) {
+                String transportDirName = transport.transportDirName();
+                File stateDir = new File(mBaseStateDir, transportDirName);
+                File initPendingFile = new File(stateDir, INIT_SENTINEL_FILE_NAME);
 
-            if (isPending) {
-                // We need an init before we can proceed with sending backup data.
-                // Record that with an entry in our set of pending inits, as well as
-                // journaling it via creation of a sentinel file.
-                mPendingInits.add(transportName);
-                try {
-                    (new FileOutputStream(initPendingFile)).close();
-                } catch (IOException ioe) {
-                    // Something is badly wrong with our permissions; just try to move on
+                if (isPending) {
+                    // We need an init before we can proceed with sending backup data.
+                    // Record that with an entry in our set of pending inits, as well as
+                    // journaling it via creation of a sentinel file.
+                    mPendingInits.add(transportName);
+                    try {
+                        (new FileOutputStream(initPendingFile)).close();
+                    } catch (IOException ioe) {
+                        // Something is badly wrong with our permissions; just try to move on
+                    }
+                } else {
+                    // No more initialization needed; wipe the journal and reset our state.
+                    initPendingFile.delete();
+                    mPendingInits.remove(transportName);
                 }
-            } else {
-                // No more initialization needed; wipe the journal and reset our state.
-                initPendingFile.delete();
-                mPendingInits.remove(transportName);
+                return; // done; don't fall through to the error case
             }
         } catch (RemoteException e) {
-            // can't happen; the transport is local
+            // transport threw when asked its name; fall through to the lookup-failed case
+        }
+
+        // The named transport doesn't exist or threw.  This operation is
+        // important, so we record the need for a an init and post a message
+        // to retry the init later.
+        if (isPending) {
+            mPendingInits.add(transportName);
+            mBackupHandler.sendMessageDelayed(
+                    mBackupHandler.obtainMessage(MSG_RETRY_INIT,
+                            (isPending ? 1 : 0),
+                            0,
+                            transportName),
+                    TRANSPORT_RETRY_INTERVAL);
         }
     }
 
@@ -1348,7 +1485,10 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
             }
         } catch (RemoteException e) {
-            // can't happen, the transport is local
+            // the transport threw when asked its file naming prefs; declare it invalid
+            Slog.e(TAG, "Unable to register transport as " + name);
+            mTransportNames.remove(component);
+            mTransports.remove(name);
         }
     }
 
@@ -1668,7 +1808,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     agent = mConnectedAgent;
                 }
             } catch (RemoteException e) {
-                // can't happen
+                // can't happen - ActivityManager is local
             }
         }
         return agent;
@@ -1844,17 +1984,13 @@ class BackupManagerService extends IBackupManager.Stub {
         int mStatus;
         boolean mFinished;
 
-        public PerformBackupTask(IBackupTransport transport, ArrayList<BackupRequest> queue,
-                File journal) {
+        public PerformBackupTask(IBackupTransport transport, String dirName,
+                ArrayList<BackupRequest> queue, File journal) {
             mTransport = transport;
             mOriginalQueue = queue;
             mJournal = journal;
 
-            try {
-                mStateDir = new File(mBaseStateDir, transport.transportDirName());
-            } catch (RemoteException e) {
-                // can't happen; the transport is local
-            }
+            mStateDir = new File(mBaseStateDir, dirName);
 
             mCurrentState = BackupState.INITIAL;
             mFinished = false;
@@ -2100,8 +2236,12 @@ class BackupManagerService extends IBackupManager.Stub {
                 addBackupTrace("success; recording token");
                 try {
                     mCurrentToken = mTransport.getCurrentRestoreSet();
-                } catch (RemoteException e) {} // can't happen
-                writeRestoreTokens();
+                    writeRestoreTokens();
+                } catch (RemoteException e) {
+                    // nothing for it at this point, unfortunately, but this will be
+                    // recorded the next time we fully succeed.
+                    addBackupTrace("transport threw returning token");
+                }
             }
 
             // Set up the next backup pass - at this point we can set mBackupRunning
@@ -2322,7 +2462,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 addBackupTrace("unbinding " + mCurrentPackage.packageName);
                 try {  // unbind even on timeout, just in case
                     mActivityManager.unbindBackupAgent(mCurrentPackage.applicationInfo);
-                } catch (RemoteException e) {}
+                } catch (RemoteException e) { /* can't happen; activity manager is local */ }
             }
         }
 
@@ -2644,11 +2784,9 @@ class BackupManagerService extends IBackupManager.Stub {
 
                 // Verify that the given password matches the currently-active
                 // backup password, if any
-                if (hasBackupPassword()) {
-                    if (!passwordMatchesSaved(mCurrentPassword, PBKDF2_HASH_ROUNDS)) {
-                        if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
-                        return;
-                    }
+                if (!backupPasswordMatches(mCurrentPassword)) {
+                    if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
+                    return;
                 }
 
                 // Write the global file header.  All strings are UTF-8 encoded; lines end
@@ -2656,7 +2794,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 // final '\n'.
                 //
                 // line 1: "ANDROID BACKUP"
-                // line 2: backup file format version, currently "1"
+                // line 2: backup file format version, currently "2"
                 // line 3: compressed?  "0" if not compressed, "1" if compressed.
                 // line 4: name of encryption algorithm [currently only "none" or "AES-256"]
                 //
@@ -2764,7 +2902,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 OutputStream ofstream) throws Exception {
             // User key will be used to encrypt the master key.
             byte[] newUserSalt = randomBytes(PBKDF2_SALT_SIZE);
-            SecretKey userKey = buildPasswordKey(mEncryptPassword, newUserSalt,
+            SecretKey userKey = buildPasswordKey(PBKDF_CURRENT, mEncryptPassword, newUserSalt,
                     PBKDF2_HASH_ROUNDS);
 
             // the master key is random for each backup
@@ -2811,7 +2949,7 @@ class BackupManagerService extends IBackupManager.Stub {
             // stated number of PBKDF2 rounds
             IV = c.getIV();
             byte[] mk = masterKeySpec.getEncoded();
-            byte[] checksum = makeKeyChecksum(masterKeySpec.getEncoded(),
+            byte[] checksum = makeKeyChecksum(PBKDF_CURRENT, masterKeySpec.getEncoded(),
                     checksumSalt, PBKDF2_HASH_ROUNDS);
 
             ByteArrayOutputStream blob = new ByteArrayOutputStream(IV.length + mk.length
@@ -3154,11 +3292,9 @@ class BackupManagerService extends IBackupManager.Stub {
             FileInputStream rawInStream = null;
             DataInputStream rawDataIn = null;
             try {
-                if (hasBackupPassword()) {
-                    if (!passwordMatchesSaved(mCurrentPassword, PBKDF2_HASH_ROUNDS)) {
-                        if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
-                        return;
-                    }
+                if (!backupPasswordMatches(mCurrentPassword)) {
+                    if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
+                    return;
                 }
 
                 mBytes = 0;
@@ -3179,8 +3315,12 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (Arrays.equals(magicBytes, streamHeader)) {
                     // okay, header looks good.  now parse out the rest of the fields.
                     String s = readHeaderLine(rawInStream);
-                    if (Integer.parseInt(s) == BACKUP_FILE_VERSION) {
-                        // okay, it's a version we recognize
+                    final int archiveVersion = Integer.parseInt(s);
+                    if (archiveVersion <= BACKUP_FILE_VERSION) {
+                        // okay, it's a version we recognize.  if it's version 1, we may need
+                        // to try two different PBKDF2 regimes to compare checksums.
+                        final boolean pbkdf2Fallback = (archiveVersion == 1);
+
                         s = readHeaderLine(rawInStream);
                         compressed = (Integer.parseInt(s) != 0);
                         s = readHeaderLine(rawInStream);
@@ -3188,7 +3328,8 @@ class BackupManagerService extends IBackupManager.Stub {
                             // no more header to parse; we're good to go
                             okay = true;
                         } else if (mDecryptPassword != null && mDecryptPassword.length() > 0) {
-                            preCompressStream = decodeAesHeaderAndInitialize(s, rawInStream);
+                            preCompressStream = decodeAesHeaderAndInitialize(s, pbkdf2Fallback,
+                                    rawInStream);
                             if (preCompressStream != null) {
                                 okay = true;
                             }
@@ -3248,7 +3389,71 @@ class BackupManagerService extends IBackupManager.Stub {
             return buffer.toString();
         }
 
-        InputStream decodeAesHeaderAndInitialize(String encryptionName, InputStream rawInStream) {
+        InputStream attemptMasterKeyDecryption(String algorithm, byte[] userSalt, byte[] ckSalt,
+                int rounds, String userIvHex, String masterKeyBlobHex, InputStream rawInStream,
+                boolean doLog) {
+            InputStream result = null;
+
+            try {
+                Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                SecretKey userKey = buildPasswordKey(algorithm, mDecryptPassword, userSalt,
+                        rounds);
+                byte[] IV = hexToByteArray(userIvHex);
+                IvParameterSpec ivSpec = new IvParameterSpec(IV);
+                c.init(Cipher.DECRYPT_MODE,
+                        new SecretKeySpec(userKey.getEncoded(), "AES"),
+                        ivSpec);
+                byte[] mkCipher = hexToByteArray(masterKeyBlobHex);
+                byte[] mkBlob = c.doFinal(mkCipher);
+
+                // first, the master key IV
+                int offset = 0;
+                int len = mkBlob[offset++];
+                IV = Arrays.copyOfRange(mkBlob, offset, offset + len);
+                offset += len;
+                // then the master key itself
+                len = mkBlob[offset++];
+                byte[] mk = Arrays.copyOfRange(mkBlob,
+                        offset, offset + len);
+                offset += len;
+                // and finally the master key checksum hash
+                len = mkBlob[offset++];
+                byte[] mkChecksum = Arrays.copyOfRange(mkBlob,
+                        offset, offset + len);
+
+                // now validate the decrypted master key against the checksum
+                byte[] calculatedCk = makeKeyChecksum(algorithm, mk, ckSalt, rounds);
+                if (Arrays.equals(calculatedCk, mkChecksum)) {
+                    ivSpec = new IvParameterSpec(IV);
+                    c.init(Cipher.DECRYPT_MODE,
+                            new SecretKeySpec(mk, "AES"),
+                            ivSpec);
+                    // Only if all of the above worked properly will 'result' be assigned
+                    result = new CipherInputStream(rawInStream, c);
+                } else if (doLog) Slog.w(TAG, "Incorrect password");
+            } catch (InvalidAlgorithmParameterException e) {
+                if (doLog) Slog.e(TAG, "Needed parameter spec unavailable!", e);
+            } catch (BadPaddingException e) {
+                // This case frequently occurs when the wrong password is used to decrypt
+                // the master key.  Use the identical "incorrect password" log text as is
+                // used in the checksum failure log in order to avoid providing additional
+                // information to an attacker.
+                if (doLog) Slog.w(TAG, "Incorrect password");
+            } catch (IllegalBlockSizeException e) {
+                if (doLog) Slog.w(TAG, "Invalid block size in master key");
+            } catch (NoSuchAlgorithmException e) {
+                if (doLog) Slog.e(TAG, "Needed decryption algorithm unavailable!");
+            } catch (NoSuchPaddingException e) {
+                if (doLog) Slog.e(TAG, "Needed padding mechanism unavailable!");
+            } catch (InvalidKeyException e) {
+                if (doLog) Slog.w(TAG, "Illegal password; aborting");
+            }
+
+            return result;
+        }
+
+        InputStream decodeAesHeaderAndInitialize(String encryptionName, boolean pbkdf2Fallback,
+                InputStream rawInStream) {
             InputStream result = null;
             try {
                 if (encryptionName.equals(ENCRYPTION_ALGORITHM_NAME)) {
@@ -3265,59 +3470,13 @@ class BackupManagerService extends IBackupManager.Stub {
                     String masterKeyBlobHex = readHeaderLine(rawInStream); // 9
 
                     // decrypt the master key blob
-                    Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
-                    SecretKey userKey = buildPasswordKey(mDecryptPassword, userSalt,
-                            rounds);
-                    byte[] IV = hexToByteArray(userIvHex);
-                    IvParameterSpec ivSpec = new IvParameterSpec(IV);
-                    c.init(Cipher.DECRYPT_MODE,
-                            new SecretKeySpec(userKey.getEncoded(), "AES"),
-                            ivSpec);
-                    byte[] mkCipher = hexToByteArray(masterKeyBlobHex);
-                    byte[] mkBlob = c.doFinal(mkCipher);
-
-                    // first, the master key IV
-                    int offset = 0;
-                    int len = mkBlob[offset++];
-                    IV = Arrays.copyOfRange(mkBlob, offset, offset + len);
-                    offset += len;
-                    // then the master key itself
-                    len = mkBlob[offset++];
-                    byte[] mk = Arrays.copyOfRange(mkBlob,
-                            offset, offset + len);
-                    offset += len;
-                    // and finally the master key checksum hash
-                    len = mkBlob[offset++];
-                    byte[] mkChecksum = Arrays.copyOfRange(mkBlob,
-                            offset, offset + len);
-
-                    // now validate the decrypted master key against the checksum
-                    byte[] calculatedCk = makeKeyChecksum(mk, ckSalt, rounds);
-                    if (Arrays.equals(calculatedCk, mkChecksum)) {
-                        ivSpec = new IvParameterSpec(IV);
-                        c.init(Cipher.DECRYPT_MODE,
-                                new SecretKeySpec(mk, "AES"),
-                                ivSpec);
-                        // Only if all of the above worked properly will 'result' be assigned
-                        result = new CipherInputStream(rawInStream, c);
-                    } else Slog.w(TAG, "Incorrect password");
+                    result = attemptMasterKeyDecryption(PBKDF_CURRENT, userSalt, ckSalt,
+                            rounds, userIvHex, masterKeyBlobHex, rawInStream, false);
+                    if (result == null && pbkdf2Fallback) {
+                        result = attemptMasterKeyDecryption(PBKDF_FALLBACK, userSalt, ckSalt,
+                                rounds, userIvHex, masterKeyBlobHex, rawInStream, true);
+                    }
                 } else Slog.w(TAG, "Unsupported encryption method: " + encryptionName);
-            } catch (InvalidAlgorithmParameterException e) {
-                Slog.e(TAG, "Needed parameter spec unavailable!", e);
-            } catch (BadPaddingException e) {
-                // This case frequently occurs when the wrong password is used to decrypt
-                // the master key.  Use the identical "incorrect password" log text as is
-                // used in the checksum failure log in order to avoid providing additional
-                // information to an attacker.
-                Slog.w(TAG, "Incorrect password");
-            } catch (IllegalBlockSizeException e) {
-                Slog.w(TAG, "Invalid block size in master key");
-            } catch (NoSuchAlgorithmException e) {
-                Slog.e(TAG, "Needed decryption algorithm unavailable!");
-            } catch (NoSuchPaddingException e) {
-                Slog.e(TAG, "Needed padding mechanism unavailable!");
-            } catch (InvalidKeyException e) {
-                Slog.w(TAG, "Illegal password; aborting");
             } catch (NumberFormatException e) {
                 Slog.w(TAG, "Can't parse restore data header");
             } catch (IOException e) {
@@ -4337,7 +4496,7 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        PerformRestoreTask(IBackupTransport transport, IRestoreObserver observer,
+        PerformRestoreTask(IBackupTransport transport, String dirName, IRestoreObserver observer,
                 long restoreSetToken, PackageInfo targetPackage, int pmToken,
                 boolean needFullBackup, String[] filterSet) {
             mCurrentState = RestoreState.INITIAL;
@@ -4360,11 +4519,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 mFilterSet = null;
             }
 
-            try {
-                mStateDir = new File(mBaseStateDir, transport.transportDirName());
-            } catch (RemoteException e) {
-                // can't happen; the transport is local
-            }
+            mStateDir = new File(mBaseStateDir, dirName);
         }
 
         // Execute one tick of whatever state machine the task implements
@@ -5090,8 +5245,8 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     // Clear the given package's backup data from the current transport
-    public void clearBackupData(String packageName) {
-        if (DEBUG) Slog.v(TAG, "clearBackupData() of " + packageName);
+    public void clearBackupData(String transportName, String packageName) {
+        if (DEBUG) Slog.v(TAG, "clearBackupData() of " + packageName + " on " + transportName);
         PackageInfo info;
         try {
             info = mPackageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
@@ -5122,13 +5277,22 @@ class BackupManagerService extends IBackupManager.Stub {
 
         // Is the given app an available participant?
         if (apps.contains(packageName)) {
-            if (DEBUG) Slog.v(TAG, "Found the app - running clear process");
             // found it; fire off the clear request
+            if (DEBUG) Slog.v(TAG, "Found the app - running clear process");
+            mBackupHandler.removeMessages(MSG_RETRY_CLEAR);
             synchronized (mQueueLock) {
+                final IBackupTransport transport = getTransport(transportName);
+                if (transport == null) {
+                    // transport is currently unavailable -- make sure to retry
+                    Message msg = mBackupHandler.obtainMessage(MSG_RETRY_CLEAR,
+                            new ClearRetryParams(transportName, packageName));
+                    mBackupHandler.sendMessageDelayed(msg, TRANSPORT_RETRY_INTERVAL);
+                    return;
+                }
                 long oldId = Binder.clearCallingIdentity();
                 mWakelock.acquire();
                 Message msg = mBackupHandler.obtainMessage(MSG_RUN_CLEAR,
-                        new ClearParams(getTransport(mCurrentTransport), info));
+                        new ClearParams(transport, info));
                 mBackupHandler.sendMessage(msg);
                 Binder.restoreCallingIdentity(oldId);
             }
@@ -5620,31 +5784,55 @@ class BackupManagerService extends IBackupManager.Stub {
             return;
         }
 
+        boolean skip = false;
+
         long restoreSet = getAvailableRestoreToken(packageName);
         if (DEBUG) Slog.v(TAG, "restoreAtInstall pkg=" + packageName
                 + " token=" + Integer.toHexString(token)
                 + " restoreSet=" + Long.toHexString(restoreSet));
+        if (restoreSet == 0) {
+            if (MORE_DEBUG) Slog.i(TAG, "No restore set");
+            skip = true;
+        }
 
-        if (mAutoRestore && mProvisioned && restoreSet != 0) {
-            // okay, we're going to attempt a restore of this package from this restore set.
-            // The eventual message back into the Package Manager to run the post-install
-            // steps for 'token' will be issued from the restore handling code.
+        // Do we have a transport to fetch data for us?
+        IBackupTransport transport = getTransport(mCurrentTransport);
+        if (transport == null) {
+            if (DEBUG) Slog.w(TAG, "No transport");
+            skip = true;
+        }
 
-            // We can use a synthetic PackageInfo here because:
-            //   1. We know it's valid, since the Package Manager supplied the name
-            //   2. Only the packageName field will be used by the restore code
-            PackageInfo pkg = new PackageInfo();
-            pkg.packageName = packageName;
+        if (!skip && mAutoRestore && mProvisioned) {
+            try {
+                // okay, we're going to attempt a restore of this package from this restore set.
+                // The eventual message back into the Package Manager to run the post-install
+                // steps for 'token' will be issued from the restore handling code.
 
-            mWakelock.acquire();
-            Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-            msg.obj = new RestoreParams(getTransport(mCurrentTransport), null,
-                    restoreSet, pkg, token, true);
-            mBackupHandler.sendMessage(msg);
-        } else {
+                // This can throw and so *must* happen before the wakelock is acquired
+                String dirName = transport.transportDirName();
+
+                // We can use a synthetic PackageInfo here because:
+                //   1. We know it's valid, since the Package Manager supplied the name
+                //   2. Only the packageName field will be used by the restore code
+                PackageInfo pkg = new PackageInfo();
+                pkg.packageName = packageName;
+
+                mWakelock.acquire();
+                Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
+                msg.obj = new RestoreParams(transport, dirName, null,
+                        restoreSet, pkg, token, true);
+                mBackupHandler.sendMessage(msg);
+            } catch (RemoteException e) {
+                // Binding to the transport broke; back off and proceed with the installation.
+                Slog.e(TAG, "Unable to contact transport");
+                skip = true;
+            }
+        }
+
+        if (skip) {
             // Auto-restore disabled or no way to attempt a restore; just tell the Package
             // Manager to proceed with the post-install handling for this package.
-            if (DEBUG) Slog.v(TAG, "No restore set -- skipping restore");
+            if (DEBUG) Slog.v(TAG, "Skipping");
             try {
                 mPackageManagerBinder.finishPackageInstall(token);
             } catch (RemoteException e) { /* can't happen */ }
@@ -5797,13 +5985,23 @@ class BackupManagerService extends IBackupManager.Stub {
                 return -1;
             }
 
+            String dirName;
+            try {
+                dirName = mRestoreTransport.transportDirName();
+            } catch (RemoteException e) {
+                // Transport went AWOL; fail.
+                Slog.e(TAG, "Unable to contact transport for restore");
+                return -1;
+            }
+
             synchronized (mQueueLock) {
                 for (int i = 0; i < mRestoreSets.length; i++) {
                     if (token == mRestoreSets[i].token) {
                         long oldId = Binder.clearCallingIdentity();
                         mWakelock.acquire();
                         Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-                        msg.obj = new RestoreParams(mRestoreTransport, observer, token, true);
+                        msg.obj = new RestoreParams(mRestoreTransport, dirName,
+                                observer, token, true);
                         mBackupHandler.sendMessage(msg);
                         Binder.restoreCallingIdentity(oldId);
                         return 0;
@@ -5857,13 +6055,22 @@ class BackupManagerService extends IBackupManager.Stub {
                 return -1;
             }
 
+            String dirName;
+            try {
+                dirName = mRestoreTransport.transportDirName();
+            } catch (RemoteException e) {
+                // Transport went AWOL; fail.
+                Slog.e(TAG, "Unable to contact transport for restore");
+                return -1;
+            }
+
             synchronized (mQueueLock) {
                 for (int i = 0; i < mRestoreSets.length; i++) {
                     if (token == mRestoreSets[i].token) {
                         long oldId = Binder.clearCallingIdentity();
                         mWakelock.acquire();
                         Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-                        msg.obj = new RestoreParams(mRestoreTransport, observer, token,
+                        msg.obj = new RestoreParams(mRestoreTransport, dirName, observer, token,
                                 packages, true);
                         mBackupHandler.sendMessage(msg);
                         Binder.restoreCallingIdentity(oldId);
@@ -5929,11 +6136,21 @@ class BackupManagerService extends IBackupManager.Stub {
                 return -1;
             }
 
+            String dirName;
+            try {
+                dirName = mRestoreTransport.transportDirName();
+            } catch (RemoteException e) {
+                // Transport went AWOL; fail.
+                Slog.e(TAG, "Unable to contact transport for restore");
+                return -1;
+            }
+
             // Ready to go:  enqueue the restore request and claim success
             long oldId = Binder.clearCallingIdentity();
             mWakelock.acquire();
             Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-            msg.obj = new RestoreParams(mRestoreTransport, observer, token, app, 0, false);
+            msg.obj = new RestoreParams(mRestoreTransport, dirName,
+                    observer, token, app, 0, false);
             mBackupHandler.sendMessage(msg);
             Binder.restoreCallingIdentity(oldId);
             return 0;

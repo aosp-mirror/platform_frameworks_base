@@ -9,7 +9,7 @@ page.tags="text","edittext","input"
   </div>
 </a>
 
-<p>Text fields allow the user to type text into your app. They can be either single line or multi-line.
+<p itemprop="description">Text fields allow the user to type text into your app. They can be either single line or multi-line.
 Touching a text field places the cursor and automatically displays the keyboard. In addition to
 typing, text fields allow for a variety of other activities, such as text selection (cut, copy,
 paste) and data lookup via auto-completion.</p>

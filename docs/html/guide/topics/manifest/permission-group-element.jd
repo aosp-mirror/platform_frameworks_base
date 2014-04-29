@@ -14,7 +14,7 @@ parent.link=manifest-intro.html
 <dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Declares a name for a logical grouping of related permissions.  Individual 
+<dd itemprop="description">Declares a name for a logical grouping of related permissions.  Individual
 permission join the group through the {@code permissionGroup} attribute of the
 <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> element.  Members of a group are
 presented together in the user interface.

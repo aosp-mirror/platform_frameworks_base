@@ -57,6 +57,7 @@ public:
 
     /** Create a java Bitmap object given the native bitmap (required) and optional
         storage array (may be null).
+        bitmap's SkAlphaType must already be in sync with bitmapCreateFlags.
     */
     static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buffer,
             int bitmapCreateFlags, jbyteArray ninepatch, jintArray layoutbounds, int density = -1);
@@ -64,6 +65,9 @@ public:
     static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, int bitmapCreateFlags,
             jbyteArray ninepatch, int density = -1);
 
+    /** Reinitialize a bitmap. bitmap must already have its SkAlphaType set in
+        sync with isPremultiplied
+    */
     static void reinitBitmap(JNIEnv* env, jobject javaBitmap, SkBitmap* bitmap,
             bool isPremultiplied);
 
@@ -88,15 +92,16 @@ public:
 
 class AndroidPixelRef : public SkMallocPixelRef {
 public:
-    AndroidPixelRef(JNIEnv* env, void* storage, size_t size, jbyteArray storageObj,
-                    SkColorTable* ctable);
+    AndroidPixelRef(JNIEnv* env, const SkImageInfo& info, void* storage, size_t rowBytes,
+            jbyteArray storageObj, SkColorTable* ctable);
 
     /**
      * Creates an AndroidPixelRef that wraps (and refs) another to reuse/share
      * the same storage and java byte array refcounting, yet have a different
      * color table.
      */
-    AndroidPixelRef(AndroidPixelRef& wrappedPixelRef, SkColorTable* ctable);
+    AndroidPixelRef(AndroidPixelRef& wrappedPixelRef, const SkImageInfo& info,
+            size_t rowBytes, SkColorTable* ctable);
 
     virtual ~AndroidPixelRef();
 

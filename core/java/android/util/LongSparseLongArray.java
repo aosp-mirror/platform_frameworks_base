@@ -39,7 +39,7 @@ import java.util.Arrays;
  * {@link #keyAt(int)} and {@link #valueAt(int)}. Iterating over the keys using
  * <code>keyAt(int)</code> with ascending values of the index will return the
  * keys in ascending order, or the values corresponding to the keys in ascending
- * order in the case of <code>valueAt(int)<code>.</p>
+ * order in the case of <code>valueAt(int)</code>.</p>
  *
  * @hide
  */

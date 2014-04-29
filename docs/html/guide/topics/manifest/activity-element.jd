@@ -54,7 +54,7 @@ parent.link=manifest-intro.html
 <br/><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Declares an activity (an {@link android.app.Activity} subclass) that
+<dd itemprop="description">Declares an activity (an {@link android.app.Activity} subclass) that
 implements part of the application's visual user interface.  All activities
 must be represented by {@code &lt;activity&gt;}
 elements in the manifest file.  Any that are not declared there will not be seen

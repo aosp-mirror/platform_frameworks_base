@@ -302,15 +302,6 @@ static int check_interface(const char *name)
     return ifr4.ifr_flags;
 }
 
-static int bind_to_interface(int socket, const char *name)
-{
-    if (setsockopt(socket, SOL_SOCKET, SO_BINDTODEVICE, name, strlen(name))) {
-        ALOGE("Cannot bind socket to %s: %s", name, strerror(errno));
-        return SYSTEM_ERROR;
-    }
-    return 0;
-}
-
 //------------------------------------------------------------------------------
 
 static void throwException(JNIEnv *env, int error, const char *message)
@@ -433,19 +424,6 @@ static jint check(JNIEnv *env, jobject thiz, jstring jName)
     return flags;
 }
 
-static void protect(JNIEnv *env, jobject thiz, jint socket, jstring jName)
-{
-    const char *name = jName ? env->GetStringUTFChars(jName, NULL) : NULL;
-    if (!name) {
-        jniThrowNullPointerException(env, "name");
-        return;
-    }
-    if (bind_to_interface(socket, name) < 0) {
-        throwException(env, SYSTEM_ERROR, "Cannot protect socket");
-    }
-    env->ReleaseStringUTFChars(jName, name);
-}
-
 //------------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -455,7 +433,6 @@ static JNINativeMethod gMethods[] = {
     {"jniSetRoutes", "(Ljava/lang/String;Ljava/lang/String;)I", (void *)setRoutes},
     {"jniReset", "(Ljava/lang/String;)V", (void *)reset},
     {"jniCheck", "(Ljava/lang/String;)I", (void *)check},
-    {"jniProtect", "(ILjava/lang/String;)V", (void *)protect},
 };
 
 int register_android_server_connectivity_Vpn(JNIEnv *env)

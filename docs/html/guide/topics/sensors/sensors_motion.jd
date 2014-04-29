@@ -1,5 +1,5 @@
 page.title=Motion Sensors
-page.tags="sensorevent","accelerometer","gyroscope","gravity","rotation"
+page.tags="sensorevent","accelerometer","gyroscope","gravity","rotation","stepcounter"
 @jd:body
 
 <div id="qv-wrapper">
@@ -11,6 +11,9 @@ page.tags="sensorevent","accelerometer","gyroscope","gravity","rotation"
       <li><a href="#sensors-motion-gyro">Using the Gyroscope</a></li>
       <li><a href="#sensors-motion-linear">Using the Linear Accelerometer</a></li>
       <li><a href="#sensors-motion-rotate">Using the Rotation Vector Sensor</a></li>
+      <li><a href="#sensors-motion-significant">Using the Significant Motion Sensor</a></li>
+      <li><a href="#sensors-motion-stepcounter">Using the Step Counter Sensor</a></li>
+      <li><a href="#sensors-motion-stepdetector">Using the Step Detector Sensor</a></li>
     </ol>
     <h2>Key classes and interfaces</h2>
     <ol>
@@ -47,7 +50,7 @@ sensors can be either hardware-based or software-based (the gravity, linear acce
 rotation vector sensors). For example, on some devices the software-based sensors derive their data
 from the accelerometer and magnetometer, but on other devices they may also use the gyroscope to
 derive their data. Most Android-powered devices have an accelerometer, and many now
-include a gyroscope. The availability of the softare-based sensors is more variable because they
+include a gyroscope. The availability of the software-based sensors is more variable because they
 often rely on one or more hardware sensors to derive their data.</p>
 
 <p>Motion sensors are useful for monitoring device movement, such as tilt, shake, rotation, or
@@ -121,6 +124,32 @@ parameters. Table 1 summarizes the motion sensors that are available on the Andr
     <td>Rate of rotation around the z axis.</td>
   </tr>
   <tr>
+    <td rowspan="6">{@link android.hardware.Sensor#TYPE_GYROSCOPE_UNCALIBRATED}</td>
+    <td><code>SensorEvent.values[0]</code></td>
+    <td>Rate of rotation (without drift compensation) around the x axis.</td>
+    <td rowspan="6">rad/s</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[1]</code></td>
+    <td>Rate of rotation (without drift compensation) around the y axis.</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[2]</code></td>
+    <td>Rate of rotation (without drift compensation) around the z axis.</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[3]</code></td>
+    <td>Estimated drift around the x axis.</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[4]</code></td>
+    <td>Estimated drift around the y axis.</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[5]</code></td>
+    <td>Estimated drift around the z axis.</td>
+  </tr>
+  <tr>
     <td rowspan="3">{@link android.hardware.Sensor#TYPE_LINEAR_ACCELERATION}</td>
     <td><code>SensorEvent.values[0]</code></td>
     <td>Acceleration force along the x axis (excluding gravity).</td>
@@ -151,6 +180,25 @@ parameters. Table 1 summarizes the motion sensors that are available on the Andr
   <tr>
     <td><code>SensorEvent.values[3]</code></td>
     <td>Scalar component of the rotation vector ((cos(θ/2)).<sup>1</sup></td>
+  </tr>
+  <tr>
+    <td>{@link android.hardware.Sensor#TYPE_SIGNIFICANT_MOTION}</td>
+    <td>N/A</td>
+    <td>N/A</td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td>{@link android.hardware.Sensor#TYPE_STEP_COUNTER}</td>
+    <td><code>SensorEvent.values[0]</code></td>
+    <td>Number of steps taken by the user since the last reboot while the sensor
+        was activated.</td>
+    <td>Steps</td>
+  </tr>
+  <tr>
+    <td>{@link android.hardware.Sensor#TYPE_STEP_DETECTOR}</td>
+    <td>N/A</td>
+    <td>N/A</td>
+    <td>N/A</td>
   </tr>
 </table>
 
@@ -366,6 +414,36 @@ drift (bias). In practice, gyroscope noise and drift will introduce errors that 
 compensated for. You usually determine the drift (bias) and noise by monitoring other sensors, such
 as the gravity sensor or accelerometer.</p>
 
+<h2 id="sensors-motion-gyrounc">Using the Uncalibrated Gyroscope</h2>
+
+<p>The uncalibrated gyroscope is similar to the <a href="#sensors-motion-gyro">gyroscope</a>,
+except that no gyro-drift compensation is applied to the rate of rotation. Factory calibration
+and temperature compensation are still applied to the rate of rotation. The uncalibrated
+gyroscope is useful for post-processing and melding orientation data. In general,
+<code>gyroscope_event.values[0]</code> will be close to
+<code>uncalibrated_gyroscope_event.values[0] - uncalibrated_gyroscope_event.values[3]</code>.
+That is,</p>
+
+<p><code>calibrated_x ~= uncalibrated_x - bias_estimate_x</code></p>
+
+<p class="note"><strong>Note:</strong> Uncalibrated sensors provide more raw results and may
+include some bias, but their measurements contain fewer jumps from corrections applied through
+calibration. Some applications may prefer these uncalibrated results as smoother and more
+reliable. For instance, if an application is attempting to conduct its own sensor fusion,
+introducing calibrations can actually distort results.</p>
+
+<p>In addition to the rates of rotation, the uncalibrated gyroscope also provides the estimated
+drift around each axis. The following code shows you how to get an instance of the default
+uncalibrated gyroscope:</p>
+
+<pre>
+private SensorManager mSensorManager;
+private Sensor mSensor;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE_UNCALIBRATED);
+</pre>
+
 <h2 id="sensors-motion-linear">Using the Linear Accelerometer</h2>
 
 <p>The linear acceleration sensor provides you with a three-dimensional vector representing
@@ -451,3 +529,63 @@ North Pole.</li>
 The sample application is located in the API Demos code (<a
 href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/os/RotationVectorDemo.html">
 OS - RotationVectorDemo</a>).</p>
+
+
+<h2 id="sensors-motion-significant">Using the Significant Motion Sensor</h2>
+
+<p>The significant motion sensor triggers an event each time significant motion is detected and
+then it disables itself. A significant motion is a motion that might lead to a change in the
+user's location; for example walking, biking, or sitting in a moving car. The following code shows you
+how to get an instance of the default significant motion sensor and how to register an event
+listener:</p>
+
+<pre>
+private SensorManager mSensorManager;
+private Sensor mSensor;
+private TriggerEventListener mTriggerEventListener;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
+
+mTriggerEventListener = new TriggerEventListener() {
+    &#64;Override
+    public void onTrigger(TriggerEvent event) {
+        // Do work
+    }
+};
+
+mSensorManager.requestTriggerSensor(mTriggerEventListener, mSensor);
+</pre>
+
+<p>For more information, see {@link android.hardware.TriggerEventListener}.</p>
+
+
+<h2 id="sensors-motion-stepcounter">Using the Step Counter Sensor</h2>
+
+<p>The step counter sensor provides the number of steps taken by the user since the last reboot
+while the sensor was activated. The step counter has more latency (up to 10 seconds) but more
+accuracy than the step detector sensor. The following code shows you how to get an instance of
+the default step counter sensor:</p>
+
+<pre>
+private SensorManager mSensorManager;
+private Sensor mSensor;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+</pre>
+
+
+<h2 id="sensors-motion-stepdetector">Using the Step Detector Sensor</h2>
+
+<p>The step detector sensor triggers an event each time the user takes a step. The latency is
+expected to be below 2 seconds. The following code shows you how to get an instance of the
+default step detector sensor:</p>
+
+<pre>
+private SensorManager mSensorManager;
+private Sensor mSensor;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
+</pre>

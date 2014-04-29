@@ -36,7 +36,7 @@ import android.os.RemoteException;
  * API for interacting with "application operation" tracking.
  *
  * <p>This API is not generally intended for third party application developers; most
- * features are only available to system applicatins.  Obtain an instance of it through
+ * features are only available to system applications.  Obtain an instance of it through
  * {@link Context#getSystemService(String) Context.getSystemService} with
  * {@link Context#APP_OPS_SERVICE Context.APP_OPS_SERVICE}.</p>
  */
@@ -878,7 +878,7 @@ public class AppOpsManager {
     }
 
     /**
-     * Like {@link #checkOp but instead of throwing a {@link SecurityException} it
+     * Like {@link #checkOp} but instead of throwing a {@link SecurityException} it
      * returns {@link #MODE_ERRORED}.
      */
     public int checkOpNoThrow(String op, int uid, String packageName) {

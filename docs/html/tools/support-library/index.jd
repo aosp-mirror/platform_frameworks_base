@@ -62,6 +62,49 @@ page.title=Support Library
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 19.0.1</a> <em>(December 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Improved {@link android.support.v4.print.PrintHelper} by adding asynchronous
+            handling of printing.</li>
+          <li>Fixed the {@link android.support.v4.widget.DrawerLayout} class approximation of
+            the {@link android.view.View#addChildrenForAccessibility addChildrenForAccessibility()}
+            method.</li>
+          <li>Fixed slide drawable mirroring in {@link
+            android.support.v4.app.ActionBarDrawerToggle}.</li>
+          <li>Fixed off-by-one issue when removing an item from a collection iterator.</li>
+        </ul>
+      </dd>
+
+      <dt>Changes for v7 mediarouter library:</dt>
+      <dd>
+        <ul>
+          <li>Improved route identification by using full component name in the {@link
+            android.support.v7.media.MediaRouteProvider.ProviderMetadata}.</li>
+          <li>Updated {@link android.support.v7.app.MediaRouteChooserDialog} to hide disabled
+            routes.</li>
+        </ul>
+      </dd>
+
+      <dt>Changes for v8 renderscript library:</dt>
+      <dd>
+        <ul>
+          <li>Added error propagation for the RenderScript thunking layer.</li>
+        </ul>
+      </dd>
+
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 19</a> <em>(October 2013)</em>
   </p>
   <div class="toggle-content-toggleme">

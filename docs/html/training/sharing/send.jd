@@ -75,10 +75,12 @@ startActivity(sendIntent);
 <p>If there's an installed application with a filter that matches
 {@link android.content.Intent#ACTION_SEND} and MIME type text/plain, the Android system will run
 it; if more than one application matches, the system displays a disambiguation dialog (a "chooser")
-that allows the user to choose an app. If you call
+that allows the user to choose an app.</p>
+
+<p>However, if you call
 {@link android.content.Intent#createChooser(android.content.Intent, CharSequence)
-Intent.createChooser()}
-for the intent, Android will <strong>always</strong> display the chooser. This has some
+Intent.createChooser()}, passing it your {@link android.content.Intent} object, it returns a version
+of your intent that will <strong>always display the chooser</strong>. This has some
 advantages:</p>
 
 <ul>
@@ -102,10 +104,8 @@ startActivity(<strong>Intent.createChooser(sendIntent, getResources().getText(R.
 
 <p>Optionally, you can set some standard extras for the intent:
 {@link android.content.Intent#EXTRA_EMAIL}, {@link android.content.Intent#EXTRA_CC},
-{@link android.content.Intent#EXTRA_BCC}, {@link android.content.Intent#EXTRA_SUBJECT}. However,
-if the receiving application is not designed to use them, nothing will happen. You can use
-custom extras as well, but there's no effect unless the receiving application understands them.
-Typically, you'd use custom extras defined by the receiving application itself.</p>
+{@link android.content.Intent#EXTRA_BCC}, {@link android.content.Intent#EXTRA_SUBJECT}.
+If the receiving application is not designed to use them, it simply ignores them.</p>
 
 <p class="note"><strong>Note:</strong> Some e-mail applications, such as Gmail, expect a
 {@link java.lang.String String[]} for extras like {@link android.content.Intent#EXTRA_EMAIL} and

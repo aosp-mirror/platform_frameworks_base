@@ -1,0 +1,643 @@
+page.title=Supporting Controllers Across Android Versions
+trainingnavtop=true
+
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#prepare">Prepare to Abstract APIs for Game Controller
+Suppport</a></li>
+  <li><a href="#abstraction">Add an Interface for Backward Compatibility</a></li>
+  <li><a href="#newer">Implement the Interface on Android 4.1 and Higher</a></li>
+  <li><a href="#older">Implement the Interface on Android 2.3 up to Android
+4.0</a></li>
+  <li><a href="#using">Use the Version-Specific Implementations</a></li>
+</ol>
+
+<h2>Try it out</h2>
+<div class="download-box">
+  <a href="http://developer.android.com/shareables/training/ControllerSample.zip"
+class="button">Download the sample</a>
+  <p class="filename">ControllerSample.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>If you are supporting game controllers in your game, it's your responsibility
+to make sure that your game responds to controllers consistently across devices
+running on different versions of Android. This lets your game reach a wider
+audience, and your players can enjoy a seamless gameplay experience with
+their controllers even when they switch or upgrade their Android devices.</p>
+
+<p>This lesson demonstrates how to use APIs available in Android 4.1 and higher
+in a backward compatible way, enabling your game to support the following
+features on devices running Android 2.3 and higher:</p>
+<ul>
+<li>The game can detect if a new game controller is added, changed, or removed.</li>
+<li>The game can query the capabilities of a game controller.</li>
+<li>The game can recognize incoming motion events from a game controller.</li>
+</ul>
+
+<p>The examples in this lesson are based on the reference implementation
+provided by the sample {@code ControllerSample.zip} available for download
+above. This sample shows how to implement the {@code InputManagerCompat}
+interface to support different versions of Android. To compile the sample, you
+must use Android 4.1 (API level 16) or higher. Once compiled, the sample app
+runs on any device running Android 2.3 (API level 9) or higher as the build
+target.
+</p>
+
+<h2 id="prepare">Prepare to Abstract APIs for Game Controller Support</h2>
+<p>Suppose you want to be able to determine if a game controller's connection
+status has changed on devices running on Android 2.3 (API level 9). However,
+the APIs are only available in Android 4.1 (API level 16) and higher, so you
+need to provide an implementation that supports Android 4.1 and higher while
+providing a fallback mechanism that supports Android 2.3 up to Android 4.0.</p>
+
+<p>To help you determine which features require such a fallback mechanism for
+    older versions, table 1 lists the differences in game controller support
+    between Android 2.3 (API level 9), 3.1 (API level 12), and 4.1 (API level
+    16).</p>
+
+<p class="table-caption" id="game-controller-support-table">
+<strong>Table 1.</strong> APIs for game controller support across
+different Android versions.
+</p>
+
+<table>
+<tbody>
+<tr>
+<th>Controller Information</th>
+<th>Controller API</th>
+<th>API level 9</th>
+<th>API level 12</th>
+<th>API level 16</th>
+</tr>
+
+<tr>
+<td rowspan="5">Device Identification</td>
+<td>{@link android.hardware.input.InputManager#getInputDeviceIds()}</td>
+<td style="text-align: center;"><big>&nbsp;</big></td>
+<td style="text-align: center;"><big>&nbsp;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
+</tr>
+
+<tr>
+<td>{@link android.hardware.input.InputManager#getInputDevice(int)
+getInputDevice()}</td>
+<td style="text-align: center;">&nbsp;</td>
+<td style="text-align: center;"><big>&nbsp;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
+</tr>
+
+<tr>
+<td>{@link android.view.InputDevice#getVibrator()}</td>
+<td style="text-align: center;">&nbsp;</td>
+<td style="text-align: center;"><big>&nbsp;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
+</tr>
+
+<td>{@link android.view.InputDevice#SOURCE_JOYSTICK}</td>
+<td style="text-align: center;">&nbsp;</td>
+<td style="text-align: center;"><big>&bull;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
+</tr>
+
+<tr>
+<td>{@link android.view.InputDevice#SOURCE_GAMEPAD}</td>
+<td style="text-align: center;">&nbsp;</td>
+<td style="text-align: center;"><big>&bull;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
+</tr>
+
+<tr>
+<td rowspan="3">Connection Status</td>
+<td>{@link android.hardware.input.InputManager.InputDeviceListener#onInputDeviceAdded(int) onInputDeviceAdded()}</td>
+<td style="text-align: center;">&nbsp;</td>
+<td style="text-align: center;">&nbsp;</td>
+<td style="text-align: center;"><big>&bull;</big></td>
+</tr>
+
+<tr>
+<td>{@link android.hardware.input.InputManager.InputDeviceListener#onInputDeviceChanged(int) onInputDeviceChanged()}</td>
+<td style="text-align: center;">&nbsp;</td>
+<td style="text-align: center;">&nbsp;</td>
+<td style="text-align: center;"><big>&bull;</big></td>
+</tr>
+
+<tr>
+<td>{@link android.hardware.input.InputManager.InputDeviceListener#onInputDeviceRemoved(int) onInputDeviceRemoved()}</td>
+<td style="text-align: center;">&nbsp;</td>
+<td style="text-align: center;">&nbsp;</td>
+<td style="text-align: center;"><big>&bull;</big></td>
+</tr>
+
+<tr>
+<td rowspan="4">Input Event Identification</td>
+<td>D-pad press (
+{@link android.view.KeyEvent#KEYCODE_DPAD_UP},
+{@link android.view.KeyEvent#KEYCODE_DPAD_DOWN},
+{@link android.view.KeyEvent#KEYCODE_DPAD_LEFT},
+{@link android.view.KeyEvent#KEYCODE_DPAD_RIGHT},
+{@link android.view.KeyEvent#KEYCODE_DPAD_CENTER})</td>
+<td style="text-align: center;"><big>&bull;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
+</tr>
+
+<tr>
+<td>Gamepad button press (
+{@link android.view.KeyEvent#KEYCODE_BUTTON_A BUTTON_A},
+{@link android.view.KeyEvent#KEYCODE_BUTTON_B BUTTON_B},
+{@link android.view.KeyEvent#KEYCODE_BUTTON_THUMBL BUTTON_THUMBL},
+{@link android.view.KeyEvent#KEYCODE_BUTTON_THUMBR BUTTON_THUMBR},
+{@link android.view.KeyEvent#KEYCODE_BUTTON_SELECT BUTTON_SELECT},
+{@link android.view.KeyEvent#KEYCODE_BUTTON_START BUTTON_START},
+{@link android.view.KeyEvent#KEYCODE_BUTTON_R1 BUTTON_R1},
+{@link android.view.KeyEvent#KEYCODE_BUTTON_L1 BUTTON_L1},
+{@link android.view.KeyEvent#KEYCODE_BUTTON_R2 BUTTON_R2},
+{@link android.view.KeyEvent#KEYCODE_BUTTON_L2 BUTTON_L2})</td>
+<td style="text-align: center;">&nbsp;</td>
+<td style="text-align: center;"><big>&bull;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
+</tr>
+
+<tr>
+<td>Joystick and hat switch movement (
+{@link android.view.MotionEvent#AXIS_X},
+{@link android.view.MotionEvent#AXIS_Y},
+{@link android.view.MotionEvent#AXIS_Z},
+{@link android.view.MotionEvent#AXIS_RZ},
+{@link android.view.MotionEvent#AXIS_HAT_X},
+{@link android.view.MotionEvent#AXIS_HAT_Y})</td>
+<td style="text-align: center;">&nbsp;</td>
+<td style="text-align: center;"><big>&bull;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
+</tr>
+
+<tr>
+<td>Analog trigger press (
+{@link android.view.MotionEvent#AXIS_LTRIGGER},
+{@link android.view.MotionEvent#AXIS_RTRIGGER})</td>
+<td style="text-align: center;">&nbsp;</td>
+<td style="text-align: center;"><big>&bull;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
+</tr>
+
+</tbody>
+</table>
+
+<p>You can use abstraction to build version-aware game controller support that
+works across platforms. This approach involves the following steps:</p>
+<ol>
+<li>Define an intermediary Java interface that abstracts the implementation of
+the game controller features required by your game.</li>
+<li>Create a proxy implementation of your interface that uses APIs in Android
+4.1 and higher.</li>
+<li>Create a custom implementation of your interface that uses APIs available
+between Android 2.3 up to Android 4.0.</li>
+<li>Create the logic for switching between these implementations at runtime,
+and begin using the interface in your game.</li>
+</ol>
+
+<p>For an overview of how abstraction can be used to ensure that applications
+can work in a backward compatible way across different versions of Android, see
+<a href="{@docRoot}training/backward-compatible-ui/index.html">Creating
+Backward-Compatible UIs</a>.
+</p>
+
+<h2 id="abstraction">Add an Interface for Backward Compatibility</h2>
+
+<p>To provide backward compatibility, you can create a custom interface then
+add version-specific implementations. One advantage of this approach is that it
+lets you mirror the public interfaces on Android 4.1 (API level 16) that
+support game controllers.</p>
+<pre>
+// The InputManagerCompat interface is a reference example.
+// The full code is provided in the ControllerSample.zip sample.
+public interface InputManagerCompat {
+    ...
+    public InputDevice getInputDevice(int id);
+    public int[] getInputDeviceIds();
+
+    public void registerInputDeviceListener(
+            InputManagerCompat.InputDeviceListener listener,
+            Handler handler);
+    public void unregisterInputDeviceListener(
+            InputManagerCompat.InputDeviceListener listener);
+
+    public void onGenericMotionEvent(MotionEvent event);
+
+    public void onPause();
+    public void onResume();
+
+    public interface InputDeviceListener {
+        void onInputDeviceAdded(int deviceId);
+        void onInputDeviceChanged(int deviceId);
+        void onInputDeviceRemoved(int deviceId);
+    }
+    ...
+}
+</pre>
+<p>The {@code InputManagerCompat} interface provides the following methods:</p>
+<dl>
+<dt>{@code getInputDevice()}</dt>
+<dd>Mirrors {@link android.hardware.input.InputManager#getInputDevice(int)
+getInputDevice()}. Obtains the {@link android.view.InputDevice}
+object that represents the capabilities of a game controller.</dd>
+<dt>{@code getInputDeviceIds()}</dt>
+<dd>Mirrors {@link android.hardware.input.InputManager#getInputDeviceIds()
+getInputDeviceIds()}. Returns an array of integers, each of
+which is an ID for a different input device. This is useful if you're building
+a game that supports multiple players and you want to detect how many
+controllers are connected.</dd>
+<dt>{@code registerInputDeviceListener()}</dt>
+<dd>Mirrors {@link android.hardware.input.InputManager#registerInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener, android.os.Handler)
+registerInputDeviceListener()}. Lets you register to be informed when a new
+device is added, changed, or removed.</dd>
+<dt>{@code unregisterInputDeviceListener()}</dt>
+<dd>Mirrors {@link android.hardware.input.InputManager#unregisterInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener) unregisterInputDeviceListener()}.
+Unregisters an input device listener.</dd>
+<dt>{@code onGenericMotionEvent()}</dt>
+<dd>Mirrors {@link android.view.View#onGenericMotionEvent(android.view.MotionEvent)
+onGenericMotionEvent()}. Lets your game intercept and handle
+{@link android.view.MotionEvent} objects and axis values that represent events
+such as joystick movements and analog trigger presses.</dd>
+<dt>{@code onPause()}</dt>
+<dd>Stops polling for game controller events when the
+main activity is paused, or when the game no longer has focus.</dd>
+<dt>{@code onResume()}</dt>
+<dd>Starts polling for game controller events when the
+main activity is resumed, or when the game is started and runs in the
+foreground.</dd>
+<dt>{@code InputDeviceListener}</dt>
+<dd>Mirrors the {@link android.hardware.input.InputManager.InputDeviceListener}
+interface. Lets your game know when a game controller has been added, changed, or
+removed.</dd>
+</dl>
+<p>Next, create implementations for {@code InputManagerCompat} that work
+across different platform versions. If your game is running on Android 4.1 or
+higher and calls an {@code InputManagerCompat} method, the proxy implementation
+calls the equivalent method in {@link android.hardware.input.InputManager}.
+However, if your game is running on Android 2.3 up to Android 4.0, the custom implementation processes calls to {@code InputManagerCompat} methods by using
+only APIs introduced no later than Android 2.3. Regardless of which
+version-specific implementation is used at runtime, the implementation passes
+the call results back transparently to the game.</p>
+
+<img src="{@docRoot}images/training/backward-compatible-inputmanager.png" alt=""
+id="figure1" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> Class diagram of interface and version-specific
+implementations.
+</p>
+
+<h2 id="newer">Implement the Interface on Android 4.1 and Higher</h2>
+<p>{@code InputManagerCompatV16} is an implementation of the
+{@code InputManagerCompat} interface that proxies method calls to an
+actual {@link android.hardware.input.InputManager} and {@link
+android.hardware.input.InputManager.InputDeviceListener}. The
+{@link android.hardware.input.InputManager} is obtained from the system
+{@link android.content.Context}.</p>
+
+<pre>
+// The InputManagerCompatV16 class is a reference implementation.
+// The full code is provided in the ControllerSample.zip sample.
+public class InputManagerV16 implements InputManagerCompat {
+
+    private final InputManager mInputManager;
+    private final Map<InputManagerCompat.InputDeviceListener,
+            V16InputDeviceListener> mListeners;
+
+    public InputManagerV16(Context context) {
+        mInputManager = (InputManager)
+                context.getSystemService(Context.INPUT_SERVICE);
+        mListeners = new HashMap<InputManagerCompat.InputDeviceListener,
+                V16InputDeviceListener>();
+    }
+
+    &#64;Override
+    public InputDevice getInputDevice(int id) {
+        return mInputManager.getInputDevice(id);
+    }
+
+    &#64;Override
+    public int[] getInputDeviceIds() {
+        return mInputManager.getInputDeviceIds();
+    }
+
+    static class V16InputDeviceListener implements
+            InputManager.InputDeviceListener {
+        final InputManagerCompat.InputDeviceListener mIDL;
+
+        public V16InputDeviceListener(InputDeviceListener idl) {
+            mIDL = idl;
+        }
+
+        &#64;Override
+        public void onInputDeviceAdded(int deviceId) {
+            mIDL.onInputDeviceAdded(deviceId);
+        }
+
+        // Do the same for device change and removal
+        ...
+    }
+
+    &#64;Override
+    public void registerInputDeviceListener(InputDeviceListener listener,
+            Handler handler) {
+        V16InputDeviceListener v16Listener = new
+                V16InputDeviceListener(listener);
+        mInputManager.registerInputDeviceListener(v16Listener, handler);
+        mListeners.put(listener, v16Listener);
+    }
+
+    // Do the same for unregistering an input device listener
+    ...
+
+    &#64;Override
+    public void onGenericMotionEvent(MotionEvent event) {
+        // unused in V16
+    }
+
+    &#64;Override
+    public void onPause() {
+        // unused in V16
+    }
+
+    &#64;Override
+    public void onResume() {
+        // unused in V16
+    }
+
+}
+</pre>
+
+<h2 id="older">Implementing the Interface on Android 2.3 up to Android 4.0</h2>
+
+<p>The {@code InputManagerV9} implementation uses APIs introduced no later
+than Android 2.3. To create an implementation of {@code
+InputManagerCompat} that supports Android 2.3 up to Android 4.0, you can use
+the following objects:
+<ul>
+<li>A {@link android.util.SparseArray} of device IDs to track the
+game controllers that are connected to the device.</li>
+<li>A {@link android.os.Handler} to process device events. When an app is started
+or resumed, the {@link android.os.Handler} receives a message to start polling
+for game controller disconnection. The {@link android.os.Handler} will start a
+loop to check each known connected game controller and see if a device ID is
+returned. A {@code null} return value indicates that the game controller is
+disconnected. The {@link android.os.Handler} stops polling when the app is
+paused.</li>
+<li>A {@link java.util.Map} of {@code InputManagerCompat.InputDeviceListener}
+objects. You will use the listeners to update the connection status of tracked
+game controllers.</li>
+</ul>
+
+<pre>
+// The InputManagerCompatV9 class is a reference implementation.
+// The full code is provided in the ControllerSample.zip sample.
+public class InputManagerV9 implements InputManagerCompat {
+    private final SparseArray<long[]> mDevices;
+    private final Map<InputDeviceListener, Handler> mListeners;
+    private final Handler mDefaultHandler;
+    …
+
+    public InputManagerV9() {
+        mDevices = new SparseArray<long[]>();
+        mListeners = new HashMap<InputDeviceListener, Handler>();
+        mDefaultHandler = new PollingMessageHandler(this);
+    }
+}
+</pre>
+
+<p>Implement a {@code PollingMessageHandler} object that extends
+{@link android.os.Handler}, and override the
+{@link android.os.Handler#handleMessage(android.os.Message) handleMessage()}
+method. This method checks if an attached game controller has been
+disconnected and notifies registered listeners.</p>
+
+<pre>
+private static class PollingMessageHandler extends Handler {
+    private final WeakReference<InputManagerV9> mInputManager;
+
+    PollingMessageHandler(InputManagerV9 im) {
+        mInputManager = new WeakReference<InputManagerV9>(im);
+    }
+
+    &#64;Override
+    public void handleMessage(Message msg) {
+        super.handleMessage(msg);
+        switch (msg.what) {
+            case MESSAGE_TEST_FOR_DISCONNECT:
+                InputManagerV9 imv = mInputManager.get();
+                if (null != imv) {
+                    long time = SystemClock.elapsedRealtime();
+                    int size = imv.mDevices.size();
+                    for (int i = 0; i &lt; size; i++) {
+                        long[] lastContact = imv.mDevices.valueAt(i);
+                        if (null != lastContact) {
+                            if (time - lastContact[0] > CHECK_ELAPSED_TIME) {
+                                // check to see if the device has been
+                                // disconnected
+                                int id = imv.mDevices.keyAt(i);
+                                if (null == InputDevice.getDevice(id)) {
+                                    // Notify the registered listeners
+                                    // that the game controller is disconnected
+                                    ...
+                                    imv.mDevices.remove(id);
+                                } else {
+                                    lastContact[0] = time;
+                                }
+                            }
+                        }
+                    }
+                    sendEmptyMessageDelayed(MESSAGE_TEST_FOR_DISCONNECT,
+                            CHECK_ELAPSED_TIME);
+                }
+                break;
+        }
+    }
+}
+</pre>
+
+<p>To start and stop polling for game controller disconnection, override
+these methods:</p>
+<pre>
+private static final int MESSAGE_TEST_FOR_DISCONNECT = 101;
+private static final long CHECK_ELAPSED_TIME = 3000L;
+
+&#64;Override
+public void onPause() {
+    mDefaultHandler.removeMessages(MESSAGE_TEST_FOR_DISCONNECT);
+}
+
+&#64;Override
+public void onResume() {
+    mDefaultHandler.sendEmptyMessageDelayed(MESSAGE_TEST_FOR_DISCONNECT,
+            CHECK_ELAPSED_TIME);
+}
+</pre>
+
+<p>To detect that an input device has been added, override the
+{@code onGenericMotionEvent()} method. When the system reports a motion event,
+check if this event came from a device ID that is already tracked, or from a
+new device ID. If the device ID is new, notify registered listeners.</p>
+
+<pre>
+&#64;Override
+public void onGenericMotionEvent(MotionEvent event) {
+    // detect new devices
+    int id = event.getDeviceId();
+    long[] timeArray = mDevices.get(id);
+    if (null == timeArray) {
+        // Notify the registered listeners that a game controller is added
+        ...
+        timeArray = new long[1];
+        mDevices.put(id, timeArray);
+    }
+    long time = SystemClock.elapsedRealtime();
+    timeArray[0] = time;
+}
+</pre>
+
+<p>Notification of listeners is implemented by using the
+{@link android.os.Handler} object to send a {@code DeviceEvent}
+{@link java.lang.Runnable} object to the message queue. The {@code DeviceEvent}
+contains a reference to an {@code InputManagerCompat.InputDeviceListener}. When
+the {@code DeviceEvent} runs, the appropriate callback method of the listener
+is called to signal if the game controller was added, changed, or removed.
+</p>
+
+<pre>
+&#64;Override
+public void registerInputDeviceListener(InputDeviceListener listener,
+        Handler handler) {
+    mListeners.remove(listener);
+    if (handler == null) {
+        handler = mDefaultHandler;
+    }
+    mListeners.put(listener, handler);
+}
+
+&#64;Override
+public void unregisterInputDeviceListener(InputDeviceListener listener) {
+    mListeners.remove(listener);
+}
+
+private void notifyListeners(int why, int deviceId) {
+    // the state of some device has changed
+    if (!mListeners.isEmpty()) {
+        for (InputDeviceListener listener : mListeners.keySet()) {
+            Handler handler = mListeners.get(listener);
+            DeviceEvent odc = DeviceEvent.getDeviceEvent(why, deviceId,
+                    listener);
+            handler.post(odc);
+        }
+    }
+}
+
+private static class DeviceEvent implements Runnable {
+    private int mMessageType;
+    private int mId;
+    private InputDeviceListener mListener;
+    private static Queue<DeviceEvent> sObjectQueue =
+            new ArrayDeque<DeviceEvent>();
+    ...
+
+    static DeviceEvent getDeviceEvent(int messageType, int id,
+            InputDeviceListener listener) {
+        DeviceEvent curChanged = sObjectQueue.poll();
+        if (null == curChanged) {
+            curChanged = new DeviceEvent();
+        }
+        curChanged.mMessageType = messageType;
+        curChanged.mId = id;
+        curChanged.mListener = listener;
+        return curChanged;
+    }
+
+    &#64;Override
+    public void run() {
+        switch (mMessageType) {
+            case ON_DEVICE_ADDED:
+                mListener.onInputDeviceAdded(mId);
+                break;
+            case ON_DEVICE_CHANGED:
+                mListener.onInputDeviceChanged(mId);
+                break;
+            case ON_DEVICE_REMOVED:
+                mListener.onInputDeviceRemoved(mId);
+                break;
+            default:
+                // Handle unknown message type
+                ...
+                break;
+        }
+        // Put this runnable back in the queue
+        sObjectQueue.offer(this);
+    }
+}
+</pre>
+
+<p>You now have two implementations of {@code InputManagerCompat}: one that
+works on devices running Android 4.1 and higher, and another
+that works on devices running Android 2.3 up to Android 4.0.</p>
+
+<h2 id="using">Use the Version-Specific Implementation</h2>
+<p>The version-specific switching logic is implemented in a class that acts as
+a <a href="http://en.wikipedia.org/wiki/Factory_(software_concept)"
+class="external-link" target="_blank">factory</a>.</p>
+<pre>
+public static class Factory {
+    public static InputManagerCompat getInputManager(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            return new InputManagerV16(context);
+        } else {
+            return new InputManagerV9();
+        }
+    }
+}
+</pre>
+<p>Now you can simply instantiate an {@code InputManagerCompat} object and
+register an {@code InputManagerCompat.InputDeviceListener} in your main
+{@link android.view.View}. Because of the version-switching logic you set
+up, your game automatically uses the implementation that's appropriate for the
+version of Android the device is running.</p>
+<pre>
+public class GameView extends View implements InputDeviceListener {
+    private InputManagerCompat mInputManager;
+    ...
+
+    public GameView(Context context, AttributeSet attrs) {
+        mInputManager =
+                InputManagerCompat.Factory.getInputManager(this.getContext());
+        mInputManager.registerInputDeviceListener(this, null);
+        ...
+    }
+}
+</pre>
+<p>Next, override the
+{@link android.view.View#onGenericMotionEvent(android.view.MotionEvent)
+onGenericMotionEvent()} method in your main view, as described in
+<a href="controller-input.html#analog">Handle a MotionEvent from a Game
+Controller</a>. Your game should now be able to process game controller events
+consistently on devices running Android 2.3 (API level 9) and higher.
+<p>
+<pre>
+&#64;Override
+public boolean onGenericMotionEvent(MotionEvent event) {
+    mInputManager.onGenericMotionEvent(event);
+
+    // Handle analog input from the controller as normal
+    ...
+    return super.onGenericMotionEvent(event);
+}
+</pre>
+<p>You can find a complete implementation of this compatibility code in the
+{@code GameView} class provided in the sample {@code ControllerSample.zip}
+available for download above.</p>

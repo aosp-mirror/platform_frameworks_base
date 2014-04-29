@@ -40,13 +40,14 @@ page.title=&lt;application&gt;
 <dt>can contain:</dt>
 <dd><code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
 <br/><code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
 <br/><code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
 <br/><code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>
 <br/><code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
 <br/><code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>The declaration of the application.  This element contains subelements 
+<dd itemprop="description">The declaration of the application.  This element contains subelements
 that declare each of the application's components and has attributes 
 that can affect all the components.  Many of these attributes (such as 
 {@code icon}, {@code label}, {@code permission}, {@code process}, 

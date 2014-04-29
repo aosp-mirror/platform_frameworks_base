@@ -31,7 +31,7 @@ parent.link=manifest-intro.html
     </code>
 </dd>
 <dt>description:</dt>
-<dd>
+<dd itemprop="descridption">
     Specifies a shared library that the application must be linked against.
     This element tells the system to include the library's code in the class
     loader for the package.

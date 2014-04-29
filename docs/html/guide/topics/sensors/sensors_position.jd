@@ -6,7 +6,9 @@ page.tags="sensorevent","orientation","proximity"
   <div id="qv">
   <h2>In this document</h2>
   <ol>
-     <li><a href="#sensors-pos-orient">Using the Orientation Sensor</a></li>
+    <li><a href="#sensors-pos-gamerot">Using the Game Rotation Vector Sensor</a></li>
+    <li><a href="#sensors-pos-geomrot">Using the Geomagnetic Rotation Vector Sensor</a></li>
+    <li><a href="#sensors-pos-orient">Using the Orientation Sensor</a></li>
     <li><a href="#sensors-pos-mag">Using the Geomagnetic Field Sensor</a></li>
     <li><a href="#sensors-pos-prox">Using the Proximity Sensor</a></li>
   </ol>
@@ -83,6 +85,34 @@ the position sensors that are supported on the Android platform.</p>
     <th scope="col" style="white-space:nowrap">Units of measure</th>
   </tr>
   <tr>
+    <td rowspan="3">{@link android.hardware.Sensor#TYPE_GAME_ROTATION_VECTOR}</td>
+    <td><code>SensorEvent.values[0]</code></td>
+    <td>Rotation vector component along the x axis (x * sin(θ/2)).</td>
+    <td rowspan="3">Unitless</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[1]</code></td>
+    <td>Rotation vector component along the y axis (y * sin(θ/2)).</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[2]</code></td>
+    <td>Rotation vector component along the z axis (z * sin(θ/2)).</td>
+  </tr>
+  <tr>
+    <td rowspan="3">{@link android.hardware.Sensor#TYPE_GEOMAGNETIC_ROTATION_VECTOR}</td>
+    <td><code>SensorEvent.values[0]</code></td>
+    <td>Rotation vector component along the x axis (x * sin(θ/2)).</td>
+    <td rowspan="3">Unitless</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[1]</code></td>
+    <td>Rotation vector component along the y axis (y * sin(θ/2)).</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[2]</code></td>
+    <td>Rotation vector component along the z axis (z * sin(θ/2)).</td>
+  </tr>
+  <tr>
     <td rowspan="3">{@link android.hardware.Sensor#TYPE_MAGNETIC_FIELD}</td>
     <td><code>SensorEvent.values[0]</code></td>
     <td>Geomagnetic field strength along the x axis.</td>
@@ -95,6 +125,32 @@ the position sensors that are supported on the Android platform.</p>
   <tr>
     <td><code>SensorEvent.values[2]</code></td>
     <td>Geomagnetic field strength along the z axis.</td>
+  </tr>
+  <tr>
+    <td rowspan="6">{@link android.hardware.Sensor#TYPE_MAGNETIC_FIELD_UNCALIBRATED}</td>
+    <td><code>SensorEvent.values[0]</code></td>
+    <td>Geomagnetic field strength (without hard iron calibration) along the x axis.</td>
+    <td rowspan="6">&mu;T</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[1]</code></td>
+    <td>Geomagnetic field strength (without hard iron calibration) along the y axis.</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[2]</code></td>
+    <td>Geomagnetic field strength (without hard iron calibration) along the z axis.</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[3]</code></td>
+    <td>Iron bias estimation along the x axis.</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[4]</code></td>
+    <td>Iron bias estimation along the y axis.</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[5]</code></td>
+    <td>Iron bias estimation along the z axis.</td>
   </tr>
   <tr>
     <td rowspan="3">{@link android.hardware.Sensor#TYPE_ORIENTATION}<sup>1</sup></td>
@@ -125,11 +181,58 @@ discussed in <a href="#sensors-pos-orient">Using the Orientation Sensor</a>.</p>
 <p class="note"><sup><strong>2</strong></sup> Some proximity sensors provide only binary values
 representing near and far.</p>
 
+
+<h2 id="sensors-pos-gamerot">Using the Game Rotation Vector Sensor</h2>
+
+<p>The game rotation vector sensor is identical to the
+<a href="{@docRoot}guide/topics/sensors/sensors_motion.html#sensors-motion-rotate">Rotation
+Vector Sensor</a>, except it does not use the geomagnetic field. Therefore the Y axis does not
+point north but instead to some other reference. That reference is allowed to drift by the
+same order of magnitude as the gyroscope drifts around the Z axis.</p>
+
+<p>Because the game rotation vector sensor does not use the magnetic field, relative rotations
+are more accurate, and not impacted by magnetic field changes. Use this sensor in a game if
+you do not care about where north is, and the normal rotation vector does not fit your needs
+because of its reliance on the magnetic field.</p>
+
+<p>The following code shows you how to get an instance of the default game rotation vector
+sensor:</p>
+
+<pre>
+private SensorManager mSensorManager;
+private Sensor mSensor;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
+</pre>
+
+
+<h2 id="sensors-pos-geomrot">Using the Geomagnetic Rotation Vector Sensor</h2>
+
+<p>The geomagnetic rotation vector sensor is similar to the
+<a href="{@docRoot}guide/topics/sensors/sensors_motion.html#sensors-motion-rotate">Rotation
+Vector Sensor</a>, but it uses a magnetometer instead of a gyroscope. The accuracy of this
+sensor is lower than the normal rotation vector sensor, but the power consumption is reduced.
+Only use this sensor if you want to collect some rotation information in the background without
+draining too much battery. This sensor is most useful when used in conjunction with batching.</p>
+
+<p>The following code shows you how to get an instance of the default geomagnetic rotation
+vector sensor:</p>
+
+<pre>
+private SensorManager mSensorManager;
+private Sensor mSensor;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR);
+</pre>
+
+
 <h2 id="sensors-pos-orient">Using the Orientation Sensor</h2>
 
 <p>The orientation sensor lets you monitor the position of a device relative to the earth's frame of
 reference (specifically, magnetic north). The following code shows you how to get an instance of the
-default orientation sensor :</p>
+default orientation sensor:</p>
 
 <pre>
 private SensorManager mSensorManager;
@@ -248,6 +351,35 @@ getRotationMatrix()} method to obtain the rotation matrix and the inclination ma
 use these matrices with the {@link android.hardware.SensorManager#getOrientation getOrientation()}
 and {@link android.hardware.SensorManager#getInclination getInclination()} methods to obtain azimuth
 and geomagnetic inclination data.</p>
+
+<h2 id="sensors-pos-magunc">Using the Uncalibrated Magnetometer</h2>
+
+<p>The uncalibrated magnetometer is similar to the <a href="#sensors-pos-mag">geomagnetic field
+sensor</a>, except that no hard iron calibration is applied to the magnetic field. Factory calibration
+and temperature compensation are still applied to the magnetic field. The uncalibrated magnetometer
+is useful to handle bad hard iron estimations. In general, <code>geomagneticsensor_event.values[0]</code>
+will be close to <code>uncalibrated_magnetometer_event.values[0] -
+uncalibrated_magnetometer_event.values[3]</code>. That is,</p>
+
+<p><code>calibrated_x ~= uncalibrated_x - bias_estimate_x</code></p></p>
+
+<p class="note"><strong>Note:</strong> Uncalibrated sensors provide more raw results and may
+include some bias, but their measurements contain fewer jumps from corrections applied through
+calibration. Some applications may prefer these uncalibrated results as smoother and more
+reliable. For instance, if an application is attempting to conduct its own sensor fusion,
+introducing calibrations can actually distort results.</p>
+
+<p>In addition to the magnetic field, the uncalibrated magnetometer also provides the
+estimated hard iron bias in each axis. The following code shows you how to get an instance of the
+default uncalibrated magnetometer:</p>
+
+<pre>
+private SensorManager mSensorManager;
+private Sensor mSensor;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED);
+</pre>
 
 <h2 id="sensors-pos-prox">Using the Proximity Sensor</h2>
 <p>The proximity sensor lets you determine how far away an object is from a device. The following

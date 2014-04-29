@@ -96,7 +96,7 @@ invalidate the registration ID. Future attempts to send a message to that device
 will get a <code>NotRegistered</code> error. See <a href="#unreg">
 How Unregistration Works</a> for more information.</p>
 <p>Although is not possible to track the status of each individual message, the
-Google APIs Console stats are broken down by messages sent to device, messages
+Google Cloud Console stats are broken down by messages sent to device, messages
 collapsed, and messages waiting for delivery.</p>
 
 <h2 id="throttling">Throttling</h2>
@@ -312,14 +312,10 @@ individually. Note that the order of delivery is not guaranteed.</p>
 <p>GCM will store up to 100 non-collapsible messages. After that, all messages
 are discarded from GCM, and a new message is created that tells the client how
 far behind it is. The message is delivered through a regular
-<code>com.google.android.c2dm.intent.RECEIVE</code> intent, with the following
-extras:</p>
-<ul>
-  <li> <code>message_type</code>&mdash;The value is always the string
-&quot;deleted_messages&quot;.</li>
-  <li><code>total_deleted</code>&mdash;The value  is a string with the number of
-deleted messages.</li>
-</ul>
+<code>com.google.android.c2dm.intent.RECEIVE</code> intent with the
+extra <code>message_type</code>, for which the value is always the string
+&quot;deleted_messages&quot;.</p>
+
 <p>The application should respond by syncing with the server to recover the
 discarded messages. </p>
 

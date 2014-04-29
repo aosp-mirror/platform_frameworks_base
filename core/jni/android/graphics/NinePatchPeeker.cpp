@@ -40,15 +40,14 @@ bool NinePatchPeeker::peek(const char tag[], const void* data, size_t length) {
         // now update our host to force index or 32bit config
         // 'cause we don't want 565 predithered, since as a 9patch, we know
         // we will be stretched, and therefore we want to dither afterwards.
-        static const SkBitmap::Config gNo565Pref[] = {
-            SkBitmap::kIndex8_Config,
-            SkBitmap::kIndex8_Config,
-            SkBitmap::kARGB_8888_Config,
-            SkBitmap::kARGB_8888_Config,
-            SkBitmap::kARGB_8888_Config,
-            SkBitmap::kARGB_8888_Config,
-        };
-        fHost->setPrefConfigTable(gNo565Pref);
+        SkImageDecoder::PrefConfigTable table;
+        table.fPrefFor_8Index_NoAlpha_src   = SkBitmap::kIndex8_Config;
+        table.fPrefFor_8Index_YesAlpha_src  = SkBitmap::kIndex8_Config;
+        table.fPrefFor_8Gray_src            = SkBitmap::kARGB_8888_Config;
+        table.fPrefFor_8bpc_NoAlpha_src     = SkBitmap::kARGB_8888_Config;
+        table.fPrefFor_8bpc_YesAlpha_src    = SkBitmap::kARGB_8888_Config;
+
+        fHost->setPrefConfigTable(table);
     } else if (strcmp("npLb", tag) == 0 && length == sizeof(int) * 4) {
         fLayoutBounds = new int[4];
         memcpy(fLayoutBounds, data, sizeof(int) * 4);

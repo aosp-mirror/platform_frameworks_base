@@ -475,6 +475,12 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          * @param colorModes The color mode bit mask.
          * @param defaultColorMode The default color mode.
          * @return This builder.
+         * <p>
+         * <strong>Note:</strong> On platform version 19 (Kitkat) specifying
+         * only PrintAttributes#COLOR_MODE_MONOCHROME leads to a print spooler
+         * crash. Hence, you should declare either both color modes or
+         * PrintAttributes#COLOR_MODE_COLOR.
+         * </p>
          *
          * @throws IllegalArgumentException If color modes contains an invalid
          *         mode bit or if the default color mode is invalid.

@@ -844,7 +844,7 @@ public class Intent implements Parcelable, Cloneable {
      * {@link #FLAG_GRANT_WRITE_URI_PERMISSION}, then these flags will also be
      * set in the returned chooser intent, with its ClipData set appropriately:
      * either a direct reflection of {@link #getClipData()} if that is non-null,
-     * or a new ClipData build from {@link #getData()}.
+     * or a new ClipData built from {@link #getData()}.
      *
      * @param target The Intent that the user will be selecting an activity
      * to perform.
@@ -4424,7 +4424,7 @@ public class Intent implements Parcelable, Cloneable {
      * Return the {@link ClipData} associated with this Intent.  If there is
      * none, returns null.  See {@link #setClipData} for more information.
      *
-     * @see #setClipData;
+     * @see #setClipData
      */
     public ClipData getClipData() {
         return mClipData;
@@ -5440,7 +5440,7 @@ public class Intent implements Parcelable, Cloneable {
      * directly used by Intent.  Applications should generally rely on the
      * MIME type of the Intent itself, not what it may find in the ClipData.
      * A common practice is to construct a ClipData for use with an Intent
-     * with a MIME type of "*\/*".
+     * with a MIME type of "*&#47;*".
      *
      * @param clip The new clip to set.  May be null to clear the current clip.
      */
@@ -7162,8 +7162,8 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param type MIME data type to normalize
      * @return normalized MIME data type, or null if the input was null
-     * @see {@link #setType}
-     * @see {@link #setTypeAndNormalize}
+     * @see #setType
+     * @see #setTypeAndNormalize
      */
     public static String normalizeMimeType(String type) {
         if (type == null) {

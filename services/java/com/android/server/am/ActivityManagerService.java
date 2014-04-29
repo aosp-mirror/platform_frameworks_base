@@ -1328,7 +1328,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     String pkg = bundle.getString("pkg");
                     String reason = bundle.getString("reason");
                     forceStopPackageLocked(pkg, appid, restart, false, true, false,
-                            UserHandle.USER_ALL, reason);
+                            false, UserHandle.USER_ALL, reason);
                 }
             } break;
             case FINALIZE_PENDING_INTENT_MSG: {
@@ -4515,7 +4515,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private void forceStopPackageLocked(final String packageName, int uid, String reason) {
         forceStopPackageLocked(packageName, UserHandle.getAppId(uid), false,
-                false, true, false, UserHandle.getUserId(uid), reason);
+                false, true, false, false, UserHandle.getUserId(uid), reason);
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,
                 Uri.fromParts("package", packageName, null));
         if (!mProcessesReady) {
@@ -4531,7 +4531,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void forceStopUserLocked(int userId, String reason) {
-        forceStopPackageLocked(null, -1, false, false, true, false, userId, reason);
+        forceStopPackageLocked(null, -1, false, false, true, false, false, userId, reason);
         Intent intent = new Intent(Intent.ACTION_USER_STOPPED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                 | Intent.FLAG_RECEIVER_FOREGROUND);
@@ -4616,7 +4616,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private final boolean forceStopPackageLocked(String name, int appId,
             boolean callerWillRestart, boolean purgeCache, boolean doit,
-            boolean evenPersistent, int userId, String reason) {
+            boolean evenPersistent, boolean uninstalling, int userId, String reason) {
         int i;
         int N;
 
@@ -4708,7 +4708,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Remove transient permissions granted from/to this package/user
         removeUriPermissionsForPackageLocked(name, userId, false);
 
-        if (name == null) {
+        if (name == null || uninstalling) {
             // Remove pending intents.  For now we only do this when force
             // stopping users, because we have some problems when doing this
             // for packages -- app widgets are not currently cleaned up for
@@ -5153,7 +5153,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (pkgs != null) {
                     for (String pkg : pkgs) {
                         synchronized (ActivityManagerService.this) {
-                            if (forceStopPackageLocked(pkg, -1, false, false, false, false, 0,
+                            if (forceStopPackageLocked(pkg, -1, false, false, false, false, false, 0,
                                     "finished booting")) {
                                 setResultCode(Activity.RESULT_OK);
                                 return;
@@ -8466,7 +8466,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mDebugTransient = !persistent;
                 if (packageName != null) {
                     forceStopPackageLocked(packageName, -1, false, false, true, true,
-                            UserHandle.USER_ALL, "set debug app");
+                            false, UserHandle.USER_ALL, "set debug app");
                 }
             }
         } finally {
@@ -9246,8 +9246,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                         ActivityInfo ai = ris.get(i).activityInfo;
                         ComponentName comp = new ComponentName(ai.packageName, ai.name);
                         if (lastDoneReceivers.contains(comp)) {
+                            // We already did the pre boot receiver for this app with the current
+                            // platform version, so don't do it again...
                             ris.remove(i);
                             i--;
+                            // ...however, do keep it as one that has been done, so we don't
+                            // forget about it when rewriting the file of last done receivers.
+                            doneReceivers.add(comp);
                         }
                     }
 
@@ -13395,7 +13400,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         String list[] = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                         if (list != null && (list.length > 0)) {
                             for (String pkg : list) {
-                                forceStopPackageLocked(pkg, -1, false, true, true, false, userId,
+                                forceStopPackageLocked(pkg, -1, false, true, true, false, false, userId,
                                         "storage unmount");
                             }
                             sendPackageBroadcastLocked(
@@ -13407,10 +13412,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
                             boolean removed = Intent.ACTION_PACKAGE_REMOVED.equals(
                                     intent.getAction());
+                            boolean fullUninstall = removed &&
+                                    !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
                             if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
                                 forceStopPackageLocked(ssp, UserHandle.getAppId(
                                         intent.getIntExtra(Intent.EXTRA_UID, -1)), false, true, true,
-                                        false, userId, removed ? "pkg removed" : "pkg changed");
+                                        false, fullUninstall, userId,
+                                        removed ? "pkg removed" : "pkg changed");
                             }
                             if (removed) {
                                 sendPackageBroadcastLocked(IApplicationThread.PACKAGE_REMOVED,
@@ -13897,7 +13905,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             final long origId = Binder.clearCallingIdentity();
             // Instrumentation can kill and relaunch even persistent processes
-            forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, userId,
+            forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, false, userId,
                     "start instr");
             ProcessRecord app = addAppLocked(ai, false);
             app.instrumentationClass = className;
@@ -13965,7 +13973,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.instrumentationProfileFile = null;
         app.instrumentationArguments = null;
 
-        forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, app.userId,
+        forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, false, app.userId,
                 "finished inst");
     }
 

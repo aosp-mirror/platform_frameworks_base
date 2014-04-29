@@ -45,7 +45,7 @@ starts a new activity when the user clicks the Send button.</p>
 
 <h2 id="RespondToButton">Respond to the Send Button</h2>
 
-<p>To respond to the button's on-click event, open the <code>activity_main.xml</code>
+<p>To respond to the button's on-click event, open the <code>fragment_main.xml</code>
 layout file and add the <a
 href="{@docRoot}reference/android/view/View.html#attr_android:onClick">{@code android:onClick}</a>
 attribute to the {@link android.widget.Button &lt;Button>} element:</p>
@@ -72,14 +72,6 @@ public void sendMessage(View view) {
     // Do something in response to button
 }
 </pre>
-
-<p>This requires that you import the {@link android.view.View} class:</p>
-<pre>
-import android.view.View;
-</pre>
-
-<p class="note"><strong>Tip:</strong> In Eclipse, press Ctrl + Shift + O to import missing classes
-(Cmd + Shift + O on Mac).</p>
 
 <p>In order for the system to match this method to the method name given to <a
 href="{@docRoot}reference/android/view/View.html#attr_android:onClick">{@code android:onClick}</a>,
@@ -110,6 +102,14 @@ an activity called {@code DisplayMessageActivity}:</p>
 <pre>
 Intent intent = new Intent(this, DisplayMessageActivity.class);
 </pre>
+
+<p>This requires that you import the {@link android.content.Intent} class:</p>
+<pre>
+import android.content.Intent;
+</pre>
+
+<p class="note"><strong>Tip:</strong> In Eclipse, press Ctrl + Shift + O to import missing classes
+(Cmd + Shift + O on Mac).</p>
 
 <p>The constructor used here takes two parameters:</p>
 <ul>
@@ -151,9 +151,8 @@ intent.putExtra(EXTRA_MESSAGE, message);
 </pre>
 
 <p class="note"><strong>Note:</strong>
-You now need import statements for <code>android.content.Intent</code>
-and <code>android.widget.EditText</code>. You'll define the <code>EXTRA_MESSAGE</code>
-constant in a moment.</p>
+You now need an import statement for <code>android.widget.EditText</code>. 
+You'll define the <code>EXTRA_MESSAGE</code> constant in a moment.</p>
 
 <p>An {@link android.content.Intent} can carry a collection of various data types as key-value
 pairs called <em>extras</em>. The {@link android.content.Intent#putExtra putExtra()} method takes the
@@ -165,7 +164,7 @@ public constant. So add the {@code EXTRA_MESSAGE} definition to the top of the {
 MainActivity} class:</p>
 
 <pre>
-public class MainActivity extends Activity {
+public class MainActivity extends ActionBarActivity {
     public final static String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
     ...
 }
@@ -223,6 +222,7 @@ work.</p>
       <li><strong>Project</strong>: MyFirstApp</li>
       <li><strong>Activity Name</strong>: DisplayMessageActivity</li>
       <li><strong>Layout Name</strong>: activity_display_message</li>
+      <li><strong>Fragment Layout Name</strong>: fragment_display_message</li>
       <li><strong>Title</strong>: My Message</li>
       <li><strong>Hierarchial Parent</strong>: com.example.myfirstapp.MainActivity</li>
       <li><strong>Navigation Type</strong>: None</li>
@@ -240,48 +240,64 @@ activity:</p>
 <ul>
   <li>The class
 already includes an implementation of the required {@link android.app.Activity#onCreate onCreate()}
-method.</li>
+method. You will update the implementation of this method later.</li>
   <li>There's also an implementation of the {@link android.app.Activity#onCreateOptionsMenu
 onCreateOptionsMenu()} method, but
 you won't need it for this app so you can remove it.</li>
   <li>There's also an implementation of {@link android.app.Activity#onOptionsItemSelected
   onOptionsItemSelected()} which handles the behavior for the action bar's <em>Up</em> behavior.
   Keep this one the way it is.</li>
+  <li>There's also a <code>PlaceholderFragment</code> class that extends 
+{@link android.app.Fragment}. You will not need this class in the final version of this
+activity.</li>
 </ul>
 
-<p>Because the {@link android.app.ActionBar} APIs are available only on {@link
-android.os.Build.VERSION_CODES#HONEYCOMB} (API level 11) and higher, you must add a condition
-around the {@link android.app.Activity#getActionBar()} method to check the current platform version.
-Additionally, you must add the {@code &#64;SuppressLint("NewApi")} tag to the
-{@link android.app.Activity#onCreate onCreate()} method to avoid <a
-href="{@docRoot}tools/help/lint.html">lint</a> errors.</p>
+<p>Fragments decompose application functionality and UI into reusable modules. For more 
+information on fragments, see the <a href="{@docRoot}guide/components/fragments.html">Fragments 
+API Guide</a>. The final version of this activity does not use fragments.</p>
 
 <p>The {@code DisplayMessageActivity} class should now look like this:</p>
 
 <pre>
-public class DisplayMessageActivity extends Activity {
+public class DisplayMessageActivity extends ActionBarActivity {
 
-    &#64;SuppressLint("NewApi")
     &#64;Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_message);
 
-        // Make sure we're running on Honeycomb or higher to use ActionBar APIs
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            // Show the Up button in the action bar.
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                .add(R.id.container, new PlaceholderFragment()).commit();
         }
     }
 
     &#64;Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case android.R.id.home:
-            NavUtils.navigateUpFromSameTask(this);
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * A placeholder fragment containing a simple view.
+     */
+    public static class PlaceholderFragment extends Fragment {
+
+        public PlaceholderFragment() { }
+
+        &#64;Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                  Bundle savedInstanceState) {
+              View rootView = inflater.inflate(R.layout.fragment_display_message,
+                      container, false);
+              return rootView;
+        }
     }
 }
 </pre>
@@ -422,7 +438,7 @@ public void onCreate(Bundle savedInstanceState) {
 
 <img src="{@docRoot}images/training/firstapp/firstapp.png" />
 <p class="img-caption"><strong>Figure 2.</strong> Both activities in the final app, running
-on Android 4.0.
+on Android 4.4.
 
 <p>That's it, you've built your first Android app!</p>
 

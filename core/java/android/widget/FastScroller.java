@@ -224,6 +224,8 @@ class FastScroller {
             mHasPendingDrag = false;
         }
     };
+    private int mOldItemCount;
+    private int mOldChildCount;
 
     /**
      * Used to delay hiding fast scroll decorations.
@@ -248,6 +250,8 @@ class FastScroller {
     public FastScroller(AbsListView listView) {
         mList = listView;
         mOverlay = listView.getOverlay();
+        mOldItemCount = listView.getCount();
+        mOldChildCount = listView.getChildCount();
 
         final Context context = listView.getContext();
         mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
@@ -258,6 +262,7 @@ class FastScroller {
         final ImageView trackImage = new ImageView(context);
         mTrackImage = trackImage;
 
+        updateLongList(mOldChildCount, mOldItemCount);
         int width = 0;
 
         // Add track to overlay if it has an image.
@@ -445,20 +450,23 @@ class FastScroller {
         updateLayout();
     }
 
-    public void onItemCountChanged(int totalItemCount) {
-        final int visibleItemCount = mList.getChildCount();
-        final boolean hasMoreItems = totalItemCount - visibleItemCount > 0;
-        if (hasMoreItems && mState != STATE_DRAGGING) {
-            final int firstVisibleItem = mList.getFirstVisiblePosition();
-            setThumbPos(getPosFromItemCount(firstVisibleItem, visibleItemCount, totalItemCount));
-        }
+    public void onItemCountChanged(int childCount, int itemCount) {
+        if (mOldItemCount != itemCount || mOldChildCount != childCount) {
+            mOldItemCount = itemCount;
+            mOldChildCount = childCount;
 
-        updateLongList(visibleItemCount, totalItemCount);
+            final boolean hasMoreItems = itemCount - childCount > 0;
+            if (hasMoreItems && mState != STATE_DRAGGING) {
+                final int firstVisibleItem = mList.getFirstVisiblePosition();
+                setThumbPos(getPosFromItemCount(firstVisibleItem, childCount, itemCount));
+            }
+
+            updateLongList(childCount, itemCount);
+        }
     }
 
-    private void updateLongList(int visibleItemCount, int totalItemCount) {
-        final boolean longList = visibleItemCount > 0
-                && totalItemCount / visibleItemCount >= MIN_PAGES;
+    private void updateLongList(int childCount, int itemCount) {
+        final boolean longList = childCount > 0 && itemCount / childCount >= MIN_PAGES;
         if (mLongList != longList) {
             mLongList = longList;
 

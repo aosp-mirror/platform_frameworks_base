@@ -23,7 +23,7 @@ parent.link=manifest-intro.html
 <br/><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Declares a broadcast receiver (a {@link android.content.BroadcastReceiver} 
+<dd itemprop="description">Declares a broadcast receiver (a {@link android.content.BroadcastReceiver}
 subclass) as one of the application's components.  Broadcast receivers enable 
 applications to receive intents that are broadcast by the system or by other 
 applications, even when other components of the application are not running.

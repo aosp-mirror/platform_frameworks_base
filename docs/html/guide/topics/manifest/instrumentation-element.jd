@@ -16,7 +16,7 @@ parent.link=manifest-intro.html
 <dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Declares an {@link android.app.Instrumentation} class that enables you
+<dd itemprop="description">Declares an {@link android.app.Instrumentation} class that enables you
 to monitor an application's interaction with the system.  The Instrumentation
 object is instantiated before any of the application's components.</dd>
 

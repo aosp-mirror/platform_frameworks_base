@@ -9,6 +9,8 @@ page.title=SDK Manager
 <ul>
   <li>From Eclipse (with <a href="{@docRoot}tools/help/adt.html">ADT</a>),
   select <strong>Window</strong> &gt; <strong>Android SDK Manager</strong>.</li>
+  <li>From Android Studio, select <strong>Tools</strong> &gt; <strong>Android</strong>
+  &gt; <strong>SDK Manager</strong>.</li>
   <li>On Windows, double-click the <code>SDK Manager.exe</code> file at the root of the Android
 SDK directory.</li>
   <li>On Mac or Linux, open a terminal and navigate to the <code>tools/</code> directory in the

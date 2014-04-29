@@ -206,6 +206,14 @@ project</a> based on the support library code:</p>
     <li>In the properties window, click <strong>OK</strong>.</li>
   </ol>
 
+<p class="note">
+  <strong>Note:</strong> If you are using the {@code android-support-v7-mediarouter} support
+  library, you should note that it depends on the {@code android-support-v7-appcompat} library.
+  In order for the v7 mediarouter library to compile, you must import both library projects into
+  your development workspace. Then follow the procedure above to add the v7 appcompat project as a
+  library to the v7 mediarouter library project.
+</p>
+
   </div>
 </div>
 

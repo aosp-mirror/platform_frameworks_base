@@ -74,8 +74,9 @@ import junit.textui.ResultPrinter;
  *   <li>{@link android.test.ProviderTestCase}</li>
  *   <li>{@link android.test.ServiceTestCase}</li>
  *   <li>{@link android.test.SingleLaunchActivityTestCase}</li></ul>
- *   <li>In an appropriate AndroidManifest.xml, define the this instrumentation with
- * the appropriate android:targetPackage set.
+ * <li>Set the <code>android:targetPackage</code> attribute of the <code>&lt;instrumentation&gt;</code>
+ * element in the test package's manifest. You should set the attribute value
+ * to the package name of the target application under test.
  * <li>Run the instrumentation using "adb shell am instrument -w",
  * with no optional arguments, to run all tests (except performance tests).
  * <li>Run the instrumentation using "adb shell am instrument -w",

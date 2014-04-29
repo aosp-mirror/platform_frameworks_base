@@ -9,7 +9,7 @@ page.tags="viewpager","navigation","tabs"
   </div>
 </a>
 
-<p>Efficient navigation is one of the cornerstones of a well-designed app. While apps are generally
+<p itemprop="description">Efficient navigation is one of the cornerstones of a well-designed app. While apps are generally
 built in a hierarchical fashion, there are instances where horizontal navigation can flatten
 vertical hierarchies and make access to related data items faster and more enjoyable. Swipe views
 allow the user to efficiently move from item to item using a simple gesture and thereby make

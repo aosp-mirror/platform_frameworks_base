@@ -1,7 +1,7 @@
 page.title=Multi-pane Layouts
 page.tags="tablet","navigation","layout","fragment"
+page.metaDescription=Android devices come in many different screen sizes and types. Multi-pane layouts help you provide a balanced and aesthetically pleasing layout across the range of Android devices.
 @jd:body
-
 
 <a class="notice-developers" href="{@docRoot}training/basics/fragments/index.html">
   <div>
@@ -10,9 +10,11 @@ page.tags="tablet","navigation","layout","fragment"
   </div>
 </a>
 
-<p>When writing an app for Android, keep in mind that Android devices come in many different screen
-sizes and types. Make sure that your app consistently provides a balanced and aesthetically pleasing
-layout by adjusting its content to varying screen sizes and orientations.</p>
+<p>When writing an app for Android, keep in mind that Android devices
+come in many different screen sizes and types. Make sure that your app consistently provides a
+balanced and aesthetically pleasing layout by adjusting its content to varying screen sizes and
+orientations.</p>
+
 <p><em>Panels</em> are a great way for your app to achieve this. They allow you to combine multiple views into
 one compound view when a lot of horizontal screen real estate is available and by splitting them up
 when less space is available.</p>

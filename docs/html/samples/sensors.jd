@@ -1,0 +1,11 @@
+page.title=Sensors
+@jd:body
+
+
+<div id="samples" class="sensors">
+</div>
+
+
+<script>
+  $(document).ready(showSamples);
+</script>

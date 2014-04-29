@@ -26,8 +26,8 @@ trainingnavtop=true
 <h2>Try it out</h2>
 
 <div class="download-box">
-  <a href="{@docRoot}shareables/training/BitmapFun.zip" class="button">Download the sample</a>
-  <p class="filename">BitmapFun.zip</p>
+  <a href="{@docRoot}downloads/samples/DisplayingBitmaps.zip" class="button">Download the sample</a>
+  <p class="filename">DisplayingBitmaps.zip</p>
 </div>
 
 </div>
@@ -172,7 +172,8 @@ public static boolean cancelPotentialWork(int data, ImageView imageView) {
 
     if (bitmapWorkerTask != null) {
         final int bitmapData = bitmapWorkerTask.data;
-        if (bitmapData != data) {
+        // If bitmapData is not yet set or it differs from the new data
+        if (bitmapData == 0 || bitmapData != data) {
             // Cancel previous task
             bitmapWorkerTask.cancel(true);
         } else {

@@ -420,7 +420,7 @@ interface INetworkManagementService
     /**
     * Clear a user range from being associated with an interface.
     */
-    void clearDnsInterfaceForUidRange(int uid_start, int uid_end);
+    void clearDnsInterfaceForUidRange(String iface, int uid_start, int uid_end);
 
     /**
     * Clear the mappings from pid to Dns interface and from uid range to Dns interface.

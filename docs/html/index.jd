@@ -1,6 +1,7 @@
 fullpage=true
 no_footer_links=true
 carousel=true
+excludeFromSuggestions=true
 page.metaDescription=The official site for Android developers. Provides the Android SDK and documentation for app developers and designers.
 page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3f61-WpRguHq-aNjtF7xJjMTSi79as" />
 
@@ -15,6 +16,68 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
         <div class="frame">
             <ul>
                 <!-- set explicit widths as needed to prevent overflow issues -->
+
+
+                <li class="item carousel-home">
+                  <div class="content-left col-10" style="width:580px;">
+                    <a href="{@docRoot}design/patterns/new.html">
+                      <img src="{@docRoot}images/home/aw_dac.png" style="margin-top:50px" >
+                    </a>
+                  </div>
+                  <div class="content-right col-5" style="width:280px;">
+                    <h1>Introducing Android Wear</h1>
+                    <p>We’re extending the Android platform to wearables. You can start building richer wearable experiences for your apps today using the enhanced Notification APIs in this Developer Preview.</p>
+                    <p>We can’t wait to see what you will create.</p>
+                    <p><a href="{@docRoot}wear/index.html" class="button">Learn more</a></p>
+                  </div>
+                </li>
+
+
+                <li class="item carousel-home">
+                    <div class="content-left col-11" style="padding-top:65px;">
+                      <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+                      <div style="box-shadow: 3px 10px 18px 1px #999;width:600px;height:336px">
+                        <div id="ytapiplayer">
+                          <a href="http://www.youtube.com/watch?v=i2uvYI6blEE"><img width=600 
+                          src="https://i1.ytimg.com/vi/i2uvYI6blEE/maxresdefault.jpg"></a><!--You need Flash player 8+ and JavaScript enabled to view this video. -->
+                        </div>
+                        <script type="text/javascript">
+                            var params = { allowScriptAccess: "always" };
+                            var atts = { id: "ytapiplayer" };
+                            swfobject.embedSWF("//www.youtube.com/v/i2uvYI6blEE?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1",
+                              "ytapiplayer", "600", "336", "8", null, null, params, atts);
+
+                            // Callback used to pause/resume carousel based on video state
+                            function onytplayerStateChange(newState) {
+                               var isPaused = $("#pauseButton").hasClass("paused");
+                               if ((newState == 1) || (newState == 3)) {
+                               // if playing or buffering, pause the carousel
+                                 if (!isPaused) {
+                                    $("#pauseButton").click();
+                                 }
+                               } else {
+                               // otherwise, make sure carousel is running
+                                 if (isPaused) {
+                                    $("#pauseButton").click();
+                                 }
+                               }
+                            }
+
+                            // Callback received when YouTube player loads to setup callback (above)
+                            function onYouTubePlayerReady(playerId) {
+                              var ytplayer = document.getElementById("ytapiplayer");
+                              ytplayer.addEventListener("onStateChange", "onytplayerStateChange");
+                            }
+
+                        </script>
+                      </div>
+                    </div>
+                    <div class="content-right col-4">
+                    <h1 style="white-space:nowrap;line-height:1.2em;">Developer Story: <br />Box Inc.</h1>
+                    <p>Box is a cloud-based platform and app for users to share business information. See how they got over 5 million downloads by leveraging the flexibility in the Android platform.</p>
+                      <p><a href="{@docRoot}distribute/googleplay/spotlight/index.html" class="button">Watch more videos </a></p>
+                    </div>
+                </li>
 
                 <li class="item carousel-home">
                   <div class="content-left col-7" style="width:400px;">

@@ -11,7 +11,7 @@ parent.link=manifest-intro.html
 <dd><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Adds a category name to an intent filter.  See 
+<dd itemprop="description">Adds a category name to an intent filter.  See
 <a href="{@docRoot}guide/components/intents-filters.html">Intents and 
 Intent Filters</a> for details on intent filters and the role of category
 specifications within a filter.</dd>
@@ -26,6 +26,14 @@ by prefixing "{@code android.intent.category.}" to the
 {@code <i>name</i>} that follows {@code CATEGORY_}.  For example,
 the string value for {@code CATEGORY_LAUNCHER} is 
 "{@code android.intent.category.LAUNCHER}".
+
+<p class="note"><strong>Note:</strong> In order to receive implicit intents, you must include the
+{@link android.content.Intent#CATEGORY_DEFAULT} category in the intent filter. The methods
+{@link android.app.Activity#startActivity startActivity()} and
+{@link android.app.Activity#startActivityForResult startActivityForResult()} treat all intents
+as if they declared the {@link android.content.Intent#CATEGORY_DEFAULT} category.
+If you do not declare it in your intent filter, no implicit intents will resolve to
+your activity.</p>
 
 <p>
 Custom categories should use the package name as a prefix, to ensure

@@ -1,0 +1,534 @@
+page.title=Authorizing with Google for REST APIs
+page.tags="oauth 2.0","GoogleAuthUtil"
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#Register">Register Your App</a></li>
+  <li><a href="#AccountPicker">Invoke the Account Picker</a></li>
+  <li><a href="#AccountName">Retrieve the Account Name</a></li>
+  <li><a href="#ExtendAsyncTask">Extend AsyncTask to Get the Auth Token</a></li>
+  <li><a href="#HandleExceptions">Handle Exceptions</a></li>
+</ol>
+<h2>Try it out</h2>
+
+<div class="download-box">
+<a href="http://developer.android.com/shareables/training/GoogleAuth.zip"
+  class="button">Download the sample app</a>
+<p class="filename">GoogleAuth.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>When you want your Android app to access Google APIs using the user's Google account over
+HTTP, the <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html">{@code GoogleAuthUtil}</a>
+class and related APIs provide your users a secure and consistent experience for picking an
+account and retrieving an OAuth 2.0 token for your app.</p>
+
+<p>You can then use that token in your HTTP-based communications with Google API services
+that are not included in the <a href="{@docRoot}google/play-services/index.html">Google Play
+services</a> library, such as the Blogger or Translate APIs.</p>
+
+<p class="note"><strong>Note:</strong> An OAuth 2.0 token using <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html">{@code GoogleAuthUtil}</a>
+is required only for certain types of Google
+APIs that you need to access over HTTP. If you're instead using the <a
+href="{@docRoot}google/play-services/index.html">Google Play services library</a> to access Google
+APIs such as <a href="{@docRoot}google/play-services/plus.html">Google+</a> or <a
+href="{@docRoot}google/play-services/games.html">Play Games</a>, you don't need an OAuth 2.0
+token and you can instead access these services using the {@code GoogleApiClient}. For more
+information, read <a href="{@docRoot}google/auth/api-client.html">Accessing Google Play
+Services APIs</a>.</p>
+
+<p>To get started with <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html">{@code GoogleAuthUtil}</a>
+for accessing Google's REST APIs, you must set up your Android app project with the Google Play
+services library. Follow the procedures in <a href=
+"{@docRoot}google/play-services/setup.html">Setup Google Play Services SDK</a>.</p>
+
+
+
+
+<h2 id="Register">Register Your App</h2>
+
+<p>Before you can publish an app that retrieves an OAuth 2.0 token for Google REST APIs,
+you must register your Android app with the Google Cloud Console by providing your app's
+package name and the SHA1 fingerprint of the keystore with which you sign your release APK.</p>
+
+<p class="caution"><strong>Caution:</strong> While you are testing an APK that's <a
+href="{@docRoot}tools/publishing/app-signing.html#debugmode">signed with a
+debug key</a>, Google does not require that your app be registered in Google Cloud Console. However,
+your app must be registered in Google Cloud Console in order to continue working once it is
+<a href="{@docRoot}tools/publishing/app-signing.html#releasemode">signed
+with a release key</a>.</p>
+
+<p>To register your Android app with Google Cloud Console:</p>
+
+<ol>
+<li>Visit <a href="https://cloud.google.com/console" class="external-link" target="_blank"
+>Google Cloud Console</a>.
+<li>If you have an existing project to which you're adding an Android app, select the project.
+Otherwise, click <strong>Create project</strong> at the top, enter your project name and ID,
+then click <strong>Create</strong>.
+<p class="note"><strong>Note:</strong> The name you provide for the project is the name that
+appears to users in the Google Settings app in the list of <em>Connected apps</em>.</p>
+<li>In the left-side navigation, select <strong>APIs &amp; auth</strong>.
+<li>Enable the API you'd like to use by setting the Status to <strong>ON</strong>.
+
+<li>In the left-side navigation, select <strong>Credentials</strong>.
+<li>Click <strong>Create new client ID</strong> or <strong>Create new key</strong>
+as appropriate for your app.</li>
+<li>Complete the form that appears by filling in your Android app details.
+<p>To get the SHA1 fingerprint for your app, run the following command in a terminal:
+<pre class="no-pretty-print">
+keytool -exportcert -alias &lt;keystore_alias> -keystore &lt;keystore_path> -list -v
+</pre>
+<p>For example, you're using a debug-key with Eclipse, then the command looks like this:</p>
+<pre class="no-pretty-print">
+keytool -exportcert -alias androiddebugkey-keystore ~/.android/debug.keystore -list -v
+</pre>
+<p>Then the keystore password is "android".</p>
+</li>
+<li>Click <strong>Create</strong>.
+</ol>
+
+<p>The Credentials page then provides the available credentials such as an OAuth 2.0 client ID and
+an Android Key, but you don't need these to authorize your Android users. Simply registering your
+app with the package name and SHA1 makes the Google services accessible by your app.
+
+
+<p>To acquire the OAuth 2.0 token that will grant you access to Google APIs over HTTP, you need to
+first identify the user's Google account with which you'll query the servers. For this task, the
+Google Play services library provides a convenient account picker dialog you can invoke using
+<a href="{@docRoot}reference/com/google/android/gms/common/AccountPicker.html">{@code
+AccountPicker}</a>. The result delivered to your activity from the account picker is the account
+name you'll use to request the OAuth 2.0 token in the next lesson.</p>
+
+<p class="note"><strong>Note:</strong> In order to use the APIs discussed here, you must
+include the Google Play services library with your project. If you haven't set up your project
+with the library yet, read the guide to <a
+href="{@docRoot}google/play-services/setup.html">Setup Google Play Services SDK</a>.</p>
+
+
+
+<h2 id="AccountPicker">Invoke the Account Picker</h2>
+
+<p>To open the account picker dialog that's managed by the Google Play services library, call
+{@link android.app.Activity#startActivityForResult startActivityForResult()} using an {@link
+android.content.Intent} returned by <a href=
+"{@docRoot}reference/com/google/android/gms/common/AccountPicker.html#newChooseAccountIntent(android.accounts.Account,%20java.util.ArrayList%3Candroid.accounts.Account%3E,%20java.lang.String[],%20boolean,%20java.lang.String,%20java.lang.String,%20java.lang.String[],%20android.os.Bundle)">
+{@code AccountPicker.newChooseAccountIntent}</a>.</p>
+
+
+<p>For example:</p>
+<pre>
+static final int REQUEST_CODE_PICK_ACCOUNT = 1000;
+
+private void pickUserAccount() {
+    String[] accountTypes = new String[]{"com.google"};
+    Intent intent = AccountPicker.newChooseAccountIntent(null, null,
+            accountTypes, false, null, null, null, null);
+    startActivityForResult(intent, REQUEST_CODE_PICK_ACCOUNT);
+}
+</pre>
+
+<p>When this code executes, a dialog appears for the user to pick an account. When the user
+selects the account, your activity receives the result in the {@link
+android.app.Activity#onActivityResult onActivityResult()} callback.</p>
+
+<p>Most apps should pass the <a href=
+"{@docRoot}reference/com/google/android/gms/common/AccountPicker.html#newChooseAccountIntent(android.accounts.Account,%20java.util.ArrayList%3Candroid.accounts.Account%3E,%20java.lang.String[],%20boolean,%20java.lang.String,%20java.lang.String,%20java.lang.String[],%20android.os.Bundle)">
+{@code newChooseAccountIntent()}</a> method the same arguments shown in the above example,
+which indicate that:</p>
+
+
+<ul>
+<li>There is no currently selected account.</li>
+<li>There is no restricted list of accounts.</li>
+<li>The dialog should list only accounts from the "com.google" domain.</li>
+<li>Don't prompt the user to pick an account if there's only one available account (just use that
+one). However, even if only one account currently exists, the dialog may include an option for the
+user to add a new account.</li>
+<li>There is no custom title for the dialog.</li>
+<li>There is no specific auth token type required.</li>
+<li>There are no restrictions based on account features.</li>
+<li>There are no authenticator-specific options.</li>
+</ul>
+
+<p>For more details about these arguments, see the <a href=
+"{@docRoot}reference/com/google/android/gms/common/AccountPicker.html#newChooseAccountIntent(android.accounts.Account,%20java.util.ArrayList%3Candroid.accounts.Account%3E,%20java.lang.String[],%20boolean,%20java.lang.String,%20java.lang.String,%20java.lang.String[],%20android.os.Bundle)">
+{@code newChooseAccountIntent()}</a> method documentation.</p>
+
+
+
+
+<h2 id="AccountName">Retrieve the Account Name</h2>
+
+<p>Once the user selects an account, your activity receives a call to its
+{@link android.app.Activity#onActivityResult onActivityResult()} method. The received
+{@link android.content.Intent} includes an extra for
+{@link android.accounts.AccountManager#KEY_ACCOUNT_NAME}, specifying the account name
+(an email address) you must use to acquire the OAuth 2.0 token.</p>
+
+<p>Here's an example implementation of the callback {@link android.app.Activity#onActivityResult
+onActivityResult()} that receives the selected account:</p>
+
+<pre>
+String mEmail; // Received from <a href=
+"{@docRoot}reference/com/google/android/gms/common/AccountPicker.html#newChooseAccountIntent(android.accounts.Account,%20java.util.ArrayList%3Candroid.accounts.Account%3E,%20java.lang.String[],%20boolean,%20java.lang.String,%20java.lang.String,%20java.lang.String[],%20android.os.Bundle)"
+>{@code newChooseAccountIntent()}</a>; passed to <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">{@code getToken()}</a>
+
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
+        // Receiving a result from the AccountPicker
+        if (resultCode == RESULT_OK) {
+            mEmail = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+            // With the account name acquired, go get the auth token
+            getUsername();
+        } else if (resultCode == RESULT_CANCELED) {
+            // The account picker dialog closed without selecting an account.
+            // Notify users that they must pick an account to proceed.
+            Toast.makeText(this, R.string.pick_account, Toast.LENGTH_SHORT).show();
+        }
+    }
+    // Later, more code will go here to handle the result from some exceptions...
+}
+</pre>
+
+<p>You can now pass the account name held by {@code mEmail} to <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">
+{@code GoogleAuthUtil.getToken()}</a> (which is what the {@code getUsername()} method
+does), but because it performs network transactions, this method should not be called from the
+UI thread. The next lesson shows how to create an {@link android.os.AsyncTask} to get the auth token
+on a separate thread.</p>
+
+
+<p>Once you have retrieved the account name for the user's Google account, you can call <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">
+{@code GoogleAuthUtil.getToken()}</a>, which returns the access token string required by Google API
+services.</p>
+
+
+<p>Calling this method is generally a straightforward procedure, but you must be
+aware that:</p>
+<ul>
+<li>The <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">
+{@code GoogleAuthUtil.getToken()}</a> method requires a network connection, so your app must
+acquire the {@link android.Manifest.permission#INTERNET} permission. You should also check whether
+the device has a network connection at runtime by querying {@link android.net.NetworkInfo}, which
+requires that your app also acquire the {@link android.Manifest.permission#ACCESS_NETWORK_STATE}
+permissions&mdash;for more details, read <a href=
+"{@docRoot}training/basics/network-ops/connecting.html">Connecting to the Network</a>.</li>
+<li>Because the <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">
+{@code GoogleAuthUtil.getToken()}</a> method performs a synchronous network transaction, you should
+always perform this call from a worker thread to avoid blocking your app's UI thread.</li>
+<li>As is true when performing any network transaction, you should be prepared to handle
+exceptions that may occur. There are also specific exceptions that
+<a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">
+{@code GoogleAuthUtil.getToken()}</a> may throw, defined as <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthException.html">{@code
+GoogleAuthException}</a> objects.</li>
+</ul>
+
+<p>This lesson shows how you can gracefully handle these concerns by performing authentication in
+an {@link android.os.AsyncTask} and providing users with the appropriate information and available
+actions during known exceptions.</p>
+
+<p class="note"><strong>Note:</strong> The code shown in this lesson, using <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">{@code GoogleAuthUtil.getToken()}</a>,
+is appropriate when you will be requesting the OAuth token from an {@link android.app.Activity}.
+However, if you need to request the OAuth token from a {@link android.app.Service}, then you
+should instead use <a
+href="{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">{@code
+getTokenWithNotification()}</a>. This method works the same as <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">{@code GoogleAuthUtil.getToken()}</a>, but if an error occurs, it
+also creates an appropriate
+<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">notification</a>
+that allows the user can recover from the error.
+The sample available for download above includes code showing how to use this method instead.</p>
+
+
+<h2 id="ExtendAsyncTask">Extend AsyncTask to Get the Auth Token</h2>
+
+<p>The {@link android.os.AsyncTask} class provides a simple way to create a worker thread for jobs
+that should not run on your UI thread. This lesson focuses on how to create such a thread
+to get your auth token; for a more complete discussion about {@link android.os.AsyncTask},
+read <a href="{@docRoot}training/articles/perf-anr.html">Keeping Your
+App Responsive</a> and the {@link android.os.AsyncTask} class reference.</p>
+
+
+<p>The {@link android.os.AsyncTask#doInBackground doInBackground()} method in your {@link
+android.os.AsyncTask} class is where you should call the <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">
+{@code GoogleAuthUtil.getToken()}</a> method. You can also use it to catch some of the generic
+exceptions that may occur during your network transactions.</p>
+
+<p>For example, here's part of an {@link android.os.AsyncTask} subclass that calls <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">
+{@code GoogleAuthUtil.getToken()}</a>:</p>
+
+<pre>
+public class GetUsernameTask extends AsyncTask<Void, Void, Void>{
+    Activity mActivity;
+    String mScope;
+    String mEmail;
+
+    GetUsernameTask(Activity activity, String name, String scope) {
+        this.mActivity = activity;
+        this.mScope = scope;
+        this.mEmail = name;
+    }
+
+    /**
+     * Executes the asynchronous job. This runs when you call execute()
+     * on the AsyncTask instance.
+     */
+    &#64;Override
+    protected Void doInBackground(Void... params) {
+        try {
+            String token = fetchToken();
+            if (token != null) {
+                // <b>Insert the good stuff here.</b>
+                // Use the token to access the user's Google data.
+                ...
+            }
+        } catch (IOException e) {
+            // The fetchToken() method handles Google-specific exceptions,
+            // so this indicates something went wrong at a higher level.
+            // TIP: Check for network connectivity before starting the AsyncTask.
+            ...
+        }
+        return null;
+    }
+
+    /**
+     * Gets an authentication token from Google and handles any
+     * GoogleAuthException that may occur.
+     */
+    protected String fetchToken() throws IOException {
+        try {
+            <b>return GoogleAuthUtil.getToken(mActivity, mEmail, mScope);</b>
+        } catch (UserRecoverableAuthException userRecoverableException) {
+            // GooglePlayServices.apk is either old, disabled, or not present
+            // so we need to show the user some UI in the activity to recover.
+            mActivity.handleException(userRecoverableException);
+        } catch (GoogleAuthException fatalException) {
+            // Some other type of unrecoverable exception has occurred.
+            // Report and log the error as appropriate for your app.
+            ...
+        }
+        return null;
+    }
+    ...
+}
+</pre>
+
+<p>In order to call <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">
+{@code GoogleAuthUtil.getToken()}</a>, you must provide the app {@link android.content.Context},
+the account name retrieved from the account picker, and the scope for your auth
+token request. The above sample code (and the attached sample) defines these arguments with
+class members that the host activity passes to
+the {@link android.os.AsyncTask} class constructor.</p>
+
+<p class="note"><strong>Note:</strong>
+As shown by the {@code fetchToken()} method above, you must handle
+special exceptions that may occur during the <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">
+{@code GoogleAuthUtil.getToken()}</a> method. The next section shows how you should
+respond to these exceptions.</p>
+
+<p>Once you have an {@link android.os.AsyncTask} subclass defined,
+you can instantiate and execute an instance after you get the user's
+account name from the account picker.
+For example, back in the {@link android.app.Activity} class you can do something like this:</p>
+
+<pre>
+String mEmail; // Received from <a href=
+"{@docRoot}reference/com/google/android/gms/common/AccountPicker.html#newChooseAccountIntent(android.accounts.Account,%20java.util.ArrayList%3Candroid.accounts.Account%3E,%20java.lang.String[],%20boolean,%20java.lang.String,%20java.lang.String,%20java.lang.String[],%20android.os.Bundle)"
+>{@code newChooseAccountIntent()}</a>; passed to <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">{@code getToken()}</a>
+private static final String SCOPE =
+        "oauth2:https://www.googleapis.com/auth/userinfo.profile";
+
+/**
+ * Attempts to retrieve the username.
+ * If the account is not yet known, invoke the picker. Once the account is known,
+ * start an instance of the AsyncTask to get the auth token and do work with it.
+ */
+private void getUsername() {
+    if (mEmail == null) {
+        pickUserAccount();
+    } else {
+        if (isDeviceOnline()) {
+            <b>new GetUsernameTask(HelloActivity.this, mEmail, SCOPE).execute();</b>
+        } else {
+            Toast.makeText(this, R.string.not_online, Toast.LENGTH_LONG).show();
+        }
+    }
+}
+</pre>
+
+<p>The {@code pickUserAccount()} method is shown in the first lesson, <a
+href="{@docRoot}training/auth-google/picking-account.html">Picking the User's Account</a>.
+
+<p>For information about how to check whether the device is currently online (as performed by
+the {@code isDeviceOnline()} method above), see the attached sample app or the
+<a href=
+"{@docRoot}training/basics/network-ops/connecting.html">Connecting to the Network</a> lesson.</p>
+
+<p>The only part left is how you should handle the exceptions that may occur when you call
+<a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">
+{@code GoogleAuthUtil.getToken()}</a>.</p>
+
+
+
+
+<h2 id="HandleExceptions">Handle Exceptions</h2>
+
+<p>As shown in the <code>fetchToken()</code> method above, you must catch all occurrences of <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthException.html">{@code
+GoogleAuthException}</a> when you call <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">
+{@code GoogleAuthUtil.getToken()}</a>.</p>
+
+<p>To provide users information and a proper solution to issues that may occur while acquiring the
+auth token, it's important that you properly handle the following subclasses of <a href=
+"{@docRoot}reference/com/google/android/gms/auth/GoogleAuthException.html">{@code
+GoogleAuthException}</a>:</p>
+
+
+<dl>
+<dt><a href="{@docRoot}reference/com/google/android/gms/auth/UserRecoverableAuthException.html">{@code UserRecoverableAuthException}</a></dt>
+  <dd>This is an error that users can resolve through some verification. For example, users may
+  need to confirm that your app is allowed to access their Google data or they may need to re-enter
+  their account password. When you receive this exception, call <a href=
+"{@docRoot}reference/com/google/android/gms/auth/UserRecoverableAuthException.html#getIntent()">{@code
+getIntent()}</a> on the instance and pass the returned {@link android.content.Intent} to {@link
+android.app.Activity#startActivityForResult startActivityForResult()} to give users the opportunity
+to solve the problem, such as by logging in.</dd>
+
+<dt><a href="{@docRoot}reference/com/google/android/gms/auth/GooglePlayServicesAvailabilityException.html">{@code GooglePlayServicesAvailabilityException}</a></dt>
+    <dd>This is a specific type of <a
+    href="{@docRoot}reference/com/google/android/gms/auth/UserRecoverableAuthException.html">{@code
+    UserRecoverableAuthException}</a> indicating that the user's current version
+of Google Play services is outdated. Although the recommendation above for
+<a href="{@docRoot}reference/com/google/android/gms/auth/UserRecoverableAuthException.html">{@code
+    UserRecoverableAuthException}</a> also works for this exception, calling {@link
+android.app.Activity#startActivityForResult startActivityForResult()} will immediately send users
+ to Google Play Store to install an update, which may be confusing. So you should instead call <a
+ href="{@docRoot}reference/com/google/android/gms/auth/GooglePlayServicesAvailabilityException.html#getConnectionStatusCode()">
+{@code getConnectionStatusCode()}</a> and pass the result to <a href=
+"{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int,%20android.app.Activity,%20int,%20android.content.DialogInterface.OnCancelListener)">
+{@code GooglePlayServicesUtil.getErrorDialog()}</a>. This returns a {@link android.app.Dialog}
+that includes an appropriate message and a button to take users to Google Play Store so they
+can install an update.</dd>
+</dl>
+
+<p>For example, the <code>fetchToken()</code> method in the above sample code catches any
+occurrence of <a
+href="{@docRoot}reference/com/google/android/gms/auth/UserRecoverableAuthException.html">{@code
+UserRecoverableAuthException}</a> and passes it back to the activity with a method called
+{@code handleException()}. Here's what that method in the activity may look like:</p>
+
+
+<pre>
+static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 1001;
+
+/**
+ * This method is a hook for background threads and async tasks that need to
+ * provide the user a response UI when an exception occurs.
+ */
+public void handleException(final Exception e) {
+    // Because this call comes from the AsyncTask, we must ensure that the following
+    // code instead executes on the UI thread.
+    runOnUiThread(new Runnable() {
+        &#64;Override
+        public void run() {
+            if (e instanceof GooglePlayServicesAvailabilityException) {
+                // The Google Play services APK is old, disabled, or not present.
+                // Show a dialog created by Google Play services that allows
+                // the user to update the APK
+                int statusCode = ((GooglePlayServicesAvailabilityException)e)
+                        .getConnectionStatusCode();
+                Dialog dialog = GooglePlayServicesUtil.getErrorDialog(statusCode,
+                        HelloActivity.this,
+                        REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR);
+                dialog.show();
+            } else if (e instanceof UserRecoverableAuthException) {
+                // Unable to authenticate, such as when the user has not yet granted
+                // the app access to the account, but the user can fix this.
+                // Forward the user to an activity in Google Play services.
+                Intent intent = ((UserRecoverableAuthException)e).getIntent();
+                startActivityForResult(intent,
+                        REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR);
+            }
+        }
+    });
+}
+</pre>
+
+<p>Notice that in both cases, the {@code REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR}
+request code is passed with the request to handle the exception with a dialog or activity.
+This way, when the user completes the appropriate action to resolve the exception,
+your {@link android.app.Activity#onActivityResult onActivityResult()} method receives an
+intent that includes this request code and you can try to acquire the auth
+token again.</p>
+
+
+<p>For example, the following code is a complete implementation of {@link
+android.app.Activity#onActivityResult onActivityResult()} that handles results for
+both the {@code REQUEST_CODE_PICK_ACCOUNT} action (shown in the previous lesson, <a
+href="{@docRoot}training/auth-google/picking-account.html">Picking the User's Account</a>)
+and the {@code REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR} action, which occurs after the user
+completes one of the actions above to resolve an exception.</p>
+
+
+<pre>
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
+        // Receiving a result from the AccountPicker
+        if (resultCode == RESULT_OK) {
+            mEmail = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+            // With the account name acquired, go get the auth token
+            getUsername();
+        } else if (resultCode == RESULT_CANCELED) {
+            // The account picker dialog closed without selecting an account.
+            // Notify users that they must pick an account to proceed.
+            Toast.makeText(this, R.string.pick_account, Toast.LENGTH_SHORT).show();
+        }
+    } else if ((requestCode == REQUEST_CODE_RECOVER_FROM_AUTH_ERROR ||
+            requestCode == REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR)
+            && resultCode == RESULT_OK) {
+        // Receiving a result that follows a GoogleAuthException, try auth again
+        getUsername();
+    }
+}
+</pre>
+
+<p>For a complete set of code that acquires the OAuth token and queries a Google service
+over HTTP (including how to use <a
+href="{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">{@code
+getTokenWithNotification()}</a> when you need to acquire the token from
+a {@link android.app.Service}), see the sample app available for download at the top
+of this page.</p>
+
+
+

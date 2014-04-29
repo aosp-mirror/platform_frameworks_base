@@ -1,5 +1,6 @@
 page.title=Accessibility
 page.tags="accessibility","navigation","input"
+page.metaDescription=Design an app that's universally accessible to people with visual impairment, color deficiency, hearing loss, and limited dexterity.
 @jd:body
 
 <a class="notice-developers" href="{@docRoot}training/accessibility/index.html">

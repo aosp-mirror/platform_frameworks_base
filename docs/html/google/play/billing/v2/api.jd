@@ -32,14 +32,6 @@ Store app installed on the device. </p>
 asynchronous and uses service messages sent as broadcast intents, so
 it is more complicated than Version 3. </p>
 
-<p>Version 2 supports both unmanaged and managed products, as well as supports
-subscriptions, where Version 3 does not yet offer support for subscriptions. If
-you want to sell subscriptions in your app, you should implement In-app Billing
-Version 2, rather than Version 3. </p>
-
-<p>If you do not need to sell subscriptions, you
-should implement In-app Billing Version 3 instead.</p>
-
 <h2 id="billing-types">Product Types</h2>
 
 <p>In-app Billing Version supports three different product types
@@ -500,11 +492,8 @@ limitations.</p>
   <li>In-app billing can be implemented only in applications that you publish through Google
   Play.</li>
   <li>You must have a Google Wallet Merchant account to use Google Play In-app Billing.</li>
-  <li>In-app billing requires version 2.3.4 (or higher) of the Android Market application.
-  To support subscriptions, version 3.5 or higher of the Google Play app is required. On devices
-  running Android 3.0, version 5.0.12 (or higher) of the MyApps application is required.</li>
-  <li>An application can use in-app billing only if the device is running Android 1.6 (API level 4)
-  or higher.</li>
+  <li>To support subscriptions, version 3.5 or higher of the Google Play app is required. </li>
+  <li>In-app Billing requires Android 1.6 (API level 4) or higher.</li>
   <li>You can use in-app billing to sell only digital content. You cannot use in-app billing to sell
   physical goods, personal services, or anything that requires physical delivery.</li>
   <li>Google Play does not provide any form of content delivery. You are responsible for

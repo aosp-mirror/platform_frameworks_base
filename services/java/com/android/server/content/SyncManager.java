@@ -2352,7 +2352,7 @@ public class SyncManager {
                             Log.v(TAG, "canceling and rescheduling sync since an initialization "
                                     + "takes higher priority, " + conflict);
                         }
-                    } else if (candidate.expedited && !conflict.mSyncOperation.expedited
+                    } else if (candidate.isExpedited() && !conflict.mSyncOperation.isExpedited()
                             && (candidateIsInitialization
                                 == conflict.mSyncOperation.isInitialization())) {
                         toReschedule = conflict;

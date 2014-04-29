@@ -75,16 +75,16 @@ content of the text field to another activity.</p>
 
 <h2 id="LinearLayout">Create a Linear Layout</h2>
 
-<p>Open the <code>activity_main.xml</code> file from the <code>res/layout/</code>
+<p>Open the <code>fragment_main.xml</code> file from the <code>res/layout/</code>
 directory.</p>
 
 <p class="note"><strong>Note:</strong> In Eclipse, when you open a layout file, you’re first shown
 the Graphical Layout editor. This is an editor that helps you build layouts using WYSIWYG tools. For this
-lesson, you’re going to work directly with the XML, so click the <em>activity_main.xml</em> tab at
+lesson, you’re going to work directly with the XML, so click the <em>fragment_main.xml</em> tab at
 the bottom of the screen to open the XML editor.</p>
 
 <p>The BlankActivity template you chose when you created this project includes the
-<code>activity_main.xml</code> file with a {@link
+<code>fragment_main.xml</code> file with a {@link
 android.widget.RelativeLayout} root view and a {@link android.widget.TextView} child view.</p>
 
 <p>First, delete the {@link android.widget.TextView &lt;TextView>} element and change the {@link
@@ -95,7 +95,6 @@ android:orientation}</a> attribute and set it to <code>"horizontal"</code>.
 The result looks like this:</p>
 
 <pre>
-&lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"

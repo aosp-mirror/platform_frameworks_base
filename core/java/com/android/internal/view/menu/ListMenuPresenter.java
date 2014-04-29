@@ -163,7 +163,7 @@ public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClick
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        mMenu.performItemAction(mAdapter.getItem(position), 0);
+        mMenu.performItemAction(mAdapter.getItem(position), this, 0);
     }
 
     @Override

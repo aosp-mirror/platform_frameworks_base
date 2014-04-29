@@ -17,9 +17,12 @@
 package com.android.internal.telephony;
 
 import android.os.Bundle;
-import java.util.List;
-import android.telephony.NeighboringCellInfo;
 import android.telephony.CellInfo;
+import android.telephony.NeighboringCellInfo;
+
+import com.android.internal.telephony.ITelephonyListener;
+
+import java.util.List;
 
 /**
  * Interface used to interact with the phone.  Mostly this is used by the
@@ -324,5 +327,48 @@ interface ITelephony {
      * Sets minimum time in milli-seconds between onCellInfoChanged
      */
     void setCellInfoListRate(int rateInMillis);
+
+    /**
+     * Put a call on hold.
+     */
+     void toggleHold();
+
+     /**
+      * Merge foreground and background calls.
+      */
+     void merge();
+
+     /**
+      * Swap foreground and background calls.
+      */
+     void swap();
+
+     /**
+      * Mute the phone.
+      */
+     void mute(boolean mute);
+
+    /**
+     * Start playing DTMF tone for the specified digit.
+     *
+     * @param digit the digit that corresponds with the desired tone.
+     * @param timedShortcode whether the specified digit should be played as a timed short code.
+     */
+     void playDtmfTone(char digit, boolean timedShortCode);
+
+     /**
+      * Stop playing DTMF tones.
+      */
+     void stopDtmfTone();
+
+     /**
+       * Register a callback.
+       */
+      void addListener(ITelephonyListener listener);
+
+      /**
+       * Unregister a callback.
+       */
+      void removeListener(ITelephonyListener listener);
 }
 

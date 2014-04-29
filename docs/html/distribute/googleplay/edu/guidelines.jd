@@ -208,11 +208,11 @@ Google Play for Education.</p>
 
 <h3 id="devices">Android tablets</h3>
 
-<p>Google Play for Education uses primarily Nexus 7 devices, so
-your testing can focus on that specific hardware device. You can purchase the
+<p>Google Play for Education offers a range of 7-inch through 10-inch tablets, so
+your testing should focus on those hardware devices. You can purchase the Nexus 7
 device from <a href="https://play.google.com/store/devices/details?id=nexus_7_16gb"
 target="_android">Google Play</a> and other stores. Although testing on Nexus
-devices is preferred, you can test on other 7-inch (or 10-inch) tablets or virtual
+devices is preferred, you can test on other 7-inch or 10-inch tablets or virtual
 devices if you don't have access to Nexus devices.</p>
 
 <h3 id="conditions">Test conditions</h3>

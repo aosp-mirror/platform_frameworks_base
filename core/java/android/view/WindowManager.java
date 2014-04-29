@@ -1063,13 +1063,6 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_SHOW_FOR_ALL_USERS = 0x00000010;
 
         /**
-         * Special flag for the volume overlay: force the window manager out of "hide nav bar"
-         * mode while the window is on screen.
-         *
-         * {@hide} */
-        public static final int PRIVATE_FLAG_FORCE_SHOW_NAV_BAR = 0x00000020;
-
-        /**
          * Never animate position changes of the window.
          *
          * {@hide} */

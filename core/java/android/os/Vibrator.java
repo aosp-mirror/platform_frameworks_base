@@ -21,11 +21,11 @@ import android.content.Context;
 /**
  * Class that operates the vibrator on the device.
  * <p>
- * If your process exits, any vibration you started with will stop.
+ * If your process exits, any vibration you started will stop.
  * </p>
  *
  * To obtain an instance of the system vibrator, call
- * {@link Context#getSystemService} with {@link Context#VIBRATOR_SERVICE} as argument.
+ * {@link Context#getSystemService} with {@link Context#VIBRATOR_SERVICE} as the argument.
  */
 public abstract class Vibrator {
     /**

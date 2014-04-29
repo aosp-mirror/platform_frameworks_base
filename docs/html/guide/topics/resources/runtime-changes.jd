@@ -53,7 +53,7 @@ situation, you have two other options:</p>
 <ol type="a">
   <li><a href="#RetainingAnObject">Retain an object during a configuration change</a>
   <p>Allow your activity to restart when a configuration changes, but carry a stateful
-{@link java.lang.Object} to the new instance of your activity.</p>
+object to the new instance of your activity.</p>
 
   </li>
   <li><a href="#HandlingTheChange">Handle the configuration change yourself</a>
@@ -73,40 +73,53 @@ activity state with the {@link android.os.Bundle} that the system saves for you 
 android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} callback&mdash;it is not
 designed to carry large objects (such as bitmaps) and the data within it must be serialized then
 deserialized, which can consume a lot of memory and make the configuration change slow. In such a
-situation, you can alleviate the burden of reinitializing your activity by retaining a stateful
-{@link java.lang.Object} when your activity is restarted due to a configuration change.</p>
+situation, you can alleviate the burden of reinitializing your activity by retaining a {@link
+android.app.Fragment} when your activity is restarted due to a configuration change. This fragment
+can contain references to stateful objects that you want to retain.</p>
 
-<p>To retain an object during a runtime configuration change:</p>
+<p>When the Android system shuts down your activity due to a configuration change, the fragments
+of your activity that you have marked to retain are not destroyed. You can add such fragments to
+your activity to preserve stateful objects.</p>
+
+<p>To retain stateful objects in a fragment during a runtime configuration change:</p>
+
 <ol>
-  <li>Override the {@link android.app.Activity#onRetainNonConfigurationInstance()} method to return
-the object you would like to retain.</li>
-  <li>When your activity is created again, call {@link
-android.app.Activity#getLastNonConfigurationInstance()} to recover your object.</li>
+  <li>Extend the {@link android.app.Fragment} class and declare references to your stateful 
+      objects.</li>
+  <li>Call {@link android.app.Fragment#setRetainInstance(boolean)} when the fragment is created.
+      </li>
+  <li>Add the fragment to your activity.</li>
+  <li>Use {@link android.app.FragmentManager} to retrieve the fragment when the activity is 
+      restarted.</li>
 </ol>
 
-<p>When the Android system shuts down your activity due to a configuration change, it calls {@link
-android.app.Activity#onRetainNonConfigurationInstance()} between the {@link
-android.app.Activity#onStop()} and {@link android.app.Activity#onDestroy()} callbacks. In your
-implementation of {@link android.app.Activity#onRetainNonConfigurationInstance()}, you can return
-any {@link java.lang.Object} that you need in order to efficiently restore your state after the
-configuration change.</p>
-
-<p>A scenario in which this can be valuable is if your application loads a lot of data from the
-web. If the user changes the orientation of the device and the activity restarts, your application
-must re-fetch the data, which could be slow. What you can do instead is implement
-{@link android.app.Activity#onRetainNonConfigurationInstance()} to return an object carrying your
-data and then retrieve the data when your activity starts again with {@link
-android.app.Activity#getLastNonConfigurationInstance()}. For example:</p>
+<p>For example, define your fragment as follows:</p>
 
 <pre>
-&#64;Override
-public Object onRetainNonConfigurationInstance() {
-    final MyDataObject data = collectMyLoadedData();
-    return data;
+public class RetainedFragment extends Fragment {
+
+    // data object we want to retain
+    private MyDataObject data;
+
+    // this method is only called once for this fragment
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // retain this fragment
+        setRetainInstance(true);
+    }
+
+    public void setData(MyDataObject data) {
+        this.data = data;
+    }
+
+    public MyDataObject getData() {
+        return data;
+    }
 }
 </pre>
 
-<p class="caution"><strong>Caution:</strong> While you can return any object, you
+<p class="caution"><strong>Caution:</strong> While you can store any object, you
 should never pass an object that is tied to the {@link android.app.Activity}, such as a {@link
 android.graphics.drawable.Drawable}, an {@link android.widget.Adapter}, a {@link android.view.View}
 or any other object that's associated with a {@link android.content.Context}. If you do, it will
@@ -114,26 +127,51 @@ leak all the views and resources of the original activity instance. (Leaking res
 means that your application maintains a hold on them and they cannot be garbage-collected, so
 lots of memory can be lost.)</p>
 
-<p>Then retrieve the data when your activity starts again:</p>
+<p>Then use {@link android.app.FragmentManager} to add the fragment to the activity. 
+You can obtain the data object from the fragment when the activity starts again during runtime 
+configuration changes. For example, define your activity as follows:</p>
 
 <pre>
-&#64;Override
-public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.main);
+public class MyActivity extends Activity {
 
-    final MyDataObject data = (MyDataObject) getLastNonConfigurationInstance();
-    if (data == null) {
-        data = loadMyData();
+    private RetainedFragment dataFragment;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getFragmentManager();
+        dataFragment = (DataFragment) fm.findFragmentByTag(“data”);
+
+        // create the fragment and data the first time
+        if (dataFragment == null) {
+            // add the fragment
+            dataFragment = new DataFragment();
+            fm.beginTransaction().add(dataFragment, “data”).commit();
+            // load the data from the web
+            dataFragment.setData(loadMyData());
+        }
+
+        // the data is available in dataFragment.getData()
+        ...
     }
-    ...
+
+    &#64;Override
+    public void onDestroy() {
+        super.onDestroy();
+        // store the data in the fragment
+        dataFragment.setData(collectMyLoadedData());
+    }
 }
 </pre>
 
-<p>In this case, {@link android.app.Activity#getLastNonConfigurationInstance()} returns the data
-saved by {@link android.app.Activity#onRetainNonConfigurationInstance()}. If {@code data} is null
-(which happens when the activity starts due to any reason other than a configuration change) then
-this code loads the data object from the original source.</p>
+<p>In this example, {@link android.app.Activity#onCreate(Bundle) onCreate()} adds a fragment
+or restores a reference to it. {@link android.app.Activity#onCreate(Bundle) onCreate()} also
+stores the stateful object inside the fragment instance.
+{@link android.app.Activity#onDestroy() onDestroy()} updates the stateful object inside the 
+retained fragment instance.</p>
 
 
 

@@ -45,7 +45,7 @@ $ adb shell
     <tr>
       <td><code>-b&nbsp;&lt;buffer&gt;</code></td>
 
-      <td>Loads an alternate log buffer for viewing, such as <code>event</code> or
+      <td>Loads an alternate log buffer for viewing, such as <code>events</code> or
       <code>radio</code>. The <code>main</code> buffer is used by default. See <a href= 
       "{@docRoot}tools/debugging/debugging-log.html#alternativeBuffers">Viewing Alternative Log Buffers</a>.</td>
     </tr>

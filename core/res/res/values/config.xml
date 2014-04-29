@@ -352,6 +352,10 @@
     <!-- Wifi driver supports batched scan -->
     <bool translatable="false" name="config_wifi_batched_scan_supported">false</bool>
 
+    <!-- Wifi driver's fallback country code; WS is ISO-Alpha2 code for Samoa which
+         has restrictions on can be scanned; which may satisfy quite a few regulatory issues. -->
+    <string translatable="false" name="config_wifi_unknown_country_code">WS</string>
+
     <!-- Flag indicating whether the we should enable the automatic brightness in Settings.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">false</bool>
@@ -1304,4 +1308,12 @@
         <item>333</item>
         <item>353</item>
     </string-array>
+
+    <!-- Override the default detection behavior for the framework method
+         android.view.ViewConfiguration#hasPermanentMenuKey().
+         Valid settings are:
+         0 - No change. Use the default autodetection behavior.
+         1 - The device DOES have a permanent menu key; ignore autodetection.
+         2 - The device DOES NOT have a permanent menu key; ignore autodetection. -->
+    <integer name="config_overrideHasPermanentMenuKey">0</integer>
 </resources>

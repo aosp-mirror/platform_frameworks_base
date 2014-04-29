@@ -97,6 +97,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
 <script src="/assets/js/android_3p-bundle.js" type="text/javascript"></script>
 <script type="text/javascript">
   var toRoot = "/";
+  var metaTags = [];
   var devsite = false;
 </script>
 <script src="/assets/js/docs.js" type="text/javascript"></script>
@@ -241,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -279,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -307,6 +310,9 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
+                          <li><a href="/samples/index.html">Samples</a>
+                          </li>
                         
                       </ul>
                     </li>
@@ -347,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -374,6 +380,10 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
+                  <li class="samples"><a href="/samples/index.html"
+                    >Samples</a>
+                  </li>
                 
             </ul>
         </div>
@@ -425,6 +435,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -439,12 +459,6 @@ onkeyup="return search_changed(event, false, '/')" />
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -454,6 +468,18 @@ onkeyup="return search_changed(event, false, '/')" />
     <ul>
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="/google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
@@ -517,28 +543,31 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-  <li class="nav-section">
+   <li class="nav-section">
       <div class="nav-section-header"><a href="/google/gcm/index.html">
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -902,17 +931,18 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Called when the client attempts to join a real-time room. The real-time room can be joined
- by calling the <code><a href="/reference/com/google/android/gms/games/GamesClient.html#joinRoom(com.google.android.gms.games.multiplayer.realtime.RoomConfig)">joinRoom(RoomConfig)</a></code> operation.
- Possible status codes include:
+  <div class="jd-tagdata jd-tagdescr"><p>Called when the client attempts to join a real-time room. The real-time room can be joined by
+ calling the <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#join(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.realtime.RoomConfig)">join(GoogleApiClient, RoomConfig)</a></code> operation. Possible status codes include:
  <ul>
- <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_OK">STATUS_OK</a></code> if data was successfully loaded and is up-to-date.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the <code><a href="/reference/com/google/android/gms/games/GamesClient.html">GamesClient</a></code> needs to
- reconnect to the service to access this data.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_REAL_TIME_CONNECTION_FAILED">STATUS_REAL_TIME_CONNECTION_FAILED</a></code> if the client failed
- to connect to the network</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></code> if an unexpected error occurred in the
- service.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_OK">STATUS_OK</a></code> if data was successfully loaded and is up-to-date.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the client needs to reconnect to
+ the service to access this data.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_REAL_TIME_CONNECTION_FAILED">STATUS_REAL_TIME_CONNECTION_FAILED</a></code> if the client failed to connect to
+ the network</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MULTIPLAYER_DISABLED">STATUS_MULTIPLAYER_DISABLED</a></code> if the game does not support multiplayer.
+ </li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></code> if an unexpected error occurred in the service.
+ </li>
  </ul></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -924,7 +954,7 @@ onkeyup="return search_changed(event, false, '/')" />
         <tr>
           <th>room</td>
           <td>The data of the room that was joined. The room can be <code>null</code> if the
-              <code><a href="/reference/com/google/android/gms/games/GamesClient.html#joinRoom(com.google.android.gms.games.multiplayer.realtime.RoomConfig)">joinRoom(RoomConfig)</a></code> operation failed.
+            <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#join(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.realtime.RoomConfig)">join(GoogleApiClient, RoomConfig)</a></code> operation failed.
 </td>
         </tr>
       </table>
@@ -957,12 +987,11 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Called when the client attempts to leaves the real-time room.
- Possible status codes include:
+  <div class="jd-tagdata jd-tagdescr"><p>Called when the client attempts to leaves the real-time room. Possible status codes include:
  <ul>
- <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_OK">STATUS_OK</a></code> if operation was successfully completed.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></code> if an unexpected error occurred in the
- service.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_OK">STATUS_OK</a></code> if operation was successfully completed.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></code> if an unexpected error occurred in the service.
+ </li>
  </ul></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1007,14 +1036,14 @@ onkeyup="return search_changed(event, false, '/')" />
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Called when all the participants in a real-time room are fully connected. This gets called
- once all invitations are accepted and any necessary automatching has been completed
- Possible status codes include:
+ once all invitations are accepted and any necessary automatching has been completed. Possible
+ status codes include:
  <ul>
- <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_OK">STATUS_OK</a></code> if data was successfully loaded and is up-to-date.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the <code><a href="/reference/com/google/android/gms/games/GamesClient.html">GamesClient</a></code> needs to
- reconnect to the service to access this data.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></code> if an unexpected error occurred in the
- service.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_OK">STATUS_OK</a></code> if data was successfully loaded and is up-to-date.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the client needs to reconnect to
+ the service to access this data.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></code> if an unexpected error occurred in the service.
+ </li>
  </ul></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1022,7 +1051,7 @@ onkeyup="return search_changed(event, false, '/')" />
         <tr>
           <th>room</td>
           <td>The fully connected room object. The room can be <code>null</code> if it could not be
-              loaded successfully.
+            loaded successfully.
 </td>
         </tr>
       </table>
@@ -1056,16 +1085,17 @@ onkeyup="return search_changed(event, false, '/')" />
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Called when the client attempts to create a real-time room. The real-time room can be created
- by calling the <code><a href="/reference/com/google/android/gms/games/GamesClient.html#createRoom(com.google.android.gms.games.multiplayer.realtime.RoomConfig)">createRoom(RoomConfig)</a></code> operation.
- Possible status codes include:
+ by calling the <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#create(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.realtime.RoomConfig)">create(GoogleApiClient, RoomConfig)</a></code> operation. Possible status codes include:
  <ul>
- <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_OK">STATUS_OK</a></code> if data was successfully loaded and is up-to-date.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the <code><a href="/reference/com/google/android/gms/games/GamesClient.html">GamesClient</a></code> needs to
- reconnect to the service to access this data.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_REAL_TIME_CONNECTION_FAILED">STATUS_REAL_TIME_CONNECTION_FAILED</a></code> if the client failed to connect to
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_OK">STATUS_OK</a></code> if data was successfully loaded and is up-to-date.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the client needs to reconnect to
+ the service to access this data.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_REAL_TIME_CONNECTION_FAILED">STATUS_REAL_TIME_CONNECTION_FAILED</a></code> if the client failed to connect to
  the network</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></code> if an unexpected error occurred in the
- service.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MULTIPLAYER_DISABLED">STATUS_MULTIPLAYER_DISABLED</a></code> if the game does not support multiplayer.
+ </li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></code> if an unexpected error occurred in the service.
+ </li>
  </ul></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1077,8 +1107,7 @@ onkeyup="return search_changed(event, false, '/')" />
         <tr>
           <th>room</td>
           <td>The room data that was created if successful. The room can be <code>null</code> if the
-              <code><a href="/reference/com/google/android/gms/games/GamesClient.html#createRoom(com.google.android.gms.games.multiplayer.realtime.RoomConfig)">createRoom(RoomConfig)</a></code> operation failed.
-
+            <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#create(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.realtime.RoomConfig)">create(GoogleApiClient, RoomConfig)</a></code> operation failed.
 </td>
         </tr>
       </table>

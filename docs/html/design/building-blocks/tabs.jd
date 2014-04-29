@@ -11,7 +11,7 @@ page.tags="tabs","actionbar","navigation","viewpager"
   </div>
 </a>
 
-<p>Tabs in the action bar make it easy to explore and switch between different views or functional
+<p itemprop="description">Tabs in the action bar make it easy to explore and switch between different views or functional
 aspects of your app, or to browse categorized data sets.</p>
 
 <p>For details on using gestures to move between tabs, see the <a href="{@docRoot}design/patterns/swipe-views.html">Swipe Views</a> pattern.</p>

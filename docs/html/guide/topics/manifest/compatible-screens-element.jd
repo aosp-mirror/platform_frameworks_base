@@ -20,7 +20,7 @@ parent.link=manifest-intro.html
 href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Specifies each screen configuration with which the application is compatible. Only one instance
+<dd itemprop="description">Specifies each screen configuration with which the application is compatible. Only one instance
 of the {@code &lt;compatible-screens&gt;} element is allowed in the manifest, but it can
 contain multiple <code>&lt;screen&gt;</code> elements. Each <code>&lt;screen&gt;</code> element
 specifies a specific screen size-density combination with which the application is compatible.

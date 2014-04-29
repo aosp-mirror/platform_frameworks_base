@@ -1,0 +1,148 @@
+page.title=Using the Layout Editor
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>See also</h2>
+<ul>
+<li><a href="{@docRoot}sdk/installing/studio.html">
+Getting Started with Android Studio</a></li>
+<li><a href="{@docRoot}sdk/installing/studio-tips.html">
+Android Studio Tips and Tricks</a></li>
+<li><a href="{@docRoot}sdk/installing/migrate.html">
+Migrating from Eclipse</a></li>
+</div>
+</div>
+
+<a class="notice-developers-video"
+href="https://developers.google.com/events/io/sessions/324603352">
+<div>
+    <h3>Video</h3>
+    <p>What's New in Android Developer Tools</p>
+</div>
+</a>
+
+<p>Android Studio offers an advanced layout editor that allows you to drag-and-drop widgets
+into your layout and preview your layout while editing the XML.</p>
+
+<p>Within the layout editor, you can switch between the <strong>Text</strong> view, where
+you edit the XML file as text, and the <strong>Design</strong> view. Just click the
+appropriate tab at the bottom of the window to display the desired editor.</p>
+
+<h2>Editing in the Text View</h2>
+
+<p>You can use the <strong>Text</strong> view to edit your layout file. This section describes
+some of the features that are available in the <strong>Text</strong> view.</p>
+
+<h3>Preview</h3>
+
+<p>While editing in the <strong>Text</strong> view, you can preview the layout on devices
+by opening the <strong>Preview</strong> pane available on the right side of the window.
+Within the <strong>Preview</strong> pane, you can modify the preview by changing various
+options at the top of the pane, including the preview device, layout theme, platform
+version and more. To see a preview of how your app would look with a particular device
+skin, click the preview icon
+<img src="{@docRoot}images/tools/as-preview-icon.png" style="vertical-align:bottom;margin:0;height:19px" />
+and choose the desired device, such as Nexus 4:</p>
+
+<img src="{@docRoot}images/tools/as-preview-chrome.png" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> Previewing your app.</p>
+
+<p>To preview the layout on multiple devices simultaneously, select <strong>Preview All
+Screen Sizes</strong> from the device drop-down. </p>
+
+<p>When you click in the preview image, the layout editor highlights the corresponding
+section in the XML, and vice-versa.</p>
+
+<h3>Interactive error detection and recovery</h3>
+
+<p>As you edit the <strong>Text</strong> view of your layout XML file, Android Studio flags
+typos and offers assistance.</p>
+
+<p>For example, suppose you are adding a button, and you misspell it as &quot;Buttonn&quot;.
+Android Studio helps you to correct it by displaying an error such as the following,
+where you can click on &quot;Change to Button&quot; to fix the error in the XML file:</p>
+
+<img src="{@docRoot}images/tools/as-error.png" alt="" />
+
+<p class="img-caption"><strong>Figure 2.</strong> Flagging errors.</p>
+
+<p>Android Studio also prompts you to supply missing information. For example, suppose you
+start adding a fragment to your layout XML file. First of all, Android Studio displays
+auto-complete suggestions as you type. Once it becomes clear that you are adding a fragment,
+Android Studio displays an error panel with links that you can click to supply the missing
+attributes. Clicking &quot;Automatically add all missing attributes&quot; in this case
+does just that&mdash;it completes the fragment definition in your layout XML file:</p>
+
+<img src="{@docRoot}images/tools/as-frag-ex.png" alt="" />
+
+<p class="img-caption"><strong>Figure 3.</strong> Supplying missing information</p>
+
+<h3>Picking a theme</h3>
+
+<p>To pick a theme for your app, click the Theme icon
+<img src="{@docRoot}images/tools/as-theme-icon.png" style="vertical-align:bottom;margin:0;height:19px" />.
+</p>
+
+<p>This displays the <strong>Select Theme</strong> dialog, where you can search for a
+particular theme and/or select one from the list on the right hand side. The theme you
+choose will be reflected in the previewed image.</p>
+
+<img src="{@docRoot}images/tools/as-theme-db.png" alt="" />
+
+<p class="img-caption"><strong>Figure 4.</strong> Specifying a theme.</p>
+
+<h3>Localization</h3>
+
+<p>Android Studio provides built-in localization support. When you click the
+localization icon
+<img src="{@docRoot}images/tools/as-i18n-icon.png" style="vertical-align:bottom;margin:0;height:19px" />,
+you can select a particular locale, add and edit translations, preview the locales your
+app supports (all locales or just a single locale), and preview right-to-left layout for
+languages that are RTL.</p>
+
+<p>See <a href="{@docRoot}training/basics/supporting-devices/languages.html">Supporting
+Different Languages</a> for a description of how to support different locales in your app.</p>
+<p>For example, here is a preview of a &quot;Hello World&quot; app for the
+<img src="{@docRoot}images/tools/as-fr-icon.png" style="vertical-align:bottom;margin:0;height:19px" />
+locale:</p>
+
+<img src="{@docRoot}images/tools/as-fr-device.png" alt="" />
+<p class="img-caption"><strong>Figure 5.</strong> Previewing locales.</p>
+
+<h2>Editing in the Design View</h2>
+
+<p>You can switch to the graphical editor by clicking <strong>Design</strong> at the
+bottom of the window. While editing in the <strong>Design</strong> view, you can show and
+hide the widgets available to drag-and-drop by clicking <strong>Palette</strong> on the
+left side of the window. Clicking <strong>Designer</strong> on the right side of the
+window reveals a panel with a layout hierarchy and a list of properties for each view in
+the layout.</p>
+
+<p>When you drag a widget into the graphical layout for your app, the display changes to
+help you place the widget. What you see depends on the type of layout. For example, if
+you're dragging a widget into a {@link android.widget.FrameLayout}, it displays a grid to
+help you place the widget, as shown in figure 6:</p>
+
+<img src="{@docRoot}images/tools/as-grid-layout.png" alt="" />
+
+<p class="img-caption"><strong>Figure 6.</strong> Using the grid layout to place a widget.</p>
+
+<p>Within the graphical editor, you can rearrange your app's UI by dragging widgets to
+the desired location.</p>
+
+<h3>Taking a snapshot</h3>
+
+<p>When you run your app on a connected device, you can take a snapshot of it by clicking
+the camera icon
+<img src="{@docRoot}images/tools/as-camera-icon.png" style="vertical-align:bottom;margin:0;height:19px" />
+to the left of the logging
+panel (at the bottom of the window by default). This takes a snapshot of your running app
+(or whatever is currently displayed on your device) and displays it in a window. Check
+<strong>Frame Screenshot</strong> to show your screenshot within the device skin of your
+choice. You can also specify whether you want the image to have screen glare and/or a drop
+shadow. Once you have the desired effect, you can save the image.</p>
+
+<p>You can use the same process to create a snapshot of your app's preview. Just click the
+camera icon in the preview area and follow the steps for adding a device skin.</p>

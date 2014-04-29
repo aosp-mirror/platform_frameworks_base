@@ -501,7 +501,7 @@ public class SyncStorageEngine extends Handler {
      * @return amount of seconds before syncTimeSeconds that the sync can occur.
      *      I.e.
      *      earliest_sync_time = syncTimeSeconds - calculateDefaultFlexTime(syncTimeSeconds)
-     * The flex time is capped at a percentage of the {@link DEFAULT_POLL_FREQUENCY_SECONDS}.
+     * The flex time is capped at a percentage of the {@link #DEFAULT_POLL_FREQUENCY_SECONDS}.
      */
     public static long calculateDefaultFlexTime(long syncTimeSeconds) {
         if (syncTimeSeconds < DEFAULT_MIN_FLEX_ALLOWED_SECS) {

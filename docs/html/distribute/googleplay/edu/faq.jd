@@ -258,7 +258,7 @@ excludeFromSuggestions=true
   </dt>
 
   <dd>
-    If you’d like to reach users of Nexus tablets for schools we encourage you
+    If you’d like to reach tablet users in schools we encourage you
     to build a native app for the optimal user experience. Considerations for
     building your app and instructions for registering it can be found at
     <a href="http://developer.android.com/edu">developer.android.com/edu</a>.
@@ -325,9 +325,9 @@ excludeFromSuggestions=true
   </dt>
 
   <dd>
-    Nexus 7 is available for shipment now, and the Asus Transformer will be
-    available in early 2014. We look forward to welcoming more Android devices
-    into the Google in Education family soon.
+    Nexus 7 is available for shipment now, and the Asus Transformer and HP
+    Slate 8 Pro will be available in early 2014. We look forward to welcoming
+    more Android devices into the Google in Education family soon.
   </dd>
 
   <dt>

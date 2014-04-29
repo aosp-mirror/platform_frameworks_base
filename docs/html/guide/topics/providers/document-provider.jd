@@ -3,8 +3,11 @@ page.title=Storage Access Framework
 <div id="qv-wrapper">
 <div id="qv">
 
-<h2>In this document</h2>
-<ol>
+<h2>In this document
+ <a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle">
+        <span class="more">show more</span>
+        <span class="less" style="display:none">show less</span></a></h2>
+<ol id="toc44" class="hide-nested">
     <li>
         <a href="#overview">Overview</a>
     </li>
@@ -38,8 +41,25 @@ page.title=Storage Access Framework
 <ol>
     <li>{@link android.provider.DocumentsProvider}</li>
     <li>{@link android.provider.DocumentsContract}</li>
-    <li>{@link android.provider.DocumentsContract.Document}</li>
-    <li>{@link android.provider.DocumentsContract.Root}</li>
+</ol>
+
+<h2>Videos</h2>
+
+<ol>
+    <li><a href="http://www.youtube.com/watch?v=zxHVeXbK1P4">
+DevBytes: Android 4.4 Storage Access Framework: Provider</a></li>
+     <li><a href="http://www.youtube.com/watch?v=UFj9AEz0DHQ">
+DevBytes: Android 4.4 Storage Access Framework: Client</a></li>
+</ol>
+
+
+<h2>Code Samples</h2>
+
+<ol>
+    <li><a href="{@docRoot}samples/StorageProvider/index.html">
+Storage Provider</a></li>
+     <li><a href="{@docRoot}samples/StorageClient/index.html">
+StorageClient</a></li>
 </ol>
 
 <h2>See Also</h2>
@@ -50,18 +70,28 @@ page.title=Storage Access Framework
         </a>
     </li>
 </ol>
+
 </div>
 </div>
-<p>Android 4.4 (API level 19) introduces the Storage Access Framework. The
-Storage Access Framework encapsulates capabilities in the Android platform that
-allow apps to request files from file storage services. The Storage Access
-Framework includes the following:</p>
+
+
+<p>Android 4.4 (API level 19) introduces the Storage Access Framework (SAF). The SAF
+ makes it simple for users to browse and open documents, images, and other files
+across all of their their preferred document storage providers. A standard, easy-to-use UI
+lets users browse files and access recents in a consistent way across apps and providers.</p>
+
+<p>Cloud or local storage services can participate in this ecosystem by implementing a
+{@link android.provider.DocumentsProvider} that encapsulates their services. Client
+apps that need access to a provider's documents can integrate with the SAF with just a few
+lines of code.</p>
+
+<p>The SAF includes the following:</p>
 
 <ul>
 <li><strong>Document provider</strong>&mdash;A content provider that allows a
-storage service (such as Google Drive) to reveal the files it manages. This is
+storage service (such as Google Drive) to reveal the files it manages. A document provider is
 implemented as a subclass of the {@link android.provider.DocumentsProvider} class.
-The document provider schema is based on a traditional file hierarchy,
+The document-provider schema is based on a traditional file hierarchy,
 though how your document provider physically stores data is up to you.
 The Android platform includes several built-in document providers, such as
 Downloads, Images, and Videos.</li>
@@ -75,7 +105,7 @@ files returned by document providers.</li>
 document providers that satisfy the client app's search criteria.</li>
 </ul>
 
-<p>Some of the features offered by the Storage Access Framework are as follows:</p>
+<p>Some of the features offered by the SAF are as follows:</p>
 <ul>
 <li>Lets users browse content from all document providers, not just a single app.</li>
 <li>Makes it possible for your app to have long term, persistent access to
@@ -87,7 +117,7 @@ providers, which only appear if the drive is plugged in. </li>
 
 <h2 id ="overview">Overview</h2>
 
-<p>The Storage Access Framework centers around a content provider that is a
+<p>The SAF centers around a content provider that is a
 subclass of the {@link android.provider.DocumentsProvider} class. Within a <em>document provider</em>, data is
 structured as a traditional file hierarchy:</p>
 <p><img src="{@docRoot}images/providers/storage_datamodel.png" alt="data model" /></p>
@@ -134,7 +164,7 @@ file hierarchy. However, you can physically store your data however you like, as
 long as it can be accessed through the {@link android.provider.DocumentsProvider} API. For example, you
 could use tag-based cloud storage for your data.</p>
 
-<p>Figure 2 shows an example of how a photo app might use the Storage Access Framework
+<p>Figure 2 shows an example of how a photo app might use the SAF
 to access  stored data:</p>
 <p><img src="{@docRoot}images/providers/storage_dataflow.png" alt="app" /></p>
 
@@ -143,7 +173,7 @@ to access  stored data:</p>
 <p>Note the following:</p>
 <ul>
 
-<li>In the Storage Access Framework, providers and clients don't interact
+<li>In the SAF, providers and clients don't interact
 directly. A client requests permission to interact
 with files (that is, to read, edit, create, or delete files).</li>
 
@@ -430,7 +460,7 @@ DocumentsContract.deleteDocument(getContentResolver(), uri);
 
 <h3 id="edit">Edit a document</h3>
 
-<p>You can use the Storage Access Framework to edit a text document in place.
+<p>You can use the SAF to edit a text document in place.
 This snippet fires
 the {@link android.content.Intent#ACTION_OPEN_DOCUMENT} intent and uses the
 category {@link android.content.Intent#CATEGORY_OPENABLE} to to display only
@@ -513,8 +543,8 @@ freshest data.</p>
 
 <p>
 If you're developing an app that provides storage services for files (such as
-a cloud save service), you can make your files available through the Storage
-Access Framework by writing a custom document provider.  This section describes
+a cloud save service), you can make your files available through the
+SAF by writing a custom document provider.  This section describes
 how to do this.</p>
 
 
@@ -540,13 +570,25 @@ For example: <code>com.example.android.storageprovider.MyCloudProvider</code>.</
 You must export your provider so that other apps can see it.</li>
 
 <li>The attribute <code>android:grantUriPermissions</code> set to
-<code>&quot;true&quot;</code>. This allows the system to grant other apps access
+<code>&quot;true&quot;</code>. This setting allows the system to grant other apps access
 to content in your provider. For a discussion of how to persist a grant for
 a particular document, see <a href="#permissions">Persist permissions</a>.</li>
 
 <li>The {@code MANAGE_DOCUMENTS} permission. By default a provider is available
-to everyone. Adding this permission restricts your provider to the system,
-which is important for security. </li>
+to everyone. Adding this permission restricts your provider to the system.
+This restriction is important for security.</li>
+
+<li>The {@code android:enabled} attribute set to a boolean value defined in a resource
+file. The purpose of this attribute is to disable the provider on devices running Android 4.3 or lower.
+For example, {@code android:enabled=&quot;&#64;bool/atLeastKitKat&quot;}. In
+addition to including this attribute in the manifest, you need to do the following:
+<ul>
+<li>In your {@code bool.xml} resources file under {@code res/values/}, add
+this line: <pre>&lt;bool name=&quot;atLeastKitKat&quot;&gt;false&lt;/bool&gt;</pre></li>
+
+<li>In your {@code bool.xml} resources file under {@code res/values-v19/}, add
+this line: <pre>&lt;bool name=&quot;atLeastKitKat&quot;&gt;true&lt;/bool&gt;</pre></li>
+</ul></li>
 
 <li>An intent filter that includes the
 {@code android.content.action.DOCUMENTS_PROVIDER} action, so that your provider
@@ -566,7 +608,8 @@ appears in the picker when the system searches for providers.</li>
             android:authorities=&quot;com.example.android.storageprovider.documents&quot;
             android:grantUriPermissions=&quot;true&quot;
             android:exported=&quot;true&quot;
-            android:permission=&quot;android.permission.MANAGE_DOCUMENTS&quot;&gt;
+            android:permission=&quot;android.permission.MANAGE_DOCUMENTS&quot;
+            android:enabled=&quot;&#64;bool/atLeastKitKat&quot;&gt;
             &lt;intent-filter&gt;
                 &lt;action android:name=&quot;android.content.action.DOCUMENTS_PROVIDER&quot; /&gt;
             &lt;/intent-filter&gt;
@@ -575,7 +618,7 @@ appears in the picker when the system searches for providers.</li>
 
 &lt;/manifest&gt;</pre>
 
-<h4>Supporting devices running Android 4.3 and lower</h4>
+<h4 id="43">Supporting devices running Android 4.3 and lower</h4>
 
 <p>The
 {@link android.content.Intent#ACTION_OPEN_DOCUMENT} intent is only available
@@ -583,7 +626,7 @@ on devices running Android 4.4 and higher.
 If you want your application to support {@link android.content.Intent#ACTION_GET_CONTENT}
 to accommodate devices that are running Android 4.3 and lower, you should
 disable the {@link android.content.Intent#ACTION_GET_CONTENT} intent filter in
-your manifest if a device is running Android 4.4 or higher. A
+your manifest for devices running Android 4.4 or higher. A
 document provider and {@link android.content.Intent#ACTION_GET_CONTENT} should be considered
  mutually exclusive. If you support both of them simultaneously, your app will
 appear twice in the system picker UI, offering two different ways of accessing
@@ -630,7 +673,7 @@ implementing contract classes, as described in the
 <a href="{@docRoot}guide/topics/providers/content-provider-creating.html#ContractClass">
 Content Providers</a> developers guide. A contract class is a {@code public final} class
 that contains constant definitions for the URIs, column names, MIME types, and
-other metadata that pertain to the provider. The Storage Access Framework
+other metadata that pertain to the provider. The SAF
 provides these contract classes for you, so you don't need to write your
 own:</p>
 

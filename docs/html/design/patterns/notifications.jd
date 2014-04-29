@@ -8,7 +8,7 @@ page.title=Notifications
   </div>
 </a>
 
-<p>The notification system allows your app to keep the user informed about events, such as new chat messages or a calendar event. Think of notifications as a news channel that alerts the user to important events as they happen or a log that chronicles events while the user is not paying attention.</p>
+<p itemprop="description">The notification system allows your app to keep the user informed about events, such as new chat messages or a calendar event. Think of notifications as a news channel that alerts the user to important events as they happen or a log that chronicles events while the user is not paying attention.</p>
 
 <h4>New in Jelly Bean</h4>
 <p>In Jelly Bean, notifications received their most important structural and functional update since the beginning of Android.</p>

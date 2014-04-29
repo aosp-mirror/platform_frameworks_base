@@ -35,6 +35,8 @@ import android.view.KeyEvent;
  */
 interface IAudioService {
 
+    int verifyX509CertChain(int chainsize, in byte[] chain, String host, String authtype);
+
     void adjustVolume(int direction, int flags, String callingPackage);
 
     boolean isLocalOrRemoteMusicActive();
@@ -236,4 +238,5 @@ interface IAudioService {
     AudioRoutesInfo startWatchingRoutes(in IAudioRoutesObserver observer);
 
     boolean isCameraSoundForced();
+
 }

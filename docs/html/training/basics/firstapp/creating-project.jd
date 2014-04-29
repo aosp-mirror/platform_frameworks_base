@@ -120,8 +120,8 @@ devices.</li>
     <strong>Finish</strong>.</li>
 </ol>
 
-<p>Your Android project is now set up with some default files and you’re ready to begin
-building the app. Continue to the <a href="running-app.html">next lesson</a>.</p>
+<p>Your Android project is now a basic "Hello World" app that contains some default files. 
+To run the app, continue to the <a href="running-app.html">next lesson</a>.</p>
 
 
 
@@ -155,8 +155,8 @@ and replace
 projects.</p></li>
 </ol>
 
-<p>Your Android project is now set up with several default configurations and you’re ready to begin
-building the app. Continue to the <a href="running-app.html">next lesson</a>.</p>
+<p>Your Android project is now a basic "Hello World" app that contains some default files. 
+To run the app, continue to the <a href="running-app.html">next lesson</a>.</p>
 
 <p class="note"><strong>Tip:</strong> Add the <code>platform-tools/</code> as well as the
 <code>tools/</code> directory to your <code>PATH</code> environment variable.</p>

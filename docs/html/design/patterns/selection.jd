@@ -35,9 +35,9 @@ the contextual action bar (CAB).</p>
   </div>
 </div>
 
-<h4>Using the contextual action bar (CAB)</h4>
-<p>The selection CAB is a temporary action bar that overlays your app's current action bar while data
-is selected. It appears after the user long presses on a selectable data item.</p>
+<h4>Using the contextual action bar</h4>
+<p itemprop="description">The contextual action bar (CAB) is a temporary action bar that overlays your app's current action bar while data
+is selected. It appears after the user long-presses on a selectable data item.</p>
 
 <img src="{@docRoot}design/media/selection_cab_big.png">
 

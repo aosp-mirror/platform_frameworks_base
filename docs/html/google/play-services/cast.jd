@@ -1,0 +1,92 @@
+page.title=Google Cast Android API
+page.tags="chromecast","miracast"
+header.hide=1
+
+@jd:body
+
+
+<div class="landing-banner">
+
+<div class="col-6">
+  <img src="{@docRoot}images/google/googlecast.png" alt="">
+</div>
+<div class="col-6">
+
+  <h1 itemprop="name" style="margin-bottom:0;">Google Cast Android API</h1>
+  <p itemprop="description">Google Cast is a technology that enables multi-screen experiences, which
+  allows users to send content from mobile devices and personal computers to their TVs.
+  You can use the Google Cast Android API
+  to add casting functionality to your Android app so users can view your app content on their
+  big screens.</p>
+
+  <p>Explore the <a href="{@docRoot}reference/com/google/android/gms/cast/package-summary.html"
+  >Google Cast Android API reference</a> or visit <a
+  href="http://developers.google.com/cast/" class="external-link">developers.google.com/cast</a>
+  for more information about how to design and build your app to support Google Cast.</p>
+  <p></p>
+</div>
+</div>
+
+<div class="landing-docs">
+  <div class="col-6 normal-links">
+    <h3 style="clear:left">Key Developer Features</h3>
+
+      <h4>Add your own style to a pre-built receiver app</h4>
+      <p>Adding support for Google Cast requires that you provide a companion app on the
+      Google Cast device, known as the receiver app. If your app streams audio or video content
+      using one of several supported media types, then you can create a receiver app with your
+      own style and branding by creating nothing more than a CSS file.
+      <br/><a href="http://developers.google.com/cast/docs/styled_receiver" class="external-link"
+      >Create a Styled Media Receiver</a></p>
+
+      <h4>Build an entirely custom receiver app</h4>
+      <p>If the Styled Media Receiver does not provide the UI components required for your
+      receiver app or does not support the media types your app requires, you can build your
+      own receiver app as a web page using the JavaScript Receiver API.
+      <br/><a href="http://developers.google.com/cast/docs/styled_receiver" class="external-link"
+      >Create a Custom Receiver</a></p>
+
+      <h4>Add playback controls to your app</h4>
+      <p>To allow users to control playback on the receiver app, you can add a
+      controller interface to your app on Android, iOS, and Chrome. The client app on these devices
+      is known as the sender app and can perform a variety of actions using the Google Cast APIs
+      such as start and pause playback and control the volume on the Google Cast device.
+      <br/><a href="http://developers.google.com/cast/docs/sender_apps" class="external-link"
+      >Create a Sender App</a></p>
+  </div>
+
+
+  <div class="col-6 normal-links">
+    <h3 style="clear:left">Getting Started</h3>
+    <h4>1. Get the Google Play services SDK</h4>
+
+    <p>The Google Cast Android APIs are part of the Google Play services platform.</p>
+    <p>To get started, <a href="{@docRoot}google/play-services/setup.html">set up
+      the Google Play services SDK</a> on your development machine and be sure your test device has
+      Google Play services 4.2 (or higher) installed.</p>
+
+    <h4>2. Register your app</h4>
+    <p>Before you can develop and test apps on your own Google Cast device,
+    you need to acquire an app ID for your API calls and register your Google Cast device
+    (such as a Chromecast) as a development device. For details, read the
+    <a href="http://developers.google.com/cast/docs/registration"
+    class="external-link">Registration</a> guide.</p>
+
+    <h4>3. Design the Android app UI</h4>
+    <p>To provide the perfect user experience when casting your content to TVs, be sure your
+    app follows all the recommendations in the <a class="external-link"
+    href="https://developers.google.com/cast/docs/design_checklist"
+    >Design Checklist</a>.</p>
+
+    <h4>4. Start developing</h4>
+    <p>Read the <a class="external-link"
+    href="https://developers.google.com/cast/docs/developers">Developer's Guide</a>
+    to learn how to implement the receiver app and how to send it commands from your Android app.
+    </p>
+
+    <p>For quick access while developing your Android app, the
+    <a href="{@docRoot}reference/com/google/android/gms/cast/package-summary.html">Google Cast
+    Android API reference</a> is available here on developer.android.com.</p>
+
+  </div>
+</div>

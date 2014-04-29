@@ -357,6 +357,18 @@ SkRegion* GraphicsJNI::getNativeRegion(JNIEnv* env, jobject region)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+// Assert that bitmap's SkAlphaType is consistent with isPremultiplied.
+static void assert_premultiplied(const SkBitmap& bitmap, bool isPremultiplied) {
+    // kOpaque_SkAlphaType and kIgnore_SkAlphaType mean that isPremultiplied is
+    // irrelevant. This just tests to ensure that the SkAlphaType is not
+    // opposite of isPremultiplied.
+    if (isPremultiplied) {
+        SkASSERT(bitmap.alphaType() != kUnpremul_SkAlphaType);
+    } else {
+        SkASSERT(bitmap.alphaType() != kPremul_SkAlphaType);
+    }
+}
+
 jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buffer,
         int bitmapCreateFlags, jbyteArray ninepatch, jintArray layoutbounds, int density)
 {
@@ -364,6 +376,10 @@ jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buff
     SkASSERT(bitmap->pixelRef());
     bool isMutable = bitmapCreateFlags & kBitmapCreateFlag_Mutable;
     bool isPremultiplied = bitmapCreateFlags & kBitmapCreateFlag_Premultiplied;
+
+    // The caller needs to have already set the alpha type properly, so the
+    // native SkBitmap stays in sync with the Java Bitmap.
+    assert_premultiplied(*bitmap, isPremultiplied);
 
     jobject obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
             reinterpret_cast<jlong>(bitmap), buffer,
@@ -382,6 +398,10 @@ jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, int bitmapCreat
 void GraphicsJNI::reinitBitmap(JNIEnv* env, jobject javaBitmap, SkBitmap* bitmap,
         bool isPremultiplied)
 {
+    // The caller needs to have already set the alpha type properly, so the
+    // native SkBitmap stays in sync with the Java Bitmap.
+    assert_premultiplied(*bitmap, isPremultiplied);
+
     env->CallVoidMethod(javaBitmap, gBitmap_reinitMethodID,
             bitmap->width(), bitmap->height(), isPremultiplied);
 }
@@ -424,8 +444,9 @@ static JNIEnv* vm2env(JavaVM* vm)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-AndroidPixelRef::AndroidPixelRef(JNIEnv* env, void* storage, size_t size, jbyteArray storageObj,
-        SkColorTable* ctable) : SkMallocPixelRef(storage, size, ctable, (storageObj == NULL)),
+AndroidPixelRef::AndroidPixelRef(JNIEnv* env, const SkImageInfo& info, void* storage,
+        size_t rowBytes, jbyteArray storageObj, SkColorTable* ctable) :
+        SkMallocPixelRef(info, storage, rowBytes, ctable, (storageObj == NULL)),
         fWrappedPixelRef(NULL) {
     SkASSERT(storage);
     SkASSERT(env);
@@ -440,13 +461,13 @@ AndroidPixelRef::AndroidPixelRef(JNIEnv* env, void* storage, size_t size, jbyteA
 
     // If storageObj is NULL, the memory was NOT allocated on the Java heap
     fOnJavaHeap = (storageObj != NULL);
-
 }
 
-AndroidPixelRef::AndroidPixelRef(AndroidPixelRef& wrappedPixelRef, SkColorTable* ctable) :
-        SkMallocPixelRef(wrappedPixelRef.getAddr(), wrappedPixelRef.getSize(), ctable, false),
+AndroidPixelRef::AndroidPixelRef(AndroidPixelRef& wrappedPixelRef, const SkImageInfo& info,
+        size_t rowBytes, SkColorTable* ctable) :
+        SkMallocPixelRef(info, wrappedPixelRef.getAddr(), rowBytes, ctable, false),
         fWrappedPixelRef(wrappedPixelRef.fWrappedPixelRef ?
-            wrappedPixelRef.fWrappedPixelRef : &wrappedPixelRef)
+                wrappedPixelRef.fWrappedPixelRef : &wrappedPixelRef)
 {
     SkASSERT(fWrappedPixelRef);
     SkSafeRef(fWrappedPixelRef);
@@ -548,6 +569,14 @@ jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
                           "bitmap size exceeds 32bits");
         return NULL;
     }
+
+    SkImageInfo bitmapInfo;
+    if (!bitmap->asImageInfo(&bitmapInfo)) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                "unknown bitmap configuration");
+        return NULL;
+    }
+
     size_t size = size64.get32();
     jbyteArray arrayObj = (jbyteArray) env->CallObjectMethod(gVMRuntime,
                                                              gVMRuntime_newNonMovableArray,
@@ -561,7 +590,8 @@ jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
         return NULL;
     }
     SkASSERT(addr);
-    SkPixelRef* pr = new AndroidPixelRef(env, (void*) addr, size, arrayObj, ctable);
+    SkPixelRef* pr = new AndroidPixelRef(env, bitmapInfo, (void*) addr,
+            bitmap->rowBytes(), arrayObj, ctable);
     bitmap->setPixelRef(pr)->unref();
     // since we're already allocated, we lockPixels right away
     // HeapAllocator behaves this way too

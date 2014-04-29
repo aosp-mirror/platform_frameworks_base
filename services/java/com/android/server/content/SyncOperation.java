@@ -66,7 +66,8 @@ public class SyncOperation implements Comparable {
     public final boolean allowParallelSyncs;
     public Bundle extras;
     public final String key;
-    public boolean expedited;
+    /** Internal boolean to avoid reading a bundle everytime we want to compare operations. */
+    private final boolean expedited;
     public SyncStorageEngine.PendingOperation pendingOperation;
     /** Elapsed real time in millis at which to run this sync. */
     public long latestRunTime;
@@ -79,7 +80,7 @@ public class SyncOperation implements Comparable {
      * Depends on max(backoff, latestRunTime, and delayUntil).
      */
     public long effectiveRunTime;
-    /** Amount of time before {@link effectiveRunTime} from which this sync can run. */
+    /** Amount of time before {@link #effectiveRunTime} from which this sync can run. */
     public long flexTime;
 
     public SyncOperation(Account account, int userId, int reason, int source, String authority,
@@ -98,16 +99,39 @@ public class SyncOperation implements Comparable {
         this.backoff = backoff;
         final long now = SystemClock.elapsedRealtime();
         // Checks the extras bundle. Must occur after we set the internal bundle.
-        if (runTimeFromNow < 0 || isExpedited()) {
+        if (runTimeFromNow < 0) {
+            // Sanity check: Will always be true.
+            if (!this.extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false)) {
+                this.extras.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+            }
             this.expedited = true;
             this.latestRunTime = now;
             this.flexTime = 0;
         } else {
+            this.extras.remove(ContentResolver.SYNC_EXTRAS_EXPEDITED);
             this.expedited = false;
             this.latestRunTime = now + runTimeFromNow;
             this.flexTime = flexTime;
         }
         updateEffectiveRunTime();
+        this.key = toKey();
+    }
+
+    /** Only used to immediately reschedule a sync. */
+    SyncOperation(SyncOperation other) {
+        this.service = other.service;
+        this.account = other.account;
+        this.authority = other.authority;
+        this.userId = other.userId;
+        this.reason = other.reason;
+        this.syncSource = other.syncSource;
+        this.extras = new Bundle(other.extras);
+        this.expedited = other.expedited;
+        this.latestRunTime = SystemClock.elapsedRealtime();
+        this.flexTime = 0L;
+        this.backoff = other.backoff;
+        this.allowParallelSyncs = other.allowParallelSyncs;
+        this.updateEffectiveRunTime();
         this.key = toKey();
     }
 
@@ -136,24 +160,6 @@ public class SyncOperation implements Comparable {
         if (!bundle.getBoolean(extraName, false)) {
             bundle.remove(extraName);
         }
-    }
-
-    /** Only used to immediately reschedule a sync. */
-    SyncOperation(SyncOperation other) {
-        this.service = other.service;
-        this.account = other.account;
-        this.authority = other.authority;
-        this.userId = other.userId;
-        this.reason = other.reason;
-        this.syncSource = other.syncSource;
-        this.extras = new Bundle(other.extras);
-        this.expedited = other.expedited;
-        this.latestRunTime = SystemClock.elapsedRealtime();
-        this.flexTime = 0L;
-        this.backoff = other.backoff;
-        this.allowParallelSyncs = other.allowParallelSyncs;
-        this.updateEffectiveRunTime();
-        this.key = toKey();
     }
 
     @Override
@@ -220,7 +226,7 @@ public class SyncOperation implements Comparable {
     }
 
     public boolean isExpedited() {
-        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false) || expedited;
+        return expedited;
     }
 
     public boolean ignoreBackoff() {

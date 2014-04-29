@@ -58,7 +58,7 @@ made with In-app Billing v1 or v2.</li>
 
 <p>The Purchase Status API is part of the <a
 href="https://developers.google.com/android-publisher/v1_1/">Google Play Android
-Developer API v1.1</a>, available through the Google Cloud Console. The new version
+Developer API v1.1</a>, available through the Google Developers Console. The new version
 of the API supersedes the v1 API, which is deprecated. If you are using the v1
 API, please migrate your operations to the v1.1 API as soon as possible.</p>
 
@@ -66,7 +66,7 @@ API, please migrate your operations to the v1.1 API as soon as possible.</p>
 <h2 id="using">Using the API</h2>
 
 <p>To use the API, you must first register a project at the <a
-href="https://cloud.google.com/console">Google Cloud Console</a> and receive
+href="https://cloud.google.com/console">Google Developers Console</a> and receive
 a Client ID and shared secret that  your app will present when calling the
 API. All calls are authenticated with OAuth 2.0.</p>
 
@@ -95,7 +95,8 @@ this section.</p>
 
 <p>If you need to request a higher limit for your application, see the
 instructions in the <a
-href="https://developers.google.com/console/help/new/#trafficcontrols">Google Cloud Console Help</a>.
+href="https://developers.google.com/console/help/new/#trafficcontrols">Google Developers
+Console Help</a>.
 Also, please read the section below on design best practices for minimizing your
 use of the API.</p>
 

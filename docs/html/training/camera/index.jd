@@ -14,7 +14,7 @@ next.link=photobasics.html
 
 <h2>Dependencies and prerequisites</h2>
 <ul>
-  <li>Android 1.5 (API level 3) or higher</li>
+  <li>Android 2.2 (API level 8) or higher</li>
   <li>A device with a camera</li>
 </ul>
 

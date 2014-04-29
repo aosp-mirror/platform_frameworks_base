@@ -17,8 +17,8 @@ header.hide=1
   with the same credentials they use on Google every day. Once a user signs in with Google,
   you can create more engaging experiences and drive usage of your app.</p>
   
-  <p>Check out the <a href="{@docRoot}reference/com/google/android/gms/plus/package-summary.html"
->Google+ Android API reference</a> and visit <a class="external-link"
+  <p>Explore the <a href="{@docRoot}reference/com/google/android/gms/plus/package-summary.html"
+>Google+ Android API reference</a> or visit <a class="external-link"
 href="https://developers.google.com/+/mobile/android/">developers.google.com/+</a> for more
 information about integrating Google+ into your app.</p>
 </div>
@@ -61,8 +61,8 @@ information about integrating Google+ into your app.</p>
     <h3 style="clear:left">Getting Started</h3>
     <h4>1. Get the Google Play services SDK</h4>
     <p>The Google+ Android APIs are part of the Google Play services platform.</p>
-    <p>To get started, <a href="{@docRoot}google/play-services/setup.html">set up</a>
-      the Google Play services SDK.
+    <p>To get started, <a href="{@docRoot}google/play-services/setup.html">set up
+      the Google Play services SDK</a>.
     </p>
             
     <h4>2. Run the sample</h4>

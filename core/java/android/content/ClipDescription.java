@@ -87,7 +87,7 @@ public class ClipDescription implements Parcelable {
     /**
      * Helper to compare two MIME types, where one may be a pattern.
      * @param concreteType A fully-specified MIME type.
-     * @param desiredType A desired MIME type that may be a pattern such as *\/*.
+     * @param desiredType A desired MIME type that may be a pattern such as *&#47;*.
      * @return Returns true if the two MIME types match.
      */
     public static boolean compareMimeTypes(String concreteType, String desiredType) {

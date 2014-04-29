@@ -82,10 +82,10 @@ Note that you can upload and publish your in-app items before you publish the
 APK itself. For example, you can publish your in-app items while your APK is
 still a draft. </p>
 
-<p>Next, create license test accounts for authorized users.  In the Developer
+<p>Next, create license test accounts for authorized users. In the Developer
 Console, go to <strong>Settings</strong> &gt; <strong>Account details</strong>,
 then in the License Testing section, add the addresses to <strong>Gmail accounts
-with testing status</strong>. For more information, see <a
+with testing access</strong> field. For more information, see <a
 href="#billing-testing-test">Setting Up for Test Purchases</a>.</p>
 
 <p>Once you’ve added the users as license tester accounts and saved the change,

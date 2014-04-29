@@ -610,7 +610,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * still running. Each call to this method will trigger the execution of
      * {@link #onProgressUpdate} on the UI thread.
      *
-     * {@link #onProgressUpdate} will note be called if the task has been
+     * {@link #onProgressUpdate} will not be called if the task has been
      * canceled.
      *
      * @param values The progress values to update the UI with.
