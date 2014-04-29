@@ -17,6 +17,7 @@
 package android.os;
 
 import android.system.ErrnoException;
+import android.text.TextUtils;
 import android.system.Os;
 import android.system.OsConstants;
 import android.util.Log;
@@ -381,5 +382,33 @@ public class FileUtils {
             dirPath += "/";
         }
         return filePath.startsWith(dirPath);
+    }
+
+    public static void deleteContents(File dir) {
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    deleteContents(file);
+                }
+                file.delete();
+            }
+        }
+    }
+
+    /**
+     * Assert that given filename is valid on ext4.
+     */
+    public static boolean isValidExtFilename(String name) {
+        if (TextUtils.isEmpty(name) || ".".equals(name) || "..".equals(name)) {
+            return false;
+        }
+        for (int i = 0; i < name.length(); i++) {
+            final char c = name.charAt(i);
+            if (c == '\0' || c == '/') {
+                return false;
+            }
+        }
+        return true;
     }
 }

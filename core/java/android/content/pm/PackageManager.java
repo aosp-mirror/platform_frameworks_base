@@ -3551,6 +3551,9 @@ public abstract class PackageManager {
      */
     public abstract VerifierDeviceIdentity getVerifierDeviceIdentity();
 
+    /** {@hide} */
+    public abstract PackageInstaller getPackageInstaller();
+
     /**
      * Returns the data directory for a particular user and package, given the uid of the package.
      * @param uid uid of the package, including the userId and appId

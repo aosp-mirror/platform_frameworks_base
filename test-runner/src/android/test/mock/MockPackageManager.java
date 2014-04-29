@@ -33,6 +33,7 @@ import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.ManifestDigest;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
@@ -716,6 +717,11 @@ public class MockPackageManager extends PackageManager {
      */
     @Override
     public void clearForwardingIntentFilters(int userIdOrig) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    public PackageInstaller getPackageInstaller() {
         throw new UnsupportedOperationException();
     }
 }

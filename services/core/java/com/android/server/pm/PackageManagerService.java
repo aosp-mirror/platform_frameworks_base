@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.Manifest.permission.GRANT_REVOKE_PERMISSIONS;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.INSTALL_PACKAGES;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
@@ -59,6 +60,7 @@ import org.xmlpull.v1.XmlSerializer;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
+import android.app.PackageInstallObserver;
 import android.app.admin.IDevicePolicyManager;
 import android.app.backup.IBackupManager;
 import android.content.BroadcastReceiver;
@@ -78,6 +80,7 @@ import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageInstallObserver2;
+import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
@@ -86,6 +89,7 @@ import android.content.pm.ManifestDigest;
 import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
+import android.content.pm.PackageInstallerParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser.ActivityIntentInfo;
 import android.content.pm.PackageParser;
@@ -179,6 +183,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import dalvik.system.DexFile;
 import dalvik.system.StaleDexCacheError;
 import dalvik.system.VMRuntime;
+
 import libcore.io.IoUtils;
 
 /**
@@ -351,6 +356,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     // apps.
     final File mDrmAppPrivateInstallDir;
 
+    final File mAppStagingDir;
+
     // ----------------------------------------------------------------
 
     // Lock for state used when installing and doing other long running
@@ -456,6 +463,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** List of packages waiting for verification. */
     final SparseArray<PackageVerificationState> mPendingVerification
             = new SparseArray<PackageVerificationState>();
+
+    final PackageInstallerService mInstallerService;
 
     HashSet<PackageParser.Package> mDeferredDexOpt = null;
 
@@ -1339,6 +1348,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             mAsecInternalPath = new File(dataDir, "app-asec").getPath();
             mUserAppDataDir = new File(dataDir, "user");
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
+            mAppStagingDir = new File(dataDir, "app-staging");
 
             sUserManager = new UserManagerService(context, this,
                     mInstallLock, mPackages);
@@ -1701,14 +1711,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_READY,
                     SystemClock.uptimeMillis());
 
-            // Now after opening every single application zip, make sure they
-            // are all flushed.  Not really needed, but keeps things nice and
-            // tidy.
-            Runtime.getRuntime().gc();
 
             mRequiredVerifierPackage = getRequiredVerifierLPr();
         } // synchronized (mPackages)
         } // synchronized (mInstallLock)
+
+        mInstallerService = new PackageInstallerService(context, this, mAppStagingDir);
+
+        // Now after opening every single application zip, make sure they
+        // are all flushed.  Not really needed, but keeps things nice and
+        // tidy.
+        Runtime.getRuntime().gc();
     }
 
     private static void pruneDexFiles(File cacheDir) {
@@ -2252,7 +2265,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if ((flags & PackageManager.GET_UNINSTALLED_PACKAGES) == 0) {
                     return null;
                 }
-                pkg = new PackageParser.Package(packageName);
+                // TODO: teach about reading split name
+                pkg = new PackageParser.Package(packageName, null);
                 pkg.applicationInfo.packageName = packageName;
                 pkg.applicationInfo.flags = ps.pkgFlags | ApplicationInfo.FLAG_IS_DATA_ONLY;
                 pkg.applicationInfo.publicSourceDir = ps.resourcePathString;
@@ -2348,6 +2362,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
         });
+    }
+
+    void freeStorage(long freeStorageSize) throws IOException {
+        synchronized (mInstallLock) {
+            if (mInstaller.freeCache(freeStorageSize) < 0) {
+                throw new IOException("Failed to free enough space");
+            }
+        }
     }
 
     @Override
@@ -2533,10 +2555,9 @@ public class PackageManagerService extends IPackageManager.Stub {
      * Checks if the request is from the system or an app that has INTERACT_ACROSS_USERS
      * or INTERACT_ACROSS_USERS_FULL permissions, if the userid is not for the caller.
      * @param message the message to log on security exception
-     * @return
      */
-    private void enforceCrossUserPermission(int callingUid, int userId,
-            boolean requireFullPermission, String message) {
+    void enforceCrossUserPermission(int callingUid, int userId, boolean requireFullPermission,
+            String message) {
         if (userId < 0) {
             throw new IllegalArgumentException("Invalid userId " + userId);
         }
@@ -7734,6 +7755,16 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    void installStage(String basePackageName, File stageDir, IPackageInstallObserver2 observer,
+            int flags) {
+        // TODO: install stage!
+        try {
+            observer.packageInstalled(basePackageName, null,
+                    PackageManager.INSTALL_FAILED_INTERNAL_ERROR);
+        } catch (RemoteException ignored) {
+        }
+    }
+
     /**
      * @hide
      */
@@ -7777,7 +7808,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return PackageManager.INSTALL_SUCCEEDED;
     }
 
-    private boolean isUserRestricted(int userId, String restrictionKey) {
+    boolean isUserRestricted(int userId, String restrictionKey) {
         Bundle restrictions = sUserManager.getUserRestrictions(userId);
         if (restrictions.getBoolean(restrictionKey, false)) {
             Log.w(TAG, "User is restricted: " + restrictionKey);
@@ -12899,5 +12930,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    @Override
+    public IPackageInstaller getPackageInstaller() {
+        return mInstallerService;
     }
 }

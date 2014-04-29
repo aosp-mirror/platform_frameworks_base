@@ -16,6 +16,9 @@
 
 package android.content.pm;
 
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -32,6 +35,7 @@ import android.util.AttributeSet;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.TypedValue;
 
@@ -41,6 +45,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -51,7 +56,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -61,6 +65,7 @@ import java.util.Set;
 import java.util.jar.StrictJarFile;
 import java.util.zip.ZipEntry;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -207,16 +212,20 @@ public class PackageParser {
      */
     public static class PackageLite {
         public final String packageName;
+        public final String splitName;
         public final int versionCode;
         public final int installLocation;
         public final VerifierInfo[] verifiers;
+        public final Signature[] signatures;
 
-        public PackageLite(String packageName, int versionCode,
-                int installLocation, List<VerifierInfo> verifiers) {
+        public PackageLite(String packageName, String splitName, int versionCode,
+                int installLocation, List<VerifierInfo> verifiers, Signature[] signatures) {
             this.packageName = packageName;
+            this.splitName = splitName;
             this.versionCode = versionCode;
             this.installLocation = installLocation;
             this.verifiers = verifiers.toArray(new VerifierInfo[verifiers.size()]);
+            this.signatures = signatures;
         }
     }
 
@@ -459,7 +468,7 @@ public class PackageParser {
         return pi;
     }
 
-    private Certificate[][] loadCertificates(StrictJarFile jarFile, ZipEntry je,
+    private static Certificate[][] loadCertificates(StrictJarFile jarFile, ZipEntry je,
             byte[] readBuffer) {
         try {
             // We must read the stream for the JarEntry to retrieve
@@ -486,6 +495,7 @@ public class PackageParser {
     public final static int PARSE_ON_SDCARD = 1<<5;
     public final static int PARSE_IS_SYSTEM_DIR = 1<<6;
     public final static int PARSE_IS_PRIVILEGED = 1<<7;
+    public final static int PARSE_GET_SIGNATURES = 1<<8;
 
     public int getParseError() {
         return mParseError;
@@ -722,12 +732,8 @@ public class PackageParser {
                 mReadBuffer = readBufferRef;
             }
 
-            if (certs != null && certs.length > 0) {
-                final int N = certs.length;
-                pkg.mSignatures = new Signature[certs.length];
-                for (int i=0; i<N; i++) {
-                    pkg.mSignatures[i] = new Signature(certs[i]);
-                }
+            if (!ArrayUtils.isEmpty(certs)) {
+                pkg.mSignatures = convertToSignatures(certs);
             } else {
                 Slog.e(TAG, "Package " + pkg.packageName
                         + " has no certificates; ignoring!");
@@ -762,6 +768,39 @@ public class PackageParser {
         return true;
     }
 
+    /**
+     * Only collect certificates on the manifest; does not validate signatures
+     * across remainder of package.
+     */
+    private static Signature[] collectCertificates(String packageFilePath) {
+        try {
+            final StrictJarFile jarFile = new StrictJarFile(packageFilePath);
+            try {
+                final ZipEntry jarEntry = jarFile.findEntry(ANDROID_MANIFEST_FILENAME);
+                if (jarEntry != null) {
+                    final Certificate[][] certs = loadCertificates(jarFile, jarEntry, null);
+                    return convertToSignatures(certs);
+                }
+            } finally {
+                jarFile.close();
+            }
+        } catch (GeneralSecurityException e) {
+            Slog.w(TAG, "Failed to collect certs from " + packageFilePath + ": " + e);
+        } catch (IOException e) {
+            Slog.w(TAG, "Failed to collect certs from " + packageFilePath + ": " + e);
+        }
+        return null;
+    }
+
+    private static Signature[] convertToSignatures(Certificate[][] certs)
+            throws CertificateEncodingException {
+        final Signature[] res = new Signature[certs.length];
+        for (int i = 0; i < certs.length; i++) {
+            res[i] = new Signature(certs[i]);
+        }
+        return res;
+    }
+
     /*
      * Utility method that retrieves just the package name and install
      * location from the apk location at the given file path.
@@ -794,11 +833,22 @@ public class PackageParser {
             return null;
         }
 
+        // Only collect certificates on the manifest; does not validate
+        // signatures across remainder of package.
+        final Signature[] signatures;
+        if ((flags & PARSE_GET_SIGNATURES) != 0) {
+            signatures = collectCertificates(packageFilePath);
+        } else {
+            signatures = null;
+        }
+
         final AttributeSet attrs = parser;
         final String errors[] = new String[1];
         PackageLite packageLite = null;
         try {
-            packageLite = parsePackageLite(res, parser, attrs, flags, errors);
+            packageLite = parsePackageLite(res, parser, attrs, flags, signatures, errors);
+        } catch (PackageParserException e) {
+            Slog.w(TAG, packageFilePath, e);
         } catch (IOException e) {
             Slog.w(TAG, packageFilePath, e);
         } catch (XmlPullParserException e) {
@@ -840,72 +890,51 @@ public class PackageParser {
                 ? null : "must have at least one '.' separator";
     }
 
-    private static String parsePackageName(XmlPullParser parser,
-            AttributeSet attrs, int flags, String[] outError)
-            throws IOException, XmlPullParserException {
+    private static Pair<String, String> parsePackageSplitNames(XmlPullParser parser,
+            AttributeSet attrs, int flags) throws IOException, XmlPullParserException,
+            PackageParserException {
 
         int type;
         while ((type = parser.next()) != XmlPullParser.START_TAG
                 && type != XmlPullParser.END_DOCUMENT) {
-            ;
         }
 
         if (type != XmlPullParser.START_TAG) {
-            outError[0] = "No start tag found";
-            return null;
+            throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                    "No start tag found");
         }
-        if (DEBUG_PARSER)
-            Slog.v(TAG, "Root element name: '" + parser.getName() + "'");
         if (!parser.getName().equals("manifest")) {
-            outError[0] = "No <manifest> tag";
-            return null;
-        }
-        String pkgName = attrs.getAttributeValue(null, "package");
-        if (pkgName == null || pkgName.length() == 0) {
-            outError[0] = "<manifest> does not specify package";
-            return null;
-        }
-        String nameError = validateName(pkgName, true);
-        if (nameError != null && !"android".equals(pkgName)) {
-            outError[0] = "<manifest> specifies bad package name \""
-                + pkgName + "\": " + nameError;
-            return null;
+            throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                    "No <manifest> tag");
         }
 
-        return pkgName.intern();
+        final String packageName = attrs.getAttributeValue(null, "package");
+        if (!"android".equals(packageName)) {
+            final String error = validateName(packageName, true);
+            if (error != null) {
+                throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME,
+                        "Invalid manifest package: " + error);
+            }
+        }
+
+        final String splitName = attrs.getAttributeValue(null, "split");
+        if (splitName != null) {
+            final String error = validateName(splitName, true);
+            if (error != null) {
+                throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME,
+                        "Invalid manifest split: " + error);
+            }
+        }
+
+        return Pair.create(packageName.intern(),
+                (splitName != null) ? splitName.intern() : splitName);
     }
 
     private static PackageLite parsePackageLite(Resources res, XmlPullParser parser,
-            AttributeSet attrs, int flags, String[] outError) throws IOException,
-            XmlPullParserException {
+            AttributeSet attrs, int flags, Signature[] signatures, String[] outError)
+            throws IOException, XmlPullParserException, PackageParserException {
+        final Pair<String, String> packageSplit = parsePackageSplitNames(parser, attrs, flags);
 
-        int type;
-        while ((type = parser.next()) != XmlPullParser.START_TAG
-                && type != XmlPullParser.END_DOCUMENT) {
-            ;
-        }
-
-        if (type != XmlPullParser.START_TAG) {
-            outError[0] = "No start tag found";
-            return null;
-        }
-        if (DEBUG_PARSER)
-            Slog.v(TAG, "Root element name: '" + parser.getName() + "'");
-        if (!parser.getName().equals("manifest")) {
-            outError[0] = "No <manifest> tag";
-            return null;
-        }
-        String pkgName = attrs.getAttributeValue(null, "package");
-        if (pkgName == null || pkgName.length() == 0) {
-            outError[0] = "<manifest> does not specify package";
-            return null;
-        }
-        String nameError = validateName(pkgName, true);
-        if (nameError != null && !"android".equals(pkgName)) {
-            outError[0] = "<manifest> specifies bad package name \""
-                + pkgName + "\": " + nameError;
-            return null;
-        }
         int installLocation = PARSE_DEFAULT_INSTALL_LOCATION;
         int versionCode = 0;
         int numFound = 0;
@@ -925,6 +954,7 @@ public class PackageParser {
         }
 
         // Only search the tree when the tag is directly below <manifest>
+        int type;
         final int searchDepth = parser.getDepth() + 1;
 
         final List<VerifierInfo> verifiers = new ArrayList<VerifierInfo>();
@@ -942,7 +972,8 @@ public class PackageParser {
             }
         }
 
-        return new PackageLite(pkgName.intern(), versionCode, installLocation, verifiers);
+        return new PackageLite(packageSplit.first, packageSplit.second, versionCode,
+                installLocation, verifiers, signatures);
     }
 
     /**
@@ -966,12 +997,18 @@ public class PackageParser {
         mParseActivityArgs = null;
         mParseServiceArgs = null;
         mParseProviderArgs = null;
-        
-        String pkgName = parsePackageName(parser, attrs, flags, outError);
-        if (pkgName == null) {
+
+        final String pkgName;
+        final String splitName;
+        try {
+            Pair<String, String> packageSplit = parsePackageSplitNames(parser, attrs, flags);
+            pkgName = packageSplit.first;
+            splitName = packageSplit.second;
+        } catch (PackageParserException e) {
             mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
             return null;
         }
+
         int type;
 
         if (mOnlyCoreApps) {
@@ -982,9 +1019,9 @@ public class PackageParser {
             }
         }
 
-        final Package pkg = new Package(pkgName);
+        final Package pkg = new Package(pkgName, splitName);
         boolean foundApp = false;
-        
+
         TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AndroidManifest);
         pkg.mVersionCode = pkg.applicationInfo.versionCode = sa.getInteger(
@@ -3544,6 +3581,7 @@ public class PackageParser {
     public final static class Package {
 
         public String packageName;
+        public String splitName;
 
         // For now we only support one application per package.
         public final ApplicationInfo applicationInfo = new ApplicationInfo();
@@ -3660,9 +3698,10 @@ public class PackageParser {
         public Set<PublicKey> mSigningKeys;
         public Map<String, Set<PublicKey>> mKeySetMapping;
 
-        public Package(String _name) {
-            packageName = _name;
-            applicationInfo.packageName = _name;
+        public Package(String packageName, String splitName) {
+            this.packageName = packageName;
+            this.splitName = splitName;
+            applicationInfo.packageName = packageName;
             applicationInfo.uid = -1;
         }
 
@@ -4266,5 +4305,14 @@ public class PackageParser {
      */
     public static void setCompatibilityModeEnabled(boolean compatibilityModeEnabled) {
         sCompatibilityModeEnabled = compatibilityModeEnabled;
+    }
+
+    public static class PackageParserException extends Exception {
+        public final int error;
+
+        public PackageParserException(int error, String detailMessage) {
+            super(detailMessage);
+            this.error = error;
+        }
     }
 }

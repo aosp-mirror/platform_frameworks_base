@@ -35,6 +35,7 @@ import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
@@ -1127,7 +1128,7 @@ final class ApplicationPackageManager extends PackageManager {
     public void installPackage(Uri packageURI, PackageInstallObserver observer,
             int flags, String installerPackageName) {
         try {
-            mPM.installPackageEtc(packageURI, null, observer.mObserver,
+            mPM.installPackageEtc(packageURI, null, observer.getBinder(),
                     flags, installerPackageName);
         } catch (RemoteException e) {
             // Should never happen!
@@ -1140,7 +1141,7 @@ final class ApplicationPackageManager extends PackageManager {
             Uri verificationURI, ManifestDigest manifestDigest,
             ContainerEncryptionParams encryptionParams) {
         try {
-            mPM.installPackageWithVerificationEtc(packageURI, null, observer.mObserver, flags,
+            mPM.installPackageWithVerificationEtc(packageURI, null, observer.getBinder(), flags,
                     installerPackageName, verificationURI, manifestDigest, encryptionParams);
         } catch (RemoteException e) {
             // Should never happen!
@@ -1153,7 +1154,7 @@ final class ApplicationPackageManager extends PackageManager {
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
         try {
             mPM.installPackageWithVerificationAndEncryptionEtc(packageURI, null,
-                    observer.mObserver, flags, installerPackageName, verificationParams,
+                    observer.getBinder(), flags, installerPackageName, verificationParams,
                     encryptionParams);
         } catch (RemoteException e) {
             // Should never happen!
@@ -1438,6 +1439,16 @@ final class ApplicationPackageManager extends PackageManager {
             // Should never happen!
         }
         return null;
+    }
+
+    @Override
+    public PackageInstaller getPackageInstaller() {
+        try {
+            return new PackageInstaller(this, mPM.getPackageInstaller(), mContext.getUserId(),
+                    mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
     }
 
     /**
