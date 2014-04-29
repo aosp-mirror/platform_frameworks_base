@@ -18,6 +18,7 @@ package android.tv;
 
 import android.content.ComponentName;
 import android.tv.ITvInputSession;
+import android.view.InputChannel;
 
 /**
  * Interface a client of the ITvInputManager implements, to identify itself and receive information
@@ -25,6 +26,6 @@ import android.tv.ITvInputSession;
  * @hide
  */
 oneway interface ITvInputClient {
-    void onSessionCreated(in ComponentName name, IBinder token, int seq);
+    void onSessionCreated(in ComponentName name, IBinder token, in InputChannel channel, int seq);
     void onAvailabilityChanged(in ComponentName name, boolean isAvailable);
 }
