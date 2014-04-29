@@ -5029,6 +5029,8 @@
         <attr name="excludeId" format="reference" />
         <!-- The fully-qualified name of the Class to exclude from this transition. -->
         <attr name="excludeClass" format="string" />
+        <!-- The fully-qualified name of the Class to include in this transition. -->
+        <attr name="targetClass" />
     </declare-styleable>
 
     <!-- Use <code>set</code> as the root tag of the XML resource that

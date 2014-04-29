@@ -28319,6 +28319,7 @@ package android.transition {
     ctor public Transition();
     method public android.transition.Transition addListener(android.transition.Transition.TransitionListener);
     method public android.transition.Transition addTarget(int);
+    method public android.transition.Transition addTarget(java.lang.Class);
     method public android.transition.Transition addTarget(android.view.View);
     method public boolean canRemoveViews();
     method public abstract void captureEndValues(android.transition.TransitionValues);

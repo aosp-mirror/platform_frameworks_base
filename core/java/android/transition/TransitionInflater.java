@@ -231,22 +231,24 @@ public class TransitionInflater {
                         com.android.internal.R.styleable.TransitionTarget_targetId, -1);
                 if (id >= 0) {
                     transition.addTarget(id);
+                } else if ((id = a.getResourceId(
+                        com.android.internal.R.styleable.TransitionTarget_excludeId, -1)) >= 0) {
+                    transition.excludeTarget(id, true);
                 } else {
-                    id = a.getResourceId(
-                            com.android.internal.R.styleable.TransitionTarget_excludeId, -1);
-                    if (id >= 0) {
-                        transition.excludeTarget(id, true);
-                    } else {
-                        String className = a.getString(
-                                com.android.internal.R.styleable.TransitionTarget_excludeClass);
+                    String className = a.getString(
+                            com.android.internal.R.styleable.TransitionTarget_excludeClass);
+                    try {
                         if (className != null) {
-                            try {
-                                Class clazz = Class.forName(className);
-                                transition.excludeTarget(clazz, true);
-                            } catch (ClassNotFoundException e) {
-                                throw new RuntimeException("Could not create " + className, e);
-                            }
+                            Class clazz = Class.forName(className);
+                            transition.excludeTarget(clazz, true);
+                        } else if ((className = a.getString(
+                                com.android.internal.R.styleable.TransitionTarget_targetClass))
+                                != null) {
+                            Class clazz = Class.forName(className);
+                            transition.addTarget(clazz);
                         }
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException("Could not create " + className, e);
                     }
                 }
             } else {
