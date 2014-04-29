@@ -2735,16 +2735,17 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 /*
-                 * Add shared application GID so applications can share some
-                 * resources like shared libraries
+                 * Add shared application and profile GIDs so applications can share some
+                 * resources like shared libraries and access user-wide resources
                  */
                 if (permGids == null) {
-                    gids = new int[1];
+                    gids = new int[2];
                 } else {
-                    gids = new int[permGids.length + 1];
-                    System.arraycopy(permGids, 0, gids, 1, permGids.length);
+                    gids = new int[permGids.length + 2];
+                    System.arraycopy(permGids, 0, gids, 2, permGids.length);
                 }
                 gids[0] = UserHandle.getSharedAppGid(UserHandle.getAppId(uid));
+                gids[1] = UserHandle.getUserGid(UserHandle.getUserId(uid));
             }
             if (mFactoryTest != SystemServer.FACTORY_TEST_OFF) {
                 if (mFactoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL
