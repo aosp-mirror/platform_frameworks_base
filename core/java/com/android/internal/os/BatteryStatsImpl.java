@@ -88,7 +88,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 103 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 104 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -318,6 +318,18 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mDischargeAmountScreenOnSinceCharge;
     int mDischargeAmountScreenOff;
     int mDischargeAmountScreenOffSinceCharge;
+
+    static final int MAX_LEVEL_STEPS = 100;
+
+    int mLastDischargeStepLevel;
+    long mLastDischargeStepTime;
+    int mNumDischargeStepDurations;
+    final long[] mDischargeStepDurations = new long[MAX_LEVEL_STEPS];
+
+    int mLastChargeStepLevel;
+    long mLastChargeStepTime;
+    int mNumChargeStepDurations;
+    final long[] mChargeStepDurations = new long[MAX_LEVEL_STEPS];
 
     long mLastWriteTime = 0; // Milliseconds
 
@@ -5721,6 +5733,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         mDischargeAmountScreenOnSinceCharge = 0;
         mDischargeAmountScreenOff = 0;
         mDischargeAmountScreenOffSinceCharge = 0;
+        mLastDischargeStepTime = -1;
+        mNumDischargeStepDurations = 0;
+        mLastChargeStepTime = -1;
+        mNumChargeStepDurations = 0;
     }
 
     public void resetAllStatsCmdLocked() {
@@ -5885,7 +5901,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                 resetAllStatsLocked();
                 mDischargeStartLevel = level;
                 reset = true;
+                mNumDischargeStepDurations = 0;
             }
+            mLastDischargeStepLevel = level;
+            mLastDischargeStepTime = -1;
             pullPendingStateUpdatesLocked();
             mHistoryCur.batteryLevel = (byte)level;
             mHistoryCur.states &= ~HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
@@ -5921,6 +5940,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             updateDischargeScreenLevelsLocked(mScreenOn, mScreenOn);
             updateTimeBasesLocked(false, !mScreenOn, uptime, realtime);
+            mNumChargeStepDurations = 0;
+            mLastChargeStepLevel = level;
+            mLastChargeStepTime = -1;
         }
         if (doWrite || (mLastWriteTime + (60 * 1000)) < mSecRealtime) {
             if (mFile != null) {
@@ -5943,6 +5965,24 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     // This should probably be exposed in the API, though it's not critical
     private static final int BATTERY_PLUGGED_NONE = 0;
+
+    private static int addLevelSteps(long[] steps, int stepCount, long lastStepTime,
+            int numStepLevels, long elapsedRealtime) {
+        if (lastStepTime >= 0 && numStepLevels > 0) {
+            long duration = elapsedRealtime - lastStepTime;
+            for (int i=0; i<numStepLevels; i++) {
+                System.arraycopy(steps, 0, steps, 1, steps.length-1);
+                long thisDuration = duration / (numStepLevels-i);
+                duration -= thisDuration;
+                steps[0] = thisDuration;
+            }
+            stepCount += numStepLevels;
+            if (stepCount > steps.length) {
+                stepCount = steps.length;
+            }
+        }
+        return stepCount;
+    }
 
     public void setBatteryState(int status, int health, int plugType, int level,
             int temp, int volt) {
@@ -6020,6 +6060,23 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
                 if (changed) {
                     addHistoryRecordLocked(elapsedRealtime, uptime);
+                }
+                if (onBattery) {
+                    if (mLastDischargeStepLevel != level) {
+                        mNumDischargeStepDurations = addLevelSteps(mDischargeStepDurations,
+                                mNumDischargeStepDurations, mLastDischargeStepTime,
+                                mLastDischargeStepLevel - level, elapsedRealtime);
+                        mLastDischargeStepLevel = level;
+                        mLastDischargeStepTime = elapsedRealtime;
+                    }
+                } else {
+                    if (mLastChargeStepLevel != level) {
+                        mNumChargeStepDurations = addLevelSteps(mChargeStepDurations,
+                                mNumChargeStepDurations, mLastChargeStepTime,
+                                level - mLastChargeStepLevel, elapsedRealtime);
+                        mLastChargeStepLevel = level;
+                        mLastChargeStepTime = elapsedRealtime;
+                    }
                 }
             }
             if (!onBattery && status == BatteryManager.BATTERY_STATUS_FULL) {
@@ -6235,11 +6292,51 @@ public final class BatteryStatsImpl extends BatteryStats {
         return mOnBatteryScreenOffTimeBase.computeRealtime(curTime, which);
     }
 
+    private long computeTimePerLevel(long[] steps, int numSteps) {
+        // For now we'll do a simple average across all steps.
+        if (numSteps <= 0) {
+            return -1;
+        }
+        long total = 0;
+        for (int i=0; i<numSteps; i++) {
+            total += steps[i];
+        }
+        return total / numSteps;
+        /*
+        long[] buckets = new long[numSteps];
+        int numBuckets = 0;
+        int numToAverage = 4;
+        int i = 0;
+        while (i < numSteps) {
+            long totalTime = 0;
+            int num = 0;
+            for (int j=0; j<numToAverage && (i+j)<numSteps; j++) {
+                totalTime += steps[i+j];
+                num++;
+            }
+            buckets[numBuckets] = totalTime / num;
+            numBuckets++;
+            numToAverage *= 2;
+            i += num;
+        }
+        if (numBuckets < 1) {
+            return -1;
+        }
+        long averageTime = buckets[numBuckets-1];
+        for (i=numBuckets-2; i>=0; i--) {
+            averageTime = (averageTime + buckets[i]) / 2;
+        }
+        return averageTime;
+        */
+    }
+
     @Override
     public long computeBatteryTimeRemaining(long curTime) {
         if (!mOnBattery) {
             return -1;
         }
+        /* Simple implementation just looks at the average discharge per level across the
+           entire sample period.
         int discharge = (getLowDischargeAmountSinceCharge()+getHighDischargeAmountSinceCharge())/2;
         if (discharge < 2) {
             return -1;
@@ -6250,14 +6347,24 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         long usPerLevel = duration/discharge;
         return usPerLevel * mCurrentBatteryLevel;
+        */
+        if (mNumDischargeStepDurations < 1) {
+            return -1;
+        }
+        long msPerLevel = computeTimePerLevel(mDischargeStepDurations, mNumDischargeStepDurations);
+        if (msPerLevel <= 0) {
+            return -1;
+        }
+        return (msPerLevel * mCurrentBatteryLevel) * 1000;
     }
 
     @Override
     public long computeChargeTimeRemaining(long curTime) {
-        if (true || mOnBattery) {
+        if (mOnBattery) {
             // Not yet working.
             return -1;
         }
+        /* Broken
         int curLevel = mCurrentBatteryLevel;
         int plugLevel = mDischargePlugLevel;
         if (plugLevel < 0 || curLevel < (plugLevel+1)) {
@@ -6269,6 +6376,15 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         long usPerLevel = duration/(curLevel-plugLevel);
         return usPerLevel * (100-curLevel);
+        */
+        if (mNumChargeStepDurations < 1) {
+            return -1;
+        }
+        long msPerLevel = computeTimePerLevel(mChargeStepDurations, mNumChargeStepDurations);
+        if (msPerLevel <= 0) {
+            return -1;
+        }
+        return (msPerLevel * (100-mCurrentBatteryLevel)) * 1000;
     }
 
     long getBatteryUptimeLocked() {
@@ -6776,6 +6892,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         mHighDischargeAmountSinceCharge = in.readInt();
         mDischargeAmountScreenOnSinceCharge = in.readInt();
         mDischargeAmountScreenOffSinceCharge = in.readInt();
+        mNumDischargeStepDurations = in.readInt();
+        in.readLongArray(mDischargeStepDurations);
+        mNumChargeStepDurations = in.readInt();
+        in.readLongArray(mChargeStepDurations);
 
         mStartCount++;
 
@@ -7030,6 +7150,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeInt(getHighDischargeAmountSinceCharge());
         out.writeInt(getDischargeAmountScreenOnSinceCharge());
         out.writeInt(getDischargeAmountScreenOffSinceCharge());
+        out.writeInt(mNumDischargeStepDurations);
+        out.writeLongArray(mDischargeStepDurations);
+        out.writeInt(mNumChargeStepDurations);
+        out.writeLongArray(mChargeStepDurations);
 
         mScreenOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
@@ -7344,6 +7468,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         mDischargeAmountScreenOnSinceCharge = in.readInt();
         mDischargeAmountScreenOff = in.readInt();
         mDischargeAmountScreenOffSinceCharge = in.readInt();
+        mNumDischargeStepDurations = in.readInt();
+        in.readLongArray(mDischargeStepDurations);
+        mNumChargeStepDurations = in.readInt();
+        in.readLongArray(mChargeStepDurations);
         mLastWriteTime = in.readLong();
 
         mBluetoothPingCount = in.readInt();
@@ -7464,6 +7592,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mDischargeAmountScreenOnSinceCharge);
         out.writeInt(mDischargeAmountScreenOff);
         out.writeInt(mDischargeAmountScreenOffSinceCharge);
+        out.writeInt(mNumDischargeStepDurations);
+        out.writeLongArray(mDischargeStepDurations);
+        out.writeInt(mNumChargeStepDurations);
+        out.writeLongArray(mChargeStepDurations);
         out.writeLong(mLastWriteTime);
 
         out.writeInt(getBluetoothPingCount());
@@ -7572,6 +7704,25 @@ public final class BatteryStatsImpl extends BatteryStats {
             for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
                 pr.println("*** Bluetooth active type #" + i + ":");
                 mBluetoothStateTimer[i].logState(pr, "  ");
+            }
+            StringBuilder sb = new StringBuilder(128);
+            if (mNumDischargeStepDurations > 0) {
+                pr.println("*** Discharge step durations:");
+                for (int i=0; i<mNumDischargeStepDurations; i++) {
+                    sb.setLength(0);
+                    sb.append("  #"); sb.append(i); sb.append(": ");
+                            formatTimeMs(sb, mDischargeStepDurations[i]);
+                    pr.println(sb.toString());
+                }
+            }
+            if (mNumChargeStepDurations > 0) {
+                pr.println("*** Charge step durations:");
+                for (int i=0; i<mNumChargeStepDurations; i++) {
+                    sb.setLength(0);
+                    sb.append("  #"); sb.append(i); sb.append(": ");
+                            formatTimeMs(sb, mChargeStepDurations[i]);
+                    pr.println(sb.toString());
+                }
             }
         }
         super.dumpLocked(context, pw, flags, reqUid, histStart);
