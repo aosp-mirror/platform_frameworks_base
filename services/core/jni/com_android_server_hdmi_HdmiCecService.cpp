@@ -67,10 +67,10 @@ public:
 
     cec_logical_address_t getLogicalAddress(cec_device_type_t deviceType);
     uint16_t getPhysicalAddress();
-    int getDeviceType(cec_logical_address_t addr);
+    cec_device_type_t getDeviceType(cec_logical_address_t addr);
     void queueMessage(const MessageEntry& message);
     void queueOutgoingMessage(const cec_message_t& message);
-    void sendReportPhysicalAddress();
+    void sendReportPhysicalAddress(cec_logical_address_t srcAddr);
     void sendActiveSource(cec_logical_address_t srcAddr);
     void sendFeatureAbort(cec_logical_address_t srcAddr, cec_logical_address_t dstAddr,
             int opcode, int reason);
@@ -93,15 +93,41 @@ private:
         EVENT_TYPE_STANDBY
     };
 
+    /*
+     * logical address pool for each device type.
+     */
+    static const cec_logical_address_t TV_ADDR_POOL[];
+    static const cec_logical_address_t PLAYBACK_ADDR_POOL[];
+    static const cec_logical_address_t RECORDER_ADDR_POOL[];
+    static const cec_logical_address_t TUNER_ADDR_POOL[];
+
     static const unsigned int MAX_BUFFER_SIZE = 256;
     static const uint16_t INVALID_PHYSICAL_ADDRESS = 0xFFFF;
-    static const int INACTIVE_DEVICE_TYPE = -1;
 
     static void onReceived(const hdmi_event_t* event, void* arg);
     static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
 
     void updatePhysicalAddress();
     void updateLogicalAddress();
+
+    // Allocate logical address. The CEC standard recommends that we try to use the address
+    // we have ever used before, in case this is to allocate an address afte the cable is
+    // connected again. If preferredAddr is given a valid one (not CEC_ADDR_UNREGISTERED), then
+    // this method checks if the address is available first. If not, it tries other addresses
+    // int the address pool available for the given type.
+    cec_logical_address_t allocateLogicalAddress(cec_device_type_t type,
+            cec_logical_address_t preferredAddr);
+
+    // Send a CEC ping message. Returns true if successful.
+    bool sendPing(cec_logical_address_t addr);
+
+    // Return the pool of logical addresses that are used for a given device type.
+    // One of the addresses in the pool will be chosen in the allocation logic.
+    bool getLogicalAddressPool(cec_device_type_t type, const cec_logical_address_t** addrPool,
+            size_t* poolSize);
+
+    // Handles the message retrieved from internal message queue. The message can be
+    // for either rx or tx.
     void dispatchMessage(const MessageEntry& message);
     void processIncomingMessage(const cec_message_t& msg);
 
@@ -159,6 +185,29 @@ private:
     std::string mOsdName;
 };
 
+    const cec_logical_address_t HdmiCecHandler::TV_ADDR_POOL[] = {
+        CEC_ADDR_TV,
+        CEC_ADDR_FREE_USE,
+    };
+
+    const cec_logical_address_t HdmiCecHandler::PLAYBACK_ADDR_POOL[] = {
+        CEC_ADDR_PLAYBACK_1,
+        CEC_ADDR_PLAYBACK_2,
+        CEC_ADDR_PLAYBACK_3
+    };
+
+    const cec_logical_address_t HdmiCecHandler::RECORDER_ADDR_POOL[] = {
+        CEC_ADDR_RECORDER_1,
+        CEC_ADDR_RECORDER_2,
+        CEC_ADDR_RECORDER_3
+    };
+
+    const cec_logical_address_t HdmiCecHandler::TUNER_ADDR_POOL[] = {
+        CEC_ADDR_TUNER_1,
+        CEC_ADDR_TUNER_2,
+        CEC_ADDR_TUNER_3,
+        CEC_ADDR_TUNER_4
+    };
 
 HdmiCecHandler::HdmiCecHandler(hdmi_cec_device_t* device, jobject callbacksObj) :
     mDevice(device),
@@ -176,39 +225,15 @@ uint16_t HdmiCecHandler::getPhysicalAddress() {
     return mPhysicalAddress;
 }
 
-void HdmiCecHandler::updatePhysicalAddress() {
-    uint16_t addr;
-    if (!mDevice->get_physical_address(mDevice, &addr)) {
-        mPhysicalAddress = addr;
-    } else {
-        mPhysicalAddress = INVALID_PHYSICAL_ADDRESS;
-    }
-}
-
-void HdmiCecHandler::updateLogicalAddress() {
-    std::map<cec_device_type_t, cec_logical_address_t>::iterator it = mLogicalDevices.begin();
-    for (; it != mLogicalDevices.end(); ++it) {
-        cec_logical_address_t addr;
-        if (!mDevice->get_logical_address(mDevice, it->first, &addr)) {
-            it->second = addr;
-        }
-    }
-}
-
 cec_logical_address_t HdmiCecHandler::initLogicalDevice(cec_device_type_t type) {
-    cec_logical_address_t addr;
-    int res = mDevice->allocate_logical_address(mDevice, type, &addr);
-
-    if (res != 0) {
-        ALOGE("Logical Address Allocation failed: %d", res);
-    } else {
-        ALOGV("Logical Address Allocation success: %d", addr);
+    cec_logical_address addr = allocateLogicalAddress(type, CEC_ADDR_UNREGISTERED);
+    if (addr != CEC_ADDR_UNREGISTERED && !mDevice->add_logical_address(mDevice, addr)) {
         mLogicalDevices.insert(std::pair<cec_device_type_t, cec_logical_address_t>(type, addr));
 
         // Broadcast <Report Physical Address> when a new logical address was allocated to let
         // other devices discover the new logical device and its logical - physical address
         // association.
-        sendReportPhysicalAddress();
+        sendReportPhysicalAddress(addr);
     }
     return addr;
 }
@@ -229,14 +254,14 @@ cec_logical_address_t HdmiCecHandler::getLogicalAddress(cec_device_type_t type) 
     return CEC_ADDR_UNREGISTERED;
 }
 
-int HdmiCecHandler::getDeviceType(cec_logical_address_t addr) {
+cec_device_type_t HdmiCecHandler::getDeviceType(cec_logical_address_t addr) {
     std::map<cec_device_type_t, cec_logical_address_t>::iterator it = mLogicalDevices.begin();
     for (; it != mLogicalDevices.end(); ++it) {
         if (it->second == addr) {
             return it->first;
         }
     }
-    return INACTIVE_DEVICE_TYPE;
+    return CEC_DEVICE_INACTIVE;
 }
 
 void HdmiCecHandler::queueMessage(const MessageEntry& entry) {
@@ -256,26 +281,26 @@ void HdmiCecHandler::queueOutgoingMessage(const cec_message_t& message) {
     queueMessage(entry);
 }
 
-void HdmiCecHandler::sendReportPhysicalAddress() {
+void HdmiCecHandler::sendReportPhysicalAddress(cec_logical_address_t addr) {
     if (mPhysicalAddress == INVALID_PHYSICAL_ADDRESS) {
         ALOGE("Invalid physical address.");
         return;
     }
-
-    // Report physical address for each logical one hosted in it.
-    std::map<cec_device_type_t, cec_logical_address_t>::iterator it = mLogicalDevices.begin();
-    while (it != mLogicalDevices.end()) {
-        cec_message_t msg;
-        msg.initiator = it->second;  // logical address
-        msg.destination = CEC_ADDR_BROADCAST;
-        msg.length = 4;
-        msg.body[0] = CEC_MESSAGE_REPORT_PHYSICAL_ADDRESS;
-        msg.body[1] = (mPhysicalAddress >> 8) & 0xff;
-        msg.body[2] = mPhysicalAddress & 0xff;
-        msg.body[3] = it->first;  // device type
-        queueOutgoingMessage(msg);
-        ++it;
+    cec_device_type_t deviceType = getDeviceType(addr);
+    if (deviceType == CEC_DEVICE_INACTIVE) {
+        ALOGE("Invalid logical address: %d", addr);
+        return;
     }
+
+    cec_message_t msg;
+    msg.initiator = addr;
+    msg.destination = CEC_ADDR_BROADCAST;
+    msg.length = 4;
+    msg.body[0] = CEC_MESSAGE_REPORT_PHYSICAL_ADDRESS;
+    msg.body[1] = (mPhysicalAddress >> 8) & 0xff;
+    msg.body[2] = mPhysicalAddress & 0xff;
+    msg.body[3] = deviceType;
+    queueOutgoingMessage(msg);
 }
 
 void HdmiCecHandler::sendActiveSource(cec_logical_address_t srcAddr) {
@@ -410,6 +435,99 @@ void HdmiCecHandler::checkAndClearExceptionFromCallback(JNIEnv* env, const char*
     }
 }
 
+void HdmiCecHandler::updatePhysicalAddress() {
+    uint16_t addr;
+    if (!mDevice->get_physical_address(mDevice, &addr)) {
+        mPhysicalAddress = addr;
+    } else {
+        mPhysicalAddress = INVALID_PHYSICAL_ADDRESS;
+    }
+}
+
+void HdmiCecHandler::updateLogicalAddress() {
+    mDevice->clear_logical_address(mDevice);
+    std::map<cec_device_type_t, cec_logical_address_t>::iterator it = mLogicalDevices.begin();
+    for (; it != mLogicalDevices.end(); ++it) {
+        cec_logical_address_t addr;
+        cec_logical_address_t preferredAddr = it->second;
+        cec_device_type_t deviceType = it->first;
+        addr = allocateLogicalAddress(deviceType, preferredAddr);
+        if (!mDevice->add_logical_address(mDevice, addr)) {
+            it->second = addr;
+        } else {
+            it->second = CEC_ADDR_UNREGISTERED;
+        }
+    }
+}
+
+cec_logical_address_t HdmiCecHandler::allocateLogicalAddress(cec_device_type_t type,
+        cec_logical_address_t preferredAddr) {
+    const cec_logical_address_t* addrPool;
+    size_t poolSize;
+    if (getLogicalAddressPool(type, &addrPool, &poolSize) < 0) {
+        return CEC_ADDR_UNREGISTERED;
+    }
+    unsigned start = 0;
+
+    // Find the index of preferred address in the pool. If not found, the start
+    // position will be 0. This happens when the passed preferredAddr is set to
+    // CEC_ADDR_UNREGISTERED, meaning that no preferred address is given.
+    for (unsigned i = 0; i < poolSize; i++) {
+        if (addrPool[i] == preferredAddr) {
+            start = i;
+            break;
+        }
+    }
+    for (unsigned i = 0; i < poolSize; i++) {
+        cec_logical_address_t addr = addrPool[(start + i) % poolSize];
+        if (!sendPing(addr)) {
+            // Failure in pinging means the address is available, not taken by any device.
+            ALOGV("Logical Address Allocation success: %d", addr);
+            return addr;
+        }
+    }
+    ALOGE("Logical Address Allocation failed");
+    return CEC_ADDR_UNREGISTERED;
+}
+
+bool HdmiCecHandler::sendPing(cec_logical_address addr) {
+    cec_message_t msg;
+    msg.initiator = msg.destination = addr;
+    msg.length = 0;
+    return !mDevice->send_message(mDevice, &msg);
+
+}
+
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+
+bool HdmiCecHandler::getLogicalAddressPool(cec_device_type_t deviceType,
+        const cec_logical_address_t** addrPool, size_t* poolSize) {
+    switch (deviceType) {
+    case CEC_DEVICE_TV:
+        *addrPool = TV_ADDR_POOL;
+        *poolSize = ARRAY_SIZE(TV_ADDR_POOL);
+        break;
+    case CEC_DEVICE_RECORDER:
+        *addrPool = RECORDER_ADDR_POOL;
+        *poolSize = ARRAY_SIZE(RECORDER_ADDR_POOL);
+        break;
+    case CEC_DEVICE_TUNER:
+        *addrPool = TUNER_ADDR_POOL;
+        *poolSize = ARRAY_SIZE(TUNER_ADDR_POOL);
+        break;
+    case CEC_DEVICE_PLAYBACK:
+        *addrPool = PLAYBACK_ADDR_POOL;
+        *poolSize = ARRAY_SIZE(PLAYBACK_ADDR_POOL);
+        break;
+    default:
+        ALOGE("Unsupported device type: %d", deviceType);
+        return false;
+    }
+    return true;
+}
+
+#undef ARRAY_SIZE
+
 void HdmiCecHandler::dispatchMessage(const MessageEntry& entry) {
     int type = entry.first;
     mMessageQueueLock.unlock();
@@ -434,7 +552,7 @@ void HdmiCecHandler::dispatchMessage(const MessageEntry& entry) {
 void HdmiCecHandler::processIncomingMessage(const cec_message_t& msg) {
     int opcode = msg.body[0];
     if (opcode == CEC_MESSAGE_GIVE_PHYSICAL_ADDRESS) {
-        sendReportPhysicalAddress();
+        sendReportPhysicalAddress(msg.destination);
     } else if (opcode == CEC_MESSAGE_REQUEST_ACTIVE_SOURCE) {
         handleRequestActiveSource();
     } else if (opcode == CEC_MESSAGE_GET_OSD_NAME) {
@@ -507,7 +625,7 @@ void HdmiCecHandler::handleRequestActiveSource() {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     jint activeDeviceType = env->CallIntMethod(mCallbacksObj,
             gHdmiCecServiceClassInfo.getActiveSource);
-    if (activeDeviceType != INACTIVE_DEVICE_TYPE) {
+    if (activeDeviceType != CEC_DEVICE_INACTIVE) {
         sendActiveSource(getLogicalAddress(static_cast<cec_device_type_t>(activeDeviceType)));
     }
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
