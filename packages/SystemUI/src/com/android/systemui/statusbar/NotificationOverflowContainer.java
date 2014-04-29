@@ -35,6 +35,26 @@ public class NotificationOverflowContainer extends ActivatableNotificationView {
     }
 
     @Override
+    public void setActualHeight(int currentHeight) {
+        // noop
+    }
+
+    @Override
+    public int getActualHeight() {
+        return getHeight();
+    }
+
+    @Override
+    public int getMaxHeight() {
+        return getHeight();
+    }
+
+    @Override
+    public void setClipTopAmount(int clipTopAmount) {
+        // noop
+    }
+
+    @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         mIconsView = (NotificationOverflowIconsView) findViewById(R.id.overflow_icons_view);
@@ -43,6 +63,7 @@ public class NotificationOverflowContainer extends ActivatableNotificationView {
         mActivator = new NotificationActivator(this);
         mActivator.setDimmed(true);
         setLocked(true);
+        setDimmed(true);
     }
 
     public NotificationOverflowIconsView getIconsView() {

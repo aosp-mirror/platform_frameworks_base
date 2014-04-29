@@ -29,7 +29,7 @@ import com.android.internal.R;
  * Base class for both {@link ExpandableNotificationRow} and {@link NotificationOverflowContainer}
  * to implement dimming/activating on Keyguard for the double-tap gesture
  */
-public class ActivatableNotificationView extends FrameLayout {
+public abstract class ActivatableNotificationView extends ExpandableOutlineView {
 
     private static final long DOUBLETAP_TIMEOUT_MS = 1000;
 
@@ -54,6 +54,7 @@ public class ActivatableNotificationView extends FrameLayout {
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        updateBackgroundResource();
     }
 
 
@@ -84,6 +85,9 @@ public class ActivatableNotificationView extends FrameLayout {
             case MotionEvent.ACTION_DOWN:
                 mDownX = event.getX();
                 mDownY = event.getY();
+                if (mDownY > getActualHeight()) {
+                    return false;
+                }
 
                 // Call the listener tentatively directly, even if we don't know whether the user
                 // will stay within the touch slop, as the listener is implemented as a scale
@@ -122,7 +126,7 @@ public class ActivatableNotificationView extends FrameLayout {
     }
 
     private void makeActive(float x, float y) {
-        getBackground().setHotspot(0, x, y);
+        mCustomBackground.setHotspot(0, x, y);
         mActivated = true;
     }
 
@@ -132,8 +136,8 @@ public class ActivatableNotificationView extends FrameLayout {
     private void makeInactive() {
         if (mActivated) {
             // Make sure that we clear the hotspot from the center.
-            getBackground().setHotspot(0, getWidth() / 2, getHeight() / 2);
-            getBackground().removeHotspot(0);
+            mCustomBackground.setHotspot(0, getWidth() / 2, getActualHeight() / 2);
+            mCustomBackground.removeHotspot(0);
             mActivated = false;
         }
         if (mOnActivatedListener != null) {
@@ -178,7 +182,19 @@ public class ActivatableNotificationView extends FrameLayout {
     }
 
     private void updateBackgroundResource() {
-        setBackgroundResource(mDimmed ? mDimmedBgResId : mBgResId);
+        setCustomBackgroundResource(mDimmed ? mDimmedBgResId : mBgResId);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        setPivotX(getWidth()/2);
+    }
+
+    @Override
+    public void setActualHeight(int actualHeight) {
+        super.setActualHeight(actualHeight);
+        setPivotY(actualHeight/2);
     }
 
     public void setOnActivatedListener(OnActivatedListener onActivatedListener) {

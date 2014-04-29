@@ -23,10 +23,12 @@ import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
-public class NotificationPanelView extends PanelView {
+public class NotificationPanelView extends PanelView implements
+        ExpandableView.OnHeightChangedListener {
     public static final boolean DEBUG_GESTURES = true;
 
     PhoneStatusBar mStatusBar;
@@ -67,6 +69,7 @@ public class NotificationPanelView extends PanelView {
         mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
         mNotificationStackScroller = (NotificationStackScrollLayout)
                 findViewById(R.id.notification_stack_scroller);
+        mNotificationStackScroller.setOnHeightChangedListener(this);
         mNotificationParent = findViewById(R.id.notification_container_parent);
     }
 
@@ -217,5 +220,10 @@ public class NotificationPanelView extends PanelView {
     protected void onExpandingFinished() {
         super.onExpandingFinished();
         mNotificationStackScroller.onExpansionStopped();
+    }
+
+    @Override
+    public void onHeightChanged(ExpandableView view) {
+        requestPanelHeightUpdate();
     }
 }

@@ -37,6 +37,7 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 
@@ -44,7 +45,8 @@ import com.android.systemui.statusbar.policy.ScrollAdapter;
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
  */
 public class NotificationStackScrollLayout extends ViewGroup
-        implements SwipeHelper.Callback, ExpandHelper.Callback, ScrollAdapter {
+        implements SwipeHelper.Callback, ExpandHelper.Callback, ScrollAdapter,
+        ExpandableView.OnHeightChangedListener {
 
     private static final String TAG = "NotificationStackScrollLayout";
     private static final boolean DEBUG = false;
@@ -78,6 +80,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mBottomStackPeekSize;
     private int mEmptyMarginBottom;
     private int mPaddingBetweenElements;
+    private boolean mListenForHeightChanges = true;
 
     /**
      * The algorithm which calculates the properties for our children
@@ -90,6 +93,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private final StackScrollState mCurrentStackScrollState = new StackScrollState(this);
 
     private OnChildLocationsChangedListener mListener;
+    private ExpandableView.OnHeightChangedListener mOnHeightChangedListener;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -227,7 +231,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (!isCurrentlyAnimating()) {
             mCurrentStackScrollState.setScrollY(mOwnScrollY);
             mStackScrollAlgorithm.getStackScrollState(mCurrentStackScrollState);
+            mListenForHeightChanges = false;
             mCurrentStackScrollState.apply();
+            mListenForHeightChanges = true;
             if (mListener != null) {
                 mListener.onChildLocationsChanged(this);
             }
@@ -306,12 +312,12 @@ public class NotificationStackScrollLayout extends ViewGroup
         // find the view under the pointer, accounting for GONE views
         final int count = getChildCount();
         for (int childIdx = 0; childIdx < count; childIdx++) {
-            View slidingChild = getChildAt(childIdx);
+            ExpandableView slidingChild = (ExpandableView) getChildAt(childIdx);
             if (slidingChild.getVisibility() == GONE) {
                 continue;
             }
             float top = slidingChild.getTranslationY();
-            float bottom = top + slidingChild.getHeight();
+            float bottom = top + slidingChild.getActualHeight();
             int left = slidingChild.getLeft();
             int right = slidingChild.getRight();
 
@@ -615,16 +621,11 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private int getScrollRange() {
         int scrollRange = 0;
-        View firstChild = getFirstChildNotGone();
+        ExpandableView firstChild = (ExpandableView) getFirstChildNotGone();
         if (firstChild != null) {
             int contentHeight = getContentHeight();
             int firstChildMaxExpandHeight = getMaxExpandHeight(firstChild);
-            int firstChildExpandPotential = firstChildMaxExpandHeight - firstChild.getHeight();
 
-            // If we already scrolled in, the first child is layouted smaller than it actually
-            // could be when expanded. We have to compensate for this loss of the contentHeight
-            // by adding the expand potential again.
-            contentHeight += firstChildExpandPotential;
             scrollRange = Math.max(0, contentHeight - mMaxLayoutHeight + mBottomStackPeekSize);
             if (scrollRange > 0 && getChildCount() > 0) {
                 // We want to at least be able collapse the first item and not ending in a weird
@@ -666,9 +667,16 @@ public class NotificationStackScrollLayout extends ViewGroup
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
             if (child.getVisibility() != View.GONE) {
-                height += child.getHeight();
-                if (i < getChildCount()-1) {
+                if (height != 0) {
+                    // add the padding before this element
                     height += mPaddingBetweenElements;
+                }
+                if (child instanceof ExpandableNotificationRow) {
+                    ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                    height += row.getMaximumAllowedExpandHeight();
+                } else if (child instanceof ExpandableView) {
+                    ExpandableView expandableView = (ExpandableView) child;
+                    height += expandableView.getActualHeight();
                 }
             }
         }
@@ -723,6 +731,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     protected void onViewRemoved(View child) {
         super.onViewRemoved(child);
+        ((ExpandableView) child).setOnHeightChangedListener(null);
         mCurrentStackScrollState.removeViewStateForView(child);
         mStackScrollAlgorithm.notifyChildrenChanged(this);
     }
@@ -731,6 +740,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     protected void onViewAdded(View child) {
         super.onViewAdded(child);
         mStackScrollAlgorithm.notifyChildrenChanged(this);
+        ((ExpandableView) child).setOnHeightChangedListener(this);
     }
 
     private boolean onInterceptTouchEventScroll(MotionEvent ev) {
@@ -889,6 +899,23 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (!isExpanded) {
             mOwnScrollY = 0;
         }
+    }
+
+    @Override
+    public void onHeightChanged(ExpandableView view) {
+        if (mListenForHeightChanges) {
+            updateContentHeight();
+            updateScrollPositionIfNecessary();
+            if (mOnHeightChangedListener != null) {
+                mOnHeightChangedListener.onHeightChanged(view);
+            }
+            updateChildren();
+        }
+    }
+
+    public void setOnHeightChangedListener(
+            ExpandableView.OnHeightChangedListener mOnHeightChangedListener) {
+        this.mOnHeightChangedListener = mOnHeightChangedListener;
     }
 
     /**
