@@ -88,8 +88,8 @@ import java.util.List;
  * transition uses a fadingMode of {@link Fade#OUT} instead of the default
  * out-in behavior. Finally, note the use of the <code>targets</code> sub-tag, which
  * takes a set of {@link android.R.styleable#TransitionTarget target} tags, each
- * of which lists a specific <code>targetId</code>, <code>excludeId</code>, or
- * <code>excludeClass</code>, which this transition acts upon.
+ * of which lists a specific <code>targetId</code>, <code>targetClass</code>,
+ * <code>excludeId</code>, or <code>excludeClass</code>, which this transition acts upon.
  * Use of targets is optional, but can be used to either limit the time spent checking
  * attributes on unchanging views, or limiting the types of animations run on specific views.
  * In this case, we know that only the <code>grayscaleContainer</code> will be
@@ -116,6 +116,7 @@ public abstract class Transition implements Cloneable {
     ArrayList<Integer> mTargetIdExcludes = null;
     ArrayList<View> mTargetExcludes = null;
     ArrayList<Class> mTargetTypeExcludes = null;
+    ArrayList<Class> mTargetTypes = null;
     ArrayList<Integer> mTargetIdChildExcludes = null;
     ArrayList<View> mTargetChildExcludes = null;
     ArrayList<Class> mTargetTypeChildExcludes = null;
@@ -569,19 +570,15 @@ public abstract class Transition implements Cloneable {
                 }
             }
         }
-        if (mTargetIds.size() == 0 && mTargets.size() == 0) {
+        if (mTargetIds.size() == 0 && mTargets.size() == 0 && mTargetTypes == null) {
             return true;
         }
-        if (mTargetIds.size() > 0) {
-            for (int i = 0; i < mTargetIds.size(); ++i) {
-                if (mTargetIds.get(i) == targetId) {
-                    return true;
-                }
-            }
+        if (mTargetIds.contains((int) targetId) || mTargets.contains(target)) {
+            return true;
         }
-        if (target != null && mTargets.size() > 0) {
-            for (int i = 0; i < mTargets.size(); ++i) {
-                if (mTargets.get(i) == target) {
+        if (mTargetTypes != null) {
+            for (int i = 0; i < mTargetTypes.size(); ++i) {
+                if (mTargetTypes.get(i).isInstance(target)) {
                     return true;
                 }
             }
@@ -723,6 +720,36 @@ public abstract class Transition implements Cloneable {
         if (targetId > 0) {
             mTargetIds.add(targetId);
         }
+        return this;
+    }
+
+    /**
+     * Adds the Class of a target view that this Transition is interested in
+     * animating. By default, there are no targetTypes, and a Transition will
+     * listen for changes on every view in the hierarchy below the sceneRoot
+     * of the Scene being transitioned into. Setting targetTypes constrains
+     * the Transition to only listen for, and act on, views with these classes.
+     * Views with different classes will be ignored.
+     *
+     * <p>Note that any View that can be cast to targetType will be included, so
+     * if targetType is <code>View.class</code>, all Views will be included.</p>
+     *
+     * @see #addTarget(int)
+     * @see #addTarget(android.view.View)
+     * @see #excludeTarget(Class, boolean)
+     * @see #excludeChildren(Class, boolean)
+     *
+     * @param targetType The type to include when running this transition.
+     * @return The Transition to which the target class was added.
+     * Returning the same object makes it easier to chain calls during
+     * construction, such as
+     * <code>transitionSet.addTransitions(new Fade()).addTarget(ImageView.class);</code>
+     */
+    public Transition addTarget(Class targetType) {
+        if (mTargetTypes == null) {
+            mTargetTypes = new ArrayList<Class>();
+        }
+        mTargetTypes.add(targetType);
         return this;
     }
 
@@ -1114,9 +1141,6 @@ public abstract class Transition implements Cloneable {
      */
     private void captureHierarchy(View view, boolean start) {
         if (view == null) {
-            return;
-        }
-        if (!isValidTarget(view, view.getId())) {
             return;
         }
         boolean isListViewItem = false;
