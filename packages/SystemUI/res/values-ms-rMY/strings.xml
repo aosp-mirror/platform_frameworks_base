@@ -216,9 +216,12 @@
     <item quantity="other" msgid="7388721375827338153">"%d pemberitahuan disembunyikan"</item>
   </plurals>
     <string name="zen_mode_notification_text" msgid="8336623711388065713">"Sentuh untuk menunjukkan"</string>
-    <!-- no translation found for zen_mode_title (8793432092004749188) -->
-    <skip />
+    <string name="zen_mode_title" msgid="8793432092004749188">"Jangan ganggu"</string>
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"%d lagi"</item>
   </plurals>
+    <!-- no translation found for notification_tap_again (7590196980943943842) -->
+    <skip />
+    <!-- no translation found for keyguard_unlock (8043466894212841998) -->
+    <skip />
 </resources>

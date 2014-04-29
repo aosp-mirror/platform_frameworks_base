@@ -216,9 +216,10 @@
     <item quantity="other" msgid="7388721375827338153">"ເຊື່ອງ %d ການ​ແຈ້ງ​ເຕືອນ​ແລ້ວ"</item>
   </plurals>
     <string name="zen_mode_notification_text" msgid="8336623711388065713">"​ແຕະ​ເພື່ອ​ສະ​ແດງ"</string>
-    <!-- no translation found for zen_mode_title (8793432092004749188) -->
-    <skip />
+    <string name="zen_mode_title" msgid="8793432092004749188">"ຫ້າມລົບກວນ"</string>
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"%d ເພີ່ມ​ເຕີມ"</item>
   </plurals>
+    <string name="notification_tap_again" msgid="7590196980943943842">"ແຕະ​ອີກ​ຄັ້ງ​ເພື່ອ​ເປີດ"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"ເລື່ອນ​ຂຶ້ນ​ເພື່ອ​ປົດ​ລັອກ"</string>
 </resources>

@@ -220,4 +220,6 @@
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"‏עוד %d"</item>
   </plurals>
+    <string name="notification_tap_again" msgid="7590196980943943842">"הקש שוב כדי לפתוח"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"החלק מעלה כדי לבטל את הנעילה"</string>
 </resources>
