@@ -92,6 +92,7 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
             mExitIndex = 0;
             dispatchChanged();
         }
+        setZenModeCondition();
     }
 
     @Override
@@ -143,7 +144,15 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
         }
         mExitIndex = i;
         dispatchChanged();
-        final Uri conditionUri = (Uri) ec.tag;
+        setZenModeCondition();
+    }
+
+    private void setZenModeCondition() {
+        if (mExitIndex < 0 || mExitIndex >= mExits.size()) {
+            Log.w(TAG, "setZenModeCondition to bad index " + mExitIndex + " of " + mExits.size());
+            return;
+        }
+        final Uri conditionUri = (Uri) mExits.get(mExitIndex).tag;
         try {
             mNoMan.setZenModeCondition(conditionUri);
         } catch (RemoteException e) {
