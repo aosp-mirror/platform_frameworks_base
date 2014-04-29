@@ -173,8 +173,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Način rada u zrakoplovu"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Uključen je način rada u zrakoplovu"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Isključen je način rada u zrakoplovu"</string>
-    <!-- no translation found for global_action_settings (1756531602592545966) -->
-    <skip />
+    <string name="global_action_settings" msgid="1756531602592545966">"Postavke"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Siguran način rada"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sustav Android"</string>
@@ -388,6 +387,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Nositelju omogućuje vezanje uz sučelje najviše razine VPN usluge. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"povezano s pozadinskom slikom"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Nositelju omogućuje povezivanje sa sučeljem pozadinske slike najviše razine. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
+    <!-- no translation found for permlab_bindVoiceInteraction (5334852580713715068) -->
+    <skip />
+    <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
+    <skip />
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"vezanje uz udaljeni zaslon"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Nositelju omogućuje vezanje uza sučelje najviše razine udaljenog zaslona. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vezanje na uslugu widgeta"</string>
@@ -700,6 +703,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Omogućuje aplikaciji dohvaćanje, pregledavanje i brisanje obavijesti, uključujući obavijesti drugih aplikacija."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vezanje uz uslugu slušatelja obavijesti"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Nositelju omogućuje vezanje uz sučelje najviše razine usluge slušatelja obavijesti. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
+    <!-- no translation found for permlab_bindConditionProviderService (1180107672332704641) -->
+    <skip />
+    <!-- no translation found for permdesc_bindConditionProviderService (1680513931165058425) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"pozovi operaterovu aplikaciju za konfiguraciju"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Dopušta nositelju pozivanje operaterove aplikacije za konfiguraciju. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"praćenje motrenja mrežnih uvjeta"</string>
@@ -1370,6 +1377,8 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Pozadinska slika"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Promjena pozadinske slike"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Slušatelj obavijesti"</string>
+    <!-- no translation found for condition_provider_service_binding_label (1321343352906524564) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPN aktiviran"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"Aplikacija <xliff:g id="APP">%s</xliff:g> aktivirala je VPN"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Dodirnite za upravljanje mrežom."</string>

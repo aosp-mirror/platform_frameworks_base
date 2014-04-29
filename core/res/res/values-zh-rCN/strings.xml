@@ -77,14 +77,14 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"未提供服务。"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"您无法更改来电显示设置。"</string>
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"网络可用情况发生变化"</string>
-    <string name="RestrictedOnData" msgid="8653794784690065540">"数据服务已禁用。"</string>
-    <string name="RestrictedOnEmergency" msgid="6581163779072833665">"紧急服务已禁用。"</string>
-    <string name="RestrictedOnNormal" msgid="4953867011389750673">"已禁用语音服务。"</string>
-    <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"已停用所有语音服务。"</string>
-    <string name="RestrictedOnSms" msgid="8314352327461638897">"已禁用短信服务。"</string>
-    <string name="RestrictedOnVoiceData" msgid="996636487106171320">"已停用语音/数据服务。"</string>
-    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"已禁用语音/短信服务。"</string>
-    <string name="RestrictedOnAll" msgid="5643028264466092821">"已停用所有语音/数据/短信服务。"</string>
+    <string name="RestrictedOnData" msgid="8653794784690065540">"数据网络服务已停用。"</string>
+    <string name="RestrictedOnEmergency" msgid="6581163779072833665">"紧急服务已停用。"</string>
+    <string name="RestrictedOnNormal" msgid="4953867011389750673">"语音服务已停用。"</string>
+    <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"所有语音服务都已停用。"</string>
+    <string name="RestrictedOnSms" msgid="8314352327461638897">"短信服务已停用。"</string>
+    <string name="RestrictedOnVoiceData" msgid="996636487106171320">"语音/数据服务已停用。"</string>
+    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"语音/短信服务已停用。"</string>
+    <string name="RestrictedOnAll" msgid="5643028264466092821">"所有语音/数据/短信服务都已停用。"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"语音"</string>
     <string name="serviceClassData" msgid="872456782077937893">"数据"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"传真"</string>
@@ -173,8 +173,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"飞行模式"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"已开启飞行模式"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"未开启飞行模式"</string>
-    <!-- no translation found for global_action_settings (1756531602592545966) -->
-    <skip />
+    <string name="global_action_settings" msgid="1756531602592545966">"设置"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
@@ -388,6 +387,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"允许用户绑定到 VPN 服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"绑定到壁纸"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"允许用户绑定到壁纸的顶级接口。普通应用绝不需要此权限。"</string>
+    <!-- no translation found for permlab_bindVoiceInteraction (5334852580713715068) -->
+    <skip />
+    <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
+    <skip />
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"绑定至远程显示屏"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"允许应用绑定至远程显示屏的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"绑定到小部件服务"</string>
@@ -610,8 +613,8 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"允许该应用获取手机已知的帐户列表，其中可能包括由已安装的应用创建的所有帐户。"</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"创建帐户并设置密码"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"允许应用使用 AccountManager 的帐户身份验证程序功能，包括创建帐户以及获取和设置其密码。"</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"添加或删除帐户"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"允许应用执行添加帐户、删除帐户、删除帐户密码等操作。"</string>
+    <string name="permlab_manageAccounts" msgid="4983126304757177305">"添加或移除帐户"</string>
+    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"允许应用执行添加帐户、移除帐户、删除帐户密码等操作。"</string>
     <string name="permlab_useCredentials" msgid="235481396163877642">"使用设备上的帐户"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"允许应用请求身份验证令牌。"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"查看网络连接"</string>
@@ -700,6 +703,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"允许该应用检索、检查并清除通知，包括其他应用发布的通知。"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"绑定到通知侦听器服务"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"允许应用绑定到通知侦听器服务的顶级接口（普通应用绝不需要此权限）。"</string>
+    <!-- no translation found for permlab_bindConditionProviderService (1180107672332704641) -->
+    <skip />
+    <!-- no translation found for permdesc_bindConditionProviderService (1680513931165058425) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"调用运营商提供的配置应用"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"允许应用调用运营商提供的配置应用。普通应用绝不需要此权限。"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"监听网络状况的观测信息"</string>
@@ -1370,6 +1377,8 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"壁纸"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"更改壁纸"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"通知侦听器"</string>
+    <!-- no translation found for condition_provider_service_binding_label (1321343352906524564) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPN 已激活"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"“<xliff:g id="APP">%s</xliff:g>”已激活 VPN"</string>
     <string name="vpn_text" msgid="3011306607126450322">"触摸可管理网络。"</string>

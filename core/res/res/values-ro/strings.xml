@@ -173,8 +173,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Mod Avion"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modul Avion este ACTIVAT"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modul avion este DEZACTIVAT"</string>
-    <!-- no translation found for global_action_settings (1756531602592545966) -->
-    <skip />
+    <string name="global_action_settings" msgid="1756531602592545966">"Setări"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"˃999"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mod sigur"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistemul Android"</string>
@@ -388,6 +387,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unui serviciu VPN. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"conectare la o imagine de fundal"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unei imagini de fundal. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
+    <!-- no translation found for permlab_bindVoiceInteraction (5334852580713715068) -->
+    <skip />
+    <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
+    <skip />
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"conectare la un ecran la distanță"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permite proprietarului să se conecteze la interfața de nivel superior a unui ecran la distanță. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"conectare la un serviciu widget"</string>
@@ -700,6 +703,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permite aplicației să recupereze, să examineze și să șteargă notificări, inclusiv pe cele postate de alte aplicații."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"conectare la un serviciu de citire a notificărilor"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de citire a notificărilor. În mod normal aplicațiile nu ar trebui să aibă nevoie de această permisiune."</string>
+    <!-- no translation found for permlab_bindConditionProviderService (1180107672332704641) -->
+    <skip />
+    <!-- no translation found for permdesc_bindConditionProviderService (1680513931165058425) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"apelarea aplicației de configurare furnizată de operator"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite proprietarului să apeleze aplicația de configurare furnizată de operator. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ascultă observații despre starea rețelei"</string>
@@ -1370,6 +1377,8 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Imagine de fundal"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Modificaţi imaginea de fundal"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Serviciu de citire a notificărilor"</string>
+    <!-- no translation found for condition_provider_service_binding_label (1321343352906524564) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPN activat"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN este activată de <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Atingeţi pentru a gestiona reţeaua."</string>

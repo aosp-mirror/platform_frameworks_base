@@ -387,6 +387,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម Vpn ។​ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"ចង​ទៅ​ផ្ទាំង​រូបភាព"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"ឲ្យ​ម្ចាស់​ចង​ចំណុចប្រទាក់​កម្រិត​កំពូល​នៃ​ផ្ទាំង​រូបភាព។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
+    <!-- no translation found for permlab_bindVoiceInteraction (5334852580713715068) -->
+    <skip />
+    <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
+    <skip />
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"ភ្ជាប់​ទៅ​ការ​បង្ហាញ​ពី​ចម្ងាយ"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​ការ​បង្ហាញ​ពី​ចម្ងាយ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ចង​សេវា​កម្ម​ធាតុ​ក្រាហ្វិក"</string>
@@ -699,6 +703,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"ឲ្យ​កម្មវិធី​ទៅ​យក ពិនិត្យ និង​សម្អាត​ការ​ជូន​ដំណឹង រួមមាន​​ប្រកាស​ដោយ​កម្មវិធី​ផ្សេងៗ។"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"ចង​ទៅ​សេវាកម្ម​ស្ដាប់​ការ​ជូន​ដំណឹង"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​កម្មវិធី​ស្ដាប់​ការ​ជូន​ដំណឹង។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​​ទេ។"</string>
+    <!-- no translation found for permlab_bindConditionProviderService (1180107672332704641) -->
+    <skip />
+    <!-- no translation found for permdesc_bindConditionProviderService (1680513931165058425) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"ដកហូត​កម្មវិធី​កំណត់​រចនាសម្ព័ន្ធ​ដែល​បាន​ផ្ដល់​ដោយ​ក្រុមហ៊ុន​បញ្ជូន"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ដក​ហូត​កម្មវិធី​កំណត់​រចនាសម្ព័ន្ធ​ដែល​បាន​ផ្ដល់​ដោយ​ក្រុមហ៊ុន​បញ្ជូន។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"សង្កេត​មើល​លើ​លក្ខខណ្ឌ​បណ្ដាញ"</string>
@@ -1369,6 +1377,8 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"ផ្ទាំង​រូបភាព"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"ប្ដូរ​ផ្ទាំង​រូបភាព"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"កម្មវិធី​ស្ដាប់​ការ​ជូន​ដំណឹង"</string>
+    <!-- no translation found for condition_provider_service_binding_label (1321343352906524564) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"បាន​ធ្វើ​ឲ្យ VPN សកម្ម"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"បាន​ធ្វើ​ឲ្យ VPN សកម្ម​ដោយ <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"ប៉ះ ដើម្បី​គ្រប់គ្រង​បណ្ដាញ។"</string>

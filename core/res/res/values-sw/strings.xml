@@ -173,8 +173,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Hali ya ndege"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Hali ya ndege IMEWASHWA"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Hali ya ndege IMEZIMWA"</string>
-    <!-- no translation found for global_action_settings (1756531602592545966) -->
-    <skip />
+    <string name="global_action_settings" msgid="1756531602592545966">"Mipangilio"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mtindo salama"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Mfumo wa Android"</string>
@@ -255,7 +254,7 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Inaruhusu programu kuwa upau wa hali."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"panua/kunja mwambaa hali"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Inaruhusu programu kupanua au kukunja upau wa hali."</string>
-    <string name="permlab_install_shortcut" msgid="4279070216371564234">"sakinisha njia za mkato"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"kuweka njia za mkato"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Huruhusu programu kuongeza njia za mkato za Skrini ya kwanza bila mtumiaji kuingilia."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ondoa njia za mikato"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Huruhusu programu kuondoa njia za mkato za Skrini ya kwanza bila mtumiaji kuingilia."</string>
@@ -283,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Inaruhusu programu kupokea na kuchakata ujumbe wa WAP. Idhini hii inajumuisha uwezo wa kuchunguza na kufuta ujumbe uliotumwa kwako bila ya kukuonyesha."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"rudisha programu zinazoendeshwa"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Inaruhusu programu kurudisha taarifa kuhusu kazi zinazoendeshwa sasa na hivi karibuni. Hii inaweza kuruhusu programu kugundua taarifa kuhusu ni programu zipi zinazotumika kwenye kifaa."</string>
-    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"Tagusana na watumiaji"</string>
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"kuwasiliana na watumiaji wengine"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Inaruhusu programu kutenda vitendo kwa watumiaji tofauti kwenye kifaa. Programu hasidi huenda zikatumia hii ili kukiuka ulinzi kati ya watumiaji."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"leseni kamili ili kushirikiana na watumiaji"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Inaruhusu miingialiano yote inayowezekana kwa watumiaji."</string>
@@ -388,6 +387,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Inaruhusu kishikiliaji kushurutisha kusano ya kiwango cha juu cha huduma ya Vpn. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"funga kwa mandhari"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Inaruhusu kishikiliaji kushurutisha kwa kusano ya kiwango cha juu cha mandhari. Haipaswi kamwe kuhitajika kwa programu za kawaida."</string>
+    <!-- no translation found for permlab_bindVoiceInteraction (5334852580713715068) -->
+    <skip />
+    <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
+    <skip />
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"fungisha kwenye mwonekano wa mbali"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Huruhusu mtumiaji kujifungia kiolesura cha kiwango cha juu cha mwonekano wa mbali. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"funga kwenye huduma ya widget"</string>
@@ -421,7 +424,7 @@
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Inaruhusu Programu kupata tena msimbo, data na ukubwa wa kache yake."</string>
     <string name="permlab_installPackages" msgid="2199128482820306924">"sakinisha programu moja kwa moja"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Inaruhusu programu kusakanisha au kusasisha furushi mpya za Android. Programu hasidi zinaweza kutumia hii kuongeza programu mpya ambazo zina ruhusa zenye nguvu."</string>
-    <string name="permlab_clearAppCache" msgid="7487279391723526815">"Futa data yote kwenye kache ya programu"</string>
+    <string name="permlab_clearAppCache" msgid="7487279391723526815">"kufuta data yote kwenye akiba ya programu"</string>
     <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Inaruhusu programu kutoa nafasi ya hifadhi ya kompyuta ndogo kwa kufuta faili katika saraka za kache za programu nyingine. Huenda hii ikasababisha programu nyingine kuanza polepole zaidi kwa sababu zinahitaji kuepua data zazo."</string>
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Inaruhusu programu kutoa nafasi ya hifadhi ya simu kwa kufuta faili katika saraka za kache za programu nyingine. Huenda hii ikasababisha programu nyingine kuanza polepole zaidi kwa sababu zinahitaji kuepua data zazo."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"songesha rasilimali ya programu"</string>
@@ -614,13 +617,13 @@
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Inaruhusu programu kutekeleza shughuli kama vile kuongeza na kutoa akaunti, na kufuta manenosiri yazo."</string>
     <string name="permlab_useCredentials" msgid="235481396163877642">"kutumia akaunti zilizo kwenye kifaa"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Inaruhusu programu kuomba shuhuda za uthibitisho."</string>
-    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"Kuangalia mitandao"</string>
+    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"kuona mitandao"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Inaruhusu programu kuona taarifa kuhusu miunganisho ya mtandao kama vile mitandao ipi iliyopo na imeunganishwa."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"ufikiaji kamili wa mtandao"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Inaruhusu programu kuunda soketi za mtandao na kutumia itifaki za mtandao maalum. Kivinajri na programu nyingine zilizotolewa zinamaanisha kutuma data kwenye mtandao, kwa hivyo kibali hiki hakihitajiki kutuma data kwenye mtandao."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"mabadiliko / kuingilia mipangilio ya mtandao/msonmgamano"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Inaruhusu programu kubadilisha mipangilio ya mtandao na kukatiza na kukagua uendaji wa mtandao, kwa mfano kubadilisha kituo tarishi na mbadala cha APN yoyote. Programu hasidi zinaweza kuangalia, kuelekeza kwingine, au kurekebisha furushi za mtandao bila ya wewe kujua."</string>
-    <string name="permlab_changeNetworkState" msgid="958884291454327309">"badilisha muunganisho wa mtandao"</string>
+    <string name="permlab_changeNetworkState" msgid="958884291454327309">"kubadilisha muunganisho wa mtandao"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Inaruhusu programu kubadilisha hali ya muunganisho wa mtandao."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"Badilisha muunganisho uliofunganishwa"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Inaruhusu programu kubadilisha hali ya muunganisho wa mtandao uliofungwa."</string>
@@ -650,25 +653,25 @@
     <string name="permlab_bluetooth" msgid="6127769336339276828">"oanisha na vifaa vya Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Inaruhusu programu kuona usanidi wa Bluetooth kwenye kompyuta kibao, na kuunda na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Inaruhusu programu kuona usanidi wa Bluetooth kwenye simu, na kuunda na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
-    <string name="permlab_nfc" msgid="4423351274757876953">"dhibiti Mawasiliano ya vifaa vilivyo Karibu"</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"kudhibiti Mawasiliano ya Vifaa Vilivyokaribu (NFC)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Inaruhusu programu kuwasiliana na lebo, kadi na wasomaji wa Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"zima kufuli la skrini yako"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Inaruhusu programu kulemaza ufunguo wa vitufe na usalama mwingine ambata wa nenosiri. Kwa mfano, simu inalemaza ufunguo wa viitufe inapopokea simu inayoingia, kisha inawezesha upya ufunguo wa vitufe wakati simu inapokamilika."</string>
-    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"soma mipangilio ya usawazishaji"</string>
+    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"kusoma mipangilio ya usawazishaji"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Inaruhusu programu kusoma mipangilio ya upatanishi wa akaunti. Kwa mfano, huku kunaweza kuamua kama programu ya Watu imepatanishwa na akaunti."</string>
-    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"washa na uzime usawazishaji"</string>
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"kuwasha na kuzima usawazishaji"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Inaruhusu programu kurekebisha mipangalio ya upatanishi wa akaunti. Kwa mfano, hii inaweza kuwezesha programu ya upatanishi wa Watu na akaunti."</string>
-    <string name="permlab_readSyncStats" msgid="7396577451360202448">"soma takwimu za usawazishaji"</string>
+    <string name="permlab_readSyncStats" msgid="7396577451360202448">"kusoma takwimu za usawazishaji"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Inaruhusu programu kusoma takwimu za upatanishi za akaunti, ikiwa ni pamoja na historia ya matukio ya upatanishi na kiasi cha data kimepatanishwa."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"soma milisho ya kujiunga"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"kusoma mipasho kutoka vyanzo unavyofuatilia"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Inaruhusu programu kupata maelezo kuhusu mlisho iliyolandanishwa kwa sasa."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"andika milisho ya kujiunga"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"kuandika mipasho kutoka vyanzo unavyofuatilia"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Inaruhusu programu kurekebisha milisho yako iliyolandanishwa kwa sasa. Programu hasidi zinaweza kubadilisha milisho yako iliyolandanishwa."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"soma maneno uliyoongeza kwenye kamusi"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Inaruhusu programu kusoma maneno, majina na misemo yote ambayo mtumiaji alihifadhi katika kamusi ya mtumiaji."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"ongeza maneno katika kamusi ya mtumiaji iliyofafanuliwa"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Inaruhusu programu kuandika maneno mapya katika kamusi ya mtumiaji."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"soma maudhui ya hifadhi yako ya USB"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"kusoma maudhui yaliyo kwenye hifadhi yako ya USB"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"soma maudhui ya kadi yako ya SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Huruhusu programu kusoma maudhui ya hifadhi ya USB."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Huruhusu programu kusoma maudhui ya kadi yako ya SD."</string>
@@ -700,6 +703,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Huruhusu programu kurejesha, kuchunguza, na kuondoa arifa, ikiwa ni pamoja na zile zilizochapishwa na programu nyingine."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"unganisha kwenye huduma ya kisikilizi cha arifa"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Inaruhusu kishikilizi kuunganishwa kwenye kusano cha kiwango cha juu cha huduma ya kisikilizi cha arifa. Haipaswi kuhitajika tena kwa programu za kawaida."</string>
+    <!-- no translation found for permlab_bindConditionProviderService (1180107672332704641) -->
+    <skip />
+    <!-- no translation found for permdesc_bindConditionProviderService (1680513931165058425) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"omba programu ya usakinishaji inayotolewa na mtoa huduma."</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Inaruhusu kishikiliaji kuomba programu ya usakinishaji inayotolewa na mto huduma. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"sikiliza matukio katika hali za mtandao"</string>
@@ -1370,6 +1377,8 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Mandhari"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Badilisha mandhari"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Kisikilizi cha arifa"</string>
+    <!-- no translation found for condition_provider_service_binding_label (1321343352906524564) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPN imewezeshwa"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN imeamilishwa na <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Gusa ili kudhibiti mtandao."</string>

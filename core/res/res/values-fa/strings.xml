@@ -173,8 +173,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"حالت هواپیما"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"حالت هواپیما روشن است"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"حالت هواپیما خاموش است"</string>
-    <!-- no translation found for global_action_settings (1756531602592545966) -->
-    <skip />
+    <string name="global_action_settings" msgid="1756531602592545966">"تنظیمات"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"بیشتر از 999"</string>
     <string name="safeMode" msgid="2788228061547930246">"حالت ایمن"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏سیستم Android"</string>
@@ -388,6 +387,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"‏به دارنده اجازه می‌دهد که به رابط سطح بالای سرویس Vpn متصل شود. هرگز برای برنامه‌های معمولی مورد نیاز نیست."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"پیوند شده به تصویر زمینه"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"‏به دارنده اجازه می‎دهد تا به رابط سطح بالای تصویر زمینه متصل شود. برنامه‎های معمولی هرگز به این ویژگی نیاز ندارند."</string>
+    <!-- no translation found for permlab_bindVoiceInteraction (5334852580713715068) -->
+    <skip />
+    <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
+    <skip />
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"اتصال به نمایشگر راه دور"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"به دارنده ام‍ک‍ان می‌دهد تا به رابط سطح بالای نمایشگر راه دور وصل شود. نباید هرگز برای برنامه‌های عادی لازم باشد."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"اتصال به یک سرویس ابزارک"</string>
@@ -700,6 +703,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"به برنامه اجازه می‌دهد به بازیابی، بررسی و پاک کردن اعلان‌ها از جمله موارد پست شده توسط سایر برنامه‌ها بپردازد."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"اتصال به یک سرویس شنونده اعلان"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"به دارنده اجازه می‌دهد به یک رابط سطح بالای سرویس شنونده اعلان متصل شود. هرگز نباید برای برنامه‌های عادی لازم شود."</string>
+    <!-- no translation found for permlab_bindConditionProviderService (1180107672332704641) -->
+    <skip />
+    <!-- no translation found for permdesc_bindConditionProviderService (1680513931165058425) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"لغو برنامه پیکربندی ارائه شده توسط شرکت مخابراتی"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"به دارنده اجازه می‌دهد که تنظیمات برنامه شرکت مخابراتی را لغو کند. هرگز برای برنامه‌های معمولی مورد نیاز نیست."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"گوش دادن برای بررسی شرایط شبکه"</string>
@@ -1370,6 +1377,8 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"تصویر زمینه"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"تغییر تصویر زمینه"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"شنونده اعلان"</string>
+    <!-- no translation found for condition_provider_service_binding_label (1321343352906524564) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"‏VPN فعال شد"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"‏VPN توسط <xliff:g id="APP">%s</xliff:g> فعال شده است"</string>
     <string name="vpn_text" msgid="3011306607126450322">"برای مدیریت شبکه لمس کنید."</string>

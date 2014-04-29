@@ -173,8 +173,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Airplane mode"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Naka-ON ang airplane mode"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Naka-OFF ang airplane mode"</string>
-    <!-- no translation found for global_action_settings (1756531602592545966) -->
-    <skip />
+    <string name="global_action_settings" msgid="1756531602592545966">"Mga Setting"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android System"</string>
@@ -388,6 +387,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Pinapayagan ang may-hawak na sumailalim sa nangungunang interface ng serbisyo ng Vpn. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"sumailalim sa wallpaper"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Pinapayagan ang may-hawak na sumailalim sa nangungunang interface ng isang wallpaper. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
+    <!-- no translation found for permlab_bindVoiceInteraction (5334852580713715068) -->
+    <skip />
+    <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
+    <skip />
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"magpasaklaw sa isang remote na display"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Binibigyang-daan ang may-hawak na masaklaw ang pinakamataas na antas ng interface ng isang remote na display. Hindi dapat kailanman kailanganin ng normal na apps."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"itali sa serbisyo ng widget"</string>
@@ -700,6 +703,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Pinapayagan ang app na kumuha, sumuri, at mag-clear ng mga notification, kabilang ang mga na-post ng iba pang apps."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"mapailalim sa isang serbisyo ng notification listener"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Nagbibigay-daan sa may-ari na mapailalim sa interface sa tuktok na antas ng isang serbisyo ng notification listener. Hindi dapat kailanganin para sa karaniwang apps kahit kailan."</string>
+    <!-- no translation found for permlab_bindConditionProviderService (1180107672332704641) -->
+    <skip />
+    <!-- no translation found for permdesc_bindConditionProviderService (1680513931165058425) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"paganahin ang app ng configuration na ibinigay ng carrier"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Nagbibigay-daan sa may-ari na paganahin ang app ng configuration na ibinigay ng carrier. Hindi dapat kailanganin para sa normal na apps kahit kailan."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"makinig sa mga obserbasyon sa mga kundisyon ng network"</string>
@@ -1370,6 +1377,8 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Wallpaper"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Baguhin ang wallpaper"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Notification listener"</string>
+    <!-- no translation found for condition_provider_service_binding_label (1321343352906524564) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"Naka-activate ang VPN"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"Isinaaktibo ang VPN ng <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Pindutin upang pamahalaan ang network."</string>
