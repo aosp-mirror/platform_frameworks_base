@@ -28,6 +28,7 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.util.EventLog;
@@ -200,7 +201,7 @@ public class ZygoteInit {
             }
         } catch (IOException ex) {
             Log.e(TAG, "Zygote:  error closing sockets", ex);
-        } catch (libcore.io.ErrnoException ex) {
+        } catch (ErrnoException ex) {
             Log.e(TAG, "Zygote:  error closing descriptor", ex);
         }
 
